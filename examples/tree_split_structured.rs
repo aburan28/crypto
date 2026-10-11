@@ -340,7 +340,11 @@ struct VInfo {
 
 fn build_v(vtype: &str, f: &Field, ell: u32, seed: u64, rng: &mut Rng) -> (Vec<u64>, VInfo) {
     let n = f.n;
-    let none = VInfo { g: None, candidates: None, choice: None };
+    let none = VInfo {
+        g: None,
+        candidates: None,
+        choice: None,
+    };
     match vtype {
         "rand" => {
             let mut basis: Vec<u64> = vec![];
@@ -362,12 +366,21 @@ fn build_v(vtype: &str, f: &Field, ell: u32, seed: u64, rng: &mut Rng) -> (Vec<u
         "subfield" => {
             assert!(n % ell == 0, "subfield V needs ℓ | n");
             let g = (1u64 << ell) | 1;
-            (frobenius_kernel(f, g), VInfo { g: Some(g), candidates: Some(1), choice: Some(0) })
+            (
+                frobenius_kernel(f, g),
+                VInfo {
+                    g: Some(g),
+                    candidates: Some(1),
+                    choice: Some(0),
+                },
+            )
         }
         "frob" => {
             let fac = factor_xn1(n);
-            let subfields: Vec<u64> =
-                (1..n).filter(|d| n % d == 0).map(|d| (1u64 << d) | 1).collect();
+            let subfields: Vec<u64> = (1..n)
+                .filter(|d| n % d == 0)
+                .map(|d| (1u64 << d) | 1)
+                .collect();
             let mut cands = vec![];
             for mask in 1u64..(1 << fac.len()) {
                 let g = (0..fac.len())
@@ -377,13 +390,20 @@ fn build_v(vtype: &str, f: &Field, ell: u32, seed: u64, rng: &mut Rng) -> (Vec<u
                     cands.push(g);
                 }
             }
-            assert!(!cands.is_empty(), "no Frobenius-stable V of dim {ell} in GF(2^{n})");
+            assert!(
+                !cands.is_empty(),
+                "no Frobenius-stable V of dim {ell} in GF(2^{n})"
+            );
             // `seed mod #candidates`: consecutive seeds pick distinct `g`.
             let choice = (seed % cands.len() as u64) as usize;
             let g = cands[choice];
             (
                 frobenius_kernel(f, g),
-                VInfo { g: Some(g), candidates: Some(cands.len()), choice: Some(choice) },
+                VInfo {
+                    g: Some(g),
+                    candidates: Some(cands.len()),
+                    choice: Some(choice),
+                },
             )
         }
         _ => panic!("unknown vtype {vtype}"),
@@ -460,7 +480,9 @@ fn echelon(mut rows: Vec<Vec<u64>>, w: usize) -> (Vec<Vec<u64>>, Vec<usize>) {
             break;
         }
         let (cw, bit) = (col / 64, 1u64 << (col % 64));
-        let Some(p) = (r..s).find(|&i| rows[i][cw] & bit != 0) else { continue };
+        let Some(p) = (r..s).find(|&i| rows[i][cw] & bit != 0) else {
+            continue;
+        };
         rows.swap(r, p);
         let (head, tail) = rows.split_at_mut(r + 1);
         let pivot = &head[r];
@@ -512,7 +534,14 @@ struct Profile {
     rows: Vec<DegreeRow>,
 }
 
-fn profile(points: &[u64], nvars: u32, d_max: u32, k: usize, max_cols: usize, rng: &mut Rng) -> Profile {
+fn profile(
+    points: &[u64],
+    nvars: u32,
+    d_max: u32,
+    k: usize,
+    max_cols: usize,
+    rng: &mut Rng,
+) -> Profile {
     let set: HashSet<u64> = points.iter().copied().collect();
     let mask = (1u64 << nvars) - 1;
     let mut samples = Vec::with_capacity(k);
@@ -567,7 +596,13 @@ fn profile(points: &[u64], nvars: u32, d_max: u32, k: usize, max_cols: usize, rn
             break;
         }
     }
-    Profile { size: points.len(), nvars, d_s, censored: d_s.is_none(), rows }
+    Profile {
+        size: points.len(),
+        nvars,
+        d_s,
+        censored: d_s.is_none(),
+        rows,
+    }
 }
 
 // ------------------------------------------------------------------ cell
@@ -593,7 +628,16 @@ struct Cell {
     max_cols: usize,
 }
 
-fn run_cell(vtype: &str, n: u32, a: u32, ell: u32, seed: u64, d_max: u32, k: usize, max_cols: usize) -> Cell {
+fn run_cell(
+    vtype: &str,
+    n: u32,
+    a: u32,
+    ell: u32,
+    seed: u64,
+    d_max: u32,
+    k: usize,
+    max_cols: usize,
+) -> Cell {
     assert!(n % 2 == 1, "half-trace solver needs n odd");
     let f = Field::new(n);
     let curve = Curve { f, a: a as u64 };
@@ -601,7 +645,10 @@ fn run_cell(vtype: &str, n: u32, a: u32, ell: u32, seed: u64, d_max: u32, k: usi
     assert_eq!(v.len(), 1 << ell, "dim V != ℓ");
     if vtype == "frob" || vtype == "subfield" {
         let vs: HashSet<u64> = v.iter().copied().collect();
-        assert!(v.iter().all(|&x| vs.contains(&f.sqr(x))), "V not Frobenius-stable");
+        assert!(
+            v.iter().all(|&x| vs.contains(&f.sqr(x))),
+            "V not Frobenius-stable"
+        );
     }
     let (fb, t2) = tree_split_t2(&curve, &v);
     let t2_in_v = (vtype == "subfield").then(|| {
@@ -609,8 +656,22 @@ fn run_cell(vtype: &str, n: u32, a: u32, ell: u32, seed: u64, d_max: u32, k: usi
         t2.iter().all(|x| vs.contains(x))
     });
     let control = random_control(&f, t2.len(), &mut stream(seed, n, a, ell, TAG_CONTROL));
-    let cp = profile(&t2, n, d_max, k, max_cols, &mut stream(seed, n, a, ell, TAG_SAMPLES_CURVE));
-    let rp = profile(&control, n, d_max, k, max_cols, &mut stream(seed, n, a, ell, TAG_SAMPLES_R));
+    let cp = profile(
+        &t2,
+        n,
+        d_max,
+        k,
+        max_cols,
+        &mut stream(seed, n, a, ell, TAG_SAMPLES_CURVE),
+    );
+    let rp = profile(
+        &control,
+        n,
+        d_max,
+        k,
+        max_cols,
+        &mut stream(seed, n, a, ell, TAG_SAMPLES_R),
+    );
     Cell {
         vtype: vtype.into(),
         n,
@@ -650,7 +711,10 @@ fn verdict(cells: &[&Cell]) -> (String, Vec<String>) {
             .filter_map(|c| match (c.curve.d_s, c.r.d_s) {
                 (Some(dc), Some(dr)) => Some((c.ell as i64, dc as i64, dc as i64 - dr as i64)),
                 _ => {
-                    notes.push(format!("n={n} a={a} seed={seed} ell={}: censored, excluded", c.ell));
+                    notes.push(format!(
+                        "n={n} a={a} seed={seed} ell={}: censored, excluded",
+                        c.ell
+                    ));
                     None
                 }
             })
@@ -675,7 +739,11 @@ fn verdict(cells: &[&Cell]) -> (String, Vec<String>) {
         notes.push(format!(
             "n={n} a={a} seed={seed}: gaps {:?}, slope {:.3}",
             pts.iter().map(|p| p.2).collect::<Vec<_>>(),
-            if den > 0 { num as f64 / den as f64 } else { f64::NAN }
+            if den > 0 {
+                num as f64 / den as f64
+            } else {
+                f64::NAN
+            }
         ));
     }
     let need = series.len().div_ceil(2);
@@ -709,16 +777,29 @@ fn readout(path: &str) {
         };
         println!(
             "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
-            c.vtype, c.n, c.a, c.seed, c.ell, c.factor_base_points, c.t2_size, ds(&c.curve), ds(&c.r), gap
+            c.vtype,
+            c.n,
+            c.a,
+            c.seed,
+            c.ell,
+            c.factor_base_points,
+            c.t2_size,
+            ds(&c.curve),
+            ds(&c.r),
+            gap
         );
     }
     let gate: Vec<&Cell> = cells.iter().filter(|c| c.vtype == "subfield").collect();
     let gate_ok = !gate.is_empty()
         && gate.iter().all(|c| {
             c.t2_in_v == Some(true)
-                && c.curve.rows.first().and_then(|r| r.deficit).unwrap_or(0) >= (c.n - c.ell) as usize
+                && c.curve.rows.first().and_then(|r| r.deficit).unwrap_or(0)
+                    >= (c.n - c.ell) as usize
         });
-    println!("\npositive control (subfield, deficit(1) ≥ n − ℓ and T2 ⊆ V): {}", if gate_ok { "PASS" } else { "FAIL" });
+    println!(
+        "\npositive control (subfield, deficit(1) ≥ n − ℓ and T2 ⊆ V): {}",
+        if gate_ok { "PASS" } else { "FAIL" }
+    );
     for vt in ["poly", "frob", "rand"] {
         let sel: Vec<&Cell> = cells
             .iter()
@@ -746,7 +827,10 @@ fn emit_lean(path: &str, out: &str) {
     let mut s = String::new();
     s.push_str("import TreeSplit.Rule\n\n");
     s.push_str("/-! Generated by `examples/tree_split_structured.rs lean` from the registered\n");
-    s.push_str(&format!("cell records `{}`. Do not edit: regenerate. -/\n", path.replace("/-", "/ -")));
+    s.push_str(&format!(
+        "cell records `{}`. Do not edit: regenerate. -/\n",
+        path.replace("/-", "/ -")
+    ));
     s.push_str("\nnamespace TreeSplit\n\n/-- The registered cells, one row each. -/\n");
     s.push_str("def cells : List Row := [\n");
     for (i, c) in cells.iter().enumerate() {
@@ -793,16 +877,27 @@ fn selftest() {
             pts.extend(curve.points_with_x(x));
         }
         for i in 0..pts.len() {
-            let (p, q, r) = (Some(pts[i]), Some(pts[(i + 1) % 30]), Some(pts[(i + 7) % 30]));
+            let (p, q, r) = (
+                Some(pts[i]),
+                Some(pts[(i + 1) % 30]),
+                Some(pts[(i + 7) % 30]),
+            );
             assert_eq!(curve.add(p, q), curve.add(q, p), "commutativity");
-            assert_eq!(curve.add(curve.add(p, q), r), curve.add(p, curve.add(q, r)), "associativity");
+            assert_eq!(
+                curve.add(curve.add(p, q), r),
+                curve.add(p, curve.add(q, r)),
+                "associativity"
+            );
             assert!(curve.add(p, q).map_or(true, |s| curve.on_curve(s)));
         }
     }
     // #K_0(GF(2^7)) = 116, and 116·P = O.
     let f7 = Field::new(7);
     let k0 = Curve { f: f7, a: 0 };
-    let count = 1 + (0..128u64).map(|x| if x == 0 { 1 } else { k0.points_with_x(x).len() }).sum::<usize>();
+    let count = 1
+        + (0..128u64)
+            .map(|x| if x == 0 { 1 } else { k0.points_with_x(x).len() })
+            .sum::<usize>();
     assert_eq!(count, 116, "#K_0(GF(2^7))");
     for p in (1..128u64).flat_map(|x| k0.points_with_x(x)).take(5) {
         let mut acc: Pt = None;
@@ -813,16 +908,28 @@ fn selftest() {
     }
     // Frobenius-stable subspaces and subfields.
     let f21 = Field::new(21);
-    assert_eq!(factor_xn1(21).iter().map(|&p| deg(p)).collect::<Vec<_>>(), vec![1, 2, 3, 3, 6, 6]);
-    assert_eq!(factor_xn1(17).iter().map(|&p| deg(p)).collect::<Vec<_>>(), vec![1, 8, 8]);
+    assert_eq!(
+        factor_xn1(21).iter().map(|&p| deg(p)).collect::<Vec<_>>(),
+        vec![1, 2, 3, 3, 6, 6]
+    );
+    assert_eq!(
+        factor_xn1(17).iter().map(|&p| deg(p)).collect::<Vec<_>>(),
+        vec![1, 8, 8]
+    );
     let sub7 = frobenius_kernel(&f21, (1 << 7) | 1);
     assert_eq!(sub7.len(), 128);
-    assert!(sub7.iter().all(|&x| (0..7).fold(x, |y, _| f21.sqr(y)) == x), "GF(2^7) = ker(σ^7 − 1)");
+    assert!(
+        sub7.iter().all(|&x| (0..7).fold(x, |y, _| f21.sqr(y)) == x),
+        "GF(2^7) = ker(σ^7 − 1)"
+    );
     for ell in 4..=8 {
         let (v, info) = build_v("frob", &f21, ell, ell as u64, &mut Rng(ell as u64));
         assert_eq!(v.len(), 1 << ell);
         assert!(v.iter().all(|x| v.binary_search(&f21.sqr(*x)).is_ok()));
-        println!("frob n=21 ℓ={ell}: {} candidate g", info.candidates.unwrap());
+        println!(
+            "frob n=21 ℓ={ell}: {} candidate g",
+            info.candidates.unwrap()
+        );
     }
     // Linear-algebra screen checks (as in the 2026-09-30 study §5).
     let mut r = Rng(7);
@@ -830,13 +937,23 @@ fn selftest() {
     let shift = r.next() & 0xFFFFF;
     let aff: Vec<u64> = span(&basis).into_iter().map(|x| x ^ shift).collect();
     assert_eq!(aff.len(), 256);
-    assert_eq!(profile(&aff, 20, 6, 2000, 90000, &mut Rng(1)).d_s, Some(1), "affine subspace");
-    let quad: Vec<u64> = (0..1u64 << 14).filter(|x| (x & 1) & (x >> 1 & 1) == (x >> 2 & 1)).collect();
+    assert_eq!(
+        profile(&aff, 20, 6, 2000, 90000, &mut Rng(1)).d_s,
+        Some(1),
+        "affine subspace"
+    );
+    let quad: Vec<u64> = (0..1u64 << 14)
+        .filter(|x| (x & 1) & (x >> 1 & 1) == (x >> 2 & 1))
+        .collect();
     let qp = profile(&quad, 14, 6, 2000, 90000, &mut Rng(2));
     assert_eq!(qp.d_s, Some(2), "quadric D_s");
     assert_eq!(qp.rows[1].deficit, Some(3), "quadric deficit at D = 2");
     let rnd = random_control(&Field { n: 20, poly: 0 }, 1000, &mut Rng(3));
-    assert_eq!(profile(&rnd, 20, 6, 2000, 90000, &mut Rng(4)).d_s, Some(3), "random 1000 in GF(2)^20");
+    assert_eq!(
+        profile(&rnd, 20, 6, 2000, 90000, &mut Rng(4)).d_s,
+        Some(3),
+        "random 1000 in GF(2)^20"
+    );
     println!("selftest: ok");
 }
 
@@ -870,6 +987,8 @@ fn main() {
         }
         Some("readout") => readout(&args[2]),
         Some("lean") => emit_lean(&args[2], &args[3]),
-        _ => eprintln!("usage: tree_split_structured selftest | cell … | readout CELLS | lean CELLS OUT"),
+        _ => eprintln!(
+            "usage: tree_split_structured selftest | cell … | readout CELLS | lean CELLS OUT"
+        ),
     }
 }

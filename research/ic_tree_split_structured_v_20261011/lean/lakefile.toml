@@ -4,4 +4,4 @@ defaultTargets = ["TreeSplit"]
 
 [[lean_lib]]
 name = "TreeSplit"
-roots = ["TreeSplit.Rule", "TreeSplit.Data", "TreeSplit.Verdict", "TreeSplit.Replay"]
+roots = ["TreeSplit.Rule", "TreeSplit.Data", "TreeSplit.Verdict", "TreeSplit.Replay", "TreeSplit.Leak"]
