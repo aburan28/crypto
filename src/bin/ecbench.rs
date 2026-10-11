@@ -8,6 +8,7 @@
 //! ecbench verify --dir D [--replay N]  re-derive a session; replay runs exactly
 //! ecbench compare --dir D --a X --b Y  paired ratio with a bootstrap interval
 //! ecbench table  --dir D... [--reference ARM]   the one-unit table AGENTS.md §2 asks for
+//! ecbench resources --dir D [--out F]   cold native-work, memory and PMU vectors
 //! ecbench fb --curve C --factor-base F a factor base with its points
 //! ecbench claim build --dir D --ic X --rho Y --workload W   a vs_rho claim, checked
 //! ecbench claim attach --base-report R --independent-receipt A   attach a later replay
@@ -37,7 +38,7 @@ use clap::{Parser, Subcommand};
 
 use crypto_lib::cryptanalysis::ecbench::{
     audit, bounds, callgrind, canonical, challenge, claim, compare, db, frontier, host, isolab,
-    isolation, methods, record, runner, signals, spec, stats, workload,
+    isolation, methods, record, resources, runner, signals, spec, stats, workload,
 };
 
 #[derive(Parser)]
@@ -171,6 +172,13 @@ enum Cmd {
         /// `reference` arm).
         #[arg(long)]
         reference: Option<String>,
+    },
+    /// Resource vectors for all measured attempts; no invented SAT/GAE conversion.
+    Resources {
+        #[arg(long)]
+        dir: PathBuf,
+        #[arg(long)]
+        out: Option<PathBuf>,
     },
     /// Build a factor base and write it with its points.
     Fb {
@@ -858,6 +866,19 @@ fn run(cli: Cli) -> Result<ExitCode, String> {
             }
         }
         Cmd::Table { dir, reference } => table(&dir, reference.as_deref())?,
+        Cmd::Resources { dir, out } => {
+            let report = resources::session(&dir)?;
+            if let Some(path) = out {
+                std::fs::write(
+                    &path,
+                    serde_json::to_string_pretty(&report).map_err(|e| e.to_string())? + "\n",
+                )
+                .map_err(|e| format!("{}: {e}", path.display()))?;
+                eprintln!("saved {}", path.display());
+            } else {
+                print_json(&report)?;
+            }
+        }
         Cmd::Fb {
             curve,
             factor_base,
