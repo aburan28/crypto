@@ -139,17 +139,20 @@ fn fp_from_hex<P: ParamSet<N>, const N: usize>(h: &str) -> Fp<P::Cfg, N> {
 }
 
 /// Deterministic basis (P, Q) of E[3^F3] on the Montgomery curve y^2 = x^3 +
-/// A x^2 + x, computed from public data only (variable time).
-fn canonical_basis_3<P: ParamSet<N>, const N: usize>(a: &F<P, N>) -> (WPoint<F<P, N>>, WPoint<F<P, N>>) {
+/// A x^2 + x, computed from public data only (variable time).  The search is
+/// capped: for an honest curve it succeeds within a handful of counters
+/// (failure after the cap has probability below 2^-1000), and on any input
+/// it returns None instead of spinning, so a crafted public key or
+/// ciphertext cannot make encapsulation or decapsulation loop.
+const BASIS_SEARCH_CAP: u64 = 4096;
+fn canonical_basis_3<P: ParamSet<N>, const N: usize>(a: &F<P, N>) -> Option<(WPoint<F<P, N>>, WPoint<F<P, N>>)> {
     let w = WCurve::from_montgomery(*a);
     let d = BigUint::from(3u32).pow(P::F3 as u32);
     let cof = crate::cm::p_plus_1::<F<P, N>>() / &d;
     let d1 = &d / 3u32;
     let mut found: Vec<WPoint<F<P, N>>> = vec![];
-    let mut k = 1u64;
-    loop {
+    for k in 1..=BASIS_SEARCH_CAP {
         let x = <F<P, N> as Field>::from_counter(k);
-        k += 1;
         let Some(r) = point_from_x(&w, x) else { continue };
         let r = mul_vartime(&w, &r, &cof);
         let r3 = mul_vartime(&w, &r, &d1);
@@ -161,10 +164,11 @@ fn canonical_basis_3<P: ParamSet<N>, const N: usize>(a: &F<P, N>) -> (WPoint<F<P
             if bool::from(p3.x.ct_eq(&r3.x)) {
                 continue; // [3^(k-1)] R in <[3^(k-1)] P>
             }
-            return (*p0, r);
+            return Some((*p0, r));
         }
         found.push(r);
     }
+    None
 }
 
 /// Full point [k]P on the Montgomery curve (A), constant time in k and P:
@@ -238,14 +242,14 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
 
     /// Deterministic encryption of the kernel scalar s.  Constant time in s.
     /// Public, variable-time: the canonical basis of E_A[3^F3] and x(P - Q).
-    fn pk_basis(a_a: &F<P, N>) -> PkBasis<F<P, N>> {
-        let (pd, qd) = canonical_basis_3::<P, N>(a_a);
+    fn pk_basis(a_a: &F<P, N>) -> Option<PkBasis<F<P, N>>> {
+        let (pd, qd) = canonical_basis_3::<P, N>(a_a)?;
         let pqd = WCurve::from_montgomery(*a_a).sub(&pd, &qd);
-        PkBasis { pd, qd, pqd }
+        Some(PkBasis { pd, qd, pqd })
     }
 
-    fn enc_det(ctx: &Ctx<P, N>, pk: &[F<P, N>; 4], s: &Scalar, pkh: &[u8]) -> Vec<u8> {
-        Self::enc_det_core(ctx, pk, &Self::pk_basis(&pk[0]), s, pkh)
+    fn enc_det(ctx: &Ctx<P, N>, pk: &[F<P, N>; 4], s: &Scalar, pkh: &[u8]) -> Option<Vec<u8>> {
+        Some(Self::enc_det_core(ctx, pk, &Self::pk_basis(&pk[0])?, s, pkh))
     }
 
     /// Deterministic encryption given the public basis: constant time in `s`.
@@ -285,7 +289,7 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         let s_raw = Scalar::from_le_bytes(&buf, buf.len().div_ceil(8));
         let s = ctx.modd.to_scalar_width(&ctx.modd.reduce(&s_raw), ctx.modd.limbs());
         buf.zeroize();
-        let ct = Self::enc_det(&ctx, &pkf, &s, &pkh);
+        let ct = Self::enc_det(&ctx, &pkf, &s, &pkh)?;
         let k = Zeroizing::new(shake(&[b"EigenSeta-K", &Zeroizing::new(Self::s_to_bytes(&ctx, &s)), &ct], SS_BYTES));
         let mut out = [0u8; SS_BYTES];
         out.copy_from_slice(&k);
@@ -319,8 +323,8 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
                 return None;
             }
         }
-        let (x1, x2) = canonical_basis_3::<P, N>(&a_c);
-        Some(DecapsPrep { pkf, a_c, s_pt, t_pt, x1, x2, pk_basis: Self::pk_basis(&pkf[0]) })
+        let (x1, x2) = canonical_basis_3::<P, N>(&a_c)?;
+        Some(DecapsPrep { pkf, a_c, s_pt, t_pt, x1, x2, pk_basis: Self::pk_basis(&pkf[0])? })
     }
 
     /// Secret phase of decapsulation: trapdoor inversion, deterministic

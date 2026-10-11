@@ -114,3 +114,39 @@ fn decaps_never_panics_on_adversarial_ciphertexts() {
     }
     eprintln!("robustness: {} adversarial cases, no panic", cases.len());
 }
+
+/// Encapsulation to an adversarial public key must terminate without
+/// panicking: it either refuses (None) or returns some ciphertext.  The
+/// canonical-basis search is capped, so no curve can make it spin.
+#[test]
+fn encaps_terminates_on_adversarial_public_keys() {
+    use eigen_seta::kem::PublicKey;
+    let mut rng = TestRng(0xBADC0DE);
+    let fl = F::byte_len();
+    let mut keys: Vec<(String, Vec<u8>)> = vec![
+        ("empty".into(), vec![]),
+        ("all-zero".into(), vec![0; 4 * fl]),
+        ("all-ff".into(), vec![0xff; 4 * fl]),
+    ];
+    for (name, a) in [("A=0", F::zero()), ("A=2", F::from_i64(2)), ("A=-2", F::from_i64(-2))] {
+        if let Some(b) = on_curve_ct(a, &mut rng) {
+            keys.push((format!("curve-{name}"), b));
+        }
+    }
+    let mut made = 0;
+    while made < 8 {
+        if let Some(b) = on_curve_ct(rand_f(&mut rng), &mut rng) {
+            keys.push((format!("random-curve-{made}"), b));
+            made += 1;
+        }
+    }
+    for (name, b) in &keys {
+        let pk = PublicKey { bytes: b.clone() };
+        let r = std::panic::catch_unwind(|| {
+            let mut r2 = TestRng(7);
+            K::encaps(&pk, &mut r2).map(|(c, _)| c.bytes.len())
+        });
+        assert!(r.is_ok(), "encaps panicked on public key {name}");
+    }
+    eprintln!("robustness: {} adversarial public keys, encaps terminated", keys.len());
+}
