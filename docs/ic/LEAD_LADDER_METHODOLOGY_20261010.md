@@ -278,8 +278,9 @@ the invariant subspace of equal columns). **Algebraic form measured
 2026-10-11** (`koblitz-closure` base + `descent-algebraic:slots=all`,
 `pq_descent_symbolic::descend_with_bases`, exhaustive solver): hits per
 solved system 1.79× (n = 23) and 1.34× (n = 17) against the predicted
-`2! = 2`; relations per target × ≈ 2n because every rotation is its own
-system. `RESULTS_ROUND2.md` §L5 algebraic.
+`2! = 2`; with three summands (one rotated) 2.14× and 1.92× against 3;
+relations per target × ≈ 2n because every rotation is its own system.
+`RESULTS_ROUND2.md` §L5 algebraic.
 
 ### L6. Phase-aware quotient summation
 

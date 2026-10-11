@@ -411,9 +411,16 @@ the plain system's `3! = 6` symmetry is broken down to the swap of summands
 |---:|---|---|---:|---:|---:|---:|---:|
 | n = 17 (`K_1`) | closure of dim 4: 136 points, 4 columns | plain descended S4 | 22,982 | 35 | 22,451 | 0.00156 | 1 |
 | n = 17 | same | slots = all (17 systems per target) | 686 | 34 | 11,387 | 0.00299 | **1.92** |
+| n = 23 (`K_0`) | closure of dim 4: 370 points, 9 columns | plain descended S4 | 394,971 | 69 | 389,587 | 0.000177 | 1 |
+| n = 23 | same | slots = all (23 systems per target) | 8,197 | 71 | 187,698 | 0.000378 | **2.14** |
 
-At n = 17 the measured factor is again about two thirds of the prediction
-(1.92 against 3, as 1.34 against 2 at `m = 2`), consistent with the same
-small-group correction on this `K_1` instance; the n = 23 row follows below
-when it lands. Lift failures (18 and 10) are abscissae whose points lie on
+The measured factor is about two thirds of the prediction at both rungs
+(1.92 at n = 17, 2.14 at n = 23, against 3), the same shortfall as at
+`m = 2` (1.34 and 1.79 against 2). With 69–71 hits per arm the binomial
+interval on the n = 23 ratio is roughly ±0.5, so 3 is not excluded there;
+the consistent shortfall across four rows suggests a systematic cause
+(the closure's dimension-4 seed subspace overlaps its own Frobenius
+images, so some rotated systems duplicate plain ones) rather than noise.
+Relations per target rise ≈ 48× at n = 23 (trials per relation 115 against
+5,724) because every rotation is its own system. Lift failures (18 and 10) are abscissae whose points lie on
 the twist, as the oracle documents; every recovered logarithm verified.
