@@ -1563,9 +1563,11 @@ mod tests {
         let kc = KoblitzCurve::new(0, 41).unwrap();
         assert_eq!(order_of_2_mod_n(41), Some(20));
         let targets = TargetSet::new(&kc, 8, 4096, 11);
-        let mut opts = SearchOptions::default();
-        opts.m = 2;
-        opts.max_abscissae = 2048;
+        let opts = SearchOptions {
+            m: 2,
+            max_abscissae: 2048,
+            ..SearchOptions::default()
+        };
         for spec in [
             FactorBaseSpec::Factor { index: 1 },
             FactorBaseSpec::Divisor {
@@ -1598,7 +1600,7 @@ mod tests {
         assert!(candidates[0]
             .skipped
             .as_ref()
-            .map_or(true, |s| { !s.contains("exceed the cap") }));
+            .is_none_or(|s| !s.contains("exceed the cap")));
     }
 
     #[test]

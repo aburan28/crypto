@@ -1,0 +1,90 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=11",
+          "oracle": "descent-algebraic:m=2",
+          "solver": "f4-f2"
+        }
+      },
+      "name": "ic-f4",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=11",
+          "oracle": "mitm:negation_folded=1"
+        }
+      },
+      "name": "ic-mitm",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg-aa",
+      "role": "control"
+    }
+  ],
+  "description": "Part B of research/isogeny_conductor_gap_ic_20261010/PROTOCOL.md: both ends of every certified pair under the subspace factor base with the F4 descent oracle (solving degree) and the MITM oracle (yield), and the generic rho on both.",
+  "label": "isogenous pairs, koblitz n=23: crater and floor under the same binary index calculus",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 3,
+    "seed": 1,
+    "timeout_seconds": 1800,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 0,
+        "kind": "koblitz",
+        "n": 23
+      },
+      {
+        "a": 0,
+        "b": 6290471,
+        "group_order": 8383412,
+        "gx": 6545096,
+        "gy": 2451407,
+        "kind": "binary_explicit",
+        "modulus": 8388641,
+        "n": 23,
+        "r": 2095853
+      },
+      {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 23
+      },
+      {
+        "a": 1,
+        "b": 8138435,
+        "group_order": 8393806,
+        "gx": 7975409,
+        "gy": 6985862,
+        "kind": "binary_explicit",
+        "modulus": 8388641,
+        "n": 23,
+        "r": 4196903
+      }
+    ],
+    "target_seed": 20261010,
+    "targets_per_curve": 4
+  }
+}
