@@ -749,21 +749,28 @@ unsafe fn add_lazy_avx512(acc: &mut [u64], pivot: &[u32], from: usize, factor: u
     }
 }
 
-/// Zero selects scalar accumulation, one forces AVX2, and two forces
-/// AVX-512F. Both vector paths remain explicit opt-ins.
+/// Zero selects scalar accumulation, one AVX2, two AVX-512F.  The widest
+/// vector path the CPU has is the default, since the Faugère–Lachartre
+/// step runs its dense updates through this kernel (`f4_fp_bench 2 large`
+/// on an AVX-512 host: quad_n9 6.7 s with AVX-512, 7.2 s with AVX2, 8.5 s
+/// scalar); `F4_FP_LAZY_SIMD=0` forces scalar, `F4_FP_LAZY_AVX2=1` forces
+/// AVX2 and `F4_FP_LAZY_AVX512=1` AVX-512, as before.
 fn lazy_simd_kind() -> u8 {
     #[cfg(target_arch = "x86_64")]
     {
         static KIND: std::sync::OnceLock<u8> = std::sync::OnceLock::new();
         *KIND.get_or_init(|| {
-            if std::env::var("F4_FP_LAZY_AVX512").as_deref() == Ok("1")
-                && std::arch::is_x86_feature_detected!("avx512f")
-                && std::arch::is_x86_feature_detected!("avx2")
-            {
+            let avx2 = std::arch::is_x86_feature_detected!("avx2");
+            let avx512 = avx2 && std::arch::is_x86_feature_detected!("avx512f");
+            if std::env::var("F4_FP_LAZY_SIMD").as_deref() == Ok("0") {
+                0
+            } else if std::env::var("F4_FP_LAZY_AVX512").as_deref() == Ok("1") && avx512 {
                 2
-            } else if std::env::var("F4_FP_LAZY_AVX2").as_deref() == Ok("1")
-                && std::arch::is_x86_feature_detected!("avx2")
-            {
+            } else if std::env::var("F4_FP_LAZY_AVX2").as_deref() == Ok("1") && avx2 {
+                1
+            } else if avx512 {
+                2
+            } else if avx2 {
                 1
             } else {
                 0
@@ -804,63 +811,259 @@ fn normalize_lazy(acc: &mut [u64], fp: Barrett) {
     }
 }
 
+/// Rows of a step reduced together against the pivots known so far.  A
+/// chunk's rows are independent of each other until they are stored, so
+/// their reductions run in parallel; a smaller chunk finds pivots sooner
+/// for the rows after it, a larger one spreads better.
+const DEFERRED_CHUNK: usize = 64;
+
+/// `F4_FP_DEFERRED_PAR=0` runs the deferred elimination row by row on one
+/// thread, as it did before the chunks; a same-binary control.
+fn deferred_parallel() -> bool {
+    static PAR: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *PAR.get_or_init(|| std::env::var("F4_FP_DEFERRED_PAR").as_deref() != Ok("0"))
+}
+
+/// Reduce `acc` (64-bit lazy accumulators of one row) by `known`, in
+/// increasing pivot column, with the bounded normalisation that keeps the
+/// accumulators far below `u64` overflow; `pending` carries the count of
+/// unnormalised updates in and out.
+#[inline]
+fn reduce_lazy_by(
+    acc: &mut [u64],
+    known: &[(usize, Vec<u32>)],
+    fp: Barrett,
+    simd: u8,
+    pending: &mut usize,
+) {
+    const NORMALIZE_AFTER: usize = 256;
+    for (c, pivot) in known {
+        let f = fp.reduce(acc[*c]);
+        if f != 0 {
+            add_lazy(acc, pivot, *c, fp.p - f, simd);
+            *pending += 1;
+            if *pending == NORMALIZE_AFTER {
+                normalize_lazy(acc, fp);
+                *pending = 0;
+            }
+        }
+    }
+}
+
 /// Row-oriented RREF.  Each row keeps a 64-bit scratch accumulator while
 /// it meets the existing 32-bit pivots, reducing only the next pivot
 /// coefficient and the row when it is stored.  A bounded normalization
 /// keeps even the largest supported prime far below `u64` overflow.
+///
+/// Rows are taken in chunks of [`DEFERRED_CHUNK`]: every row of a chunk is
+/// reduced in parallel against the pivots known before the chunk, then the
+/// rows are stored one at a time, each first reduced again against the
+/// whole pivot list so the pivots its chunk-mates contributed (and any
+/// earlier pivot column those re-dirtied) are cleared — a pass that costs
+/// one coefficient reduction per pivot already clear.  The result is the
+/// unique reduced echelon form either way.  Back-substitution reduces every
+/// pivot row by the *unreduced* later pivots in increasing column order,
+/// which clears each later pivot column for good and so gives the same
+/// fully reduced rows as the sequential pass did, with the rows now
+/// independent and in parallel.
 fn rref32_deferred(
     rows: &mut Vec<Vec<u32>>,
     fp32: Barrett32,
     fp: Barrett,
     deadline: Option<Instant>,
 ) -> Option<Vec<usize>> {
-    const NORMALIZE_AFTER: usize = 256;
     let simd = lazy_simd_kind();
+    let parallel = deferred_parallel();
     let mut known: Vec<(usize, Vec<u32>)> = Vec::new();
-    for source in std::mem::take(rows) {
+    let sources = std::mem::take(rows);
+    let chunk_rows = if parallel { DEFERRED_CHUNK } else { 1 };
+    for chunk in sources.chunks(chunk_rows) {
         if deadline.is_some_and(|d| Instant::now() > d) {
             return None;
         }
-        let mut acc: Vec<u64> = source.into_iter().map(u64::from).collect();
-        let mut pending = 0usize;
-        for (j, (c, pivot)) in known.iter().enumerate() {
-            if j % 32 == 0 && deadline.is_some_and(|d| Instant::now() > d) {
-                return None;
-            }
-            let f = fp.reduce(acc[*c]);
-            if f != 0 {
-                add_lazy(&mut acc, pivot, *c, fp.p - f, simd);
-                pending += 1;
-                if pending == NORMALIZE_AFTER {
-                    normalize_lazy(&mut acc, fp);
-                    pending = 0;
-                }
-            }
-        }
-        let mut row: Vec<u32> = acc.into_iter().map(|v| fp.reduce(v) as u32).collect();
-        let Some(c) = row.iter().position(|&v| v != 0) else {
-            continue;
+        let n_cols = chunk[0].len();
+        let reduce_one = |source: &Vec<u32>| -> (Vec<u64>, usize) {
+            let mut acc: Vec<u64> = source.iter().copied().map(u64::from).collect();
+            let mut pending = 0usize;
+            reduce_lazy_by(&mut acc, &known, fp, simd, &mut pending);
+            (acc, pending)
         };
-        let inv = invmod(u64::from(row[c]), fp.p) as u32;
-        for x in &mut row[c..] {
-            *x = fp32.reduce(*x * inv);
+        let mut reduced: Vec<(Vec<u64>, usize)> =
+            if chunk.len() > 1 && chunk.len() * known.len().max(1) * n_cols > PAR_WORK {
+                chunk.par_iter().map(reduce_one).collect()
+            } else {
+                chunk.iter().map(reduce_one).collect()
+            };
+        let known_before = known.len();
+        for (acc, pending) in reduced.iter_mut() {
+            if known.len() > known_before {
+                // chunk-mates became pivots: clear them, and whatever
+                // earlier pivot columns they re-dirtied
+                reduce_lazy_by(acc, &known, fp, simd, pending);
+            }
+            let mut row: Vec<u32> = acc.iter().map(|&v| fp.reduce(v) as u32).collect();
+            let Some(c) = row.iter().position(|&v| v != 0) else {
+                continue;
+            };
+            let inv = invmod(u64::from(row[c]), fp.p) as u32;
+            for x in &mut row[c..] {
+                *x = fp32.reduce(*x * inv);
+            }
+            count_ops(row.len() - c);
+            let at = known.partition_point(|(pc, _)| *pc < c);
+            known.insert(at, (c, row));
         }
-        count_ops(row.len() - c);
-        let at = known.partition_point(|(pc, _)| *pc < c);
-        known.insert(at, (c, row));
     }
-    for i in (0..known.len()).rev() {
-        if deadline.is_some_and(|d| Instant::now() > d) {
-            return None;
-        }
-        let (earlier, later) = known.split_at_mut(i + 1);
-        let row = &mut earlier[i].1;
+    if deadline.is_some_and(|d| Instant::now() > d) {
+        return None;
+    }
+    let n_cols = known.first().map_or(0, |(_, r)| r.len());
+    let back = |i: usize| -> Vec<u32> {
+        let (_, row) = &known[i];
         let mut acc: Vec<u64> = row.iter().copied().map(u64::from).collect();
         let mut pending = 0usize;
-        for (c, pivot) in later.iter().rev() {
-            let f = fp.reduce(acc[*c]);
-            if f != 0 {
-                add_lazy(&mut acc, pivot, *c, fp.p - f, simd);
+        reduce_lazy_by(&mut acc, &known[i + 1..], fp, simd, &mut pending);
+        acc.into_iter().map(|v| fp.reduce(v) as u32).collect()
+    };
+    let reduced: Vec<Vec<u32>> = if parallel && known.len() * n_cols > PAR_WORK {
+        (0..known.len()).into_par_iter().map(back).collect()
+    } else {
+        (0..known.len()).map(back).collect()
+    };
+    let pivots = known.iter().map(|(c, _)| *c).collect();
+    *rows = reduced;
+    Some(pivots)
+}
+
+/// Most entries of `B'` (reducers × free columns, 4 bytes each) the
+/// Faugère–Lachartre form is allowed; above it the step falls back to
+/// reducing each pair row through the reducer cascade.
+const FL_MAX_ENTRIES: usize = 1 << 28;
+
+/// Reducers finished together in [`reduce_pairs_fl`].
+const FL_BLOCK: usize = 64;
+
+/// Columns a step needs before the Faugère–Lachartre form is used.
+const FL_MIN_COLS: usize = 256;
+
+/// `F4_FP_FL=0` keeps the per-pair-row reducer cascade; a same-binary
+/// control for the Faugère–Lachartre form.
+fn fl_enabled() -> bool {
+    static FL: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *FL.get_or_init(|| std::env::var("F4_FP_FL").as_deref() != Ok("0"))
+}
+
+/// The pair rows reduced by the reducers, over the free columns, in the
+/// Faugère–Lachartre form (see the call site).  `reducer_at[c]` is the
+/// reducer led by column `c` or `u32::MAX`; `free_cols` is ascending.
+/// Entries are `< p`; `None` when the deadline passed.
+#[allow(clippy::too_many_arguments)]
+fn reduce_pairs_fl(
+    pair_rows: &[Vec<(u32, u64)>],
+    reducers: &[Vec<(u32, u64)>],
+    reducer_at: &[u32],
+    free_cols: &[usize],
+    n_cols: usize,
+    fp: Barrett,
+    deadline: Option<Instant>,
+) -> Option<Vec<Vec<u32>>> {
+    const NONE: u32 = u32::MAX;
+    const NORMALIZE_AFTER: usize = 256;
+    let simd = lazy_simd_kind();
+    let n_free = free_cols.len();
+    let mut free_index = vec![NONE; n_cols];
+    for (i, &c) in free_cols.iter().enumerate() {
+        free_index[c] = i as u32;
+    }
+    // A row of `B'` is zero on the free columns left of its reducer's lead
+    // (every term of a reducer, and of everything it is reduced by, lies
+    // right of that lead), so its updates start at the first free column
+    // past the lead.
+    let bstart: Vec<usize> = reducers
+        .iter()
+        .map(|r| free_cols.partition_point(|&c| c <= r[0].0 as usize))
+        .collect();
+    // reducers by leading column, rightmost first: a reducer's entry at
+    // another reducer's column lies right of its own lead, so that
+    // reducer is finished before this one is reached
+    let mut order: Vec<usize> = (0..reducers.len()).collect();
+    order.sort_unstable_by_key(|&k| std::cmp::Reverse(reducers[k][0].0));
+    let mut position = vec![0usize; reducers.len()];
+    for (pos, &k) in order.iter().enumerate() {
+        position[k] = pos;
+    }
+    let mut bprime: Vec<Vec<u32>> = vec![Vec::new(); reducers.len()];
+    // `(acc, pending, in-block dependencies)` of one reducer against the
+    // finished blocks
+    let against_finished = |k: usize, block_start: usize, bprime: &Vec<Vec<u32>>| {
+        let mut acc = vec![0u64; n_free];
+        let mut pending = 0usize;
+        let mut later: Vec<(usize, u64)> = Vec::new();
+        for &(c, v) in &reducers[k][1..] {
+            let fi = free_index[c as usize];
+            if fi != NONE {
+                acc[fi as usize] += v;
+            } else {
+                let j = reducer_at[c as usize] as usize;
+                if position[j] < block_start {
+                    add_lazy(&mut acc, &bprime[j], bstart[j], fp.p - v, simd);
+                    pending += 1;
+                    if pending == NORMALIZE_AFTER {
+                        normalize_lazy(&mut acc, fp);
+                        pending = 0;
+                    }
+                } else {
+                    later.push((j, v));
+                }
+            }
+        }
+        (acc, pending, later)
+    };
+    for block in order.chunks(FL_BLOCK) {
+        if deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let block_start = position[block[0]];
+        let bp = &bprime;
+        let mut partial: Vec<(Vec<u64>, usize, Vec<(usize, u64)>)> =
+            if block.len() * n_free > PAR_WORK {
+                block
+                    .par_iter()
+                    .map(|&k| against_finished(k, block_start, bp))
+                    .collect()
+            } else {
+                block
+                    .iter()
+                    .map(|&k| against_finished(k, block_start, bp))
+                    .collect()
+            };
+        for (&k, (acc, pending, later)) in block.iter().zip(partial.iter_mut()) {
+            // in-block dependencies are earlier in the block, so finished
+            for &(j, v) in later.iter() {
+                debug_assert!(position[j] < position[k]);
+                add_lazy(acc, &bprime[j], bstart[j], fp.p - v, simd);
+                *pending += 1;
+                if *pending == NORMALIZE_AFTER {
+                    normalize_lazy(acc, fp);
+                    *pending = 0;
+                }
+            }
+            bprime[k] = acc.iter().map(|&x| fp.reduce(x) as u32).collect();
+        }
+    }
+    let reduce_pair = |r: &Vec<(u32, u64)>| -> Option<Vec<u32>> {
+        if deadline.is_some_and(|d| Instant::now() > d) {
+            return None;
+        }
+        let mut acc = vec![0u64; n_free];
+        let mut pending = 0usize;
+        for &(c, v) in r {
+            let fi = free_index[c as usize];
+            if fi != NONE {
+                acc[fi as usize] += v;
+            } else {
+                let j = reducer_at[c as usize] as usize;
+                add_lazy(&mut acc, &bprime[j], bstart[j], fp.p - v, simd);
                 pending += 1;
                 if pending == NORMALIZE_AFTER {
                     normalize_lazy(&mut acc, fp);
@@ -868,13 +1071,13 @@ fn rref32_deferred(
                 }
             }
         }
-        for (x, v) in row.iter_mut().zip(acc) {
-            *x = fp.reduce(v) as u32;
-        }
+        Some(acc.iter().map(|&x| fp.reduce(x) as u32).collect())
+    };
+    if pair_rows.len() * n_free > PAR_WORK {
+        pair_rows.par_iter().map(reduce_pair).collect()
+    } else {
+        pair_rows.iter().map(reduce_pair).collect()
     }
-    let pivots = known.iter().map(|(c, _)| *c).collect();
-    *rows = known.into_iter().map(|(_, row)| row).collect();
-    Some(pivots)
 }
 
 /// Row-reduce `rows` (dense, entries in `[0, p)`) to reduced echelon form
@@ -1221,11 +1424,16 @@ fn f4_with_arithmetic(
         let mut monomials: FxSet<Vec<u32>> = FxSet::default();
         let mut done: FxSet<Vec<u32>> = FxSet::default();
         let mut queue: Vec<Vec<u32>> = Vec::new();
+        // One scratch monomial; a heap copy only for a monomial not seen.
+        let mut em: Vec<u32> = vec![0; n_vars];
         for (idx, m) in &rows_poly {
             for (e, _) in &basis[*idx] {
-                let em: Vec<u32> = e.iter().zip(m).map(|(x, y)| x + y).collect();
-                if monomials.insert(em.clone()) {
-                    queue.push(em);
+                for (k, x) in em.iter_mut().enumerate() {
+                    *x = e[k] + m[k];
+                }
+                if !monomials.contains(em.as_slice()) {
+                    monomials.insert(em.clone());
+                    queue.push(em.clone());
                 }
             }
             let lm: Vec<u32> = basis[*idx][0].0.iter().zip(m).map(|(x, y)| x + y).collect();
@@ -1248,9 +1456,12 @@ fn f4_with_arithmetic(
                     .collect();
                 if seen.insert((idx, m.clone())) {
                     for (e, _) in &basis[idx] {
-                        let em: Vec<u32> = e.iter().zip(&m).map(|(x, y)| x + y).collect();
-                        if monomials.insert(em.clone()) {
-                            queue.push(em);
+                        for (k, x) in em.iter_mut().enumerate() {
+                            *x = e[k] + m[k];
+                        }
+                        if !monomials.contains(em.as_slice()) {
+                            monomials.insert(em.clone());
+                            queue.push(em.clone());
                         }
                     }
                     rows_poly.push((idx, m));
@@ -1368,7 +1579,32 @@ fn f4_with_arithmetic(
                         .collect(),
                 )
             };
-            let reduced: Option<Vec<Vec<u32>>> = if parallel {
+            // Faugère–Lachartre: reduce the reducer block once instead of
+            // re-running its cascade for every pair row.  With the
+            // reducers `A | B` (`A` on their own leading columns, `B` on the
+            // free columns) brought to `B' = A⁻¹B`, each pair row `C | D`
+            // becomes `D − C·B'`: one dense update over the free columns per
+            // original entry at a reducer column, and no cascade, because
+            // `B'` has no entries on reducer columns.  Rows are monic, so
+            // `A` has a unit diagonal.  `B'` is built rightmost lead first
+            // in blocks: a block's rows are reduced in parallel against the
+            // blocks before it, then finished in order against each other.
+            // Tiny steps (most of `solve`'s specialised runs) keep the
+            // cascade: building `B'` there costs more than it saves.
+            let fl = fl_enabled()
+                && n_cols >= FL_MIN_COLS
+                && reducers.len().saturating_mul(free_cols.len()) <= FL_MAX_ENTRIES;
+            let reduced: Option<Vec<Vec<u32>>> = if fl {
+                reduce_pairs_fl(
+                    pair_rows,
+                    reducers,
+                    &reducer_at,
+                    &free_cols,
+                    n_cols,
+                    fp,
+                    deadline,
+                )
+            } else if parallel {
                 pair_rows.par_iter().map(reduce_pair_row).collect()
             } else {
                 pair_rows.iter().map(reduce_pair_row).collect()
@@ -1804,6 +2040,13 @@ pub struct SolveReport {
     pub field_ops: u64,
     /// Block-reduced steps of the top-level run.
     pub blocked_steps: usize,
+    /// Candidate points the substitution tree produced that do not satisfy
+    /// the input, and were dropped.  A truncated run (pairs above the
+    /// degree bound, or a staircase stop) returns a basis of a sub-ideal,
+    /// whose variety can be strictly larger than the input's; the final
+    /// evaluation against the input keeps the verdict exact.  Non-zero only
+    /// when some run of the tree was truncated.
+    pub candidates_rejected: usize,
 }
 
 /// Roots in `F_p` of a univariate polynomial given as `(degree, coeff)`.
@@ -1867,6 +2110,35 @@ pub fn solve(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> SolveRe
         &mut blocked,
     );
     let (solving_degree, degree_reached) = top.unwrap_or((0, 0));
+    // Every run of the substitution tree may be a truncation (pairs above
+    // the degree bound dropped, or a staircase stop), and a truncated basis
+    // generates a sub-ideal of the input: its variety is a superset of the
+    // input's, never a subset, and the same holds for every specialised
+    // basis further down.  The tree therefore returns a superset of the
+    // solutions, and the input itself decides which candidates are real.
+    // A refutation needs no check: `1` in a truncated basis is `1` in the
+    // ideal.
+    let mut candidates_rejected = 0usize;
+    let verdict = match verdict {
+        Verdict::Solutions(sols) => {
+            let kept: Vec<Vec<u64>> = sols
+                .into_iter()
+                .filter(|s| {
+                    let ok = input.iter().all(|f| eval(f, s, p) == 0);
+                    if !ok {
+                        candidates_rejected += 1;
+                    }
+                    ok
+                })
+                .collect();
+            if kept.is_empty() {
+                Verdict::Inconsistent
+            } else {
+                Verdict::Solutions(kept)
+            }
+        }
+        other => other,
+    };
     SolveReport {
         verdict,
         solving_degree,
@@ -1878,6 +2150,7 @@ pub fn solve(input: &[Poly], n_vars: usize, p: u64, opts: &F4Options) -> SolveRe
         timed_out,
         field_ops: field_ops_now() - ops0,
         blocked_steps: blocked,
+        candidates_rejected,
     }
 }
 
@@ -1937,10 +2210,11 @@ fn solve_rec(
     let (var, values): (usize, Vec<u64>) = match best {
         Some(b) => b,
         None => {
-            if r.pairs_above_bound > 0 && r.basis.len() < n_vars {
-                // the truncation may have hidden the univariate element;
-                // brute force on the first variable is still sound
-            }
+            // Without a univariate element every value of the first
+            // variable is tried.  With a truncation (`pairs_above_bound`)
+            // the basis is that of a sub-ideal, so this and the root
+            // enumeration above return a superset of the solutions, which
+            // `solve` filters against the input.
             (0, (0..p).collect())
         }
     };
@@ -2070,7 +2344,7 @@ mod tests {
         }
     }
 
-    fn poly(terms: &[(&[u32], u64)]) -> Poly {
+    pub(super) fn poly(terms: &[(&[u32], u64)]) -> Poly {
         terms.iter().map(|(e, c)| (e.to_vec(), *c)).collect()
     }
 
@@ -2502,5 +2776,48 @@ mod tests {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod degree_bound_solve_tests {
+    use super::tests::poly;
+    use super::*;
+
+    /// `{x³ + 1, xy − 1, x + y}` over `F_5` is inconsistent (x + y = 0 and
+    /// xy = 1 force x² = −1, so x⁴ = 1 and x³ + 1 = x⁻¹ + 1 ≠ 0 for every
+    /// root of x² + 1, i.e. x ∈ {2, 3}).  At degree bound 2 the step finds
+    /// x² + 1, retires x³ + 1, and drops their degree-3 pair: the truncated
+    /// basis no longer generates the input ideal, so a solver that trusts
+    /// it reports solutions of a system that has none.
+    #[test]
+    fn truncated_run_must_not_certify_solutions() {
+        let p = 5;
+        let f = poly(&[(&[3, 0], 1), (&[0, 0], 1)]); // x³ + 1
+        let g = poly(&[(&[1, 1], 1), (&[0, 0], p - 1)]); // xy − 1
+        let h = poly(&[(&[1, 0], 1), (&[0, 1], 1)]); // x + y
+        let sys = [f, g, h];
+        let r = f4(&sys, 2, p, &F4Options::new(Ordering::Grevlex, 2));
+        assert!(
+            r.pairs_above_bound > 0,
+            "the counterexample needs a dropped pair"
+        );
+        let s = solve(&sys, 2, p, &F4Options::new(Ordering::Grevlex, 2));
+        assert!(
+            matches!(s.verdict, Verdict::Inconsistent),
+            "{:?}",
+            s.verdict
+        );
+        assert_eq!(
+            s.candidates_rejected, 2,
+            "both spurious roots x ∈ {{2, 3}} are dropped"
+        );
+        // With a sufficient bound the verdict is exact.
+        let s = solve(&sys, 2, p, &F4Options::new(Ordering::Grevlex, 8));
+        assert!(
+            matches!(s.verdict, Verdict::Inconsistent),
+            "{:?}",
+            s.verdict
+        );
     }
 }
