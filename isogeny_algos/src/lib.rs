@@ -8,12 +8,12 @@ pub mod api;
 pub mod bigint;
 pub mod binary;
 pub mod curve;
-pub mod ext;
 /// Research-only Eigen-Séta design helpers.  This module is deliberately not
 /// a cryptographic encryption implementation; see its module documentation.
 pub mod eigen_seta;
 /// End-to-end small-parameter Eigen-Séta experiment; exhaustive decapsulation.
 pub mod eigen_seta_toy;
+pub mod ext;
 pub mod field;
 pub mod find;
 pub mod fp2;
