@@ -1,0 +1,18 @@
+{
+  "baseline_faster_pair_count": 3,
+  "candidate_faster_pair_count": 9,
+  "claim_limit": "No auditable host-wide CPU isolation receipt; timing ratios are exploratory. Twelve deterministic targets are a small correctness sample, not a demonstrated general success rate.",
+  "controlled_speedup": null,
+  "exploratory_paired_ratio_median": 1.1673959645982024,
+  "exploratory_paired_ratio_range": [
+    0.7944779068799065,
+    1.647957580402291
+  ],
+  "independent_sage_replay_sha256": "00a5a3430be89db97d4f775092e6aedc530764d5350f45c45e13f970e4a7f4d2",
+  "kind": "s3_pair_fresh_one_target_panel_verified_exploratory",
+  "measurement_rows_verified_sha256": "f9685e589a02fe8a07ce0b902589d2936fe58fee466888aba9724d100fa5bd07",
+  "question": "Does paired S3 inversion preserve correctness across fresh one-target workloads?",
+  "successful_verified_pairs": 12,
+  "target_count": 12,
+  "verified_raw_runs": 24
+}

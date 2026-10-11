@@ -40,8 +40,8 @@ use std::collections::HashMap;
 
 use num_bigint::BigUint;
 
-use crate::binary_ecc::{BinaryPoint, F2mElement};
-use crate::cryptanalysis::fx_hash::FxMap;
+use crate::binary_ecc::{BinaryPoint, F2mElement, IrreduciblePoly};
+use crate::cryptanalysis::fx_hash::{FxMap, FxSet};
 use crate::cryptanalysis::gf2_elim;
 use crate::cryptanalysis::koblitz_groebner::FieldStructure;
 use crate::cryptanalysis::koblitz_index_calculus::{
@@ -50,6 +50,87 @@ use crate::cryptanalysis::koblitz_index_calculus::{
 
 /// Most unknowns a [`WPoly`] can carry.
 pub const MAX_WIDE_VARS: usize = 128;
+
+/// Field structure constants consumed by the wide Boolean solver.
+/// The legacy table stores each coefficient in one word; this interface
+/// also admits two-word coefficients without changing the narrow solvers.
+pub trait WideFieldTable: Sync {
+    fn degree(&self) -> u32;
+    fn max_degree(&self) -> u32;
+    fn product_bits(&self, i: usize, j: usize) -> u128;
+    fn square_bits(&self, i: usize) -> u128;
+}
+
+impl WideFieldTable for FieldStructure {
+    fn degree(&self) -> u32 {
+        self.n
+    }
+
+    fn max_degree(&self) -> u32 {
+        64
+    }
+
+    fn product_bits(&self, i: usize, j: usize) -> u128 {
+        u128::from(self.reduced[i][j])
+    }
+
+    fn square_bits(&self, i: usize) -> u128 {
+        u128::from(self.squares[i])
+    }
+}
+
+/// Structure constants of a polynomial-basis field of at most 128 bits.
+#[derive(Clone, Debug)]
+pub struct TwoWordFieldStructure {
+    n: u32,
+    reduced: Vec<Vec<u128>>,
+    squares: Vec<u128>,
+}
+
+fn element_bits(v: &F2mElement) -> u128 {
+    let words = v.raw_bits();
+    u128::from(words.first().copied().unwrap_or(0))
+        | (u128::from(words.get(1).copied().unwrap_or(0)) << 64)
+}
+
+impl TwoWordFieldStructure {
+    pub fn new(n: u32, irr: &IrreduciblePoly) -> Option<Self> {
+        if n == 0 || n > 128 || irr.degree != n {
+            return None;
+        }
+        let mono = |k: u32| F2mElement::from_bit_positions(&[k], n);
+        let mut reduced = vec![vec![0u128; n as usize]; n as usize];
+        for i in 0..n as usize {
+            for j in 0..n as usize {
+                reduced[i][j] = element_bits(&mono(i as u32).mul(&mono(j as u32), irr));
+            }
+        }
+        let squares = (0..n as usize).map(|k| reduced[k][k]).collect();
+        Some(Self {
+            n,
+            reduced,
+            squares,
+        })
+    }
+}
+
+impl WideFieldTable for TwoWordFieldStructure {
+    fn degree(&self) -> u32 {
+        self.n
+    }
+
+    fn max_degree(&self) -> u32 {
+        128
+    }
+
+    fn product_bits(&self, i: usize, j: usize) -> u128 {
+        self.reduced[i][j]
+    }
+
+    fn square_bits(&self, i: usize) -> u128 {
+        self.squares[i]
+    }
+}
 
 /// A monomial: bit `v` set means variable `v` divides it.
 pub type Mono = u128;
@@ -240,7 +321,7 @@ pub struct WSym {
 
 impl WSym {
     fn constant(v: &F2mElement, n: u32) -> Self {
-        let bits = v.raw_bits().first().copied().unwrap_or(0);
+        let bits = element_bits(v);
         Self {
             coords: (0..n)
                 .map(|k| {
@@ -257,7 +338,7 @@ impl WSym {
     fn from_subspace_vars(basis: &[F2mElement], offset: usize, n: u32) -> Self {
         let mut coords = vec![Vec::new(); n as usize];
         for (t, b) in basis.iter().enumerate() {
-            let bits = b.raw_bits().first().copied().unwrap_or(0);
+            let bits = element_bits(b);
             for (k, c) in coords.iter_mut().enumerate() {
                 if bits >> k & 1 == 1 {
                     c.push(1u128 << (offset + t));
@@ -286,8 +367,8 @@ impl WSym {
         }
     }
 
-    fn mul(&self, other: &Self, st: &FieldStructure) -> Self {
-        let n = st.n as usize;
+    fn mul(&self, other: &Self, st: &impl WideFieldTable) -> Self {
+        let n = st.degree() as usize;
         let mut acc: Vec<Vec<Mono>> = vec![Vec::new(); n];
         for (i, a) in self.coords.iter().enumerate() {
             if a.is_zero() {
@@ -298,7 +379,7 @@ impl WSym {
                     continue;
                 }
                 let prod = a.mul(b);
-                let red = st.reduced[i][j];
+                let red = st.product_bits(i, j);
                 for (k, slot) in acc.iter_mut().enumerate() {
                     if red >> k & 1 == 1 {
                         slot.extend_from_slice(&prod.terms);
@@ -311,11 +392,11 @@ impl WSym {
         }
     }
 
-    fn square(&self, st: &FieldStructure) -> Self {
-        let n = st.n as usize;
+    fn square(&self, st: &impl WideFieldTable) -> Self {
+        let n = st.degree() as usize;
         let mut acc: Vec<Vec<Mono>> = vec![Vec::new(); n];
         for (k, c) in self.coords.iter().enumerate() {
-            let sq = st.squares[k];
+            let sq = st.square_bits(k);
             for (t, slot) in acc.iter_mut().enumerate() {
                 if sq >> t & 1 == 1 {
                     slot.extend_from_slice(&c.terms);
@@ -329,14 +410,14 @@ impl WSym {
 }
 
 /// `S₃(x₁, x₂, x₃) = (x₁+x₂)² x₃² + x₁x₂x₃ + (x₁x₂)² + b`, coordinatewise.
-fn s3(x1: &WSym, x2: &WSym, x3: &WSym, b: &F2mElement, st: &FieldStructure) -> Vec<WPoly> {
+fn s3(x1: &WSym, x2: &WSym, x3: &WSym, b: &F2mElement, st: &impl WideFieldTable) -> Vec<WPoly> {
     let prod = x1.mul(x2, st);
     x1.add(x2)
         .square(st)
         .mul(&x3.square(st), st)
         .add(&prod.mul(x3, st))
         .add(&prod.square(st))
-        .add(&WSym::constant(b, st.n))
+        .add(&WSym::constant(b, st.degree()))
         .coords
 }
 
@@ -358,12 +439,12 @@ impl WideSystem {
         x_r: &F2mElement,
         b: &F2mElement,
         m: usize,
-        st: &FieldStructure,
+        st: &impl WideFieldTable,
     ) -> Option<Self> {
-        if m < 2 || st.n > 64 {
+        if m < 2 || st.degree() > st.max_degree() || st.degree() > 128 {
             return None;
         }
-        let n = st.n;
+        let n = st.degree();
         let ell = basis.len();
         let n_vars = m * ell + (m - 2) * n as usize;
         if n_vars > MAX_WIDE_VARS {
@@ -407,12 +488,12 @@ impl WideSystem {
         x_r: &F2mElement,
         b: &F2mElement,
         k: usize,
-        st: &FieldStructure,
+        st: &impl WideFieldTable,
     ) -> Option<Self> {
-        if k == 0 || st.n > 64 {
+        if k == 0 || st.degree() > st.max_degree() || st.degree() > 128 {
             return None;
         }
-        let n = st.n;
+        let n = st.degree();
         let ell = basis.len();
         let n_vars = k * (ell + n as usize);
         if n_vars > MAX_WIDE_VARS {
@@ -454,8 +535,11 @@ pub struct WideStats {
     /// Largest linearisation matrix, rows × columns.
     pub max_rows: usize,
     pub max_cols: usize,
-    /// The node budget ran out: a `None` then says nothing.
+    /// The search is incomplete from a spent budget or unsupported input:
+    /// a `None` then says nothing.
     pub exhausted: bool,
+    /// The field representation or input is outside this solver's model.
+    pub unsupported: bool,
 }
 
 /// Columns above which a node skips linearisation and just splits: a
@@ -824,8 +908,8 @@ fn prolong(eqs: &[WPoly], d: u32, stats: &mut WideStats) -> Prolonged {
 }
 
 /// Decompose `target` into `m` factor-base points through the wide
-/// chained system; `None` with `stats.exhausted` unset is a complete
-/// search that found nothing, with it set says nothing.
+/// chained system; `None` is a proved miss only when neither
+/// `stats.exhausted` nor `stats.unsupported` is set.
 ///
 /// When the whole chain needs more than [`MAX_WIDE_VARS`] unknowns, the
 /// search takes the largest `k` trailing summands whose chain suffix
@@ -838,12 +922,17 @@ pub fn wide_groebner_decompose(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
     index_of: &HashMap<(BigUint, BigUint), usize>,
-    st: &FieldStructure,
+    st: &impl WideFieldTable,
     target: &BinaryPoint,
     m: usize,
     node_budget: usize,
 ) -> (Option<Vec<usize>>, WideStats) {
     let mut stats = WideStats::default();
+    if m >= 2 && (st.degree() != kc.n || st.degree() > st.max_degree() || st.degree() > 128) {
+        stats.unsupported = true;
+        stats.exhausted = true;
+        return (None, stats);
+    }
     let opts = SearchOptions::from_env();
     let valid = if opts.points {
         valid_coordinates(kc, fb, index_of)
@@ -862,6 +951,15 @@ pub fn wide_groebner_decompose(
         &valid,
         &mut stats,
     );
+    if found.is_some() {
+        stats.exhausted = false;
+        stats.unsupported = false;
+    } else {
+        // Keep the public incomplete-result contract for callers that
+        // only check `exhausted`, while letting internal search continue
+        // past an unsupported branch to find a witness elsewhere.
+        stats.exhausted |= stats.unsupported;
+    }
     (found, stats)
 }
 
@@ -880,6 +978,36 @@ fn valid_coordinates(
     let ell = fb.subspace_basis.len();
     if ell > MAX_POINT_BRANCH_ELL {
         return Vec::new();
+    }
+    // The usual index is a map into this exact base. Reuse its already
+    // validated point lifts instead of solving the curve equation for
+    // every subspace abscissa on every query. Keep the reference path for
+    // arbitrary external index maps, whose keys could contain points not
+    // represented by `fb.points`.
+    let indexed_base = index_of
+        .iter()
+        .all(|(key, &i)| fb.points.get(i).is_some_and(|p| &point_key(p) == key));
+    if indexed_base {
+        let allowed_x: FxSet<u128> = index_of
+            .values()
+            .filter_map(|&i| match &fb.points[i] {
+                BinaryPoint::Affine { x, .. } => Some(element_bits(x)),
+                BinaryPoint::Infinity => None,
+            })
+            .collect();
+        let basis_bits: Vec<u128> = fb.subspace_basis.iter().map(element_bits).collect();
+        let mut x_by_code = vec![0u128; 1usize << ell];
+        let mut valid = Vec::new();
+        for code in 0..x_by_code.len() {
+            if code != 0 {
+                let bit = code.trailing_zeros() as usize;
+                x_by_code[code] = x_by_code[code & (code - 1)] ^ basis_bits[bit];
+            }
+            if allowed_x.contains(&x_by_code[code]) {
+                valid.push(code as u32);
+            }
+        }
+        return valid;
     }
     (0..1u32 << ell)
         .filter(|&c| {
@@ -927,7 +1055,7 @@ fn decompose_rec(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
     index_of: &HashMap<(BigUint, BigUint), usize>,
-    st: &FieldStructure,
+    st: &impl WideFieldTable,
     target: &BinaryPoint,
     m: usize,
     node_budget: usize,
@@ -941,12 +1069,19 @@ fn decompose_rec(
     if m == 1 {
         return index_of.get(&point_key(target)).map(|&i| vec![i]);
     }
+    if st.degree() != kc.n || st.degree() > st.max_degree() || st.degree() > 128 {
+        stats.unsupported = true;
+        return None;
+    }
     let x_r = match target {
         BinaryPoint::Affine { x, .. } => x.clone(),
-        BinaryPoint::Infinity => return None,
+        BinaryPoint::Infinity => {
+            stats.unsupported = true;
+            return None;
+        }
     };
     let ell = fb.subspace_basis.len();
-    let full_vars = m * ell + (m - 2) * st.n as usize;
+    let full_vars = m * ell + (m - 2) * st.degree() as usize;
     let whole = if full_vars <= opts.max_vars {
         WideSystem::build(&fb.subspace_basis, &x_r, &kc.curve.b, m, st)
     } else {
@@ -978,10 +1113,17 @@ fn decompose_rec(
         );
     }
     // Too wide: prune with the longest chain suffix that fits.
-    let k = (1..m - 1)
+    let Some(k) = (1..m - 1)
         .rev()
-        .find(|&k| k * (ell + st.n as usize) <= opts.max_vars)?;
-    let sys = WideSystem::build_suffix(&fb.subspace_basis, &x_r, &kc.curve.b, k, st)?;
+        .find(|&k| k * (ell + st.degree() as usize) <= opts.max_vars)
+    else {
+        stats.unsupported = true;
+        return None;
+    };
+    let Some(sys) = WideSystem::build_suffix(&fb.subspace_basis, &x_r, &kc.curve.b, k, st) else {
+        stats.unsupported = true;
+        return None;
+    };
     search(
         &sys,
         k,
@@ -1071,10 +1213,10 @@ fn negate(p: &BinaryPoint) -> BinaryPoint {
 
 /// Summand `i`'s abscissa under an assignment of the summand bits.
 fn summand_x(basis: &[F2mElement], ell: usize, bits: u128, i: usize, n: u32) -> F2mElement {
-    let mut acc = 0u64;
+    let mut acc = 0u128;
     for t in 0..ell {
         if bits >> (i * ell + t) & 1 == 1 {
-            acc ^= basis[t].raw_bits().first().copied().unwrap_or(0);
+            acc ^= element_bits(&basis[t]);
         }
     }
     let positions: Vec<u32> = (0..n).filter(|&k| acc >> k & 1 == 1).collect();
@@ -1090,6 +1232,57 @@ struct Frame {
     values: u128,
 }
 
+/// A branch choice keeps the reduced parent shared until this child is
+/// visited. Point splits can have thousands of children at n=83; eagerly
+/// substituting every one copies the whole equation system thousands of
+/// times even when the node budget stops after the first child.
+struct DeferredFrame {
+    parent: std::sync::Arc<Frame>,
+    fixed: u128,
+    values: u128,
+    choice: BranchChoice,
+}
+
+enum BranchChoice {
+    Point {
+        i: usize,
+        ell: usize,
+        c: u32,
+        free: u32,
+    },
+    Bit {
+        v: usize,
+        value: bool,
+    },
+}
+
+impl DeferredFrame {
+    fn materialize(self) -> Frame {
+        let assignment: Vec<(usize, bool)> = match self.choice {
+            BranchChoice::Point { i, ell, c, free } => (0..ell)
+                .filter(|&t| free >> t & 1 == 1)
+                .map(|t| (i * ell + t, c >> t & 1 == 1))
+                .collect(),
+            BranchChoice::Bit { v, value } => vec![(v, value)],
+        };
+        assign(&self.parent, self.fixed, self.values, &assignment)
+    }
+}
+
+enum PendingFrame {
+    Ready(Frame),
+    Deferred(DeferredFrame),
+}
+
+impl PendingFrame {
+    fn materialize(self) -> Frame {
+        match self {
+            Self::Ready(frame) => frame,
+            Self::Deferred(frame) => frame.materialize(),
+        }
+    }
+}
+
 /// What processing one node gave.
 enum Step {
     /// No root below: refuted by the linearisation or the order test.
@@ -1097,7 +1290,7 @@ enum Step {
     /// A leaf: `is_head` for the last-summand shortcut.
     Leaf { values: u128, is_head: bool },
     /// Children, pushed in this order (the last is explored first).
-    Split(Vec<Frame>),
+    Split(Vec<DeferredFrame>),
 }
 
 /// The search's fixed shape, shared by every thread.
@@ -1177,17 +1370,19 @@ impl Shape<'_> {
                 0
             };
             let start = self.valid.partition_point(|&c| c < low);
-            let children: Vec<Frame> = self.valid[start..]
+            let parent = std::sync::Arc::new(f);
+            let children: Vec<DeferredFrame> = self.valid[start..]
                 .iter()
                 .rev()
                 .filter(|&&c| c & fixed_i == values_i & fixed_i)
                 .map(|&c| {
                     let free = !fixed_i & summand_mask as u32;
-                    let assignment: Vec<(usize, bool)> = (0..ell)
-                        .filter(|&t| free >> t & 1 == 1)
-                        .map(|t| (i * ell + t, c >> t & 1 == 1))
-                        .collect();
-                    assign(&f, fixed, values, &assignment)
+                    DeferredFrame {
+                        parent: parent.clone(),
+                        fixed,
+                        values,
+                        choice: BranchChoice::Point { i, ell, c, free },
+                    }
                 })
                 .collect();
             if children.is_empty() {
@@ -1209,9 +1404,20 @@ impl Shape<'_> {
                 is_head: false,
             };
         };
+        let parent = std::sync::Arc::new(f);
         Step::Split(vec![
-            assign(&f, fixed, values, &[(v, true)]),
-            assign(&f, fixed, values, &[(v, false)]),
+            DeferredFrame {
+                parent: parent.clone(),
+                fixed,
+                values,
+                choice: BranchChoice::Bit { v, value: true },
+            },
+            DeferredFrame {
+                parent,
+                fixed,
+                values,
+                choice: BranchChoice::Bit { v, value: false },
+            },
         ])
     }
 }
@@ -1313,21 +1519,21 @@ fn search(
     let stop = AtomicBool::new(false);
     // Serial breadth-first expansion into a frontier.
     let want = SUBTREES_PER_THREAD * rayon::current_num_threads().max(1);
-    let mut frontier = vec![Frame {
+    let mut frontier = vec![PendingFrame::Ready(Frame {
         eqs: sys.equations.clone(),
         subs: Vec::new(),
         fixed: 0,
         values: 0,
-    }];
+    })];
     while !frontier.is_empty() && frontier.len() < want {
         let mut next = Vec::with_capacity(frontier.len() * 2);
-        for f in frontier {
+        for pending in frontier {
             if nodes.fetch_add(1, Ordering::Relaxed) >= node_budget {
                 stats.exhausted = true;
                 stats.nodes = nodes.load(Ordering::Relaxed);
                 return None;
             }
-            match shape.step(f, stats) {
+            match shape.step(pending.materialize(), stats) {
                 Step::Closed => {}
                 Step::Leaf { values, is_head } => {
                     stats.leaves += 1;
@@ -1339,7 +1545,9 @@ fn search(
                         return None;
                     }
                 }
-                Step::Split(children) => next.extend(children.into_iter().rev()),
+                Step::Split(children) => {
+                    next.extend(children.into_iter().rev().map(PendingFrame::Deferred))
+                }
             }
         }
         frontier = next;
@@ -1360,7 +1568,7 @@ fn search(
                     stop.store(true, Ordering::Relaxed);
                     break;
                 }
-                match shape.step(f, &mut local) {
+                match shape.step(f.materialize(), &mut local) {
                     Step::Closed => {}
                     Step::Leaf { values, is_head } => {
                         local.leaves += 1;
@@ -1373,7 +1581,9 @@ fn search(
                             break;
                         }
                     }
-                    Step::Split(children) => stack.extend(children),
+                    Step::Split(children) => {
+                        stack.extend(children.into_iter().map(PendingFrame::Deferred))
+                    }
                 }
             }
             (None, local)
@@ -1387,6 +1597,7 @@ fn search(
         stats.max_rows = stats.max_rows.max(local.max_rows);
         stats.max_cols = stats.max_cols.max(local.max_cols);
         stats.exhausted |= local.exhausted;
+        stats.unsupported |= local.unsupported;
         if found.is_none() {
             found = r;
         }
@@ -1396,6 +1607,7 @@ fn search(
         // A decomposition was found: the budget running out elsewhere
         // does not make this answer incomplete.
         stats.exhausted = false;
+        stats.unsupported = false;
     }
     found
 }
@@ -1490,8 +1702,197 @@ fn summands_ordered(fixed: u128, values: u128, m: usize, ell: usize) -> bool {
 mod tests {
     use super::*;
     use crate::cryptanalysis::koblitz_groebner::build_decomposition_system;
-    use crate::cryptanalysis::koblitz_index_calculus::build_frobenius_factor_base;
+    use crate::cryptanalysis::koblitz_index_calculus::{
+        build_frobenius_factor_base, build_standard_subspace_factor_base,
+        cofactor_project_factor_base, find_irreducible,
+    };
     use rand::{rngs::StdRng, Rng, SeedableRng};
+
+    #[test]
+    fn indexed_coordinates_match_curve_lift_reference() {
+        fn reference(
+            kc: &KoblitzCurve,
+            fb: &FrobeniusFactorBase,
+            index_of: &HashMap<(BigUint, BigUint), usize>,
+        ) -> Vec<u32> {
+            let ell = fb.subspace_basis.len();
+            (0..1u32 << ell)
+                .filter(|&c| {
+                    let x = summand_x(&fb.subspace_basis, ell, c as u128, 0, kc.n);
+                    points_with_x(&kc.curve, &x)
+                        .iter()
+                        .any(|p| index_of.contains_key(&point_key(p)))
+                })
+                .collect()
+        }
+
+        for (kc, ell) in [
+            (KoblitzCurve::new(0, 9).unwrap(), 3),
+            (KoblitzCurve::new(1, 17).unwrap(), 5),
+            (KoblitzCurve::known_n83_k0().unwrap(), 12),
+        ] {
+            let fb = build_standard_subspace_factor_base(&kc, ell).unwrap();
+            let full = fb.index_map();
+            assert_eq!(
+                valid_coordinates(&kc, &fb, &full),
+                reference(&kc, &fb, &full)
+            );
+            if kc.n == 83 {
+                assert_eq!(valid_coordinates(&kc, &fb, &full).len(), 2_029);
+            }
+
+            let mut subset = full.clone();
+            subset.retain(|_, i| *i % 3 == 0);
+            assert_eq!(
+                valid_coordinates(&kc, &fb, &subset),
+                reference(&kc, &fb, &subset)
+            );
+
+            let mut changed_basis = fb.clone();
+            changed_basis.subspace_basis[0] =
+                changed_basis.subspace_basis[0].add(&changed_basis.subspace_basis[1]);
+            assert_eq!(
+                valid_coordinates(&kc, &changed_basis, &full),
+                reference(&kc, &changed_basis, &full)
+            );
+
+            let mut malformed = full.clone();
+            let (key, &index) = full.iter().next().unwrap();
+            malformed.insert(key.clone(), (index + 1) % fb.points.len());
+            assert_eq!(
+                valid_coordinates(&kc, &fb, &malformed),
+                reference(&kc, &fb, &malformed)
+            );
+
+            if kc.n == 9 {
+                let frobenius = build_frobenius_factor_base(&kc, 0).unwrap();
+                let frobenius_index = frobenius.index_map();
+                assert_eq!(
+                    valid_coordinates(&kc, &frobenius, &frobenius_index),
+                    reference(&kc, &frobenius, &frobenius_index)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn two_word_field_table_matches_legacy_and_reference() {
+        for n in [9, 17, 31] {
+            let irr = find_irreducible(n).unwrap();
+            let old = FieldStructure::new(n, &irr);
+            let wide = TwoWordFieldStructure::new(n, &irr).unwrap();
+            for i in 0..n as usize {
+                assert_eq!(wide.square_bits(i), old.square_bits(i));
+                for j in 0..n as usize {
+                    assert_eq!(wide.product_bits(i, j), old.product_bits(i, j));
+                }
+            }
+        }
+        let kc = KoblitzCurve::known_n83_k0().unwrap();
+        let wide = TwoWordFieldStructure::new(83, &kc.curve.irreducible).unwrap();
+        assert_ne!(wide.product_bits(70, 1) >> 64, 0);
+        for i in 0..83 {
+            let x = F2mElement::from_bit_positions(&[i], 83);
+            assert_eq!(
+                wide.square_bits(i as usize),
+                element_bits(&x.square(&kc.curve.irreducible))
+            );
+            for j in 0..83 {
+                let y = F2mElement::from_bit_positions(&[j], 83);
+                assert_eq!(
+                    wide.product_bits(i as usize, j as usize),
+                    element_bits(&x.mul(&y, &kc.curve.irreducible))
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn n83_three_summand_block_and_cofactor_bridge_replay() {
+        let kc = KoblitzCurve::known_n83_k0().unwrap();
+        let source = build_standard_subspace_factor_base(&kc, 12).unwrap();
+        let projected = cofactor_project_factor_base(&kc, &source).unwrap();
+        assert_eq!(source.points.len(), 4_057);
+        assert_eq!(projected.points.len(), 4_054);
+        let [p, q, t] = [0usize, 2, 4].map(|i| &source.points[i]);
+        let pq = kc.add(p, q);
+        let sum = kc.add(&pq, t);
+        let (BinaryPoint::Affine { x: x_pq, .. }, BinaryPoint::Affine { x: x_sum, .. }) =
+            (&pq, &sum)
+        else {
+            panic!("the frozen planted points must have affine partial sums");
+        };
+        let st = TwoWordFieldStructure::new(83, &kc.curve.irreducible).unwrap();
+        let legacy = FieldStructure::new(83, &kc.curve.irreducible);
+        assert!(
+            WideSystem::build(&source.subspace_basis, x_sum, &kc.curve.b, 3, &legacy).is_none()
+        );
+        let (legacy_witness, legacy_stats) =
+            wide_groebner_decompose(&kc, &source, &source.index_map(), &legacy, &sum, 3, 16);
+        assert!(legacy_witness.is_none());
+        assert!(legacy_stats.unsupported);
+        assert!(legacy_stats.exhausted);
+        let system = WideSystem::build(&source.subspace_basis, x_sum, &kc.curve.b, 3, &st)
+            .expect("119 variables fit the wide mask");
+        assert_eq!(system.n_vars, 119);
+        let mut assignment = 0u128;
+        for (i, point) in [p, q, t].into_iter().enumerate() {
+            let BinaryPoint::Affine { x, .. } = point else {
+                panic!("factor-base point must be affine");
+            };
+            let code = element_bits(x);
+            assert_eq!(code >> 12, 0);
+            assert_eq!(summand_x(&source.subspace_basis, 12, code, 0, 83), *x);
+            assignment |= code << (i * 12);
+        }
+        assignment |= element_bits(x_pq) << 36;
+        assert!(system.equations.iter().all(|row| !row.eval(assignment)));
+        assert_eq!(kc.add(&kc.add(p, q), t), sum);
+
+        let four = BigUint::from(4u32);
+        let target = kc.mul(&sum, &four);
+        assert_eq!(
+            target,
+            [p, q, t]
+                .into_iter()
+                .fold(BinaryPoint::Infinity, |acc, point| {
+                    kc.add(&acc, &kc.mul(point, &four))
+                })
+        );
+        let one = F2mElement::one(83);
+        let zero = F2mElement::zero(83);
+        let torsion = [
+            BinaryPoint::Infinity,
+            BinaryPoint::Affine {
+                x: zero.clone(),
+                y: one.clone(),
+            },
+            BinaryPoint::Affine {
+                x: one.clone(),
+                y: zero,
+            },
+            BinaryPoint::Affine {
+                x: one.clone(),
+                y: one,
+            },
+        ];
+        for (i, point) in torsion.iter().enumerate() {
+            assert!(kc.curve.is_on_curve(point));
+            assert_eq!(kc.mul(point, &four), BinaryPoint::Infinity);
+            assert!(torsion[..i].iter().all(|prior| prior != point));
+        }
+        assert_eq!(&kc.subgroup_order % &four, BigUint::from(1u32));
+        let inv_four = (&kc.subgroup_order * BigUint::from(3u32) + BigUint::from(1u32)) / &four;
+        let subgroup_preimage = kc.mul(&target, &inv_four);
+        assert_eq!(kc.mul(&subgroup_preimage, &four), target);
+        assert_eq!(
+            torsion
+                .iter()
+                .filter(|offset| kc.add(&subgroup_preimage, offset) == sum)
+                .count(),
+            1
+        );
+    }
 
     #[test]
     fn wide_system_matches_the_64_bit_builder() {

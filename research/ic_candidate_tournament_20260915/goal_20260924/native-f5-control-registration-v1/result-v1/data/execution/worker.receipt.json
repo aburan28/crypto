@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "/private/tmp/ic-native-f5-control-20261003-preregister-v1/immutable/bin/ic_tournament_worker"
+  ],
+  "child_wall_ns": 22451179708,
+  "cwd": "/private/tmp/ic-native-f5-control-20261003-execution-v1",
+  "deadline_ms": 900000,
+  "environment": {
+    "IC_ARTIFACT_CACHE": "off",
+    "IC_F2_BACKEND": "cpu",
+    "LC_ALL": "C",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "executable_sha256_after": "c4a2f160faeb57a2451171a2f105c05c77d57abad76e13eb8112f57ac47c20b0",
+  "executable_sha256_before": "c4a2f160faeb57a2451171a2f105c05c77d57abad76e13eb8112f57ac47c20b0",
+  "exit_code": 0,
+  "output_limit": false,
+  "pid": 57017,
+  "process_group_drain_confirmed": true,
+  "process_group_drain_requested": true,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdin_bytes": 7223,
+  "stdin_sha256": "b0ecbb19d33ecf739499d1db5d23ffd25a1c85309a574d5cf6cffa66cab94fc5",
+  "stdin_write_error": null,
+  "stdin_written_bytes": 7223,
+  "stdout_bytes": 5819,
+  "stdout_sha256": "234ca4c051ee4baa105eb2b87bfa45d573b75b5dc8546463f37b8abca52a1120",
+  "timed_out": false
+}

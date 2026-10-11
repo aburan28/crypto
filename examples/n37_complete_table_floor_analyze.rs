@@ -64,7 +64,9 @@ fn analyze(
     if session.records_sha256.as_deref() != Some(records_sha.as_str()) {
         return Err("rho records hash differs from sealed session".into());
     }
-    let lines = runner::read_record_lines(session_dir)?;
+    // This receipt was migrated after serde_json's exact float parser was
+    // enabled: preserve the value already written in the sealed source line.
+    let lines = runner::read_record_lines_exact(session_dir)?;
     if lines.len() != 24 {
         return Err("rho session does not contain 24 warmup plus measured records".into());
     }
@@ -100,7 +102,7 @@ fn analyze(
             || rec.arm != "rho-strong"
             || rec.method.id != METHOD
             || rec.workload.curve.slug != CURVE
-            || rec.workload.curve.r != R
+            || rec.workload.curve.r != u128::from(R)
             || rec.workload.curve.group_order != 137_439_487_532
             || rec.workload.curve.generator[0] != "0x17262ad4f3"
             || rec.workload.curve.generator[1] != "0x82fe10673"

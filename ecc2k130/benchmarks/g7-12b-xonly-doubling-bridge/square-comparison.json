@@ -1,0 +1,52 @@
+{
+  "status": "doubling-only-compressed-square-screen",
+  "checkpoint_mismatches": {
+    "square1": 0,
+    "square3": 0
+  },
+  "rows": [
+    {
+      "variant": "base",
+      "rates_billion_per_second": [
+        11.754555,
+        11.494082,
+        11.460321
+      ],
+      "median_billion_per_second": 11.494082,
+      "paired_geomean_vs_base": 1.0,
+      "paired_95_ci": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "variant": "square1",
+      "rates_billion_per_second": [
+        11.674347,
+        11.521119,
+        11.42952
+      ],
+      "median_billion_per_second": 11.521119,
+      "paired_geomean_vs_base": 0.9976066346861749,
+      "paired_95_ci": [
+        0.9862588131056056,
+        1.0090850234697069
+      ]
+    },
+    {
+      "variant": "square3",
+      "rates_billion_per_second": [
+        11.688744,
+        11.65631,
+        11.474999
+      ],
+      "median_billion_per_second": 11.65631,
+      "paired_geomean_vs_base": 1.003232152146145,
+      "paired_95_ci": [
+        0.9787178498982253,
+        1.02836047304588
+      ]
+    }
+  ],
+  "decision": "reject compressed-square variants; retain multiplication-based square"
+}

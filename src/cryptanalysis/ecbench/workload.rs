@@ -16,11 +16,16 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
-use crate::cryptanalysis::ecbench::canonical::{bare_id, derive_u64};
+use crate::binary_ecc::IrreduciblePoly;
+use crate::cryptanalysis::ecbench::canonical::{bare_id, compat_u128, derive_u128, derive_u64};
+use crate::cryptanalysis::ecbench::conductor_gap::{self, GapLevel};
+use crate::cryptanalysis::ecbench_large_prime::binary_explicit_instance;
 use crate::cryptanalysis::ic_boundary::{
     find_prime_order_curve, koblitz_instance, random_binary_instance, roster_prime_instance,
     BinaryGroup, BinaryInstance, CountedGroup, GroupOps, PrimeCurve, PrimeInstance, PrimePoint,
 };
+use crate::cryptanalysis::koblitz_strong_rho::{RawPointG, WideStrongRho};
+use crate::cryptanalysis::koblitz_wide::WideKoblitz;
 
 /// How to build the curve.  Each variant is a constructor the repository
 /// already has, so the registry's `generator_call` names the same curve.
@@ -32,13 +37,26 @@ pub enum CurveSpec {
     PrimeSearch { bits: u32, seed: u64 },
     /// `ic_boundary::roster_prime_instance(bits)`: the bench roster.
     PrimeRoster { bits: u32 },
-    /// `ic_boundary::koblitz_instance(a, n)`: `K_a / F_{2^n}`, `n ≤ 62`.
+    /// `ic_boundary::koblitz_instance(a, n)`: `K_a / F_{2^n}`, `n ≤ 62`;
+    /// for `64 ≤ n ≤ 127`, `koblitz_wide::WideKoblitz` over the registry's
+    /// modulus for that `K_a` (the m = 83 gate curve of AGENTS.md §8a).
     Koblitz { a: u8, n: u32 },
     /// `ic_boundary::random_binary_instance(n, seed, max_cofactor)`.
     BinaryRandom {
         n: u32,
         seed: u64,
         max_cofactor: u64,
+    },
+    /// `conductor_gap::{crater, floor}(params(ell, t), seed)`: a curve of
+    /// the CM pair over `GF((t² + 19ℓ²)/4)` with prime order `q + 1 − t`,
+    /// at the crater (endomorphism conductor 1) or the floor (conductor
+    /// `ℓ`), certified from the Frobenius discriminant `−19ℓ²` alone.
+    /// `seed` drives the floor search and is ignored at the crater.
+    ConductorGap {
+        ell: u64,
+        t: u64,
+        level: GapLevel,
+        seed: u64,
     },
     /// A prime curve given outright: `y² = x³ + ax + b` over `F_p`, the
     /// group order, the prime subgroup order `r` and a generator of it.
@@ -48,6 +66,20 @@ pub enum CurveSpec {
     /// children this form so a child never repeats a curve search.
     PrimeExplicit {
         p: u64,
+        a: u64,
+        b: u64,
+        group_order: u64,
+        r: u64,
+        gx: u64,
+        gy: u64,
+    },
+    /// A binary curve given outright in polynomial basis. `modulus` is
+    /// the complete integer bitmask, including its degree-`n` leading bit.
+    /// The constructor checks irreducibility, subgroup divisibility,
+    /// generator membership, and `[r]G = O`.
+    BinaryExplicit {
+        n: u32,
+        modulus: u64,
         a: u64,
         b: u64,
         group_order: u64,
@@ -70,10 +102,18 @@ impl CurveSpec {
             CurveSpec::PrimeRoster { bits } => roster_prime_instance(bits)
                 .map(Instance::Prime)
                 .ok_or_else(|| format!("the bench roster has no {bits}-bit curve")),
+            CurveSpec::Koblitz { a, n } if (64..=127).contains(&n) && a <= 1 => {
+                let irr = registry_koblitz_modulus(a, n).ok_or_else(|| {
+                    format!("K_{a} over F_2^{n} is not in docs/curves/registry.json; register it first (AGENTS.md §11)")
+                })?;
+                let kc = WideKoblitz::new(a, &irr)?;
+                let rho = kc.strong_rho();
+                Ok(Instance::Wide(Box::new(WideInstance { kc, rho })))
+            }
             CurveSpec::Koblitz { a, n } => {
                 if a > 1 || !(3..=62).contains(&n) {
                     return Err(format!(
-                        "koblitz takes a ∈ {{0,1}} and 3 ≤ n ≤ 62, not a={a} n={n}"
+                        "koblitz takes a ∈ {{0,1}} and 3 ≤ n ≤ 62, or 64 ≤ n ≤ 127 (wide), not a={a} n={n}"
                     ));
                 }
                 koblitz_instance(a, n).map(|i| Instance::Binary(Box::new(i))).ok_or_else(|| {
@@ -87,6 +127,19 @@ impl CurveSpec {
             } => random_binary_instance(n, seed, max_cofactor)
                 .map(|i| Instance::Binary(Box::new(i)))
                 .ok_or_else(|| format!("no binary curve found for n={n} seed={seed}")),
+            CurveSpec::ConductorGap {
+                ell,
+                t,
+                level,
+                seed,
+            } => {
+                let p = conductor_gap::params(ell, t)?;
+                match level {
+                    GapLevel::Crater => conductor_gap::crater(p),
+                    GapLevel::Floor => conductor_gap::floor(p, seed),
+                }
+                .map(Instance::Prime)
+            }
             CurveSpec::PrimeExplicit {
                 p,
                 a,
@@ -122,6 +175,17 @@ impl CurveSpec {
                 inst.name = inst.curve_id().slug;
                 Ok(Instance::Prime(inst))
             }
+            CurveSpec::BinaryExplicit {
+                n,
+                modulus,
+                a,
+                b,
+                group_order,
+                r,
+                gx,
+                gy,
+            } => binary_explicit_instance(n, modulus, a, b, group_order, r, gx, gy)
+                .map(|i| Instance::Binary(Box::new(i))),
         }
     }
 
@@ -138,7 +202,27 @@ impl CurveSpec {
                 gx: i.generator.0,
                 gy: i.generator.1,
             }),
-            Instance::Binary(_) => None,
+            Instance::Binary(i) if i.koblitz.is_none() => {
+                let modulus = i
+                    .irreducible
+                    .low_terms
+                    .iter()
+                    .fold(1u64 << i.n, |v, &term| v | (1u64 << term));
+                Some(CurveSpec::BinaryExplicit {
+                    n: i.n,
+                    modulus,
+                    a: i.a,
+                    b: i.b,
+                    group_order: i.group_order,
+                    r: i.r,
+                    gx: i.generator.x,
+                    gy: i.generator.y,
+                })
+            }
+            // Preserve the original Koblitz constructor: it carries the
+            // certified Frobenius action and endomorphism identity that a
+            // generic explicit binary instance intentionally does not claim.
+            Instance::Binary(_) | Instance::Wide(_) => None,
         }
     }
 
@@ -149,15 +233,30 @@ impl CurveSpec {
                 format!("find_prime_order_curve({bits}, {seed})")
             }
             CurveSpec::PrimeRoster { bits } => format!("roster_prime_instance({bits})"),
+            CurveSpec::Koblitz { a, n } if n >= 64 => {
+                format!("WideKoblitz::new({a}, registry modulus for n = {n})")
+            }
             CurveSpec::Koblitz { a, n } => format!("KoblitzCurve::new({a}, {n})"),
             CurveSpec::BinaryRandom {
                 n,
                 seed,
                 max_cofactor,
             } => format!("random_binary_instance({n}, {seed}, {max_cofactor})"),
+            CurveSpec::ConductorGap {
+                ell,
+                t,
+                level,
+                seed,
+            } => match level {
+                GapLevel::Crater => format!("conductor_gap::crater(params({ell}, {t}))"),
+                GapLevel::Floor => format!("conductor_gap::floor(params({ell}, {t}), {seed})"),
+            },
             CurveSpec::PrimeExplicit { p, a, b, .. } => {
                 format!("PrimeCurve {{ p: {p}, a: {a}, b: {b} }} (explicit)")
             }
+            CurveSpec::BinaryExplicit {
+                n, modulus, a, b, ..
+            } => format!("binary_explicit_instance({n}, 0x{modulus:x}, 0x{a:x}, 0x{b:x}, ...)"),
         }
     }
 }
@@ -166,6 +265,36 @@ impl CurveSpec {
 pub enum Instance {
     Prime(PrimeInstance),
     Binary(Box<BinaryInstance>),
+    /// A Koblitz curve past one word (`64 ≤ n ≤ 127`).
+    Wide(Box<WideInstance>),
+}
+
+/// A wide Koblitz curve and the strong reference's arithmetic on it, which
+/// every wide method and the workload's own `[k]G` use.
+pub struct WideInstance {
+    pub kc: WideKoblitz,
+    pub rho: WideStrongRho,
+}
+
+/// The registry's modulus for `K_a` over `F_{2^n}`, if it lists one.
+pub fn registry_koblitz_modulus(a: u8, n: u32) -> Option<IrreduciblePoly> {
+    let doc: Value = serde_json::from_str(REGISTRY).ok()?;
+    let entry = doc.get("curves")?.as_array()?.iter().find(|c| {
+        let p = c.get("params");
+        c.get("family").and_then(Value::as_str) == Some("koblitz")
+            && p.and_then(|p| p.get("a")).and_then(Value::as_u64) == Some(u64::from(a))
+            && p.and_then(|p| p.get("n")).and_then(Value::as_u64) == Some(u64::from(n))
+    })?;
+    let hex = entry.get("params")?.get("modulus")?.as_str()?;
+    let bits = u128::from_str_radix(hex.trim_start_matches("0x"), 16).ok()?;
+    if 127 - bits.leading_zeros() != n {
+        return None;
+    }
+    let low_terms = (0..n).filter(|&i| (bits >> i) & 1 == 1).collect();
+    Some(IrreduciblePoly {
+        degree: n,
+        low_terms,
+    })
 }
 
 /// The facts about a built curve every record carries.
@@ -181,9 +310,14 @@ pub struct CurveFacts {
     pub field_degree: Option<u32>,
     /// Bits of the field characteristic for prime curves.
     pub field_bits: Option<u32>,
-    pub group_order: u64,
-    pub r: u64,
-    pub cofactor: u64,
+    /// Orders as `u128` for wide curves; a value that fits a `u64` is
+    /// written as the number it always was (`canonical::compat_u128`).
+    #[serde(with = "compat_u128")]
+    pub group_order: u128,
+    #[serde(with = "compat_u128")]
+    pub r: u128,
+    #[serde(with = "compat_u128")]
+    pub cofactor: u128,
     /// Generator coordinates as lower-case hex.
     pub generator: [String; 2],
     /// Automorphisms a generic algorithm may use: 2 (negation), or `2n`
@@ -210,20 +344,20 @@ fn registry_entry(slug: &str) -> Option<Value> {
         .cloned()
 }
 
-fn parse_hex(s: &str) -> Option<u64> {
-    u64::from_str_radix(s.trim_start_matches("0x"), 16).ok()
+fn parse_hex(s: &str) -> Option<u128> {
+    u128::from_str_radix(s.trim_start_matches("0x"), 16).ok()
 }
 
 /// `(ec1, curve_uid)` of the representation with this subgroup and
 /// generator.
-fn matching_representation(entry: &Value, r: u64, gx: u64, gy: u64) -> Option<(String, String)> {
+fn matching_representation(entry: &Value, r: u128, gx: u128, gy: u128) -> Option<(String, String)> {
     entry
         .get("representations")?
         .as_array()?
         .iter()
         .find_map(|rep| {
             let c = rep.get("curve")?;
-            let order: u64 = c.get("subgroup_order")?.as_str()?.parse().ok()?;
+            let order: u128 = c.get("subgroup_order")?.as_str()?.parse().ok()?;
             let g = c.get("generator")?.as_array()?;
             let x = parse_hex(g.first()?.as_str()?)?;
             let y = parse_hex(g.get(1)?.as_str()?)?;
@@ -238,10 +372,11 @@ fn matching_representation(entry: &Value, r: u64, gx: u64, gy: u64) -> Option<(S
 }
 
 impl Instance {
-    pub fn r(&self) -> u64 {
+    pub fn r(&self) -> u128 {
         match self {
-            Instance::Prime(i) => i.r,
-            Instance::Binary(i) => i.r,
+            Instance::Prime(i) => u128::from(i.r),
+            Instance::Binary(i) => u128::from(i.r),
+            Instance::Wide(i) => i.kc.r,
         }
     }
 
@@ -252,11 +387,11 @@ impl Instance {
                 "prime",
                 None,
                 Some(64 - i.curve.p.leading_zeros()),
-                i.group_order,
-                i.r,
-                i.cofactor,
-                i.generator.0,
-                i.generator.1,
+                u128::from(i.group_order),
+                u128::from(i.r),
+                u128::from(i.cofactor),
+                u128::from(i.generator.0),
+                u128::from(i.generator.1),
                 2,
             ),
             Instance::Binary(i) => (
@@ -268,12 +403,24 @@ impl Instance {
                 },
                 Some(i.n),
                 None,
-                i.group_order,
-                i.r,
-                i.cofactor,
-                i.generator.x,
-                i.generator.y,
+                u128::from(i.group_order),
+                u128::from(i.r),
+                u128::from(i.cofactor),
+                u128::from(i.generator.x),
+                u128::from(i.generator.y),
                 if i.koblitz.is_some() { 2 * i.n } else { 2 },
+            ),
+            Instance::Wide(i) => (
+                i.kc.curve_id(),
+                "koblitz",
+                Some(i.kc.n),
+                None,
+                i.kc.group_order,
+                i.kc.r,
+                i.kc.cofactor,
+                i.kc.generator.0,
+                i.kc.generator.1,
+                2 * i.kc.n,
             ),
         };
         let entry = registry_entry(&id.slug);
@@ -301,8 +448,17 @@ impl Instance {
     /// `[k]G` as hex coordinates, computed by the instance's own counted
     /// double-and-add on a ledger nobody reads.  Used to build the
     /// target and, separately, to verify an answer.
-    pub fn mul_generator_hex(&self, k: u64) -> Option<[String; 2]> {
+    pub fn mul_generator_hex(&self, k: u128) -> Option<[String; 2]> {
         let mut scratch = GroupOps::default();
+        if let Instance::Wide(i) = self {
+            return match i.rho.scalar_mul(i.rho.generator(), k % i.kc.r) {
+                RawPointG::Affine { x, y } => Some([format!("0x{x:x}"), format!("0x{y:x}")]),
+                RawPointG::Infinity => None,
+            };
+        }
+        // A one-word instance's subgroup order fits a word, so a reduced
+        // scalar does too.
+        let k = u64::try_from(k % self.r()).ok()?;
         match self {
             Instance::Prime(i) => {
                 let p = i.curve.mul(&mut scratch, i.generator_point(), k);
@@ -313,6 +469,7 @@ impl Instance {
                 let p = g.mul(&mut scratch, i.generator, k);
                 (!p.infinity).then(|| [format!("0x{:x}", p.x), format!("0x{:x}", p.y)])
             }
+            Instance::Wide(_) => unreachable!("returned above"),
         }
     }
 }
@@ -332,8 +489,35 @@ impl Instance {
     ) -> Option<([String; 2], u64)> {
         let model = model_hash(curve);
         let mut scratch = GroupOps::default();
+        if let Instance::Wide(i) = self {
+            // PUBLIC_TARGET_LAW_WIDE: the same inputs as decimal strings, a
+            // 128-bit draw, its top bit choosing the ordinate.
+            for counter in 0..10_000u64 {
+                let parts = [
+                    model.to_string(),
+                    curve.r.to_string(),
+                    seed.to_string(),
+                    index.to_string(),
+                    counter.to_string(),
+                ];
+                let h = derive_u128(PUBLIC_TARGET_LAW_WIDE, &parts);
+                let flip = h >> 127 == 1;
+                let pts = i.kc.points_with_x(h & ((1u128 << i.kc.n) - 1));
+                let Some(&(x, y)) = pts.get(usize::from(flip && pts.len() > 1)) else {
+                    continue;
+                };
+                if let RawPointG::Affine { x, y } =
+                    i.rho.scalar_mul(RawPointG::Affine { x, y }, i.kc.cofactor)
+                {
+                    return Some(([format!("0x{x:x}"), format!("0x{y:x}")], counter));
+                }
+            }
+            return None;
+        }
         for counter in 0..10_000u64 {
-            let h = derive_u64(PUBLIC_TARGET_LAW, &[model, curve.r, seed, index, counter]);
+            // One-word curves only: their order fits the law's u64 parts.
+            let r = u64::try_from(curve.r).ok()?;
+            let h = derive_u64(PUBLIC_TARGET_LAW, &[model, r, seed, index, counter]);
             let flip = (h >> 63) & 1 == 1;
             match self {
                 Instance::Prime(i) => {
@@ -350,6 +534,7 @@ impl Instance {
                         return Some(([format!("0x{:x}", q.x), format!("0x{:x}", q.y)], counter));
                     }
                 }
+                Instance::Wide(_) => unreachable!("handled above"),
                 Instance::Binary(i) => {
                     let mask = if i.n >= 64 {
                         u64::MAX
@@ -391,6 +576,10 @@ pub const TARGET_LAW: &str = "uniform_scalar_sha256_v1";
 /// target"; `identity.py` refuses a planted workload).
 pub const PUBLIC_TARGET_LAW: &str = "hash_to_subgroup_v1";
 
+/// The public-target law for a subgroup order past `2^64`: the same
+/// inputs, hashed as decimal strings, with a 128-bit draw.
+pub const PUBLIC_TARGET_LAW_WIDE: &str = "hash_to_subgroup_v2";
+
 /// Whether a workload's target was built from a known scalar.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -408,12 +597,30 @@ impl TargetKind {
     }
 }
 
+/// The planted-scalar law for a subgroup order past `2^64`: the same
+/// inputs, hashed as decimal strings, with a 128-bit draw.  A one-word
+/// order keeps [`TARGET_LAW`], so every existing workload is unchanged.
+pub const TARGET_LAW_WIDE: &str = "uniform_scalar_sha256_v2";
+
 /// `k ∈ [1, r−1]` for target `index` under `target_seed`.
-pub fn planted_scalar(curve: &CurveFacts, target_seed: u64, index: u64) -> u64 {
+pub fn planted_scalar(curve: &CurveFacts, target_seed: u64, index: u64) -> u128 {
     // The curve's model hash and subgroup enter the derivation, so the
     // same seed on two curves gives unrelated scalars.
     let model = model_hash(curve);
-    1 + derive_u64(TARGET_LAW, &[model, curve.r, target_seed, index]) % (curve.r - 1)
+    match u64::try_from(curve.r) {
+        Ok(r) => u128::from(1 + derive_u64(TARGET_LAW, &[model, r, target_seed, index]) % (r - 1)),
+        Err(_) => {
+            let parts = [model, target_seed, index].map(|v| v.to_string());
+            let parts = [
+                parts[0].clone(),
+                curve.r.to_string(),
+                parts[1].clone(),
+                parts[2].clone(),
+            ];
+            // The modulo bias of a 128-bit draw over r < 2^127 is below 2^-1.
+            1 + derive_u128(TARGET_LAW_WIDE, &parts) % (curve.r - 1)
+        }
+    }
 }
 
 /// One built single-target workload.
@@ -433,7 +640,8 @@ pub struct Workload {
     /// The planted `k` with `Q = [k]G`, for a planted target.  Not in the
     /// identity (the target point is) and never passed to a solver.
     /// `None` for a public target, whose logarithm nobody knows.
-    pub planted: Option<u64>,
+    #[serde(default, with = "compat_u128::option")]
+    pub planted: Option<u128>,
     /// The hash counter that landed a public target in the subgroup.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub target_counter: Option<u64>,
@@ -477,7 +685,12 @@ impl Workload {
                 let q = inst
                     .mul_generator_hex(k)
                     .ok_or("the planted scalar gave the identity; the subgroup order is wrong")?;
-                (TARGET_LAW, q, Some(k), None)
+                let law = if u64::try_from(curve.r).is_ok() {
+                    TARGET_LAW
+                } else {
+                    TARGET_LAW_WIDE
+                };
+                (law, q, Some(k), None)
             }
             TargetKind::Public => {
                 // With r | h the r-torsion can be Z/r × Z/r, and a cleared
@@ -491,7 +704,12 @@ impl Workload {
                 let (q, c) = inst
                     .hash_to_subgroup(&curve, target_seed, index)
                     .ok_or("no public target found in 10 000 hash attempts")?;
-                (PUBLIC_TARGET_LAW, q, None, Some(c))
+                let law = if u64::try_from(curve.r).is_ok() {
+                    PUBLIC_TARGET_LAW
+                } else {
+                    PUBLIC_TARGET_LAW_WIDE
+                };
+                (law, q, None, Some(c))
             }
         };
         let (workload_id, workload_sha256) = bare_id(
@@ -514,7 +732,7 @@ impl Workload {
 
     /// The target's kind, from its law.
     pub fn kind(&self) -> TargetKind {
-        if self.target_law == PUBLIC_TARGET_LAW {
+        if self.target_law == PUBLIC_TARGET_LAW || self.target_law == PUBLIC_TARGET_LAW_WIDE {
             TargetKind::Public
         } else {
             TargetKind::Planted
@@ -681,6 +899,61 @@ mod tests {
         assert!(d < 1.63 / (n as f64).sqrt(), "KS D = {d}");
         let gap = xs.iter().map(|x| (x - 0.5).abs()).sum::<f64>() / n as f64;
         assert!((gap - 0.25).abs() < 0.005, "mean gap {gap}");
+    }
+
+    #[test]
+    fn conductor_gap_pair_shares_order_and_differs_in_j() {
+        let crater = CurveSpec::ConductorGap {
+            ell: 263,
+            t: 241,
+            level: GapLevel::Crater,
+            seed: 0,
+        };
+        let floor = CurveSpec::ConductorGap {
+            ell: 263,
+            t: 241,
+            level: GapLevel::Floor,
+            seed: 3,
+        };
+        let (Instance::Prime(c), Instance::Prime(f)) =
+            (crater.build().unwrap(), floor.build().unwrap())
+        else {
+            panic!("conductor_gap builds prime instances");
+        };
+        assert_eq!(
+            (c.curve.p, c.group_order, c.cofactor),
+            (343_073, 342_833, 1)
+        );
+        assert_eq!(
+            (f.curve.p, f.group_order, f.cofactor),
+            (343_073, 342_833, 1)
+        );
+        assert_ne!(
+            conductor_gap::j_invariant(&c.curve),
+            conductor_gap::j_invariant(&f.curve)
+        );
+        assert_eq!(
+            conductor_gap::j_invariant(&c.curve),
+            343_073 - 884_736 % 343_073
+        );
+        // The explicit form a measured child receives rebuilds the same curve.
+        let ex = CurveSpec::explicit(&Instance::Prime(f.clone())).unwrap();
+        let Instance::Prime(f2) = ex.build().unwrap() else {
+            panic!()
+        };
+        assert_eq!(
+            (f2.curve.a, f2.curve.b, f2.generator),
+            (f.curve.a, f.curve.b, f.generator)
+        );
+        assert_eq!(crater.call(), "conductor_gap::crater(params(263, 241))");
+        assert!(CurveSpec::ConductorGap {
+            ell: 263,
+            t: 3,
+            level: GapLevel::Crater,
+            seed: 0
+        }
+        .build()
+        .is_err());
     }
 
     #[test]

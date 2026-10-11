@@ -42,3 +42,38 @@ jobs:
           helm template t taskq/deploy/helm/taskq --set redis.enabled=false --set redis.externalUrlSecret.name=ext > /dev/null
       - name: Worker image builds
         run: docker build -f taskq/deploy/Dockerfile taskq
+  terraform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: taskq/deploy/aws
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - name: Format
+        run: terraform fmt -check -recursive
+      - name: Validate
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+      - name: Plan against mocked providers
+        # No AWS account: the providers are mocked, but the provider still
+        # reads credentials at configure time.
+        env:
+          AWS_ACCESS_KEY_ID: mock
+          AWS_SECRET_ACCESS_KEY: mock
+        run: terraform test
+      - name: State bootstrap validates and plans
+        env:
+          AWS_ACCESS_KEY_ID: mock
+          AWS_SECRET_ACCESS_KEY: mock
+        working-directory: taskq/deploy/aws/bootstrap
+        run: |
+          terraform init -input=false
+          terraform validate
+          terraform test

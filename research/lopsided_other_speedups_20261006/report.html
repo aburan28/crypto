@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>What else can the lopsided technique speed up? Survey report (2026-10-06)</title>
+<style>
+body { font-family: Georgia, 'Times New Roman', serif; max-width: 900px; margin: 2em auto; color: #111; line-height: 1.5; }
+h1 { font-size: 1.6em; } h2 { font-size: 1.25em; border-bottom: 1px solid #ccc; padding-bottom: 0.2em; }
+table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+th, td { border: 1px solid #999; padding: 6px 8px; text-align: left; vertical-align: top; }
+th { background: #f0f0f0; }
+code { font-size: 0.92em; }
+figure { margin: 1.5em 0; } figcaption { font-size: 0.9em; color: #333; margin-top: 0.5em; }
+.label { font-weight: bold; }
+@media print { body { margin: 1cm; } figure svg { max-height: 220mm; } }
+</style>
+</head>
+<body>
+<h1>What else can the lopsided technique speed up? Survey report (2026-10-06)</h1>
+<p>Question and method in the <span class="label">protocol</span> (<code>README.md</code>).
+Round 1 (interface + four IC insertion points, all proposals, merged PR #1485) is the companion study.
+Statement status is labelled <b>[proposed]</b> / <b>[derived]</b> / <b>[verified]</b> / <b>[measured]</b>
+(none in this round).</p>
+
+<h2>Bottom line</h2>
+<p>Twelve candidate transfers were screened. <span class="label">Zero repository workloads pass all three
+gates; the reusable gate itself is the positive deliverable.</span> Five fail the shape gate, two fail the
+ring gate, none from the repo reaches the size gate with a valid shape, and five are out of scope.
+The one passing shape is synthetic, proving the gate is not vacuous <b>[verified]</b> by unit test.</p>
+
+<h2>Screening funnel</h2>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 650" font-family="sans-serif" role="img" aria-label="Screening funnel">
+<rect x="0" y="0" width="1200" height="650" fill="#ffffff"/>
+<text x="20" y="28" font-size="17" font-weight="bold">Screening funnel -- 12 candidate transfers, zero repo passers, gate named per reject</text>
+<text x="20" y="48" font-size="12" fill="#444">Gate order matches screen_workload: shape, then ring, then size. Numbered candidates refer to the REPORT table.</text>
+<rect x="490" y="60" width="220" height="44" rx="8" fill="#e3f2fd" stroke="#1565c0"/>
+<text x="600" y="78" font-size="12" font-weight="bold" text-anchor="middle">12 candidate transfers</text>
+<text x="600" y="94" font-size="11" text-anchor="middle">surveyed [this work]</text>
+<polygon points="600,120 720,180 600,240 480,180" fill="#fff8e1" stroke="#f9a825"/>
+<text x="600" y="172" font-size="12" font-weight="bold" text-anchor="middle">Gate 1 -- Shape</text>
+<text x="600" y="188" font-size="11" text-anchor="middle">shared bilinear middle?</text>
+<line x1="600" y1="104" x2="600" y2="120" stroke="#333" stroke-width="1.5"/>
+<rect x="20" y="120" width="330" height="120" rx="8" fill="#ffebee" stroke="#c62828"/>
+<text x="30" y="140" font-size="12" font-weight="bold">Structural rejects (5)</text>
+<text x="30" y="157" font-size="11">#1 pair-table / MITM probes</text>
+<text x="30" y="173" font-size="11">#2 BSGS giant-step lookups</text>
+<text x="30" y="189" font-size="11">#3 rho distinguished-point tables</text>
+<text x="30" y="205" font-size="11">#6 F4/F5 Macaulay batches</text>
+<text x="30" y="221" font-size="11">hash probes / poly matrices -- nothing to prune</text>
+<line x1="480" y1="150" x2="350" y2="160" stroke="#333" stroke-width="1.5"/>
+<text x="400" y="145" font-size="11">no</text>
+<polygon points="600,260 720,320 600,380 480,320" fill="#fff8e1" stroke="#f9a825"/>
+<text x="600" y="312" font-size="12" font-weight="bold" text-anchor="middle">Gate 2 -- Ring</text>
+<text x="600" y="328" font-size="11" text-anchor="middle">small integers?</text>
+<line x1="600" y1="240" x2="600" y2="260" stroke="#333" stroke-width="1.5"/>
+<text x="612" y="252" font-size="11">yes</text>
+<rect x="850" y="260" width="330" height="120" rx="8" fill="#ffebee" stroke="#c62828"/>
+<text x="860" y="280" font-size="12" font-weight="bold">Ring rejects (2)</text>
+<text x="860" y="297" font-size="11">#4 batch MSM relation verification</text>
+<text x="860" y="313" font-size="11">#5 block-Wiedemann sparse LA</text>
+<text x="860" y="329" font-size="11">group ops / residues mod r</text>
+<text x="860" y="345" font-size="11">#4 also fails size: eps about 1 at R about F</text>
+<text x="860" y="361" font-size="11">(scale-free -- doubling keeps eps=1)</text>
+<line x1="720" y1="300" x2="850" y2="310" stroke="#333" stroke-width="1.5"/>
+<text x="775" y="295" font-size="11">no</text>
+<polygon points="600,400 720,460 600,520 480,460" fill="#fff8e1" stroke="#f9a825"/>
+<text x="600" y="452" font-size="12" font-weight="bold" text-anchor="middle">Gate 3 -- Size</text>
+<text x="600" y="468" font-size="11" text-anchor="middle">eps at most 1/18, kap at least 1/2?</text>
+<line x1="600" y1="380" x2="600" y2="400" stroke="#333" stroke-width="1.5"/>
+<text x="612" y="392" font-size="11">yes</text>
+<rect x="20" y="400" width="330" height="120" rx="8" fill="#ffebee" stroke="#c62828"/>
+<text x="30" y="420" font-size="12" font-weight="bold">Size rejects -- repo: 0</text>
+<text x="30" y="437" font-size="11">MSM operating shape: eps=1 (demo)</text>
+<text x="30" y="453" font-size="11">full-wanted demo: kap=0 below 1/2</text>
+<text x="30" y="469" font-size="11">both FailsRegime, exact coordinates</text>
+<line x1="480" y1="440" x2="350" y2="450" stroke="#333" stroke-width="1.5"/>
+<text x="400" y="435" font-size="11">no</text>
+<rect x="850" y="400" width="330" height="120" rx="8" fill="#e8f5e9" stroke="#2e7d32"/>
+<text x="860" y="420" font-size="12" font-weight="bold">Pass: synthetic only (1)</text>
+<text x="860" y="437" font-size="11">N=2^18, D=2, |W|=N^2/2</text>
+<text x="860" y="453" font-size="11">eps=1/18, kap=1: FitsConcrete</text>
+<text x="860" y="469" font-size="11">proves the gate is not vacuous</text>
+<text x="860" y="485" font-size="11">promotion: matched full-DLP suites in S</text>
+<line x1="720" y1="470" x2="850" y2="460" stroke="#333" stroke-width="1.5"/>
+<text x="775" y="455" font-size="11">yes</text>
+<rect x="20" y="540" width="1160" height="90" rx="8" fill="#f5f5f5" stroke="#757575"/>
+<text x="30" y="562" font-size="12" font-weight="bold">Paper-excluded / absent lane (5) -- bypasses the gates, recorded so no follow-up re-screens them without new evidence</text>
+<text x="30" y="582" font-size="11">#9 no convolution stage in the ECDLP path; #10 isogeny graphs tiny + unweighted (scale/model mismatch); #11 real-RAM variants N/A here</text>
+<text x="30" y="600" font-size="11">#12 SETH, OV, k-SUM/XOR with k at least 4, unhinted OMv, 3SUM-indexing -- explicitly unaffected (paper Sec. 1.2, Fig. 1)</text>
+</svg>
+<figcaption>Figure 1 -- the funnel. Gate order matches <code>screen_workload</code>: shape, then ring,
+then size. Numbered candidates refer to the table below. Editable source: <code>figure.mmd</code>.</figcaption>
+</figure>
+
+<h2>Ranked table</h2>
+<table>
+<tr><th>#</th><th>Candidate (paper source to repo target)</th><th>Verdict [derived]</th><th>Failing gate + reason</th></tr>
+<tr><td>1</td><td>Hinted-OMv workflow to online pair-table probes (<code>orbit_pair_table</code> m=2/m=3; <code>native_signed_mitm</code> batched lookups)</td><td>Negative</td><td><b>Shape</b>: frozen table + online queries matches the workflow, but each probe is a hash lookup over an unstructured key space, not an inner product over a shared middle</td></tr>
+<tr><td>2</td><td>BSGS giant-step lookups vs baby table</td><td>Negative</td><td><b>Shape</b>: hash probes; the table is large (sqrt n), the opposite of thin</td></tr>
+<tr><td>3</td><td>Rho distinguished-point / collision tables</td><td>Negative</td><td><b>Shape</b>: hash probes on walk states</td></tr>
+<tr><td>4</td><td>Thin batch verification to batch MSM relation checks</td><td>Negative</td><td><b>Ring</b> (then size): group operations, not small-integer products; at R about F, eps about 1 scale-free</td></tr>
+<tr><td>5</td><td>Sparse-LA block Wiedemann (round-1 re-screen)</td><td>Negative</td><td><b>Ring</b>: large sparse matvecs over Z/rZ</td></tr>
+<tr><td>6</td><td>Rectangular MM to F4/F5 Macaulay batch reduction</td><td>Negative</td><td><b>Shape/Ring</b>: polynomial matrices over fields; no shared thin integer middle</td></tr>
+<tr><td>7</td><td>3SUM O(n^1.9992) to Semaev/MITM point decomposition</td><td>Negative</td><td><b>Reduction missing</b>: integers vs curve points with algebraic constraints</td></tr>
+<tr><td>8</td><td>3XOR speedup to Boolean SAT/F4 systems</td><td>Negative</td><td><b>Reduction missing</b>: 3XOR instances are not our polynomial systems</td></tr>
+<tr><td>9</td><td>MonoConvolution O(n^1.5-eps) to convolution stages</td><td>Out of scope</td><td>No convolution stage in the ECDLP path</td></tr>
+<tr><td>10</td><td>(min,+)/APSP to isogeny-route search</td><td>Negative</td><td><b>Scale + model</b>: tiny unweighted graphs vs large-n polynomial weights</td></tr>
+<tr><td>11</td><td>Real-valued Las Vegas variants (Sec. 5.2)</td><td>Out of scope</td><td>Finite-field repository; real-RAM model absent</td></tr>
+<tr><td>12</td><td>SETH, OV, k-SUM/XOR k at least 4, unhinted OMv, 3SUM-indexing</td><td>Out of scope</td><td>Explicitly unaffected per the paper</td></tr>
+</table>
+
+<h2>Screening map</h2>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1000 500" font-family="sans-serif" role="img" aria-label="Screening map">
+<rect x="0" y="0" width="1000" height="500" fill="#ffffff"/>
+<text x="20" y="26" font-size="16" font-weight="bold">Screening map -- gate evaluations in the (eps, kap) plane, NOT measurements</text>
+<text x="20" y="46" font-size="12" fill="#444">Points are exact closed-form gate evaluations of workload shapes. Structural rejects have no coordinates.</text>
+<rect x="120" y="60" width="43" height="171" fill="#e8f5e9"/>
+<text x="122" y="80" font-size="11" fill="#2e7d32">PASS</text>
+<line x1="120" y1="60" x2="120" y2="360" stroke="#333" stroke-width="1.5"/>
+<line x1="120" y1="360" x2="980" y2="360" stroke="#333" stroke-width="1.5"/>
+<line x1="163" y1="60" x2="163" y2="360" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="6 4"/>
+<line x1="120" y1="231" x2="980" y2="231" stroke="#2e7d32" stroke-width="1.5" stroke-dasharray="6 4"/>
+<g font-size="11" fill="#333">
+<text x="112" y="380">0</text>
+<text x="150" y="380">1/18</text>
+<text x="505" y="380">0.5</text>
+<text x="895" y="380">1.0</text>
+<text x="480" y="408">eps = ln D / ln N (concrete gate: eps at most 1/18)</text>
+<text x="55" y="363">0</text>
+<text x="45" y="234">0.5</text>
+<text x="55" y="127">1.0</text>
+</g>
+<g stroke="#ddd" stroke-width="1">
+<line x1="120" y1="231" x2="980" y2="231"/>
+<line x1="120" y1="124" x2="980" y2="124"/>
+<line x1="120" y1="339" x2="980" y2="339"/>
+</g>
+<circle cx="163" cy="124" r="7" fill="#2e7d32"/>
+<text x="175" y="120" font-size="12" fill="#2e7d32" font-weight="bold">synthetic fitter (eps=1/18, kap=1)</text>
+<text x="175" y="136" font-size="11" fill="#2e7d32">N=2^18, D=2, |W|=N^2/2</text>
+<circle cx="902" cy="124" r="7" fill="#c62828"/>
+<text x="700" y="105" font-size="12" fill="#c62828" font-weight="bold">MSM operating point (eps=1, kap=1)</text>
+<text x="700" y="90" font-size="11" fill="#c62828">R about F at every scale: scale-free fail</text>
+<circle cx="163" cy="339" r="7" fill="#c62828"/>
+<text x="175" y="343" font-size="12" fill="#c62828" font-weight="bold">oversized-W demo (kap=0)</text>
+<rect x="120" y="420" width="860" height="60" rx="8" fill="#f5f5f5" stroke="#757575"/>
+<text x="130" y="442" font-size="12" font-weight="bold">No coordinates -- structural rejects (hash probes / poly matrices, NoSharedMiddle):</text>
+<text x="130" y="462" font-size="11">#1 pair-table + MITM probes, #2 BSGS lookups, #3 rho tables, #6 Macaulay batches. Ring rejects (#4 MSM, #5 Wiedemann) fail before size.</text>
+</svg>
+<figcaption>Figure 2 -- the (eps, kap) plane. Green: pass region. Points are exact gate evaluations of
+workload shapes (not measurements). Structural rejects have no coordinates and are listed, not plotted.</figcaption>
+</figure>
+
+<h2>Promotion protocol for any future passer [proposed]</h2>
+<p>A candidate returning <code>FitsConcrete</code> earns a follow-up measurement protocol, not a claim:
+freeze curve/subgroup/base/targets/seeds, run matched baseline/candidate full-DLP suites with every phase
+priced in <code>S</code> against the generic floor and matched rho, classify per AGENTS.md Sec. 3, and update
+scoreboard/leaderboard/browser in that PR.</p>
+
+<h2>Boundary, table, ratio (AGENTS.md Secs. 1-8)</h2>
+<ul>
+<li>Boundaries stated before measuring: generic floor + matched rho, unchanged; unit <code>S</code>.</li>
+<li>No table row produced: gate evaluations are not verified DLP answers.</li>
+<li>Falsification target: a repo workload returning <code>FitsConcrete</code> with a concrete (N, D, W) mapping
+would overturn this round's headline and open the promotion protocol.</li>
+<li>All phases unpriced (<code>null</code>); wall time appears nowhere.</li>
+</ul>
+
+<h2>Graphs checked -- no change [verified by inspection]</h2>
+<ul>
+<li><code>docs/index-calculus-scoreboard.html</code> + <code>docs/ic/progress-timeline.json</code>: no new ratio.</li>
+<li><code>docs/ic-leaderboard.html</code> / <code>LEADERBOARD.md</code> / <code>leaderboard.json</code>: no new measurement.</li>
+<li><code>docs/browser/data.json</code>: no new curve, session, round, or IC1 identity.</li>
+<li><code>docs/curves/registry.json</code>: no curve named; family notation only.</li>
+<li>Figures 1-2 are new visuals for this search round, not canonical-graph updates.</li>
+</ul>
+
+<h2>Open checks [proposed]</h2>
+<ol>
+<li>Future batch workloads with N small-integer inner products over one shared D-dimensional middle go through
+<code>screen_workload</code> first; call and verdict belong in their protocol.</li>
+<li>Candidate #4's eps about 1 is scale-free only at R about F; a workload with R much larger than F^2 would move
+eps -- none exists in the pipeline today.</li>
+<li>The paper's general regime (eps below 0.1204, size-dependent gamma) is not encoded in the gate; a candidate
+failing the concrete 1/18 line but plausibly inside the general regime needs a Section-4 analysis first.</li>
+</ol>
+
+<h2>Sources</h2>
+<ul>
+<li>Paper: <a href="https://arxiv.org/pdf/2610.06783">https://arxiv.org/pdf/2610.06783</a> (v1), Fig. 1 (p. 9), Secs. 5.1-5.4.</li>
+<li>Round 1: <code>research/lopsided_thin_product_20261006/</code> (merged PR #1485).</li>
+<li>Code: <code>screen_workload</code> in <code>src/cryptanalysis/lopsided_thin_product.rs</code> (this PR).</li>
+</ul>
+</body>
+</html>

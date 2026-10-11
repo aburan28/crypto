@@ -1,0 +1,34 @@
+{
+  "base": {
+    "columns": 600,
+    "file": "base_n71_K600.jsonl",
+    "hash": "f3acde0cfc22ef8abc4a5214842ab32ecd1da82ca3e7a7c4e6da4d0e8a51514f",
+    "points": 85200
+  },
+  "checks": {
+    "generator_on_curve": true,
+    "subgroup_annihilates_generator": true,
+    "target_is_scalar_times_g": true,
+    "target_on_curve": true
+  },
+  "curve": {
+    "a": 0,
+    "generator": [
+      "461735816632835152742",
+      "441632902040031190095"
+    ],
+    "modulus": "x^71 + x^5 + x^3 + x + 1",
+    "n": 71,
+    "subgroup_order": 5513228015079457
+  },
+  "date": "2026-10-02",
+  "fresh_scalar": 2718281828459045,
+  "kind": "koblitz_n71_ledger_target_freeze",
+  "method": "standalone Python GF(2^71) scalar multiplication (module replay arithmetic); no Rust producer involved in freezing",
+  "public_target_q": [
+    "1871938466584478812274",
+    "411988277714743466179"
+  ],
+  "scalar_note": "fresh: never used in any prior fixture (distinct from n61 sidecar 77777777777777, n53 scalar 4572131355890, n41 scalar 122329249266, and the concurrent-session pilot scalar 314159265358979)",
+  "target_q_sha256": "7b328b40376ea4817f3be4f2a0fc52d04cefd0d16028fd50b92d41fe6ed8ba4f"
+}

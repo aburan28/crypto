@@ -1,0 +1,76 @@
+{
+  "schema": "prime-field-smt.run/v1",
+  "input_path": "research/prime_field_smt_20261005/instances/cryptanalysis_fp_random_b20.json",
+  "input": {
+    "bytes": 581,
+    "blake3": "14e9e04df5ca8e4e92d966059c2eff8a0de22c9a2af8ee5ad1b68753d57336e4"
+  },
+  "validation": {
+    "schema": "prime-field-smt.validation/v1",
+    "field_bits": 20,
+    "multiplication_bits": 40,
+    "primality_assurance": "deterministic-u64-miller-rabin",
+    "nonsingular": true,
+    "target_on_curve": true,
+    "valid": true
+  },
+  "encoding": {
+    "abscissa_bits": 12,
+    "addition_branches": 2,
+    "assertion_count": 31,
+    "boolean_field_variables": 24,
+    "canonical_instance_blake3": "73dd66449fd6d55673e2f55e69086ebc4b8848c12e27b0c331d08ae4ce175cd6",
+    "declared_field_variables": 29,
+    "exact_field_arithmetic": true,
+    "field_bits": 20,
+    "field_modulus": "630043",
+    "injective_bit_decomposition": true,
+    "logic": "QF_FF",
+    "query_blake3": "0c75980a00748290135ad259bd53ef0777cff23aa0a7ae571e3e3a0f0547d5a7",
+    "query_bytes": 4747,
+    "recommended_solver_option": "--ff-solver=split",
+    "relation": "finite P1 + P2 = target; x1,x2 < x_bound",
+    "schema": "prime-field-smt.ff-encoding/v1",
+    "symmetry_breaking": "exact bitwise x1 < x2 for ordinary addition"
+  },
+  "harness_binary_blake3": "de91b24c1a11ca0ac6ab43ff4cba4f99291db15d0a7897148d0b128a8f2e53df",
+  "solver": {
+    "executable": "/workspace/.tools/cvc5-1.4.1-gpl/cvc5-Linux-x86_64-static-gpl/bin/cvc5",
+    "blake3_before": "236709965a6385893d987ce778dbf34dfc66d621ba3dd4cc9b1ec99398136705",
+    "blake3_after": "236709965a6385893d987ce778dbf34dfc66d621ba3dd4cc9b1ec99398136705",
+    "unchanged_during_run": true,
+    "arguments": [
+      "--lang=smt2",
+      "--tlimit-per=120000",
+      "--ff-solver=split",
+      "research/prime_field_smt_20261005/results/cryptanalysis_fp_random_b20_qf_ff_cvc5/query.smt2"
+    ],
+    "requested_timeout_ms": 120000,
+    "harness_grace_ms": 5000,
+    "elapsed_ms": 120011,
+    "timed_out": false,
+    "success": true,
+    "exit_code": 0,
+    "stdout": {
+      "bytes": 94,
+      "blake3": "0e2692eb1837351907b3d1b73fc3b61b883802be84829837618b2980b67b55db"
+    },
+    "stderr": {
+      "bytes": 0,
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    }
+  },
+  "outcome": "unknown",
+  "parsed": {
+    "status": "unknown"
+  },
+  "parse_error": null,
+  "verification": null,
+  "accepted_sat": false,
+  "claim_scope": {
+    "end_to_end_s": null,
+    "kind": "decomposition_stage_diagnostic",
+    "pollard_rho_ratio": null,
+    "speedup": null
+  }
+}

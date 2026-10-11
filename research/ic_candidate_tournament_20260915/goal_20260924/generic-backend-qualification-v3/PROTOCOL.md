@@ -1,10 +1,11 @@
 # Generic F4/F5 subspace smoke qualification (third registration)
 
-Status: **dispatch authorized / not measured**. The runner, smoke-schedule
-workflow, sealed panel digest lock, and feasibility preflight land with this
-registration. Seed **2026093001** is reserved here and must not be reused if
-this registration is abandoned. Measurement requires the single
-`workflow_dispatch` campaign job on main.
+Status: **measured, negative, closed**. The single `workflow_dispatch`
+[Actions run 37399021219](https://github.com/aburan28/crypto/actions/runs/37399021219)
+finished and packed. The family gate is `NEGATIVE_FAMILY_QUALIFICATION`:
+both F4 and F5 smoke arms were censored on every cell, with no retained
+ordinary queries. See [RESULT.md](RESULT.md). Seed **2026093001** is consumed
+and must not be redispatched.
 
 ## Why this registration exists
 

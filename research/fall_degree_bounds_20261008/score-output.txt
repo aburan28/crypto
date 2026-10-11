@@ -1,0 +1,24 @@
+E1 as run (constant Tr(x3), see Amendment 1): 112 draws
+  H1  L in span(F):                58/112  -> FALSIFIED
+  C1  Tr|V != 0 => d_ff = 2:        67/67  -> held
+  C2  Tr|V = 0, L = 1 => refuted@2: 8/22  -> FALSIFIED
+  C3  Tr|V = 0, L = 0 cells: 23; d_ff there: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3]; sat 8
+  side dim(span∩R<=1) = 1, n>=12:  38/38  -> held
+E1 Amendment 1 (registered constant): 112 draws
+  H1  L in span(F):                112/112  -> held
+  C2  Tr|V = 0, Tr(b/x3^2) = 1 => refuted at degree 2: 17/17  -> held
+  C3  random V, Tr|V = 0, constant 0: d_ff [3, 3, 3, 3], degree<=1 dims [0, 0, 0, 0]
+E1b: 106 draws, 69 scored
+  H1b unique syzygy = (L+1)·L:      69/69  -> held
+  unscored ('subfield', True, '0') syz_dim: [29, 29, 36, 37, 37, 38, 38, 46, 46, 46, 47, 47, 47, 47, 55, 55, 56, 57, 67]
+  unscored ('subfield', True, '1') syz_dim: [26, 26, 26, 34, 34, 34, 43, 53, 53, 53, 53, 64, 64, 64, 64, 64, 64, 64]
+E2: 96 control draws
+  n | Semaev sat | Semaev unsat | plain sat | plain unsat | planted sat | planted unsat
+  8 | 3 | 3 | 3 | 3 | 3.0 | None
+  10 | 3 | 3 | 4.0 | 4.0 | 4 | 4
+  12 | 3 | 3 | 4 | 4 | 4 | 4
+  14 | 3.0 | 3.0 | 4 | 4 | 4.0 | 4.0
+  16 | 3 | 3 | 5.0 | None | 4.0 | 4.0
+  18 | 4 | 4 | 5.0 | 5.0 | 5 | 5
+  H2a Semaev d_F <= planted control (medians): -> held
+  H2b gap nondecreasing in n: gaps {'sat': [(8, 0.0), (10, 1), (12, 1), (14, 1.0), (16, 1.0), (18, 1)], 'unsat': [(10, 1), (12, 1), (14, 1.0), (16, 1.0), (18, 1)]} -> held

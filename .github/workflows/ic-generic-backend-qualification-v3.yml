@@ -78,9 +78,9 @@ jobs:
           retention-days: 3
           if-no-files-found: error
   campaign:
-    # Seed 2026093001 may run exactly once from main via workflow_dispatch.
+    # Seed 2026093001 already ran once: Actions 37399021219. Do not run it again.
     # Never redispatch 2026092901 or 2026092902.
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    if: false
     needs: [preflight, artifact-smoke]
     runs-on: ubuntu-24.04
     timeout-minutes: 240

@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "kind": "censored_operational_observation",
+  "n": 53,
+  "mode": "planted_lazy_pair_roots",
+  "nogoods": false,
+  "conflict_budget": 30000,
+  "result": "ABORTED_AFTER_WALL",
+  "wall_s_observed_min": 8,
+  "note": "Planted units + lazy_pair_roots at n53 remained in CDCL after base construction; aborted. Contrast full-S3 planted n53 SAT in ~15s solve after base. Not a soundness disproof; search-hostile observation only.",
+  "pair_table_entries": 0,
+  "claim_boundary": "Not unrestricted extraction, not vs_rho, not ledger promotion, not key recovery.",
+  "generated_at": "2026-09-15T14:42:06Z"
+}

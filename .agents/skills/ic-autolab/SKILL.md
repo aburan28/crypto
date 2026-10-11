@@ -12,6 +12,10 @@ the existing tournament, independent certificate checker, portfolio selector,
 portable development driver, and frozen historical evidence. Extend these;
 do not create a parallel scoreboard or redefine historical protocols.
 
+Every autolab or tournament round leaves a run report, graph and PDF beside
+its records, and every PR that lands its result carries the result's graphs
+and PDF (`research-visuals`, "Every experiment run" and "Every result PR").
+
 ## Begin or resume
 
 **The current `AGENTS.md` requires native research execution and verification.**
@@ -82,7 +86,29 @@ adds `f5-control-publish-custody` and `f5-control-replay-custody` for the actual
 full archive. Replay requires the external registration seal, reads every
 archived member as data, and admits no execution. Publish the accepted actual
 registration and custody archive before its sole scientific invocation.
+The [actual native F5 control](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-registration-v1/RESULT.md)
+is now consumed and closed: main accepted PR #1294 before its sole dispatch;
+the original frozen checker admits the three target attempts and verified scalar.
+Never retry, resume, extend or dispatch an archive restoration. Its result
+publication is an unmerged follow-up until its own exact-head gates pass.
+Use `icprog f5-control-replay-result --publication PATH --out NEWFILE` for
+portable data/math replay only; no archived executable is run and the original
+frozen audit is retained, not replaced. The 500 ns stopwatch/phase discrepancy
+remains explicit. No fresh qualification, comparative speed or new natural
+yield is admitted. Native ordinary-query admission and the new fresh paired
+protocol remain required for the exact F5 and CryptoMiniSat pipelines; the
+worker's built-in Rust SAT engine is a separate backend. Old confirmation sets
+stay closed.
 All new cross-method measurements use native `ecbench` under AGENTS.md §12.
+The [ordinary preparation mathematical gate](../../../research/ic_candidate_tournament_20260915/goal_20260924/native-ordinary-preparation-v1/PROTOCOL.md)
+adds `icprog ordinary-preparation-audit --input INPUT.json --out NEWFILE` for
+strict target-free n17 transcripts. It independently reconstructs the whole
+geometric base, input law, exact negatives, projected rows, rank and logs,
+preserving failed attempts and incomplete panels. It executes no solver and
+admits neither source-bound production nor new natural yield or performance.
+Native target-free F5 and external CryptoMiniSat producers, their own one-use
+registrations and per-attempt costs remain pending. Never use the worker's Rust
+CDCL engine as evidence for the accepted external CryptoMiniSat pipeline.
 Its merged online-window extension is available for integration and review;
 public unplanted-target, IC1 identity and prepared solver admission remain open.
 On Unix, `isolated_bench busy` serializes builds/tests against the same lock as

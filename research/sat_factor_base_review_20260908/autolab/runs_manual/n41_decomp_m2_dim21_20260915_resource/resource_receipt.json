@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "kind": "n41_m2_dim21_resource_probe",
+  "beat_id": "koblitz.decomposition.advance_quadratic_cell",
+  "updated_at": "2026-09-15T16:29:32Z",
+  "claim_boundary": "Resource/feasibility probe of symmetrised n=41 m=2 dim~21 cell only. Not a solved decomposition win, not FFD frontier claim, not ledger promotion.",
+  "claim_boundary_non_claims": [
+    "not decomposition win",
+    "not key recovery",
+    "not ledger promotion",
+    "not vs_rho"
+  ],
+  "geometry": {
+    "n": 41,
+    "m": 2,
+    "target_dim": 21,
+    "observed_dim_V": 21,
+    "divisor_indices": [
+      0,
+      1
+    ]
+  },
+  "factor_base": {
+    "F_x": 2096989,
+    "F_u": 2096741
+  },
+  "run": {
+    "seed": 7,
+    "targets": 1,
+    "sat": false,
+    "node_budget": 2000,
+    "wall_s": 313.5,
+    "x_chained_f4": {
+      "found": 0,
+      "refuted": 0,
+      "inconclusive": 1,
+      "effort": 1005,
+      "ffd": 3,
+      "gate": "ok"
+    },
+    "sym_f4": {
+      "found": 0,
+      "refuted": 0,
+      "inconclusive": 1,
+      "effort": 1005,
+      "ffd": null,
+      "gate": "ok"
+    }
+  },
+  "verdict": "CONSTRUCTIBLE_BUT_BUDGET_INCONCLUSIVE",
+  "notes": [
+    "Confirms F2 cyclotomic geometry: n41 admits exact mid-dim 21 (unlike n37/n53).",
+    "FB sizes ~2.10M; single-target F4 with node_budget=2000 finishes wall~314s but both arms inconclusive.",
+    "Not a scaling win; establishes resource envelope for future higher-budget panels."
+  ],
+  "ledger_promotion": false,
+  "evidence": "smoke_targets1_fg.stdout.txt"
+}

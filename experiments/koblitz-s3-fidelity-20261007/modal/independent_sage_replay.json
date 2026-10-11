@@ -1,0 +1,302 @@
+{
+  "all_factor_base_points_and_labels_checked": true,
+  "all_target_scalars_independently_recovered": true,
+  "curves": [
+    {
+      "factor_base_digest": "994ebecce7d2a7ff0da957b7a58cbcf97ef5bf364b4cf17e12f58bfc61cda64a",
+      "factor_base_fixture": "/Volumes/SSD990/cryptanalysis/.worktrees/crypto-s3-pair-query-20261006/experiments/koblitz-s3-fidelity-20261007/modal/n41_base_dump.json",
+      "factor_base_fixture_sha256": "fab2d4f4c828e8cea16d5ea4bc54070f22ef82e9161ace601f860262d89c96ab",
+      "factor_base_points_checked": 20008,
+      "field_modulus_powers": [
+        41,
+        3,
+        0
+      ],
+      "fixtures_sha256": "16fa23c01e6e6b0ae133079c84777ddfb49f6683415c01dc8c67ce8906cafbc3",
+      "folded_columns_checked": 244,
+      "generator": [
+        2056947637384,
+        1635505394702
+      ],
+      "n": 41,
+      "relation_witnesses_group_checked": 3024,
+      "subgroup_order": 549756390943,
+      "targets": [
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T001",
+          "matrix_rank": 243,
+          "public_target_sha256": "ad9283278c0a54d3a39e877327d9e3270835a68c4322e02f5f6817859ca9e4bc",
+          "recovered_scalar": 133290198418,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "ce00dc08dad1a2fb0575932202c67c44f0d7203f04c5f448307b27d35686a3a4"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T002",
+          "matrix_rank": 243,
+          "public_target_sha256": "e0a22e338f348ee642c93a9fba8a86ea019aad4612d2a7f993283d6c071231e7",
+          "recovered_scalar": 379629404922,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "a024ac9f9f1c2244d6a62acf30bfd58603beeb626da9149b8cea571e6f446091"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T003",
+          "matrix_rank": 243,
+          "public_target_sha256": "af8a3e8100722b2739520a6b1e9cedff850abeec799e17d4adf25d39ea73a45e",
+          "recovered_scalar": 344115423077,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "d479e634c117ab4cb8f290a0bca27284515781248ee8a1342fb5585c80608d6a"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T004",
+          "matrix_rank": 243,
+          "public_target_sha256": "51996ce1165b370b4be1c45b040eef9b6a5046bc8fd3cee4c9ce9a9c222b5098",
+          "recovered_scalar": 357210516231,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "31a62d22a9c00a7dcb9de7de7b6f7236818bf4dc092a37b7080d55e1bc9645e9"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T005",
+          "matrix_rank": 243,
+          "public_target_sha256": "331299ad30be73894b4e996c06fe1eb184c610f2d1c52bf4f22c9b257b41988c",
+          "recovered_scalar": 154716918408,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "5b44f59a80332371bd2660fa3bd78d7a6c7e1053a2f3aac86eafbbee35c34b86"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T006",
+          "matrix_rank": 243,
+          "public_target_sha256": "9f370694f830110d989c94772e694b392b97d494f8ece6c22febca03a1ea0318",
+          "recovered_scalar": 195233671682,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "67b8b1531c4daa19c6453df0e23839313bc3da51a5bcbc9c024aeb716a60a2b4"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T007",
+          "matrix_rank": 243,
+          "public_target_sha256": "84590bc64b283856abd6ce6de67e2059bd37d366b70f1e335817bea52b5f1a2f",
+          "recovered_scalar": 51204966640,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "8fde148f5e6798efe2a4f02d3d69a2c8d6161da64de0354c362eb8f8a5773a53"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T008",
+          "matrix_rank": 243,
+          "public_target_sha256": "a6b8f54c27902d89956d454aa07d24009779e5f0e4bfe29c6c967b794b5fbb3d",
+          "recovered_scalar": 457924038005,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "91ff254d2e2bc0c378905ec71009149461e3cec11c9d330d4e82185cc5d41935"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T009",
+          "matrix_rank": 243,
+          "public_target_sha256": "7732a1a886c3efba1b322a73bdb33a2f66ef0725aa06081bcd1ae81e4a68aa01",
+          "recovered_scalar": 526550710172,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "9e8eff00ab2952be5dd04f5052ace040396cb38256c9ea5816836c7181604362"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 242,
+          "label": "T010",
+          "matrix_rank": 243,
+          "public_target_sha256": "4f925340bf77313c9d90d7de3c93274665d6f8686778263b18f18adb9668650c",
+          "recovered_scalar": 476181703236,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "3fc8fe8871d7cbf82183e0e9da586e92432a1deeaa7fbf2ecbd361377aef3d73"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T011",
+          "matrix_rank": 243,
+          "public_target_sha256": "944432693e76b6884b016bb636eef217fc3ddbd56c97030f3ff934335f277f4d",
+          "recovered_scalar": 207134223116,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "07834fef68939919df419a40cb3c97b08e886cb6c24d5204415fb132a1d9827a"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 240,
+          "label": "T012",
+          "matrix_rank": 243,
+          "public_target_sha256": "abac5ce32fa8fda36caf6c43bcf55c231773799b82f445761a09852694626fd2",
+          "recovered_scalar": 171760292096,
+          "relation_witnesses_group_checked": 252,
+          "representative_raw_sha256": "04cdc8e2f4a87e6b631f9d2d8d8c6483feff20b3f90154ec58139eec4298fe2e"
+        }
+      ]
+    },
+    {
+      "factor_base_digest": "ca9bd9d1c64bc068e78186dfe3215884573ca799d90d50f5f69efb62c5fbbf82",
+      "factor_base_fixture": "/Volumes/SSD990/cryptanalysis/.worktrees/crypto-s3-pair-query-20261006/experiments/koblitz-s3-pair-query-20261007-v4/fb244_preflight.json",
+      "factor_base_fixture_sha256": "b4a1ea4a68d305bc7dd86e2dca56cb2d078f48ef9721d0f1ea28526419d99dca",
+      "factor_base_points_checked": 25864,
+      "field_modulus_powers": [
+        53,
+        6,
+        2,
+        1,
+        0
+      ],
+      "fixtures_sha256": "5f18351f40dd13e97dcf8921b7784f110abe963c418601df78a1cceac18c5112",
+      "folded_columns_checked": 244,
+      "generator": [
+        198217578752339,
+        7929897206038174
+      ],
+      "n": 53,
+      "relation_witnesses_group_checked": 2856,
+      "subgroup_order": 21044858204113,
+      "targets": [
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T001",
+          "matrix_rank": 237,
+          "public_target_sha256": "23fa30e0c4f05a7b2744491590c9a40e3abd32df0f1d5f2e9f16c4d1d9c25660",
+          "recovered_scalar": 14670575928188,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "e38f7cd784662e305b47500999a5a538a7c065139c942bd75b895e26d66ad4ba"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T002",
+          "matrix_rank": 237,
+          "public_target_sha256": "634d1bbcd1df8dc2b95e10aaff6110510fd82ca810792bdeeae949655f2677e7",
+          "recovered_scalar": 2870639215557,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "0c86c7f5cfbea7d895bcd9a17bf77152af007ecfeb8b728d8648e39a319923f2"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T003",
+          "matrix_rank": 237,
+          "public_target_sha256": "e80390b16ccb39ee28211d7d0753f203c005da949fc5f42f543bb15cc56370bb",
+          "recovered_scalar": 428069317639,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "20cf3b671516181b447a7071f6235b7159173883706c54e9b5fd88c667597b11"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T004",
+          "matrix_rank": 237,
+          "public_target_sha256": "93f57c735d2e89dde9119dbb31cd56e3d349e2573f780c6cac26530bc984b3fb",
+          "recovered_scalar": 20760262443929,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "9a3291ba76337de06f77c6db8e930cac228da88a17e5fe1b42e6111339ac733a"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T005",
+          "matrix_rank": 237,
+          "public_target_sha256": "3f548e41c7b0d5b4ef1fdcd8e193b5c8c3bcfe3e5b205de0e37b0d3f62ee2aae",
+          "recovered_scalar": 20601613183419,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "70dc01496631492affd1e8ecccac565546a36bc38f89058d34de1e56c202923b"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T006",
+          "matrix_rank": 237,
+          "public_target_sha256": "fa67aade14c1a04916b898109cafeac7738d532dfd50ae41f2fcc75cb0f2cec5",
+          "recovered_scalar": 17973556866106,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "bcee9c4bdd3de07caf39a0d7c56c9ee9a6dc7ca30ca1418f2d0de2dd545a7a3f"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T007",
+          "matrix_rank": 237,
+          "public_target_sha256": "dd0be47c2095c33eb54ce93d6256519a115ea544550bed032ca7b1ed9296b0b3",
+          "recovered_scalar": 20092716364253,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "c51e615a271a8a91158f4d96f98d9da0914d4c4f6b0871fafc100b0f4ce85657"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T008",
+          "matrix_rank": 237,
+          "public_target_sha256": "506cf47a0b6ded90e0e81106917fc90f5cb97f02349adf5fb33e42bd909677aa",
+          "recovered_scalar": 20060692586424,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "82d74339bc27d051edb093f53e9144c2e4d1e33225e1f8b480352da0bc0f779e"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T009",
+          "matrix_rank": 237,
+          "public_target_sha256": "a7c789d957470f4e2f1b492ba69fd23d434f64fca88b49e4fec51b19c27cb497",
+          "recovered_scalar": 8852546444268,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "6ba5f6fbcdc97b1ae2b5325e352d0f09cac6e6115ba95ef1d121ca2352ca3856"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T010",
+          "matrix_rank": 237,
+          "public_target_sha256": "d72babd37ff125d19c1669a0fc1734203313a86c67a5e15cafd9a82e943ac453",
+          "recovered_scalar": 1747174738776,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "ce6cbb42e4c58b74a23e5c7865a37777017dea023b1e42db15707ce4827c8cb1"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T011",
+          "matrix_rank": 237,
+          "public_target_sha256": "e25124382ca6d275c9e179c7c33491f82732baae7716ecfc5812395e0f8b5770",
+          "recovered_scalar": 2808751536225,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "ec6237d768db1dcbd947cd8192f1591998adc88eae7209c0b5b8fff54b6378a8"
+        },
+        {
+          "all_six_runs_semantically_equal": true,
+          "first_target_span_relation_prefix": 237,
+          "label": "T012",
+          "matrix_rank": 237,
+          "public_target_sha256": "bfe13bb2612484b4fb10bff30904a846830db1c9e0a276ac6a81197ac08391a0",
+          "recovered_scalar": 3209507283552,
+          "relation_witnesses_group_checked": 238,
+          "representative_raw_sha256": "202c49f34c5e56633b40b269b90d5cd24057577d9f3cc3e86bc36f4551f61886"
+        }
+      ]
+    }
+  ],
+  "kind": "modal_two_curve_independent_sage_replay_v1",
+  "panel_sha256": "44829cd402523d4fe2cd68ec833611ab46ceb21c074079b3292695da5a253654",
+  "relation_witnesses_group_checked": 5880,
+  "replay_script_sha256": "40dbee2f22ede8a7ba552475977bd3c1309e084d2e1477a4057b39062bf45397",
+  "replay_wall_ns": 17200011333,
+  "run_count_with_exact_raw_hash_checked": 146,
+  "sage_runtime_info_sha256": "073ca37250b100a7f961de3475da8a4d489f3f2140c15f4c72457816893f3f01",
+  "sage_version": "10.10.rc0",
+  "scope": "all distinct public points, full factor bases, one semantic relation trace per target, rank and target scalar; no host timing certification",
+  "target_count": 24
+}

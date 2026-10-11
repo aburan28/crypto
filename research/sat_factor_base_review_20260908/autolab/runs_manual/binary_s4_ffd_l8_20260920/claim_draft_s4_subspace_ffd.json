@@ -1,0 +1,148 @@
+{
+  "beat_id": "manual.binary.decomposition.l8_s4_subspace_ffd",
+  "claim_boundary": "Public synthetic binary Semaev l=8 subspace FFD measurement only.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not sub-2^(2l) oracle claim",
+    "not ledger promotion",
+    "no oracle speedup measured",
+    "no asymptotic or extrapolated statement"
+  ],
+  "created_at": "2026-09-21T04:39:12Z",
+  "dimension_l_or_dim": 8,
+  "eq_var_ratio": "24 eqs / 24 x-vars (full); 24 eqs / 16 x-vars (x1-fixed)",
+  "evidence_paths": [
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_s4_ffd_l8_20260920/ffd_s4_subspace_summary.json",
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_s4_ffd_l8_20260920/ffd_s4_subspace.stdout.txt",
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_s4_ffd_l8_20260920/ffd_s4_subspace.stderr.txt",
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_s4_ffd_l8_20260920/source_and_binary_hashes.txt",
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_s4_ffd_l8_20260920/host.txt",
+    "examples/ffd_s4_subspace.rs",
+    "src/cryptanalysis/ffd_harness.rs"
+  ],
+  "executable_or_source_hash": {
+    "binary": "3d46ea8ac241efa3d33cefe70ff0cd5853b5b631007e2921ced8911c6de77803",
+    "rustc": [
+      "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)"
+    ],
+    "source_example": "c23a33ef00ab69d01c4734759ad62ab4694aab8e722fc7a0a5d5db0377a45c05",
+    "source_harness": "fcbd3fa319a8fadd2a55e587ae779ae4ffcb90e20e6614d95e4b152f79f42ed8"
+  },
+  "ffd_or_degree_of_regularity": {
+    "convention": "operational FFD: smallest D with rank<rows AND rank<cols on the multilinear truncated Macaulay matrix; identical convention to ffd_harness quadratic path (sanity-reproduced against documented S3 FFD=3, n=5..7, rank-for-rank)",
+    "draws": 16,
+    "full": {
+      "censored_note": "no fall up to D=8 (rank==rows at D=6,7,8); D=9 dense estimate ~18GB skipped under mem cap",
+      "eqs": 24,
+      "fall": null,
+      "koszul_degree": 12,
+      "measured_degrees": [
+        4,
+        8
+      ],
+      "system_degree": 6,
+      "vars": 24
+    },
+    "sanity_gate": {
+      "ffd_all": 3,
+      "match_reference": true,
+      "n_checked": [
+        5,
+        6,
+        7
+      ],
+      "seed": "0xFFDDEAD"
+    },
+    "scope": "subspace_restricted_weil_descended_S4_l8_after_exact_e_elimination",
+    "seed": "0x54FFD518",
+    "source": "examples/ffd_s4_subspace.rs",
+    "status": "measured",
+    "verification_gates": {
+      "decomposable_draws": 2,
+      "elimination_exactness": "64 random V^3 points per draw, zero mismatches vs symmetrised_s4_eval",
+      "extra_witness_draws": 0,
+      "witness_vanishing": "every decomposable draw's witness satisfies both variants; extra draws until >=1 witness check"
+    },
+    "x1_fixed": {
+      "deficit_at_fall_values": [
+        788
+      ],
+      "deficit_decomposable_targets": [
+        788
+      ],
+      "deficit_nondecomposable_targets": [
+        788
+      ],
+      "draws_censored": 0,
+      "draws_with_fall": 16,
+      "eqs": 24,
+      "fall_structural": "all observed falls at D=7 < 2*deg_min=8, i.e. below the Koszul syzygy degree",
+      "ffd_max": 7,
+      "ffd_mean": 7.0,
+      "ffd_min": 7,
+      "koszul_degree": 8,
+      "measured_degrees": [
+        4,
+        7
+      ],
+      "system_degree": 4,
+      "target_independence_note": "deficit invariant across targets including decomposable ones => syzygy space looks like target-independent image geometry, not a decomposability signal",
+      "vars": 16
+    }
+  },
+  "fixture_hash": "dcab16b92642656a31917124cb6aaf63c2874d93835fd7310c077b7ea8e5af29",
+  "fixture_hash_semantics": "sha256 of ffd_s4_subspace_summary.json (pins targets, seeds, per-draw measurements)",
+  "forward_guidance": [
+    "extract the D=7 syzygy module (kernel of the x1-fixed D=7 Macaulay transpose) and identify its origin; expected: target-independent relations induced by the 16-dim sigma-image inside the 37-dim (e2,e3) space",
+    "if syzygies are target-independent geometry (as the deficit invariance suggests), they cannot decide decomposability directly; a sub-2^(2l) oracle of the per-X1 Groebner shape is cost-obstructed at l=8 (~10^3-10^5x baseline)",
+    "the beat's sub-2^(2l) oracle remains open; remaining mechanism classes: structural compression of the pair sweep (resultants/batched gcd over X2), Frobenius-invariant factor bases (constant-factor, changes the comparison object), or higher summation polynomial shapes"
+  ],
+  "host_id": {
+    "cpu": "Apple M4 Pro",
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "Darwin 25.6.0 arm64 26.6",
+    "ram_bytes": 51539607552
+  },
+  "independent_replay_command": "./target/release/examples/ffd_s4_subspace --draws 16 --seed 0x54FFD518 --dmax-full 8 --dmax-fix 7 --mem-cap-gb 2.0 --out <fresh-path>.json",
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_s4_ffd_l8_20260920/claim_draft_s4_subspace_ffd.json",
+  "largest_solvable": {
+    "budget": "measurement_run_no_oracle",
+    "l": 8,
+    "n": 24,
+    "note": "no new oracle attempted; pairs-and-solve remains the decision procedure at this rung",
+    "pairs_solve_recheck_s": 0.0165
+  },
+  "ledger_gate_assessment": {
+    "ffd_logged": true,
+    "median_le_half_pairs": "n/a_no_new_oracle",
+    "note": "FFD gate datum now measured (x1-fixed: min/max/mean over 16 draws; full: censored no-fall record). Oracle gate unmet: per-X1 Macaulay at the fall degree costs ~30s (=> ~2h/target over the 2^8 sweep) and full-system D=8 LA costs ~135s/target, versus the 68ms ledger-recorded pairs baseline; the D=7 syzygy space does not currently translate into a decision or speedup.",
+    "sub_2_to_2l_oracle": false,
+    "targets_le_64": true
+  },
+  "m_summands": 3,
+  "median_ms_per_target": 16.45125,
+  "median_ms_per_target_note": "pairs-and-solve recheck on THIS host (warm, this binary); the ledger-recorded baseline arm measured 68.0 ms \u2014 runs must not be mixed",
+  "n_or_bits": 24,
+  "oracle_class": "none_ffd_measurement_only",
+  "regime": "binary",
+  "resource_caps": {
+    "d9_full_skipped_estimate_bytes": "~1.8e10",
+    "max_dense_matrix_bytes_observed": 1148327040,
+    "mem_cap_gb": 2.0,
+    "wall_clock_s_total": 2748.830484625
+  },
+  "schema_version": 2,
+  "seeds": {
+    "decomp_bench_baseline_internal": "0x9E3779B9 (baseline arm, referenced not rerun)",
+    "draw_seed": "0x54FFD518",
+    "extra_witness_seed": "0xA5A55A5AF15A8F42",
+    "rng": "splitmix64 (draws); rand StdRng (S3 sanity, matching run_sweep)",
+    "s3_sanity_seed": "0xFFDDEAD"
+  },
+  "stage": "decomposition",
+  "system_degree": "degree<=6 full / degree<=4 x1-fixed, after exact e-elimination (semaev quadratic in e-space; correspondence linear/quadratic/cubic in x-bits)",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "unknowns": "24 x-bits (full); 16 x-bits (x1-fixed)",
+  "verdict": "L8_S4_SUBSPACE_X1FIXED_STRUCTURAL_FALL_D7",
+  "verdict_extended": "X1-fixed system falls at D=7 (below Koszul degree 8) with deficit [788] across draws; full system shows no fall up to D=8. Measurement only: no oracle, no speedup, no promotion."
+}

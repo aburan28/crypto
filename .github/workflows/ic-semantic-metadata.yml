@@ -1,0 +1,51 @@
+name: ic-semantic-metadata
+
+on:
+  pull_request:
+    paths:
+      - AGENTS.md
+      - docs/curves/ic/**
+      - docs/curves/registry.json
+      - .github/workflows/ic-semantic-metadata.yml
+  push:
+    branches: [main]
+    paths:
+      - AGENTS.md
+      - docs/curves/ic/**
+      - docs/curves/registry.json
+      - .github/workflows/ic-semantic-metadata.yml
+  workflow_dispatch:
+  schedule:
+    - cron: '17 5 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  metadata:
+    name: canonical identities and upstream mirror
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install metadata-only validators
+        run: python -m pip install pyyaml==6.0.2 jsonschema==4.23.0
+      - name: Negative controls
+        run: python -m unittest discover -s docs/curves/ic -p 'test_validate_semantics.py' -v
+      - name: Fetch authoritative cryptanalysis registry for byte comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=cryptanalysis-peer/experiments/ic-candidate-catalog
+          mkdir -p "$base/curve-links"
+          for file in curves.yaml curves.schema.json curve-links/link.schema.json \
+                      validate_semantics.py test_validate_semantics.py; do
+            curl --fail --location --show-error --silent --retry 3 \
+              "https://raw.githubusercontent.com/aburan28/cryptanalysis/main/experiments/ic-candidate-catalog/$file" \
+              --output "$base/$file"
+          done
+      - name: Validate committed metadata and upstream mirror
+        run: python docs/curves/ic/validate_semantics.py --peer cryptanalysis-peer

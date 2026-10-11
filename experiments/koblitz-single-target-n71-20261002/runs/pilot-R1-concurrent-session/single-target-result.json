@@ -1,0 +1,183 @@
+{
+  "artifacts": [
+    "freeze_receipt.json",
+    "public_target.json",
+    "target_points.jsonl",
+    "ic.jsonl",
+    "ic.stdout.txt",
+    "ic.stderr.txt",
+    "ic_external_time.txt",
+    "rho.jsonl",
+    "rho.stderr.txt",
+    "rho_external_time.txt",
+    "sage_runtime_info.json",
+    "independent_validation.json",
+    "verify_n71_single_target.py"
+  ],
+  "candidate_id": "IC1N71Ckb1fb85200PDP4rootRCguidedLAgaussTDdirectISO0h419f6af6f42e",
+  "claim_boundary": "Synthetic Koblitz n=71 toy boundary rung only; not ECC2K-130, not an external point, and not a production key-recovery claim.",
+  "cold_start_supplementary": {
+    "ic_process_total_ms": 1528946.920834,
+    "note": "The process total includes reusable IC preparation and is supplementary; it is not the one-target online metric.",
+    "rho_online_ms": 28513.091417
+  },
+  "curve_id": "EC1N71Ckb1hd0db69932bcd",
+  "ic": {
+    "base_scanned_x": 1336,
+    "dependent_rows_without_gain": 0,
+    "effective_orbit_columns": 600,
+    "exclusive_online_phase_ms": {
+      "target_descent": 0.026250000000000002,
+      "target_pdp_plus_relation_check": 1698.943709,
+      "target_query_orchestration": 0.0004580000002151752,
+      "target_recovery_check": 0.11887500000000001
+    },
+    "factor_base_actual_points": 85200,
+    "factor_base_hash": "f3acde0cfc22ef8abc4a5214842ab32ecd1da82ca3e7a7c4e6da4d0e8a51514f",
+    "final_rank": 600,
+    "independent_sage_replay_verified": true,
+    "online_interval": "From immediately before target-coordinate query hashing through direct decomposition, relation/group check, scalar descent, and in-process [d]G=Q check. Excludes process launch, input loading, curve/base/index construction, factor-base log acquisition, and target fixture generation.",
+    "online_wall_ms": 1699.0892920000001,
+    "phase_instrumentation_note": "The producer times target PDP and exact factor-base group-relation checking in one combined extract call; their internal split is unavailable. Query orchestration is reconciled as the measured online-clock residual so exclusive phases sum to online_wall_ms.",
+    "producer_exit_code": 0,
+    "producer_group_verified": true,
+    "rank_attempts": 600,
+    "rank_failures": 0,
+    "rank_seed": 7,
+    "recovered_scalar": "314159265358979",
+    "regular_states": 25560000,
+    "root_table_entries": 25558188,
+    "status": "success",
+    "target_failed": 0,
+    "target_generation_ms_excluded": 0.0,
+    "target_pdp_probes": 490584,
+    "target_phase_sum_ms_reported": 1699.0888339999997,
+    "target_solved": 1,
+    "time_wrapper_exit_code": 1,
+    "time_wrapper_exit_note": "The producer emitted a valid success summary and target row; /usr/bin/time -l returned 1 after macOS denied sysctl kern.clockrate.",
+    "timing_ms_by_stage": {
+      "base_load": 240.88875000000002,
+      "index_build": 41313.106750000006,
+      "linear_algebra": 3.734208,
+      "normal_basis_and_selftest": 8.20475,
+      "process_total": 1528946.920834,
+      "rank_stage": 1485679.143375,
+      "setup_total": 41562.200583,
+      "target_median": 1699.0892920000001,
+      "targets_total": 1701.318291
+    },
+    "total_operations_S": null,
+    "verified_rank_relations": 600
+  },
+  "independent_validation": {
+    "curve": "y^2 + x*y = x^3 + 1",
+    "curve_order_record_consistency_verified": true,
+    "curve_trace": "48653080717",
+    "field_degree": 71,
+    "field_polynomial": "x^71 + x^5 + x^3 + x + 1",
+    "fixture_scalar_validation_only": "314159265358979",
+    "frobenius_action_on_generator_verified": true,
+    "frobenius_eigenvalue_mod_r": "5336382444749771",
+    "frobenius_order_on_subgroup": 71,
+    "generator_exact_order_verified": true,
+    "ic_recovered_scalar": "314159265358979",
+    "ic_scalar_replay_verified": true,
+    "kind": "sage_independent_single_target_scalar_replay",
+    "public_target": [
+      "1850589826078099102726",
+      "2157895285144092536687"
+    ],
+    "rho_recovered_scalar": "314159265358979",
+    "rho_scalar_replay_verified": true,
+    "sage_runtime_info": "/Volumes/SSD990/crypto/experiments/koblitz-single-target-n71-20261002/runs/R1/sage_runtime_info.json",
+    "same_public_point_verified": true,
+    "signed_frobenius_orbit_size": 142,
+    "subgroup_order": "5513228015079457",
+    "subgroup_order_factorization": "5513228015079457",
+    "target_count": 1
+  },
+  "input_kind": "one supplied public point; fixture scalar is validation-only",
+  "measurement_uncertainty": {
+    "interval_estimate": null,
+    "note": "Single frozen target and one paired observation; no repeated-run uncertainty estimate.",
+    "paired_observations": 1
+  },
+  "paired_result": {
+    "S_total_operations_over_sqrt_r": null,
+    "both_answers_independently_verified": true,
+    "operation_count_note": "The IC target phase does not emit a comparable total operation count; S and operation-count ratios are unknown.",
+    "rho_online_ms_over_ic_online_ms": 16.78139668777337,
+    "same_curve_and_subgroup": true,
+    "same_public_target": true,
+    "speedup_status": "observed one-pair online ratio; one paired run only, so statistical uncertainty is not estimable"
+  },
+  "proposal_id": "N71_U128_COMPACT_ORBIT_SINGLE_TARGET",
+  "resource_envelope": {
+    "actual_peak_rss_bytes": {
+      "ic": null,
+      "rho": null
+    },
+    "declared_peak_rss_cap_bytes": 17179869184,
+    "one_process_per_arm": true,
+    "peak_rss_note": "Producer peak RSS was null and macOS time -l reported a sysctl permission warning; actual per-process peak is unknown. The 16 GiB value was a declared envelope, not an observed RSS.",
+    "workers_per_arm": 1
+  },
+  "rho_reference": {
+    "arithmetic_backend": "packed_u128_polynomial_basis",
+    "distinguished_bits": 0,
+    "exclusive_online_phase_ms": {
+      "recovery_check": 7.381375,
+      "target_walk_setup": 9.01625,
+      "walk": 28496.693792
+    },
+    "independent_sage_replay_verified": true,
+    "jump_count": 32,
+    "lambda_mod_r": 5336382444749771,
+    "name": "one-target packed-u128 signed-Frobenius rho on the same point",
+    "online_interval": "Target-specific jump setup, rho walk, and in-process scalar/group validation. Excludes process launch, input loading, and target fixture generation.",
+    "online_wall_ms": 28513.091417,
+    "operation_counts": {
+      "canonicalizations": 5317115,
+      "failed_collisions": 1217,
+      "frobenius_maps": 372198050,
+      "fruitless_cycle_restarts": 1217,
+      "group_additions": 5317147,
+      "negations_examined": 377515165,
+      "partition_hashes": 5315897,
+      "scalar_multiplications": 2501,
+      "table_inserts": 5315897,
+      "table_queries": 5317115
+    },
+    "peak_rss_bytes": null,
+    "producer_output_valid": true,
+    "producer_verified": true,
+    "quotient_mode": "signed_frobenius",
+    "recovered_scalar": "314159265358979",
+    "restarts": 1217,
+    "table_entries": 5315897,
+    "table_payload_lower_bound_bytes": 260478953,
+    "target_generation_ms_excluded": 0.0,
+    "time_wrapper_exit_code": 1,
+    "time_wrapper_exit_note": "The producer emitted a verified success row; /usr/bin/time -l returned 1 after macOS denied sysctl kern.clockrate.",
+    "walk_seed": 20261002,
+    "walk_steps": 5315897,
+    "workers": 1
+  },
+  "run_id": "IC1N71Ckb1fb85200PDP4rootRCguidedLAgaussTDdirectISO0h419f6af6f42eWcd9b5b764d88R1",
+  "runtime_environment": {
+    "architecture": "arm64",
+    "cargo": "1.93.1 (Homebrew)",
+    "cpu_model": null,
+    "cpu_model_note": "Host CPU model query was denied by the environment.",
+    "operating_system": "macOS 26.6 (25G70)",
+    "rustc": "1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+    "sage_runtime_info_artifact": "sage_runtime_info.json"
+  },
+  "schema_version": "single-target-ic-rho-1",
+  "target_count": 1,
+  "target_point": [
+    "1850589826078099102726",
+    "2157895285144092536687"
+  ],
+  "workload_id": "cd9b5b764d88"
+}

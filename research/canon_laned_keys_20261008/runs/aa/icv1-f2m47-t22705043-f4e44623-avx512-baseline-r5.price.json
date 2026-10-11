@@ -1,0 +1,273 @@
+{
+  "a": 1,
+  "all_verified": true,
+  "commit": null,
+  "counts": {
+    "build": {
+      "stored_pairs": 150024,
+      "tier": "folded"
+    },
+    "collect": {
+      "per_unit_index_relations_trials_summands": [
+        [
+          0,
+          5,
+          164,
+          26896
+        ],
+        [
+          1,
+          3,
+          164,
+          26896
+        ],
+        [
+          2,
+          3,
+          164,
+          26896
+        ],
+        [
+          3,
+          4,
+          164,
+          26896
+        ],
+        [
+          4,
+          4,
+          164,
+          26896
+        ],
+        [
+          5,
+          5,
+          164,
+          26896
+        ],
+        [
+          6,
+          7,
+          164,
+          26896
+        ],
+        [
+          7,
+          4,
+          164,
+          26896
+        ],
+        [
+          8,
+          6,
+          164,
+          26896
+        ],
+        [
+          9,
+          4,
+          164,
+          26896
+        ],
+        [
+          10,
+          1,
+          164,
+          26896
+        ],
+        [
+          11,
+          3,
+          164,
+          26896
+        ],
+        [
+          12,
+          2,
+          164,
+          26896
+        ],
+        [
+          13,
+          3,
+          164,
+          26896
+        ],
+        [
+          14,
+          2,
+          164,
+          26896
+        ]
+      ],
+      "relations_collected": 56,
+      "summands_scanned": 403440,
+      "trials": 2460,
+      "units": 15,
+      "units_extended": 14,
+      "units_planned": 1
+    },
+    "descent": {
+      "summands": 3,
+      "trials_per_target": [
+        2
+      ],
+      "trials_total": 2
+    },
+    "logs": {
+      "columns": 56,
+      "duplicates": 0,
+      "linear_algebra": {
+        "attempts": 0,
+        "core_dimension": 0,
+        "core_nonzeros": 0,
+        "filter": {
+          "columns_in": 56,
+          "columns_out": 0,
+          "dependent_rows_dropped": 0,
+          "duplicates_removed": 0,
+          "excess_rows_removed": 0,
+          "merged_columns": 51,
+          "nonzeros_in": 166,
+          "nonzeros_out": 0,
+          "rows_in": 56,
+          "rows_out": 0,
+          "singletons_removed": 5,
+          "uncovered_columns": 0
+        },
+        "reconstructed_columns": 56,
+        "wiedemann": null
+      },
+      "rejected": 0,
+      "relations_accepted": 56,
+      "solve_attempts": 1
+    },
+    "select": {
+      "columns": 56,
+      "points": 5264,
+      "selection_cost": {
+        "abscissae_drawn": 108,
+        "cofactor_multiplications": 56,
+        "frobenius_squarings": 2632,
+        "lifts_found": 56,
+        "rebuilds": 1
+      },
+      "signed_orbits": 56
+    }
+  },
+  "counts_identical_across_repetitions": true,
+  "curve": "icv1-f2m47-t22705043-f4e44623",
+  "first_repetition_total_units": 3064009.4134199065,
+  "floor": {
+    "batch_law": 1.0,
+    "per_target_k": 0.12926948294637178
+  },
+  "log2_r": 36.635865112243344,
+  "median": {
+    "groups": {
+      "constructions": 486046.33154661447,
+      "verification": 146997.18377037044,
+      "what": "work = the phases the frozen model prices; constructions = curve, projections, collectors, coverage and solvers built around them; verification = relation and final checks. The three sum to the median phases, which need not equal the median total.",
+      "work": 2430965.8981029214
+    },
+    "per_target_units": 16814.751979986813,
+    "phases_units": {
+      "build": 836699.8697564285,
+      "collect": 1158452.3718606872,
+      "collect_setup": 269240.31666655606,
+      "descent": 16523.189880569767,
+      "descent_setup": 22703.44912085596,
+      "la": 23753.875226919627,
+      "logs_setup": 4067.1864084147633,
+      "other": 461.7387892863634,
+      "select": 395536.5913783162,
+      "select_projection": 109057.63138423178,
+      "setup": 80516.00917726959,
+      "verify": 146705.62167095338,
+      "verify_final": 291.56209941704594
+    },
+    "s_cold": 9.37654705216462,
+    "s_per_target": 9.376547052164621,
+    "shared_units": 3047194.6614399194,
+    "total_units": 3064009.4134199065
+  },
+  "n": 47,
+  "name": "k1n47-c56-m3-s201-T01",
+  "operation": "price",
+  "params": "/home/user/crypto/research/ic_single_target_20260930/runs/k1n47/T01.params.json",
+  "r": 106781081677,
+  "recipe": {
+    "collection_aim": true,
+    "collection_window": 164,
+    "descent_summands": 3,
+    "max_trials": 498240,
+    "max_units": 100000,
+    "points_requested": {
+      "kind": "subgroup_orbits",
+      "points": 5264,
+      "seed": 201
+    },
+    "seed": 201,
+    "summands": 3,
+    "unit_trials": 164,
+    "units": 1
+  },
+  "recovered": [
+    "98279021128"
+  ],
+  "repetitions": [
+    {
+      "phases_ns": {
+        "build": 9174476,
+        "collect": 12702516,
+        "collect_setup": 2952240,
+        "descent": 181178,
+        "descent_setup": 248945,
+        "la": 260463,
+        "logs_setup": 44597,
+        "other": 5063,
+        "select": 4337088,
+        "select_projection": 1195825,
+        "setup": 882864,
+        "verify": 1608638,
+        "verify_final": 3197
+      },
+      "phases_units": {
+        "build": 836699.8697564285,
+        "collect": 1158452.3718606872,
+        "collect_setup": 269240.31666655606,
+        "descent": 16523.189880569767,
+        "descent_setup": 22703.44912085596,
+        "la": 23753.875226919627,
+        "logs_setup": 4067.1864084147633,
+        "other": 461.7387892863634,
+        "select": 395536.5913783162,
+        "select_projection": 109057.63138423178,
+        "setup": 80516.00917726959,
+        "verify": 146705.62167095338,
+        "verify_final": 291.56209941704594
+      },
+      "s_per_target": 9.376547052164621,
+      "total_ns": 33597090,
+      "total_units": 3064009.4134199065,
+      "unit_ns": 10.965074014736944,
+      "unit_ns_after": 11.027964789746544,
+      "unit_ns_before": 10.902183239727343
+    }
+  ],
+  "schema_version": 1,
+  "single_thread": true,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "14ee094b011d7b26bee533fbf328168a7714972751ec69f19375685519c50b69",
+    "git_commit": null,
+    "git_commit_source": null,
+    "git_dirty": null,
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "spread_max_over_min": 1.0,
+  "status": "complete",
+  "targets": 1,
+  "threads": 1
+}

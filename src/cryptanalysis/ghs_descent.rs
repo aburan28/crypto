@@ -620,7 +620,7 @@ mod tests {
         assert_eq!(trap_row.magic_m, 1, "trapdoor factorisation gives m = 1");
         // Genus = 2^{m-1} − 1 in type-I (orbit closed) = 0 for m=1.
         // That's the "trivial" descent: E itself already over k.
-        assert_eq!(trap_row.genus, 0);
+        assert_eq!(trap_row.genus, num_bigint::BigUint::from(0u32));
 
         // ── (3) Pick P, d ──
         let curve = ECurve::new(big_n, irr.clone(), a.clone(), b.clone());

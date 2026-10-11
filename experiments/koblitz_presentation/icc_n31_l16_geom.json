@@ -1,0 +1,50 @@
+{
+  "n=31 a2=0 l=16": {
+    "curves": 32,
+    "subspaces": 4,
+    "yield_per_F2": {
+      "icc_curve": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "var_curve": 0.0,
+      "var_subspace": 0.0,
+      "var_residual": 6.329548250791211e-20,
+      "share_subspace": 0.0
+    },
+    "log_us_per_call": {
+      "icc_curve": 0.0,
+      "ci95": [
+        0.0,
+        0.014261979256017552
+      ],
+      "var_curve": 0.0,
+      "var_subspace": 0.0,
+      "var_residual": 0.13893631271907306,
+      "share_subspace": 0.0
+    },
+    "reductions_per_call": {
+      "icc_curve": 0.0,
+      "ci95": [
+        0.0,
+        0.005044478890493278
+      ],
+      "var_curve": 0.0,
+      "var_subspace": 0.0,
+      "var_residual": 152.51199176747312,
+      "share_subspace": 0.0
+    },
+    "log_projected_solve": {
+      "icc_curve": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "var_curve": 0.0,
+      "var_subspace": 0.0,
+      "var_residual": 7.876046016005831,
+      "share_subspace": 0.0
+    }
+  }
+}

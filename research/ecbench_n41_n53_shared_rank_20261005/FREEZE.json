@@ -1,0 +1,92 @@
+{
+  "schema": "ecbench.n41_n53_shared_rank_freeze/v1",
+  "source_commit_at_freeze": "63a09ff7b297531b8bacef853d79745b3575983b",
+  "spec_file_sha256": "bc6d9bbfae1d4a19216268431f1bd5ec3acf668a9336260e37686525bb4d1288",
+  "plan_file_sha256": "06ee98c3659f105c862f97c5f2e7e3df20141386fedb90f52f467562260d68a8",
+  "spec_id": "ECS1hb5e99ec6937e",
+  "canonical_spec_sha256": "b5e99ec6937e9fb6bc2398cb450e2cf8dbe62b3c7412b6ffa89f3a136a2a2bf7",
+  "curves": [
+    "icv1-f2m41-tm2308219-7f48b14a",
+    "icv1-f2m53-tm56619371-dac20a85"
+  ],
+  "public_targets_per_curve": 16,
+  "planned_executions_including_warmups": 768,
+  "primary_target_index_per_curve": 0,
+  "primary_workloads": {
+    "icv1-f2m41-tm2308219-7f48b14a": "W15dcf1a74cb8",
+    "icv1-f2m53-tm56619371-dac20a85": "W32013b060ceb"
+  },
+  "workload_ids": [
+    "W15dcf1a74cb8",
+    "W58966332d354",
+    "W209f07abaaeb",
+    "Wcfd3a21e46fe",
+    "W2c831e15bf01",
+    "W289d2f3cec86",
+    "Wa19cda0cc1a4",
+    "W457bfc288ea6",
+    "W67b6de6cae1f",
+    "W5b37a6615229",
+    "W79e398e98b74",
+    "W9f34390e2590",
+    "W745f41e72e78",
+    "W595bec26193e",
+    "W128fdf0a9314",
+    "W0b23b25ea500",
+    "W32013b060ceb",
+    "W6152454b01d8",
+    "W362bfb17df38",
+    "Waf2e9dd0f327",
+    "W53b3c7191bc1",
+    "W9397d97679e6",
+    "W2407a541d20a",
+    "Wae934f34bbc8",
+    "Wa2264e0443c9",
+    "Wb6f1e915c529",
+    "Wfee1d78cba4b",
+    "W87416516674f",
+    "W89e923f9e4fd",
+    "We730247bf7c5",
+    "Wa8d2390eed05",
+    "W980f6c02dbe3"
+  ],
+  "target_overlap_checks": {
+    "prior_ecbench_n41_n53_sessions": {
+      "files": [
+        "research/ecbench_calibration_20261002/sessions/koblitz/plan.json",
+        "research/ecbench_calibration_20261002/sessions/followup-koblitz/plan.json",
+        "research/ecbench_pair_claw_20261003/sessions/koblitz/plan.json"
+      ],
+      "prior_workloads": 88,
+      "point_overlap": 0,
+      "workload_id_overlap": 0
+    },
+    "pr_1353_koblitz_base_size_cold_panel_frozen_points": {
+      "points": 4,
+      "point_overlap": 0
+    },
+    "repository_text_grep": {
+      "roots": [
+        "research",
+        "experiments",
+        "docs",
+        "examples",
+        "src",
+        "tools"
+      ],
+      "patterns_per_target": [
+        "0x-hex abscissa",
+        "decimal abscissa",
+        "bare hex abscissa"
+      ],
+      "files_matching_outside_this_directory": 0
+    }
+  },
+  "pilot": {
+    "purpose": "per-child timeout estimate only; throwaway target seed 999001, not part of the panel",
+    "directory": "pilot/",
+    "largest_process_wall_s": 185.83,
+    "timeout_seconds_chosen": 600
+  },
+  "status": "preregistered; no panel result"
+}

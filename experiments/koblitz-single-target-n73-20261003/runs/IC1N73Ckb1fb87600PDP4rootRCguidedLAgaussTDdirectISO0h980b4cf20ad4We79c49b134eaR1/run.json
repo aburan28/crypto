@@ -1,0 +1,36 @@
+{
+  "active_arm": null,
+  "active_arm_started_at_utc": "2026-10-04T09:46:18+00:00",
+  "candidate_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4",
+  "ic_binary_sha256": "03f74ed95edf8fe3bd91f0adde3423b804843f922915a2e6f79e90f77b229dfe",
+  "ic_finished_at_utc": "2026-10-04T14:53:24+00:00",
+  "ic_rank_seed": 7,
+  "ic_return_code": 0,
+  "known_answer_sent_to_ic": false,
+  "known_answer_sent_to_rho": false,
+  "launch_finished_at_utc": "2026-10-04T14:53:24+00:00",
+  "launch_started_at_utc": "2026-10-04T09:45:31+00:00",
+  "memory_limit_mechanism": "No finite kernel cap; per-process peak RSS recorded with wait4(2)",
+  "paired_run_order": [
+    "rho",
+    "ic"
+  ],
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "python": "3.13.1",
+  "resource_cap_bytes_per_arm": null,
+  "rho_finished_at_utc": "2026-10-04T09:46:18+00:00",
+  "rho_reference_binary_sha256": "8a17723a2b0d26658ea684d19b6527aced19f91daffe85f4b838a1ad8d454527",
+  "rho_reference_source_sha256": "0a35b2f7820110e773023108706bfee0aa91d7bbe5953290f0a5b2fc7cc2b60f",
+  "rho_return_code": 0,
+  "rho_walk_seed": 202610041,
+  "run_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR1",
+  "sidecar_validation_after_run": true,
+  "status": "PRODUCERS_COMPLETE",
+  "target": [
+    "1852858978593996699777",
+    "7821257062942871962177"
+  ],
+  "target_count": 1,
+  "validation_scalar_sidecar_path": "../frozen/fixture.json",
+  "workload_id": "e79c49b134ea"
+}

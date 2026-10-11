@@ -1,0 +1,15 @@
+digraph exp7 {
+  graph [rankdir=LR, bgcolor="#fffdf9", label="EXP7: what the toy Fourier sweep measures", labelloc=t, fontsize=20, fontname="DejaVu Sans", pad=0.25];
+  node [shape=box, style="rounded,filled", fillcolor="#dcebf0", color="#536b75", fontname="DejaVu Sans", fontsize=13, margin="0.22,0.12"];
+  edge [color="#536b75", arrowsize=0.8, fontname="DejaVu Sans", fontsize=11];
+  curve [label="Frozen E/F_p, generator G\nprime group order n"];
+  enumerate [label="Enumerate all [k]G\nknown k = 0,...,n−1", fillcolor="#f6dfa6"];
+  membership [label="Cheap predicate on x([k]G)\nindicator f(k), k ↔ −k symmetry"];
+  fft [label="Full DFT on Z/n\nall nonzero frequencies + pair sums"];
+  null [label="512 matched random sets\nsame size and inversion symmetry", fillcolor="#d9ead3"];
+  compare [label="Peak vs null maxima\n24-cell adjusted decision"];
+  log [label="Log interval\npositive control", fillcolor="#ee9a82"];
+  curve -> enumerate -> membership -> fft -> compare;
+  membership -> null -> compare;
+  enumerate -> log -> fft;
+}

@@ -22,6 +22,20 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def covered_by_inventory(path: str, historical_dirs: set[str]) -> bool:
+    """Whether a tracked points file sits inside this freeze's directories.
+
+    Later experiments add their own corpora beside this one. A file in a
+    new directory does not change these hashes. A new file inside a
+    directory the inventory already listed, including a nested
+    subdirectory, is still a hole in the freeze. Prefix matching is on
+    the directory plus a slash so ``foo`` does not cover ``foo-extra``.
+    """
+    parent = str(Path(path).parent)
+    return any(parent == directory or parent.startswith(directory + "/")
+               for directory in historical_dirs)
+
+
 def rows(path: Path) -> list:
     return [json.loads(line) for line in path.read_bytes().splitlines() if line.strip()]
 
@@ -65,6 +79,18 @@ def replay() -> dict:
         ["git", "ls-files", "research/notes/ecc2k130/**/*.points.jsonl"],
         cwd=ROOT, text=True).splitlines()
         if not path.startswith(str(HERE.relative_to(ROOT)) + "/")]
+    canonical_paths = [item["path"] for item in canonical]
+    historical_dirs = {str(Path(path).parent) for path in canonical_paths}
+    historical_tracked = [path for path in tracked
+                          if covered_by_inventory(path, historical_dirs)]
+    assert canonical_paths == historical_tracked
+    # The equality used to cover every ecc2k130 points file. Later freezes
+    # add their own corpora beside this one. A new file inside a directory
+    # this inventory already listed is still a hole; a file in a new
+    # directory is a later experiment and does not change these hashes.
+    historical_dirs = {str(Path(path).parent) for path in canonical_paths}
+    historical_tracked = [path for path in tracked if str(Path(path).parent) in historical_dirs]
+    assert canonical_paths == historical_tracked
     # The inventory was the complete tracked set when the freeze was taken
     # (prepare.py refuses to run otherwise, and the sealed INPUT_RECEIPT.json
     # was produced against it). Corpora frozen by later rounds, such as

@@ -28,7 +28,7 @@ SHIPPING = (
     "PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 "
     "PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 "
     "PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 "
-    "WALK_TABLE=0 TABLE_BRANCHES=8"
+    "WALK_TABLE=0 TABLE_BRANCHES=8 WITNESS=0"
 )
 
 
@@ -95,6 +95,21 @@ class GeometryGate(unittest.TestCase):
         staged = manifest(knobs=knobsReplace(SHIPPING, PACKED_COMPACT_STATE=0))
         reasons = rollout.geometryReasons(campaign(), staged, manifest())
         self.assertTrue(any("PACKED_COMPACT_STATE" in r for r in reasons))
+
+    def test_witness_counters_blocked(self):
+        # 72-byte v2 records in a 32-byte corpus, and new checkpoint state:
+        # refused whether or not the live manifest declared the knob.
+        staged = manifest(knobs=knobsReplace(SHIPPING, WITNESS=1))
+        for live in (manifest(), manifest(knobs=SHIPPING.replace(" WITNESS=0", "")), None):
+            reasons = rollout.geometryReasons(campaign(), staged, live)
+            self.assertTrue(any("WITNESS=1" in r for r in reasons), (live, reasons))
+
+    def test_a_build_that_does_not_declare_witness_blocked(self):
+        # The Makefile defaults WITNESS to 1 for the sigma walk, so a build
+        # that left it out cannot be assumed to have compiled the counters out.
+        staged = manifest(knobs=SHIPPING.replace(" WITNESS=0", ""))
+        reasons = rollout.geometryReasons(campaign(), staged, manifest())
+        self.assertIn("staged manifest knobs omit WITNESS", reasons)
 
     def test_dropping_arch_blocked(self):
         staged = manifest(arches=["120"])
@@ -513,6 +528,18 @@ class Scripts(unittest.TestCase):
 
     def test_build_sh_parses(self):
         subprocess.run(["bash", "-n", str(HERE / "build.sh")], check=True)
+
+    def test_build_sh_compiles_the_witness_out(self):
+        build = (HERE / "build.sh").read_text()
+        start = build.index('knobs="') + len('knobs="')
+        knobs = rollout.parseKnobs(build[start:build.index('"', start)].replace("\\\n", " "))
+        self.assertEqual(knobs.get("WITNESS"), "0")
+        # SHIPPING stands in for build.sh's manifest everywhere above.
+        shipping = rollout.parseKnobs(SHIPPING)
+        self.assertEqual(set(knobs), set(shipping))
+        for name, value in knobs.items():
+            if not value.startswith("$"):
+                self.assertEqual(value, shipping[name], name)
 
     def test_bootstrap_still_points(self):
         text = (HERE / "bootstrap.sh").read_text()

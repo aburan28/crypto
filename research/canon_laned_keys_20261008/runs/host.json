@@ -1,0 +1,29 @@
+{
+  "baseline_commit": "7424539b51f1540ece45b25d9d7a2754a664a46c",
+  "candidate_commit": "a98ba95a4cd54a42064c9b49d57f00eb1b80a827",
+  "rustc": "rustc 1.97.0 (2d8144b78 2026-07-07)",
+  "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "cpu_flags_relevant": [
+    "pclmulqdq",
+    "popcnt",
+    "avx2",
+    "bmi2",
+    "avx512f",
+    "avx512dq",
+    "avx512cd",
+    "avx512bw",
+    "avx512vl",
+    "gfni",
+    "vpclmulqdq"
+  ],
+  "logical_cores": 4,
+  "memory": "15 GiB",
+  "os": "Linux 6.18.44-fc-v80 x86_64",
+  "build": "cargo build --release --bin ic (both arms in one target dir; only src/cryptanalysis/koblitz_fast.rs differs)",
+  "ic_baseline_sha256": "93c23f66e9fa6c8c7da9004dfa9342a436be27ae1d6b81b483d6b71adef7cb4f",
+  "ic_candidate_sha256": "d35469af7ffa3d51b2ecd8dc8659340a1a7280ec777b1c5cf1cef91237959a3a",
+  "isolated_bench_sha256": "4fd305a83f23b06d01272be05494401741233220c93180dd0dec28361fc462f1",
+  "pinning": "isolated_bench run --cpus 3 --max-other-cpu 0.3, RAYON_NUM_THREADS=1",
+  "hardware_class": "one x86-64 cloud container with AVX-512; the portable path is forced with KIC_SCAN_SIMD=0; no Arm64, AMD or GPU host measured",
+  "isolation_note": "max-other-cpu raised from the 0.1 default to 0.3: the session harness process (claude, about 0.1 CPU on another core) cannot be stopped in this container; isolation.jsonl records every run's conditions"
+}

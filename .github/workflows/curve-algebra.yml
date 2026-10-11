@@ -1,0 +1,22 @@
+name: Curve algebra fixtures
+on:
+  pull_request:
+    paths:
+      - '.agents/skills/curve-algebra/**'
+      - '.github/workflows/curve-algebra.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.agents/skills/curve-algebra/**'
+      - '.github/workflows/curve-algebra.yml'
+permissions:
+  contents: read
+jobs:
+  verify-examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile native algebraic verifier
+        run: c++ -std=c++17 -O2 -Wall -Wextra -Werror .agents/skills/curve-algebra/scripts/verify_examples.cpp -o /tmp/curve-algebra-check
+      - name: Verify both exact examples
+        run: /tmp/curve-algebra-check

@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "kind": "cms_pair_sum_trie_relative_positive_n19_probe",
+  "updated_at": "2026-09-15T17:49:23Z",
+  "claim_boundary": "External CMS5 on public-synthetic orbit_factorized S5 with pair_sum_trie + relative-positive + nogoods. pair_table=0. Not unrestricted win; not ledger promotion; not vs_rho.",
+  "encoding": {
+    "n": 19,
+    "eta": "1/2",
+    "algebra": "orbit_factorized",
+    "intermediate_domain": "pair_sum_trie",
+    "positive_mode": "relative",
+    "pair_table_entries": 0,
+    "variables": 7415,
+    "ordinary_clauses": 74331,
+    "native_xor_rows": 1159,
+    "intermediate_domain_x_coordinates": 1330
+  },
+  "unrestricted_planted_target": {
+    "cms_status": "INDETERMINATE",
+    "maxconfl": 150000,
+    "conflicts_reported": 150002,
+    "evidence": "n19_unrestricted_cms150k.out"
+  },
+  "planted_units_sanity": {
+    "cms_status": "SATISFIABLE",
+    "maxconfl": 50000,
+    "evidence": "n19_planted_cms50k.out"
+  },
+  "verdict": "CMS_MATCHES_INTERNAL_CLIFF_ON_COMBO",
+  "notes": [
+    "CMS5 INDETERMINATE on unrestricted combo @150k conflicts (~16s).",
+    "Planted-unit same encoding SATISFIABLE under CMS \u2014 formula soundness under external XOR-aware solver.",
+    "Cliff is not internal-CDCL-only for this combo either."
+  ],
+  "ledger_promotion": false
+}

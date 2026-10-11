@@ -1,0 +1,234 @@
+{
+  "control": {
+    "binary_sha256": "47e24298666b7dda14f113af18e7c20de530aa5c3bf1f5388aa846ea41c67d3e",
+    "test": {
+      "command": [
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xonly-15b-control",
+        "--test"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 13.03158589100076,
+      "log": "poly15-control-builtin-test.log",
+      "log_sha256": "811064af92c24991bddfd3450130b8b4ea1dff2fd5918b8b6439b0babf9141d0",
+      "passed": true
+    },
+    "state": {
+      "command": [
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xonly-15b-control",
+        "--packed",
+        "--curve",
+        "131",
+        "--threads",
+        "128",
+        "--steps",
+        "7",
+        "--launches",
+        "1",
+        "--verify",
+        "0",
+        "--run-id",
+        "62590",
+        "--checkpoint",
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xonly-15b-control-state.ckpt"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.5143648760003998,
+      "log": "poly15-control-state-client.log",
+      "log_sha256": "9474655f0fe6ae8c0339d5c5abe9375f2e6850475986560a7b9b01e6dc351288",
+      "resources": {
+        "registers": 80,
+        "local_bytes": 0,
+        "shared_bytes": 32400,
+        "occupancy_ok": true,
+        "passed": true
+      },
+      "checkpoint": "build/g7-xonly-15b-control-state.ckpt",
+      "checkpoint_sha256": "bc5e37648cbbc13ab5d929b104077a80d2224b1c342e7067cd43281d2a6230aa",
+      "backend_ok": true,
+      "passed": true
+    },
+    "oracle": {
+      "command": [
+        "/home/ubuntu/crypto/ecc2k130/build/check-bridge13-mod72-state",
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xonly-15b-control-state.ckpt"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 55.04160014899935,
+      "log": "poly15-control-state-oracle.log",
+      "log_sha256": "e4f60f9d30cfd9c216f3bd5d4f2f0021574fba50e8f36656142e0ce278a53e84",
+      "output": "bridge1-sparse-bridge3-mod72 full-x oracle: points=2048 steps=7 mismatches=0",
+      "passed": true
+    }
+  },
+  "arith": {
+    "binary_sha256": "b34c726def9b953a48b4f987fe0bb67f10171bf1adfdbeeefb4a7e9b201543c9",
+    "test": {
+      "command": [
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xonly-15b-arith",
+        "--test"
+      ],
+      "returncode": 1,
+      "elapsed_seconds": 12.432481874000587,
+      "log": "poly15-arith-builtin-test.log",
+      "log_sha256": "da033449265dfc91d845b93864a0d1dbb4eab44e41d339338f8b61e5522cb56a",
+      "passed": false
+    },
+    "state": {
+      "command": [
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xonly-15b-arith",
+        "--packed",
+        "--curve",
+        "131",
+        "--threads",
+        "128",
+        "--steps",
+        "7",
+        "--launches",
+        "1",
+        "--verify",
+        "0",
+        "--run-id",
+        "62590",
+        "--checkpoint",
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xonly-15b-arith-state.ckpt"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.5158517729996674,
+      "log": "poly15-arith-state-client.log",
+      "log_sha256": "0104def4dcfbb7fb9e180b5241233b6e9642e4a78ebdfa867122e6e575fc859c",
+      "resources": {
+        "registers": 80,
+        "local_bytes": 0,
+        "shared_bytes": 28032,
+        "occupancy_ok": true,
+        "passed": true
+      },
+      "checkpoint": "build/g7-xonly-15b-arith-state.ckpt",
+      "checkpoint_sha256": "b1fb724cdf34b6022d336ce8f2c2f7a839f279fdb57d51bcfc596482c92b3c3e",
+      "backend_ok": true,
+      "passed": true
+    },
+    "oracle": {
+      "command": [
+        "/home/ubuntu/crypto/ecc2k130/build/check-arith-state",
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xonly-15b-arith-state.ckpt"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 54.34360000200013,
+      "log": "poly15-arith-state-oracle.log",
+      "log_sha256": "8fb15cdf1f4bf9977175f7ae55972d95c9dd99b27aaf42e14917ffcd88129a4d",
+      "output": "sigma-bridge-1 arithmetic-only full-x oracle: points=2048 steps=7 mismatches=0",
+      "passed": true
+    }
+  },
+  "poly12": {
+    "binary_sha256": "c1217f5971114bbbf86478644617b012e1650c64caf3e5c5fddaca108ab20d30",
+    "test": {
+      "command": [
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xonly-15b-poly12",
+        "--test"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 12.883291257000565,
+      "log": "poly15-poly12-builtin-test.log",
+      "log_sha256": "bb6d01c41bb8297374582dbcd926057e2adf9989f79c001f509f4f67b2bdf98d",
+      "passed": true
+    },
+    "state": {
+      "command": [
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xonly-15b-poly12",
+        "--packed",
+        "--curve",
+        "131",
+        "--threads",
+        "128",
+        "--steps",
+        "7",
+        "--launches",
+        "1",
+        "--verify",
+        "0",
+        "--run-id",
+        "62590",
+        "--checkpoint",
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xonly-15b-poly12-state.ckpt"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.47802790199966694,
+      "log": "poly15-poly12-state-client.log",
+      "log_sha256": "e2436fdf7aa529a91d1ee16441052f7ae0b8eb0af5fe596d841f2566b3ef3961",
+      "resources": {
+        "registers": 80,
+        "local_bytes": 0,
+        "shared_bytes": 32400,
+        "occupancy_ok": true,
+        "passed": true
+      },
+      "checkpoint": "build/g7-xonly-15b-poly12-state.ckpt",
+      "checkpoint_sha256": "5fc661c9ae61f700c330c2a2c97aeb6505fa796406a5479f64fc3b308d8f06ea",
+      "backend_ok": true,
+      "passed": true
+    },
+    "oracle": {
+      "command": [
+        "/home/ubuntu/crypto/ecc2k130/build/check-poly12-state",
+        "/home/ubuntu/crypto/ecc2k130/build/g7-xonly-15b-poly12-state.ckpt"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 54.34693326800061,
+      "log": "poly15-poly12-state-oracle.log",
+      "log_sha256": "6873915b4fe19ebd1aaa8b3d009b23df64ba0aa6b83dac9d29c3a9187cc4638d",
+      "output": "bridge1-sparse-bridge3-poly12 full-x oracle: points=2048 steps=7 mismatches=0",
+      "passed": true
+    }
+  },
+  "control_oracle_compile": {
+    "command": [
+      "g++",
+      "-O3",
+      "-std=c++17",
+      "-I",
+      "/home/ubuntu/crypto",
+      "/home/ubuntu/crypto/ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/check_bridge13_mod72_state.cpp",
+      "-o",
+      "/home/ubuntu/crypto/ecc2k130/build/check-bridge13-mod72-state"
+    ],
+    "returncode": 0,
+    "elapsed_seconds": 0.8684866470002817,
+    "log": "poly15-control-oracle-compile.log",
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "arith_oracle_compile": {
+    "command": [
+      "g++",
+      "-O3",
+      "-std=c++17",
+      "-I",
+      "/home/ubuntu/crypto",
+      "/home/ubuntu/crypto/ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/check_arith_state.cpp",
+      "-o",
+      "/home/ubuntu/crypto/ecc2k130/build/check-arith-state"
+    ],
+    "returncode": 0,
+    "elapsed_seconds": 0.8679725049996705,
+    "log": "poly15-arith-oracle-compile.log",
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "poly12_oracle_compile": {
+    "command": [
+      "g++",
+      "-O3",
+      "-std=c++17",
+      "-I",
+      "/home/ubuntu/crypto",
+      "/home/ubuntu/crypto/ecc2k130/benchmarks/g7-12b-xonly-doubling-bridge/check_poly12_state.cpp",
+      "-o",
+      "/home/ubuntu/crypto/ecc2k130/build/check-poly12-state"
+    ],
+    "returncode": 0,
+    "elapsed_seconds": 0.8658557899998414,
+    "log": "poly15-poly12-oracle-compile.log",
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "passed": false
+}

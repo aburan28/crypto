@@ -1,13 +1,9 @@
 name: Koblitz Stage 32 WDSat capacity correction
 
 on:
-  pull_request:
-    paths:
-      - "scripts/run_koblitz_stage32_wdsat_correction.py"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-32-wdsat-config.h"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-32-wdsat-capacity-protocol.json"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE32_WDSAT_CAPACITY.md"
-      - ".github/workflows/koblitz-stage32-wdsat-capacity.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

@@ -10,9 +10,7 @@
 //! artifact -- measured at up to 5.6 ms against a 9.1 ms build, so the cache
 //! was returning most of what it saved (`examples/preprocessing_cost.rs`).
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::{
-    any::Any, cell::RefCell, collections::VecDeque, sync::OnceLock, time::Instant,
-};
+use std::{any::Any, cell::RefCell, collections::VecDeque, sync::OnceLock, time::Instant};
 
 #[derive(Clone, Copy)]
 pub enum Layer {
@@ -511,7 +509,10 @@ mod tests {
     #[test]
     fn one_key_at_two_types_recomputes() {
         let mut c = AlgebraCache::local(1 << 20);
-        assert_eq!(c.memoize(Layer::Preprocessing, b"x", || Some(2u64)), Some(2));
+        assert_eq!(
+            c.memoize(Layer::Preprocessing, b"x", || Some(2u64)),
+            Some(2)
+        );
         assert_eq!(
             c.memoize(Layer::Preprocessing, b"x", || Some("two".to_string())),
             Some("two".to_string())

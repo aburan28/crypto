@@ -6,6 +6,7 @@ on:
     paths:
       - 'src/bin/icprog.rs'
       - 'src/bin/icprog/f5_control.rs'
+      - 'src/bin/icprog/f5_control_publication.rs'
       - 'src/cryptanalysis/prepared_control_archive.rs'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-registration-v1/**'
       - '.github/workflows/ic-native-f5-registration.yml'
@@ -14,6 +15,7 @@ on:
     paths:
       - 'src/bin/icprog.rs'
       - 'src/bin/icprog/f5_control.rs'
+      - 'src/bin/icprog/f5_control_publication.rs'
       - 'src/cryptanalysis/prepared_control_archive.rs'
       - 'research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-registration-v1/**'
       - '.github/workflows/ic-native-f5-registration.yml'
@@ -57,11 +59,17 @@ jobs:
           fi
           test ! -e "$RUNNER_TEMP/failed-f5-custody.json"
           grep -qx 'icprog: invalid gzip header' "$RUNNER_TEMP/failed-packaging.stderr"
+      - name: Replay the closed native F5 result as data, never archived code
+        run: |
+          "$RUNNER_TEMP/native-busy" busy -- target/debug/icprog f5-control-replay-result \
+            --publication research/ic_candidate_tournament_20260915/goal_20260924/native-f5-control-registration-v1/result-v1 \
+            --out "$RUNNER_TEMP/f5-consumed-result-replay.json"
       - uses: actions/upload-artifact@v4
         with:
           name: native-f5-registration-custody-${{ matrix.os }}
           path: |
             ${{ runner.temp }}/f5-registration-custody.json
+            ${{ runner.temp }}/f5-consumed-result-replay.json
             ${{ runner.temp }}/failed-packaging.stdout
             ${{ runner.temp }}/failed-packaging.stderr
             ${{ runner.temp }}/custody-rustc.txt

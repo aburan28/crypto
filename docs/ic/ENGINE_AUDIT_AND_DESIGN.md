@@ -219,7 +219,14 @@ once the rate estimate stabilizes, and marked provisional before then.
 - `icx inspect <curve>` — full parameter verification (reuses `params.rs`
   checks, generalized past the 512-bit cap).
 - `icx estimate <curve> [--solver ...]` — boundary floors, family-optimum `S`,
-  fitted-exponent extrapolation; no solve.
+  fitted-exponent extrapolation; no solve.  For a curve over `F_{2^n}` it
+  also prints the Kousidis–Wiemers form of the Petit–Quisquater heuristic at
+  every `ω` bound in `cryptanalysis::matmul_exponent`, each labelled with its
+  construction (practical, galactic, existence only) and its standing in
+  characteristic 2 (established, conditional, undetermined).  This is a model
+  under the first-fall-degree assumption, never a measurement
+  (`research/notes/ecc2k130/RESEARCH_ECC2K130_IC_LITERATURE.md`, addendum of
+  2026-10-07).
 - `icx run <curve> [--factor-base ...] [--oracle ...] [--solver ...]
   [--linalg ...] [--regime auto|scaled|attack]` — runs the pipeline via the
   framework at the feasible size, prints staged progress + ETA, verifies the

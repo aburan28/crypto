@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/home/ubuntu/crypto/ecc2k130/build/g7-xcache-6",
+    "--packed",
+    "--threads",
+    "512",
+    "--steps",
+    "64",
+    "--launches",
+    "4",
+    "--run-id",
+    "139",
+    "--checkpoint",
+    "/home/ubuntu/crypto/ecc2k130/build/xcache-six-candidate-139.ckpt",
+    "--dp-weight",
+    "52",
+    "--verify",
+    "16",
+    "--dp-file",
+    "/home/ubuntu/crypto/ecc2k130/build/xcache-six-candidate-139.dp"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "timeout_seconds": 300,
+  "elapsed_seconds": 3.630471026000123,
+  "log": "xcache-six-candidate-139.log",
+  "log_sha256": "02c82f820ccd09243a2ef5657f1c65943916034a25d8880928dda6f3ac5e375b",
+  "binary_sha256": "17439cb4541f16598bd9992c9c499c6224cadfd50e9bde8aefcfd9794f391841"
+}

@@ -1,0 +1,8 @@
+ecc2k130/benchmarks/g7-12b-fixed-add/collision_study.cpp: In function ‘int main()’:
+ecc2k130/benchmarks/g7-12b-fixed-add/collision_study.cpp:32:27: error: ‘mult’ was not declared in this scope
+   32 |       if(!mode) { U192 ma=mult(a),mb=mult(b); den=mod_sub(mod_mul(sc,mb,ell),ma,ell); }
+      |                           ^~~~
+ecc2k130/benchmarks/g7-12b-fixed-add/collision_study.cpp:32:70: error: ‘mb’ was not declared in this scope; did you mean ‘ma’?
+   32 |       if(!mode) { U192 ma=mult(a),mb=mult(b); den=mod_sub(mod_mul(sc,mb,ell),ma,ell); }
+      |                                                                      ^~
+      |                                                                      ma

@@ -89,10 +89,15 @@ case "$walk" in
     table) walkTable=1 ;;
     *) echo "campaign.json names an unknown walk: $walk" >&2; exit 1 ;;
 esac
+# WITNESS is pinned, never inherited: the Makefile defaults it to 1 for the
+# sigma walk, which writes 72-byte v2 records into a campaign whose contract
+# is 32-byte records (protocol.RECORD_BYTES) and costs ~35% of the rate on an
+# RTX PRO 6000 (#745). rollout.py refuses a staged build without WITNESS=0.
 knobs="BATCH=16 THREADS=256 MINBLOCKS=2 PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 \
 PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 \
 PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=$CLMAD PACKED_STATE_TILE=256 \
-PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 WALK_TABLE=$walkTable TABLE_BRANCHES=8"
+PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 WALK_TABLE=$walkTable TABLE_BRANCHES=8 \
+WITNESS=0"
 # The fixtures must be built with the arithmetic they are meant to check, so
 # take their -D flags from the knobs above rather than from a second list.
 defs="-DECC_STREAM_KARAT=0 -DECC_SMEM_SPILL=0"

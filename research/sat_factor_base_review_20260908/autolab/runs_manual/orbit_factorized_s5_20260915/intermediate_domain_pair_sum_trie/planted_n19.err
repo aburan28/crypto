@@ -1,0 +1,6 @@
+
+thread 'main' (108418585) panicked at examples/koblitz_s5_sat_instance.rs:4917:9:
+assertion `left == right` failed
+  left: "pair_sum_trie"
+ right: "none"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

@@ -1,0 +1,14 @@
+# Track B's arm B5a on main, bundled in stack-20261006-b5a.bundle
+# B5a's local branch and its arm: one merge of b5a-int into arm B4, by the chain's rules (README.md)
+
+## the arm and the branch tip
+tbarm-B5a 97ade3d0556b46f493d780d704f889b25f25424f Track B's chain on main, arm B5a: b5a-int (538afdce) into arm B4
+b5a-int 538afdce44c50c4f575cfe68c3f1a18949e699b5 B5a (work in progress): ic on extension fields GF(p^k)
+
+## prerequisite: arm B4, which stack-20261005-main.bundle holds (and with it b4-int, 8a2519e6)
+d5761c134f4a6e980660a6e99d4663e7d9e2a7e9 Track B on main, arm B4: R05's presence filter in the W-word table
+
+## every commit in the bundle, oldest first
+7fda9f62c1d5f4891641faea575c7f7f5c3370da 2026-10-01 B5a (work in progress): GF(p^k) in the library
+538afdce44c50c4f575cfe68c3f1a18949e699b5 2026-10-01 B5a (work in progress): ic on extension fields GF(p^k)
+97ade3d0556b46f493d780d704f889b25f25424f 2026-10-05 Track B's chain on main, arm B5a: b5a-int (538afdce) into arm B4

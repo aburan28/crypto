@@ -241,3 +241,39 @@ None of these is a measurement.
   later arms carry its change.
 - **Nothing else changes:** the acceptance rule, the A/A bands and the
   other measurements.
+
+## Amendment 4 (2026-10-05, before any measurement)
+
+**B3b is measured on main's head, with native tools.**
+- **Why.** R07 re-bases the programme on main's head, `995ea207`.
+  AGENTS.md also excludes Python from the programme's tooling
+  (plan §10a).
+- **B3b's arm** is `tbarm-B3b` (`98320f2f`). Each step's arm is one merge of
+  that step's tip into the arm before it, starting from main's head.
+  The arms are on record in
+  [`../../track-b/stack-20261005-main.bundle`](../../track-b/stack-20261005-main.bundle),
+  and [`../../track-b/README.md`](../../track-b/README.md) states the rules
+  that resolve their conflicts.
+- **The base** is main's head, `995ea207`: v3, if R07 accepts it. No
+  Track B run starts before R07's decision. If R07 is not accepted, this
+  amendment is revisited first.
+- **The runners.** `icprog conformance` replaces `conformance/run.py`,
+  and `icprog bround` replaces `harness/bround.py`. Each keeps the
+  script's steps and rules.
+- **The A/A bands.** This host is not R01's, so the bands are the run's
+  own, as the acceptance rule already allows. `icprog bround aa` runs
+  the base against a byte-identical copy, on `M1`'s 22 rows, five
+  rounds, in the chain's run tree.
+- **The chain** gains B4 after B3b, as B4's protocol declares.
+- **The arm carries one port commit:** the two-word pair table takes
+  R05's presence filter, as main's one-word table does. Its sameness
+  with the one-word pipeline then holds on main.
+- **Measurement 5, F0 at two words,** runs on `icprog f0 run --set b3b`.
+  Each of the ten runs is under the tool's one-day budget, and
+  `icprog f0 analyse` replays both arms' answers in arithmetic of its
+  own.
+- **Measurement 6, the two-word premium,** runs on `icprog
+  b3b-premium`. Its prices are the build phase over the stored pairs, the
+  collection phase over the summands scanned, and the online probe loop
+  (`target_pdp`) over the descent's trials.
+- **Nothing else changes:** the cases, the pins, the acceptance rules.

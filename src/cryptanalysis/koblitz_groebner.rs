@@ -1711,6 +1711,179 @@ fn f4_solver_linear_tail_flat(
     (low, rank)
 }
 
+fn rref_f2_full(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+    let words = n_cols.div_ceil(64);
+    let mut pivot_row = 0usize;
+    for c in 0..n_cols {
+        let (w, bit) = (c / 64, 1u64 << (c % 64));
+        let piv = (pivot_row..matrix.len()).find(|&r| matrix[r][w] & bit != 0);
+        let piv = match piv {
+            Some(p) => p,
+            None => continue,
+        };
+        matrix.swap(pivot_row, piv);
+        for r in 0..matrix.len() {
+            if r != pivot_row && matrix[r][w] & bit != 0 {
+                for k in 0..words {
+                    matrix[r][k] ^= matrix[pivot_row][k];
+                }
+            }
+        }
+        pivot_row += 1;
+        if pivot_row == matrix.len() {
+            break;
+        }
+    }
+    pivot_row
+}
+
+/// Active-suffix Gauss-Jordan kernel. Every eligible pivot row is zero before
+/// the pivot word, so those words do not need to be XORed.
+fn rref_f2_suffix(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+    let words = n_cols.div_ceil(64);
+    let mut pivot_row = 0usize;
+    for c in 0..n_cols {
+        let (w, bit) = (c / 64, 1u64 << (c % 64));
+        let piv = (pivot_row..matrix.len()).find(|&r| matrix[r][w] & bit != 0);
+        let piv = match piv {
+            Some(p) => p,
+            None => continue,
+        };
+        matrix.swap(pivot_row, piv);
+        // Every row still eligible for this pivot is zero in every earlier
+        // column: pivot columns were eliminated globally, and a non-pivot
+        // column was scanned only after proving the remaining rows zero there.
+        // Clone the pivot once so the hot XOR loop is alias-free and can be
+        // vectorised; touching only the active suffix avoids roughly half the
+        // word operations on the dense degree-3 Koblitz matrices.
+        let pivot = matrix[pivot_row].clone();
+        for r in 0..matrix.len() {
+            if r != pivot_row && matrix[r][w] & bit != 0 {
+                for (target, source) in matrix[r][w..words].iter_mut().zip(&pivot[w..words]) {
+                    *target ^= *source;
+                }
+            }
+        }
+        pivot_row += 1;
+        if pivot_row == matrix.len() {
+            break;
+        }
+    }
+    pivot_row
+}
+
+/// Method of Four Russians elimination over `F_2`. Up to eight pivot rows are
+/// reduced as one block; all combinations of those rows are materialized once,
+/// then each non-pivot row clears the whole block with a single suffix XOR.
+fn rref_f2_m4ri(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+    let block_width = std::env::var("KIC_F4_M4RI_BLOCK")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(6)
+        .clamp(2, 10);
+    let words = n_cols.div_ceil(64);
+    let rows = matrix.len();
+    let mut pivot_row = 0usize;
+    let mut column = 0usize;
+    while pivot_row < rows && column < n_cols {
+        let block_start = pivot_row;
+        let mut pivot_columns = Vec::with_capacity(block_width);
+        let mut block_pivots: Vec<Vec<u64>> = Vec::with_capacity(block_width);
+        while pivot_columns.len() < block_width && pivot_row < rows && column < n_cols {
+            let next_pivot = block_start + pivot_columns.len();
+            let (word, bit) = (column / 64, 1u64 << (column % 64));
+            let mut found = None;
+            for row in next_pivot..rows {
+                // Bring this candidate into echelon form with respect to the
+                // pivots already selected in the current block.
+                for (index, &pivot_column) in pivot_columns.iter().enumerate() {
+                    let (pivot_word, pivot_bit) = (pivot_column / 64, 1u64 << (pivot_column % 64));
+                    if matrix[row][pivot_word] & pivot_bit != 0 {
+                        for (target, source) in matrix[row][pivot_word..words]
+                            .iter_mut()
+                            .zip(&block_pivots[index][pivot_word..words])
+                        {
+                            *target ^= *source;
+                        }
+                    }
+                }
+                if matrix[row][word] & bit != 0 {
+                    found = Some(row);
+                    break;
+                }
+            }
+            if let Some(found) = found {
+                matrix.swap(next_pivot, found);
+                let pivot = matrix[next_pivot].clone();
+                // Make the already selected pivot rows zero in this new pivot
+                // column, so the block columns form an identity matrix.
+                for previous in block_start..next_pivot {
+                    if matrix[previous][word] & bit != 0 {
+                        let block_index = previous - block_start;
+                        for (target, source) in matrix[previous][word..words]
+                            .iter_mut()
+                            .zip(&pivot[word..words])
+                        {
+                            *target ^= *source;
+                        }
+                        for (target, source) in block_pivots[block_index][word..words]
+                            .iter_mut()
+                            .zip(&pivot[word..words])
+                        {
+                            *target ^= *source;
+                        }
+                    }
+                }
+                pivot_columns.push(column);
+                block_pivots.push(pivot);
+            }
+            column += 1;
+        }
+        if pivot_columns.is_empty() {
+            break;
+        }
+
+        let block_rows = pivot_columns.len();
+        let first_word = pivot_columns[0] / 64;
+        let combinations = 1usize << block_rows;
+        let suffix_words = words - first_word;
+        let mut table = vec![0u64; combinations * suffix_words];
+        for mask in 1..combinations {
+            let bit = mask.trailing_zeros() as usize;
+            let previous = mask & (mask - 1);
+            let pivot = &block_pivots[bit][first_word..words];
+            let target_offset = mask * suffix_words;
+            let source_offset = previous * suffix_words;
+            for index in 0..suffix_words {
+                table[target_offset + index] = table[source_offset + index] ^ pivot[index];
+            }
+        }
+
+        for row in 0..rows {
+            if (block_start..block_start + block_rows).contains(&row) {
+                continue;
+            }
+            let mut pattern = 0usize;
+            for (index, &pivot_column) in pivot_columns.iter().enumerate() {
+                if matrix[row][pivot_column / 64] & (1u64 << (pivot_column % 64)) != 0 {
+                    pattern |= 1usize << index;
+                }
+            }
+            if pattern != 0 {
+                let table_offset = pattern * suffix_words;
+                for (target, source) in matrix[row][first_word..words]
+                    .iter_mut()
+                    .zip(&table[table_offset..table_offset + suffix_words])
+                {
+                    *target ^= *source;
+                }
+            }
+        }
+        pivot_row += block_rows;
+    }
+    pivot_row
+}
+
 fn f4_echelon_column(
     matrix: &mut [Vec<u64>],
     pivot_row: &mut usize,
@@ -1948,6 +2121,111 @@ pub(crate) fn pack_rows(rows_monos: &[Vec<u64>], cols: &[u64]) -> Vec<Vec<u64>> 
     } else {
         rows_monos.iter().map(pack).collect()
     }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum SplitHeuristic {
+    Lowest,
+    MaxOccurrence,
+    MaxNonlinearOccurrence,
+}
+
+fn choose_split_variable(
+    system: &[F2BoolPoly],
+    assignment: &[Option<bool>],
+    heuristic: SplitHeuristic,
+) -> Option<usize> {
+    if heuristic == SplitHeuristic::Lowest {
+        return assignment.iter().position(|value| value.is_none());
+    }
+    let mut scores = vec![0u64; assignment.len()];
+    for polynomial in system {
+        for term in &polynomial.terms {
+            let degree = term.mask.count_ones() as u64;
+            if heuristic == SplitHeuristic::MaxNonlinearOccurrence && degree < 2 {
+                continue;
+            }
+            let weight = if heuristic == SplitHeuristic::MaxNonlinearOccurrence {
+                degree - 1
+            } else {
+                1
+            };
+            let mut variables = term.mask;
+            while variables != 0 {
+                let variable = variables.trailing_zeros() as usize;
+                variables &= variables - 1;
+                if assignment[variable].is_none() {
+                    scores[variable] += weight;
+                }
+            }
+        }
+    }
+    assignment
+        .iter()
+        .enumerate()
+        .filter(|(_, value)| value.is_none())
+        .max_by_key(|(variable, _)| (scores[*variable], std::cmp::Reverse(*variable)))
+        .map(|(variable, _)| variable)
+}
+
+/// Evaluate every equation on the whole cube of `free_variables`. The ANF
+/// coefficient vector is converted to a truth table by the subset zeta
+/// transform: `f(x) = XOR_{m subset x} a_m`. Returned entries are true exactly
+/// for assignments satisfying all equations.
+fn tail_zero_assignments(
+    equations: &[F2BoolPoly],
+    assignment: &[Option<bool>],
+    free_variables: &[usize],
+) -> Vec<bool> {
+    let count = 1usize << free_variables.len();
+    let mut valid = vec![true; count];
+    let mut false_mask = 0u64;
+    let mut true_mask = 0u64;
+    let mut free_mask = 0u64;
+    let mut local_index = [u8::MAX; 64];
+    for (variable, value) in assignment.iter().enumerate() {
+        if *value == Some(false) {
+            false_mask |= 1u64 << variable;
+        } else if *value == Some(true) {
+            true_mask |= 1u64 << variable;
+        }
+    }
+    for (local, &variable) in free_variables.iter().enumerate() {
+        free_mask |= 1u64 << variable;
+        local_index[variable] = local as u8;
+    }
+    let mut values = vec![false; count];
+    for equation in equations {
+        values.fill(false);
+        for term in &equation.terms {
+            if term.mask & false_mask != 0 {
+                continue;
+            }
+            let mut remaining = term.mask & free_mask;
+            debug_assert_eq!(term.mask & !(free_mask | false_mask | true_mask), 0);
+            let mut local_monomial = 0usize;
+            while remaining != 0 {
+                let variable = remaining.trailing_zeros() as usize;
+                remaining &= remaining - 1;
+                local_monomial |= 1usize << local_index[variable];
+            }
+            values[local_monomial] ^= true;
+        }
+        for bit in 0..free_variables.len() {
+            for point in 0..count {
+                if point & (1usize << bit) != 0 {
+                    values[point] ^= values[point ^ (1usize << bit)];
+                }
+            }
+        }
+        for point in 0..count {
+            valid[point] &= !values[point];
+        }
+        if valid.iter().all(|value| !*value) {
+            break;
+        }
+    }
+    valid
 }
 
 pub(crate) fn macaulay_rows_monos_with_mask(
@@ -2360,8 +2638,16 @@ pub(crate) fn build_inherited_macaulay_support_local(
     multiplier_mask: u64,
     quadratic_generators: bool,
 ) -> Option<(Vec<u64>, Vec<Vec<u64>>)> {
+    use std::sync::atomic::Ordering::Relaxed;
+    let profiling = F4_SUPPORT_LOCAL_PROFILE_ENABLED.load(Relaxed);
+    if profiling {
+        support_local_counters::CALLS.fetch_add(1, Relaxed);
+    }
     let support = |p: &F2BoolPoly| p.terms.iter().fold(0u64, |acc, t| acc | t.mask);
     if polys.iter().all(|p| multiplier_mask & !support(p) == 0) {
+        if profiling {
+            support_local_counters::DELEGATED.fetch_add(1, Relaxed);
+        }
         return build_inherited_macaulay(
             polys,
             n_vars,
@@ -2370,26 +2656,181 @@ pub(crate) fn build_inherited_macaulay_support_local(
             quadratic_generators,
         );
     }
-    let mut rows_monos: Vec<Vec<u64>> = Vec::new();
-    for p in polys {
-        let rows = macaulay_rows_monos_with_mask(
-            std::slice::from_ref(p),
-            n_vars,
-            degree,
-            multiplier_mask & support(p),
-            None,
-        )?;
-        rows_monos.extend(rows);
-        if rows_monos.len() > max_f4_rows() {
-            return None;
+    let rows_started = profiling.then(std::time::Instant::now);
+    let rows_result = (|| {
+        if F4_SUPPORT_LOCAL_STREAM.load(Relaxed) {
+            support_local_rows_stream(polys, n_vars, degree, multiplier_mask, max_f4_rows())
+        } else {
+            let mut rows_monos: Vec<Vec<u64>> = Vec::new();
+            for p in polys {
+                let rows = macaulay_rows_monos_with_mask(
+                    std::slice::from_ref(p),
+                    n_vars,
+                    degree,
+                    multiplier_mask & support(p),
+                    None,
+                )?;
+                rows_monos.extend(rows);
+                if rows_monos.len() > max_f4_rows() {
+                    return None;
+                }
+            }
+            Some(rows_monos)
+        }
+    })();
+    if let Some(started) = rows_started {
+        support_local_counters::ROWS_NS.fetch_add(started.elapsed().as_nanos() as u64, Relaxed);
+        if let Some(rows) = rows_result.as_ref() {
+            support_local_counters::ROWS.fetch_add(rows.len() as u64, Relaxed);
         }
     }
+    let rows_monos = rows_result?;
     if rows_monos.is_empty() {
         return Some((Vec::new(), Vec::new()));
     }
-    let columns = macaulay_columns(&rows_monos)?;
+    let columns_started = profiling.then(std::time::Instant::now);
+    let columns_result = if F4_SUPPORT_LOCAL_BITMAP_COLUMNS.load(Relaxed) {
+        support_local_bitmap_columns(&rows_monos, n_vars, degree)
+            .or_else(|| macaulay_columns(&rows_monos))
+    } else {
+        macaulay_columns(&rows_monos)
+    };
+    if let Some(started) = columns_started {
+        support_local_counters::COLUMNS_NS.fetch_add(started.elapsed().as_nanos() as u64, Relaxed);
+        if let Some(columns) = columns_result.as_ref() {
+            support_local_counters::COLUMNS.fetch_add(columns.len() as u64, Relaxed);
+        }
+    }
+    let columns = columns_result?;
+    let pack_started = profiling.then(std::time::Instant::now);
     let matrix = pack_rows(&rows_monos, &columns);
+    if let Some(started) = pack_started {
+        support_local_counters::PACK_NS.fetch_add(started.elapsed().as_nanos() as u64, Relaxed);
+    }
     Some((columns, matrix))
+}
+
+/// Collect exact observed columns using the colex rank of each square-free
+/// monomial within its degree. Only the unique masks need the final order
+/// sort; the bitmap does not admit a monomial cancelled out of a row.
+fn support_local_bitmap_columns(rows: &[Vec<u64>], n_vars: usize, degree: u32) -> Option<Vec<u64>> {
+    const MAX_DEGREE: usize = 4;
+    let degree = degree as usize;
+    if n_vars > 64 || degree > MAX_DEGREE {
+        return None;
+    }
+    let mut choose = [[0usize; MAX_DEGREE + 1]; 65];
+    for n in 0..=n_vars {
+        choose[n][0] = 1;
+        for k in 1..=MAX_DEGREE.min(n) {
+            choose[n][k] = choose[n - 1][k - 1] + choose[n - 1][k];
+        }
+    }
+    let mut offsets = [0usize; MAX_DEGREE + 1];
+    let mut total = 0usize;
+    for d in (0..=degree).rev() {
+        offsets[d] = total;
+        total += choose[n_vars][d];
+    }
+    let mut seen = vec![0u64; total.div_ceil(64)];
+    let mut columns = Vec::new();
+    let column_cap = max_f4_cols();
+    let variable_mask = all_variable_mask(n_vars);
+    for row in rows {
+        for &mask in row {
+            let d = mask.count_ones() as usize;
+            if d > degree || mask & !variable_mask != 0 {
+                return None;
+            }
+            let mut rank = 0usize;
+            let mut bits = mask;
+            let mut j = 1;
+            while bits != 0 {
+                let bit = bits.trailing_zeros() as usize;
+                rank += choose[bit][j];
+                bits &= bits - 1;
+                j += 1;
+            }
+            let index = offsets[d] + rank;
+            let word = &mut seen[index / 64];
+            let bit = 1u64 << (index % 64);
+            if *word & bit == 0 {
+                *word |= bit;
+                columns.push(mask);
+                if columns.len() > column_cap {
+                    return None;
+                }
+            }
+        }
+    }
+    columns.sort_unstable_by_key(|&mask| std::cmp::Reverse(mono_key(F2BoolMono::from_mask(mask))));
+    Some(columns)
+}
+
+/// The support-local row order and odd-multiplicity cancellation of the
+/// historical per-generator builder, using one product/row scratch pair
+/// and one multiplier schedule per distinct support-mask/degree-gap pair.
+fn support_local_rows_stream(
+    polys: &[F2BoolPoly],
+    n_vars: usize,
+    degree: u32,
+    multiplier_mask: u64,
+    row_cap: usize,
+) -> Option<Vec<Vec<u64>>> {
+    let mut rows = Vec::new();
+    let mut schedules: std::collections::HashMap<(u64, u32), std::rc::Rc<[u64]>> =
+        std::collections::HashMap::new();
+    let mut product = Vec::new();
+    let mut odd = Vec::new();
+    let full_mask = all_variable_mask(n_vars);
+    for polynomial in polys {
+        let polynomial_degree = polynomial
+            .terms
+            .iter()
+            .map(|term| term.mask.count_ones())
+            .max()
+            .unwrap_or(0);
+        if polynomial_degree > degree {
+            continue;
+        }
+        let gap = degree - polynomial_degree;
+        let support = polynomial
+            .terms
+            .iter()
+            .fold(0u64, |mask, term| mask | term.mask);
+        let local_mask = multiplier_mask & support;
+        let multipliers = schedules.entry((local_mask, gap)).or_insert_with(|| {
+            if local_mask == full_mask {
+                monomials_up_to_mask(local_mask, gap).into()
+            } else {
+                cached_monomials_up_to_mask(local_mask, gap)
+            }
+        });
+        for &multiplier in multipliers.iter() {
+            product.clear();
+            product.extend(polynomial.terms.iter().map(|term| term.mask | multiplier));
+            product.sort_unstable();
+            odd.clear();
+            let mut read = 0;
+            while read < product.len() {
+                let mut end = read + 1;
+                while end < product.len() && product[end] == product[read] {
+                    end += 1;
+                }
+                if (end - read) % 2 == 1 {
+                    odd.push(product[read]);
+                }
+                read = end;
+            }
+            if !odd.is_empty() {
+                if rows.len() == row_cap {
+                    return None;
+                }
+                rows.push(odd.clone());
+            }
+        }
+    }
+    Some(rows)
 }
 
 fn build_inherited_macaulay_with_layout(
@@ -2408,9 +2849,24 @@ fn build_inherited_macaulay_with_layout(
         let layout_key = (multiplier_mask, degree, false);
         let cached = cached_f4_layout(layout_key);
         if let Some(layout) = cached {
-            if let Some(matrix) =
-                pack_polynomials_nested_fused(polys, n_vars, degree, multiplier_mask, &layout)
-            {
+            let matrix = if F4_DIRECT_FUSED_PACK.load(std::sync::atomic::Ordering::Relaxed) {
+                pack_polynomials_nested_fused::<true>(
+                    polys,
+                    n_vars,
+                    degree,
+                    multiplier_mask,
+                    &layout,
+                )
+            } else {
+                pack_polynomials_nested_fused::<false>(
+                    polys,
+                    n_vars,
+                    degree,
+                    multiplier_mask,
+                    &layout,
+                )
+            };
+            if let Some(matrix) = matrix {
                 F4_LAYOUT_HITS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                 return Some((layout.columns.clone(), matrix));
             }
@@ -2611,7 +3067,7 @@ fn pack_polynomials_flat_fused(
     Some(FlatF2Matrix { data, rows, words })
 }
 
-fn pack_polynomials_nested_fused(
+fn pack_polynomials_nested_fused<const DIRECT: bool>(
     polys: &[F2BoolPoly],
     n_vars: usize,
     degree: u32,
@@ -2652,13 +3108,36 @@ fn pack_polynomials_nested_fused(
         .map(|polynomial| polynomial.terms.len())
         .max()
         .unwrap_or(0);
-    let mut product = Vec::with_capacity(max_terms);
+    let mut product = Vec::with_capacity(if DIRECT { 0 } else { max_terms });
     for (polynomial, gap) in polys.iter().zip(gaps) {
         let Some(gap) = gap else {
             continue;
         };
         let multipliers = schedules[gap].as_ref().unwrap();
         for &multiplier in multipliers.iter() {
+            if DIRECT {
+                let mut row = vec![0u64; words];
+                for term in &polynomial.terms {
+                    let monomial = term.mask | multiplier;
+                    let &column = layout.index.get(&monomial)?;
+                    row[column / 64] ^= 1 << (column % 64);
+                }
+                if row.iter().all(|&word| word == 0) {
+                    continue;
+                }
+                if matrix.len() == row_cap {
+                    return None;
+                }
+                for (word_index, &word) in row.iter().enumerate() {
+                    let mut bits = word;
+                    while bits != 0 {
+                        seen[word_index * 64 + bits.trailing_zeros() as usize] = true;
+                        bits &= bits - 1;
+                    }
+                }
+                matrix.push(row);
+                continue;
+            }
             product.clear();
             product.extend(polynomial.terms.iter().map(|term| term.mask | multiplier));
             product.sort_unstable();
@@ -2704,6 +3183,36 @@ fn build_macaulay_with_multiplier_mask(
     reuse_layout: bool,
     criterion: RowCriterion,
 ) -> Option<BuiltMacaulay<Vec<Vec<u64>>>> {
+    // F6's decisive Macaulay calls enter this generic builder. On a
+    // verified cached layout, direct parity packing avoids materialising
+    // and sorting every Boolean product. The regular builder still owns
+    // cold layouts and all criterion-pruned rows.
+    if reuse_layout
+        && criterion == RowCriterion::None
+        && F4_DIRECT_FUSED_PACK.load(std::sync::atomic::Ordering::Relaxed)
+    {
+        let layout_key = (multiplier_mask, degree, false);
+        if let Some(layout) = cached_f4_layout(layout_key) {
+            if let Some(matrix) = pack_polynomials_nested_fused::<true>(
+                polys,
+                n_vars,
+                degree,
+                multiplier_mask,
+                &layout,
+            ) {
+                F4_LAYOUT_HITS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                return Some(BuiltMacaulay {
+                    columns: layout.columns.clone(),
+                    matrix,
+                    rows_pruned: 0,
+                    criterion_word_ops: 0,
+                });
+            }
+            F4_LAYOUTS.with(|layouts| {
+                layouts.borrow_mut().remove(&layout_key);
+            });
+        }
+    }
     build_macaulay_packed(
         polys,
         n_vars,
@@ -2854,6 +3363,80 @@ pub static F4_WORD_OPS_TOTAL: std::sync::atomic::AtomicU64 = std::sync::atomic::
 
 static F4_LAYOUT_HITS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 static F4_LAYOUT_MISSES: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+static F4_DIRECT_FUSED_PACK: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+static F4_SUPPORT_LOCAL_STREAM: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+static F4_SUPPORT_LOCAL_BITMAP_COLUMNS: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+static F4_SUPPORT_LOCAL_PROFILE_ENABLED: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+static F4_INHERITED_BASIS_PROFILE_ENABLED: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+mod inherited_basis_counters {
+    use std::sync::atomic::AtomicU64;
+    pub(super) static ROOT_CALLS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static ROOT_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static SPECIALISE_CALLS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static SPECIALISE_TOTAL_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static CHILD_PREP_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static BASIS_SPECIALISE_CALLS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static BASIS_SPECIALISE_NS: AtomicU64 = AtomicU64::new(0);
+
+    pub(super) fn all() -> [&'static AtomicU64; 7] {
+        [
+            &ROOT_CALLS,
+            &ROOT_NS,
+            &SPECIALISE_CALLS,
+            &SPECIALISE_TOTAL_NS,
+            &CHILD_PREP_NS,
+            &BASIS_SPECIALISE_CALLS,
+            &BASIS_SPECIALISE_NS,
+        ]
+    }
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize)]
+pub struct InheritedBasisProfile {
+    pub root_calls: u64,
+    pub root_ns: u64,
+    pub specialise_calls: u64,
+    pub specialise_total_ns: u64,
+    pub child_prep_ns: u64,
+    pub basis_specialise_calls: u64,
+    pub basis_specialise_ns: u64,
+}
+mod support_local_counters {
+    use std::sync::atomic::AtomicU64;
+    pub(super) static CALLS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static DELEGATED: AtomicU64 = AtomicU64::new(0);
+    pub(super) static ROWS_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static COLUMNS_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static PACK_NS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static ROWS: AtomicU64 = AtomicU64::new(0);
+    pub(super) static COLUMNS: AtomicU64 = AtomicU64::new(0);
+
+    pub(super) fn all() -> [&'static AtomicU64; 7] {
+        [
+            &CALLS,
+            &DELEGATED,
+            &ROWS_NS,
+            &COLUMNS_NS,
+            &PACK_NS,
+            &ROWS,
+            &COLUMNS,
+        ]
+    }
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize)]
+pub struct SupportLocalBuildProfile {
+    pub calls: u64,
+    pub delegated: u64,
+    pub rows_ns: u64,
+    pub columns_ns: u64,
+    pub pack_ns: u64,
+    pub rows: u64,
+    pub columns: u64,
+}
 static F4_BUILD_ROWS_NS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 static F4_BUILD_PACK_NS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 struct F4ColumnLayout {
@@ -2937,6 +3520,71 @@ pub fn f4_layout_stats_reset() {
     F4_LAYOUT_HITS.store(0, Relaxed);
     F4_LAYOUT_MISSES.store(0, Relaxed);
     F4_LAYOUTS.with(|layouts| layouts.borrow_mut().clear());
+}
+
+/// Opt-in direct parity packing for inherited F4 cached-layout hits.
+/// Set before a single-threaded diagnostic solve; the default is sorted.
+pub fn set_f4_direct_fused_pack(enabled: bool) {
+    F4_DIRECT_FUSED_PACK.store(enabled, std::sync::atomic::Ordering::Relaxed);
+}
+
+/// Opt-in shared-scratch construction for inherited F4 support-local rows.
+/// Set before a single-threaded diagnostic solve; the default is historical.
+pub fn set_f4_support_local_stream(enabled: bool) {
+    F4_SUPPORT_LOCAL_STREAM.store(enabled, std::sync::atomic::Ordering::Relaxed);
+}
+
+/// Opt-in exact bitmap column collection for support-local Macaulay rows.
+pub fn set_f4_support_local_bitmap_columns(enabled: bool) {
+    F4_SUPPORT_LOCAL_BITMAP_COLUMNS.store(enabled, std::sync::atomic::Ordering::Relaxed);
+}
+
+/// Enable nested support-local build timers before a single-threaded solve.
+pub fn set_f4_support_local_profile(enabled: bool) {
+    F4_SUPPORT_LOCAL_PROFILE_ENABLED.store(enabled, std::sync::atomic::Ordering::Relaxed);
+}
+
+pub fn support_local_build_profile_reset() {
+    for counter in support_local_counters::all() {
+        counter.store(0, std::sync::atomic::Ordering::Relaxed);
+    }
+}
+
+pub fn support_local_build_profile() -> SupportLocalBuildProfile {
+    use std::sync::atomic::Ordering::Relaxed;
+    SupportLocalBuildProfile {
+        calls: support_local_counters::CALLS.load(Relaxed),
+        delegated: support_local_counters::DELEGATED.load(Relaxed),
+        rows_ns: support_local_counters::ROWS_NS.load(Relaxed),
+        columns_ns: support_local_counters::COLUMNS_NS.load(Relaxed),
+        pack_ns: support_local_counters::PACK_NS.load(Relaxed),
+        rows: support_local_counters::ROWS.load(Relaxed),
+        columns: support_local_counters::COLUMNS.load(Relaxed),
+    }
+}
+
+/// Enable nested inherited-basis timers before a single-threaded solve.
+pub fn set_f4_inherited_basis_profile(enabled: bool) {
+    F4_INHERITED_BASIS_PROFILE_ENABLED.store(enabled, std::sync::atomic::Ordering::Relaxed);
+}
+
+pub fn inherited_basis_profile_reset() {
+    for counter in inherited_basis_counters::all() {
+        counter.store(0, std::sync::atomic::Ordering::Relaxed);
+    }
+}
+
+pub fn inherited_basis_profile() -> InheritedBasisProfile {
+    use std::sync::atomic::Ordering::Relaxed;
+    InheritedBasisProfile {
+        root_calls: inherited_basis_counters::ROOT_CALLS.load(Relaxed),
+        root_ns: inherited_basis_counters::ROOT_NS.load(Relaxed),
+        specialise_calls: inherited_basis_counters::SPECIALISE_CALLS.load(Relaxed),
+        specialise_total_ns: inherited_basis_counters::SPECIALISE_TOTAL_NS.load(Relaxed),
+        child_prep_ns: inherited_basis_counters::CHILD_PREP_NS.load(Relaxed),
+        basis_specialise_calls: inherited_basis_counters::BASIS_SPECIALISE_CALLS.load(Relaxed),
+        basis_specialise_ns: inherited_basis_counters::BASIS_SPECIALISE_NS.load(Relaxed),
+    }
 }
 
 pub fn f4_build_subprofile() -> (u64, u64) {
@@ -3453,6 +4101,14 @@ pub(crate) fn echelon_f2_counted(
     n_cols: usize,
     word_ops: &mut u64,
 ) -> usize {
+    // Same gate as `rref_f2_counted`: the Four Russians kernel of
+    // `gf2_elim` for matrices from 128 × 256, where its tables pay for
+    // themselves (`gf2_elim_bench`), and the legacy kernels below it.  The
+    // inherited engine's root, the only echelon on the solving path,
+    // previously never reached it.  `KIC_F4_KERNEL=legacy` is the control.
+    if !legacy_rref_kernel() && !suffix_kernel_forced() && matrix.len() >= 128 && n_cols >= 256 {
+        return crate::cryptanalysis::gf2_elim::echelon_counted(matrix, n_cols, word_ops);
+    }
     if suffix_kernel_forced()
         || matrix.len() < 128
         || n_cols < 256
@@ -4299,6 +4955,18 @@ pub struct SolveStats {
     pub propagations: usize,
     /// Splitting decisions made.
     pub splits: usize,
+    /// Split nodes that deferred an F4 reduction.
+    /// Number of algebraically reduced nodes closed by direct enumeration of
+    /// the remaining small Boolean cube.
+    #[serde(default)]
+    pub tail_enumerations: usize,
+    /// Complete assignments checked inside those tail cubes.
+    #[serde(default)]
+    pub tail_assignments_tested: usize,
+    /// Split nodes that deliberately deferred F4 until the configured batch
+    /// of Boolean decisions was complete.
+    #[serde(default)]
+    pub deferred_splits: usize,
     /// True if the node budget ran out or the input was unsupported, so
     /// results may be incomplete. Check `unsupported` to distinguish them.
     pub exhausted: bool,
@@ -4326,6 +4994,13 @@ pub struct SolveStats {
     /// Fixed summand x-coordinate checks performed by the IC node oracle.
     #[serde(default)]
     pub geometric_support_checks: u64,
+    /// Partially assigned summands tested against the base's subspace
+    /// codes by the IC node oracle, and how many of those tests refuted
+    /// the branch.
+    #[serde(default)]
+    pub geometric_partial_support_checks: u64,
+    #[serde(default)]
+    pub geometric_partial_support_refutations: u64,
     /// Exact residual-point hash lookups performed by the IC node oracle.
     #[serde(default)]
     pub geometric_residual_lookups: u64,
@@ -4339,10 +5014,32 @@ pub struct SolveStats {
     /// the IC node oracle.
     #[serde(default)]
     pub geometric_group_additions: u64,
+    /// Exact unordered pair-sum indexes built by the opt-in IC node oracle.
+    #[serde(default)]
+    pub geometric_pair_index_builds: u64,
+    /// Exact pair-sum hash lookups made by the opt-in IC node oracle.
+    #[serde(default)]
+    pub geometric_pair_index_lookups: u64,
+    /// Calls to the exact IC node oracle. Profiling diagnostics only.
+    #[serde(default)]
+    pub geometric_oracle_calls: u64,
+    /// Time inside the exact IC node oracle, including its witness replay.
+    /// This is nested in target PDP and is not a sixth online phase.
+    #[serde(default)]
+    pub geometric_oracle_ns: u64,
     /// The IC gate could not prove that its coordinate encoding matched
     /// this base, so the solve used plain inherited F4 instead.
     #[serde(default)]
     pub geometric_fallbacks: usize,
+}
+
+impl SolveStats {
+    /// Search effort including hybrid tail assignments.
+    /// Comparable search effort including assignments checked by the hybrid
+    /// tail enumerator.
+    pub fn effort(&self) -> usize {
+        self.splits + self.tail_assignments_tested
+    }
 }
 
 /// Reduce `system`, returning polynomials in the same ideal — either a
@@ -4509,11 +5206,29 @@ impl InheritedBases {
             return (Self::default(), std::rc::Rc::new(substituted));
         };
         let started = std::time::Instant::now();
+        let profile = F4_INHERITED_BASIS_PROFILE_ENABLED.load(std::sync::atomic::Ordering::Relaxed);
+        if profile {
+            inherited_basis_counters::SPECIALISE_CALLS
+                .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        }
         let mut total = InheritCost::default();
+        let child_started = profile.then(std::time::Instant::now);
         let child = ChildSystem::from_owned(first.generator_degrees(), substituted);
+        if let Some(t) = child_started {
+            inherited_basis_counters::CHILD_PREP_NS.fetch_add(
+                t.elapsed().as_nanos() as u64,
+                std::sync::atomic::Ordering::Relaxed,
+            );
+        }
         if (policy.rebuild_on_drop && child.has_dropped())
             || (policy.linear_elimination && child.system().iter().any(is_linear_generator))
         {
+            if profile {
+                inherited_basis_counters::SPECIALISE_TOTAL_NS.fetch_add(
+                    started.elapsed().as_nanos() as u64,
+                    std::sync::atomic::Ordering::Relaxed,
+                );
+            }
             f4_profile_add(|p| p.build_ns += started.elapsed().as_nanos());
             return (Self::default(), child.system().clone());
         }
@@ -4521,7 +5236,16 @@ impl InheritedBases {
             .bases
             .iter()
             .map(|b| {
+                let basis_started = profile.then(std::time::Instant::now);
                 let (next, cost) = b.specialise_shared(var, value, &child);
+                if let Some(t) = basis_started {
+                    inherited_basis_counters::BASIS_SPECIALISE_CALLS
+                        .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                    inherited_basis_counters::BASIS_SPECIALISE_NS.fetch_add(
+                        t.elapsed().as_nanos() as u64,
+                        std::sync::atomic::Ordering::Relaxed,
+                    );
+                }
                 total.reduce_word_ops += cost.reduce_word_ops;
                 total.specialise_word_ops += cost.specialise_word_ops;
                 next
@@ -4529,6 +5253,12 @@ impl InheritedBases {
             .collect();
         let word_ops = total.word_ops();
         charge_word_ops(word_ops);
+        if profile {
+            inherited_basis_counters::SPECIALISE_TOTAL_NS.fetch_add(
+                started.elapsed().as_nanos() as u64,
+                std::sync::atomic::Ordering::Relaxed,
+            );
+        }
         f4_profile_add(|p| {
             p.build_ns += started.elapsed().as_nanos();
             p.word_ops += word_ops;
@@ -4648,14 +5378,22 @@ fn reduce_inherited(
             Some(i) => i,
             None => {
                 let started = std::time::Instant::now();
+                let profile =
+                    F4_INHERITED_BASIS_PROFILE_ENABLED.load(std::sync::atomic::Ordering::Relaxed);
+                if profile {
+                    inherited_basis_counters::ROOT_CALLS
+                        .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                }
                 let rounds = if d == top { closure_rounds() } else { 0 };
-                match ReducedBasis::from_system_closed_with(
-                    system,
-                    n_vars,
-                    d,
-                    rounds,
-                    support_local,
-                ) {
+                let built =
+                    ReducedBasis::from_system_closed_with(system, n_vars, d, rounds, support_local);
+                if profile {
+                    inherited_basis_counters::ROOT_NS.fetch_add(
+                        started.elapsed().as_nanos() as u64,
+                        std::sync::atomic::Ordering::Relaxed,
+                    );
+                }
+                match built {
                     Some((basis, cost)) => {
                         let word_ops = cost.word_ops();
                         charge_word_ops(word_ops);
@@ -4981,6 +5719,13 @@ fn solve_with_policy_and_oracle(
     (out, stats)
 }
 
+/// `KIC_F4_EARLY_ORACLE=0` makes a child specialise its bases before asking
+/// the node oracle, as it did before; a same-binary control, read once.
+fn early_oracle_enabled() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("KIC_F4_EARLY_ORACLE").as_deref() != Ok("0"))
+}
+
 #[allow(clippy::too_many_arguments)]
 fn solve_rec(
     system: Vec<F2BoolPoly>,
@@ -5018,6 +5763,31 @@ fn solve_rec(
         return;
     }
 
+    // The node oracle decides from the assignment alone, so a child asks it
+    // before paying for its bases: specialising the parent's reduced rows
+    // is most of a node's work under the inherited engine, and a branch the
+    // oracle refutes or closes never needs them.  The first pass of the
+    // loop below then skips the call it has already made; nothing between
+    // here and there changes the assignment or the definitions.
+    let mut oracle_decided = false;
+    if parent.is_some() && early_oracle_enabled() {
+        let defined_mask = defined
+            .iter()
+            .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
+        match node_oracle(&assignment, defined_mask) {
+            NodeOracleDecision::Continue => oracle_decided = true,
+            NodeOracleDecision::Refute => {
+                stats.geometric_refutations += 1;
+                return;
+            }
+            NodeOracleDecision::Witness => {
+                stats.geometric_witnesses += 1;
+                *stop = true;
+                return;
+            }
+        }
+    }
+
     // Under the inherited engine the node's bases are its parent's,
     // specialised by the branch assignment; the root starts with none and
     // builds them at its first reduction.  A system that already contains
@@ -5036,19 +5806,23 @@ fn solve_rec(
 
     // Reduce, propagate, repeat until the algebra stops learning.
     loop {
-        let defined_mask = defined
-            .iter()
-            .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
-        match node_oracle(&assignment, defined_mask) {
-            NodeOracleDecision::Continue => {}
-            NodeOracleDecision::Refute => {
-                stats.geometric_refutations += 1;
-                return;
-            }
-            NodeOracleDecision::Witness => {
-                stats.geometric_witnesses += 1;
-                *stop = true;
-                return;
+        if std::mem::take(&mut oracle_decided) {
+            // Already asked above, on this same assignment.
+        } else {
+            let defined_mask = defined
+                .iter()
+                .fold(0u64, |mask, &(v, _, _)| mask | (1u64 << v));
+            match node_oracle(&assignment, defined_mask) {
+                NodeOracleDecision::Continue => {}
+                NodeOracleDecision::Refute => {
+                    stats.geometric_refutations += 1;
+                    return;
+                }
+                NodeOracleDecision::Witness => {
+                    stats.geometric_witnesses += 1;
+                    *stop = true;
+                    return;
+                }
             }
         }
         drop_zeros(&mut system);
@@ -5215,6 +5989,274 @@ fn solve_rec(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn direct_fused_pack_matches_sorted_parity_and_exact_layout() {
+        let n_vars = 4;
+        let polys = [
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b0001),
+                    F2BoolMono::from_mask(0b0011),
+                    F2BoolMono::from_mask(0b0100),
+                ],
+                n_vars,
+            ),
+            F2BoolPoly::from_monos(
+                vec![F2BoolMono::from_mask(0b0001), F2BoolMono::from_mask(0b0011)],
+                n_vars,
+            ),
+        ];
+        let mask = all_variable_mask(n_vars);
+        let degree = 3;
+        let rows = macaulay_rows_monos_with_mask(&polys, n_vars, degree, mask, None).unwrap();
+        let columns = macaulay_columns(&rows).unwrap();
+        let layout = F4ColumnLayout::new(columns.clone());
+        let sorted = pack_polynomials_nested_fused::<false>(&polys, n_vars, degree, mask, &layout);
+        let direct = pack_polynomials_nested_fused::<true>(&polys, n_vars, degree, mask, &layout);
+        assert_eq!(direct, sorted);
+        assert_eq!(direct.as_ref().unwrap().len(), rows.len());
+
+        let missing = F4ColumnLayout::new(columns[1..].to_vec());
+        assert!(
+            pack_polynomials_nested_fused::<false>(&polys, n_vars, degree, mask, &missing)
+                .is_none()
+        );
+        assert!(
+            pack_polynomials_nested_fused::<true>(&polys, n_vars, degree, mask, &missing).is_none()
+        );
+
+        let mut extra_columns = columns;
+        extra_columns.push(0b1111);
+        let extra = F4ColumnLayout::new(extra_columns);
+        assert!(
+            pack_polynomials_nested_fused::<false>(&polys, n_vars, degree, mask, &extra).is_none()
+        );
+        assert!(
+            pack_polynomials_nested_fused::<true>(&polys, n_vars, degree, mask, &extra).is_none()
+        );
+    }
+
+    #[test]
+    fn generic_cached_direct_pack_matches_sorted_and_repairs_stale_layout() {
+        let n_vars = 4;
+        let polys = [
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b0001),
+                    F2BoolMono::from_mask(0b0011),
+                    F2BoolMono::from_mask(0b0100),
+                ],
+                n_vars,
+            ),
+            F2BoolPoly::from_monos(
+                vec![F2BoolMono::from_mask(0b0001), F2BoolMono::from_mask(0b0011)],
+                n_vars,
+            ),
+        ];
+        let mask = all_variable_mask(n_vars);
+        let degree = 3;
+        let key = (mask, degree, false);
+        f4_layout_stats_reset();
+        set_f4_direct_fused_pack(false);
+        let cold = build_macaulay_with_multiplier_mask(
+            &polys,
+            n_vars,
+            degree,
+            mask,
+            true,
+            RowCriterion::None,
+        )
+        .unwrap();
+        let sorted = build_macaulay_with_multiplier_mask(
+            &polys,
+            n_vars,
+            degree,
+            mask,
+            true,
+            RowCriterion::None,
+        )
+        .unwrap();
+        set_f4_direct_fused_pack(true);
+        let direct = build_macaulay_with_multiplier_mask(
+            &polys,
+            n_vars,
+            degree,
+            mask,
+            true,
+            RowCriterion::None,
+        )
+        .unwrap();
+        assert_eq!(cold.columns, sorted.columns);
+        assert_eq!(sorted.columns, direct.columns);
+        assert_eq!(cold.matrix, sorted.matrix);
+        assert_eq!(sorted.matrix, direct.matrix);
+        assert_eq!(sorted.rows_pruned, direct.rows_pruned);
+        assert_eq!(sorted.criterion_word_ops, direct.criterion_word_ops);
+
+        let stale = std::rc::Rc::new(F4ColumnLayout::new(cold.columns[1..].to_vec()));
+        F4_LAYOUTS.with(|layouts| {
+            layouts.borrow_mut().insert(key, stale);
+        });
+        let repaired = build_macaulay_with_multiplier_mask(
+            &polys,
+            n_vars,
+            degree,
+            mask,
+            true,
+            RowCriterion::None,
+        )
+        .unwrap();
+        assert_eq!(cold.columns, repaired.columns);
+        assert_eq!(cold.matrix, repaired.matrix);
+        set_f4_direct_fused_pack(false);
+        f4_layout_stats_reset();
+    }
+
+    #[test]
+    fn support_local_stream_matches_materialized_rows_and_cap() {
+        let n_vars = 5;
+        let polys = [
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b00001),
+                    F2BoolMono::from_mask(0b00011),
+                    F2BoolMono::from_mask(0b01000),
+                ],
+                n_vars,
+            ),
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b00010),
+                    F2BoolMono::from_mask(0b00110),
+                    F2BoolMono::from_mask(0b10000),
+                ],
+                n_vars,
+            ),
+            F2BoolPoly::zero(n_vars),
+            F2BoolPoly::from_monos(vec![F2BoolMono::from_mask(0b01111)], n_vars),
+        ];
+        let mask = all_variable_mask(n_vars);
+        let degree = 3;
+        let mut old_rows = Vec::new();
+        for p in &polys {
+            let support = p.terms.iter().fold(0u64, |acc, term| acc | term.mask);
+            old_rows.extend(
+                macaulay_rows_monos_with_mask(
+                    std::slice::from_ref(p),
+                    n_vars,
+                    degree,
+                    mask & support,
+                    None,
+                )
+                .unwrap(),
+            );
+        }
+        let streamed = support_local_rows_stream(&polys, n_vars, degree, mask, old_rows.len());
+        assert_eq!(streamed.unwrap(), old_rows);
+        assert!(
+            support_local_rows_stream(&polys, n_vars, degree, mask, old_rows.len() - 1).is_none()
+        );
+
+        set_f4_support_local_stream(false);
+        let old = build_inherited_macaulay_support_local(&polys, n_vars, degree, mask, false);
+        set_f4_support_local_stream(true);
+        let new = build_inherited_macaulay_support_local(&polys, n_vars, degree, mask, false);
+        assert_eq!(old, new);
+        set_f4_support_local_stream(false);
+    }
+
+    #[test]
+    fn support_local_bitmap_columns_match_exact_sorted_columns() {
+        for n_vars in 0..=7 {
+            for degree in 0..=4 {
+                let mut rows = vec![Vec::new(), Vec::new(), Vec::new()];
+                for mask in 0..(1u64 << n_vars) {
+                    if mask.count_ones() <= degree {
+                        rows[(mask as usize) % 3].push(mask);
+                    }
+                }
+                rows[0].push(0); // duplicate observation, same exact column set
+                assert_eq!(
+                    support_local_bitmap_columns(&rows, n_vars, degree).unwrap(),
+                    macaulay_columns(&rows).unwrap()
+                );
+            }
+        }
+        assert!(support_local_bitmap_columns(&[vec![0]], 5, 5).is_none());
+
+        let n_vars = 5;
+        let polys = [
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b00001),
+                    F2BoolMono::from_mask(0b00011),
+                    F2BoolMono::from_mask(0b01000),
+                ],
+                n_vars,
+            ),
+            F2BoolPoly::from_monos(
+                vec![
+                    F2BoolMono::from_mask(0b00010),
+                    F2BoolMono::from_mask(0b00110),
+                    F2BoolMono::from_mask(0b10000),
+                ],
+                n_vars,
+            ),
+        ];
+        let mask = all_variable_mask(n_vars);
+        set_f4_support_local_stream(false);
+        set_f4_support_local_bitmap_columns(false);
+        let original = build_inherited_macaulay_support_local(&polys, n_vars, 3, mask, false);
+        set_f4_support_local_bitmap_columns(true);
+        let bitmap = build_inherited_macaulay_support_local(&polys, n_vars, 3, mask, false);
+        assert_eq!(original, bitmap);
+        set_f4_support_local_bitmap_columns(false);
+    }
+
+    #[test]
+    fn support_local_timers_preserve_rows_and_count_delegation() {
+        let n_vars = 4;
+        let mask = all_variable_mask(n_vars);
+        let polys = [
+            F2BoolPoly::from_monos(
+                vec![F2BoolMono::from_mask(0b0001), F2BoolMono::from_mask(0b0011)],
+                n_vars,
+            ),
+            F2BoolPoly::from_monos(vec![F2BoolMono::from_mask(0b0100)], n_vars),
+        ];
+        set_f4_support_local_profile(false);
+        let original = build_inherited_macaulay_support_local(&polys, n_vars, 3, mask, false);
+        set_f4_support_local_profile(true);
+        support_local_build_profile_reset();
+        let profiled = build_inherited_macaulay_support_local(&polys, n_vars, 3, mask, false);
+        assert_eq!(original, profiled);
+        let p = support_local_build_profile();
+        assert_eq!(p.calls, 1);
+        assert_eq!(p.delegated, 0);
+        assert_eq!(p.rows as usize, profiled.as_ref().unwrap().1.len());
+        assert_eq!(p.columns as usize, profiled.as_ref().unwrap().0.len());
+
+        support_local_build_profile_reset();
+        let zero = [F2BoolPoly::zero(n_vars)];
+        assert_eq!(
+            build_inherited_macaulay_support_local(&zero, n_vars, 3, mask, false),
+            Some((Vec::new(), Vec::new()))
+        );
+        let p = support_local_build_profile();
+        assert_eq!((p.calls, p.delegated, p.rows, p.columns), (1, 0, 0, 0));
+
+        support_local_build_profile_reset();
+        let full = [F2BoolPoly::from_monos(
+            vec![F2BoolMono::from_mask(0b0011), F2BoolMono::from_mask(0b1100)],
+            n_vars,
+        )];
+        let _ = build_inherited_macaulay_support_local(&full, n_vars, 3, mask, false);
+        let p = support_local_build_profile();
+        assert_eq!((p.calls, p.delegated), (1, 1));
+        set_f4_support_local_profile(false);
+        support_local_build_profile_reset();
+    }
 
     #[test]
     fn node_oracle_never_treats_affine_placeholders_as_fixed_bits() {
@@ -7292,6 +8334,66 @@ mod reference_equivalence_tests {
         assert!(blocked > 200, "{blocked}");
     }
 
+    #[test]
+    fn active_suffix_rref_matches_full_width_gauss_jordan() {
+        fn reference(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+            let words = n_cols.div_ceil(64);
+            let mut pivot_row = 0usize;
+            for column in 0..n_cols {
+                let (word, bit) = (column / 64, 1u64 << (column % 64));
+                let Some(pivot) =
+                    (pivot_row..matrix.len()).find(|&row| matrix[row][word] & bit != 0)
+                else {
+                    continue;
+                };
+                matrix.swap(pivot_row, pivot);
+                let pivot_bits = matrix[pivot_row].clone();
+                for row in 0..matrix.len() {
+                    if row != pivot_row && matrix[row][word] & bit != 0 {
+                        for index in 0..words {
+                            matrix[row][index] ^= pivot_bits[index];
+                        }
+                    }
+                }
+                pivot_row += 1;
+                if pivot_row == matrix.len() {
+                    break;
+                }
+            }
+            pivot_row
+        }
+
+        let mut state = 0x9e37_79b9_7f4a_7c15u64;
+        let mut random = || {
+            state ^= state >> 12;
+            state ^= state << 25;
+            state ^= state >> 27;
+            state.wrapping_mul(0x2545_f491_4f6c_dd1d)
+        };
+        for columns in [1usize, 17, 63, 64, 65, 127, 193] {
+            let words = columns.div_ceil(64);
+            for rows in [1usize, 2, 7, 31, 129] {
+                let mut input: Vec<Vec<u64>> = (0..rows)
+                    .map(|_| (0..words).map(|_| random()).collect())
+                    .collect();
+                if columns % 64 != 0 {
+                    let mask = (1u64 << (columns % 64)) - 1;
+                    input.iter_mut().for_each(|row| row[words - 1] &= mask);
+                }
+                let mut expected = input.clone();
+                let mut suffix = input.clone();
+                let mut m4ri = input;
+                let rank = reference(&mut expected, columns);
+                assert_eq!(rref_f2_suffix(&mut suffix, columns), rank);
+                assert_eq!(suffix, expected);
+                assert_eq!(rref_f2_m4ri(&mut m4ri, columns), rank);
+                assert_eq!(m4ri, expected);
+            }
+        }
+    }
+
+    /// The splitting solver finds exactly the roots, and closes
+    /// infeasible branches by Gröbner rather than by enumeration.
     /// Operands shorter than `n` (the field is public).  The old product
     /// read `b`'s coordinates only under nonzero ones of `a`, so a zero
     /// times a short operand was zero, and an `S₃` whose `x₁x₂` is such a

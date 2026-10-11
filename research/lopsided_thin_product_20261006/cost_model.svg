@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="480" viewBox="0 0 1000 480" font-family="sans-serif">
+<title>Quoted-bound illustration (not a measurement): thin-product cost vs inner dimension D at N=2^36</title>
+<rect x="0" y="0" width="1000" height="480" fill="#ffffff"/>
+<text x="20" y="26" font-size="16" font-weight="bold">Quoted-bound illustration  NOT a measurement (log scale, operations, N = 2^36)</text>
+<text x="20" y="46" font-size="12" fill="#444">Curves evaluate closed forms from arXiv:2610.06783v1: naive-max = N²D (|W| = N²/D inner products) · full H N² · paper = N²/D^0.063 (Thm 1). No code was timed.</text>
+
+<!-- regime shading: D>4 outside concrete regime -->
+<rect x="275" y="60" width="705" height="300" fill="#f5f5f5"/>
+<text x="600" y="80" font-size="12" fill="#666">D &gt; 4: outside concrete regime N e D^18 (dashed; general µ &lt; 0.1204 form applies with its own ³)</text>
+
+<!-- axes -->
+<line x1="120" y1="60" x2="120" y2="360" stroke="#333" stroke-width="1.5"/>
+<line x1="120" y1="360" x2="980" y2="360" stroke="#333" stroke-width="1.5"/>
+<g font-size="11" fill="#333">
+<text x="60" y="363">1e21</text>
+<text x="60" y="288">3e21</text>
+<text x="60" y="213">1e22</text>
+<text x="60" y="138">3e22</text>
+<text x="60" y="63">1e23</text>
+<text x="150" y="380">D=4</text>
+<text x="400" y="380">D=16</text>
+<text x="650" y="380">D=64</text>
+<text x="900" y="380">D=256</text>
+<text x="420" y="410">inner dimension D (log axis, four evaluated points)</text>
+<text x="30" y="210" transform="rotate(-90 30 210)">operations (log10 scale)</text>
+</g>
+<!-- gridlines at 1e21(y=360?), compute: log range 21.0..23.0 over y 360..60 -->
+<!-- y(logv) = 360 - (logv-21.0)/2.0*300 -->
+<g stroke="#ddd" stroke-width="1">
+<line x1="120" y1="360" x2="980" y2="360"/>
+<line x1="120" y1="285" x2="980" y2="285"/>
+<line x1="120" y1="210" x2="980" y2="210"/>
+<line x1="120" y1="135" x2="980" y2="135"/>
+<line x1="120" y1="60" x2="980" y2="60"/>
+</g>
+
+<!-- full product flat at 21.674 -> y = 360-(0.674/2)*300 = 360-101=259 -->
+<line x1="150" y1="259" x2="900" y2="259" stroke="#1565c0" stroke-width="2.5"/>
+<!-- naive-max: 21.975->214, 22.276->168, 22.577->123, 22.878->78 -->
+<polyline points="150,214 400,168 650,123 900,78" fill="none" stroke="#c62828" stroke-width="2.5"/>
+<!-- paper: 21.636->265, 21.598->270, 21.560->276, 21.522->282 -->
+<line x1="150" y1="265" x2="275" y2="268" stroke="#2e7d32" stroke-width="2.5"/>
+<line x1="275" y1="268" x2="400" y2="270" stroke="#2e7d32" stroke-width="2.5" stroke-dasharray="7 4"/>
+<line x1="400" y1="270" x2="650" y2="276" stroke="#2e7d32" stroke-width="2.5" stroke-dasharray="7 4"/>
+<line x1="650" y1="276" x2="900" y2="282" stroke="#2e7d32" stroke-width="2.5" stroke-dasharray="7 4"/>
+<g font-size="12">
+<circle cx="150" cy="214" r="4" fill="#c62828"/><circle cx="400" cy="168" r="4" fill="#c62828"/><circle cx="650" cy="123" r="4" fill="#c62828"/><circle cx="900" cy="78" r="4" fill="#c62828"/>
+<circle cx="150" cy="265" r="4" fill="#2e7d32"/><circle cx="400" cy="270" r="4" fill="#2e7d32"/><circle cx="650" cy="276" r="4" fill="#2e7d32"/><circle cx="900" cy="282" r="4" fill="#2e7d32"/>
+</g>
+<g font-size="13">
+<text x="640" y="120" fill="#c62828" font-weight="bold">naive-max N²D (one inner product per wanted entry)</text>
+<text x="640" y="250" fill="#1565c0" font-weight="bold">full product H N² (must write every entry)</text>
+<text x="640" y="305" fill="#2e7d32" font-weight="bold">paper N²/D^0.063  solid only at D=4 (in-regime)</text>
+</g>
+<text x="20" y="435" font-size="12" fill="#444">Reading: at max wanted size the paper's bound beats per-entry inner products by D^0.563 for every D &gt; 1 (closed-form ratio, not timed).</text>
+<text x="20" y="453" font-size="12" fill="#444">For tiny |W| (e.g. 2 entries) the naive cost wins outright  see unit test cost_model_hooks_are_monotone_and_ordered.</text>
+</svg>

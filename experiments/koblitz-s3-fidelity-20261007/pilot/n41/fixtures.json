@@ -1,0 +1,136 @@
+{
+  "count": 12,
+  "field_degree": 41,
+  "fixtures": [
+    {
+      "fixture_scalar": "133290198418",
+      "label": "T001",
+      "public_point": [
+        1062386753234,
+        1703849484387
+      ],
+      "scalar_derivation_sha256": "c83e203aa1524f1fd5b3c3d52ed331c4a28fa809d6310b1c32df1949d602b391",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "379629404922",
+      "label": "T002",
+      "public_point": [
+        564157387228,
+        472237808600
+      ],
+      "scalar_derivation_sha256": "9a83e5277985607b6d97178c6851678204fe46c10e956d41d8005b9c7246b111",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "344115423077",
+      "label": "T003",
+      "public_point": [
+        139984133430,
+        324307346804
+      ],
+      "scalar_derivation_sha256": "562bfa39fed72a131d14940d67a8b0ca45b278a5fd0794a5262a36939ea2b44c",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "357210516231",
+      "label": "T004",
+      "public_point": [
+        219880060172,
+        1824832321879
+      ],
+      "scalar_derivation_sha256": "1ab6f4e704cbbe7398722aa2bab0c0a44d5391f5d892d782853e4bc166b0a06c",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "154716918408",
+      "label": "T005",
+      "public_point": [
+        1364385209028,
+        1427745283460
+      ],
+      "scalar_derivation_sha256": "79d43bf954e37e2859c6e57da2d8177bc5cea44e647f891a4e041abeadc853f7",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "195233671682",
+      "label": "T006",
+      "public_point": [
+        1556243308822,
+        182890277801
+      ],
+      "scalar_derivation_sha256": "d125a5756765a5c77beb8a608eb1e0a42f624cc642c51e7fb69f911ab29001b1",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "51204966640",
+      "label": "T007",
+      "public_point": [
+        1890244073358,
+        1283536984261
+      ],
+      "scalar_derivation_sha256": "9a962b15ae2ddff33d0870b6f7766ad8dc7ae0a4af91dc1592730fefd227ebb3",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "457924038005",
+      "label": "T008",
+      "public_point": [
+        682591294062,
+        96351604805
+      ],
+      "scalar_derivation_sha256": "9614332dfb18ccafe9bda620808fc66ce7a62409909dc4dd69d5c8797de9d75a",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "526550710172",
+      "label": "T009",
+      "public_point": [
+        1005875920870,
+        1775774417768
+      ],
+      "scalar_derivation_sha256": "e02ede0c13f1f00fd73880f5fcfcf22f6f8443d8f6eaee65f6f18a2aa28ecc17",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "476181703236",
+      "label": "T010",
+      "public_point": [
+        1715608989016,
+        410653216126
+      ],
+      "scalar_derivation_sha256": "51400caa0635764a13e4787a9197c6aad10813775e0435774c4908c81d3d52f3",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "207134223116",
+      "label": "T011",
+      "public_point": [
+        1119575597340,
+        1749728771078
+      ],
+      "scalar_derivation_sha256": "a1178615182fa9eb6362484060d24077343fb38646e40705b0e94c70de8ac96f",
+      "workload_id": null
+    },
+    {
+      "fixture_scalar": "171760292096",
+      "label": "T012",
+      "public_point": [
+        866713413640,
+        298554108993
+      ],
+      "scalar_derivation_sha256": "f422a32041067eb2062b20bccc7b8a5f9ccd1a98619e5cb365b2d3c4733be189",
+      "workload_id": null
+    }
+  ],
+  "generator": [
+    2056947637384,
+    1635505394702
+  ],
+  "kind": "s3_pair_public_target_fixtures_v1",
+  "koblitz_a": 0,
+  "scalar_law": "1 + int_be(SHA256('s3-pair-target-v1:' || seed_label || ':' || u32be(n) || u32be(index))) mod (r-1)",
+  "seed_label": "s3-pair-pilot-20261007-v1",
+  "solver_input_policy": "only each public_target.json point is passed to the solver; fixture_scalar is for independent checking after measurement",
+  "subgroup_order": "549756390943"
+}

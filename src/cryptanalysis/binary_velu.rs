@@ -277,48 +277,38 @@ pub fn velu_x_map(
     Some(x.add(&a).add(&a.mul(&a, irr)))
 }
 
-/// Map a point across the normalized odd-degree isogeny, including its sign.
-///
-/// For kernel abscissae `u_i`, put `L = h'(x)/h(x)` and
-/// `E_j = h^[j](x)/h(x)`, where `h^[j]` is the j-th Hasse derivative.
-/// Newton's identities in characteristic two give
-/// `Σ_i 1/(x+u_i)^3 = L^3 + L E_2 + E_3`.  Substituting these sums into
-/// Vélu's pairwise ordinate formula avoids splitting the kernel polynomial
-/// over an extension field.  The result is the same short Weierstrass model
-/// as [`velu_codomain`]. The caller supplies a valid odd-degree kernel and
-/// a point on its domain curve. `None` rejects inconsistent field parameters,
-/// out-of-field coordinates, or a failed inversion; kernel points map to
-/// `Some(INFINITY)`.
-pub fn velu_point_map(
-    point: FastPoint,
+#[derive(Debug, PartialEq, Eq)]
+enum VeluAffineImage {
+    Infinity,
+    Affine { x: F2mElement, y: F2mElement },
+}
+
+/// The single field-element implementation behind both public point-map
+/// wrappers. Keeping the ordinate formula here prevents the wide and packed
+/// backends from silently acquiring different sign conventions.
+fn velu_affine_point_map(
+    x: &F2mElement,
+    y: &F2mElement,
     kernel: &F2mPoly,
     n: u32,
     irr: &IrreduciblePoly,
-) -> Option<FastPoint> {
-    if n == 0 || n > FastCurve::MAX_DEGREE || kernel.m != n || irr.degree != n {
+) -> Option<VeluAffineImage> {
+    if !velu_map_field_is_consistent(x, y, kernel, n, irr) {
         return None;
     }
-    if point.infinity {
-        return Some(FastPoint::INFINITY);
-    }
-    let field_mask = (1u64 << n) - 1;
-    if (point.x | point.y) & !field_mask != 0 {
-        return None;
-    }
-    let x = elt(point.x, n);
-    let y = elt(point.y, n);
-    let h = kernel.eval(&x, irr);
+
+    let h = kernel.eval(x, irr);
     if h.is_zero() {
-        return Some(FastPoint::INFINITY);
+        return Some(VeluAffineImage::Infinity);
     }
     let h_inv = h.flt_inverse(irr)?;
-    let l = derivative(kernel, n).eval(&x, irr).mul(&h_inv, irr);
+    let l = derivative(kernel, n).eval(x, irr).mul(&h_inv, irr);
     let l2 = l.mul(&l, irr);
-    let e2 = hasse_eval(kernel, 2, &x, irr).mul(&h_inv, irr);
-    let e3 = hasse_eval(kernel, 3, &x, irr).mul(&h_inv, irr);
+    let e2 = hasse_eval(kernel, 2, x, irr).mul(&h_inv, irr);
+    let e3 = hasse_eval(kernel, 3, x, irr).mul(&h_inv, irr);
     let p3 = l2.mul(&l, irr).add(&l.mul(&e2, irr)).add(&e3);
-    let x2 = x.mul(&x, irr);
-    let x3 = x2.mul(&x, irr);
+    let x2 = x.mul(x, irr);
+    let x3 = x2.mul(x, irr);
     let parity = if kernel.degree().unwrap_or(0) % 2 == 1 {
         F2mElement::one(n)
     } else {
@@ -333,11 +323,109 @@ pub fn velu_point_map(
         .add(&x2.mul(&l2, irr))
         .add(&x3.mul(&p3, irr));
     let image_y = y_coefficient
-        .mul(&y, irr)
+        .mul(y, irr)
         .add(&x.mul(&a2.add(&a), irr))
         .add(&a)
         .add(&z3_sum);
-    Some(FastPoint::affine(to_u64(&image_x), to_u64(&image_y)))
+    Some(VeluAffineImage::Affine {
+        x: image_x,
+        y: image_y,
+    })
+}
+
+fn velu_map_field_parameters_are_consistent(
+    kernel: &F2mPoly,
+    n: u32,
+    irr: &IrreduciblePoly,
+) -> bool {
+    n != 0
+        && kernel.m == n
+        && kernel
+            .coeffs
+            .iter()
+            .all(|coefficient| coefficient.m_value() == n)
+        && irr.degree == n
+        && irr.low_terms.iter().all(|&term| term < n)
+}
+
+fn velu_map_field_is_consistent(
+    x: &F2mElement,
+    y: &F2mElement,
+    kernel: &F2mPoly,
+    n: u32,
+    irr: &IrreduciblePoly,
+) -> bool {
+    x.m_value() == n && y.m_value() == n && velu_map_field_parameters_are_consistent(kernel, n, irr)
+}
+
+/// Map a point across a normalized odd-degree binary Vélu isogeny without
+/// restricting the field degree to the `u64` fast backend.
+///
+/// This is the wide-field counterpart of [`velu_point_map`]. It keeps every
+/// coordinate as an [`F2mElement`], so standardized fields such as
+/// `F_{2^113}` are not truncated. Both coordinate widths, every kernel
+/// coefficient width, and the reduction-polynomial degree are checked before
+/// arithmetic. A kernel point maps to [`BinaryPoint::Infinity`].
+///
+/// This routine deliberately does not establish that `point` lies on the
+/// domain curve, that the reduction polynomial is irreducible, or that
+/// `kernel` describes a subgroup of that curve. Those are certificate-level
+/// obligations for the caller. `None` means inconsistent field parameters or
+/// that a required inversion failed; it is not the image identity.
+pub fn velu_point_map_binary(
+    point: &BinaryPoint,
+    kernel: &F2mPoly,
+    n: u32,
+    irr: &IrreduciblePoly,
+) -> Option<BinaryPoint> {
+    if !velu_map_field_parameters_are_consistent(kernel, n, irr) {
+        return None;
+    }
+    let BinaryPoint::Affine { x, y } = point else {
+        return Some(BinaryPoint::Infinity);
+    };
+    match velu_affine_point_map(x, y, kernel, n, irr)? {
+        VeluAffineImage::Infinity => Some(BinaryPoint::Infinity),
+        VeluAffineImage::Affine { x, y } => Some(BinaryPoint::Affine { x, y }),
+    }
+}
+
+/// Map a point across the normalized odd-degree isogeny, including its sign.
+///
+/// For kernel abscissae `u_i`, put `L = h'(x)/h(x)` and
+/// `E_j = h^[j](x)/h(x)`, where `h^[j]` is the j-th Hasse derivative.
+/// Newton's identities in characteristic two give
+/// `Σ_i 1/(x+u_i)^3 = L^3 + L E_2 + E_3`.  Substituting these sums into
+/// Vélu's pairwise ordinate formula avoids splitting the kernel polynomial
+/// over an extension field. The result is the same short Weierstrass model as
+/// [`velu_codomain`]. This wrapper accepts only fields supported by
+/// [`FastCurve`] and rejects packed coordinates with set bits above `n`; the
+/// shared field-element core also checks the kernel coefficient widths and
+/// reduction-polynomial degree. The caller remains responsible for validating
+/// the point and kernel against the domain curve. `None` means a contract
+/// failure or failed inversion; kernel points map to `Some(INFINITY)`.
+pub fn velu_point_map(
+    point: FastPoint,
+    kernel: &F2mPoly,
+    n: u32,
+    irr: &IrreduciblePoly,
+) -> Option<FastPoint> {
+    if n > FastCurve::MAX_DEGREE || !velu_map_field_parameters_are_consistent(kernel, n, irr) {
+        return None;
+    }
+    if point.infinity {
+        return Some(FastPoint::INFINITY);
+    }
+    let field_mask = (1u64 << n) - 1;
+    if (point.x | point.y) & !field_mask != 0 {
+        return None;
+    }
+    let x = elt(point.x, n);
+    let y = elt(point.y, n);
+    match velu_affine_point_map(&x, &y, kernel, n, irr)? {
+        VeluAffineImage::Infinity => Some(FastPoint::INFINITY),
+        VeluAffineImage::Affine { x, y } => Some(FastPoint::affine(to_u64(&x), to_u64(&y))),
+    }
 }
 
 /// Pull a rational point back through a coprime-degree isogeny.
@@ -857,11 +945,35 @@ mod tests {
             assert!(velu_preimage_point(&domain, &iso, FastPoint::INFINITY).is_err());
             let map = |p| velu_point_map(p, &iso.kernel, n, &irr).expect("defined map");
             assert_eq!(map(FastPoint::INFINITY), FastPoint::INFINITY);
+            assert_eq!(
+                velu_point_map_binary(&BinaryPoint::Infinity, &iso.kernel, n, &irr),
+                Some(BinaryPoint::Infinity),
+                "both wrappers preserve the identity"
+            );
             let points: Vec<_> = (0..(1u64 << n))
                 .flat_map(|x| domain.points_with_x(x))
                 .collect();
             for &p in &points {
                 let image = map(p);
+                let wide_point = if p.infinity {
+                    BinaryPoint::Infinity
+                } else {
+                    BinaryPoint::Affine {
+                        x: elt(p.x, n),
+                        y: elt(p.y, n),
+                    }
+                };
+                let wide_image = velu_point_map_binary(&wide_point, &iso.kernel, n, &irr)
+                    .expect("wide map is defined");
+                let expected_wide = if image.infinity {
+                    BinaryPoint::Infinity
+                } else {
+                    BinaryPoint::Affine {
+                        x: elt(image.x, n),
+                        y: elt(image.y, n),
+                    }
+                };
+                assert_eq!(wide_image, expected_wide, "wide and u64 maps differ");
                 assert!(codomain.fast.is_on_curve(image), "image of {p:?} off curve");
                 assert_eq!(image, codomain.fast.neg(map(domain.fast.neg(p))));
                 if !image.infinity {
@@ -887,6 +999,66 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn wide_point_map_retains_high_bits_and_rejects_width_mismatches() {
+        let n = 113;
+        let irr = IrreduciblePoly::deg_113();
+        // A constant kernel is the degree-one identity map. It isolates the
+        // representation contract from curve-membership obligations and
+        // makes truncation of either coordinate immediately visible.
+        let identity_kernel = F2mPoly::one(n);
+        let point = BinaryPoint::Affine {
+            x: F2mElement::from_bit_positions(&[3, 79, 112], n),
+            y: F2mElement::from_bit_positions(&[7, 64, 109], n),
+        };
+        assert_eq!(
+            velu_point_map_binary(&point, &identity_kernel, n, &irr),
+            Some(point.clone()),
+            "the wide wrapper must not truncate coordinates above bit 63"
+        );
+        assert_eq!(
+            velu_point_map_binary(&BinaryPoint::Infinity, &identity_kernel, n, &irr),
+            Some(BinaryPoint::Infinity)
+        );
+
+        let wrong_width_point = BinaryPoint::Affine {
+            x: F2mElement::one(n - 1),
+            y: F2mElement::zero(n - 1),
+        };
+        assert_eq!(
+            velu_point_map_binary(&wrong_width_point, &identity_kernel, n, &irr),
+            None
+        );
+
+        // F2mPoly exposes its representation, so reject a polynomial whose
+        // declared field and coefficient fields disagree before eval() can
+        // rely on debug-only width assertions.
+        let wrong_width_kernel = F2mPoly {
+            m: n,
+            coeffs: vec![F2mElement::one(n - 1)],
+        };
+        assert_eq!(
+            velu_point_map_binary(&point, &wrong_width_kernel, n, &irr),
+            None
+        );
+
+        let malformed_modulus = IrreduciblePoly {
+            degree: n,
+            low_terms: vec![0, n],
+        };
+        assert_eq!(
+            velu_point_map_binary(&point, &identity_kernel, n, &malformed_modulus),
+            None
+        );
+
+        // The packed wrapper must reject a wide field before evaluating its
+        // bit mask or converting through u64.
+        assert_eq!(
+            velu_point_map(FastPoint::affine(1, 1), &identity_kernel, n, &irr),
+            None
+        );
     }
 
     fn archive_field_element(expression: &str) -> u64 {

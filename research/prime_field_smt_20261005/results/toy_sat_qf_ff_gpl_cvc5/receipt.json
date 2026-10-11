@@ -1,0 +1,74 @@
+{
+  "schema": "prime-field-smt.run/v1",
+  "input_path": "research/prime_field_smt_20261005/instances/toy_p17_sat.json",
+  "input": {
+    "bytes": 278,
+    "blake3": "cf6352bb837e9ae6b78d923d62bb87bb5d91c9cca07f1c9a1e0c5a440c4f14e2"
+  },
+  "validation": {
+    "schema": "prime-field-smt.validation/v1",
+    "field_bits": 5,
+    "multiplication_bits": 10,
+    "primality_assurance": "deterministic-u64-miller-rabin",
+    "nonsingular": true,
+    "target_on_curve": true,
+    "valid": true
+  },
+  "encoding": {
+    "abscissa_bits": 2,
+    "addition_branches": 2,
+    "assertion_count": 11,
+    "boolean_field_variables": 4,
+    "canonical_instance_blake3": "c3abd6b3a84845829ba33e5c72e8d4cf9df839bb1fd6814c5c9c2b3aa6fafaf6",
+    "declared_field_variables": 9,
+    "exact_field_arithmetic": true,
+    "field_bits": 5,
+    "field_modulus": "17",
+    "injective_bit_decomposition": true,
+    "logic": "QF_FF",
+    "query_blake3": "b3fc487a02adfde22f4823c490efa81857ca9664819b810f6d33d6fe6150782d",
+    "query_bytes": 1626,
+    "recommended_solver_option": "--ff-solver=split",
+    "relation": "finite P1 + P2 = target; x1,x2 < x_bound",
+    "schema": "prime-field-smt.ff-encoding/v1",
+    "symmetry_breaking": "exact bitwise x1 < x2 for ordinary addition"
+  },
+  "harness_binary_blake3": "5df759d4aca599044234c9a7c9d7e19b97c9d510a5a3ff1b76b86f0d699b30ad",
+  "solver": {
+    "executable": "/workspace/.tools/cvc5-1.4.1-gpl/cvc5-Linux-x86_64-static-gpl/bin/cvc5",
+    "blake3_before": "236709965a6385893d987ce778dbf34dfc66d621ba3dd4cc9b1ec99398136705",
+    "blake3_after": "236709965a6385893d987ce778dbf34dfc66d621ba3dd4cc9b1ec99398136705",
+    "unchanged_during_run": true,
+    "arguments": [
+      "--lang=smt2",
+      "--tlimit-per=10000",
+      "--ff-solver=split",
+      "research/prime_field_smt_20261005/results/toy_sat_qf_ff_gpl_cvc5/query.smt2"
+    ],
+    "requested_timeout_ms": 10000,
+    "harness_grace_ms": 5000,
+    "elapsed_ms": 96,
+    "timed_out": false,
+    "success": true,
+    "exit_code": 0,
+    "stdout": {
+      "bytes": 73,
+      "blake3": "6e7d1100788b26b1f39ecae19dec6e73f1781309a5e43b4dfc0532b5221f49cf"
+    },
+    "stderr": {
+      "bytes": 0,
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    }
+  },
+  "outcome": "parse_error",
+  "parsed": null,
+  "parse_error": "unsupported value for x1",
+  "verification": null,
+  "accepted_sat": false,
+  "claim_scope": {
+    "end_to_end_s": null,
+    "kind": "decomposition_stage_diagnostic",
+    "pollard_rho_ratio": null,
+    "speedup": null
+  }
+}

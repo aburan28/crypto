@@ -1,0 +1,420 @@
+{
+  "schema": "p256.fb_log_transport/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "dependencies": {
+    "round20_sha256": "72f269c401d5192fda1e2a9f8c7e4b7bd537d92fe29a18b851882b610fa5c459",
+    "round6_sha256": "71d63031111ba48ff831e79430bc87e6c7bac34626d7d0de4acfb4eaa65d40f4"
+  },
+  "factor_base": {
+    "spec": "dickson-torus:depth=18,root_exponent=0x2b6fdc73dc04e7667129",
+    "fb_id": "FB1h2f8621cda105",
+    "fb_sha256": "2f8621cda105a51f8703dabe38dec87f3715ab855770acd7b2af0a14906f9e42",
+    "points_sha256": "70ab21cbda76205ff43ab6bf85c68607be9f6b89df6399e6fa98e3489b888cf1",
+    "terminal": "0x5b17195299a3158b93389ad04c776fff2a8bb23ca8659b5b0c2b75f9009b65e5",
+    "columns": 131458,
+    "signed_points": 262916,
+    "complete_rebuild_verified": true,
+    "dickson_leaves_checked": 131458,
+    "dickson_leaf_rejections": 0
+  },
+  "orbit_control": {
+    "points": 4096,
+    "expected_components": 1,
+    "observed_components": 1,
+    "expected_adjacent_doubling_edges": 4095,
+    "observed_adjacent_doubling_edges": 4095,
+    "all_edges_replayed": true,
+    "passed": true,
+    "census": {
+      "points": 4096,
+      "max_multiplier": 64,
+      "images": 262144,
+      "equal_x_buckets": 65536,
+      "equal_x_pairs": 257928,
+      "same_column_pairs": 0,
+      "cross_column_candidates": 257928,
+      "replayed_relations": 257928,
+      "replay_failures": 0,
+      "duplicate_relations": 233373,
+      "independent_relation_rank": 4095,
+      "quotient_components": 1,
+      "isolated_columns": 0,
+      "largest_component": 4096,
+      "inconsistent_cycles": 0,
+      "adjacent_doubling_edges": 4095,
+      "relation_digests": [],
+      "relation_set_sha256": "f55f384c886cfd472f2def12f35a5607fa435c8be5ff8a1a4f8d3530aedf5871",
+      "record_logical_bytes": 40,
+      "peak_logical_bytes": 11796480,
+      "disk_bytes_read": 0,
+      "disk_bytes_written": 0,
+      "operations": {
+        "multiplier_group_additions": 258048,
+        "block_initial_group_additions": 0,
+        "block_gray_group_additions": 0,
+        "replay_group_additions": 1031712,
+        "replay_group_doublings": 491202,
+        "normalization_field_multiplications": 1335232,
+        "dickson_field_squarings": 0
+      }
+    }
+  },
+  "prefix_reference": {
+    "selected_columns": [
+      289,
+      4986,
+      21256,
+      25412,
+      27311,
+      31614,
+      71703,
+      74269,
+      79905,
+      92101,
+      120857,
+      126267
+    ],
+    "selection_sha256": "a0edd917a2a7843e2d37d99a2973351fe20b4fb970ac518ebc7505296831551d",
+    "multiplier_sorted_relations": 0,
+    "multiplier_direct_relations": 0,
+    "multiplier_false_positives": 0,
+    "multiplier_false_negatives": 0,
+    "block_gray_images": [
+      [
+        1,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        4,
+        0
+      ]
+    ],
+    "block_direct_images": [
+      [
+        1,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        4,
+        0
+      ]
+    ],
+    "nontrivial_block_controls": [
+      {
+        "depth": 1,
+        "ancestor": "ec282ab7c3014759be6a5cbe726aba1c8561878bbd045aaa0e75d3f8186ea345",
+        "leaves": 2,
+        "gray_images": 2,
+        "direct_images": 2,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      {
+        "depth": 2,
+        "ancestor": "a29ebd4315e6cc1c3a728c1044ebbcf8dcca6da087dc2629472b49bdaed63dda",
+        "leaves": 4,
+        "gray_images": 8,
+        "direct_images": 8,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      {
+        "depth": 3,
+        "ancestor": "9ba5bbc09688e18065cd91574cbd61676aa0bf35e6c242f1687ffb392fb5c152",
+        "leaves": 8,
+        "gray_images": 128,
+        "direct_images": 128,
+        "false_positives": 0,
+        "false_negatives": 0
+      },
+      {
+        "depth": 4,
+        "ancestor": "f5dedf6292514141464da95c1cc5c88076bb5b4c0778e2e1dc890d2defd004d4",
+        "leaves": 15,
+        "gray_images": 16384,
+        "direct_images": 16384,
+        "false_positives": 0,
+        "false_negatives": 0
+      }
+    ],
+    "block_false_positives": 0,
+    "block_false_negatives": 0,
+    "passed": true
+  },
+  "multiplier_census": {
+    "points": 131458,
+    "max_multiplier": 64,
+    "images": 8413312,
+    "equal_x_buckets": 0,
+    "equal_x_pairs": 0,
+    "same_column_pairs": 0,
+    "cross_column_candidates": 0,
+    "replayed_relations": 0,
+    "replay_failures": 0,
+    "duplicate_relations": 0,
+    "independent_relation_rank": 0,
+    "quotient_components": 131458,
+    "isolated_columns": 131458,
+    "largest_component": 1,
+    "inconsistent_cycles": 0,
+    "adjacent_doubling_edges": 0,
+    "relation_digests": [],
+    "relation_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "record_logical_bytes": 40,
+    "peak_logical_bytes": 378599040,
+    "disk_bytes_read": 0,
+    "disk_bytes_written": 0,
+    "operations": {
+      "multiplier_group_additions": 8281854,
+      "block_initial_group_additions": 0,
+      "block_gray_group_additions": 0,
+      "replay_group_additions": 0,
+      "replay_group_doublings": 0,
+      "normalization_field_multiplications": 42483264,
+      "dickson_field_squarings": 0
+    }
+  },
+  "block_censuses": [
+    {
+      "depth": 1,
+      "blocks": 98596,
+      "eligible_blocks": 32862,
+      "maximum_block_leaves": 2,
+      "registered_images": 65724,
+      "materialized_images": 65724,
+      "infinity_images": 0,
+      "equal_x_buckets": 0,
+      "cross_block_candidates": 0,
+      "factor_base_candidates": 0,
+      "replayed_relations": 0,
+      "replay_failures": 0,
+      "duplicate_relations": 0,
+      "unique_relations": 0,
+      "relation_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "completed": true,
+      "skip_reason": null,
+      "record_logical_bytes": 40,
+      "peak_logical_bytes": 3154792,
+      "disk_bytes_read": 0,
+      "disk_bytes_written": 0,
+      "operations": {
+        "multiplier_group_additions": 0,
+        "block_initial_group_additions": 32862,
+        "block_gray_group_additions": 32862,
+        "replay_group_additions": 0,
+        "replay_group_doublings": 0,
+        "normalization_field_multiplications": 332067,
+        "dickson_field_squarings": 131458
+      }
+    },
+    {
+      "depth": 2,
+      "blocks": 61562,
+      "eligible_blocks": 45280,
+      "maximum_block_leaves": 4,
+      "registered_images": 147936,
+      "materialized_images": 147936,
+      "infinity_images": 0,
+      "equal_x_buckets": 0,
+      "cross_block_candidates": 0,
+      "factor_base_candidates": 0,
+      "replayed_relations": 0,
+      "replay_failures": 0,
+      "duplicate_relations": 0,
+      "unique_relations": 0,
+      "relation_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "completed": true,
+      "skip_reason": null,
+      "record_logical_bytes": 40,
+      "peak_logical_bytes": 6443272,
+      "disk_bytes_read": 0,
+      "disk_bytes_written": 0,
+      "operations": {
+        "multiplier_group_additions": 0,
+        "block_initial_group_additions": 69896,
+        "block_gray_group_additions": 102656,
+        "replay_group_additions": 0,
+        "replay_group_doublings": 0,
+        "normalization_field_multiplications": 746957,
+        "dickson_field_squarings": 262916
+      }
+    },
+    {
+      "depth": 3,
+      "blocks": 32644,
+      "eligible_blocks": 31642,
+      "maximum_block_leaves": 8,
+      "registered_images": 420904,
+      "materialized_images": 420904,
+      "infinity_images": 0,
+      "equal_x_buckets": 0,
+      "cross_block_candidates": 0,
+      "factor_base_candidates": 0,
+      "replayed_relations": 0,
+      "replay_failures": 0,
+      "duplicate_relations": 0,
+      "unique_relations": 0,
+      "relation_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "completed": true,
+      "skip_reason": null,
+      "record_logical_bytes": 40,
+      "peak_logical_bytes": 17361992,
+      "disk_bytes_read": 0,
+      "disk_bytes_written": 0,
+      "operations": {
+        "multiplier_group_additions": 0,
+        "block_initial_group_additions": 98814,
+        "block_gray_group_additions": 389262,
+        "replay_group_additions": 0,
+        "replay_group_doublings": 0,
+        "normalization_field_multiplications": 2124436,
+        "dickson_field_squarings": 394374
+      }
+    },
+    {
+      "depth": 4,
+      "blocks": 16383,
+      "eligible_blocks": 16379,
+      "maximum_block_leaves": 15,
+      "registered_images": 5351780,
+      "materialized_images": 5351780,
+      "infinity_images": 0,
+      "equal_x_buckets": 0,
+      "cross_block_candidates": 0,
+      "factor_base_candidates": 0,
+      "replayed_relations": 0,
+      "replay_failures": 0,
+      "duplicate_relations": 0,
+      "unique_relations": 0,
+      "relation_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "completed": true,
+      "skip_reason": null,
+      "record_logical_bytes": 40,
+      "peak_logical_bytes": 214597032,
+      "disk_bytes_read": 0,
+      "disk_bytes_written": 0,
+      "operations": {
+        "multiplier_group_additions": 0,
+        "block_initial_group_additions": 115075,
+        "block_gray_group_additions": 5335401,
+        "replay_group_additions": 0,
+        "replay_group_doublings": 0,
+        "normalization_field_multiplications": 27009382,
+        "dickson_field_squarings": 525832
+      }
+    }
+  ],
+  "quotient": {
+    "original_columns": 131458,
+    "pairwise_relation_rank": 0,
+    "pairwise_components": 131458,
+    "unique_block_relations": 0,
+    "independent_block_rank_in_pairwise_quotient": 0,
+    "total_independent_relation_rank": 0,
+    "quotient_dimension": 131458,
+    "relation_set_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "residual_degree_evidence": {
+    "maximum_by_residual_depth": [
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    "every_component_complete_and_correct": true,
+    "local_join_degree": 2,
+    "structured_residual_maximum": 4,
+    "unsplit_s17_degree_of_regularity": null
+  },
+  "parity_projection": {
+    "group_order": "115792089210356248762697446949407573529996955224135760342422259061068512044369",
+    "quotient_dimension": 131458,
+    "disjoint_probability": 0.9994524131979801,
+    "rho_reference_s": 1.3,
+    "comparison_unit": "P-256 group-addition equivalents; S=total/sqrt(n)",
+    "rows": [
+      {
+        "variant": "Pollard rho reference",
+        "class": "reference",
+        "group_addition_equivalents_log2": 128.37851162308579,
+        "s_total_over_sqrt_n": 1.3,
+        "ratio_to_rho": 1.0,
+        "complete_end_to_end": true,
+        "correctness": "registered reference"
+      },
+      {
+        "variant": "round-20 direct finite-domain S17 projection",
+        "class": "projected engineering",
+        "group_addition_equivalents_log2": 147.79753715874966,
+        "s_total_over_sqrt_n": 911265.3104554573,
+        "ratio_to_rho": 700973.3157349671,
+        "complete_end_to_end": true,
+        "correctness": "exact sampled cells; projected full collection"
+      },
+      {
+        "variant": "round-20 optimistic finite-domain boundary",
+        "class": "generic lower boundary",
+        "group_addition_equivalents_log2": 144.58053715874968,
+        "s_total_over_sqrt_n": 98069.1411747531,
+        "ratio_to_rho": 75437.80090365623,
+        "complete_end_to_end": false,
+        "correctness": "analytic lower boundary"
+      },
+      {
+        "variant": "quotient-adjusted balanced two-list boundary",
+        "class": "generic lower boundary",
+        "group_addition_equivalents_log2": 137.50251631621464,
+        "s_total_over_sqrt_n": 725.3413654418708,
+        "ratio_to_rho": 557.9548964937468,
+        "complete_end_to_end": false,
+        "correctness": "analytic lower boundary from exact quotient rank"
+      },
+      {
+        "variant": "ideal memoryless quotient boundary",
+        "class": "unimplemented lower boundary",
+        "group_addition_equivalents_log2": 136.8282643809508,
+        "s_total_over_sqrt_n": 454.54029384401264,
+        "ratio_to_rho": 349.6463798800097,
+        "complete_end_to_end": false,
+        "correctness": "analytic birthday constant; collector not implemented"
+      }
+    ],
+    "two_list_parity_possible": false,
+    "ideal_memoryless_parity_possible": false,
+    "implemented_end_to_end_parity": false
+  },
+  "false_positives": 0,
+  "false_negatives": 0,
+  "exact_group_replay": true,
+  "structured_degree_gate": true,
+  "quotient_dimension_gate": false,
+  "rho_parity_gate": false,
+  "attack_promotion_gate": false,
+  "full_depth_unplanted_attempted": false,
+  "result_class": "negative/no-rank-compression",
+  "decision": "negative: registered exact transport families do not collapse FB1 to one logarithm class; rho parity remains blocked by quotient rank"
+}

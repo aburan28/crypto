@@ -916,6 +916,46 @@ pub fn log2_expected_cost(hist: &BTreeMap<u32, u32>, vars: u32, eqs: u32, omega:
     acc.log2()
 }
 
+/// The `ω` the extraction costs below are summarised at: Strassen, rounded
+/// as every Macaulay-cost model here uses it
+/// ([`crate::cryptanalysis::matmul_exponent::STRASSEN`]).
+pub const MACAULAY_OMEGA: f64 = 2.807;
+
+/// The degree-3 Macaulay rounds a mean extraction cost is charged for, kept
+/// as shapes rather than as one cost so it can be priced at any `ω`: a total
+/// that adds extraction to a solve must price both at the same exponent.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct ExtractionShapes {
+    /// `(vars, eqs)` of a round → how many times it was charged.
+    pub rounds: BTreeMap<(u32, u32), u64>,
+    /// The number of systems the mean is taken over.
+    pub systems: u32,
+}
+
+impl ExtractionShapes {
+    /// Charge one system's saturation rounds.  Round `r` works on the
+    /// system as it stood going in: `eqs` plus every generator added before
+    /// it.
+    pub fn charge(&mut self, vars: u32, eqs: u32, per_round: &[usize]) {
+        let mut eqs_so_far = eqs;
+        for added in per_round {
+            *self.rounds.entry((vars, eqs_so_far)).or_insert(0) += 1;
+            eqs_so_far += *added as u32;
+        }
+        self.systems += 1;
+    }
+
+    /// log2 of the mean per-system extraction cost at exponent `omega`.
+    pub fn log2_mean_cost(&self, omega: f64) -> f64 {
+        let total: f64 = self
+            .rounds
+            .iter()
+            .map(|(&(vars, eqs), &c)| c as f64 * log2_macaulay_cost(vars, eqs, 3, omega).exp2())
+            .sum();
+        (total / self.systems.max(1) as f64).log2()
+    }
+}
+
 /// Repeatedly extract degree-3 falls and fold them back into the generating
 /// set until no new generator appears or `rounds` is exhausted.
 ///
@@ -988,8 +1028,11 @@ pub struct MutantRow {
     /// the degree-3 rows of the system as it stands and takes a kernel, and
     /// that work is what produces the falls. Charging only the cheap
     /// augmented solve would be double-counting the saving — the tower still
-    /// had to reach degree 3 to get there.
+    /// had to reach degree 3 to get there.  Priced at [`MACAULAY_OMEGA`];
+    /// `extraction` prices it at any other `ω`.
     pub log2_extraction_cost: f64,
+    /// The extraction rounds behind `log2_extraction_cost`.
+    pub extraction: ExtractionShapes,
     /// The highest Macaulay degree the augmented route actually touches:
     /// `max(3, D*_aug)`, since extraction itself works at degree 3. This is
     /// the honest single-number comparison against `D*_base`.
@@ -1032,7 +1075,8 @@ pub fn run_mutant_cell(
     let (mut rounds_sum, mut added_sum, mut augeqs_sum) = (0.0f64, 0.0f64, 0.0f64);
     let mut base_hist: BTreeMap<u32, u32> = BTreeMap::new();
     let mut aug_hist: BTreeMap<u32, u32> = BTreeMap::new();
-    let (mut extract_cost_sum, mut working_sum) = (0.0f64, 0.0f64);
+    let mut extraction = ExtractionShapes::default();
+    let mut working_sum = 0.0f64;
 
     let mut attempts = 0u32;
     while found < targets && attempts < targets * 64 + 256 {
@@ -1055,15 +1099,6 @@ pub fn run_mutant_cell(
 
         let report = extract_degree_falls(&eqs, full_vars);
         let (aug, per_round) = saturate_with_falls(&eqs, full_vars, rounds);
-        // Charge every saturation round: round r operates on the system as it
-        // stood going in, so its generator count is n + (all falls added so
-        // far). Summed in linear space, then logged by the caller.
-        let mut eqs_so_far = eqs.len() as u32;
-        let mut extract_linear = 0.0f64;
-        for added in &per_round {
-            extract_linear += log2_macaulay_cost(full_vars, eqs_so_far, 3, 2.807).exp2();
-            eqs_so_far += *added as u32;
-        }
         let (_, augd, _) = refutation_scan(&aug, full_vars, d_max);
         let Some(augd) = augd else { continue };
 
@@ -1082,7 +1117,10 @@ pub fn run_mutant_cell(
         pure_sum += report.pure_syzygies as f64;
         fall_sum += report.falls as f64;
         newgen_sum += report.new_generators.len() as f64;
-        extract_cost_sum += extract_linear;
+        // Charge every saturation round: round r operates on the system as
+        // it stood going in, so its generator count is n + (all falls added
+        // so far).
+        extraction.charge(full_vars, eqs.len() as u32, &per_round);
         working_sum += augd.max(3) as f64;
         rounds_sum += per_round.iter().filter(|c| **c > 0).count() as f64;
         added_sum += per_round.iter().sum::<usize>() as f64;
@@ -1111,7 +1149,8 @@ pub fn run_mutant_cell(
         productive_rounds_mean: rounds_sum / f,
         total_added_mean: added_sum / f,
         aug_eqs_mean: augeqs_sum / f,
-        log2_extraction_cost: (extract_cost_sum / f).log2(),
+        log2_extraction_cost: extraction.log2_mean_cost(MACAULAY_OMEGA),
+        extraction,
         working_degree_mean: working_sum / f,
     })
 }
@@ -1151,8 +1190,11 @@ pub struct ComposedRow {
     pub new_generators_mean: f64,
     /// Mean equation count of a saturated slice (extra Macaulay rows).
     pub aug_eqs_mean: f64,
-    /// log2 of the mean per-slice extraction cost (all saturation rounds).
+    /// log2 of the mean per-slice extraction cost (all saturation rounds),
+    /// priced at [`MACAULAY_OMEGA`].
     pub log2_extraction_cost: f64,
+    /// The extraction rounds behind `log2_extraction_cost`.
+    pub extraction: ExtractionShapes,
 }
 
 impl ComposedRow {
@@ -1167,7 +1209,7 @@ impl ComposedRow {
     ///
     /// Charging extraction is the whole point — iteration 2 established that
     /// booking only the cheap augmented solve double-counts the degree the
-    /// extraction itself had to climb to.
+    /// extraction itself had to climb to.  Both are priced at `omega`.
     pub fn log2_composed_total(&self, omega: f64) -> f64 {
         let solve = log2_macaulay_cost(
             self.vars,
@@ -1175,7 +1217,8 @@ impl ComposedRow {
             self.mut_dstar_mean.ceil() as u32,
             omega,
         );
-        self.k as f64 + (self.log2_extraction_cost.exp2() + solve.exp2()).log2()
+        let extraction = self.extraction.log2_mean_cost(omega);
+        self.k as f64 + (extraction.exp2() + solve.exp2()).log2()
     }
 }
 
@@ -1287,7 +1330,7 @@ pub fn run_composed_sweep(
         mut_max: u32,
         working_sum: f64,
         newgen_sum: f64,
-        extract_linear: f64,
+        extraction: ExtractionShapes,
         aug_eqs_sum: f64,
     }
     let mut acc: Vec<Acc> = (0..=k_max)
@@ -1300,7 +1343,7 @@ pub fn run_composed_sweep(
             mut_max: 0,
             working_sum: 0.0,
             newgen_sum: 0.0,
-            extract_linear: 0.0,
+            extraction: ExtractionShapes::default(),
             aug_eqs_sum: 0.0,
         })
         .collect();
@@ -1340,15 +1383,6 @@ pub fn run_composed_sweep(
                 let (sat, per_round) = saturate_with_falls(&slice, nv, rounds);
                 let (_, mutd, _) = refutation_scan(&sat, nv, d_max);
 
-                // Charge every saturation round on the system as it stood
-                // going in — the same accounting iteration 2 settled on.
-                let mut eqs_so_far = slice.len() as u32;
-                let mut extract = 0.0f64;
-                for added in &per_round {
-                    extract += log2_macaulay_cost(nv, eqs_so_far, 3, 2.807).exp2();
-                    eqs_so_far += *added as u32;
-                }
-
                 match (raw, mutd) {
                     (Some(r), Some(m)) => {
                         a.raw_sum += r as f64;
@@ -1357,7 +1391,10 @@ pub fn run_composed_sweep(
                         a.mut_max = a.mut_max.max(m);
                         a.working_sum += m.max(3) as f64;
                         a.newgen_sum += per_round.iter().sum::<usize>() as f64;
-                        a.extract_linear += extract;
+                        // Charge every saturation round on the system as it
+                        // stood going in — the same accounting iteration 2
+                        // settled on.
+                        a.extraction.charge(nv, slice.len() as u32, &per_round);
                         a.aug_eqs_sum += sat.len() as f64;
                     }
                     _ => a.censored += 1,
@@ -1385,7 +1422,8 @@ pub fn run_composed_sweep(
                 mut_working_mean: a.working_sum / m,
                 new_generators_mean: a.newgen_sum / m,
                 aug_eqs_mean: a.aug_eqs_sum / m,
-                log2_extraction_cost: (a.extract_linear / m).log2(),
+                log2_extraction_cost: a.extraction.log2_mean_cost(MACAULAY_OMEGA),
+                extraction: a.extraction.clone(),
             }
         })
         .collect();
@@ -2598,6 +2636,52 @@ mod tests {
                 r.raw_dstar_mean
             );
             assert!(r.mut_dstar_max <= r.raw_dstar_max);
+        }
+    }
+
+    /// The composed total prices extraction and solve at the caller's `ω`:
+    /// at [`MACAULAY_OMEGA`] it is the stored extraction cost plus the solve,
+    /// and at a smaller `ω` the extraction term falls with the solve instead
+    /// of staying at its `2.807` price.
+    #[test]
+    fn composed_total_prices_extraction_at_the_callers_omega() {
+        let n = 10;
+        let irr = choose_irreducible(n);
+        let sw = run_composed_sweep(
+            BasisFamily::Coordinate,
+            GuessPattern::OneSide,
+            n,
+            5,
+            &irr,
+            5,
+            3,
+            3,
+            7,
+            3,
+            0xC0DE,
+        )
+        .unwrap();
+        let w = crate::cryptanalysis::matmul_exponent::CORPUS_FAMILY_107.value;
+        for r in sw.rows.iter().filter(|r| r.extraction.systems > 0) {
+            let at = |omega: f64, extraction: f64| {
+                let solve = log2_macaulay_cost(
+                    r.vars,
+                    r.aug_eqs_mean.round().max(1.0) as u32,
+                    r.mut_dstar_mean.ceil() as u32,
+                    omega,
+                );
+                r.k as f64 + (extraction.exp2() + solve.exp2()).log2()
+            };
+            assert_eq!(
+                r.extraction.log2_mean_cost(MACAULAY_OMEGA),
+                r.log2_extraction_cost
+            );
+            let stored = at(MACAULAY_OMEGA, r.log2_extraction_cost);
+            assert!((r.log2_composed_total(MACAULAY_OMEGA) - stored).abs() < 1e-12);
+            let consistent = at(w, r.extraction.log2_mean_cost(w));
+            let mixed = at(w, r.log2_extraction_cost);
+            assert!((r.log2_composed_total(w) - consistent).abs() < 1e-12);
+            assert!(consistent < mixed, "k={}", r.k);
         }
     }
 

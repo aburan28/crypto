@@ -1,0 +1,11 @@
+[package]
+name = "yield_census"
+version = "0.1.0"
+edition = "2021"
+description = "Exact census of 3-summand x-only decompositions on y^2+xy=x^3+x^2+1 over F_2^24 against Trimoska's thesis Table 7.7"
+
+[dependencies]
+
+[profile.release]
+opt-level = 3
+debug = 1

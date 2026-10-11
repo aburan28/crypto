@@ -1,0 +1,73 @@
+{
+  "schema": "prime-field-smt.run/v1",
+  "input_path": "research/prime_field_smt_20261005/instances/toy_p17_unsat.json",
+  "input": {
+    "bytes": 268,
+    "blake3": "e014c699a8719f744e87baaeac07208b154c81e59e13526175e7839e9bab83d0"
+  },
+  "validation": {
+    "schema": "prime-field-smt.validation/v1",
+    "field_bits": 5,
+    "multiplication_bits": 10,
+    "primality_assurance": "deterministic-u64-miller-rabin",
+    "nonsingular": true,
+    "target_on_curve": true,
+    "valid": true
+  },
+  "encoding": {
+    "schema": "prime-field-smt.encoding/v1",
+    "logic": "QF_BV",
+    "relation": "finite P1 + P2 = target; x1,x2 < x_bound",
+    "field_bits": 5,
+    "multiplication_bits": 10,
+    "declared_variables": 5,
+    "field_helpers": 3,
+    "addition_branches": 2,
+    "assertion_count": 10,
+    "canonical_range_constraints": true,
+    "widened_arithmetic": true,
+    "symmetry_breaking": "x1 < x2 for ordinary addition; x1 = x2 for doubling",
+    "canonical_instance_blake3": "776169a6fe9146beaaf8f46d8c335797e4ec3d89321d7048c5a3baf0220b6a80",
+    "query_bytes": 1841,
+    "query_blake3": "bde873212c4409ba587e254b3b04b53911c6b73db5eadc1da0a43d97f00a6404"
+  },
+  "harness_binary_blake3": "a3a9c350667cd86d80c623d47000e0efa2986ffc1f085e5635b9d6065ca92385",
+  "solver": {
+    "executable": "/workspace/.tools/cvc5-1.4.1/cvc5-Linux-x86_64-static/bin/cvc5",
+    "blake3_before": "2a0070ebcd28a71fabd6686a1c7200282b427a6e18e49925eff17a655456f2a4",
+    "blake3_after": "2a0070ebcd28a71fabd6686a1c7200282b427a6e18e49925eff17a655456f2a4",
+    "unchanged_during_run": true,
+    "arguments": [
+      "--lang=smt2",
+      "--tlimit-per=10000",
+      "research/prime_field_smt_20261005/results/toy_unsat_cvc5/query.smt2"
+    ],
+    "requested_timeout_ms": 10000,
+    "harness_grace_ms": 5000,
+    "elapsed_ms": 35,
+    "timed_out": false,
+    "success": true,
+    "exit_code": 0,
+    "stdout": {
+      "bytes": 73,
+      "blake3": "a5f61deec392fe76da865415c1359ea6eba235cfefac91db65ac060d7bac4e96"
+    },
+    "stderr": {
+      "bytes": 0,
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    }
+  },
+  "outcome": "solver_unsat_unverified",
+  "parsed": {
+    "status": "unsat"
+  },
+  "parse_error": null,
+  "verification": null,
+  "accepted_sat": false,
+  "claim_scope": {
+    "end_to_end_s": null,
+    "kind": "decomposition_stage_diagnostic",
+    "pollard_rho_ratio": null,
+    "speedup": null
+  }
+}

@@ -124,7 +124,9 @@
 //!   Pollard lambda search on anomalous binary curves*, Math. Comp. 69
 //!   (2000) — the `√n` rho speed-up we compare against.
 
+use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 use std::sync::{Arc, OnceLock};
 
@@ -149,14 +151,19 @@ use crate::cryptanalysis::ec_index_calculus::{
 use crate::cryptanalysis::fx_hash::{FxMap, FxSet};
 use crate::cryptanalysis::ic_measurement::{self as measurement, Phase};
 use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, FrobeniusCanon};
+use crate::cryptanalysis::koblitz_fast_arith::{
+    pack_fast, FastBinaryCurve, FastPoint as ArithFastPoint,
+};
 use crate::cryptanalysis::koblitz_groebner::{
     chain_order_interleaved, invert_permutation, matrix_f4_f2, permute_mask, permute_poly,
     solve_boolean_system_filtered, solve_boolean_system_with_node_oracle, split_rule_default,
     FieldStructure, NodeOracleDecision, SolveOptions, SolveStats, SolverEngine,
 };
-use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
+use crate::cryptanalysis::koblitz_relation_solver::{
+    to_u64_mod, IncrementalRelationSolver, RowStatus, U64RankTracker,
+};
 use crate::cryptanalysis::koblitz_sparse_la::{
-    self, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
+    self, SparseCoreSolver, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
 };
 use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly;
 use crate::cryptanalysis::sat::SolveResult;
@@ -166,16 +173,17 @@ use crate::utils::mod_inverse;
 /// Largest extension degree this module will build a curve for.  The
 /// factor base and the point-counting/factoring helpers are all
 /// materialised, so this is a deliberate guard rail, not a limit of
-/// the mathematics.  Field elements are packed in a `u64`, so the
-/// absolute limit is `n < 64`.  Past `n ≈ 24` the generator is found
-/// by deterministic sampling rather than a full abscissa sweep; point
-/// counting still uses the closed Koblitz recurrence (no `2^n` scan).
+/// the mathematics.  Field elements are packed in a `u64` word through
+/// `n = 63` and in a `u128` word past it, so the absolute limit is
+/// `n < 128`.  Past `n ≈ 24` the generator is found by deterministic
+/// sampling rather than a full abscissa sweep; point counting still
+/// uses the closed Koblitz recurrence (no `2^n` scan).
 /// Curve construction costs trial division to `√#E ≈ 2^{n/2}` and a
 /// sparse irreducible search; both are still cheap at the
 /// boundary-ledger rungs through `n = 53`.  What actually bounds a run
 /// is the `2^dim` factor base and, for the meet-in-the-middle oracle,
 /// its `|F|²` pair table.
-pub const MAX_N: u32 = 63;
+pub const MAX_N: u32 = 127;
 
 // ── F_2[x] helpers on `u64` bitmasks ───────────────────────────────
 //
@@ -350,6 +358,126 @@ pub fn find_irreducible_sparse(n: u32) -> Option<IrreduciblePoly> {
     None
 }
 
+// ── F_2[x] helpers on `u128` bitmasks (degrees 64..=127) ──────────
+//
+// Twin of the `u64` helpers above with identical Rabin semantics; the
+// `u64` path is deliberately untouched so every `n ≤ 63` fixture stays
+// byte-identical.  The twin is only used past the `u64` shift ceiling
+// (`1u64 << n` wraps for `n ≥ 64`, which is why the narrow search
+// returns `None` there).  A 256-bit carry-less product never arises
+// here: every intermediate is reduced to degree `< 128` before it can
+// overflow the word.
+fn poly_deg_wide(f: u128) -> Option<u32> {
+    if f == 0 {
+        None
+    } else {
+        Some(127 - f.leading_zeros())
+    }
+}
+
+fn poly_rem_wide(mut a: u128, f: u128) -> u128 {
+    let df = match poly_deg_wide(f) {
+        Some(d) => d,
+        None => return a,
+    };
+    while let Some(da) = poly_deg_wide(a) {
+        if da < df {
+            break;
+        }
+        a ^= f << (da - df);
+    }
+    a
+}
+
+fn poly_mulmod_wide(a: u128, b: u128, f: u128) -> u128 {
+    let mut acc = 0u128;
+    let mut a = poly_rem_wide(a, f);
+    let mut b = b;
+    while b != 0 {
+        if b & 1 == 1 {
+            acc ^= a;
+        }
+        b >>= 1;
+        a <<= 1;
+        a = poly_rem_wide(a, f);
+    }
+    poly_rem_wide(acc, f)
+}
+
+fn poly_gcd_wide(mut a: u128, mut b: u128) -> u128 {
+    while b != 0 {
+        let r = poly_rem_wide(a, b);
+        a = b;
+        b = r;
+    }
+    a
+}
+
+fn poly_x_pow_2k_wide(k: u32, f: u128) -> u128 {
+    let mut acc = poly_rem_wide(0b10, f);
+    for _ in 0..k {
+        acc = poly_mulmod_wide(acc, acc, f);
+    }
+    acc
+}
+
+/// Rabin's irreducibility test for a degree-`d` polynomial of `F_2[x]`
+/// held in a `u128` bitmask (`64 ≤ d ≤ 127`): `f` is irreducible iff
+/// `x^(2^d) ≡ x (mod f)` and `gcd(x^(2^(d/p)) − x, f) = 1` for every
+/// prime `p | d`.  Same mathematics as [`is_irreducible_f2`].
+pub fn is_irreducible_f2_wide(f: u128) -> bool {
+    let d = match poly_deg_wide(f) {
+        Some(d) if d >= 1 => d,
+        _ => return false,
+    };
+    if f & 1 == 0 && d > 1 {
+        return false;
+    }
+    if poly_x_pow_2k_wide(d, f) != poly_rem_wide(0b10, f) {
+        return false;
+    }
+    for p in prime_divisors(d) {
+        let t = poly_x_pow_2k_wide(d / p, f) ^ 0b10;
+        if poly_deg_wide(poly_gcd_wide(poly_rem_wide(t, f), f)) != Some(0) {
+            return false;
+        }
+    }
+    true
+}
+
+/// **Sparse irreducible search on `u128` masks**: the smallest-mask
+/// irreducible polynomial of degree `n` over `F_2` among trinomials
+/// and pentanomials, for `64 ≤ n ≤ 127`.  Same ascending-mask order
+/// as [`find_irreducible_sparse`]; at `n = 71` this is
+/// `x^71 + x^5 + x^3 + x + 1` (independent sympy check agrees).
+pub fn find_irreducible_sparse_wide(n: u32) -> Option<IrreduciblePoly> {
+    if n <= 63 || n > 127 {
+        return None;
+    }
+    let mut candidates: Vec<u128> = Vec::new();
+    candidates.push(1);
+    for i in 1..n {
+        candidates.push(1 | (1u128 << i));
+        for j in (i + 1)..n {
+            candidates.push(1 | (1u128 << i) | (1u128 << j));
+            for k in (j + 1)..n {
+                candidates.push(1 | (1u128 << i) | (1u128 << j) | (1u128 << k));
+            }
+        }
+    }
+    candidates.sort_unstable();
+    let hi = 1u128 << n;
+    for low in candidates {
+        if is_irreducible_f2_wide(hi | low) {
+            return Some(IrreduciblePoly {
+                degree: n,
+                low_terms: (0..n).filter(|i| (low >> i) & 1 == 1).collect(),
+            });
+        }
+    }
+    None
+}
+
 /// The `index`-th Frobenius-invariant subspace of `F_{2^n}`, as an
 /// `F_2`-basis — the factor base's `x`-coordinate support, without
 /// building the curve, counting its points, or materialising `F`.
@@ -389,8 +517,49 @@ pub fn order_of_2_mod_n(n: u32) -> Option<u32> {
     None
 }
 
+/// Memoised `x^n − 1` factorisations over `F_2`, keyed by `n`.
+///
+/// The scan costs `2^d` Rabin tests per degree (`≈ 0.6 s` at
+/// `n = 41, d = 20`) and was recomputed on every divisor-base build —
+/// minutes per search at the rungs where the cosets are large.  The
+/// function is pure in `n` with tiny values, so a process-wide cache
+/// is exact, not heuristic: hits return clones of computed lists, a
+/// poisoned mutex falls back to its (still correct) contents, and a
+/// missed race only recomputes.
+static ALL_FACTORS_MEMO: std::sync::OnceLock<std::sync::Mutex<HashMap<u32, Vec<u64>>>> =
+    std::sync::OnceLock::new();
+
+fn memo_get(
+    memo: &std::sync::OnceLock<std::sync::Mutex<HashMap<u32, Vec<u64>>>>,
+    n: u32,
+) -> Option<Vec<u64>> {
+    memo.get_or_init(|| std::sync::Mutex::new(HashMap::new()))
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .get(&n)
+        .cloned()
+}
+
+fn memo_put(
+    memo: &std::sync::OnceLock<std::sync::Mutex<HashMap<u32, Vec<u64>>>>,
+    n: u32,
+    factors: Vec<u64>,
+) -> Vec<u64> {
+    memo.get_or_init(|| std::sync::Mutex::new(HashMap::new()))
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .insert(n, factors.clone());
+    factors
+}
+
 /// **The degree-`ord_n(2)` irreducible factors of `x^n − 1`** over
-/// `F_2`, found by scanning the `2^ℓ` monic polynomials of that degree.
+/// `F_2`, sliced from the cached full factorisation.
+///
+/// Degrees above 24 return empty: a `2^d` scan with `d > 24` is never
+/// worth it (the `all_factors` scan rightfully skips those degrees), and
+/// any factor base it would define has `≥ 2^25` abscissae — far past
+/// every materialisation cap.  Previously this end of the range ran an
+/// unbounded `2^ell` scan per call (hours at `n = 37`, `ell = 36`).
 ///
 /// **Not a complete factorisation.**  `x^n − 1` has one irreducible
 /// factor per 2-cyclotomic coset mod `n`, of degree equal to that
@@ -402,32 +571,16 @@ pub fn order_of_2_mod_n(n: u32) -> Option<u32> {
 /// [`build_frobenius_factor_base`] indexes into it.
 pub fn factor_x_n_minus_1(n: u32) -> Vec<u64> {
     let ell = match order_of_2_mod_n(n) {
-        Some(l) if l < 40 => l,
+        Some(l) if l <= 24 => l,
         _ => return Vec::new(),
     };
-    let mut out = Vec::new();
-    let hi = 1u64 << ell;
-    for low in 0..hi {
-        let f = hi | low;
-        if !is_irreducible_f2(f) {
-            continue;
-        }
-        // f | x^n − 1  ⟺  x^n ≡ 1 (mod f).
-        let mut xn = poly_rem(0b10, f);
-        let mut acc = 1u64;
-        let mut e = n;
-        while e > 0 {
-            if e & 1 == 1 {
-                acc = poly_mulmod(acc, xn, f);
-            }
-            xn = poly_mulmod(xn, xn, f);
-            e >>= 1;
-        }
-        if acc == 1 {
-            out.push(f);
-        }
-    }
-    out
+    // Exactly the degree-`ell` slice of the cached full list (same scan
+    // order; `x + 1` has degree 1 != `ell >= 2` for `n >= 3`) — no
+    // `2^ell` scan at all.
+    all_factors_of_x_n_minus_1(n)
+        .into_iter()
+        .filter(|&f| 63 - f.leading_zeros() == ell)
+        .collect()
 }
 
 // ── Koblitz curve over F_{2^n} ─────────────────────────────────────
@@ -455,6 +608,14 @@ pub struct KoblitzCurve {
     pub cofactor: BigUint,
     /// The eigenvalue of `π` on `⟨generator⟩`: `π(Q) = [λ]Q`.
     pub lambda: BigUint,
+    /// Whether the 2-power Frobenius `(x, y) ↦ (x², y²)` is an
+    /// endomorphism of this model.  True for the Koblitz models `K_a`
+    /// (all coefficients in `F_2`).  False for an isogenous model with
+    /// `b ∉ F_2` built by [`KoblitzCurve::isogenous_model`]: there
+    /// squaring maps `E_b` onto its conjugate `E_{b²}`, so
+    /// [`KoblitzCurve::frobenius`] is the identity, every orbit walk
+    /// degenerates to `{P, −P}`, and `λ = 1`.
+    pub frobenius_is_endomorphism: bool,
     /// Degree `k` of the subfield the curve is defined over, `q = 2^k`;
     /// `1` for a Koblitz curve.  `π` is the `q`-power Frobenius and
     /// `trace`, `lambda` refer to it.
@@ -487,6 +648,39 @@ pub fn koblitz_point_count(a: u8, n: u32) -> BigUint {
     }
     let count = (1i128 << n) + 1 - s_cur;
     BigUint::from(count as u128)
+}
+
+/// Trial-division factorisation into `(prime, exponent)` pairs.  Only
+/// ever called on `#E` for toy `n`.
+///
+/// When the value fits in 128 bits (every admitted `n ≤ 127`: group
+/// orders are `≈ 2^n`), the trial loop runs natively with no
+/// allocations.  The factor list is identical to the [`BigUint`] loop
+/// below, so every `n ≤ 63` fixture is unaffected.
+fn factorise(mut v: BigUint) -> Vec<(BigUint, u32)> {
+    if let Some(small) = biguint_to_u128(&v) {
+        return factorise_u128(small)
+            .into_iter()
+            .map(|(p, e)| (BigUint::from(p), e))
+            .collect();
+    }
+    let mut out: Vec<(BigUint, u32)> = Vec::new();
+    let mut d = BigUint::from(2u32);
+    while &d * &d <= v {
+        let mut e = 0;
+        while (&v % &d).is_zero() {
+            v /= &d;
+            e += 1;
+        }
+        if e > 0 {
+            out.push((d.clone(), e));
+        }
+        d += BigUint::one();
+    }
+    if v > BigUint::one() {
+        out.push((v, 1));
+    }
+    out
 }
 
 /// `#E(F_{q^e}) = q^e + 1 − s_e` from the trace `t` of the `q`-power
@@ -522,22 +716,8 @@ fn subfield_point_count(curve: &BinaryCurve, basis: &[F2mElement], k: u32) -> u6
     count
 }
 
-/// Trial-division factorisation into `(prime, exponent)` pairs,
-/// ascending.  Only ever called on `#E`, which for `n ≤ MAX_N` fits a
-/// `u64`: there it stops as soon as what is left is prime (a
-/// deterministic Miller–Rabin test), instead of dividing up to the
-/// square root of the large prime `r` — about 2²² big-integer divisions
-/// at `n = 53`, which was most of building a curve.
-fn factorise(v: BigUint) -> Vec<(BigUint, u32)> {
-    if let Some(small) = v.to_u64() {
-        return factorise_u64(small)
-            .into_iter()
-            .map(|(p, e)| (BigUint::from(p), e))
-            .collect();
-    }
-    factorise_big(v)
-}
-
+/// Trial-division helper kept for upcoming cofactor work.
+#[allow(dead_code)]
 fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
     let mut out = Vec::new();
     // Whether what is left is prime changes only when a division changes
@@ -608,6 +788,8 @@ fn is_prime_u64(n: u64) -> bool {
     true
 }
 
+/// Trial-division helper kept for upcoming cofactor work.
+#[allow(dead_code)]
 fn factorise_big(mut v: BigUint) -> Vec<(BigUint, u32)> {
     let mut out: Vec<(BigUint, u32)> = Vec::new();
     let mut d = BigUint::from(2u32);
@@ -628,7 +810,46 @@ fn factorise_big(mut v: BigUint) -> Vec<(BigUint, u32)> {
     out
 }
 
+/// `Some(v)` as a native word when the [`BigUint`] fits in 128 bits.
+fn biguint_to_u128(v: &BigUint) -> Option<u128> {
+    let limbs = v.to_u64_digits();
+    if limbs.len() > 2 {
+        return None;
+    }
+    Some(limbs[0] as u128 | ((limbs.get(1).copied().unwrap_or(0) as u128) << 64))
+}
+
+/// Native-word trial division: same factor list as [`factorise`], no
+/// allocations.  `d * d` cannot overflow: `d ≤ √v < 2^64`.
+fn factorise_u128(mut v: u128) -> Vec<(u128, u32)> {
+    let mut out: Vec<(u128, u32)> = Vec::new();
+    let mut d = 2u128;
+    while d * d <= v {
+        let mut e = 0;
+        while v.is_multiple_of(d) {
+            v /= d;
+            e += 1;
+        }
+        if e > 0 {
+            out.push((d, e));
+        }
+        d += 1;
+    }
+    if v > 1 {
+        out.push((v, 1));
+    }
+    out
+}
+
 impl KoblitzCurve {
+    /// Word arithmetic with the curve's actual field-encoded coefficient.
+    /// A subfield model's `a` tag is a basis index, not that coefficient.
+    pub(crate) fn fast_binary_curve(&self) -> Option<FastBinaryCurve> {
+        let mut fast = FastBinaryCurve::new(&self.curve.irreducible, 0)?;
+        fast.a = fast.word(&self.curve.a);
+        Some(fast)
+    }
+
     /// Build `K_a` over `F_{2^n}`: pick a defining irreducible
     /// polynomial, count points, split off the largest prime-order
     /// subgroup, find a generator of it, and determine `λ`.
@@ -641,6 +862,97 @@ impl KoblitzCurve {
             return None;
         }
         Self::subfield(1, n, u64::from(a), 1)
+    }
+
+
+    /// The pinned K_1 model over GF(2^83) used by the two-word IC stage
+    /// gate. Its parameters are the C082 public fixture.
+    pub fn known_n83_k1() -> Option<Self> {
+        Self::known_n83_from_fixture(
+            1,
+            "8569786107849059",
+            "1128547018",
+            "68a212cfe19a809fe0598",
+            "244a245ea0b17d8cc8297",
+        )
+    }
+
+    /// The pinned K_0 n=83 confidence-gate model and public subgroup
+    /// generator from `gate-m83-T001.json`. Its 81-bit subgroup order was
+    /// independently proved prime with the checked Sage launcher; the
+    /// certificate is in `research/f6_wide_n83_20261004/prime-check.txt`.
+    /// The generic constructor remains capped at [`MAX_N`] because its
+    /// factorisation and normal-basis helpers use single-word polynomials.
+    pub fn known_n83_k0() -> Option<Self> {
+        Self::known_n83_from_fixture(
+            0,
+            "2417851639230796216685689",
+            "4",
+            "477f77103dfad59850800",
+            "2fa5e737d542c4e4fd5c3",
+        )
+    }
+
+    fn known_n83_from_fixture(
+        a: u8,
+        order: &str,
+        cofactor: &str,
+        gx: &str,
+        gy: &str,
+    ) -> Option<Self> {
+        let n = 83;
+        let r = BigUint::parse_bytes(order.as_bytes(), 10)?;
+        let cofactor = BigUint::parse_bytes(cofactor.as_bytes(), 10)?;
+        let group_order = koblitz_point_count(a, n);
+        if group_order != &r * &cofactor
+            || r <= cofactor
+            || r.to_u64().is_some_and(|small| !is_prime_u64(small))
+        {
+            return None;
+        }
+        let generator = BinaryPoint::Affine {
+            x: F2mElement::from_hex(gx, n),
+            y: F2mElement::from_hex(gy, n),
+        };
+        let curve = BinaryCurve {
+            m: n,
+            irreducible: IrreduciblePoly {
+                degree: n,
+                low_terms: vec![0, 1, 2, 45],
+            },
+            a: if a == 0 {
+                F2mElement::zero(n)
+            } else {
+                F2mElement::one(n)
+            },
+            b: F2mElement::one(n),
+            generator: generator.clone(),
+            order: r.clone(),
+            cofactor: cofactor.clone(),
+        };
+        if !curve.is_on_curve(&generator)
+            || scalar_mul(&curve, &generator, &r) != BinaryPoint::Infinity
+        {
+            return None;
+        }
+        let trace = if a == 0 { -1 } else { 1 };
+        let lambda = frobenius_eigenvalue(&curve, trace, &r)?;
+        Some(Self {
+            a,
+            n,
+            curve,
+            trace,
+            group_order,
+            subgroup_order: r,
+            cofactor,
+            lambda,
+            frobenius_is_endomorphism: true,
+            k: 1,
+            q: 2,
+            a_index: u64::from(a),
+            b_index: 1,
+            subfield_basis: vec![F2mElement::one(n)],
+        })
     }
 
     /// **A curve defined over `F_q`, `q = 2^k`, taken over `F_{2^n}`**
@@ -669,8 +981,14 @@ impl KoblitzCurve {
         // are defined (a test pins that for every n ≤ 24) and far
         // cheaper past it, where the exhaustive scan would touch 2^n
         // masks: the sparse (trinomial/pentanomial) search is what
-        // reaches the boundary-ledger rungs at n = 37 / n = 41.
-        let irreducible = find_irreducible_sparse(n)?;
+        // reaches the boundary-ledger rungs at n = 37 / n = 41, and
+        // its `u128` twin reaches the wide rungs past the `u64` shift
+        // ceiling (`1u64 << n` wraps for `n ≥ 64`).
+        let irreducible = if n <= 63 {
+            find_irreducible_sparse(n)?
+        } else {
+            find_irreducible_sparse_wide(n)?
+        };
         // F_q ⊂ F_{2^n} is the kernel of X^{2^k} + X.
         let subfield_basis = linearised_kernel_basis(&[0, k], n, &irreducible);
         if subfield_basis.len() != k as usize {
@@ -781,12 +1099,131 @@ impl KoblitzCurve {
             a_index,
             b_index,
             subfield_basis,
+            frobenius_is_endomorphism: true,
         })
     }
 
+    /// Build an **isogenous member of the class of `K_a`**: the model
+    /// `y² + xy = x³ + a x² + b` over `F_{2^n}` with `b` arbitrary (in
+    /// practice `b ∉ F_2`, a floor curve of the isogeny volcano).
+    ///
+    /// Isogenous curves have equal point counts, so `#E` is taken from the
+    /// Koblitz recurrence for the class and then **certified** on sampled
+    /// points: every sample is killed by `#E`, and some sample realises the
+    /// full 2-part of `#E`.  With `r > 2√q` (every admitted rung) `#E` is
+    /// the only multiple of `r` in the Hasse interval, so the certificate
+    /// pins `#E`; a `b` whose curve is not in the class fails it and yields
+    /// `None`.
+    ///
+    /// The 2-power Frobenius is **not** an endomorphism of such a model:
+    /// `frobenius_is_endomorphism` is false, [`KoblitzCurve::frobenius`]
+    /// is the identity, `λ = 1`, and the factor-base machinery folds only
+    /// by negation.  `modulus` fixes the field representation (`None`
+    /// selects the same sparse search as [`KoblitzCurve::new`], so toy
+    /// classes built on that modulus can pass `b` verbatim).
+    pub fn isogenous_model(
+        a: u8,
+        n: u32,
+        b: F2mElement,
+        modulus: Option<IrreduciblePoly>,
+    ) -> Option<Self> {
+        if a > 1 || n < 3 || n > MAX_N {
+            return None;
+        }
+        let irreducible = match modulus {
+            Some(m) => {
+                if m.degree != n {
+                    return None;
+                }
+                m
+            }
+            None if n <= 63 => find_irreducible_sparse(n)?,
+            None => find_irreducible_sparse_wide(n)?,
+        };
+        let a_fe = if a == 0 {
+            F2mElement::zero(n)
+        } else {
+            F2mElement::one(n)
+        };
+        if b.is_zero() {
+            return None; // singular
+        }
+        let mut curve = BinaryCurve {
+            m: n,
+            irreducible,
+            a: a_fe,
+            b,
+            generator: BinaryPoint::Infinity,
+            order: BigUint::zero(),
+            cofactor: BigUint::one(),
+        };
+        let group_order = koblitz_point_count(a, n);
+
+        // Certify the class order on sampled points.
+        let half_order = &group_order >> 1u32;
+        let mask = if n >= 64 { u64::MAX } else { (1u64 << n) - 1 };
+        let mut state = 0x2545_f491_4f6c_dd1du64 ^ (n as u64) ^ ((a as u64) << 32);
+        let mut samples = 0usize;
+        // Every sample must be killed by `#E`; with `r > 2√q` (every admitted
+        // rung) `#E` is the only multiple of `r` in the Hasse interval, so a
+        // point of order `r` plus this check pins `#E`.  The second check,
+        // that some sample realises the full 2-part of `#E`, is a cheap extra
+        // guard against a twist of the same `r`-part.
+        let mut saw_full_two_part = false;
+        let mut tries = 0u32;
+        while samples < 16 && tries < 4096 {
+            tries += 1;
+            state = state
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
+            let x = F2mElement::from_biguint(&BigUint::from(state & mask), n);
+            for p in points_with_x(&curve, &x) {
+                samples += 1;
+                if scalar_mul(&curve, &p, &group_order) != BinaryPoint::Infinity {
+                    return None;
+                }
+                if scalar_mul(&curve, &p, &half_order) != BinaryPoint::Infinity {
+                    saw_full_two_part = true;
+                }
+            }
+        }
+        if samples < 8 || !saw_full_two_part {
+            return None;
+        }
+
+        let (r, cofactor) = attach_prime_subgroup(&mut curve, a, n, &group_order)?;
+        let trace: i64 = if a == 0 { -1 } else { 1 };
+        Some(Self {
+            a,
+            n,
+            curve,
+            trace,
+            group_order,
+            subgroup_order: r,
+            cofactor,
+            lambda: BigUint::one(),
+            frobenius_is_endomorphism: false,
+            k: 1,
+            q: 2,
+            a_index: u64::from(a),
+            b_index: 0,
+            subfield_basis: vec![F2mElement::one(n)],
+        })
+    }
+}
+
+
+impl KoblitzCurve {
+    /// The `2`-power Frobenius `π(x, y) = (x², y²)`; the identity on an
+    /// isogenous model where squaring would leave the curve.
+    ///
     /// The `q`-power Frobenius `π(x, y) = (x^q, y^q)` — squaring for a
-    /// Koblitz curve.
+    /// Koblitz curve — and the identity on an isogenous model where
+    /// field Frobenius would leave the curve.
     pub fn frobenius(&self, p: &BinaryPoint) -> BinaryPoint {
+        if !self.frobenius_is_endomorphism {
+            return p.clone();
+        }
         match p {
             BinaryPoint::Infinity => BinaryPoint::Infinity,
             BinaryPoint::Affine { x, y } => BinaryPoint::Affine {
@@ -796,9 +1233,14 @@ impl KoblitzCurve {
         }
     }
 
-    /// `x ↦ x^q`, the Frobenius on abscissae.
+    /// The abscissa action of [`Self::frobenius`]: `x ↦ x^q` when that
+    /// map is a curve endomorphism, and the identity otherwise.
     pub fn frobenius_x(&self, x: &F2mElement) -> F2mElement {
-        x.square_k_times(self.k, &self.curve.irreducible)
+        if self.frobenius_is_endomorphism {
+            x.square_k_times(self.k, &self.curve.irreducible)
+        } else {
+            x.clone()
+        }
     }
 
     /// The degree `e = n / k` of `F_{2^n}` over the subfield: the
@@ -860,6 +1302,77 @@ impl KoblitzCurve {
     pub fn generator(&self) -> &BinaryPoint {
         &self.curve.generator
     }
+}
+
+/// Factor `#E`, split off the largest prime `r` (which must be simple
+/// and exceed the cofactor), find a generator of the order-`r` subgroup,
+/// and store generator / order / cofactor on `curve`.  Shared by
+/// [`KoblitzCurve::isogenous_model`].
+fn attach_prime_subgroup(
+    curve: &mut BinaryCurve,
+    a: u8,
+    n: u32,
+    group_order: &BigUint,
+) -> Option<(BigUint, BigUint)> {
+    let factors = factorise(group_order.clone());
+    let (r, e) = factors.last()?.clone();
+    if e != 1 {
+        return None;
+    }
+    let cofactor = group_order / &r;
+    if r <= cofactor {
+        return None;
+    }
+
+    // A generator of the order-r subgroup: kill the cofactor on
+    // curve points until the result is non-trivial.  Exhaustive
+    // abscissa search is fine through ~24 bits; past that a full
+    // `2^n` sweep is impossible, so sample deterministically from
+    // a fixed LCG (reproducible across hosts).
+    let mut generator = BinaryPoint::Infinity;
+    let mask = if n >= 64 { u64::MAX } else { (1u64 << n) - 1 };
+    let exhaustive = n <= 24;
+    let budget = if exhaustive {
+        1u64 << n
+    } else {
+        // ~1M trials is plenty: a random x hits the curve ~1/2 of
+        // the time and survives the cofactor map with probability
+        // ≈ 1 − 1/r ≫ 2^{-20} on admitted rungs.
+        1u64 << 20
+    };
+    let mut state = 0x9e37_79b9_7f4a_7c15u64 ^ (n as u64) ^ ((a as u64) << 32);
+    for i in 0..budget {
+        let raw = if exhaustive {
+            i
+        } else {
+            state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+            state & mask
+        };
+        let x = F2mElement::from_biguint(&BigUint::from(raw), n);
+        let pts = points_with_x(curve, &x);
+        let mut found = false;
+        for p in pts {
+            let cand = scalar_mul(curve, &p, &cofactor);
+            if cand != BinaryPoint::Infinity {
+                // Confirm order divides r (reject accidental torsion).
+                if scalar_mul(curve, &cand, &r) == BinaryPoint::Infinity {
+                    generator = cand;
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if found {
+            break;
+        }
+    }
+    if generator == BinaryPoint::Infinity {
+        return None;
+    }
+    curve.generator = generator;
+    curve.order = r.clone();
+    curve.cofactor = cofactor.clone();
+    Some((r, cofactor))
 }
 
 /// Both points of `E` with the given `x`-coordinate, or an empty vector
@@ -1266,10 +1779,27 @@ impl FrobeniusFactorBase {
     /// every invariant subspace and carries the 2-torsion point — these
     /// classes are non-trivial and constrain which `m` can work at all.
     pub fn cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
-        self.points
-            .iter()
-            .map(|p| kc.mul(p, &kc.subgroup_order))
-            .collect()
+        match kc.fast_binary_curve() {
+            // One batched `[r]` for every point (was: one slow scalar mul
+            // each).  Bit-exact, so the class list is unchanged.
+            Some(fast) if kc.n <= 63 => {
+                let pts: Vec<ArithFastPoint> = self
+                    .points
+                    .iter()
+                    .map(|p| to_fast_point(&fast, p))
+                    .collect();
+                let rs: Vec<BigUint> = (0..pts.len()).map(|_| kc.subgroup_order.clone()).collect();
+                fast.batch_scalar_mul(&pts, &rs)
+                    .into_iter()
+                    .map(|p| from_fast_point(&fast, p))
+                    .collect()
+            }
+            _ => self
+                .points
+                .iter()
+                .map(|p| kc.mul(p, &kc.subgroup_order))
+                .collect(),
+        }
     }
 
     /// Distinct h-torsion classes `[r]P`, derived with one scalar
@@ -1280,25 +1810,52 @@ impl FrobeniusFactorBase {
     /// operations. Multiplicity is irrelevant to exact-summand reachability
     /// because decomposition permits repeated factor-base points.
     pub fn distinct_cofactor_classes(&self, kc: &KoblitzCurve) -> Vec<BinaryPoint> {
-        let mut classes = HashMap::new();
-        for orbit in &self.signed_orbits {
-            let Some(&representative) = orbit.first() else {
-                continue;
-            };
-            let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
-            let steps = if matches!(
+        let steps = if !kc.frobenius_is_endomorphism
+            || matches!(
                 self.domain,
                 FactorBaseDomain::StandardSubspace | FactorBaseDomain::CofactorProjection
             ) {
-                1
-            } else {
-                kc.n
-            };
-            for _ in 0..steps {
-                for candidate in [current.clone(), point_neg(&current)] {
-                    classes.entry(point_key(&candidate)).or_insert(candidate);
+            1
+        } else {
+            kc.extension_degree()
+        };
+        let Some(fast) = kc.fast_binary_curve().filter(|_| kc.n <= 63) else {
+            let mut classes = HashMap::new();
+            for orbit in &self.signed_orbits {
+                let Some(&representative) = orbit.first() else {
+                    continue;
+                };
+                let mut current = kc.mul(&self.points[representative], &kc.subgroup_order);
+                for _ in 0..steps {
+                    for candidate in [current.clone(), point_neg(&current)] {
+                        classes.entry(point_key(&candidate)).or_insert(candidate);
+                    }
+                    current = kc.frobenius(&current);
                 }
-                current = kc.frobenius(&current);
+            }
+            return classes.into_values().collect();
+        };
+        let reps: Vec<ArithFastPoint> = self
+            .signed_orbits
+            .iter()
+            .filter_map(|orbit| {
+                orbit
+                    .first()
+                    .map(|&i| to_fast_point(&fast, &self.points[i]))
+            })
+            .collect();
+        let rs: Vec<BigUint> = (0..reps.len()).map(|_| kc.subgroup_order.clone()).collect();
+        let projs = fast.batch_scalar_mul(&reps, &rs);
+        let mut classes = HashMap::new();
+        for projected in projs {
+            let mut current = projected;
+            for _ in 0..steps {
+                for candidate in [current, FastBinaryCurve::neg(current)] {
+                    classes
+                        .entry(pack_fast(candidate))
+                        .or_insert_with(|| from_fast_point(&fast, candidate));
+                }
+                current = fast_frobenius(kc, &fast, current);
             }
         }
         classes.into_values().collect()
@@ -1323,6 +1880,82 @@ impl FrobeniusFactorBase {
         if m == 1 {
             return classes.contains(&BinaryPoint::Infinity);
         }
+        // `Σ c_i = O` with `m` summands ⇔ `−c_m` lies in the (m − 1)-fold
+        // sumset, and the classes are closed under negation, so it is
+        // enough to build `m − 1` layers and intersect with the classes.
+        //
+        // Every layer is closed under Frobenius and negation (the
+        // classes are, and both commute with addition), so a layer is
+        // generated by adding the classes to one representative per
+        // signed Frobenius orbit of the previous layer and closing the
+        // result under squaring and negation — cheap field squarings in
+        // place of the `|layer| · |classes|` point additions the naive
+        // walk pays.  Each layer holds at most `h` points.
+        //
+        // The grid additions run as one Montgomery batch per layer and
+        // the walks on words; sets, keys, and the verdict match the
+        // general-field version exactly.  Curves too wide for the
+        // single-word field take the original slow path below.
+        let Some(fast) = kc.fast_binary_curve().filter(|_| kc.n <= 63) else {
+            return self.m_can_decompose_slow(kc, &classes, m);
+        };
+        let class_pts: Vec<ArithFastPoint> =
+            classes.iter().map(|c| to_fast_point(&fast, c)).collect();
+        let class_keys: HashSet<u64> = class_pts.iter().map(|&p| pack_fast(p)).collect();
+        let identity = pack_fast(None);
+        let mut layer: Vec<ArithFastPoint> = vec![None];
+        let mut layer_keys: HashSet<u64> = HashSet::from([identity]);
+        let frob = |p: ArithFastPoint| fast_frobenius(kc, &fast, p);
+        for _ in 1..m {
+            let reps = signed_frobenius_orbit_representatives_fast(&fast, kc, &layer);
+            // One batch for the reps × classes grid; replayed below in
+            // the same nested order, so traversal matches exactly.
+            let mut pairs = Vec::with_capacity(reps.len() * class_pts.len());
+            for q in &reps {
+                let (qx, qy, qi) = match q {
+                    None => (0, 0, true),
+                    Some((x, y)) => (*x, *y, false),
+                };
+                for c in &class_pts {
+                    let (cx, cy, ci) = match c {
+                        None => (0, 0, true),
+                        Some((x, y)) => (*x, *y, false),
+                    };
+                    pairs.push((qx, qy, cx, cy, qi, ci));
+                }
+            }
+            let seeds = fast.batch_add(&pairs);
+            let mut next_keys: HashSet<u64> = HashSet::new();
+            let mut next: Vec<ArithFastPoint> = Vec::new();
+            let mut it = seeds.into_iter();
+            for _ in &reps {
+                for _ in &class_pts {
+                    let seed = it.next().expect("grid batch mirrors the nested loops");
+                    if next_keys.contains(&pack_fast(seed)) {
+                        continue;
+                    }
+                    // Close the orbit of `seed` under π and negation.
+                    let mut current = seed;
+                    for _ in 0..kc.n {
+                        for candidate in [current, FastBinaryCurve::neg(current)] {
+                            if next_keys.insert(pack_fast(candidate)) {
+                                next.push(candidate);
+                            }
+                        }
+                        current = frob(current);
+                    }
+                }
+            }
+            layer = next;
+            layer_keys = next_keys;
+        }
+        layer_keys.iter().any(|k| class_keys.contains(k))
+    }
+
+    /// Slow general-field admissibility walk, kept for curves too wide
+    /// for the single-word fast path (unreachable via the constructor)
+    /// and as a second reference alongside the naive one in tests.
+    fn m_can_decompose_slow(&self, kc: &KoblitzCurve, classes: &[BinaryPoint], m: usize) -> bool {
         match FastCurve::new(&kc.curve) {
             Some(fc) => fast_classes_can_cancel(kc, &fc, &classes, m),
             None => classes_can_cancel(kc, &classes, m),
@@ -1404,6 +2037,62 @@ fn signed_frobenius_orbit_representatives(
             seen.insert(pack_point(&current));
             seen.insert(pack_point(&point_neg(&current)));
             current = kc.frobenius(&current);
+        }
+    }
+    reps
+}
+
+/// Apply the curve's q-power Frobenius to a word point.  For subfield
+/// curves q = 2^k; an isogenous model without this endomorphism is fixed.
+fn fast_frobenius(
+    kc: &KoblitzCurve,
+    fast: &FastBinaryCurve,
+    point: ArithFastPoint,
+) -> ArithFastPoint {
+    if !kc.frobenius_is_endomorphism {
+        return point;
+    }
+    match point {
+        None => None,
+        Some((mut x, mut y)) => {
+            for _ in 0..kc.k {
+                x = fast.gf.sqr(x);
+                y = fast.gf.sqr(y);
+            }
+            Some((x, y))
+        }
+    }
+}
+
+/// The same curve action on the packed `FastCurve` point representation.
+fn packed_curve_frobenius(kc: &KoblitzCurve, fc: &FastCurve, point: FastPoint) -> FastPoint {
+    if kc.frobenius_is_endomorphism {
+        fc.frobenius_k(point, kc.k)
+    } else {
+        point
+    }
+}
+
+/// Word-level twin of [`signed_frobenius_orbit_representatives`]: same
+/// traversal over packed keys, so the representative sequence matches
+/// exactly while the arithmetic stays allocation-free.
+fn signed_frobenius_orbit_representatives_fast(
+    fast: &FastBinaryCurve,
+    kc: &KoblitzCurve,
+    points: &[ArithFastPoint],
+) -> Vec<ArithFastPoint> {
+    let mut seen: HashSet<u64> = HashSet::with_capacity(points.len());
+    let mut reps = Vec::new();
+    for &p in points {
+        if seen.contains(&pack_fast(p)) {
+            continue;
+        }
+        reps.push(p);
+        let mut current = p;
+        for _ in 0..kc.n {
+            seen.insert(pack_fast(current));
+            seen.insert(pack_fast(FastBinaryCurve::neg(current)));
+            current = fast_frobenius(kc, fast, current);
         }
     }
     reps
@@ -1504,7 +2193,7 @@ fn fast_classes_can_cancel(
                 for _ in 0..kc.n {
                     next_keys.insert(current.pack());
                     next_keys.insert(fc.neg(current).pack());
-                    current = fc.frobenius_k(current, kc.k);
+                    current = packed_curve_frobenius(kc, fc, current);
                 }
             }
         }
@@ -1562,22 +2251,25 @@ pub fn q_linearised_kernel_basis(
 /// Kernel basis of an `F_2`-linear map on `F_{2^n}` given by its action
 /// on the polynomial basis.
 fn kernel_basis_of(n: u32, image: impl Fn(&F2mElement) -> F2mElement) -> Vec<F2mElement> {
-    // Column i = F(z^i), packed into the low n bits of a u64.
-    let mut rows: Vec<(u64, u64)> = Vec::with_capacity(n as usize);
+    // Column i = F(z^i), packed into the low n bits of a u128.
+    // Retain both coordinate words for the admitted degrees 64..=127.
+    let mut rows: Vec<(u128, u128)> = Vec::with_capacity(n as usize);
     for i in 0..n {
         let basis = F2mElement::from_bit_positions(&[i], n);
         let img = image(&basis);
-        let img_bits = img.raw_bits().first().copied().unwrap_or(0);
-        rows.push((img_bits, 1u64 << i));
+        let words = img.raw_bits();
+        let img_bits = u128::from(words.first().copied().unwrap_or(0))
+            | (u128::from(words.get(1).copied().unwrap_or(0)) << 64);
+        rows.push((img_bits, 1u128 << i));
     }
 
     // Gaussian elimination on the image halves; whatever reduces to
     // zero contributes its preimage to the kernel basis.
-    let mut pivots: Vec<(u64, u64)> = Vec::new();
-    let mut kernel_basis: Vec<u64> = Vec::new();
+    let mut pivots: Vec<(u128, u128)> = Vec::new();
+    let mut kernel_basis: Vec<u128> = Vec::new();
     for (mut img, mut pre) in rows {
         for &(pimg, ppre) in &pivots {
-            let lead = 1u64 << (63 - pimg.leading_zeros());
+            let lead = 1u128 << (127 - pimg.leading_zeros());
             if img & lead != 0 {
                 img ^= pimg;
                 pre ^= ppre;
@@ -1702,7 +2394,17 @@ fn poly_mul_full(a: u64, b: u64) -> Option<u64> {
 /// [`factor_x_n_minus_1`] returns only the non-trivial factors; a
 /// divisor may use `x + 1` too, so the divisor-based constructions take
 /// their indices into this list.
+///
+/// Memoised (pure in `n`); the uncached scan follows.
 pub fn all_factors_of_x_n_minus_1(n: u32) -> Vec<u64> {
+    if let Some(hit) = memo_get(&ALL_FACTORS_MEMO, n) {
+        return hit;
+    }
+    memo_put(&ALL_FACTORS_MEMO, n, all_factors_of_x_n_minus_1_uncached(n))
+}
+
+/// Uncached scan behind [`all_factors_of_x_n_minus_1`].
+fn all_factors_of_x_n_minus_1_uncached(n: u32) -> Vec<u64> {
     let mut out = vec![0b11u64]; // x + 1
                                  // The degrees that occur are exactly the cyclotomic coset sizes;
                                  // the size-1 coset is {0}, already covered by x + 1 above.
@@ -2374,7 +3076,9 @@ pub fn build_subgroup_orbit_factor_base_with_cost(
             for _ in 0..kc.extension_degree() {
                 abscissae.insert(orbit.to_biguint());
                 orbit = kc.frobenius_x(&orbit);
-                cost.frobenius_squarings += 1;
+                if kc.frobenius_is_endomorphism {
+                    cost.frobenius_squarings += u64::from(kc.k);
+                }
             }
             representatives.push(x);
             added += 1;
@@ -2460,6 +3164,27 @@ pub fn saturate_factor_base_two_torsion(
     if kc.mul(&t, &kc.cofactor) != BinaryPoint::Infinity {
         return None;
     }
+    // Translate every base point by T in one Montgomery batch (a single
+    // inversion for the whole base instead of one slow inversion per
+    // point).  Results are bit-identical to the per-point adds, so the
+    // collected abscissa set — and everything built from it — is
+    // unchanged.  The at-most-one doubling case (P = T itself) takes the
+    // exact slow path inside the batch.
+    let fast = kc.fast_binary_curve()?;
+    let (tx, ty) = match &t {
+        BinaryPoint::Affine { x, y } => (fast.word(x), fast.word(y)),
+        BinaryPoint::Infinity => return None,
+    };
+    let mut pairs = Vec::with_capacity(fb.points.len());
+    for p in &fb.points {
+        match p {
+            BinaryPoint::Infinity => pairs.push((0, 0, tx, ty, true, false)),
+            BinaryPoint::Affine { x, y } => {
+                pairs.push((fast.word(x), fast.word(y), tx, ty, false, false))
+            }
+        }
+    }
+    let sums = fast.batch_add(&pairs);
     let mut xs = std::collections::BTreeMap::new();
     for p in &fb.points {
         for q in [p.clone(), kc.add(p, &t)] {
@@ -2525,7 +3250,7 @@ fn orbit_maps_packed(
             }
             orbit_of[idx] = (o, k);
             cycle.push(idx);
-            cur = curve.frobenius_k(cur, kc.k);
+            cur = packed_curve_frobenius(kc, curve, cur);
             k += 1;
         }
         orbits.push(cycle);
@@ -2550,7 +3275,7 @@ fn orbit_maps_packed(
                     return None;
                 }
             }
-            current = curve.frobenius_k(current, kc.k);
+            current = packed_curve_frobenius(kc, curve, current);
         }
         if current != fast[start] {
             return None;
@@ -3537,6 +4262,136 @@ impl Default for ProbeBudget {
     }
 }
 
+/// Least-significant-digit radix sort of table entries by packed key.
+///
+/// Stable 16-bit counting-sort passes over two buffers, one pass per
+/// 16-bit group that can discriminate (a key-OR pre-pass finds the top
+/// group; higher groups permute nothing).  Work is split into a few
+/// wide chunks across the rayon pool in both the counting and scatter
+/// phases — those phases are memory-bandwidth bound, so more threads
+/// add contention rather than throughput, while the serial prefix costs
+/// `chunks × 64K`.  A short serial prefix over the per-chunk histograms
+/// assigns disjoint output ranges, so no atomics or locks are needed.
+///
+/// Stability preserves the build's row-major `(i, j)` order within each
+/// key group.  Callers need key-grouped order only (binary-search lookup
+/// ranges, key-grouped `m = 4` walk); the previous comparison sort made
+/// no order guarantee within a group either, and every gate checks
+/// verdicts, witness validity, and sortedness rather than exact order.
+fn radix_sort_entries_by_key(entries: &mut [(u64, u32, u32)]) {
+    const BITS: u32 = 16;
+    const BUCKETS: usize = 1 << BITS;
+    const MASK: u64 = (1 << BITS) - 1;
+    let n = entries.len();
+    if n < 2 {
+        return;
+    }
+    // Few wide chunks: counting and scatter are memory-bandwidth bound
+    // (more threads add contention, not throughput), while the serial
+    // prefix below costs `chunks × 64K` operations.
+    let parallelism = std::thread::available_parallelism()
+        .map(|t| t.get())
+        .unwrap_or(1)
+        .clamp(1, 8);
+    let chunks = parallelism.min(n).max(1);
+    // Balanced division bounds: chunk c covers [c*n/chunks, (c+1)*n/chunks).
+    // Every bound satisfies lo <= hi <= n (empty tail chunks become (n, n),
+    // which slice harmlessly), and sizes differ by at most one entry.
+    let bounds: Vec<(usize, usize)> = (0..chunks)
+        .map(|c| ((c * n) / chunks, ((c + 1) * n) / chunks))
+        .collect();
+    let mut scratch: Vec<(u64, u32, u32)> = vec![(0, 0, 0); n];
+    // One histogram row and one cursor row per chunk, reused across passes.
+    let mut hists: Vec<Vec<usize>> = (0..chunks).map(|_| vec![0usize; BUCKETS]).collect();
+    let mut starts: Vec<Vec<usize>> = (0..chunks).map(|_| vec![0usize; BUCKETS]).collect();
+    // Only the 16-bit groups that can discriminate need passes: groups
+    // above the highest set key bit permute nothing.  (At n = 13 every
+    // packed key fits 15 bits, so one pass sorts the whole table.)
+    let key_or: u64 = entries
+        .par_iter()
+        .map(|e| e.0)
+        .reduce(|| 0u64, |a, b| a | b);
+    let passes = ((64 - key_or.leading_zeros()) as usize).div_ceil(16).max(1);
+    let mut from_scratch = false;
+    for pass in 0..passes as u32 {
+        let shift = BITS * pass;
+        for hist in hists.iter_mut() {
+            hist.iter_mut().for_each(|c| *c = 0);
+        }
+        // Phase A: count chunk histograms in parallel.
+        {
+            let src: &[(u64, u32, u32)] = if from_scratch { &scratch } else { entries };
+            bounds
+                .par_iter()
+                .zip(hists.par_iter_mut())
+                .for_each(|(&(lo, hi), hist)| {
+                    for e in &src[lo..hi] {
+                        hist[((e.0 >> shift) & MASK) as usize] += 1;
+                    }
+                });
+        }
+        // Phase B (serial): per-chunk scatter cursors.  Chunk c's items
+        // in bucket b follow all earlier buckets (`base`) plus earlier
+        // chunks' items in bucket b; `base` then advances by the
+        // bucket total.
+        {
+            let mut base = 0usize;
+            for b in 0..BUCKETS {
+                for (c, hist) in hists.iter().enumerate() {
+                    starts[c][b] = base;
+                    base += hist[b];
+                }
+            }
+        }
+        // Phase C: scatter chunks in parallel.  Positions written by
+        // different chunks are disjoint by construction (each output
+        // slot belongs to exactly one (chunk, bucket) segment), so the
+        // destination base address travels as a plain `usize` (natively
+        // `Send + Sync`, unlike a raw pointer) and each worker casts it
+        // back locally.  rayon::scope joins every worker before return.
+        //
+        // SAFETY: `starts[c][b]` is `base[b]` plus bucket-`b` items of
+        // earlier chunks, and exactly `hists[c][b]` items of chunk `c`
+        // fall in bucket `b`; hence chunk `c` writes precisely
+        // `[starts[c][b], starts[c][b] + hists[c][b])`, and these
+        // segments partition `[0, n)` across all `(c, b)`.  Every slot
+        // is therefore written exactly once, no two threads ever write
+        // the same slot, and no thread reads the destination.  All
+        // scoped threads join before either buffer is touched again, so
+        // the address-derived pointers never outlive their buffer.
+        {
+            let dst_addr = (if from_scratch {
+                entries.as_mut_ptr()
+            } else {
+                scratch.as_mut_ptr()
+            }) as usize;
+            let src_all: &[(u64, u32, u32)] = if from_scratch { &scratch } else { entries };
+            rayon::scope(|s| {
+                for ((lo, hi), starts_c) in bounds.iter().copied().zip(starts.iter()) {
+                    let mut cur = starts_c.clone();
+                    s.spawn(move |_| {
+                        let dst = dst_addr as *mut (u64, u32, u32);
+                        for e in &src_all[lo..hi] {
+                            let b = ((e.0 >> shift) & MASK) as usize;
+                            // SAFETY: justified above; `cur[b]` stays
+                            // inside this chunk's segment by counting.
+                            unsafe {
+                                dst.add(cur[b]).write(*e);
+                            }
+                            cur[b] += 1;
+                        }
+                    });
+                }
+            });
+        }
+        from_scratch = !from_scratch;
+    }
+    // An odd pass count leaves the sorted output in the scratch buffer.
+    if from_scratch {
+        entries.copy_from_slice(&scratch);
+    }
+}
+
 impl PairSumTable {
     /// Entries a table may occupy before [`Self::build`] refuses: 4 GiB,
     /// which is a base of about 16000 points.
@@ -4418,7 +5273,9 @@ impl PairSumTable {
             tagged,
         ))
     }
+}
 
+impl PairSumTable {
     /// A folded table around stored words, however they were built:
     /// everything a lookup needs beyond the words themselves comes from
     /// the base.  `parts.canon_tables` is not read — `canon` is the basis
@@ -4831,7 +5688,28 @@ impl PairSumTable {
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
+}
 
+/// Project a general point to single-word coordinates for the fast field.
+pub(crate) fn to_fast_point(fast: &FastBinaryCurve, p: &BinaryPoint) -> ArithFastPoint {
+    match p {
+        BinaryPoint::Infinity => None,
+        BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
+    }
+}
+
+/// Lift single-word coordinates back to a general point.
+pub(crate) fn from_fast_point(fast: &FastBinaryCurve, p: ArithFastPoint) -> BinaryPoint {
+    match p {
+        None => BinaryPoint::Infinity,
+        Some((x, y)) => BinaryPoint::Affine {
+            x: fast.element(x),
+            y: fast.element(y),
+        },
+    }
+}
+
+impl PairSumTable {
     /// The single-word curve the table was built on.
     pub fn curve(&self) -> &FastCurve {
         &self.curve
@@ -5665,7 +6543,7 @@ pub(crate) fn lift_candidate(
 /// pivot row retains its expression in the original basis so a residual
 /// point can be checked against a partially assigned summand code.
 struct F6CoordinateEncoder {
-    rows: Vec<(u32, u64, u64)>,
+    rows: Vec<(u32, u128, u64)>,
 }
 
 struct F6FastGeometry {
@@ -5677,16 +6555,24 @@ struct F6FastGeometry {
 }
 
 impl F6CoordinateEncoder {
+    fn field_word(element: &F2mElement) -> Option<u128> {
+        let bits = element.raw_bits();
+        if bits.is_empty() || bits.len() > 2 {
+            return None;
+        }
+        Some(u128::from(bits[0]) | (u128::from(*bits.get(1).unwrap_or(&0)) << 64))
+    }
+
     fn new(basis: &[F2mElement]) -> Option<Self> {
         if basis.len() >= 64 {
             return None;
         }
-        let mut rows: Vec<(u32, u64, u64)> = Vec::with_capacity(basis.len());
+        let mut rows: Vec<(u32, u128, u64)> = Vec::with_capacity(basis.len());
         for (j, element) in basis.iter().enumerate() {
-            let mut value = *element.raw_bits().first()?;
+            let mut value = Self::field_word(element)?;
             let mut code = 1u64 << j;
             for &(pivot, row, row_code) in &rows {
-                if value & (1u64 << pivot) != 0 {
+                if value & (1u128 << pivot) != 0 {
                     value ^= row;
                     code ^= row_code;
                 }
@@ -5694,23 +6580,38 @@ impl F6CoordinateEncoder {
             if value == 0 {
                 return None;
             }
-            rows.push((63 - value.leading_zeros(), value, code));
+            rows.push((127 - value.leading_zeros(), value, code));
             rows.sort_unstable_by_key(|a| std::cmp::Reverse(a.0));
         }
         Some(Self { rows })
     }
 
     fn encode(&self, element: &F2mElement) -> Option<u64> {
-        let mut value = *element.raw_bits().first()?;
+        let mut value = Self::field_word(element)?;
         let mut code = 0u64;
         for &(pivot, row, row_code) in &self.rows {
-            if value & (1u64 << pivot) != 0 {
+            if value & (1u128 << pivot) != 0 {
                 value ^= row;
                 code ^= row_code;
             }
         }
         (value == 0).then_some(code)
     }
+}
+
+thread_local! {
+    /// The pair-sum index of the last base an F6-IC pair-index gate built
+    /// one for, keyed by the base's fingerprint: the index depends on the
+    /// base alone, so every target and attempt on that base reuses it.
+    static SHARED_PAIR_INDEX: RefCell<Option<(u64, Rc<HashMap<FastPoint, Vec<(usize, usize)>>>)>> =
+        const { RefCell::new(None) };
+}
+
+/// `KIC_F6_PARTIAL_SUPPORT=0` turns the gate's partial support test off, as
+/// a same-binary control; read once per process.
+fn partial_support_enabled() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("KIC_F6_PARTIAL_SUPPORT").as_deref() != Ok("0"))
 }
 
 /// F6-IC's target-specific geometric branch oracle. It may close a branch
@@ -5724,10 +6625,27 @@ struct F6GeometricGate<'a> {
     vars: Vec<Vec<usize>>,
     encoder: F6CoordinateEncoder,
     by_x: HashMap<BigUint, Vec<usize>>,
+    /// The distinct subspace codes of the usable base points, for the
+    /// partial support test: a summand whose assigned bits match none of
+    /// them cannot be a base point whatever its free bits become.
+    codes: Vec<u64>,
     fast: Option<F6FastGeometry>,
     batch_fast: bool,
+    pair_index_enabled: bool,
+    /// Every unordered pair sum of the packed base, keyed by the sum.  It
+    /// depends on the base alone, so one index serves every target and
+    /// every attempt on the same base: built once (eagerly, in the
+    /// pair-index arm) and kept in [`SHARED_PAIR_INDEX`].
+    pair_index: Option<Rc<HashMap<FastPoint, Vec<(usize, usize)>>>>,
+    /// Fingerprint of the packed base the index is for.
+    pair_index_key: u64,
+    pair_index_builds: u64,
+    pair_index_lookups: u64,
+    one_fixed_additions: u64,
     witness: Option<Vec<usize>>,
     support_checks: u64,
+    partial_support_checks: u64,
+    partial_support_refutations: u64,
     residual_lookups: u64,
     fast_residual_lookups: u64,
     batch_groups: u64,
@@ -5752,6 +6670,7 @@ impl<'a> F6GeometricGate<'a> {
         }
         let encoder = F6CoordinateEncoder::new(&fb.subspace_basis)?;
         let mut by_x: HashMap<BigUint, Vec<usize>> = HashMap::new();
+        let mut codes: Vec<u64> = Vec::with_capacity(fb.points.len());
         for (index, point) in fb.points.iter().enumerate() {
             if index_of.get(&point_key(point)) != Some(&index) {
                 return None;
@@ -5759,9 +6678,11 @@ impl<'a> F6GeometricGate<'a> {
             let BinaryPoint::Affine { x, .. } = point else {
                 continue;
             };
-            encoder.encode(x)?;
+            codes.push(encoder.encode(x)?);
             by_x.entry(x.to_biguint()).or_default().push(index);
         }
+        codes.sort_unstable();
+        codes.dedup();
         let fast = FastCurve::new(&kc.curve).and_then(|curve| {
             let points: Vec<_> = fb.points.iter().map(|p| curve.lift(p)).collect();
             let target_fast = curve.lift(target);
@@ -5790,6 +6711,16 @@ impl<'a> F6GeometricGate<'a> {
                 codes,
             })
         });
+        let pair_index_key = fast
+            .as_ref()
+            .map(|f| {
+                use std::hash::{Hash, Hasher};
+                let mut h = std::collections::hash_map::DefaultHasher::new();
+                (kc.a, kc.n, f.points.len()).hash(&mut h);
+                f.points.hash(&mut h);
+                h.finish()
+            })
+            .unwrap_or(0);
         let vars = (0..m)
             .map(|i| {
                 (0..ell)
@@ -5808,10 +6739,19 @@ impl<'a> F6GeometricGate<'a> {
             vars,
             encoder,
             by_x,
+            codes,
             fast,
             batch_fast: true,
+            pair_index_enabled: false,
+            pair_index: None,
+            pair_index_key,
+            pair_index_builds: 0,
+            pair_index_lookups: 0,
+            one_fixed_additions: 0,
             witness: None,
             support_checks: 0,
+            partial_support_checks: 0,
+            partial_support_refutations: 0,
             residual_lookups: 0,
             fast_residual_lookups: 0,
             batch_groups: 0,
@@ -5866,6 +6806,121 @@ impl<'a> F6GeometricGate<'a> {
     /// exact branch decision: try its usable point lifts against every
     /// second base point, then look up the uniquely determined third point.
     fn close_one_fixed(
+        &mut self,
+        fixed: &(usize, BigUint),
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> bool {
+        if self.pair_index_enabled && self.fast.is_some() {
+            // The index is a property of the base: take the one a previous
+            // gate on this base left, or build it now and leave it for the
+            // next.  Its additions are charged to the target that builds it.
+            if self.pair_index.is_none() {
+                self.pair_index = SHARED_PAIR_INDEX.with(|cache| {
+                    cache
+                        .borrow()
+                        .as_ref()
+                        .filter(|(key, _)| *key == self.pair_index_key)
+                        .map(|(_, index)| index.clone())
+                });
+            }
+            if self.pair_index.is_none() {
+                self.build_pair_index();
+                if let Some(index) = &self.pair_index {
+                    SHARED_PAIR_INDEX.with(|cache| {
+                        *cache.borrow_mut() = Some((self.pair_index_key, index.clone()));
+                    });
+                }
+            }
+            if self.pair_index.is_some() {
+                return match self.close_one_fixed_fast_pair(fixed, assignment, defined_mask) {
+                    Some(chosen) if self.verify_witness(&chosen) => true,
+                    Some(_) => self.close_one_fixed_legacy(fixed, assignment, defined_mask),
+                    None => false,
+                };
+            }
+        }
+        let before = self.group_additions;
+        let found = self.close_one_fixed_legacy(fixed, assignment, defined_mask);
+        self.one_fixed_additions += self.group_additions - before;
+        found
+    }
+
+    fn build_pair_index(&mut self) {
+        let Some(fast) = self.fast.as_ref() else {
+            return;
+        };
+        let mut index: HashMap<FastPoint, Vec<(usize, usize)>> = HashMap::new();
+        let mut scratch = BatchScratch::default();
+        let mut sums = Vec::new();
+        for first in 0..fast.points.len() {
+            sums.clear();
+            fast.curve.add_many(
+                fast.points[first],
+                &fast.points[first..],
+                &mut sums,
+                &mut scratch,
+            );
+            assert_eq!(sums.len(), fast.points.len() - first);
+            self.group_additions += sums.len() as u64;
+            self.batch_groups += 1;
+            for (offset, &sum) in sums.iter().enumerate() {
+                index.entry(sum).or_default().push((first, first + offset));
+            }
+        }
+        self.pair_index = Some(Rc::new(index));
+        self.pair_index_builds += 1;
+    }
+
+    fn close_one_fixed_fast_pair(
+        &mut self,
+        fixed: &(usize, BigUint),
+        assignment: &[Option<bool>],
+        defined_mask: u64,
+    ) -> Option<[usize; 3]> {
+        let fast = self.fast.as_ref()?;
+        let index = self.pair_index.as_ref()?;
+        let free: Vec<_> = (0..3).filter(|&i| i != fixed.0).collect();
+        let (second, third) = (free[0], free[1]);
+        let choices = self.by_x.get(&fixed.1)?;
+        for &first in choices {
+            self.group_additions += 1;
+            let residual = fast
+                .curve
+                .add(fast.target, fast.curve.neg(fast.points[first]));
+            self.pair_index_lookups += 1;
+            let Some(pairs) = index.get(&residual) else {
+                continue;
+            };
+            for &(left, right) in pairs {
+                for &(second_index, third_index) in &[(left, right), (right, left)] {
+                    if Self::code_matches(
+                        &self.vars[second],
+                        fast.codes[second_index],
+                        assignment,
+                        defined_mask,
+                    ) && Self::code_matches(
+                        &self.vars[third],
+                        fast.codes[third_index],
+                        assignment,
+                        defined_mask,
+                    ) {
+                        let mut chosen = [usize::MAX; 3];
+                        chosen[fixed.0] = first;
+                        chosen[second] = second_index;
+                        chosen[third] = third_index;
+                        return Some(chosen);
+                    }
+                    if left == right {
+                        break;
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    fn close_one_fixed_legacy(
         &mut self,
         fixed: &(usize, BigUint),
         assignment: &[Option<bool>],
@@ -6090,18 +7145,42 @@ impl<'a> F6GeometricGate<'a> {
         for (i, vars) in self.vars.iter().enumerate() {
             let mut x = F2mElement::zero(self.kc.n);
             let mut complete = true;
+            // The summand's assigned, undefined bits as a code mask and
+            // value: any base point this summand can still be has a code
+            // agreeing with them.
+            let mut assigned_mask = 0u64;
+            let mut assigned_code = 0u64;
             for (j, &var) in vars.iter().enumerate() {
                 if defined_mask & (1u64 << var) != 0 {
                     complete = false;
-                    break;
+                    continue;
                 }
                 match assignment[var] {
-                    Some(true) => x.add_assign(&self.fb.subspace_basis[j]),
-                    Some(false) => {}
-                    None => {
-                        complete = false;
-                        break;
+                    Some(true) => {
+                        assigned_mask |= 1u64 << j;
+                        assigned_code |= 1u64 << j;
+                        if complete {
+                            x.add_assign(&self.fb.subspace_basis[j]);
+                        }
                     }
+                    Some(false) => assigned_mask |= 1u64 << j,
+                    None => complete = false,
+                }
+            }
+            if !complete && assigned_mask != 0 && partial_support_enabled() {
+                // Exact partial support: refute as soon as the bits fixed
+                // so far rule out every base code.  Sound for every
+                // decomposition over the enumerated base, since each of its
+                // summands has one of these codes; this is the SAT path's
+                // coordinate domain, applied inside the algebraic tree.
+                self.partial_support_checks += 1;
+                if !self
+                    .codes
+                    .iter()
+                    .any(|&code| code & assigned_mask == assigned_code)
+                {
+                    self.partial_support_refutations += 1;
+                    return NodeOracleDecision::Refute;
                 }
             }
             if complete {
@@ -6113,7 +7192,11 @@ impl<'a> F6GeometricGate<'a> {
                 fixed.push((i, key));
             }
         }
-        if self.vars.len() == 3 && fixed.len() == 1 && self.fb.points.len() <= 256 {
+        // One-fixed closure scans the base (Θ(|F|) additions a call), so it
+        // is capped at 256 points; with a pair index a call is two lookups,
+        // and the cap does not apply.
+        let indexed = self.pair_index_enabled && self.fast.is_some();
+        if self.vars.len() == 3 && fixed.len() == 1 && (self.fb.points.len() <= 256 || indexed) {
             return if self.close_one_fixed(&fixed[0], assignment, defined_mask) {
                 NodeOracleDecision::Witness
             } else {
@@ -6195,6 +7278,7 @@ pub fn groebner_decompose(
         engine,
         node_budget,
         false,
+        false,
         Some(sys),
     )
 }
@@ -6233,6 +7317,45 @@ pub fn groebner_decompose_f6_ic(
         engine,
         node_budget,
         true,
+        false,
+        None,
+    )
+}
+
+/// Opt-in F6-IC geometric closure with an adaptively built exact pair-sum
+/// index. The original F6-IC path remains the reference.
+#[allow(clippy::too_many_arguments)]
+pub fn groebner_decompose_f6_ic_pair_index(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    index_of: &HashMap<(BigUint, BigUint), usize>,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    engine: SolverEngine,
+    node_budget: usize,
+) -> (Option<Vec<usize>>, SolveStats) {
+    if !matches!(engine.effective(), SolverEngine::InheritedF4 { .. }) {
+        return (
+            None,
+            SolveStats {
+                exhausted: true,
+                unsupported: true,
+                ..Default::default()
+            },
+        );
+    }
+    groebner_decompose_with_geometry(
+        kc,
+        fb,
+        index_of,
+        st,
+        target,
+        m,
+        engine,
+        node_budget,
+        true,
+        true,
         None,
     )
 }
@@ -6248,6 +7371,7 @@ fn groebner_decompose_with_geometry(
     engine: SolverEngine,
     node_budget: usize,
     f6_ic: bool,
+    pair_index_enabled: bool,
     prebuilt: Option<crate::cryptanalysis::koblitz_groebner::DecompositionSystem>,
 ) -> (Option<Vec<usize>>, SolveStats) {
     let unsupported = || SolveStats {
@@ -6320,18 +7444,33 @@ fn groebner_decompose_with_geometry(
     if f6_ic {
         if let Some(mut gate) = F6GeometricGate::new(kc, fb, index_of, target, m, order.as_deref())
         {
+            gate.pair_index_enabled = pair_index_enabled;
+            let mut oracle_calls = 0u64;
+            let mut oracle_ns = 0u64;
             let (_, mut stats) = solve_boolean_system_with_node_oracle(
                 equations,
                 sys.n_vars,
                 &opts,
                 &mut accept_root,
-                |assignment, defined_mask| gate.decide(assignment, defined_mask),
+                |assignment, defined_mask| {
+                    let started = std::time::Instant::now();
+                    let decision = gate.decide(assignment, defined_mask);
+                    oracle_ns = oracle_ns.saturating_add(started.elapsed().as_nanos() as u64);
+                    oracle_calls += 1;
+                    decision
+                },
             );
+            stats.geometric_oracle_calls = oracle_calls;
+            stats.geometric_oracle_ns = oracle_ns;
             stats.geometric_support_checks = gate.support_checks;
+            stats.geometric_partial_support_checks = gate.partial_support_checks;
+            stats.geometric_partial_support_refutations = gate.partial_support_refutations;
             stats.geometric_residual_lookups = gate.residual_lookups;
             stats.geometric_fast_residual_lookups = gate.fast_residual_lookups;
             stats.geometric_batch_groups = gate.batch_groups;
             stats.geometric_group_additions = gate.group_additions;
+            stats.geometric_pair_index_builds = gate.pair_index_builds;
+            stats.geometric_pair_index_lookups = gate.pair_index_lookups;
             return (gate.witness.or(found), stats);
         }
     }
@@ -6462,17 +7601,24 @@ pub struct SatDecompositionStats {
 /// Encode a finite set of coordinates without enumerating its complement.
 /// Missing branches of the binary trie become forbidden-prefix clauses.
 /// No auxiliary variables are needed; at most O(ell * |codes|) clauses.
+fn packed_coordinate_u128(x: &F2mElement) -> u128 {
+    let words = x.raw_bits();
+    assert!(words.len() <= 2, "coordinate exceeds u128 width");
+    u128::from(*words.first().unwrap_or(&0)) | (u128::from(*words.get(1).unwrap_or(&0)) << 64)
+}
+
 fn add_coordinate_domain(
     solver: &mut crate::cryptanalysis::sat::Solver,
     offset: usize,
     ell: usize,
-    codes: &[u64],
+    codes: &[u128],
 ) {
+    assert!(ell <= 128, "coordinate domain exceeds u128 width");
     fn visit(
         solver: &mut crate::cryptanalysis::sat::Solver,
         offset: usize,
         bit: usize,
-        codes: &[u64],
+        codes: &[u128],
         prefix: &mut Vec<i32>,
     ) {
         if codes.is_empty() {
@@ -6495,7 +7641,7 @@ fn add_coordinate_domain(
 }
 
 /// Absolute trace F_(2^n) -> F_2 in the configured field representation.
-fn absolute_trace_bit(x: &F2mElement, n: u32, irr: &IrreduciblePoly) -> bool {
+pub(crate) fn absolute_trace_bit(x: &F2mElement, n: u32, irr: &IrreduciblePoly) -> bool {
     let mut t = F2mElement::zero(n);
     let mut power = x.clone();
     for _ in 0..n {
@@ -6519,6 +7665,10 @@ pub struct SatDecompositionOptions {
     pub trace_constraint: bool,
     /// Cumulative conflict cap across every model of one target.
     pub conflict_budget: u64,
+    /// Wall-clock cap across every model of one target; `None` is no
+    /// limit. Reaching it ends the attempt as exhausted, like the
+    /// conflict cap, so it can only lower the decided count.
+    pub wall_budget: Option<std::time::Duration>,
     /// Order the summands lexicographically by subspace code,
     /// `code(x_1) ≤ code(x_2) ≤ … ≤ code(x_m)`.  The summands are
     /// interchangeable, so if any decomposition exists a sorted one
@@ -6551,6 +7701,7 @@ impl Default for SatDecompositionOptions {
             restrict_to_factor_base: false,
             trace_constraint: true,
             conflict_budget: u64::MAX,
+            wall_budget: None,
             symmetry_breaking: false,
         }
     }
@@ -6716,6 +7867,7 @@ pub fn sat_decompose_with(
     // with `max_models` in the dozens that dominated the loop.
     let mut enc = encode_boolean_system_with(sys.n_vars, &equations, &[], options.encoding);
     enc.solver.conflict_budget = options.conflict_budget;
+    enc.solver.deadline = options.wall_budget.map(|d| std::time::Instant::now() + d);
     if options.symmetry_breaking {
         let ell = fb.subspace_basis.len();
         for i in 1..m {
@@ -6746,11 +7898,15 @@ pub fn sat_decompose_with(
                 BinaryPoint::Infinity => None,
             })
             .collect();
-        let mut codes: Vec<u64> = if fb.uses_ambient_basis() {
+        let mut codes: Vec<u128> = if fb.uses_ambient_basis() {
             // Union construction uses the full polynomial field basis.
             legal_x
                 .iter()
-                .map(|x| x.to_u64_digits().first().copied().unwrap_or(0))
+                .map(|x| {
+                    let words = x.to_u64_digits();
+                    u128::from(*words.first().unwrap_or(&0))
+                        | (u128::from(*words.get(1).unwrap_or(&0)) << 64)
+                })
                 .collect()
         } else {
             (0..(1u64 << ell))
@@ -6760,6 +7916,7 @@ pub fn sat_decompose_with(
                             .to_biguint(),
                     )
                 })
+                .map(u128::from)
                 .collect()
         };
         codes.sort_unstable();
@@ -6839,6 +7996,11 @@ fn sat_decompose_union_s4(
 ) -> (Option<Vec<usize>>, SatDecompositionStats) {
     use crate::cryptanalysis::semaev_sat::encode_semaev_s4;
     let mut stats = SatDecompositionStats::default();
+    if kc.n > 128 {
+        stats.exhausted = true;
+        stats.unsupported = true;
+        return (None, stats);
+    }
     let BinaryPoint::Affine { x: x_r, .. } = target else {
         stats.exhausted = true;
         stats.unsupported = true;
@@ -6853,11 +8015,12 @@ fn sat_decompose_union_s4(
         options.encoding,
     );
     enc.solver.conflict_budget = options.conflict_budget;
-    let mut codes: Vec<_> = fb
+    enc.solver.deadline = options.wall_budget.map(|d| std::time::Instant::now() + d);
+    let mut codes: Vec<u128> = fb
         .points
         .iter()
         .filter_map(|p| match p {
-            BinaryPoint::Affine { x, .. } => Some(x.raw_bits().first().copied().unwrap_or(0)),
+            BinaryPoint::Affine { x, .. } => Some(packed_coordinate_u128(x)),
             BinaryPoint::Infinity => None,
         })
         .collect();
@@ -7094,6 +8257,13 @@ impl<'a> ProjectedFactorBase<'a> {
         self.map.representatives.len()
     }
 
+    /// The signed-Frobenius location of `[h]P_i` among the projected
+    /// columns, `(column, shift, negated)`, or `None` when `[h]P_i = O`
+    /// and the point contributes to no column.
+    pub fn location_of(&self, index: usize) -> Option<(usize, u32, bool)> {
+        self.map.orbit_of.get(index).copied().flatten()
+    }
+
     /// Native construction counts for full-cost reporting.
     pub fn cost(&self) -> ProjectedFactorBaseCost {
         self.cost
@@ -7156,6 +8326,14 @@ fn build_projected_signed_orbit_map(
     if let Some(map) = projected_signed_orbit_map_fast(kc, fb) {
         return map;
     }
+    projected_signed_orbit_map_slow(kc, fb)
+}
+
+/// General-field reference for the projected signed-orbit map.
+fn projected_signed_orbit_map_slow(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+) -> ProjectedSignedOrbitMap {
     let projected: Vec<_> = fb
         .points
         .iter()
@@ -7259,7 +8437,7 @@ fn projected_signed_orbit_map_fast(
                     canonical_key = key;
                 }
             }
-            current = fc.frobenius_k(current, kc.k);
+            current = packed_curve_frobenius(kc, &fc, current);
         }
         representatives.push(canonical);
     }
@@ -7275,7 +8453,7 @@ fn projected_signed_orbit_map_fast(
             location_by_key
                 .entry(fc.neg(current).pack())
                 .or_insert((orbit, k, true));
-            current = fc.frobenius_k(current, kc.k);
+            current = packed_curve_frobenius(kc, &fc, current);
         }
     }
     let orbit_of = projected
@@ -7330,7 +8508,7 @@ fn project_by_frobenius_orbits(
             }
             let walks = orbit
                 .windows(2)
-                .all(|w| fc.frobenius_k(lifted[w[0]], kc.k) == lifted[w[1]]);
+                .all(|w| packed_curve_frobenius(kc, fc, lifted[w[0]]) == lifted[w[1]]);
             if !walks {
                 return None;
             }
@@ -7338,7 +8516,7 @@ fn project_by_frobenius_orbits(
             let mut images = Vec::with_capacity(orbit.len());
             images.push(current);
             for _ in 1..orbit.len() {
-                current = fc.frobenius_k(current, kc.k);
+                current = packed_curve_frobenius(kc, fc, current);
                 images.push(current);
             }
             Some(images)
@@ -7425,6 +8603,9 @@ pub struct KoblitzIcOptions {
     /// inherited F4. Only the ordinary Gröbner decomposition path supports
     /// it; chart plans retain their separate, explicit implementation.
     pub f6_ic: bool,
+    /// Opt-in adaptive exact pair-sum closure for the three-summand F6-IC
+    /// node oracle. Its index build is charged inside each PDP attempt.
+    pub f6_pair_index: bool,
     /// Experimental exact S3 decomposition on a validated Frobenius chart
     /// cover. Applies only to two-summand Groebner collection/descent. Plan
     /// construction is caller-owned precomputation and must be charged.
@@ -7503,6 +8684,7 @@ impl Default for KoblitzIcOptions {
             strategy: DecompositionStrategy::Groebner,
             engine: SolverEngine::default(),
             f6_ic: false,
+            f6_pair_index: false,
             weil_charts: None,
             node_budget: 4096,
             max_models: 64,
@@ -8072,7 +9254,11 @@ fn koblitz_index_calculus_dlp_observed(
                         return RelationAttemptOutcome::Groebner(idxs, stats.solver);
                     }
                     let decompose = if opts.f6_ic {
-                        groebner_decompose_f6_ic
+                        if opts.f6_pair_index {
+                            groebner_decompose_f6_ic_pair_index
+                        } else {
+                            groebner_decompose_f6_ic
+                        }
                     } else {
                         groebner_decompose
                     };
@@ -9794,7 +10980,11 @@ fn decompose_once(
                 return attempt;
             }
             let decompose = if opts.f6_ic {
-                groebner_decompose_f6_ic
+                if opts.f6_pair_index {
+                    groebner_decompose_f6_ic_pair_index
+                } else {
+                    groebner_decompose_f6_ic
+                }
             } else {
                 groebner_decompose
             };
@@ -10705,9 +11895,9 @@ impl<'a> LogSystem<'a> {
     }
 
     /// Whether an attempt is due: enough rows, and enough new ones since
-    /// the last attempt (a failed block Wiedemann run costs a whole Krylov
-    /// sequence, so the sparse path waits for a batch of new rows; the
-    /// dense path attempts after every batch).
+    /// the last attempt (a failed sparse run costs a whole Krylov sequence,
+    /// so that path waits for a batch of new rows; the dense path attempts
+    /// after every batch).
     fn attempt_interval(&self) -> usize {
         if self.sparse_opts.is_some() {
             (self.n_cols / 32).max(1)
@@ -10956,10 +12146,10 @@ impl<'a> FactorBaseLogSolver<'a> {
             modulus: self.kc.subgroup_order.to_string(),
             column_points,
             rows,
-            solver: if system.sparse_opts.is_some() {
-                "sparse-filter-block-wiedemann"
-            } else {
-                "dense-gauss"
+            solver: match system.sparse_opts.map(|options| options.solver) {
+                Some(SparseCoreSolver::BlockWiedemann) => "sparse-filter-block-wiedemann",
+                Some(SparseCoreSolver::BlockLanczos) => "sparse-filter-block-lanczos",
+                None => "dense-gauss",
             },
             sparse_options: system.sparse_opts,
         }
@@ -13332,7 +14522,7 @@ mod tests {
         use crate::cryptanalysis::sat::{SolveResult, Solver};
         for ell in 1..=5usize {
             for mode in 0..4 {
-                let codes: Vec<_> = (0..(1u64 << ell))
+                let codes: Vec<_> = (0..(1u128 << ell))
                     .filter(|x| match mode {
                         0 => false,
                         1 => true,
@@ -13340,7 +14530,7 @@ mod tests {
                         _ => x & 1 == 1,
                     })
                     .collect();
-                for x in 0..(1u64 << ell) {
+                for x in 0..(1u128 << ell) {
                     let mut solver = Solver::new(ell as u32 + 2);
                     add_coordinate_domain(&mut solver, 2, ell, &codes);
                     for j in 0..ell {
@@ -13351,6 +14541,33 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn domain_trie_distinguishes_n83_high_bits() {
+        use crate::cryptanalysis::sat::{SolveResult, Solver};
+        let low = 0x1a5u128;
+        let high = low | (1u128 << 82);
+        let codes = [low, high];
+        for (value, accepted) in [
+            (low, true),
+            (high, true),
+            (low | (1u128 << 64), false),
+            (high | (1u128 << 70), false),
+        ] {
+            let mut solver = Solver::new(85);
+            add_coordinate_domain(&mut solver, 2, 83, &codes);
+            for bit in 0..83 {
+                let lit = bit + 3;
+                solver.add_clause(vec![if (value >> bit) & 1 == 1 { lit } else { -lit }]);
+            }
+            assert_eq!(solver.solve() == SolveResult::Sat, accepted, "{value:#x}");
+        }
+        let x = F2mElement::from_bit_positions(&[0, 64, 82], 83);
+        assert_eq!(
+            packed_coordinate_u128(&x),
+            1 | (1u128 << 64) | (1u128 << 82)
+        );
     }
 
     /// The single-word enumeration returns exactly the generic search's
@@ -14616,6 +15833,82 @@ mod tests {
     }
 
     #[test]
+    fn wide_rabin_matches_sympy_vectors_at_71() {
+        // x^71 + x^5 + x^3 + x + 1 is irreducible (independent sympy
+        // check agrees); x^71 + 1 and x^71 + x + 1 are reducible.
+        let good = (1u128 << 71) | (1 << 5) | (1 << 3) | (1 << 1) | 1;
+        assert!(is_irreducible_f2_wide(good));
+        assert!(!is_irreducible_f2_wide((1u128 << 71) | 1));
+        assert!(!is_irreducible_f2_wide((1u128 << 71) | (1 << 1) | 1));
+    }
+
+    #[test]
+    fn wide_rabin_agrees_with_narrow_on_small_inputs() {
+        // The wide twin must give the same answers as the narrow
+        // implementation wherever both are defined, so the `n ≤ 63`
+        // path (which keeps using the narrow one) cannot drift.
+        let masks: [u64; 6] = [
+            0b111,
+            0b10011,
+            0b1001,
+            (1 << 41) | (1 << 3) | 1,
+            (1 << 53) | (1 << 6) | (1 << 2) | (1 << 1) | 1,
+            (1 << 61) | (1 << 5) | (1 << 2) | (1 << 1) | 1,
+        ];
+        for mask in masks {
+            assert_eq!(
+                is_irreducible_f2(mask),
+                is_irreducible_f2_wide(mask as u128),
+                "mask = {mask:#x}"
+            );
+        }
+    }
+
+    #[test]
+    fn wide_sparse_search_finds_71_pentanomial() {
+        // Smallest-mask irreducible at degree 71 (same ascending
+        // order as the narrow search; sympy check agrees).
+        let irr = find_irreducible_sparse_wide(71).expect("n = 71 must resolve");
+        assert_eq!(irr.degree, 71);
+        assert_eq!(irr.low_terms, vec![0, 1, 3, 5]);
+        // The wide search only handles the past-`u64` degrees.
+        assert!(find_irreducible_sparse_wide(63).is_none());
+        assert!(find_irreducible_sparse_wide(128).is_none());
+    }
+
+    #[test]
+    fn factorise_fast_path_keeps_factor_lists() {
+        // The native-word loop must return the same lists as the
+        // BigUint loop; the n = 71 order exercises it past 64 bits.
+        let order = koblitz_point_count(0, 71);
+        let factors = factorise(order);
+        let last = factors.last().cloned().unwrap();
+        assert_eq!(last.1, 1);
+        assert_eq!(last.0, BigUint::from(5_513_228_015_079_457u64));
+        let cofactor: BigUint = factors
+            .iter()
+            .take(factors.len() - 1)
+            .map(|(p, e)| p.pow(*e))
+            .product();
+        assert_eq!(cofactor, BigUint::from(428_276u32));
+    }
+
+    #[test]
+    fn constructs_n71_a0_with_expected_subgroup() {
+        let curve = KoblitzCurve::new(0, 71).expect("K_0/F_2^71 must construct");
+        assert_eq!(curve.n, 71);
+        assert_eq!(
+            curve.subgroup_order,
+            BigUint::from(5_513_228_015_079_457u64)
+        );
+        assert_eq!(curve.cofactor, BigUint::from(428_276u32));
+        assert_eq!(
+            scalar_mul(&curve.curve, curve.generator(), &curve.subgroup_order),
+            BinaryPoint::Infinity
+        );
+    }
+
+    #[test]
     fn the_folded_table_decomposes_at_every_summand_count() {
         // The trap the compact table fell into once: a search path that
         // walks `entries` reports no witness for a target that has one.
@@ -14735,6 +16028,38 @@ mod tests {
             checked_hits > 0 && checked_misses > 0,
             "degree {degree}: the test checked only one side"
         );
+    }
+
+    #[test]
+    fn large_ord_factor_list_is_empty_not_a_hang() {
+        // ord_37(2) = 36: a 2^36 scan would hang for hours.  Degrees
+        // above 24 are out of scope (any base they define has ≥ 2^25
+        // abscissae, past every materialisation cap), so this returns
+        // empty immediately — and stays consistent with the full list,
+        // which skips those degrees for the same reason.
+        assert_eq!(order_of_2_mod_n(37), Some(36));
+        let start = std::time::Instant::now();
+        assert!(factor_x_n_minus_1(37).is_empty());
+        assert!(
+            start.elapsed().as_secs() < 10,
+            "factor scan at n=37 must not hang"
+        );
+        // The full list agrees on every degree it covers: the ord-slice
+        // equals the legacy scan wherever the legacy scan is feasible.
+        for n in [7u32, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31] {
+            if let Some(ell) = order_of_2_mod_n(n) {
+                if ell > 24 {
+                    continue;
+                }
+                for f in factor_x_n_minus_1(n) {
+                    assert_eq!(63 - f.leading_zeros(), ell, "n={n}");
+                    assert!(
+                        all_factors_of_x_n_minus_1(n).contains(&f),
+                        "n={n}: ord factor {f:#x} missing from full list"
+                    );
+                }
+            }
+        }
     }
 
     #[test]
@@ -16026,6 +17351,52 @@ mod tests {
     }
 
     #[test]
+    fn radix_sort_orders_entries_by_key_stably() {
+        // Edge cases: empty, singleton, all-equal keys.
+        let mut empty: Vec<(u64, u32, u32)> = Vec::new();
+        radix_sort_entries_by_key(&mut empty);
+        assert!(empty.is_empty());
+        let mut one = vec![(7u64, 1u32, 2u32)];
+        radix_sort_entries_by_key(&mut one);
+        assert_eq!(one, vec![(7u64, 1u32, 2u32)]);
+        // Random data with heavy key duplication (few distinct keys, as
+        // in real pair-sum tables): keys sorted, payloads stable
+        // (input order within each key), multiset preserved.
+        let mut rng_state = 0x9e3779b97f4a7c15u64;
+        let mut next = move || {
+            rng_state = rng_state.wrapping_mul(6364136223846793005).wrapping_add(1);
+            rng_state
+        };
+        for &len in &[0usize, 1, 2, 3, 17, 1000, 70000] {
+            let mut v: Vec<(u64, u32, u32)> = (0..len)
+                .map(|i| (next() % 13, i as u32, (i * 7) as u32))
+                .collect();
+            let mut expected = v.clone();
+            expected.sort_by_key(|e| e.0);
+            radix_sort_entries_by_key(&mut v);
+            // `sort_by_key` is stable too: exact equality, not just
+            // key order, pins stability down.
+            assert_eq!(v, expected, "len = {len}");
+        }
+        // Full-width keys incl. extremes.
+        let mut v: Vec<(u64, u32, u32)> = vec![
+            (u64::MAX, 0, 0),
+            (0, 1, 1),
+            (u64::MAX, 2, 3),
+            (1u64 << 63, 4, 5),
+            (0, 6, 7),
+        ];
+        radix_sort_entries_by_key(&mut v);
+        let keys: Vec<u64> = v.iter().map(|e| e.0).collect();
+        assert_eq!(keys, vec![0, 0, 1 << 63, u64::MAX, u64::MAX]);
+        // Stability: the two 0-keys and two MAX-keys keep input order.
+        assert_eq!((v[0].1, v[0].2), (1, 1));
+        assert_eq!((v[1].1, v[1].2), (6, 7));
+        assert_eq!((v[3].1, v[3].2), (0, 0));
+        assert_eq!((v[4].1, v[4].2), (2, 3));
+    }
+
+    #[test]
     fn query_accounting_descent_preserves_success_and_terminal_failures() {
         let kc = KoblitzCurve::new(0, 9).unwrap();
         let fb = build_frobenius_factor_base(&kc, 0).unwrap();
@@ -16613,6 +17984,63 @@ mod tests {
     }
 
     #[test]
+    fn f6_ic_pair_index_matches_legacy_closure_with_partial_codes() {
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_standard_subspace_factor_base(&kc, 4).unwrap();
+        let index_of = fb.index_map();
+        let ell = fb.subspace_basis.len();
+        let mut witnessed = 0;
+        let mut refuted = 0;
+        let mut duplicate_sums = false;
+        for scalar in 1..=12u32 {
+            let target = kc.mul(kc.generator(), &BigUint::from(scalar));
+            for code in 0..(1u64 << ell) {
+                for second_bit in [false, true] {
+                    for third_bit in [None, Some(false), Some(true)] {
+                        let mut assignment = vec![None; 3 * ell];
+                        for j in 0..ell {
+                            assignment[j] = Some(code & (1 << j) != 0);
+                        }
+                        assignment[ell] = Some(second_bit);
+                        assignment[2 * ell] = third_bit;
+                        let mut legacy =
+                            F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
+                        let expected = legacy.decide(&assignment, 0);
+                        let mut indexed =
+                            F6GeometricGate::new(&kc, &fb, &index_of, &target, 3, None).unwrap();
+                        indexed.pair_index_enabled = true;
+                        indexed.one_fixed_additions =
+                            (fb.points.len() * (fb.points.len() + 1)) as u64;
+                        let actual = indexed.decide(&assignment, 0);
+                        assert_eq!(actual, expected, "scalar={scalar}, code={code}");
+                        if indexed.pair_index_builds != 0 {
+                            let table = indexed.pair_index.as_ref().unwrap();
+                            assert_eq!(
+                                table.values().map(Vec::len).sum::<usize>(),
+                                fb.points.len() * (fb.points.len() + 1) / 2
+                            );
+                            duplicate_sums |= table.values().any(|bucket| bucket.len() > 1);
+                        }
+                        if actual == NodeOracleDecision::Witness {
+                            witnessed += 1;
+                            let sum = indexed
+                                .witness
+                                .as_ref()
+                                .unwrap()
+                                .iter()
+                                .fold(BinaryPoint::Infinity, |acc, &i| kc.add(&acc, &fb.points[i]));
+                            assert_eq!(sum, target);
+                        } else {
+                            refuted += 1;
+                        }
+                    }
+                }
+            }
+        }
+        assert!(witnessed > 0 && refuted > 0 && duplicate_sums);
+    }
+
+    #[test]
     fn f6_coordinate_encoder_reconstructs_nonstandard_basis_codes() {
         let basis = [
             F2mElement::from_bit_positions(&[0, 3], 9),
@@ -16631,6 +18059,29 @@ mod tests {
         }
         assert_eq!(
             encoder.encode(&F2mElement::from_bit_positions(&[8], 9)),
+            None
+        );
+    }
+
+    #[test]
+    fn f6_coordinate_encoder_keeps_n83_high_words() {
+        let basis = [
+            F2mElement::from_bit_positions(&[70], 83),
+            F2mElement::from_bit_positions(&[5, 70], 83),
+            F2mElement::from_bit_positions(&[82, 2], 83),
+        ];
+        let encoder = F6CoordinateEncoder::new(&basis).unwrap();
+        for code in 0..8u64 {
+            let mut x = F2mElement::zero(83);
+            for (j, item) in basis.iter().enumerate() {
+                if code & (1u64 << j) != 0 {
+                    x.add_assign(item);
+                }
+            }
+            assert_eq!(encoder.encode(&x), Some(code));
+        }
+        assert_eq!(
+            encoder.encode(&F2mElement::from_bit_positions(&[71], 83)),
             None
         );
     }
@@ -16677,6 +18128,46 @@ mod tests {
             assert_eq!(report.sat_refutations, 0);
             if strategy == DecompositionStrategy::Sat {
                 assert_eq!(report.sat_unknowns, unsupported);
+            }
+        }
+    }
+
+    #[test]
+    fn fast_enumeration_matches_slow_recursion_exactly() {
+        // The single-word fast path must return the *same witness* (not
+        // just the same verdict) as the textbook recursion, on subgroup and
+        // off-subgroup targets, at m = 2 and m = 3, including Infinity.
+        use rand::{Rng, SeedableRng};
+        let kc = KoblitzCurve::new(0, 9).unwrap();
+        let fb = build_frobenius_factor_base(&kc, 0).unwrap();
+        let index_of = fb.index_map();
+        let mut rng = rand::rngs::StdRng::seed_from_u64(0xe71c);
+        let g = kc.generator().clone();
+        let mut targets = vec![BinaryPoint::Infinity];
+        for _ in 0..24 {
+            let k = rng.gen_range(1..1000u32);
+            targets.push(kc.mul(&g, &BigUint::from(k)));
+        }
+        // Off-subgroup points: raw abscissa lifts (some outside <G>).
+        for raw in [0u64, 1, 2, 7, 42, 100, 300] {
+            let x = crate::binary_ecc::F2mElement::from_biguint(&BigUint::from(raw), kc.n);
+            for p in points_with_x(&kc.curve, &x) {
+                targets.push(p);
+            }
+        }
+        for m in [2usize, 3] {
+            for target in &targets {
+                let fast = enumerate_decompose(&kc, &fb, &index_of, target, m);
+                let slow = decompose(&kc, &fb, &index_of, target, m, 0);
+                assert_eq!(fast, slow, "m={m} target={target:?}");
+                // Any returned witness genuinely sums to the target.
+                if let Some(idxs) = fast {
+                    let mut acc = BinaryPoint::Infinity;
+                    for i in &idxs {
+                        acc = kc.add(&acc, &fb.points[*i]);
+                    }
+                    assert_eq!(acc, *target);
+                }
             }
         }
     }
@@ -17319,6 +18810,98 @@ mod tests {
         assert!(model.relation_collection_speedup > model.rho_speedup);
     }
 }
+
+#[cfg(test)]
+mod isogenous_model_tests {
+    use super::*;
+    use crate::cryptanalysis::koblitz_fast_arith::FastBinaryCurve;
+
+    /// Brute-force a floor curve of the class of `K_a / F_{2^n}`: the first
+    /// `b ∉ F_2` whose model has the Koblitz point count.  (The class of
+    /// `K_1 / F_{2^11}` has conductor 23 and 22 floor curves.)
+    fn floor_curve(n: u32, a: u8) -> (KoblitzCurve, F2mElement) {
+        let kc0 = KoblitzCurve::new(a, n).expect("Koblitz rung");
+        let fast = FastBinaryCurve::new(&kc0.curve.irreducible, a as u64).expect("fast curve");
+        let order = kc0.group_order.to_u64_digits()[0];
+        for b_word in 2u64..(1u64 << n) {
+            let mut count = 1u64;
+            for x in 0..(1u64 << n) {
+                count += fast.points_with_x(b_word, x).len() as u64;
+            }
+            if count == order {
+                return (kc0, fast.element(b_word));
+            }
+        }
+        panic!("no floor curve found at n = {n}");
+    }
+
+    #[test]
+    fn isogenous_model_certifies_the_class_order_and_has_no_frobenius() {
+        let (kc0, b) = floor_curve(11, 1);
+        let kc = KoblitzCurve::isogenous_model(1, 11, b.clone(), None).expect("isogenous model");
+        assert!(!kc.frobenius_is_endomorphism);
+        assert_eq!(kc.group_order, kc0.group_order);
+        assert_eq!(kc.subgroup_order, kc0.subgroup_order);
+        assert_eq!(kc.cofactor, kc0.cofactor);
+        assert_eq!(kc.lambda, BigUint::one());
+        assert_eq!(kc.curve.b, b);
+        let g = kc.generator().clone();
+        assert_ne!(g, BinaryPoint::Infinity);
+        assert_eq!(kc.frobenius(&g), g);
+        assert_eq!(kc.mul(&g, &kc.subgroup_order), BinaryPoint::Infinity);
+        // Squaring really leaves the curve: `(x², y²)` is not a point of `E_b`.
+        if let BinaryPoint::Affine { x, y } = &g {
+            assert_eq!(kc.frobenius_x(x), x.clone());
+            let irr = &kc.curve.irreducible;
+            let (xs, ys) = (x.square(irr), y.square(irr));
+            let lifted = points_with_x(&kc.curve, &xs);
+            assert!(!lifted.contains(&BinaryPoint::Affine {
+                x: xs.clone(),
+                y: ys
+            }));
+        }
+        // Some small `b` lies outside the class and must fail the certificate.
+        let fast = FastBinaryCurve::new(&kc0.curve.irreducible, 1).unwrap();
+        let rejected = (2u64..64)
+            .any(|w| KoblitzCurve::isogenous_model(1, 11, fast.element(w), None).is_none());
+        assert!(rejected);
+        // The Koblitz model itself passes the certificate too (b = 1).
+        assert!(KoblitzCurve::isogenous_model(1, 11, F2mElement::one(11), None).is_some());
+    }
+
+    #[test]
+    fn isogenous_model_solves_the_dlp_with_every_oracle() {
+        let (_, b) = floor_curve(11, 1);
+        let kc = KoblitzCurve::isogenous_model(1, 11, b, None).expect("isogenous model");
+        let fb = build_frobenius_factor_base(&kc, 0).expect("factor base on the model");
+        // Without a Frobenius endomorphism every point is its own orbit.
+        assert!(fb.orbits.iter().all(|orbit| orbit.len() == 1));
+        let fast = FastCurve::new(&kc.curve).expect("packed curve");
+        assert_eq!(
+            orbit_maps_packed(&kc, &fast, &fb.points),
+            orbit_maps_bigint(&kc, &fb.points)
+        );
+        for p in &fb.points {
+            assert_eq!(kc.frobenius(p), *p);
+        }
+        let d = BigUint::from(53u32) % &kc.subgroup_order;
+        let q = kc.mul(kc.generator(), &d);
+        for strategy in [
+            DecompositionStrategy::Enumerate,
+            DecompositionStrategy::Groebner,
+            DecompositionStrategy::Sat,
+        ] {
+            let opts = KoblitzIcOptions {
+                m: 2,
+                strategy,
+                ..KoblitzIcOptions::default()
+            };
+            let report = koblitz_index_calculus_dlp(&kc, &q, &opts).expect("the DLP solves");
+            assert_eq!(report.log, Some(d.clone()));
+        }
+    }
+}
+
 #[cfg(test)]
 mod subfield_tests {
     use super::*;
@@ -17387,6 +18970,16 @@ mod subfield_tests {
         );
         assert!(KoblitzCurve::subfield(2, 10, 4, 1).is_none(), "a below q");
         assert!(KoblitzCurve::subfield(9, 27, 0, 1).is_none(), "k ≤ 8");
+    }
+
+    #[test]
+    fn wide_f2_subfield_kernel_is_the_unit_line() {
+        let n = 71;
+        let irr = find_irreducible_sparse_wide(n).unwrap();
+        assert_eq!(
+            linearised_kernel_basis(&[0, 1], n, &irr),
+            vec![F2mElement::one(n)]
+        );
     }
 
     #[test]

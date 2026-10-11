@@ -39,12 +39,34 @@ spec.json ──ecbench run──► session/                ──ecbench verif
 
 ## 1. Quick start
 
+Rolling `main` release archives ship `ecbench` beside `ic` for Linux (glibc
+and static musl), Apple silicon, and Windows. A source build is:
+
 ```bash
 cargo build --release --bin ecbench
 ```
 
 ```bash
 ./target/release/ecbench plan --spec docs/ecbench/specs/smoke-prime.json
+```
+
+The exact binary-field correctness fixture pairs `ic.large_prime` with
+the matched `rho.signed_frobenius` on the same explicit Koblitz curve and targets:
+
+```bash
+./target/release/ecbench plan --spec docs/ecbench/specs/smoke-binary-large-prime.json
+```
+
+The companion `ic large-prime` command imports and validates every curve,
+base point, and challenge point in an external ECBench corpus before solving
+one selected challenge. `--summands n-1` is literal and a run is refused when
+its exact combination table would exceed `--max-states`. The JSON report binds
+the raw manifest bytes with `manifest_sha256` and `manifest_bytes` and refuses
+duplicate family ids:
+
+```bash
+ic --json large-prime --manifest corpus/manifest.json --family koblitz-n11-l4 \
+  --summands n-1 --large-primes 2
 ```
 
 ```bash
@@ -234,7 +256,7 @@ a run that fails the check loses its isolation level), or **recorded**
 | Heterogeneous cores | Apple P and E cores differ by about 2× | performance levels recorded; with no affinity control the runs are L0 | recorded |
 | Threads | four Rayon threads on one pinned CPU wait on each other | `RAYON_NUM_THREADS=1`, `OMP_NUM_THREADS=1`; child CPU time over wall above 1.05 loses L1 | controlled, gated (L1) |
 | Environment leakage | an engine knob in the operator's shell changes the search | the child's environment is cleared and rebuilt: `PATH`, `HOME`, a pinned locale and thread counts, nothing else; its hash is in the session | controlled |
-| Build | a debug build or another binary is another experiment | the binary's SHA-256, the commit and dirty state of the worktree the binary sits in, `rustc -Vv`, compiler flags in the environment; on Linux each child execs `/proc/self/exe`, so a rebuild mid-session cannot swap the code (elsewhere a changed binary stops the session); a debug build loses L1 | recorded, gated (L1) |
+| Build | a debug build or another binary is another experiment | the binary's SHA-256, the source commit embedded at build time and its declared dirty state, any runtime worktree commit as a diagnostic only, `rustc -Vv`, compiler flags in the environment; on Linux each child execs `/proc/self/exe`, so a rebuild mid-session cannot swap the code (elsewhere a changed binary stops the session); a debug build loses L1 | recorded, gated (L1) |
 | Host | the same binary differs by 17–20 % across hosts | the host capsule's stable facts hash to the class id; wall-clock ratios are formed only inside one session | recorded, controlled |
 | What each method counts | one tool counts additions, another wall time, another instructions | one `CountedGroup` ledger for every method; native work the unit does not charge is counted as `*_uncharged` and makes the total a lower bound (§7) | controlled |
 | Pricing drift | per-run measured ratios repriced identical runs by up to 8 % | IC native work is priced only at the repository's pinned ratios (`docs/ic/calibration.json`); a unit without one stays unpriced, never host-measured; an algebraic solver's wall-priced work is taken back out | controlled |
@@ -295,6 +317,14 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
 | `claw.pair_table` | the known-log base's seed scalar multiplications, every table addition `P_i + F_b`, both query additions `Q − (F_k + F_l)`, the addition that rebuilds a hit's table sum; phases `base`, `table`, `search`, `recover` | Frobenius maps, canonicalisations, table inserts and probes |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
+| `ic.pipeline_counted` | the same pipeline with the relation phase charge rebuilt from counted work and pinned conversions for deterministic SAT/PDP replays | algebraic-solver operations without a pinned conversion, including SAT conflicts; these runs remain lower bounds |
+| `ic.large_prime` | cofactor projection, exact combination-table group additions, target probes, and relation witness checks; the external runner verifies the returned scalar | combination states, MITM lookups, large-prime merge operations, and modular row operations; the record is therefore a lower bound, not a speed claim |
+
+The counted IC method has its own method identity so frozen SAT/PDP sessions
+retain their exact parameter and accounting contract. It removes solver wall
+pricing from the reported group-addition equivalents. Solver conflicts and
+other work without a pinned conversion stay visible as unpriced counters;
+the recorded `S` is therefore a lower bound on the complete pipeline cost.
 
 `ic.pipeline` defaults to `linalg=incremental-gauss`, which stops when the
 target scalar is pinned; the factor-base logs can still be underdetermined.
@@ -319,6 +349,25 @@ unpinned work keeps the reported `S` a lower bound. The
 probe but adds canonicalisation, Frobenius-map, lookup, entry and
 representative counts to `oracle_setup`. Use `mitm-frobenius:m=3` on the
 same base as its accounting control.
+
+`mitm-fiber:fiber=closed|lifts|blind`, `mitm-frobenius-fiber:fiber=closed|lifts|blind`
+and `descent-algebraic-fiber:fiber=combined|lifts|blind` (with a `solver`) are
+the cofactor-fiber-aware oracles of `ic_framework::fiber`
+(`research/isogeny_conductor_gap_ic_20261010/`).  A subgroup target `T` is
+decomposed as `Σ P_i = T + K` for any `K` in the rational `h`-torsion, which
+the relation loop's `[h]` projection makes an exact row: `closed` holds
+`P_i + P_j + K` for every `K` in the pair table (one probe, `h` times the
+entries), `lifts` probes or descends every lift (`h` calls), `combined`
+descends one system with the target abscissa free and the fiber polynomial
+adjoined, and `blind` is the landed oracle.  The fiber the oracle found is
+in `oracle_setup` (`fiber_size`, `fiber_complete`); with `h = 1` every mode
+is the blind oracle.  All three take `fiber_gen=legacy|coset` and
+`fiber_scale=d` (`research/isogeny_conductor_gap_round2_20261011/`).
+`legacy`, the default, is the round-1 subgroup closure, kept so that
+committed sessions replay.  It overcounts set-up when `E(F_q)[h]` needs
+several generators.  `coset` stops the closure at the first multiple already
+in the subgroup.  `fiber_scale=d` (coset only) uses the subgroup
+`[d]E(F_q)[h]` instead of the whole fiber.
 
 `koblitz-standard-subspace:dimension=d` with
 `pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N` runs
@@ -372,6 +421,21 @@ Two consequences to read every table with:
   anything is unpriced, and comparisons carry `bounded: true`. A rho with
   the negation map is a lower bound by this rule (its canonicalisations
   are counted, not charged), exactly as in the rest of the repository.
+  The ratio of two such lower bounds is **not** a bound on the ratio of
+  full costs. Read it as a counted-work diagnostic until both arms have
+  complete, calibrated costs; do not infer an end-to-end speedup from it.
+
+`ecbench resources --dir SESSION --out resources.json` reports, for every
+measured attempt including failures, the native integer counters by phase,
+charged GAE and clocks by phase, the target's exclusive online window,
+method counters, fork-to-reap and solve time, CPU time, peak resident memory,
+and solve-wide instructions and cycles when the host exposes a PMU. A PMU
+sum is null unless **every** measured run in that arm has the counter.
+These are separate units: a SAT conflict, table lookup and byte of memory
+do not have universal GAE prices. The resource vector shows where the
+counted `S` is incomplete. A full runtime comparison still requires
+matched L2/L3 runs and the A/A noise gate in §8; the Mac's L0 timings
+remain descriptive.
 
 ## 8. Statistics
 
@@ -514,10 +578,17 @@ field the schema requires, from the session's own files:
   one thread, timeout), identical for both arms by construction.
 - **Independence.** The schema requires `independent_validation` and a
   replay certificate for each arm. The certificate is the SHA-256 of an
-  `ecbench verify --replay-all` receipt made on a host of another class
-  that reproduced both runs; `--independent-receipt FILE --pointer WHERE`
-  supplies it, and a receipt from the session's own class, for other
-  bytes, or that did not reproduce both runs is refused. Without one the
+  `ecbench verify --replay-all` receipt that reproduced both runs;
+  `--independent-receipt FILE --pointer WHERE` supplies it. The auditor
+  must have a different measurement environment **and** a different
+  hardware profile class. The latter omits mutable compiler, kernel and
+  governor facts: changing `rustc` on `PATH` on one Mac was enough to
+  change `ECBENV2` while staying on the same machine. A receipt from the
+  session's own hardware class, one lacking the new auditor hardware
+  class, one for other bytes, or one that did not reproduce both runs is
+  refused. These self-reported fingerprints cannot by themselves attest
+  physical independence; retain the external runner's job and custody
+  receipt with the pointer. Without an admitted receipt the
   claim is built with null certificates, the checker fails it on exactly
   those fields, and the verdict says it is not yet a claim.
 - **Late receipt attachment.** If the measuring binary is no longer
@@ -602,7 +673,12 @@ FROM method_by_curve ORDER BY curve_slug, mean_s;
   The `ecbench-extend` skill walks through it.
 - **A curve construction:** a variant of `workload::CurveSpec` that calls
   an existing constructor. Register any new curve before citing its slug
-  (AGENTS.md §11).
+  (AGENTS.md §11). `conductor_gap` (`{"kind": "conductor_gap", "ell": 263,
+  "t": 241, "level": "crater" | "floor", "seed": 1}`) builds CM pairs over
+  `GF((t² + 19ℓ²)/4)` of prime order `q + 1 − t` whose endomorphism
+  conductor is 1 at the crater and the prime `ℓ` at the floor, certified
+  without computing an isogeny; it is the construction behind
+  `research/conductor_gap_cm_pairs_20261010/`.
 - **A factor base or oracle:** add it to `ic_framework` as a plug-in;
   `ic.pipeline` reaches it through its name. Dump it with `ecbench fb` to
   store its points.
@@ -619,12 +695,24 @@ Stated so that nothing here is read as more than it is:
   is a passing audit of these exact files, run elsewhere, that
   reproduced both runs, and a reader checks the receipt itself at the
   pointer the claim cites.
-- **Word-size curves only.** The counted group types hold `GF(p)` with
-  `p < 2^62` and `GF(2^m)` with `m ≤ 62`. The m = 83 confidence gate
-  (AGENTS.md §8a) needs a wide-word group type before `ecbench` can run
-  it. `p256_factor_base` only constructs and inventories a factor base on the
-  registered wide curve; it does not make that curve runnable by
-  `ic.pipeline` and produces no operation-count or speed claim.
+- **Wide curves run two methods.** Prime curves need `p < 2^62`. Binary
+  curves run every method for `m ≤ 62`. Koblitz curves with `64 ≤ m ≤ 127`
+  (`koblitz_wide`, over the registry's modulus, so the m = 83 gate curve
+  `icv1-f2m83-tm6151469093347-debefd74` of AGENTS.md §8a builds) run only
+  `rho.signed_frobenius_strong` and `claw.pair_table`. Both are the one-word
+  code made generic over the word, and the committed sessions' replays pin
+  that the one-word walk did not change. Every other method refuses a wide
+  curve. A subgroup order past `2^64` is written as a decimal string
+  (`canonical::compat_u128`) and gets the `_v2` target laws
+  (`uniform_scalar_sha256_v2`, `hash_to_subgroup_v2`). Of the registered
+  wide Koblitz curves only m = 83 and m = 97 have a prime `#E/h`, so the
+  cheapest wide solve is m = 83 itself: about `2^37` strong-rho steps,
+  some 20 single-core hours at the 0.49 µs per step measured on Apple
+  silicon. The claw's cost-minimising table there is about `2^37` entries,
+  out of reach of one host's memory. `p256_factor_base` only constructs
+  and inventories a factor base on the registered wide prime curve; it
+  does not make that curve runnable by `ic.pipeline` and produces no
+  operation-count or speed claim.
 - **NUMA binding has met a two-node kernel, not two-socket hardware.** In
   a two-node QEMU guest the policy read back as `bind:<node>` and every
   anonymous page sat on the bound node, and that test found and fixed a

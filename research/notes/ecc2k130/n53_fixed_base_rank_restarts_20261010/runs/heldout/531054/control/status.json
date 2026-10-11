@@ -1,0 +1,47 @@
+{
+  "binary_sha256": "3c03013e4a12d5eac74e1737c5549558ddf734aa9a324426914778765da0f51e",
+  "cold_in_process_ms": 8914.041875,
+  "command": [
+    "/private/tmp/crypto-compact-target/release/examples/koblitz_orbit_dlp_fast_online",
+    "construct:53:0:220",
+    "/private/tmp/crypto-compact-producer-union-repair-20261010/research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/inputs/heldout_q.jsonl",
+    "531054",
+    "/private/tmp/crypto-compact-producer-union-repair-20261010/research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/heldout/531054/control/targets.jsonl"
+  ],
+  "environment_flags": {
+    "KIC_RANK_PROBE_CAP": null,
+    "KIC_RHO_DP_BITS": null,
+    "KIC_RHO_LANES": null,
+    "KIC_RHO_RUNG": null,
+    "KIC_RHO_TARGET_POINT": null
+  },
+  "exit_code": 0,
+  "external_wall_ms": 8955.736207997688,
+  "label": "control",
+  "peak_rss_bytes": 349863936,
+  "public_point_sha256": "4b32ce8b5c559f68518eca609d4a97f095e49bffdb579746636aafaee77dcabf",
+  "rank": 220,
+  "rank_attempts": 220,
+  "rank_capped_attempts": 0,
+  "rank_probe_cap": null,
+  "rank_probes_total": 20084341,
+  "rank_replay_sha256": "21b08f1c6ebabf40e9f17a527c3893737edd198d537d3e9e7d98c629bb76ebec",
+  "rank_seed": 531054,
+  "rank_trace_sha256": "e2c915b5c30f5377ee73db89049b365512ec25a7b2dd09e2833e1d8ff1b061c1",
+  "recovered_scalar": 11184763905218,
+  "resource_envelope": {
+    "observed_rss_cap_bytes": 17179869184,
+    "threads": 1,
+    "wall_cap_seconds": 60
+  },
+  "rho_seed": 530154,
+  "run_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h3b66c9056640W3ba5ba44e9fdR1",
+  "runner_sha256": "93e213e2a4caa1678f094d7dcbf4aa61dd60fb7b393b51c10ba8eb93e5bccfdf",
+  "source_sha256": "4dd3c5e7823b453ad1fa9046d9be68a04bddc79343ea29576dd1f32b0bc66299",
+  "status": "VERIFIED",
+  "target_online_ms": 2.711666,
+  "target_replay_sha256": "39a804c634bfe07bf7aec0c1f0565bc7a783a5d16074bcbc354b5e7ed9f5c967",
+  "target_sha256": "31ef2fb541c15987b4a9fb672b87bb4cac224d7987d37b68721e6070289d5992",
+  "timed_out": false,
+  "workload_id": "W3ba5ba44e9fd"
+}

@@ -1,0 +1,201 @@
+{
+ "claim": {
+  "n": 53,
+  "a": 0,
+  "log2_r": 44.258533022667656,
+  "curve": "icv1-f2m53-tm56619371-dac20a85",
+  "curve_id": "EC1N53Ce0hb097de99be9a",
+  "candidate_id": "IC1N53Ckb0fb27984PDP3pairtableRCaimedLAsparseTDwalkISO0h715dd7692112",
+  "candidate_manifest_sha256": "715dd7692112ec6f0ea9efcbcfc164d2013e31c2aa0bb826e6ffc520d39dbda4",
+  "workload_id": "c22742353ac7",
+  "workload_manifest_sha256": "c22742353ac718f3ea017adfcddaf9e1737986b5000fa5b8ddd7845629bf2415",
+  "run_id": "IC1N53Ckb0fb27984PDP3pairtableRCaimedLAsparseTDwalkISO0h715dd7692112Wc22742353ac7R1",
+  "rho_reference_uid": "urn:ec-candidate:1:sha256:233468cc65662cb99d35d7167846b3764fa1a840c174d000e93d0587bd18d3b1",
+  "target_count": 1,
+  "ic_target_hash": "dac6cff0153850158b6505f6daa521444a758f8cb449cdd71d17240a5428af46",
+  "rho_target_hash": "dac6cff0153850158b6505f6daa521444a758f8cb449cdd71d17240a5428af46",
+  "timing_class": "single_target_online_wall",
+  "ic_online_wall_ms": 9.084596,
+  "rho_online_wall_ms": 36.43056,
+  "online_speedup": 4.010146406070231,
+  "ic_online_phase_ms": {
+   "T_target_PDP_ms": 5.833185,
+   "T_target_descent_ms": 0.001737,
+   "T_target_query_ms": 3.246834,
+   "T_target_recovery_check_ms": 0.001827,
+   "T_target_relation_check_ms": 0.001013
+  },
+  "ic_online_phases_not_entered": [],
+  "online_interval": {
+   "ic_included_stages": [
+    "target_query",
+    "target_PDP",
+    "target_relation_check",
+    "target_descent",
+    "target_recovery_check"
+   ],
+   "ic_phase_map": {
+    "target_PDP": "target_pdp",
+    "target_descent": "target_descent",
+    "target_query": "target_query",
+    "target_recovery_check": "recovery_check",
+    "target_relation_check": "target_relation_check"
+   },
+   "ic_start_event": "first target-dependent operation after reusable setup: the descent's first query",
+   "ic_stop_event": "the descent returns a logarithm it has checked as [d]G = Q on the single-word ladder",
+   "replay": "[d]G = Q in the general arithmetic, for both arms after their intervals; timed as ic_replay_ns and rho_replay_ns",
+   "rho_included_stages": [
+    "walk",
+    "collision",
+    "recovery_check"
+   ],
+   "rho_phase_map": {
+    "recovery_check": [
+     "recovery_check"
+    ],
+    "rho_solve": [
+     "walk",
+     "collision"
+    ]
+   },
+   "rho_start_event": "first target-dependent operation after reusable setup: lifting the target for the walk",
+   "rho_stop_event": "the walk returns a logarithm it has checked as [d]G = Q on the single-word ladder"
+  },
+  "same_resource_envelope": true,
+  "independent_validation": true,
+  "ic_replay_certificate_sha256": "e95096a47b8e9ce77f94d27eb71ed98c0215244e7d309c3997334ccb28f13062",
+  "rho_replay_certificate_sha256": "3cef2016fa05b9952221505c4aafc6c35d248a6e6d0461b20362f448999a19a3",
+  "ic_resource_envelope": {
+   "worker_count": 1,
+   "rayon_threads": 1,
+   "isolation": "isolated_bench (src/bin/isolated_bench.rs) run --wait --cpus 2, uncontended",
+   "cpus_allowed_list": "2",
+   "process": "one process: the index calculus, then rho, both rebuilt each repetition"
+  },
+  "rho_resource_envelope": {
+   "worker_count": 1,
+   "rayon_threads": 1,
+   "isolation": "isolated_bench (src/bin/isolated_bench.rs) run --wait --cpus 2, uncontended",
+   "cpus_allowed_list": "2",
+   "process": "one process: the index calculus, then rho, both rebuilt each repetition"
+  },
+  "ic_scalar_verified": true,
+  "rho_scalar_verified": true,
+  "rho_policy": {
+   "worker_count": 1,
+   "walk_policy": "64 lanes in lockstep, one inversion a round; jumps in G only; batched restarts (16): signed-Frobenius r-adding walk: normal-basis canonicalisation, look-ahead, short-cycle escape by doubling, distinguished points, stride starts",
+   "collision_policy": "distinguished points in one table for the target's walks; a stored point reached with a different coefficient of Q gives d, checked as [d]G = Q; fruitless short cycles are left by doubling their least point",
+   "distinguished_point_memory_bytes": 86016,
+   "lanes": 64,
+   "distinguished_point_bits": 7
+  },
+  "verdict": "index calculus online faster",
+  "claim_boundary": "one public target on icv1-f2m53-tm56619371-dac20a85; the index calculus's reusable set-up is outside its online interval and is reported beside it",
+  "independent_replay_pointer": "research/ic_tool_program/rule/v3/claims/k0n53/T60-R1.replay.json",
+  "fixture_hash": "2d6f3e44aac9ef4b57e7d7210c0a1a4c3e48e5c9f2ab97dd495f54d76c0d9779",
+  "executable_or_source_hash": {
+   "ic_binary_sha256": "9c3320390d74ae48b74382d2ec3f8b4b5b1585e5e8aa2448c0d78369807a26b4",
+   "source_commit": "995ea2071cc7453877a503d30eb561ae82cddab9",
+   "ic_source_manifest_sha256": "8b26d0fe85d7126dc59fce796763a48f26bcd2c2465aa99d8754589ad47c5bba",
+   "rho_source_manifest_sha256": "c0842713f20b2d0bf972f2d55172cb3f5f6217778d1ef1e624563e8dcbc5f740"
+  },
+  "host_id": {
+   "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+   "logical_cores": 4,
+   "os": "Linux-6.18.44-fc-v70-x86_64-with-glibc2.39",
+   "host_manifest": "runs/host.json"
+  },
+  "resource_caps": {
+   "rayon_threads": 1,
+   "cpus": "2",
+   "contended": false
+  },
+  "seeds": {
+   "recipe_seed": 201,
+   "public_hash_seed": 23060,
+   "rho_seed": 2293820
+  },
+  "claim_boundary_non_claims": [
+   "one public target per row; no multi-target or batch result",
+   "the online interval excludes the reusable set-up, which is reported separately and dominates the cold cost",
+   "rho here has no precomputed table of distinguished points; a generic walk with one (Bernstein and Lange) is a different reference and is not measured",
+   "no statement about ECC2K-130 or any curve past n = 61; m = 83 is not run (AGENTS.md section 8a)",
+   "wall time on one x86-64 container; no claim for other hardware classes"
+  ],
+  "units": {
+   "ic_online_units": 840552.9769999789,
+   "rho_online_units": 3495396.459331824,
+   "setup_units": 75960988.13825029,
+   "rho_setup_units": 212614.03206076357,
+   "rho_model_units": 1663445.0506224816,
+   "s_ic_online": 0.1832281044373588,
+   "s_rho_online": 0.7619446781168698,
+   "s_setup": 16.558370797086177,
+   "s_rho_setup": 0.046346711197572166,
+   "s_ic_cold": 16.741598901523535,
+   "s_rho_cold": 0.808291389314442,
+   "s_rho_model": 0.36260639341150214,
+   "cold_ratio_ic_over_rho": 20.71233112568852,
+   "online_speedup_rho_model": 1.9789889467282482,
+   "rho_units_per_step": 10.344255843565904,
+   "rho_step_over_model": 2.102524682991015,
+   "ic_replay_ns": 7236.0,
+   "rho_replay_ns": 13002.0
+  },
+  "report": "research/ic_tool_program/rule/v3/runs/k0n53/T60-R1.price.json",
+  "attempts": [
+   {
+    "file": "T60-R1.price.json",
+    "status": "complete",
+    "contended": false,
+    "exit_status": 0
+   }
+  ]
+ },
+ "validation": {
+  "schema_version": 2,
+  "stage": "vs_rho",
+  "fail_closed": true,
+  "status": "PASS",
+  "missing_stage_fields": [],
+  "missing_global_provenance": [],
+  "validation_errors": [],
+  "required_stage_fields": [
+   "n_or_bits",
+   "candidate_id",
+   "candidate_manifest_sha256",
+   "workload_id",
+   "workload_manifest_sha256",
+   "run_id",
+   "target_count",
+   "ic_target_hash",
+   "rho_target_hash",
+   "timing_class",
+   "ic_online_wall_ms",
+   "rho_online_wall_ms",
+   "online_speedup",
+   "ic_online_phase_ms",
+   "online_interval",
+   "same_resource_envelope",
+   "independent_validation",
+   "ic_replay_certificate_sha256",
+   "rho_replay_certificate_sha256",
+   "ic_resource_envelope",
+   "rho_resource_envelope",
+   "ic_scalar_verified",
+   "rho_scalar_verified",
+   "rho_policy",
+   "verdict",
+   "claim_boundary",
+   "independent_replay_pointer"
+  ],
+  "required_global_provenance": [
+   "fixture_hash",
+   "executable_or_source_hash",
+   "host_id",
+   "resource_caps",
+   "seeds",
+   "claim_boundary_non_claims"
+  ]
+ }
+}

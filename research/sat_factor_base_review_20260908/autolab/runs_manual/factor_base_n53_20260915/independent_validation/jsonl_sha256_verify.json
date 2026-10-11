@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "kind": "factor_base_n53_jsonl_sha256_verify",
+  "updated_at": "2026-09-15T19:25:23Z",
+  "verdict_from_receipt": "CONSTRUCTION_INDEPENDENTLY_REPLAYED",
+  "ledger_promotion": false,
+  "files": {
+    "replay_same_seed.jsonl": {
+      "sha256": "7f4d21a0feb06e94fb04167109a4823b3c99cea616506fc05d05828a655c0e34",
+      "bytes": 1919951
+    },
+    "replay_second_seed.jsonl": {
+      "sha256": "d0765af4079530b21aa93fcd91e690a1e4cc4d748c37f4c40fc97b4b7024d3dd",
+      "bytes": 1917233
+    }
+  },
+  "note": "SHA-256 of local jsonl fixtures paired with existing digests/receipt. Large jsonl remain untracked. NOT ledger promotion."
+}

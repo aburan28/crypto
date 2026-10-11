@@ -62,6 +62,10 @@
     </p>
   </noscript>
 
+  <p class="banner mac-current" id="mac-current" role="status">
+    Loading current Mac control uploads&hellip;
+  </p>
+
   <div id="banner" class="banner UNREACHABLE" role="status">Loading snapshot&hellip;</div>
 
   <div class="freshness">
@@ -70,7 +74,7 @@
   </div>
 
   <section class="ops" aria-labelledby="h-ops">
-    <h2 id="h-ops">Group operations walked</h2>
+    <h2 id="h-ops">Original campaign group operations walked</h2>
     <p class="ops-value mono" id="ops-value">&mdash;</p>
     <p class="ops-sub" id="ops-sub">&nbsp;</p>
 
@@ -131,12 +135,12 @@
       34</span>, and says so: that fallback reads low, because the campaign
       distinguishes at the sparser <span class="mono">HW(x) &le; 32</span>
       and walks about <span class="mono">2^28.4</span> iterations per point.
-      Both figures belong to one campaign's distinguishing rule, so neither
-      is shown for anything but <span class="mono">ecc2k-130</span>.
+      These constants refer to the ECC2K-130 curve at two stated cutoffs;
+      neither is applied to another campaign.
     </p>
   </section>
 
-  <h2 class="sr-only">Headline counts</h2>
+  <h2 class="sr-only">Original campaign counts</h2>
   <div class="row">
     <div class="card">
       <div class="label">Distinguished points</div>
@@ -164,6 +168,30 @@
       <div class="foot" id="collisions-foot">&nbsp;</div>
     </div>
   </div>
+
+  <section class="mac-control" aria-labelledby="h-mac-control">
+    <h2 id="h-mac-control">Mac control uploads</h2>
+    <p class="note">
+      These Macs upload a separate synthetic signed-Frobenius control run,
+      <span class="mono">ecc2k130-synthetic-metal-h128-v1</span>. Its points and
+      walk updates are excluded from the original campaign totals and collision
+      odds above. This panel shows only cumulative counters from worker uploads.
+    </p>
+    <div class="row mac-row">
+      <div class="card"><div class="label">Control DP records</div><div class="value mono" id="mac-dps">&mdash;</div></div>
+      <div class="card"><div class="label">Walk updates</div><div class="value mono" id="mac-updates">&mdash;</div></div>
+      <div class="card"><div class="label">Workers reporting</div><div class="value mono" id="mac-count">&mdash;</div></div>
+    </div>
+    <p class="mac-source" id="mac-source" role="status">Loading Mac uploads&hellip;</p>
+    <div class="scroll" tabindex="0">
+      <table>
+        <caption class="sr-only">Mac control worker uploads</caption>
+        <thead><tr><th scope="col">Worker</th><th scope="col" class="num">DP records</th><th scope="col" class="num">Walk updates</th><th scope="col">Last upload (UTC)</th></tr></thead>
+        <tbody id="mac-workers"><tr><td colspan="4">Loading&hellip;</td></tr></tbody>
+      </table>
+    </div>
+    <p class="note">Source: <a href="https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/mac-control.json">live sanitized Mac control feed</a>, with the <a href="./mac-control.json">Pages snapshot</a> as backup. Private worker manifests, point keys, and walk state are not published.</p>
+  </section>
 
   <section aria-labelledby="h-rate">
     <h2 id="h-rate">Distinguished points per hour</h2>
@@ -201,15 +229,13 @@
   <section aria-labelledby="h-forest">
     <h2 id="h-forest">What the walk builds</h2>
     <p class="note">
-      Real walks on the challenge curve. Each walk steps from point to point
-      by a rule that depends only on the point it is standing on, so two
-      walks that ever land on the same orbit take every step after it
-      together, and the search grows a forest whose roots are the
-      distinguished points the walkers report and the table above counts. A
-      collision is two walks arriving at the same distinguished point from
-      different starts. On ECC2K-130 that has not happened: every trail below
-      is on its own, and the day two of them join is the day the campaign
-      ends.
+      These are real walks on the challenge curve from a separate client run,
+      using a weight-34 cutoff so short trails can be drawn. The live campaign
+      uses weight 32; none of the endpoints in this figure were uploaded to
+      its table or counted above. Each step depends only on the orbit the
+      walk is standing on, so trails that meet follow the same path to a
+      distinguished point. The sample below has no meetings; the live
+      campaign's collision count is shown above.
     </p>
     <figure class="figure">
       <div class="figure-frame forest" id="forest">
@@ -225,9 +251,10 @@
       <figcaption>
         <span class="mono" id="wf-walks">106</span> walks of the ECC2K-130
         client on the Certicom ECC2K-130 curve, distinguished at weight
-        <span class="mono" id="wf-weight">34</span> as the campaign is: the
-        seeds of its first <span class="mono" id="wf-tried">256</span> reported
-        points replayed with the client's own kernel, keeping every walk that
+        <span class="mono" id="wf-weight">34</span> for this separate run
+        (the live campaign uses weight 32). The first
+        <span class="mono" id="wf-tried">256</span> records from that run
+        were replayed with the client's own kernel, keeping every walk that
         reached its point within <span class="mono" id="wf-cap">65,536</span>
         iterations. Each hollow node is the orbit the walk stood on every
         <span class="mono" id="wf-every">2,048</span> iterations,
@@ -235,9 +262,10 @@
         <span class="mono" id="wf-steps">3,400,768</span> iterations in all, the
         longest trail <span class="mono" id="wf-longest">64,596</span>; each filled
         node one of the <span class="mono" id="wf-dps">106</span> distinguished
-        points reached, and <span class="mono" id="wf-meetings">0</span>
-        meetings between trails. A walk on this curve is expected to take
-        <span class="mono">2^25.27</span> iterations to reach a point, so what
+        endpoints in this sample, and <span class="mono" id="wf-meetings">0</span>
+        meetings between trails. At this sample's weight-34 cutoff a walk is
+        expected to take about <span class="mono">2^25.27</span> iterations to
+        reach a point, so what
         is drawn is the short end of the distribution, the only end short
         enough to draw. Every trail is checked against the record the client
         wrote for it, the first few against the scalar reference as well, and
@@ -247,17 +275,18 @@
         from as far inside as it had iterations still to go, so a seed sits
         as deep as its walk was long and the rings mark each quarter of the
         cap; the walks are in order of length, which is why their seeds
-        spiral in. The figure regenerates from the committed
-        trails with
-        <a href="https://github.com/aburan28/crypto/blob/main/docs/ecc2k130-status/walk-forest/README.md">walk_forest.py</a>.
+        spiral in. The figure regenerates from the committed trails with
+        <a href="https://github.com/aburan28/crypto/blob/main/scripts/site/walk_forest.py">walk_forest.py</a>;
+        the <a href="https://github.com/aburan28/crypto/blob/main/docs/ecc2k130-status/walk-forest/README.md">sample instructions</a>
+        show how its separate records were made.
         With JavaScript the figure is a graph: drag to pan, wheel or pinch to
         zoom, hover a node for the walk it is on and how far along, click one
         to light every path through it to its distinguished point, and play
         the walks to run them all at once, at the same number of iterations a
         second, each lighting its trail until it reaches the rim. The second forest in the
         menu is the <span class="mono">GF(2^23)</span> test curve, small
-        enough that trails meet, with the same iteration function and
-        distinguishing test.
+        enough that trails meet, with the same form of iteration and
+        weight-based distinguishing test at its own cutoff.
       </figcaption>
     </figure>
   </section>
@@ -595,6 +624,8 @@ cd ec2k-gpu-$V-linux-x86_64
   // does not wait on the GitHub Actions publish cadence for current counts.
   var LIVE_FEED_URL =
     "https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/status.json";
+  var MAC_LIVE_FEED_URL =
+    "https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/mac-control.json";
   // Cap on the bars in the per-hour chart. Seven days of UTC hours, matching
   // the interval the snapshot query buckets over — a window in the data, not
   // in the publish cadence, so it does not move when the cron does.
@@ -1532,7 +1563,7 @@ cd ec2k-gpu-$V-linux-x86_64
     var banner = el("banner");
     var known = Object.prototype.hasOwnProperty.call(STATE_TEXT, state) ? state : "UNREACHABLE";
     banner.className = "banner " + known;
-    banner.textContent = STATE_TEXT[known] + (extra ? " " + extra : "");
+    banner.textContent = "Original campaign: " + STATE_TEXT[known] + (extra ? " " + extra : "");
   }
 
   function tickFreshness(status, failure) {
@@ -1668,7 +1699,93 @@ cd ec2k-gpu-$V-linux-x86_64
   var lastStatus = null;
   var historyLoaded = false;
 
+  async function loadMacControl() {
+    var body = el("mac-workers");
+    try {
+      var responses = await Promise.allSettled([
+        fetchJSON(MAC_LIVE_FEED_URL), fetchJSON("./mac-control.json")
+      ]);
+      var live = responses[0].status === "fulfilled" ? responses[0].value : null;
+      var pages = responses[1].status === "fulfilled" ? responses[1].value : null;
+      var valid = function (value) {
+        return value && value.schema === "ecc2k130-mac-control-public-v1" &&
+          value.campaign_id === "ecc2k130-synthetic-metal-h128-v1";
+      };
+      if (!valid(live)) live = null;
+      if (!valid(pages)) pages = null;
+      var useLive = live && (live.source_state !== "unavailable" || !pages) &&
+        (!pages || generatedMs(live) >= generatedMs(pages));
+      var control = useLive ? live : pages || live;
+      if (!control) throw new Error("live feed and Pages snapshot unavailable");
+      var sourceLabel = useLive ? "live feed" : "Pages snapshot";
+      var unavailable = control.source_state === "unavailable";
+      el("mac-dps").textContent = unavailable ? "—" : num(control.dp_records);
+      el("mac-updates").textContent = unavailable ? "—" : num(control.walk_updates);
+      el("mac-count").textContent = unavailable ? "—" : num(control.worker_count);
+      body.textContent = "";
+      var workers = Array.isArray(control.workers) ? control.workers : [];
+      var latest = null;
+      workers.forEach(function (worker) {
+        var row = document.createElement("tr");
+        var name = document.createElement("th");
+        name.scope = "row";
+        name.textContent = worker.worker_id;
+        row.appendChild(name);
+        [worker.dp_records, worker.walk_updates].forEach(function (value) {
+          var cell = document.createElement("td");
+          cell.className = "num mono";
+          cell.textContent = num(value);
+          row.appendChild(cell);
+        });
+        var at = parseTime(worker.updated_at);
+        var dateCell = document.createElement("td");
+        dateCell.textContent = utc(at, true);
+        row.appendChild(dateCell);
+        body.appendChild(row);
+        if (at && (!latest || at > latest)) latest = at;
+      });
+      if (!workers.length) emptyRow(body, 4, "No Mac worker manifests available.");
+      var state = control.source_state;
+      var source = el("mac-source");
+      var current = el("mac-current");
+      current.className = "banner mac-current";
+      if (state === "unavailable") {
+        source.textContent = "Mac upload feed unavailable at the last " + sourceLabel + " update.";
+        current.textContent = "Mac control uploads are unavailable. Original campaign status is shown below.";
+      } else if (state === "mixed_walks" || state === "ambiguous_runs") {
+        source.textContent = "Worker identities differ; combined totals are withheld. Individual counters are shown below.";
+        current.textContent = "Mac control workers are reporting, but their combined count needs review.";
+      } else if (state === "partial") {
+        source.textContent = "Some worker manifests could not be read. Totals include the readable workers only.";
+        current.textContent = "Mac control: " + num(control.worker_count) + " workers reporting; some uploads could not be read.";
+      } else if (latest) {
+        var age = Date.now() - latest.getTime();
+        current.className += age > 20 * 60 * 1000 ? " stale" : " live";
+        source.textContent = "Latest worker upload " + utc(latest, true) + " (" + ago(latest) + ")" +
+          (age > 20 * 60 * 1000 ? ". Upload feed is stale." : ".") + " Via " + sourceLabel + ".";
+        current.textContent = "Mac control: " + num(control.worker_count) + " worker" +
+          (control.worker_count === 1 ? "" : "s") + " reporting, " + num(control.walk_updates) +
+          " walk updates; latest upload " + ago(latest) +
+          (age > 20 * 60 * 1000 ? " (stale)." : ".");
+      } else {
+        source.textContent = "No Mac control worker has reported yet.";
+        current.textContent = "Mac control has no worker uploads yet. Original campaign status is shown below.";
+      }
+    } catch (err) {
+      el("mac-dps").textContent = "—";
+      el("mac-updates").textContent = "—";
+      el("mac-count").textContent = "—";
+      body.textContent = "";
+      emptyRow(body, 4, "Mac upload snapshot could not be read.");
+      el("mac-source").textContent = "Mac upload snapshot unavailable (" + err.message + ").";
+      el("mac-current").textContent = "Mac control uploads are unavailable. Original campaign status is shown below.";
+    }
+  }
+
   async function load() {
+    // This feed is independent: an original-campaign outage must not hide
+    // the Macs, and a Mac feed outage must not hide the original campaign.
+    loadMacControl();
     var status;
     try {
       status = await loadStatus();

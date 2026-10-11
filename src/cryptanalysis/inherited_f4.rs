@@ -80,9 +80,19 @@ use crate::cryptanalysis::koblitz_groebner::{
     echelon_f2_counted, macaulay_columns, macaulay_rows_monos_with_mask, monomials_up_to_mask,
     pack_rows, rref_f2_counted,
 };
-use crate::cryptanalysis::pq_groebner_f2::{cmp_mono, F2BoolMono, F2BoolPoly};
+use crate::cryptanalysis::pq_groebner_f2::{
+    cmp_mono, sort_masks_descending, F2BoolMono, F2BoolPoly,
+};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
+
+static COMPACT_REFUTED_BASIS: AtomicBool = AtomicBool::new(false);
+
+/// Keep only the decisive constant row after a basis proves `1`.
+pub fn set_compact_refuted_basis(enabled: bool) {
+    COMPACT_REFUTED_BASIS.store(enabled, Ordering::Relaxed);
+}
 
 /// Degree of a Boolean polynomial (`0` for a constant or zero).
 fn poly_degree(p: &F2BoolPoly) -> u32 {
@@ -149,6 +159,283 @@ struct LayoutStep {
     /// built on demand.  Shared with every basis below this step, so a
     /// child composes one step on top of what its parent already built.
     to_here: RefCell<HashMap<u32, Rc<Vec<u32>>>>,
+    /// The word-wise rewrite plans of those composed maps (and of this
+    /// step's own map, under key `to − 1`), built on demand from the map.
+    plans: RefCell<HashMap<u32, Rc<RewritePlan>>>,
+}
+
+/// One `pext`/`pdep` move of a rewrite: the source bits `src_mask` of one
+/// source word go, in order, to the bits `dst_mask` of word `dst_word`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct Segment {
+    src_mask: u64,
+    dst_mask: u64,
+    dst_word: u32,
+}
+
+/// A column map as a list of segments per source word, so a row is
+/// rewritten a word at a time instead of a bit at a time.
+///
+/// Every layout step is a merge of monotone pieces (the kept columns keep
+/// their order, the folded ones keep theirs), so under a composed map the
+/// columns of one source word fall into a few runs on which the map is
+/// increasing and stays inside one destination word.  Each such run is a
+/// [`Segment`]: `pext` gathers its source bits, `pdep` spreads them onto
+/// its destination bits, and the XOR into the destination word performs
+/// the folds, exactly as the bit scatter did.  Two sources folding onto one
+/// destination are never in one segment (the destination would not be
+/// strictly increasing), so they meet in the XOR as before.
+///
+/// A word's segments are built the first time a rewrite reads that word:
+/// rows are trimmed to their leading word and few rows of a given epoch
+/// are rewritten at a node, so building every word of the layout up front
+/// cost as much as the rewrites it served.
+#[derive(Debug)]
+struct RewritePlan {
+    map: Rc<Vec<u32>>,
+    words: Vec<std::cell::OnceCell<Box<[Segment]>>>,
+}
+
+impl RewritePlan {
+    /// The plan of `map`, with nothing built yet.
+    fn new(map: Rc<Vec<u32>>) -> Self {
+        let n_src_words = map.len().div_ceil(64);
+        Self {
+            map,
+            words: (0..n_src_words)
+                .map(|_| std::cell::OnceCell::new())
+                .collect(),
+        }
+    }
+
+    /// The segments of source word `w` of `map`.
+    fn segments_of(map: &[u32], w: usize) -> Box<[Segment]> {
+        let mut segments = Vec::new();
+        Self::segments_into(map, w, &mut segments);
+        segments.into_boxed_slice()
+    }
+
+    /// [`RewritePlan::segments_of`], appended to `segments`.
+    fn segments_into(map: &[u32], w: usize, segments: &mut Vec<Segment>) {
+        let base = w * 64;
+        let end = (base + 64).min(map.len());
+        let mut current: Option<(Segment, u32)> = None;
+        for c in base..end {
+            let d = map[c];
+            if d == DELETED {
+                continue;
+            }
+            let (dw, db) = (d / 64, d % 64);
+            let extend = match &current {
+                Some((seg, last_bit)) => seg.dst_word == dw && db > *last_bit,
+                None => false,
+            };
+            if !extend {
+                if let Some((seg, _)) = current.take() {
+                    segments.push(seg);
+                }
+                current = Some((
+                    Segment {
+                        src_mask: 0,
+                        dst_mask: 0,
+                        dst_word: dw,
+                    },
+                    0,
+                ));
+            }
+            let (seg, last_bit) = current.as_mut().expect("just set");
+            seg.src_mask |= 1u64 << (c - base);
+            seg.dst_mask |= 1u64 << db;
+            *last_bit = db;
+        }
+        if let Some((seg, _)) = current {
+            segments.push(seg);
+        }
+    }
+
+    /// Segments of source word `w`, built on first use.
+    #[inline(always)]
+    fn of(&self, w: usize) -> &[Segment] {
+        self.words[w].get_or_init(|| Self::segments_of(&self.map, w))
+    }
+}
+
+/// One layout step's rewrite plan, built whole as flat arrays: under eager
+/// specialisation every kept row of a node goes through it, so nothing is
+/// gained by building it a word at a time.
+#[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
+struct StepPlan {
+    /// Source word `w`'s segments are `segments[first[w]..first[w + 1]]`.
+    first: Vec<u32>,
+    segments: Vec<Segment>,
+    /// `low[w]`: the smallest destination word of any column in source
+    /// words `w ..` (`u32::MAX` if every one is deleted).  A row read from
+    /// its word `lead` writes nothing before `low[lead]`.
+    low: Vec<u32>,
+}
+
+impl StepPlan {
+    fn new(map: &[u32]) -> Self {
+        let n = map.len().div_ceil(64);
+        let mut first = Vec::with_capacity(n + 1);
+        let mut segments = Vec::new();
+        for w in 0..n {
+            first.push(segments.len() as u32);
+            RewritePlan::segments_into(map, w, &mut segments);
+        }
+        first.push(segments.len() as u32);
+        let mut low = vec![u32::MAX; n + 1];
+        for w in (0..n).rev() {
+            let here = segments[first[w] as usize..first[w + 1] as usize]
+                .iter()
+                .map(|s| s.dst_word)
+                .min()
+                .unwrap_or(u32::MAX);
+            low[w] = here.min(low[w + 1]);
+        }
+        Self {
+            first,
+            segments,
+            low,
+        }
+    }
+}
+
+/// Apply a [`StepPlan`] to the live words of a row (`live[i]` is source
+/// word `lead + i`), XORing the image into `out`, which holds destination
+/// words `lo ..` with `lo ≤ plan.low[lead]`.
+///
+/// # Safety
+/// BMI2 must be available on this CPU.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "bmi2")]
+unsafe fn apply_step_bmi2(plan: &StepPlan, live: &[u64], lead: usize, out: &mut [u64], lo: usize) {
+    use std::arch::x86_64::{_pdep_u64, _pext_u64};
+    for (i, &word) in live.iter().enumerate() {
+        if word == 0 {
+            continue;
+        }
+        let w = lead + i;
+        let segments = &plan.segments[plan.first[w] as usize..plan.first[w + 1] as usize];
+        for seg in segments {
+            out[seg.dst_word as usize - lo] ^=
+                _pdep_u64(_pext_u64(word, seg.src_mask), seg.dst_mask);
+        }
+    }
+}
+
+/// Whether a specialisation rewrites every kept row into the child's
+/// layout at once, through the step's own plan, instead of leaving each
+/// to be rewritten from wherever it was last current when something first
+/// reads it.  At every node most rows are read (on `K₀/2²³` dim 8, 70 %
+/// of them were rewritten lazily anyway), and the lazy rewrite paid for a
+/// composed map and a plan per pair of layouts.  Needs BMI2, as the
+/// word-wise rewrite does; `KIC_F4_EAGER=0` keeps the lazy rows as a
+/// same-binary control.  The row space, and so every verdict, is the
+/// same; the specialisation word count charges every kept row's rewrite.
+fn eager_rewrite() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED
+        .get_or_init(|| std::env::var("KIC_F4_EAGER").as_deref() != Ok("0") && wordwise_rewrite())
+}
+
+/// Whether the word-wise rewrite is used: `pext`/`pdep` need BMI2, and
+/// `KIC_F4_REWRITE=scatter` keeps the bit scatter as a same-binary control.
+fn wordwise_rewrite() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED.get_or_init(|| {
+        if std::env::var("KIC_F4_REWRITE").as_deref() == Ok("scatter") {
+            return false;
+        }
+        #[cfg(target_arch = "x86_64")]
+        {
+            std::arch::is_x86_feature_detected!("bmi2")
+        }
+        #[cfg(not(target_arch = "x86_64"))]
+        {
+            false
+        }
+    })
+}
+
+/// Apply `plan` to the live words of a row (`live[i]` is source word
+/// `lead + i`), XORing the image into `staging`; returns the first
+/// destination word touched, or `usize::MAX` when nothing survived.
+///
+/// # Safety
+/// BMI2 must be available on this CPU.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "bmi2")]
+unsafe fn apply_plan_bmi2(
+    plan: &RewritePlan,
+    live: &[u64],
+    lead: usize,
+    staging: &mut [u64],
+) -> usize {
+    use std::arch::x86_64::{_pdep_u64, _pext_u64};
+    let mut lo = usize::MAX;
+    for (i, &word) in live.iter().enumerate() {
+        if word == 0 {
+            continue;
+        }
+        for seg in plan.of(lead + i) {
+            let x = _pext_u64(word, seg.src_mask);
+            if x != 0 {
+                let dw = seg.dst_word as usize;
+                staging[dw] ^= _pdep_u64(x, seg.dst_mask);
+                lo = lo.min(dw);
+            }
+        }
+    }
+    lo
+}
+
+/// The same with portable bit loops, for the tests and for CPUs without
+/// BMI2 (where the scatter path runs instead).
+#[cfg_attr(not(test), allow(dead_code))]
+fn apply_plan_portable(
+    plan: &RewritePlan,
+    live: &[u64],
+    lead: usize,
+    staging: &mut [u64],
+) -> usize {
+    fn pext(x: u64, mut mask: u64) -> u64 {
+        let mut out = 0u64;
+        let mut k = 0;
+        while mask != 0 {
+            let b = mask.trailing_zeros();
+            mask &= mask - 1;
+            out |= ((x >> b) & 1) << k;
+            k += 1;
+        }
+        out
+    }
+    fn pdep(x: u64, mut mask: u64) -> u64 {
+        let mut out = 0u64;
+        let mut k = 0;
+        while mask != 0 {
+            let b = mask.trailing_zeros();
+            mask &= mask - 1;
+            out |= ((x >> k) & 1) << b;
+            k += 1;
+        }
+        out
+    }
+    let mut lo = usize::MAX;
+    for (i, &word) in live.iter().enumerate() {
+        if word == 0 {
+            continue;
+        }
+        for seg in plan.of(lead + i) {
+            let x = pext(word, seg.src_mask);
+            if x != 0 {
+                let dw = seg.dst_word as usize;
+                staging[dw] ^= pdep(x, seg.dst_mask);
+                lo = lo.min(dw);
+            }
+        }
+    }
+    lo
 }
 
 /// A child's generator system, computed once per node and shared by every
@@ -343,7 +630,45 @@ struct LazyRow {
     /// from here.
     lead: u32,
     /// Words `start ..` to the end of the layout of `version`.
-    data: Rc<[u64]>,
+    data: RowWords,
+}
+
+/// The words of a basis row: a range of a shared buffer.  A row inserted
+/// on its own owns its buffer; the kept rows of an eager specialisation
+/// share one ([`ReducedBasis::rewrite_kept`]), which spares an allocation,
+/// a staging pass and a copy per row.
+#[derive(Clone, Debug)]
+struct RowWords {
+    buf: Rc<[u64]>,
+    off: u32,
+    len: u32,
+}
+
+impl std::ops::Deref for RowWords {
+    type Target = [u64];
+    #[inline]
+    fn deref(&self) -> &[u64] {
+        &self.buf[self.off as usize..(self.off + self.len) as usize]
+    }
+}
+
+impl From<Rc<[u64]>> for RowWords {
+    fn from(buf: Rc<[u64]>) -> Self {
+        let len = buf.len() as u32;
+        Self { buf, off: 0, len }
+    }
+}
+
+impl From<Vec<u64>> for RowWords {
+    fn from(words: Vec<u64>) -> Self {
+        Rc::<[u64]>::from(words).into()
+    }
+}
+
+/// A zeroed shared buffer of `n` words, allocated once (an `Rc<[u64]>`
+/// made from a `Vec` would copy it).
+fn zeroed_words(n: usize) -> Rc<[u64]> {
+    std::iter::repeat_n(0u64, n).collect()
 }
 
 impl LazyRow {
@@ -373,13 +698,23 @@ impl LazyRow {
 /// current layout.
 struct Draft {
     start: usize,
-    data: Vec<u64>,
+    /// Uniquely owned until the draft becomes a pivot row, which then
+    /// takes the allocation as it is instead of copying it.
+    data: Rc<[u64]>,
 }
 
 impl Draft {
     /// A full-width row.
     fn full(data: Vec<u64>) -> Self {
-        Self { start: 0, data }
+        Self {
+            start: 0,
+            data: Rc::from(data),
+        }
+    }
+
+    /// The words, for reduction; the draft is the only holder.
+    fn data_mut(&mut self) -> &mut [u64] {
+        Rc::get_mut(&mut self.data).expect("a draft is uniquely owned")
     }
 
     /// Leading set column at or after word `from` (a layout word).
@@ -397,6 +732,193 @@ impl Draft {
 thread_local! {
     /// Full-width staging for [`ReducedBasis::rewrite`], zero between uses.
     static STAGING: RefCell<Vec<u64>> = const { RefCell::new(Vec::new()) };
+    /// Open-addressing slots for [`odd_terms`], and the call's stamp: a
+    /// slot is live only if its high half is the current stamp, and then
+    /// its low half is `k + 1` for the `k`-th distinct monomial seen.  The
+    /// stamp spares clearing the table on every call.
+    static ODD_SLOTS: RefCell<(Vec<u64>, u32)> = const { RefCell::new((Vec::new(), 0)) };
+}
+
+/// The completion rows of one specialisation, gathered before the layout
+/// grows to hold them.
+///
+/// A product `t·p` has the terms `m ∪ t` of odd multiplicity, and the
+/// rows of one generator share most of their monomials, many of them new
+/// to the layout.  Each occurrence is hashed once, to a batch-local id;
+/// a row's parity is taken on one bit per id, and whether a monomial is in
+/// the layout is asked once per distinct monomial.  The rows, their order
+/// and the monomials added to the layout are exactly those of multiplying
+/// out each row, cancelling, and extending the layout by every monomial of
+/// a kept row that it lacks.
+#[derive(Default)]
+struct CompletionBatch {
+    /// Monomial → id.
+    ids: MaskMap<u32>,
+    /// Per id: the monomial, its column in the layout the batch was
+    /// gathered against (`DELETED` if absent), and whether a kept row
+    /// holds it.
+    monos: Vec<u64>,
+    old_column: Vec<u32>,
+    used: Vec<bool>,
+    /// One parity bit per id, zero between rows.
+    parity: Vec<u64>,
+    /// The ids of the row being gathered, with repeats.
+    scratch: Vec<u32>,
+    /// The kept rows: the ids of their terms, in order of first occurrence.
+    rows: Vec<Vec<u32>>,
+}
+
+impl CompletionBatch {
+    /// Gather the row with terms `monos` (repeats cancelling in pairs)
+    /// against the layout `index`; kept only if something survives.
+    fn push_row(&mut self, monos: impl ExactSizeIterator<Item = u64>, index: &MaskMap<usize>) {
+        self.scratch.clear();
+        let len = monos.len();
+        self.scratch.reserve(len);
+        self.monos.reserve(len);
+        self.old_column.reserve(len);
+        self.used.reserve(len);
+        for m in monos {
+            let next = self.monos.len() as u32;
+            let id = *self.ids.entry(m).or_insert(next);
+            if id == next {
+                self.monos.push(m);
+                self.old_column
+                    .push(index.get(&m).map_or(DELETED, |&c| c as u32));
+                self.used.push(false);
+                if id as usize / 64 >= self.parity.len() {
+                    self.parity.push(0);
+                }
+            }
+            self.parity[id as usize / 64] ^= 1u64 << (id % 64);
+            self.scratch.push(id);
+        }
+        // Emit each odd id at its first occurrence and clear its bit; the
+        // even ones are already clear.
+        let mut row = Vec::with_capacity(len);
+        for &id in &self.scratch {
+            let (w, bit) = (id as usize / 64, 1u64 << (id % 64));
+            if self.parity[w] & bit != 0 {
+                self.parity[w] &= !bit;
+                self.used[id as usize] = true;
+                row.push(id);
+            }
+        }
+        if !row.is_empty() {
+            self.rows.push(row);
+        }
+    }
+
+    /// Grow `basis`'s layout by the monomials the kept rows hold and it
+    /// lacks, and return every used id's column in the new layout.
+    fn place(&self, basis: &mut ReducedBasis) -> Vec<u32> {
+        let mut missing: Vec<u64> = (0..self.monos.len())
+            .filter(|&i| self.used[i] && self.old_column[i] == DELETED)
+            .map(|i| self.monos[i])
+            .collect();
+        if missing.is_empty() {
+            return self.old_column.clone();
+        }
+        sort_masks_descending(&mut missing);
+        let placed = basis.insert_columns(&missing);
+        let step = basis
+            .history
+            .last()
+            .expect("a step was just adopted")
+            .map
+            .clone();
+        let mut column: Vec<u32> = self
+            .old_column
+            .iter()
+            .map(|&c| {
+                if c == DELETED {
+                    DELETED
+                } else {
+                    step[c as usize]
+                }
+            })
+            .collect();
+        for (m, c) in missing.iter().zip(placed) {
+            column[self.ids[m] as usize] = c;
+        }
+        column
+    }
+}
+
+/// `dst ^= src` over their common length, in fixed-width chunks the
+/// compiler packs into vector XORs on the baseline target.  (An AVX2
+/// build of the same loop was measured 2–8 % slower on the n = 23 cells
+/// of `f6_ic_probe`: the rows are a few dozen words, so the wider vector
+/// does not pay for its dispatch.)
+#[inline]
+fn xor_words(dst: &mut [u64], src: &[u64]) {
+    let n = dst.len().min(src.len());
+    let (dst, src) = (&mut dst[..n], &src[..n]);
+    let mut d4 = dst.chunks_exact_mut(4);
+    let mut s4 = src.chunks_exact(4);
+    for (d, s) in (&mut d4).zip(&mut s4) {
+        d[0] ^= s[0];
+        d[1] ^= s[1];
+        d[2] ^= s[2];
+        d[3] ^= s[3];
+    }
+    for (d, &s) in d4.into_remainder().iter_mut().zip(s4.remainder()) {
+        *d ^= s;
+    }
+}
+
+/// The monomials occurring an odd number of times in `monos`, in order of
+/// first occurrence: the terms of `Σ monos` over `F_2`.  A product `t·p`
+/// in the Boolean ring maps the terms of `p` to `m ∪ t`, and two terms that
+/// differ only inside `t` meet and cancel.  Order does not matter to any
+/// caller (each packs the row by column or collects it into a set), so the
+/// parity is taken with a small hash table rather than by sorting.
+fn odd_terms(monos: impl ExactSizeIterator<Item = u64>) -> Vec<u64> {
+    let len = monos.len();
+    let mut keys: Vec<u64> = Vec::with_capacity(len);
+    let mut odd: Vec<bool> = Vec::with_capacity(len);
+    ODD_SLOTS.with(|state| {
+        let mut state = state.borrow_mut();
+        let (slots, stamp) = &mut *state;
+        let bits = (2 * len).max(16).next_power_of_two().trailing_zeros();
+        let cap = 1usize << bits;
+        *stamp = stamp.wrapping_add(1);
+        if *stamp == 0 || slots.len() < cap {
+            // a wrapped stamp could meet a stale slot; a grown table has
+            // fresh ones: either way start from zeros
+            slots.clear();
+            slots.resize(cap.max(slots.capacity()), 0);
+            *stamp = 1;
+        }
+        let live = u64::from(*stamp) << 32;
+        for m in monos {
+            let mut s = (m.wrapping_mul(0x9E37_79B9_7F4A_7C15) >> (64 - bits)) as usize;
+            loop {
+                let slot = slots[s];
+                if slot & !0xFFFF_FFFF != live {
+                    keys.push(m);
+                    odd.push(true);
+                    slots[s] = live | keys.len() as u64;
+                    break;
+                }
+                let k = (slot & 0xFFFF_FFFF) as usize - 1;
+                if keys[k] == m {
+                    odd[k] ^= true;
+                    break;
+                }
+                s = (s + 1) & (cap - 1);
+            }
+        }
+    });
+    let mut kept = 0;
+    for i in 0..keys.len() {
+        if odd[i] {
+            keys[kept] = keys[i];
+            kept += 1;
+        }
+    }
+    keys.truncate(kept);
+    keys
 }
 
 /// The reduced degree-`degree` Macaulay row space of a system, kept as an
@@ -590,6 +1112,23 @@ impl ReducedBasis {
     /// Reduce the basis to its row `r`, which is the constant `1`.
     fn collapse_to_one(&mut self, r: usize) {
         debug_assert_eq!(self.columns[self.pivot_col[r] as usize], 0);
+        if COMPACT_REFUTED_BASIS.load(Ordering::Relaxed) {
+            self.columns = vec![0];
+            self.column_index = None;
+            self.words = 1;
+            self.history.clear();
+            self.rows = vec![LazyRow {
+                version: 0,
+                start: 0,
+                lead: 0,
+                data: Rc::<[u64]>::from([1u64].as_slice()).into(),
+            }];
+            self.pivot_col = vec![0];
+            self.pivot_of = vec![Some(0)];
+            self.pending.clear();
+            self.refuted = true;
+            return;
+        }
         let row = self.rows.swap_remove(r);
         let c = self.pivot_col[r];
         self.rows = vec![row];
@@ -754,6 +1293,19 @@ impl ReducedBasis {
         self.composite_to(self.epoch(), from)
     }
 
+    /// The word-wise plan of [`ReducedBasis::composite`], memoised on the
+    /// step that maps into the current layout like the map itself.
+    fn rewrite_plan(&self, from: u32) -> Rc<RewritePlan> {
+        let to = self.epoch();
+        let step = &self.history[(to - 1) as usize];
+        if let Some(p) = step.plans.borrow().get(&from) {
+            return p.clone();
+        }
+        let plan = Rc::new(RewritePlan::new(self.composite(from)));
+        step.plans.borrow_mut().insert(from, plan.clone());
+        plan
+    }
+
     /// Rewrite `row` from the layout of epoch `version` into the current
     /// one, trimmed to the first word its image touches; `None` if every
     /// bit was deleted or the folds cancelled it.  Charged one word
@@ -762,7 +1314,7 @@ impl ReducedBasis {
     fn rewrite(&self, row: &LazyRow, cost: &mut InheritCost) -> Option<Draft> {
         self.rewrite_with(row, cost, |image, start| Draft {
             start,
-            data: image.to_vec(),
+            data: Rc::from(image),
         })
     }
 
@@ -781,11 +1333,33 @@ impl ReducedBasis {
         finish: impl FnOnce(&[u64], usize) -> T,
     ) -> Option<T> {
         debug_assert!(row.version < self.epoch());
-        let map = self.composite(row.version);
         let words = self.words;
         let live = row.live();
         let lead = row.lead as usize;
         cost.specialise_word_ops += live.len() as u64;
+        #[cfg(target_arch = "x86_64")]
+        if wordwise_rewrite() {
+            let plan = self.rewrite_plan(row.version);
+            return STAGING.with(|staging| {
+                let mut staging = staging.borrow_mut();
+                if staging.len() < words {
+                    staging.resize(words, 0);
+                }
+                let staging = &mut staging[..words];
+                // SAFETY: `wordwise_rewrite` checked BMI2 for this process.
+                let lo = unsafe { apply_plan_bmi2(&plan, live, lead, staging) };
+                if lo == usize::MAX {
+                    return None;
+                }
+                cost.specialise_word_ops += (words - lo) as u64;
+                let image = &mut staging[lo..];
+                let nonzero = image.iter().any(|&w| w != 0);
+                let out = nonzero.then(|| finish(image, lo));
+                image.fill(0);
+                out
+            });
+        }
+        let map = self.composite(row.version);
         STAGING.with(|staging| {
             let mut staging = staging.borrow_mut();
             if staging.len() < words {
@@ -833,22 +1407,131 @@ impl ReducedBasis {
         })
     }
 
+    /// Rewrite every kept row that was current in the parent's layout into
+    /// this one through the step's plan, all into one shared buffer, each
+    /// trimmed to the plan's bound on its first word.  A row from an older
+    /// layout (none, unless a lazy ancestor left one) is materialised as
+    /// before.  Charged as [`ReducedBasis::rewrite`] charges: the words
+    /// read, and the words from the image's first nonzero one to the end.
+    #[cfg(target_arch = "x86_64")]
+    fn rewrite_kept(&mut self, plan: &StepPlan, cost: &mut InheritCost) {
+        let to = self.epoch();
+        let words = self.words;
+        let mut spans: Vec<(usize, usize)> = Vec::with_capacity(self.rows.len());
+        let mut total = 0usize;
+        for row in &self.rows {
+            if row.version + 1 == to {
+                let lo = plan.low[row.lead as usize] as usize;
+                debug_assert!(lo < words, "a kept pivot survives");
+                spans.push((total, lo));
+                total += words - lo;
+            } else {
+                spans.push((usize::MAX, 0));
+            }
+        }
+        let mut buf = zeroed_words(total);
+        {
+            let data = Rc::get_mut(&mut buf).expect("just allocated");
+            for (row, &(off, lo)) in self.rows.iter().zip(&spans) {
+                if off != usize::MAX {
+                    let live = row.live();
+                    cost.specialise_word_ops += live.len() as u64;
+                    let out = &mut data[off..off + words - lo];
+                    // SAFETY: `eager_rewrite` checked BMI2 for this process.
+                    unsafe { apply_step_bmi2(plan, live, row.lead as usize, out, lo) };
+                }
+            }
+        }
+        for (r, &(off, lo)) in spans.iter().enumerate() {
+            if off == usize::MAX {
+                self.ensure_current(r, cost);
+                continue;
+            }
+            let len = words - lo;
+            let first = buf[off..off + len]
+                .iter()
+                .position(|&w| w != 0)
+                .expect("a kept pivot survives");
+            cost.specialise_word_ops += (len - first) as u64;
+            self.rows[r] = LazyRow {
+                version: to,
+                start: lo as u32,
+                lead: (lo + first) as u32,
+                data: RowWords {
+                    buf: buf.clone(),
+                    off: off as u32,
+                    len: len as u32,
+                },
+            };
+        }
+    }
+
+    #[cfg(not(target_arch = "x86_64"))]
+    fn rewrite_kept(&mut self, _plan: &StepPlan, _cost: &mut InheritCost) {
+        unreachable!("eager rewrite needs BMI2")
+    }
+
+    /// [`ReducedBasis::rewrite`] of a row current in the parent's layout,
+    /// through the step's plan.
+    #[cfg(target_arch = "x86_64")]
+    fn rewrite_step(
+        &self,
+        plan: &StepPlan,
+        row: &LazyRow,
+        cost: &mut InheritCost,
+    ) -> Option<Draft> {
+        debug_assert_eq!(row.version + 1, self.epoch());
+        let words = self.words;
+        let live = row.live();
+        cost.specialise_word_ops += live.len() as u64;
+        let lo = plan.low[row.lead as usize] as usize;
+        if lo >= words {
+            return None;
+        }
+        let mut data = zeroed_words(words - lo);
+        let out = Rc::get_mut(&mut data).expect("just allocated");
+        // SAFETY: `eager_rewrite` checked BMI2 for this process.
+        unsafe { apply_step_bmi2(plan, live, row.lead as usize, out, lo) };
+        let first = out.iter().position(|&w| w != 0)?;
+        cost.specialise_word_ops += (words - lo - first) as u64;
+        Some(Draft { start: lo, data })
+    }
+
+    #[cfg(not(target_arch = "x86_64"))]
+    fn rewrite_step(
+        &self,
+        _plan: &StepPlan,
+        _row: &LazyRow,
+        _cost: &mut InheritCost,
+    ) -> Option<Draft> {
+        unreachable!("eager rewrite needs BMI2")
+    }
+
     /// Bring row `r` into the current layout if it is not there yet.  A
     /// kept row's leading monomial survives every step, so its image is
     /// nonzero.
+    #[inline]
     fn ensure_current(&mut self, r: usize, cost: &mut InheritCost) {
+        // Most calls find the row current (a pivot hit twice at one level),
+        // so only the rewrite stays out of line.
         if self.rows[r].version != self.epoch() {
-            let (start, data) = self
-                .rewrite_frozen(&self.rows[r], cost)
-                .expect("a kept pivot survives");
-            let lead = start + data.iter().position(|&w| w != 0).expect("nonzero");
-            self.rows[r] = LazyRow {
-                version: self.epoch(),
-                start: start as u32,
-                lead: lead as u32,
-                data,
-            };
+            self.materialise(r, cost);
         }
+    }
+
+    /// Rewrite row `r` into the current layout.
+    #[inline(never)]
+    fn materialise(&mut self, r: usize, cost: &mut InheritCost) {
+        let (start, data) = self
+            .rewrite_frozen(&self.rows[r], cost)
+            .expect("a kept pivot survives");
+        let lead = start + data.iter().position(|&w| w != 0).expect("nonzero");
+        self.rows[r] = LazyRow {
+            version: self.epoch(),
+            start: start as u32,
+            lead: lead as u32,
+            data: data.into(),
+        };
     }
 
     /// Bring every row into the current layout.
@@ -948,9 +1631,7 @@ impl ReducedBasis {
                     self.ensure_current(r as usize, cost);
                     let pivot = &self.rows[r as usize];
                     let at = w - row.start;
-                    for (dst, &src) in row.data[at..].iter_mut().zip(pivot.from_word(w)) {
-                        *dst ^= src;
-                    }
+                    xor_words(&mut row.data_mut()[at..], pivot.from_word(w));
                     cost.reduce_word_ops += (self.words - w) as u64;
                     from = w;
                 }
@@ -987,6 +1668,7 @@ impl ReducedBasis {
         let step = LayoutStep {
             map: Rc::new(map),
             to_here: RefCell::new(HashMap::default()),
+            plans: RefCell::new(HashMap::default()),
         };
         self.column_index = None;
         self.words = columns.len().div_ceil(64).max(1);
@@ -1141,7 +1823,11 @@ impl ReducedBasis {
                 displaced.push((pc, row.clone()));
             }
         }
+        let step = eager_rewrite().then(|| StepPlan::new(&map));
         out.adopt_layout(new_columns, map);
+        if let Some(step) = &step {
+            out.rewrite_kept(step, &mut cost);
+        }
         cost.displaced_rows = displaced.len() as u64;
         // Lowest pivot first.  The order changes neither the child's row
         // space nor, measurably, the cost of building it; it changes how
@@ -1151,7 +1837,13 @@ impl ReducedBasis {
         // the whole basis are touched (`RESEARCH_INHERITED_F4.md` §3.7).
         displaced.sort_unstable_by_key(|&(pc, _)| std::cmp::Reverse(pc));
         for (_, row) in displaced {
-            if let Some(image) = out.rewrite(&row, &mut cost) {
+            let image = match &step {
+                Some(step) if row.version + 1 == out.epoch() => {
+                    out.rewrite_step(step, &row, &mut cost)
+                }
+                _ => out.rewrite(&row, &mut cost),
+            };
+            if let Some(image) = image {
                 let inserted = out.insert(image, &mut cost);
                 if out.refutes(inserted) {
                     return (out, cost);
@@ -1174,48 +1866,34 @@ impl ReducedBasis {
                 .flat_map(|p| p.terms.iter())
                 .fold(0u64, |acc, t| acc | t.mask)
                 & all_variable_mask(out.n_vars);
-            let mut completion: Vec<Vec<u64>> = Vec::new();
-            for &(index, old_degree, new_degree) in &dropped {
-                let p = &out.system[index];
-                let old_gap = self.degree - old_degree;
-                let new_gap = self.degree - new_degree;
-                let mask = if self.support_local {
-                    multiplier_mask & p.terms.iter().fold(0u64, |acc, t| acc | t.mask)
-                } else {
-                    multiplier_mask
-                };
-                for t in monomials_up_to_mask(mask, new_gap) {
-                    if t.count_ones() <= old_gap {
-                        continue;
-                    }
-                    let mut monos: Vec<u64> = p.terms.iter().map(|m| m.mask | t).collect();
-                    monos.sort_unstable();
-                    let mut row_monos = Vec::with_capacity(monos.len());
-                    let mut i = 0;
-                    while i < monos.len() {
-                        let mut j = i;
-                        while j < monos.len() && monos[j] == monos[i] {
-                            j += 1;
+            let mut batch = CompletionBatch::default();
+            {
+                out.column_index();
+                let index = out.column_index.as_ref().expect("just built");
+                for &(i, old_degree, new_degree) in &dropped {
+                    let p = &out.system[i];
+                    let old_gap = self.degree - old_degree;
+                    let new_gap = self.degree - new_degree;
+                    let mask = if self.support_local {
+                        multiplier_mask & p.terms.iter().fold(0u64, |acc, t| acc | t.mask)
+                    } else {
+                        multiplier_mask
+                    };
+                    for t in monomials_up_to_mask(mask, new_gap) {
+                        if t.count_ones() <= old_gap {
+                            continue;
                         }
-                        if (j - i) % 2 == 1 {
-                            row_monos.push(monos[i]);
-                        }
-                        i = j;
-                    }
-                    if !row_monos.is_empty() {
-                        completion.push(row_monos);
+                        batch.push_row(p.terms.iter().map(|m| m.mask | t), index);
                     }
                 }
             }
-            if !completion.is_empty() {
-                out.extend_columns(&completion);
-                cost.completion_rows = completion.len() as u64;
-                for monos in completion {
-                    let words = out.words;
-                    let index = out.column_index();
-                    let mut row = vec![0u64; words];
-                    for m in monos {
-                        let c = index[&m];
+            if !batch.rows.is_empty() {
+                let columns = batch.place(&mut out);
+                cost.completion_rows = batch.rows.len() as u64;
+                for ids in &batch.rows {
+                    let mut row = vec![0u64; out.words];
+                    for &id in ids {
+                        let c = columns[id as usize] as usize;
                         row[c / 64] |= 1u64 << (c % 64);
                     }
                     let inserted = out.insert(Draft::full(row), &mut cost);
@@ -1318,20 +1996,7 @@ impl ReducedBasis {
                     if t == 0 {
                         continue;
                     }
-                    let mut all: Vec<u64> = q_monos.iter().map(|&m| m | t).collect();
-                    all.sort_unstable();
-                    let mut product = Vec::with_capacity(all.len());
-                    let mut i = 0;
-                    while i < all.len() {
-                        let mut j = i;
-                        while j < all.len() && all[j] == all[i] {
-                            j += 1;
-                        }
-                        if (j - i) % 2 == 1 {
-                            product.push(all[i]);
-                        }
-                        i = j;
-                    }
+                    let product = odd_terms(q_monos.iter().map(|&m| m | t));
                     if !product.is_empty() {
                         products.push(product);
                         read_words += q.live().len() as u64;
@@ -1422,25 +2087,53 @@ impl ReducedBasis {
     /// are not touched.
     fn extend_columns(&mut self, rows_monos: &[Vec<u64>]) {
         let index = self.column_index();
-        let mut missing: Vec<u64> = rows_monos
-            .iter()
-            .flatten()
-            .copied()
-            .filter(|m| !index.contains_key(m))
-            .collect();
+        // The products share most of their new monomials, so collect each
+        // distinct one once as it is first met and key only those into the
+        // layout's order.
+        let mut seen: MaskMap<()> = MaskMap::default();
+        let mut missing: Vec<u64> = Vec::new();
+        for &m in rows_monos.iter().flatten() {
+            if !index.contains_key(&m) && seen.insert(m, ()).is_none() {
+                missing.push(m);
+            }
+        }
         if missing.is_empty() {
             return;
         }
-        missing.sort_unstable();
-        missing.dedup();
-        let mut columns = self.columns.clone();
-        columns.extend(missing);
-        columns.sort_by(|a, b| {
-            cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse()
-        });
-        let index: MaskMap<usize> = columns.iter().enumerate().map(|(i, &m)| (m, i)).collect();
-        let map: Vec<u32> = self.columns.iter().map(|m| index[m] as u32).collect();
+        sort_masks_descending(&mut missing);
+        self.insert_columns(&missing);
+    }
+
+    /// Adopt the layout with the monomials `missing` added: distinct, absent
+    /// from the layout and in its descending order.  Returns the new column
+    /// of each.  The layout is already in descending order, so the new one
+    /// is a merge of two sorted lists and the old → new map falls out of
+    /// the merge, as in `fold_layout`.
+    fn insert_columns(&mut self, missing: &[u64]) -> Vec<u32> {
+        let old = &self.columns;
+        let mut columns = Vec::with_capacity(old.len() + missing.len());
+        let mut map = vec![0u32; old.len()];
+        let mut placed = Vec::with_capacity(missing.len());
+        let (mut i, mut j) = (0usize, 0usize);
+        while i < old.len() || j < missing.len() {
+            let take_old = j == missing.len()
+                || (i < old.len()
+                    && cmp_mono(
+                        F2BoolMono::from_mask(old[i]),
+                        F2BoolMono::from_mask(missing[j]),
+                    ) == std::cmp::Ordering::Greater);
+            if take_old {
+                map[i] = columns.len() as u32;
+                columns.push(old[i]);
+                i += 1;
+            } else {
+                placed.push(columns.len() as u32);
+                columns.push(missing[j]);
+                j += 1;
+            }
+        }
         self.adopt_layout(columns, map);
+        placed
     }
 
     /// The linear tail — the intersection of the row space with the
@@ -1525,7 +2218,231 @@ pub fn substitute(p: &F2BoolPoly, var: u32, value: bool) -> F2BoolPoly {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A random column layout, random fold and delete steps composed into
+    /// one map, random rows: the segment plan rewrites every row exactly as
+    /// the bit scatter does, on the portable and (where present) the BMI2
+    /// path.
+    #[test]
+    fn rewrite_plan_matches_the_bit_scatter() {
+        let mut state = 0x9E37_79B9_7F4A_7C15u64;
+        let mut next = || {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            state
+        };
+        for trial in 0..200 {
+            let n_vars = 4 + (next() % 9) as usize;
+            let degree = 2 + (next() % 2) as u32;
+            let mut columns = monomials_up_to_mask(all_variable_mask(n_vars), degree);
+            columns.sort_unstable_by(|a, b| {
+                cmp_mono(F2BoolMono::from_mask(*b), F2BoolMono::from_mask(*a))
+            });
+            if trial % 3 == 0 {
+                // a thinned layout, as support-local roots have
+                columns.retain(|_| next() % 3 != 0);
+                if columns.is_empty() {
+                    continue;
+                }
+            }
+            let n_old = columns.len();
+            let steps = 1 + (next() % 3) as usize;
+            let mut composed: Vec<u32> = (0..n_old as u32).collect();
+            let mut layout = columns.clone();
+            let mut used = 0u64;
+            for _ in 0..steps {
+                let var = (next() % n_vars as u64) as u32;
+                if used & (1 << var) != 0 {
+                    continue;
+                }
+                used |= 1 << var;
+                let bit = 1u64 << var;
+                let mut map = vec![DELETED; layout.len()];
+                let mut new_layout = Vec::with_capacity(layout.len());
+                if next() % 2 == 0 {
+                    fold_layout(&layout, bit, &mut new_layout, &mut map);
+                } else {
+                    for (k, &m) in layout.iter().enumerate() {
+                        if m & bit == 0 {
+                            map[k] = new_layout.len() as u32;
+                            new_layout.push(m);
+                        }
+                    }
+                }
+                for c in composed.iter_mut() {
+                    *c = map.get(*c as usize).copied().unwrap_or(DELETED);
+                }
+                layout = new_layout;
+            }
+            let src_words = n_old.div_ceil(64);
+            let dst_words = layout.len().div_ceil(64).max(1);
+            let plan = RewritePlan::new(Rc::new(composed.clone()));
+            for _ in 0..8 {
+                let lead = (next() % src_words as u64) as usize;
+                let live: Vec<u64> = (lead..src_words)
+                    .map(|w| {
+                        let mut x = next() & next();
+                        if w + 1 == src_words && !n_old.is_multiple_of(64) {
+                            x &= (1u64 << (n_old % 64)) - 1;
+                        }
+                        x
+                    })
+                    .collect();
+                let mut expected = vec![0u64; dst_words];
+                let mut expected_lo = usize::MAX;
+                for (i, &word) in live.iter().enumerate() {
+                    let mut bits = word;
+                    while bits != 0 {
+                        let b = bits.trailing_zeros() as usize;
+                        bits &= bits - 1;
+                        let c = composed[(lead + i) * 64 + b];
+                        if c != DELETED {
+                            expected[c as usize / 64] ^= 1u64 << (c % 64);
+                            expected_lo = expected_lo.min(c as usize / 64);
+                        }
+                    }
+                }
+                let mut got = vec![0u64; dst_words];
+                let lo = apply_plan_portable(&plan, &live, lead, &mut got);
+                assert_eq!(got, expected, "trial {trial}");
+                assert_eq!(lo, expected_lo, "trial {trial}");
+                #[cfg(target_arch = "x86_64")]
+                if std::arch::is_x86_feature_detected!("bmi2") {
+                    let mut got = vec![0u64; dst_words];
+                    let lo = unsafe { apply_plan_bmi2(&plan, &live, lead, &mut got) };
+                    assert_eq!(got, expected, "trial {trial} (bmi2)");
+                    assert_eq!(lo, expected_lo, "trial {trial} (bmi2)");
+                }
+            }
+        }
+    }
     use crate::cryptanalysis::koblitz_groebner::matrix_f4_f2;
+
+    /// The sort-and-count parity the completion rows used before
+    /// [`odd_terms`] and [`CompletionBatch`].
+    fn odd_by_sort(mut monos: Vec<u64>) -> Vec<u64> {
+        monos.sort_unstable();
+        let mut out = Vec::new();
+        let mut i = 0;
+        while i < monos.len() {
+            let mut j = i;
+            while j < monos.len() && monos[j] == monos[i] {
+                j += 1;
+            }
+            if (j - i) % 2 == 1 {
+                out.push(monos[i]);
+            }
+            i = j;
+        }
+        out
+    }
+
+    fn xorshift(seed: &mut u64) -> u64 {
+        *seed ^= *seed << 13;
+        *seed ^= *seed >> 7;
+        *seed ^= *seed << 17;
+        *seed
+    }
+
+    #[test]
+    fn odd_terms_matches_sorting_parity() {
+        let mut seed = 0x2545_f491_4f6c_dd1du64;
+        for round in 0..400 {
+            let len = (xorshift(&mut seed) % 90) as usize;
+            // a small alphabet, so repeats of every multiplicity occur
+            let alphabet = 1 + xorshift(&mut seed) % 40;
+            let monos: Vec<u64> = (0..len)
+                .map(|_| (xorshift(&mut seed) % alphabet) << (round % 7))
+                .collect();
+            let mut got = odd_terms(monos.iter().copied());
+            got.sort_unstable();
+            assert_eq!(got, odd_by_sort(monos), "round {round}");
+        }
+    }
+
+    #[test]
+    fn xor_words_is_wordwise_xor_over_the_common_length() {
+        let mut seed = 0x9e37_79b9_7f4a_7c15u64;
+        for len in 0..20 {
+            let a: Vec<u64> = (0..len).map(|_| xorshift(&mut seed)).collect();
+            let b: Vec<u64> = (0..len + 3).map(|_| xorshift(&mut seed)).collect();
+            let mut got = a.clone();
+            xor_words(&mut got, &b);
+            let want: Vec<u64> = a.iter().zip(&b).map(|(x, y)| x ^ y).collect();
+            assert_eq!(got, want);
+        }
+    }
+
+    /// The completion batch keeps exactly the rows, in order, and adds
+    /// exactly the columns that per-row cancellation plus a sorted layout
+    /// extension would.
+    #[test]
+    fn completion_batch_matches_cancel_then_extend() {
+        let mut seed = 0x51_7cc1_b727_220au64;
+        for _ in 0..60 {
+            let n_vars = 12;
+            let system = vec![random_poly(n_vars, 3, 14, &mut seed)];
+            let Some((basis, _)) = ReducedBasis::from_system(&system, n_vars, 3) else {
+                continue;
+            };
+            // products of random monomials by random multipliers, some
+            // cancelling, some reaching outside the layout
+            let products: Vec<Vec<u64>> = (0..12)
+                .map(|_| {
+                    let t = xorshift(&mut seed) & (0b111 << (xorshift(&mut seed) % 9));
+                    (0..(xorshift(&mut seed) % 16))
+                        .map(|_| (xorshift(&mut seed) & 0xfff) | t)
+                        .collect()
+                })
+                .collect();
+
+            // reference: cancel each row, extend by sorting, pack by index
+            let mut reference = basis.clone();
+            let kept: Vec<Vec<u64>> = products
+                .iter()
+                .map(|p| odd_by_sort(p.clone()))
+                .filter(|r| !r.is_empty())
+                .collect();
+            let old: std::collections::HashSet<u64> = reference.columns.iter().copied().collect();
+            let mut want_columns = reference.columns.clone();
+            let mut added: Vec<u64> = kept
+                .iter()
+                .flatten()
+                .copied()
+                .filter(|m| !old.contains(m))
+                .collect();
+            added.sort_unstable();
+            added.dedup();
+            want_columns.extend(added);
+            want_columns.sort_by(|a, b| {
+                cmp_mono(F2BoolMono::from_mask(*a), F2BoolMono::from_mask(*b)).reverse()
+            });
+            if !kept.is_empty() {
+                reference.extend_columns(&kept);
+            }
+            assert_eq!(reference.columns, want_columns);
+
+            let mut out = basis.clone();
+            let mut batch = CompletionBatch::default();
+            out.column_index();
+            let index = out.column_index.clone().expect("built");
+            for p in &products {
+                batch.push_row(p.iter().copied(), &index);
+            }
+            assert_eq!(batch.rows.len(), kept.len());
+            let columns = batch.place(&mut out);
+            assert_eq!(out.columns, want_columns);
+            for (ids, want) in batch.rows.iter().zip(&kept) {
+                let mut got: Vec<u64> = ids
+                    .iter()
+                    .map(|&id| out.columns[columns[id as usize] as usize])
+                    .collect();
+                got.sort_unstable();
+                assert_eq!(&got, want);
+            }
+        }
+    }
 
     fn random_poly(n_vars: usize, deg: u32, terms: usize, seed: &mut u64) -> F2BoolPoly {
         let mut next = || {
@@ -1986,6 +2903,54 @@ mod tests {
             refuted_children > 0,
             "no specialisation refuted; the test exercised nothing"
         );
+    }
+
+    #[test]
+    #[ignore = "global compact-refutation toggle requires an isolated test process"]
+    fn compact_refuted_basis_survives_two_more_specialisations() {
+        let mut seed = 0x0bad_5eed_0dd5_0001u64;
+        set_compact_refuted_basis(false);
+        for trial in 0..120 {
+            let n_vars = 5 + trial % 3;
+            let system: Vec<F2BoolPoly> = (0..3 + trial % 3)
+                .map(|k| random_poly(n_vars, 2, 4 + k, &mut seed))
+                .filter(|p| poly_degree(p) >= 1)
+                .collect();
+            let Some((root, _)) = ReducedBasis::from_system(&system, n_vars, 3) else {
+                continue;
+            };
+            if root.refuted {
+                continue;
+            }
+            for v in 0..n_vars as u32 {
+                for value in [false, true] {
+                    let (ordinary, _) = root.specialise(v, value);
+                    if !ordinary.refuted {
+                        continue;
+                    }
+                    set_compact_refuted_basis(true);
+                    let (compact, _) = root.specialise(v, value);
+                    set_compact_refuted_basis(false);
+                    assert!(compact.refuted);
+                    assert_eq!(compact.columns, vec![0]);
+                    assert_eq!(compact.words, 1);
+                    assert!(compact.history.is_empty());
+                    let remaining: Vec<u32> =
+                        (0..n_vars as u32).filter(|&w| w != v).take(2).collect();
+                    let (mut ordinary, _) =
+                        ordinary.specialise_all(&[(remaining[0], true), (remaining[1], false)]);
+                    let (mut compact, cost) =
+                        compact.specialise_all(&[(remaining[0], true), (remaining[1], false)]);
+                    assert_eq!(cost.word_ops(), 0);
+                    assert_eq!(
+                        ordinary.decisive_rows(&mut InheritCost::default()),
+                        compact.decisive_rows(&mut InheritCost::default())
+                    );
+                    return;
+                }
+            }
+        }
+        panic!("seeded systems produced no refuted child");
     }
 
     #[test]

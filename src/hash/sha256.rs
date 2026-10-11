@@ -161,6 +161,179 @@ pub fn sha224(data: &[u8]) -> [u8; 28] {
     out
 }
 
+// ── Incremental hashing ──────────────────────────────────────────────────────
+
+/// SHA-256 over input fed in pieces, for files too large to hold in memory.
+///
+/// Blocks are compressed with the x86 SHA extensions when the CPU has them
+/// and with [`compress`] otherwise; either way the digest is that of
+/// [`sha256`], the portable reference this is tested against.
+#[derive(Clone)]
+pub struct Sha256 {
+    state: [u32; 8],
+    block: [u8; 64],
+    filled: usize,
+    length: u64,
+}
+
+impl Default for Sha256 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Sha256 {
+    pub fn new() -> Self {
+        Self {
+            state: H0,
+            block: [0; 64],
+            filled: 0,
+            length: 0,
+        }
+    }
+
+    pub fn update(&mut self, mut data: &[u8]) {
+        self.length = self.length.wrapping_add(data.len() as u64);
+        if self.filled > 0 {
+            let take = data.len().min(64 - self.filled);
+            self.block[self.filled..self.filled + take].copy_from_slice(&data[..take]);
+            self.filled += take;
+            data = &data[take..];
+            if self.filled < 64 {
+                return;
+            }
+            compress_blocks(&mut self.state, &self.block);
+            self.filled = 0;
+        }
+        let whole = data.len() - data.len() % 64;
+        compress_blocks(&mut self.state, &data[..whole]);
+        self.filled = data.len() - whole;
+        self.block[..self.filled].copy_from_slice(&data[whole..]);
+    }
+
+    pub fn finalize(mut self) -> [u8; 32] {
+        let mut tail = [0u8; 128];
+        tail[..self.filled].copy_from_slice(&self.block[..self.filled]);
+        tail[self.filled] = 0x80;
+        let end = if self.filled < 56 { 64 } else { 128 };
+        tail[end - 8..end].copy_from_slice(&self.length.wrapping_mul(8).to_be_bytes());
+        compress_blocks(&mut self.state, &tail[..end]);
+        let mut out = [0u8; 32];
+        for (i, word) in self.state.iter().enumerate() {
+            out[i * 4..i * 4 + 4].copy_from_slice(&word.to_be_bytes());
+        }
+        out
+    }
+}
+
+/// Compress `blocks`, a whole number of 64-byte blocks, into `state`.
+fn compress_blocks(state: &mut [u32; 8], blocks: &[u8]) {
+    debug_assert_eq!(blocks.len() % 64, 0);
+    if blocks.is_empty() {
+        return;
+    }
+    #[cfg(target_arch = "x86_64")]
+    if shani::available() {
+        // SAFETY: the required CPU features were detected at runtime.
+        unsafe { shani::compress(state, blocks) };
+        return;
+    }
+    for block in blocks.chunks_exact(64) {
+        compress(state, block);
+    }
+}
+
+/// The compression function on the SHA extensions: `sha256rnds2` runs two
+/// rounds on the state held as the register pair (ABEF, CDGH), and
+/// `sha256msg1`/`sha256msg2` extend the message schedule four words at a
+/// time.
+#[cfg(target_arch = "x86_64")]
+mod shani {
+    use core::arch::x86_64::*;
+
+    use super::K;
+
+    pub(super) fn available() -> bool {
+        std::arch::is_x86_feature_detected!("sha")
+            && std::arch::is_x86_feature_detected!("sse2")
+            && std::arch::is_x86_feature_detected!("ssse3")
+            && std::arch::is_x86_feature_detected!("sse4.1")
+    }
+
+    /// # Safety
+    ///
+    /// The CPU must support SHA, SSE2, SSSE3 and SSE4.1, and `blocks` must
+    /// be a whole number of 64-byte blocks.
+    #[target_feature(enable = "sha,sse2,ssse3,sse4.1")]
+    pub(super) unsafe fn compress(state: &mut [u32; 8], blocks: &[u8]) {
+        // Byte-reverses each 32-bit lane: message words are big-endian.
+        let bswap = _mm_set_epi64x(0x0c0d_0e0f_0809_0a0b, 0x0405_0607_0001_0203);
+
+        let dcba = _mm_loadu_si128(state.as_ptr().cast());
+        let hgfe = _mm_loadu_si128(state.as_ptr().add(4).cast());
+        let cdab = _mm_shuffle_epi32(dcba, 0xb1);
+        let efgh = _mm_shuffle_epi32(hgfe, 0x1b);
+        let mut abef = _mm_alignr_epi8(cdab, efgh, 8);
+        let mut cdgh = _mm_blend_epi16(efgh, cdab, 0xf0);
+
+        // Rounds 4i..4i+3 on the schedule words W[4i..4i+4] held in `$w`.
+        macro_rules! rounds4 {
+            ($w:expr, $i:expr) => {{
+                let k = _mm_loadu_si128(K.as_ptr().add(4 * $i).cast());
+                let wk = _mm_add_epi32($w, k);
+                cdgh = _mm_sha256rnds2_epu32(cdgh, abef, wk);
+                abef = _mm_sha256rnds2_epu32(abef, cdgh, _mm_shuffle_epi32(wk, 0x0e));
+            }};
+        }
+        // W[4i..4i+4] from the sixteen words before them, written over the
+        // oldest four, then its rounds.
+        macro_rules! schedule_rounds4 {
+            ($w0:ident, $w1:ident, $w2:ident, $w3:ident, $i:expr) => {{
+                let w7 = _mm_alignr_epi8($w3, $w2, 4);
+                $w0 = _mm_sha256msg2_epu32(_mm_add_epi32(_mm_sha256msg1_epu32($w0, $w1), w7), $w3);
+                rounds4!($w0, $i);
+            }};
+        }
+
+        for block in blocks.chunks_exact(64) {
+            let (abef_in, cdgh_in) = (abef, cdgh);
+            let p = block.as_ptr();
+            let mut w0 = _mm_shuffle_epi8(_mm_loadu_si128(p.cast()), bswap);
+            let mut w1 = _mm_shuffle_epi8(_mm_loadu_si128(p.add(16).cast()), bswap);
+            let mut w2 = _mm_shuffle_epi8(_mm_loadu_si128(p.add(32).cast()), bswap);
+            let mut w3 = _mm_shuffle_epi8(_mm_loadu_si128(p.add(48).cast()), bswap);
+
+            rounds4!(w0, 0);
+            rounds4!(w1, 1);
+            rounds4!(w2, 2);
+            rounds4!(w3, 3);
+            schedule_rounds4!(w0, w1, w2, w3, 4);
+            schedule_rounds4!(w1, w2, w3, w0, 5);
+            schedule_rounds4!(w2, w3, w0, w1, 6);
+            schedule_rounds4!(w3, w0, w1, w2, 7);
+            schedule_rounds4!(w0, w1, w2, w3, 8);
+            schedule_rounds4!(w1, w2, w3, w0, 9);
+            schedule_rounds4!(w2, w3, w0, w1, 10);
+            schedule_rounds4!(w3, w0, w1, w2, 11);
+            schedule_rounds4!(w0, w1, w2, w3, 12);
+            schedule_rounds4!(w1, w2, w3, w0, 13);
+            schedule_rounds4!(w2, w3, w0, w1, 14);
+            schedule_rounds4!(w3, w0, w1, w2, 15);
+
+            abef = _mm_add_epi32(abef, abef_in);
+            cdgh = _mm_add_epi32(cdgh, cdgh_in);
+        }
+
+        let feba = _mm_shuffle_epi32(abef, 0x1b);
+        let dchg = _mm_shuffle_epi32(cdgh, 0xb1);
+        _mm_storeu_si128(state.as_mut_ptr().cast(), _mm_blend_epi16(feba, dchg, 0xf0));
+        _mm_storeu_si128(
+            state.as_mut_ptr().add(4).cast(),
+            _mm_alignr_epi8(dchg, feba, 8),
+        );
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -262,5 +435,80 @@ mod tests {
             sha224(b"abc").as_slice(),
             h("23097d223405d8228642a477bda255b32aadbce4bda0b3f7e36c9da7").as_slice(),
         );
+    }
+
+    // ── Incremental hashing ───────────────────────────────────────────────────
+
+    fn next(x: &mut u64) -> u64 {
+        *x ^= *x << 13;
+        *x ^= *x >> 7;
+        *x ^= *x << 17;
+        *x
+    }
+
+    fn noise(x: &mut u64, len: usize) -> Vec<u8> {
+        (0..len).map(|_| next(x) as u8).collect()
+    }
+
+    #[test]
+    fn streaming_matches_one_shot_at_every_split() {
+        let mut x = 0x9E37_79B9_7F4A_7C15u64;
+        for len in (0..=200).chain([255, 256, 257, 4095, 4096, 4097, 65_599]) {
+            let data = noise(&mut x, len);
+            let want = sha256(&data);
+
+            let mut whole = Sha256::new();
+            whole.update(&data);
+            assert_eq!(whole.finalize(), want, "{len} bytes in one update");
+
+            let mut bytewise = Sha256::new();
+            for byte in &data {
+                bytewise.update(std::slice::from_ref(byte));
+            }
+            assert_eq!(bytewise.finalize(), want, "{len} bytes one at a time");
+
+            let mut ragged = Sha256::new();
+            let mut rest = &data[..];
+            while !rest.is_empty() {
+                let n = (1 + next(&mut x) as usize % 150).min(rest.len());
+                ragged.update(&rest[..n]);
+                ragged.update(&[]);
+                rest = &rest[n..];
+            }
+            assert_eq!(ragged.finalize(), want, "{len} bytes in ragged pieces");
+        }
+    }
+
+    #[test]
+    fn streaming_million_a() {
+        let mut hasher = Sha256::default();
+        for _ in 0..1000 {
+            hasher.update(&[b'a'; 1000]);
+        }
+        assert_eq!(
+            hasher.finalize().as_slice(),
+            h("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0").as_slice(),
+        );
+    }
+
+    #[cfg(target_arch = "x86_64")]
+    #[test]
+    fn sha_extensions_agree_with_the_portable_rounds() {
+        if !shani::available() {
+            eprintln!("no SHA extensions on this CPU: the portable rounds are the only path");
+            return;
+        }
+        let mut x = 0x2545_F491_4F6C_DD1Du64;
+        for n in [1usize, 2, 3, 17] {
+            let blocks = noise(&mut x, 64 * n);
+            let mut state: [u32; 8] = std::array::from_fn(|_| next(&mut x) as u32);
+            let mut portable = state;
+            for block in blocks.chunks_exact(64) {
+                compress(&mut portable, block);
+            }
+            // SAFETY: the CPU features were detected above.
+            unsafe { shani::compress(&mut state, &blocks) };
+            assert_eq!(state, portable, "{n} blocks");
+        }
     }
 }

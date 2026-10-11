@@ -1,0 +1,19 @@
+curves: [('O00-000', 6998741, 'O00'), ('O01-000', 4926473, 'O01')] 
+T23 meta modulus: x^23 + x^5 + 1
+O00-000  enumerate seed=0 status=complete wall=1.008s
+O00-000  enumerate seed=1 status=complete wall=1.024s
+O00-000  enumerate seed=2 status=complete wall=1.22s
+O00-000  enumerate seed=3 status=complete wall=1.258s
+O00-000  groebner  seed=0 status=complete wall=325.376s
+O00-000  groebner  seed=1 status=complete wall=209.934s
+O00-000  groebner  seed=2 status=complete wall=306.43s
+O00-000  groebner  seed=3 status=complete wall=415.044s
+O01-000  enumerate seed=0 status=complete wall=1.146s
+O01-000  enumerate seed=1 status=complete wall=0.939s
+O01-000  enumerate seed=2 status=complete wall=0.531s
+O01-000  enumerate seed=3 status=complete wall=0.706s
+O01-000  groebner  seed=0 status=complete wall=283.213s
+O01-000  groebner  seed=1 status=complete wall=277.344s
+O01-000  groebner  seed=2 status=complete wall=138.482s
+O01-000  groebner  seed=3 status=complete wall=403.346s
+exit=0

@@ -154,7 +154,10 @@ fn invmod(a: u64, m: u64) -> Option<u64> {
     Some(old_s.rem_euclid(m as i128) as u64)
 }
 
-fn to_u64_mod(v: &BigUint, m: u64) -> u64 {
+/// Export for the factor-base-logs precompute, which tracks coefficient
+/// rank in `u64` while its relation rows stay big-integer for the final
+/// dense solve.
+pub(crate) fn to_u64_mod(v: &BigUint, m: u64) -> u64 {
     let reduced = v % BigUint::from(m);
     reduced.to_u64_digits().first().copied().unwrap_or(0)
 }
@@ -310,6 +313,74 @@ impl IncrementalRelationSolver {
     /// The target scalar as a `BigUint`, if determined.
     pub fn target_biguint(&self) -> Option<BigUint> {
         self.target().map(BigUint::from)
+    }
+}
+
+/// Minimal rank tracker for dense `u64` rows over `Z/mZ`.
+///
+/// The factor-base-logs precompute grows a big-integer relation matrix
+/// and re-runs a dense solve after (almost) every new row, but a solve
+/// can only succeed once the coefficient rows reach full column rank.
+/// Tracking that rank here in `O(cols²)` native operations per row lets
+/// the driver skip every provably-doomed dense attempt; the calls it
+/// still makes — and their results — are unchanged.
+#[derive(Clone, Debug, Default)]
+pub struct U64RankTracker {
+    modulus: u64,
+    cols: usize,
+    /// Echelon rows with strictly increasing leading positions.
+    basis: Vec<(usize, Vec<u64>)>,
+}
+
+impl U64RankTracker {
+    /// Track rank over `Z/mZ` for rows of exactly `cols` entries.
+    pub fn new(modulus: u64, cols: usize) -> Self {
+        Self {
+            modulus,
+            cols,
+            basis: Vec::new(),
+        }
+    }
+
+    /// Current rank (independent rows kept).
+    pub fn rank(&self) -> usize {
+        self.basis.len()
+    }
+
+    /// Insert a row; returns the new rank.  Rows are reduced against the
+    /// basis in leading-position order, and newly kept rows are
+    /// normalised to a monic leading entry, so a surviving nonzero row
+    /// always carries a fresh leading position and the basis stays
+    /// sorted.  One modular inverse per independent row.
+    pub fn insert(&mut self, mut row: Vec<u64>) -> usize {
+        assert_eq!(row.len(), self.cols, "row width");
+        let m = self.modulus;
+        for (lead, brow) in &self.basis {
+            let factor = row[*lead];
+            if factor == 0 {
+                continue;
+            }
+            for k in *lead..self.cols {
+                if brow[k] != 0 {
+                    row[k] = submod(row[k], mulmod(factor, brow[k], m), m);
+                }
+            }
+        }
+        if let Some(lead) = row.iter().position(|&c| c != 0) {
+            let inv = invmod(row[lead], m).expect("prime modulus: nonzero entries invert");
+            if inv != 1 {
+                for k in lead..self.cols {
+                    row[k] = mulmod(row[k], inv, m);
+                }
+            }
+            let pos = self
+                .basis
+                .iter()
+                .position(|(l, _)| *l > lead)
+                .unwrap_or(self.basis.len());
+            self.basis.insert(pos, (lead, row));
+        }
+        self.basis.len()
     }
 }
 
@@ -572,6 +643,62 @@ mod tests {
         let too_big = BigUint::from(1u8) << 70;
         assert!(IncrementalRelationSolver::new(4, &too_big).is_none());
         assert!(IncrementalRelationSolver::new(4, &BigUint::zero()).is_none());
+    }
+
+    #[test]
+    fn rank_tracker_agrees_with_incremental_solver() {
+        use rand::{rngs::StdRng, Rng, SeedableRng};
+        // Same row stream into both structures: ranks must agree at
+        // every step (the incremental solver also folds in a `d` column
+        // and rhs, which can only keep its rank at or above the
+        // coefficient rank — so assert exactly that).
+        let m = 2003u64;
+        let big = BigUint::from(m);
+        let mut rng = StdRng::seed_from_u64(0x274c);
+        for unknowns in [1usize, 4, 9] {
+            let mut tracker = U64RankTracker::new(m, unknowns);
+            let mut solver =
+                IncrementalRelationSolver::new(unknowns, &big).expect("modulus fits");
+            for _ in 0..3 * unknowns + 5 {
+                let coeff: Vec<u64> = (0..unknowns).map(|_| rng.gen_range(0..m)).collect();
+                let t_rank = tracker.insert(coeff.clone());
+                let mut full = coeff;
+                full.push(rng.gen_range(0..m));
+                full.push(rng.gen_range(0..m));
+                solver.add_row(full);
+                assert!(solver.rank() >= t_rank, "U={unknowns}");
+                assert!(t_rank <= unknowns, "U={unknowns}");
+            }
+            assert_eq!(tracker.rank(), unknowns, "U={unknowns} reaches full rank");
+        }
+    }
+
+    #[test]
+    fn rank_tracker_counts_basis_size() {
+        use rand::{rngs::StdRng, Rng, SeedableRng};
+        let m = 2003u64;
+        // Identity rows: rank grows one per row.
+        let mut tracker = U64RankTracker::new(m, 4);
+        for i in 0..4 {
+            let mut row = vec![0u64; 4];
+            row[i] = 1;
+            assert_eq!(tracker.insert(row), i + 1);
+        }
+        // Duplicates, multiples, and zero rows add nothing.
+        assert_eq!(tracker.insert(vec![1, 0, 0, 0]), 4);
+        assert_eq!(tracker.insert(vec![0, 0, 5, 0]), 4);
+        assert_eq!(tracker.insert(vec![0, 0, 0, 0]), 4);
+        // Full-rank random matrices reach min(rows, cols); extra rows stop.
+        let mut rng = StdRng::seed_from_u64(0x7a);
+        for cols in [1usize, 3, 7] {
+            let mut tracker = U64RankTracker::new(m, cols);
+            for i in 0..2 * cols + 3 {
+                let row: Vec<u64> = (0..cols).map(|_| rng.gen_range(0..m)).collect();
+                let rank = tracker.insert(row);
+                assert!(rank <= cols.min(i + 1));
+            }
+            assert_eq!(tracker.rank(), cols, "random rows reach full rank");
+        }
     }
 }
 

@@ -1,13 +1,36 @@
 # Hyperelliptic covers of ECC2K-130
 
-**Experiment:** `scripts/ecc2k130_hyperelliptic_cover_boundary.py`
+**Experiment:** `scripts/ecc2k130_hyperelliptic_cover_boundary.py` (legacy Python, written before the
+repository's no-Python rule; its numbers are replayed natively by `ecc2k130_curve_construction`,
+which agrees to 0.0048 on every value this note cites)
 **Frozen artefact:** `experiments/ecc2k130_hyperelliptic_cover_boundary.json`
 **Related:** `research/notes/ecc2k130/RESEARCH_ECC2K130_EXTENSION.md` (the same arithmetic fact in the
 field register; this note is the genus register), `research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md` and
 `research/notes/cm-isogeny/RESEARCH_SECP256K1_CM.md` §8 (the genus-2 gluing machinery, applied to a prime
 field), `research/ghs-c2pnb/ghs_poc.py` (GHS magic numbers and the Hess isogeny
-shift, on the curves where that attack lands), `research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md` (the
+shift, swept on the ANSI X9.62 composite-degree curves, where the shift is only a
+hypothetical), `research/notes/index-calculus/RESEARCH_QUASI_SUBFIELD.md` (the
 same barrier from the factor-base side).
+
+> **Correction, 2026-10-06 (accounting).**  This note said the genus *any*
+> construction reaches over `F_2` is 1, `2^129` or `2^130`, that the window and
+> "the constructions" miss by `2^120.77`, and that "every construction is
+> closed".  The trichotomy is a theorem about **GHS/Hess descent** and stands.
+> The generalisation does not: the Klein quartic is a non-GHS construction at
+> `n = 3`, and the reduction of the modular curve `X_H(3²·7²·263²)` carries `A`
+> explicitly at genus `508,799,809 ≈ 2^28.92`, `2^20.69` above the window.
+> No modelled or measured number below changed.  See
+> `research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md`, which also
+> closes cyclic covers below genus 1300.
+
+> **Correction, 2026-10-09 (attribution).**  §3 said the Hess/Menezes-Teske
+> isogeny walk is "exactly how `c2pnb176w1` fell, at `m′ = 5`, genus 16 over
+> `F_2^16`".  No paper read for this repository reports that curve broken, and
+> neither Menezes-Teske paper mentions it.  The source of the `m′ = 5` figure is
+> Maurer-Menezes-Teske (2002) §6, where it is a hypothetical isogenous instance
+> `(n, m) = (8, 5)`, genus 16 over `F_2^22`, that the authors judge infeasible to
+> find.  The trichotomy argument for `F_2^131` does not use the example and
+> stands; no number computed in this note changed.
 
 The question.  `E : y² + xy = x³ + 1` over `F_2^131` has genus 1.  Curves of
 higher genus have Jacobians, Jacobians admit index calculus, and in the
@@ -25,10 +48,11 @@ lives.**
   rises with genus (§2).
 - Over `F_2` — the only proper subfield, because 131 is prime — a transfer would
   be *cheap*, and this is the interesting half.  The genus that would pay sits
-  in the window **[130, between 290 and 300]** (§5).  The genus any construction reaches is
-  **1, 2^129 or 2^130** and nothing else, for every elliptic curve over `F_2^131`,
-  because `2` is a primitive root mod `131` (§3).  The window and the
-  constructions miss each other by `2^120.77` (§5).
+  in the window **[130, between 290 and 300]** (§5).  The genus GHS/Hess descent
+  reaches is **1, 2^129 or 2^130** and nothing else, for every elliptic curve over
+  `F_2^131`, because `2` is a primitive root mod `131` (§3).  The window and GHS
+  descent miss each other by `2^120.77` (§5) — not every construction does (see
+  the correction above).
 - ECC2K-130 sits at the degenerate end of that trichotomy, genus 1, where the
   transfer is not merely useless but **exactly the zero map** on the target
   subgroup: the conorm-norm composite is `Tr_{F_2^131/F_2}`, and
@@ -38,7 +62,7 @@ lives.**
   exactly.  If `A` were isogenous to a Jacobian and the isogeny were evaluable,
   index calculus on that genus-130 curve would cost `2^37.17` — `2^23.64` times
   *cheaper* than rho.  No point count forbids it; the Torelli codimension at
-  `g = 130` is `8128`, and explicit constructions of curves with prescribed
+  `g = 130` is `8128`, and CM-method constructions of curves with prescribed
   Frobenius stop at genus 3.
 
 The counterfactual is what makes the arithmetic fact concrete (§7): at field
@@ -69,8 +93,9 @@ of genus `g ≥ 2` over `F_2` or `F_2^131`, together with a correspondence that 
 evaluable in polynomial time and non-zero on `⟨G⟩`, for which relation
 collection *and* linear algebra *and* the construction of `C` together cost
 under `2^60.81` operations.  It is abandoned if the available genera can be
-shown to miss the window that would pay — which is what §3 and §5 do for every
-construction known, leaving §6's question open but unsearchable.
+shown to miss the window that would pay — which is what §3 and §5 do for GHS/Hess
+descent (the construction note extends it to cyclic covers), leaving §6's
+question open.
 
 **Boundary A, the one that holds for every row below.**  A correspondence that
 preserves the discrete logarithm carries `⟨G⟩` to a cyclic group of the *same*
@@ -130,7 +155,7 @@ the machinery `research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md` documents for 
 and an `ℓ ≥ 3` gluing partner is needed.)  Either way the result lives over
 `F_2^131` and lands on the `2^70.19×` row above.
 
-## 3. Boundary C — over `F_2` the genus is 1, 2^129 or 2^130, and nothing else
+## 3. Boundary C — over `F_2`, GHS/Hess descent reaches genus 1, 2^129 or 2^130, and nothing else
 
 Weil descent to `F_2` is the GHS construction: the compositum of the Frobenius
 conjugates of the Artin-Schreier extension defining `E` gives a hyperelliptic
@@ -165,9 +190,17 @@ the script asserts `m ∈ {1, 130, 131}` and the exact `Tr(b)` correspondence on
 every sample, not just the distribution.
 
 **This closes the Hess/Menezes-Teske route too.**  That attack raises a magic
-number of 1 by walking to an isogenous curve with `b′ ∉ F_2` — which is exactly
-how `c2pnb176w1` fell, at `m′ = 5`, genus 16 over `F_2^16`
-(`research/ghs-c2pnb/ghs_poc.py`).  Here the walk has nowhere to land: the
+number of 1 by walking to an isogenous curve with `b′ ∉ F_2`.  The worked example
+in the literature is the ANSI X9.62 curve `c2pnb176w1`, and it is a hypothetical,
+not a break.  Maurer–Menezes–Teske (LMS J. Comput. Math. 5 (2002), §6, Remark 26
+and Table 4) find that an isogenous curve with `(n, m) = (8, 5)` would descend to
+genus 16 over `F_2^22`, at Enge–Gaudry cost `2^61`–`2^65` against rho `2^87` in
+their units.  About `2^110` of the roughly `2^176` isomorphism classes have those
+parameters, a density of roughly `2^-66`, so the walk costs more than rho (about `2^88`
+operations on the `N·2^(v+15)` model of Menezes–Teske 2005, our arithmetic) and
+the authors judge finding such a curve infeasible.  Neither Menezes–Teske paper
+mentions `c2pnb176w1`, and `research/ghs-c2pnb/ghs_poc.py` only sweeps
+hypothetical `m′`.  Here the walk has nowhere to land: the
 trichotomy is a statement about the *field*, not about one curve, so every
 curve in every isogeny class over `F_2^131` has magic number 1, 130 or 131.
 
@@ -262,13 +295,15 @@ smoothness heuristic.
 
 ```
 window that would pay : genus 130 … between 290 and 300
-genus a construction reaches : 1, 2^129, 2^130
+genus GHS descent reaches : 1, 2^129, 2^130
 gap, in log2 of genus :  129 − 8.23 = 120.77
+best explicit construction (modular curve, 2026-10-06) : 2^28.92, gap 20.69
 ```
 
-**The window is not narrow because index calculus is weak.  It is empty because
-the constructions land 121 bits of genus away from it.**  Nothing in the middle
-is expensive; there is simply nothing in the middle.
+**The window is not narrow because index calculus is weak.  It is empty of GHS
+covers because GHS descent lands 121 bits of genus away from it.**  The best
+explicit construction of any kind, a modular curve, lands 20.69 bits away
+(`research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md`).
 
 ## 6. What is *not* closed, stated as sharply as it can be
 
@@ -291,17 +326,20 @@ Three things are true about it, and none of them is a proof either way.
    codimension `8256`.  This is a heuristic and the note says so in §8 — the
    isogeny class of `A` contains as many principally polarised members as the
    degree-260 CM field has ideal classes, a number this thread has not bounded.
-3. **Nobody can build it.**  The trivial existence theorem — every abelian
+3. **Nobody can build it in the window.**  The trivial existence theorem — every abelian
    variety is a quotient of a Jacobian, cut `A` by `dim A − 1` hyperplanes of the
    3-theta embedding — gives a curve of degree `2^936.2` and genus `2^942.3`,
    which is an answer to the literal question and to nothing else.  Constructive
    CM: Mestre at genus 2, Weber/Koike-Weng at genus 3, **nothing at genus ≥ 4**,
    and `research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md` is this repository's record of how much work
-   even genus 2 is.
+   even genus 2 is.  Modular curves are explicit in every genus, and one
+   carries `A` — at genus `2^28.92` (correction above).
 
-So the honest verdict is not "impossible", it is: *every construction is closed,
-and the residual is not a search anyone can run.*  That is also why this note
-does not have a next round.
+So the honest verdict is not "impossible", it is: *every known construction
+lands outside the window* — GHS at `2^129`, the modular curve at `2^28.92`,
+cyclic covers of genus ≤ 1 curves at ≥ 1300 — and the residual is not a search
+anyone can run at genus 130.  Its next round is
+`research/notes/ecc2k130/RESEARCH_ECC2K130_CURVE_CONSTRUCTION.md`.
 
 ## 7. The counterfactual, which is where the arithmetic fact becomes visible
 
@@ -368,7 +406,10 @@ obstacle, and it acts on the genus exactly as it acts on the field.**
 - F. Hess, *Generalising the GHS attack on the elliptic curve discrete
   logarithm problem*, LMS J. Comput. Math. 7 (2004).
 - A. Menezes, E. Teske, *Cryptographic implications of Hess' generalized GHS
-  attack*, AAECC 16 (2006).
+  attack*, AAECC 16 (2006).  Does not discuss the X9.62 curves.
+- M. Maurer, A. Menezes, E. Teske, *Analysis of the GHS Weil descent attack on
+  the ECDLP over characteristic two finite fields of composite degree*, LMS J.
+  Comput. Math. 5 (2002) 127–174, §6 (the X9.62 curves).
 - C. Diem, *On the discrete logarithm problem in elliptic curves*,
   Compositio Math. 147 (2011).
 - P. Gaudry, *An algorithm for solving the discrete log problem on hyperelliptic

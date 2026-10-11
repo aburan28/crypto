@@ -1,0 +1,103 @@
+[package]
+name = "crypto"
+version = "0.1.0"
+edition = "2021"
+default-run = "crypto"
+description = "Educational comprehensive cryptography library: ECC, RSA, AES, ChaCha20, SHA, KDF, PQC"
+
+[[bin]]
+name = "crypto"
+path = "src/main.rs"
+
+[[bin]]
+name = "ic"
+path = "src/bin/ic.rs"
+
+# `icx` — index calculus across every standardized curve (catalog + engine).
+[[bin]]
+name = "icx"
+path = "src/bin/icx.rs"
+
+# `ecc2k-guard` — the ECC2K-130 rho campaign's no-fruitless-cycle
+# certificate and verifiable seed provenance.
+[[bin]]
+name = "ecc2k-guard"
+path = "src/bin/ecc2k_guard.rs"
+
+[lib]
+name = "crypto_lib"
+path = "src/lib.rs"
+
+[features]
+f4-four-tables = []
+f4-five-tables = []
+f4-wide-tables = []
+redis-cache = ["dep:redis"]
+# Verbose tracing in the isogeny rho attack's linear-algebra step.
+rho_debug = []
+
+[lints.rust]
+# `hashclash_linked` is set by a downstream build script that links the
+# HashClash C library (see src/cryptanalysis/md5_hashclash_ffi.rs).
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(hashclash_linked)"] }
+
+[lints.clippy]
+# The whole allow list; CI runs clippy with -D warnings for everything else.
+# Index loops mirror the specs and papers the algorithms come from (state
+# matrices, round tables, polynomial coefficients); iterator rewrites of
+# them obscure the correspondence without making them safer.
+needless_range_loop = "allow"
+manual_memcpy = "allow"
+# Attack and protocol entry points take their parameters explicitly.
+too_many_arguments = "allow"
+type_complexity = "allow"
+# Constants are grouped as they appear in their standards, not by nibble.
+unusual_byte_groupings = "allow"
+# Authenticated decryption fails without detail on purpose: no error oracle.
+result_unit_err = "allow"
+# `chunks_exact(N)` is equivalent to `as_chunks::<N>().0`; rewriting 51 call
+# sites would change slice types throughout for no behavior gain.
+chunks_exact_to_as_chunks = "allow"
+
+[dependencies]
+redis = { version = "0.32", optional = true, default-features = false, features = ["tls-rustls"] }
+# Portable CPU-time and peak-RSS measurements for ic research reports.
+libc = "0.2"
+num-bigint = { version = "0.4", features = ["rand"] }
+num-traits = "0.2"
+num-integer = "0.1"
+rand = { version = "0.8", features = ["small_rng"] }
+# OS-backed CSPRNG (getrandom(2) on Linux, BCryptGenRandom on Windows, etc.).
+getrandom = "0.2"
+# Constant-time equality for MAC/tag verification. Public-domain.
+subtle = "2.5"
+# Zeroize secret material on drop. Best-effort: cannot zeroize internal
+# heap allocations of num-bigint, but covers byte buffers and re-assigns
+# BigUint fields to zero on drop.
+zeroize = { version = "1.7", features = ["zeroize_derive"] }
+hex = "0.4"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+# Data-parallel sweeps for the isogeny experimental harness.
+rayon = "1.10"
+# BLAKE3 is kept as a crate: its Merkle-tree construction is too complex to
+# reimplement educationally without obscuring the learning goal.
+blake3 = "1.5"
+# DEFLATE compression. Used only by the cryptopals Set-7 CRIME demo
+# (challenge 51): the attack treats compressed-output length as a
+# side channel, so we need a real LZ77-style compressor for the
+# attack to be faithful. Pure-Rust, no_std-compatible.
+flate2 = "1.0"
+# Base64 codec for cryptopals fixtures (challenge 56 cookie).
+base64 = "0.21"
+
+[[bench]]
+name = "pqc_speed"
+path = "benches/pqc_speed.rs"
+harness = false
+
+[[bench]]
+name = "pqc_split"
+path = "benches/pqc_split.rs"
+harness = false

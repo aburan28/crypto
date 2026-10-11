@@ -232,10 +232,14 @@
       "repo": "crypto"
      }
     ],
-    "finding": "The commit in an ic report is `git rev-parse HEAD` of the working directory at start-up, not the commit the binary was built from; a baseline and a candidate built from different commits reported the same commit. The repository has no rust-toolchain file, Cargo.lock is gitignored, and 85 workflow files install a floating stable toolchain.",
+    "finding": "At audit time, the commit in an ic report was `git rev-parse HEAD` of the working directory at start-up, not the commit the binary was built from; a baseline and a candidate built from different commits reported the same commit. The repository had no rust-toolchain file, Cargo.lock was gitignored, and 85 workflow files installed a floating stable toolchain.",
     "icms": "records identify code by binary sha256, compiled-in calibration hash, the build tree's Cargo.lock hash, rustc -Vv and the session's commit, dirty flag and diff hash; the gaps are stated on the page",
     "id": "A12",
-    "severity": "high"
+    "severity": "high",
+    "verification": {
+     "corrected": "ic and ecbench now prefer the build-embedded source commit and dirty flag while retaining the runtime worktree only as a diagnostic. The root Cargo.lock is tracked and release builds use --locked. A repository-wide rust-toolchain pin remains open.",
+     "verdict": "historical finding; partially remediated 2026-10-06"
+    }
    },
    {
     "dimension": "solver_counter_definition",
@@ -841,13 +845,13 @@
       "where": "line 179 dependencies {sympy, pyyaml}"
      }
     ],
-    "finding": "Toolchain and dependency pinning differ across the repositories. crypto gitignores Cargo.lock and has no rust-toolchain file, and nothing records the rustc version. ic bench reports carry software{version, os, arch, binary_blake3}; price and boundary reports also carry the working-tree git commit. cryptanalysis's implementation hash and candidate ID cover the CFLAGS string, but -march=native makes the compiled kernel depend on the host, and no compiler version or target CPU is hashed. The autoresearcher manifest records sympy and pyyaml, not numpy or msolve. The crypto toolchain part overlaps A12.",
+    "finding": "At audit time, toolchain and dependency pinning differed across the repositories. crypto gitignored Cargo.lock and had no rust-toolchain file, and nothing recorded the rustc version. ic bench reports carried software{version, os, arch, binary_blake3}; price and boundary reports also carried the working-tree git commit. cryptanalysis's implementation hash and candidate ID covered the CFLAGS string, but -march=native made the compiled kernel depend on the host, and no compiler version or target CPU was hashed. The autoresearcher manifest recorded sympy and pyyaml, not numpy or msolve. The crypto toolchain part overlaps A12.",
     "icms": "each record carries the binary sha256, the Cargo.lock and calibration hashes present at the run, and the producer repository's commit and dirty flag; the capsule carries rustc -Vv, cc --version, numpy and the build flags in the environment",
     "id": "X17",
     "severity": "medium",
     "verification": {
-     "corrected": "The claim that crypto reports record 'only' the software block is overstated: price and boundary reports also record a git commit, and binary_blake3 does identify the binary. The autoresearcher dependencies line is 179, not 178.",
-     "verdict": "corrected"
+     "corrected": "The claim that crypto reports recorded 'only' the software block was overstated: price and boundary reports also recorded a git commit, and binary_blake3 did identify the binary. The autoresearcher dependencies line is 179, not 178. ic and ecbench now embed source provenance, the root Cargo.lock is tracked, and release builds use --locked; a repository-wide rust-toolchain pin remains open.",
+     "verdict": "historical finding; partially remediated 2026-10-06"
     }
    }
   ],
@@ -3371,7 +3375,7 @@
   },
   "audit": {
    "path": "docs/ic/measurement/audit.json",
-   "sha256": "617de8b19fb0706c091cc29a07d58f2eeb1c6a1deeb1a1a1614e00c236177b57"
+   "sha256": "0ad55b7c765b3710bc75c30d486970968c93521ab8e174337b734b93b9831ad0"
   },
   "example spec": {
    "path": "docs/ic/measurement/specs/k17-subspace-d6-sat-native.yaml",

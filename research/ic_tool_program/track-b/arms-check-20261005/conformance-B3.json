@@ -1,0 +1,358 @@
+{
+ "binary": "/tmp/claude-0/-home-user-crypto/56047a67-af13-5c18-babc-0bd1175ee451/scratchpad/bin/ic-tbarm-B3-ff3b96242",
+ "steps": [
+  "B0",
+  "B1",
+  "B3"
+ ],
+ "cases": 37,
+ "passed": 37,
+ "results": [
+  {
+   "id": "C001-generate-degree-range-message",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "error: invalid value '65' for '--degree <DEGREE>': synthetic degree must be odd and 3..=63",
+    "",
+    "For more information, try '--help'."
+   ]
+  },
+  {
+   "id": "C002-workflow-foreign-state-short-digest",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 1,
+   "stderr_tail": [
+    "ic: run directory /tmp/ic-conf-C002-workflow-foreign-state-short-digest-20961-1791238029285239811/run belongs to a different parameter set (digest ab); use a fresh directory"
+   ]
+  },
+  {
+   "id": "C003-subgroup-orbits-points-beyond-the-abscissa-limit",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 1,
+   "stderr_tail": [
+    "ic: subgroup_orbits points must be 1..=1048576 (two per abscissa, at most 524288 abscissae), got 2000000"
+   ]
+  },
+  {
+   "id": "C004-boundary-random-binary-degree-bound",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 1,
+   "stderr_tail": [
+    "ic: random binary curves are counted by enumerating 2^n abscissae, so their degrees must lie in 5..=32, got 40"
+   ]
+  },
+  {
+   "id": "C005-rho-random-binary-degree-bound",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 1,
+   "stderr_tail": [
+    "ic: random binary curves are counted by enumerating 2^n abscissae, so their degrees must lie in 5..=32, got 40"
+   ]
+  },
+  {
+   "id": "C006-bench-random-binary-degree-bound",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 1,
+   "stderr_tail": [
+    "ic: random binary curves are counted by enumerating 2^n abscissae, so their degrees must lie in 5..=32, got 40"
+   ]
+  },
+  {
+   "id": "C007-pair-table-budget-named",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 1,
+   "stderr_tail": [
+    "ic: no pair table of tier Auto for 496 base points fits pair_table_bytes = 1; raise it or use a smaller base"
+   ]
+  },
+  {
+   "id": "C008-single-target-smoke-row-solves",
+   "step": "B0",
+   "pass": true,
+   "why": [],
+   "exit": 0,
+   "stderr_tail": []
+  },
+  {
+   "id": "C009-v2-translation-same-outputs",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 0,
+   "stderr_tail": []
+  },
+  {
+   "id": "C010-curve-a-other-generator",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 0,
+   "stderr_tail": []
+  },
+  {
+   "id": "C011-another-modulus-is-another-model",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 0,
+   "stderr_tail": []
+  },
+  {
+   "id": "C012-unknown-key",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, unknown-key: subgroup.comment is not a schema key"
+   ]
+  },
+  {
+   "id": "C013-schema-version",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, schema-version: ic reads schema_version 1 and 2"
+   ]
+  },
+  {
+   "id": "C014-two-targets",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, target-count: a document names exactly one target; this one gives [\"public_hash_seed\", \"known_log\"]"
+   ]
+  },
+  {
+   "id": "C015-coordinates-without-modulus",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, modulus-required: a document with coordinates names its modulus: coordinates mean nothing without it"
+   ]
+  },
+  {
+   "id": "C016-integer-syntax",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, integer-syntax: subgroup.order: \"+1439393\" is not a decimal or 0x-hexadecimal integer of at most 1024 bits"
+   ]
+  },
+  {
+   "id": "C017-reducible-modulus",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, modulus-reducible: reduction polynomial is reducible over GF(2)"
+   ]
+  },
+  {
+   "id": "C018-singular-curve",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, curve-singular: y^2 + xy = x^3 + ax^2 + b is singular when b = 0"
+   ]
+  },
+  {
+   "id": "C019-generator-off-curve",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, generator-off-curve: G is not on the curve"
+   ]
+  },
+  {
+   "id": "C020-generator-order",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, generator-order: [r]G != O"
+   ]
+  },
+  {
+   "id": "C021-composite-order",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, order-composite: r = 4318179 is composite"
+   ]
+  },
+  {
+   "id": "C022-cofactor-mismatch",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, cofactor-mismatch: h\u00b7r = 2146134963 but #E = 2147574356 (koblitz-trace-recurrence)"
+   ]
+  },
+  {
+   "id": "C023-target-outside-subgroup",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, target-outside-subgroup: [r]Q != O"
+   ]
+  },
+  {
+   "id": "C024-target-off-curve",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, target-off-curve: Q is not on the curve"
+   ]
+  },
+  {
+   "id": "C025-known-log-range",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 2,
+   "stderr_tail": [
+    "ic: refused, known-log-range: known_log lies in [1, r)"
+   ]
+  },
+  {
+   "id": "C026-identity-target",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 0,
+   "stderr_tail": []
+  },
+  {
+   "id": "C028-gate-curve-checks",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 0,
+   "stderr_tail": []
+  },
+  {
+   "id": "C029-composite-degree-disclosed",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 0,
+   "stderr_tail": []
+  },
+  {
+   "id": "C030-even-degree-has-no-ic-route",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 3,
+   "stderr_tail": [
+    "ic: refused, no-ic-route: no admitted pipeline for this arm; kic: even-extension-degree"
+   ]
+  },
+  {
+   "id": "C031-challenge-checks",
+   "step": "B1",
+   "pass": true,
+   "why": [],
+   "exit": 0,
+   "stderr_tail": []
+  },
+  {
+   "id": "C052-rho-alone-curve-a",
+   "step": "B3",
+   "pass": true,
+   "why": [],
+   "exit": 0,
+   "stderr_tail": []
+  },
+  {
+   "id": "C053-gate-rho-capped",
+   "step": "B3",
+   "pass": true,
+   "why": [],
+   "exit": 1,
+   "stderr_tail": []
+  },
+  {
+   "id": "C054-gate-paired-has-no-ic-route",
+   "step": "B3",
+   "pass": true,
+   "why": [],
+   "exit": 3,
+   "stderr_tail": [
+    "ic: refused, no-ic-route: no admitted pipeline for this arm; kic: field-wider-than-one-word"
+   ]
+  },
+  {
+   "id": "C055-challenge-past-two-words",
+   "step": "B3",
+   "pass": true,
+   "why": [],
+   "exit": 0,
+   "stderr_tail": []
+  },
+  {
+   "id": "C056-gate-rho-hashed-target",
+   "step": "B3",
+   "pass": true,
+   "why": [],
+   "exit": 3,
+   "stderr_tail": [
+    "ic: refused, not-yet-supported: a hashed or random target past one word arrives with step B4"
+   ]
+  },
+  {
+   "id": "C057-smoke-rho-alone-is-the-paired-rho",
+   "step": "B3",
+   "pass": true,
+   "why": [],
+   "exit": 0,
+   "stderr_tail": []
+  },
+  {
+   "id": "C058-n61-rho-alone-is-the-paired-rho",
+   "step": "B3",
+   "pass": true,
+   "why": [],
+   "exit": 0,
+   "stderr_tail": []
+  }
+ ]
+}

@@ -44,7 +44,7 @@ connecting to DevTools. The isolated-profile check subsequently passed with
 the sandbox restriction lifted; no timeout or assertion was relaxed.
 
 The browser check uses an installed Chrome or Chromium with a fresh temporary
-profile. It checks chart visibility, the admitted SAT status, quiet evidence
+profile. It checks chart visibility, both native F5 and SAT admission statuses, quiet evidence
 search, old deep links, desktop and 390/320-pixel layouts, dark appearance,
 JavaScript-disabled rendering and the absence of page network requests. It
 does not use the user's browser profile. Set `IC_DASHBOARD_CHROME` to override

@@ -1,0 +1,160 @@
+{
+  "controlled_online_speedup": null,
+  "counter_note": "IC S3 root-index probes and rho walk steps are distinct native counters; their quotient is not an operation speedup.",
+  "field_degree": 73,
+  "host_isolation_receipt": null,
+  "missing_for_promotion": [
+    "qualifying physical-host isolation receipt",
+    "verified matching resource envelope and exact rho online boundary"
+  ],
+  "public_generator": [
+    "4735344536444938487862",
+    "4753051995279452466153"
+  ],
+  "public_target_q": [
+    "1852858978593996699777",
+    "7821257062942871962177"
+  ],
+  "record_class": "verified_answer_exploratory_wall",
+  "rho_interval_note": "The legacy interval includes setup_ms; its target dependence is not established by these receipts. A new paired run must freeze the exact online start event.",
+  "runs": [
+    {
+      "candidate_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4",
+      "common_resource_cap_bytes": null,
+      "ic_binary_sha256": "03f74ed95edf8fe3bd91f0adde3423b804843f922915a2e6f79e90f77b229dfe",
+      "ic_online_ms": 249.023875,
+      "ic_online_phase_ms": {
+        "target_descent": 0.000916,
+        "target_pdp": 248.89108499999998,
+        "target_query": 0.0,
+        "target_recovery_check": 0.12125000000000001,
+        "target_relation_check": 0.010374
+      },
+      "ic_peak_rss_bytes": 5630296064,
+      "ic_rank_seed": 7,
+      "independent_replay": "PASS",
+      "legacy_run_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR1",
+      "native_counters": {
+        "ic_s3_root_index_probes": 457561,
+        "rho_walk_steps": 10561809
+      },
+      "public_target_q": [
+        "1852858978593996699777",
+        "7821257062942871962177"
+      ],
+      "recorded_wall_ratio": 184.8588383342762,
+      "rho_binary_sha256": "8a17723a2b0d26658ea684d19b6527aced19f91daffe85f4b838a1ad8d454527",
+      "rho_peak_rss_bytes": 2187935744,
+      "rho_recorded_online_ms": 46034.26425,
+      "rho_recorded_phase_ms": {
+        "setup_ms": 7.6499999999999995,
+        "validation_ms": 7.96275,
+        "walk_ms": 46018.6515
+      },
+      "rho_walk_plus_validation_ms": 46026.61425,
+      "rho_walk_seed": 202610041,
+      "source_sha256": {
+        "ic.jsonl": "3762698fca7a290baa65e07610fa3608287f7991ae958e1ffe5c6da37fc913ff",
+        "ic_execution.json": "4c77b47590ef8f48fec089edfe8c29d330111adb3baa9a830287a980bcd68800",
+        "independent_replay.json": "e25a85ccb4ac943f069dd06fba58073fcc67ef3f54f72b9d1ef0702695a0c10e",
+        "rho.jsonl": "8c2c10ad0baa91077b40348e1630e8aeb3f733fca6e7049a9aa6de6d5f542dd1",
+        "rho_execution.json": "84866f311e1d37e1ef4b1d3dfb505c6cad774fc73c3f9b52e1c15799f63b1a5d",
+        "run.json": "1e0a66d8ef1052130f09af8de07a15155e3e05cc7db4b0a587ca2629f2baabd5"
+      },
+      "workload_id": "e79c49b134ea"
+    },
+    {
+      "candidate_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4",
+      "common_resource_cap_bytes": null,
+      "ic_binary_sha256": "03f74ed95edf8fe3bd91f0adde3423b804843f922915a2e6f79e90f77b229dfe",
+      "ic_online_ms": 326.15937499999995,
+      "ic_online_phase_ms": {
+        "target_descent": 0.009417,
+        "target_pdp": 325.987959,
+        "target_query": 4.2e-05,
+        "target_recovery_check": 0.148125,
+        "target_relation_check": 0.013666
+      },
+      "ic_peak_rss_bytes": 5043765248,
+      "ic_rank_seed": 8,
+      "independent_replay": "PASS",
+      "legacy_run_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR2",
+      "native_counters": {
+        "ic_s3_root_index_probes": 457561,
+        "rho_walk_steps": 43892625
+      },
+      "public_target_q": [
+        "1852858978593996699777",
+        "7821257062942871962177"
+      ],
+      "recorded_wall_ratio": 2094.6676468919527,
+      "rho_binary_sha256": "8a17723a2b0d26658ea684d19b6527aced19f91daffe85f4b838a1ad8d454527",
+      "rho_peak_rss_bytes": 5007884288,
+      "rho_recorded_online_ms": 683195.4905429999,
+      "rho_recorded_phase_ms": {
+        "setup_ms": 87.194584,
+        "validation_ms": 11.343875,
+        "walk_ms": 683096.952084
+      },
+      "rho_walk_plus_validation_ms": 683108.295959,
+      "rho_walk_seed": 202610042,
+      "source_sha256": {
+        "ic.jsonl": "71bec9b6109942255da722770d0e4cb593d3a52f8a061df17596391d61fe9107",
+        "ic_execution.json": "152a1a1978d0e5a46face52375c9e063d15436cca3a40186cb17acfce20dd677",
+        "independent_replay.json": "6c21bd2816223bbf02830094bbce84c1416e26035c9dc0ab31f43ec24c7f8137",
+        "rho.jsonl": "514db84ccfa8f3c882eae18a3934c303a6b22938efc4f99cdd127c9584603e4e",
+        "rho_execution.json": "65fadcbeee41c3f56f11b19fb3e65a1daa5dac6553e9284ed42b376eb85b70da",
+        "run.json": "6fa5e9b6c97e3449b9018e2d8527fc602544d7084fd1f45c85ce030df837e794"
+      },
+      "workload_id": "e79c49b134ea"
+    },
+    {
+      "candidate_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4",
+      "common_resource_cap_bytes": null,
+      "ic_binary_sha256": "03f74ed95edf8fe3bd91f0adde3423b804843f922915a2e6f79e90f77b229dfe",
+      "ic_online_ms": 543.8117500000001,
+      "ic_online_phase_ms": {
+        "target_descent": 0.011209,
+        "target_pdp": 543.475167,
+        "target_query": 0.0,
+        "target_recovery_check": 0.296625,
+        "target_relation_check": 0.028333
+      },
+      "ic_peak_rss_bytes": 5628755968,
+      "ic_rank_seed": 9,
+      "independent_replay": "PASS",
+      "legacy_run_id": "IC1N73Ckb1fb87600PDP4rootRCguidedLAgaussTDdirectISO0h980b4cf20ad4We79c49b134eaR3",
+      "native_counters": {
+        "ic_s3_root_index_probes": 457561,
+        "rho_walk_steps": 41590986
+      },
+      "public_target_q": [
+        "1852858978593996699777",
+        "7821257062942871962177"
+      ],
+      "recorded_wall_ratio": 1189.7419463922945,
+      "rho_binary_sha256": "8a17723a2b0d26658ea684d19b6527aced19f91daffe85f4b838a1ad8d454527",
+      "rho_peak_rss_bytes": 5199986688,
+      "rho_recorded_online_ms": 646995.649916,
+      "rho_recorded_phase_ms": {
+        "setup_ms": 72.405,
+        "validation_ms": 12.853416,
+        "walk_ms": 646910.3914999999
+      },
+      "rho_walk_plus_validation_ms": 646923.2449159999,
+      "rho_walk_seed": 202610043,
+      "source_sha256": {
+        "ic.jsonl": "e5190d01c78441d8774cda5bcca8881c4e8c0851961274f79c8fcfcf89c7409a",
+        "ic_execution.json": "d53cc04afdd3d3802d6bce4e3f7d156e5246c15789143ded2a0f9da845ac477d",
+        "independent_replay.json": "a3e3bfbb1f27a4ce6ea8483ae96104f21578067debb2da007f3008878f259edd",
+        "rho.jsonl": "43883751dd004f71b77f8f34ebd88c8e64428a90e4bb1d6f6f1d7ee913c4d21b",
+        "rho_execution.json": "eb28d0c27451a24b8f3a52f66bce7c854d93800ebef5896b787ff116d3aec9d1",
+        "run.json": "be144d8980332257b311bf7791dc847783d5b017645dad0e7ff36aee3d63a085"
+      },
+      "workload_id": "e79c49b134ea"
+    }
+  ],
+  "schema_version": 2,
+  "stage": "vs_rho",
+  "target_count": 1
+}

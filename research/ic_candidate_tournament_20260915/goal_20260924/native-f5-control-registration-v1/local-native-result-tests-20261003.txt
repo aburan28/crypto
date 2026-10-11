@@ -1,0 +1,133 @@
+Local tooling transcript; trailing blank lines removed.
+Original transcript SHA-256: fdf137e8c504c089b3862b1c35539f4e304565c3e371582a8edb6e72f407e4cc
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1037:5
+     |
+1035 | enum Lanes {
+     |      ----- variants in this enum
+1036 |     Scalar,
+1037 |     Avx2,
+     |     ^^^^
+1038 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+    --> src/cryptanalysis/koblitz_fast.rs:1077:5
+     |
+1073 | pub struct BatchScratch {
+     |            ------------ fields in this struct
+...
+1077 |     qx: Vec<u64>,
+     |     ^^
+1078 |     qy: Vec<u64>,
+     |     ^^
+     |
+     = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `crypto` (lib) generated 4 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.23s
+     Running unittests src/bin/icprog.rs (target/debug/deps/icprog-e25e93b3719d47da)
+
+running 78 tests
+test autolab::tests::a_frozen_claim_passes_and_each_tampering_is_named ... ok
+test autolab::tests::label_digests_are_found_as_the_pattern_finds_them ... ok
+test bench::tests::a_price_command_is_the_suites ... ok
+test bench::tests::the_stderr_files_are_named_from_the_stem ... ok
+test bench::tests::the_utc_stamp_is_a_civil_date ... ok
+test callgrind::tests::a_table_row_reads_its_counts_and_its_function ... ok
+test callgrind::tests::percentages_become_spaces_and_objects_are_cut_as_the_script_cut_them ... ok
+test f5_control::tests::compact_build_replay_binds_external_seal_and_creates_receipt_once ... ok
+test f5_control::tests::compact_build_replay_rejects_resealed_missing_receipt_and_changed_inputs ... ok
+test f5_control::tests::compact_build_replay_rejects_runtime_and_performance_claims ... ok
+test f5_control::tests::empty_cargo_home_does_not_authorize_ancestor_build_configuration ... ok
+test f5_control::tests::full_capsule_custody_is_data_only_external_sealed_and_create_only ... ok
+test f5_control::tests::full_custody_rejects_resealed_sidecars_archives_and_promoted_claims ... ok
+test f5_control::tests::mathematical_stdin_contains_only_accepted_geometry_logs_point_and_limits ... ok
+test f5_control::tests::original_audit_and_dispatch_require_the_external_registration_seal ... ok
+test f5_control::tests::simulated_transport_rejects_modified_environment_input_output_claim_and_drain ... ok
+test f5_control::tests::strict_control_rejects_other_targets_budgets_questions_and_unknown_fields ... ok
+test f5_control::tests::validation_capsules_cannot_dispatch_or_admit_scientific_jobs ... ok
+test f5_control_publication::tests::original_result_replays_without_search_or_fresh_claim ... ok
+test f5_control_publication::tests::resealed_changes_do_not_replace_original_audit_claim_or_receipts ... ok
+test f5_control_publication::tests::resealed_fresh_promotion_and_overwrite_are_rejected ... ok
+test f5_target::tests::changed_query_witness_log_recovery_engine_and_phase_fail ... ok
+test f5_target::tests::failed_target_keeps_unknown_unperformed_phases_and_cannot_claim_scalar ... ok
+test f5_target::tests::missing_phase_key_rejects_without_panicking ... ok
+test f5_target::tests::portable_replay_creates_once_and_never_reopens_the_control ... ok
+test f5_target::tests::retained_disclosed_math_reconstructs_all_queries_and_scalar_without_search ... ok
+test f5_target::tests::witness_cannot_be_reclassified_as_proved_negative ... ok
+test identity::tests::canonical_json_sorts_keys_and_refuses_floats ... ok
+test identity::tests::labels_parse_as_the_adapters_pattern ... ok
+test json::tests::a_record_reads_and_writes_back_unchanged ... ok
+test json::tests::floats_print_as_python_repr_does ... ok
+test json::tests::non_bmp_characters_escape_as_surrogate_pairs ... ok
+test json::tests::the_programmes_records_read_and_write_back_byte_for_byte ... ok
+test oracle::tests::a_small_curves_group_law_closes ... ok
+test oracle::tests::primality_and_irreducibility_agree_with_small_cases ... ok
+test pin::tests::a_pin_reads_the_seven_outputs ... ok
+test pin::tests::equality_is_pythons ... ok
+test prepared_f5::tests::external_seal_rejects_provenance_swaps_and_promotion ... ok
+test prepared_f5::tests::log_rank_target_chronology_and_outcome_corruption_are_rejected ... ok
+test prepared_f5::tests::missing_torsion_reordered_geometry_and_omitted_query_fail ... ok
+test prepared_f5::tests::reconstructs_all_original_queries_and_full_rank_without_search ... ok
+test prepared_f5::tests::witness_as_negative_and_false_witness_fail_group_checks ... ok
+test prepared_sat::tests::does_not_accept_a_witness_as_unsat_or_budget_as_a_relation ... ok
+test prepared_sat::tests::pair_complement_proof_retains_repetition_torsion_and_identity_sums ... ok
+test prepared_sat::tests::reconstructs_all_retained_rows_rank_logs_and_negatives ... ok
+test prepared_sat::tests::rejects_changed_witness_projection_log_and_rank_trajectory ... ok
+test pyrandom::tests::the_reference_generator_and_pythons_seeding ... ok
+test report::tests::a_row_renders_its_interval_and_units ... ok
+test rule::tests::a_fit_through_a_line_has_its_slope ... ok
+test rule::tests::medians_keep_pythons_types ... ok
+test rule::tests::names_are_matched_as_glob_and_the_pattern_match_them ... ok
+test runs::tests::attempts_and_records_are_named_from_the_stem ... ok
+test runs::tests::the_figure_is_the_first_clean_complete_attempt ... ok
+test sat_control::native::tests::accepted_archive_custody_extracts_without_executing_binaries ... ok
+test sat_control::native::tests::create_only_and_tree_mutation_controls ... ok
+test sat_control::native::tests::helper_requires_consumed_execution_parent_and_query_cap ... ok
+test sat_control::native::tests::nonreading_worker_cannot_block_registered_job_deadline ... ok
+test sat_control::native::tests::registered_job_preserves_exact_input_and_environment ... ok
+test sat_control::native::tests::retained_exports_have_exact_layout_and_hashes ... ok
+test sat_control::native::tests::watchdog_preserves_exit_and_kills_a_timed_out_group ... ok
+test sat_control::tests::independent_complete_flow_and_mutation_controls_without_search ... ok
+test sat_control_publication::tests::altered_role_policy_rejects_even_with_resealed_publication_inventory ... ok
+test sat_control_publication::tests::modified_cnf_missing_attempt_and_promoted_manifest_reject ... ok
+test sat_control_publication::tests::retained_result_replays_without_any_native_child ... ok
+test sat_query_law::tests::independent_law_matches_native_sampler ... ok
+test sat_source::tests::anf_constant_and_monomial_semantics_and_truncation ... ok
+test sat_source::tests::auxiliary_definitions_must_be_complete_unique_and_satisfy_reverse_clauses ... ok
+test sat_source::tests::cnf_rejects_invalid_headers_literals_counts_and_terminators ... ok
+test sat_source::tests::retained_model_corruption_is_rejected_by_source_rows ... ok
+test sat_source::tests::retained_native_source_replay_matches_independent_historical_assignment ... ok
+test sat_source::tests::same_length_mutation_and_truncated_sources_fail_the_pin ... ok
+test sat_source::tests::signed_xors_and_empty_rows_are_checked ... ok
+test stats::tests::division_rounds_half_to_even ... ok
+test stats::tests::fsum_is_exactly_rounded ... ok
+test stats::tests::lgamma_agrees_with_the_factorials ... ok
+test stats::tests::stdev_is_the_correctly_rounded_root_of_the_exact_variance ... ok
+test stats::tests::t_quantiles_match_the_table ... ok
+test stats::tests::the_geometric_interval_brackets_its_mean ... ok
+
+test result: ok. 78 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 26.18s

@@ -30,7 +30,9 @@
 //! rewriting rules, the other equations its input in normal form (the
 //! `reduced` presentation), and the naive control, which has no tower, is
 //! skipped. `--max-nnz` stops a system whose matrices grow past a size, and
-//! `--trace` prints its step trace.
+//! `--trace` prints its step trace, with the step a stop cut off as a
+//! `tower stop in step` line. `--targets 1` measures target 1 alone: every
+//! target is still drawn, so it is the system a full run gives it.
 //!
 //! The committed runs, their exact flags and the scripts that tabulate and
 //! cross-check them are in `research/pkm_tower_pilot_20260924/` (the pilot,
@@ -940,12 +942,60 @@ fn memory_mb() -> Option<(u64, u64)> {
 /// One line of a tower run's step trace, with the process's memory when the
 /// step ended.
 fn print_tower_step(k: usize, st: &f4_fp_tower::StepTrace) {
+    eprintln!("tower step {k}: {}", tower_step_fields(st));
+}
+
+/// The step a stop cut off (`TowerF4Report::stopped_step`), as far as it
+/// got, at the moment of the stop: with the process's memory and its
+/// address space, which `ulimit -v` caps. Its prefix differs from a
+/// step's, so that no reader of traces takes it for a finished step.
+fn print_stopped_step(k: usize, oversize: bool, st: &f4_fp_tower::StepTrace) {
+    let why = if oversize {
+        "oversize: --max-nnz"
+    } else {
+        "budget"
+    };
+    let space = address_space_mb().map_or(String::new(), |(size, peak)| {
+        format!(", address space {size} MB (peak {peak} MB)")
+    });
+    let live = live_heap_mb().map_or(String::new(), |mb| format!(", live heap {mb} MB"));
+    eprintln!(
+        "tower stop in step {k} ({why}): {}{space}{live}",
+        tower_step_fields(st)
+    );
+}
+
+/// The bytes the allocator holds for live allocations, in MB: what the run
+/// still uses, without the freed memory the allocator keeps mapped for
+/// reuse, which the address space counts. glibc only.
+#[cfg(all(target_os = "linux", target_env = "gnu"))]
+fn live_heap_mb() -> Option<u64> {
+    // SAFETY: mallinfo2 only reads the allocator's counters.
+    let m = unsafe { libc::mallinfo2() };
+    Some(((m.uordblks + m.hblkhd) >> 20) as u64)
+}
+
+#[cfg(not(all(target_os = "linux", target_env = "gnu")))]
+fn live_heap_mb() -> Option<u64> {
+    None
+}
+
+/// The process's address space and its peak, in MB (`VmSize`, `VmPeak`).
+fn address_space_mb() -> Option<(u64, u64)> {
+    let status = std::fs::read_to_string("/proc/self/status").ok()?;
+    let field = |key: &str| -> Option<u64> {
+        let line = status.lines().find(|l| l.starts_with(key))?;
+        Some(line.split_whitespace().nth(1)?.parse::<u64>().ok()? / 1024)
+    };
+    Some((field("VmSize:")?, field("VmPeak:")?))
+}
+
+fn tower_step_fields(st: &f4_fp_tower::StepTrace) -> String {
     let memory = memory_mb().map_or(String::new(), |(rss, peak)| {
         format!(", memory {rss} MB (peak {peak} MB)")
     });
-    eprintln!(
-        "tower step {}: degree {}, {} critical + {} tower pairs, {} S-rows + {} reducers + {} promoted x {} cols, nnz {}, residue {} x {}, fresh {} (lowest degree {}), basis {}, pairs left {}, {:.1} ms (rows {:.0}, A {:.0}, B {:.0}, update {:.0}), B' {} entries, kept {} elements with {} entries, muladds {}{}{}",
-        k,
+    format!(
+        "degree {}, {} critical + {} tower pairs, {} S-rows + {} reducers + {} promoted x {} cols, nnz {}, residue {} x {}, fresh {} (lowest degree {}), basis {}, pairs left {}, {:.1} ms (rows {:.0}, A {:.0}, B {:.0}, update {:.0}), B' {} entries, kept {} elements with {} entries, muladds {}{}{}",
         st.degree,
         st.critical_pairs,
         st.tower_pairs,
@@ -974,7 +1024,7 @@ fn print_tower_step(k: usize, st: &f4_fp_tower::StepTrace) {
             st.s_rows, st.skipped_rows
         )),
         memory
-    );
+    )
 }
 
 /// One line of a signature-engine run's step trace, with the process's
@@ -1031,6 +1081,7 @@ fn measure_tower(
     budget: Duration,
     stop_below: Option<usize>,
     max_nnz: Option<u64>,
+    max_dense: Option<u64>,
     trace: bool,
     full_rank_exit: bool,
     sig: Option<sig_fp_tower::SigOptions>,
@@ -1066,10 +1117,15 @@ fn measure_tower(
     if let Some(c) = max_nnz {
         opts = opts.with_max_nnz(c);
     }
+    if let Some(c) = max_dense {
+        opts = opts.with_max_dense(c);
+    }
     opts.full_rank_exit = full_rank_exit;
     if trace {
-        // Each step as it ends, so that a run that dies leaves its trace.
+        // Each step as it ends, so that a run that dies leaves its trace,
+        // and a step a stop cuts off when it does.
         opts = opts.on_step(print_tower_step);
+        opts.on_stop = Some(print_stopped_step);
         opts.on_sig_step = Some(print_sig_step);
     }
     let (r, sig_stats) = if let Some(so) = sig {
@@ -1124,6 +1180,10 @@ fn measure_tower(
             "max_residual_rows": r.max_residual_rows,
             "full_rank_exit": sig.is_none().then_some(full_rank_exit),
             "rows_skipped_full_rank": sig.is_none().then_some(r.rows_skipped),
+            // The largest `B'`, counting a step stopped for it, and that
+            // step as far as it got (both added in round 7).
+            "max_dense_entries": sig.is_none().then_some(r.max_dense_entries),
+            "stopped_step": r.stopped_step,
             "oversize": r.oversize,
             "critical_pairs_reduced": r.critical_pairs_reduced,
             "tower_pairs_reduced": r.tower_pairs_reduced,
@@ -1170,8 +1230,12 @@ struct Args {
     /// committed pilot row), `f4_fp_tower` on the tower quotient ring, or
     /// the signature-based `sig_fp_tower` on the same ring.
     engine: Engine,
-    /// `f4_fp_tower` only: stop before a matrix with more non-zeros.
+    /// `f4_fp_tower` only: stop before a matrix with more non-zeros, or a
+    /// `B'` with more entries.
     max_nnz: Option<u64>,
+    /// `f4_fp_tower` only: the bound on `B'` alone, in place of `--max-nnz`
+    /// (round 7).
+    max_dense: Option<u64>,
     /// `f4_fp_tower` only: print one line per F4 step.
     trace: bool,
     /// `f4_fp_tower` only: skip a step's remaining S-rows once their
@@ -1179,6 +1243,10 @@ struct Args {
     full_rank_exit: bool,
     /// `sig_fp_tower` only: the module and rewrite orders.
     sig: sig_fp_tower::SigOptions,
+    /// Measure only the targets with these indices (`target_index`). Every
+    /// target and system is still drawn, in order, so each one measured is
+    /// the system a run without the flag gives it.
+    targets: Option<Vec<usize>>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -1229,9 +1297,11 @@ fn parse_args() -> Args {
         dump: None,
         engine: Engine::F4,
         max_nnz: None,
+        max_dense: None,
         trace: false,
         full_rank_exit: true,
         sig: sig_fp_tower::SigOptions::default(),
+        targets: None,
     };
     let args: Vec<String> = std::env::args().skip(1).collect();
     let list = |s: &str| -> Vec<usize> {
@@ -1301,6 +1371,7 @@ fn parse_args() -> Args {
                 }
             }
             "--max-nnz" => a.max_nnz = Some(v.parse().expect("--max-nnz")),
+            "--max-dense" => a.max_dense = Some(v.parse().expect("--max-dense")),
             "--sig-order" => {
                 a.sig.order = match v.as_str() {
                     "pot" => sig_fp_tower::ModuleOrder::PositionFirst,
@@ -1324,6 +1395,7 @@ fn parse_args() -> Args {
                 }
             }
             "--dump" => a.dump = Some(v.parse().expect("--dump")),
+            "--targets" => a.targets = Some(list(&v)),
             other => panic!("unknown flag `{other}`"),
         }
         i += 2;
@@ -1402,6 +1474,9 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
             // The naive control has no tower to rewrite by.
             continue;
         }
+        if a.targets.as_ref().is_some_and(|ts| !ts.contains(&k)) {
+            continue;
+        }
         let d_in: Vec<u32> = eqs.iter().map(Pol::degree).collect();
         let d_max = d_in.iter().copied().max().unwrap_or(1);
         let max_degree = match (a.cap, cell.control) {
@@ -1435,6 +1510,7 @@ fn run_cell(cell: &Cell, a: &Args, sink: &mut Sink) -> bool {
                     Duration::from_secs(a.budget),
                     a.stop_below,
                     a.max_nnz,
+                    a.max_dense,
                     a.trace,
                     a.full_rank_exit,
                     (a.engine == Engine::Sig).then_some(a.sig),

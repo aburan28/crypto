@@ -1,0 +1,50 @@
+name: Jacobian polarization certificates
+on:
+  pull_request:
+    paths:
+      - 'src/bin/jacobian_certificate.rs'
+      - 'src/bin/jacobian_certificate/**'
+      - 'docs/curves/jacobian-*'
+      - 'docs/curves/JACOBIAN_CERTIFICATES.md'
+      - '.github/workflows/jacobian-certificates.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/bin/jacobian_certificate.rs'
+      - 'src/bin/jacobian_certificate/**'
+      - 'docs/curves/jacobian-*'
+      - 'docs/curves/JACOBIAN_CERTIFICATES.md'
+      - '.github/workflows/jacobian-certificates.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  certificates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - run: rustfmt --edition 2021 --check src/bin/jacobian_certificate.rs
+      - run: cargo test --bin jacobian-certificate
+      - run: cargo build --release --bin jacobian-certificate
+      - run: ./target/release/jacobian-certificate --check --sql docs/curves/jacobian-certificates.sql
+      - name: Import twice and query the SQLite index
+        run: |
+          command -v sqlite3 || (sudo apt-get update && sudo apt-get install -y sqlite3)
+          sqlite3 /tmp/jacobian.sqlite < docs/curves/jacobian-certificates.sql
+          sqlite3 /tmp/jacobian.sqlite < docs/curves/jacobian-certificates.sql
+          test "$(sqlite3 /tmp/jacobian.sqlite 'SELECT count(*) FROM jacobian_certificates;')" = 1
+          minimum=$(sqlite3 /tmp/jacobian.sqlite "SELECT json_extract(record_json,'$.lattice.minimum') FROM jacobian_certificates WHERE discriminant=-619 AND status='conditional_existence' AND curve_uid IS NULL;")
+          test "$minimum" = 12
+      - name: Reject an altered report
+        run: |
+          cp docs/curves/jacobian-certificates.json /tmp/altered.json
+          sed -i 's/"minimum": 12/"minimum": 11/' /tmp/altered.json
+          if ./target/release/jacobian-certificate --check --output /tmp/altered.json; then
+            exit 1
+          fi

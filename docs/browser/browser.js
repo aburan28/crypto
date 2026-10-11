@@ -44,7 +44,25 @@
     return el("div", { class: "fact" }, [el("dt", { text: label }), dd]);
   }
   function fieldLabel(c) {
-    return c.field.characteristic === 2 ? "GF(2^" + c.field.degree + ")" : "GF(p), p of " + c.field.bits + " bits";
+    if (c.field.characteristic === 2) return "GF(2^" + c.field.degree + ")";
+    if (c.field.degree > 1) return "GF(p^" + c.field.degree + "), p of " + BigInt(c.field.p).toString(2).length + " bits";
+    return "GF(p), p of " + c.field.bits + " bits";
+  }
+  /* An extension's modulus t^k + c_{k-1}t^{k-1} + ... + c_0, from its low
+     coefficients [c_0, ..., c_{k-1}]. */
+  function extensionModulus(low) {
+    var terms = ["t^" + low.length];
+    for (var i = low.length - 1; i >= 0; i--) {
+      if (low[i] === "0") continue;
+      var power = i === 0 ? "" : (i === 1 ? "t" : "t^" + i);
+      terms.push((low[i] === "1" && i > 0 ? "" : low[i]) + power);
+    }
+    return terms.join(" + ");
+  }
+  function fieldFact(c) {
+    if (c.field.characteristic === 2) return "GF(2^" + c.field.degree + "), modulus " + fmt(c.field.modulus);
+    if (c.field.degree > 1) return "GF(p^" + c.field.degree + ") = GF(p)[t]/(" + extensionModulus(c.field.modulus) + "), p = " + c.field.p + "; coefficients listed over 1, t, …, t^" + (c.field.degree - 1);
+    return "GF(p), p = " + c.field.p + " (" + c.field.bits + " bits)";
   }
   function bestRatio(c) {
     var vals = (c.leaderboard || []).map(function (b) { return b.ratio_rho; }).filter(function (v) { return typeof v === "number"; });
@@ -275,7 +293,7 @@
     view.appendChild(chips);
     var facts = el("dl", { class: "facts" }, [
       fact("ICV1 identity", c.icv1, true),
-      fact("Field", c.field.characteristic === 2 ? "GF(2^" + c.field.degree + "), modulus " + fmt(c.field.modulus) : "GF(p), p = " + c.field.p + " (" + c.field.bits + " bits)", false),
+      fact("Field", fieldFact(c), false),
       fact("Coefficients", "a = " + fmt(c.a) + ", b = " + fmt(c.b), true),
       fact("Trace of Frobenius", c.trace),
       fact("Group order #E", c.order, true),
@@ -290,13 +308,19 @@
     ]);
     view.appendChild(facts);
 
+    view.appendChild(el("p", { class: "note" }, [repoLink("docs/curves/standards/coverage.json", "Standards inventory and unresolved records"), "; worldwide historical completeness has not been established."]));
     view.appendChild(el("h2", { text: "Hyperelliptic cover" }));
     var cover = c.hyperelliptic_cover;
+    var linkage = (c.cover_links || [])[0];
     if (cover) {
       var cert = cover.certificate;
       view.appendChild(el("dl", { class: "facts" }, [
         fact("Existence", cover.exists === true ? "Verified over the declared field" : (cover.status === "invalid_input" ? "Invalid input model" : "Unresolved")),
         fact("Cover direction", "H → E"),
+        fact("Cover identity", linkage ? linkage.cover_id : null, true),
+        fact("Map identity", linkage ? linkage.map_id : null, true),
+        fact("Cover UID", linkage ? linkage.cover_uid : null, true),
+        fact("Map UID", linkage ? linkage.map_uid : null, true),
         fact("Cover genus", cert ? cert.genus : null),
         fact("Map degree", cert ? cert.degree : null),
         fact("Field", cert ? "Same field as E" : "Not established"),
@@ -305,10 +329,10 @@
         fact("Subfield descent / subgroup transfer", "Not tested"),
         fact("DLP advantage", "Not measured")
       ]));
-      view.appendChild(el("p", { class: "note" }, [cert ? "An explicit geometric cover is recorded. Computational advantage requires separate evidence. " : "This result establishes neither existence nor nonexistence. ", repoLink("docs/curves/COVERS.md", "Proof and scope"), "; ", repoLink("docs/curves/covers.json", "replayable catalog findings"), "."]));
+      view.appendChild(el("p", { class: "note" }, [cert ? "An explicit geometric cover is recorded. Computational advantage requires separate evidence. " : "This result establishes neither existence nor nonexistence. ", repoLink("docs/curves/COVERS.md", "Proof and scope"), "; ", repoLink("docs/curves/covers.json", "replayable catalog findings"), "; ", repoLink("docs/curves/cover-links.yaml", "YAML identity graph"), "."]));
       if (cert) {
         var details = el("details", null, [el("summary", { text: "Cover equation and map certificate" })]);
-        details.appendChild(el("p", { text: "Ascending powers of u; H: v² + h(u)v = f(u). Map: x = x(u), y = y_v(u)v + y_0(u). Coefficients use the curve's field representation." }));
+        details.appendChild(el("p", { text: "Ascending powers of u; H: v² + h(u)v = f(u). Map to the short model: x = x(u), y = y_v(u)v + y_0(u); compose with target_model_map when present. Coefficients use the curve's field representation." }));
         details.appendChild(el("pre", { text: JSON.stringify(cert, null, 2) }));
         view.appendChild(details);
       }

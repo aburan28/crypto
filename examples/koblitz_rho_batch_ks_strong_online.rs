@@ -45,6 +45,7 @@
 //! Usage: `<n> <a> signed_frobenius <fixtures> <batch_seed>`.
 
 use crypto_lib::binary_ecc::BinaryPoint;
+use crypto_lib::cryptanalysis::ecbench::isolation::HwCounters;
 use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
 use crypto_lib::cryptanalysis::semaev_decomp::Gf2;
 use rand::rngs::StdRng;
@@ -859,6 +860,8 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
             }
         };
         let target_generation_ms = started.elapsed().as_secs_f64() * 1000.0;
+        let mut online_counter = Some(HwCounters::open());
+        online_counter.as_ref().unwrap().start();
         let online_started = Instant::now();
         let mut recovery_check = Duration::ZERO;
         let mut collision_total = Duration::ZERO;
@@ -878,6 +881,7 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
         let mut recovered = None;
         let mut via_target = None;
         let mut online_stopped: Option<Instant> = None;
+        let mut online_hw_counts = None;
 
         if cfg.rung < 3 {
             'walks: while steps < step_cap {
@@ -940,6 +944,7 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
                 collision_total += collision_started.elapsed();
                 if let Some((scalar, via)) = resolved {
                     online_stopped = Some(Instant::now());
+                    online_hw_counts = Some(online_counter.take().unwrap().stop());
                     recovered = Some(scalar);
                     via_target = Some(via);
                     break;
@@ -1007,6 +1012,7 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
                         collision_total += collision_started.elapsed();
                         if let Some((scalar, via)) = resolved {
                             online_stopped = Some(Instant::now());
+                            online_hw_counts = Some(online_counter.take().unwrap().stop());
                             recovered = Some(scalar);
                             via_target = Some(via);
                             break 'target;
@@ -1120,6 +1126,8 @@ fn run(cfg: &RunCfg, emit: &mut dyn FnMut(Value)) -> RunResult {
             "online_stop_ns":(online_started + online - process_started).as_nanos() as u64,
             "online_ns":online_ns,
             "online_ms":online_ms,
+            "online_hw_counts":online_hw_counts,
+            "online_hw_scope":"calling thread, user space, target walk through recovery check",
             "walk_and_collision_ms":online_ms - recovery_check_ms,
             "walk_ns":walk_ns,
             "collision_ns":collision_ns,

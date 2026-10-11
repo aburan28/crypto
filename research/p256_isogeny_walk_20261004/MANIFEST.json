@@ -1,0 +1,31 @@
+{
+  "schema": "p256.isogeny-walk-manifest/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "degree": 11,
+  "steps": 4096,
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+  "artifacts": [
+    {
+      "path": "certificate.jsonl.gz",
+      "sha256": "4c4798fe791c8f603a248782a861f3488216af7476c814bff59f007f87c0d162",
+      "bytes": 744997,
+      "content": "gzip-compressed p256.isogeny-walk-certificate/v1 JSON Lines"
+    },
+    {
+      "path": "isolated-run.jsonl",
+      "sha256": "33df4ef940a6c3f20ae7c9b63ecc6378ed92fa60d89245bef91a6df1b273afee",
+      "bytes": 1726,
+      "content": "isolated-bench/1 generation and in-command replay conditions"
+    },
+    {
+      "path": "isolated-verify.jsonl",
+      "sha256": "41196ca02e3e8945e2ece743c08b82d520809a3ab839ed002feb4f2887fc1087",
+      "bytes": 1653,
+      "content": "isolated-bench/1 standalone replay conditions"
+    }
+  ],
+  "phi11": {
+    "source": "https://math.mit.edu/~drew/modpolys/jfiles/phi_j_11.txt",
+    "sha256": "985c6a76ca7cc2802ba3f9fd48112fe0d82ffe11dbaa5f49c57526658338b352"
+  }
+}

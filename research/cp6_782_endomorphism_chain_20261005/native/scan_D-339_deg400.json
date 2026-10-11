@@ -1,0 +1,1472 @@
+{
+  "curve_binding": {
+    "exclusions": "exact_for_O_D; conditional_for_any_named_curve",
+    "status": "not_bound_to_a_curve"
+  },
+  "decision_tree": {
+    "index_calculus": {
+      "relation_model": null,
+      "status": "unresolved",
+      "total_cost": null
+    },
+    "rho": {
+      "cheap_orbit_handling": "unresolved",
+      "extra_geometric_automorphisms": "excluded_for_this_order",
+      "measured_gain": "unresolved"
+    },
+    "scalar_multiplication": {
+      "benchmark": "unresolved",
+      "map_construction": "unresolved",
+      "status": "abstract_candidates"
+    }
+  },
+  "input": {
+    "degree_bound": 400,
+    "discriminant": -339
+  },
+  "norm_search": {
+    "b_bound": 2,
+    "candidate_count": 102,
+    "candidates": [
+      {
+        "a": -1,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          1,
+          85
+        ],
+        "degree": 85,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -1
+      },
+      {
+        "a": 0,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          1,
+          85
+        ],
+        "degree": 85,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -1
+      },
+      {
+        "a": 0,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -1,
+          85
+        ],
+        "degree": 85,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 1
+      },
+      {
+        "a": 1,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -1,
+          85
+        ],
+        "degree": 85,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 1
+      },
+      {
+        "a": -2,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          3,
+          87
+        ],
+        "degree": 87,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -3
+      },
+      {
+        "a": -1,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          3,
+          87
+        ],
+        "degree": 87,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -3
+      },
+      {
+        "a": 1,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -3,
+          87
+        ],
+        "degree": 87,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 3
+      },
+      {
+        "a": 2,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -3,
+          87
+        ],
+        "degree": 87,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 3
+      },
+      {
+        "a": -3,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          5,
+          91
+        ],
+        "degree": 91,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -5
+      },
+      {
+        "a": -2,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          5,
+          91
+        ],
+        "degree": 91,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -5
+      },
+      {
+        "a": 2,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -5,
+          91
+        ],
+        "degree": 91,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 5
+      },
+      {
+        "a": 3,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -5,
+          91
+        ],
+        "degree": 91,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 5
+      },
+      {
+        "a": -4,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          7,
+          97
+        ],
+        "degree": 97,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -7
+      },
+      {
+        "a": -3,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          7,
+          97
+        ],
+        "degree": 97,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -7
+      },
+      {
+        "a": 3,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -7,
+          97
+        ],
+        "degree": 97,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 7
+      },
+      {
+        "a": 4,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -7,
+          97
+        ],
+        "degree": 97,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 7
+      },
+      {
+        "a": -5,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          9,
+          105
+        ],
+        "degree": 105,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -9
+      },
+      {
+        "a": -4,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          9,
+          105
+        ],
+        "degree": 105,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -9
+      },
+      {
+        "a": 4,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -9,
+          105
+        ],
+        "degree": 105,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 9
+      },
+      {
+        "a": 5,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -9,
+          105
+        ],
+        "degree": 105,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 9
+      },
+      {
+        "a": -6,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          11,
+          115
+        ],
+        "degree": 115,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -11
+      },
+      {
+        "a": -5,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          11,
+          115
+        ],
+        "degree": 115,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -11
+      },
+      {
+        "a": 5,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -11,
+          115
+        ],
+        "degree": 115,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 11
+      },
+      {
+        "a": 6,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -11,
+          115
+        ],
+        "degree": 115,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 11
+      },
+      {
+        "a": -7,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          13,
+          127
+        ],
+        "degree": 127,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -13
+      },
+      {
+        "a": -6,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          13,
+          127
+        ],
+        "degree": 127,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -13
+      },
+      {
+        "a": 6,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -13,
+          127
+        ],
+        "degree": 127,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 13
+      },
+      {
+        "a": 7,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -13,
+          127
+        ],
+        "degree": 127,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 13
+      },
+      {
+        "a": -8,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          15,
+          141
+        ],
+        "degree": 141,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -15
+      },
+      {
+        "a": -7,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          15,
+          141
+        ],
+        "degree": 141,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -15
+      },
+      {
+        "a": 7,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -15,
+          141
+        ],
+        "degree": 141,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 15
+      },
+      {
+        "a": 8,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -15,
+          141
+        ],
+        "degree": 141,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 15
+      },
+      {
+        "a": -9,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          17,
+          157
+        ],
+        "degree": 157,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -17
+      },
+      {
+        "a": -8,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          17,
+          157
+        ],
+        "degree": 157,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -17
+      },
+      {
+        "a": 8,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -17,
+          157
+        ],
+        "degree": 157,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 17
+      },
+      {
+        "a": 9,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -17,
+          157
+        ],
+        "degree": 157,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 17
+      },
+      {
+        "a": -10,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          19,
+          175
+        ],
+        "degree": 175,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -19
+      },
+      {
+        "a": -9,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          19,
+          175
+        ],
+        "degree": 175,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -19
+      },
+      {
+        "a": 9,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -19,
+          175
+        ],
+        "degree": 175,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 19
+      },
+      {
+        "a": 10,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -19,
+          175
+        ],
+        "degree": 175,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 19
+      },
+      {
+        "a": -11,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          21,
+          195
+        ],
+        "degree": 195,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -21
+      },
+      {
+        "a": -10,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          21,
+          195
+        ],
+        "degree": 195,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -21
+      },
+      {
+        "a": 10,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -21,
+          195
+        ],
+        "degree": 195,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 21
+      },
+      {
+        "a": 11,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -21,
+          195
+        ],
+        "degree": 195,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 21
+      },
+      {
+        "a": -12,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          23,
+          217
+        ],
+        "degree": 217,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -23
+      },
+      {
+        "a": -11,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          23,
+          217
+        ],
+        "degree": 217,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -23
+      },
+      {
+        "a": 11,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -23,
+          217
+        ],
+        "degree": 217,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 23
+      },
+      {
+        "a": 12,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -23,
+          217
+        ],
+        "degree": 217,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 23
+      },
+      {
+        "a": -13,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          25,
+          241
+        ],
+        "degree": 241,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -25
+      },
+      {
+        "a": -12,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          25,
+          241
+        ],
+        "degree": 241,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -25
+      },
+      {
+        "a": 12,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -25,
+          241
+        ],
+        "degree": 241,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 25
+      },
+      {
+        "a": 13,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -25,
+          241
+        ],
+        "degree": 241,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 25
+      },
+      {
+        "a": -14,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          27,
+          267
+        ],
+        "degree": 267,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -27
+      },
+      {
+        "a": -13,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          27,
+          267
+        ],
+        "degree": 267,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -27
+      },
+      {
+        "a": 13,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -27,
+          267
+        ],
+        "degree": 267,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 27
+      },
+      {
+        "a": 14,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -27,
+          267
+        ],
+        "degree": 267,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 27
+      },
+      {
+        "a": -15,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          29,
+          295
+        ],
+        "degree": 295,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -29
+      },
+      {
+        "a": -14,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          29,
+          295
+        ],
+        "degree": 295,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -29
+      },
+      {
+        "a": 14,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -29,
+          295
+        ],
+        "degree": 295,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 29
+      },
+      {
+        "a": 15,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -29,
+          295
+        ],
+        "degree": 295,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 29
+      },
+      {
+        "a": -16,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          31,
+          325
+        ],
+        "degree": 325,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -31
+      },
+      {
+        "a": -15,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          31,
+          325
+        ],
+        "degree": 325,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -31
+      },
+      {
+        "a": 15,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -31,
+          325
+        ],
+        "degree": 325,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 31
+      },
+      {
+        "a": 16,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -31,
+          325
+        ],
+        "degree": 325,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 31
+      },
+      {
+        "a": -1,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          0,
+          339
+        ],
+        "degree": 339,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 0
+      },
+      {
+        "a": 1,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          0,
+          339
+        ],
+        "degree": 339,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 0
+      },
+      {
+        "a": -2,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          2,
+          340
+        ],
+        "degree": 340,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -2
+      },
+      {
+        "a": 0,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          2,
+          340
+        ],
+        "degree": 340,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -2
+      },
+      {
+        "a": 0,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -2,
+          340
+        ],
+        "degree": 340,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 2
+      },
+      {
+        "a": 2,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -2,
+          340
+        ],
+        "degree": 340,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 2
+      },
+      {
+        "a": -3,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          4,
+          343
+        ],
+        "degree": 343,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -4
+      },
+      {
+        "a": -1,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          4,
+          343
+        ],
+        "degree": 343,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -4
+      },
+      {
+        "a": 1,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -4,
+          343
+        ],
+        "degree": 343,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 4
+      },
+      {
+        "a": 3,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -4,
+          343
+        ],
+        "degree": 343,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 4
+      },
+      {
+        "a": -4,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          6,
+          348
+        ],
+        "degree": 348,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -6
+      },
+      {
+        "a": -2,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          6,
+          348
+        ],
+        "degree": 348,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -6
+      },
+      {
+        "a": 2,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -6,
+          348
+        ],
+        "degree": 348,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 6
+      },
+      {
+        "a": 4,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -6,
+          348
+        ],
+        "degree": 348,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 6
+      },
+      {
+        "a": -5,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          8,
+          355
+        ],
+        "degree": 355,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -8
+      },
+      {
+        "a": -3,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          8,
+          355
+        ],
+        "degree": 355,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -8
+      },
+      {
+        "a": 3,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -8,
+          355
+        ],
+        "degree": 355,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 8
+      },
+      {
+        "a": 5,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -8,
+          355
+        ],
+        "degree": 355,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 8
+      },
+      {
+        "a": -17,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          33,
+          357
+        ],
+        "degree": 357,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -33
+      },
+      {
+        "a": -16,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          33,
+          357
+        ],
+        "degree": 357,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -33
+      },
+      {
+        "a": 16,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -33,
+          357
+        ],
+        "degree": 357,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 33
+      },
+      {
+        "a": 17,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -33,
+          357
+        ],
+        "degree": 357,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 33
+      },
+      {
+        "a": -6,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          10,
+          364
+        ],
+        "degree": 364,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -10
+      },
+      {
+        "a": -4,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          10,
+          364
+        ],
+        "degree": 364,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -10
+      },
+      {
+        "a": 4,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -10,
+          364
+        ],
+        "degree": 364,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 10
+      },
+      {
+        "a": 6,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -10,
+          364
+        ],
+        "degree": 364,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 10
+      },
+      {
+        "a": -7,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          12,
+          375
+        ],
+        "degree": 375,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -12
+      },
+      {
+        "a": -5,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          12,
+          375
+        ],
+        "degree": 375,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -12
+      },
+      {
+        "a": 5,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -12,
+          375
+        ],
+        "degree": 375,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 12
+      },
+      {
+        "a": 7,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -12,
+          375
+        ],
+        "degree": 375,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 12
+      },
+      {
+        "a": -8,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          14,
+          388
+        ],
+        "degree": 388,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -14
+      },
+      {
+        "a": -6,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          14,
+          388
+        ],
+        "degree": 388,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -14
+      },
+      {
+        "a": 6,
+        "b": 2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -14,
+          388
+        ],
+        "degree": 388,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 14
+      },
+      {
+        "a": 8,
+        "b": -2,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -14,
+          388
+        ],
+        "degree": 388,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 14
+      },
+      {
+        "a": -18,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          35,
+          391
+        ],
+        "degree": 391,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -35
+      },
+      {
+        "a": -17,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          35,
+          391
+        ],
+        "degree": 391,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": -35
+      },
+      {
+        "a": 17,
+        "b": 1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -35,
+          391
+        ],
+        "degree": 391,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 35
+      },
+      {
+        "a": 18,
+        "b": -1,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -35,
+          391
+        ],
+        "degree": 391,
+        "geometrically_non_scalar": true,
+        "map_status": "abstract_ring_element",
+        "trace": 35
+      }
+    ],
+    "completeness_certificate": {
+      "enumeration_complete": true,
+      "identity": "4*N=(2*a+s*b)^2+abs(D)*b^2"
+    },
+    "degree_bound": 400,
+    "elapsed_seconds": null,
+    "limits": {
+      "max_candidates": 100000,
+      "max_work": 1000000,
+      "seconds": 10.0
+    },
+    "non_scalar_only": true,
+    "signs_and_conjugates": "both_retained",
+    "status": "complete",
+    "stop_reason": null,
+    "time_limit_applies_to_enumeration": true,
+    "work_used": 103
+  },
+  "order": {
+    "basis": {
+      "omega": "(s+sqrt(D))/2",
+      "s": 1
+    },
+    "class_forms": {
+      "class_number": 6,
+      "forms": [
+        {
+          "a": 1,
+          "b": 1,
+          "c": 85
+        },
+        {
+          "a": 3,
+          "b": 3,
+          "c": 29
+        },
+        {
+          "a": 5,
+          "b": -1,
+          "c": 17
+        },
+        {
+          "a": 5,
+          "b": 1,
+          "c": 17
+        },
+        {
+          "a": 7,
+          "b": -5,
+          "c": 13
+        },
+        {
+          "a": 7,
+          "b": 5,
+          "c": 13
+        }
+      ],
+      "status": "complete",
+      "work_used": 60
+    },
+    "conductor": 1,
+    "fundamental_discriminant": -339,
+    "geometric_unit_count": 2,
+    "geometric_units": [
+      {
+        "a": -1,
+        "b": 0,
+        "characteristic_polynomial_coefficients": [
+          1,
+          2,
+          1
+        ],
+        "degree": 1,
+        "geometrically_non_scalar": false,
+        "map_status": "abstract_ring_element",
+        "trace": -2
+      },
+      {
+        "a": 1,
+        "b": 0,
+        "characteristic_polynomial_coefficients": [
+          1,
+          -2,
+          1
+        ],
+        "degree": 1,
+        "geometrically_non_scalar": false,
+        "map_status": "abstract_ring_element",
+        "trace": 2
+      }
+    ],
+    "ideal_classes_are_not_self_endomorphisms": true,
+    "minimum_degree_proof": "b!=0; minimize trace at |b|=1; |b|>=2 gives N>=abs(D)",
+    "minimum_degree_witness": {
+      "a": 0,
+      "b": 1,
+      "characteristic_polynomial_coefficients": [
+        1,
+        -1,
+        85
+      ],
+      "degree": 85,
+      "geometrically_non_scalar": true,
+      "map_status": "abstract_ring_element",
+      "trace": 1
+    },
+    "minimum_non_scalar_degree": 85,
+    "norm_coefficients": [
+      1,
+      1,
+      85
+    ]
+  },
+  "schema": "endomorphism-search/native-v1"
+}

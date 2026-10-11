@@ -1,0 +1,2012 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aburan28/crypto/blob/main/docs/curves/hyperelliptic-infrastructure.schema.json",
+  "title": "Hyperelliptic cover, Jacobian, and transfer evidence envelope",
+  "description": "Additive v1 records for exact elliptic inputs, hyperelliptic models, curve morphisms, Jacobian contexts, induced maps, field relationships, and evidence. Schema validity is structural only; the documented replay checks must also recompute identities and mathematical certificates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "identity_rule",
+    "records"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "hyperelliptic-infrastructure/v1"
+    },
+    "identity_rule": {
+      "const": "sha256_sorted_key_compact_utf8_json_without_record_uid"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/record"
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "gitCommit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "recordUid": {
+      "type": "string",
+      "pattern": "^urn:hyperelliptic-infrastructure:record:1:sha256:[0-9a-f]{64}$"
+    },
+    "objectRef": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]{0,63}$"
+    },
+    "evidenceRef": {
+      "type": "string",
+      "pattern": "^evidence:[a-z0-9][a-z0-9_.-]{0,95}$"
+    },
+    "implementationRef": {
+      "type": "string",
+      "pattern": "^implementation:[a-z0-9][a-z0-9_.-]{0,95}$"
+    },
+    "fieldElement": {
+      "description": "An exact field element in the encoding named by its field record. JSON floating-point values are forbidden.",
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        }
+      ]
+    },
+    "assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "scope",
+        "rationale",
+        "evidence_refs"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "unknown",
+            "supported",
+            "refuted",
+            "not_applicable"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidenceRef"
+          },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "supported",
+                  "refuted"
+                ]
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "evidence_refs": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ec1Identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "curve_id",
+        "curve_uid",
+        "curve_sha256",
+        "field_sha256",
+        "field",
+        "curve",
+        "source_ref",
+        "unresolved_reason"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "verified_preimage",
+            "unresolved"
+          ]
+        },
+        "curve_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^EC1(?:N[0-9]+|P[0-9]+|Q[0-9]+D[0-9]+)C[a-z][a-z0-9]*h[0-9a-f]{12,64}$"
+        },
+        "curve_uid": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^urn:ec-record:1:sha256:[0-9a-f]{64}$"
+        },
+        "curve_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "field_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "field": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "curve": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "source_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "unresolved_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "verified_preimage"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "curve_id": {
+                "type": "string"
+              },
+              "curve_uid": {
+                "type": "string"
+              },
+              "curve_sha256": {
+                "$ref": "#/$defs/sha256"
+              },
+              "field_sha256": {
+                "$ref": "#/$defs/sha256"
+              },
+              "field": {
+                "type": "object",
+                "required": [
+                  "characteristic",
+                  "degree",
+                  "representation",
+                  "element_encoding"
+                ]
+              },
+              "curve": {
+                "type": "object",
+                "required": [
+                  "model",
+                  "subgroup_order",
+                  "cofactor",
+                  "generator",
+                  "target_group"
+                ]
+              },
+              "source_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "unresolved_reason": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "unresolved_reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "icv1Identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "slug",
+        "full",
+        "model_sha256",
+        "registry_ref",
+        "registry_sha256",
+        "unresolved_reason"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "registered_representation",
+            "model_match_only",
+            "unresolved"
+          ]
+        },
+        "slug": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^icv1-[a-z0-9-]+$"
+        },
+        "full": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^ICV1:\\S+$"
+        },
+        "model_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "registry_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "registry_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unresolved_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "registered_representation",
+                  "model_match_only"
+                ]
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "slug": {
+                "type": "string"
+              },
+              "full": {
+                "type": "string"
+              },
+              "model_sha256": {
+                "$ref": "#/$defs/sha256"
+              },
+              "registry_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "registry_sha256": {
+                "$ref": "#/$defs/sha256"
+              },
+              "unresolved_reason": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "unresolved_reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ellipticInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ec1",
+        "icv1"
+      ],
+      "properties": {
+        "ec1": {
+          "$ref": "#/$defs/ec1Identity"
+        },
+        "icv1": {
+          "$ref": "#/$defs/icv1Identity"
+        }
+      }
+    },
+    "fieldRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field_id",
+        "family",
+        "characteristic",
+        "degree",
+        "representation",
+        "defining_modulus",
+        "element_encoding",
+        "base_field_ref",
+        "validation"
+      ],
+      "properties": {
+        "field_id": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "family": {
+          "enum": [
+            "characteristic_two",
+            "odd_characteristic"
+          ]
+        },
+        "characteristic": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "degree": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "representation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "defining_modulus": {
+          "type": [
+            "object",
+            "string",
+            "null"
+          ]
+        },
+        "element_encoding": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_field_ref": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/objectRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "validation": {
+          "$ref": "#/$defs/assessment"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "family": {
+                "const": "characteristic_two"
+              }
+            },
+            "required": [
+              "family"
+            ]
+          },
+          "then": {
+            "properties": {
+              "characteristic": {
+                "const": 2
+              },
+              "defining_modulus": {
+                "type": [
+                  "object",
+                  "string"
+                ]
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "characteristic": {
+                "type": "integer",
+                "minimum": 3,
+                "not": {
+                  "multipleOf": 2
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "degree": {
+                "minimum": 2
+              }
+            },
+            "required": [
+              "degree"
+            ]
+          },
+          "then": {
+            "properties": {
+              "defining_modulus": {
+                "type": [
+                  "object",
+                  "string"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "fieldRelationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relationship_id",
+        "kind",
+        "base_field_ref",
+        "working_field_ref",
+        "degree",
+        "embedding",
+        "descent",
+        "assessment"
+      ],
+      "properties": {
+        "relationship_id": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "kind": {
+          "enum": [
+            "same_field_identity",
+            "finite_extension",
+            "restriction_of_scalars"
+          ]
+        },
+        "base_field_ref": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "working_field_ref": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "degree": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "embedding": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "descent": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "assessment": {
+          "$ref": "#/$defs/assessment"
+        }
+      }
+    },
+    "univariatePolynomial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "variable",
+        "coefficient_order",
+        "coefficients"
+      ],
+      "properties": {
+        "variable": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+        },
+        "coefficient_order": {
+          "const": "ascending_power"
+        },
+        "coefficients": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/fieldElement"
+          }
+        }
+      }
+    },
+    "oddHyperellipticModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family",
+        "equation",
+        "f",
+        "degree_f",
+        "degree_parity"
+      ],
+      "properties": {
+        "family": {
+          "const": "odd_characteristic"
+        },
+        "equation": {
+          "const": "v^2=f(u)"
+        },
+        "f": {
+          "$ref": "#/$defs/univariatePolynomial"
+        },
+        "degree_f": {
+          "type": "integer",
+          "minimum": 5
+        },
+        "degree_parity": {
+          "enum": [
+            "odd",
+            "even"
+          ]
+        }
+      }
+    },
+    "binaryHyperellipticModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family",
+        "equation",
+        "h",
+        "f",
+        "degree_h",
+        "degree_f"
+      ],
+      "properties": {
+        "family": {
+          "const": "characteristic_two"
+        },
+        "equation": {
+          "const": "v^2+h(u)*v=f(u)"
+        },
+        "h": {
+          "$ref": "#/$defs/univariatePolynomial"
+        },
+        "f": {
+          "$ref": "#/$defs/univariatePolynomial"
+        },
+        "degree_h": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "degree_f": {
+          "type": "integer",
+          "minimum": 3
+        }
+      }
+    },
+    "infinityConfiguration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "places",
+        "base_divisor",
+        "assessment"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "one_rational_point",
+            "two_rational_points",
+            "one_degree_two_place",
+            "other",
+            "unknown"
+          ]
+        },
+        "places": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "residue_degree",
+              "coordinates"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "residue_degree": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "coordinates": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "base_divisor": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "assessment": {
+          "$ref": "#/$defs/assessment"
+        }
+      }
+    },
+    "hyperellipticCurve": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "curve_id",
+        "curve_sha256",
+        "field_ref",
+        "genus",
+        "model",
+        "infinity",
+        "smoothness",
+        "genus_verification"
+      ],
+      "properties": {
+        "curve_id": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "curve_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "field_ref": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "genus": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "model": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/oddHyperellipticModel"
+            },
+            {
+              "$ref": "#/$defs/binaryHyperellipticModel"
+            }
+          ]
+        },
+        "infinity": {
+          "$ref": "#/$defs/infinityConfiguration"
+        },
+        "smoothness": {
+          "$ref": "#/$defs/assessment"
+        },
+        "genus_verification": {
+          "$ref": "#/$defs/assessment"
+        }
+      }
+    },
+    "operationCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assessment",
+        "implementation_ref",
+        "exception_policy"
+      ],
+      "properties": {
+        "assessment": {
+          "$ref": "#/$defs/assessment"
+        },
+        "implementation_ref": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/implementationRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "exception_policy": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "assessment": {
+                "properties": {
+                  "status": {
+                    "const": "supported"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            "required": [
+              "assessment"
+            ]
+          },
+          "then": {
+            "properties": {
+              "implementation_ref": {
+                "$ref": "#/$defs/implementationRef"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "jacobianContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "jacobian_id",
+        "curve_ref",
+        "dimension",
+        "divisor_representation",
+        "normalization",
+        "infinity_configuration",
+        "operations"
+      ],
+      "properties": {
+        "jacobian_id": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "curve_ref": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "dimension": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "divisor_representation": {
+          "enum": [
+            "mumford_one_infinity",
+            "balanced_two_infinity",
+            "general_picard",
+            "other"
+          ]
+        },
+        "normalization": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "canonical",
+            "rules"
+          ],
+          "properties": {
+            "canonical": {
+              "type": "boolean"
+            },
+            "rules": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "infinity_configuration": {
+          "$ref": "#/$defs/infinityConfiguration"
+        },
+        "operations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "validity",
+            "reduction",
+            "equality",
+            "addition",
+            "negation",
+            "scalar_multiplication"
+          ],
+          "properties": {
+            "validity": {
+              "$ref": "#/$defs/operationCapability"
+            },
+            "reduction": {
+              "$ref": "#/$defs/operationCapability"
+            },
+            "equality": {
+              "$ref": "#/$defs/operationCapability"
+            },
+            "addition": {
+              "$ref": "#/$defs/operationCapability"
+            },
+            "negation": {
+              "$ref": "#/$defs/operationCapability"
+            },
+            "scalar_multiplication": {
+              "$ref": "#/$defs/operationCapability"
+            }
+          }
+        }
+      }
+    },
+    "multivariatePolynomial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "variables",
+        "terms"
+      ],
+      "properties": {
+        "variables": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+          }
+        },
+        "terms": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "coefficient",
+              "exponents"
+            ],
+            "properties": {
+              "coefficient": {
+                "$ref": "#/$defs/fieldElement"
+              },
+              "exponents": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "rationalFunction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "properties": {
+        "numerator": {
+          "$ref": "#/$defs/multivariatePolynomial"
+        },
+        "denominator": {
+          "$ref": "#/$defs/multivariatePolynomial"
+        }
+      }
+    },
+    "curveMorphism": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "morphism_id",
+        "kind",
+        "domain_curve_ref",
+        "codomain_ec1_curve_uid",
+        "field_relationship_ref",
+        "degree",
+        "separability",
+        "coordinate_map",
+        "defining_equation_identity",
+        "infinity_behavior",
+        "verification"
+      ],
+      "properties": {
+        "morphism_id": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "kind": {
+          "const": "curve_morphism"
+        },
+        "domain_curve_ref": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "codomain_ec1_curve_uid": {
+          "type": "string",
+          "pattern": "^urn:ec-record:1:sha256:[0-9a-f]{64}$"
+        },
+        "field_relationship_ref": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "degree": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "separability": {
+          "$ref": "#/$defs/assessment"
+        },
+        "coordinate_map": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source_coordinates",
+            "target_coordinates",
+            "expressions"
+          ],
+          "properties": {
+            "source_coordinates": {
+              "type": "array",
+              "minItems": 2,
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "target_coordinates": {
+              "type": "array",
+              "minItems": 2,
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "expressions": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "target_coordinate",
+                  "function"
+                ],
+                "properties": {
+                  "target_coordinate": {
+                    "type": "string"
+                  },
+                  "function": {
+                    "$ref": "#/$defs/rationalFunction"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "defining_equation_identity": {
+          "$ref": "#/$defs/assessment"
+        },
+        "infinity_behavior": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "images",
+            "ramification",
+            "assessment"
+          ],
+          "properties": {
+            "images": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            "ramification": {
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "assessment": {
+              "$ref": "#/$defs/assessment"
+            }
+          }
+        },
+        "verification": {
+          "$ref": "#/$defs/assessment"
+        }
+      }
+    },
+    "inducedMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "map_id",
+        "kind",
+        "morphism_ref",
+        "domain_ref",
+        "codomain_ref",
+        "field_relationship_ref",
+        "divisor_rule",
+        "exceptional_divisors",
+        "homomorphism_verification",
+        "implementation_ref"
+      ],
+      "properties": {
+        "map_id": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "kind": {
+          "enum": [
+            "pullback",
+            "pushforward"
+          ]
+        },
+        "morphism_ref": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "domain_ref": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "codomain_ref": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "field_relationship_ref": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "divisor_rule": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "algorithm",
+            "normalization",
+            "artifact_ref"
+          ],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "minLength": 1
+            },
+            "normalization": {
+              "type": "string",
+              "minLength": 1
+            },
+            "artifact_ref": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "exceptional_divisors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "policy",
+            "tested_cases"
+          ],
+          "properties": {
+            "policy": {
+              "type": "string",
+              "minLength": 1
+            },
+            "tested_cases": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/evidenceRef"
+              },
+              "uniqueItems": true
+            }
+          }
+        },
+        "homomorphism_verification": {
+          "$ref": "#/$defs/assessment"
+        },
+        "implementation_ref": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/implementationRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "homomorphism_verification": {
+                "properties": {
+                  "status": {
+                    "const": "supported"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            "required": [
+              "homomorphism_verification"
+            ]
+          },
+          "then": {
+            "properties": {
+              "implementation_ref": {
+                "$ref": "#/$defs/implementationRef"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "inducedMapCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assessment",
+        "map"
+      ],
+      "properties": {
+        "assessment": {
+          "$ref": "#/$defs/assessment"
+        },
+        "map": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/inducedMap"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "assessment": {
+                "properties": {
+                  "status": {
+                    "const": "supported"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            },
+            "required": [
+              "assessment"
+            ]
+          },
+          "then": {
+            "properties": {
+              "map": {
+                "$ref": "#/$defs/inducedMap"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "compositionIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity",
+        "left_map_ref",
+        "right_map_ref",
+        "multiplier",
+        "domain_scope",
+        "assessment"
+      ],
+      "properties": {
+        "identity": {
+          "enum": [
+            "pushforward_after_pullback_equals_degree",
+            "pullback_after_pushforward_equals_trace",
+            "custom"
+          ]
+        },
+        "left_map_ref": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "right_map_ref": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "multiplier": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "domain_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assessment": {
+          "$ref": "#/$defs/assessment"
+        }
+      }
+    },
+    "subgroupTransfer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_subgroup",
+        "image_subgroup",
+        "kernel_intersection",
+        "order_preservation",
+        "log_recovery",
+        "assessment"
+      ],
+      "properties": {
+        "source_subgroup": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "order",
+            "generator",
+            "ec1_curve_uid"
+          ],
+          "properties": {
+            "order": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            },
+            "generator": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "$ref": "#/$defs/fieldElement"
+              }
+            },
+            "ec1_curve_uid": {
+              "type": "string",
+              "pattern": "^urn:ec-record:1:sha256:[0-9a-f]{64}$"
+            }
+          }
+        },
+        "image_subgroup": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "kernel_intersection": {
+          "$ref": "#/$defs/assessment"
+        },
+        "order_preservation": {
+          "$ref": "#/$defs/assessment"
+        },
+        "log_recovery": {
+          "$ref": "#/$defs/assessment"
+        },
+        "assessment": {
+          "$ref": "#/$defs/assessment"
+        }
+      }
+    },
+    "inducedMaps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pullback",
+        "pushforward",
+        "composition_identities",
+        "subgroup_transfer"
+      ],
+      "properties": {
+        "pullback": {
+          "$ref": "#/$defs/inducedMapCapability"
+        },
+        "pushforward": {
+          "$ref": "#/$defs/inducedMapCapability"
+        },
+        "composition_identities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/compositionIdentity"
+          }
+        },
+        "subgroup_transfer": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/subgroupTransfer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "claimSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "proved_existence",
+        "explicit_construction",
+        "verified_curve_morphism",
+        "jacobian_arithmetic",
+        "verified_pullback",
+        "verified_pushforward",
+        "subgroup_preservation",
+        "computational_advantage"
+      ],
+      "properties": {
+        "proved_existence": {
+          "$ref": "#/$defs/assessment"
+        },
+        "explicit_construction": {
+          "$ref": "#/$defs/assessment"
+        },
+        "verified_curve_morphism": {
+          "$ref": "#/$defs/assessment"
+        },
+        "jacobian_arithmetic": {
+          "$ref": "#/$defs/assessment"
+        },
+        "verified_pullback": {
+          "$ref": "#/$defs/assessment"
+        },
+        "verified_pushforward": {
+          "$ref": "#/$defs/assessment"
+        },
+        "subgroup_preservation": {
+          "$ref": "#/$defs/assessment"
+        },
+        "computational_advantage": {
+          "$ref": "#/$defs/assessment"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_id",
+        "kind",
+        "title",
+        "uri",
+        "repository",
+        "commit",
+        "path",
+        "sha256",
+        "command",
+        "exit_status",
+        "independent",
+        "scope"
+      ],
+      "properties": {
+        "evidence_id": {
+          "$ref": "#/$defs/evidenceRef"
+        },
+        "kind": {
+          "enum": [
+            "primary_source",
+            "proof",
+            "construction_certificate",
+            "test",
+            "independent_reference",
+            "command_receipt",
+            "implementation_source",
+            "negative_control",
+            "unsupported_result"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uri": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "repository": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "commit": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/gitCommit"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "command": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "exit_status": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "independent": {
+          "type": "boolean"
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "uri": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "repository": {
+              "type": "string",
+              "minLength": 1
+            },
+            "commit": {
+              "$ref": "#/$defs/gitCommit"
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "repository",
+            "commit",
+            "path"
+          ]
+        }
+      ]
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implementation_id",
+        "revision_kind",
+        "repository",
+        "commit",
+        "base_commit",
+        "path",
+        "source_sha256",
+        "version",
+        "entry_point"
+      ],
+      "properties": {
+        "implementation_id": {
+          "$ref": "#/$defs/implementationRef"
+        },
+        "revision_kind": {
+          "enum": [
+            "git_commit",
+            "working_tree"
+          ]
+        },
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/gitCommit"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "base_commit": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/gitCommit"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entry_point": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "revision_kind": {
+                "const": "git_commit"
+              }
+            },
+            "required": [
+              "revision_kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "commit": {
+                "$ref": "#/$defs/gitCommit"
+              },
+              "base_commit": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "commit": {
+                "type": "null"
+              },
+              "base_commit": {
+                "$ref": "#/$defs/gitCommit"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "inputSupport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reason",
+        "family_boundary"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "supported",
+            "unsupported"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "family_boundary": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "unsupported"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "reason": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "created_utc",
+        "producer",
+        "repository",
+        "commit",
+        "registry_ref",
+        "registry_sha256",
+        "schema_sha256"
+      ],
+      "properties": {
+        "created_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "producer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit": {
+          "$ref": "#/$defs/gitCommit"
+        },
+        "registry_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "registry_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "schema_sha256": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "record_uid",
+        "record_kind",
+        "input_support",
+        "elliptic_input",
+        "fields",
+        "field_relationships",
+        "hyperelliptic_curve",
+        "jacobian",
+        "morphism",
+        "induced_maps",
+        "claims",
+        "evidence",
+        "implementations",
+        "provenance"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "hyperelliptic-infrastructure-record/v1"
+        },
+        "record_uid": {
+          "$ref": "#/$defs/recordUid"
+        },
+        "record_kind": {
+          "enum": [
+            "theorem_claim",
+            "explicit_construction",
+            "verified_construction",
+            "arithmetic_certificate",
+            "transfer_certificate",
+            "unsupported_case"
+          ]
+        },
+        "input_support": {
+          "$ref": "#/$defs/inputSupport"
+        },
+        "elliptic_input": {
+          "$ref": "#/$defs/ellipticInput"
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/fieldRecord"
+          }
+        },
+        "field_relationships": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/fieldRelationship"
+          }
+        },
+        "hyperelliptic_curve": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hyperellipticCurve"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "jacobian": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/jacobianContext"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "morphism": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/curveMorphism"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "induced_maps": {
+          "$ref": "#/$defs/inducedMaps"
+        },
+        "claims": {
+          "$ref": "#/$defs/claimSet"
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        },
+        "implementations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/implementation"
+          }
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "record_kind": {
+                "const": "unsupported_case"
+              }
+            },
+            "required": [
+              "record_kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "input_support": {
+                "properties": {
+                  "status": {
+                    "const": "unsupported"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_kind": {
+                "enum": [
+                  "explicit_construction",
+                  "verified_construction",
+                  "arithmetic_certificate",
+                  "transfer_certificate"
+                ]
+              }
+            },
+            "required": [
+              "record_kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "hyperelliptic_curve": {
+                "$ref": "#/$defs/hyperellipticCurve"
+              },
+              "morphism": {
+                "$ref": "#/$defs/curveMorphism"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_kind": {
+                "enum": [
+                  "arithmetic_certificate",
+                  "transfer_certificate"
+                ]
+              }
+            },
+            "required": [
+              "record_kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "jacobian": {
+                "$ref": "#/$defs/jacobianContext"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "record_kind": {
+                "const": "transfer_certificate"
+              }
+            },
+            "required": [
+              "record_kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "induced_maps": {
+                "properties": {
+                  "pullback": {
+                    "properties": {
+                      "assessment": {
+                        "properties": {
+                          "status": {
+                            "const": "supported"
+                          }
+                        }
+                      },
+                      "map": {
+                        "$ref": "#/$defs/inducedMap"
+                      }
+                    }
+                  },
+                  "pushforward": {
+                    "properties": {
+                      "assessment": {
+                        "properties": {
+                          "status": {
+                            "const": "supported"
+                          }
+                        }
+                      },
+                      "map": {
+                        "$ref": "#/$defs/inducedMap"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

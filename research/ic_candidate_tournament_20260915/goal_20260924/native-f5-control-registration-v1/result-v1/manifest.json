@@ -1,0 +1,70 @@
+{
+  "files": {
+    "config.json": {
+      "bytes": 225,
+      "sha256": "ac66f4cf13a531035621f191fc7554d045db3f846db2d808d194d826013d3d34"
+    },
+    "consumed.json": {
+      "bytes": 207,
+      "sha256": "a6e8859aec821e5880107e493794edc456fb3328ee4c6a6b0c75158b91fc61aa"
+    },
+    "execution/terminal.json": {
+      "bytes": 1552,
+      "sha256": "84daae6c1f1a34d4da8751ce3357b388735c2d6ca1ea1962f466545f3adf97ed"
+    },
+    "execution/worker-pids": {
+      "bytes": 23,
+      "sha256": "54371c7e24505b74b69a076985cfe5a9a705f11c8c017aa6d6f22b19f89c5b21"
+    },
+    "execution/worker.receipt.json": {
+      "bytes": 1121,
+      "sha256": "ae77a47360e2913fe7b93f70db075ae211934fde3e5db0ca3ba17c1027ff34c3"
+    },
+    "execution/worker.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "execution/worker.stdout": {
+      "bytes": 5819,
+      "sha256": "234ca4c051ee4baa105eb2b87bfa45d573b75b5dc8546463f37b8abca52a1120"
+    },
+    "host-context.json": {
+      "bytes": 396,
+      "sha256": "46f492adb765107b88c9eb93ccceb0833b6ad4c6c876712dc7ffaf56cfa093d4"
+    },
+    "independent-audit.json": {
+      "bytes": 3445,
+      "sha256": "994ab5bf1f3153eb6d22425eb15647a152cc1ebd14b68347147c279479a9ed69"
+    },
+    "job.json": {
+      "bytes": 7223,
+      "sha256": "b0ecbb19d33ecf739499d1db5d23ffd25a1c85309a574d5cf6cffa66cab94fc5"
+    },
+    "preparation.json": {
+      "bytes": 82045,
+      "sha256": "8c5ed3868d9131dd0c319ce436955f18ab9411bf47cc4970b47ac28ec5e56bd1"
+    },
+    "registration.json": {
+      "bytes": 1009207,
+      "sha256": "13871d06cea4e672ce29a77f7d6e701b5ac12ec95865b3d8bc561ce69f3ddf49"
+    },
+    "seal.json": {
+      "bytes": 95,
+      "sha256": "cf0a76e646c3d38b1f8c34eea6ec1a5b5ca40276266e2cbd0b7b081a70b972f2"
+    },
+    "source-acceptance.json": {
+      "bytes": 5829,
+      "sha256": "96dec1470be30bfc8c1afbe2d7e0bd58c42270b726537b36b8f2234517df5c1f"
+    }
+  },
+  "fresh_paired_qualification": false,
+  "full_goal_complete": false,
+  "headline_eligible": false,
+  "online_speedup": null,
+  "original_frozen_audit_sha256": "994ab5bf1f3153eb6d22425eb15647a152cc1ebd14b68347147c279479a9ed69",
+  "postexecution_publication_context": true,
+  "promotion_eligible": false,
+  "registration_sha256": "5a50e01c02fa7e14f227dea413cb9e569f73d68d684a68541e49fd357660f060",
+  "schema_version": 1,
+  "scope": "closed-disclosed-n17-native-f5-control"
+}

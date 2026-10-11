@@ -1,0 +1,179 @@
+{
+  "base_id_or_hash": "koblitz_factor_base_yield frobenius_union+divisor census seed=0x5949454c44",
+  "beat_id": "binary.relation_yield.koblitz_n19_probe",
+  "claim_boundary": "Public synthetic Koblitz factor-base yield census only.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not asymptotic law",
+    "not ledger promotion until CI gates"
+  ],
+  "created_at": "2026-09-11T06:39:41.209624+00:00",
+  "eta_or_coverage_policy": "charged_pair_table_m2_m3_over_random_256_subgroup_targets",
+  "evidence_paths": [
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/relation_yield_koblitz_n19_20260911/factor_base_yield_n19_t256.jsonl"
+  ],
+  "executable_or_source_hash": {
+    "source": "4c08042cbebfab1a557a59656a1b619ce2782a06b9b03276dfc8a352820ecc34"
+  },
+  "fixture_hash": "4c08042cbebfab1a557a59656a1b619ce2782a06b9b03276dfc8a352820ecc34",
+  "host_id": {
+    "node": "Adams-MacBook-Pro.local"
+  },
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs_manual/relation_yield_koblitz_n19_20260911/claim_draft_yield.json",
+  "n_or_bits": 19,
+  "note": "Earlier eta-sweep via rank_fixture SUMMARY lacked coverage fields; this census is the real p6 probe.",
+  "pr_decomposition_or_hit_rate_with_ci": {
+    "ci": "empirical_sd_across_identities_not_binomial_ci",
+    "m2_max": 0.30859375,
+    "m2_mean": 0.0947265625,
+    "m2_min": 0.0,
+    "m2_n_identities": 12,
+    "m2_sd": 0.10586736257149817,
+    "metric": "coverage = hits/targets on fixed 256 natural subgroup targets",
+    "top_m2": [
+      {
+        "coverage": 0.30859375,
+        "identity": {
+          "seed_basis": [
+            254395,
+            373196,
+            7206,
+            141314,
+            342102
+          ],
+          "seed_dimension": 5,
+          "seed_index": 1,
+          "type": "frobenius_union"
+        },
+        "orbits": 35,
+        "points": 647
+      },
+      {
+        "coverage": 0.23828125,
+        "identity": {
+          "seed_basis": [
+            1,
+            2,
+            4,
+            8,
+            16
+          ],
+          "seed_dimension": 5,
+          "seed_index": 0,
+          "type": "frobenius_union"
+        },
+        "orbits": 31,
+        "points": 571
+      },
+      {
+        "coverage": 0.234375,
+        "identity": {
+          "seed_basis": [
+            124760,
+            203612,
+            461258,
+            291720,
+            337968
+          ],
+          "seed_dimension": 5,
+          "seed_index": 2,
+          "type": "frobenius_union"
+        },
+        "orbits": 29,
+        "points": 533
+      },
+      {
+        "coverage": 0.14453125,
+        "identity": {
+          "seed_basis": [
+            239102,
+            224204,
+            464854,
+            264064
+          ],
+          "seed_dimension": 4,
+          "seed_index": 2,
+          "type": "frobenius_union"
+        },
+        "orbits": 19,
+        "points": 343
+      },
+      {
+        "coverage": 0.10546875,
+        "identity": {
+          "seed_basis": [
+            515355,
+            340172,
+            107057,
+            356747
+          ],
+          "seed_dimension": 4,
+          "seed_index": 1,
+          "type": "frobenius_union"
+        },
+        "orbits": 21,
+        "points": 381
+      },
+      {
+        "coverage": 0.04296875,
+        "identity": {
+          "seed_basis": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "seed_dimension": 4,
+          "seed_index": 0,
+          "type": "frobenius_union"
+        },
+        "orbits": 13,
+        "points": 229
+      },
+      {
+        "coverage": 0.02734375,
+        "identity": {
+          "seed_basis": [
+            43986,
+            266776
+          ],
+          "seed_dimension": 2,
+          "seed_index": 2,
+          "type": "frobenius_union"
+        },
+        "orbits": 7,
+        "points": 115
+      },
+      {
+        "coverage": 0.01953125,
+        "identity": {
+          "seed_basis": [
+            270294,
+            282599,
+            394404
+          ],
+          "seed_dimension": 3,
+          "seed_index": 1,
+          "type": "frobenius_union"
+        },
+        "orbits": 5,
+        "points": 77
+      }
+    ]
+  },
+  "regime": "binary",
+  "resource_caps": {},
+  "schema_version": 2,
+  "seeds": {
+    "factor_base_yield": "0x5949454c44"
+  },
+  "stage": "relation_yield",
+  "target_mix": {
+    "natural": 256,
+    "planted_sat": 0,
+    "proven_unsat": 0
+  },
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "trials_per_relation": "not_applicable_pair_table_oracle",
+  "verdict": "N19_YIELD_CURVE_PROBE_FIRST_PUBLICATION"
+}

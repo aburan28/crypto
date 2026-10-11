@@ -1,0 +1,15 @@
+%% Editable source for figure.svg (pipeline diagram).
+%% Rendered by hand into figure.svg (SVG is the committed rendering).
+%% Legend: [paper] = proved in arXiv:2610.06783v1; [this work] = proposal/assessment.
+flowchart LR
+    S["Schoenhage 10-mult identity [paper]\n(Sec 2.2, Lemma 6)"] --> C["Coppersmith-style recursion [paper]\n(Sec 2.3: batch of thin products)"]
+    C --> P["Prune to leaves wanted by W [paper]\n(Sec 2.4: new idea)"]
+    P --> T["Thin product [paper, Thm 1/5]\nN x D by D x N, |W| <= N^2/sqrt(D)\nO(N^2 / D^0.063)"]
+    T --> G["Lopsided All-Edges Sparse Triangle [paper]\n(XY)[a,b] = # shared middle vertices"]
+    T --> D["Data structure [paper, Thm 3]\npreprocess O(N^2/D^0.063)\nquery O(D^0.437)"]
+    G --> R["3SUM O(n^1.9992), APSP O(n^2.9995)\nExact Triangle [paper, Thm 2]\nvia known reductions"]
+    G --> I1["IC: relation-verification batch [this work: PROPOSAL]\nblocked: PDP is polynomial, not inner products"]
+    D --> I2["IC: factor-base intersection query [this work: PROPOSAL, closest fit]\nblocked: yield is algebraic, not set-theoretic"]
+    T --> I3["IC: sparse-LA block [this work: PROPOSAL]\nblocked: needs sparse matvecs over Z/rZ"]
+    T --> I4["IC: target-descent batch [this work: PROPOSAL]\nblocked: batching changes one-target workload"]
+    I1 & I2 & I3 & I4 --> E["End-to-end S: UNSET [this work]\nneeds matched full-DLP suites + rho pairing"]

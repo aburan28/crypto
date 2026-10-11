@@ -1,0 +1,21 @@
+{
+  "curves_checked": 4,
+  "end_to_end_cost": null,
+  "exhaustive_accelerated_scalar_checks": 64589,
+  "historical_manifest_files_checked": 15,
+  "historical_timings": "Python; preserved, not certified as native measurements",
+  "maps_checked": 15,
+  "native_source_sha256": {
+    "curves.rs": "e290b958138a6504304c61e3f7bbb9fcdd705a921eba476c8a6452ba193c1911",
+    "lib.rs": "d6415bede41b11e8cd5cbf2eb732b962e770208ecd494290c00cbf21a5af1b46",
+    "main.rs": "6b72a6911c0c8574245e90e4694f8544619519411e468e6255609c0ad161a3e0",
+    "orders.rs": "378833ef446682d62b6175c695c9236a5ec74aaf3fc7c6ef2665221382c757f8",
+    "scalar.rs": "21e8d6627ac142830a3c5923c7ff3ea72f5d48ce45fe83ee0b3cd91bd0654e51"
+  },
+  "native_wall_timing": null,
+  "orders_checked": 500,
+  "schema": "endomorphism-search-replay/v1",
+  "speedup": null,
+  "status": "all_correctness_checks_passed"
+}
+PASS: frozen correctness parity and altered-evidence rejection controls

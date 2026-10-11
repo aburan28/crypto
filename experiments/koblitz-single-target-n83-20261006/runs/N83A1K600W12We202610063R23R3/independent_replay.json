@@ -1,0 +1,63 @@
+{
+  "candidate_id": "IC1N83A1Ckb1fb99600PDP4rootRCguidedLAgaussTDdirectISO0parallel",
+  "checks": {
+    "G_on_curve": true,
+    "Q_on_curve": true,
+    "deterministic_target_relation": true,
+    "fixture_order_factorization_matches": true,
+    "fixture_trace_matches_order": true,
+    "ic_in_process_verification_passed": true,
+    "ic_online_phase_sum_matches": true,
+    "ic_process_succeeded": true,
+    "ic_recovers_fixture_scalar": true,
+    "ic_uses_frozen_Q": true,
+    "known_answer_not_sent_to_ic": true,
+    "known_answer_not_sent_to_rho": true,
+    "no_edge_selectors": true,
+    "no_explicit_pair_table": true,
+    "one_ic_online_target": true,
+    "one_rho_online_target": true,
+    "rho_fixture_generation_excluded": true,
+    "rho_in_process_verification_passed": true,
+    "rho_online_phase_sum_matches": true,
+    "rho_process_succeeded": true,
+    "rho_recovers_fixture_scalar": true,
+    "rho_used_supplied_public_point": true,
+    "rho_uses_frozen_G": true,
+    "rho_uses_frozen_Q": true,
+    "scalar_replay_equals_Q": true,
+    "subgroup_annihilates_Q": true,
+    "subgroup_order_replay_is_infinity": true
+  },
+  "kind": "independent_n83_single_target_replay",
+  "precompute_detail": {
+    "orbit_columns": 600,
+    "pair_table_entries": 0,
+    "rank_failures": 0,
+    "rank_probes_mean": 2646554.625,
+    "rank_stage_ms": 209024.826875,
+    "rank_threads": 12
+  },
+  "run_id": "N83A1K600W12We202610063R23R3",
+  "scope": "Standalone standard-library GF(2^83) curve replay, same-point pairing, one-target accounting, and phase sums; does not independently remeasure producer runtimes.",
+  "status": "PASS",
+  "timing_ms": {
+    "ic_online": 5623.275125,
+    "ic_peak_rss_bytes": 4399742976,
+    "ic_phases": {
+      "target_PDP": 5623.126208,
+      "target_descent": 0.00675,
+      "target_query": 4.2e-05,
+      "target_recovery_check": 0.126167,
+      "target_relation_check": 0.015417
+    },
+    "online_speedup": 12.671208207334514,
+    "rho_online": 71253.68991600002,
+    "rho_peak_rss_bytes": 2188230656,
+    "rho_phases": {
+      "scalar_recovery_check": 8.891291,
+      "target_specific_jump_setup": 7.51625,
+      "target_walk": 71237.28237500001
+    }
+  }
+}

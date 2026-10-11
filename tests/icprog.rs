@@ -124,6 +124,21 @@ fn icprog_reproduces_r05s_committed_analysis_byte_for_byte() {
     );
 }
 
+/// R07's `analysis.json` is `icprog analyse r07`'s output from R07's
+/// `runs.tar.xz`, and stays so.
+#[test]
+fn icprog_reproduces_r07s_committed_analysis_byte_for_byte() {
+    let round = round("R07-main-head");
+    let dir = unpack(&round, "r07");
+    let out = analyse("r07", &dir.join("runs"));
+    std::fs::remove_dir_all(&dir).ok();
+    let committed = std::fs::read(round.join("analysis.json")).unwrap();
+    assert!(
+        out.stdout == committed,
+        "icprog's R07 analysis differs from the committed analysis.json"
+    );
+}
+
 /// R05's pin was written by the declared `run.py pin`; with its record
 /// removed, `icprog run r05 pin` must write the same bytes from the
 /// candidate's outputs in the run tree (no binary runs: every output is
@@ -157,6 +172,111 @@ fn icprog_reproduces_r05s_pin_byte_for_byte() {
     let again = std::fs::read(&pin).unwrap();
     std::fs::remove_dir_all(&dir).ok();
     assert!(again == frozen, "the native pin differs from R05's");
+}
+
+fn holdouts(round_dir: &Path, sizes: &[&str], seeds: &str, first: &str, check: bool) -> Output {
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_icprog"));
+    cmd.arg("holdouts").arg(round_dir).arg("--root").arg(root());
+    for s in sizes {
+        cmd.args(["--size", s]);
+    }
+    cmd.args(["--seeds", seeds, "--first-target", first]);
+    if check {
+        cmd.arg("--check");
+    }
+    cmd.output().expect("icprog runs")
+}
+
+/// The rounds' holdouts were drawn by suite v1's `make_suite.py`
+/// construction; `icprog holdouts --check` must re-derive every file and
+/// each `SHA256SUMS` byte for byte, as it must every suite v1 row.
+#[test]
+fn icprog_reproduces_the_frozen_holdouts_and_suite_rows_byte_for_byte() {
+    for (dir, sizes, seeds, first) in [
+        (
+            "R02b-wide-tail-retest",
+            &["1,59", "0,61"][..],
+            "206,207,208,209",
+            "103",
+        ),
+        (
+            "R05-presence-filter",
+            &["0,53", "1,59", "0,61"][..],
+            "210,211,212,213",
+            "111",
+        ),
+        (
+            "R07-main-head",
+            &["0,53", "1,59", "0,61"][..],
+            "214,215,216,217",
+            "119",
+        ),
+        (
+            "R06-scan-key",
+            &["0,53", "1,59", "0,61"][..],
+            "218,219,220,221",
+            "127",
+        ),
+        (
+            "R08-scan-fold",
+            &["0,53", "1,59", "0,61"][..],
+            "222,223,224,225",
+            "135",
+        ),
+    ] {
+        let out = holdouts(&round(dir), sizes, seeds, first, true);
+        assert!(
+            out.status.success(),
+            "{dir}: {}{}",
+            String::from_utf8_lossy(&out.stdout),
+            String::from_utf8_lossy(&out.stderr)
+        );
+    }
+    // Suite v1's own rows: seeds 201–204 from target 1, file for file.
+    let tmp = std::env::temp_dir().join(format!("icprog-holdouts-{}", std::process::id()));
+    let suite = root().join("research/ic_tool_program/suite/v1/params/S");
+    for (a, n) in [
+        (1, 19),
+        (1, 23),
+        (1, 45),
+        (0, 37),
+        (1, 43),
+        (1, 47),
+        (0, 57),
+        (0, 41),
+        (0, 53),
+        (1, 59),
+        (0, 61),
+    ] {
+        let dir = tmp.join(format!("k{a}n{n}"));
+        let size = format!("{a},{n}");
+        let out = holdouts(&dir, &[&size], "201,202,203,204", "1", false);
+        assert!(
+            out.status.success(),
+            "{}",
+            String::from_utf8_lossy(&out.stderr)
+        );
+        let drawn = dir.join("holdouts");
+        let slug = std::fs::read_dir(&drawn)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .find(|e| e.path().is_dir())
+            .expect("a slug directory")
+            .path();
+        for i in 1..=8u32 {
+            let m = i.div_ceil(2);
+            let ours = std::fs::read(slug.join(format!("M{m}-T{i}.json"))).unwrap();
+            let frozen = std::fs::read(suite.join(format!("k{a}n{n}/M{m}-T{i:02}.json"))).unwrap();
+            assert!(
+                ours == frozen,
+                "k{a}n{n} M{m}-T{i:02} differs from suite v1's"
+            );
+        }
+        // Drawn once: a second draw into the same round refuses.
+        let again = holdouts(&dir, &[&size], "201,202,203,204", "1", false);
+        assert!(!again.status.success());
+    }
+    std::fs::remove_dir_all(&tmp).ok();
 }
 
 /// The extension rule is re-tested from the runs: a record of extended
@@ -323,6 +443,30 @@ fn icprog_reproduces_s23s_claims_and_analysis_byte_for_byte() {
     );
 }
 
+/// The rule's comparison at v3 (`research/ic_tool_program/rule/v3`):
+/// `icprog rule analyse` reads its committed runs, claims and manifests in
+/// place, since each claim points at its run by path, and must write the
+/// committed `analysis.json` byte for byte.
+#[test]
+fn icprog_reproduces_rule_v3s_committed_analysis_byte_for_byte() {
+    let out = Command::new(env!("CARGO_BIN_EXE_icprog"))
+        .args(["rule", "analyse", "--comparison", "v3", "--root"])
+        .arg(root())
+        .output()
+        .expect("icprog runs");
+    assert!(
+        out.status.success(),
+        "icprog failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+    let committed =
+        std::fs::read(root().join("research/ic_tool_program/rule/v3/analysis.json")).unwrap();
+    assert!(
+        out.stdout == committed,
+        "icprog's rule v3 analysis differs from the committed analysis.json"
+    );
+}
+
 /// A run tree that is not one is refused, with the reason.
 #[test]
 fn icprog_refuses_a_missing_run_tree() {
@@ -334,4 +478,296 @@ fn icprog_refuses_a_missing_run_tree() {
         .expect("icprog runs");
     assert!(!out.status.success());
     assert!(String::from_utf8_lossy(&out.stderr).contains("is not a run tree"));
+}
+
+/// Whether this host has a feature, as `rounds::host_has` detects it.
+fn host_has(feature: &str) -> bool {
+    #[cfg(target_arch = "x86_64")]
+    {
+        match feature {
+            "avx512f" => is_x86_feature_detected!("avx512f"),
+            "avx512bw" => is_x86_feature_detected!("avx512bw"),
+            "avx512vbmi" => is_x86_feature_detected!("avx512vbmi"),
+            "avx512vbmi2" => is_x86_feature_detected!("avx512vbmi2"),
+            "gfni" => is_x86_feature_detected!("gfni"),
+            "pclmulqdq" => is_x86_feature_detected!("pclmulqdq"),
+            "vpclmulqdq" => is_x86_feature_detected!("vpclmulqdq"),
+            other => panic!("no detection for {other}"),
+        }
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        let _ = feature;
+        false
+    }
+}
+
+/// `icprog host-class` reports each round's hardware class against this
+/// host, and `run` refuses a round's steps on a host outside its class,
+/// before it touches the run tree.  Whatever host the test runs on, the
+/// report must name exactly the features that host lacks.
+#[test]
+fn icprog_reports_and_enforces_each_round_s_hardware_class() {
+    let reference: &[&str] = &["avx512f", "pclmulqdq", "vpclmulqdq", "gfni"];
+    let r06: &[&str] = &[
+        "avx512f",
+        "pclmulqdq",
+        "vpclmulqdq",
+        "gfni",
+        "avx512bw",
+        "avx512vbmi",
+        "avx512vbmi2",
+    ];
+    for (round, class) in [
+        ("r05", reference),
+        ("r07", reference),
+        ("r06", r06),
+        ("r08", r06),
+        ("r09", &["avx512f", "pclmulqdq", "!vpclmulqdq"]),
+    ] {
+        // `!name` is a feature the class excludes: failed where the host has it.
+        let missing: Vec<&str> = class
+            .iter()
+            .copied()
+            .filter(|f| match f.strip_prefix('!') {
+                Some(absent) => host_has(absent),
+                None => !host_has(f),
+            })
+            .collect();
+        let out = Command::new(env!("CARGO_BIN_EXE_icprog"))
+            .args(["host-class", round])
+            .output()
+            .expect("icprog runs");
+        let text = String::from_utf8_lossy(&out.stdout);
+        let doc: serde_json::Value = serde_json::from_str(&text).expect("a JSON report");
+        assert_eq!(doc["round"], round);
+        assert_eq!(doc["requires"], serde_json::json!(class), "{round}");
+        assert_eq!(doc["missing"], serde_json::json!(missing), "{round}");
+        assert_eq!(doc["in_class"], missing.is_empty(), "{round}");
+        assert_eq!(
+            out.status.code(),
+            Some(if missing.is_empty() { 0 } else { 3 }),
+            "{round}"
+        );
+        if !missing.is_empty() {
+            let runs =
+                std::env::temp_dir().join(format!("icprog-class-{round}-{}", std::process::id()));
+            let out = Command::new(env!("CARGO_BIN_EXE_icprog"))
+                .args(["run", round, "manifest", "--root"])
+                .arg(root())
+                .arg("--runs")
+                .arg(&runs)
+                .args(["--base", "/nonexistent/ic", "--cand", "/nonexistent/ic"])
+                .output()
+                .expect("icprog runs");
+            assert!(!out.status.success(), "{round}");
+            let err = String::from_utf8_lossy(&out.stderr);
+            assert!(
+                err.contains("outside the round's hardware class"),
+                "{round}: {err}"
+            );
+            assert!(!runs.exists(), "{round}: the run tree was touched");
+        }
+    }
+}
+
+/// A stub `ic`: each case's first argument says what it does.
+const STUB_IC: &str = r#"#!/bin/sh
+case "$1" in
+  report)
+    printf '{"status": "%s", "build_commit": "abc123", "detail": {"n": 3, "items": [{"code": "x", "k": 1}, {"code": "y"}]}}\n' "$2" > "$3"
+    exit 0 ;;
+  refuse) echo "ic: refused: $2" >&2; exit 2 ;;
+  panic) echo "thread 'main' panicked" >&2; exit 101 ;;
+  hang) exec sleep 30 ;;
+  cat) cat "$2" >&2; exit 0 ;;
+esac
+exit 3
+"#;
+
+/// The conformance runner (N4) on a stub `ic`, every rule of the scripts
+/// it replaces (`conformance/run.py`, `v2/run.py`) exercised: the exit
+/// rule, under which a panic never passes; the timeout; `stderr_contains`;
+/// the report's `json_equals` (an absent key is `None`),
+/// `json_equals_build_commit`, `json_paths`, `json_contains` and
+/// `same_outputs_as`; a file copied with a key set, from `{here}`; and the
+/// `until` and `supersedes` rules that choose the cases.
+#[test]
+fn icprog_conformance_runs_each_rule_on_a_stub_ic() {
+    let dir = std::env::temp_dir().join(format!(
+        "icprog-conformance-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    let conf = dir.join("research/ic_tool_program/conformance");
+    std::fs::create_dir_all(conf.join("v1")).unwrap();
+    std::fs::create_dir_all(conf.join("v2/params")).unwrap();
+    let report = "{tmp}/r.json";
+    let v1 = serde_json::json!({"cases": [
+        {"id": "C001", "argv": ["report", "complete", report], "timeout_s": 10,
+         "expect": {"exit": "zero", "json_file": report,
+                    "json_equals": {"status": "complete", "absent": null},
+                    "json_equals_build_commit": true,
+                    "json_paths": {"detail.n": 3.0, "detail.items.1.code": "y"},
+                    "json_contains": {"detail.items": [{"code": "x"}]},
+                    "same_outputs_as": {"argv": ["report", "complete", "{tmp}/s.json"],
+                                        "json_file": "{tmp}/s.json",
+                                        "paths": ["status", "detail.n"]}}},
+        {"id": "C002", "argv": ["refuse", "bad-field"], "timeout_s": 10,
+         "expect": {"exit": "nonzero", "stderr_contains": ["refused: bad-field"]}},
+        {"id": "C003", "argv": ["panic"], "timeout_s": 10, "expect": {"exit": "nonzero"}},
+        {"id": "C004", "argv": ["hang"], "timeout_s": 0.5, "expect": {"exit": "zero"}},
+        {"id": "C005", "until": "B1", "argv": ["refuse", "x"], "timeout_s": 10,
+         "expect": {"exit": 2}},
+        {"id": "C006", "argv": ["report", "refused", report], "timeout_s": 10,
+         "expect": {"exit": "zero", "json_file": report,
+                    "json_equals": {"status": "complete"}}}
+    ]});
+    let v2 = serde_json::json!({"cases": [
+        {"id": "C010", "step": "B1", "timeout_s": 10,
+         "files": {"doc.json": {"copy": "{here}/base.json", "set": {"a.b": 5}}},
+         "argv": ["cat", "{tmp}/doc.json"],
+         "expect": {"exit": "zero", "stderr_contains": ["\"b\": 5", "\"c\": 2"]}},
+        {"id": "C011", "step": "B1", "supersedes": "C002", "argv": ["refuse", "other"],
+         "timeout_s": 10,
+         "expect": {"exit": "nonzero", "stderr_contains": ["refused: other"]}}
+    ]});
+    std::fs::write(conf.join("v1/cases.json"), v1.to_string()).unwrap();
+    std::fs::write(conf.join("v2/cases.json"), v2.to_string()).unwrap();
+    std::fs::write(
+        conf.join("v2/params/base.json"),
+        r#"{"a": {"b": 1, "c": 2}}"#,
+    )
+    .unwrap();
+    let ic = dir.join("ic");
+    std::fs::write(&ic, STUB_IC).unwrap();
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(&ic, std::fs::Permissions::from_mode(0o755)).unwrap();
+    }
+    let run = |steps: &str, commit: &str| -> (bool, serde_json::Value) {
+        let out_file = dir.join(format!("report-{steps}.json"));
+        let out = Command::new(env!("CARGO_BIN_EXE_icprog"))
+            .arg("conformance")
+            .arg("--ic")
+            .arg(&ic)
+            .args(["--steps", steps, "--build-commit", commit, "--root"])
+            .arg(&dir)
+            .arg("--out")
+            .arg(&out_file)
+            .output()
+            .unwrap();
+        let printed: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+        let written: serde_json::Value =
+            serde_json::from_slice(&std::fs::read(&out_file).unwrap()).unwrap();
+        assert_eq!(printed, written);
+        (out.status.success(), written)
+    };
+    let verdicts = |doc: &serde_json::Value| -> Vec<(String, bool, Vec<String>)> {
+        doc["results"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|r| {
+                let why = r["why"].as_array().unwrap();
+                (
+                    r["id"].as_str().unwrap().to_string(),
+                    r["pass"].as_bool().unwrap(),
+                    why.iter()
+                        .map(|w| w.as_str().unwrap().to_string())
+                        .collect(),
+                )
+            })
+            .collect()
+    };
+    let case = |id: &str, pass: bool, why: &[&str]| {
+        (
+            id.to_string(),
+            pass,
+            why.iter().map(|w| w.to_string()).collect::<Vec<_>>(),
+        )
+    };
+
+    let (all, b0) = run("B0", "abc123");
+    assert!(!all);
+    assert_eq!(b0["steps"], serde_json::json!(["B0"]));
+    assert_eq!(
+        (b0["cases"].as_u64(), b0["passed"].as_u64()),
+        (Some(6), Some(3))
+    );
+    assert_eq!(
+        verdicts(&b0),
+        vec![
+            case("C001", true, &[]),
+            case("C002", true, &[]),
+            case("C003", false, &["panicked (exit status 101)"]),
+            case("C004", false, &["no exit within 0.5 s"]),
+            case("C005", true, &[]),
+            case(
+                "C006",
+                false,
+                &[r#"status = "refused", expected "complete""#]
+            ),
+        ]
+    );
+    assert_eq!(b0["results"][2]["exit"], 101);
+    assert_eq!(
+        b0["results"][1]["stderr_tail"],
+        serde_json::json!(["ic: refused: bad-field"])
+    );
+
+    // B1's cases join; C005 ends at B1 and C011 supersedes C002.  The
+    // steps are reported in the scripts' order, whatever order they came in.
+    let (_, b1) = run("B1,B0", "zzz");
+    assert_eq!(b1["steps"], serde_json::json!(["B0", "B1"]));
+    assert_eq!(
+        verdicts(&b1),
+        vec![
+            case(
+                "C001",
+                false,
+                &[r#"build_commit = "abc123", expected "zzz""#]
+            ),
+            case("C003", false, &["panicked (exit status 101)"]),
+            case("C004", false, &["no exit within 0.5 s"]),
+            case(
+                "C006",
+                false,
+                &[r#"status = "refused", expected "complete""#]
+            ),
+            case("C010", true, &[]),
+            case("C011", true, &[]),
+        ]
+    );
+    let unknown = Command::new(env!("CARGO_BIN_EXE_icprog"))
+        .arg("conformance")
+        .arg("--ic")
+        .arg(&ic)
+        .args(["--steps", "B9", "--root"])
+        .arg(&dir)
+        .output()
+        .unwrap();
+    assert!(!unknown.status.success());
+    assert!(String::from_utf8_lossy(&unknown.stderr).contains("unknown step \"B9\""));
+    // A set whose files no longer match its `SHA256SUMS` runs nothing.
+    std::fs::write(
+        conf.join("v2/SHA256SUMS"),
+        format!("{}  params/base.json\n", "0".repeat(64)),
+    )
+    .unwrap();
+    let tampered = Command::new(env!("CARGO_BIN_EXE_icprog"))
+        .arg("conformance")
+        .arg("--ic")
+        .arg(&ic)
+        .args(["--steps", "B0", "--root"])
+        .arg(&dir)
+        .output()
+        .unwrap();
+    assert!(!tampered.status.success());
+    assert!(String::from_utf8_lossy(&tampered.stderr).contains("does not match SHA256SUMS"));
+    assert!(tampered.stdout.is_empty());
+    std::fs::remove_dir_all(&dir).unwrap();
 }

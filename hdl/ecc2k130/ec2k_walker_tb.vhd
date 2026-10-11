@@ -80,6 +80,7 @@ begin
 
   dut : entity work.ec2k_walker
     generic map (ID_W => ID_W, LOG_W => LOG_W, LOG_NB => LOG_NB, FLUSH_CLK => 16,
+                 CNT_W => CNT_W, DP_WEIGHT => 56)
                  CNT_W => CNT_W, CNT_LO_W => CNT_LO_W, DP_WEIGHT => 56)
     port map (
       clk => clk, rst => rst,

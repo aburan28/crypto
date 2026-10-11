@@ -76,7 +76,7 @@ The geometric family supplies 2^{O(n)} distinct cheap presentations, since θ an
 range over the field. So the curve-vs-presentation experiment can be rerun at
 n = 31 with V_s = geom(s), at about twice the cost of monomial V.
 
-## 5. n = 31, l = 16 curve-vs-presentation with geometric V (running)
+## 5. n = 31, l = 16 curve-vs-presentation with geometric V
 
 This is an additive amendment to `presentation-vs-curve-design-20261003.md`. The model,
 the ICC estimator and the thresholds are unchanged. The only change is the subspace
@@ -96,3 +96,37 @@ family: geometric `V_s` for s = 1..4 instead of random V.
 Caveat stated up front: H0 or H1 here is scoped to geometric presentations, a
 measure-zero family of subspaces. It is not a statement about random V at n = 31,
 which remains out of reach (about 330 s/call).
+
+### Results (2026-10-05)
+
+The run completed all 128 cells (32 curves × 4 geometric V), with 4 probes each.
+
+**Soundness.** Every cell's log matched BSGS (`bsgs_ok`), and there were 0
+inconsistent relations.
+
+**Cost and yield.** 319 relations from 512 probes (0.62 per probe).
+- Reductions per call: median 37.6, mean 36.9.
+- Mean reductions per call by subspace: 38.3, 35.1, 36.8 and 37.3.
+- Median 92 s per call, with 2–4 cells sharing 4 cores.
+
+Variance split (`presentation_icc.py`). The 95 % intervals are bootstrapped over
+curves. Output is in `experiments/koblitz_presentation/icc_n31_l16_geom.json`.
+
+| metric | ICC_curve | 95 % CI | subspace share |
+|---|---|---|---|
+| reductions/call (primary) | 0.000 | [0, 0.005] | 0.000 |
+| log µs/call | 0.000 | [0, 0.014] | 0.000 |
+| yield per \|F\|² | 0.000 | [0, 0.000] | 0.000 |
+| log projected solve | 0.000 | [0, 0.000] | 0.000 |
+
+**Reading.** Every metric's upper bound is below the pre-registered 0.05 line, so by
+the design rule this is **H0 for n = 31, l = 16, m = 2, over geometric presentations**:
+no curve effect is detected, and the four geometric V do not differ from each other
+either.
+
+**Caveats.**
+- With 4 probes per cell, most of the variance is within-cell probe noise (residual).
+  The bound says the curve share of cell-level variance is small. It does not bound a
+  curve effect smaller than that noise.
+- The scope is geometric V only (see the caveat above). Random V at n = 31 is not tested.
+- First fall is not measured in this arm.

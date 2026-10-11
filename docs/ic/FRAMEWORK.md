@@ -748,6 +748,14 @@ worse than none:
   step's elimination once the residue echelon is full, is round 6 (§15):
   every output unchanged, 39% fewer multiply-adds at `m = 4`, `N = 12` and
   25% at `N = 16`, all in the refutation step.
+
+  Round 7 (§16) finishes `m = 3` at `N = 18`, where round 2 had only
+  `D ≥ 7`: `D = 7` on both targets. The `m = 3` line reads 6, 6, 7, 7
+  over `N = 9`–18, which A1 calls inconclusive, like `m = 4`'s 7, 7. Its
+  address space peaked at 96% of the 14 GB that machine allows, so
+  `m = 3` at `N = 21` is beyond it too. The round's checks run on a native
+  checker (`examples/pkm_tower_check.rs`) that reproduces the retired
+  Python scripts line for line.
 - **No parallelism.** Every count is single-threaded, which is what
   makes operation counts comparable; a parallel implementation would
   need its own accounting.
@@ -761,15 +769,16 @@ worse than none:
 
 | stage | trait | plug-ins |
 |:--|:--|:--|
-| factor base | `FactorBaseBuilder` | `prime-abscissa`, `glv-orbit`, `binary-subspace`, `koblitz-orbit`, `koblitz-symmetrised`, `gls-line` |
+| factor base | `FactorBaseBuilder` | `prime-abscissa`, `glv-orbit`, `binary-subspace`, `koblitz-orbit`, `koblitz-trace-zero`, `koblitz-symmetrised`, `gls-line` |
 | targets | `Targets` | `random`, `walk` |
 | point decomposition | `DecompositionOracle` | `subtract`, `mitm`, `mitm-frobenius`, `descent-algebraic`, `symmetrised`; `line-resultant` (library and `examples/glv_invariant_experiments.rs`: the `O(log p)` Weil-descent oracle for a line base over `F_{p^k}`, `line_oracle.rs`) |
 | polynomial solver | `SystemSolver` | `f4-f2`, `buchberger-f2`, `matrix-f4`, `matrix-f5`, `inherited-f4`, `crossbred-f2`, `xl-f2`, `sat-cdcl`, `fes-f2`, `fes-f2-wide`, `exhaustive` |
 | relation matrix | `RelationSolver` | `incremental-gauss`, `structured-gauss` |
 
 `ic bench --list` prints this with every parameter each plug-in reads.
-A parameter that takes several values (`divisor` on `koblitz-orbit` and
-`koblitz-symmetrised`) takes them separated by `;`, quoted in a shell.
+A parameter that takes several values (`divisor` on `koblitz-orbit`,
+`koblitz-trace-zero`, and `koblitz-symmetrised`) takes them separated by `;`,
+quoted in a shell.
 
 ### Source map
 

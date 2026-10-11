@@ -1,0 +1,57 @@
+c CMS SHA1: GIT-notfound
+c CryptoMiniSat version 5.14.7
+c CMS compilation env CMAKE_CXX_COMPILER = clang++ | CMAKE_CXX_FLAGS =  -fno-stack-protector -msse4.2 -Wno-bitfield-constant-conversion -Wlogical-op -Wrestrict -Wnull-dereference -Wdouble-promotion -Wshadow -Wformat=2 -Wextra-semi -pedantic | COMPILE_DEFINES =  -DNDEBUG -D_FORTIFY_SOURCE=0 -DUSE_ZLIB | BUILD_SHARED_LIBS = ON | ONLY_SIMPLE =  | STATS = OFF | SQLITE3_FOUND =  | ZLIB_FOUND = TRUE | VALGRIND_FOUND =  | ENABLE_TESTING = OFF | SLOW_DEBUG = OFF | ENABLE_ASSERTIONS = OFF | PYTHON_EXECUTABLE =  | PYTHON_LIBRARY =  | PYTHON_INCLUDE_DIRS =  | MY_TARGETS =  | LARGEMEM = OFF | LIMITMEM = OFF | BREAKID_LIBRARIES =  | BREAKID-VER = . | c c Using VMTF, picosat, CaDiCaL, and CadiBack code by Armin Biere
+c CMS is MIT licensed
+c Using code from 'When Boolean Satisfiability Meets Gauss-E. in a Simplex Way'
+c       by C.-S. Han and J.-H. Roland Jiang in CAV 2012. Fixes by M. Soos
+c Using CCAnr from 'CCAnr: A Conf. Checking Based Local Search Solver [...]'
+c       by Shaowei Cai, Chuan Luo, and Kaile Su, SAT 2015
+c Using Oracle code from 'Integrating Tree Decompositions [...]'
+c       by Tuukka Korhonen and Matti Jarvisalo, CP 2021
+c Executed with command line: /opt/homebrew/bin/cryptominisat5 --verb=1 --maxconfl=300000 --maxtime=240 research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/cms_probe_relative_eta1_16/n19_natural_relative_eta1_16.xor
+c Reading file 'research/sat_factor_base_review_20260908/autolab/runs_manual/orbit_factorized_s5_20260915/cms_probe_relative_eta1_16/n19_natural_relative_eta1_16.xor'
+c o -- header says num vars:           5055
+c o -- header says num clauses:       20418
+c -- clauses added: 19259
+c -- xor clauses added: 1159
+c -- vars added 5055
+c Parsing time: 0.00 s
+c [gauss] clauses deleted that are represented by XORs: 0 xorclauses: 931 GJ matrices: 0 T: 0.00
+c [find&init matx] performing matrix init
+c [matrix] Too many columns in matrix: 1159 -> set usage to NO
+c [matrix] UNused matrix        95 x 1159  density:0.0263  xorlen avg: 30.54
+c [matrix] Too many columns in matrix: 1159 -> set usage to NO
+c [matrix] UNused matrix        95 x 1159  density:0.0263  xorlen avg: 30.54
+c [matrix] Good   matrix  0c [matrix] disabling SLS since matrix is found
+    171 x  551  density:0.0177  xorlen avg:  9.74
+c [matrix] Good   matrix  1     19 x   38  density:0.2521  xorlen avg:  9.58
+c [matrix] Good   matrix  2     19 x   38  density:0.2521  xorlen avg:  9.58
+c [matrix] Good   matrix  3     19 x   38  density:0.2521  xorlen avg:  9.58
+c [matrix] Good   matrix  4     19 x   38  density:0.2521  xorlen avg:  9.58
+c [matrix] UNused matrix        19 x   38  density:0.2521  xorlen avg:  9.58
+c [matrix] UNused matrix        19 x   38  density:0.2521  xorlen avg:  9.58
+c [matrix] UNused matrix        19 x   38  density:0.2479  xorlen avg:  9.42
+c [matrix] UNused matrix        19 x   38  density:0.2479  xorlen avg:  9.42
+c [matrix] UNused matrix        19 x   38  density:0.2479  xorlen avg:  9.42
+c [matrix] UNused matrix        19 x   38  density:0.2479  xorlen avg:  9.42
+c [matrix] UNused matrix        19 x   38  density:0.2479  xorlen avg:  9.42
+c [matrix] UNused matrix        19 x   38  density:0.2479  xorlen avg:  9.42
+c [matrix] unused matrices: 26 of which too few rows: 0
+c [matrix] Using 5 matrices recovered from 684 xors T: 0.00 T-out: N
+...
+c time                     : 7.43        
+c conflicts                : 300002      
+c time                     : 0.28        (0.00      % var-elim)
+c time                     : 0.00        (0.00      per call)
+c time                     : 0.05        (0.03      per call)
+c time                     : 0.42        (0.03      per call)
+c timed out                : 0           (0.00      % of calls)
+c time                     : 0.09        (0.00      s/call)
+c time                     : 0.00        (0.00      s/call)
+c time                     : 0.00        (0.00      per call)
+c timed out                : 0           (0.00      % of calls)
+c Mem used                 : 0           MB
+c time                     : 7.43        
+c conflicts                : 300002      
+c Mem used                 : 0.00        MB
+s INDETERMINATE

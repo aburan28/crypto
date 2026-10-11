@@ -282,8 +282,44 @@ fn estimate(args: &EstimateArgs) -> Result<Value, String> {
             "relevant": est.ic_relevant,
             "regime": est.regime.tag(),
         },
+        "heuristic_index_calculus": est.heuristic.as_ref().map(|h| heuristic_json(h, est.rho_log2_ops)),
         "notes": est.notes,
     }))
+}
+
+/// The per-`ω` heuristic table: a model on the first-fall-degree
+/// assumption, never a measurement.
+fn heuristic_json(h: &ic_engine::HeuristicIc, rho_log2_ops: f64) -> Value {
+    let n = h.field_degree as f64;
+    let rows: Vec<Value> = h
+        .rows
+        .iter()
+        .map(|r| {
+            json!({
+                "omega_bound": r.bound.id,
+                "omega": r.bound.value,
+                "relation": r.bound.relation(),
+                "construction": r.bound.construction.tag(),
+                "proof": r.bound.proof.tag(),
+                "characteristic_2": r.applicability.tag(),
+                "log2_cost": round2(r.log2_cost),
+                "below_generic": r.log2_cost < n / 2.0,
+                "log2_cost_minus_rho": round2(r.log2_cost - rho_log2_ops),
+                "turning_point_n": r.turning_point,
+                "exponent_ratio_to_best_established": (r.exponent_ratio_to_best_established * 1e4).round() / 1e4,
+                "source": r.bound.source,
+            })
+        })
+        .collect();
+    json!({
+        "kind": "model",
+        "heuristic": h.heuristic.id(),
+        "formula": h.heuristic.formula(),
+        "assumption": "first-fall-degree assumption (D_reg ~ D_ff), contested by Kosters-Yeo 2015 and Huang-Kosters-Yeo 2015",
+        "field_degree": h.field_degree,
+        "generic_log2": n / 2.0,
+        "rows": rows,
+    })
 }
 
 fn round1(x: f64) -> f64 {
@@ -370,6 +406,31 @@ fn display(report: &Value) {
                 report["index_calculus"]["relevant"],
                 report["index_calculus"]["regime"].as_str().unwrap_or("?"),
             );
+            let h = &report["heuristic_index_calculus"];
+            if !h.is_null() {
+                println!(
+                    "Heuristic IC ({}, a model, not a measurement): {}",
+                    h["heuristic"].as_str().unwrap_or("?"),
+                    h["formula"].as_str().unwrap_or("?"),
+                );
+                println!(
+                    "  {:<24} {:>10} {:>15} {:>13} {:>9} {:>8}",
+                    "omega bound", "omega", "construction", "char 2", "log2 T", "turn n"
+                );
+                for r in h["rows"].as_array().into_iter().flatten() {
+                    println!(
+                        "  {:<24} {:>2}{:>8.4} {:>15} {:>13} {:>9.2} {:>8}",
+                        r["omega_bound"].as_str().unwrap_or("?"),
+                        r["relation"].as_str().unwrap_or("?"),
+                        r["omega"].as_f64().unwrap_or(f64::NAN),
+                        r["construction"].as_str().unwrap_or("?"),
+                        r["characteristic_2"].as_str().unwrap_or("?"),
+                        r["log2_cost"].as_f64().unwrap_or(f64::NAN),
+                        r["turning_point_n"].as_u64().unwrap_or(0),
+                    );
+                }
+                println!("  generic 2^(n/2) = 2^{}", h["generic_log2"]);
+            }
             for n in report["notes"].as_array().into_iter().flatten() {
                 println!("  - {}", n.as_str().unwrap_or(""));
             }

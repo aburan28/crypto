@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "kind": "ladder_progress_tick",
+  "updated_at": "2026-09-15T20:53:37Z",
+  "claim_boundary": "Public-synthetic only. NOT ledger promotion; NOT vs_rho; NOT key recovery.",
+  "bound_lift": "pair_sum_trie + relative-positive relative mode asserts raised 41\u219253 (absolute positive remains \u226423)",
+  "n41_pairthen_chain_planted": {
+    "verdict": "SAT",
+    "conflicts": 389,
+    "valid_x_tuples": 1,
+    "invalid_group_lifts": 0,
+    "pair_table_entries": 0,
+    "variables": 16145
+  },
+  "unrestricted_n37_eta1_16_50k": {
+    "verdict": "UNKNOWN",
+    "conflicts": 50000,
+    "pair_table_entries": 0,
+    "variables": 116927,
+    "solve_ms": 435902.724041,
+    "note": "Cliff open at 50k; 200k in flight"
+  },
+  "aborted": {
+    "unrestricted_n37_eta1_2_100k": "too_slow_~2.6h",
+    "n53_fullstack_chain_20k": "encoding_or_solve_>15m; pairthen+chain n53 already SAT"
+  },
+  "in_flight": "unrestricted_n37_eta1_16_seed1_200k",
+  "ledger_promotion": false
+}

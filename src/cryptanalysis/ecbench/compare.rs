@@ -66,7 +66,8 @@ pub struct ArmSummary {
 pub struct WorkloadRow {
     pub workload_id: String,
     pub slug: String,
-    pub r: u64,
+    #[serde(with = "crate::cryptanalysis::ecbench::canonical::compat_u128")]
+    pub r: u128,
     pub floor_s: f64,
     /// Matched, verified pairs on this workload.
     pub pairs: u64,
@@ -109,7 +110,8 @@ pub struct OpsResult {
     pub same_session: bool,
     /// Pooled over curves of different sizes; read `curves` for scaling.
     pub pooled_curves: u64,
-    /// Either arm left work unpriced: the ratio is between bounds.
+    /// Either arm left work unpriced. The displayed ratio is diagnostic:
+    /// dividing two lower bounds does not bound the full-cost ratio.
     pub bounded: bool,
     pub resamples: usize,
 }
@@ -407,7 +409,7 @@ pub fn compare(
         rows.len(),
         ops.pooled_curves,
         if ops.bounded {
-            ", bounded (unpriced work)"
+            ", diagnostic only (unpriced work; ratio does not bound full cost)"
         } else {
             ""
         },

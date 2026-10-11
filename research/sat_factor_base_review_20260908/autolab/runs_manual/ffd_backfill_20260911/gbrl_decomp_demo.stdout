@@ -1,0 +1,25 @@
+curve: y^2 = x^3 + 1*x + 1 over F_1000003
+
+factor base (3 pts):
+  x = 0  →  Affine(Fp(0), Fp(1))
+  x = 11  →  Affine(Fp(11), Fp(18628))
+  x = 18  →  Affine(Fp(18), Fp(880730))
+
+chosen: a_idx=0 (x=0), b_idx=2 (x=18)
+R = P_a + P_b has x_R = 797035
+
+decomposition system:
+  S_3(x_R, x_1, x_2): 19 terms, deg = 6
+  F(x_1):            3 terms, deg = 3
+  F(x_2):            3 terms, deg = 3
+
+Buchberger: steps=8, final basis=7, arith_ops=35
+
+brute-force scan over V × V, classify via group-law filter:
+  (0, 0)  → spurious (no sign choice yields ±R)
+  (0, 18)  → REAL: Affine(Fp(0), Fp(1)) + Affine(Fp(18), Fp(880730)) = R (or -R)
+  (11, 11)  → spurious (no sign choice yields ±R)
+  (18, 0)  → REAL: Affine(Fp(18), Fp(880730)) + Affine(Fp(0), Fp(1)) = R (or -R)
+  (18, 18)  → spurious (no sign choice yields ±R)
+
+2 real decomposition(s) found.

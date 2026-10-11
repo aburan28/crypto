@@ -1,0 +1,11 @@
+{
+  "schema": "isogeny-walk-trait-shard/v1",
+  "isogeny_routes_sha256": "5dfe974e55fb3b83f237b7ba6646966803ab6f4da27352f4295cb0dcb7aea892",
+  "root": "P-256",
+  "shard": 0,
+  "of": 1,
+  "curves_total": 65536,
+  "curves_in_shard": 65536,
+  "traits_sha256": "4affbafb9cbb0c957bb6849a235767ba7077b1212a97e8ea8b7cbce487021668",
+  "detectors": ["non_singular", "generator_valid", "a_minus_3_model", "qr_prefix_64", "coefficient_bits"]
+}

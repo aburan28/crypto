@@ -1,0 +1,53 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1h9e7e5532edc9",
+  "label": "pilot timing estimate only; throwaway seed, not the frozen panel",
+  "spec_id": "ECS1ha3d64fdf44a8",
+  "spec_sha256": "a3d64fdf44a8dc820cc5687dd72ba974ac7ca00799e437c3e42ccfba46c973f1",
+  "env_class_id": "ECBENV2h59034d4cd61b",
+  "host_sha256": "f54bd72f0347cdaa09e73f2ec33708a4607fd373f040069c4627440afc7c45fc",
+  "plan_sha256": "e82fd84c71212c821a922d4ece6fd3012d10248e360376f55359fb0f8997bf18",
+  "binary_sha256": "f7cf3e275ea08d1b84cd1bed959b9ea5e83372f81fb9f07da61a8034af283be0",
+  "git_commit": "63a09ff7b297531b8bacef853d79745b3575983b",
+  "git_dirty": false,
+  "options": {
+    "cpus": "none",
+    "lock_path": "/tmp/crypto-bench-pilot-n41n53.lock",
+    "wait_for_lock": false,
+    "allow_busy": true,
+    "thresholds": {
+      "settle_seconds": 0.0,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/Volumes/SSD990/crypto-worktrees/koblitz-factor-bases-novel-9ba1ad/target/release/ecbench"
+  },
+  "cpu_plan": null,
+  "preflight": null,
+  "eviction": null,
+  "runner_on_run_cpu": false,
+  "runner_cpus": null,
+  "ticks_per_second": 100,
+  "grading_version": 2,
+  "child_env_sha256": "c4cccd61201fbd7a759a1a0437de712fad3e8fea29c9d9dbdc8aef130311fe69",
+  "child_env": {
+    "HOME": "/Users/adamburan",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/Users/adamburan/.local/bin:/Users/adamburan/.bun/bin:/Users/adamburan/.bun/bin:/Users/adamburan/.bun/bin:/Users/adamburan/bin:/Users/adamburan/.opencode/bin:/Users/adamburan/.bun/bin:/Users/adamburan/.atuin/bin:/Users/adamburan/.pyenv/shims:/Users/adamburan/.pyenv/bin:/Users/adamburan/.local/bin:/Users/adamburan/.local/share/solana/install/active_release/bin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/usr/local/go/bin:/Users/adamburan/.cargo/bin:/Users/adamburan/.docker/bin:/Users/adamburan/go/bin:/Users/adamburan/istio-1.24.0/bin:/Users/adamburan/.local/bin:/Users/adamburan/.lmstudio/bin",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1791251174364,
+  "finished_unix_ms": 1791251532800,
+  "status": "complete",
+  "executions_planned": 6,
+  "records_written": 6,
+  "records_sha256": "a34616d95c6fc1e8a8ec7de405ce6a9c92b2212c11bbf5beff6a5892f20ca4c7",
+  "status_counts": {
+    "error": 3,
+    "verified": 3
+  }
+}

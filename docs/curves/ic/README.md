@@ -8,6 +8,16 @@ known/unknown trait statuses and isogeny route references. Evidence paths
 inside it are relative to **cryptanalysis**. Change both copies in one
 paired update; compare their SHA-256 before merging either update.
 
+Run `python3 docs/curves/ic/validate_semantics.py` to check the mirrored YAML,
+JSON Schemas, exact EC1/UID hashes, ICV1 crosswalk, trait statuses and typed
+link references. `mirror-lock.json` pins the three mirrored source files.
+The `ic-semantic-metadata` CI job runs these checks and compares their bytes
+and the validator implementation against cryptanalysis `main`; its daily run
+also detects later mirror drift. Keep the negative tests mirrored as well.
+Merge a cryptanalysis source change before updating this mirror. The check
+validates metadata and evidence references, not mathematical certificates or
+measured performance.
+
 `ICV1` is crypto's model/display name. `EC1` plus the full
 `urn:ec-record:1:sha256:...` UID identifies the field representation,
 model, subgroup and generator used by a DLP experiment. The toy N13 and
@@ -45,6 +55,8 @@ frozen workload, verified one-target run, and paired rho run under the
 existing measurement contract.
 
 ## Walking an isogeny class
+
+**How to run it, including S3 setup:** [`docs/isogeny-walk/README.md`](../../isogeny-walk/README.md).
 
 `src/bin/isogeny_walk.rs` walks the `F_p`-isogeny class of a prime-field
 curve (P-256, P-224, or a custom short Weierstrass curve with its order and

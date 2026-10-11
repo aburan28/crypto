@@ -1375,7 +1375,15 @@ pub fn verify_routes(
         .into_iter()
         .collect();
     let class = ClassInfo::compute(start, &primes);
-    type Checked = (String, Model, String, HashMap<u64, u64>);
+    type Checked = (
+        String,
+        Model,
+        String,
+        String,
+        String,
+        String,
+        HashMap<u64, u64>,
+    );
     let checked: Vec<Result<Checked, String>> = nodes
         .par_iter()
         .enumerate()
@@ -1389,6 +1397,14 @@ pub fn verify_routes(
                 a: f.from_big(&a),
                 b: f.from_big(&b),
             };
+            let model_j = m.j(&f).ok_or_else(|| format!("{r}: singular model"))?;
+            let recorded_j = dec(&node["j_invariant"], "j_invariant")?;
+            let canonical_j = f.to_big(&model_j);
+            if recorded_j != canonical_j {
+                return Err(format!(
+                    "{r}: j_invariant differs from the recomputed {canonical_j}"
+                ));
+            }
             if i == 0 && (a != &start.a % &start.p || b != &start.b % &start.p) {
                 return Err("the root is not the registered model".into());
             }
@@ -1438,13 +1454,31 @@ pub fn verify_routes(
                     levels.insert(l, lv);
                 }
             }
-            Ok((r, m, uid, levels))
+            Ok((r, m, id.slug, ec1, uid, canonical_j.to_string(), levels))
         })
         .collect();
     let mut models: HashMap<String, (Model, String, HashMap<u64, u64>)> = HashMap::new();
+    let mut slugs = std::collections::HashSet::new();
+    let mut curve_ids = std::collections::HashSet::new();
+    let mut curve_uids = std::collections::HashSet::new();
+    let mut j_invariants = std::collections::HashSet::new();
     for c in checked {
-        let (r, m, uid, levels) = c?;
-        models.insert(r, (m, uid, levels));
+        let (r, m, slug, curve_id, uid, j, levels) = c?;
+        if !slugs.insert(slug.clone()) {
+            return Err(format!("{r}: duplicate ICV1 slug {slug}"));
+        }
+        if !curve_ids.insert(curve_id.clone()) {
+            return Err(format!("{r}: duplicate EC1 curve id {curve_id}"));
+        }
+        if !curve_uids.insert(uid.clone()) {
+            return Err(format!("{r}: duplicate curve uid {uid}"));
+        }
+        if !j_invariants.insert(j.clone()) {
+            return Err(format!("{r}: duplicate j_invariant {j}"));
+        }
+        if models.insert(r.clone(), (m, uid, levels)).is_some() {
+            return Err(format!("duplicate curve ref {r}"));
+        }
     }
     let edges = routes["edges"].as_array().ok_or("edges")?;
     let edge_records: Vec<Result<(String, u64, char, V), String>> = edges
@@ -1521,10 +1555,16 @@ pub fn verify_routes(
     let mut by_id: HashMap<String, (u64, char, V)> = HashMap::new();
     for r in edge_records {
         let (id, ell, dir, rec) = r?;
-        by_id.insert(id, (ell, dir, rec));
+        if by_id.insert(id.clone(), (ell, dir, rec)).is_some() {
+            return Err(format!("duplicate edge id {id}"));
+        }
     }
+    let mut route_ids = std::collections::HashSet::new();
     for route in routes["routes"].as_array().ok_or("routes")? {
         let rid = route["id"].as_str().unwrap_or("?");
+        if !route_ids.insert(rid.to_string()) {
+            return Err(format!("duplicate route id {rid}"));
+        }
         let path: Vec<&(u64, char, V)> = route["edge_ids"]
             .as_array()
             .ok_or("edge_ids")?

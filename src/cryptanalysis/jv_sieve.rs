@@ -1521,8 +1521,29 @@ pub fn run_cover_sieve_dlp(
     m_override: Option<usize>,
     trace: bool,
 ) -> SieveDlpReport {
-    let start = Instant::now();
     let spec = generate_spec(p, seed);
+    run_cover_sieve_dlp_on(
+        &spec, seed, rho_runs, rho_s_ref, stop, margin, m_override, trace,
+    )
+}
+
+/// [`run_cover_sieve_dlp`] on a given instance (§18: the curve the walk
+/// reached, with the transported points).  The route's randomness is seeded
+/// from `seed` exactly as before, so the walk-free runs are unchanged.
+#[allow(clippy::too_many_arguments)]
+pub fn run_cover_sieve_dlp_on(
+    spec: &Spec,
+    seed: u64,
+    rho_runs: usize,
+    rho_s_ref: f64,
+    stop: Option<usize>,
+    margin: f64,
+    m_override: Option<usize>,
+    trace: bool,
+) -> SieveDlpReport {
+    let start = Instant::now();
+    let spec = spec.clone();
+    let p = spec.p;
     let ctx = Ctx::new(&spec);
     let jac = ctx.jac();
     let l = spec.l;

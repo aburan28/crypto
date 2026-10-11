@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/home/ubuntu/crypto/ecc2k130/build/g7-split-batch24",
+    "--packed",
+    "--threads",
+    "336",
+    "--steps",
+    "1",
+    "--launches",
+    "1",
+    "--run-id",
+    "58301",
+    "--checkpoint",
+    "/home/ubuntu/crypto/ecc2k130/build/batch16-rejection-source.ckpt",
+    "--bench",
+    "--verify",
+    "0"
+  ],
+  "returncode": 6,
+  "timed_out": false,
+  "timeout_seconds": 300,
+  "elapsed_seconds": 0.4646584219990473,
+  "log": "batch24-reject-batch16.log",
+  "log_sha256": "230e0006ac0b50d09b95c92292ba8657fb33f6f4dc9a5eff68927a39244e7392",
+  "binary_sha256": "ea262776683d3014876ab70d09d800b334529cd366760ad67d3099eb82b04f6a"
+}

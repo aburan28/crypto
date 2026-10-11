@@ -1,0 +1,1343 @@
+{
+  "schema": "identity.certificate/v1",
+  "id": "IDC1hb935f3d4940f1848",
+  "statement": {
+    "name": "Schoenhage ten-multiplication identity (3x3 outer + 2x2 inner, with error E)",
+    "source": "Alman-Vassilevska Williams, arXiv:2610.06783v1, Lemma 6 (Schoenhage 1981, Sec. 6, eq. 6.3, k = n = 3)",
+    "variables": [
+      "x1",
+      "x2",
+      "x3",
+      "y1",
+      "y2",
+      "y3",
+      "p11",
+      "p12",
+      "p21",
+      "p22",
+      "q11",
+      "q12",
+      "q21",
+      "q22",
+      "z11",
+      "z12",
+      "z13",
+      "z21",
+      "z22",
+      "z23",
+      "z31",
+      "z32",
+      "z33",
+      "z0"
+    ],
+    "degree_bound": 3,
+    "lhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x1"
+                },
+                {
+                  "op": "var",
+                  "args": "p11"
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y1"
+                },
+                {
+                  "op": "var",
+                  "args": "q11"
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "z11"
+                },
+                {
+                  "op": "var",
+                  "args": "z0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x1"
+                },
+                {
+                  "op": "var",
+                  "args": "p12"
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y2"
+                },
+                {
+                  "op": "var",
+                  "args": "q12"
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "z12"
+                },
+                {
+                  "op": "var",
+                  "args": "z0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x1"
+                },
+                {
+                  "op": "const",
+                  "args": 0
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y3"
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "q11"
+                      },
+                      {
+                        "op": "var",
+                        "args": "q12"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "z13"
+                },
+                {
+                  "op": "var",
+                  "args": "z0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x2"
+                },
+                {
+                  "op": "var",
+                  "args": "p21"
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y1"
+                },
+                {
+                  "op": "var",
+                  "args": "q21"
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "z21"
+                },
+                {
+                  "op": "var",
+                  "args": "z0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x2"
+                },
+                {
+                  "op": "var",
+                  "args": "p22"
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y2"
+                },
+                {
+                  "op": "var",
+                  "args": "q22"
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "z22"
+                },
+                {
+                  "op": "var",
+                  "args": "z0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x2"
+                },
+                {
+                  "op": "const",
+                  "args": 0
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y3"
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "q21"
+                      },
+                      {
+                        "op": "var",
+                        "args": "q22"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "z23"
+                },
+                {
+                  "op": "var",
+                  "args": "z0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x3"
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "p11"
+                      },
+                      {
+                        "op": "var",
+                        "args": "p21"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y1"
+                },
+                {
+                  "op": "const",
+                  "args": 0
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "z31"
+                },
+                {
+                  "op": "var",
+                  "args": "z0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x3"
+                },
+                {
+                  "op": "neg",
+                  "args": {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "p12"
+                      },
+                      {
+                        "op": "var",
+                        "args": "p22"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y2"
+                },
+                {
+                  "op": "const",
+                  "args": 0
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "z32"
+                },
+                {
+                  "op": "var",
+                  "args": "z0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x3"
+                },
+                {
+                  "op": "const",
+                  "args": 0
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y3"
+                },
+                {
+                  "op": "const",
+                  "args": 0
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "z33"
+                },
+                {
+                  "op": "var",
+                  "args": "z0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "neg",
+              "args": {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "x1"
+                  },
+                  {
+                    "op": "var",
+                    "args": "x2"
+                  },
+                  {
+                    "op": "var",
+                    "args": "x3"
+                  }
+                ]
+              }
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "y1"
+                },
+                {
+                  "op": "var",
+                  "args": "y2"
+                },
+                {
+                  "op": "var",
+                  "args": "y3"
+                }
+              ]
+            },
+            {
+              "op": "var",
+              "args": "z0"
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x1"
+                },
+                {
+                  "op": "var",
+                  "args": "y1"
+                },
+                {
+                  "op": "var",
+                  "args": "z11"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x1"
+                },
+                {
+                  "op": "var",
+                  "args": "y2"
+                },
+                {
+                  "op": "var",
+                  "args": "z12"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x1"
+                },
+                {
+                  "op": "var",
+                  "args": "y3"
+                },
+                {
+                  "op": "var",
+                  "args": "z13"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x2"
+                },
+                {
+                  "op": "var",
+                  "args": "y1"
+                },
+                {
+                  "op": "var",
+                  "args": "z21"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x2"
+                },
+                {
+                  "op": "var",
+                  "args": "y2"
+                },
+                {
+                  "op": "var",
+                  "args": "z22"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x2"
+                },
+                {
+                  "op": "var",
+                  "args": "y3"
+                },
+                {
+                  "op": "var",
+                  "args": "z23"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x3"
+                },
+                {
+                  "op": "var",
+                  "args": "y1"
+                },
+                {
+                  "op": "var",
+                  "args": "z31"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x3"
+                },
+                {
+                  "op": "var",
+                  "args": "y2"
+                },
+                {
+                  "op": "var",
+                  "args": "z32"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "x3"
+                },
+                {
+                  "op": "var",
+                  "args": "y3"
+                },
+                {
+                  "op": "var",
+                  "args": "z33"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "p11"
+                        },
+                        {
+                          "op": "var",
+                          "args": "q11"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "p12"
+                        },
+                        {
+                          "op": "var",
+                          "args": "q12"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "p21"
+                        },
+                        {
+                          "op": "var",
+                          "args": "q21"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "p22"
+                        },
+                        {
+                          "op": "var",
+                          "args": "q22"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "var",
+                  "args": "z0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "x1"
+                        },
+                        {
+                          "op": "var",
+                          "args": "q11"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "p11"
+                        },
+                        {
+                          "op": "var",
+                          "args": "y1"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "p11"
+                        },
+                        {
+                          "op": "var",
+                          "args": "q11"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "var",
+                  "args": "z11"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "x1"
+                        },
+                        {
+                          "op": "var",
+                          "args": "q12"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "p12"
+                        },
+                        {
+                          "op": "var",
+                          "args": "y2"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "p12"
+                        },
+                        {
+                          "op": "var",
+                          "args": "q12"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "var",
+                  "args": "z12"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "x1"
+                        },
+                        {
+                          "op": "neg",
+                          "args": {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "var",
+                                "args": "q11"
+                              },
+                              {
+                                "op": "var",
+                                "args": "q12"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "const",
+                          "args": 0
+                        },
+                        {
+                          "op": "var",
+                          "args": "y3"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "const",
+                          "args": 0
+                        },
+                        {
+                          "op": "neg",
+                          "args": {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "var",
+                                "args": "q11"
+                              },
+                              {
+                                "op": "var",
+                                "args": "q12"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "var",
+                  "args": "z13"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "x2"
+                        },
+                        {
+                          "op": "var",
+                          "args": "q21"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "p21"
+                        },
+                        {
+                          "op": "var",
+                          "args": "y1"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "p21"
+                        },
+                        {
+                          "op": "var",
+                          "args": "q21"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "var",
+                  "args": "z21"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "x2"
+                        },
+                        {
+                          "op": "var",
+                          "args": "q22"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "p22"
+                        },
+                        {
+                          "op": "var",
+                          "args": "y2"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "p22"
+                        },
+                        {
+                          "op": "var",
+                          "args": "q22"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "var",
+                  "args": "z22"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "x2"
+                        },
+                        {
+                          "op": "neg",
+                          "args": {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "var",
+                                "args": "q21"
+                              },
+                              {
+                                "op": "var",
+                                "args": "q22"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "const",
+                          "args": 0
+                        },
+                        {
+                          "op": "var",
+                          "args": "y3"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "const",
+                          "args": 0
+                        },
+                        {
+                          "op": "neg",
+                          "args": {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "var",
+                                "args": "q21"
+                              },
+                              {
+                                "op": "var",
+                                "args": "q22"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "var",
+                  "args": "z23"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "x3"
+                        },
+                        {
+                          "op": "const",
+                          "args": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "neg",
+                          "args": {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "var",
+                                "args": "p11"
+                              },
+                              {
+                                "op": "var",
+                                "args": "p21"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "op": "var",
+                          "args": "y1"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "neg",
+                          "args": {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "var",
+                                "args": "p11"
+                              },
+                              {
+                                "op": "var",
+                                "args": "p21"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "op": "const",
+                          "args": 0
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "var",
+                  "args": "z31"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "x3"
+                        },
+                        {
+                          "op": "const",
+                          "args": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "neg",
+                          "args": {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "var",
+                                "args": "p12"
+                              },
+                              {
+                                "op": "var",
+                                "args": "p22"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "op": "var",
+                          "args": "y2"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "neg",
+                          "args": {
+                            "op": "add",
+                            "args": [
+                              {
+                                "op": "var",
+                                "args": "p12"
+                              },
+                              {
+                                "op": "var",
+                                "args": "p22"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "op": "const",
+                          "args": 0
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "var",
+                  "args": "z32"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "x3"
+                        },
+                        {
+                          "op": "const",
+                          "args": 0
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "const",
+                          "args": 0
+                        },
+                        {
+                          "op": "var",
+                          "args": "y3"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "const",
+                          "args": 0
+                        },
+                        {
+                          "op": "const",
+                          "args": 0
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "var",
+                  "args": "z33"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "modulus": 2305843009213693951,
+  "points": 32,
+  "seed": 2742699286339780609,
+  "value_digest": "713e40aa2232afcabc962f5bea1d8dc63ece3b2d51b7f4bd347a79a1e27a9310",
+  "independence": "issued by examples/identity_certificate_schoenhage.rs from the module constructor; checked independently by cryptanalysis::identity_certificate::check replaying from the sealed id and seed",
+  "proof": null
+}

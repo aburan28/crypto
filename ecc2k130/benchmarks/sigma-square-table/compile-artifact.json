@@ -1,0 +1,39 @@
+{
+  "schema": "ecc2k130-sigma-square-table-compile-artifact-v2",
+  "status": "PASS",
+  "producerSourceHead": "d36d2e6156c719786e032abdf2744e97b32492e2",
+  "github": {
+    "runId": 37048199847,
+    "jobId": 110974759153,
+    "artifactId": 11245940827,
+    "artifactName": "sigma-square-table-sm120-compile",
+    "artifactSizeBytes": 16368210,
+    "artifactZipSha256": "99152a84774032f27959648be99f13792b5f00282f481323a18bd749e3bfab4e",
+    "downloadCommand": "gh run download 37048199847 --name sigma-square-table-sm120-compile --dir OUTPUT"
+  },
+  "environment": {
+    "container": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+    "compiler": "CUDA 13.3.73",
+    "architecture": "sm_120",
+    "gpuAttached": false
+  },
+  "contents": {
+    "manifestEntries": 22,
+    "allManifestEntriesVerified": true,
+    "controlBinarySha256": "297cc3593b17f26d87d4dbb67a7cd98a817aadbde27d8864c3a784d768150738",
+    "candidateBinarySha256": "fc2618c954d93ac4ddc547268f4ea9eeb69f0f46b0d54af16f33868c703032d0",
+    "controlSassSha256": "f82c0ffe9b3fbda6b4b9ab0153c882cc448ec96ba5f99b990235fb781ee3fc50",
+    "candidateSassSha256": "9c40e5ebd33cf80daf64fc4b3c91039070e3cf95ee610db22fe6e3d4a3e09cd3",
+    "controlProbeObjects": {
+      "packed": "1f34833583eec97db130723bb0029b6d06bded54692c06b5e9e135cec7835aa6",
+      "storage": "25943c56e6f5294882187e48439a41e9336a696779a270152760dc0a4931a66d",
+      "sharedSigma": "433bb10cec171414ef02c8e39a627f835aebb4219fbe96d2306d23f08d5b2303"
+    },
+    "candidateProbeObjects": {
+      "packed": "c2fc1fc8bc243c5a73a972a7176be5f50937a468812cd2bd52c0b47e5c2cad5d",
+      "storage": "f6a15623b0185dafedcc4e7d9a6ff8fd894d16561124891d3f1a364fd0f40cd3",
+      "sharedSigma": "a7563a9a02a5c8d2985f8cc85b80773d22dbdcd6d3d1edfb1bcb4af7eda8cca1"
+    }
+  },
+  "claimBoundary": "No-GPU compile and six-probe-object artifact. Static resources and SASS pass; named-device occupancy, runtime correctness, dynamic instruction counts and throughput remain pending."
+}

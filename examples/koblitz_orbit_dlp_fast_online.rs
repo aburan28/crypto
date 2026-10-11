@@ -25,6 +25,7 @@
 //!
 //! Usage: <base_header.jsonl> <target_points.jsonl|legacy_scalars.txt> <rank_seed> <out.jsonl>
 
+use crypto_lib::cryptanalysis::ecbench::isolation::HwCounters;
 use crypto_lib::cryptanalysis::koblitz_fast_arith::{s3_x_roots, FastBinaryCurve, FastPoint};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
 use crypto_lib::cryptanalysis::semaev_decomp::Gf2;
@@ -33,6 +34,7 @@ use num_traits::ToPrimitive;
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::io::Write;
+use std::process::ExitCode;
 use std::time::{Duration, Instant};
 
 /// Consecutive laps on one clock: the laps of an interval sum to its length.
@@ -281,10 +283,57 @@ fn invert(gf: &Gf2, basis: &NormalBasis, a: u64) -> u64 {
 
 /// Open-addressing u64 -> u64 table; keys are < 2^63 so u64::MAX marks empty.
 /// Key and value share a slot so a probe touches one cache line.
+/// A negative answer skips an exact root-table probe. Every inserted key is
+/// also inserted here, so the filter cannot discard a table witness.
+struct RootBloom {
+    words: Vec<u64>,
+    bit_mask: usize,
+}
+
+impl RootBloom {
+    fn with_capacity(keys: usize) -> Self {
+        let bits = keys
+            .checked_mul(8)
+            .and_then(usize::checked_next_power_of_two)
+            .expect("root Bloom size overflow")
+            .max(64);
+        Self { words: vec![0; bits / 64], bit_mask: bits - 1 }
+    }
+
+    #[inline(always)]
+    fn positions(&self, key: u64) -> [usize; 3] {
+        let first = mix_root_bloom(key ^ 0xA5A5_38F9_9328_6F3D);
+        let step = mix_root_bloom(key.rotate_left(17) ^ 0xD4C9_3E72_B719_485B) | 1;
+        [0, 1, 2].map(|index| first.wrapping_add(index * step) as usize & self.bit_mask)
+    }
+
+    #[inline(always)]
+    fn insert(&mut self, key: u64) {
+        for bit in self.positions(key) {
+            self.words[bit >> 6] |= 1u64 << (bit & 63);
+        }
+    }
+
+    #[inline(always)]
+    fn contains(&self, key: u64) -> bool {
+        self.positions(key).into_iter().all(|bit| self.words[bit >> 6] & (1u64 << (bit & 63)) != 0)
+    }
+
+    fn bytes(&self) -> usize { self.words.len() * std::mem::size_of::<u64>() }
+}
+
+#[inline(always)]
+fn mix_root_bloom(mut value: u64) -> u64 {
+    value = (value ^ (value >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    value = (value ^ (value >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    value ^ (value >> 31)
+}
+
 struct RootTable {
     slots: Vec<(u64, u64)>,
     shift: u32,
     len: usize,
+    bloom: Option<RootBloom>,
 }
 
 impl RootTable {
@@ -294,6 +343,8 @@ impl RootTable {
             slots: vec![(u64::MAX, 0); slots],
             shift: 64 - slots.trailing_zeros(),
             len: 0,
+            bloom: (std::env::var("KIC_ROOT_BLOOM").as_deref() == Ok("1"))
+                .then(|| RootBloom::with_capacity(entries)),
         }
     }
 
@@ -309,6 +360,7 @@ impl RootTable {
             if self.slots[slot].0 == u64::MAX {
                 self.slots[slot] = (key, value);
                 self.len += 1;
+                if let Some(bloom) = &mut self.bloom { bloom.insert(key); }
                 return;
             }
             if self.slots[slot].0 == key {
@@ -320,6 +372,9 @@ impl RootTable {
 
     #[inline(always)]
     fn get(&self, key: u64) -> Option<u64> {
+        if self.bloom.as_ref().is_some_and(|bloom| !bloom.contains(key)) {
+            return None;
+        }
         let mask = self.slots.len() - 1;
         let mut slot = self.slot(key);
         loop {
@@ -331,6 +386,35 @@ impl RootTable {
                 return None;
             }
             slot = (slot + 1) & mask;
+        }
+    }
+}
+
+#[cfg(test)]
+mod root_bloom_table_tests {
+    use super::{mix_root_bloom, RootBloom, RootTable};
+
+    #[test]
+    fn screened_lookup_matches_exact_table() {
+        let mut reference = RootTable::with_capacity(4096);
+        reference.bloom = None;
+        let mut screened = RootTable::with_capacity(4096);
+        screened.bloom = Some(RootBloom::with_capacity(4096));
+        for i in 0..4096u64 {
+            let key = mix_root_bloom(i) & (u64::MAX >> 1);
+            reference.insert_if_absent(key, i);
+            screened.insert_if_absent(key, i);
+            screened.insert_if_absent(key, i + 1);
+        }
+        for i in 0..100_000u64 {
+            let key = mix_root_bloom(i ^ 0xD1B5_4A32_D192_ED03) & (u64::MAX >> 1);
+            assert_eq!(screened.get(key), reference.get(key));
+        }
+        for &(key, value) in &reference.slots {
+            if key != u64::MAX {
+                assert!(screened.bloom.as_ref().unwrap().contains(key));
+                assert_eq!(screened.get(key), Some(value));
+            }
         }
     }
 }
@@ -419,6 +503,12 @@ struct Relation {
     probes: u64,
 }
 
+struct ExtractOutcome {
+    relation: Option<Relation>,
+    probes: u64,
+    capped: bool,
+}
+
 #[derive(Clone, Copy)]
 enum TargetInput {
     PublicPoint(FastPoint),
@@ -467,11 +557,12 @@ fn extract(
     base: &Base,
     target: FastPoint,
     start: usize,
+    probe_cap: Option<u64>,
     clock: &mut PhaseClock,
     split: &mut ExtractSplit,
-) -> Option<Relation> {
+) -> ExtractOutcome {
     let relation = extract_timed(
-        gf, fast, basis, solver, index, base, target, start, clock, split,
+        gf, fast, basis, solver, index, base, target, start, probe_cap, clock, split,
     );
     split.pdp += clock.lap();
     relation
@@ -489,10 +580,17 @@ fn extract_timed(
     base: &Base,
     target: FastPoint,
     start: usize,
+    probe_cap: Option<u64>,
     clock: &mut PhaseClock,
     split: &mut ExtractSplit,
-) -> Option<Relation> {
-    let (target_x, _) = target?;
+) -> ExtractOutcome {
+    let Some((target_x, _)) = target else {
+        return ExtractOutcome {
+            relation: None,
+            probes: 0,
+            capped: false,
+        };
+    };
     let n = gf.n;
     let mut probes = 0u64;
     // Callers provide a rotating, target-dependent origin so rank-stage rows
@@ -513,6 +611,13 @@ fn extract_timed(
                     let (canonical, partner_shift) =
                         basis.canonical(basis.to_normal.apply(partner));
                     let Some(value) = index.table.get(canonical) else {
+                        if probe_cap.is_some_and(|cap| probes >= cap) {
+                            return ExtractOutcome {
+                                relation: None,
+                                probes,
+                                capped: true,
+                            };
+                        }
                         continue;
                     };
                     let (left2, right2, relative2, stored_shift) = unpack(value);
@@ -529,18 +634,33 @@ fn extract_timed(
                     split.relation_check += clock.lap();
                     split.relation_checks += 1;
                     if let Some(point_indices) = lifted {
-                        return Some(Relation {
-                            point_indices,
-                            x_codes: codes,
-                            intermediates: [absolute, partner],
+                        return ExtractOutcome {
+                            relation: Some(Relation {
+                                point_indices,
+                                x_codes: codes,
+                                intermediates: [absolute, partner],
+                                probes,
+                            }),
                             probes,
-                        });
+                            capped: false,
+                        };
+                    }
+                    if probe_cap.is_some_and(|cap| probes >= cap) {
+                        return ExtractOutcome {
+                            relation: None,
+                            probes,
+                            capped: true,
+                        };
                     }
                 }
             }
         }
     }
-    None
+    ExtractOutcome {
+        relation: None,
+        probes,
+        capped: false,
+    }
 }
 
 /// Frobenius-closed signed-orbit base from a deterministic public x-scan.
@@ -711,7 +831,7 @@ fn peak_rss_bytes() -> Option<u64> {
     }
 }
 
-fn main() {
+fn main() -> ExitCode {
     let arguments: Vec<String> = std::env::args().collect();
     assert_eq!(
         arguments.len(),
@@ -757,6 +877,13 @@ fn main() {
         })
         .collect();
     let mut rank_seed: u64 = arguments[3].parse().unwrap();
+    let rank_probe_cap = std::env::var("KIC_RANK_PROBE_CAP").ok().map(|raw| {
+        let cap: u64 = raw
+            .parse()
+            .expect("KIC_RANK_PROBE_CAP must be a positive integer");
+        assert!(cap > 0, "KIC_RANK_PROBE_CAP must be positive");
+        cap
+    });
     let mut out = std::fs::File::create(&arguments[4]).expect("create output");
 
     let setup_started = Instant::now();
@@ -836,7 +963,8 @@ fn main() {
         .iter()
         .map(|p| p.expect("affine representative")[0])
         .collect();
-    let base_load_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
+    let base_elapsed = setup_started.elapsed();
+    let base_load_ms = ms(base_elapsed);
 
     let basis_started = Instant::now();
     let basis = NormalBasis::new(&gf);
@@ -852,12 +980,14 @@ fn main() {
         let y = (probe * 0x9E37_79B9) & basis.mask;
         assert_eq!(solver.roots(&gf, &basis, x, y), s3_x_roots(&gf, b, x, y));
     }
-    let basis_ms = basis_started.elapsed().as_secs_f64() * 1000.0;
+    let basis_elapsed = basis_started.elapsed();
+    let basis_ms = ms(basis_elapsed);
 
     let index_started = Instant::now();
     let index = build_index(&gf, &basis, &solver, &reps);
-    let index_ms = index_started.elapsed().as_secs_f64() * 1000.0;
-    let setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
+    let index_elapsed = index_started.elapsed();
+    let index_ms = ms(index_elapsed);
+    let setup_ms = ms(setup_started.elapsed());
 
     // Rank stage: rows sum(coefficient * L_column) = a for random [a]G.
     // The optional trace lets a separate implementation replay every attempted
@@ -873,6 +1003,7 @@ fn main() {
             json!({
                 "kind":"compact_orbit_rank_header", "schema_version":1,
                 "n":n, "a":a, "subgroup_order":r, "base_hash":base_hash,
+                "rank_probe_cap":rank_probe_cap,
                 "generator":generator.map(|(x, y)| [x, y]),
                 "orbit_columns":base.columns, "factor_base_points":base.points.len(),
             })
@@ -889,10 +1020,17 @@ fn main() {
     let mut rank_failures = 0u64;
     let mut rank_relations = 0u64;
     let mut rank_probes = 0u64;
+    let mut rank_relation_probes = 0u64;
+    let mut rank_capped_attempts = 0u64;
+    let mut rank_capped_probes = 0u64;
+    let mut rank_query_elapsed = Duration::ZERO;
+    let mut rank_pdp_elapsed = Duration::ZERO;
+    let mut rank_relation_check_elapsed = Duration::ZERO;
     // Guided: decompose [a]G - R_j for a column j that has no pivot yet, so the
     // row a = L_j + sum(...) always contains column j and raises the rank.
     let mut rank_rows_without_gain = 0u64;
     while echelon.rank < base.columns {
+        let query_started = Instant::now();
         rank_seed = rank_seed
             .wrapping_mul(6364136223846793005)
             .wrapping_add(1442695040888963407);
@@ -907,7 +1045,11 @@ fn main() {
         );
         rank_attempts += 1;
         let rank_before = echelon.rank;
-        match extract(
+        let query_elapsed = query_started.elapsed();
+        rank_query_elapsed += query_elapsed;
+        let mut rank_clock = PhaseClock::start();
+        let mut rank_split = ExtractSplit::default();
+        let outcome = extract(
             &gf,
             &fast,
             &basis,
@@ -916,12 +1058,22 @@ fn main() {
             &base,
             point,
             (rank_seed >> 20) as usize,
-            &mut PhaseClock::start(),
-            &mut ExtractSplit::default(),
-        ) {
+            rank_probe_cap,
+            &mut rank_clock,
+            &mut rank_split,
+        );
+        rank_pdp_elapsed += rank_split.pdp;
+        rank_relation_check_elapsed += rank_split.relation_check;
+        let ExtractOutcome {
+            relation,
+            probes,
+            capped,
+        } = outcome;
+        rank_probes += probes;
+        match relation {
             Some(relation) => {
                 rank_relations += 1;
-                rank_probes += relation.probes;
+                rank_relation_probes += probes;
                 let mut row = relation_row(&base, &relation, scalar, r);
                 row[column] = (row[column] + 1) % r;
                 let gained = echelon.insert(row.clone());
@@ -938,7 +1090,10 @@ fn main() {
                             "target":point.map(|(x, y)| [x, y]),
                             "point_indices":relation.point_indices, "x_codes":relation.x_codes,
                             "pinned_intermediates":relation.intermediates,
-                            "probes":relation.probes, "row":row,
+                            "probes":probes, "capped":false, "row":row,
+                            "query_ms":ms(query_elapsed), "pdp_ms":ms(rank_split.pdp),
+                            "relation_check_ms":ms(rank_split.relation_check),
+                            "relation_checks":rank_split.relation_checks,
                             "rank_before":rank_before, "rank_after":echelon.rank, "gained":gained,
                         })
                     )
@@ -947,6 +1102,10 @@ fn main() {
             }
             None => {
                 rank_failures += 1;
+                if capped {
+                    rank_capped_attempts += 1;
+                    rank_capped_probes += probes;
+                }
                 if let Some(trace) = rank_trace.as_mut() {
                     writeln!(
                         trace,
@@ -955,6 +1114,10 @@ fn main() {
                             "kind":"compact_orbit_rank_attempt", "attempt_index":rank_attempts - 1,
                             "found":false, "scalar":scalar, "pivotless_column":column,
                             "target":point.map(|(x, y)| [x, y]),
+                            "probes":probes, "capped":capped,
+                            "query_ms":ms(query_elapsed), "pdp_ms":ms(rank_split.pdp),
+                            "relation_check_ms":ms(rank_split.relation_check),
+                            "relation_checks":rank_split.relation_checks,
                             "rank_before":rank_before, "rank_after":echelon.rank,
                         })
                     )
@@ -963,7 +1126,11 @@ fn main() {
             }
         }
     }
-    let rank_ms = rank_started.elapsed().as_secs_f64() * 1000.0;
+    let rank_elapsed = rank_started.elapsed();
+    let rank_ms = ms(rank_elapsed);
+    let rank_matrix_elapsed = rank_elapsed
+        .checked_sub(rank_query_elapsed + rank_pdp_elapsed + rank_relation_check_elapsed)
+        .expect("rank phase accounting exceeds rank interval");
     let la_started = Instant::now();
     let logs = echelon.solve();
     if let Some(trace) = rank_trace.as_mut() {
@@ -974,19 +1141,27 @@ fn main() {
                 "kind":"compact_orbit_rank_solution", "rank":echelon.rank,
                 "attempts":rank_attempts, "relations":rank_relations,
                 "failures":rank_failures, "rows_without_gain":rank_rows_without_gain,
+                "rank_probe_cap":rank_probe_cap, "probes_total":rank_probes,
+                "capped_attempts":rank_capped_attempts, "capped_probes":rank_capped_probes,
                 "logs":logs,
             })
         )
         .unwrap();
         trace.flush().unwrap();
     }
-    let la_ms = la_started.elapsed().as_secs_f64() * 1000.0;
-    let setup_complete_ns = process_started.elapsed().as_nanos() as u64;
+    let la_elapsed = la_started.elapsed();
+    let la_ms = ms(la_elapsed);
+    let setup_complete_elapsed = process_started.elapsed();
+    let setup_complete_ns = setup_complete_elapsed.as_nanos() as u64;
+    let input_control_elapsed = setup_complete_elapsed
+        .checked_sub(base_elapsed + basis_elapsed + index_elapsed + rank_elapsed + la_elapsed)
+        .expect("setup phase accounting exceeds setup interval");
 
     let targets_started = Instant::now();
     let mut solved = 0usize;
     let mut failed = 0usize;
     let mut target_query_ms = Vec::with_capacity(target_inputs.len());
+    let mut single_target_phases = None;
     for (fixture_index, &target_input) in target_inputs.iter().enumerate() {
         // Fixture construction is outside the online interval: a real query
         // arrives as a point Q, not as its known-answer scalar.
@@ -999,6 +1174,8 @@ fn main() {
                 (target, Some(scalar), elapsed)
             }
         };
+        let online_counters = HwCounters::open();
+        online_counters.start();
         let mut clock = PhaseClock::start();
         let online_started = clock.last;
         // The scan origin must be a function of the public target point only;
@@ -1012,8 +1189,9 @@ fn main() {
         let query_phase = clock.lap();
         let mut split = ExtractSplit::default();
         let relation = extract(
-            &gf, &fast, &basis, &solver, &index, &base, target, start, &mut clock, &mut split,
-        );
+            &gf, &fast, &basis, &solver, &index, &base, target, start, None, &mut clock, &mut split,
+        )
+        .relation;
         let recovered = relation.as_ref().map(|relation| {
             relation.point_indices.iter().fold(0u64, |acc, &index| {
                 let (column, coefficient) = base.labels[index];
@@ -1024,7 +1202,17 @@ fn main() {
         let verified = recovered.map(|d| fast.scalar_mul(generator, &BigUint::from(d)) == target);
         let recovery_check_phase = clock.lap();
         let online_stopped = clock.last;
+        let online_hw_counts = online_counters.stop();
         let online = online_stopped - online_started;
+        if target_inputs.len() == 1 {
+            single_target_phases = Some((
+                query_phase,
+                split.pdp,
+                split.relation_check,
+                descent_phase,
+                recovery_check_phase,
+            ));
+        }
         let elapsed = ms(online);
         target_query_ms.push(elapsed);
         if verified == Some(true) {
@@ -1032,6 +1220,7 @@ fn main() {
         } else {
             failed += 1;
         }
+        let target_exit_code = if verified == Some(true) { 0 } else { 1 };
         let record = json!({
             "kind":"compact_orbit_dlp_target",
             "n":n, "a":a, "fixture_index":fixture_index,
@@ -1039,7 +1228,7 @@ fn main() {
             "generator":generator.map(|(x, y)| [x, y]),
             "target":target.map(|(x, y)| [x, y]),
             "published_q":target.map(|(x, y)| [x, y]),
-            "exit_code":0,
+            "exit_code":target_exit_code,
             "x_codes":relation.as_ref().map(|relation| relation.x_codes),
             "pinned_intermediates":relation.as_ref().map(|relation| relation.intermediates),
             "point_indices":relation.as_ref().map(|relation| relation.point_indices),
@@ -1054,6 +1243,8 @@ fn main() {
             "online_start_ns":(online_started - process_started).as_nanos() as u64,
             "online_stop_ns":(online_stopped - process_started).as_nanos() as u64,
             "online_ms":elapsed,
+            "online_hw_counts":online_hw_counts,
+            "online_hw_scope":"calling thread, user space, target query through recovery check",
             "target_query_ms":ms(query_phase),
             "target_pdp_ms":ms(split.pdp),
             "target_relation_check_ms":ms(split.relation_check),
@@ -1069,11 +1260,68 @@ fn main() {
     let mut sorted = target_query_ms.clone();
     sorted.sort_by(|x, y| x.partial_cmp(y).unwrap());
     let median = sorted.get(sorted.len() / 2).copied();
+    let (cold_in_process_ms, cold_phase_ms) = if let Some((
+        target_query,
+        target_pdp,
+        target_relation_check,
+        target_descent,
+        target_recovery_check,
+    )) = single_target_phases
+    {
+        let phases = [
+            input_control_elapsed,
+            base_elapsed,
+            basis_elapsed,
+            index_elapsed,
+            rank_query_elapsed,
+            rank_pdp_elapsed,
+            rank_relation_check_elapsed,
+            rank_matrix_elapsed,
+            la_elapsed,
+            target_query,
+            target_pdp,
+            target_relation_check,
+            target_descent,
+            target_recovery_check,
+        ];
+        let phase_sum: Duration = phases.iter().copied().sum();
+        let cold_total = setup_complete_elapsed
+            + target_query
+            + target_pdp
+            + target_relation_check
+            + target_descent
+            + target_recovery_check;
+        assert_eq!(phase_sum, cold_total, "exclusive cold phases differ");
+        (
+            Some(ms(cold_total)),
+            Some(json!({
+                "setup_input_control":ms(input_control_elapsed),
+                "isogeny":0.0,
+                "factor_base":ms(base_elapsed),
+                "precompute_basis_and_selftest":ms(basis_elapsed),
+                "precompute_index":ms(index_elapsed),
+                "rank_query":ms(rank_query_elapsed),
+                "rank_pdp":ms(rank_pdp_elapsed),
+                "rank_relation_check":ms(rank_relation_check_elapsed),
+                "rank_matrix_build":ms(rank_matrix_elapsed),
+                "relation_la":ms(la_elapsed),
+                "target_query":ms(target_query),
+                "target_pdp":ms(target_pdp),
+                "target_relation_check":ms(target_relation_check),
+                "target_descent":ms(target_descent),
+                "target_recovery_check":ms(target_recovery_check),
+            })),
+        )
+    } else {
+        (None, None)
+    };
     let summary = json!({
         "kind":"compact_orbit_dlp_summary",
         "schema_version":"1.0",
-        "producer_version":"compact_orbit_online_v1",
+        "producer_version":"compact_orbit_online_rank_restart_v1",
         "setup_complete_ns":setup_complete_ns,
+        "cold_in_process_ms":cold_in_process_ms,
+        "cold_phase_ms":cold_phase_ms,
         "n":n, "a":a,
         "base_hash":base_hash,
         "base_source":if constructed.is_some() { "constructed_in_process_x_scan" } else { "retained_header" },
@@ -1082,6 +1330,8 @@ fn main() {
         "factor_base_points":base.points.len(),
         "regular_states":index.states.len(),
         "root_table_entries":index.table.len,
+        "root_bloom_enabled":index.table.bloom.is_some(),
+        "root_bloom_bytes":index.table.bloom.as_ref().map_or(0, RootBloom::bytes),
         "pair_table_entries":0,
         "edge_selectors":0,
         "timing_ms":{
@@ -1098,9 +1348,16 @@ fn main() {
         "rank_attempts":rank_attempts,
         "rank_relations":rank_relations,
         "rank_failures":rank_failures,
+        "rank_probe_cap":rank_probe_cap,
+        "rank_capped_attempts":rank_capped_attempts,
+        "rank_capped_probes":rank_capped_probes,
+        "rank_exhausted_attempts":rank_failures - rank_capped_attempts,
+        "rank_probes_total":rank_probes,
         "rank_rows_without_gain":rank_rows_without_gain,
         "rank_policy":"guided: decompose [a]G - R_j for the first pivotless column j",
-        "rank_probes_mean":if rank_relations > 0 { rank_probes as f64 / rank_relations as f64 } else { 0.0 },
+        "rank_restart_policy":if rank_probe_cap.is_some() { "abandon after cap support probes; draw next scalar" } else { "unbounded" },
+        "rank_probes_mean":if rank_relations > 0 { rank_relation_probes as f64 / rank_relations as f64 } else { 0.0 },
+        "rank_probes_mean_per_attempt":if rank_attempts > 0 { rank_probes as f64 / rank_attempts as f64 } else { 0.0 },
         "rank":echelon.rank,
         "targets":target_inputs.len(),
         "targets_solved":solved,
@@ -1124,5 +1381,10 @@ fn main() {
             "factor_base_representatives":representatives,
         });
         std::fs::write(path, format!("{dump}\n")).expect("write base dump");
+    }
+    if failed == 0 {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::FAILURE
     }
 }

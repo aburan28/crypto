@@ -1,13 +1,14 @@
 //! Native control-plane contracts for a proposed `2^40`-record search over
 //! curves isogenous to P-256.
 //!
-//! This module deliberately does **not** implement the isogeny walk.  The
-//! repository does not yet have a native P-256-scale isogeny engine, and an
-//! S3 receipt is not evidence that its referenced curves are isogenous.  The
-//! types below cover the part that can be made exact now: deterministic shard
-//! ownership, immutable S3 attempt keys, authoritative completion markers,
-//! and the compact audit-reference artifact sent through Cairn's existing
-//! commit-reveal transport.
+//! This module deliberately does **not** implement the isogeny walk.  A bounded
+//! native prefix now exists in [`super::p256_isogeny_walk`], with its portable
+//! one-unit wrapper in [`super::p256_isogeny_task`], but neither supplies the
+//! independently rooted shards this production layout requires.  An S3 receipt
+//! is also not evidence that its referenced curves are isogenous.  The types
+//! below cover deterministic shard ownership, immutable S3 attempt keys,
+//! authoritative completion markers, and the compact audit-reference artifact
+//! sent through Cairn's existing commit-reveal transport.
 //!
 //! The scientific and deployment gates are frozen in
 //! `research/p256_isogeny_s3_cairn_20261004/PROTOCOL.md`.

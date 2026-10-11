@@ -2310,6 +2310,237 @@ fn e13(o: &Opts) -> Vec<Value> {
     rows
 }
 
+// ── E17: the D₃ oracle and the τ_T fold on the full group ──────────
+
+/// E17 (goal G2, note §9): on a non-subfield curve over `F_{p³}` with
+/// `r ≈ p³/h`, the `D₃` conic-resultant oracle on Gaudry's affine line
+/// `x ∈ x₀ + F_p` (as `Y ∈ F_p`), folded by `⟨−1, τ_T⟩` against the
+/// `⟨−1⟩` control on one relation stream; the `S₃` Macaulay oracle on
+/// the same base and targets for the solve constant (`p ≤ 2^{s3_bits}`);
+/// both against the exhaustive pair table on `200` targets
+/// (`p ≤ 2^8`); and the matched negation rho on the same subgroup.
+fn e17(o: &Opts) -> Vec<Value> {
+    use crypto_lib::cryptanalysis::ext_curve::ExtField;
+    use crypto_lib::cryptanalysis::fghr_full::{
+        full_line_base, generate_full_fghr_instance, FullFold,
+    };
+    use crypto_lib::cryptanalysis::fghr_line::{fghr_polynomials_on, Mobius};
+    let s3_bits: u32 = env::var("E17_S3_BITS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(9);
+    let mut rows = Vec::new();
+    for &p_bits in &o.bits {
+        for seed in 1..=o.seeds {
+            let inst = match generate_full_fghr_instance(p_bits, seed, 8) {
+                Ok(i) => i,
+                Err(e) => {
+                    eprintln!("e17 {p_bits} seed {seed}: {e}");
+                    continue;
+                }
+            };
+            let started = Instant::now();
+            let k_inv = inversion_in_multiplications(inst.p);
+            take_field_counters();
+            let (fold4, r4) = full_line_base(&inst, FullFold::Translation).unwrap();
+            let (b4m, b4i) = take_field_counters();
+            let (control, _) = full_line_base(&inst, FullFold::Negation).unwrap();
+            let (b2m, b2i) = take_field_counters();
+            let polys = fghr_polynomials_on(
+                &inst.curve,
+                inst.r,
+                inst.generator,
+                inst.curve.f.one(),
+                Mobius::Fp3(inst.mobius),
+            )
+            .unwrap();
+            let planted = planted_for(seed, inst.r);
+            let mut ops = GroupOps::default();
+            let target = inst.curve.mul(&mut ops, inst.generator, planted);
+            let ctx = InstanceCtx {
+                group: &inst.curve,
+                generator: inst.generator,
+                target,
+                r: inst.r,
+                cofactor: inst.cofactor,
+                group_order: inst.group_order,
+                name: inst.name.clone(),
+                field_degree: Some(3),
+            };
+            let stream = |oracle: &mut dyn DecompositionOracle<
+                crypto_lib::cryptanalysis::subfield_fp3::Fp3Curve,
+            >| {
+                take_field_counters();
+                let rep = full_rank_stream_until(
+                    &inst.curve,
+                    inst.generator,
+                    target,
+                    inst.r,
+                    inst.cofactor,
+                    planted,
+                    &fold4,
+                    &control,
+                    seed,
+                    o.max_trials,
+                    3,
+                    None,
+                    StopRule::FoldedSquareBothPinned,
+                    |ops, ctr, pt| oracle.decompose(&ctx, &fold4, ops, ctr, pt),
+                )
+                .unwrap();
+                let (m, i) = take_field_counters();
+                (rep, m, i)
+            };
+            let mut d3 = FghrOracle::new(&inst, &polys, seed);
+            let (rep_d3, md3, id3) = stream(&mut d3);
+            let s3_stream = (p_bits <= s3_bits).then(|| {
+                let mut s3 = YLineS4Oracle::new(&inst, &polys, seed);
+                let (rep, m, i) = stream(&mut s3);
+                json!({
+                    "stream": stream_json(&rep),
+                    "stream_cost": {"fp_muls": m, "fp_invs": i},
+                    "solver": {"calls": s3.stats.solves, "fp_muls": s3.stats.fp_muls, "unsolved": s3.stats.unsolved, "quotient_dim_total": s3.stats.quotient_dim_total, "unliftable": s3.unliftable},
+                })
+            });
+            let agreement = (p_bits <= 8).then(|| {
+                let mut d3 = FghrOracle::new(&inst, &polys, seed ^ 5);
+                let mut s3 = YLineS4Oracle::new(&inst, &polys, seed ^ 5);
+                let mut mitm = MitmOracle::new(3);
+                let mut params = Params::default();
+                params.set("negation_folded", "1");
+                let mut tmp = GroupOps::default();
+                mitm.prepare(&ctx, &fold4, &params, &mut tmp).unwrap();
+                let mut c = [
+                    OracleCounters::default(),
+                    OracleCounters::default(),
+                    OracleCounters::default(),
+                ];
+                // A pair-table hit with two cancelling summands (P and −P) means
+                // the target is itself a base point: S₄ then has a one-dimensional
+                // component (x₁ = x₂ free), which no zero-dimensional solver
+                // returns.  Counted apart, never dropped.
+                let (mut hits, mut d3_dis, mut s3_dis) = (0u64, 0u64, 0u64);
+                let (mut degenerate, mut d3_dis_nondeg, mut s3_dis_nondeg) = (0u64, 0u64, 0u64);
+                let n = 200u64;
+                for k in 2..n + 2 {
+                    let pt = inst.curve.mul(&mut tmp, inst.generator, k);
+                    let a = d3.decompose(&ctx, &fold4, &mut tmp, &mut c[0], pt);
+                    let b = s3.decompose(&ctx, &fold4, &mut tmp, &mut c[1], pt);
+                    let m = mitm.decompose(&ctx, &fold4, &mut tmp, &mut c[2], pt);
+                    for idx in [&a, &b].into_iter().flatten() {
+                        let sum = idx.iter().fold(inst.curve.identity(), |acc, &i| {
+                            inst.curve.add(&mut tmp, acc, fold4.points[i])
+                        });
+                        assert_eq!(
+                            sum, pt,
+                            "an algebraic decomposition did not sum to its target"
+                        );
+                    }
+                    let cancelling = m.as_ref().is_some_and(|v| {
+                        v.iter().any(|&i| {
+                            v.iter()
+                                .any(|&j| inst.curve.neg(fold4.points[i]) == fold4.points[j])
+                        })
+                    });
+                    hits += m.is_some() as u64;
+                    degenerate += cancelling as u64;
+                    d3_dis += (a.is_some() != m.is_some()) as u64;
+                    s3_dis += (b.is_some() != m.is_some()) as u64;
+                    if !cancelling {
+                        d3_dis_nondeg += (a.is_some() != m.is_some()) as u64;
+                        s3_dis_nondeg += (b.is_some() != m.is_some()) as u64;
+                    }
+                }
+                json!({"targets": n, "pair_table_hits": hits, "pair_table_cancelling": degenerate, "d3_disagreements": d3_dis, "s3_disagreements": s3_dis, "d3_disagreements_nondegenerate": d3_dis_nondeg, "s3_disagreements_nondegenerate": s3_dis_nondeg, "d3_muls_per_call": d3.stats.fp_muls as f64 / n as f64, "s3_muls_per_call": s3.stats.fp_muls as f64 / n as f64, "s3_quotient_per_call": s3.stats.quotient_dim_total as f64 / n as f64})
+            });
+            let mut walks = Vec::new();
+            let (mut st_neg, mut all_ok) = (0u64, true);
+            for k in 0..o.rho_runs as u64 {
+                let ws = seed ^ (k * 0x9E37);
+                take_field_counters();
+                let n = rho_reference_negation(
+                    &inst.curve,
+                    inst.generator,
+                    target,
+                    inst.r,
+                    ws,
+                    o.rho_max_steps,
+                );
+                let (nm, ni) = take_field_counters();
+                all_ok &= n.verified;
+                st_neg += n.steps;
+                walks.push(json!({
+                    "walk_seed": ws,
+                    "negation": n,
+                    "negation_fp_muls": nm,
+                    "negation_fp_invs": ni,
+                }));
+            }
+            eprintln!(
+                "e17 p=2^{p_bits} ({}) r=2^{:.1} h={}: cols {}/{} | pinned fold4 {:?}/{:?} | D3 muls/call {:.0} unsolved {} | S3 {} | agreement {} | rho steps {:.0} | ok {}/{} [{:.1}s]",
+                inst.p,
+                (inst.r as f64).log2(),
+                inst.cofactor,
+                fold4.columns,
+                control.columns,
+                rep_d3.folded.square_relations,
+                rep_d3.control.square_relations,
+                d3.stats.fp_muls as f64 / d3.stats.calls.max(1) as f64,
+                d3.stats.unsolved,
+                s3_stream
+                    .as_ref()
+                    .map(|v| format!("muls/call {:.0}", v["solver"]["fp_muls"].as_f64().unwrap() / v["solver"]["calls"].as_f64().unwrap().max(1.0)))
+                    .unwrap_or_else(|| "—".into()),
+                agreement
+                    .as_ref()
+                    .map(|a| format!("d3 {}/{} s3 {}/{} hits {} cancelling {}", a["d3_disagreements"], a["targets"], a["s3_disagreements"], a["targets"], a["pair_table_hits"], a["pair_table_cancelling"]))
+                    .unwrap_or_else(|| "—".into()),
+                st_neg as f64 / o.rho_runs.max(1) as f64,
+                rep_d3.folded.verified && rep_d3.control.verified,
+                all_ok,
+                started.elapsed().as_secs_f64()
+            );
+            let f = &inst.curve.f;
+            rows.push(json!({
+                "experiment": "e17",
+                "family": "full-group-2torsion",
+                "p_bits": p_bits,
+                "seed": seed,
+                "instance": inst.name,
+                "p": inst.p,
+                "log2_r": (inst.r as f64).log2(),
+                "r": inst.r,
+                "group_order": inst.group_order,
+                "cofactor": inst.cofactor,
+                "x0": f.coords(inst.x0),
+                "c": inst.c,
+                "j": f.coords(inst.j),
+                "a": f.coords(inst.curve.a),
+                "b": f.coords(inst.curve.b),
+                "summands": 3,
+                "unit": "F_p multiplications; an inversion is priced at inversion_in_multiplications, measured on this host; each solver counts its own multiplications; a row operation of the linear algebra is one Z/rZ multiplication, priced as one; the polynomials' once-per-curve set-up is charged to every arm",
+                "inversion_in_multiplications": k_inv,
+                "points": fold4.points.len(),
+                "points_per_column": {"fold4": r4.points_per_orbit, "control": 2.0},
+                "columns": {"fold4": fold4.columns, "control": control.columns},
+                "base_build": {
+                    "fold4": {"fp_muls": b4m, "fp_invs": b4i},
+                    "control": {"fp_muls": b2m, "fp_invs": b2i},
+                },
+                "polynomials": {"y_terms": polys.y_terms, "s3_terms": polys.s3_terms, "d3_terms": polys.d3_terms, "setup_fp_muls": polys.setup_muls},
+                "d3": {"stream": stream_json(&rep_d3), "stream_cost": {"fp_muls": md3, "fp_invs": id3}, "solver": d3.stats},
+                "s3": s3_stream,
+                "agreement": agreement,
+                "rho_runs": o.rho_runs,
+                "rho_all_verified": all_ok,
+                "walks": walks,
+                "wall_seconds": started.elapsed().as_secs_f64(),
+            }));
+        }
+    }
+    rows
+}
+
 // ── E14: Q-curves of degree 2 and 3 over F_{p²} ────────────────────
 
 /// E14: on a degree-`d` Q-curve over `F_{p²}`, every `ψ = π ∘ ι ∘ φ` the
@@ -2637,7 +2868,8 @@ fn main() {
         "e13" => e13(&o),
         "e14" => e14(&o),
         "e15" => e15(&o),
-        other => panic!("unknown experiment {other}; try e1..e9, e11..e15, e12p"),
+        "e17" => e17(&o),
+        other => panic!("unknown experiment {other}; try e1..e9, e11..e15, e17, e12p"),
     };
     let out = json!({
         "what_this_is": format!("Experiment {} of research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md: rows as measured, every logarithm checked against the planted one.", o.exp),

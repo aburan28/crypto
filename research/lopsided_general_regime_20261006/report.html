@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>General-regime watch: resolved quantitatively (2026-10-06)</title>
+<style>
+body { font-family: Georgia, 'Times New Roman', serif; max-width: 900px; margin: 2em auto; color: #111; line-height: 1.5; }
+h1 { font-size: 1.6em; } h2 { font-size: 1.25em; border-bottom: 1px solid #ccc; padding-bottom: 0.2em; }
+table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+th, td { border: 1px solid #999; padding: 6px 8px; text-align: left; vertical-align: top; }
+th { background: #f0f0f0; }
+code { font-size: 0.92em; }
+figure { margin: 1.5em 0; } figcaption { font-size: 0.9em; color: #333; margin-top: 0.5em; }
+@media print { body { margin: 1cm; } figure svg { max-height: 190mm; } }
+</style>
+</head>
+<body>
+<h1>General-regime watch: resolved quantitatively (2026-10-06)</h1>
+<p>Questions and method in the <b>protocol</b> (<code>README.md</code>). Rounds 1-3: thin-product interface
+(merged PR #1485), twelve-target survey (open PR #1493), refutation audit (open PR #1494).
+Status labels: <b>[proposed]</b> / <b>[derived]</b> / <b>[verified]</b> / <b>[measured]</b> (none in this round).</p>
+
+<h2>Headline</h2>
+<p><b>The envelope widens; nothing moves.</b> The proven regime runs from the concrete line
+(<code>D &lt;= N^(1/18)</code>, gamma <code>0.063</code>) out to <code>D &lt;= N^0.114</code> with gamma up to
+<code>0.2412</code> for very thin, very sparse wants (frozen in <code>table2.json</code>, verified against a render
+of paper p.40). All sixteen targets stay blocked at shape, ring, or scope: <b>size never binds</b>, so widening
+size changes no verdict.</p>
+
+<h2>Envelope and funnel</h2>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="660" viewBox="0 0 1200 660" font-family="sans-serif">
+<title>General-regime envelope and where the sixteen targets stop</title>
+<rect x="0" y="0" width="1200" height="660" fill="#ffffff"/>
+<text x="20" y="28" font-size="17" font-weight="bold">The general envelope widens size -- and size never binds</text>
+<text x="20" y="48" font-size="12" fill="#444">Proven gamma(eps) from paper Table 2 (Thm 25), plotted from table2.json. All 16 repo targets stop at shape/ring/scope.</text>
+<rect x="1048" y="70" width="92" height="260" fill="#f5f5f5"/>
+<text x="1056" y="90" font-size="11" fill="#666">past eps*: no theorem --</text>
+<text x="1056" y="106" font-size="11" fill="#666">new base identity needed (Sec 6, open)</text>
+<line x1="90" y1="330" x2="1140" y2="330" stroke="#333"/>
+<line x1="90" y1="70" x2="90" y2="330" stroke="#333"/>
+<line x1="90" y1="330" x2="90" y2="336" stroke="#333"/>
+<text x="76" y="350" font-size="11">eps 0.02</text>
+<line x1="281" y1="330" x2="281" y2="336" stroke="#333"/>
+<text x="267" y="350" font-size="11">eps 0.04</text>
+<line x1="472" y1="330" x2="472" y2="336" stroke="#333"/>
+<text x="458" y="350" font-size="11">eps 0.06</text>
+<line x1="663" y1="330" x2="663" y2="336" stroke="#333"/>
+<text x="649" y="350" font-size="11">eps 0.08</text>
+<line x1="854" y1="330" x2="854" y2="336" stroke="#333"/>
+<text x="840" y="350" font-size="11">eps 0.10</text>
+<line x1="1045" y1="330" x2="1045" y2="336" stroke="#333"/>
+<text x="1031" y="350" font-size="11">eps 0.12</text>
+<line x1="84" y1="330" x2="90" y2="330" stroke="#333"/>
+<text x="46" y="334" font-size="11">0.00</text>
+<line x1="84" y1="280" x2="90" y2="280" stroke="#333"/>
+<text x="46" y="284" font-size="11">0.05</text>
+<line x1="84" y1="230" x2="90" y2="230" stroke="#333"/>
+<text x="46" y="234" font-size="11">0.10</text>
+<line x1="84" y1="180" x2="90" y2="180" stroke="#333"/>
+<text x="46" y="184" font-size="11">0.15</text>
+<line x1="84" y1="130" x2="90" y2="130" stroke="#333"/>
+<text x="46" y="134" font-size="11">0.20</text>
+<line x1="84" y1="80" x2="90" y2="80" stroke="#333"/>
+<text x="46" y="84" font-size="11">0.25</text>
+<text x="46" y="58" font-size="11">gamma</text>
+<line x1="429" y1="70" x2="429" y2="330" stroke="#2e7d32" stroke-dasharray="6,4" stroke-width="1.5"/>
+<text x="435" y="122" font-size="11" fill="#2e7d32">concrete gate 1/18 (Cor 26)</text>
+<line x1="1048" y1="70" x2="1048" y2="330" stroke="#c62828" stroke-dasharray="6,4" stroke-width="1.5"/>
+<text x="930" y="138" font-size="11" fill="#c62828">ceiling eps* 0.1204</text>
+<polyline points="176,89 434,175 491,192 653,236 844,284 987,317" fill="none" stroke="#1565c0" stroke-width="2.5"/>
+<polyline points="176,224 434,265 491,272 653,291 844,311 987,325" fill="none" stroke="#7b1fa2" stroke-width="2.5"/>
+<circle cx="176" cy="89" r="4" fill="#1565c0"/>
+<circle cx="434" cy="175" r="4" fill="#1565c0"/>
+<circle cx="491" cy="192" r="4" fill="#1565c0"/>
+<circle cx="653" cy="236" r="4" fill="#1565c0"/>
+<circle cx="844" cy="284" r="4" fill="#1565c0"/>
+<circle cx="987" cy="317" r="4" fill="#1565c0"/>
+<circle cx="176" cy="224" r="4" fill="#7b1fa2"/>
+<circle cx="434" cy="265" r="4" fill="#7b1fa2"/>
+<circle cx="491" cy="272" r="4" fill="#7b1fa2"/>
+<circle cx="653" cy="291" r="4" fill="#7b1fa2"/>
+<circle cx="844" cy="311" r="4" fill="#7b1fa2"/>
+<circle cx="987" cy="325" r="4" fill="#7b1fa2"/>
+<text x="46" y="79" font-size="11" fill="#1565c0">kappa=1: 0.2412 at eps 0.029</text>
+<text x="653" y="315" font-size="11" fill="#7b1fa2">kappa=1/2 (lower curve)</text>
+<text x="844" y="272" font-size="11" fill="#1565c0">kappa=1 (upper curve)</text>
+<text x="90" y="368" font-size="11" fill="#333">MSM operating point eps~1 and hash-probe targets have no coordinates in this plane (blocked before size).</text>
+<rect x="20" y="400" width="360" height="130" rx="8" fill="#ffebee" stroke="#c62828"/>
+<text x="30" y="424" font-size="12" font-weight="bold">SHAPE: shared thin integer middle?</text>
+<text x="30" y="446" font-size="11">hash probes (#1-3, #6): no middle</text>
+<text x="30" y="466" font-size="11">polynomial systems: not inner products</text>
+<text x="30" y="486" font-size="11">per-target recursion: no batch W</text>
+<rect x="420" y="400" width="360" height="130" rx="8" fill="#fff8e1" stroke="#f9a825"/>
+<text x="430" y="424" font-size="12" font-weight="bold">RING: small-integer products over Z?</text>
+<text x="430" y="446" font-size="11">MSM checks: group ops, eps~1 scale-free</text>
+<text x="430" y="466" font-size="11">sparse LA: matvecs over Z/rZ</text>
+<text x="430" y="486" font-size="11">paper: no new sparse-MM either (Sec 6)</text>
+<rect x="820" y="400" width="360" height="130" rx="8" fill="#e8f5e9" stroke="#2e7d32"/>
+<text x="830" y="424" font-size="12" font-weight="bold">SIZE: inside the envelope?</text>
+<text x="830" y="446" font-size="11">nothing arrives here</text>
+<text x="830" y="466" font-size="11">widest row (eps 0.114) moves zero verdicts</text>
+<text x="830" y="486" font-size="11">size never binds</text>
+<line x1="380" y1="465" x2="420" y2="465" stroke="#333" stroke-width="1.5"/>
+<polygon points="420,459 420,471 432,465" fill="#333"/>
+<line x1="780" y1="465" x2="820" y2="465" stroke="#333" stroke-width="1.5"/>
+<polygon points="820,459 820,471 832,465" fill="#333"/>
+<text x="20" y="560" font-size="11" fill="#333">Watch condition (conjunction): a new base identity past eps* = 0.1204 AND a reduction reshaping an algebraic workload into thin products. Either alone changes nothing.</text>
+<text x="20" y="582" font-size="11" fill="#333">Gate-parameterization next action: extend screen_workload with the six table2.json rows after PR #1493 merges (acceptance: existing tests unchanged).</text>
+<text x="20" y="620" font-size="11" fill="#666">Editable source: figure.mmd. Envelope data: table2.json (paper Table 2, p.40, cells verified against rendered page).</text>
+</svg>
+<figcaption>Figure 1 -- proven gamma(eps) envelope from paper Table 2 (curves plotted from
+<code>table2.json</code>), and where the sixteen screened targets stop. Green size gate: nothing arrives.
+Editable source: <code>figure.mmd</code>.</figcaption>
+</figure>
+
+<h2>Re-screen (widest proven row: eps 0.114, kappa up to 1)</h2>
+<table>
+<tr><th>Target group</th><th>Blocking gate [derived]</th><th>Envelope effect</th></tr>
+<tr><td>4 insertion points (relation batch, factor queries, sparse LA, descent)</td><td>Shape/ring/model</td><td><b>None</b>: no (D, W) mapping to resize</td></tr>
+<tr><td>Pair-table / MITM / BSGS / rho probes; Macaulay (#1-3, #6)</td><td>Shape: hash probes, no middle</td><td><b>None</b>: no plane coordinates</td></tr>
+<tr><td>Batch MSM (#4); isogeny-route search (#10)</td><td>Ring, then scale-free size (eps ~ 1)</td><td><b>None</b>: eps ~ 1 off every row</td></tr>
+<tr><td>3SUM/3XOR transfers (#7-8)</td><td>Missing cross-domain reduction</td><td><b>None</b>: envelope is not a reduction</td></tr>
+<tr><td>Convolution, real-RAM, SETH/OV (#9, #11-12)</td><td>Out of scope</td><td><b>None</b></td></tr>
+</table>
+
+<h2>Sparse multiplication, reduction losses [derived]</h2>
+<ul>
+<li><b>Sparse MM closed twice over.</b> The paper (Sec. 6): its techniques "do not seem to give new algorithms
+for sparse matrix multiplication" (balanced case untouched). Ours stacks on top: block Wiedemann is sparse
+<em>matvecs</em> over <code>Z/rZ</code> -- wrong operation and wrong ring. Greps for <code>girth</code>,
+sparse-MM hardness, and balanced-triangle vocabulary return nothing outside our own study files.</li>
+<li><b>Kept saving is the metric.</b> Hardness reductions reused as algorithms keep only a fraction of the
+exponent saving (half, a third); SVX27 black-box optimality forces tighter transfers to use problem structure.
+That is our <code>S</code> rule in other words: end-to-end kept savings only, never headline exponents.</li>
+<li><b>Gray boxes mirror the audit.</b> Merely 3SUM/APSP-<em>hard</em> problems (reductions going the wrong way)
+get no speedup -- consistent with round 3's unaffected classifications.</li>
+</ul>
+
+<h2>Standing watch condition [proposed]</h2>
+<p>The technique family reaches our workloads only through <b>two</b> independent breakthroughs: (a) a new base
+identity lifting the ceiling past eps* = 0.1204 (the paper's open computer-search problem), <b>and</b> (b) a
+reduction reshaping an algebraic IC workload into thin small-integer products with known sparse W. Either alone
+changes nothing. Next action: parameterize <code>screen_workload</code> on the six <code>table2.json</code> rows
+after PR #1493 merges (existing tests unchanged).</p>
+
+<h2>Boundary, table, ratio</h2>
+<ul>
+<li>Boundaries unchanged: generic floor + matched rho, unit <code>S</code>.</li>
+<li>No table row produced: envelope cells are the paper's transcribed numbers; re-screen verdicts are gate
+evaluations, kept out of every result panel.</li>
+<li>Falsification target: a workload whose only block is size under the concrete line but passes a general row.
+The table above is the search that found none.</li>
+<li>All phases unpriced (<code>null</code>); wall time appears nowhere.</li>
+</ul>
+
+<h2>Graphs checked -- no change [verified by inspection]</h2>
+<ul>
+<li>Scoreboard + progress-timeline: no new ratio, no point added.</li>
+<li>Leaderboard files, browser data, curve registry: nothing landed.</li>
+<li>Figure 1 is a new visual for this round (envelope plotted from frozen data), not a canonical-graph update.</li>
+</ul>
+
+<h2>Sources</h2>
+<ul>
+<li>Paper: <a href="https://arxiv.org/pdf/2610.06783">https://arxiv.org/pdf/2610.06783</a> (v1); Table 2 + Theorems 24-25 (p.40); Sec. 6.</li>
+<li>Frozen envelope: <code>table2.json</code> (this directory).</li>
+<li>Rounds 1-3: <code>research/lopsided_thin_product_20261006/</code>, <code>research/lopsided_other_speedups_20261006/</code>, <code>research/lopsided_implications_20261006/</code>.</li>
+</ul>
+</body>
+</html>
