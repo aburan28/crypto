@@ -136,7 +136,11 @@ struct Curve {
 impl Curve {
     fn rhs(&self, x: u64) -> u64 {
         let p = self.p;
-        add(add(mul(mul(x, x, p), x, p), mul(self.a, x, p), p), self.b, p)
+        add(
+            add(mul(mul(x, x, p), x, p), mul(self.a, x, p), p),
+            self.b,
+            p,
+        )
     }
     fn neg(&self, q: Pt) -> Pt {
         match q {
@@ -212,8 +216,14 @@ impl Curve {
             (vec![2, 0], c2),
             (vec![0, 2], c2),
             (vec![1, 1], neg(add(mul(2, c2, p), mul(2, a, p), p))),
-            (vec![1, 0], neg(add(mul(mul(2, c, p), a, p), mul(4, b, p), p))),
-            (vec![0, 1], neg(add(mul(mul(2, c, p), a, p), mul(4, b, p), p))),
+            (
+                vec![1, 0],
+                neg(add(mul(mul(2, c, p), a, p), mul(4, b, p), p)),
+            ),
+            (
+                vec![0, 1],
+                neg(add(mul(mul(2, c, p), a, p), mul(4, b, p), p)),
+            ),
             (vec![0, 0], sub(mul(a, a, p), mul(mul(4, c, p), b, p), p)),
         ]
     }
@@ -384,7 +394,13 @@ struct Outcome {
     rec: Value,
 }
 
-fn run_system(curve: &Curve, roots: &[u64], xr: u64, planted: Option<(u64, u64)>, budget: Duration) -> Outcome {
+fn run_system(
+    curve: &Curve,
+    roots: &[u64],
+    xr: u64,
+    planted: Option<(u64, u64)>,
+    budget: Duration,
+) -> Outcome {
     let p = curve.p;
     let input: Vec<Poly> = vec![
         f4_fp::normalise(&curve.s3_poly(xr), p, Ordering::Grevlex),
@@ -431,7 +447,9 @@ fn run_system(curve: &Curve, roots: &[u64], xr: u64, planted: Option<(u64, u64)>
 // ── driver ─────────────────────────────────────────────────────────
 
 fn arg(args: &[String], name: &str) -> Option<String> {
-    args.iter().position(|a| a == name).map(|i| args[i + 1].clone())
+    args.iter()
+        .position(|a| a == name)
+        .map(|i| args[i + 1].clone())
 }
 
 fn main() {
@@ -446,7 +464,8 @@ fn main() {
     let budget = Duration::from_millis(
         arg(&args, "--budget-ms").map_or(20000, |s| s.parse().expect("budget")),
     );
-    let pairs: Value = serde_json::from_str(&std::fs::read_to_string(&pairs_path).unwrap()).unwrap();
+    let pairs: Value =
+        serde_json::from_str(&std::fs::read_to_string(&pairs_path).unwrap()).unwrap();
 
     // Curves already complete in the output.
     let mut done: BTreeSet<String> = BTreeSet::new();
@@ -479,7 +498,10 @@ fn main() {
             .filter(|c| c["role"] == "crater" || c["role"] == "floor")
             .map(|c| (c["role"].as_str().unwrap().to_string(), c["spec"].clone()))
             .collect();
-        roles.push(("floor-iso".into(), pr["floor_isomorphic_model"]["spec"].clone()));
+        roles.push((
+            "floor-iso".into(),
+            pr["floor_isomorphic_model"]["spec"].clone(),
+        ));
         for (role, spec) in roles {
             let key = format!("{pair}|{role}");
             if done.contains(&key) {
@@ -495,7 +517,10 @@ fn main() {
                 state: e.p ^ e.a.rotate_left(17) ^ e.b.rotate_left(41),
             };
             let two = two_primary(&e, order, &mut pts);
-            let rank2 = two.iter().filter(|&&q| q != Pt::O && order_of(&e, q) == 2).count();
+            let rank2 = two
+                .iter()
+                .filter(|&&q| q != Pt::O && order_of(&e, q) == 2)
+                .count();
             let two_rank = if rank2 == 3 { 2 } else { 1 };
             let mut groups: Vec<(&str, Vec<Pt>)> = vec![("1", vec![Pt::O])];
             groups.extend(subgroups(&e, &two));
@@ -514,8 +539,15 @@ fn main() {
                         .collect();
                     if xs.len() == 3 {
                         let (a1, a2, a3) = (velu.x(xs[0]), velu.x(xs[1]), velu.x(xs[2]));
-                        assert_eq!(velu.target.s3(a1, a2, a3), 0, "Vélu map fails S₃' on {key} {hname}");
-                        assert!(is_square(velu.target.rhs(a1), e.p), "image off E' on {key} {hname}");
+                        assert_eq!(
+                            velu.target.s3(a1, a2, a3),
+                            0,
+                            "Vélu map fails S₃' on {key} {hname}"
+                        );
+                        assert!(
+                            is_square(velu.target.rhs(a1), e.p),
+                            "image off E' on {key} {hname}"
+                        );
                     }
                 }
                 for &size in &sizes {
@@ -528,7 +560,18 @@ fn main() {
                         if let Some(q) = e.lift(x0) {
                             if !velu.kernel_x.contains(&x0) && !xs.contains(&x0) {
                                 let orbit: Vec<Pt> = h.iter().map(|&k| e.add(q, k)).collect();
-                                if orbit.iter().all(|o| matches!(o, Pt::A(x, _) if !xs.contains(x)))
+                                // Only orbits of |H| distinct abscissae, so the
+                                // base reaches exactly `size` (an orbit with
+                                // `P + K = −(P + K')` repeats an abscissa).
+                                let orbit_xs: BTreeSet<u64> = orbit
+                                    .iter()
+                                    .filter_map(|o| match o {
+                                        Pt::A(x, _) => Some(*x),
+                                        Pt::O => None,
+                                    })
+                                    .collect();
+                                if orbit_xs.len() == h.len()
+                                    && orbit_xs.iter().all(|x| !xs.contains(x))
                                     && xs.len() + orbit.len() <= size
                                 {
                                     for o in orbit {
@@ -571,7 +614,9 @@ fn main() {
                                 "base_size": size, "method": method,
                                 "target_index": ti, "target_kind": tkind,
                             });
-                            line.as_object_mut().unwrap().extend(rec.as_object().unwrap().clone());
+                            line.as_object_mut()
+                                .unwrap()
+                                .extend(rec.as_object().unwrap().clone());
                             writeln!(out, "{line}").unwrap();
                         };
                         let pl = |q: Pt, f: &dyn Fn(u64) -> u64| match q {
@@ -582,7 +627,8 @@ fn main() {
                             let planted_x = planted.map(|(a, b)| (pl(a, &|x| x), pl(b, &|x| x)));
                             write("direct", run_system(&e, &v, xr, planted_x, budget).rec);
                         } else {
-                            let planted_x = planted.map(|(a, b)| (pl(a, &|x| velu.x(x)), pl(b, &|x| velu.x(x))));
+                            let planted_x = planted
+                                .map(|(a, b)| (pl(a, &|x| velu.x(x)), pl(b, &|x| velu.x(x))));
                             write(
                                 "quotient",
                                 run_system(&velu.target, &w, velu.x(xr), planted_x, budget).rec,
@@ -600,7 +646,11 @@ fn main() {
             )
             .unwrap();
             out.flush().unwrap();
-            eprintln!("{key}: rank {two_rank}, 2-part {}, subgroups {:?}", two.len(), groups.iter().map(|(n, _)| *n).collect::<Vec<_>>());
+            eprintln!(
+                "{key}: rank {two_rank}, 2-part {}, subgroups {:?}",
+                two.len(),
+                groups.iter().map(|(n, _)| *n).collect::<Vec<_>>()
+            );
         }
     }
 }
