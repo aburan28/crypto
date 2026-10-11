@@ -71,6 +71,21 @@ into the results) before the first data point. It states:
    seeing results. Any such change is a new, labelled protocol version, and
    both versions are reported.
 
+**Power check before freezing (do the arithmetic).** An empirical rank test
+cannot reject below its resolution. With the add-one estimate the smallest
+attainable two-sided p is `2/(N + 1)`, so `N` must satisfy
+`2/(N + 1) < α/m` for `m` corrected tests, with margin: `N + 1 ≥ 4m/α`
+lets a target beyond every control reach `p = α/(2m)`. Check this for every
+test family in the protocol and write the numbers into it. A protocol that
+fails this check can only ever report "within the control distribution", so
+its nulls are vacuous. (The first protocol written with this skill,
+`research/nist_cyclotomic_controls_20261011/PROTOCOL.md`, failed it in all
+three comparative families. The fix was a dated amendment, not an edit.)
+Also do a dry run of the full analysis at small `N` on scratch output. It
+catches power failures, runtime blow-ups and broken positive controls
+before the real run. Disclose in the amendment anything that dry run
+revealed about the target.
+
 ## 4. Run
 
 - Native code per `AGENTS.md` (Rust), with a fixed seed recorded in the output.
@@ -104,7 +119,8 @@ Lead with the table. For each target × metric:
 - [ ] comparative claims have a negative-control population with a stated null
 - [ ] every "nothing found" has a passing positive control on the same path
 - [ ] one instrument, identical budgets across arms
-- [ ] `PROTOCOL.md` frozen (hash recorded) before results
+- [ ] power check passes: `2/(N + 1) < α/m` for every test family (§3)
+- [ ] `PROTOCOL.md` frozen (hash recorded) before results; dry run on scratch output
 - [ ] raw rows committed; summary recomputable
 - [ ] decision rule and multiple-comparison correction applied as written
 - [ ] verdicts use the fixed wording; scope sentence present
