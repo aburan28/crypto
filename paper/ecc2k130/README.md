@@ -50,12 +50,17 @@ TeX can open the paper.
   rules, the 0.85→14.64 B/s ledger, the table walk at 20.08, the RTX
   PRO 4500, the twelve-SKU survey, every declined candidate.
 - §6 CPU clients.
-- §7 The FPGA engine: pre-board estimate, design, measured F2 images.
-- §8 The campaign: configuration, the 2^28.41 interval, fleet
+- §7 The other GPU kernels: an evidence-class inventory, 256-bit
+  secp256k1 arithmetic and its instruction ledger, rho with order-six
+  folding and baby-step giant-step, kangaroo, P-256/P-384, the ECC2K-95
+  kernel and pair table, the polynomial-system and linear-algebra
+  solvers, and the F4 elimination kernels that did run on a device.
+- §8 The FPGA engine: pre-board estimate, design, measured F2 images.
+- §9 The campaign: configuration, the 2^28.41 interval, fleet
   economics, storage and certification, state.
-- §9 Structural alternatives: index calculus on the Koblitz curve,
+- §10 Structural alternatives: index calculus on the Koblitz curve,
   point decomposition against the budget.
-- §10 Related work. §11 Conclusion.
+- §11 Related work. §12 Conclusion.
 - Appendix A: reproduction commands.
 
 Every number is footnoted to a repository artefact (`\art{path}`);
@@ -75,6 +80,14 @@ paths prefixed `cryptanalysis:` are in the sibling library.
   (`data/status_20261010T154157Z.json`); related work extended to
   ECC2K-108 and the 2016 binary-curve record.
 
+- Draft 3: a new section on the repositories' other GPU arithmetic
+  (prime-field secp256k1 / NIST and binary-field ECC2K-95 / solver
+  kernels), written from their READMEs, optimisation notes and
+  experiment records, with an evidence-class table up front. Apart
+  from the F4 elimination kernels and one Macaulay scheduling run, none
+  of that code has run on a device; the section quotes static
+  instruction counts and emulated walk constants and says so.
+
 ## Known caveats carried into the text
 
 - The RTX PRO 6000 σ-walk headline has moved past the audited 14.64 B/s
@@ -93,5 +106,9 @@ paths prefixed `cryptanalysis:` are in the sibling library.
   `C = 1`.
 - Whether the storage bucket's copy of `campaign.json` had its iteration
   guard raised to 2^32 before the fleet stopped is not recorded.
+- The other-GPU section's numbers are static PTX counts (clang,
+  `ptxas` 12.9) and host-emulation operation counts, not device rates;
+  the `gpu/ecc` occupancy and stack tables predate the order-six fold
+  and the cycle ring and are quoted as such.
 - The author block is anonymized; `make deanonymize` with an `AUTHORS`
   file restores it.

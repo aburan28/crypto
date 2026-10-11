@@ -43,7 +43,8 @@ fn key(point: &BinaryPoint) -> Option<PointKey> {
     }
 }
 
-#[cfg_attr(not(test), allow(dead_code))] // exercised by the unit tests only
+// Signed-index query path, kept for the upcoming batch kernels.
+#[allow(dead_code)]
 fn stored_point(point: &BinaryPoint) -> Option<Option<(u128, u128)>> {
     match point {
         BinaryPoint::Infinity => Some(None),
@@ -51,7 +52,8 @@ fn stored_point(point: &BinaryPoint) -> Option<Option<(u128, u128)>> {
     }
 }
 
-#[cfg_attr(not(test), allow(dead_code))] // exercised by the unit tests only
+// Signed-index query path, kept for the upcoming batch kernels.
+#[allow(dead_code)]
 fn restore_point(point: Option<(u128, u128)>, m: u32) -> BinaryPoint {
     let Some((x, y)) = point else {
         return BinaryPoint::Infinity;
@@ -494,8 +496,9 @@ mod packed83 {
     /// query path avoids rebuilding heap-backed points for every batch.
     /// # Safety
     /// The caller must check the pinned polynomial and ARM64 AES/PMULL.
+    // Kept for the upcoming batch kernels.
+    #[allow(dead_code)]
     #[target_feature(enable = "aes")]
-    #[cfg_attr(not(test), allow(dead_code))] // exercised by the unit tests only
     pub(super) unsafe fn batch_x_keys_stored(
         curve: &BinaryCurve,
         fixed: &BinaryPoint,
@@ -560,8 +563,9 @@ mod packed83 {
     /// # Safety
     /// The caller must have checked ARM64 AES/PMULL support and the pinned
     /// degree-83 irreducible polynomial.
+    // Kept for the upcoming batch kernels.
+    #[allow(dead_code)]
     #[target_feature(enable = "aes")]
-    #[allow(dead_code)] // callers are compiled only on aarch64 and in its tests
     pub(super) unsafe fn batch_add_fixed(
         curve: &BinaryCurve,
         fixed: &BinaryPoint,

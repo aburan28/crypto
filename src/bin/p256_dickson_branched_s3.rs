@@ -374,7 +374,7 @@ fn measure(
         input_max_degree,
         inconsistent: report.inconsistent,
         complete,
-        correct: complete && ((!report.inconsistent) == expected_positive),
+        correct: complete && (report.inconsistent != expected_positive),
         timed_out: report.timed_out,
         pairs_above_bound: report.pairs_above_bound,
         solving_degree_max: report.solving_degree_max,

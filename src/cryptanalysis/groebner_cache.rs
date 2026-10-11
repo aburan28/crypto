@@ -5,11 +5,10 @@
 //! solver's answer.  Set `IC_GROEBNER_CACHE_URL` to enable it.  For an
 //! ElastiCache replication group with in-transit encryption, use a `rediss://`
 //! URL and provide the auth token in the URL through the deployment secret.
-//!
-//! Nothing in the solver calls [`get_or_compute`] yet, so the module is
-//! compiled but unused outside its tests.
-#![allow(dead_code)]
 
+// Fail-open cache infra, currently unwired: kept for upcoming use.
+// `dead_code` is allowed so `-D warnings` stays green until it is wired in.
+#![allow(dead_code)]
 use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly;
 use redis::Commands;
 use serde::{Deserialize, Serialize};

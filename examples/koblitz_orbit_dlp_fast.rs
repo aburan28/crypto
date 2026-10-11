@@ -3,8 +3,9 @@
 //! Public synthetic Koblitz fixtures only. Reads a retained
 //! `point_defined_factor_base` header, builds the Frobenius-quotiented S3
 //! regular-root index once (no pair table, no edge selectors), then
-//!   1. rank stage: decomposes random `[a]G` until the K orbit logs are fixed,
-//!   2. target stage: decomposes each published target and recovers its log.
+//!
+//! 1. rank stage: decomposes random `[a]G` until the K orbit logs are fixed,
+//! 2. target stage: decomposes each published target and recovers its log.
 //!
 //! Every stage is timed in this one process.
 //!
@@ -1040,7 +1041,7 @@ mod wide {
                                     let (left2, right2, relative2, stored_shift) = unpack(value);
                                     let left_shift2 =
                                         ((stored_shift + n_u32 - partner_shift) % n_u32) as usize;
-                                    let right_shift2 = (left_shift2 + relative2) % n;
+                                    let right_shift2 = (left_shift2 + relative2 as usize) % n;
                                     let codes = [
                                         left_x,
                                         right_x,

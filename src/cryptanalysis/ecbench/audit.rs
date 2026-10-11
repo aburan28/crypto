@@ -353,7 +353,7 @@ pub fn audit_with(
                 (None, None, None) => true,
                 _ => false,
             }
-            && r.cost.lower_bound == !r.cost.unpriced.is_empty()
+            && r.cost.lower_bound != r.cost.unpriced.is_empty()
             && (r.cost.total_gae.is_none()
                 || r.cost.deterministic == r.cost.nondeterminism.is_empty())
             && r.run_id

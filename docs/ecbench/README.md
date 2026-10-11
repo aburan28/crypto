@@ -343,6 +343,19 @@ probe but adds canonicalisation, Frobenius-map, lookup, entry and
 representative counts to `oracle_setup`. Use `mitm-frobenius:m=3` on the
 same base as its accounting control.
 
+`mitm-fiber:fiber=closed|lifts|blind`, `mitm-frobenius-fiber:fiber=closed|lifts|blind`
+and `descent-algebraic-fiber:fiber=combined|lifts|blind` (with a `solver`) are
+the cofactor-fiber-aware oracles of `ic_framework::fiber`
+(`research/isogeny_conductor_gap_ic_20261010/`).  A subgroup target `T` is
+decomposed as `Σ P_i = T + K` for any `K` in the rational `h`-torsion, which
+the relation loop's `[h]` projection makes an exact row: `closed` holds
+`P_i + P_j + K` for every `K` in the pair table (one probe, `h` times the
+entries), `lifts` probes or descends every lift (`h` calls), `combined`
+descends one system with the target abscissa free and the fiber polynomial
+adjoined, and `blind` is the landed oracle.  The fiber the oracle found is
+in `oracle_setup` (`fiber_size`, `fiber_complete`); with `h = 1` every mode
+is the blind oracle.
+
 `koblitz-standard-subspace:dimension=d` with
 `pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N` runs
 PR #1333's Groebner decomposers unmodified inside `ic.pipeline`, with no

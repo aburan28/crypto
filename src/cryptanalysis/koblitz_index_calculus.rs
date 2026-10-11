@@ -710,7 +710,8 @@ fn subfield_point_count(curve: &BinaryCurve, basis: &[F2mElement], k: u32) -> u6
     count
 }
 
-#[cfg_attr(not(test), allow(dead_code))] // exercised by the unit tests only
+/// Trial-division helper kept for upcoming cofactor work.
+#[allow(dead_code)]
 fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
     let mut out = Vec::new();
     // Whether what is left is prime changes only when a division changes
@@ -781,7 +782,8 @@ fn is_prime_u64(n: u64) -> bool {
     true
 }
 
-#[cfg_attr(not(test), allow(dead_code))] // exercised by the unit tests only
+/// Trial-division helper kept for upcoming cofactor work.
+#[allow(dead_code)]
 fn factorise_big(mut v: BigUint) -> Vec<(BigUint, u32)> {
     let mut out: Vec<(BigUint, u32)> = Vec::new();
     let mut d = BigUint::from(2u32);
