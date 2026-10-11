@@ -141,9 +141,23 @@ whose discriminants did not factor are not thereby alike. `--keys` compares
 on a chosen set instead, each weighted 1; `--other-sizes` leaves out curves
 over a field of the target's size.
 
-## What the current registry shows
+## Current catalogue and earlier classification panel
 
-From `group --by cm,descent --min-sizes 2` on the 121 registry curves:
+The current generated index contains all 449 registry models: 304 prime,
+72 binary, 60 Koblitz, 4 subfield and 9 extension models. It includes the
+100 independently verified large-prime isogeny codomains. Each record retains
+the status of its order certificate and every derived trait. Models whose
+coordinate/order adapter is unavailable explicitly report `not_evaluated`;
+Curve25519 is one such record. A complete catalogue entry does not by itself
+certify its coordinates or group order.
+
+The following classification panel describes the earlier 121-model registry
+snapshot, with registry digest
+`a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed`.
+Its counts refer to that snapshot. The current generated file provides the
+expanded records and their individual certification statuses.
+
+From `group --by cm,descent --min-sizes 2` on that 121-model snapshot:
 
 - **CM by −7, defined over `GF(2)`: 59 curves at 41 degrees**, 7 to 577:
   the `K_a / GF(2^n)` family, every member with `|t₁| = 1`;
@@ -167,7 +181,7 @@ From `group --by cm,descent --min-sizes 2` on the 121 registry curves:
   the four curves defined over `GF(4)` through their `GF(4)` Frobenius, and
   secp256k1 through `Z[ζ₃]`. Six remain unresolved between `Z[π]` and
   `O_K`; P-256 is unknown with its `d_K`.
-- Every order in the registry is certified: 60 by exhaustive count, 41 by
+- Every order in that snapshot was certified: 60 by exhaustive count, 41 by
   a descent count, the rest by generator certificates (4 of those rest on
   a probable prime).
 

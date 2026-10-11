@@ -1,0 +1,444 @@
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008)
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/ec_index_calculus.rs:397:9
+    |
+397 |     let mut g = poly_gcd(&monic, &shifted, p);
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/ec_index_calculus.rs:406:20
+    |
+406 |     while let Some(mut h) = queue.pop() {
+    |                    ----^
+    |                    |
+    |                    help: remove this `mut`
+
+warning: unused variable: `deg`
+   --> src/cryptanalysis/ec_index_calculus.rs:386:9
+    |
+386 |     let deg = monic.len() - 1;
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_deg`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/ec_index_calculus.rs:576:9
+    |
+576 |     let mut b = poly_rem(base, f, p);
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+
+warning: variable does not need to be mutable
+   --> src/pqc/fast/ml_kem.rs:420:13
+    |
+420 |         let mut buf = buf;
+    |             ----^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1063:5
+     |
+1061 | enum Lanes {
+     |      ----- variants in this enum
+1062 |     Scalar,
+1063 |     Avx2,
+     |     ^^^^
+1064 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `stored_point` is never used
+  --> src/cryptanalysis/f6_wide_geometry.rs:46:4
+   |
+46 | fn stored_point(point: &BinaryPoint) -> Option<Option<(u128, u128)>> {
+   |    ^^^^^^^^^^^^
+
+warning: function `restore_point` is never used
+  --> src/cryptanalysis/f6_wide_geometry.rs:53:4
+   |
+53 | fn restore_point(point: Option<(u128, u128)>, m: u32) -> BinaryPoint {
+   |    ^^^^^^^^^^^^^
+
+warning: function `batch_x_keys_stored` is never used
+   --> src/cryptanalysis/f6_wide_geometry.rs:496:26
+    |
+496 |     pub(super) unsafe fn batch_x_keys_stored(
+    |                          ^^^^^^^^^^^^^^^^^^^
+
+warning: function `batch_add_fixed` is never used
+   --> src/cryptanalysis/f6_wide_geometry.rs:561:26
+    |
+561 |     pub(super) unsafe fn batch_add_fixed(
+    |                          ^^^^^^^^^^^^^^^
+
+warning: constant `CACHE_VERSION` is never used
+  --> src/cryptanalysis/groebner_cache.rs:14:7
+   |
+14 | const CACHE_VERSION: u8 = 1;
+   |       ^^^^^^^^^^^^^
+
+warning: constant `DEFAULT_TTL_SECS` is never used
+  --> src/cryptanalysis/groebner_cache.rs:15:7
+   |
+15 | const DEFAULT_TTL_SECS: u64 = 7 * 24 * 60 * 60;
+   |       ^^^^^^^^^^^^^^^^
+
+warning: constant `DEFAULT_MAX_BYTES` is never used
+  --> src/cryptanalysis/groebner_cache.rs:16:7
+   |
+16 | const DEFAULT_MAX_BYTES: usize = 16 * 1024 * 1024;
+   |       ^^^^^^^^^^^^^^^^^
+
+warning: struct `CachedRows` is never constructed
+  --> src/cryptanalysis/groebner_cache.rs:19:8
+   |
+19 | struct CachedRows {
+   |        ^^^^^^^^^^
+
+warning: struct `GroebnerCache` is never constructed
+  --> src/cryptanalysis/groebner_cache.rs:27:19
+   |
+27 | pub(crate) struct GroebnerCache {
+   |                   ^^^^^^^^^^^^^
+
+warning: static `CACHE` is never used
+  --> src/cryptanalysis/groebner_cache.rs:34:8
+   |
+34 | static CACHE: OnceLock<Option<GroebnerCache>> = OnceLock::new();
+   |        ^^^^^
+
+warning: static `CONFIG_WARNING_EMITTED` is never used
+  --> src/cryptanalysis/groebner_cache.rs:35:8
+   |
+35 | static CONFIG_WARNING_EMITTED: OnceLock<()> = OnceLock::new();
+   |        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: associated items `from_env`, `key`, `get`, and `put` are never used
+   --> src/cryptanalysis/groebner_cache.rs:38:8
+    |
+ 37 | impl GroebnerCache {
+    | ------------------ associated items in this implementation
+ 38 |     fn from_env() -> Option<Self> {
+    |        ^^^^^^^^
+...
+ 65 |     fn key(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32) -> String {
+    |        ^^^
+...
+ 88 |     fn get(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<Vec<F2BoolPoly>> {
+    |        ^^^
+...
+134 |     fn put(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32, rows: &[F2BoolPoly]) {
+    |        ^^^
+
+warning: function `get_or_compute` is never used
+   --> src/cryptanalysis/groebner_cache.rs:162:15
+    |
+162 | pub(crate) fn get_or_compute(
+    |               ^^^^^^^^^^^^^^
+
+warning: function `parse_env_u64` is never used
+   --> src/cryptanalysis/groebner_cache.rs:180:4
+    |
+180 | fn parse_env_u64(name: &str, default: u64) -> u64 {
+    |    ^^^^^^^^^^^^^
+
+warning: function `parse_env_usize` is never used
+   --> src/cryptanalysis/groebner_cache.rs:187:4
+    |
+187 | fn parse_env_usize(name: &str, default: usize) -> usize {
+    |    ^^^^^^^^^^^^^^^
+
+warning: function `warn_once` is never used
+   --> src/cryptanalysis/groebner_cache.rs:194:4
+    |
+194 | fn warn_once(message: String) {
+    |    ^^^^^^^^^
+
+warning: fields `qx` and `qy` are never read
+    --> src/cryptanalysis/koblitz_fast.rs:1111:5
+     |
+1107 | pub struct BatchScratch {
+     |            ------------ fields in this struct
+...
+1111 |     qx: Vec<u64>,
+     |     ^^
+1112 |     qy: Vec<u64>,
+     |     ^^
+     |
+     = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `factorise_u64` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:713:4
+    |
+713 | fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
+    |    ^^^^^^^^^^^^^
+
+warning: function `factorise_big` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:783:4
+    |
+783 | fn factorise_big(mut v: BigUint) -> Vec<(BigUint, u32)> {
+    |    ^^^^^^^^^^^^^
+
+warning: constant `RC` is never used
+  --> src/pqc/fast/keccak4.rs:27:7
+   |
+27 | const RC: [u64; 24] = [
+   |       ^^
+
+warning: function `use_avx2` is never used
+   --> src/pqc/fast/ml_kem.rs:343:4
+    |
+343 | fn use_avx2() -> bool {
+    |    ^^^^^^^^
+
+warning: `crypto` (lib) generated 29 warnings (run `cargo fix --lib -p crypto` to apply 7 suggestions)
+warning: unused imports: `Echelon`, `mulmod`, and `peak_rss_bytes`
+   --> examples/koblitz_orbit_dlp_fast.rs:637:17
+    |
+637 |     use super::{mulmod, pack, peak_rss_bytes, unpack, Echelon};
+    |                 ^^^^^^        ^^^^^^^^^^^^^^          ^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `crypto` (example "koblitz_orbit_dlp_fast" test) generated 1 warning (run `cargo fix --example "koblitz_orbit_dlp_fast" -p crypto --tests` to apply 1 suggestion)
+warning: variable does not need to be mutable
+    --> examples/koblitz_rank_fixture.rs:4446:13
+     |
+4446 |         let mut rank_targeted_nonincrements = 0usize;
+     |             ----^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `required_rank_surplus`
+    --> examples/koblitz_rank_fixture.rs:3844:9
+     |
+3844 |     let required_rank_surplus: usize = std::env::var("KIC_RANK_SURPLUS")
+     |         ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_required_rank_surplus`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `signed_size`
+    --> examples/koblitz_rank_fixture.rs:3894:9
+     |
+3894 |     let signed_size = automorphisms.len();
+     |         ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_signed_size`
+
+warning: unused variable: `reference_generator_table`
+    --> examples/koblitz_rank_fixture.rs:4289:9
+     |
+4289 |     let reference_generator_table = fixed_base_reference_validation
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_reference_generator_table`
+
+warning: unused variable: `reference_generator_table_ms`
+    --> examples/koblitz_rank_fixture.rs:4291:9
+     |
+4291 |     let reference_generator_table_ms =
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_reference_generator_table_ms`
+
+warning: unused variable: `fixture_scalar_source`
+    --> examples/koblitz_rank_fixture.rs:4327:31
+     |
+4327 |         let (known_scalar, q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
+     |                               ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_fixture_scalar_source`
+
+warning: variable `query_parallel_waves` is assigned to, but never used
+    --> examples/koblitz_rank_fixture.rs:4440:13
+     |
+4440 |         let mut query_parallel_waves = 0usize;
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: consider using `_query_parallel_waves` instead
+
+warning: variable `query_parallel_chunks` is assigned to, but never used
+    --> examples/koblitz_rank_fixture.rs:4441:13
+     |
+4441 |         let mut query_parallel_chunks = 0usize;
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: consider using `_query_parallel_chunks` instead
+
+warning: variable `query_shared_sign_denominator_inputs` is assigned to, but never used
+    --> examples/koblitz_rank_fixture.rs:4442:13
+     |
+4442 |         let mut query_shared_sign_denominator_inputs = 0usize;
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: consider using `_query_shared_sign_denominator_inputs` instead
+
+warning: variable `rank_targeted_trials` is assigned to, but never used
+    --> examples/koblitz_rank_fixture.rs:4445:13
+     |
+4445 |         let mut rank_targeted_trials = 0usize;
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: consider using `_rank_targeted_trials` instead
+
+warning: unused variable: `rank_targeted_nonincrements`
+    --> examples/koblitz_rank_fixture.rs:4446:13
+     |
+4446 |         let mut rank_targeted_nonincrements = 0usize;
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_rank_targeted_nonincrements`
+
+warning: variable `rank_target_slot_index_builds` is assigned to, but never used
+    --> examples/koblitz_rank_fixture.rs:4447:13
+     |
+4447 |         let mut rank_target_slot_index_builds = 0usize;
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: consider using `_rank_target_slot_index_builds` instead
+
+warning: value assigned to `query_parallel_waves` is never read
+    --> examples/koblitz_rank_fixture.rs:4783:25
+     |
+4783 |                         query_parallel_waves += 1;
+     |                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: maybe it is overwritten before being read?
+     = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: value assigned to `query_parallel_chunks` is never read
+    --> examples/koblitz_rank_fixture.rs:4784:25
+     |
+4784 |                         query_parallel_chunks += pair_parallel_results.len();
+     |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: maybe it is overwritten before being read?
+
+warning: value assigned to `query_shared_sign_denominator_inputs` is never read
+    --> examples/koblitz_rank_fixture.rs:4791:29
+     |
+4791 | / ...                   query_shared_sign_denominator_inputs +=
+4792 | | ...                       result.shared_denominator_inputs;
+     | |__________________________________________________________^
+     |
+     = help: maybe it is overwritten before being read?
+
+warning: value assigned to `rank_targeted_trials` is never read
+    --> examples/koblitz_rank_fixture.rs:4732:13
+     |
+4732 |             rank_targeted_trials += usize::from(targeted_column.is_some());
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: maybe it is overwritten before being read?
+
+warning: value assigned to `rank_target_slot_index_builds` is never read
+    --> examples/koblitz_rank_fixture.rs:4739:21
+     |
+4739 |                     rank_target_slot_index_builds += 1;
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: maybe it is overwritten before being read?
+
+warning: struct `BatchInverseScratch` is never constructed
+   --> examples/koblitz_rank_fixture.rs:252:8
+    |
+252 | struct BatchInverseScratch {
+    |        ^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `itoh_n53_inverse_enabled` is never used
+    --> examples/koblitz_rank_fixture.rs:2431:4
+     |
+2431 | fn itoh_n53_inverse_enabled() -> bool {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variable does not need to be mutable
+    --> examples/koblitz_s5_sat_instance.rs:5916:9
+     |
+5916 |     let mut compact_batch_targets_requested = 0usize;
+     |         ----^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |         |
+     |         help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `compact_batch_targets_requested`
+    --> examples/koblitz_s5_sat_instance.rs:5916:9
+     |
+5916 |     let mut compact_batch_targets_requested = 0usize;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_compact_batch_targets_requested`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `crypto` (example "koblitz_rank_fixture" test) generated 19 warnings (run `cargo fix --example "koblitz_rank_fixture" -p crypto --tests` to apply 7 suggestions)
+warning: `crypto` (example "koblitz_s5_sat_instance" test) generated 2 warnings (run `cargo fix --example "koblitz_s5_sat_instance" -p crypto --tests` to apply 2 suggestions)
+    Finished `release` profile [optimized] target(s) in 6m 37s
+     Running unittests examples/koblitz_orbit_dlp_fast.rs (target/isogeny-canonical-20261010/release/examples/koblitz_orbit_dlp_fast-994bcbbf84fbcba6)
+
+running 3 tests
+test wide::wide_json_tests::wide_point_coordinates_round_trip_as_decimal_strings ... ok
+test wide::wide_json_tests::wide_point_list_preserves_infinity_entries ... ok
+test wide::wide_json_tests::wide_point_parser_accepts_small_legacy_numeric_words ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/koblitz_rank_fixture.rs (target/isogeny-canonical-20261010/release/examples/koblitz_rank_fixture-efcf9c737254abcf)
+
+running 12 tests
+test packed_tests::dual_sign_batch_matches_separate_signed_inputs ... ok
+test packed_tests::bloom_hash_strategies_retain_every_inserted_x ... ok
+test packed_tests::full_rank_solver_recovers_unique_public_solution ... ok
+test packed_tests::one_online_target_with_log_precomputation_does_not_emit_batch_summary ... ok
+test packed_tests::online_timer_phases_exclude_nested_solve_and_validation ... ok
+test packed_tests::forward_and_reverse_incremental_ranks_match_dense_elimination ... ok
+test packed_tests::packed_n37_field_group_and_point_defined_base_validate ... ok
+test packed_tests::packed_n41_field_group_and_point_defined_base_validate ... ok
+test packed_tests::quotient_pair_witness_packs_48_bit_coefficients_losslessly ... ok
+test packed_tests::packed_field_and_group_operations_match_reference ... ok
+test packed_tests::x_filter_and_lazy_y_recovery_match_full_fiber_batch ... ok
+test packed_tests::sharded_support_table_matches_exact_unsharded_membership ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests examples/koblitz_s5_sat_instance.rs (target/isogeny-canonical-20261010/release/examples/koblitz_s5_sat_instance-c0bffab792c92f18)
+
+running 13 tests
+test tests::comparator_preserves_equal_and_strict_order_cases ... ok
+test tests::compact_index_order_is_independent_of_map_insertion ... ok
+test tests::empty_target_edge_domain_retains_exported_root_unsat ... ok
+test tests::full_rank_linear_solver_recovers_the_public_unknowns ... ok
+test tests::legacy_selection_keeps_small_field_orbits_and_labels ... ok
+test tests::pair_table_equals_all_numeric_s3_roots_over_small_field ... ok
+test tests::rational_final_support_equals_s3_on_the_pair_table_domain ... ok
+test tests::rejects_missing_contradictory_and_tampered_auxiliary_assignments ... ok
+test tests::rotated_regular_scan_preserves_group_valid_support_at_n11 ... ok
+test tests::schoolbook_and_karatsuba_circuits_agree_with_field_arithmetic ... ok
+test tests::target_cyclic_start_has_stable_public_vectors ... ok
+test tests::legacy_selection_reproduces_certified_n53_order_and_labels ... ok
+test tests::target_edge_selector_is_exhaustively_equivalent_at_n7 ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 20.02s
+
+     Running unittests examples/koblitz_unknown_scalar_panel.rs (target/isogeny-canonical-20261010/release/examples/koblitz_unknown_scalar_panel-66c44290f2dea145)
+
+running 2 tests
+test tests::smoke_targets_are_deterministic_and_have_no_scalar ... ok
+test tests::arbitrary_target_ic_and_rho_smoke_verify ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
