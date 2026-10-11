@@ -459,7 +459,7 @@ stated with the phase it moves, the evidence, and the bar it must clear.
    `canonicalisations` is host-priced and the `S` column moves between
    identical runs (0.22 vs 8.7 LA GAE for the same 225 row operations).
    `calibration.json` had pins for `K_0` at n = 13, 15, 31, 37, 39, 41 and
-   none at n = 23; **added 2026-10-11** (`koblitz/K_0 / GF(2^23)`, median of
+   none at n = 23; **added 2026-10-11** (the entry for `icv1-f2m23-t5197-69e76b73`, median of
    10 reports on this host, provenance in `sources`), to be re-pinned on
    the ledger's isolated host.
 8. **Algebraic τ-slots (L5/L6 proper) for the no-table regime.** The table

@@ -328,7 +328,7 @@ the same table with `10×` fewer relations; unmeasured there.
 - **Batched probes (item 6).** Invisible in operation counts and only
   measurable in the wall-clock window on an isolated host; not pursued on
   this host.
-- **Calibration pins (item 7).** `koblitz/K_0 / GF(2^23)` added to
+- **Calibration pins (item 7).** the `icv1-f2m23-t5197-69e76b73` entry added to
   `docs/ic/calibration.json` from the median of 10 reports (provenance in
   `sources`); `K_0` n = 41 was already pinned, which is why its reports
   show `pinned` units. The pins are from this loaded host and should be
