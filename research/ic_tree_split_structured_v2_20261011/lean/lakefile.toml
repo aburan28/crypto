@@ -1,0 +1,7 @@
+name = "tree_split2"
+version = "0.1.0"
+defaultTargets = ["TreeSplit2"]
+
+[[lean_lib]]
+name = "TreeSplit2"
+roots = ["TreeSplit2.Rule", "TreeSplit2.Data", "TreeSplit2.Verdict"]
