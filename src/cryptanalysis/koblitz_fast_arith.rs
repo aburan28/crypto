@@ -951,7 +951,6 @@ mod tests {
 
     #[test]
     fn s3_roots_match_slow_reference_on_generic_pairs() {
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         // Generic pairs only (both sides nonzero and unequal): the fast
         // kernel must agree with the slow one bit for bit, including
         // verdict and root order.  Degenerate pairs are covered by
@@ -980,7 +979,6 @@ mod tests {
     #[test]
     fn s3_roots_degenerate_pairs_are_exact() {
         use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         // Diagonal (x, x): linear, single root.  Zero side: x_3^2 = C/A,
         // single root.  (0, 0): genuinely rootless.  Each returned root
         // must vanish under S3; single-root cases are complete by degree
@@ -1026,11 +1024,6 @@ mod tests {
                 // The slow kernel is known-None on every degenerate pair
                 // (its combined inversion hits zero) — pin that, so a
                 // future reader sees the divergence is deliberate.
-                if x == 0 || true {
-                    assert!(slow_s3_x_roots(&irr, &b_fe, n, x, x).is_none());
-                    assert!(slow_s3_x_roots(&irr, &b_fe, n, x, 0).is_none());
-                    assert!(slow_s3_x_roots(&irr, &b_fe, n, 0, x).is_none());
-                }
                 assert!(slow_s3_x_roots(&irr, &b_fe, n, x, x).is_none());
                 assert!(slow_s3_x_roots(&irr, &b_fe, n, x, 0).is_none());
                 assert!(slow_s3_x_roots(&irr, &b_fe, n, 0, x).is_none());
@@ -1041,7 +1034,6 @@ mod tests {
     #[test]
     fn s3_roots_satisfy_semaev_independently() {
         use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         for n in [13u32, 41, 53] {
             let irr = find_irreducible_sparse(n).unwrap();
             let gf = Gf2::new(&irr);
@@ -1087,7 +1079,6 @@ mod tests {
     #[test]
     fn s3_roots_none_is_exact_on_tiny_field() {
         use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         // Exhaustive at n = 7: fast-None holds iff no x3 in F_{2^7}
         // zeroes S3, and fast-Some returns exactly the full root set.
         let n = 7u32;
@@ -1144,7 +1135,6 @@ mod tests {
     #[test]
     fn artin_schreier_root_matches_slow() {
         use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         for n in [7u32, 9, 13, 23, 41, 53] {
             let irr = find_irreducible_sparse(n).unwrap();
             let gf = Gf2::new(&irr);
@@ -1173,7 +1163,6 @@ mod tests {
     #[test]
     fn fast_points_with_x_matches_slow() {
         use crate::cryptanalysis::koblitz_index_calculus::points_with_x as slow_points_with_x;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         for (n, a) in [(7u32, 0u8), (9, 0), (13, 0), (23, 1), (41, 0), (53, 0)] {
             let (curve, fast) = toy_curve(n, a);
             let gf = Gf2::new(&curve.irreducible);

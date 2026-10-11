@@ -312,13 +312,26 @@ impl TargetSet {
             // set (two inversions per scalar bit for all targets together
             // instead of ~1.5 per target per bit).  Bit-exact with the
             // per-target scalar muls, so the census sees identical points.
-            Some(fast) if kc.n <= 63 => {
-                let base = to_fast_point(&fast, g);
+            Some(fast)
+                if kc.n <= 63
+                    && kc.curve.b == F2mElement::one(kc.n)
+                    && kc.curve.a == F2mElement::from_biguint(&BigUint::from(kc.a), kc.n) =>
+            {
+                let base = match g {
+                    BinaryPoint::Infinity => None,
+                    BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
+                };
                 let bases = vec![base; scalars.len()];
                 let ks: Vec<BigUint> = scalars.iter().map(|&k| BigUint::from(k)).collect();
                 fast.batch_scalar_mul(&bases, &ks)
                     .into_iter()
-                    .map(|p| from_fast_point(&fast, p))
+                    .map(|p| match p {
+                        None => BinaryPoint::Infinity,
+                        Some((x, y)) => BinaryPoint::Affine {
+                            x: fast.element(x),
+                            y: fast.element(y),
+                        },
+                    })
                     .collect()
             }
             _ => scalars
