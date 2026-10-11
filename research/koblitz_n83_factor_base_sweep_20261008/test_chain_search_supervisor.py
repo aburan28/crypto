@@ -76,7 +76,7 @@ def receipts(config: dict, status: str = "PREFLIGHT_ONLY") -> tuple[dict, dict]:
         "relation_matrix": ([{
             "a": "1", "b": "2", "summands": [[0, 0]] * config["summands"],
             "summand_negated": [False] * config["summands"],
-            "row": ["0"] * config["columns"],
+            "row": [str(config["summands"])] + ["0"] * (config["columns"] - 1),
         }] if verified else []),
         "rank_history": ([{
             "rows": 1, "columns": config["columns"] + 1, "rank": 1,
@@ -121,6 +121,15 @@ class ChainSearchGuardTests(unittest.TestCase):
         worker["relation_matrix"][0]["row"].pop()
         self.assertIn("relation replay", guard.receipt_error(worker, worker_config, config))
         worker_config, worker = receipts(config, "PASS_verified_target_only")
+        worker["relation_matrix"][0]["row"][0] = str(config["summands"] + 1)
+        self.assertIn("signed-Frobenius", guard.receipt_error(worker, worker_config, config))
+        worker_config, worker = receipts(config, "PASS_verified_target_only")
+        worker["attempt_records"][0]["decomposition_indices"][0] = 1
+        self.assertIn("labels", guard.receipt_error(worker, worker_config, config))
+        worker_config, worker = receipts(config, "PASS_verified_target_only")
+        worker["relation_matrix"][0]["a"] = "7"
+        self.assertIn("labels", guard.receipt_error(worker, worker_config, config))
+        worker_config, worker = receipts(config, "PASS_verified_target_only")
         worker["rank_history"].clear()
         self.assertIn("replay ledger", guard.receipt_error(worker, worker_config, config))
         worker_config, worker = receipts(config, "PASS_verified_target_only")
@@ -140,6 +149,23 @@ class ChainSearchGuardTests(unittest.TestCase):
         self.assertIsNone(guard.receipt_error(worker, worker_config, orbit_config))
         worker_config["strategy"] = "chain-s3"
         self.assertIn("strategy", guard.receipt_error(worker, worker_config, orbit_config))
+
+    def test_relation_replay_checks_phase_sign_and_canonical_residue(self):
+        self.assertEqual((guard.PRIMARY_FROBENIUS_LAMBDA**2 +
+                          guard.PRIMARY_FROBENIUS_LAMBDA + 2) % guard.PRIMARY_ORDER, 0)
+        self.assertEqual(pow(guard.PRIMARY_FROBENIUS_LAMBDA, 83, guard.PRIMARY_ORDER), 1)
+        config = dict(self.config, max_trials=1)
+        worker_config, worker = receipts(config, "PASS_verified_target_only")
+        worker["attempt_records"][0]["decomposition_indices"] = [0, 2, 1, 166, 167]
+        relation = worker["relation_matrix"][0]
+        relation["summands"] = [[0, 0], [0, 1], [0, 0], [1, 0], [1, 0]]
+        relation["summand_negated"] = [False, False, True, False, True]
+        relation["row"] = ["254512724090651164922414"] + ["0"] * (config["columns"] - 1)
+        self.assertIsNone(guard.receipt_error(worker, worker_config, config))
+        relation["row"][0] = str(guard.PRIMARY_ORDER + guard.PRIMARY_FROBENIUS_LAMBDA)
+        self.assertIn("malformed", guard.receipt_error(worker, worker_config, config))
+        relation["row"][0] = "²"
+        self.assertIn("malformed", guard.receipt_error(worker, worker_config, config))
 
     def test_outer_retains_preflight_timeout_resource_and_bad_receipts(self):
         with tempfile.TemporaryDirectory(prefix="n83-chain-search-guard-") as temporary:

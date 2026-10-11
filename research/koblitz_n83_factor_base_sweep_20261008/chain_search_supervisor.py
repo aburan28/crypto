@@ -29,6 +29,12 @@ SCHEMA = "n83.chain-s3-search-outer/v1"
 WORKER_SCHEMA = "n83.primary-cold-result/v1"
 WORKER_CONFIG_SCHEMA = "n83.primary-cold-config/v1"
 SIZES = (64, 256, 600, 1182, 2048, 4096, 8192, 16627)
+# The pinned a=0 subgroup's Frobenius eigenvalue is the unique root of
+# x^2 + x + 2 mod r with x^83 = 1; the exporter also checks [x]G = pi(G).
+PRIMARY_ORDER = 2417851639230796216685689
+PRIMARY_FROBENIUS_LAMBDA = 254512724090651164922414
+FROBENIUS_PHASES = tuple(pow(PRIMARY_FROBENIUS_LAMBDA, phase, PRIMARY_ORDER)
+                         for phase in range(83))
 COUNTERS = (
     "factor_base_size", "orbit_count", "trials", "relations",
     "independent_relations", "dependent_relations", "inconsistent_relations",
@@ -38,6 +44,12 @@ COUNTERS = (
     "direct_relations_skipped", "matrix_rows", "matrix_columns",
     "terminal_matrix_rank", "rank_checks",
 )
+
+
+def canonical_decimal(value: object, exclusive_upper: int) -> bool:
+    return (isinstance(value, str) and value.isascii() and value.isdecimal() and
+            len(value) <= len(str(exclusive_upper)) and
+            value == str(int(value)) and int(value) < exclusive_upper)
 
 
 def strategy_name(config: dict) -> str:
@@ -146,10 +158,10 @@ def receipt_error(worker: object, worker_config: object, config: dict) -> str | 
             not isinstance(relations, list) or len(relations) != report["relations"] or
             not isinstance(ranks, list) or len(ranks) != report["linear_solve_attempts"]):
         return "worker attempt, relation, or rank replay ledger is incomplete"
-    for attempt in attempts:
+    for position, attempt in enumerate(attempts, 1):
         if (not isinstance(attempt, dict) or
-                type(attempt.get("trial")) is not int or not 1 <= attempt["trial"] <= report["trials"] or
-                any(not isinstance(attempt.get(key), str) or not attempt[key].isdecimal()
+                type(attempt.get("trial")) is not int or attempt["trial"] != position or
+                any(not canonical_decimal(attempt.get(key), PRIMARY_ORDER)
                     for key in ("a", "b")) or
                 attempt.get("disposition") not in ("RelationFound", "Refuted", "Unsupported",
                     "Unknown", "InvalidModel", "DirectSkipped", "DirectSolved") or
@@ -158,23 +170,28 @@ def receipt_error(worker: object, worker_config: object, config: dict) -> str | 
             return "worker attempt replay record is malformed"
         target = attempt.get("target")
         if target is not None and (not isinstance(target, list) or len(target) != 2 or
-                                   any(not isinstance(word, str) or not word.isdecimal() for word in target)):
+                                   any(not canonical_decimal(word, 1 << 83) for word in target)):
             return "worker attempt target is malformed"
         indices = attempt.get("decomposition_indices")
         if indices is not None and (not isinstance(indices, list) or
                                     any(type(index) is not int or not 0 <= index < report["factor_base_size"]
                                         for index in indices)):
             return "worker attempt decomposition indices are malformed"
+        if (attempt["disposition"] == "RelationFound") is not (indices is not None):
+            return "worker relation disposition disagrees with decomposition indices"
     if (sum(item["solver_calls"] for item in attempts) != report["sat_calls"] or
             sum(item["models"] for item in attempts) != report["sat_models"] or
             sum(item["conflicts"] for item in attempts) != report["sat_conflicts"]):
         return "worker attempt ledger disagrees with SAT counters"
-    for relation in relations:
+    found_attempts = [item for item in attempts if item["disposition"] == "RelationFound"]
+    if len(found_attempts) != len(relations):
+        return "worker relation rows disagree with found attempts"
+    for attempt, relation in zip(found_attempts, relations):
         if (not isinstance(relation, dict) or
-                any(not isinstance(relation.get(key), str) or not relation[key].isdecimal()
+                any(not canonical_decimal(relation.get(key), PRIMARY_ORDER)
                     for key in ("a", "b")) or
                 not isinstance(relation.get("row"), list) or len(relation["row"]) != report["orbit_count"] or
-                any(not isinstance(value, str) or not value.isdecimal() for value in relation["row"]) or
+                any(not canonical_decimal(value, PRIMARY_ORDER) for value in relation["row"]) or
                 not isinstance(relation.get("summands"), list) or len(relation["summands"]) != config["summands"] or
                 not isinstance(relation.get("summand_negated"), list) or
                 len(relation["summand_negated"]) != config["summands"] or
@@ -185,6 +202,19 @@ def receipt_error(worker: object, worker_config: object, config: dict) -> str | 
                     any(type(value) is not int for value in summand) or
                     not 0 <= summand[0] < report["orbit_count"] or not 0 <= summand[1] < 83):
                 return "worker relation orbit label is malformed"
+        indices = attempt["decomposition_indices"]
+        if (len(indices) != config["summands"] or
+                relation["a"] != attempt["a"] or relation["b"] != attempt["b"] or
+                relation["summands"] != [[index // 166, index % 166 // 2] for index in indices] or
+                relation["summand_negated"] != [index % 2 == 1 for index in indices]):
+            return "worker relation replay labels disagree with the found attempt"
+        expected_row = [0] * report["orbit_count"]
+        for (column, phase), negative in zip(relation["summands"], relation["summand_negated"]):
+            coefficient = FROBENIUS_PHASES[phase]
+            expected_row[column] = (expected_row[column] - coefficient if negative else
+                                    expected_row[column] + coefficient) % PRIMARY_ORDER
+        if any(int(value) != expected for value, expected in zip(relation["row"], expected_row)):
+            return "worker relation replay row disagrees with signed-Frobenius coefficients"
     for rank in ranks:
         if (not isinstance(rank, dict) or
                 any(type(rank.get(key)) is not int or rank[key] < 0 for key in ("rows", "columns", "rank")) or
@@ -208,7 +238,7 @@ def receipt_error(worker: object, worker_config: object, config: dict) -> str | 
     verified = status == "PASS_verified_target_only"
     log = worker.get("verified_log")
     if verified:
-        if (not isinstance(log, str) or not log.isdecimal() or
+        if (not canonical_decimal(log, PRIMARY_ORDER) or
                 report["independent_relations"] == 0 or report["linear_solve_attempts"] == 0 or
                 not worker["solver_stage_executed"]):
             return "verified target lacks rank, linear solve, or scalar receipt"
