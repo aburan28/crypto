@@ -38,6 +38,8 @@ declare -A ARM=(
   [mitm-tz-m3-proj]="--factor-base koblitz-trace-zero:divisor=$DTZ,projected=1 --oracle mitm-frobenius:m=3"
   [sym-m2-proj]="--factor-base koblitz-symmetrised:divisor=$D,projected=1 --oracle symmetrised:m=2"
   [sym-m3-proj]="--factor-base koblitz-symmetrised:divisor=$D,projected=1 --oracle symmetrised:m=3"
+  # run with REPEATS=1: three repeats did not finish inside 90 minutes (exit 124)
+  [sym-m3-proj-r1]="--factor-base koblitz-symmetrised:divisor=$D,projected=1 --oracle symmetrised:m=3"
 )
 ORDER="mitm-x-m2 mitm-x-m2-proj mitm-u-m2 mitm-u-m2-proj mitm-x-m3 mitm-x-m3-proj mitm-u-m3 mitm-u-m3-proj mitm-tz-m3 mitm-tz-m3-proj sym-m2-proj sym-m3-proj"
 

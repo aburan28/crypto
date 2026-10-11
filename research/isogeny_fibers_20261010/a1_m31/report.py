@@ -14,7 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 RES = os.path.join(HERE, "results")
 ORDER = ["mitm-x-m2", "mitm-x-m2-proj", "mitm-u-m2", "mitm-u-m2-proj",
          "mitm-x-m3", "mitm-x-m3-proj", "mitm-u-m3", "mitm-u-m3-proj",
-         "mitm-tz-m3", "mitm-tz-m3-proj", "sym-m2-proj", "sym-m3-proj"]
+         "mitm-tz-m3", "mitm-tz-m3-proj", "sym-m2-proj", "sym-m3-proj", "sym-m3-proj-r1"]
 
 def fmt(xs, nd=1):
     if not xs: return "—"
