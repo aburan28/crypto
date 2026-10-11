@@ -97,3 +97,7 @@
 2026-10-05T17:05:00Z lane vm-2 start K1n23l6:0:rr (threads 2, cap 9)
 2026-10-05T17:05:00Z lane vm-1 end K0n61l4:3:x4
 2026-10-05T17:05:00Z lane vm-1 start K1n23l6:1:rr (threads 2, cap 9)
+2026-10-11T17:40:38Z host restarted (runner found dead after 2026-10-05T17:05Z during K1n23l6 rr d0/d1); relaunched lanes.sh, resuming from the log
+2026-10-11T17:40:40Z lane vm-1 start K1n23l6:1:rr (threads 2, cap 9)
+2026-10-11T17:40:40Z lane vm-2 start K1n23l6:0:rr (threads 2, cap 9)
+2026-10-11T17:41:40Z remote lanes a, b, f stopped at the account's weekly usage limit on 2026-10-05 before measuring past D=8; their six units (K0n61l6 d0-3 x4, K1n59l6 d2-3 x4) released to the local lanes. Lanes c, d (K1n61l6 d0-3 x4) and e (K1n59l6 d0-1 x4) completed remotely.
