@@ -81,6 +81,19 @@ fails this check can only ever report "within the control distribution", so
 its nulls are vacuous. (The first protocol written with this skill,
 `research/nist_cyclotomic_controls_20261011/PROTOCOL.md`, failed it in all
 three comparative families. The fix was a dated amendment, not an edit.)
+**Pre-flight runtime estimate (write it into the protocol).** Before
+freezing, time one instrument call per arm and per size class, and
+separate the *per-sample* cost (scales with `N`) from the *fixed* cost
+(target and positive controls, paid once per curve or target). Then
+estimate `fixed + N · per_sample / threads` for every family. Fixed costs
+are easy to miss. In the NIST re-test the dependent-pair positive control
+(heights of `[3]G̃` and `[4]G̃`, about 16 times the generator's height and
+super-linear in it) took longer than 100 random pairs did. Choose `N`
+from the power check first. If the estimate is infeasible, change the
+design (a cheaper positive control of equal strength, fewer families),
+never the power. Record the estimate next to the actual run time, so the
+next protocol calibrates against it.
+
 Also do a dry run of the full analysis at small `N` on scratch output. It
 catches power failures, runtime blow-ups and broken positive controls
 before the real run. Disclose in the amendment anything that dry run
@@ -120,6 +133,7 @@ Lead with the table. For each target × metric:
 - [ ] every "nothing found" has a passing positive control on the same path
 - [ ] one instrument, identical budgets across arms
 - [ ] power check passes: `2/(N + 1) < α/m` for every test family (§3)
+- [ ] pre-flight runtime estimate (fixed and per-sample) in the protocol (§3)
 - [ ] `PROTOCOL.md` frozen (hash recorded) before results; dry run on scratch output
 - [ ] raw rows committed; summary recomputable
 - [ ] decision rule and multiple-comparison correction applied as written
