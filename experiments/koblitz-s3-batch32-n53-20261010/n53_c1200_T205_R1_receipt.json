@@ -1,0 +1,52 @@
+{
+  "kind": "s3_batch32_n53_c1200_full_pipeline_diagnostic_v1",
+  "run_label": "R1",
+  "status": "outer_wrapper_failed_native_report_complete",
+  "outer_exit_code": 1,
+  "native_exit_code": null,
+  "outer_wrapper": "/usr/bin/time -l",
+  "outer_wrapper_error": "time: sysctl kern.clockrate: Operation not permitted",
+  "outer_elapsed_seconds_reported": "65.78",
+  "timeout_seconds": 180,
+  "termination_grace_seconds": 5,
+  "source_sha256": "ff5abc14341e9a801e6d94c4cd6c7234077a78325d7a756d45d4bbdfb4a3f082",
+  "binary_sha256": "e9a36bbf612bb7193266dc31178c8b3405639227b350fe51b98714e4e42739ef",
+  "point_sha256": "c7ddebc262aa32eab9665b2d8c5661339195360f2a35dc5083ed85777ef4ae9f",
+  "public_point": [3972666425999055, 1236852798481438],
+  "curve_field_degree": 53,
+  "orbit_columns": 1200,
+  "relation_seed": 20260928,
+  "setup_workers": 4,
+  "target_workers": 1,
+  "prepared_rank_requested": 1200,
+  "factor_base_points": 127200,
+  "factor_base_digest": "95fa6447153d53b9197a52ba52708d04eaf5bba02f9a3e40cbcdece91d3c116c",
+  "prepared_rank": 1200,
+  "final_rank": 1200,
+  "recovered_scalar": 7380136779495,
+  "expected_scalar_from_prior_checked_fixture": 7380136779495,
+  "group_verified": true,
+  "target_query_batch_width": 32,
+  "target_s3_calls": 3136,
+  "target_state_probes": 1568,
+  "target_online_ms_diagnostic": "1.035375",
+  "target_online_phase_sum_ms_diagnostic": "1.035375",
+  "reusable_setup_ms_diagnostic": "64904.594916",
+  "host_isolation_receipt": null,
+  "controlled_speedup": null,
+  "raw_report": {
+    "path": "n53_c1200_T205_R1_report.jsonl.gz",
+    "gzip_sha256": "325c1eaee51a2ec92f4a7c0201162e0ad46e597ca2bc24309884154202ef655a",
+    "uncompressed_sha256": "6776519d713c6e3754598996d4e360a2001d7e13bb248bddb4eb238face9c54d"
+  },
+  "raw_stdout": {
+    "path": "n53_c1200_T205_R1_stdout.txt.gz",
+    "gzip_sha256": "325c1eaee51a2ec92f4a7c0201162e0ad46e597ca2bc24309884154202ef655a",
+    "uncompressed_sha256": "6776519d713c6e3754598996d4e360a2001d7e13bb248bddb4eb238face9c54d"
+  },
+  "raw_stderr": {
+    "path": "n53_c1200_T205_R1_stderr.txt.gz",
+    "gzip_sha256": "476aecef20b62c84a4bd690b3e0010b4039a4989b8ead42c7bfcf56f383e0977",
+    "uncompressed_sha256": "3283f975e0dcc83101751c3483a5f6c0906bf4b1470f3fbdf324cd3b233e434a"
+  }
+}

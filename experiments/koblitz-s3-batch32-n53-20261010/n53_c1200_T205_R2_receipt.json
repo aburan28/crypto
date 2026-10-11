@@ -1,0 +1,47 @@
+{
+  "kind": "s3_batch32_n53_c1200_full_pipeline_diagnostic_v1",
+  "run_label": "R2",
+  "status": "timeout",
+  "exit_code": 124,
+  "timeout_seconds": 180,
+  "termination_grace_seconds": 5,
+  "source_sha256": "ff5abc14341e9a801e6d94c4cd6c7234077a78325d7a756d45d4bbdfb4a3f082",
+  "binary_sha256": "e9a36bbf612bb7193266dc31178c8b3405639227b350fe51b98714e4e42739ef",
+  "point_sha256": "c7ddebc262aa32eab9665b2d8c5661339195360f2a35dc5083ed85777ef4ae9f",
+  "public_point": [3972666425999055, 1236852798481438],
+  "curve_field_degree": 53,
+  "orbit_columns": 1200,
+  "relation_seed": 20260928,
+  "setup_workers": 4,
+  "target_workers": 1,
+  "prepared_rank_requested": 1200,
+  "factor_base_points": null,
+  "factor_base_digest": null,
+  "prepared_rank": null,
+  "final_rank": null,
+  "recovered_scalar": null,
+  "group_verified": null,
+  "target_online_ms_diagnostic": null,
+  "reusable_setup_ms_diagnostic": null,
+  "host_isolation_receipt": null,
+  "controlled_speedup": null,
+  "host_observation_during_run": {
+    "load_average": ["107.81", "88.47", "71.36"],
+    "memory_free_percent": 42
+  },
+  "raw_report": {
+    "path": "n53_c1200_T205_R2_report.jsonl",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "raw_stdout": {
+    "path": "n53_c1200_T205_R2_stdout.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "raw_stderr": {
+    "path": "n53_c1200_T205_R2_stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

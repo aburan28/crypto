@@ -86,12 +86,11 @@ The full N53 C1800 target panel is pending. At the local preflight, load
 averages were **170.71, 79.18, 43.33** on 14 logical CPUs, and the system
 reported **54% free** of 52 GiB RAM. The earlier C1800 panel reached about
 25 GiB RSS per process. This host does not have a host-exclusive CPU receipt,
-so its timing cannot satisfy the controlled >=2× gate. No new N53 online-time
-row or scalar-recovery receipt has been produced for this variant;
-`candidate_id`, online costs, and `controlled_speedup` remain null. The next
-execution is one bounded full-pipeline correctness pilot on a host with
-adequate memory, followed by the 34-target paired confirmation if fidelity
-passes.
+so its timing cannot satisfy the controlled >=2× gate. The local diagnostics
+below do not produce a qualified candidate measurement row; `candidate_id`
+and `controlled_speedup` remain null. The next full C1800 execution is a
+bounded pilot on a host with adequate memory, followed by the 34-target
+paired confirmation if fidelity passes.
 
 ## Bounded local integration control
 
@@ -118,3 +117,48 @@ host preflight, exit status, and the byte-exact compressed [report](n41_c244_T22
 [stdout](n41_c244_T220_stdout.txt.gz), and [stderr](n41_c244_T220_stderr.txt.gz).
 The scalar also matches the prior [checked Sage fixture](../koblitz-s3-directlookup-n41-20261010/local/smoke_replay.json)
 for this same public point.
+
+## Bounded N53 full-pipeline control
+
+Run the 32-state binary once with C1200 and full prepared rank 1,200 on the
+existing public T205 N53 point `[3972666425999055,1236852798481438]`. Its
+point file SHA-256 is
+`c7ddebc262aa32eab9665b2d8c5661339195360f2a35dc5083ed85777ef4ae9f`,
+and the prior checked fixture expects scalar `7380136779495`. Use relation
+seed `20260928`, four setup workers, one target worker, and a 180-second
+process cap with five seconds to terminate. Record `/usr/bin/time -l` process
+resources, the complete report, stdout, stderr, exit status, base digest,
+prepared rank, scalar replay, and online phase sum. This run tests the real
+N53 target path with a base whose prior T205 process peaked at
+12,024,938,496 bytes RSS. The preflight reported 48% free of 52 GiB RAM and
+load averages 70.81, 90.13, 66.94 on 14 logical CPUs. Timing remains a
+correctness diagnostic because the host has no exclusive CPU receipt.
+
+The first N53 process emitted a complete report with a **verified scalar
+7380136779495**, the same **127,200-point base digest** as the earlier C1200
+T205 process, and prepared/final rank **1,200/1,200**. It used **1,568 states
+and 3,136 S3 queries**. The report's online interval and five-phase sum both
+read **1.035375 ms**. The outer `/usr/bin/time -l` then returned **exit 1**
+because macOS denied `sysctl kern.clockrate`; the native process exit code is
+therefore unknown, and the wrapper supplied no trustworthy RSS value. Its
+[R1 receipt](n53_c1200_T205_R1_receipt.json), [complete report](n53_c1200_T205_R1_report.jsonl.gz),
+[stdout](n53_c1200_T205_R1_stdout.txt.gz), and [stderr](n53_c1200_T205_R1_stderr.txt.gz)
+retain that result and wrapper failure.
+
+A direct retry without `/usr/bin/time -l` reached the **180-second cap** and
+exited **124**, with empty report, stdout, and stderr. The stage at which it
+stopped is unknown. During the retry, sampled load averages rose above 100;
+they reached 157.29, 105.06, 78.49 just after the timeout. The
+[R2 receipt](n53_c1200_T205_R2_receipt.json) keeps the cap, exit status,
+host observation, and hashes of all three zero-byte outputs. Both rows remain
+in the record. Neither is a valid controlled timing pair, and no aggregate
+batch32 speedup is computed from them.
+
+The earlier frozen C1200 eight-state T205 report used **3,104 S3 queries**
+and the same base digest. The batch32 R1 report used **32 more queries** on
+this point, consistent with extra work in its final batch. The reference
+uses a different packed source, so this observation does not isolate batch
+width or give a wall-time ratio. The next
+full-pipeline run should be the bounded N53 C1800 pilot on a host with ample
+memory and a recorded fidelity preflight; the 34-target confirmation follows
+only if that pilot passes.
