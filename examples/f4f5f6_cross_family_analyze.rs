@@ -31,6 +31,7 @@ struct Run {
     r: f64,
     s: Option<f64>,
     word_xors: Option<u64>,
+    calls: Option<u64>,
     reductions: Option<u64>,
     geometry: Option<u64>,
     relations: Option<u64>,
@@ -70,6 +71,7 @@ fn read(dir: &str) -> Result<(String, Vec<Run>), String> {
             r: curve["r"].as_f64().unwrap_or(f64::NAN),
             s: r["cost"]["s"].as_f64(),
             word_xors: r["solver"]["ops"].as_u64(),
+            calls: r["solver"]["calls"].as_u64(),
             reductions: r["solver"]["extra"]["reductions"].as_u64(),
             geometry: r["solver"]["extra"]["geometric_group_additions"].as_u64(),
             relations: r["counters"]["relations_found"].as_u64(),
@@ -149,6 +151,7 @@ fn cell(slug: &str, runs: &[&Run]) -> Value {
                 "isolation": isolation,
                 "s": field(&|r| r.s),
                 "word_xors": field(&|r| r.word_xors.map(|x| x as f64)),
+                "solver_calls": field(&|r| r.calls.map(|x| x as f64)),
                 "reductions": field(&|r| r.reductions.map(|x| x as f64)),
                 "geometric_additions": field(&|r| r.geometry.map(|x| x as f64)),
                 "relations": field(&|r| r.relations.map(|x| x as f64)),
@@ -225,6 +228,15 @@ fn cell(slug: &str, runs: &[&Run]) -> Value {
             "mixed"
         };
         let s_ratio = paired("f6-ic", "inherited-f4", &|x, y| Some(x.s? / y.s?));
+        // Derived, not a preregistered rule: the arms' trees can diverge
+        // (each engine returns its own decomposition, so runs stop after
+        // different numbers of trials), so also report work per solver call.
+        let per_call = paired("inherited-f4", "f6-ic", &|x, y| {
+            let a = x.word_xors? as f64 / x.calls? as f64;
+            let b = y.word_xors? as f64 / y.calls? as f64;
+            Some((a / b).log2())
+        });
+        let same_calls = paired("inherited-f4", "f6-ic", &|x, y| Some((x.calls == y.calls) as u8 as f64));
         let wall = paired("inherited-f4", "f6-ic", &|x, y| {
             Some(x.relations_wall_ns? as f64 / y.relations_wall_ns? as f64)
         });
@@ -233,6 +245,8 @@ fn cell(slug: &str, runs: &[&Run]) -> Value {
             json!({
                 "log2_ratio": summary(&l),
                 "verdict": verdict,
+                "derived_log2_per_call": summary(&per_call),
+                "targets_with_equal_solver_calls": same_calls.iter().filter(|&&v| v == 1.0).count(),
                 "s_f6_over_inherited": summary(&s_ratio),
                 "relations_wall_inherited_over_f6": summary(&wall),
             }),
