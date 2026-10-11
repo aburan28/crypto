@@ -57,6 +57,10 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /.github/scripts/
+            /build.rs
+            /rustfmt.toml
+            /clippy.toml
+            /rust-toolchain*
             /src/
             /tests/
             /examples/
@@ -87,6 +91,10 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /.github/scripts/
+            /build.rs
+            /rustfmt.toml
+            /clippy.toml
+            /rust-toolchain*
             /src/
             /tests/
             /examples/
@@ -102,7 +110,7 @@ jobs:
         run: |
           git fetch --no-tags --depth=1 origin "$BASE"
           git diff --name-only -z --diff-filter=AMR "$BASE" HEAD -- \
-            'src/**.rs' 'tests/**.rs' 'examples/**.rs' 'benches/**.rs' 'cd_attack/**.rs' \
+            'src/**.rs' 'tests/**.rs' 'examples/**.rs' 'benches/**.rs' 'cd_attack/**.rs' 'build.rs' \
             > "$RUNNER_TEMP/changed-rust-files"
           mapfile -d '' -t files < "$RUNNER_TEMP/changed-rust-files"
           if [ ${#files[@]} -eq 0 ]; then
@@ -162,6 +170,9 @@ jobs:
             /.cargo/
             /rust-toolchain*
             /.github/scripts/
+            /build.rs
+            /rustfmt.toml
+            /clippy.toml
             /src/
             /tests/
             /examples/

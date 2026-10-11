@@ -25,7 +25,7 @@ export function classify(files, embedded = new Set()) {
     result.rust_cd ||= /^cd_attack\/(src|tests|examples|benches)\//.test(file) && !prose.test(file)
       || /^cd_attack\/(Cargo\.(toml|lock)|build\.rs|rust-toolchain(\.toml)?|\.cargo\/.*)$/.test(file)
       || /^rust-toolchain(\.toml)?$|^\.cargo\//.test(file);
-    result.rust_fmt ||= /\.rs$/.test(file) && (maintained.test(file) || /^cd_attack\//.test(file));
+    result.rust_fmt ||= /\.rs$/.test(file) && (maintained.test(file) || /^cd_attack\//.test(file) || file === 'build.rs');
     result.release_rust ||= /^src\//.test(file) && !prose.test(file) || rustConfig.test(file)
       || file === 'tests/fixtures/ecbench_manifest_small.json'
       || /^docs\/curves\//.test(file) || embedded.has(file);
@@ -70,7 +70,7 @@ function git(args, cwd) {
 export function embeddedInputs(cwd) {
   const inputs = new Set();
   const sources = git(['ls-files', '-z'], cwd).split('\0').filter(file =>
-    /\.rs$/.test(file) && (maintained.test(file) || frozenExamples.test(file)));
+    /\.rs$/.test(file) && (maintained.test(file) || frozenExamples.test(file) || file === 'build.rs'));
   for (const file of sources) {
     const text = readFileSync(path.join(cwd, file), 'utf8');
     for (const match of text.matchAll(/include_(?:str|bytes)!\(\s*"([^"\n]+)"/g)) {

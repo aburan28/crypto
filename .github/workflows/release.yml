@@ -60,6 +60,10 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /.github/scripts/
+            /build.rs
+            /rustfmt.toml
+            /clippy.toml
+            /rust-toolchain*
             /src/
             /tests/
             /examples/
@@ -128,6 +132,9 @@ jobs:
             /.cargo/
             /rust-toolchain*
             /.github/scripts/
+            /build.rs
+            /rustfmt.toml
+            /clippy.toml
             /src/
             /tests/
             /examples/

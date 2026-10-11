@@ -34,6 +34,8 @@ test('crates and languages select their own checks', () => {
 
 test('dependencies, workflow edits and frozen evidence remain applicable', () => {
   assert.equal(classify(['Cargo.lock']).rust_root, true);
+  assert.equal(classify(['build.rs']).rust_root, true);
+  assert.equal(classify(['build.rs']).rust_fmt, true);
   assert.equal(classify(['.cargo/config.toml']).rust_root, true);
   assert.equal(classify(['.cargo/config.toml']).rust_cd, true);
   assert.equal(classify(['.github/workflows/rust-all-targets.yml']).rust_root, true);
@@ -82,12 +84,15 @@ test('sparse compilation restores only embedded inputs, preserving archived file
   try {
     git('init', '-q'); git('config', 'user.email', 'ci@example.invalid'); git('config', 'user.name', 'CI scope test');
     write('src/lib.rs', 'const DATA: &str = include_str!("../research/fixture.json");\n');
+    write('build.rs', 'const DATA: &str = include_str!("research/build.json");\n');
+    write('research/build.json', '{}\n');
     write('research/fixture.json', '{}\n'); write('research/archive/huge.json', '{}\n');
     git('add', '.'); git('commit', '-qm', 'base');
-    git('sparse-checkout', 'set', '--no-cone', '/src/');
+    git('sparse-checkout', 'set', '--no-cone', '/src/', '/build.rs');
     assert.equal(existsSync(path.join(cwd, 'research/fixture.json')), false);
     materializeInputs(cwd);
     assert.equal(existsSync(path.join(cwd, 'research/fixture.json')), true);
+    assert.equal(existsSync(path.join(cwd, 'research/build.json')), true);
     assert.equal(existsSync(path.join(cwd, 'research/archive/huge.json')), false);
   } finally { rmSync(cwd, { recursive: true, force: true }); }
 });
