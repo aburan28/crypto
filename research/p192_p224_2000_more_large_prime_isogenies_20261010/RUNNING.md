@@ -1,5 +1,10 @@
 # Running campaign and frozen initial snapshot
 
+**Superseded live location:** the scratch run below is no longer active. Its later
+outputs and root-gate receipt were unavailable after scratch cleanup. See
+[the recovery record](RECOVERY_20261011.md) for the active durable restart and
+acceptance accounting. The initial snapshot below remains a historical record.
+
 The requested **at least 2000 additional maps remains open**. Two real native
 walks are running, each requesting 1050 independently replayed steps. The initial
 snapshot contains 6 P192 and 19 P224 sealed steps; all 25 reproduce earlier maps,
@@ -57,6 +62,13 @@ other host activity. The system disk had 18 GiB free. Raw walks and build/log
 scratch therefore use the system disk. A temporary absolute path is live storage,
 not final durable delivery: archive raw new maps before claiming the request
 fully delivered.
+
+During execution the research SSD fell to 32 MiB free. The inactive CLI cache
+and the completed 3.2 GiB all-targets cache belonging to this worktree were moved
+to the system disk, preserving their files. This recovered 3.6 GiB on the SSD;
+11 GiB remained on the system disk at that check. The active root-gate executable
+and both copied walk executables were left at their running paths. The cache
+moves do not alter the frozen producer binary or its source identity.
 
 PR 1606 remains ready for review. Its preceding head passed all four dedicated
 isogeny release build profiles. Other hosted checks failed, including copied

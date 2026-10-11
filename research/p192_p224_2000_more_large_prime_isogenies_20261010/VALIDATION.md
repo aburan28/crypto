@@ -26,8 +26,10 @@ chain are rejected. Positive two-step replay passes. Extracting the archived
 runtime outside the checkout also passes a complete two-map P384/19 construction
 and independent replay. These control maps are excluded from campaign yield.
 
-The root release library gate remains running. Historical merged-tree validation
-does not replace the new check. Raw native test/control logs are retained under
+The former root release library process and scratch log were lost before a
+completion receipt could be retained. A fresh required gate now runs with its
+log under `runs/restart-20261011/validation/`. Historical merged-tree validation
+does not replace this check. Saved native test/control logs remain under
 `evidence/validation/` and `evidence/controls/`.
 
 The first commit included the CLI changes but sparse-checkout staging omitted

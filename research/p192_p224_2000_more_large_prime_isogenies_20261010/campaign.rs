@@ -128,6 +128,11 @@ fn inventory(root: &Path, dir: &Path, rows: &mut Vec<Value>) {
         .collect();
     paths.sort();
     for path in paths {
+        // The live restart is durable, but mutable. Frozen inventories include
+        // its archived checkpoints only after the campaign seals them.
+        if path == root.join("runs") {
+            continue;
+        }
         if path.is_dir() {
             inventory(root, &path, rows);
         } else if path.file_name().unwrap() != "FILES.json" {
