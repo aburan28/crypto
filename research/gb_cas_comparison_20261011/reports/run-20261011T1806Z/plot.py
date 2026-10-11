@@ -42,6 +42,7 @@ ax.set_title("Reduced grevlex Gröbner basis over F_p, same systems; bars = medi
              "run-20261011T1806Z; msolve wall includes ~6 ms process start-up", fontsize=9)
 fig.tight_layout()
 fig.savefig(R("fp.svg"))
+fig.savefig(R("fp.png"), dpi=150)
 
 ours = {}
 for l in open(R("raw", "bool_n17_ours.jsonl")):
@@ -76,3 +77,4 @@ ax.set_title("Deciding the m = 3 decomposition system, K(1,17), dim-6 factor bas
              "run-20261011T1806Z; ours: best of 3 reps; external: one run each", fontsize=9)
 fig.tight_layout()
 fig.savefig(R("bool_n17.svg"))
+fig.savefig(R("bool_n17.png"), dpi=150)
