@@ -5,11 +5,11 @@ This directory holds the structural-completeness paper (below) and, in
 Makefile and README.
 
 `structural_completeness.tex` is a paper-quality LaTeX version of
-[`research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md`](../research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md).
+[`research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md`](../../research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md).
 
 **Status**: anonymized for double-blind review.  Restore real
 authors via `make deanonymize` after creating an `AUTHORS` file
-(see `AUTHORS.example`).
+(see `../AUTHORS.example`).
 
 ## Building
 
@@ -17,7 +17,7 @@ Requires a TeX distribution (TeX Live, MacTeX, MiKTeX) with
 `pdflatex` and standard packages (`amsmath`, `amssymb`, `hyperref`,
 `booktabs`).
 
-Use the provided `Makefile`:
+Use the provided `Makefile` (the rules are the shared `../paper.mk`):
 
 ```
 make           # build the PDF (two passes for cross-refs)
@@ -30,7 +30,7 @@ make clean     # remove build artefacts
 Manually (without Makefile):
 
 ```
-cd paper
+cd papers/structural-completeness
 pdflatex structural_completeness.tex
 pdflatex structural_completeness.tex    # second pass for cross-refs
 ```
@@ -58,10 +58,10 @@ Output: `structural_completeness.pdf` (~15 pages).
 
 Everything cited in the paper is in this repository:
 
-- PARI scripts: `../secp256k1_cm_audit/*.gp`
-- Rust integration: `../tests/curve_audit.rs`
-- Research notes: `../RESEARCH_*.md`
-- Markdown paper (kept in sync with this LaTeX): `../PAPER_STRUCTURAL_COMPLETENESS.md`
+- PARI scripts: `../../secp256k1_cm_audit/*.gp`
+- Rust integration: `../../tests/curve_audit.rs`
+- Research notes: `../../RESEARCH_*.md`
+- Markdown paper (kept in sync with this LaTeX): `../../research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md`
 
 ## Status
 

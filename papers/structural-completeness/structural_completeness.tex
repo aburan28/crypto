@@ -37,7 +37,8 @@
 \newcommand{\Jac}{\operatorname{Jac}}
 \newcommand{\Res}{\operatorname{Res}}
 \newcommand{\disc}{\operatorname{disc}}
-\newcommand{\gcd}{\operatorname{gcd}}
+\renewcommand{\gcd}{\operatorname{gcd}}
+\newcommand{\CM}{\mathrm{CM}}
 \newcommand{\NS}{\operatorname{NS}}
 
 \title{Structural Completeness of Prime-Field Elliptic Curves \\
@@ -49,6 +50,7 @@
 
 \begin{document}
 \maketitle
+\emergencystretch=2em
 
 \begin{abstract}
 We pursue a comprehensive cryptanalytic audit of the isogeny-graph
@@ -335,11 +337,13 @@ Gaudry~\cite{gaudry2000} with $g = 2$.
 \end{proof}
 
 \begin{remark}
+\begin{sloppypar}
 For secp256k1, computed residues are $p \bmod 3 = 1$, $p \bmod 5 = 3$,
 $p \bmod 7 = 1$, $p \bmod 11 = 7$, $p \bmod 13 = 5$.  In every case
 $p \not\equiv \ell{-}1 \pmod\ell$, so Lemma~\ref{lem:ell-rank} applies
 and no $\FF_p$-rational split $(\ell,\ell)$-kernel exists for
 $\ell \in \{3,5,7,11,13\}$.
+\end{sloppypar}
 The $(3,3)$-isogeny graph from $E \times E^t$ was walked to depth~5
 across 25 kernel-curve pairs (Exp~U--Y, script
 \texttt{hesse\_33\_walk\_depth2.py}),
@@ -478,10 +482,10 @@ Proposition~\ref{prop:biquadratic-order2} was discovered empirically in Thread~1
 for norm-form primes ($4p = 73 + 3k^2$, $k$ odd), proved algebraically in
 Thread~15, and generalised to arbitrary $(p, a_2)$ in Thread~16.
 Numerical verification covers:
-$25$ norm-form primes $k \leq 199$ (script \texttt{thread15\_order2\_algebraic.gp}),
+$25$ norm-form primes $k \leq 199$ (script \path{thread15_order2_algebraic.gp}),
 and $57$ arbitrary $(p, a_2)$ pairs including non-norm-form primes, $D < 0$, $D > 0$,
 and values derived from genus-$2$ curves over $\FF_p$
-(script \texttt{thread16\_general\_order2.gp}).
+(script \path{thread16_general_order2.gp}).
 All $82$ cases gave $[\mathfrak{P}]^2 = 1$ with zero failures.
 
 The proposition is a \emph{purely algebraic} statement about ideals in quadratic
@@ -536,7 +540,7 @@ the underlying abelian surface.  When $a_2$ is the middle coefficient of a biqua
 Weil polynomial $T^4 + a_2 T^2 + p^2$ (as arises for $\Jac(C)$ with $\#C(\FF_p)=p+1$),
 the Frobenius ideal $\mathfrak{P}$ in $\QQ(\sqrt{\mathrm{sf}(D)})$ always has order $\leq 2$
 in the class group.  Verified for 82 cases (Threads 15--16, scripts
-\texttt{thread15\_order2\_algebraic.gp}, \texttt{thread16\_general\_order2.gp}) and
+\path{thread15_order2_algebraic.gp}, \path{thread16_general_order2.gp}) and
 the splitting corollary numerically confirmed for 408 pairs $(p, a_2)$
 with $p \in [5, 541]$ (Thread 17, script \texttt{thread17\_p\_splits.gp}).
 \end{remark}
@@ -579,12 +583,12 @@ Hence $p \nmid \mathrm{sf}$, so $p \nmid \disc(K)$ and $p$ is unramified.
 Proposition~\ref{prop:biquad-order2} is a pure ideal-theoretic statement,
 independent of any specific curve construction.
 It was discovered empirically for norm-form primes
-(Thread~14, script \texttt{thread14\_norm\_form\_sweep.gp}),
+(Thread~14, script \path{thread14_norm_form_sweep.gp}),
 proved algebraically and extended to arbitrary $(p,a_2)$
-in Threads~15--16 (scripts \texttt{thread15\_order2\_algebraic.gp} and
-\texttt{thread16\_general\_order2.gp}, 82 cases covering both $D < 0$
+in Threads~15--16 (scripts \path{thread15_order2_algebraic.gp} and
+\path{thread16_general_order2.gp}, 82 cases covering both $D < 0$
 and $D > 0$), and the splitting corollary verified separately for 10 diverse pairs
-with $p$ up to $10^6$ in Thread~17 (\texttt{thread17\_splitting\_check.gp}).
+with $p$ up to $10^6$ in Thread~17 (\path{thread17_splitting_check.gp}).
 All 92 verified cases give $[\mathfrak{P}]^2 = 1$ and split behaviour with zero failures.
 
 For any abelian surface $J/\FF_p$ with biquadratic Weil polynomial
