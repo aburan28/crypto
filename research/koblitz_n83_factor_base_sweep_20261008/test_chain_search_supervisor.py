@@ -1,5 +1,6 @@
 """Synthetic process guards for retained N83 chained-S3 search."""
 
+import copy
 import gzip
 import json
 from pathlib import Path
@@ -100,6 +101,41 @@ class ChainSearchGuardTests(unittest.TestCase):
             "selected_object": "objects/" + "b" * 64 + ".jsonl.gz",
             "selected_point_set_blake3": "c" * 64,
         }
+
+    def test_full_augmented_rank_is_admitted(self):
+        config = dict(self.config, max_trials=65)
+        worker_config, worker = receipts(config, "PASS_verified_target_only")
+        # Sixty-four orbit pivots and one target-column pivot are possible.
+        # This checks receipt structure; group replay is checked separately.
+        attempt = worker["attempt_records"][0]
+        relation = worker["relation_matrix"][0]
+        attempts, relations = [], []
+        for i in range(65):
+            column = min(i, 63)
+            next_attempt = copy.deepcopy(attempt)
+            next_attempt["trial"] = i + 1
+            next_attempt["b"] = "2" if i == 64 else "1"
+            next_attempt["decomposition_indices"] = [166 * column] * config["summands"]
+            attempts.append(next_attempt)
+            next_relation = copy.deepcopy(relation)
+            next_relation["b"] = next_attempt["b"]
+            next_relation["summands"] = [[column, 0]] * config["summands"]
+            next_relation["row"] = ["0"] * config["columns"]
+            next_relation["row"][column] = str(config["summands"])
+            relations.append(next_relation)
+        worker["attempt_records"] = attempts
+        worker["relation_matrix"] = relations
+        worker["rank_history"][0].update(rows=65, rank=65)
+        worker["report"].update(
+            trials=65, relations=65, independent_relations=65,
+            sat_calls=65, sat_models=65, matrix_rows=65,
+            terminal_matrix_rank=65,
+        )
+        self.assertIsNone(guard.receipt_error(worker, worker_config, config))
+        worker["report"]["independent_relations"] = 66
+        self.assertIn("rank", guard.receipt_error(worker, worker_config, config))
+        worker["report"]["independent_relations"] = 64
+        self.assertIn("rank", guard.receipt_error(worker, worker_config, config))
 
     def test_receipt_checks_rank_solver_caps_and_false_completion(self):
         worker_config, worker = receipts(self.config)

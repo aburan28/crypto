@@ -173,7 +173,10 @@ def receipt_error(worker: object, worker_config: object, config: dict) -> str | 
             report["matrix_rows"] != report["relations"] or
             report["matrix_columns"] != report["orbit_count"] + 1 or
             report["terminal_matrix_rank"] > min(report["matrix_rows"], report["matrix_columns"]) or
-            report["independent_relations"] > report["orbit_count"] or
+            # The augmented system has one target-log column in addition to
+            # the orbit columns; a complete solve can pivot on every column.
+            report["independent_relations"] > report["matrix_columns"] or
+            report["terminal_matrix_rank"] != report["independent_relations"] or
             report["independent_relations"] + report["dependent_relations"] != report["relations"] or
             report["sat_refutations"] > report["sat_calls"] or
             report["sat_unknowns"] > report["sat_calls"] or
