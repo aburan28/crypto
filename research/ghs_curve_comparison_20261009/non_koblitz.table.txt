@@ -1,0 +1,12 @@
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---|
+| ECBS1hd395a1344225 | rho-neg | rho.negation | icv1-f2m13-t181-515ee569 | 10.97 | 8/8 | 2.949 | [2.472, 3.433] | 0.886 | 3.328 | 11.999 | 1.000 | yes | L0×8 |
+| ECBS1hd395a1344225 | rho-neg | rho.negation | icv1-f2m13-t11-f036dc01 | 12.00 | 8/8 | 2.605 | [2.175, 3.191] | 0.886 | 2.940 | 2.940 | 1.000 | yes | L0×8 |
+| ECBS1hd395a1344225 | rho-neg | rho.negation | icv1-f2m15-tm275-2d22ff5d | 9.55 | 8/8 | 3.676 | [3.179, 4.206] | 0.886 | 4.148 | 16.067 | 1.000 | yes | L0×8 |
+| ECBS1hd395a1344225 | rho-neg | rho.negation | icv1-f2m15-t5-d9fb183e | 13.00 | 8/8 | 2.344 | [1.946, 2.802] | 0.886 | 2.645 | 2.645 | 1.000 | yes | L0×8 |
+| ECBS1hd395a1344225 | rho-neg | rho.negation | icv1-f2m15-tm185-565c1669 | 14.01 | 8/8 | 1.844 | [1.430, 2.291] | 0.886 | 2.081 | 2.081 | 1.000 | yes | L0×8 |
+| ECBS1hd395a1344225 | bsgs-neg | bsgs.negation | icv1-f2m13-t181-515ee569 | 10.97 | 8/8 | 1.137 | [0.980, 1.302] | 1.000 | 1.137 | 4.625 | 0.385 | yes | L0×8 |
+| ECBS1hd395a1344225 | bsgs-neg | bsgs.negation | icv1-f2m13-t11-f036dc01 | 12.00 | 8/8 | 1.030 | [0.897, 1.141] | 1.000 | 1.030 | 1.162 | 0.395 | yes | L0×8 |
+| ECBS1hd395a1344225 | bsgs-neg | bsgs.negation | icv1-f2m15-tm275-2d22ff5d | 9.55 | 8/8 | 1.286 | [1.154, 1.409] | 1.000 | 1.286 | 5.621 | 0.350 | yes | L0×8 |
+| ECBS1hd395a1344225 | bsgs-neg | bsgs.negation | icv1-f2m15-t5-d9fb183e | 13.00 | 8/8 | 1.225 | [1.063, 1.371] | 1.000 | 1.225 | 1.382 | 0.523 | yes | L0×8 |
+| ECBS1hd395a1344225 | bsgs-neg | bsgs.negation | icv1-f2m15-tm185-565c1669 | 14.01 | 8/8 | 1.134 | [1.029, 1.258] | 1.000 | 1.134 | 1.280 | 0.615 | yes | L0×8 |

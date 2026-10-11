@@ -1,0 +1,5 @@
+{
+ "_note": "Derived (not measured): expected c(A)/c(plain) at m = 2 when the automorphism group A acts trivially on the cofactor group H, = 1 + (h-1)(|A|-2)/(2|F|); 0 correction when no nonzero element of H is fixed by any zeta^k (C2: zeta permutes the nonzero 2-torsion freely). |A| = 10.",
+ "C1": {"h": 5, "formula": "1 + 16/|F|", "size": [50, 100, 200], "derived_c2_ratio": [1.32, 1.16, 1.08]},
+ "C2": {"h": 16, "formula": "1 (no fixed cofactor class)", "size": [80, 160], "derived_c2_ratio": [1.0, 1.0]}
+}

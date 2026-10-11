@@ -39,6 +39,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            Cargo.lock
             src
             examples/n37_four_policy_pdp.rs
             examples/n37_four_policy_pdp_replay.rs

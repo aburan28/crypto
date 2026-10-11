@@ -1,0 +1,16 @@
+Independent p=47 positive-label validation, 2026-10-08
+
+Command: gp -q -f research/iso1_weak_classes_20261007/gp_p47_validation.gp > research/iso1_weak_classes_20261007/gp_p47_traces.csv 2> research/iso1_weak_classes_20261007/gp_p47_stderr.txt
+Exit status: 0; standard error: empty. PARI/GP native ellcard runs on
+ffgen([47,6],'z), a separate field representation and point counter
+from the Rust census. Setrand seed 1501; 5,000 norm-one Legendre
+parameters lambda=random(z)^(q-1), excluding zero and one.
+
+The output has 5,000 rows, 4,200 distinct traces, SHA-256
+2de6fa1c7051c91104d4aab8d35a76adf6cc1f796566adf9bb332f37038f4bb7.
+All 5,000 traces occur with positive weak_representatives in p47_orbit.csv;
+zero missing. Comparison keyed by the trace column, with the CSV's
+nonordinary boundary positives included. This validates sampled positive
+labels, not every positive label or any zero-witness row. The special
+size-two orbit's boundary trace has a separate direct GP check in
+gp_p47_special_trace.txt.

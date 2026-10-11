@@ -1,0 +1,10 @@
+Commands run concurrently in eigen_seta/:
+cargo run --release --example pke_run -- L3
+cargo run --release --example pke_run -- L5
+Both exited 0.
+
+L3 stdout:
+L3 keygen_s 186.427 encrypt_s 1.1051 decrypt_s 47.138 pk_bytes 1992 pke_ct_bytes 2059 message_bytes 39 correct true
+
+L5 stdout:
+L5 keygen_s 298.906 encrypt_s 2.2990 decrypt_s 104.223 pk_bytes 2632 pke_ct_bytes 2699 message_bytes 39 correct true

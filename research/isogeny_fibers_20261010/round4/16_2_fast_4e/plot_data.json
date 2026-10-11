@@ -1,0 +1,48 @@
+{
+  "131": {
+    "points_members_of_G": 249896,
+    "mul": {
+      "binary_ld_rP": 661.0,
+      "tnaf_ld_rP": 346.0,
+      "closed_form_chain": 1.0,
+      "closed_form_table": 1.0
+    },
+    "sqr": {
+      "binary_ld_rP": 816.0,
+      "tnaf_ld_rP": 609.0,
+      "closed_form_chain": 130.0,
+      "closed_form_table": 0.0
+    },
+    "wall_ns_median": {
+      "binary_ld_rP": 232170.0888671875,
+      "tnaf_ld_rP": 160293.73876953125,
+      "closed_form_chain": 22841.52099609375,
+      "closed_form_table": 124.03857421875
+    },
+    "bench_points": 2048,
+    "bench_reps": 5
+  },
+  "233": {
+    "points_members_of_G": 250583,
+    "mul": {
+      "binary_ld_rP": 1255.0,
+      "tnaf_ld_rP": 618.0,
+      "closed_form_chain": 1.0,
+      "closed_form_table": 1.0
+    },
+    "sqr": {
+      "binary_ld_rP": 1506.0,
+      "tnaf_ld_rP": 1085.0,
+      "closed_form_chain": 232.0,
+      "closed_form_table": 0.0
+    },
+    "wall_ns_median": {
+      "binary_ld_rP": 165402.3916015625,
+      "tnaf_ld_rP": 98230.69140625,
+      "closed_form_chain": 11778.193359375,
+      "closed_form_table": 122.19775390625
+    },
+    "bench_points": 2048,
+    "bench_reps": 5
+  }
+}

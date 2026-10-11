@@ -74,7 +74,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::binary_ecc::{BinaryPoint, F2mElement};
 
-use super::koblitz_fast_arith::FastBinaryCurve;
 use super::koblitz_groebner::{f4_word_ops_thread, FieldStructure, SolverEngine};
 use super::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, build_frobenius_factor_base,
@@ -841,11 +840,7 @@ fn spec_abscissa_bound(spec: &FactorBaseSpec, n: u32) -> Option<u64> {
         // Saturation is monotone in abscissae (parent x-values are kept),
         // so a parent bound is a lower bound for the child.
         FactorBaseSpec::TwoTorsionSaturated { parent } => spec_abscissa_bound(parent, n),
-        FactorBaseSpec::FrobeniusUnion { .. }
-        | FactorBaseSpec::Pruned { .. }
-        | FactorBaseSpec::StandardSubspace { .. }
-        | FactorBaseSpec::CofactorProjected { .. }
-        | FactorBaseSpec::SubgroupOrbits { .. } => None,
+        FactorBaseSpec::FrobeniusUnion { .. } | FactorBaseSpec::Pruned { .. } => None,
     }
 }
 

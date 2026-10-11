@@ -179,7 +179,13 @@ Floor ÷ crater on each certified pair, same arms, factor base and targets:
   from one, up to 3.1, are the five pairs with cofactor 25 or 784 to 5408.
   There the closed table's set-up cost differs between crater and floor,
   while relation-phase cost per relation stays within 25 percent.  This
-  round does not explain the set-up difference.
+  round does not explain the set-up difference.  *Explained in round 2*
+  ([`../isogeny_conductor_gap_round2_20261011/`](../isogeny_conductor_gap_round2_20261011/README.md)):
+  the oracle's subgroup closure overcounted additions. The overcount grew
+  with how many base points the sampler needed, not with the curve.  Under
+  the corrected closure, crater, floor and model pay the same set-up
+  within 0.3 percent, and the 3.1 ratio becomes 1.00.  The sessions here
+  are unchanged and still replay.
 - **The isomorphic floor model is a null control.**  Its `S` over the
   floor's is 1.00 [0.28, 1.11] for the closed MITM and 1.01 [0.54, 1.51]
   for rho, across 38 pairs.

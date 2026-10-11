@@ -1,0 +1,13 @@
+measure.json was produced by binary sha256 b06cb13007c358c3c9097caa369f42123b61c0e33d2cc92b4a95044cf8fa209b
+(started 2026-10-11T20:12Z; 77.41 s user, 5:15.90 wall at load 86-91).
+
+A rebuild after report-only source changes (binary sha256
+32e9cd1749af6cfd8d7aff6fdcc10c60488d1bfafb926cca853d84dcadf6b9aa; the measure code path
+was unchanged) re-ran `measure 24 36` (77.49 s user, 6:48.10 wall, load 96-106 at the end)
+and wrote a byte-identical file:
+
+sha256(measure.json)       = 48295d00b8919a69a1e04f123f8f588ca69a2b016d410ff13a23e5d8fd9334a7
+sha256(re-run measure.json) = 48295d00b8919a69a1e04f123f8f588ca69a2b016d410ff13a23e5d8fd9334a7
+
+The measurement is deterministic in its seeds and counted in group-addition equivalents;
+wall time is not used anywhere.

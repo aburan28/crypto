@@ -1,0 +1,42 @@
+rank    ratio  verdict             family      curve                                               route
+   1    +57.6  unresolved          binary      c2pnb304w1                                          GHS descent to Jac(C)/GF(2^2), N = 152 * 2 [m = 9, upper bound]
+   2    +41.3  unresolved          binary      c2pnb272w1                                          GHS descent to Jac(C)/GF(2^2), N = 136 * 2 [m = 9, upper bound]
+   3    +23.9  unresolved          binary      c2pnb176w1                                          GHS descent to Jac(C)/GF(2^2), N = 88 * 2 [m = 8, lower bound]
+   4    +10.9  formula_advantage   binary      Oakley Group 4                                      GHS descent to Jac(C)/GF(2^37), N = 5 * 37
+   5    +10.1  formula_advantage   binary      c2pnb368w1                                          GHS descent to Jac(C)/GF(2^92), N = 4 * 92
+   6     +1.1  formula_marginal    binary      Oakley Group 3                                      GHS descent to Jac(C)/GF(2^31), N = 5 * 31
+   7     +0.4  formula_marginal    extension   icv1-fp12k5-tm296780010-475f4271                    descent to a genus-5 cover C/GF(p) of E/GF(p^5)
+   8     -0.4  boundary            extension   icv1-fp31k2-t1044939202-6687f4aa                    descent to a genus-2 cover C/GF(p) of E/GF(p^2)
+   9     -0.4  boundary            extension   icv1-fp36k2-tm52676205250-0d78f787                  descent to a genus-2 cover C/GF(p) of E/GF(p^2)
+  10     -0.5  boundary            subfield    icv1-f2m18-t999-40751283                            GHS descent to Jac(C)/GF(2^9), N = 2 * 9 [m = 2, upper bound]
+  11     -0.7  boundary            binary      icv1-f2m27-t12543-569dca8b                          GHS descent to Jac(C)/GF(2^9), N = 3 * 9
+  12     -0.7  boundary            binary      icv1-f2m27-t20811-3d0fd5a1                          GHS descent to Jac(C)/GF(2^9), N = 3 * 9
+  13     -0.7  boundary            binary      icv1-f2m27-t6931-1834c541                           GHS descent to Jac(C)/GF(2^9), N = 3 * 9
+  14     -0.7  boundary            binary      icv1-f2m27-tm20293-ca4ad8af                         GHS descent to Jac(C)/GF(2^9), N = 3 * 9
+  15     -0.7  boundary            extension   icv1-fp10k3-t3589-bbd5cc8b                          descent to a genus-3 cover C/GF(p) of E/GF(p^3)
+  16     -0.7  boundary            extension   icv1-fp11k3-tm30789-3c2726bc                        descent to a genus-3 cover C/GF(p) of E/GF(p^3)
+  17     -0.7  boundary            extension   icv1-fp9k3-tm4575-aba104ba                          descent to a genus-3 cover C/GF(p) of E/GF(p^3)
+  18     -0.7  boundary            binary      icv1-f2m24-t1545-54539071                           GHS descent to Jac(C)/GF(2^8), N = 3 * 8
+  19     -0.7  boundary            binary      icv1-f2m24-tm3047-2d0c0e8c                          GHS descent to Jac(C)/GF(2^8), N = 3 * 8
+  20     -0.7  boundary            binary      icv1-f2m21-t2591-de54d72e                           GHS descent to Jac(C)/GF(2^7), N = 3 * 7
+  21     -0.7  boundary            binary      icv1-f2m21-t2845-e2683765                           GHS descent to Jac(C)/GF(2^7), N = 3 * 7
+  22     -0.7  boundary            extension   icv1-fp10k3-t41822-dfa3991d                         descent to a genus-3 cover C/GF(p) of E/GF(p^3)
+  23     -0.7  boundary            binary      icv1-f2m21-tm1495-8bd9aa74                          GHS descent to Jac(C)/GF(2^7), N = 3 * 7
+  24     -0.7  boundary            extension   icv1-fp9k3-t1227-55c8d640                           descent to a genus-3 cover C/GF(p) of E/GF(p^3)
+  25     -0.7  boundary            binary      icv1-f2m18-t393-d2c04152                            GHS descent to Jac(C)/GF(2^6), N = 3 * 6
+  26     -0.7  boundary            binary      icv1-f2m15-t131-ed7256f0                            GHS descent to Jac(C)/GF(2^5), N = 3 * 5
+  27     -0.7  boundary            binary      icv1-f2m15-tm185-565c1669                           GHS descent to Jac(C)/GF(2^5), N = 3 * 5
+  28     -0.7  boundary            binary      icv1-f2m15-tm217-f2f901c1                           GHS descent to Jac(C)/GF(2^5), N = 3 * 5
+  29     -0.7  boundary            binary      icv1-f2m15-tm65-37237277                            GHS descent to Jac(C)/GF(2^5), N = 3 * 5
+  30     -0.7  boundary            binary      icv1-f2m15-t5-d9fb183e                              GHS descent to Jac(C)/GF(2^5), N = 3 * 5
+  31     -0.7  boundary            binary      icv1-f2m15-tm237-34b47a4a                           GHS descent to Jac(C)/GF(2^5), N = 3 * 5
+  32     -1.4  boundary            binary      c2pnb208w1                                          GHS descent to Jac(C)/GF(2^52), N = 4 * 52
+  33     -1.4  boundary            extension   icv1-fp6k11-tm527622722-07ccd925                    descent to a genus-11 cover C/GF(p) of E/GF(p^11)
+  34     -2.0  boundary            prime       secp112r2                                           same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)
+  35     -2.0  boundary            prime       wap-wsg-idm-ecid-wtls8                              same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)
+  36     -2.0  boundary            prime       secp112r1                                           same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)
+  37     -2.0  boundary            prime       secp128r2                                           same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)
+  38     -2.0  boundary            prime       secp128r1                                           same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)
+  39     -2.0  boundary            prime       icv1-fp158-t454233058419889982668807-a7cee044       same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)
+  40     -2.0  boundary            prime       icv1-fp159-t3-4900a99f                              same-field genus-2 cover H -> E of degree 2 over GF(p) (prime_quadratic_pullback_v1)
+321 curves, 2 with a formula advantage, 2 marginal, 3 unresolved
