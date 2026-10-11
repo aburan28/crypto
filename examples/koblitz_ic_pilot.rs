@@ -53,6 +53,7 @@ fn main() {
         m3_solver: match std::env::var("KOBLITZ_PILOT_M3").as_deref() {
             Ok("sym") => M3Solver::SymmetricGroebner,
             Ok("e3") => M3Solver::SymmetricE3,
+            Ok("pin") => M3Solver::PinX3,
             _ => M3Solver::Chain,
         },
         ..Default::default()
@@ -71,7 +72,9 @@ fn main() {
         "{}",
         serde_json::json!({
             "n": n, "a2": a2, "a6": a6, "m": m, "l": l, "mode": if full {"full"} else {"exact"},
-            "basis_seed": basis_seed, "geometric": geometric, "m3_solver": format!("{:?}", opts.m3_solver), "probes": row.trials, "seconds": secs,
+            "basis_seed": basis_seed, "geometric": geometric, "m3_solver": format!("{:?}", opts.m3_solver),
+            "sym_e3_visited": row.sym_e3_visited, "sym_roots": row.sym_roots, "sym_split": row.sym_split,
+            "wordfield_serial": std::env::var("KOBLITZ_WORDFIELD_SERIAL").as_deref() == Ok("1"), "probes": row.trials, "seconds": secs,
             "factor_base_points": row.factor_base_points, "unknowns": row.unknowns,
             "us_per_call": ns_call / 1e3,
             "reductions_per_call": row.reductions as f64 / row.groebner_calls.max(1) as f64,

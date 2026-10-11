@@ -68,7 +68,15 @@ fn main() {
     // `KOBLITZ_PRES_GEOMETRIC=1`: V_s = θ_s·⟨1, g_s, …⟩ (cheap, varied) instead
     // of a random basis; written to a separate `_geom` file.
     let geometric = std::env::var("KOBLITZ_PRES_GEOMETRIC").is_ok_and(|v| v == "1");
-    let suffix = if geometric { "_geom" } else { "" };
+    // `KOBLITZ_PRES_M3=e3`: m = 3 through the symmetrised S₄ with exact e₃
+    // enumeration (needs `KOBLITZ_PRES_GEOMETRIC=1`); written to `_m3e3`.
+    let m3 = std::env::var("KOBLITZ_PRES_M3").is_ok_and(|v| v == "e3");
+    let suffix = match (geometric, m3) {
+        (true, true) => "_geom_m3e3",
+        (false, true) => "_m3e3",
+        (true, false) => "_geom",
+        (false, false) => "",
+    };
     let path = std::path::PathBuf::from(dir).join(format!("pres_{n}_{a2}_l{l}{suffix}.jsonl"));
     let done: HashSet<(u64, u64)> = std::fs::read_to_string(&path)
         .unwrap_or_default()
@@ -117,7 +125,8 @@ fn main() {
     cells.par_iter().with_max_len(1).for_each(|&(a6, seed)| {
         let opts = IcCostOptions {
             l,
-            m: 2,
+            m: if m3 { 3 } else { 2 },
+            m3_solver: if m3 { M3Solver::SymmetricE3 } else { M3Solver::Chain },
             yield_probes: probes,
             max_trials: 0,
             // `KOBLITZ_PRES_FFD_TARGETS=0` skips first fall: its decomposability
@@ -139,6 +148,8 @@ fn main() {
                 "reductions": r.reductions, "first_fall_hist": r.first_fall_hist,
                 "d_star_hist": r.d_star_hist, "inconsistent": r.inconsistent_relations,
                 "bsgs_ok": r.bsgs_log == Some(r.planted), "r": r.r, "cofactor": r.cofactor,
+                "m": if m3 { 3 } else { 2 }, "sym_e3_visited": r.sym_e3_visited,
+                "sym_roots": r.sym_roots, "sym_split": r.sym_split,
             }),
             Err(e) => serde_json::json!({"n": n, "a2": a2, "l": l, "a6": a6, "basis_seed": seed,
                                          "depth": depth[&a6], "skipped": format!("{e:?}")}),

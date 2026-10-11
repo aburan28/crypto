@@ -102,7 +102,7 @@ use crate::cryptanalysis::koblitz_groebner::{
 };
 use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
 use crate::cryptanalysis::koblitz_sym_s4::{
-    build_sym_s4_system, decompose_by_e3, split_in, SymSpaces, WordField,
+    build_sym_s4_system, decompose_by_e3, decompose_pair_linear, split_in, SymSpaces, WordField,
 };
 use crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing;
 use crate::cryptanalysis::semaev_decomp::Gf2;
@@ -505,6 +505,14 @@ pub struct IcCostRow {
     /// First-fall-degree histogram over the same targets.
     pub first_fall_hist: BTreeMap<u32, u32>,
     pub refutable_targets: u32,
+    /// `SymmetricE3` only: `e₃` values visited, `S₄` roots found, and roots
+    /// whose cubic split in `V`, summed over calls.
+    #[serde(default)]
+    pub sym_e3_visited: u64,
+    #[serde(default)]
+    pub sym_roots: u64,
+    #[serde(default)]
+    pub sym_split: u64,
 }
 
 impl IcCostRow {
@@ -858,6 +866,14 @@ pub fn measure_member(
             v_values: v_words.iter().map(|&w| to_element(w, n)).collect(),
             v_words,
             field: WordField::new(n, &me.irr),
+            w1_words: Vec::new(),
+            w2_words: Vec::new(),
+        })
+        .map(|mut c| {
+            let words = |k: usize| -> Vec<u64> { c.spaces.w[k].iter().map(from_element).collect() };
+            c.w1_words = words(0);
+            c.w2_words = words(1);
+            c
         })
     } else {
         None
@@ -953,6 +969,9 @@ pub fn measure_member(
         d_star_hist: BTreeMap::new(),
         first_fall_hist: BTreeMap::new(),
         refutable_targets: 0,
+        sym_e3_visited: 0,
+        sym_roots: 0,
+        sym_split: 0,
     };
 
     // ── phase 1: the measurement, a fixed budget spent in full ──────
@@ -1102,9 +1121,57 @@ fn probe_once(
 
     let x_r = to_element(target.x, n);
     let mut lifted: Option<Vec<(usize, i8)>> = None;
-    let stats = if let (Some(sym), M3Solver::SymmetricE3) = (sym, opts.m3_solver) {
+    let stats = if let (Some(sym), M3Solver::PinX3) = (sym, opts.m3_solver) {
         let started = Instant::now();
-        let (_, _e3) = decompose_by_e3(
+        let (mut pins, mut roots_total) = (0u64, 0u64);
+        'pins: for &x3 in &sym.v_words {
+            if !entry_of.contains_key(&x3) {
+                continue;
+            }
+            let Some(&p3) = me.points_with_x(x3).first() else {
+                continue;
+            };
+            for p in [p3, me.fast.neg(p3)] {
+                pins += 1;
+                let t = me.fast.add(target, me.fast.neg(p));
+                if t.infinity {
+                    continue;
+                }
+                let (done, roots) = decompose_pair_linear(
+                    &sym.w1_words,
+                    &sym.w2_words,
+                    t.x,
+                    me.a6,
+                    &sym.field,
+                    &sym.v_words,
+                    |[x1, x2]| match lift(
+                        me,
+                        group,
+                        entry_of,
+                        &[x1, x2, x3],
+                        target,
+                        opts.cofactor_tolerant,
+                    ) {
+                        Some(terms) => {
+                            lifted = Some(terms);
+                            true
+                        }
+                        None => false,
+                    },
+                );
+                roots_total += roots;
+                if done {
+                    break 'pins;
+                }
+            }
+        }
+        row.groebner_ns += started.elapsed().as_nanos();
+        row.sym_e3_visited += pins;
+        row.sym_roots += roots_total;
+        SolveStats::default()
+    } else if let (Some(sym), M3Solver::SymmetricE3) = (sym, opts.m3_solver) {
+        let started = Instant::now();
+        let (_, e3_stats) = decompose_by_e3(
             &sym.spaces,
             &sym.v_words,
             target.x,
@@ -1119,6 +1186,9 @@ fn probe_once(
             },
         );
         row.groebner_ns += started.elapsed().as_nanos();
+        row.sym_e3_visited += e3_stats.e3_visited;
+        row.sym_roots += e3_stats.roots;
+        row.sym_split += e3_stats.split;
         SolveStats::default()
     } else if let Some(sym) = sym {
         let b_el = to_element(me.a6, n);
@@ -1256,6 +1326,11 @@ pub enum M3Solver {
     /// The same system solved exactly by enumerating `e₃ ∈ W₃` and one
     /// linear solve in `(e₁, e₂)` each ([`decompose_by_e3`]).
     SymmetricE3,
+    /// Pin `x₃ ∈ V`: for each point `±P₃` over it, decompose `R ∓ P₃` with
+    /// m = 2, which is one linear solve in `(x₁ + x₂, x₁x₂)`
+    /// ([`decompose_pair_linear`]).  `2^{l+1}` eliminations per probe
+    /// instead of `2^{3l−2}`.
+    PinX3,
 }
 
 /// The seeded `(θ, g)` behind [`geometric_basis`].
@@ -1277,6 +1352,8 @@ struct SymCtx {
     v_values: Vec<F2mElement>,
     v_words: Vec<u64>,
     field: WordField,
+    w1_words: Vec<u64>,
+    w2_words: Vec<u64>,
 }
 
 /// The `F_2`-span value of a coefficient mask over `basis`.
@@ -1961,6 +2038,16 @@ mod tests {
             let row = measure_member(n, &irr, a2, 1, &opts).expect("member");
             assert_eq!(row.inconsistent_relations, 0);
             assert!(row.verified, "IC and BSGS disagreed under symmetric S4");
+            // Pinning x3 finds a relation on exactly the probes e3 enumeration
+            // does: same seed, same probes, so the yields must agree.
+            let pinned = IcCostOptions {
+                m3_solver: M3Solver::PinX3,
+                ..opts.clone()
+            };
+            let rp = measure_member(n, &irr, a2, 1, &pinned).expect("member");
+            assert_eq!(rp.inconsistent_relations, 0);
+            assert!(rp.verified, "IC and BSGS disagreed under PinX3");
+            assert_eq!(rp.relations, row.relations, "PinX3 and e3 yields differ");
         }
         let random = IcCostOptions {
             l: 4,

@@ -236,12 +236,16 @@ pub fn split_in(
     None
 }
 
-/// One-word arithmetic in `F_{2^n}`, `n ≤ 32`: carry-less product reduced
-/// by a table of `z^k mod f`.
+/// One-word arithmetic in `F_{2^n}`, `n ≤ 32`.  With PCLMULQDQ the product
+/// is one carry-less multiply and the reduction folds the high half by
+/// `f − z^n` (a fixed number of folds for a sparse `f`); otherwise a
+/// bit-serial loop whose cost grows with the operands' bit lengths.
+/// `KOBLITZ_WORDFIELD_SERIAL=1` forces the serial path.
 #[derive(Clone, Debug)]
 pub struct WordField {
     n: u32,
     high: Vec<u64>,
+    clmul: bool,
 }
 
 impl WordField {
@@ -256,11 +260,45 @@ impl WordField {
             }
             p = p.mul(&z, irr);
         }
-        Self { n, high }
+        let clmul =
+            clmul::usable() && std::env::var("KOBLITZ_WORDFIELD_SERIAL").as_deref() != Ok("1");
+        Self { n, high, clmul }
+    }
+
+    /// Whether products use the carry-less multiply instruction.
+    pub fn uses_clmul(&self) -> bool {
+        self.clmul
     }
 
     #[inline]
     pub fn mul(&self, a: u64, b: u64) -> u64 {
+        if self.clmul {
+            // SAFETY: `clmul` is set only when `clmul::usable()` held.
+            return unsafe { self.mul_clmul(a, b) };
+        }
+        self.mul_serial(a, b)
+    }
+
+    /// Carry-less product, then fold `hi·z^n = hi·(f − z^n)` until it fits.
+    ///
+    /// # Safety
+    /// PCLMULQDQ must be available.
+    #[inline]
+    unsafe fn mul_clmul(&self, a: u64, b: u64) -> u64 {
+        let f_low = self.high[0];
+        let low_mask = (1u64 << self.n) - 1;
+        let mut prod = unsafe { clmul::mul(a, b) } as u64;
+        loop {
+            let hi = prod >> self.n;
+            if hi == 0 {
+                return prod;
+            }
+            prod = (prod & low_mask) ^ unsafe { clmul::mul(hi, f_low) } as u64;
+        }
+    }
+
+    #[inline]
+    fn mul_serial(&self, a: u64, b: u64) -> u64 {
         let mut prod = 0u64;
         let mut bb = b;
         let mut i = 0;
@@ -291,6 +329,37 @@ impl WordField {
     }
 }
 
+mod clmul {
+    #[cfg(target_arch = "x86_64")]
+    pub fn usable() -> bool {
+        std::arch::is_x86_feature_detected!("pclmulqdq")
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    pub fn usable() -> bool {
+        false
+    }
+
+    /// # Safety
+    /// PCLMULQDQ must be available.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "pclmulqdq")]
+    pub unsafe fn mul(a: u64, b: u64) -> u128 {
+        use std::arch::x86_64::{_mm_clmulepi64_si128, _mm_set_epi64x};
+        let product =
+            _mm_clmulepi64_si128(_mm_set_epi64x(0, a as i64), _mm_set_epi64x(0, b as i64), 0);
+        // SAFETY: `__m128i` and `u128` are both 16 plain bytes; lane 0 is
+        // the low half on little-endian x86-64.
+        unsafe { std::mem::transmute::<std::arch::x86_64::__m128i, u128>(product) }
+    }
+
+    /// # Safety
+    /// Never called: `usable()` is false off x86-64.
+    #[cfg(not(target_arch = "x86_64"))]
+    pub unsafe fn mul(_a: u64, _b: u64) -> u128 {
+        unreachable!("no carry-less multiply on this target")
+    }
+}
+
 /// Counters of one [`decompose_by_e3`] call.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct E3Stats {
@@ -298,6 +367,8 @@ pub struct E3Stats {
     pub e3_visited: u64,
     /// `(e₁, e₂, e₃)` roots of `S₄` found (before the splitting test).
     pub roots: u64,
+    /// Roots whose cubic split with all three roots in `V`.
+    pub split: u64,
 }
 
 /// **Exact m = 3 decomposition by enumerating `e₃`.**  With `e₃` fixed,
@@ -415,6 +486,7 @@ pub fn decompose_by_e3(
             let e1 = span(&w1, s & ((1u64 << d1) - 1));
             let e2 = span(&w2, s >> d1);
             if let Some(roots) = split_words(f, [e1, e2, e3], v_values) {
+                stats.split += 1;
                 if accept(roots) {
                     return (true, stats);
                 }
@@ -422,6 +494,84 @@ pub fn decompose_by_e3(
         }
     }
     (false, stats)
+}
+
+/// **m = 2 decomposition by one linear solve.**  With `s = x₁ + x₂ ∈ W₁`
+/// and `p = x₁x₂ ∈ W₂`, `S₃(x₁, x₂, X) = s²X² + pX + p² + b`, which is
+/// `F_2`-affine in the bits of `(s, p)`: squaring is linear and `X` is a
+/// constant.  So every pair `{x₁, x₂} ⊂ V` with `S₃(x₁, x₂, X) = 0` comes
+/// from one `n × (dim W₁ + dim W₂)` elimination plus a splitting test of
+/// `t² + st + p` over `V`.  `accept` gets each pair and stops the search by
+/// returning `true`; the second value counts the `(s, p)` roots found.
+pub fn decompose_pair_linear(
+    w1: &[u64],
+    w2: &[u64],
+    x_t: u64,
+    b: u64,
+    f: &WordField,
+    v_values: &[u64],
+    mut accept: impl FnMut([u64; 2]) -> bool,
+) -> (bool, u64) {
+    let (d1, d2) = (w1.len(), w2.len());
+    assert!(d1 + d2 <= 63);
+    let x2 = f.sq(x_t);
+    let columns: Vec<u64> = w1
+        .iter()
+        .map(|&u| f.mul(f.sq(u), x2))
+        .chain(w2.iter().map(|&w| f.mul(w, x_t) ^ f.sq(w)))
+        .collect();
+    let mut pivots: Vec<(u64, u64)> = Vec::new();
+    let mut kernel: Vec<u64> = Vec::new();
+    for (c, &val) in columns.iter().enumerate() {
+        let (mut v, mut combo) = (val, 1u64 << c);
+        for &(pv, pc) in &pivots {
+            if v ^ pv < v {
+                v ^= pv;
+                combo ^= pc;
+            }
+        }
+        if v == 0 {
+            kernel.push(combo);
+        } else {
+            pivots.push((v, combo));
+            pivots.sort_unstable_by(|a, b| b.0.cmp(&a.0));
+        }
+    }
+    let (mut r, mut sol) = (b, 0u64);
+    for &(pv, pc) in &pivots {
+        if r ^ pv < r {
+            r ^= pv;
+            sol ^= pc;
+        }
+    }
+    if r != 0 {
+        return (false, 0);
+    }
+    let span = |ws: &[u64], bits: u64| {
+        ws.iter()
+            .enumerate()
+            .filter(|(t, _)| (bits >> t) & 1 == 1)
+            .fold(0u64, |a, (_, &u)| a ^ u)
+    };
+    let mut roots = 0;
+    for kmask in 0u64..(1u64 << kernel.len()) {
+        let mut sp = sol;
+        for (t, &k) in kernel.iter().enumerate() {
+            if (kmask >> t) & 1 == 1 {
+                sp ^= k;
+            }
+        }
+        roots += 1;
+        let sv = span(w1, sp & ((1u64 << d1) - 1));
+        let pv = span(w2, sp >> d1);
+        // t² + s·t + p splits in V iff one root lies in V (the other is s + t).
+        if let Some(&x1) = v_values.iter().find(|&&t| f.sq(t) ^ f.mul(sv, t) ^ pv == 0) {
+            if accept([x1, sv ^ x1]) {
+                return (true, roots);
+            }
+        }
+    }
+    (false, roots)
 }
 
 /// [`split_in`] on one-word values.
@@ -502,6 +652,57 @@ mod tests {
         }
     }
 
+    /// The linear m = 2 solve returns exactly the brute-force pairs.
+    #[test]
+    fn pair_linear_matches_brute_force() {
+        let (n, l) = (13u32, 4u32);
+        let irr = find_irreducible_sparse(n).unwrap();
+        let f = WordField::new(n, &irr);
+        let mut rng = StdRng::seed_from_u64(5);
+        for (theta, g) in [(el(1, n), el(2, n)), (el(0x5a3, n), el(0x1c9, n))] {
+            let spaces = SymSpaces::geometric(n, l, &theta, &g, &irr);
+            let words = |k: usize| -> Vec<u64> { spaces.w[k].iter().map(bits).collect() };
+            let (w1, w2) = (words(0), words(1));
+            let v: Vec<u64> = (0..1u64 << l)
+                .map(|mask| {
+                    (0..l as usize)
+                        .filter(|t| (mask >> t) & 1 == 1)
+                        .fold(0, |a, t| a ^ w1[t])
+                })
+                .collect();
+            let b = 1u64;
+            let mut nonempty = 0;
+            for _ in 0..60 {
+                // a target that decomposes: a root X of S3(v_i, v_j, X)
+                let (i, j) = (rng.gen_range(0..v.len()), rng.gen_range(0..v.len()));
+                let (s0, p0) = (v[i] ^ v[j], f.mul(v[i], v[j]));
+                let Some(x_t) = (0..1u64 << n)
+                    .find(|&x| f.mul(f.sq(s0), f.sq(x)) ^ f.mul(p0, x) ^ f.sq(p0) ^ b == 0)
+                else {
+                    continue;
+                };
+                let mut brute = BTreeSet::new();
+                for i in 0..v.len() {
+                    for j in i..v.len() {
+                        let s = v[i] ^ v[j];
+                        let p = f.mul(v[i], v[j]);
+                        if f.mul(f.sq(s), f.sq(x_t)) ^ f.mul(p, x_t) ^ f.sq(p) ^ b == 0 {
+                            brute.insert([v[i].min(v[j]), v[i].max(v[j])]);
+                        }
+                    }
+                }
+                let mut lin = BTreeSet::new();
+                decompose_pair_linear(&w1, &w2, x_t, b, &f, &v, |[a, c]| {
+                    lin.insert([a.min(c), a.max(c)]);
+                    false
+                });
+                assert_eq!(lin, brute);
+                nonempty += !brute.is_empty() as usize;
+            }
+            assert!(nonempty > 0);
+        }
+    }
+
     #[test]
     fn word_field_matches_f2m() {
         let n = 23;
@@ -513,7 +714,9 @@ mod tests {
                 rng.gen::<u64>() & ((1 << n) - 1),
                 rng.gen::<u64>() & ((1 << n) - 1),
             );
-            assert_eq!(f.mul(a, b), bits(&el(a, n).mul(&el(b, n), &irr)));
+            let want = bits(&el(a, n).mul(&el(b, n), &irr));
+            assert_eq!(f.mul(a, b), want);
+            assert_eq!(f.mul_serial(a, b), want);
         }
     }
 

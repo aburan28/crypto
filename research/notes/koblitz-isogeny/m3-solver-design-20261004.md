@@ -127,3 +127,67 @@ about whether a summation-polynomial approach beats generic methods asymptotical
 
 Next useful step: m = 3 curve-vs-presentation at n = 19–23, which this makes
 affordable. At n ≥ 29 the enumeration is 2^{3l−2} with l ≥ 9, which is out of reach.
+
+## Addendum (2026-10-11, later): the geometric-V cost gap, and pinning x₃
+
+### Why geometric V cost 2–2.5× more per call (diagnosed)
+
+Data: `experiments/koblitz_m3/geom_cost_diag.jsonl`; curve a₆ = 1, 20 probes per cell.
+- **The algorithmic work is identical.** Monomial and geometric V visit the same
+  number of e₃ values and find the same number of S₄ roots per call:
+  - n = 17, l = 5: 8192 vs 7790 e₃ values (the geometric probes stop early on a
+    relation), 1019 vs 966 roots.
+  - n = 19, l = 6: 65536 vs 65536 e₃ values, 16410 vs 16346 roots.
+- **The gap came from `WordField::mul`.** Its bit-serial loop runs over the set bits of
+  one operand and the high bits of the product. Monomial-basis elements are
+  low-degree, so those loops exit early.
+- **With PCLMULQDQ the gap closes.** Monomial vs geometric ms/call: 9.6 vs 9.3 at
+  n = 17, and 106 vs 123 at n = 19, against 19.4 vs 28.7 and 211 vs 503 with the
+  serial loop.
+- PCLMULQDQ is now the default; `KOBLITZ_WORDFIELD_SERIAL=1` restores the serial path.
+  Both paths are tested against `F2mElement` multiplication.
+
+### `M3Solver::PinX3`: m = 3 for 2^{l+1} linear solves per probe
+
+With s = x₁ + x₂ and p = x₁x₂, S₃(x₁, x₂, X) = s²X² + pX + p² + b. That is F₂-linear in
+the bits of (s, p) ∈ W₁ × W₂, so m = 2 decomposition is one elimination plus a check
+that t² + st + p splits over V (`decompose_pair_linear`).
+
+For m = 3: for every x₃ ∈ V carrying a point P₃, and both signs ±P₃, decompose the
+point R ∓ P₃ with m = 2. That is 2^{l+1} eliminations per probe, against 2^{3l−2} for
+e₃ enumeration. Every m = 3 decomposition is reached this way: fix its third summand.
+
+**Tests.**
+- `pair_linear_matches_brute_force`: n = 13, l = 4, monomial and geometric V, on targets
+  that decompose. The linear solve returns exactly the brute-force pairs.
+- `symmetric_e3_m3_solves_soundly_and_refuses_random_v` (extended): on the same seed
+  and probes, PinX3 and e₃ enumeration produce the **same number of relations**, and
+  both IC solves agree with BSGS.
+
+**Per call, geometric V, 40 probes** (`experiments/koblitz_m3/pin_vs_e3.jsonl`). The
+relations found were identical: 2/40 at n = 17 and 1/40 at n = 19.
+
+| n, l | e₃ enumeration | PinX3 |
+|---|---|---|
+| 17, 5 | 9.7 ms | 0.052 ms |
+| 19, 6 | 124 ms | 0.154 ms |
+
+**Full m = 3 solves with PinX3** (`experiments/koblitz_m3/full_solves_pin.jsonl`, curve
+a₆ = 1). All four solved, with every log equal to the planted secret and the BSGS log.
+
+| n, a₂, l | monomial V | geometric V |
+|---|---|---|
+| 23, 1, 8 | 0.5 s, 418 probes, 118 unknowns | 0.7 s, 435 probes, 118 unknowns |
+| 31, 0, 10 | 33.5 s, 5612 probes, 525 unknowns | 45.9 s, 5876 probes, 507 unknowns |
+
+**What this is and is not.** The exponent drops from 3l to l per probe: in general,
+pinning m − 2 summands costs 2^{(m−2)l} linear solves. This is the standard
+"fix all but two summands" reduction, made cheap by the linearity of S₃ in
+symmetric coordinates in characteristic 2.
+
+It does not threaten the curves. With l chosen so that the yield is at most about 1
+per probe, the whole index calculus costs about 2^{2n/3}·poly(n), which is worse than
+Pollard rho's 2^{n/2}. At n = 31, rho needs about 2^{15.5} group operations; the
+34–46 s IC solves above are a measurement of this solver, not a competitive attack.
+
+**What it enables:** m = 3 curve-vs-presentation at n = 31, at about 6–8 ms per call.
