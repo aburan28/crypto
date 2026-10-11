@@ -93,7 +93,9 @@ impl Cnf {
             }
             return;
         }
-        let s: Vec<Vec<Lit>> = (0..n - 1).map(|_| (0..w).map(|_| self.var()).collect()).collect();
+        let s: Vec<Vec<Lit>> = (0..n - 1)
+            .map(|_| (0..w).map(|_| self.var()).collect())
+            .collect();
         self.clause(vec![-xs[0], s[0][0]]);
         for j in 1..w {
             self.clause(vec![-s[0][j]]);
@@ -210,7 +212,10 @@ impl Lin {
         Lin { vars: vec![], c }
     }
     fn var(v: Lit) -> Self {
-        Lin { vars: vec![v], c: false }
+        Lin {
+            vars: vec![v],
+            c: false,
+        }
     }
     fn add(&self, o: &Lin) -> Lin {
         let mut vars = self.vars.clone();
@@ -221,7 +226,10 @@ impl Lin {
                 vars.push(v);
             }
         }
-        Lin { vars, c: self.c ^ o.c }
+        Lin {
+            vars,
+            c: self.c ^ o.c,
+        }
     }
     fn is_zero(&self) -> bool {
         self.vars.is_empty() && !self.c
@@ -252,7 +260,9 @@ impl SymField {
         index.min(ring - index)
     }
     fn constant(&self, v: u128) -> Vec<Lin> {
-        (0..self.n).map(|i| Lin::constant(v >> i & 1 == 1)).collect()
+        (0..self.n)
+            .map(|i| Lin::constant(v >> i & 1 == 1))
+            .collect()
     }
     fn inputs(&self, cnf: &mut Cnf) -> Vec<Lin> {
         (0..self.n).map(|_| Lin::var(cnf.var())).collect()
@@ -359,7 +369,10 @@ fn build_instance(sf: &SymField, m: usize, w: usize, x_r: u128, symmetry: bool) 
         }
         _ => panic!("m must be 2 or 3"),
     }
-    let summands: Vec<Vec<Lit>> = xs.iter().map(|x| x.iter().map(|l| l.vars[0]).collect()).collect();
+    let summands: Vec<Vec<Lit>> = xs
+        .iter()
+        .map(|x| x.iter().map(|l| l.vars[0]).collect())
+        .collect();
     for s in &summands {
         cnf.at_most(s, w);
     }
@@ -389,7 +402,11 @@ fn enumerate_weight(n: usize, w: usize) -> Vec<u128> {
     for _ in 0..w {
         let mut next = Vec::new();
         for &v in &cur {
-            let top = if v == 0 { 0 } else { 128 - v.leading_zeros() as usize };
+            let top = if v == 0 {
+                0
+            } else {
+                128 - v.leading_zeros() as usize
+            };
             for b in top..n {
                 next.push(v | (1u128 << b));
             }
@@ -508,10 +525,17 @@ fn run_solver(solver: Solver, path: &PathBuf, timeout: Duration, nvars: usize) -
             cmd.arg("cryptominisat5").arg("--verb").arg("1").arg(path);
         }
         Solver::Cadical => {
-            cmd.arg("cadical").arg("-t").arg(format!("{}", timeout.as_secs())).arg(path);
+            cmd.arg("cadical")
+                .arg("-t")
+                .arg(format!("{}", timeout.as_secs()))
+                .arg(path);
         }
     }
-    let output = cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).output().expect("spawn solver");
+    let output = cmd
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output()
+        .expect("spawn solver");
     let wall = start.elapsed();
     let text = String::from_utf8_lossy(&output.stdout).to_string();
     let mut status = "error";
@@ -549,7 +573,12 @@ fn run_solver(solver: Solver, path: &PathBuf, timeout: Duration, nvars: usize) -
     if status == "error" && wall >= timeout {
         status = "timeout";
     }
-    SolveOutcome { status, model, conflicts, wall }
+    SolveOutcome {
+        status,
+        model,
+        conflicts,
+        wall,
+    }
 }
 
 // --------------------------------------------------------------------- main
@@ -643,7 +672,13 @@ fn random_point(curve: OnbCurve, n: usize, rng: &mut Rng) -> OnbPoint {
     }
 }
 
-fn verify_model(curve: OnbCurve, m: usize, xs: &[u128], r: OnbPoint, w: usize) -> Option<Vec<OnbPoint>> {
+fn verify_model(
+    curve: OnbCurve,
+    m: usize,
+    xs: &[u128],
+    r: OnbPoint,
+    w: usize,
+) -> Option<Vec<OnbPoint>> {
     let mut lifts: Vec<Vec<OnbPoint>> = Vec::new();
     for &x in xs {
         if !weight_le(x, w) {
@@ -679,7 +714,13 @@ fn main() {
     let sf = SymField::new(field);
     fs::create_dir_all(&args.work).unwrap();
     let mut out: Box<dyn std::io::Write> = match &args.out {
-        Some(p) => Box::new(fs::OpenOptions::new().create(true).append(true).open(p).unwrap()),
+        Some(p) => Box::new(
+            fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(p)
+                .unwrap(),
+        ),
         None => Box::new(std::io::stdout()),
     };
     let t0 = Instant::now();
@@ -719,7 +760,14 @@ fn main() {
             _ => (base_size as u64) * (base_size as u64 - 1) / 2,
         };
         for &solver in &args.solvers {
-            let path = args.work.join(format!("n{}-w{}-m{}-t{}-{}.cnf", args.n, args.w, args.m, ti, solver.name()));
+            let path = args.work.join(format!(
+                "n{}-w{}-m{}-t{}-{}.cnf",
+                args.n,
+                args.w,
+                args.m,
+                ti,
+                solver.name()
+            ));
             let mut cnf_clauses = inst.cnf.clauses.clone();
             let mut cnf = Cnf {
                 vars: inst.cnf.vars,
@@ -737,7 +785,11 @@ fn main() {
             let (nvars, nclauses) = cnf.write_dimacs(&path, solver.native_xor());
             loop {
                 if total_wall >= args.timeout || blocked >= args.max_models {
-                    verdict = if blocked >= args.max_models { "model_budget" } else { "timeout" };
+                    verdict = if blocked >= args.max_models {
+                        "model_budget"
+                    } else {
+                        "timeout"
+                    };
                     break;
                 }
                 let remaining = args.timeout - total_wall;

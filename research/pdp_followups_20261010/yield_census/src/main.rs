@@ -137,7 +137,10 @@ impl LinSolver {
             }
         }
         // Read the transforms only after every column has been cleared.
-        let masks: Vec<(usize, u64)> = pivots.iter().map(|&(col, row)| (col, rows[row].1)).collect();
+        let masks: Vec<(usize, u64)> = pivots
+            .iter()
+            .map(|&(col, row)| (col, rows[row].1))
+            .collect();
         assert_eq!(r, n - 1, "z^2+z has a kernel of dimension exactly 1");
         let kernel_check = rows[n - 1].1;
         LinSolver {
@@ -289,7 +292,11 @@ fn census(f: &Field, curve: &Curve, l: u32, label: &str, n_abscissae: usize, ord
                 if let Pt::Aff(x, _) = r {
                     let c = &mut counts[x as usize];
                     *c = c.saturating_add(1);
-                    let (Pt::Aff(xi, _), Pt::Aff(xj, _), Pt::Aff(xk, _)) = (base[i], base[j], base[k]) else { unreachable!() };
+                    let (Pt::Aff(xi, _), Pt::Aff(xj, _), Pt::Aff(xk, _)) =
+                        (base[i], base[j], base[k])
+                    else {
+                        unreachable!()
+                    };
                     if xi != xj && xj != xk && xi != xk {
                         let d = &mut counts_distinct_x[x as usize];
                         *d = d.saturating_add(1);
@@ -344,7 +351,10 @@ fn curve_order(f: &Field, curve: &Curve) -> u64 {
     let mut count = 1u64;
     for x in 0..(1u64 << f.n) {
         if let Some([p, q]) = curve.lift(x) {
-            assert!(curve.on_curve(p) && curve.on_curve(q), "lift produced an off-curve point at x={x:#x}");
+            assert!(
+                curve.on_curve(p) && curve.on_curve(q),
+                "lift produced an off-curve point at x={x:#x}"
+            );
             count += if p == q { 1 } else { 2 };
         }
     }
@@ -373,13 +383,20 @@ fn main() {
             s == 1
         })
         .unwrap();
-    let twist = Curve { f: &f, a: 1 ^ delta, b: 1 };
+    let twist = Curve {
+        f: &f,
+        a: 1 ^ delta,
+        b: 1,
+    };
     let order = curve_order(&f, &curve);
     let twist_order = curve_order(&f, &twist);
     println!("curve y^2+xy=x^3+x^2+1: #E={order}  twist (a=1+delta, delta=0x{delta:x}): #E'={twist_order}  sum={} (expected 2*(2^n+1)={})", order + twist_order, 2 * ((1u64 << n) + 1));
     let n_abscissae = 1usize << n;
     for &l in &ls {
         println!("{}", census(&f, &curve, l, "curve", n_abscissae, order));
-        println!("{}", census(&f, &twist, l, "twist", n_abscissae, twist_order));
+        println!(
+            "{}",
+            census(&f, &twist, l, "twist", n_abscissae, twist_order)
+        );
     }
 }
