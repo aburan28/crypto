@@ -138,6 +138,8 @@ control.
 | `gf2_elim` selects AVX2 on hosts without AVX-512 (they ran scalar) | `gf2_elim.rs::simd_kind` | `KIC_GF2_SIMD=0` | §4.4; no change on AVX-512 hosts |
 | inherited-basis rewrite word by word: a `RewritePlan` of `pext`/`pdep` segments per composed column map (memoised beside the map) replaces the bit scatter; drafts become pivot rows without a second copy | `inherited_f4.rs` | `KIC_F4_REWRITE=scatter` | §4.3: F4 and F6-IC 10–14 % faster at n = 23, noise at n = 17; counters identical |
 | F6-IC pair-index arm: the pair-sum index is cached per base across targets and attempts, built eagerly, and the 256-point closure cap is lifted when an index exists | `koblitz_index_calculus.rs` (`groebner_decompose_f6_ic_pair_index`) | the reference arm `groebner_decompose_f6_ic` is unchanged | §4.3: at 275 points 1.36× over both other arms, 61 % fewer reductions; the reference arm's measurements are untouched |
+| rewrite-plan segments built per source word on first use (a plan for every column of a layout had cost as much as the rewrites it served, 16.5 % of instructions) | `inherited_f4.rs` | — | §4.3 |
+| `f4_fp` narrow deferred RREF in chunks of 64 rows reduced in parallel, independent parallel back-substitution | `f4_fp.rs::rref32_deferred` | `F4_FP_DEFERRED_PAR=0` | §4.5: output identical (same basis fingerprints), 3–11 % on the large bench cases; the dense step is not the bottleneck of `f4_fp` |
 | `f4_fp::solve` candidate filter (§2.1) | `f4_fp.rs` | — | correctness |
 | `examples/f6_ic_probe.rs`: same-binary F4/F6-IC timing probe with verdict agreement | new | — | tooling |
 
@@ -225,6 +227,44 @@ noise (the legacy scan was 4–7 ms of the 190–470 ms); above it the
 one-fixed closure, which the reference arm skips, prunes the tree. The
 reference arm `groebner_decompose_f6_ic` and its ladder measurements are
 unchanged.
+
+### 4.5 What bounds the Gröbner track now
+
+With the probe's solver timers (build = specialisation and root build,
+reduce = the tail RREF; all repetitions summed):
+
+| cell, 1 target, 2 reps | arm | wall / target | calls | word XORs | build ms | root only (budget 1) |
+|:--|:--|--:|--:|--:|--:|--:|
+| K₀/2³¹ dim 9 (553 pts) | inherited F4 | 1 706 ms | 1 410 | 281.6 M | 3 031 | 38.5 ms |
+| | F6-IC | 1 922 ms | 1 357 | 281.5 M | 3 290 | |
+| | F6-IC + index | 1 563 ms | 528 | 278.2 M | 2 785 | |
+| K₀/2²³ dim 8 (275 pts), 4 targets | inherited F4 | 1 546 ms | 2 796 | 158.5 M | 2 667 | 8.8 ms |
+| | F6-IC + index | 1 124 ms | 1 045 | 124.9 M | 2 018 | |
+
+Two readings. The root Macaulay build and echelon is 2–3 % of a target,
+so it is not the lever. And at 553 points the index removes 63 % of the
+calls but only 1 % of the word XORs: the pruned nodes are the cheap ones
+near the leaves, and the wall follows the XOR volume of re-reducing
+displaced rows at the shallow nodes (`insert`, 27 % of instructions,
+with the rewrite behind it). That is where the next factor is: a
+block reduction of a node's displaced rows against the pivots they hit
+(Four Russians over the touched pivot set) in place of one `insert`
+cascade per row, or a reduced root so a displaced row costs one XOR per
+pivot bit (`KIC_F4_INHERIT_ROOT=rref`, measured not to pay at these
+depths in `RESEARCH_INHERITED_F4.md` §3.1).
+
+`f4_fp`, `examples/f4_fp_bench 2 large`, same binary:
+
+| case | rows × cols | sequential | chunk-parallel |
+|:--|--:|--:|--:|
+| quad_n8_p65521 | 5 668 × 4 991 | 1 137 ms | 1 101 ms |
+| quad_n9_p65521 | 15 164 × 12 589 | 10 668 ms | 9 532 ms |
+
+Basis fingerprints identical. The dense residue elimination is a small
+share of a step at these sizes; the symbolic preprocessing and the sparse
+pair-row reduction (`f4_fp.rs`, the per-monomial reducer scan and the
+`Vec<u32>` monomials) are the larger part, as the first-round audit
+listed.
 
 ### 4.4 Kernel row update on this host
 
