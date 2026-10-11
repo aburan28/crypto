@@ -57,6 +57,7 @@ struct NormalBasis {
     mask: u64,
     to_normal: Linear,
     to_poly: Linear,
+    sparse_canonical: bool,
 }
 
 impl NormalBasis {
@@ -78,6 +79,7 @@ impl NormalBasis {
                 mask,
                 to_normal: Linear::from_images(&inverse_columns),
                 to_poly: Linear::from_images(&conjugates),
+                sparse_canonical: std::env::var("KIC_SPARSE_CANONICAL").as_deref() == Ok("1"),
             };
             return basis;
         }
@@ -106,6 +108,114 @@ impl NormalBasis {
             }
         }
         (best, best_shift)
+    }
+
+    /// Find the longest cyclic zero gap and compare rotations tied on it.
+    /// Ties use the smallest shift, matching `canonical` exactly.
+    #[inline(always)]
+    fn canonical_sparse(&self, v: u64) -> (u64, u32) {
+        let value = v & self.mask;
+        if value == 0 || value == self.mask {
+            return (value, 0);
+        }
+
+        let n = self.n as usize;
+        let zeros = (!value) & self.mask;
+        let mut zero_runs = [0u64; 6];
+        zero_runs[0] = zeros;
+        for level in 1..zero_runs.len() {
+            let previous_length = 1usize << (level - 1);
+            if previous_length >= n {
+                zero_runs[level] = 0;
+                continue;
+            }
+            zero_runs[level] = zero_runs[level - 1]
+                & self.rotate(zero_runs[level - 1], previous_length as u32);
+        }
+
+        let mut longest_gap = 0usize;
+        let mut starts = self.mask;
+        for level in (0..zero_runs.len()).rev() {
+            let length = 1usize << level;
+            if longest_gap + length >= n {
+                continue;
+            }
+            let eligible = starts & self.rotate(zero_runs[level], longest_gap as u32);
+            if eligible != 0 {
+                starts = eligible;
+                longest_gap += length;
+            }
+        }
+
+        let mut best_value = u64::MAX;
+        let mut best_shift = u32::MAX;
+        while starts != 0 {
+            let start = starts.trailing_zeros() as usize;
+            starts &= starts - 1;
+            let shift = (n - 1 - start) as u32;
+            let rotated = self.rotate(value, shift);
+            if rotated < best_value || (rotated == best_value && shift < best_shift) {
+                best_value = rotated;
+                best_shift = shift;
+            }
+        }
+        (best_value, best_shift)
+    }
+
+    #[inline(always)]
+    fn canonical_selected(&self, v: u64) -> (u64, u32) {
+        if self.sparse_canonical { self.canonical_sparse(v) } else { self.canonical(v) }
+    }
+}
+
+#[cfg(test)]
+mod sparse_canonical_tests {
+    use super::{Linear, NormalBasis};
+
+    fn basis(n: u32, sparse_canonical: bool) -> NormalBasis {
+        NormalBasis {
+            n,
+            mask: if n == 64 { u64::MAX } else { (1u64 << n) - 1 },
+            to_normal: Linear { tables: Vec::new() },
+            to_poly: Linear { tables: Vec::new() },
+            sparse_canonical,
+        }
+    }
+
+    #[test]
+    fn sparse_key_and_shift_match_every_word_through_degree_13() {
+        for n in 1..=13 {
+            let reference = basis(n, false);
+            let sparse = basis(n, true);
+            for value in 0..=reference.mask {
+                assert_eq!(sparse.canonical_selected(value), reference.canonical_selected(value),
+                           "degree={n}, value={value:#x}");
+            }
+        }
+    }
+
+    #[test]
+    fn sparse_key_and_shift_match_sampled_u64_words() {
+        let mut seed = 0xD1B5_4A32_D192_ED03u64;
+        for n in [23, 53, 63, 64] {
+            let reference = basis(n, false);
+            let sparse = basis(n, true);
+            for bit in 0..n {
+                let singleton = 1u64 << bit;
+                for value in [singleton, reference.mask ^ singleton] {
+                    assert_eq!(sparse.canonical_selected(value), reference.canonical_selected(value),
+                               "degree={n}, value={value:#x}");
+                }
+            }
+            for _ in 0..20_000 {
+                seed ^= seed >> 12;
+                seed ^= seed << 25;
+                seed ^= seed >> 27;
+                let value = seed.wrapping_mul(0x2545_F491_4F6C_DD1D) & reference.mask;
+                assert_eq!(sparse.canonical_selected(value), reference.canonical_selected(value),
+                           "degree={n}, value={value:#x}");
+            }
+        }
     }
 }
 
@@ -346,7 +456,7 @@ fn build_index(gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, reps: &[u64]) -
     let mut table = RootTable::with_capacity(states.len() * 2);
     for state in &states {
         for &root in &state.normal_roots {
-            let (canonical, shift) = basis.canonical(root);
+            let (canonical, shift) = basis.canonical_selected(root);
             table.insert_if_absent(canonical, pack(state.left, state.right, state.relative, shift));
         }
     }
@@ -418,7 +528,8 @@ fn extract(
                 };
                 for partner in partners {
                     probes += 1;
-                    let (canonical, partner_shift) = basis.canonical(basis.to_normal.apply(partner));
+                    let (canonical, partner_shift) =
+                        basis.canonical_selected(basis.to_normal.apply(partner));
                     let Some(value) = index.table.get(canonical) else {
                         continue;
                     };
@@ -645,6 +756,7 @@ mod wide {
         mask: u128,
         to_normal: Linear128,
         to_poly: Linear128,
+        sparse_canonical: bool,
     }
 
     impl NormalBasis128 {
@@ -666,6 +778,7 @@ mod wide {
                     mask,
                     to_normal: Linear128::from_images(&inverse_columns),
                     to_poly: Linear128::from_images(&conjugates),
+                    sparse_canonical: std::env::var("KIC_SPARSE_CANONICAL").as_deref() == Ok("1"),
                 };
             }
             unreachable!()
@@ -692,6 +805,118 @@ mod wide {
                 }
             }
             (best, best_shift)
+        }
+
+        /// Wide-word analogue of the exact cyclic zero-gap selector.
+        #[inline(always)]
+        fn canonical_sparse(&self, v: u128) -> (u128, u32) {
+            let value = v & self.mask;
+            if value == 0 || value == self.mask {
+                return (value, 0);
+            }
+
+            let n = self.n as usize;
+            let zeros = (!value) & self.mask;
+            let mut zero_runs = [0u128; 7];
+            zero_runs[0] = zeros;
+            for level in 1..zero_runs.len() {
+                let previous_length = 1usize << (level - 1);
+                if previous_length >= n {
+                    zero_runs[level] = 0;
+                    continue;
+                }
+                zero_runs[level] = zero_runs[level - 1]
+                    & self.rotate(zero_runs[level - 1], previous_length as u32);
+            }
+
+            let mut longest_gap = 0usize;
+            let mut starts = self.mask;
+            for level in (0..zero_runs.len()).rev() {
+                let length = 1usize << level;
+                if longest_gap + length >= n {
+                    continue;
+                }
+                let eligible = starts & self.rotate(zero_runs[level], longest_gap as u32);
+                if eligible != 0 {
+                    starts = eligible;
+                    longest_gap += length;
+                }
+            }
+
+            let mut best_value = u128::MAX;
+            let mut best_shift = u32::MAX;
+            while starts != 0 {
+                let start = starts.trailing_zeros() as usize;
+                starts &= starts - 1;
+                let shift = (n - 1 - start) as u32;
+                let rotated = self.rotate(value, shift);
+                if rotated < best_value || (rotated == best_value && shift < best_shift) {
+                    best_value = rotated;
+                    best_shift = shift;
+                }
+            }
+            (best_value, best_shift)
+        }
+
+        #[inline(always)]
+        fn canonical_selected(&self, v: u128) -> (u128, u32) {
+            if self.sparse_canonical { self.canonical_sparse(v) } else { self.canonical(v) }
+        }
+    }
+
+    #[cfg(test)]
+    mod sparse_canonical_tests {
+        use super::{Linear128, NormalBasis128};
+
+        fn basis(n: u32, sparse_canonical: bool) -> NormalBasis128 {
+            NormalBasis128 {
+                n,
+                mask: (1u128 << n) - 1,
+                to_normal: Linear128 { tables: Vec::new() },
+                to_poly: Linear128 { tables: Vec::new() },
+                sparse_canonical,
+            }
+        }
+
+        #[test]
+        fn sparse_key_and_shift_match_every_word_through_degree_13() {
+            for n in 1..=13 {
+                let reference = basis(n, false);
+                let sparse = basis(n, true);
+                for value in 0..=reference.mask {
+                    assert_eq!(sparse.canonical_selected(value), reference.canonical_selected(value),
+                               "degree={n}, value={value:#x}");
+                }
+            }
+        }
+
+        #[test]
+        fn sparse_key_and_shift_match_sampled_wide_words() {
+            let mut seed = 0xA7C1_D9E4_356B_F208u64;
+            for n in [65, 71, 83, 127] {
+                let reference = basis(n, false);
+                let sparse = basis(n, true);
+                for bit in 0..n {
+                    let singleton = 1u128 << bit;
+                    for value in [singleton, reference.mask ^ singleton] {
+                        assert_eq!(sparse.canonical_selected(value), reference.canonical_selected(value),
+                                   "degree={n}, value={value:#x}");
+                    }
+                }
+                for _ in 0..20_000 {
+                    seed ^= seed >> 12;
+                    seed ^= seed << 25;
+                    seed ^= seed >> 27;
+                    let high = seed.wrapping_mul(0x2545_F491_4F6C_DD1D);
+                    seed ^= seed >> 12;
+                    seed ^= seed << 25;
+                    seed ^= seed >> 27;
+                    let low = seed.wrapping_mul(0x2545_F491_4F6C_DD1D);
+                    let value = (((high as u128) << 64) | low as u128) & reference.mask;
+                    assert_eq!(sparse.canonical_selected(value), reference.canonical_selected(value),
+                               "degree={n}, value={value:#x}");
+                }
+            }
         }
     }
 
@@ -998,7 +1223,7 @@ mod wide {
                                 for partner in partners {
                                     probes += 1;
                                     let (canonical, partner_shift) =
-                                        basis.canonical(basis.to_normal.apply(partner));
+                                        basis.canonical_selected(basis.to_normal.apply(partner));
                                     let Some(value) = index.table.get(canonical) else {
                                         continue;
                                     };
@@ -1141,7 +1366,7 @@ mod wide {
         let mut table = RootTable128::with_capacity(states.len() * 2);
         for state in &states {
             for &root in &state.normal_roots {
-                let (canonical, shift) = basis.canonical(root);
+                let (canonical, shift) = basis.canonical_selected(root);
                 table.insert_if_absent(canonical, pack(state.left, state.right, state.relative, shift));
             }
         }
@@ -1201,7 +1426,8 @@ mod wide {
                     };
                     for partner in partners {
                         probes += 1;
-                        let (canonical, partner_shift) = basis.canonical(basis.to_normal.apply(partner));
+                        let (canonical, partner_shift) =
+                            basis.canonical_selected(basis.to_normal.apply(partner));
                         let Some(value) = index.table.get(canonical) else {
                             continue;
                         };
@@ -1671,6 +1897,7 @@ mod wide {
             "factor_base_points":base.points.len(),
             "regular_states":index.states.len(),
             "root_table_entries":index.table.len,
+            "sparse_canonical_enabled":basis.sparse_canonical,
             "pair_table_entries":0,
             "edge_selectors":0,
             "timing_ms":{
@@ -2082,6 +2309,7 @@ fn main() {
         "factor_base_points":base.points.len(),
         "regular_states":index.states.len(),
         "root_table_entries":index.table.len,
+        "sparse_canonical_enabled":basis.sparse_canonical,
         "pair_table_entries":0,
         "edge_selectors":0,
         "timing_ms":{
