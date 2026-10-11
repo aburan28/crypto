@@ -132,7 +132,10 @@ With the certified n53 header restored, all four touched example targets pass:
 point-input panel tests (30 total). Their successful terminal receipt is retained
 separately from the earlier missing-fixture failure. The all-target workspace
 check passes with the exact static imports materialized. The ordinary staged
-fixture's focused check and complete corrected-library run remain pending.
+fixture's focused check passes. Both staged fixtures then pass 100 consecutive
+paired invocations (200 successful fixture executions). Their complete outputs
+are retained. This repetition is a regression check, not a deterministic rank
+guarantee. The complete corrected-library run is recorded separately.
 
 The full command is:
 
