@@ -110,6 +110,21 @@ explicit-orbit fixture checks a complete relation-to-rank-to-verified-target
 path; this validates plumbing and does not measure the retained degree-83
 capacity or cold runtime.
 
+`DecompositionStrategy::ChainedS3FrobeniusOrbit` now selects the exact
+representative-and-phase domain as a separate mode of that driver. Before
+constructing SAT, it derives one x representative from each signed orbit and
+requires their complete Frobenius closure to equal the replayed factor-base
+x-set. An incomplete orbit, duplicate representative, or resource-cap breach
+returns inconclusive before solver search. SAT models pass the same original
+field-equation replay, finite x-domain check and full curve-group sign lift
+as the coordinate-domain mode; accepted point indices enter the existing
+relation, rank, column-log and target-verification path. A degree-7 public
+known-answer fixture passed both five- and six-summand lifting, fail-closed
+domain controls, and an end-to-end relation/rank/verified-target solve with
+this strategy. The stored N83 structured-orbit object has not been imported
+into this driver, searched, or measured for natural relation yield. Its
+separate N83 model-construction receipt remains pinned to its earlier source.
+
 ## Guarded retained-base search path
 
 The separate `primary-chain-cold` worker command now selects exactly one

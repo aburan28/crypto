@@ -3512,6 +3512,11 @@ pub enum DecompositionStrategy {
     /// is lifted and checked in the original curve group. Resource caps
     /// are supplied separately through `KoblitzIcOptions::chain_s3_limits`.
     ChainedS3,
+    /// The same chained-S3 solver with an exact representative-and-Frobenius-
+    /// phase domain for an ambient-basis signed-orbit base. This can avoid a
+    /// large explicit-coordinate trie, but still requires the same complete
+    /// curve-group witness and relation checks.
+    ChainedS3FrobeniusOrbit,
     /// **Meet in the middle** over a precomputed table of all pair sums
     /// `P_i + P_j` ([`PairSumTable`]).  `m = 2` is one lookup, `m = 3`
     /// is `|F|` lookups, `m = 4` is `|F|²` lookups — against
@@ -7915,8 +7920,33 @@ pub fn sat_decompose_chained_s3(
     m: usize,
     limits: ChainS3Limits,
 ) -> (Option<Vec<usize>>, ChainS3Stats) {
+    sat_decompose_chained_s3_with_domain(kc, fb, target, m, limits, false)
+}
+
+/// Use one signed-Frobenius representative per column to constrain the same
+/// chained-S3 solver. The representative closure must equal the factor-base
+/// x-set exactly; a missing or extra coordinate is inconclusive. Accepted
+/// models still pass the original field equations and full curve-group lift.
+pub fn sat_decompose_chained_s3_frobenius_orbit(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    target: &BinaryPoint,
+    m: usize,
+    limits: ChainS3Limits,
+) -> (Option<Vec<usize>>, ChainS3Stats) {
+    sat_decompose_chained_s3_with_domain(kc, fb, target, m, limits, true)
+}
+
+fn sat_decompose_chained_s3_with_domain(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    target: &BinaryPoint,
+    m: usize,
+    limits: ChainS3Limits,
+    frobenius_orbits: bool,
+) -> (Option<Vec<usize>>, ChainS3Stats) {
     use crate::cryptanalysis::binary_semaev_chain_sat::{
-        finite_domain_clause_count, ChainBuildError, ChainedS3Encoding,
+        finite_domain_clause_count, frobenius_orbit_domain_size, ChainBuildError, ChainedS3Encoding,
     };
     let mut stats = ChainS3Stats::default();
     if !(5..=6).contains(&m)
@@ -7949,7 +7979,44 @@ pub fn sat_decompose_chained_s3(
         stats.exhausted = true;
         return (None, stats);
     }
-    let Some(domain_clauses) = finite_domain_clause_count(&codes, kc.n, m) else {
+    let representatives: Vec<BigUint> = if frobenius_orbits {
+        let mut reps = Vec::with_capacity(fb.signed_orbits.len());
+        for orbit in &fb.signed_orbits {
+            let Some(BinaryPoint::Affine { x, .. }) =
+                orbit.first().and_then(|&index| fb.points.get(index))
+            else {
+                stats.exhausted = true;
+                return (None, stats);
+            };
+            reps.push(x.to_biguint());
+        }
+        let mut closure = std::collections::BTreeSet::new();
+        for rep in &reps {
+            let mut x = F2mElement::from_biguint(rep, kc.n);
+            for _ in 0..kc.n {
+                closure.insert(x.to_biguint());
+                // Match the SAT domain's binary phases even if the curve's
+                // group Frobenius is a higher power or is disabled.
+                x = x.square_k_times(1, &kc.curve.irreducible);
+            }
+        }
+        if reps.is_empty()
+            || reps.iter().collect::<HashSet<_>>().len() != reps.len()
+            || !closure.iter().eq(codes.iter())
+        {
+            stats.exhausted = true;
+            return (None, stats);
+        }
+        reps
+    } else {
+        Vec::new()
+    };
+    let domain_clauses = if frobenius_orbits {
+        frobenius_orbit_domain_size(kc.n, m, representatives.len()).map(|size| size.clauses)
+    } else {
+        finite_domain_clause_count(&codes, kc.n, m)
+    };
+    let Some(domain_clauses) = domain_clauses else {
         stats.exhausted = true;
         return (None, stats);
     };
@@ -7986,10 +8053,17 @@ pub fn sat_decompose_chained_s3(
                 return (None, stats);
             }
         };
-        if enc
-            .constrain_summands(&codes, limits.max_domain_clauses)
-            .is_err()
-        {
+        let installed = if frobenius_orbits {
+            enc.constrain_frobenius_orbit_summands(
+                &representatives,
+                limits.max_variables,
+                limits.max_domain_clauses,
+            )
+            .map(|size| size.clauses)
+        } else {
+            enc.constrain_summands(&codes, limits.max_domain_clauses)
+        };
+        if installed != Ok(domain_clauses) {
             stats.exhausted = true;
             return (None, stats);
         }
@@ -9025,14 +9099,16 @@ fn koblitz_index_calculus_dlp_observed(
         rank_checks: 0,
         rank_history: Vec::new(),
     };
-    if opts.strategy == DecompositionStrategy::ChainedS3
-        && (!(5..=6).contains(&opts.m)
-            || !fb.uses_ambient_basis()
-            || opts.chain_s3_limits.max_variables == 0
-            || opts.chain_s3_limits.max_domain_clauses == 0
-            || opts.chain_s3_limits.max_models == 0
-            || opts.chain_s3_limits.conflict_budget == 0
-            || opts.relation_batch_size != 1)
+    if matches!(
+        opts.strategy,
+        DecompositionStrategy::ChainedS3 | DecompositionStrategy::ChainedS3FrobeniusOrbit
+    ) && (!(5..=6).contains(&opts.m)
+        || !fb.uses_ambient_basis()
+        || opts.chain_s3_limits.max_variables == 0
+        || opts.chain_s3_limits.max_domain_clauses == 0
+        || opts.chain_s3_limits.max_models == 0
+        || opts.chain_s3_limits.conflict_budget == 0
+        || opts.relation_batch_size != 1)
     {
         report.sat_unknowns = 1;
         return Some(report);
@@ -9304,6 +9380,16 @@ fn koblitz_index_calculus_dlp_observed(
                 DecompositionStrategy::ChainedS3 => {
                     let (idxs, stats) =
                         sat_decompose_chained_s3(kc, fb, target, opts.m, opts.chain_s3_limits);
+                    RelationAttemptOutcome::ChainedS3(idxs, stats)
+                }
+                DecompositionStrategy::ChainedS3FrobeniusOrbit => {
+                    let (idxs, stats) = sat_decompose_chained_s3_frobenius_orbit(
+                        kc,
+                        fb,
+                        target,
+                        opts.m,
+                        opts.chain_s3_limits,
+                    );
                     RelationAttemptOutcome::ChainedS3(idxs, stats)
                 }
             }
@@ -11055,6 +11141,16 @@ fn decompose_once(
         DecompositionStrategy::ChainedS3 => {
             let (points, stats) =
                 sat_decompose_chained_s3(kc, fb, target, opts.m, opts.chain_s3_limits);
+            PdpAttempt::chained(points, stats)
+        }
+        DecompositionStrategy::ChainedS3FrobeniusOrbit => {
+            let (points, stats) = sat_decompose_chained_s3_frobenius_orbit(
+                kc,
+                fb,
+                target,
+                opts.m,
+                opts.chain_s3_limits,
+            );
             PdpAttempt::chained(points, stats)
         }
         DecompositionStrategy::Wdsat => {
@@ -14869,6 +14965,69 @@ mod tests {
     }
 
     #[test]
+    fn chained_s3_frobenius_domain_lifts_and_rejects_incomplete_orbits() {
+        let kc = KoblitzCurve::new(0, 7).unwrap();
+        let BinaryPoint::Affine { x, .. } = kc.generator() else {
+            panic!("generator is affine");
+        };
+        let fb = (2u32..32)
+            .filter_map(
+                |scalar| match kc.mul(kc.generator(), &BigUint::from(scalar)) {
+                    BinaryPoint::Affine { x: other_x, .. } => {
+                        build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone(), other_x])
+                    }
+                    BinaryPoint::Infinity => None,
+                },
+            )
+            .find(|base| base.signed_orbits.len() >= 2)
+            .expect("two distinct signed Frobenius orbits");
+        let limits = ChainS3Limits {
+            max_variables: 2_000,
+            max_domain_clauses: 10_000,
+            max_models: 128,
+            conflict_budget: 500_000,
+        };
+        for m in [5usize, 6] {
+            let target = kc.mul(&fb.points[0], &BigUint::from(m as u32));
+            let (found, stats) =
+                sat_decompose_chained_s3_frobenius_orbit(&kc, &fb, &target, m, limits);
+            let indices = found.unwrap_or_else(|| panic!("m={m}: {stats:?}"));
+            assert_eq!(indices.len(), m);
+            assert_eq!(
+                indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
+                    kc.add(&acc, &fb.points[index])
+                }),
+                target
+            );
+            assert!(!stats.exhausted);
+            assert_eq!(stats.invalid_models, 0);
+        }
+        let mut incomplete = fb.clone();
+        incomplete.signed_orbits[0].clear();
+        let (found, stats) = sat_decompose_chained_s3_frobenius_orbit(
+            &kc,
+            &incomplete,
+            &BinaryPoint::Infinity,
+            5,
+            limits,
+        );
+        assert!(found.is_none() && stats.exhausted && !stats.refuted);
+        assert_eq!(stats.patterns_attempted, 0);
+        let (found, stats) = sat_decompose_chained_s3_frobenius_orbit(
+            &kc,
+            &fb,
+            &BinaryPoint::Infinity,
+            5,
+            ChainS3Limits {
+                max_domain_clauses: 1,
+                ..limits
+            },
+        );
+        assert!(found.is_none() && stats.exhausted && !stats.refuted);
+        assert_eq!(stats.patterns_attempted, 0);
+    }
+
+    #[test]
     fn chained_s3_strategy_feeds_verified_relation_rank_and_target_solve() {
         let kc = KoblitzCurve::new(0, 7).unwrap();
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
@@ -14910,6 +15069,49 @@ mod tests {
         assert_eq!(capped.sat_calls, 0);
         assert_eq!(capped.sat_unknowns, 1);
         assert!(capped.log.is_none());
+    }
+
+    #[test]
+    fn chained_s3_frobenius_strategy_feeds_rank_and_target_solve() {
+        let kc = KoblitzCurve::new(0, 7).unwrap();
+        let BinaryPoint::Affine { x, .. } = kc.generator() else {
+            panic!("generator is affine");
+        };
+        let fb = (2u32..32)
+            .filter_map(
+                |scalar| match kc.mul(kc.generator(), &BigUint::from(scalar)) {
+                    BinaryPoint::Affine { x: other_x, .. } => {
+                        build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone(), other_x])
+                    }
+                    BinaryPoint::Infinity => None,
+                },
+            )
+            .find(|base| base.signed_orbits.len() >= 2)
+            .expect("two distinct signed Frobenius orbits");
+        let known = BigUint::from(3u32) % &kc.subgroup_order;
+        let target = kc.mul(kc.generator(), &known);
+        let opts = KoblitzIcOptions {
+            m: 5,
+            strategy: DecompositionStrategy::ChainedS3FrobeniusOrbit,
+            max_trials: 64,
+            extra_relations: 1,
+            allow_direct_relation: false,
+            chain_s3_limits: ChainS3Limits {
+                max_variables: 2_000,
+                max_domain_clauses: 10_000,
+                max_models: 128,
+                conflict_budget: 500_000,
+            },
+            ..KoblitzIcOptions::default()
+        };
+        let report = koblitz_index_calculus_dlp_with_factor_base(&kc, &target, &fb, &opts).unwrap();
+        assert_eq!(report.log, Some(known), "{report:?}");
+        assert!(report.sat_calls > 0);
+        assert!(report.independent_relations > 0);
+        assert!(report.linear_solve_attempts > 0);
+        assert_eq!(report.sat_invalid_models, 0);
+        assert_eq!(report.verification_failures, 0);
+        assert!(!report.direct_relation);
     }
 
     #[test]
