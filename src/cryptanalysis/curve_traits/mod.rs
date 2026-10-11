@@ -1307,7 +1307,7 @@ mod tests {
             .iter()
             .filter(|curve| matches!(&curve.model, Model::Extension { .. }))
             .collect();
-        assert_eq!(extensions.len(), 9);
+        assert_eq!(extensions.len(), 1313);
         for curve in extensions {
             let Model::Extension {
                 p,
@@ -1327,7 +1327,11 @@ mod tests {
                 (modulus.len(), a.len(), b.len()),
                 (*k as usize, *k as usize, *k as usize)
             );
-            let rep = curve.representations.first().unwrap();
+            let Some(rep) = curve.representations.first() else {
+                // Catalogue entries may record field data without a
+                // generator representation.
+                continue;
+            };
             assert_eq!(&rep.subgroup_order * &rep.cofactor, curve.order);
             assert!(matches!(
                 &rep.generator,

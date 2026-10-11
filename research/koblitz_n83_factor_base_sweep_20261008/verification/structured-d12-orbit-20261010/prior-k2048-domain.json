@@ -1,0 +1,19 @@
+{
+  "schema": "n83.k2048-readonly-domain-budget/v1",
+  "status": "PASS_exploratory_exact_count",
+  "prior_receipt": "../remaining-budget-k2048-20261010/retry-budget.json",
+  "prior_charged_seconds": "6682.092994294",
+  "object_sha256": "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a",
+  "object_compressed_bytes": 10313647,
+  "point_records": 339968,
+  "distinct_x_coordinates": 169984,
+  "missing_prefix_clauses_per_summand": 11003582,
+  "m5_required_clauses": 55017910,
+  "frozen_clause_cap": 12000000,
+  "source_method": "read-only gzip stream; sorted integer x coordinates; exact missing-child recursion matching finite_domain_clause_count",
+  "python_process_wall_seconds": 40.07091304200003,
+  "round_conservative_charge_seconds": 120,
+  "cumulative_charged_seconds": "6802.092994294",
+  "measurement_scope": "domain preflight only, not SAT model memory or search",
+  "source_frozen_before_execution": false
+}

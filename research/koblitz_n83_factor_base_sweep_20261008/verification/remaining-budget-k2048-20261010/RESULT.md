@@ -1,0 +1,13 @@
+# K2048 signed-Frobenius base construction, replay and S3 storage
+
+The pinned-image retry constructed a primary `a=0`, `public_x_hash`, seed 2026100801 base with **2,048 signed-Frobenius columns**, **339,968 distinct point records**, 4,094 raw x candidates and a 10,313,647-byte compressed object. Its point-set BLAKE3 is `d528f5828a05a00add4252212bc909ece481f33093e4074ff7dd8c6a51d3c97e`; compressed-object BLAKE3 is `82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851`. The object lives at:
+
+`s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851.jsonl.gz`
+
+The guarded construction returned `PASS_construction_only` in 145.547 seconds of outer process wall with one CPU, 4 GiB hard memory, zero swap, no network and source commit `8d199b0a3bf227b9a21ab19183fe0bdeba9d604e`. The separate generic multi-limb replay returned `PASS`, checking all 339,968 points and 2,048 representatives. The native uploader returned `PASS` after downloading the S3 object and matching its compressed hash. `verification.json` cross-checks manifest, replay, storage, source and receipt bindings on the same host; the exact container was independently confirmed absent after completion. The full object is deliberately not committed to Git.
+
+A separate S3 `head-object` check after upload returned `ContentLength=10313647` and `LastModified=2026-10-10T18:17:29+00:00` for the exact key. Its multipart ETag is not treated as a content digest; the uploader's downloaded BLAKE3 match supplies that check.
+
+The first K2048 launch was a retained `PRODUCER_FAILURE_worker_exit`: the mutable local image tag resolved to an image without Git, required for source attestation. It created no object. `FAILURE.md` and `failed-budget.json` preserve that failed attempt. The retry used the previously successful immutable image ID with Git and the same resource caps. The first attempt charged 101 conservative seconds; the successful retry charged 242. The cumulative two-hour pilot charge is **6,682.092994294 of 7,200 seconds**, leaving 517.907005706 unused. Source validation and evidence assembly after the experimental stop are separate.
+
+The stored collection now has 56 verified S3 objects and 44 distinct point sets, with 3,285,140 total point-record entries and 19,790 signed-orbit representatives counted across objects. These are construction/storage counts, not independent relation samples. K2048 has no retained N83 SAT model, natural relation, rank, column-log solve, target solve or complete cold-runtime measurement. No minimum-runtime base is selected.

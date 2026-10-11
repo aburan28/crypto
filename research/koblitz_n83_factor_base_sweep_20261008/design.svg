@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="650" viewBox="0 0 1100 650">
+<rect width="1100" height="650" fill="#f8fafc"/>
+<style>text{font-family:Arial,sans-serif;fill:#14263b} .box{fill:#fff;stroke:#1e6685;stroke-width:2} .future{fill:#fff7e9;stroke:#a66a14;stroke-width:2} .arrow{stroke:#456377;stroke-width:2;fill:none;marker-end:url(#arrow)}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10" fill="#456377"/></marker></defs>
+<text x="45" y="45" font-size="27" font-weight="bold">Degree-83 factor-base experiment design</text>
+<text x="45" y="76" font-size="17">45,360,000 finite configurations; execution and artifact evidence are separate</text>
+<g font-size="18" text-anchor="middle">
+<rect class="box" x="45" y="110" width="300" height="85" rx="9"/><text x="195" y="143">Exact curves and subgroup IDs</text><text x="195" y="172">Frozen public seeds and inputs</text>
+<rect class="box" x="400" y="110" width="300" height="85" rx="9"/><text x="550" y="143">Complete ordinal-addressed grid</text><text x="550" y="172">Domain and capacity audit</text>
+<rect class="box" x="755" y="110" width="300" height="85" rx="9"/><text x="905" y="143">54 actual factor-base recipes</text><text x="905" y="172">Native construction pilot</text>
+<rect class="box" x="755" y="255" width="300" height="85" rx="9"/><text x="905" y="288">Cross-backend point replay</text><text x="905" y="317">Projection, orbits, exact labels</text>
+<rect class="box" x="755" y="400" width="300" height="85" rx="9"/><text x="905" y="433">S3 content-addressed storage</text><text x="905" y="462">Download and compare hashes</text>
+<rect class="future" x="400" y="255" width="300" height="85" rx="9"/><text x="550" y="288">Future: natural relations / rank</text><text x="550" y="317">Retain failures and censoring</text>
+<rect class="future" x="45" y="255" width="300" height="85" rx="9"/><text x="195" y="288">Future: complete cold pipeline</text><text x="195" y="317">All exclusive phases charged</text>
+<rect class="future" x="45" y="400" width="300" height="85" rx="9"/><text x="195" y="433">Holdouts and independent replay</text><text x="195" y="462">Admitted paired uncertainty</text>
+<rect class="future" x="400" y="400" width="300" height="85" rx="9"/><text x="550" y="433">Minimum total-runtime candidate</text><text x="550" y="462">Unresolved until full measurements</text>
+</g>
+<path class="arrow" d="M345 152 H393"/><path class="arrow" d="M700 152 H748"/><path class="arrow" d="M905 195 V248"/><path class="arrow" d="M905 340 V393"/><path class="arrow" d="M550 195 V248"/><path class="arrow" d="M400 298 H352"/><path class="arrow" d="M195 340 V393"/><path class="arrow" d="M345 443 H393"/>
+<text x="45" y="550" font-size="18">Primary arm: a=0, 81-bit subgroup. Diagnostic arm: a=1, 53-bit subgroup.</text>
+<text x="45" y="580" font-size="18">Artifact validation and construction timings do not establish an index-calculus runtime winner.</text>
+<text x="45" y="612" font-size="16">Evidence: native exporter, design.json, pilot manifest, replay.json and upload-receipt.json.</text>
+</svg>
