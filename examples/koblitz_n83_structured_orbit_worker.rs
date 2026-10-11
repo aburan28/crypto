@@ -316,6 +316,21 @@ fn cgroup_gate() -> Result<()> {
     }
 }
 
+fn cgroup_peak_bytes() -> Result<u64> {
+    #[cfg(not(target_os = "linux"))]
+    return Err("run requires a Linux cgroup".into());
+    #[cfg(target_os = "linux")]
+    {
+        let peak: u64 = fs::read_to_string("/sys/fs/cgroup/memory.peak")?
+            .trim()
+            .parse()?;
+        if peak == 0 || peak > 4 * 1024 * 1024 * 1024 {
+            return Err("cgroup peak outside declared memory limit".into());
+        }
+        Ok(peak)
+    }
+}
+
 fn run(args: &[String]) -> Result<()> {
     if args.len() != 10 {
         return Err("usage: run MANIFEST OBJECT CORPUS VALIDATION BUDGET_SECONDS MAX_TRIALS CONFLICT_BUDGET MAX_MODELS OUTPUT_DIR".into());
@@ -419,6 +434,7 @@ fn run(args: &[String]) -> Result<()> {
         || report.sat_invalid_models != 0
         || report.direct_relation
         || (report.log.is_some() && !valid);
+    let memory_peak = cgroup_peak_bytes()?;
     let status = if bad {
         "PRODUCER_FAILURE"
     } else if valid {
@@ -480,6 +496,7 @@ fn run(args: &[String]) -> Result<()> {
             "attempt_records":attempts, "relation_matrix":relations,
             "candidate_log":report.log.as_ref().map(ToString::to_string),
             "candidate_verified":valid,
+            "memory_cgroup_peak_bytes":memory_peak,
             "base_import_elapsed_ms_L0":import_ms,
             "relation_collection_ns_L0":report.relation_collection_ns.to_string(),
             "linear_algebra_ns_L0":report.linear_algebra_ns.to_string(),
