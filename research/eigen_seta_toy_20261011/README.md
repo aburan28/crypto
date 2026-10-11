@@ -18,7 +18,8 @@ images. Neither key hides the CM endomorphism.
 | Encapsulation | Toy complete | Builds the 3-power Vélu isogeny, applies deterministic odd diagonal masks, and hashes a canonical ciphertext transcript. |
 | Decapsulation | Secret-dependent toy complete on two fixtures | `toy_trapdoor_decaps` recovers the sender index from Kani component x-coordinates and a 3-adic DLP in both the single-chain and bounded two-halves oracle regimes. `toy_decaps` remains the public exhaustive reference path. The toy secret is publicly reconstructible. |
 | Single Kani chain and component x-maps | Toy complete on the tested special-key fixture | Product-isomorphism steps, one terminal theta quotient, bounded split-chart search, and odd-torsion image recovery. Independent direct `φ θ' φ̂` evaluation agrees with the recovered `α` x-coordinates for all three sender indices. |
-| Two-halves first quotients | Toy complete on the tested `p=16127,N=64,d=9` fixture | Both original and Rosati-dual N-halves reach Jacobians. Their final Igusa–Clebsch keys match; their theta nulls and swapped-source payload images agree projectively for all nine sender indices. |
+| Two-halves first quotients | Toy complete on the tested `p=16127,N=64,d=9` fixture | Both original and Rosati-dual N-halves reach Jacobians. Their final Igusa–Clebsch keys match; their theta nulls and swapped-source payload images agree projectively for all nine sender indices. The 4-division table for graph lifts has been replaced by two-adic digit lifting. |
+| Dual of the first half | Partial | `toy_first_half_dual_prefix` starts from the Jacobian theta null, evaluates two quotient steps, and stops at an intermediate product with four steps remaining, retaining the lifted kernel images. Continuing needs a product-aware point representation; this does not yet yield the Kani matrix `F`. |
 | Second Kani half and final component maps | Exponential toy oracle only; scalable evaluator not implemented | A complete `E_C[d]²` first-half image table inverts the quotient on odd torsion, and an 11,520-element theta-coordinate search identifies candidate middle automorphisms. This yields x-actions and trapdoor decapsulation for `d=9`; it is not a dual theta/Richelot chain, uses O(d⁴) state, and cannot support full-size parameters. |
 | Full-size parameters and security | Not established | The toy uses 16,127- and 21,503-element prime fields and tiny sender degrees. No constant-time arithmetic, CCA transform, random-curve keygen, or security reduction exists here. |
 
@@ -102,3 +103,31 @@ the existing theta chain applies. The final quotient is a Jacobian. Its
 matching dual first-half quotient is not a complete two-halves evaluation;
 the bounded odd-torsion oracle fills it only at the tiny test size. Passing
 either KEM round trip does not fill the scalable requirement.
+
+## Jacobian-start dual-prefix diagnostic (2026-10-11; recorded after run)
+
+On the existing `p=16127, N=64, d=9`, keygen seed `0x44c0`, sender index
+`0` fixture, the first attempt to run the entire dual quotient from the
+middle Jacobian returned no result. The failure was not at the initial
+isogeny: a second-step theta null had a zero coordinate, requiring a change
+of theta chart. After adding bounded chart changes, the dual quotient ran
+two `(2,2)` steps and then reached an intermediate product with four steps
+remaining. `toy_first_half_dual_prefix` now returns that product null and
+the images of the two lifted kernel generators instead of silently treating
+the product as a construction failure. The experiment was not preregistered
+as a separate protocol; it is an implementation diagnostic, not evidence of
+a scalable decoder.
+
+The existing split theta coordinates retain x-coordinates of each factor
+but lose relative y-signs. Continuing through the product needs explicit
+point lifts or translated Kummer coordinates; selecting arbitrary signs
+would not define the same kernel. The desired second half additionally
+requires the middle-Jacobian automorphism and final component maps. These
+are implementation gaps, not a proof of mathematical impossibility. The
+first-half graph lifting itself now uses binary digit extraction rather
+than an `N²`-entry 4-division table; the `d⁴` odd-torsion oracle remains.
+
+Validation: `cargo test --release --lib` in `isogeny_algos/` passes the
+Jacobian-prefix fixture and the pre-existing toy decapsulation tests. The
+fixture checks the split boundary, not the dual composition `[N]` or the
+intended Kani matrix `F`, neither of which is fully evaluated here.

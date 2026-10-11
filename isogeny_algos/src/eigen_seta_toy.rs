@@ -2,10 +2,11 @@
 //!
 //! This constructs a genuine degree-2 endomorphism, publishes its eigenbasis,
 //! and sends diagonally masked torsion images of a degree-3^f isogeny.  The
-//! receiver finds the sender kernel by exhaustive search over all `3^f`
-//! possibilities.  Consequently this is a correctness experiment for the
-//! ciphertext format and key schedule, **not** the proposed trapdoor decoder
-//! or a secure cryptosystem.  The search is deliberately capped at 81 kernels.
+//! receiver can use either public exhaustive search over all `3^f`
+//! possibilities or secret-dependent decoders limited to two tiny fixtures.
+//! Consequently this is a correctness experiment for the ciphertext format,
+//! key schedule, and bounded Kani paths, **not** a secure cryptosystem.
+//! The public search is deliberately capped at 81 kernels.
 //! No FO/CCA transform, constant-time implementation, or random-curve keygen
 //! is claimed.
 
@@ -16,7 +17,10 @@ use crate::field::{is_prime, Field, Rng, Zp2};
 use crate::kernel::velu::{velu_cyclic, VeluIso};
 use crate::poly;
 use crate::sha256::sha256;
-use crate::theta::{chain, chain_until_first_split, ChainPrefix, ChainResult};
+use crate::theta::{
+    chain, chain_from_theta_until_first_split, chain_until_first_split, ChainPrefix, ChainResult,
+    ThetaChainPrefix,
+};
 use std::collections::{HashMap, HashSet, VecDeque};
 
 type Fq = (u64, u64);
@@ -153,6 +157,61 @@ fn torsion_point(f: &Zp2, e: &Curve<Fq>, order: u64, prime: u64, rng: &mut Rng) 
         }
     }
     None
+}
+
+fn toy_four_n_basis(f: &Zp2, e: &Curve<Fq>, n: u64) -> Option<[Pt<Fq>; 2]> {
+    let mut rng = Rng::new(0xe156_5e7a);
+    let order = 4 * n;
+    let p = torsion_point(f, e, order, 2, &mut rng)?;
+    let p2 = pmul(f, e, &p, (order / 2) as u128);
+    let q = (0..4096).find_map(|_| {
+        let q = torsion_point(f, e, order, 2, &mut rng)?;
+        (pmul(f, e, &q, (order / 2) as u128) != p2).then_some(q)
+    })?;
+    Some([p, q])
+}
+
+/// Lift an N-torsion point through [4] using two-adic digit extraction in a
+/// fixed E[4N] basis. This replaces the quadratic-size toy division table.
+fn toy_lift_by_four(
+    f: &Zp2,
+    e: &Curve<Fq>,
+    point: Pt<Fq>,
+    basis: [Pt<Fq>; 2],
+    exponent: u32,
+) -> Option<Pt<Fq>> {
+    let n = 1u64.checked_shl(exponent)?;
+    let [p, q] = basis.map(|x| pmul(f, e, &x, 4));
+    let p2 = pmul(f, e, &p, (n / 2) as u128);
+    let q2 = pmul(f, e, &q, (n / 2) as u128);
+    let (mut x, mut y) = (0u64, 0u64);
+    for bit in 0..exponent {
+        let current = padd(f, e, &pmul(f, e, &p, x as u128), &pmul(f, e, &q, y as u128));
+        let residual = padd(f, e, &point, &neg(f, &current));
+        let target = pmul(f, e, &residual, (n >> (bit + 1)) as u128);
+        let (dx, dy) = (0..2u64).find_map(|dx| {
+            (0..2u64)
+                .find(|&dy| {
+                    target
+                        == padd(
+                            f,
+                            e,
+                            &pmul(f, e, &p2, dx as u128),
+                            &pmul(f, e, &q2, dy as u128),
+                        )
+                })
+                .map(|dy| (dx, dy))
+        })?;
+        x += dx << bit;
+        y += dy << bit;
+    }
+    let lifted = padd(
+        f,
+        e,
+        &pmul(f, e, &basis[0], x as u128),
+        &pmul(f, e, &basis[1], y as u128),
+    );
+    (pmul(f, e, &lifted, 4) == point).then_some(lifted)
 }
 
 fn theta_eval(f: &Zp2, iso: &VeluIso<Zp2>, scale: Fq, point: &Pt<Fq>) -> Pt<Fq> {
@@ -440,6 +499,37 @@ pub fn toy_kani_dual_first_half(
     })
 }
 
+/// Evaluate the Rosati dual of the *first* Kani half from its Jacobian
+/// codomain. The result stops at the first intermediate product and retains
+/// lifted kernel images for a future product-aware continuation. This is
+/// `h†`, **not** the desired second Kani half `h'`: an explicit middle
+/// automorphism is still needed to assemble the matrix `F`.
+pub fn toy_first_half_dual_prefix(
+    sk: &ToySecretKey,
+    ct: &ToyCiphertext,
+    extra: &[(Pt<Fq>, Pt<Fq>)],
+) -> Result<ThetaChainPrefix<Fq>, ToyError> {
+    let (n, _) = sk.public.parameters.validate()?;
+    let f = Zp2::new(sk.public.parameters.prime);
+    let [p, q] = toy_four_n_basis(&f, &ct.curve, n).ok_or(ToyError::ConstructionFailed)?;
+    let mut payload = vec![(p, Pt::Inf), (q, Pt::Inf)];
+    payload.extend_from_slice(extra);
+    let (_, first, _, _) = toy_kani_eval(sk, ct, true, false, &payload)?;
+    let null = first
+        .result
+        .nulls
+        .last()
+        .ok_or(ToyError::ConstructionFailed)?;
+    chain_from_theta_until_first_split(
+        &f,
+        null,
+        [first.result.images[0], first.result.images[1]],
+        sk.public.parameters.two_exponent,
+        &first.result.images[2..],
+    )
+    .ok_or(ToyError::ConstructionFailed)
+}
+
 /// Evaluate the *single* Kani chain when `N > d²Δ'`, including supplied
 /// product points.  Returns at the first intermediate split because the
 /// current theta evaluator cannot yet continue from a product.  This is a
@@ -525,33 +615,15 @@ fn toy_kani_eval(
     if dual_graph {
         graph = graph.map(|(x, y)| (y, x));
     }
-    let mut rng = Rng::new(0xe156_5e7a);
-    let order = 4 * n;
-    let basis_p =
-        torsion_point(&f, &ct.curve, order, 2, &mut rng).ok_or(ToyError::ConstructionFailed)?;
-    let p2 = pmul(&f, &ct.curve, &basis_p, (order / 2) as u128);
-    let basis_q = (0..4096)
-        .find_map(|_| {
-            let q = torsion_point(&f, &ct.curve, order, 2, &mut rng)?;
-            (pmul(&f, &ct.curve, &q, (order / 2) as u128) != p2).then_some(q)
-        })
-        .ok_or(ToyError::ConstructionFailed)?;
-    // Enumerate the 4-division map on E[4N].  The same table lifts the four
-    // components of the Kani graph; the cost is O(N^2) and is toy-only.
-    let mut lifts = HashMap::new();
-    let mut row = Pt::Inf;
-    for _ in 0..n {
-        let mut point = row;
-        for _ in 0..n {
-            lifts.insert(pmul(&f, &ct.curve, &point, 4), point);
-            point = padd(&f, &ct.curve, &point, &basis_q);
-        }
-        row = padd(&f, &ct.curve, &row, &basis_p);
-    }
+    let [basis_p, basis_q] =
+        toy_four_n_basis(&f, &ct.curve, n).ok_or(ToyError::ConstructionFailed)?;
+    let basis = [basis_p, basis_q];
     let lifted = graph.map(|(left, right)| {
         Ok::<_, ToyError>((
-            *lifts.get(&left).ok_or(ToyError::ConstructionFailed)?,
-            *lifts.get(&right).ok_or(ToyError::ConstructionFailed)?,
+            toy_lift_by_four(&f, &ct.curve, left, basis, pk.parameters.two_exponent)
+                .ok_or(ToyError::ConstructionFailed)?,
+            toy_lift_by_four(&f, &ct.curve, right, basis, pk.parameters.two_exponent)
+                .ok_or(ToyError::ConstructionFailed)?,
         ))
     });
     let [a, b] = lifted;
@@ -1130,6 +1202,25 @@ mod tests {
     }
 
     #[test]
+    fn two_adic_four_division_matches_basis_coordinates() {
+        let f = Zp2::new(16127);
+        let e = Curve::new(f.one(), f.zero());
+        let basis = toy_four_n_basis(&f, &e, 64).unwrap();
+        for a in [0u64, 1, 7, 31, 63] {
+            for b in [0u64, 1, 9, 32, 63] {
+                let point = padd(
+                    &f,
+                    &e,
+                    &pmul(&f, &e, &basis[0], (4 * a) as u128),
+                    &pmul(&f, &e, &basis[1], (4 * b) as u128),
+                );
+                let lifted = toy_lift_by_four(&f, &e, point, basis, 6).unwrap();
+                assert_eq!(pmul(&f, &e, &lifted, 4), point);
+            }
+        }
+    }
+
+    #[test]
     fn ciphertext_kani_first_half_reaches_jacobian() {
         let parameters = ToyParameters {
             prime: 16127,
@@ -1192,6 +1283,36 @@ mod tests {
             assert_eq!(toy_trapdoor_decaps(&sk, &ct), Ok(key));
             assert_eq!(toy_decaps(&sk, &ct), Ok(key));
         }
+    }
+
+    #[test]
+    fn jacobian_start_dual_quotient_exposes_intermediate_product() {
+        let parameters = ToyParameters {
+            prime: 16127,
+            two_exponent: 6,
+            three_exponent: 2,
+        };
+        let mut rng = Rng::new(0x44c0);
+        let sk = toy_keygen(parameters, &mut rng).unwrap();
+        let (ct, _) = encaps_for_seed(&sk.public, 0).unwrap();
+        let second = toy_first_half_dual_prefix(&sk, &ct, &[]).unwrap();
+        assert_eq!(second.result.nulls.len(), 2);
+        assert_eq!(second.remaining_steps, parameters.two_exponent - 2);
+        assert!(second.result.split.is_some());
+        assert_eq!(second.kernel_images.len(), 2);
+
+        let f = Zp2::new(parameters.prime);
+        let [p, q] = toy_four_n_basis(&f, &ct.curve, 64).unwrap();
+        let (_, first, _, _) =
+            toy_kani_eval(&sk, &ct, true, false, &[(p, Pt::Inf), (q, Pt::Inf)]).unwrap();
+        let null = first.result.nulls.last().unwrap();
+        let dbl = crate::theta::ThetaDoubler::new(&f, null).unwrap();
+        let mut order_eight = [first.result.images[0], first.result.images[1]];
+        for _ in 0..parameters.two_exponent - 1 {
+            order_eight = order_eight.map(|x| dbl.double(&f, &x));
+        }
+        let one_step = crate::theta::chain_from_theta(&f, null, order_eight, 1, &[]).unwrap();
+        assert_eq!(one_step.nulls.len(), 1);
     }
 
     #[test]
