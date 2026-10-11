@@ -44,6 +44,13 @@ before its fleet was taken away.
   twelve-SKU survey, a roofline, and a floor derived from the
   carry-less unit before tuning that rules out $28$~B/s on one card;
   with every declined candidate and its ratio (Section~\ref{sec:gpu}).
+\item An inventory of the other GPU arithmetic in the repositories,
+  prime-field (secp256k1 rho with order-six folding, baby-step
+  giant-step, kangaroo, P-256/P-384) and binary-field (the ECC2K-95
+  kernel, pair tables, polynomial-system solvers), with their
+  instruction ledgers and emulated walk constants, and a plain
+  statement of which of them have run on a device: the F4 elimination
+  kernels have, the rest have not (Section~\ref{sec:othergpu}).
 \item A pipelined-Karatsuba FPGA engine measured at $8.25$~G steps/s
   on one AWS F2, within a pre-board estimate of $5$--$12$
   (Section~\ref{sec:fpga}).
