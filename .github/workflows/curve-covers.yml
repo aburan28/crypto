@@ -2,6 +2,9 @@ name: Curve cover certificates
 on:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'src/bin/curve_standards.rs'
+      - 'src/bin/curve_standards/**'
       - 'src/bin/curve_cover_check.rs'
       - 'src/bin/curve_cover_check/**'
       - 'src/binary_ecc/**'
@@ -12,10 +15,15 @@ on:
       - 'docs/browser/**'
       - 'scripts/build_lab_browser.py'
       - 'scripts/test_cover_catalog.py'
+      - 'scripts/update_curve_standards.py'
+      - 'scripts/build_curve_registry.py'
       - '.github/workflows/curve-covers.yml'
   push:
     branches: [main]
     paths:
+      - 'Cargo.toml'
+      - 'src/bin/curve_standards.rs'
+      - 'src/bin/curve_standards/**'
       - 'src/bin/curve_cover_check.rs'
       - 'src/bin/curve_cover_check/**'
       - 'src/binary_ecc/**'
@@ -26,10 +34,18 @@ on:
       - 'docs/browser/**'
       - 'scripts/build_lab_browser.py'
       - 'scripts/test_cover_catalog.py'
+      - 'scripts/update_curve_standards.py'
+      - 'scripts/build_curve_registry.py'
       - '.github/workflows/curve-covers.yml'
   workflow_dispatch:
 permissions:
   contents: read
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   certificates:
     runs-on: ubuntu-latest
@@ -40,7 +56,9 @@ jobs:
         with:
           toolchain: '1.98'
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test --bin curve_cover_check
+      - run: cargo test --bin curve_cover_check --bin curve_standards
+      - run: cargo run --bin curve_standards -- --check
+      - run: python3 scripts/update_curve_standards.py --check
       - run: cargo run --bin curve_cover_check -- --check
       - run: python3 scripts/test_cover_catalog.py
       - run: python3 scripts/build_lab_browser.py --check

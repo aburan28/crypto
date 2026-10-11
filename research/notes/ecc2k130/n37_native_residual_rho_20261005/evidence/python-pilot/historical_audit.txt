@@ -1,0 +1,255 @@
+#!/usr/bin/env python3
+"""Independently audit every arm of the frozen n37 native/rho batch panel."""
+
+import argparse
+import hashlib
+import json
+import math
+import statistics
+from pathlib import Path
+
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[3]
+FIXTURE = ROOT / "research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b01.fixture.jsonl"
+POINTS = ROOT / "research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b01.points.jsonl"
+SCHEDULE = [["ic", "rho", "rho", "ic"] if block % 2 == 0
+            else ["rho", "ic", "ic", "rho"] for block in range(5)]
+EXPECTED_SOURCE = {
+    "examples/n37_native_m6_residual.rs": "086a6fbdd12e2b104ec18f809d4048453d747ad76c5a74f695befd08d4efffa8",
+    "examples/n37_native_m6_residual_replay.rs": "68a4ce03029b82821fdabb9854a14559dde243bd5ac0f409de884df032f7394a",
+    "examples/koblitz_rho_batch_ks_v3.rs": "98b6e8a27d821ebfc7ae716410184dffe89aadf27dfe36bcac8ce834c39cf04c",
+    "Cargo.toml": "f88ac8c9527bc2403cc550b8b00aaa778630911a4c9d1de47f67dbbff055d6a2",
+    "Cargo.lock": "b28d3c2d81146a40d00df85f45c6460d9e2bc5c26875307a06cfd15efff99365",
+    "research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b01.points.jsonl": "78553fdff5ae66521d3a1052978962258e78d48c92285df6e1df962034b43717",
+}
+FIXTURE_SHA = "3453995c0423e4911ad4a6afa7cfe50ec1d6b0e6c67a771bda590f1d6ed680df"
+CORPUS = "compact-disjoint-cold-v2-n37-L1024-b01-20261001"
+
+
+def digest(path):
+    h = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def jsonlines(path):
+    with path.open(encoding="utf-8") as stream:
+        return [json.loads(line) for line in stream if line.strip()]
+
+
+def geometric(left, right):
+    assert left > 0 and right > 0
+    return math.sqrt(left * right)
+
+
+def interval(values):
+    assert len(values) == 5 and all(value > 0 for value in values)
+    logs = [math.log(value) for value in values]
+    center = statistics.mean(logs)
+    margin = 2.7764451051977987 * statistics.stdev(logs) / math.sqrt(5)
+    return [math.exp(center - margin), math.exp(center + margin)]
+
+
+def verify_ic(row, raw, points, fixtures):
+    result_path = raw / row["result"]
+    result = json.loads(result_path.read_text())
+    replay_path = raw / row["result"].replace(".result.json", ".replay.json")
+    replay = json.loads(replay_path.read_text())
+    assert replay["schema"] == "n37-native-m6-residual-source-replay-v1"
+    assert replay["raw_result_sha256"] == digest(result_path)
+    assert replay["independent_rank"] == result["rank"] == 42
+    assert replay["verified_target_logs"] == result["verified_target_logs"] == 1024
+    assert replay["unresolved_targets"] == result["unresolved_targets"] == 0
+    assert replay["complete_batch"] and result["complete_batch"]
+    assert replay["direct_hits"] == result["direct_hits"] == 939
+    assert replay["shifted_hits"] == result["shifted_hits"] == 85
+    assert replay["total_target_attempts"] == result["total_target_attempts"] == 1115
+    assert replay["input_sha256"]["points"] == digest(POINTS)
+    assert replay["input_sha256"]["fixture"] == digest(FIXTURE)
+    assert result["target_count"] == len(result["targets"]) == 1024
+    recovered = []
+    for index, (target, point, fixture) in enumerate(zip(result["targets"], points, fixtures)):
+        assert target["index"] == index
+        assert target["source"] == point == fixture["published_q"]
+        scalar = target["recovered_log"]
+        assert scalar == fixture["published_fixture_scalar"]
+        recovered.append(scalar)
+    phases = result["phase_wall_ms"]
+    charged = sum(phases[name] for name in (
+        "setup_transport", "half_table", "relations", "solve_verify_base",
+        "shift_precomputation", "target_queries_verify"))
+    assert 0 <= phases["internal_excluding_output"] - charged < 5
+    assert phases["target_queries"] + phases["target_log_verification"] <= \
+        phases["target_queries_verify"] + 1e-6
+    addition_requests = sum(result[name]["query_adds"] for name in (
+        "relation_oracle_counts", "direct_oracle_counts", "residual_oracle_counts"))
+    addition_requests += result["build_counts"]["build_adds"]
+    addition_requests += result["residual_shift_adds"]
+    addition_requests += result["external_witness_replay_adds"]
+    addition_requests += sum(result[name]["witness_adds"] for name in (
+        "relation_oracle_counts", "direct_oracle_counts", "residual_oracle_counts"))
+    assert addition_requests > 0
+    assert result["scalar_multiplications"]["total"] == 4289
+    return {"scalars": recovered, "addition_requests": addition_requests,
+            "scalar_multiplications": 4289, "phase_wall_ms": phases,
+            "replay_sha256": digest(replay_path)}
+
+
+def verify_rho(row, raw, points, fixtures):
+    records = jsonlines(raw / row["result"])
+    assert len(records) == 1025
+    summary = records[-1]
+    assert summary["kind"] == "rho_ks_batch_summary"
+    assert summary["n"] == 37 and summary["a"] == 0
+    assert summary["quotient_mode"] == "signed_frobenius"
+    assert summary["automorphism_size"] == 74
+    assert summary["fixtures"] == 1024 and summary["all_verified"] is True
+    assert summary["batch_seed"] == 2026100110101
+    assert summary["corpus"] == CORPUS
+    assert summary["dp_bits"] == 8 and summary["parallel_walks"] == 32
+    assert summary["canonicalization_backend"] == "normal_basis"
+    assert summary["target_source"] == "public_point_jsonl"
+    recovered = []
+    steps = 0
+    for index, (record, point, fixture) in enumerate(zip(records[:-1], points, fixtures)):
+        assert record["kind"] == "rho_ks_batch_fixture"
+        assert record["fixture_index"] == index
+        assert record["n"] == 37 and record["a"] == 0
+        assert record["published_q"] == point == fixture["published_q"]
+        assert record["published_fixture_scalar"] is None
+        assert record["target_source"] == "public_point_jsonl"
+        assert record["verified"] is True
+        scalar = record["recovered_fixture_scalar"]
+        assert scalar == fixture["published_fixture_scalar"]
+        recovered.append(scalar)
+        steps += record["walk_steps"]
+    assert steps == summary["total_walk_steps"]
+    assert summary["charges"]["group_additions"] > 0
+    return {"scalars": recovered, "steps": steps, "charges": summary["charges"],
+            "in_process_ms": summary["in_process_ms"]}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--raw-dir", required=True, type=Path)
+    parser.add_argument("--out", required=True, type=Path)
+    args = parser.parse_args()
+    assert not args.out.exists()
+    assert digest(FIXTURE) == FIXTURE_SHA
+    for relative, expected in EXPECTED_SOURCE.items():
+        assert digest(ROOT / relative) == expected, relative
+    raw = args.raw_dir
+    manifest = json.loads((raw / "manifest.json").read_text())
+    assert manifest["status"] == "completed_schedule"
+    assert manifest["schedule"] == SCHEDULE
+    assert manifest["wall_cap_seconds"] == 180
+    assert manifest["rss_cap_bytes"] == 4 * 1024**3
+    assert manifest["host"]["isolation"] == "unverified_unisolated_local_host"
+    assert manifest["source_sha256"] == EXPECTED_SOURCE
+    assert manifest["protocol_sha256"] == digest(HERE / "PROTOCOL.md")
+    assert manifest["runner_sha256"] == digest(HERE / "run_panel.py")
+    assert manifest["point_file_sha256"] == digest(POINTS)
+    for name, filename in (("ic", "n37_native_m6_residual"),
+                           ("ic_replay", "n37_native_m6_residual_replay"),
+                           ("rho", "koblitz_rho_batch_ks_v3")):
+        assert manifest["binary_sha256"][name] == digest(
+            ROOT / "target/release/examples" / filename)
+    points = jsonlines(POINTS)
+    fixtures = jsonlines(FIXTURE)
+    assert len(points) == len(fixtures) == 1024
+    arms = jsonlines(raw / "arms.jsonl")
+    assert len(arms) == 20
+    grouped = []
+    ic_operations = []
+    rho_operations = []
+    for block, order in enumerate(SCHEDULE):
+        arm_results = {"ic": [], "rho": []}
+        for position, method in enumerate(order):
+            row = arms[block * 4 + position]
+            assert row["block"] == block and row["position"] == position
+            assert row["method"] == method
+            assert row["exit_code"] == 0 and row["timed_out"] is False
+            assert row["resource_accepted"] is True
+            assert 0 < row["wall_ns"] <= 180 * 10**9
+            assert 0 < row["user_ns"] + row["system_ns"] <= row["wall_ns"] * 2
+            assert 0 < row["peak_rss_bytes"] <= 4 * 1024**3
+            assert digest(raw / row["stdout"]) == row["stdout_sha256"]
+            assert digest(raw / row["stderr"]) == row["stderr_sha256"]
+            assert digest(raw / row["result"]) == row["result_sha256"]
+            if method == "ic":
+                assert Path(row["command"][0]).name == "n37_native_m6_residual"
+                assert row["environment"] == {}
+                result = verify_ic(row, raw, points, fixtures)
+                ic_operations.append({key: result[key] for key in
+                                      ("addition_requests", "scalar_multiplications")})
+            else:
+                assert Path(row["command"][0]).name == "koblitz_rho_batch_ks_v3"
+                assert row["command"][1:] == ["37", "0", "signed_frobenius",
+                                              "1024", "2026100110101"]
+                env = row["environment"]
+                assert env["KIC_RHO_POINT_INPUT"] == str(POINTS)
+                assert env["KIC_RHO_BATCH_CORPUS"] == CORPUS
+                assert env["KIC_RHO_CANON_BACKEND"] == "normal_basis"
+                assert env["KIC_RHO_DP_BITS"] == "8"
+                result = verify_rho(row, raw, points, fixtures)
+                rho_operations.append({"steps": result["steps"],
+                                       "charges": result["charges"]})
+            arm_results[method].append({"cpu_ns": row["user_ns"] + row["system_ns"],
+                                        "wall_ns": row["wall_ns"],
+                                        "scalars": result["scalars"]})
+        assert len(arm_results["ic"]) == len(arm_results["rho"]) == 2
+        assert all(item["scalars"] == [f["published_fixture_scalar"] for f in fixtures]
+                   for method in ("ic", "rho") for item in arm_results[method])
+        ic_cpu = [item["cpu_ns"] for item in arm_results["ic"]]
+        rho_cpu = [item["cpu_ns"] for item in arm_results["rho"]]
+        ic_cost = geometric(*ic_cpu)
+        rho_cost = geometric(*rho_cpu)
+        ic_drift = max(ic_cpu) / min(ic_cpu)
+        rho_drift = max(rho_cpu) / min(rho_cpu)
+        grouped.append({"block": block, "ic_cpu_ns": ic_cpu,
+                        "rho_cpu_ns": rho_cpu, "ic_geomean_cpu_ns": ic_cost,
+                        "rho_geomean_cpu_ns": rho_cost,
+                        "ic_over_rho_cpu": ic_cost / rho_cost,
+                        "ic_duplicate_drift": ic_drift,
+                        "rho_duplicate_drift": rho_drift,
+                        "drift_gate_pass": ic_drift <= 1.1 and rho_drift <= 1.1})
+    ratios = [row["ic_over_rho_cpu"] for row in grouped]
+    assert len(ic_operations) == len(rho_operations) == 10
+    receipt = {
+        "schema": "n37-native-batch-rho-replay-v1",
+        "status": "PASS_20_ARMS_20480_POINT_SOLVES",
+        "input_point_count": 1024,
+        "ic_arms_replayed": 10,
+        "rho_arms_replayed": 10,
+        "verified_scalar_outputs": 20 * 1024,
+        "all_resources_accepted": True,
+        "all_duplicate_drift_pass": all(row["drift_gate_pass"] for row in grouped),
+        "host_isolation_verified": False,
+        "timing_eligible_for_speed_claim": False,
+        "blocks": grouped,
+        "descriptive_ic_over_rho_median": statistics.median(ratios),
+        "descriptive_ic_over_rho_geomean": math.exp(statistics.mean(map(math.log, ratios))),
+        "descriptive_ic_over_rho_log_t_95": interval(ratios),
+        "ic_operation_counts": ic_operations,
+        "rho_operation_counts": rho_operations,
+        "common_operation_unit_S": None,
+        "primary_one_target_online_speedup": None,
+        "input_sha256": {"points": digest(POINTS), "fixture": digest(FIXTURE)},
+        "raw_manifest_sha256": digest(raw / "manifest.json"),
+        "raw_arms_sha256": digest(raw / "arms.jsonl"),
+        "verifier_sha256": digest(Path(__file__)),
+    }
+    args.out.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
+    print(json.dumps({key: receipt[key] for key in
+                      ("status", "all_duplicate_drift_pass",
+                       "descriptive_ic_over_rho_median",
+                       "descriptive_ic_over_rho_log_t_95")}), flush=True)
+
+
+if __name__ == "__main__":
+    if not __debug__:
+        raise SystemExit("assertions must remain enabled")
+    main()

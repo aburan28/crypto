@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/home/ubuntu/crypto/ecc2k130/build/g7-split-batch32",
+    "--packed",
+    "--threads",
+    "384",
+    "--steps",
+    "64",
+    "--launches",
+    "4",
+    "--run-id",
+    "58203",
+    "--checkpoint",
+    "/home/ubuntu/crypto/ecc2k130/build/batch32-aligned-candidate-58203.ckpt",
+    "--dp-weight",
+    "52",
+    "--verify",
+    "16",
+    "--dp-file",
+    "/home/ubuntu/crypto/ecc2k130/build/batch32-aligned-candidate-58203.dp"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "timeout_seconds": 300,
+  "elapsed_seconds": 5.024490153999068,
+  "log": "batch32-aligned-candidate-58203.log",
+  "log_sha256": "9902d87e58d276a4b7879b759fb0ce14f62573b5c2bc39884351943d9fff3668",
+  "binary_sha256": "38d5aba095270e826fb70857a59ffdab11dea3670a6e548a3c48dc962a951823"
+}

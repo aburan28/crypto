@@ -1,0 +1,13 @@
+diff -ruN /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-src/include/packedxonly23.cuh /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-reset-src/include/packedxonly23.cuh
+--- /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-src/include/packedxonly23.cuh	2026-09-17 22:51:27.267085804 +0000
++++ /home/ubuntu/crypto/ecc2k130/build/g7-xonly-sparse-bridge13-pipeline-reset-src/include/packedxonly23.cuh	2026-09-17 22:57:07.328056638 +0000
+@@ -152,8 +152,8 @@
+         }
+         __syncthreads();
+         if (step + 1 < p.steps) {
++            // blockInverse131 synchronizes before any next-state append.
+             if (threadIdx.x == 0) bridgeCount131 = 0;
+-            __syncthreads();
+         }
+ #if ECC_PACKED_LAST_SLOT_CACHE
+         P131 lastDenominator{};

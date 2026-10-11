@@ -56,7 +56,7 @@
     },
     {
       "path": "research/ecbench_n37_rank_columns_20261004/RESULT.json",
-      "sha256": "9d3ba4708f70e2796bbdb8a541a85b794972563d6ecfe70bde160a698da49fbb"
+      "sha256": "f7b950edc74978cbdf2dbc3da54c73bde6c05c0827fbe29ff8bd33659168afa1"
     },
     {
       "path": "research/ecbench_n37_rank_columns_20261004/independent_validation/RECEIPT.json",
@@ -625,7 +625,7 @@
         "cold_counted_over_k42_diagnostic": 0.6940660060915055,
         "cold_counted_over_rho_ci95_diagnostic": [
           8.290752472805886,
-          12.353679510974215
+          12.353679510974217
         ],
         "cold_counted_over_rho_diagnostic": 10.01258766003444,
         "diagnostic_claim_sha256": "e65c04b0dcca6e7f59fd2529656a5ebeb22a1cdf2f2fb6760c8e14a4df4239a2",
@@ -3349,8 +3349,8 @@
       "scheduled": 216
     }
   ],
-  "historical_ledger_sha256": "ac9019fd2136447b24ef59e422b187048f19dfeee344734357c7b9485162d9ba",
-  "historical_regime_summary_sha256": "5d3130dd09b97eac4675daf96de868bca70471a4418ffe3bac7a3ca2793d2e83",
+  "historical_ledger_sha256": "2584af3ab1bc50cee7f3a4cda63a7efc5d3f5e7eb50a47c5cf843f70a2efebb0",
+  "historical_regime_summary_sha256": "3db51a80961cc2c457c9dadee8d3a1cbf9dc713a87647b230eb5496c0cc9eba0",
   "historical_overview_panels": [
     {
       "section_id": "cold-compact-orbit-20261003",
@@ -3365,6 +3365,14 @@
       "sha256": "76b251de2a0d1b6a3efb103e8b86c774a32e5aa005b7dd9386873857e8fa49af"
     },
     {
+      "section_id": "isogeny-conductor-gap-20261011",
+      "sha256": "acc59533c1cc95fc4d94fa41378f518bcfb590a62c094a8c222e26545224de83"
+    },
+    {
+      "section_id": "isogeny-conductor-gap-round2-20261011",
+      "sha256": "06618d18fef09fe098306e13af7e30af081937b3054dfd40477a44c62cacac61"
+    },
+    {
       "section_id": "lab-ecbench-all",
       "sha256": "e631294b66a0b215889cb5047a4d97c1053f21052e7f69d5c875274c432db033"
     },
@@ -3374,12 +3382,16 @@
     },
     {
       "section_id": "lab-progress",
-      "sha256": "639081c9fd3502faba95303bed7302a701fe5afb4450560f50cca19d6fb8910b"
+      "sha256": "141be685193be44729e633f547ed30157e62cdf906bfc741c3a22961daf89da2",
+      "sha256": "8cb2f23da6e83884e95a22315073d16686624fe03a1a710ea9a849453266a554",
+      "sha256": "288a371bc1b6fb8bc3af6dbd32483586fbdf0072512d041eff914807077f573a"
     },
     {
       "section_id": "lab-currency",
       "sha256": "1258aca960d4b3555ac96e2a8b4d32e51fe3cf4925df10d7e60c143fab1c986c"
     }
   ],
-  "progress_timeline_sha256": "783224c472e3ad19211822fdd1eb4cbd9285b4a78e542f98020e0b6fff604568"
+  "progress_timeline_sha256": "5a1ee11bfa55b46f55aa944463bcdc78254c573ee26a18c5dad00ed0b39dfc29",
+  "progress_timeline_sha256": "34d3a4d187619e679d090221c1c62ffa5d971a83c1100e3e0e912eb08cfe8c5b",
+  "progress_timeline_sha256": "d30f6fb80ae936fb30c8a8c44c54848c654a2b0f05f49d62ba55be882aeece9e"
 }

@@ -1,0 +1,230 @@
+{
+  "updated_at": "2026-09-15T14:56:07Z",
+  "claim_boundary": "Public-synthetic only; not ledger promotion; not vs_rho; not key recovery. pair_table_entries=0.",
+  "digests": [
+    {
+      "file": "n13_planted_karatsuba_nogoods.json",
+      "mode": "planted_karatsuba_nogoods",
+      "n": 13,
+      "decomposition_verdict": "SAT",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "models_examined": 1,
+      "conflicts": 19,
+      "solve_ms": 7.102917000000001,
+      "variables": 2114,
+      "ordinary_clauses": 2544,
+      "native_xor_rows": 1367,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "multiplication_encoding": "carryless_karatsuba",
+      "orbit_columns": 1,
+      "factor_base_points": 26,
+      "eta": {
+        "denominator": 2,
+        "numerator": 1
+      },
+      "expected_decomposable": true,
+      "nogoods": {
+        "nogood_clauses": 26,
+        "exceptional_relative_states": 1,
+        "scan_parallel": true
+      },
+      "phase_restart_shots_used": 1,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "file": "n13_unrestricted_karatsuba_pairthen_nogoods_phase4_40k.json",
+      "mode": "unrestricted_karatsuba",
+      "n": 13,
+      "decomposition_verdict": "SAT",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "models_examined": 1,
+      "conflicts": 40000,
+      "solve_ms": 12934.982667,
+      "variables": 2114,
+      "ordinary_clauses": 2466,
+      "native_xor_rows": 1367,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "multiplication_encoding": "carryless_karatsuba",
+      "orbit_columns": 1,
+      "factor_base_points": 26,
+      "eta": {
+        "denominator": 2,
+        "numerator": 1
+      },
+      "expected_decomposable": true,
+      "nogoods": {
+        "nogood_clauses": 26,
+        "exceptional_relative_states": 1,
+        "scan_parallel": true
+      },
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "file": "n19_unrestricted_karatsuba_pairthen_nogoods_phase4_80k.json",
+      "mode": "unrestricted_karatsuba_n19",
+      "n": 19,
+      "decomposition_verdict": "UNKNOWN",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "models_examined": 0,
+      "conflicts": 80000,
+      "solve_ms": 115731.74629099999,
+      "variables": 4750,
+      "ordinary_clauses": 5694,
+      "native_xor_rows": 2999,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "multiplication_encoding": "carryless_karatsuba",
+      "orbit_columns": 2,
+      "factor_base_points": 76,
+      "eta": {
+        "denominator": 2,
+        "numerator": 1
+      },
+      "expected_decomposable": true,
+      "nogoods": {
+        "nogood_clauses": 76,
+        "exceptional_relative_states": 2,
+        "scan_parallel": true
+      },
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "file": "n19_unrestricted_karatsuba_eta1_16_pairthen_nogoods_phase4_80k.json",
+      "mode": "unrestricted_karatsuba_eta16",
+      "n": 19,
+      "decomposition_verdict": "UNKNOWN",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "models_examined": 0,
+      "conflicts": 80000,
+      "solve_ms": 104154.09920899999,
+      "variables": 4742,
+      "ordinary_clauses": 5648,
+      "native_xor_rows": 2999,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "multiplication_encoding": "carryless_karatsuba",
+      "orbit_columns": 1,
+      "factor_base_points": 38,
+      "eta": {
+        "denominator": 16,
+        "numerator": 1
+      },
+      "expected_decomposable": true,
+      "nogoods": {
+        "nogood_clauses": 38,
+        "exceptional_relative_states": 1,
+        "scan_parallel": true
+      },
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "file": "n13_natural_schoolbook_pairthen_nogoods_phase4_40k.json",
+      "mode": "natural_n13",
+      "n": 13,
+      "decomposition_verdict": "UNKNOWN",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "models_examined": 0,
+      "conflicts": 40000,
+      "solve_ms": 4057.40425,
+      "variables": 2009,
+      "ordinary_clauses": 4419,
+      "native_xor_rows": 611,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "multiplication_encoding": "schoolbook",
+      "orbit_columns": 1,
+      "factor_base_points": 26,
+      "eta": {
+        "denominator": 2,
+        "numerator": 1
+      },
+      "expected_decomposable": true,
+      "nogoods": {
+        "nogood_clauses": 26,
+        "exceptional_relative_states": 1,
+        "scan_parallel": true
+      },
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "file": "n19_natural_schoolbook_pairthen_nogoods_phase4_60k.json",
+      "mode": "natural_n19",
+      "n": 19,
+      "decomposition_verdict": "UNKNOWN",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 0,
+      "invalid_group_lifts": 0,
+      "models_examined": 0,
+      "conflicts": 60000,
+      "solve_ms": 15435.231833,
+      "variables": 3889,
+      "ordinary_clauses": 9201,
+      "native_xor_rows": 969,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "multiplication_encoding": "schoolbook",
+      "orbit_columns": 2,
+      "factor_base_points": 76,
+      "eta": {
+        "denominator": 2,
+        "numerator": 1
+      },
+      "expected_decomposable": true,
+      "nogoods": {
+        "nogood_clauses": 76,
+        "exceptional_relative_states": 2,
+        "scan_parallel": true
+      },
+      "phase_restart_shots_used": 4,
+      "evidence_class": "censored_operational_observation"
+    },
+    {
+      "file": "n53_planted_schoolbook_pairthen_nogoods_relation.json",
+      "mode": "n53_planted_reconfirm",
+      "n": 53,
+      "decomposition_verdict": "SAT",
+      "terminal_search_outcome": "UNKNOWN",
+      "valid_x_tuples": 1,
+      "invalid_group_lifts": 0,
+      "models_examined": 1,
+      "conflicts": 3631,
+      "solve_ms": 14751.954583,
+      "variables": 26825,
+      "ordinary_clauses": 108763,
+      "native_xor_rows": 2915,
+      "pair_table_entries": 0,
+      "pair_selector_variables": 0,
+      "multiplication_encoding": "schoolbook",
+      "orbit_columns": 376,
+      "factor_base_points": 39856,
+      "eta": {
+        "denominator": 2,
+        "numerator": 1
+      },
+      "expected_decomposable": null,
+      "nogoods": {
+        "nogood_clauses": 39856,
+        "exceptional_relative_states": 376,
+        "scan_parallel": true
+      },
+      "phase_restart_shots_used": 1,
+      "evidence_class": "censored_operational_observation"
+    }
+  ]
+}

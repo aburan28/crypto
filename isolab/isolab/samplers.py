@@ -232,13 +232,18 @@ class Sampler(threading.Thread):
 
     ``exclude`` returns the pids whose CPU time is the job's own (so that it
     is not charged as contention). ``cgroup`` is the job's cgroup directory,
-    read for its own CPU usage and pressure when present.
+    read for its own CPU usage and pressure when present. ``co_tenants``
+    returns, per job running in another slot of the same host, that job's
+    pids: their CPU time is reported as ``co_tenant_cpu_s`` instead of
+    contention, since those jobs run on CPUs disjoint from this one's.
     """
 
     def __init__(self, job_cpus: list[int], period: float = 1.0, paths: Paths = Paths(),
                  exclude: Callable[[], set[int]] | None = None, cgroup: Path | None = None,
-                 other_cpu_threshold: float = 0.05):
+                 other_cpu_threshold: float = 0.05,
+                 co_tenants: Callable[[], dict[str, set[int]]] | None = None):
         super().__init__(daemon=True, name="isolab-sampler")
+        self.co_tenants = co_tenants or (lambda: {})
         self.cpus = sorted(job_cpus)
         self.period = period
         self.paths = paths
@@ -298,8 +303,11 @@ class Sampler(threading.Thread):
         ticks = {k: b["job_ticks"][k] - a["job_ticks"][k] for k in _STAT_FIELDS}
         total_ticks = sum(ticks.values())
         exclude = self.exclude() | {self._my_pid}
-        others = other_use(a["procs"], b["procs"], exclude)
+        co = self.co_tenants()
+        co_pids = set().union(*co.values()) if co else set()
+        others = other_use(a["procs"], b["procs"], exclude | co_pids)
         other_s = sum(others.values())
+        co_s = sum(other_use(a["procs"], b["procs"], set(b["procs"]) - co_pids).values()) if co_pids else 0.0
         if total_ticks > 0:
             job_cpu = {"busy_pct": 100.0 * (1 - ticks["idle"] / total_ticks),
                        "irq_pct": 100.0 * (ticks["irq"] + ticks["softirq"]) / total_ticks,
@@ -323,6 +331,7 @@ class Sampler(threading.Thread):
             "disk_sectors": (b["disk"]["read_sectors"] - a["disk"]["read_sectors"]) + (b["disk"]["write_sectors"] - a["disk"]["write_sectors"]),
             "other_cpu_s": other_s, "other_top": dict(list(others.items())[:5]),
             "contended": other_s > self.threshold * dt,
+            "co_tenant_cpu_s": co_s, "co_tenant_jobs": sorted(co),
             "cg_cpu_us": None if a["cg_cpu_usage_us"] is None or b["cg_cpu_usage_us"] is None else b["cg_cpu_usage_us"] - a["cg_cpu_usage_us"],
             "cg_mem_current": b["cg_mem_current"],
             "cg_psi_delta_us": _psi_delta(a["cg_psi"], b["cg_psi"]),
@@ -362,6 +371,8 @@ class Sampler(threading.Thread):
             "other_cpu_s": other, "other_cpu_ratio": other / wall if wall else 0.0,
             "other_top": dict(sorted(tops.items(), key=lambda kv: -kv[1])[:8]),
             "contended_samples": sum(1 for x in s if x["contended"]),
+            "co_tenant_cpu_s": sum(x["co_tenant_cpu_s"] for x in s),
+            "co_tenant_jobs": sorted({j for x in s for j in x["co_tenant_jobs"]}),
             "freq_mhz": freq,
             "freq_cv_max": max((v["cv"] for v in freq.values()), default=None) if freq else None,
             "throttle_events": sum(x["throttle_delta"] for x in s),

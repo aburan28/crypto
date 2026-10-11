@@ -1,0 +1,405 @@
+{
+  "schema": "crypto.sect113r1-audit/v2",
+  "admitted_scientific_run": false,
+  "evidence_status": "PRE_ADMISSION_DIAGNOSTIC_EXACT_CERTIFICATES",
+  "source": {
+    "source_url": "https://www.secg.org/SEC2-Ver-1.0.pdf",
+    "source_sha256": "d1b16728ad83888fd656d16b99dc71bcd5541d42d848ffd0de7c62c19010d8c3",
+    "identity": {
+      "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x6942e38fc45c62366c09aa8204cd:unk:unk:r:97df4ac684cb",
+      "icv1_slug": "icv1-f2m113-tm122610772499221213-97df4ac6",
+      "model_sha256": "97df4ac684cbe5e6ab7686805d46ec4aa74945314512fd4ed79598337d243117",
+      "curve_id": "EC1N113Csect113r1hf529f17bd191",
+      "curve_uid": "urn:ec-record:1:sha256:f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97",
+      "curve_sha256": "f529f17bd1913792333a661e3557ad6b8e0ca2d4d02b939bc069d17d9fd94d97",
+      "field_sha256": "da55718b2ae51e38fc5d836fcf62bbca5907b877c61b29d5e3c30a5e94b60ee3"
+    },
+    "q": "10384593717069655257060992658440192",
+    "subgroup_order_n": "5192296858534827689835882578830703",
+    "curve_order": "10384593717069655379671765157661406",
+    "trace": "-122610772499221213",
+    "frobenius_discriminant": "-26504973335422840129609279124569399",
+    "field_polynomial_irreducible": true,
+    "n_primality": {
+      "value": "5192296858534827689835882578830703",
+      "factorization_of_value_minus_one": [
+        [
+          "2",
+          1
+        ],
+        [
+          "7",
+          1
+        ],
+        [
+          "53",
+          1
+        ],
+        [
+          "547",
+          1
+        ],
+        [
+          "2848799",
+          1
+        ],
+        [
+          "8757107",
+          1
+        ],
+        [
+          "512797404440011",
+          1
+        ]
+      ],
+      "witnesses": [
+        {
+          "prime_factor": "2",
+          "witness": "5"
+        },
+        {
+          "prime_factor": "7",
+          "witness": "2"
+        },
+        {
+          "prime_factor": "53",
+          "witness": "2"
+        },
+        {
+          "prime_factor": "547",
+          "witness": "2"
+        },
+        {
+          "prime_factor": "2848799",
+          "witness": "2"
+        },
+        {
+          "prime_factor": "8757107",
+          "witness": "2"
+        },
+        {
+          "prime_factor": "512797404440011",
+          "witness": "2"
+        }
+      ],
+      "exact_product": true,
+      "verified_prime": true
+    },
+    "generator_on_curve": true,
+    "generator_exact_order_n": true,
+    "hasse_unique_multiple": true,
+    "embedding_degree": "2596148429267413844917941289415351",
+    "embedding_degree_exact": true,
+    "discriminant_factorization_exact": true,
+    "discriminant_small_factors_prime": true,
+    "discriminant_fundamental": true,
+    "discriminant_large_factor_primality": {
+      "value": "195708607903277035369399",
+      "factorization_of_value_minus_one": [
+        [
+          "2",
+          1
+        ],
+        [
+          "3",
+          2
+        ],
+        [
+          "16370128667",
+          1
+        ],
+        [
+          "664179290233",
+          1
+        ]
+      ],
+      "witnesses": [
+        {
+          "prime_factor": "2",
+          "witness": "3"
+        },
+        {
+          "prime_factor": "3",
+          "witness": "2"
+        },
+        {
+          "prime_factor": "16370128667",
+          "witness": "2"
+        },
+        {
+          "prime_factor": "664179290233",
+          "witness": "2"
+        }
+      ],
+      "exact_product": true,
+      "verified_prime": true
+    },
+    "minimum_non_scalar_cm_norm": "6626243333855710032402319781142350",
+    "no_f2_descent_representative": true,
+    "f2_base_change_traces": [
+      "-144115188075855872",
+      "-1267584991505179",
+      "0",
+      "1267584991505179",
+      "144115188075855872"
+    ],
+    "order_of_2_mod_113": 28,
+    "ghs_magic_number_computed": false,
+    "ghs_screen_status": "NOT_CERTIFIED_MAGIC_NUMBER_UNCOMPUTED"
+  },
+  "class_weakness": {
+    "frozen_classical_threshold_bits": 80,
+    "subgroup_bits": 113,
+    "rho_expected_log2_group_ops": "56.325748",
+    "rho_95pct_log2_group_ops": "57.291454",
+    "optimized_negation_rho_log2_group_ops": "55.825379",
+    "below_threshold": true,
+    "published_full_dlp_recovery": "Wenger and Wolfger report a full sect113r1 discrete-log computation in about 2.5 months on ten Kintex-7 FPGAs",
+    "published_recovery_url": "https://eprint.iacr.org/2015/143",
+    "verdict": "CLASS_WEAK",
+    "novelty_boundary": "legacy subgroup size and generic attack; not a newly discovered algebraic shortcut"
+  },
+  "singular_companion": {
+    "equation": "y^2+x*y=x^3+a*x^2 (b=0; singular nodal cubic)",
+    "discriminant_zero": true,
+    "trace_a_is_one": true,
+    "smooth_locus_order": "10384593717069655257060992658440193",
+    "factorization_exact": true,
+    "factor_primes_exact": true,
+    "attack_point": "01003088250ca6e7c7fe649ce85820f7000000000000000000000000000000",
+    "attack_point_off_nominal_curve": true,
+    "attack_point_on_singular_companion": true,
+    "attack_point_exact_order": true,
+    "nominal_and_companion_multipliers_identical": true,
+    "independent_torus_matches_demo": true,
+    "independent_torus_matches_full_width": true,
+    "exhaustive_small_field_torus_control": true,
+    "actual_oracle_queries_demo": 1,
+    "demo_seed_digest": "fa4be280c9e9f1e2112ae090729ed3b4faf78e0c1133db4a71836e266896b463",
+    "demo_scalar": "6599291615786184",
+    "demo_result": "010075c25a2b8ec5fe61deb5d9940f6b016e51d18dd6e86051047c6790df57",
+    "demo_public_key": "010151391c0faa8058107fc72f3e313b01ec08870633a463899b0f0502b2e4",
+    "demo_components": [
+      {
+        "prime": 3,
+        "residue": 0,
+        "expected_residue": 0,
+        "bsgs_giant_steps": 1,
+        "exact_replay": true
+      },
+      {
+        "prime": 227,
+        "residue": 58,
+        "expected_residue": 58,
+        "bsgs_giant_steps": 4,
+        "exact_replay": true
+      },
+      {
+        "prime": 48817,
+        "residue": 26624,
+        "expected_residue": 26624,
+        "bsgs_giant_steps": 121,
+        "exact_replay": true
+      },
+      {
+        "prime": 636190001,
+        "residue": 487863039,
+        "expected_residue": 487863039,
+        "bsgs_giant_steps": 19342,
+        "exact_replay": true
+      }
+    ],
+    "demo_crt_modulus": "21149740236874377",
+    "demo_recovered_scalar": "6599291615786184",
+    "demo_exact_recovery": true,
+    "demo_final_replay_matches_public_key": true,
+    "full_width_seed_digest": "c4cfd5aa9d48d2079788cbdd3c6c7f579cf7d41cd002106eb2bab540ad639f08",
+    "full_width_scalar": "1108386698526968361534713354743651",
+    "full_width_result": "010078aed9a682be670a024a24d76b1d00d567fa101a19af65ce7f58c0d4a4",
+    "full_width_public_key": "0100af667d2d64df714fcb7229d4509f0071c688f4f136aaf006193d1dc24f",
+    "full_width_frozen_vectors_match": true,
+    "actual_oracle_queries_full_width": 1,
+    "full_width_small_components": [
+      {
+        "prime": 3,
+        "residue": 1,
+        "expected_residue": 1,
+        "bsgs_giant_steps": 1,
+        "exact_replay": true
+      },
+      {
+        "prime": 227,
+        "residue": 130,
+        "expected_residue": 130,
+        "bsgs_giant_steps": 9,
+        "exact_replay": true
+      },
+      {
+        "prime": 48817,
+        "residue": 15463,
+        "expected_residue": 15463,
+        "bsgs_giant_steps": 70,
+        "exact_replay": true
+      },
+      {
+        "prime": 636190001,
+        "residue": 287524086,
+        "expected_residue": 287524086,
+        "bsgs_giant_steps": 11400,
+        "exact_replay": true
+      }
+    ],
+    "full_width_recovered_residue": "13735027495063591",
+    "full_width_remaining_prime": 491003369344660409,
+    "full_width_large_component_executed": false,
+    "full_width_rho_expected_log2": "29.710003",
+    "validator_rejects_attack_point": true,
+    "order_two_point": "0100000000000000000000000000000001df93aa20579d377f97203f385b11",
+    "order_two_exact": true,
+    "parity_observable_verified": true,
+    "validator_rejects_order_two_point": true,
+    "verdict": "CONDITIONAL_IMPLEMENTATION_WEAK",
+    "applicability": "conditional on attacker-selected BinaryPoint reaching unchecked scalar_mul and a distinguishable full-point result; no production protocol exposure is asserted"
+  },
+  "valid_isogenies": {
+    "frobenius_factor_degrees_q_q2_q4": [
+      2,
+      4,
+      12
+    ],
+    "rational_degree_five_kernel_count": 2,
+    "representatives": [
+      {
+        "degree": 5,
+        "map_implementation": "binary-velu/v1",
+        "kernel_coefficients_low_first": [
+          "005aa14af71294c84d25326260c3c9",
+          "017e628d91dfd1939a7b20495a0fde",
+          "000000000000000000000000000001"
+        ],
+        "kernel_sha256": "14f04e52dd7986c49fc019f3777569f5c4d5212aa427d1c771e94e1f637a43a5",
+        "kernel_certificate_exact": true,
+        "codomain_b": "0109267245489e254e8f14002629a1",
+        "codomain_nonsingular": true,
+        "codomain_identity": {
+          "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0xb1df3d9c423aa919217735a6d6ba:unk:unk:r:fd54d0ebcd45",
+          "icv1_slug": "icv1-f2m113-tm122610772499221213-fd54d0eb",
+          "model_sha256": "fd54d0ebcd451516257d578057b4819e745a575ef46e10b5263af670825df98b",
+          "curve_id": "EC1N113Crbh921ab2cd913f",
+          "curve_uid": "urn:ec-record:1:sha256:921ab2cd913f1d63106c1a55555cd869ae110bff6992dd23ee2522a4b97616c6",
+          "curve_sha256": "921ab2cd913f1d63106c1a55555cd869ae110bff6992dd23ee2522a4b97616c6",
+          "field_sha256": "da55718b2ae51e38fc5d836fcf62bbca5907b877c61b29d5e3c30a5e94b60ee3"
+        },
+        "generator_image": "01013046f06d2108d8dbf031f5a033ab011bb93fb05d5d549787a527aaf285",
+        "generator_image_on_codomain": true,
+        "generator_image_exact_order_n": true,
+        "planted_target_forward_homomorphism": true,
+        "dual_kernel_sha256": "b3ea0c7ea9ed92f3cfc18b0155df5fbe11d9c871d0111a99431f9a00f3b64d28",
+        "dual_kernel_certificate_exact": true,
+        "dual_returns_exact_source_model": true,
+        "dual_composition_on_generator_is_times_five": true,
+        "dual_composition_on_planted_target_is_times_five": true,
+        "planted_target_pullback_to_source": true,
+        "dlp_pullback_formula": "P=[5^{-1} mod n]*dual(phi(P)) for P in <G>",
+        "verdict": "TRANSFER_ONLY_SPEEDUP_NOT_ESTABLISHED"
+      },
+      {
+        "degree": 5,
+        "map_implementation": "binary-velu/v1",
+        "kernel_coefficients_low_first": [
+          "015cdf3bfe496bda979b4d76b642bd",
+          "010f30d7c3e2e2e8c46efadd41e81d",
+          "000000000000000000000000000001"
+        ],
+        "kernel_sha256": "75c8d79475727db308e7b368c76b0a2318832358925dbefefc43a3c4b0d0ccb2",
+        "kernel_certificate_exact": true,
+        "codomain_b": "0162b1a595685a1387c82647bf44cf",
+        "codomain_nonsingular": true,
+        "codomain_identity": {
+          "icv1": "ICV1:f2m-113-99967757:-122610772499221213:10384593717069655379671765157661406:0x17ef6a3b098891f6b4c529b62f0dd:unk:unk:r:5de3030fefcc",
+          "icv1_slug": "icv1-f2m113-tm122610772499221213-5de3030f",
+          "model_sha256": "5de3030fefccf2b61cb1ca25102903eb702eeb68a231e2c5da9ea2d1e29b0dfe",
+          "curve_id": "EC1N113Crbh2ee3581888f2",
+          "curve_uid": "urn:ec-record:1:sha256:2ee3581888f2dcbc20ded6386aac140f0ced5d5b8ff92aab74887ecd19f19386",
+          "curve_sha256": "2ee3581888f2dcbc20ded6386aac140f0ced5d5b8ff92aab74887ecd19f19386",
+          "field_sha256": "da55718b2ae51e38fc5d836fcf62bbca5907b877c61b29d5e3c30a5e94b60ee3"
+        },
+        "generator_image": "01018f4e7a48635b736527e45354b897007eea00533a71541476d03dcdf4b8",
+        "generator_image_on_codomain": true,
+        "generator_image_exact_order_n": true,
+        "planted_target_forward_homomorphism": true,
+        "dual_kernel_sha256": "335fc8485b574bbd7827b6148e0511c9d7c64573826dc7804f803e7efecd47bf",
+        "dual_kernel_certificate_exact": true,
+        "dual_returns_exact_source_model": true,
+        "dual_composition_on_generator_is_times_five": true,
+        "dual_composition_on_planted_target_is_times_five": true,
+        "planted_target_pullback_to_source": true,
+        "dlp_pullback_formula": "P=[5^{-1} mod n]*dual(phi(P)) for P in <G>",
+        "verdict": "TRANSFER_ONLY_SPEEDUP_NOT_ESTABLISHED"
+      }
+    ],
+    "conductor_strata_absent": true,
+    "useful_low_degree_cm_endomorphism_excluded": true,
+    "class_invariant_subgroup_order": "5192296858534827689835882578830703"
+  },
+  "quadratic_twist": {
+    "order": "10384593717069655134450220159218980",
+    "derived_from_source_order": true,
+    "factorization_exact": true,
+    "largest_prime": "4690844705882931102817",
+    "largest_prime_primality": {
+      "value": "4690844705882931102817",
+      "factorization_of_value_minus_one": [
+        [
+          "2",
+          5
+        ],
+        [
+          "3",
+          1
+        ],
+        [
+          "173",
+          1
+        ],
+        [
+          "47653",
+          1
+        ],
+        [
+          "5927116621409",
+          1
+        ]
+      ],
+      "witnesses": [
+        {
+          "prime_factor": "2",
+          "witness": "5"
+        },
+        {
+          "prime_factor": "3",
+          "witness": "3"
+        },
+        {
+          "prime_factor": "173",
+          "witness": "2"
+        },
+        {
+          "prime_factor": "47653",
+          "witness": "2"
+        },
+        {
+          "prime_factor": "5927116621409",
+          "witness": "2"
+        }
+      ],
+      "exact_product": true,
+      "verified_prime": true
+    },
+    "generic_rho_log2": "36.320917",
+    "classification": "OFF_CLASS_CONTROL_NOT_AN_ISOGENOUS_REPRESENTATIVE"
+  },
+  "statistical_policy": "exact algebra and replayed discrete logs need no p-value; randomized rho runtime is a model and its unexecuted large component remains explicitly unexecuted; no prevalence claim is made",
+  "implemented_diagnostic_gates_passed": true,
+  "certificate_sha256": "1cf4a3733e98c6acdc2219c24f29c15771fc67578bdb33dd426ab643e12572d8"
+}

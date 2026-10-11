@@ -1,0 +1,22 @@
+flowchart TB
+    subgraph ENV["Proven envelope (Thm 25, Table 2)"]
+        direction LR
+        C40["c=40: eps 0.029, gamma up to 0.2412<br/>thinnest: biggest saving"]
+        C21["c=21: eps 0.056, gamma 0.1546<br/>Corollary-26 line lives here"]
+        C10["c=10.5: eps 0.114, gamma 0.0129<br/>widest reach, tiny saving"]
+        CEIL["eps* = 0.1204: ceiling<br/>past it needs a new base identity (Sec 6, open)"]
+        C40 --> C21 --> C10 --> CEIL
+    end
+    subgraph GATES["Screening gates (rounds 1-2)"]
+        direction LR
+        SHAPE["SHAPE: shared thin integer middle?"]
+        RING["RING: small-integer products over Z?"]
+        SIZE["SIZE: inside the envelope?"]
+        SHAPE -->|pass| RING -->|pass| SIZE
+    end
+    T16["16 targets: probes, polynomial systems,<br/>group ops, matvecs, tiny graphs"]
+    T16 --> SHAPE
+    SHAPE -->|blocked: no coordinates| OUT1["stopped (no D,W to resize)"]
+    RING -->|blocked: wrong operation| OUT1
+    SIZE -->|nothing arrives| OUT2["size never binds: widening changes no verdict"]
+    ENV -.->|widens only| SIZE

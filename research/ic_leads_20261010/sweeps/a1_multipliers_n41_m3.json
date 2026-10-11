@@ -1,0 +1,23 @@
+{
+ "_comment": "A1 where relations are dear: n=41, three summands. 60 plain columns (4,920 points, trials/relation 27.3, 55 relations measured) against 6 columns with norm 16 (about 4,920 points, 6 columns). Prediction: equal trials per relation and equal table, relations needed 7 instead of 55, so the relation phase (which dominates at m=3) falls about 8x.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 17
+ },
+ "repeats": 4,
+ "seed": 20261010,
+ "max_trials": 4000000,
+ "matrix": {
+  "factor_base": [
+   "compact-orbit-scan:columns=60,raw_x_cap=400000000",
+   "compact-orbit-scan:columns=6,raw_x_cap=400000000,norm=16",
+   "compact-orbit-scan:columns=20,raw_x_cap=400000000,norm=4"
+  ],
+  "oracle": [
+   "mitm-frobenius:m=3"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

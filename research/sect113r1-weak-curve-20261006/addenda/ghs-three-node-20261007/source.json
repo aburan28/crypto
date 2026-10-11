@@ -1,0 +1,33 @@
+{
+  "schema": "ghs-screen/v1",
+  "curve": {
+    "model": "y^2+xy=x^3+a*x^2+b",
+    "absolute_degree": 113,
+    "modulus": "0x20000000000000000000000000201",
+    "a": "0x3088250ca6e7c7fe649ce85820f7",
+    "b": "0xe8bee4d3e2260744188be0e9c723"
+  },
+  "summary": {
+    "factorisations": 1,
+    "candidates_within_bound": 0,
+    "genus_bound": "64",
+    "best_relative_degree": 113,
+    "best_base_degree": 1,
+    "best_magic_number": 113,
+    "best_genus": "5192296858534827628530496329220095",
+    "interpretation": "structural screen only; no DLP cost or vulnerability claim"
+  },
+  "towers": [
+    {
+      "relative_degree": 113,
+      "base_degree": 1,
+      "field_tower": "F_2 <= F_(2^1) <= F_(2^113)",
+      "cover_tower": "C/F_(2^1) -> E/F_(2^113)",
+      "magic_number": 113,
+      "genus": "5192296858534827628530496329220095",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "10384593717069655257060992658440192",
+      "within_genus_bound": false
+    }
+  ]
+}

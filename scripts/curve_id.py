@@ -9,6 +9,7 @@ file produces, and `docs/curves/registry.json` is built with it.
     python3 scripts/curve_id.py koblitz 0 41
     python3 scripts/curve_id.py binary 27 --a 1 --b 0x845462 --order 134215648
     python3 scripts/curve_id.py prime 10935329 --a 5320418 --b 8535318 --order 10935433
+    python3 scripts/curve_id.py extension 5 --modulus 2,0 --a 1,0 --b 1,0 --order 27
     python3 scripts/curve_id.py resolve 'K_0 / GF(2^41)'
     python3 scripts/curve_id.py selftest
 
@@ -285,6 +286,96 @@ def prime_id(p: int, a: int, b: int, order: int, end: str = "unk") -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Extensions of prime fields: GF(p^k) = GF(p)[t]/(f), f = t^k + c_{k-1} t^{k-1}
+# + ... + c_0, an element the list [e_0, ..., e_{k-1}] of e_0 + e_1 t + ...
+# ---------------------------------------------------------------------------
+
+
+def _fpk_reduce(u: list[int], p: int, mod: list[int]) -> list[int]:
+    """`u`, of any length, reduced modulo the monic f whose low coefficients are `mod`."""
+    k = len(mod)
+    u = [x % p for x in u]
+    for i in range(len(u) - 1, k - 1, -1):
+        c = u[i]
+        if c:
+            u[i] = 0
+            for j in range(k):  # t^i = t^(i-k) t^k = -t^(i-k) (c_0 + ... + c_{k-1} t^(k-1))
+                u[i - k + j] = (u[i - k + j] - c * mod[j]) % p
+    return (u + [0] * k)[:k]
+
+
+def _fpk_mul(u: list[int], v: list[int], p: int, mod: list[int]) -> list[int]:
+    prod = [0] * (len(u) + len(v) - 1)
+    for i, x in enumerate(u):
+        if x:
+            for j, y in enumerate(v):
+                prod[i + j] += x * y
+    return _fpk_reduce(prod, p, mod)
+
+
+def _fpk_pow(u: list[int], e: int, p: int, mod: list[int]) -> list[int]:
+    out = _fpk_reduce([1], p, mod)
+    while e:
+        if e & 1:
+            out = _fpk_mul(out, u, p, mod)
+        u = _fpk_mul(u, u, p, mod)
+        e >>= 1
+    return out
+
+
+def _fpk_inv(u: list[int], p: int, mod: list[int]) -> list[int]:
+    """`u^(q-2)`, the inverse of a nonzero `u` when f is irreducible."""
+    return _fpk_pow(u, p ** len(mod) - 2, p, mod)
+
+
+def extension_field(p: int, k: int, modulus: list[int]) -> str:
+    """`fpk-<p>-<k>-<modhash8>`: the field part of an extension's identity.
+
+    `modulus` is `[c_0, ..., c_{k-1}]`, the low coefficients of the monic
+    modulus, as schema v2 writes them; the hash is taken over them reduced
+    modulo `p`, in decimal.
+    """
+    if k < 2 or len(modulus) != k:
+        raise ValueError("an extension has degree k >= 2 and k modulus coefficients")
+    coeffs = ",".join(str(c % p) for c in modulus)
+    return "fpk-%d-%d-%s" % (p, k, _sha256("fpk-modulus:%d:%s" % (p, coeffs))[:8])
+
+
+def extension_id(p: int, k: int, modulus: list[int], a: list[int], b: list[int],
+                 order: int, end: str = "unk") -> dict:
+    """y^2 = x^3 + a x + b over GF(p^k) = GF(p)[t]/(f), p an odd prime > 3, k >= 2.
+
+    `modulus` is `[c_0, ..., c_{k-1}]` of the monic f = t^k + c_{k-1} t^{k-1}
+    + ... + c_0, and `a` and `b` are coefficient lists in the basis 1, t,
+    ..., t^{k-1}.  The order is #E(GF(p^k)), the whole group.  As with the
+    other kinds, the modulus is part of the model, and the caller has
+    checked that it is irreducible.
+    """
+    if p < 5:
+        raise ValueError("an extension's characteristic is a prime above 3")
+    if len(a) != k or len(b) != k:
+        raise ValueError("a and b are lists of k coefficients")
+    mod = [c % p for c in modulus]
+    a, b = [x % p for x in a], [x % p for x in b]
+    field = extension_field(p, k, mod)
+    a3 = _fpk_mul(_fpk_mul(a, a, p, mod), a, p, mod)
+    disc = _fpk_reduce([4 * x + 27 * y for x, y in zip(a3, _fpk_mul(b, b, p, mod))], p, mod)
+    if not any(disc):
+        raise ValueError("singular curve")
+    model_json = _canonical({
+        "a": [str(x) for x in a], "b": [str(x) for x in b], "field": field,
+        "form": "y^2=x^3+a*x+b", "k": str(k), "modulus": [str(c) for c in mod],
+        "p": str(p), "v": VERSION,
+    })
+    q = p**k
+    _check_hasse(q, order)
+    trace = q + 1 - order
+    j = _fpk_mul([1728 * 4 * x for x in a3], _fpk_inv(disc, p, mod), p, mod)
+    return _identity(field, trace, order, ",".join(str(x) for x in j), end, model_json,
+                     "fp%dk%d" % (p.bit_length(), k))
+
+
+# ---------------------------------------------------------------------------
 # Resolving names through the registry.
 # ---------------------------------------------------------------------------
 
@@ -366,6 +457,33 @@ def _count_binary(m: int, f: int, a: int, b: int) -> int:
     return total
 
 
+def _count_extension(p: int, mod: list[int], a: list[int], b: list[int]) -> int:
+    """#E for y^2 = x^3 + a x + b over GF(p^k), one x at a time, by Euler's criterion."""
+    k = len(mod)
+    q = p**k
+    total = 1  # infinity
+    for idx in range(q):
+        x = [idx // p**i % p for i in range(k)]
+        rhs = _fpk_reduce([u + v for u, v in zip(
+            _fpk_mul(_fpk_mul(x, x, p, mod), x, p, mod),
+            [s + t for s, t in zip(_fpk_mul(a, x, p, mod), b)])], p, mod)
+        if not any(rhs):
+            total += 1
+        elif _fpk_pow(rhs, (q - 1) // 2, p, mod) == _fpk_reduce([1], p, mod):
+            total += 2
+    return total
+
+
+def _lifted_order(p: int, a: int, b: int, k: int) -> int:
+    """#E(GF(p^k)) of a curve defined over GF(p), from #E(GF(p)) by the
+    trace recurrence t_i = t_1 t_{i-1} - p t_{i-2}, t_0 = 2."""
+    t1 = p + 1 - _count_prime(p, a, b)
+    prev, cur = 2, t1
+    for _ in range(k - 1):
+        prev, cur = cur, t1 * cur - p * prev
+    return p**k + 1 - cur
+
+
 def selftest() -> None:
     # K_0/GF(2^9): the frozen oracle-pricing cells record #E = 508 and the
     # modulus x^9 + x + 1 (polynomial_low_terms [0, 1]).
@@ -403,6 +521,24 @@ def selftest() -> None:
     k = koblitz_id(0, 41)
     assert k["icv1"].startswith("ICV1:f2m-41-") and k["end"] == "-7"
     assert k["slug"].startswith("icv1-f2m41-t")
+    # Extensions: brute-force counts over GF(5^2) = GF(5)[t]/(t^2 + 2) and
+    # GF(7^3) = GF(7)[t]/(t^3 + 4) equal the trace recurrence's lift of
+    # #E(GF(p)) for curves defined over GF(p), which checks the field
+    # arithmetic the identity uses against the prime field's.
+    assert _count_extension(5, [2, 0], [1, 0], [1, 0]) == _lifted_order(5, 1, 1, 2) == 27
+    assert _count_extension(7, [4, 0, 0], [2, 0, 0], [3, 0, 0]) == _lifted_order(7, 2, 3, 3)
+    # Inversion round-trips in GF(7^3).
+    for v in ([1, 2, 3], [0, 0, 5], [6, 0, 1]):
+        assert _fpk_mul(v, _fpk_inv(v, 7, [4, 0, 0]), 7, [4, 0, 0]) == [1, 0, 0]
+    e = extension_id(5, 2, [2, 0], [1, 0], [1, 0], 27)
+    assert e["icv1"].startswith("ICV1:fpk-5-2-") and e["trace"] == -1
+    assert e["slug"].startswith("icv1-fp3k2-tm1-")
+    # A curve defined over GF(p) keeps its j-invariant in the extension.
+    assert e["j"] == prime_id(5, 1, 1, 9)["j"] + ",0" == "2,0"
+    # A curve with coefficients outside GF(p): the count is the brute force's.
+    order = _count_extension(7, [4, 0, 0], [1, 2, 0], [3, 0, 5])
+    e3 = extension_id(7, 3, [4, 0, 0], [1, 2, 0], [3, 0, 5], order)
+    assert e3["slug"].startswith("icv1-fp3k3-t") and e3["field"].startswith("fpk-7-3-")
     print("curve_id selftest: ok")
 
 
@@ -423,6 +559,13 @@ def main(argv: list[str]) -> int:
     p.add_argument("--a", type=int, required=True)
     p.add_argument("--b", type=int, required=True)
     p.add_argument("--order", type=int, required=True)
+    ints = lambda s: [int(v) for v in s.split(",")]  # noqa: E731
+    x = sub.add_parser("extension")
+    x.add_argument("p", type=int)
+    x.add_argument("--modulus", type=ints, required=True, help="c_0,...,c_{k-1} of the monic modulus")
+    x.add_argument("--a", type=ints, required=True)
+    x.add_argument("--b", type=ints, required=True)
+    x.add_argument("--order", type=int, required=True)
     r = sub.add_parser("resolve")
     r.add_argument("name")
     sub.add_parser("selftest")
@@ -437,6 +580,8 @@ def main(argv: list[str]) -> int:
         out = binary_id(args.m, mod, args.a, args.b, args.order)
     elif args.cmd == "prime":
         out = prime_id(args.p, args.a, args.b, args.order)
+    elif args.cmd == "extension":
+        out = extension_id(args.p, len(args.modulus), args.modulus, args.a, args.b, args.order)
     else:
         out = resolve(args.name)
         if out is None:

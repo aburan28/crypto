@@ -107,7 +107,7 @@ use num_bigint::BigUint;
 use num_traits::ToPrimitive;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::binary_ecc::{BinaryCurve, BinaryPoint, IrreduciblePoly};
 use crate::cryptanalysis::curve_id::{self, CurveId};
@@ -118,12 +118,46 @@ use crate::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
     find_irreducible_sparse, koblitz_signed_frobenius_rho_reference,
     saturate_factor_base_two_torsion, FrobeniusFactorBase, KoblitzCurve, KoblitzSignedRhoOptions,
+    ProjectedFactorBase,
 };
 use crate::cryptanalysis::research_bench::{bench_curves, linear_fit};
 use crate::cryptanalysis::residual_walk::is_prime_u64;
 use crate::cryptanalysis::semaev_decomp::{Gf2, SubspaceOracle};
 
 // ── Units, ledgers, boundaries ─────────────────────────────────────
+
+/// The field operations behind the group operations: modular
+/// multiplications, squarings and inversions of the curve's base field,
+/// tallied by a group whose `add` and `double` route their arithmetic
+/// through a counting field ([`PrimeCurve`] does; see
+/// [`CountedGroup::counts_field_ops`]).  A squaring is counted where the
+/// formula squares a value, so `sqrs` is a genuine subset of the
+/// multiplications performed and not a reading of equal operands; every
+/// other modular multiplication, including one by a small constant, is a
+/// `mul`; every modular inversion is an `inv`.  Additions, subtractions,
+/// negations and comparisons are not counted.
+#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq, Eq)]
+pub struct FieldOps {
+    pub muls: u64,
+    pub sqrs: u64,
+    pub invs: u64,
+}
+
+impl FieldOps {
+    pub fn merge(&mut self, other: FieldOps) {
+        self.muls += other.muls;
+        self.sqrs += other.sqrs;
+        self.invs += other.invs;
+    }
+    /// The tally of several ledgers together.
+    pub fn total(ledgers: &[GroupOps]) -> FieldOps {
+        let mut f = FieldOps::default();
+        for l in ledgers {
+            f.merge(l.field_ops);
+        }
+        f
+    }
+}
 
 /// Exact group-operation ledger.  A doubling is an operation like an
 /// addition (both are one inversion and a few multiplications in affine
@@ -133,6 +167,15 @@ pub struct GroupOps {
     pub adds: u64,
     pub doubles: u64,
     pub scalar_mults: u64,
+    /// The field operations behind the additions and doublings, where
+    /// the group counts them ([`CountedGroup::counts_field_ops`]); zero
+    /// and meaningless elsewhere.  Not serialised with the ledger, so
+    /// every report that writes a `GroupOps` is byte for byte what it
+    /// was and a binary-curve ledger never prints a zero that would read
+    /// as "no field work".  `ecbench` carries the tally as its own
+    /// optional record block, written only when the group counted it.
+    #[serde(skip)]
+    pub field_ops: FieldOps,
 }
 
 impl GroupOps {
@@ -147,6 +190,7 @@ impl GroupOps {
         self.adds += other.adds;
         self.doubles += other.doubles;
         self.scalar_mults += other.scalar_mults;
+        self.field_ops.merge(other.field_ops);
     }
 }
 
@@ -697,15 +741,40 @@ pub(crate) fn fast_map<V>(capacity: usize) -> FastMap<V> {
 
 // ── Modular arithmetic on u64 ──────────────────────────────────────
 
+/// `a·b mod m`, the value of `(a·b) % m` on 128-bit integers exactly.
+///
+/// A 128-bit remainder is a library call on every target (`__umodti3`,
+/// a loop of word divisions), and it sat under every multiplication of
+/// the prime-curve group law.  When the modulus fits 32 bits and both
+/// operands are reduced — every curve `ecbench` registers, and every
+/// operand the group law forms — the product fits a word and one
+/// hardware division gives the same value.  Anything else takes the
+/// 128-bit path unchanged, so no input changes its result.
 #[inline]
-fn mulmod(a: u64, b: u64, m: u64) -> u64 {
-    ((a as u128 * b as u128) % m as u128) as u64
+pub(crate) fn mulmod(a: u64, b: u64, m: u64) -> u64 {
+    if m <= u64::from(u32::MAX) && a < m && b < m {
+        (a * b) % m
+    } else {
+        ((a as u128 * b as u128) % m as u128) as u64
+    }
 }
 
+/// `a + b mod m`, the value of `(a + b) % m` on 128-bit integers exactly.
+/// Reduced operands need one compare-and-subtract instead of the
+/// 128-bit remainder's library call; the carry handles a modulus above
+/// `2^63`.
 #[inline]
-fn addmod(a: u64, b: u64, m: u64) -> u64 {
-    let s = a as u128 + b as u128;
-    (s % m as u128) as u64
+pub(crate) fn addmod(a: u64, b: u64, m: u64) -> u64 {
+    if a < m && b < m {
+        let (s, carry) = a.overflowing_add(b);
+        if carry || s >= m {
+            s.wrapping_sub(m)
+        } else {
+            s
+        }
+    } else {
+        ((a as u128 + b as u128) % m as u128) as u64
+    }
 }
 
 #[inline]
@@ -730,23 +799,38 @@ fn powmod(mut a: u64, mut e: u64, m: u64) -> u64 {
     r
 }
 
-/// Modular inverse by the extended Euclidean algorithm.
+/// Modular inverse by the extended Euclidean algorithm: `a⁻¹ mod m` in
+/// `[0, m)`, `None` when `gcd(a, m) ≠ 1`.
+///
+/// Remainders and quotients are words, so each step is one hardware
+/// division; the earlier 128-bit form paid a library call (`__divti3`)
+/// per step, and one inversion sits in every affine group operation.
+/// The Bézout coefficient is kept as a magnitude with its sign tracked
+/// separately: successive coefficients alternate in sign, so the update
+/// `s₀ − q·s₁` only ever adds magnitudes, and every magnitude stays at
+/// most `m`.  The inverse is unique, so the result is the one the
+/// 128-bit form returned.
 pub fn invmod(a: u64, m: u64) -> Option<u64> {
-    let (mut old_r, mut r) = (a as i128 % m as i128, m as i128);
-    let (mut old_s, mut s) = (1i128, 0i128);
-    while r != 0 {
-        let q = old_r / r;
-        (old_r, r) = (r, old_r - q * r);
-        (old_s, s) = (s, old_s - q * s);
+    let (mut r0, mut r1) = (m, a % m);
+    // `r0 ≡ ±t0·a`, `r1 ≡ ∓t1·a (mod m)`; `neg0` is the sign of `t0`'s
+    // coefficient.  Initially `m ≡ 0·a` and `a ≡ +1·a`.
+    let (mut t0, mut t1) = (0u64, 1u64);
+    let mut neg0 = true;
+    while r1 != 0 {
+        let q = r0 / r1;
+        (r0, r1) = (r1, r0 - q * r1);
+        (t0, t1) = (t1, t0 + q * t1);
+        neg0 = !neg0;
     }
-    if old_r != 1 {
+    if r0 != 1 {
         return None;
     }
-    let mut v = old_s % m as i128;
-    if v < 0 {
-        v += m as i128;
-    }
-    Some(v as u64)
+    Some(if neg0 {
+        // `t0 == m` only when `m == 1`, where the inverse is `0`.
+        (m - t0) % m
+    } else {
+        t0 % m
+    })
 }
 
 // ── Incremental Gauss–Jordan over Z/rZ ─────────────────────────────
@@ -886,6 +970,13 @@ pub trait CountedGroup {
     fn neg(&self, p: Self::Elt) -> Self::Elt;
     /// A key that identifies the element (both walks must agree on it).
     fn key(&self, p: &Self::Elt) -> u64;
+    /// Whether `add` and `double` tally the field operations behind them
+    /// into the ledger's `field_ops`.  `false` by default, and then the
+    /// tally stays at zero and means *unknown*, never "no field work":
+    /// a report must leave the figure absent rather than write the zero.
+    fn counts_field_ops(&self) -> bool {
+        false
+    }
     /// `[k]P` by double-and-add, counted exactly.
     fn mul(&self, ops: &mut GroupOps, p: Self::Elt, k: u64) -> Self::Elt {
         ops.scalar_mults += 1;
@@ -2148,6 +2239,7 @@ pub fn signed_frobenius_rho(
         doubles: 0,
         scalar_mults: c.setup_scalar_multiplications
             + c.candidate_verification_scalar_multiplications,
+        field_ops: FieldOps::default(),
     };
     let gae = gops.gae() + scalar_adds;
     let expected = generic_floor_ops(r as f64, 2.0 * n as f64);
@@ -3009,37 +3101,83 @@ impl PrimeCurve {
         }
     }
 
-    fn add_raw(&self, a: PrimePoint, b: PrimePoint) -> PrimePoint {
+    /// The field operations of one affine addition of distinct, finite,
+    /// non-opposite points, as [`PrimeCurve::add_raw`] performs it:
+    /// `λ = (y₂ − y₁) · (x₂ − x₁)⁻¹` (one inversion, one
+    /// multiplication), `x₃ = λ² − x₁ − x₂` (one squaring),
+    /// `y₃ = λ · (x₁ − x₃) − y₁` (one multiplication).
+    pub const FIELD_OPS_PER_ADD: FieldOps = FieldOps {
+        muls: 2,
+        sqrs: 1,
+        invs: 1,
+    };
+
+    /// The field operations of one affine doubling of a finite point of
+    /// order above two, as [`PrimeCurve::double_raw`] performs it:
+    /// `x²` (one squaring), `3 · x²` and `2 · y` (two multiplications by
+    /// a constant, performed as modular multiplications and counted as
+    /// such), `(2y)⁻¹` (one inversion), `λ = (3x² + a) · (2y)⁻¹` (one
+    /// multiplication), `x₃ = λ² − 2 · x` (one squaring, one
+    /// multiplication by a constant), `y₃ = λ · (x − x₃) − y` (one
+    /// multiplication).  An implementation that replaced the three
+    /// constant multiplications by additions would report `2M + 2S + 1I`
+    /// here instead, and that difference is exactly what the tally is
+    /// for.
+    pub const FIELD_OPS_PER_DOUBLE: FieldOps = FieldOps {
+        muls: 5,
+        sqrs: 2,
+        invs: 1,
+    };
+
+    /// Affine addition, the field work tallied into `tally`.  The special
+    /// cases (`∞ + P`, `P + ∞`, `P + (−P)`) perform no field arithmetic;
+    /// `P + P` is routed to the doubling formula and tallied as one.
+    fn add_raw(&self, tally: &mut FieldOps, a: PrimePoint, b: PrimePoint) -> PrimePoint {
         if a.infinity {
             return b;
         }
         if b.infinity {
             return a;
         }
-        let p = self.p;
         if a.x == b.x {
-            if addmod(a.y, b.y, p) == 0 {
+            if addmod(a.y, b.y, self.p) == 0 {
                 return PrimePoint::INFINITY;
             }
-            return self.double_raw(a);
+            return self.double_raw(tally, a);
         }
-        let inv = invmod(submod(b.x, a.x, p), p).expect("prime field");
-        let lambda = mulmod(submod(b.y, a.y, p), inv, p);
-        let x3 = submod(submod(mulmod(lambda, lambda, p), a.x, p), b.x, p);
-        let y3 = submod(mulmod(lambda, submod(a.x, x3, p), p), a.y, p);
+        let mut f = CountedFp { p: self.p, tally };
+        let dx = f.sub(b.x, a.x);
+        let inv = f.inv(dx);
+        let dy = f.sub(b.y, a.y);
+        let lambda = f.mul(dy, inv);
+        let lambda2 = f.sqr(lambda);
+        let x3 = f.sub(f.sub(lambda2, a.x), b.x);
+        let dx3 = f.sub(a.x, x3);
+        let ldx3 = f.mul(lambda, dx3);
+        let y3 = f.sub(ldx3, a.y);
         PrimePoint::affine(x3, y3)
     }
 
-    fn double_raw(&self, a: PrimePoint) -> PrimePoint {
+    /// Affine doubling, the field work tallied into `tally`
+    /// ([`PrimeCurve::FIELD_OPS_PER_DOUBLE`]).  `∞` and a point of order
+    /// two perform no field arithmetic.
+    fn double_raw(&self, tally: &mut FieldOps, a: PrimePoint) -> PrimePoint {
         if a.infinity || a.y == 0 {
             return PrimePoint::INFINITY;
         }
-        let p = self.p;
-        let num = addmod(mulmod(3, mulmod(a.x, a.x, p), p), self.a, p);
-        let inv = invmod(mulmod(2, a.y, p), p).expect("prime field");
-        let lambda = mulmod(num, inv, p);
-        let x3 = submod(mulmod(lambda, lambda, p), mulmod(2, a.x, p), p);
-        let y3 = submod(mulmod(lambda, submod(a.x, x3, p), p), a.y, p);
+        let mut f = CountedFp { p: self.p, tally };
+        let x2 = f.sqr(a.x);
+        let three_x2 = f.mul(3, x2);
+        let num = f.add(three_x2, self.a);
+        let two_y = f.mul(2, a.y);
+        let inv = f.inv(two_y);
+        let lambda = f.mul(num, inv);
+        let lambda2 = f.sqr(lambda);
+        let two_x = f.mul(2, a.x);
+        let x3 = f.sub(lambda2, two_x);
+        let dx3 = f.sub(a.x, x3);
+        let ldx3 = f.mul(lambda, dx3);
+        let y3 = f.sub(ldx3, a.y);
         PrimePoint::affine(x3, y3)
     }
 
@@ -3076,6 +3214,42 @@ fn jacobi(mut a: u64, mut n: u64) -> i32 {
     }
 }
 
+/// `F_p` arithmetic that tallies what it does.  Every multiplication,
+/// squaring and inversion of the prime-curve group law goes through one
+/// of these, so the tally is what the code performed, not a reading of
+/// the formulas; additions and subtractions are free.  Results are those
+/// of [`mulmod`], [`invmod`], [`addmod`] and [`submod`] exactly.
+struct CountedFp<'a> {
+    p: u64,
+    tally: &'a mut FieldOps,
+}
+
+impl CountedFp<'_> {
+    #[inline]
+    fn mul(&mut self, a: u64, b: u64) -> u64 {
+        self.tally.muls += 1;
+        mulmod(a, b, self.p)
+    }
+    #[inline]
+    fn sqr(&mut self, a: u64) -> u64 {
+        self.tally.sqrs += 1;
+        mulmod(a, a, self.p)
+    }
+    #[inline]
+    fn inv(&mut self, a: u64) -> u64 {
+        self.tally.invs += 1;
+        invmod(a, self.p).expect("prime field")
+    }
+    #[inline]
+    fn add(&self, a: u64, b: u64) -> u64 {
+        addmod(a, b, self.p)
+    }
+    #[inline]
+    fn sub(&self, a: u64, b: u64) -> u64 {
+        submod(a, b, self.p)
+    }
+}
+
 impl CountedGroup for PrimeCurve {
     type Elt = PrimePoint;
     fn identity(&self) -> PrimePoint {
@@ -3086,11 +3260,17 @@ impl CountedGroup for PrimeCurve {
     }
     fn add(&self, ops: &mut GroupOps, p: PrimePoint, q: PrimePoint) -> PrimePoint {
         ops.adds += 1;
-        self.add_raw(p, q)
+        self.add_raw(&mut ops.field_ops, p, q)
     }
     fn double(&self, ops: &mut GroupOps, p: PrimePoint) -> PrimePoint {
         ops.doubles += 1;
-        self.double_raw(p)
+        self.double_raw(&mut ops.field_ops, p)
+    }
+    /// The group law above tallies its multiplications, squarings and
+    /// inversions ([`PrimeCurve::FIELD_OPS_PER_ADD`],
+    /// [`PrimeCurve::FIELD_OPS_PER_DOUBLE`]).
+    fn counts_field_ops(&self) -> bool {
+        true
     }
     fn neg(&self, p: PrimePoint) -> PrimePoint {
         if p.infinity {
@@ -3575,6 +3755,43 @@ pub fn koblitz_instance(a: u8, n: u32) -> Option<BinaryInstance> {
     })
 }
 
+/// A curve of the Koblitz isogeny class that is **not** the Koblitz model:
+/// `y² + xy = x³ + a x² + b` with `b ∉ F₂`, the same group order as `K_a`
+/// (certified on sampled points by [`KoblitzCurve::isogenous_model`]),
+/// no Frobenius endomorphism.  This is the floor-curve control of the
+/// conductor-gap experiments (`docs/ic/LEAD_LADDER_METHODOLOGY_20261010.md`
+/// L8): every lead that claims a gain *from* `τ` must vanish on it.
+/// `b` is a bitmask in the instance's own sparse modulus (the one
+/// `KoblitzCurve::new` selects), so a `b` built elsewhere must be in the
+/// same representation; `koblitz` is `None`, so only negation folds.
+pub fn koblitz_floor_instance(a: u8, n: u32, b: u64) -> Option<BinaryInstance> {
+    use num_bigint::BigUint as Big;
+    if n == 0 || n > 63 || b < 2 {
+        return None;
+    }
+    let b_fe = crate::binary_ecc::F2mElement::from_biguint(&Big::from(b), n);
+    let kc = KoblitzCurve::isogenous_model(a, n, b_fe, None)?;
+    let fast = FastCurve::new(&kc.curve)?;
+    let gf = Gf2::new(&kc.curve.irreducible);
+    let ash = ArtinSchreier::new(&gf);
+    let generator = fast.lift(kc.generator());
+    Some(BinaryInstance {
+        name: format!("{}-floor-b{b:x}", kc.label()),
+        n,
+        irreducible: kc.curve.irreducible.clone(),
+        a: u64::from(a),
+        b,
+        group_order: kc.group_order.to_u64()?,
+        r: kc.subgroup_order.to_u64()?,
+        cofactor: kc.cofactor.to_u64()?,
+        generator,
+        fast,
+        gf,
+        artin_schreier: ash,
+        koblitz: None,
+    })
+}
+
 // ── Factor bases ───────────────────────────────────────────────────
 
 /// How factor-base points map to relation columns.
@@ -3585,6 +3802,13 @@ pub enum ColumnFold {
     /// One column per signed Frobenius orbit; `(−1)^s π^k(rep)` carries
     /// `(−1)^s λ^k`.  Koblitz only.
     SignedFrobeniusOrbit,
+    /// One column per signed Frobenius orbit *of the cofactor
+    /// projections* `[h]P`: two raw orbits whose projections coincide
+    /// or are signed Frobenius translates of each other share a column
+    /// (for a base closed under translation by the 2-torsion point `T`,
+    /// `P` and `P + T` do).  A point with `[h]P = O` carries
+    /// coefficient `0`.  Koblitz only.
+    ProjectedSignedFrobeniusOrbit,
 }
 
 /// A materialised factor base with its column map.  Both `P` and `−P`
@@ -3819,6 +4043,10 @@ pub fn koblitz_factor_base(
     let mut out = FactorBase::empty(description);
     let mut abscissa_col: FastMap<usize> = fast_map(fb.points.len());
     let mut key_to_index: FastMap<usize> = fast_map(fb.points.len());
+    let projected = match fold {
+        ColumnFold::ProjectedSignedFrobeniusOrbit => Some(ProjectedFactorBase::new(kc, fb)),
+        _ => None,
+    };
     for (i, p) in fb.points.iter().enumerate() {
         let fp = inst.fast.lift(p);
         key_to_index.insert(fp.pack(), i);
@@ -3828,6 +4056,15 @@ pub fn koblitz_factor_base(
                 let (orbit, k, negated) = fb.signed_orbit_of[i];
                 let c = powmod(lambda, k as u64, r);
                 (orbit, if negated { submod(0, c, r) } else { c })
+            }
+            ColumnFold::ProjectedSignedFrobeniusOrbit => {
+                match projected.as_ref().and_then(|map| map.location_of(i)) {
+                    Some((orbit, k, negated)) => {
+                        let c = powmod(lambda, u64::from(k), r);
+                        (orbit, if negated { submod(0, c, r) } else { c })
+                    }
+                    None => (0, 0),
+                }
             }
             ColumnFold::Abscissa => {
                 let next = abscissa_col.len();
@@ -3857,8 +4094,20 @@ pub fn koblitz_factor_base(
     out.abscissa_list.sort_unstable();
     out.columns = match fold {
         ColumnFold::SignedFrobeniusOrbit => fb.signed_orbits.len(),
+        ColumnFold::ProjectedSignedFrobeniusOrbit => {
+            projected.as_ref().map_or(0, |map| map.columns())
+        }
         ColumnFold::Abscissa => abscissa_col.len(),
     };
+    if let Some(map) = projected.as_ref() {
+        let c = map.cost();
+        out.cost
+            .count("cofactor_multiplications", c.cofactor_multiplications);
+        out.cost.count(
+            "frobenius_coordinate_squarings",
+            c.derived_frobenius_coordinate_squarings + c.canonical_frobenius_coordinate_squarings,
+        );
+    }
     if !fb.uses_ambient_basis() {
         out.dimension = Some(fb.ell);
         out.subspace_basis = Some(
@@ -4141,25 +4390,33 @@ impl FrobeniusPairTable {
                 member_of[i * n + t] = idx as u32;
             }
         }
-        // One representative per column, the first point of it: any
-        // member of a signed orbit serves, the orbit being its own
-        // ⟨σ, −1⟩-image.
-        let mut rep_of_col = vec![usize::MAX; fb.columns];
-        for i in 0..f {
-            let c = fb.col_of[i];
-            if rep_of_col[c] == usize::MAX {
-                rep_of_col[c] = i;
+        // One representative per signed Frobenius orbit, the first point
+        // of it: any member serves, the orbit being its own ⟨σ, −1⟩-image.
+        // Orbits are found by the canonical name of the abscissa, not by
+        // column: a column may hold several orbits (the `Z[τ]`-multiplier
+        // closure of `compact-orbit-scan`), and a table built from one
+        // representative per column would miss every pair whose first
+        // member lies in another orbit of the column.
+        let mut orbit_of = vec![0u32; f];
+        let mut rep_of_orbit: Vec<usize> = Vec::new();
+        {
+            let mut orbit_index: FastMap<u32> = fast_map(f / n + 1);
+            for i in 0..f {
+                let key = canon.canon(fb.points[i].x);
+                let next = rep_of_orbit.len() as u32;
+                let id = *orbit_index.entry(key).or_insert(next);
+                if id == next {
+                    rep_of_orbit.push(i);
+                }
+                orbit_of[i] = id;
             }
         }
         let mut ops = GroupOps::default();
         let mut canons = 0u64;
         let mut map: FastMap<(u32, u32)> = fast_map(f * f / (4 * n) + 1);
-        for (col, &rep) in rep_of_col.iter().enumerate() {
-            if rep == usize::MAX {
-                continue;
-            }
+        for (orbit, &rep) in rep_of_orbit.iter().enumerate() {
             for j in 0..f {
-                if fb.col_of[j] < col {
+                if (orbit_of[j] as usize) < orbit {
                     continue;
                 }
                 let u = g.add(&mut ops, fb.points[rep], fb.points[j]);
@@ -4174,7 +4431,7 @@ impl FrobeniusPairTable {
         }
         Some(Self {
             entries: map.len() as u64,
-            representatives: rep_of_col.iter().filter(|&&r| r != usize::MAX).count() as u64,
+            representatives: rep_of_orbit.len() as u64,
             map,
             canon,
             member_of,
@@ -5938,6 +6195,22 @@ fn calibrate_binary(inst: &BinaryInstance, calib: &mut Calibration) {
     calib.ns_per_frobenius = Some(start.elapsed().as_nanos() as f64 / samples as f64);
     std::hint::black_box(acc);
     calib.ns_per_word_xor = Some(calibrate_word_xor());
+    // The Frobenius-orbit canonicalisation (lead L2): priced here so the
+    // framework's `canonicalisations` counter is charged like every other
+    // non-addition instead of riding along unpriced.
+    if inst.koblitz.is_some() {
+        if let Some(canon) = FrobeniusCanon::new(&inst.gf, inst.n) {
+            let xs: Vec<u64> = (0..1024).map(|_| rng.gen::<u64>() & inst.gf.mask).collect();
+            let start = Instant::now();
+            let mut acc = 0u64;
+            for i in 0..samples {
+                let (c, t) = canon.canon_with_shift(xs[(i % 1024) as usize]);
+                acc ^= c.wrapping_add(t as u64);
+            }
+            calib.ns_per_canon = Some(start.elapsed().as_nanos() as f64 / samples as f64);
+            std::hint::black_box(acc);
+        }
+    }
 }
 
 /// Nanoseconds per pair of the `S₄` pairs-and-solve loop, measured on
@@ -6969,6 +7242,115 @@ pub fn format_markdown(ledger: &BoundaryLedger) -> String {
 
 #[cfg(test)]
 mod tests {
+    /// The 128-bit forms the word-sized helpers replaced; every result
+    /// of the fast paths must equal theirs.
+    mod reference {
+        pub fn mulmod(a: u64, b: u64, m: u64) -> u64 {
+            ((a as u128 * b as u128) % m as u128) as u64
+        }
+        pub fn addmod(a: u64, b: u64, m: u64) -> u64 {
+            ((a as u128 + b as u128) % m as u128) as u64
+        }
+        pub fn invmod(a: u64, m: u64) -> Option<u64> {
+            let (mut old_r, mut r) = (a as i128 % m as i128, m as i128);
+            let (mut old_s, mut s) = (1i128, 0i128);
+            while r != 0 {
+                let q = old_r / r;
+                (old_r, r) = (r, old_r - q * r);
+                (old_s, s) = (s, old_s - q * s);
+            }
+            if old_r != 1 {
+                return None;
+            }
+            let mut v = old_s % m as i128;
+            if v < 0 {
+                v += m as i128;
+            }
+            Some(v as u64)
+        }
+    }
+
+    /// Moduli at every edge the fast paths branch on: tiny, either side
+    /// of `2^32`, above `2^63`, and the largest word.
+    fn edge_moduli() -> Vec<u64> {
+        vec![
+            1,
+            2,
+            3,
+            7,
+            53117,
+            (1u64 << 32) - 5,
+            (1u64 << 32) - 1,
+            1u64 << 32,
+            (1u64 << 32) + 15,
+            (1u64 << 63) - 25,
+            (1u64 << 63) + 11,
+            u64::MAX - 58,
+            u64::MAX,
+        ]
+    }
+
+    #[test]
+    fn word_sized_field_helpers_match_the_128_bit_forms() {
+        use rand::{Rng, SeedableRng};
+        let mut rng = rand::rngs::StdRng::seed_from_u64(0x6d75_6c6d_6f64);
+        for round in 0..200_000u32 {
+            let m = if round % 4 == 0 {
+                edge_moduli()[(round as usize / 4) % edge_moduli().len()]
+            } else if round % 4 == 1 {
+                rng.gen_range(1..=u64::from(u32::MAX))
+            } else {
+                rng.gen_range(1..=u64::MAX)
+            };
+            // Reduced operands take the fast paths; unreduced ones and
+            // the edge values must fall back to the same answers.
+            let pick = |rng: &mut rand::rngs::StdRng| match rng.gen_range(0..6) {
+                0 => 0,
+                1 => m - 1,
+                2 => m,
+                3 => rng.gen::<u64>(),
+                _ => rng.gen_range(0..m),
+            };
+            let (a, b) = (pick(&mut rng), pick(&mut rng));
+            assert_eq!(
+                super::mulmod(a, b, m),
+                reference::mulmod(a, b, m),
+                "mulmod({a}, {b}, {m})"
+            );
+            assert_eq!(
+                super::addmod(a, b, m),
+                reference::addmod(a, b, m),
+                "addmod({a}, {b}, {m})"
+            );
+            assert_eq!(
+                super::invmod(a, m),
+                reference::invmod(a, m),
+                "invmod({a}, {m})"
+            );
+        }
+    }
+
+    #[test]
+    fn invmod_inverts_every_unit_of_small_moduli() {
+        for m in [1u64, 2, 3, 4, 6, 7, 12, 97, 53117] {
+            for a in 0..m.min(1 << 12) {
+                match super::invmod(a, m) {
+                    Some(v) => {
+                        assert!(v < m, "invmod({a}, {m}) = {v} not reduced");
+                        assert_eq!(super::mulmod(a, v, m) % m, 1 % m, "invmod({a}, {m}) = {v}");
+                    }
+                    None => assert_ne!(gcd(a, m), 1, "invmod({a}, {m}) missing"),
+                }
+            }
+        }
+    }
+
+    fn gcd(mut a: u64, mut b: u64) -> u64 {
+        while b != 0 {
+            (a, b) = (b, a % b);
+        }
+        a
+    }
     use super::*;
 
     #[test]
@@ -6995,6 +7377,91 @@ mod tests {
         assert_eq!(g.add_row(vec![2, 2], 6), RowStatus::Dependent);
         assert_eq!(g.add_row(vec![2, 2], 7), RowStatus::Inconsistent);
         assert!(g.row_ops > 0);
+    }
+
+    /// The field operations behind the prime-curve group law, pinned to
+    /// what `add_raw` and `double_raw` perform.  An addition is one
+    /// inversion `(x₂ − x₁)⁻¹`, one multiplication for `λ`, one squaring
+    /// `λ²` and one multiplication `λ(x₁ − x₃)`: `2M + 1S + 1I`.  A
+    /// doubling is one squaring `x²`, the constant multiplications `3·x²`,
+    /// `2·y` and `2·x` (performed as modular multiplications, so counted),
+    /// one inversion `(2y)⁻¹`, one multiplication for `λ`, one squaring
+    /// `λ²` and one multiplication `λ(x − x₃)`: `5M + 2S + 1I`.
+    #[test]
+    fn prime_group_law_tallies_its_field_operations() {
+        let inst = roster_prime_instance(12).unwrap();
+        let curve = &inst.curve;
+        let g = inst.generator_point();
+        assert!(curve.counts_field_ops());
+
+        let mut ops = GroupOps::default();
+        let g2 = curve.double(&mut ops, g);
+        assert!(curve.is_on_curve(g2));
+        assert_eq!(
+            ops.field_ops,
+            FieldOps {
+                muls: 5,
+                sqrs: 2,
+                invs: 1
+            }
+        );
+        assert_eq!(ops.field_ops, PrimeCurve::FIELD_OPS_PER_DOUBLE);
+
+        let mut ops = GroupOps::default();
+        let g3 = curve.add(&mut ops, g2, g);
+        assert!(curve.is_on_curve(g3));
+        assert_eq!(
+            ops.field_ops,
+            FieldOps {
+                muls: 2,
+                sqrs: 1,
+                invs: 1
+            }
+        );
+        assert_eq!(ops.field_ops, PrimeCurve::FIELD_OPS_PER_ADD);
+
+        // The special cases do no field arithmetic …
+        let mut ops = GroupOps::default();
+        assert_eq!(curve.add(&mut ops, PrimePoint::INFINITY, g), g);
+        assert_eq!(curve.add(&mut ops, g, PrimePoint::INFINITY), g);
+        assert!(curve.add(&mut ops, g, curve.neg(g)).infinity);
+        assert!(curve.double(&mut ops, PrimePoint::INFINITY).infinity);
+        assert_eq!((ops.adds, ops.doubles), (3, 1));
+        assert_eq!(ops.field_ops, FieldOps::default());
+        // … and `P + P` is the doubling formula under an addition's name.
+        let mut ops = GroupOps::default();
+        assert_eq!(curve.add(&mut ops, g, g), g2);
+        assert_eq!((ops.adds, ops.doubles), (1, 0));
+        assert_eq!(ops.field_ops, PrimeCurve::FIELD_OPS_PER_DOUBLE);
+
+        // A scalar multiplication is its doublings and additions and
+        // nothing else: 365 = 0b1_0110_1101 is eight doublings and five
+        // additions by the ladder, none of them an exceptional case on a
+        // prime-order generator with r > 365.
+        let mut ops = GroupOps::default();
+        let kg = curve.mul(&mut ops, g, 365);
+        assert!(curve.is_on_curve(kg) && !kg.infinity);
+        assert_eq!((ops.doubles, ops.adds), (8, 5));
+        assert_eq!(
+            ops.field_ops,
+            FieldOps {
+                muls: 5 * 8 + 2 * 5,
+                sqrs: 2 * 8 + 5,
+                invs: 8 + 5,
+            }
+        );
+        let mut both = ops;
+        both.merge(ops);
+        assert_eq!(both.field_ops.invs, 2 * ops.field_ops.invs);
+        assert_eq!(FieldOps::total(&[ops, ops]), both.field_ops);
+
+        // The tally is not part of the ledger's serialised form …
+        let json = serde_json::to_value(ops).unwrap();
+        assert!(json.get("field_ops").is_none());
+        assert_eq!(json["adds"], 5);
+        // … and a binary curve does not count: its zeros mean unknown.
+        let kob = koblitz_instance(1, 17).unwrap();
+        assert!(!BinaryGroup(&kob.fast).counts_field_ops());
     }
 
     #[test]

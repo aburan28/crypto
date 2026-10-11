@@ -1,0 +1,53 @@
+{
+  "beat_id": "prime.end_to_end_dlp.j0_16bit",
+  "claim_boundary": "synthetic_known_answer",
+  "claim_boundary_non_claims": [
+    "not key recovery on deployed curves",
+    "not asymptotic sub-rho",
+    "not ledger promotion until independent validation",
+    "IC slower than rho on this instance (expected)"
+  ],
+  "control_14bit": {
+    "ic_agrees_rho": true,
+    "ic_ms": 362.508,
+    "rho_ms": 5.067042
+  },
+  "created_at": "2026-09-11T06:35:47.950410+00:00",
+  "curve": "j0-bench-16bit",
+  "evidence_paths": [
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260911/ka_16bit.json",
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260911/ka_14bit.json"
+  ],
+  "executable_or_source_hash": {
+    "executable": "a33f7266e2ddb2b1b991bc03971359c685eede203f07d7d32f59b1db74a5843a",
+    "source": "3f5c48fa550223b6a1fc5eb74c6b002170a1ec15bf50f665827a53ab07457333"
+  },
+  "fixture_hash": "3f5c48fa550223b6a1fc5eb74c6b002170a1ec15bf50f665827a53ab07457333",
+  "host_id": {
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit"
+  },
+  "ic_agrees_rho": true,
+  "ic_matches_truth": true,
+  "ic_ms": 1851.266291,
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs_manual/prime_j0_e2e_16bit_20260911/claim_draft_16bit.json",
+  "n": 16,
+  "n_or_bits": 16,
+  "recovered_d_verified": true,
+  "regime": "prime",
+  "resource_caps": {},
+  "rho_ms": 20.463915999999998,
+  "schema_version": 2,
+  "seeds": {
+    "random_scalar": "runtime"
+  },
+  "stage": "end_to_end_dlp",
+  "stage_timers": {
+    "ic_ms": 1851.266291,
+    "note": "producer does not yet split FB/relations/LA; wall is full j0_index_calculus_dlp vs pollard_rho",
+    "rho_ms": 20.463915999999998
+  },
+  "target_orbits": 40,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "verdict": "J0_16BIT_KA_IC_AGREES_RHO_PENDING_INDEPENDENT_VALIDATION"
+}

@@ -1,10 +1,10 @@
-# Endomorphism-invariant factor bases across curve families: plan, pilot, experiments E1–E15, and the road to the state of the art
+# Endomorphism-invariant factor bases across curve families: plan, pilot, experiments E1–E18, and the road to the state of the art
 
 **Modules:** `src/cryptanalysis/glv_invariant_base.rs` (the fold, prime-field automorphisms, Vélu degree-2 and degree-3 endomorphisms, CM instance generators, the folded rho classes), `src/cryptanalysis/ext_curve.rs` (`ExtField` over `F_{p²}` and `F_{p³}`, the generic `ExtCurve` counted group, diagonal automorphisms and Frobenius-type maps on it), `src/cryptanalysis/gls_fp2.rs` (GLS `ψ`, the `ψ`-stable line, the `j = 0` and `j = 1728` twists with their lifted automorphisms), `src/cryptanalysis/subfield_fp3.rs` (`E/F_p` on `E(F_{p³})`, the Frobenius eigenline), `src/cryptanalysis/line_oracle.rs` (the Weil-descent resultant oracle for a line, E2b), `src/cryptanalysis/glv_invariant_experiments.rs` (one relation stream feeding both arms to full rank), `src/cryptanalysis/ic_framework/plugins.rs` (`glv-orbit`, `gls-line`), `src/cryptanalysis/ic_boundary.rs` (`FactorBase::from_column_map`), `src/cryptanalysis/orbit_pair_table.rs` (the pair table over orbit representatives, E12), `src/cryptanalysis/fghr_line.rs` (the `Y`-line, the `τ_T` fold and the `D₃` conic-resultant oracle, E13), `src/cryptanalysis/q_curve.rs` (Q-curves of degree 2 and 3 over `F_{p²}` and `ψ = π ∘ ι ∘ φ`, E14)
 **CLI:** `ic bench --bits 20 --family j0 --factor-base glv-orbit:size=64 --oracle mitm:negation_folded=1` (control: `glv-orbit:size=64,no_fold=1`)
 **Bench (pilot):** `cargo run --release --example glv_invariant_bench -- --families j0,j1728,generic,d7,d8 --bits 16,20,24 --seeds 2 --oracles subtract,mitm --json experiments/23_glv_invariant_pilot.json`; `--families gls --bits 8,10,12 --oracles subtract --json experiments/23_glv_invariant_gls_pilot.json`
 **Runner (E1–E7):** `cargo run --release --example glv_invariant_experiments -- --exp e1 --bits 16,20,24,28 --seeds 6 --json experiments/23_glv_invariant_e1.json` (the exact command of every file is its `command` field)
-**Data:** `experiments/23_glv_invariant_pilot.{json,log}`, `experiments/23_glv_invariant_gls_pilot.{json,log}` (2026-09-28), `experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.{json,log}` (2026-09-29), `experiments/23_glv_invariant_e{8,9,11,11_12,11_13,11_14}.{json,log}` (2026-10-01), `experiments/23_glv_invariant_e{12,12p,13,13_13,14,15}.{json,log}` (2026-10-02); this host: Linux x86-64, 4 threads; wall time is recorded and is not a result
+**Data:** `experiments/23_glv_invariant_pilot.{json,log}`, `experiments/23_glv_invariant_gls_pilot.{json,log}` (2026-09-28), `experiments/23_glv_invariant_e{1,1_32,2,3,4,5,6,7}.{json,log}` (2026-09-29), `experiments/23_glv_invariant_e{8,9,11,11_12,11_13,11_14}.{json,log}` (2026-10-01), `experiments/23_glv_invariant_e{12,12p,13,13_13,14,15}.{json,log}` (2026-10-02), `experiments/23_glv_invariant_e13_p{14,15,16}.{json,log}` (2026-10-08); this host: Linux x86-64, 4 threads; wall time is recorded and is not a result
 **Tables:** `python3 scripts/glv_invariant_tables.py experiments/23_glv_invariant_pilot.json experiments/23_glv_invariant_gls_pilot.json` (§5; legacy Python, not extended) and `cargo run --release --example glv_invariant_experiment_tables -- experiments/23_glv_invariant_e*.json` (§6, §8; the native replacement of the retired `scripts/glv_invariant_experiment_tables.py`, byte-identical output on E1–E11); every number in §5, §6 and §8 is printed by them from the frozen files
 
 > **Status.**  Implementation, pilot, and the seven experiments of §4
@@ -32,9 +32,10 @@
 > two-summand degeneracy of §6.5 is gone, and every phase is priced in
 > one unit beside the matched rho), the folded rho on the `F_{p²}` and
 > `F_{p³}` groups (E9), the fitted exponents (E10), and the algebraic
-> `S₄` oracle on the line (E11: flat in `p`, the first arm of this note
-> whose fitted exponent sits below rho's `1/2`, and still not faster than
-> rho at any size run), then the pair table over orbit representatives
+> `S₄` oracle on the line (E11: flat in `p`, ~~the first arm of this note
+> whose fitted exponent sits below rho's `1/2`~~ — corrected in §8.10: its
+> fit is `0.53`, and on these groups rho's `1/2` is the best a line base can
+> reach — and still not faster than rho at any size run), then the pair table over orbit representatives
 > (E12: the table `÷ w/2`, worth `S ÷ 1.18` where the table is the cost,
 > `F_p` `j = 0`, and nothing on the line) and FGHR's `2`-torsion symmetry
 > with the fold (E13: a degree-`16` resultant in place of a `64`-dimensional
@@ -45,8 +46,18 @@
 > `m = 31`, which cannot have that shape, the `373` cofactor confines
 > `73 %` of two-summand rows), and Q-curves of degree 2 and 3 over
 > `F_{p²}` (E14: every `ψ` verified, eigenvalue orders `≥ 1817`, base
-> points kept at chance — no fold).  Every class is engineering or
-> accounting; no row claims a speed.
+> points kept at chance — no fold).  E16 derives the boundary: on these
+> groups `r ≈ p²`, so rho costs `Θ(p)` and a line base needs `Θ(p)`
+> relations — a constant at best, never an exponent; the best arm's ratio
+> to rho grows as `r^{0.18}` to `p = 2^{16}`, and two earlier exponent
+> claims are corrected.  Every class is engineering or accounting; no row
+> claims a speed.  §9 sets goal G2 — the cheapest levers, moved to curves where index calculus
+> has rho's exponent or better — and runs it: E17 carries the `D₃` solve (`÷ 38`) and the `τ_T`
+> fold to the full group `E(F_{p³})`; E18 folds the `k = 4` linear algebra, where the `ψ` fold on
+> `j = 0` curves takes the asymptotic ratio to the matched rho from `1.23` (plain) to `0.138` and
+> the extrapolated handover from `2^{156.1}` to `2^{146.0}`, while the `τ_T` fold cannot pay for
+> its curves' cofactor and yield.  Both are engineering; §11.19's `0.518` reads `0.733` against the
+> negation walk.
 
 ## 1. What is new, against what exists
 
@@ -671,7 +682,7 @@ products.
   instances, and a fold that rho already takes as `√(w/2)`.
 - Every experiment of §8.1 has run.  E14 builds its Q-curves by scanning `F_{p²}` for the `j` with `Φ_d(j, j^p) = 0` and for the kernel, so it stops at `p = 2^{12}`.  E15 ran on `E_0` at `m = 13, 15, 23, 31` only: the faithful `4·prime` degrees `19` and `41` are beyond the pair-table driver, and the §8a `m = 83` gate was not run (E15 claims no improvement).  E13 does not price the negation arm on the `Y`-line (it stalls below full rank there, not derived, §8.7), so the plan's fold-against-negation ratio is unmeasured on that base.
 
-## 8. Toward the state of the art: what the literature does, what is next, and E8–E15
+## 8. Toward the state of the art: what the literature does, what is next, and E8–E16
 
 ### 8.0 Where E1–E7 stand against the literature
 
@@ -729,6 +740,7 @@ That is the ordering below.
 | **E13** | FGHR's `2`-torsion symmetry **and** the fold together: close the line base under translation by `T ∈ E(F_p)[2]` and under `π`, fold by `⟨−1, π⟩`, symmetrise the system by `(Z/2)^{m−1} ⋊ S_m` | the two levers multiply — columns `÷ 3`, system degree `÷ 2^{m−1}` — because one acts on the base and the other on the system | a combined `S` ratio below the product of the separate ratios by more than `20 %` falsifies "multiply" | engineering | **done** (§8.7), with the base closed under `τ_T` and folded by it too (`12` a column): `R(q₃)` of degree `16 = 64/4`, `S ÷ 27.0` from the system, `÷ 2.52` from `τ_T`; combined / product `≥ 0.82`, so "multiply" survives; the negation arm stalls below full rank on the `Y`-line and is not priced |
 | **E14** | Q-curves of degree 2 and 3 over `F_{p²}` (the second half of E4b) | type C: `0` base points kept, no fold | any image in the base beyond chance falsifies | accounting | **done** (§8.9): `40` Q-curves (`d = 2, 3`, `r = 2^{12}`–`2^{22}`), every `ψ` verified with `λ² ≡ ±d`, `ord_r(λ) ≥ 1817`; `32` of `43310` base points kept against `39.3` at chance — no fold |
 | **E15** | Transfer to the binary Koblitz program (ECC2K-130, AGENTS.md §8a–8b): is the §6.5 degeneracy present there? | no: `E(F_2) ⊂ E(F_{2^n})` has order `2` or `4`, so at most two component classes and no block structure; the fold there is the known `2n` | a measured deficiency `D > 2` on a prime-order-times-`4` Koblitz subgroup with two summands falsifies | accounting | **done** (§8.8): on `E_0` at the challenge's `4·prime` shape (`m = 23`) `D = 1` on both arms and `4 %` single-column rows, so the prediction holds; at `m = 31`, whose `E_0` cannot be `4·prime` (cofactor `4·373`), `D = 12 / 342` and `73 %` single-column rows — `m = 31` is not a faithful proxy for two-summand relation structure |
+| **E16** | The boundary on subfield curves: with `r ≈ p²/k`, does any arm's relation phase grow more slowly than rho, and where does the best arm's ratio go? (stated after the fact, §8.10) | no: a line base needs `Θ(p)` relations, rho costs `Θ(p)`, the linear algebra `Θ(p²)`; the ratio does not fall | a fitted `S / rho S` exponent below `−0.05` over `p = 2^7`–`2^{16}` falsifies | accounting | **done** (§8.10): `S / rho S ∝ r^{0.18}`, linear algebra `r^{1.01}`, total `r^{0.62}` against rho's `r^{0.44}`; two earlier exponent claims corrected |
 
 What is **not** on the list, and why: a larger fold on a fixed prime-order
 subgroup.  §6.8's closed form bounds it by the roots of unity the curve's
@@ -1024,8 +1036,10 @@ fold's reading is unchanged — columns `÷ 3`, relations `÷ 3.98`, both arms a
 `0.93` / `0.93` of full rank after `columns` relations, `S ÷ 4.17` — and
 the fitted exponents of the total over `26` instances are fold `0.53`,
 control `0.50`, rho `0.41` / `0.42`: with the oracle
-flat in `p` the stream is `p · ln` solves at a constant each, so the arms grow as `r^{1/3}`
-times the coupon factor, below rho's `1/2` for the first time in this note, and the
+flat in `p` the stream is `p · ln` solves at a constant each, ~~so the arms grow as `r^{1/3}`
+times the coupon factor, below rho's `1/2` for the first time in this note~~ (**accounting
+correction, §8.10:** on these instances `r ≈ p²/k` with `k ≤ 8`, not `p³`, so `p · ln` solves is
+`r^{1/2+o(1)}` — rho's exponent, not below it; the measured `0.53` / `0.50` are that), and the
 folded arm is still `3344`–`101441×` the matched rho at these sizes
 (a constant of `10⁶` multiplications a solve against `10²` a step).  **Frobenius
 symmetry breaking** (Galbraith–Granger–Merz–Petit's third lever) in the form the
@@ -1302,11 +1316,14 @@ rho's `64`–`164` in the same unit: `267`–`5741×` rho, against E11's `3344`�
 two orders of magnitude closer, by constants.  The solver dominates (`71`–`77 %`), the stream's
 group arithmetic is `18`–`26 %`, the base build `2`–`7 %`, the polynomials' set-up `≤ 5 %`, the linear
 algebra `< 0.1 %`.  The total grows as `p^{1.23}` (fitted over `p = 2^7`–`2^{13}`, `22` rows);
-against `r` the fits are `0.63` (fold `12`), `0.60` (fold `6`) and `0.41` (rho), but `r ≈ p³/h`
+against `r` the fits are `0.63` (fold `12`), `0.60` (fold `6`) and `0.41` (rho), ~~but `r ≈ p³/h`
 with `h` from `76` to `55804` across these instances, so `r` is a poor size variable here and a
 fit against it mixes the growth in `p` with the spread in `h`.  **Extrapolation, not measurement:** at fixed cofactor `p^{1.23}` is
 `r^{0.41}`, so `S` falls as `r^{−0.09}` and a `10³` gap to rho would close only after `r` grows by
-about `2^{110}` — on an exponent fitted over seven sizes of `p`.  Four small instances
+about `2^{110}` — on an exponent fitted over seven sizes of `p`.~~  **Accounting correction (§8.10):**
+the cofactor cannot be held fixed — it contains `E(F_p)`, so `h ≥ #E(F_p) ≈ p` and `r ≈ p²/k`
+(`k ≤ 8` here) — and the fit against `r` is the right reading: `0.63` against rho's `1/2`, a gap
+that **widens** with size.  E16 measures it to `p = 2^{16}`.  Four small instances
 (`r ≤ 2^{13.8}`) drew every target of the group with the folded arms at rank `columns` of
 `columns + 1`, as E8 and E12 did at `p = 2^7`; they are reported, not priced.
 
@@ -1498,7 +1515,109 @@ multiplication shortcut (GLV), not a factor-base symmetry.
 the only folds are the automorphisms, the Frobenius-type maps (`π`, `τ`, GLS `ψ`) and, with a
 rational `2`-torsion point, the translation `τ_T` (E13).
 
-### 8.4 Verdict after E8–E15 (with E14)
+### 8.10 E16 — the boundary on subfield curves, and the best arm's phases to `p = 2^{16}`
+
+**Runner:** E13's driver, unchanged: `--exp e13 --bits 14 --seeds 3`, `--bits 15 --seeds 3`,
+`--bits 16 --seeds 2`.  **Data:** `experiments/23_glv_invariant_e13_p{14,15,16}.{json,log}`
+(2026-10-08), beside `…_e13.json` and `…_e13_13.json`.  **Tables:** the tables binary's E16
+printer, which reads every E13 row.
+
+**The boundary, derived (it should have been stated in §8.1).**  On a subfield curve
+`E/F_p`, `E(F_p) ⊂ E(F_{p³})` and `#E(F_{p³}) = #E(F_p) · #T` with `T` the trace-zero part,
+`#T ≈ p²`.  A prime `r > p + 1 + 2√p` divides `#T`, so the cofactor `h` contains all of
+`E(F_p)`: **`h ≥ #E(F_p) ≈ p` and `r ≈ p²/k`**, `k = h/#E(F_p)` (bounded by `8` in every driver
+here).  The frozen rows agree: `log₂ r − 2·log₂ #E(F_p)` lies in `[−3.14, +0.55]` over all `66`
+E8, E11 and E13 rows and the `8` new ones.  Two consequences follow.
+
+- **Rho costs about `p`.**  The matched folded walk takes `√(π r / 2A)` steps, `∝ p / √k`.
+- **A line base cannot beat that exponent.**  The Frobenius line carries `≈ 2p` points; a base
+  folded `w` a column has `≈ 2p/w` columns and needs at least that many relations (`+1 − D`),
+  each costing at least one decomposition attempt at a hit rate `η` independent of `p`.  So the
+  relation phase alone is `≥ (2p / wη) · c_attempt`: **`Θ(p)` at best, the same exponent as
+  rho**, and the ratio to rho is bounded below by a constant, not by a falling function of `p`.
+  The linear algebra adds `(2p/w)² · ρ` row operations, `ρ` the row weight: `Θ(p²)`, which
+  eventually makes the ratio grow as `p`.
+
+So on these groups the most a fold, a symmetrised system or a cheaper solve can buy is a
+**constant** against rho — the fold divides the columns by `w` and the linear algebra by `w²`,
+the system symmetry divides the solve — never an exponent.  E8–E13 were constant-factor work on
+a boundary that is itself rho's exponent; the claims of §8.5 and §8.7 that read otherwise
+assumed `r ≈ p³` or a fixed cofactor and are corrected there (struck through, not deleted).
+This is the opposite of the full-group setting Gaudry and Diem analyse for `E(F_{q^n})` of
+prime order `≈ q^n`, where rho costs `q^{n/2}`; a subfield curve's large prime lives in a group
+of order `q^{n−1}`.
+
+**The prediction E16 tests.**  On the best arm (fold `12` + `D₃`), every relation-phase cost grows
+at least as rho does (exponent `≥ 1/2` against `r`), the linear algebra grows as `p²` (`r¹`), and
+the ratio `S / rho S` does not fall with size.  A fitted ratio exponent below `−0.05` over `p =
+2^7`–`2^{16}` would falsify it.
+
+**The best arm, every instance at full rank (fold 12 + D₃; F_p multiplications)**
+
+| p bits | #E(F_p) | log2 r | log2 r − 2·log2 #E(F_p) | cols | full-rank rel | solver | group arithmetic | linear algebra | total | LA share | S | rho S folded | S / rho S |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 8 | 260 | 12.9 | -3.14 | 19 | 23 | 6.11e+06 | 1.5e+06 | 911 | 8.42e+06 | 0.0001 | 96092 | 163.8 | 587 |
+| 7 | 112 | 13.2 | -0.37 | 9 | 12 | 3.15e+06 | 8.05e+05 | 298 | 4.35e+06 | 0.0001 | 44098 | 134.9 | 327 |
+| 7 | 112 | 14.2 | +0.55 | 10 | 13 | 9.99e+06 | 2.63e+06 | 406 | 1.31e+07 | 0.0000 | 96460 | 130.0 | 742 |
+| 8 | 184 | 15.4 | +0.34 | 19 | 36 | 6.44e+06 | 1.81e+06 | 840 | 8.94e+06 | 0.0001 | 43161 | 158.4 | 272 |
+| 8 | 244 | 15.5 | -0.39 | 21 | 26 | 9.7e+06 | 2.59e+06 | 905 | 1.3e+07 | 0.0001 | 61216 | 135.6 | 451 |
+| 9 | 404 | 17.4 | +0.05 | 39 | 45 | 1.11e+07 | 3.2e+06 | 2.53e+03 | 1.56e+07 | 0.0002 | 37871 | 141.9 | 267 |
+| 9 | 448 | 17.8 | +0.14 | 37 | 51 | 2.29e+07 | 6.65e+06 | 1.9e+03 | 3.08e+07 | 0.0001 | 65373 | 103.5 | 632 |
+| 9 | 464 | 17.9 | +0.21 | 42 | 59 | 2.3e+07 | 6.65e+06 | 2.55e+03 | 3.1e+07 | 0.0001 | 62216 | 105.7 | 588 |
+| 11 | 1552 | 18.3 | -2.87 | 116 | 234 | 1.3e+08 | 3.36e+07 | 5.69e+03 | 1.68e+08 | 0.0000 | 293056 | 91.0 | 3220 |
+| 10 | 776 | 19.1 | -0.11 | 66 | 187 | 7.67e+07 | 2.18e+07 | 5.02e+03 | 1.01e+08 | 0.0000 | 134659 | 88.8 | 1517 |
+| 10 | 700 | 19.1 | +0.20 | 58 | 87 | 4.49e+07 | 1.32e+07 | 4.32e+03 | 6.02e+07 | 0.0001 | 80294 | 81.5 | 985 |
+| 10 | 688 | 19.2 | +0.31 | 59 | 73 | 3.93e+07 | 1.19e+07 | 4.06e+03 | 5.32e+07 | 0.0001 | 69454 | 123.5 | 562 |
+| 10 | 892 | 19.4 | -0.19 | 72 | 131 | 6.18e+07 | 1.89e+07 | 4.72e+03 | 8.34e+07 | 0.0001 | 99984 | 103.0 | 971 |
+| 12 | 2480 | 19.9 | -2.68 | 213 | 651 | 3.27e+08 | 9e+07 | 3.67e+04 | 4.26e+08 | 0.0001 | 434231 | 75.6 | 5741 |
+| 11 | 1304 | 20.6 | -0.08 | 110 | 330 | 1.47e+08 | 4.34e+07 | 7.84e+03 | 1.94e+08 | 0.0000 | 153080 | 87.2 | 1756 |
+| 11 | 1288 | 20.6 | -0.03 | 104 | 208 | 1.1e+08 | 3.26e+07 | 1.16e+04 | 1.46e+08 | 0.0001 | 114411 | 85.5 | 1338 |
+| 11 | 1760 | 21.4 | -0.15 | 135 | 306 | 1.54e+08 | 5.09e+07 | 1.48e+04 | 2.1e+08 | 0.0001 | 125914 | 64.1 | 1964 |
+| 12 | 2528 | 22.7 | +0.05 | 211 | 367 | 1.91e+08 | 5.98e+07 | 2.39e+04 | 2.59e+08 | 0.0001 | 100637 | 85.9 | 1172 |
+| 13 | 7972 | 23.1 | -2.86 | 639 | 1560 | 8.23e+08 | 2.66e+08 | 4.6e+05 | 1.12e+09 | 0.0004 | 379369 | 79.6 | 4764 |
+| 14 | 9212 | 23.6 | -2.78 | 769 | 2741 | 1.31e+09 | 4.36e+08 | 7.12e+05 | 1.78e+09 | 0.0004 | 506680 | 76.6 | 6616 |
+| 12 | 3472 | 23.6 | +0.09 | 302 | 542 | 2.52e+08 | 8.4e+07 | 7.44e+04 | 3.48e+08 | 0.0002 | 97273 | 90.4 | 1076 |
+| 12 | 3760 | 23.7 | -0.03 | 318 | 844 | 3.75e+08 | 1.29e+08 | 9.94e+04 | 5.16e+08 | 0.0002 | 138787 | 77.1 | 1801 |
+| 13 | 5260 | 24.7 | -0.02 | 424 | 834 | 4.54e+08 | 1.62e+08 | 1.23e+05 | 6.33e+08 | 0.0002 | 121355 | 77.5 | 1565 |
+| 15 | 17504 | 25.4 | -2.76 | 1496 | 3498 | 1.7e+09 | 5.95e+08 | 3.99e+06 | 2.38e+09 | 0.0017 | 353096 | 76.2 | 4631 |
+| 15 | 24136 | 26.3 | -2.83 | 1967 | 4597 | 2.75e+09 | 9.01e+08 | 1.16e+07 | 3.77e+09 | 0.0031 | 416284 | 109.9 | 3788 |
+| 14 | 14780 | 27.7 | -0.04 | 1207 | 2598 | 1.38e+09 | 5.13e+08 | 2.71e+06 | 1.96e+09 | 0.0014 | 134245 | 80.6 | 1665 |
+| 14 | 15256 | 27.8 | +0.00 | 1240 | 4291 | 2.49e+09 | 9.1e+08 | 2.78e+06 | 3.47e+09 | 0.0008 | 226831 | 75.4 | 3010 |
+| 15 | 16964 | 28.0 | -0.06 | 1459 | 3671 | 1.62e+09 | 6.35e+08 | 5.32e+06 | 2.32e+09 | 0.0023 | 139720 | 78.4 | 1781 |
+| 16 | 36776 | 30.3 | +0.00 | 3073 | 8542 | 4.91e+09 | 1.82e+09 | 4.83e+07 | 6.94e+09 | 0.0070 | 188637 | 90.5 | 2084 |
+| 16 | 37580 | 30.4 | +0.01 | 3096 | 7468 | 4.04e+09 | 1.7e+09 | 4.58e+07 | 5.94e+09 | 0.0077 | 157733 | 55.6 | 2835 |
+
+**Fitted exponents (least squares, log–log)**
+
+| quantity | against #E(F_p) ≈ p | against r | rows |
+|:--|--:|--:|--:|
+| group arithmetic | 1.29 | 0.65 | 30 |
+| linear algebra | 2.01 | 1.01 | 30 |
+| rho folded (total) | 0.83 | 0.44 | 30 |
+| solver | 1.22 | 0.61 | 30 |
+| total | 1.23 | 0.62 | 30 |
+| S / rho S | — | 0.18 | 30 |
+
+Reading.  **The prediction holds, and the gap widens.**  Over `30` instances from `p = 2^7` to
+`2^{16}` (`r = 2^{12.9}`–`2^{30.4}`), the best arm's total grows as `r^{0.62}` (`p^{1.23}`): the
+solver `r^{0.61}`, the stream's group arithmetic `r^{0.65}`, and the **linear algebra `r^{1.01}`
+(`p^{2.01}`)**, the `p²` the derivation names, still `< 1 %` of the total at `p = 2^{16}` but
+closing on the solver as `p^{0.8}`.  The matched folded rho fits `r^{0.44}`: below its asymptotic
+`1/2` because per-walk set-up and verification are still a visible share at these sizes, the
+same effect E8 and E11 saw (`0.37`–`0.42`).  The ratio `S / rho S` grows as **`r^{0.18}`**, from
+`267×` at `r = 2^{17}` to `2084`–`2835×` at `r = 2^{30}`; the rows with `k ≈ 7`
+(`log₂ r − 2·log₂ #E(F_p) ≈ −2.8`) sit at `3220`–`6616×`, as the `√k` in rho's cost predicts.  No
+fitted exponent of the relation phase is below rho's, so there is no crossover to extrapolate:
+on the subfield line, index calculus with a line base is a constant factor above rho at best and
+in practice `10³`–`10⁴` above it, rising.  **Extrapolation, not measurement:** on the fitted
+exponents the linear algebra overtakes the solver near `p ≈ 2^{24}`, after which the ratio grows
+as `r^{1/2}`.
+
+**Class: accounting.**  E16 changes no algorithm.  It derives the boundary §8.1 should have stated
+for the subfield families, corrects two exponent claims that rested on `r ≈ p³` and on a fixed
+cofactor, and measures the best arm's phases to `p = 2^{16}` against it.
+
+### 8.4 Verdict after E8–E16
 
 | lever | measured | class |
 |:--|:--|:--|
@@ -1510,6 +1629,7 @@ rational `2`-torsion point, the translation `τ_T` (E13).
 | FGHR's `2`-torsion symmetry with the fold (E13) | system: `R(q₃)` of degree `16 = 64/4`, `1.25e+04`–`2.04e+04` multiplications a call (`÷ 33`–`41` against `S₃`), `S ÷ 27.0`; base: `τ_T` halves the columns, `S ÷ 2.52`; combined / product `≥ 0.82` (survives); `267`–`5741×` rho, total `p^{1.23}` | engineering |
 | the ECC2K-130 family, two summands (E15) | `E_0` at `4·prime` (`m = 23`): `D = 1` / `1`, `4 %` single-column rows, the fold buys relations; at `m = 31` (`h = 4·373`): `D = 12` / `342`, `73 %` single-column rows — the §6.5 confinement follows the cofactor, and `m = 31` cannot carry the challenge's shape | accounting |
 | Q-curves of degree 2 and 3 over `F_{p²}` (E14) | `40` instances, every `ψ = π ∘ ι ∘ φ` verified, `λ² ≡ ±d`, `ord_r(λ) = 1817`–`2.6·10⁶`; `32` images of `43310` base points in the base against `39.3` at chance | accounting |
+| the boundary on subfield curves (E16) | `r ≈ p²/k` (`h ⊇ E(F_p)`), so rho costs `Θ(p)` and a line base needs `Θ(p)` relations: at best a constant; the best arm to `p = 2^{16}`: total `r^{0.62}`, linear algebra `r^{1.01}`, rho `r^{0.44}`, `S / rho S ∝ r^{0.18}` (`267`–`6616×`) | accounting (corrects E11's and E13's exponent readings) |
 
 With E13 run, the cheapest arm in this note is the `Y`-line of a subfield curve with rational
 `2`-torsion, folded `12` a column by `⟨−1, π, τ_T⟩` and decomposed by the `D₃`-symmetrised
@@ -1518,4 +1638,384 @@ the cost.  Both uses of the `2`-torsion are now taken, on the base and on the sy
 compound with the Frobenius fold; the relation phase is still `p^{1+o(1)}` solves, so what
 remains is the constant of a solve (a degree-`16` univariate root-finding and three conics) and
 not a lever on the base.  E12 settles the pair-table regime: the table folds by `w/2`, and that
-is worth having only where the table is the cost (`F_p`, two summands).  E15 settles the transfer question for the base: on the challenge's `4·prime` shape the Frobenius-fixed cofactor does not confine two-summand relations, but on `m = 31`, the program's primary exploratory size, the `373` cofactor does.  E14 closes the base side: a Q-curve endomorphism of degree 2 or 3 keeps base points only at chance, as E4's CM maps did, so the folds on these families are the automorphisms, the Frobenius-type maps and `τ_T`, and every experiment of §8.1 has run.
+is worth having only where the table is the cost (`F_p`, two summands).  E15 settles the transfer question for the base: on the challenge's `4·prime` shape the Frobenius-fixed cofactor does not confine two-summand relations, but on `m = 31`, the program's primary exploratory size, the `373` cofactor does.  E14 closes the base side: a Q-curve endomorphism of degree 2 or 3 keeps base points only at chance, as E4's CM maps did, so the folds on these families are the automorphisms, the Frobenius-type maps and `τ_T`, and every experiment of §8.1 has run.  E16 then states the boundary that governs all of them: on a subfield curve the large prime lives in the trace-zero part, `r ≈ p²`, so rho costs `Θ(p)` and no line base can do better than a constant against it; the best arm is `10³`–`10⁴×` rho and the ratio grows as `r^{0.18}`.
+
+## 9. Goal G2 — the cheapest oracle, moved to where the exponent can beat rho
+
+**Why this goal.**  §8.10 closes the subfield families: their large prime lives in a group of
+order `≈ p²`, so rho costs `Θ(p)`, and no line base, fold or solver can do better than a constant
+against it.  The setting where index calculus has a **sub-rho exponent** is the full group: a curve
+over `F_{p³}` that is not a subfield curve, prime `r ≈ p³/h` with a small cofactor `h`, and
+Gaudry's base of abscissae in an `F_p`-line, which needs `≈ p ∝ r^{1/3}` relations against rho's
+`r^{1/2}` steps.  `RESEARCH_EXTENSION_FIELD_BOUNDARIES.md` prices that setting in full and names
+the single object that keeps it from crossing rho — the cost `C₃` of one `S₄` decomposition
+solve, `≈ 0.88·10⁶` `F_p` multiplications with the `S₃`-symmetrised Macaulay solver:
+
+- the plain method (base of all `x ∈ F_p`) is bounded away from rho, its minimum `S* ≈ 265`
+  (`≈ 200×` rho) at `N* ≈ 2^{50}` (Theorem 2, extrapolated from measured exponents);
+- the double-large-prime variant has the sub-rho exponent `N^{4/9}` but crosses rho only at
+  `N_× = 2^{33}·1989^{18} ≈ 2^{230}` (Theorem 3), because `C_DLP` is dominated by `C₃`;
+- the `ψ`-folded `j = 0` arm (`RESEARCH_GLV_INDEX_CALCULUS.md`) is `220`–`540×` rho at
+  `n = 2^{24}`–`2^{33}`.
+
+E13 (§8.7) cut exactly that solve by `33`–`41×` — `S₄` in a coordinate `Y` with
+`Y(P + T) = −Y(P)`, symmetrised by `D₃ = (Z/2)² ⋊ S₃`, solved as three conics over `F_p[q₃]` —
+but on a subfield curve, where it could buy only a constant.  **G2 moves that oracle and the
+`τ_T` fold to the full group and measures how far the crossover moves.**  `N_×` is the 18th power
+of the constant, so a cheaper solve is worth `18` bits of `n` per halving of `C_DLP` — the
+leverage in this program that is largest per unit of engineering.
+
+**The instance (`src/cryptanalysis/fghr_full.rs`).**  `x₀ ∈ F_{p³} \ F_p` and `c ∈ F_p^*` at
+random, `a = c² − 3x₀²`, `b = −x₀³ − a x₀`: `x₀` is a root of `x³ + ax + b` and
+`f'(x₀) = c²`, so `T = (x₀, 0)` is rational and `x(P + T) − x₀ = c²/(x − x₀)`.  `j(E) ∉ F_p` is
+checked, so no instance is a twist of a subfield curve; `#E(F_{p³}) = h·r` is counted by
+baby-step giant-step in the Hasse interval, with `h ≤ 8`.  The coordinate
+`Y = (x − x₀ − c)/(x − x₀ + c)` has `Y(P + T) = −Y(P)`; its inverse is a Möbius map with
+coefficients `c ∓ x₀ ∈ F_{p³}` (in `F_p` on E13's curves), so E13's oracles carry over through
+one generalised substitution (`fghr_line::s4_in_y_ext`, `fghr_polynomials_on`) and nothing else.
+The base `{P : Y(P) ∈ F_p \ {0, ±1}}` is Gaudry's affine line `x ∈ x₀ + F_p` in that coordinate;
+`τ_T` keeps it and folds with coefficient `1`, so `⟨−1, τ_T⟩` puts `4` points in a column against
+`⟨−1⟩`'s `2`.  The two unit tests already show the `D₃` oracle returning a decomposition on
+exactly the targets the `S₃` oracle and the exhaustive pair table do (`p = 2^6`, `118` targets).
+
+**Predictions, fixed before E17 runs.**
+
+| id | question | prediction | falsified by |
+|:--|:--|:--|:--|
+| G2.1 | do the oracles agree on the full group? | `D₃`, `S₃` and the pair table decompose the same targets, every decomposition re-added in the group | any disagreement at `p ≤ 2^8` |
+| G2.2 | the oracle constant | `C₃(D₃)` `÷ ≥ 20` against `C₃(S₃)` on the same instance and targets (E13: `÷ 33`–`41`), flat in `p` up to `log p` | a ratio below `10` at any size |
+| G2.3 | the `τ_T` fold | columns `÷ 2.0 ± 0.05`, relations to the pinned logarithm `÷ ≈ 2` | a column ratio outside `[1.9, 2.1]` |
+| G2.4 | end to end | `S / rho S ≤ 50` at `r ≥ 2^{28}` on the `D₃` + `τ_T` arm, against `220`–`540` for the `ψ`-fold with `S₃` | `S / rho S > 100` at `r ≥ 2^{28}` |
+| G2.5 | the ratio's slope | relations `∝ p`, rho `∝ p^{3/2}`: while the relation phase dominates, `S / rho S` falls, fitted exponent in `r` `≤ −0.10` (E16 on the subfield line: `+0.18`) | a fitted exponent `≥ 0` |
+
+**What follows if they hold.**  G2.2 and G2.4 give the measured constants to put into
+`RESEARCH_EXTENSION_FIELD_BOUNDARIES.md` Theorems 2–3 in place of `C₃ ≈ 0.88·10⁶`: the plain
+method's minimum `S*` moves by `√` of the constant (it is the geometric mean of the two terms),
+and the double-large-prime crossover by `18·log₂` of the share of `C_DLP` the solve is.  Neither is
+an exponent; both are the constant the boundary note says is the only lever, measured on the
+group where it matters.  **Class if they hold: engineering**, on a variant whose exponent is
+already sub-rho.  A falsified G2.2 would mean the `D₃` structure that made E13 cheap is an
+artefact of `F_p` Möbius coefficients; a falsified G2.5 would mean the full-group arm, too, has a
+cost that grows as fast as rho in the measured range.
+
+### 9.1 Amendment, before E18 is built: the frontier is `k = 4`
+
+*Added 2026-10-09 while E17 was running and before any `k = 4` code of this goal existed; §9's
+table above is unchanged and binds E17.*
+
+§9 read its boundary from `RESEARCH_EXTENSION_FIELD_BOUNDARIES.md`, which predates
+`RESEARCH_RESIDUAL_WALKS.md` §11.15–§11.19.  Those sections close `k = 3` (best measured: the
+plain method at `528×` rho at `2^{33.1}`; double large primes at `1,989×`) and move the frontier
+to `k = 4` on `E(F_{p⁴})`, where the base has `|F| ∝ n^{1/4}`, so the linear algebra is
+`∝ n^{1/2}`, rho's exponent:
+
+- `r∞ = 0.518 ± 0.031` — the linear algebra over the rho walk, measured over eight curves to
+  `n = 2^{40.1}` (§11.19); past the handover a plain `k = 4` method beats rho by `1/r∞` and no
+  more;
+- the handover `n* ≈ 2^{151}`, set by the `S₅` solve `C₄ = 1.213·10¹²` (§11.17), with "every
+  factor `f` taken off `C₄` moves `n*` about `4 log₂ f` bits earlier", and the
+  Faugère–Gaudry–Huot–Renault symmetries named there as one of two levers.
+
+So G2's two levers have a second, larger target.  The `D_m` symmetry acts on `C₄` (E19, to be
+registered separately), and **a fold of the base acts on `r∞` itself**.  `r∞` is the linear
+algebra, `∝ N²` in the unknowns, against rho.  A fold by `w` points a column divides `N` by
+`w/2`, while the matched rho gains `√` of whatever automorphisms it can use and nothing from
+`τ_T`.  §11.15 lists levers on the linear-algebra constant as engineering, which they are, but
+at `k = 4` that constant *is* the asymptotic ratio to rho.
+
+One accounting point must be measured, not assumed.  `rho4` (`gaudry_quartic.rs`) walks
+without the negation map (`S = 1.319`, the `√(π/2)` of an unfolded walk), while every other panel
+in this program uses the negation-folded walk.  E18 measures both.
+
+**E18 — the folds on the `k = 4` linear algebra (registered here, before the code exists).**
+On curves over `F_{p⁴}` (`p ≤ 1033`, `n ≤ 2^{40}`, the sizes of §11.19), one relation stream
+from §11.19's meet-in-the-middle oracle feeds a control arm (`⟨−1⟩`, one column per abscissa,
+exactly §11.19's matrix) and a folded arm.  Each arm is filtered and solved by §11.7's Wiedemann,
+its logarithm verified by `[d]G = Q`, and priced against the rho matched to its group:
+
+- **`ψ` arm:** `j = 0`, `p ≡ 1 (mod 12)`, prime order, `ψ(x, y) = (ωx, y)` with `ω ∈ F_p`, which
+  keeps the base `x ∈ F_p`.  Columns are the `⟨ψ⟩`-orbits of abscissae, with coefficients
+  `±λ^k`.  The matched rho walks the classes `{±ψ^k P}`.
+- **`τ_T` arm:** the §9 construction over `F_{p⁴}`, `#E = h·n` with `h = 2` where the search
+  finds one (else `h ≤ 4`, recorded), base `x ∈ x₀ + F_p`, `P` and `P + T` in one column.  The
+  matched rho is the negation walk, since rho cannot use `τ_T`.
+
+| id | quantity | prediction | falsified by |
+|:--|:--|:--|:--|
+| G2.6 | negation-folded rho against `rho4`'s unfolded walk at `k = 4` | steps `÷ √2` (`1.41 ± 0.10`), so §11.19's `r∞` reads `≈ 0.73` against the negation walk | a ratio outside `[1.25, 1.6]` |
+| G2.7 | the `ψ` fold | columns `÷ 3.0 ± 0.1`; linear algebra `÷ ≈ 9` (with the filtering fraction recorded); `ψ`-folded rho `÷ √3` against the negation walk; `r_ψ` against the `ψ`-folded rho `≈ 0.518·√6/9 ≈ 0.14`, against `≈ 1.27` for the control on the same curves | `r_ψ > 0.30` at every size, or any unverified logarithm |
+| G2.8 | the `τ_T` fold | columns `÷ 2.0 ± 0.1`; linear algebra `÷ ≈ 4`; `r_τ` against the negation rho `≈ 0.518·√2·√h / 4` (`≈ 0.26` at `h = 2`), against `≈ 1.04` for the control | `r_τ > 0.50` at every size |
+
+**What this would and would not say.**  `r` is the ratio of the linear algebra to rho, not
+`S / rho S`: the relation phase is still the meet-in-the-middle oracle's here, and §11.17's
+`4.3·10⁸×` rho for the `S₅` solve is untouched by E18.  If G2.7 holds, the eventual advantage of
+a `k = 4` method over the rho an attacker would actually run on that curve moves from
+`1/0.73 ≈ 1.4×` (negation walk) to `≈ 7×` (`ψ`-folded base against `ψ`-folded walk).
+**Class: engineering**, the constant of an asymptote.  The handover `n*` also moves, through
+`1 − r∞` in §11.16's formula and through the halved relation count, but `C₄` still sets it.
+
+### 9.2 E17 — the `D₃` oracle and the `τ_T` fold on the full group, measured
+
+**Runner:** `E17_S3_BITS=10 cargo run --release --example glv_invariant_experiments -- --exp e17
+--bits 6,7,8,9,10,11,12,13 --seeds 3 --rho-runs 8 --json experiments/23_glv_invariant_e17.json`.
+**Data:** `experiments/23_glv_invariant_e17.{json,log}` (2026-10-09, `24` rows, `294 s`).
+**Tables:** `cargo run --release --example glv_invariant_experiment_tables --
+experiments/23_glv_invariant_e17.json` (the E17 printer).  **Source:** `src/cryptanalysis/fghr_full.rs`,
+`src/cryptanalysis/fghr_line.rs` (`YLine`, `s4_in_y_ext`, `fghr_polynomials_on`).
+
+`24` non-subfield curves over `F_{p³}`, `p = 37`–`4549`, `r = 2^{13.3}`–`2^{33.5}`, cofactor
+`h ∈ {4, 8}` (`T` is rational, so `h` is even, and the search took the first `h ≤ 8`).  One
+relation stream fed the `⟨−1, τ_T⟩` base and the `⟨−1⟩` control; the `S₃` Macaulay oracle ran the
+same base and targets to `p = 2^{10}`; both oracles were checked against the exhaustive pair table
+on `200` targets per curve to `p = 2^8`.  **Every planted logarithm was recovered, every
+algebraic decomposition re-added to its target, and all `192` rho walks verified.**
+
+**The solve constant and the fold.**
+
+| p | log₂ r | h | cols `⟨−1, τ_T⟩` / `⟨−1⟩` | D₃ muls per call | S₃ muls per call | S₃ / D₃ |
+|--:|--:|--:|:--|--:|--:|--:|
+| 43 | 13.3 | 8 | 12 / 24 | 12537 | 539418 | 43.0 |
+| 67 | 15.2 | 8 | 17 / 34 | 13043 | 535231 | 41.0 |
+| 211 | 20.2 | 8 | 58 / 116 | 15451 | 570788 | 36.9 |
+| 337 | 23.2 | 4 | 88 / 176 | 15835 | 578450 | 36.5 |
+| 823 | 26.1 | 8 | 216 / 432 | 17566 | 591700 | 33.7 |
+| 1723 | 29.3 | 8 | 431 / 862 | 18867 | — | — |
+| 4549 | 33.5 | 8 | 1188 / 2376 | 19471 | — | — |
+
+(Seven of the `24` rows; the printer gives all.)  Over the `15` rows with both oracles,
+**`S₃ / D₃ = 37.99` (`33.68`–`43.03`)**.  `R(q₃)` has degree `16` on every call of every row.  The
+`D₃` cost grows from `1.25·10⁴` to `1.95·10⁴` over `p = 2^{5.2}`–`2^{12.2}`, which is the
+`log p` of Cantor–Zassenhaus.  The column ratio is **`2.00` on all `24` rows**.  Agreement with
+the pair table: **`0` disagreements in `1800` targets** for both oracles once one
+degenerate target is set apart.  In that one (`p = 67`, `k = 67`) the target is itself a base
+point, the pair table's "decomposition" is `P + (−P) + R`, and `S₄` has a one-dimensional
+component there that no zero-dimensional solver returns.  `S₃` misses it exactly as `D₃` does.
+
+**End to end, against the matched negation rho** (`F_p` multiplications, the `D₃` arm's phases):
+
+| p | log₂ r | h | set-up | group arithmetic | solver | linear algebra | S / rho S, D₃ | S / rho S, S₃ |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 43 | 13.3 | 8 | 1.37e+06 | 8.74e+05 | 3.18e+06 | 251 | 285 | 7241 |
+| 211 | 20.2 | 8 | 1.37e+06 | 7.36e+06 | 2.08e+07 | 2.09e+03 | 303 | 7898 |
+| 823 | 26.1 | 8 | 1.37e+06 | 9.88e+07 | 2.39e+08 | 2.7e+04 | 455 | 7449 |
+| 1723 | 29.3 | 8 | 1.37e+06 | 1.81e+08 | 4.15e+08 | 1.86e+05 | 298 | — |
+| 3037 | 32.7 | 4 | 1.37e+06 | 3.63e+08 | 7.94e+08 | 8.99e+05 | 180 | — |
+| 4549 | 33.5 | 8 | 1.37e+06 | 6.44e+08 | 1.29e+09 | 2.91e+06 | 236 | — |
+
+Fitted against `r` over the `24` rows: solver `r^{0.44}`, group arithmetic `r^{0.47}`, linear
+algebra `r^{0.68}`, total `r^{0.43}`, matched rho `r^{0.44}`, **`S / rho S` `r^{−0.01}`** (`S₃`
+arm: `r^{+0.03}`).
+
+**Reading, against §9's predictions.**
+
+- **G2.1 holds**, with the degenerate target counted apart and frozen in the file
+  (`pair_table_cancelling`), never dropped.
+- **G2.2 holds:** the `D₃` structure that made E13 cheap is not an artefact of `F_p` Möbius
+  coefficients.  On the full group it divides the `S₄` solve by `38`, E13's `33`–`41`.
+- **G2.3 holds exactly:** `τ_T` halves the columns on every curve.
+- **G2.4 is falsified.**  `S / rho S` is `180`–`377` at `r ≥ 2^{28}` against the `≤ 50`
+  predicted; the falsifier was `> 100`.  Within the harness the two levers buy `÷ 25`–`40` end to
+  end (the `S₃` arm on the same base is `5,961`–`14,502`).
+- **G2.5 is falsified.**  The fitted slope is `−0.01`, not `≤ −0.10`.  The cause is three costs of
+  this harness that the prediction did not price.  None of them is a property of the oracle:
+  1. **The stop rule.**  The rows stop at the folded arm's full rank, so every column must
+     appear, and a weight-3 stream reaches that after `≈ (N/3) ln N` relations.  Measured, the
+     relations at full rank are `1.1×` the columns at `N ≈ 10` and `1.5`–`2.8×` at `N ≥ 100`.  §11's pipeline filters
+     to a square core and stops at the pinned logarithm instead.
+  2. **Fresh targets.**  Each target is `aG + bQ`, two scalar multiplications.  That is a third of
+     the total (`r^{0.47}`), where a walk-generated residual costs one addition.
+  3. **The rho fit.**  The matched rho fits `r^{0.44}`, not `1/2`, because set-up is still a
+     visible share at these sizes (as in E8, E11 and E16).
+  The `ln N` and the scalar multiplications add `≈ 0.1` to the relation phase's exponent and the
+  rho fit removes `0.06`, which accounts for the predicted `−1/6` reading as `−0.01`.
+
+The cofactor costs a further constant.  With `h = 8`, rho on `r ≈ p³/8` is `√8` cheaper than on a
+prime-order curve with the same base.  A cross-harness comparison is therefore only context: the
+best `k = 3` method of `RESEARCH_RESIDUAL_WALKS.md` §11 is the plain method at `528×` rho at
+`2^{33.1}`, on prime-order curves with filtering and walk-generated residuals.  This arm is at
+`236`–`265×` at `2^{33.1}`–`2^{33.5}`.
+
+**Class: engineering.**  The solve constant is `÷ 38`, and the fold halves the columns exactly
+and the linear algebra by four.  No exponent moved, and §11.15's verdict on `k = 3` stands: the
+plain method is bounded away from rho at every size.  What E17 establishes for the goal is that
+both levers survive the move to a non-subfield curve, which is the precondition for using them at
+`k = 4` (§9.1).
+
+### 9.3 E18 — the folds on the `k = 4` linear algebra, measured
+
+**Runner:** `cargo run --release --example quartic_folds -- --family psi --sizes
+241,337,541,601,733,769,997,1069 --seeds 1 --rho-runs 16 --json experiments/26_quartic_folds_psi.json`
+and `-- --family tau --sizes 269,521,769,1033 --seeds 2 --rho-runs 16 --json
+experiments/26_quartic_folds_tau.json`.  **Data:** `experiments/26_quartic_folds_{psi,tau}.{json,log}`
+(2026-10-09).  **Tables:** `cargo run --release --example glv_invariant_experiment_tables --
+experiments/26_quartic_folds_psi.json experiments/26_quartic_folds_tau.json` (the E18 printer).
+**Source:** `src/cryptanalysis/quartic_folds.rs`, `examples/quartic_folds.rs`.  **Registered in
+advance:** §9.1, pushed (`c4f29698f`) before the module existed.
+
+**Three changes the smoke runs forced, all made before the frozen runs and all recorded in the
+rows:**
+
+1. **Identical rows are skipped.**  On the `ψ` arm, two decompositions of one target that differ
+   by `P + ψP + ψ²P = O` fold to one row.  Kept, they made half the folded cores singular (rank
+   `13` of `17` at `p = 97`; `19`–`46` solve attempts).  The control keeps such pairs in distinct
+   columns, where they are independent.  `duplicate_rows` counts the skipped rows: `0` on every
+   frozen row, because of rule 2.
+2. **Each target contributes one decomposition, drawn uniformly from its verified ones.**  On a
+   curve with rational `T`, each decomposition comes with the seven that add `T` to an even number
+   of summands, and the eight rows have rank `5`.  Square cores drawn from such families were
+   singular, and the stream never ended (`p = 61`, `97`).  Taking the oracle's first decomposition
+   instead would pick the lower index of every `{P, P + T}` pair, half-folding the control: its
+   core shrank to `φ ≈ 0.67`, and the linear-algebra ratio read `1.6`–`2.6` where the uniform draw
+   gives `3.0`–`4.2`.  §11.19 kept every decomposition, which on its prime-order curves is one per
+   target with rare exceptions.  `decompositions_per_target` records the histogram on every row.
+3. **A fruitless cycle is escaped by doubling.**  Restarting the walk cost two scalar
+   multiplications, about `87` times per negation walk at `n = 2^{32}`, `13 %` of the walk.  A
+   test now holds each walk's steps to its class size: unfolded / negation in `[1.15, 1.75]`,
+   unfolded / `ψ` in `[1.9, 3.1]`.
+
+**The `ψ` arm: `8` prime-order `j = 0` curves over `F_{p⁴}`**, `p = 241`–`1069`,
+`n = 2^{31.7}`–`2^{40.2}`.  One curve per `p`: the six sextic twists fix the possible orders, and
+two seeds at one `p` would land on isomorphic curves.  **Every logarithm was recovered on both
+arms, and all `384` walks verified.**
+
+| p | log₂ n | cols control / folded | control core (φ) | folded core (φ) | LA ratio | r control / unfolded walk | r control / ψ walk | r folded / ψ walk |
+|--:|--:|:--|:--|:--|--:|--:|--:|--:|
+| 241 | 31.7 | 120 / 40 | 103 (0.858) | 34 (0.850) | 9.20 | 0.487 | 1.083 | 0.118 |
+| 337 | 33.6 | 165 / 55 | 151 (0.915) | 49 (0.891) | 9.49 | 0.535 | 1.189 | 0.125 |
+| 541 | 36.3 | 273 / 91 | 239 (0.875) | 86 (0.945) | 7.77 | 0.520 | 1.155 | 0.149 |
+| 601 | 36.9 | 291 / 97 | 256 (0.880) | 87 (0.897) | 8.68 | 0.483 | 1.074 | 0.124 |
+| 733 | 38.1 | 414 / 138 | 367 (0.886) | 126 (0.913) | 8.49 | 0.667 | 1.483 | 0.175 |
+| 769 | 38.3 | 438 / 146 | 387 (0.884) | 130 (0.890) | 8.86 | 0.674 | 1.498 | 0.169 |
+| 997 | 39.8 | 477 / 159 | 431 (0.904) | 136 (0.855) | 10.05 | 0.498 | 1.106 | 0.110 |
+| 1069 | 40.2 | 561 / 187 | 495 (0.882) | 162 (0.866) | 9.33 | 0.571 | 1.268 | 0.136 |
+
+Rho's `S`, pooled over `128` walks per fold in `F_p` multiplications per `√n`: unfolded
+**`120.3 ± 5.5`**, negation **`91.0 ± 4.6`**, `ψ` **`54.1 ± 2.6`**, so unfolded / negation is
+`1.32` and negation / `ψ` is `1.68`.  `r` pooled over the curves, against each walk:
+
+| arm | unfolded walk | negation walk | `ψ` walk | fitted exponent in `n` |
+|:--|--:|--:|--:|--:|
+| control (`⟨−1⟩`) | `0.554 ± 0.027` | `0.733 ± 0.036` | `1.232 ± 0.061` | `0.03` |
+| `ψ`-folded | `0.062 ± 0.004` | `0.082 ± 0.005` | **`0.138 ± 0.008`** | `0.02` |
+
+**Reading, against §9.1.**
+
+- **G2.6 holds.**  Unfolded / negation is `1.32` in multiplications, inside `[1.25, 1.6]`; the
+  canonical representative and the look-ahead cost the negation walk part of its `√2`.  So
+  §11.19's `r∞ = 0.518`, which is against the unfolded walk, reads **`0.73` against the negation
+  walk**: past the handover the plain method beats the walk this program uses everywhere else by
+  `1.36×`, not `1.9×`.  The control reproduces §11.19 on different curves, `0.554 ± 0.027`
+  against `0.518 ± 0.031`.
+- **G2.7 holds on every component.**  Columns `÷ 3.00` on every curve; linear algebra `÷ 7.8`–`10.1`
+  (`÷ 9` predicted, with the filtering fractions equal to within `±0.07`); the `ψ` walk `÷ 1.68`
+  against the negation walk (`√3 = 1.73`); and **`r_ψ = 0.138 ± 0.008`** against the matched
+  `ψ`-folded walk (`≈ 0.14` predicted).  The control on the same curves is **`1.23`** against that
+  walk (`≈ 1.27` predicted).  Both are flat in `n`.
+
+So on a `j = 0` curve the plain `k = 4` method does **not** beat the rho an attacker would run
+there, at any size, because its linear algebra alone costs `1.23×` that walk.  The `ψ`-folded base
+does, asymptotically, by **`1/0.138 ≈ 7.2×`**.
+
+**The `τ_T` arm: `8` curves over `F_{p⁴}` with rational `T`**, `p = 269`–`1033` (§11.19's sizes),
+two curves per `p`, `n = 2^{30.3}`–`2^{38.1}`.  The two `p = 1033` curves ran one per invocation
+(`experiments/26_quartic_folds_tau_1033s{1,2}.{json,log}`), after two restarts of the host had
+stopped the run.  **Every logarithm was recovered on both arms, and all `256` walks verified.**
+
+| p | log₂ n | h | cols control / folded | control core (φ) | folded core (φ) | LA ratio | decompositions per decomposed target | residuals per relation | r control / negation walk | r folded / negation walk |
+|--:|--:|--:|:--|:--|:--|--:|--:|--:|--:|--:|
+| 269 | 30.3 | 4 | 134 / 67 | 125 (0.933) | 57 (0.851) | 4.87 | 9.23 | 91.5 | 1.526 | 0.313 |
+| 269 | 30.3 | 4 | 116 / 58 | 104 (0.897) | 54 (0.931) | 3.75 | 7.67 | 198.6 | 1.057 | 0.282 |
+| 521 | 34.1 | 4 | 264 / 132 | 241 (0.913) | 121 (0.917) | 3.98 | 7.59 | 82.8 | 1.511 | 0.380 |
+| 521 | 34.1 | 4 | 268 / 134 | 234 (0.873) | 117 (0.873) | 4.04 | 7.80 | 88.0 | 1.424 | 0.353 |
+| 769 | 36.3 | 4 | 378 / 189 | 342 (0.905) | 170 (0.899) | 4.07 | 7.84 | 108.4 | 1.396 | 0.343 |
+| 769 | 36.3 | 4 | 370 / 185 | 329 (0.889) | 175 (0.946) | 3.55 | 7.84 | 105.2 | 1.292 | 0.364 |
+| 1033 | 38.1 | 4 | 496 / 248 | 439 (0.885) | 219 (0.883) | 4.02 | 7.87 | 119.6 | 1.275 | 0.317 |
+| 1033 | 38.1 | 4 | 524 / 262 | 482 (0.920) | 240 (0.916) | 4.05 | 7.90 | 94.5 | 1.536 | 0.379 |
+
+Rho's `S`, pooled over `128` walks per fold: unfolded `118.9 ± 5.4`, negation `90.8 ± 4.2`
+(ratio `1.31`).  Pooled `r`: control `1.051 ± 0.044` (unfolded walk), `1.377 ± 0.058`
+(negation walk); folded **`0.261 ± 0.009`** (unfolded), **`0.341 ± 0.012`** (negation); fitted
+exponents in `n` `0.01` and `0.03`.
+
+**Reading, against §9.1.**
+
+- **G2.8 holds as registered, at the cofactor the search could reach.**  Columns `÷ 2.00`, linear
+  algebra `÷ 3.55`–`4.87` (`÷ 4` predicted), and `r_τ = 0.341 ± 0.012` against the negation walk,
+  under the `0.50` falsifier.
+- **Deviation: every curve has `h = 4`, never `2`.**  The search took its fallback on all eight,
+  and E17's `24` curves over `F_{p³}` all had `h ∈ {4, 8}`.  The construction makes `f'(x₀) = c²` a
+  square, which is the necessary condition for `T` to be halvable, i.e. for a rational 4-torsion
+  point.  So `h ≥ 4` is very likely structural for this coordinate.  That is not proved here and is
+  recorded as measured.  The cofactor costs `√h` against rho, so the registered `≈ 0.26` at `h = 2`
+  becomes `0.518·√2·√4/4 ≈ 0.37` at `h = 4`, and the control's `≈ 1.04` becomes `≈ 1.47`.  Measured:
+  `0.341` and `1.377`.
+- **What the registration did not price: the relation yield.**  Each decomposed target carries
+  `7.6`–`9.2` verified decompositions, the family that adds `T` to an even number of summands, and
+  the folded arm turns the whole family into one row.  Pooled, a relation costs **`106` residuals**
+  on these curves, against **`22.5`** on the `j = 0` curves (`2,559` relations from `270,464`
+  residuals, against `2,761` from `62,080`; §11.16 assumes `24`).  `r` does not see this, since it
+  prices the linear algebra.  The handover does.
+
+**The handovers, re-derived on the measured yields (extrapolation, not measurement).**  §11.16's
+form: relation phase `y·(columns)·C₄`, with `y` the measured residuals per relation, `columns`
+from the measured `|F| ≈ p/2`, and `C₄ = 1.213·10¹²` (§11.17).  It is set against rho
+`S·√n`, with the matched walk's pooled `S` and `√n = p²/√h`.  Then
+`S / rho = y·(cols/p)·C₄·√h / (S_rho·p) + r`, and `p* = y·(cols/p)·C₄·√h / (S_rho·(1 − r))`.
+
+| method, curves | against | `y` | `r` | `p*` | `n*` |
+|:--|:--|--:|--:|--:|--:|
+| plain, prime order (control of the `ψ` runs) | unfolded walk (§11.19's convention) | `22.5` | `0.554` | `2.5·10¹¹` | `2^{151.6}` (§11.19: `2^{151.1}`) |
+| plain, prime order | negation walk | `22.5` | `0.733` | `5.6·10¹¹` | `2^{156.1}` |
+| plain, `j = 0` | `ψ` walk | `22.5` | `1.232` | — | never |
+| **`ψ`-folded, `j = 0`** | **`ψ` walk** | `22.5` | **`0.138`** | `9.8·10¹⁰` | **`2^{146.0}`** |
+| plain, 2-torsion (`h = 4`) | negation walk | `106` | `1.377` | — | never |
+| `τ_T`-folded, 2-torsion (`h = 4`) | negation walk | `106` | `0.341` | `1.1·10¹²` | `2^{157.9}` |
+
+**So the two folds part.**  The **`ψ` fold moves the frontier**: on a `j = 0` curve, against the
+rho an attacker would run there, the asymptotic edge is `1/0.138 ≈ 7.2×`, against the plain
+method's `1/0.733 ≈ 1.36×` over the negation walk on a prime-order curve.  The handover comes
+`10` bits earlier than that (`2^{146.0}` against `2^{156.1}`).  The **`τ_T` fold improves only
+its own curves**: `r` falls `4×` there, but those curves pay a cofactor of `4` and a `4.7×` poorer
+relation yield, so they hand over `1.8` bits *later* than a plain prime-order curve.  A curve
+with this `T` is a worse target than one without, even with the fold.
+
+**Class: engineering.**  Both folds move constants of an asymptote that is already rho's exponent
+at `k = 4`.  No exponent moved, no end-to-end `S` below rho exists, and every number past `n =
+2^{40}` is an extrapolation on §11.16's exponents and §11.17's `C₄`.
+
+### 9.4 Verdict on G2, and the next lever
+
+| stage | what moved | measured | class |
+|:--|:--|:--|:--|
+| E17, `k = 3`, the `D₃` solve on the full group | `C₃` | `÷ 38.0` (`33.7`–`43.0`) against `S₃` Macaulay, on non-subfield curves with `F_{p³}` Möbius coefficients; end to end still `180`–`377×` rho (G2.4, G2.5 falsified by the harness) | engineering |
+| E17, `k = 3`, the `τ_T` fold | columns | `÷ 2.00` exactly | engineering |
+| E18, `k = 4`, the `ψ` fold | `r∞` against the matched walk | **`0.138 ± 0.008`** (plain on the same curves: `1.232`); handover `2^{156.1} → 2^{146.0}` against the negation walk's | engineering |
+| E18, `k = 4`, the `τ_T` fold | `r∞` on its own curves | `0.341 ± 0.012` (plain: `1.377`), but `h = 4` and a `4.7×` poorer yield: handover `2^{157.9}` | engineering |
+| E18, `k = 4`, the reference | the walk `r∞` is quoted against | negation walk `1.31`–`1.32×` cheaper than §11.19's unfolded one, so §11.19's `0.518` reads `0.733` against it | accounting |
+
+**What G2 established.**  The levers this note built on subfield curves, where §8.10 showed they
+could buy only a constant against a `Θ(p)` rho, carry over to curves where index calculus has
+rho's exponent or better: the `D₃` solve intact (`÷ 38`), and the folds intact and exact.  At
+`k = 4`, the one setting in this repository where a plain method has a regime below rho at all,
+the `ψ` fold is the largest constant on the linear-algebra side.  It turns a `1.36×` asymptotic
+edge into `7.2×` and brings the handover `10` bits earlier.
+
+**What it did not.**  The handover is still `2^{146}`, set by `C₄ = 1.2·10¹²` per `S₅` solve.  No
+end-to-end `k = 4` run below rho exists, here or in §11.  On curves with rational 2-torsion the
+fold cannot pay for the curve's poorer yield.
+
+**The next lever, named and not yet registered.**  §11.17: "every factor `f` taken off `C₄` moves
+`n*` about `4 log₂ f` bits earlier", with `C ≈ D^{3.1}` in this solver.  The two candidates:
+
+1. **`ψ` on the system.**  On a `j = 0` curve, `S₅` is weighted-homogeneous in `x` (weight `2`) and
+   `b` (weight `6`), so the descended system carries a `Z/3` grading.  §2 of
+   `RESEARCH_GLV_INDEX_CALCULUS.md` found the analogous `k = 3` grading usable only on the
+   orbit system, at `12`–`30×` the cost.  At `k = 4` it needs re-deriving, not assuming.
+2. **`D₄` on the system.**  The FGHR symmetry, `(Z/2)³ ⋊ S₄`, on curves with rational `T`, cuts
+   the Bézout number `4096 → 512`.  That is `≈ 8^{3.1} ≈ 630×` on `C₄` if the generic scaling
+   holds, worth `≈ 37` bits of `n*`.  E18 shows those curves pay `≈ 8` bits back through the
+   cofactor and the yield.  The `k = 5` analogue in `RESEARCH_K5_TORSION_JOUX_VITSE.md` measured
+   `416×` for its four-point test.
+
+Either is a separate build: the symmetrised `S₅` over `F_{p⁴}` and a weighted Macaulay solve.  Each
+would be registered with its own falsifier before any code, as E17 and E18 were.

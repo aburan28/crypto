@@ -31,11 +31,31 @@ ICV1:<field>:<trace>:<order>:<j>:<end>:<level>:<path>:<model12>
 | `path` | root-relative isogeny path, `r` for a curve not placed in one | the same |
 | `model12` | the first 12 hex digits of `SHA-256(model JSON)` | the same |
 
+An extension of a prime field, `GF(p^k) = GF(p)[t]/(f)` with `p > 3`
+prime, `k ≥ 2` and `f = t^k + c_{k−1}t^{k−1} + … + c_0` monic and
+irreducible, has the same parts:
+
+| part | extension field `GF(p^k)` |
+|:--|:--|
+| `field` | `fpk-<p>-<k>-<modhash8>`, `modhash8` the first 8 hex digits of `SHA-256("fpk-modulus:" + <p> + ":" + <c_0>,…,<c_{k−1}>)`, every number in decimal and each `c_i` reduced modulo `p` |
+| `trace` | `p^k + 1 − #E`, signed decimal |
+| `order` | `#E(GF(p^k))`, decimal |
+| `j` | `1728 · 4a³ / (4a³ + 27b²)` in `GF(p^k)`: its coefficients `j_0,…,j_{k−1}` in the basis `1, t, …, t^{k−1}`, decimal, joined by commas |
+| `end`, `level`, `path`, `model12` | as for the other kinds |
+
+The extension part was added on 2026-10-01, for the `ic` tool
+programme's step B5a: schema v2 (`research/ic_tool_program/design/schema-v2.md`
+§6) asks for it before the tool writes an extension-field result.  It
+adds a kind and changes no existing identity.  The reference
+implementation, `scripts/curve_id.py extension`, has it now; the Rust port
+gains it with B5a's code.
+
 The **slug** is the name used in text:
 
 ```
-icv1-<field tag>-t<trace>-<model8>        field tag: f2m<m> or fp<bits of p>
+icv1-<field tag>-t<trace>-<model8>        field tag: f2m<m>, fp<bits of p>, or fp<bits of p>k<k>
 icv1-f2m41-tm2308219-7f48b14a             a negative trace is written tm<|t|>
+icv1-fp3k2-tm1-dd44529a                   y² = x³ + x + 1 over GF(5)[t]/(t² + 2)
 ```
 
 The slug is display; the canonical record is the ICV1 string and the model
@@ -49,13 +69,18 @@ sorted keys, no whitespace and ASCII escapes (`json.dumps(obj,
 sort_keys=True, separators=(",", ":"), ensure_ascii=True)`):
 
 ```
-binary: {"a":"0x0","b":"0x1","field":"f2m-41-39c74c32","form":"y^2+xy=x^3+a*x^2+b","modulus":"0x20000000009","v":"1"}
-prime:  {"a":"5320418","b":"8535318","field":"fp-10935329","form":"y^2=x^3+a*x+b","p":"10935329","v":"1"}
+binary:    {"a":"0x0","b":"0x1","field":"f2m-41-39c74c32","form":"y^2+xy=x^3+a*x^2+b","modulus":"0x20000000009","v":"1"}
+prime:     {"a":"5320418","b":"8535318","field":"fp-10935329","form":"y^2=x^3+a*x+b","p":"10935329","v":"1"}
+extension: {"a":["1","0"],"b":["1","0"],"field":"fpk-5-2-90ac2fda","form":"y^2=x^3+a*x+b","k":"2","modulus":["2","0"],"p":"5","v":"1"}
 ```
 
 Binary coefficients are polynomial-basis field elements in lower-case hex
 (bit `i` is the coefficient of `x^i`), reduced modulo the modulus; prime
-coefficients are decimal and reduced modulo `p`.  **The modulus is part of
+coefficients are decimal and reduced modulo `p`.  An extension's
+coefficients are lists of `k` decimal strings, `[e_0, …, e_{k−1}]` for
+`e_0 + e_1 t + … + e_{k−1} t^{k−1}`, each reduced modulo `p`, and its
+`modulus` is `[c_0, …, c_{k−1}]`, the low coefficients of the monic `f`,
+as schema v2 writes a `prime_extension` field.  **The modulus is part of
 the model.**  One abstract curve under two moduli, or in a normal basis,
 is two models and two identities.  That is deliberate: a factor base, a
 pair table or a log database is a set of field elements, and it means
@@ -67,7 +92,7 @@ nothing under another modulus.
 |:--|:--|
 | Koblitz `K_a`, `n < 64` | the least `x^n + low` with `low` odd of weight at most four that is irreducible (`koblitz_index_calculus::find_irreducible_sparse`) — what `KoblitzCurve::new` and `ic` build |
 | random binary curves (`ic_boundary::random_binary_instance`) | the same rule |
-| a standard or challenge curve | its published polynomial: ECC2K-95 `x^97+x^6+1`, ECC2K-130 `x^131+x^13+x^2+x+1`, sect163k1 `x^163+x^7+x^6+x^3+1`, and SEC 2's for the other `sect*k1` |
+| a standard or challenge curve | its published polynomial: ECC2K-95 `x^97+x^6+1`, ECC2K-130 `x^131+x^13+x^2+x+1`, sect113r1 `x^113+x^9+1`, sect163k1 `x^163+x^7+x^6+x^3+1`, and SEC 2's for the other `sect*` curves |
 | the m = 83 confidence gate (`AGENTS.md` §8a) | `x^83+x^45+x^2+x+1`, the polynomial §8a designates |
 | any other Koblitz degree `≥ 64` | the least sparse irreducible by the same rule, searched without the 64-bit cap |
 
@@ -129,3 +154,21 @@ way (`docs/ic/calibration.json`), matches through
    by rerunning the example (see [`README.md`](README.md)).
 3. Run `python3 scripts/build_curve_registry.py` and commit the registry
    with the work that first names the curve.
+
+## Additional prime model forms
+
+The native standards importer preserves these original equations in model JSON:
+
+| `form` | Additional keys (decimal strings) |
+| --- | --- |
+| `B*y^2=x^3+A*x^2+x` | `A`, `B` |
+| `a*x^2+y^2=1+d*x^2*y^2` | `a`, `d` |
+| `x^2+y^2=c^2*(1+d*x^2*y^2)` | `c`, `d` |
+
+Each also has `v: "1"`, `p` and `field`, as for short Weierstrass models.
+Coefficients are canonical residues. The model hash names the original equation,
+not its normalized short Weierstrass equation. Trace and order refer to the
+smooth projective model; j is computed using the verified birational change in
+[COVERS.md](COVERS.md). Existing identities are unchanged. Native import is in
+`src/bin/curve_standards`; [the standards inventory](standards/README.md) explains
+provenance and [the YAML graph](cover-links.yaml) links ICV1, EC1 and covers.

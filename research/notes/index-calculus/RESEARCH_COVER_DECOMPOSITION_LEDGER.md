@@ -1060,9 +1060,9 @@ is the weak class.
 
 The weak curves fall in far fewer classes than random curves do, and some classes hold many of them: at `p = 7` one class holds `3.8 %` of all weak curves against `1.1 %` of random ones, i.e. a weak density `3.5×` the mean, while others hold none.  No residue condition on `t` separates them (`t ≡ 2 (mod 4)` for every full-2-torsion curve, as it must; the residues mod `8` are `0.47–0.53` on both sides).  A sampled census cannot say how many classes hold *no* weak curve, so:
 
-#### 17.5.3 The exact census (post hoc; `39_jv_isogeny_walk_v2_exact_census*.{json,log}`)
+#### 17.5.3 Historical census (post hoc; `39_jv_isogeny_walk_v2_exact_census*.{json,log}`; corrected in §18.6)
 
-Every weak curve up to the isomorphisms that keep the form (`x ↦ x − ρ`, `x ↦ s²x`) is `y² = x(x − α)(x − σα)` with `α ∈ F_{q³} ∖ F_q` modulo `F_q^{×2}`: `2q² + 2q` representatives, each with its trace.  The set of their traces is the set of isogeny classes that hold a weak curve, exactly.  `4,000` random full-2-torsion curves are then drawn and the fraction whose trace is in the set is the chance that a random such curve's class holds a weak curve.
+Every weak curve up to the isomorphisms that keep the form (`x ↦ x − ρ`, `x ↦ s²x`) is `y² = x(x − α)(x − σα)` with `α ∈ F_{q³} ∖ F_q` modulo `F_q^{×2}`: `2q² + 2q` representatives. **Correction (2026-10-07):** the implementation used a nonsquare from `F_p` as its second `F_q` square-class representative. Every nonzero `F_p` element is square in `F_{p²}`, so it duplicated one branch and omitted the other. Also, the point counter uses two random points and can mislabel individual traces (two p = 7 witnesses failed a direct square-table audit). The following values are preserved as historical outputs, **not an exact class census**; corrected p = 11, 13, 17, 37 trace tables and uncertainty are in §18.6.
 
 | p | q | weak representatives | weak classes | random curves: distinct classes | **random curves in a weak class** | largest weak classes (t: representatives) |
 |---:|--:|--:|--:|--:|--:|:--|
@@ -1073,7 +1073,7 @@ Every weak curve up to the isomorphisms that keep the form (`x ↦ x − ρ`, `x
 | 23 | 529 | 560,740 | 5,594 | 3,251 | **0.618** | −3890: 726; 3890: 702; 7666: 624; −7666: 600; 13070: 594; −13070: 558 |
 | 31 | 961 | 1,848,964 | 13,889 | 3,665 | **0.609** | −17282: 1212; 17282: 1164; −24190: 1044; −3970: 1032; −38590: 996; −8318: 996 |
 
-**About `53–62 %` of random full-2-torsion curves over `F_{q³}` lie in an isogeny class that holds a weak curve, and the rest lie in one that holds none**, at every `p` the exact count reaches (`0.528, 0.592, 0.570, 0.608, 0.618, 0.609` at `p = 7, 11, 13, 17, 23, 31`), flat from `p = 17` on.  The weak classes are the large ones (`121` of `≈ 293` classes carry `53 %` of the curves at `p = 7`), which is why a random *curve* is in one more often than a random *class* is.  So the registered run's success rates (`0.20`–`0.54`) have two factors: a class with no weak curve (`≈ 40 %` of starts, exact), and, inside a weak class, a closure under `{2, 3, 5, 7}` that misses the weak curves (`0.33 / 0.61 ≈ 55 %` of the remainder at `p = 17`, falling to `0.20 / ≈ 0.6` at `p = 101` where the classes are larger and three degrees generate less of them).  Only the second factor is the walk's to fix (more degrees); the first is a property of the target.
+The historical run suggested that about `53–62 %` of random full-2-torsion curves lie in an isogeny class with a weak representative. Those particular fractions and class counts are superseded where §18.6 has corrected data. The general distinction remains: a walk cannot reach a weak curve if its isogeny class has none. The earlier numerical decomposition of walk failures, including `0.33 / 0.61` at p = 17, must be re-evaluated against corrected trace labels before being used as a controlled reach estimate.
 
 #### 17.5.4 The walk from inside a weak class (post hoc; `39_jv_isogeny_walk_v2_weakclass*.{json,log}`)
 
@@ -1095,7 +1095,7 @@ The attack's own question is the second factor: given a curve whose class holds 
 
 `walk / rho ∝ p^{−1.48}` over `p ≥ 53`; `c_jump ∝ p^{0.32}`, `c_curve ∝ p^{0.07}`.
 
-Every walk finds a weak curve, after a median of `3`–`16` distinct curves at every size — not `q/3`, and not growing with `p`.  Inside a weak class the weak curves are not a `3/q` sprinkling: the start's own 2-component holds one `47`–`80 %` of the time.  The whole walk, point count included, costs `1.7×` rho at `p = 7` and falls through parity at `p ≈ 11` to `0.0002×` at `p = 1009`, where the point count (`3·10⁷`) is more than half of it.  Set beside the sieved route of §§14–16 (`0.021×` rho at `p = 1009` on the measured reference; `0.0068`–`0.012×` at `1511`): **for a curve in a weak class, the walk adds about one per cent to the route's cost at `p = 1009`, and the route with the walk inside it still crosses rho near `p ≈ 333`–`371`** (the walk is `0.0038×` at `251` and `0.0027×` at `503`, against the route's `≈ 3×` and `≈ 0.4×` there: the crossover moves by less than the spread between instances in §16).
+Every walk finds a weak curve, after a median of `3`–`16` distinct curves at every size — not `q/3`, and not growing with `p`.  Inside a weak class the weak curves are not a `3/q` sprinkling: the start's own 2-component holds one `47`–`80 %` of the time.  The whole walk, point count included, costs `1.7×` rho at `p = 7` and falls through parity at `p ≈ 11` to `0.0002×` at `p = 1009`, where the point count (`3·10⁷`) is more than half of it.  Set beside the separately measured sieved route of §§14–16 (`0.021×` rho at `p = 1009` on its reference; `0.0068`–`0.012×` at `1511`), the walk stage is about one per cent of that route reference at `p = 1009`.  This is a comparison of separately measured costs on different instances.  Point transport and a complete DLP run from a non-weak curve remain unmeasured in this round, so neither their end-to-end `S` nor their crossover with rho is established.  The walk alone is `0.0038×` rho at `251` and `0.0027×` at `503`, while the earlier route measured `≈ 3×` and `≈ 0.4×` on its own instances.
 
 #### 17.5.5 How far from a weak curve the start is (post hoc; `39_jv_isogeny_walk_v2_weakclass_m64.*`)
 
@@ -1116,10 +1116,10 @@ The distance matters: eight times farther from a weak curve, the walk meets `2`�
 
 #### 17.5.6 What this changes, and what it does not
 
-- **§9's caveat is answered in two parts, not one.**  *The cost* of reaching the weak class from a curve whose class holds one is now measured and is negligible beside the route (`≤ 1 %` at `p = 1009`; the step is `246×` cheaper than §13's and the walk needs tens of curves, not `q/3`).  *The reach* is not what [JV12]'s "`≈ q` steps for a curve of order divisible by `4`" suggests: about `40 %` of full-2-torsion curves over `F_{q³}` are in a class with no weak curve at all (exact at `p ≤ 31`), and for them no walk of any length helps.  The route applies to a curve exactly when its class holds a weak curve, and §17.5.3's census is the first measurement of how often that is.
+- **§9's caveat is answered in two parts, with a corrected reach estimate in §18.6.** *The cost* of reaching the weak class from a curve whose class holds one is measured and is negligible beside the route (`≤ 1 %` at `p = 1009`; the step is `246×` cheaper than §13's and the walk needs tens of curves, not `q/3`). *The reach* is limited because some full-2-torsion isogeny classes have no observed weak curve; a corrected p = 37 sample estimates `39.2 %` of random starts in such classes (Wilson 95 % interval `37.7–40.7 %`). The older p ≤ 31 figures used a duplicate square-class branch and are superseded where rerun. A walk cannot leave its isogeny class, so no walk length helps if that class truly has no weak curve.
 - **§13's "`q/3` steps, above rho below `p ≈ 8,000`" is superseded**, and it was wrong in both directions: the price per curve was `246×` too high, and the number of curves to meet was `q/3` only on the premise, false, that weak curves are a uniform `3/q` of every class.
 - **The cited `≈ q` is refuted as a description of the walk** inside a weak class (tens of curves) and is not the relevant quantity outside one (no number of steps suffices).
-- **Open, and not claimed:** whether the `55–60 %` holds as `p` grows (the exact census stops at `p = 31`, `4.5·10¹¹` multiplications there; the registered run's success at `p = 53`–`101` is a lower bound only, since three jump degrees do not generate the larger classes); what distinguishes the weak classes (the largest classes are weak, and no congruence on `t` was found); a uniform start inside a weak class (§17.5.5 is the only check, and it moves the constant by up to `40×`); the transport of the logarithm along the path (§17.4); and anything about a curve of order divisible by `4` without full rational 2-torsion.
+- **Open, and not claimed:** a necessary-and-sufficient formula for weak-class membership and its behavior through p ≈ 200 (§18.6 now tests p = 37 and finds a 2-adic necessary condition with counterexamples to sufficiency); a uniform start inside a weak class (§17.5.5 is the only check, and it moves the constant by up to `40×`); the transport of the logarithm along the path (§17.4); and anything about a curve of order divisible by `4` without full rational 2-torsion.
 
 **Class.**  Engineering (the step: `246×`; the search: exact exhaustion instead of a heuristic) and accounting (the reach and the price, both measured where §13 had estimated).  Not an advance: no number on the route's own rows moves, and the class it applies to is now *smaller* than §9 and §13 implied, not larger.
 
@@ -1215,6 +1215,12 @@ random full-2-torsion curves tested against the set) at
 sample), so that §18.3 can work from frozen files.  `p ≤ 31` is re-run with
 the full sets kept and must reproduce §17.5.3's counts exactly.
 
+**Correction after registration:** that reproduction condition cannot hold for
+the corrected implementation because §17.5.3's second square-class branch
+was duplicated. The original requirement is preserved above; §18.6 reports
+the discrepancy and the corrected p = 37 result rather than silently
+changing the frozen historical count.
+
 - **R1.**  The fraction of random full-2-torsion curves in a weak class
   stays in `[0.50, 0.68]` at `p = 37, 41, 43`.  *Falsified if* outside at
   any of them; a monotone fall below `0.50` would mean the route's reach
@@ -1304,17 +1310,147 @@ pricing; the algorithm is [JV12]'s and §§11–17's).
 
 §18.2's exact census (every weak curve's trace among `2q² + 2q`
 representatives, against `4,000` random full-2-torsion curves) extends
-§17.5.3's `p ≤ 31`.  **In progress.**
+§17.5.3's `p ≤ 31`. **`p = 37, 41, 43, 47` now measured by the corrected native census.**
 
 | p | q | weak representatives | weak classes | random curves in a weak class | status |
 |--:|--:|--:|--:|--:|:--|
-| 7–31 | | | | 0.528–0.609 | §17.5.3 |
-| 37 | 1,369 | | | | running |
-| 41 | 1,681 | | | | pending |
-| 43 | 1,849 | | | | pending |
+| 7–31 | | | | 0.528–0.609 | historical, superseded where §18.6 reran |
+| 37 | 1,369 | 3,751,060 | 24,352 ordinary trace rows with weak representatives | 0.60825 (2,433/4,000; Wilson 95 % [0.5930, 0.6233]) | corrected census; §18.6 |
+| 41 | 1,681 | 5,654,884 | 33,224 ordinary trace rows with weak representatives | 0.62525 (2,501/4,000; Wilson 95 % [0.6101, 0.6401]) | corrected census; §18.6 |
+| 43 | 1,849 | 6,841,300 | 38,452 ordinary trace rows with weak representatives | 0.61950 (2,478/4,000; Wilson 95 % [0.6043, 0.6344]) | corrected census; §18.6 |
+| 47 | 2,209 | 9,763,780 | 50,382 ordinary trace rows with weak representatives | 0.63200 (2,528/4,000; Wilson 95 % [0.6169, 0.6468]) | corrected orbit census; §18.6 |
 
-**R1** (the weak-class fraction stays in `[0.50, 0.68]` at `p = 37, 41, 43`)
-is evaluated as the rows land; `p = 31` read `0.609`.  The census at these
-sizes costs hours each (`p = 31` took `3,258` s), and `p = 41, 43` run under
-the §18.2 twelve-hour stop; their rows and §18.3's characterization are the
-remaining pending items of this thread.
+**R1** (the weak-class fraction stays in `[0.50, 0.68]` at `p = 37, 41, 43, 47`)
+has corrected observations inside the band at all four primes. The p = 31 value `0.609` is historical and affected by
+the representative bug; corrected p = 23 and 31 reruns are also pending.
+
+### 18.6 ISO-1 corrected weak-class labels and invariant audit (updated 2026-10-08)
+
+The [generalized norm-one theorem](../../iso1_weak_classes_20261007/THEOREM.pdf)
+proves `t ≡ ±(q^n+1) (mod 16)` and `4 | f_pi` for every ordinary
+weak curve when `q ≡ 1 (mod 4)` and `n ≥ 3` is odd. The exact
+[p = 7 census](../../iso1_weak_classes_20261007/p7_exact_absolute.csv)
+and complete independent GP orbit counts prove the converse false:
+the existing ordinary full-2 class `t = ±610` has `f_pi=72`, depth 3,
+and no weak representative. Absolute Frobenius and inversion give exactly
+`(p^4+3p^2+8)/12` point-count calls for the cubic census. The completed
+p = 53 census has 72,540 weak rows among 146,068 ordinary rows, no
+depth-1 weak row, and 494 high-depth zero rows. All 5,000 independent
+GP controls agree. The worker has started p = 59 and retains later
+primes through 199 under the [protocol](../../iso1_weak_classes_20261007/CONTINUATION_PROTOCOL.md).
+
+[The dated report](../../iso1_weak_classes_20261007/REPORT.md), [every-trace p = 37 CSV](../../iso1_weak_classes_20261007/p37_twist_derived.csv), [fit output](../../iso1_weak_classes_20261007/fit_p11_p13_to_p37.txt), and [visual](../../iso1_weak_classes_20261007/class_strata.svg) are the frozen evidence. The corrected census chooses an actual nonsquare of `F_{p²}` and uses both square-class branches, with one quadratic twist's trace derived from the other at p = 37. It visits all `2q²+2q = 3,751,060` normalized weak representatives at p = 37 and writes all 50,654 Hasse trace candidates; 49,284 are ordinary. The trace assignment remains probabilistic because `curve_order` validates a baby-step result on two random points. As an independent positive-label control, [PARI/GP `ellcard`](../../iso1_weak_classes_20261007/gp_p37_validation_receipt.txt) placed 100 distinct traces of random norm-one Legendre curves in the observed weak set; this does not certify every zero row.
+
+| p | q | ordinary trace rows | rows with weak representatives | depth-1 weak / depth-1 rows | depth-≥2 zero / depth-≥2 rows | random full-2 curves in weak class (4,000 samples) |
+|--:|--:|--:|--:|--:|--:|--:|
+| 7 | 49 | 294 | 126 | 0 / 148 | 20 / 146 | Exact census; not sampled |
+| 11 | 121 | 1,210 | 542 | 0 / 606 | 62 / 604 | 0.59075 [0.57543, 0.60589] |
+| 13 | 169 | 2,028 | 928 | 0 / 1,014 | 86 / 1,014 | 0.58100 [0.56564, 0.59621] |
+| 17 | 289 | 4,624 | 2,198 | 0 / 2,312 | 114 / 2,312 | 0.62000 [0.60485, 0.63492] |
+| **37** | **1,369** | **49,284** | **24,352** | **0 / 24,642** | **290 / 24,642** | **0.60825 [0.59303, 0.62327]** |
+| **41** | **1,681** | **67,240** | **33,224** | **0 / 33,620** | **396 / 33,620** | **0.62525 [0.61014, 0.64012]** |
+| **43** | **1,849** | **77,658** | **38,452** | **0 / 38,830** | **376 / 38,828** | **0.61950 [0.60435, 0.63443]** |
+| **47** | **2,209** | **101,614** | **50,382** | **0 / 50,808** | **424 / 50,806** | **0.63200 [0.61694, 0.64681]** |
+| **53** | **2,809** | **146,068** | **72,540** | **0 / 73,034** | **494 / 73,034** | **0.63475 [0.61971, 0.64954]** |
+
+For `D=t²−4p⁶=f_π²D_K` with `D_K` fundamental, the weak-trace condition `v₂(f_π)≥2`, equivalently `(t/2)²≡p⁶ (mod 16)` or `t/2≡±p³ (mod 8)`, is now **proved necessary**. Put `λ=α^{p²}/α` on a weak model. It has norm one, hence odd order and a fourth root `μ` in `F_{p⁶}`. The 2-isogenous quotient of the Legendre model `y²=x(x−1)(x−λ)` at `(0,0)` has roots `0, −(1+μ²)², −(1−μ²)²`; their pairwise differences are squares because `−1` is square. The quotient has full rational 4-torsion, forcing its order divisible by 16. The weak model is a quadratic twist of the Legendre model, so its trace satisfies `t≡±(p⁶+1) (mod 16)`. This is the exact class obstruction behind approximately half the zero rows. The quotient also has `(π−1)/4` in its endomorphism ring, so its 2-adic endomorphism conductor is at most `v₂(f_π)−2`; the quadratic twist has the same order, and a degree-2 isogeny changes conductor depth by at most one. Therefore every ordinary weak curve satisfies `v₂(f_End(E))≤v₂(f_π)−1`: it is not at the deepest possible 2-volcano level. This is a curve-level bound, not a measured exact level or a class-existence criterion. The bound is shared by every full-2-torsion curve, since (pi-1)/2 is an endomorphism with generated-order conductor f_pi/2; the extra weak-class restriction comes from full 4-torsion on the neighbor. The report now supplies the explicit map and replayable polynomial records.
+
+The condition is **not sufficient for the recorded computational labels**: held-out p = 37, 41, 43, 47 have respectively 290, 396, 376, 424 high-depth zero rows. On p = 37 its classifier has TP 24,352, FP 290, FN 0, TN 24,642 (99.41 % accuracy); on p = 47 it has TP 50,382, FP 424, FN 0, TN 50,808 (99.58 %). It cannot fully replace the reach census or seed sieve. Splitting of 2 and maximal-order class-number parity fit worse. A p = 37 counterexample is `t=-92218` (zero) versus `t=38854` (24): same Frobenius depth 3, ramified 2, even class-number parity, and identical trace mod `2^17`. The stronger p = 41 pair `t=136542` (zero) versus `t=5470` (132) also shares the exact maximal-order class number `h_K=192`, depth 2, ramified 2, and trace mod `2^17`; a near-edge pair 256 trace units apart shares depth 3, split 2, and `h_K=1680`. A held-out p = 47 pair (`t=204238` zero versus `t=73166` with 96) repeats the same depth, splitting, exact `h_K=336`, and trace residue mod `2^17`. See the [matched-class audit](../../iso1_weak_classes_20261007/counterexample_hk_residue.txt). The residual zeros concentrate near the Hasse edge but also occur centrally; maximal-order class-number magnitude is associated with their rate without classifying them exactly. The requested every-trace p = 53–about 200 census and sufficient criterion remain open; see the [full report](../../iso1_weak_classes_20261007/REPORT.md).
+
+Hilbert 90 identifies normalized `α/F_q^*` with the nonidentity norm-one parameters `λ=α^q/α`. The `q`-Frobenius and inversion orbits of `λ` have size six except one two-element orbit, and preserve the symmetric trace pair. The [orbit implementation and receipt](../../iso1_weak_classes_20261007/orbit_run_receipt.txt) reduce point-count calls by almost exactly sixfold: p = 13 and 37 orbit CSVs are byte-identical to their direct twist-derived CSVs, with 312,589 rather than 1,875,530 calls at p = 37. At p = 47, the completed [orbit census](../../iso1_weak_classes_20261007/p47_orbit_run_receipt.txt) needs 813,649 point counts and weights to 9,763,780 representatives. The special orbit yields two nonordinary Hasse-boundary rows at `t=±2·47³`, independently checked with PARI/GP. Another 5,000 independent GP norm-one samples give 4,200 distinct traces, all in the p = 47 positive set. These operation counts and sampled positive controls do not certify every zero row or establish an isolated CPU speedup.
+
+### 18.6.1 Larger-field controls and prime-degree orbit theorem (2026-10-09)
+
+The [larger-field report](../../iso1_weak_classes_20261007/larger_fields_20261009/REPORT.md) verifies 17 independently counted source/target pairs, 49 explicit geometric controls, fields through log2(Q)=252, and total extension degrees 10 and 14. All pairs are ordinary, have equal cardinality divisible by 16, and pass Hasse. Exact coefficient vectors, moduli, and 34 ICV1 model IDs are retained. These are individual norm-one positive controls; full trace-class coverage remains a separate requirement.
+
+For odd prime n, the absolute-Frobenius orbit count is now proved as C_(p,n)=[N+A+B-3+2e(n-1)^2]/(4n), where N=(p^(2n)-1)/(p^2-1), A=(p^n-1)/(p-1), B=(p^n+1)/(p+1), and e=1 iff p^2=1 mod n. Its cleared sum has record IDC1h90d58cc0e0c48fe3. Eight exhaustive cyclic-group audits cover 6,928,970 parameters; 45 stabilizer cases pass. The temporary p59 continuation was interrupted and is now restarted with a finite local service and persistent receipts; the original requested range through p199 remains preserved.
+
+The p = 59 census completed during this round: 100,408 weak ordinary rows among 201,898, 0/100,950 depth-1 positives, and 540/100,948 higher-depth zeros. All 5,000 GP controls are positive (4,565 distinct absolute traces). The archived CSV and decompressed SHA replay are retained in the larger-field report's p59_completed directory. The worker has advanced to p61.
+
+### 18.6.2 Independently sampled 192–252-bit fields (2026-10-09)
+
+The [population report](../../iso1_weak_classes_20261007/large_population_20261009/REPORT.md) point-counts 512 uniformly sampled full-2-torsion root-pair models in ten fields with total extension degrees 6, 10 and 14. All are ordinary. The proved conductor condition admits 323/512 (63.0859%; pooled Wilson 95% 58.8229–67.1540%). Every admitted source, after choosing the trace sign, has a verified full-4 representative at distance at most one rational 2-isogeny. The new theorem proves this torsion equivalence; its duplication identity has certificate IDC1h40099ec00a503c89. An independent exhaustive check verifies all 5,264 root pairs in eight smaller fields.
+
+The bounded degree-2/3 searches test 32,484 vertices and find zero norm-one witnesses from the independent population. All 323 admitted weak-class labels remain unresolved: 219 restricted-component closures and 104 vertex caps. Ten separately constructed large-field controls find a weak endpoint after two tested vertices and one edge. In the exact p7 validation, four weak classes appear among restricted-component closures, directly confirming that these closures cannot label a class zero. The precision interval for the admitted large-field population remains [0,1]; the earlier class-uniform small-prime precision is a separate result.
+
+The direct weak-model density bound is 3/(p²−1), from the three norm-fiber conditions; its degree-3/5/7 geometric sums have certified polynomial records. A CM preflight on an admitted 192-bit source obtains f_pi=8, then `polclass` reports an integer-conversion overflow on the 188-bit fundamental discriminant. The report retains the source law, all 512 field/model identities and raw receipts, 1,326 independent model replays, 72 route replays, proofs, SVGs, and a compiled PDF. Canonical dashboard context is refreshed; IC/rho ratios keep their earlier workloads and values.
+
+### 18.6.3 Exact support of both genus-3 branches (2026-10-09)
+
+The [two-branch theorem supplement](../../iso1_weak_classes_20261007/two_branch_20261009/REPORT.md) proves complete cubic and nonsplit-quadratic torus normalizations and an exact CM intersection criterion for ordinary trace pairs with D_K < -4. Cubic quotient orders satisfy c | f_pi/4; quadratic orders occupy the 2-volcano floor v2(c)=v2(f_pi). Each reduced CM factor has degree dividing six, so the reciprocal-variable decision polynomial has degree at most 18. Building the CM support retains a separate cost.
+
+At p=37 the combined family covers 48,630 of 49,284 ordinary trace classes: 24,352 cubic, 48,164 quadratic, 23,886 in both, and 654 exact zeros. Seven complete censuses extend from p7 through p37. Independent all-x replay verifies all 409 p7 parameter models with 48,118,441 evaluations; the cubic counts match the historical native p7, p13 and p37 rows. Two independent quadratic CM implementations agree on five classes, including the positive quadratic class at trace magnitude 610.
+
+From the 64 frozen independent p7 source fixtures, all 63 positive fixtures now have explicit verified routes after degree-11 and degree-19 follow-ups; the remaining trace-474 fixture is a combined-family zero. Independent coordinate replay checks 230 retained route edges and 117 literal conversions across successful variants. Their repeated-policy costs and all earlier caps remain recorded.
+
+The expanded 512-source 192–252-bit panel visits 46,356 vertices and evaluates 75,996 degree-2 and 53,604 degree-3 edges. Its 383 restricted closures and 129 vertex caps leave all large-field class labels unresolved. A generalized quadratic-base Hilbert-90 reconstruction passes 16 degree-10/14 controls, including eight section-gcd-5 cases. The specified compositum covers have genera 25 and 161 at these degrees. The selected CM support and an explicit large-field positive route remain the next construction requirements. Seven identity records, all source/phase receipts, canonical model records, source-linked diagrams and a reviewed PDF accompany the result; IC/rho ratio points retain their earlier workloads.
+
+The separate cubic worker has now completed p61 and p67. It records respectively 111,084/223,260 and 147,496/296,274 positive ordinary rows, zero depth-1 positives, and 546/640 higher-depth zeros. Each prime has 5,000 positive independent PARI controls and a replay-verified compressed archive. These retain diagnostic status for the probabilistic counter. The finite continuation stopped before p71 at the storage preflight; the stopped queue receipt remains intact. After storage became available, a fresh finite queue resumed at p71 with the same frozen runtime, four CPU threads, the original per-prime storage guard and the authorized range through p199; its restart receipt records 38,786,592,768 available bytes and the running service.
+
+### 18.7 Historical candidate R-v2, registered before its held-out test and now falsified (2026-10-08)
+
+Scope correction, 2026-10-09: the earlier weak-row labels, conductor
+restriction and zero examples select the cubic norm-one branch. The
+[prior-work comparison](../../iso1_weak_classes_20261007/large_population_20261009/PRIOR_WORK.md)
+verifies three quadratic-h Joux–Vitse models independently by complete
+affine-x enumeration and two infinity points. Their traces are −38, −10
+and 610, with Frobenius conductors 18, 26 and 72. The first two have
+conductor depth one, and the third occupies the class empty in the cubic
+census. Consequently those cubic exclusions do not exclude the broader
+published family. The 192–252-bit admission measurement and restricted
+searches also concern the cubic family. The next class criterion must
+include the quadratic branch explicitly.
+
+This preregistration is preserved as research history. The corrected p = 37,
+41, 43, 47 censuses in §18.6 falsify its **if and only if** claim, while the
+necessary half is now proved algebraically. The older p ≤ 31 and preliminary
+p = 37 reach figures in the original record used the omitted square-class
+branch and are superseded by §18.5–18.6.
+
+§18.3's exploration (`--characterize experiments/42_jv_cover_reach_all_curves_small.json`,
+sizes `p = 7, 11, 13, 17, 23`, post hoc) found one feature that nearly separates
+the weak classes among full-2-torsion classes, and none other does (`t mod 3`,
+`t mod 8`, `v₃(D)` and the class-size proxy are flat):
+
+| p | weak share of sampled classes with `v₂(D) = 5` | with `v₂(D) ≥ 6` |
+|--:|--:|--:|
+| 7 | 0.02 (147) | 0.68–1.00 |
+| 11 | 0.00 (511) | 0.67–1.00 |
+| 13 | 0.00 (728) | 0.67–1.00 |
+| 17 | 0.00 (1,025) | 0.93–1.00 |
+| 23 | 0.00 (1,305) | 0.97–1.00 |
+
+with `D = t² − 4q³` the Frobenius discriminant.  The weak set is closed under
+`t ↦ −t` up to the randomized group order's sub-1 % error (`5,568/5,594` at
+`p = 23`), as a rule in `t²` must be.
+
+**Historical R-v2 claim (falsified).** A full-2-torsion isogeny class over
+`F_{q³}` holds a weak curve **iff `v₂(t² − 4q³) ≥ 6`**. The forward
+implication is proved in §18.6; the reverse implication has 290, 396, and
+376 counterexample rows at p = 37, 41, 43.
+
+*Why it might hold (heuristic, not a proof).*  The norm-one subgroup of
+`F_{q³}^×` has odd order `q² + q + 1`, so a weak curve's Legendre parameter
+`λ`, for the ordering with `N(λ) = 1`, lies in the odd part of `F_{q³}^×`
+and is a `2^k`-th power for every `k`.  Halving the 2-torsion point `(0, 0)`
+of `y² = x(x − 1)(x − λ)` needs `−1` and `−λ` to be squares, and `−1` is a
+square because `q³ ≡ 1 (mod 4)`; so a weak curve carries extra rational
+2-power torsion, which shows in the 2-adic valuation of its Frobenius
+discriminant.
+
+**Held-out test, registered now.**  `p = 19`, never examined by any analysis
+in §§17–18, exact census with `4,000` random full-2-torsion curves.
+
+- **V1 (necessity).**  Every exact weak trace has `v₂(D) ≥ 6`, except at most
+  `1 %` attributable to the randomized group order.  *Falsified if* more
+  than `1 %` of the weak traces have `v₂(D) = 5`.
+- **V2 (sufficiency).**  Among the sampled full-2-torsion classes with
+  `v₂(D) ≥ 7`, at least `95 %` are weak; with `v₂(D) = 6`, at least `85 %`.
+  *Falsified if* below either.
+- **V3 (the reach follows).**  The share of sampled full-2-torsion curves
+  with `v₂(D) ≥ 6` matches the census's reach fraction within `0.03`.
+
+R-v2 did not survive as an exact classifier. Its conditional reach estimate
+and proposed replacement for the `2q²+2q` enumeration are therefore
+withdrawn. The p = 19 preregistered test remains an unrun historical plan;
+the larger corrected holdouts and proof establish the current status.

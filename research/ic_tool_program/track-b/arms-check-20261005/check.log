@@ -1,0 +1,47 @@
+== B0 2177afa86ad4135c27805b756430dfae9bca314b start Mon Oct  5 21:40:59 UTC 2026
+built 29f32530b9e975d6
+test result: ok. 202 passed; 0 failed; 4 ignored; 0 measured; 3360 filtered out; finished in 17.66s
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+conformance B0 exit 0 {"passed":8,"cases":8,"failed":[]}
+== B0 done Mon Oct  5 21:51:58 UTC 2026
+== B1 ac74627eb6ceec20cd41f9427da99bfaa6278b81 start Mon Oct  5 21:51:58 UTC 2026
+built 1af0641eff0c09db
+test result: ok. 203 passed; 0 failed; 4 ignored; 0 measured; 3360 filtered out; finished in 17.69s
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+conformance B0,B1 exit 0 {"passed":31,"cases":31,"failed":[]}
+== B1 done Mon Oct  5 22:00:17 UTC 2026
+== B3 ff3b96242c4e1d0ba33c5ea4327edad6a1f20b96 start Mon Oct  5 22:00:17 UTC 2026
+built ee20e521a8ed0921
+test result: ok. 208 passed; 0 failed; 4 ignored; 0 measured; 3363 filtered out; finished in 16.86s
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+conformance B0,B1,B3 exit 0 {"passed":37,"cases":37,"failed":[]}
+== B3 done Mon Oct  5 22:07:18 UTC 2026
+== B2 603c6317045b9c24be4d1595ba320541f42de580 start Mon Oct  5 22:07:18 UTC 2026
+built f895d6c87f8f1f55
+test result: ok. 211 passed; 0 failed; 4 ignored; 0 measured; 3363 filtered out; finished in 17.06s
+test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+conformance B0,B1,B3,B2 exit 0 {"passed":57,"cases":57,"failed":[]}
+== B2 done Mon Oct  5 22:14:39 UTC 2026
+== B2b 1aed30b0377f2ad2286bde8a2e8a7695c6887cbb start Mon Oct  5 22:14:39 UTC 2026
+built bf334f2ef7c3acf1
+test result: ok. 212 passed; 0 failed; 4 ignored; 0 measured; 3363 filtered out; finished in 17.54s
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+conformance B0,B1,B3,B2,B2b exit 0 {"passed":69,"cases":69,"failed":[]}
+== B2b done Mon Oct  5 22:21:35 UTC 2026
+== B7a 570d4e9ae938fdb67d0047677621aa5f55bf8873 start Mon Oct  5 22:21:35 UTC 2026
+built 1bdefe1fb9cbd6cd
+test result: ok. 213 passed; 0 failed; 4 ignored; 0 measured; 3363 filtered out; finished in 17.30s
+test result: ok. 40 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
+conformance B0,B1,B3,B2,B2b,B7a exit 0 {"passed":76,"cases":76,"failed":[]}
+== B7a done Mon Oct  5 22:29:41 UTC 2026
+== B3b 98320f2f66d71246d0e9f8a11c59906a0cdf8878 start Mon Oct  5 22:29:41 UTC 2026
+built f36e6124111ef5fc
+test result: ok. 223 passed; 0 failed; 4 ignored; 0 measured; 3367 filtered out; finished in 17.88s
+test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+conformance B0,B1,B3,B2,B2b,B7a,B3b exit 0 {"passed":83,"cases":83,"failed":[]}
+== B3b done Mon Oct  5 22:39:35 UTC 2026
+== B4 d5761c134f4a6e980660a6e99d4663e7d9e2a7e9 start Mon Oct  5 22:39:35 UTC 2026
+built f87132f9d5e467b9
+conformance B0,B1,B3,B2,B2b,B7a,B3b,B4 exit 0 {"passed":95,"cases":95,"failed":[]}
+== B4 done Mon Oct  5 22:46:33 UTC 2026
+== all done Mon Oct  5 22:46:33 UTC 2026

@@ -35,6 +35,7 @@ def compact_identity(subdir: Path) -> tuple:
     return base, ranks, tuple(identity(target) for target in targets)
 
 
+def verify(cell_id: str, run_dir: Path, mode: str, relocated: bool = False) -> dict:
 def verify(cell_id: str, run_dir: Path, mode: str,
            relocated: bool = False) -> dict:
     config, cell = load_cell(cell_id)
@@ -143,6 +144,11 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--mode", choices=("smoke", "measure"), required=True)
     parser.add_argument("--relocated", action="store_true",
+                        help="replay archived output after moving it to another host")
+    args = parser.parse_args()
+    assert not args.out.exists(), "never overwrite a cold replay receipt"
+    try:
+        receipt = verify(args.cell, args.run_dir.resolve(), args.mode, args.relocated)
                         help="replay an archived run extracted outside its original runner path")
     args = parser.parse_args()
     assert not args.out.exists(), "never overwrite a cold replay receipt"

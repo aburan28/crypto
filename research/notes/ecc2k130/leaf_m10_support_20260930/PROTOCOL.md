@@ -1,6 +1,11 @@
 # Frozen exact physical-support census on the first degree-263 leaves
 
-Status: preregistered before any leaf slot count from this panel. The source
+Status: executed once as Actions run
+[36707051160](https://github.com/aburan28/crypto/actions/runs/36707051160)
+on source head `3813d1879ca03483ac3445ce6d431f0319d25f94`. That run returned
+`PASS_CENSUS`. Do not dispatch this workflow again; the decision is in
+[`RESULT.md`](RESULT.md). The remainder of this file is the preregistration
+written before any leaf slot count. The source
 normal-basis m10 screens count the first slot and carry its physical and
 projected-column counts to the rotated slots using source-curve Frobenius.
 Coordinate squaring takes a fixed descending leaf to its conjugate curve, so

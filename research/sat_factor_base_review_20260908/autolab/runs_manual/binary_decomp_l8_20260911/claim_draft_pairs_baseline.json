@@ -1,0 +1,106 @@
+{
+  "beat_id": "manual.binary.decomposition.l8_pairs_baseline",
+  "claim_boundary": "Public synthetic binary Semaev pairs-and-solve baseline only.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not sub-2^(2l) oracle claim",
+    "not ledger promotion",
+    "FFD unmeasured"
+  ],
+  "created_at": "2026-09-11T06:29:22.718513+00:00",
+  "dimension_l_or_dim": 8,
+  "eq_var_ratio": "inapplicable_pairs_and_solve_no_boolean_system",
+  "evidence_paths": [
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_decomp_l8_20260911/decomp_bench_to_l8.stdout.txt",
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_decomp_l8_20260911/ffd_sweep_demo.stdout.txt",
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_decomp_l8_20260911/ffd_fullfield_summary.json"
+  ],
+  "executable_or_source_hash": {
+    "source": "44ba688031daad14e4d8fdfca5c699877fcdc764dafc4fe2fe26037a38a2b8f8"
+  },
+  "ffd_or_degree_of_regularity": {
+    "reason": "oracle_class=pairs_and_solve enumerates pair space; no Boolean Macaulay/GB system in this arm",
+    "related_full_field_s3": {
+      "applies_to_l8_subspace_beat": false,
+      "created_at": "2026-09-11T06:30:19.267527+00:00",
+      "ffd": {
+        "draws_per_n": 1,
+        "max": 3,
+        "mean": 3.0,
+        "min": 3
+      },
+      "headline": "FFD=3 on all n in 3..7 (D<=4)",
+      "n_range": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "note": "Ledger beat wants subspace/oracle FFD at l=8; this is the related full-field harness only.",
+      "scope": "full_field_binary_S3_weil_descent",
+      "source": "examples/ffd_sweep_demo"
+    },
+    "status": "inapplicable"
+  },
+  "fixture_hash": "44ba688031daad14e4d8fdfca5c699877fcdc764dafc4fe2fe26037a38a2b8f8",
+  "host_id": {
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit"
+  },
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs_manual/binary_decomp_l8_20260911/claim_draft_pairs_baseline.json",
+  "ladder": [
+    {
+      "l": 5,
+      "pairs_s": 0.001,
+      "speedup_vs_triples": 1.6,
+      "triples_gen_s": 0.025
+    },
+    {
+      "l": 6,
+      "pairs_s": 0.003,
+      "speedup_vs_triples": 2.7,
+      "triples_gen_s": 0.181
+    },
+    {
+      "l": 7,
+      "pairs_s": 0.014,
+      "speedup_vs_triples": 5.0,
+      "triples_gen_s": 1.586
+    },
+    {
+      "l": 8,
+      "pairs_s": 0.068,
+      "speedup_vs_triples": 8.9,
+      "triples_gen_s": 14.299
+    }
+  ],
+  "largest_solvable": {
+    "budget": "pairs_baseline",
+    "l": 8,
+    "n": 24,
+    "pairs_solve_s": 0.068
+  },
+  "ledger_gate_assessment": {
+    "ffd_logged": false,
+    "median_le_half_pairs": "n/a_until_faster_oracle_measured",
+    "note": "pairs-and-solve IS Theta(2^(2l)); this measures the baseline, not a sub-2^(2l) win",
+    "sub_2_to_2l_oracle": false,
+    "targets_le_64": true
+  },
+  "m_summands": 3,
+  "median_ms_per_target": 68.0,
+  "n_or_bits": 24,
+  "oracle_class": "pairs_and_solve",
+  "regime": "binary",
+  "resource_caps": {},
+  "schema_version": 2,
+  "seeds": {
+    "decomp_bench_internal": "0x9E3779B9"
+  },
+  "stage": "decomposition",
+  "system_degree": "quartic_s4_symmetrised",
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "unknowns": "2*l_bit_pair_space",
+  "verdict": "L8_PAIRS_BASELINE_PLUS_FULLFIELD_FFD3_NO_SUB_2_2L"
+}

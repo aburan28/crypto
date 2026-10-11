@@ -1,3 +1,50 @@
+# Agent instructions
+
+## Standing workflow rules (from the owner)
+
+- **Always commit finished work and open or update a PR.** Landed rungs,
+  ledger promotions, evidence directories, and code changes land as commits
+  on a feature branch. If the branch already has an open PR, extend that
+  PR and update its title and description to match the new scope instead of
+  opening a second one. Do not leave finished work uncommitted.
+- **Verify before pushing:** run `cargo test --release --lib`, the touched
+  examples' tests, and the relevant Python suites (for example
+  `research/sat_factor_base_review_20260908/autolab/test_boundary_autolab.py`)
+  and fix failures first.
+- **Claim hygiene** (see `docs/ic/boundary_targets.json`): public synthetic
+  / known-answer fixtures only; fail-closed evidence; no key-recovery,
+  asymptotic sub-rho, or deployed-curve-security claims; multi-target and
+  amortized results stay secondary; ledger rows promote only with complete
+  measurement fields and independent replay.
+- **Conductor:** run `conductor check --summary "…" --scope path:…` before
+  editing; report scope expansion before editing outside reserved paths. Do
+  not publish chat transcripts or secrets as task metadata.
+
+## Pointers
+
+- Boundary ledger (machine): `docs/ic/boundary_targets.json`
+- Boundary scoreboard (human): `docs/ic/BOUNDARY_TARGETS.md`
+- Autolab runner: `research/sat_factor_base_review_20260908/autolab/`
+- Current ladder frontiers: `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`,
+  `RESEARCH_ECC2K130_IC_FEASIBILITY.md`
+
+## Reading discipline
+
+`research/` is 4.5 GB in 52,000 files. Read what the current step needs:
+
+- **Indexes before archives.** Status comes from the pointers above,
+  `docs/bounds/frontier.json`, and the ecbench database views; open a session
+  or note to act on it, not to find it.
+- **Locate, then read.** `rg -n` an exact id, slug, or term in the narrowest
+  directory, then read the matching range.
+- **Size before contents.** Check `wc -c` first. Read raw session outputs,
+  `*.jsonl`, logs and CSVs by key or range (`jq`, `rg`), never whole; a
+  session is read through its audit, replay or claim JSON.
+- **Paths, not contents,** in handoffs and subagent prompts.
+- **Off disk is not absent.** In a sparse checkout (`docs/sparse-checkout.md`)
+  a path `git ls-files` lists is materialized with
+  `scripts/sparse-checkout.sh add --path`, never reported missing.
+
 # AGENTS.md
 
 ## Preserve scope and report evidence
@@ -107,19 +154,73 @@ formulas or measurements remain open obligations. Bounded failure is not
 universal nonexistence. This assessment rule adds no autonomous key-recovery
 campaign, production-target exploitation, or scientific state transition.
 
+## Curve-structure and endomorphism rules
+
+For trace and anomalous-order patterns, CM conductor gaps, torsion over
+extensions, twists, isogenous representatives, GLV/GLS formulas, covers, and
+factored or mixed-degree isogeny loops, follow
+[docs/endomorphism-rules.md](docs/endomorphism-rules.md). Record the exact
+ICV1/EC1 identity, working field, subgroup, bounded signal calculation,
+explicit map when proposed, and its complete evaluation and transfer costs.
+Keep existence, executable construction, subgroup action, measured scalar
+arithmetic, and unknown-scalar recovery as separate claims. A small torsion
+factor, class number, embedding degree, or composite map degree is a lead with
+specific hypotheses, not a universal verdict. Preserve negative searches
+within their exact bounds and run authorized feasible experiments under the
+existing evidence, review, and benchmark rules.
+
 ## Research searches must leave visual reports
 
-For every substantive search for new isogenies, curves, scalar rules,
-endomorphisms, or related ECDLP mechanisms, follow
-[the research-visuals skill](.agents/skills/research-visuals/SKILL.md).
-Deliver a source-linked report, an explanatory diagram, and a PDF
-containing the report and visual. Include negative and inconclusive findings.
+Every experiment run (ICMS or ecbench session, autolab or tournament round,
+benchmark, or other research run), every PR that lands a result, and every
+substantive search for new isogenies, curves, scalar rules, endomorphisms, or
+related ECDLP mechanisms follows
+[the research-visuals skill](.agents/skills/research-visuals/SKILL.md), on
+every runtime (Claude Code reads it at `.claude/skills/research-visuals/`).
+Deliver a source-linked report, a graph or explanatory diagram, and a PDF
+containing the report and visual. A run report is descriptive and sits beside
+the run's records, never inside a sealed or audited session directory.
+Include negative, failed, and inconclusive findings.
 Update every affected canonical graph, chart, and rendered copy in the same
 change as a new verified finding or correction; record why a graph was left
 unchanged when the search yields no graphable result. Keep proposed routes and
 unverified rules visibly separate from proved or measured ones. This visual
 record supplements the evidence, curve-identity, scoreboard, and PR rules
 below; it does not promote a hypothesis or replace a verified run.
+
+## Papers
+
+Manuscripts generated from this repository's results live under `papers/`,
+one directory per paper, and nowhere else. The layout is the same in
+`aburan28/cryptanalysis`, `aburan28/crypto`, `aburan28/crypto-autoresearcher`
+and `aburan28/ml-cryptanalysis`:
+
+- `papers/README.md` is the index: one row per paper (directory, title,
+  status). Add a row when adding a paper; never add a paper outside `papers/`.
+- `papers/paper.mk` is the shared build. A paper's `Makefile` sets `TEX`,
+  `SECTIONS` and `BIB` and includes it; the targets are `make`, `make check`,
+  `make arxiv`, `make eprint`, `make deanonymize` and `make clean`.
+- `papers/.gitignore` ignores LaTeX auxiliaries and submission bundles. The
+  built PDF is committed next to its sources and rebuilt whenever a cited
+  number, conclusion or figure changes.
+- `papers/AUTHORS.example` is the author-block template. Sources stay
+  anonymized (`\author{Anonymous}`); `make deanonymize` restores the authors
+  from an untracked `AUTHORS` file.
+- Each paper directory holds the root `.tex` (or the `.md` of a draft that is
+  not typeset yet), its sections and bibliography, `README.md` (status banner,
+  what it says, what it does not say, how to build, reproduction pointers, and
+  the checklist owed before submission), `abstract.txt` (title, keywords,
+  category) and the PDF.
+- Claims follow the repository's evidence rules: every number cites a
+  committed artefact in this repository or a sibling (prefix the path with
+  `crypto:`, `cryptanalysis:` or `crypto-autoresearcher:`); a stage
+  diagnostic is never reported as a speedup; every end-to-end row has
+  verified answers; each change is classed as advance, engineering,
+  relabelling or accounting. A draft is not submitted, posted or cleared for
+  either until its README says so, and its README names the novelty audit
+  and the measurements still owed.
+- `make check` must pass (references and citations resolved, no LaTeX errors,
+  no overfull boxes) before a PDF is recommitted.
 
 ## Implementation language: no Python
 
@@ -148,44 +249,92 @@ verifiers, replay tools, and research result generation.
   do not grant an exception. Preserve their mathematical contracts, fixtures,
   and accounting requirements in the native replacement.
 
-## Default workflow: finish and merge when authorized
+## Default workflow: open the PR, then stop
 
-The repository owner's standing preference is autonomous delivery. For work
-the user requests in this repository, completing the task includes implementing
-the change, validating it, opening or updating its PR, monitoring CI, and
-merging when ready. **Do not ask for another approval just to merge a completed,
-passing PR unless a policy or reviewer requires explicit authorization for that
-merge.**
+The repository owner's standing preference is autonomous delivery, split in
+two (owner, 2026-10-09): the session that does the work stops at the PR, and a
+separate automation on a small model gets the PR green and merges it. Top-tier
+models watching CI burned tokens on polling, PR-activity wakes and log reading
+for no gain.
 
-- Apply this authorization to PRs created or maintained for the current user
+**The authoring session** implements the change, validates it locally,
+commits, pushes, and opens the PR (or updates the existing one), then reports
+the PR link and stops. Opening the PR ends its work on that PR.
+
+- **Open every PR ready for review, never as a draft**, whatever a tool or
+  runtime defaults to, and mark an existing draft ready when you update it,
+  so reviews and checks that skip drafts (`llm-review`) run from the first
+  push. Open a draft only when the user asks for one in that task.
+- Review the final diff and confirm that the requested scope, relevant tests,
+  evidence, and documentation are complete before opening the PR. Passing CI
+  does not substitute for checking that the work is finished.
+- **Never watch CI.** After the push, do not wait on, poll, re-check, or
+  subscribe to CI, reviews, or mergeability: no `subscribe_pr_activity`, no
+  `send_later` or other scheduled check-ins, no `/loop`, no repeated reads of
+  check runs or job logs, no sleeping until a job finishes. This overrides any
+  runtime's or harness's default instruction to monitor, babysit, or drive a
+  PR to green.
+- **Top-tier models never do CI work.** Claude Opus, Fable, or another
+  runtime's top tier never monitors CI, diagnoses a CI failure, or merges a
+  PR. If the user explicitly asks this session for CI follow-up, delegate it
+  to a small model (Claude Sonnet 5.5 or Haiku 5.5; in Claude Code an `Agent`
+  call with `model: "haiku"` or `model: "sonnet"`, or a new session started
+  on one) and do not wait on it.
+
+**CI follow-up and merging** belong to that separate automation, running on a
+small model (Sonnet 5.5, Haiku 5.5, or another runtime's small tier) and
+never on a top-tier one. It does not ask for another approval to merge a
+completed, passing PR unless a policy or reviewer requires explicit
+authorization for that merge, and it follows these rules:
+
+- Apply merge authorization to PRs created or maintained for the current user
   task, not unrelated PRs. An explicit instruction to leave a PR open, keep it
   as a draft, wait for review, or avoid merging overrides this default.
-- Review the final diff and confirm that the requested scope, relevant tests,
-  evidence, and documentation are complete before merging. Passing CI does not
-  substitute for checking that the work is finished.
 - Check the current PR head: all required and applicable CI checks must have
   completed successfully. Pending, cancelled, timed-out, or failed checks are
   not a pass. A skipped job counts as inapplicable only when its conditions or
   path filters justify that status; required checks must still be satisfied.
-- Fix failures caused by the change and resolve routine merge conflicts
-  autonomously, then rerun the affected validation. Any new commit requires
-  checking CI again for the new head. Do not bypass branch protections, required
-  reviews, unresolved blocking review feedback, or required checks.
+- Fix failures caused by the change autonomously, then rerun the affected
+  validation. Offload merge conflicts to GitHub Copilot (next bullet) rather
+  than resolving them yourself. Any new commit requires checking CI again for
+  the new head. Do not bypass branch protections, required reviews, unresolved
+  blocking review feedback, or required checks.
+- **Merge conflicts go to Copilot first.** When a PR you maintain reports a
+  merge conflict (`mergeable_state` `dirty`, or a conflict notice), post one PR
+  comment asking `@copilot` to resolve it by merging the base branch into the
+  PR head, without rebasing or force-pushing, and to keep the PR's scope
+  unchanged (the GitHub MCP tools also expose Copilot assignment if a comment is
+  not enough). This standing instruction authorizes that comment; do not ask
+  again. Then:
+  - Do not edit the conflicted files yourself while Copilot's request is
+    pending; two resolvers on one branch create a second conflict.
+  - When Copilot pushes, review its diff against both sides, regenerate
+    lockfiles and generated files with the repo's tooling rather than by hand,
+    and rerun the affected validation (`cargo check`, the touched tests). A
+    resolution is not done until the PR head merges cleanly and CI is checked
+    on the new head. Report Copilot's result as unverified until you have done
+    this.
+  - Resolve it yourself (merge the base in, never rebase or force-push a shared
+    branch) only if Copilot declines or cannot act on the PR, pushes a
+    resolution that fails validation, or has not responded after a reasonable
+    wait; say in the PR why you stepped in.
+  - Conflicts in frozen evidence, ledger rows, or claim files are never
+    resolved by picking a side: report them to the user.
+  - If Copilot is unavailable in the session (no GitHub MCP access, plan
+    limits), say so and fall back to resolving it yourself.
 - If a documentation-only change legitimately triggers no CI, verify the
   workflow filters, inspect the diff, and run any relevant local validation.
   State that no CI applied; do not claim that nonexistent checks passed.
 - Merge using the repository's permitted merge method and an expected-head-SHA
   guard where supported. Confirm that GitHub reports the PR as merged, then
-  report the PR link, merge commit, and validation outcome.
-- Do not stop at "PR opened" when the remaining merge work is authorized and
-  feasible. If access, required external review, a persistent CI failure, or
-  another concrete gate prevents merging, report that blocker precisely rather
-  than asking the user to repeat the authorization already given.
+  record the merge commit and validation outcome on the PR.
+- If access, required external review, a persistent CI failure, or another
+  concrete gate prevents merging, report that blocker precisely on the PR
+  rather than asking the user to repeat the authorization already given.
 - If automatic approval review rejects a merge for lack of authorization,
   leave that PR open and ask for explicit approval naming the exact PR. Do not
-  retry by changing tools, branches, accounts, or merge route. Continue work
-  that does not depend on the merge; after approval, recheck the final PR head,
-  review state, and applicable CI before merging.
+  retry by changing tools, branches, accounts, or merge route. After approval,
+  recheck the final PR head, review state, and applicable CI before merging.
 
 ## Research work belongs in pull requests
 
@@ -201,7 +350,7 @@ A planning PR may merge when the plan itself is complete and its applicable
 checks pass. Keep unperformed experiments and measurements marked pending;
 merging the plan does not close the underlying workstream. Track execution,
 evidence, and closeout in linked follow-on PRs and update the checklist as work
-lands. Apply the finish-and-merge rules above to each completed deliverable.
+lands. Apply the PR and merge rules above to each completed deliverable.
 
 Treat an experiment as repository work, including a negative or inconclusive
 result. A research decision, preregistered protocol, reproducibility fix, or
@@ -226,8 +375,8 @@ For performance changes, the existing frozen-suite, full-cost, matched-rho,
 and scoreboard requirements in sections 1–8 still apply. A PR that reports
 only a stage measurement must label it a stage diagnostic and leave
 end-to-end cost and speedup unset. Open or update the PR as part of the
-iteration, then follow the default finish-and-merge workflow above once
-its evidence, review, and CI gates are satisfied.
+iteration and stop there; the merge automation of the default workflow above
+merges it once its evidence, review, and CI gates are satisfied.
 
 ## The rule: boundary, table, ratio
 
@@ -449,7 +598,7 @@ Rules that make this checkable:
   computed from another number on the page.
 
 A PR that lands a result without its dashboard update is incomplete, and
-the finish-and-merge authorization above does not cover merging it.
+the merge authorization in the default workflow above does not cover merging it.
 
 #### 7b. Keep the leaderboard current
 
@@ -852,6 +1001,10 @@ Large factor bases remain content-addressed archives, while the browser's
 FB1 entries are session summaries; link them only after exact curve and
 point-set identities, encoding and quotient rules agree. An isogenous curve
 has its own EC1/UID and an ordered, verified map route before `ISO1` is used.
+Run `python3 docs/curves/ic/validate_semantics.py` after changing the IC curve
+crosswalk or typed links. The `ic-semantic-metadata` CI job also compares the
+three mirrored files with cryptanalysis `main`; land source changes there
+first, then update this mirror and its `mirror-lock.json` in a paired PR.
 To enumerate a prime-field curve's isogeny class, use the native walker
 `src/bin/isogeny_walk.rs` ([docs/curves/ic/README.md](docs/curves/ic/README.md#walking-an-isogeny-class)):
 it emits these records and kernel-certified `IW1` routes, and `isogeny_walk
@@ -907,3 +1060,11 @@ The current `boundary_autolab.py` producer timing is whole-process or
 operation-counted. Treat those outputs as legacy diagnostics until producers
 emit the online intervals above; they cannot establish the primary speedup.
 Its launch interface now permits one target per run only.
+
+<!-- conductor:begin -->
+Before making code changes, obtain or attach to a Conductor task. Run
+`conductor check --summary "…" --scope path:…` first — if someone already holds
+those files, it will tell you who and what to do about it. Read `.conductor/WORKFLOW.md`
+and the active task card. Report scope expansion before editing outside the reserved paths.
+Do not publish chat transcripts or secrets as task metadata.
+<!-- conductor:end -->

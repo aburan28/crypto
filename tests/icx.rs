@@ -79,6 +79,46 @@ fn estimate_labels_koblitz_as_ic_relevant() {
     assert_eq!(v["family"], "koblitz");
 }
 
+/// Every binary-field estimate carries the per-`ω` heuristic table with each
+/// bound's characteristic-2 standing; no other field does.
+#[test]
+fn estimate_prices_the_binary_heuristic_at_every_omega_bound() {
+    assert!(run_json(&["estimate", "p256"])["heuristic_index_calculus"].is_null());
+    let list = run_json(&["list"]);
+    let binary: Vec<String> = list["curves"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|c| c["field"].as_str().is_some_and(|f| f.starts_with("F_2^")))
+        .map(|c| c["name"].as_str().unwrap().to_string())
+        .collect();
+    assert!(!binary.is_empty());
+    for name in &binary {
+        let h = &run_json(&["estimate", name])["heuristic_index_calculus"];
+        assert_eq!(h["kind"], "model", "{name}");
+        let rows = h["rows"].as_array().unwrap();
+        let standing: Vec<&str> = rows
+            .iter()
+            .map(|r| r["characteristic_2"].as_str().unwrap())
+            .collect();
+        assert_eq!(
+            standing,
+            [
+                "established",
+                "established",
+                "established",
+                "undetermined",
+                "conditional"
+            ],
+            "{name}"
+        );
+        let nine_fourths = &rows[4];
+        assert_eq!(nine_fourths["omega"], 2.25);
+        assert_eq!(nine_fourths["construction"], "existence-only");
+        assert_eq!(nine_fourths["turning_point_n"], 227);
+    }
+}
+
 #[test]
 fn aliases_resolve() {
     // NIST/SEC aliases must map to the canonical curve.

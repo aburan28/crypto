@@ -123,6 +123,7 @@ pub mod crossbred;
 pub mod curve_catalog;
 pub mod curve_construction;
 pub mod curve_id;
+pub mod curve_traits;
 pub mod degree_reduction;
 pub mod degree_reduction_anf;
 pub mod descent_algebraic;
@@ -153,6 +154,7 @@ pub mod f4_fp_tower;
 pub mod f6_wide_geometry;
 pub mod fes_gpu;
 pub mod ffd_harness;
+pub mod fghr_full;
 pub mod fghr_line;
 pub mod fght_snfs;
 pub(crate) mod fx_hash;
@@ -168,6 +170,7 @@ pub mod gls_fp2;
 pub mod glv_gaudry;
 pub mod glv_invariant_base;
 pub mod glv_invariant_experiments;
+pub mod groebner_cache;
 pub mod groebner_f4;
 pub mod hash_attacks;
 pub mod hilbert_class_poly;
@@ -183,9 +186,11 @@ pub mod ic_measurement;
 pub mod ic_oracle_pricing;
 pub mod ic_progress;
 pub mod ic_run;
+pub mod identity_certificate;
 pub mod inherited_f4;
 pub mod invalid_curve_attack;
 pub mod isogeny_class_search;
+pub mod jacobian_transfer;
 pub mod isogeny_degree_search;
 pub mod isogeny_walk;
 pub mod j0_twists;
@@ -209,11 +214,13 @@ pub mod koblitz_sparse_la;
 pub mod koblitz_strong_rho;
 pub mod koblitz_symmetrised;
 pub mod koblitz_wide;
+pub mod large_prime_filter;
 pub mod lattice;
 pub mod legacy_curve_attacks;
 pub mod line_oracle;
 pub mod line_s4_oracle;
 pub mod lopsided_thin_product;
+pub mod matmul_exponent;
 pub mod matrix_f5_f2;
 pub mod mazur_tate_sigma;
 pub mod md5_chosen_prefix;
@@ -239,6 +246,7 @@ pub mod p192_interval_bsgs;
 pub mod p192_native;
 pub mod p192_singular_recovery;
 pub mod p256_attacks;
+pub mod p256_backdoor_map;
 pub mod p256_bitbox_factor_base;
 pub mod p256_dickson_factor_base;
 pub mod p256_isogeny_campaign;
@@ -264,14 +272,18 @@ pub mod pq_xl;
 pub mod prepared_control_archive;
 pub mod prepared_sat_control;
 pub mod preprocessing_rho;
+pub mod prime_fast;
 pub mod prime_field_smt;
 pub mod q_curve;
 pub mod quantum_estimator;
+pub mod quartic_folds;
 pub mod quasi_subfield;
+pub mod recursive_descent;
 pub mod research_bench;
 pub mod residual_walk;
 pub mod sat;
 pub mod sbox;
+pub mod sect113r1_audit;
 pub mod semaev_corpus;
 pub mod semaev_decomp;
 pub mod semaev_higher;
@@ -282,6 +294,7 @@ pub mod shor;
 pub mod sig_fp_tower;
 pub mod signal_ratchet;
 pub mod signature_corpus;
+pub mod smt_oracle;
 pub mod solinas_correlations;
 pub mod sparse_macaulay;
 pub mod statistical;
@@ -376,9 +389,10 @@ pub use koblitz_index_calculus::{
     SatDecompositionStats, MAX_SUBFIELD_DEGREE, PRECOMPUTE_BATCH_TRIALS,
 };
 pub use koblitz_sparse_la::{
-    block_wiedemann_kernel, filter_relations, solve_sparse_system, BlockWiedemannOptions,
-    BlockWiedemannReport, CsrMatrix, FilterOptions, FilterReport, FilteredSystem, SparseRow,
-    SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
+    block_lanczos_solve, block_wiedemann_kernel, filter_relations, solve_sparse_system,
+    BlockLanczosOptions, BlockLanczosReport, BlockWiedemannOptions, BlockWiedemannReport,
+    CsrMatrix, FilterOptions, FilterReport, FilteredSystem, SparseCoreSolver, SparseRow,
+    SparseSolveOptions, SparseSolveOutcome, SparseSolveReport, SpmvBackend, SpmvOptions,
 };
 pub use lattice::{bkz_reduce, lll_reduce};
 pub use legacy_curve_attacks::{

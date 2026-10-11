@@ -1,0 +1,68 @@
+{
+  "base_hash": "e2c0276a010a4787cdd617043ad9833a528c919e9e3882b7de377a0e9e4f7015",
+  "base_hash_matches_full_run": true,
+  "beat_id": "manual.koblitz.factor_base.n53_construction_only",
+  "claim_boundary": "Public synthetic Koblitz factor-base construction-only measure at n=53 (KIC_EXACT_COVERAGE_ONLY=1).",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not asymptotic sub-rho",
+    "not imported-point attack",
+    "not ledger promotion until independent validation"
+  ],
+  "construction_method": "point_defined_signed_quotient_eta_1_16_exact_coverage_only",
+  "construction_rss_bytes": 666206208,
+  "construction_wall_ms": 9051.072791999999,
+  "dimension_l_or_dim": 188,
+  "eta": {
+    "denominator": 16,
+    "numerator": 1
+  },
+  "evidence_paths": [
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/n53_factor_base_construction_only_20260911/direct.stdout.json",
+    "research/sat_factor_base_review_20260908/autolab/runs_manual/n53_factor_base_construction_only_20260911/time.stderr"
+  ],
+  "executable_or_source_hash": {
+    "executable_sha256": "e657b54d59bf72f818e6609d4636a722069886f67f49344126d466750ec688d3",
+    "git_head": "c8755bd73f8e28125f5b94d3bb35bb168f6b0cb9",
+    "source_sha256": "cf9ab2f62ab2a4fb8e488f73fcd19c8f1f527c6ec4b1b2758d75fec68b64a1cb"
+  },
+  "factor_base_size_F": 19928,
+  "fixture_hash": "e2c0276a010a4787cdd617043ad9833a528c919e9e3882b7de377a0e9e4f7015",
+  "frobenius_closed": true,
+  "host_id": "Adams-MacBook-Pro.local",
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs_manual/n53_factor_base_construction_only_20260911/claim_draft.json",
+  "materialized": true,
+  "n": 53,
+  "n_or_bits": 53,
+  "negation_closed": true,
+  "orbit_count_K": 188,
+  "pair_index_mode": "signed_quotient",
+  "producer_timings_ms": {
+    "base_construction_ms": 37.423167,
+    "compare_to_full_run_rss": 667598848,
+    "compare_to_full_run_setup_ms": 10305.44525,
+    "curve_setup_ms": 454.2425,
+    "independent_base_validation_ms": 444.994,
+    "rank_status": "RANK_PLUS_32",
+    "support_index_ms": 9011.570333,
+    "total_setup_ms": 9051.072791999999,
+    "whole_process_wall_ms_time_l": 1157500.0
+  },
+  "regime": "koblitz",
+  "resource_caps": {
+    "common_cap_bytes": 17179869184,
+    "observed_peak_rss_bytes": 666206208,
+    "under_cap": true
+  },
+  "retained_bytes": 89887680,
+  "schema_version": 2,
+  "seeds": {
+    "fixture_seed": 1
+  },
+  "stage": "factor_base",
+  "subgroup_membership_verified": true,
+  "support_table_allocated_bytes": 100663296,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "verdict": "N53_FACTOR_BASE_CONSTRUCTION_ONLY_UNDER_CAP",
+  "whole_process_wall_ms": 1157500.0
+}

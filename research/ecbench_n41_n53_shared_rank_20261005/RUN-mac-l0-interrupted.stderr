@@ -1,0 +1,4 @@
+   1/768 rho-strong     icv1-f2m41-tm2308219-7f48b14a W15dcf1a74cb8  verified S=0.081 L0
+   2/768 ic-k8          icv1-f2m41-tm2308219-7f48b14a W15dcf1a74cb8   crashed S=- L0
+ecbench: interrupted by signal 15
+./.local-bin/ecbench run --spec $D/SPEC.json --out $D/sessions/mac-l0 --cpus   21.61s user 1.05s system 85% cpu 26.544 total

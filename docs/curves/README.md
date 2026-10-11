@@ -1,5 +1,19 @@
 # Curves
 
+The [weak-curve family catalogue](weak-families/README.md) organizes 21
+published or verified families and structural conditions, with their recognition
+rules, construction domains and evidence. Its [searchable browser](weak-families/index.html)
+indexes 814 exact models and the complete 294-class ordinary p7 oracle.
+Model membership, class support, subgroup compatibility and measured cost
+have separate labels; [canonical JSON](weak-families/catalog.json) retains
+the source attribution and completeness boundary for each family.
+
+The [certified property browser](weak-families/properties.html) adds independently
+checked torsion, Frobenius conductor depth, exact or bounded ordinary 2-volcano
+levels, and three fields of definition for those 814 models. Its
+[property sidecar](weak-families/properties.json) retains the original family
+labels and records the arithmetic witnesses and selected-subgroup unknowns.
+
 [CM Jacobian certificates](JACOBIAN_CERTIFICATES.md) check principal
 polarizations on elliptic squares using exact Hermitian arithmetic and all
 ideal classes. The [versioned JSON](jacobian-certificates.json) and
@@ -12,6 +26,15 @@ same-field cover certificates to each supported catalog model in
 [`covers.json`](covers.json). Each curve page in the lab browser displays
 the verified genus, map degree and field assumptions. Descent and DLP
 advantage remain unmeasured.
+
+[Jacobian transfer discovery](JACOBIAN_TRANSFERS.md) enumerates, for every
+registered curve, the known routes into a Jacobian (GHS descent per field
+factorisation, its isogeny extension, same-field covers, extension-field
+decomposition and cover descent), computes what is exact about each and
+prices the rest with one frozen formula cost model against Pollard rho, in
+[`jacobian-transfers.json`](jacobian-transfers.json). Rows are formulas and
+leads; `jacobian_transfers check` fails CI when a registered curve is
+unscreened.
 
 The [hyperelliptic infrastructure guide](HYPERELLIPTIC_INFRASTRUCTURE.md)
 documents the standalone construction, verification, arithmetic, and catalog
@@ -44,6 +67,8 @@ registry equals the one a thread's `curve_ids.json` carries; the builder fails i
 | [`registry.json`](registry.json) | every curve named anywhere in the repository: slug, ICV1, parameters, every legacy spelling that denotes it, and its EC1 representations |
 | [`sources/specs.txt`](sources/specs.txt) | the constructor calls whose curves no tracked record states in full |
 | [`sources/generated.json`](sources/generated.json) | those curves rebuilt: model, subgroup, generator, legacy handle, ICV1 computed in Rust |
+| [`TRAITS.md`](TRAITS.md) | size-independent traits of every registered curve (CM field, conductor, subfield of definition, volcano depths, cofactors, embedding degree) and how to group curves or find similar ones with `curve_traits` |
+| [`traits.json`](traits.json) | those traits, one record per registry curve, each value with its status; built by `cargo run --release --bin curve_traits -- build` |
 
 ## Two identities, and which to use
 

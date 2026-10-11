@@ -1,0 +1,9 @@
+{"group":"genus2","algo":"richelot_codomain","field":"Zp61","median_ns":654,"min_ns":620,"reps":10000,"verified":true,"note":"Delta, H1 H2 H3 from G1 G2 G3"}
+{"group":"genus2","algo":"richelot_codomain","field":"FpM4_P256","median_ns":3785,"min_ns":3649,"reps":10000,"verified":true,"note":""}
+{"group":"genus2","algo":"richelot_codomain","field":"Zp1009","median_ns":655,"min_ns":623,"reps":10000,"verified":true,"note":"L-polynomial of codomain equal (naive point counts over F_p, F_p^2)"}
+{"group":"genus2","algo":"richelot_point_image","field":"Zp1009","median_ns":3328,"min_ns":3278,"reps":10000,"verified":true,"note":"two points over F_p^2 (quadratic in x')"}
+{"group":"genus2","algo":"glue_e1xe2","field":"Zp1009","median_ns":408,"min_ns":399,"reps":10000,"verified":true,"note":"L(C) = L(E1) L(E2) checked"}
+{"group":"genus2","algo":"superspecial_richelot_graph_bfs","p":"43","ns":69350143,"jacobians":45,"products":10,"edges":820,"verified":true,"note":"vertices by Igusa-Clebsch invariants; counts = Ibukiyama-Katsura-Oort and h(h+1)/2"}
+{"group":"genus2","algo":"superspecial_richelot_graph_bfs","p":"83","ns":387930868,"jacobians":260,"products":36,"edges":4419,"verified":true,"note":"vertices by Igusa-Clebsch invariants; counts = Ibukiyama-Katsura-Oort and h(h+1)/2"}
+{"group":"genus2","algo":"superspecial_richelot_graph_bfs","p":"131","ns":1304527896,"jacobians":930,"products":78,"edges":15099,"verified":true,"note":"vertices by Igusa-Clebsch invariants; counts = Ibukiyama-Katsura-Oort and h(h+1)/2"}
+{"group":"genus2","algo":"superspecial_richelot_graph_bfs","p":"199","ns":4789665351,"jacobians":3077,"products":153,"edges":48412,"verified":true,"note":"vertices by Igusa-Clebsch invariants; counts = Ibukiyama-Katsura-Oort and h(h+1)/2"}

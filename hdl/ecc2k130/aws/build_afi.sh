@@ -15,6 +15,10 @@
 #   ./build_afi.sh list                 every build in the bucket
 #
 # Geometry of the image, all optional:
+#   NENG       walker engines (default 48; about 8.4k LUTs, 12 RAMB36 +
+#              2 RAMB18 and 4 URAM288 each; the VU47P has 1.30M LUTs,
+#              2 016 RAMB36 and 960 URAM288: 112 is 73% of the LUTs, 128 is
+#              83%; 48, 64 and 80 have run on a device)
 #   NENG       walker engines (default 48; about 6.9k LUTs, 12 RAMB36,
 #              4 URAM288 and 66 DSPs each; the VU47P has 1.30M LUTs,
 #              2 016 RAMB36 and 960 URAM288, and the CL's region 1 788 of
@@ -35,6 +39,9 @@
 #              no point; above what the routed design closes, the image is
 #              flagged timing violated and its reports fail verification.
 #   DSP_LEAVES multiplier leaves in DSP48E2 blocks, 0..27 (default: the
+#              source's gf131_pkg.MUL_DSP_LEAVES, 11 = 66 DSPs and ~750 LUTs
+#              fewer per engine; the device has 9 024 DSPs, so 128 engines
+#              take 11 and 136 take 10)
 #              source's gf131_pkg.MUL_DSP_LEAVES, 11 = 66 DSPs and ~790 LUTs
 #              fewer per engine).  The CL's region holds 7 992 of the
 #              device's 9 024 DSPs (the shell has the rest), so 6 DSPs per
@@ -57,6 +64,7 @@
 #   fpga/builds/TAG/build.log             the instance's log, refreshed every 5 min
 #   fpga/builds/TAG/TAG.Developer_CL.tar  the DCP tarball create-fpga-image ingests
 #   fpga/builds/TAG/reports/              utilisation and timing
+#   fpga/builds/TAG/afi.json              ids and geometry once submitted
 #   fpga/builds/TAG/build.json            geometry and timing once the tarball is up
 #   fpga/builds/TAG/afi.json              the same plus the image ids once submitted
 #   fpga/afi.json                         the promoted image
@@ -126,6 +134,8 @@ launch)
     # token of the calling user in its user data instead.  That is the
     # caller's own permissions on the caller's own instance for the length
     # of one build, and it is what a role would have given it, scoped wider;
+    # the role is preferred whenever it can be made.
+    ensureRole() {
     # the role is preferred when it already exists or can be made.
     ensureRole() {
         # An existing profile is enough: SSO/assumed-role callers can attach
@@ -145,6 +155,16 @@ launch)
           ]
         }" || return 1
         aws iam attach-role-policy --role-name "$ROLE" --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore || return 1
+        if ! aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1; then
+            aws iam create-instance-profile --instance-profile-name "$PROFILE" >/dev/null || return 1
+            aws iam add-role-to-instance-profile --instance-profile-name "$PROFILE" --role-name "$ROLE" || return 1
+            echo "created instance profile $PROFILE; waiting for IAM to propagate"
+            sleep 15
+        fi
+    }
+    profileOpt=()
+    credLine=""
+    if [ "${NO_ROLE:-0}" != 1 ] && ensureRole 2>/dev/null; then
         aws iam create-instance-profile --instance-profile-name "$PROFILE" >/dev/null || return 1
         aws iam add-role-to-instance-profile --instance-profile-name "$PROFILE" --role-name "$ROLE" || return 1
         echo "created instance profile $PROFILE; waiting for IAM to propagate"
@@ -204,6 +224,7 @@ launch)
           --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$STACK-fpga-build-$TAG},{Key=Project,Value=$STACK},{Key=BuildTag,Value=$TAG}]" \
           --query 'Instances[0].InstanceId' --output text)
     rm -f "$ud"
+    echo "build $TAG: instance $IID ($BUILD_TYPE), $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, engine clock $CLK_MHZ MHz (MMCM $MMCM_MULT / $MMCM_DIV)"
     echo "build $TAG: instance $IID ($BUILD_TYPE), $NENG engines x $((1 << ID_W)) walks, dp weight $DP_WEIGHT, engine clock $CLK_MHZ MHz (MMCM $MMCM_MULT / $MMCM_DIV)${LOG_W:+, LOG_W=$LOG_W}${LOG_NB:+, LOG_NB=$LOG_NB}${DSP_LEAVES:+, DSP_LEAVES=$DSP_LEAVES}"
     echo "follow with: ./build_afi.sh status $TAG   (the instance terminates itself when done)"
     ;;
@@ -299,6 +320,8 @@ promote)
 
 list)
     for t in $(aws s3 ls "s3://$BUCKET/fpga/builds/" | awk '{print $2}' | tr -d /); do
+        if aws s3 cp "s3://$BUCKET/fpga/builds/$t/afi.json" - 2>/dev/null \
+            | python3 -c 'import json,sys; d=json.load(sys.stdin); print("%-28s %s  %3d eng x %4d walks  w<=%d" % (d["tag"], d["agfi"], d["neng"], 1 << d["idW"], d["dpWeight"]))'; then :
         if j=$(aws s3 cp "s3://$BUCKET/fpga/builds/$t/afi.json" - 2>/dev/null) && [ -n "$j" ]; then
             python3 -c 'import json,sys; d=json.loads(sys.argv[1]); print("%-28s %s  %3d eng x %4d walks  w<=%d  %s %s" % (d["tag"], d["agfi"], d["neng"], 1 << d["idW"], d["dpWeight"], d.get("clkMhz", ""), d.get("timing", "")))' "$j"
         else

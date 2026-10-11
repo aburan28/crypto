@@ -59,7 +59,7 @@ fn paired(d: &Path, rows: &[Row], measure: Measure, half_width: bool) -> Result<
 }
 
 /// The same for any two arms, the first over the second.
-fn paired_of(
+pub(crate) fn paired_of(
     d: &Path,
     rows: &[Row],
     arms: (&str, &str),
@@ -148,12 +148,12 @@ fn unit_v0(c: &Ctx) -> Result<HashMap<String, f64>, String> {
     Ok(out)
 }
 
-fn round3(x: f64) -> f64 {
+pub(crate) fn round3(x: f64) -> f64 {
     format!("{x:.3}").parse().expect("a formatted float parses")
 }
 
 /// The A/A band's keys, and whether the row regresses beyond it.
-fn aa_fields(kv: &mut Vec<(String, J)>, band: Option<&J>) -> Result<(), String> {
+pub(crate) fn aa_fields(kv: &mut Vec<(String, J)>, band: Option<&J>) -> Result<(), String> {
     let Some(band) = band.filter(|b| b.truthy()) else {
         return Ok(());
     };
@@ -177,7 +177,7 @@ fn aa_fields(kv: &mut Vec<(String, J)>, band: Option<&J>) -> Result<(), String> 
     Ok(())
 }
 
-fn size_head(slug: &str, a: u8, n: u32, rs: &[Row]) -> Vec<(String, J)> {
+pub(crate) fn size_head(slug: &str, a: u8, n: u32, rs: &[Row]) -> Vec<(String, J)> {
     vec![
         ("slug".into(), J::Str(slug.into())),
         ("a".into(), J::Int(a.into())),
@@ -216,7 +216,7 @@ fn aa_reasons(suite: &J, reasons: &mut Vec<J>) {
     }
 }
 
-fn pin_summary(pin: &Option<J>) -> Result<J, String> {
+pub(crate) fn pin_summary(pin: &Option<J>) -> Result<J, String> {
     Ok(match pin {
         Some(p) => obj([
             ("held", p.at("held")?.clone()),
@@ -245,7 +245,7 @@ fn accounting(c: &Ctx, steps: &[&str]) -> Result<J, String> {
     Ok(J::Obj(kv))
 }
 
-fn opt(v: Option<J>) -> J {
+pub(crate) fn opt(v: Option<J>) -> J {
     v.unwrap_or(J::Null)
 }
 
@@ -392,6 +392,76 @@ pub struct Spec {
     pub accept: Accept,
     /// The note `manifest-resumed` writes into `host-resumed.json`.
     pub resumed_note: &'static str,
+    /// The CPU features of the round's hardware class, by the names
+    /// `is_x86_feature_detected!` takes: the ones its arms' kernels detect.
+    /// `icprog run` refuses every timed step on a host without one of them,
+    /// so a container that moves to another class cannot measure the round
+    /// there.  The plan and the pin, which time nothing, run anywhere.
+    pub requires: &'static [&'static str],
+}
+
+/// The programme's reference class (IC_TOOL_PROGRAM.md §5): x86-64 with
+/// AVX-512, PCLMULQDQ, VPCLMULQDQ and GFNI.  Its rounds ran there.
+pub const REFERENCE_CLASS: &[&str] = &["avx512f", "pclmulqdq", "vpclmulqdq", "gfni"];
+
+/// Every feature name a round may require.
+const KNOWN_FEATURES: &[&str] = &[
+    "avx2",
+    "avx512f",
+    "avx512bw",
+    "avx512vbmi",
+    "avx512vbmi2",
+    "gfni",
+    "pclmulqdq",
+    "vpclmulqdq",
+];
+
+/// Whether this host has `feature`, by the runtime detection the `ic`
+/// binaries' kernels use.  A name outside [`KNOWN_FEATURES`] is an error,
+/// so a misspelt requirement cannot pass unchecked.
+pub fn host_has(feature: &str) -> Result<bool, String> {
+    if !KNOWN_FEATURES.contains(&feature) {
+        return Err(format!(
+            "unknown CPU feature `{feature}` in a round's class"
+        ));
+    }
+    #[cfg(target_arch = "x86_64")]
+    {
+        Ok(match feature {
+            "avx2" => is_x86_feature_detected!("avx2"),
+            "avx512f" => is_x86_feature_detected!("avx512f"),
+            "avx512bw" => is_x86_feature_detected!("avx512bw"),
+            "avx512vbmi" => is_x86_feature_detected!("avx512vbmi"),
+            "avx512vbmi2" => is_x86_feature_detected!("avx512vbmi2"),
+            "gfni" => is_x86_feature_detected!("gfni"),
+            "pclmulqdq" => is_x86_feature_detected!("pclmulqdq"),
+            "vpclmulqdq" => is_x86_feature_detected!("vpclmulqdq"),
+            _ => unreachable!("checked against KNOWN_FEATURES"),
+        })
+    }
+    #[cfg(not(target_arch = "x86_64"))]
+    {
+        Ok(false)
+    }
+}
+
+/// The requirements of a round's class this host fails, in the class's
+/// order.  A name is a feature the host must have; `!name` one it must
+/// not, for a class defined by an absence (R09's: the hosts on which the
+/// scan's subtraction is the scalar product, which VPCLMULQDQ would
+/// replace).
+pub fn missing_features(requires: &[&'static str]) -> Result<Vec<&'static str>, String> {
+    let mut missing = Vec::new();
+    for &f in requires {
+        let met = match f.strip_prefix('!') {
+            Some(absent) => !host_has(absent)?,
+            None => host_has(f)?,
+        };
+        if !met {
+            missing.push(f);
+        }
+    }
+    Ok(missing)
 }
 
 /// What a round's target sizes must show to be accepted, beyond the pin
@@ -730,10 +800,43 @@ pub mod speed {
             ("holdouts".into(), holdouts),
         ]);
         if let Some(cg) = control {
-            doc.push(("callgrind".into(), cg));
+            doc.push(("callgrind".into(), callgrind_for_role(cg, s.callgrind_role)));
         }
         doc.push(("decision".into(), decision));
         Ok(J::Obj(doc))
+    }
+
+    /// The callgrind block as the round's role reads it.  A control keeps
+    /// [`callgrind::control`]'s verdict and rule.  A cross-check (plan
+    /// §5) decides one thing, the same logarithm from both arms, so its
+    /// block says that and nothing about a control it is not.
+    fn callgrind_for_role(cg: J, role: CallgrindRole) -> J {
+        match role {
+            CallgrindRole::Control => cg,
+            CallgrindRole::CrossCheck => {
+                let pairs = cg.get("pairs").cloned().unwrap_or(J::Obj(Vec::new()));
+                let held = pairs.as_obj().is_some_and(|ps| {
+                    !ps.is_empty()
+                        && ps
+                            .iter()
+                            .all(|(_, p)| p.get("same_log").is_some_and(J::truthy))
+                });
+                obj([
+                    ("pairs", pairs),
+                    ("role", J::Str("cross-check".into())),
+                    ("cross_check_held", J::Bool(held)),
+                    (
+                        "rule",
+                        J::Str(
+                            "both arms recover the same logarithm at every profiled row; the instruction \
+                             counts and the functions that differ are reported, not tested \
+                             (PROTOCOL.md, plan §5)"
+                                .into(),
+                        ),
+                    ),
+                ])
+            }
+        }
     }
 
     // ── the declared runs, natively (each PROTOCOL.md's "Rows") ──────
@@ -906,7 +1009,7 @@ pub mod speed {
 
     /// Each arm's binary, as a manifest names it: its file name, SHA-256 and,
     /// where given, the commit it was built from.
-    fn binaries(arms: &[Arm], commits: &[Option<String>]) -> Result<J, String> {
+    pub(crate) fn binaries(arms: &[Arm], commits: &[Option<String>]) -> Result<J, String> {
         let mut kv = Vec::new();
         for (i, a) in arms.iter().enumerate() {
             let name = if a.name == "cand" {
@@ -1156,6 +1259,7 @@ pub mod r05 {
         callgrind_role: CallgrindRole::Control,
         accept: Accept::Above(speed::ACCEPT_LO),
         resumed_note: "the host R05 resumed on after its container was rebuilt mid-holdouts",
+        requires: REFERENCE_CLASS,
     };
 
     pub fn analyse(c: &Ctx) -> Result<J, String> {
@@ -1206,6 +1310,7 @@ pub mod r02b {
         callgrind_role: CallgrindRole::Control,
         accept: Accept::Above(speed::ACCEPT_LO),
         resumed_note: "the host R02b resumed on after its container changed",
+        requires: REFERENCE_CLASS,
     };
 
     pub fn analyse(c: &Ctx) -> Result<J, String> {
@@ -1268,6 +1373,7 @@ pub mod r07 {
         callgrind_role: CallgrindRole::CrossCheck,
         accept: Accept::Pinned,
         resumed_note: "the host R07 resumed on after its container changed",
+        requires: REFERENCE_CLASS,
     };
 
     pub fn analyse(c: &Ctx) -> Result<J, String> {
@@ -1302,6 +1408,225 @@ pub mod r07 {
             "callgrind" => speed::callgrind_step(c, &SPEC, arms),
             other => Err(format!(
                 "unknown step `{other}`; try plan, manifest, pin, aa, compare, holdout, extend, callgrind or manifest-resumed"
+            )),
+        }
+    }
+}
+
+// ── R06: the scan's canonical key by GFNI and funnel shifts ──────────
+
+pub mod r06 {
+    use super::*;
+
+    /// R06's class (its amendment 1): the reference class, and what the
+    /// candidate's key kernels detect beyond it, VBMI2 for the funnel
+    /// shifts and BW, VBMI and GFNI for the basis change.
+    pub const CLASS: &[&str] = &[
+        "avx512f",
+        "pclmulqdq",
+        "vpclmulqdq",
+        "gfni",
+        "avx512bw",
+        "avx512vbmi",
+        "avx512vbmi2",
+    ];
+
+    /// R06's declaration: the target sizes the explorations found the key
+    /// worth most at, eight fresh holdouts at each (recipe seeds 218 to
+    /// 221, `T127` to `T134`), and an interval above 1.03 at each, on the
+    /// suite rows and the holdouts separately.  Valgrind cannot run the
+    /// candidate's VBMI2 and GFNI kernels, so there are no callgrind
+    /// profiles.
+    pub const SPEC: Spec = Spec {
+        targets: &[(0, 53), (1, 59), (0, 61)],
+        holdouts: &[
+            (218, 127),
+            (218, 128),
+            (219, 129),
+            (219, 130),
+            (220, 131),
+            (220, 132),
+            (221, 133),
+            (221, 134),
+        ],
+        what_this_is: "R06, the scan's canonical key by GFNI and funnel shifts: every figure the README, the ledger and the scoreboard quote",
+        callgrind: &[],
+        callgrind_role: CallgrindRole::CrossCheck,
+        accept: Accept::Above(1.03),
+        resumed_note: "the host R06 resumed on after its container changed",
+        requires: CLASS,
+    };
+
+    pub fn analyse(c: &Ctx) -> Result<J, String> {
+        speed::analyse(c, &SPEC)
+    }
+
+    /// One of R06's declared steps: R07's, without the callgrind profiles.
+    pub fn run(
+        c: &Ctx,
+        step: &str,
+        b: &Bench,
+        arms: &[Arm],
+        root: &Path,
+        commits: &[Option<String>],
+    ) -> Result<J, String> {
+        if let Some(done) = speed::run_common(c, &SPEC, step, b, arms) {
+            return done;
+        }
+        match step {
+            "manifest" => speed::manifest(
+                c,
+                b,
+                arms,
+                root,
+                commits,
+                "the host R06 ran on, at the round's start",
+            ),
+            "manifest-resumed" => speed::manifest_resumed(c, &SPEC, b, arms, root),
+            "pin" => pin::pin(&c.programme, &c.runs, &arms[1].binary),
+            "aa" => speed::aa(c, b, arms),
+            other => Err(format!(
+                "unknown step `{other}`; try plan, manifest, pin, aa, compare, holdout, extend or manifest-resumed"
+            )),
+        }
+    }
+}
+
+// ── R08: the scan's subtraction by carry-less folds ──────────────────
+
+pub mod r08 {
+    use super::*;
+
+    /// R08's declaration: the same target sizes, eight fresh holdouts at
+    /// each (recipe seeds 222 to 225, `T135` to `T142`), and an interval
+    /// above 1.05 at each, on the suite rows and the holdouts separately.
+    /// Valgrind cannot run the candidate's AVX-512 carry-less kernels, so
+    /// there are no callgrind profiles.  Its class is R06's: its base is
+    /// R06's candidate, and the folding kernel's VPCLMULQDQ is in the
+    /// reference class R06's includes.
+    pub const SPEC: Spec = Spec {
+        targets: &[(0, 53), (1, 59), (0, 61)],
+        holdouts: &[
+            (222, 135),
+            (222, 136),
+            (223, 137),
+            (223, 138),
+            (224, 139),
+            (224, 140),
+            (225, 141),
+            (225, 142),
+        ],
+        what_this_is: "R08, the scan's subtraction by carry-less folds: every figure the README, the ledger and the scoreboard quote",
+        callgrind: &[],
+        callgrind_role: CallgrindRole::CrossCheck,
+        accept: Accept::Above(1.05),
+        resumed_note: "the host R08 resumed on after its container changed",
+        requires: super::r06::CLASS,
+    };
+
+    pub fn analyse(c: &Ctx) -> Result<J, String> {
+        speed::analyse(c, &SPEC)
+    }
+
+    /// One of R08's declared steps: R07's, without the callgrind profiles.
+    pub fn run(
+        c: &Ctx,
+        step: &str,
+        b: &Bench,
+        arms: &[Arm],
+        root: &Path,
+        commits: &[Option<String>],
+    ) -> Result<J, String> {
+        if let Some(done) = speed::run_common(c, &SPEC, step, b, arms) {
+            return done;
+        }
+        match step {
+            "manifest" => speed::manifest(
+                c,
+                b,
+                arms,
+                root,
+                commits,
+                "the host R08 ran on, at the round's start",
+            ),
+            "manifest-resumed" => speed::manifest_resumed(c, &SPEC, b, arms, root),
+            "pin" => pin::pin(&c.programme, &c.runs, &arms[1].binary),
+            "aa" => speed::aa(c, b, arms),
+            other => Err(format!(
+                "unknown step `{other}`; try plan, manifest, pin, aa, compare, holdout, extend or manifest-resumed"
+            )),
+        }
+    }
+}
+
+// ── R09: the scan keyed from slopes, pipelined ───────────────────────
+
+pub mod r09 {
+    use super::*;
+
+    /// R09's class: x86-64 with AVX-512F and PCLMULQDQ and without
+    /// VPCLMULQDQ, the hosts on which the scan's subtraction and the
+    /// build's rows are the scalar product the candidate's slope path
+    /// replaces (Skylake-SP and Cascade Lake among them).  Where VPCLMULQDQ
+    /// is present the eight-lane kernel runs instead and the candidate
+    /// keeps it, so no claim is made there.
+    pub const CLASS: &[&str] = &["avx512f", "pclmulqdq", "!vpclmulqdq"];
+
+    /// R09's declaration: the target sizes, eight fresh holdouts at each
+    /// (recipe seeds 226 to 229, `T143` to `T150`), and an interval above
+    /// 1.05 at each, on the suite rows and the holdouts separately.
+    /// Valgrind cannot run the candidate's AVX-512 key, so there are no
+    /// callgrind profiles.
+    pub const SPEC: Spec = Spec {
+        targets: &[(0, 53), (1, 59), (0, 61)],
+        holdouts: &[
+            (226, 143),
+            (226, 144),
+            (227, 145),
+            (227, 146),
+            (228, 147),
+            (228, 148),
+            (229, 149),
+            (229, 150),
+        ],
+        what_this_is: "R09, the scan keyed from slopes and pipelined: every figure the README, the ledger and the scoreboard quote",
+        callgrind: &[],
+        callgrind_role: CallgrindRole::CrossCheck,
+        accept: Accept::Above(1.05),
+        resumed_note: "the host R09 resumed on after its container changed",
+        requires: CLASS,
+    };
+
+    pub fn analyse(c: &Ctx) -> Result<J, String> {
+        speed::analyse(c, &SPEC)
+    }
+
+    /// One of R09's declared steps: R07's, without the callgrind profiles.
+    pub fn run(
+        c: &Ctx,
+        step: &str,
+        b: &Bench,
+        arms: &[Arm],
+        root: &Path,
+        commits: &[Option<String>],
+    ) -> Result<J, String> {
+        if let Some(done) = speed::run_common(c, &SPEC, step, b, arms) {
+            return done;
+        }
+        match step {
+            "manifest" => speed::manifest(
+                c,
+                b,
+                arms,
+                root,
+                commits,
+                "the host R09 ran on, at the round's start",
+            ),
+            "manifest-resumed" => speed::manifest_resumed(c, &SPEC, b, arms, root),
+            "pin" => pin::pin(&c.programme, &c.runs, &arms[1].binary),
+            "aa" => speed::aa(c, b, arms),
+            other => Err(format!(
+                "unknown step `{other}`; try plan, manifest, pin, aa, compare, holdout, extend or manifest-resumed"
             )),
         }
     }

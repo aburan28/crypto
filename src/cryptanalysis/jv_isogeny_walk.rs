@@ -999,6 +999,13 @@ pub fn curve_order(f: &Fq3, c: &Curve2, rng: &mut StdRng) -> u128 {
     let u = f.sub(&c.e[1], &c.e[0]);
     let v = f.sub(&c.e[2], &c.e[0]);
     let ec = EllE::from_a2_a4(f, f.neg(&f.add(&u, &v)), f.mul(&u, &v));
+    ell_order(f, &ec, rng)
+}
+
+/// `#E(F_{q³})` of `y² = x³ + a₂x² + a₄x` by baby-step giant-step on two
+/// random points (the first's order located in the Hasse interval, confirmed
+/// on the second).
+pub fn ell_order(f: &Fq3, ec: &EllE, rng: &mut StdRng) -> u128 {
     let p = f.f.p as u128;
     let q3 = p.pow(6);
     let two_sqrt = 2 * isqrt_u128(q3) + 2;
@@ -1500,6 +1507,17 @@ pub fn run_walk2(
     }
 }
 
+/// Necessary trace condition for a Joux–Vitse weak curve over `F_(p^6)`.
+/// Its 2-isogenous Legendre neighbor has full rational 4-torsion, hence
+/// its trace is `±(p^6 + 1) (mod 16)` (ISO-1). Passing this filter does
+/// not imply that the isogeny class contains a weak curve.
+pub fn trace_may_hold_weak_curve(p: u64, trace: i128) -> bool {
+    let q_mod_16 = ((p % 16).pow(6) % 16) as i128;
+    let weak_residue = (q_mod_16 + 1) % 16;
+    let t = trace.rem_euclid(16);
+    t == weak_residue || t == (-weak_residue).rem_euclid(16)
+}
+
 /// §18.1 steps 1–2: a breadth-first walk to a weak curve from `start`, with
 /// each discovered curve's producing step recorded, so the path from `start`
 /// to the weak curve can be replayed on points.  Degrees whose Kronecker
@@ -1516,6 +1534,11 @@ pub fn walk_to_weak_record(
     rng: &mut StdRng,
 ) -> Option<(Curve2, Vec<Step>)> {
     let f = &ctx.f;
+    // The public trace identifies a class that cannot contain a weak curve.
+    // Reject it before any field arithmetic or graph enumeration.
+    if !trace_may_hold_weak_curve(f.f.p, trace) {
+        return None;
+    }
     let p3 = (f.f.p as i128).pow(6);
     let disc = trace * trace - 4 * p3;
     let degrees: Vec<u64> = jumps
@@ -1746,7 +1769,7 @@ pub fn run_end_to_end(
 
     // ── attack: walk back to a weak curve (charged)
     f.reset_muls();
-    let cap = cap_mult * (p as u64) * (p as u64);
+    let cap = cap_mult * p * p;
     let walk = walk_to_weak_record(&ctx, challenge, jumps, cap, trace, &mut rng);
     rep.walk_muls = f.muls();
     let Some((weak, path)) = walk else {
@@ -1932,11 +1955,10 @@ pub fn trace_census(p: u64, seed: u64, n: u64) -> TraceCensus {
 /// weak curve is `y² = x(x − α)(x − σα)` with `α ∈ F_{q³} ∖ F_q` taken up
 /// to `F_q^{×2}`: the representatives have the first non-zero of
 /// `(α₁, α₂)` in `{1, w}`, `w` the non-residue of `F_q`, `2q² + 2q` of
-/// them.  Each gets its trace by [`curve_order`]; the set of traces is the
-/// set of isogeny classes that hold a weak curve.  Then `n` random
-/// full-2-torsion curves are drawn and the fraction whose trace is in that
-/// set is the exact chance that a random such curve's class holds a weak
-/// curve at this `p`.
+/// them.  Each gets a probabilistic trace assignment by [`curve_order`];
+/// the observed trace set labels the isogeny classes that hold a weak curve.
+/// Then `n` random full-2-torsion curves are drawn.  Their fraction in that
+/// set estimates, with sampling uncertainty, the chance for a random curve.
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ExactCensus {
     pub p: u64,
@@ -1951,54 +1973,161 @@ pub struct ExactCensus {
     /// The weak classes by the number of representatives in them, top 12:
     /// `(t, representatives)`.
     pub top_weak: Vec<(i128, u64)>,
+    /// §18.2: every weak trace with its representative count, sorted by `t`,
+    /// and the traces of the `n` random full-2-torsion curves, kept for
+    /// §18.3's characterization.
+    #[serde(default)]
+    pub weak_traces: Vec<(i128, u64)>,
+    #[serde(default)]
+    pub random_traces: Vec<i128>,
+    /// §18.5: `n_uniform` uniformly random curves `y² = x³ + ax + b` over
+    /// `F_{q³}` (all curves, not only full 2-torsion).  A curve with no
+    /// rational 2-torsion point has odd order and so no weak curve in its
+    /// class; the others are counted by `ell_order`.  `uniform_in_weak_classes`
+    /// is the fraction of **all** sampled curves whose trace is a weak class.
+    #[serde(default)]
+    pub n_uniform: u64,
+    #[serde(default)]
+    pub uniform_odd_order: u64,
+    #[serde(default)]
+    pub uniform_four_divides: u64,
+    #[serde(default)]
+    pub uniform_in_weak_classes: f64,
+    #[serde(default)]
+    pub uniform_traces: Vec<i128>,
     pub muls: u64,
     pub wall_ms: f64,
 }
 
+/// One uniformly random curve `y² = x³ + ax + b` over `F_{q³}` (non-singular):
+/// its order through a rational 2-torsion point moved to `0`, or `None` if
+/// the cubic has no root in `F_{q³}` (odd order).
+fn uniform_curve_order(f: &Fq3, rng: &mut StdRng) -> Option<u128> {
+    let c = |k: u64| f.from_fq(E2([k % f.f.p, 0]));
+    loop {
+        let a = f.random(rng);
+        let b = f.random(rng);
+        // 4a³ + 27b² ≠ 0
+        let disc = f.add(
+            &f.mul(&c(4), &f.mul(&a, &f.sq(&a))),
+            &f.mul(&c(27), &f.sq(&b)),
+        );
+        if disc == E6::ZERO {
+            continue;
+        }
+        let cubic: P6 = vec![b, a, E6::ZERO, E6::ONE];
+        let roots = roots_q3(f, &cubic, rng);
+        let r = roots.first().copied()?;
+        // x = X + r:  y² = X³ + 3r X² + (3r² + a) X
+        let a2 = f.mul(&c(3), &r);
+        let a4 = f.add(&f.mul(&c(3), &f.sq(&r)), &a);
+        let ec = EllE::from_a2_a4(f, a2, a4);
+        return Some(ell_order(f, &ec, rng));
+    }
+}
+
 pub fn exact_census(p: u64, seed: u64, n: u64) -> ExactCensus {
+    exact_census_full(p, seed, n, 0)
+}
+
+pub fn exact_census_full(p: u64, seed: u64, n: u64, n_uniform: u64) -> ExactCensus {
+    use rayon::prelude::*;
     let start = Instant::now();
     let f = Fq3::new(p);
     let q = p * p;
     let q3 = (p as i128).pow(6);
-    let mut rng = StdRng::seed_from_u64(seed ^ 0xE8AC7);
-    f.reset_muls();
-    let w = E2([f.f.w % p, 0]);
+    let e2 = |k: u64| E2([k % p, k / p]);
+    // f.f.w is a nonsquare in F_p, hence a square in F_{p²}.  The two
+    // normal forms require representatives of both F_{p²} square classes.
+    let w = (1..q).map(e2).find(|x| !f.f.is_square(x)).unwrap();
+    // Enumerate every weak representative in parallel over a0, each task with
+    // its own field context (Fq3 holds a non-Sync counter).  `a1 ∈ {1, w}`
+    // covers the generic representatives; `a1 = 0` with `a2 ∈ {1, w}` the
+    // ones whose first non-zero imaginary part is in a2.
+    let both: Vec<(E2, bool)> = [(E2::ONE, false), (w, false)]
+        .into_iter()
+        .chain([(E2::ONE, true), (w, true)])
+        .collect();
+    // (a1_or_a2 value, is_a2_branch)
+    let partials: Vec<(HashMap<i128, u64>, u64, u64)> = both
+        .par_iter()
+        .flat_map_iter(|&(val, is_a2)| (0..q).map(move |a0| (val, is_a2, a0)))
+        .map(|(val, is_a2, a0)| {
+            let f = Fq3::new(p);
+            let mut rng = StdRng::seed_from_u64(seed ^ 0xE8AC7 ^ a0.wrapping_mul(0x9E3779B1));
+            let mut local: HashMap<i128, u64> = HashMap::new();
+            let mut reps = 0u64;
+            let a0e = e2(a0);
+            if is_a2 {
+                // a1 = 0, a2 = val: one curve per a0
+                let alpha = E6([a0e, E2::ZERO, val]);
+                let c = Curve2 {
+                    e: [E6::ZERO, alpha, f.sigma(&alpha)],
+                };
+                let t = q3 + 1 - curve_order(&f, &c, &mut rng) as i128;
+                *local.entry(t).or_insert(0) += 1;
+                reps += 1;
+            } else {
+                for a2 in 0..q {
+                    let alpha = E6([a0e, val, e2(a2)]);
+                    let c = Curve2 {
+                        e: [E6::ZERO, alpha, f.sigma(&alpha)],
+                    };
+                    let t = q3 + 1 - curve_order(&f, &c, &mut rng) as i128;
+                    *local.entry(t).or_insert(0) += 1;
+                    reps += 1;
+                }
+            }
+            (local, reps, f.muls())
+        })
+        .collect();
     let mut weak_t: HashMap<i128, u64> = HashMap::new();
     let mut reps = 0u64;
-    let all_q: Vec<E2> = (0..p * p).map(|k| E2([k % p, k / p])).collect();
-    let mut tally = |alpha: E6, rng: &mut StdRng| {
-        let c = Curve2 {
-            e: [E6::ZERO, alpha, f.sigma(&alpha)],
-        };
-        debug_assert!(c.weak_by_norms(&f));
-        let t = q3 + 1 - curve_order(&f, &c, rng) as i128;
-        *weak_t.entry(t).or_insert(0) += 1;
-        reps += 1;
-    };
-    for &a1 in &[E2::ONE, w] {
-        for &a0 in &all_q {
-            for &a2 in &all_q {
-                tally(E6([a0, a1, a2]), &mut rng);
-            }
+    let mut census_muls = 0u64;
+    for (local, r, m) in partials {
+        reps += r;
+        census_muls += m;
+        for (t, c) in local {
+            *weak_t.entry(t).or_insert(0) += c;
         }
     }
-    for &a2 in &[E2::ONE, w] {
-        for &a0 in &all_q {
-            tally(E6([a0, E2::ZERO, a2]), &mut rng);
-        }
-    }
+    let f = Fq3::new(p);
+    let mut rng = StdRng::seed_from_u64(seed ^ 0xE8AC7);
     let mut rand_t: HashMap<i128, u64> = HashMap::new();
+    let mut random_traces: Vec<i128> = Vec::with_capacity(n as usize);
     let mut in_weak = 0u64;
     for _ in 0..n {
         let r = random_curve(&f, &mut rng);
         let t = q3 + 1 - curve_order(&f, &r, &mut rng) as i128;
         *rand_t.entry(t).or_insert(0) += 1;
+        random_traces.push(t);
         if weak_t.contains_key(&t) {
             in_weak += 1;
         }
     }
+    // uniformly random curves over F_{q³}: the reach over all curves
+    let mut urng = StdRng::seed_from_u64(seed ^ 0x0A11_C0E5);
+    let mut uniform_traces: Vec<i128> = Vec::new();
+    let (mut u_odd, mut u_four, mut u_weak) = (0u64, 0u64, 0u64);
+    for _ in 0..n_uniform {
+        match uniform_curve_order(&f, &mut urng) {
+            None => u_odd += 1,
+            Some(ord) => {
+                if ord % 4 == 0 {
+                    u_four += 1;
+                }
+                let t = q3 + 1 - ord as i128;
+                uniform_traces.push(t);
+                if weak_t.contains_key(&t) {
+                    u_weak += 1;
+                }
+            }
+        }
+    }
     let mut top: Vec<(i128, u64)> = weak_t.iter().map(|(t, c)| (*t, *c)).collect();
     top.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+    let mut weak_traces = top.clone();
+    weak_traces.sort_by_key(|&(t, _)| t);
     top.truncate(12);
     ExactCensus {
         p,
@@ -2009,9 +2138,103 @@ pub fn exact_census(p: u64, seed: u64, n: u64) -> ExactCensus {
         random_distinct: rand_t.len() as u64,
         random_in_weak_classes: in_weak as f64 / n.max(1) as f64,
         top_weak: top,
-        muls: f.muls(),
+        weak_traces,
+        random_traces,
+        n_uniform,
+        uniform_odd_order: u_odd,
+        uniform_four_divides: u_four,
+        uniform_in_weak_classes: u_weak as f64 / n_uniform.max(1) as f64,
+        uniform_traces,
+        muls: census_muls + f.muls(),
         wall_ms: start.elapsed().as_secs_f64() * 1e3,
     }
+}
+
+/// §18.3 (exploratory, post hoc): what distinguishes the weak classes.
+/// Weak membership depends only on the trace `t`, because the Weil
+/// restriction's characteristic polynomial over `F_q` is `T⁶ − tT³ + q³`.
+/// From frozen `ExactCensus` files: for the full-2-torsion classes the
+/// random sample met, the weak fraction by `v₂(D)`, `v₃(D)`, `t mod 3`,
+/// `t mod 8` and a class-size proxy (the class's multiplicity among the
+/// uniform all-curve sample), with `D = t² − 4q³`; plus twist symmetry
+/// (`t` weak ⟹ `−t` weak).  A feature that separates shows fractions of
+/// only 0 and 1.  Labelled exploratory; a rule found here is a candidate,
+/// to be registered and tested on a size it was not fitted on.
+pub fn characterize_weak(reports: &[ExactCensus]) -> String {
+    use std::collections::{BTreeMap, HashSet as HSet};
+    use std::fmt::Write;
+    fn val(mut n: i128, p: i128) -> u32 {
+        n = n.abs();
+        if n == 0 {
+            return 99;
+        }
+        let mut k = 0;
+        while n % p == 0 {
+            n /= p;
+            k += 1;
+        }
+        k
+    }
+    let mut out = String::new();
+    for r in reports {
+        let q3 = (r.p as i128).pow(6);
+        let weak: HSet<i128> = r.weak_traces.iter().map(|&(t, _)| t).collect();
+        let classes: HSet<i128> = r.random_traces.iter().copied().collect();
+        let mut umult: HashMap<i128, u64> = HashMap::new();
+        for &t in &r.uniform_traces {
+            *umult.entry(t).or_insert(0) += 1;
+        }
+        let twist_ok = weak.iter().filter(|t| weak.contains(&-**t)).count();
+        let _ = writeln!(
+            out,
+            "\n### p = {}: {} weak classes (exact), {} full-2-torsion classes sampled, {:.1} % of them weak; weak set closed under t ↦ −t: {}/{}",
+            r.p,
+            weak.len(),
+            classes.len(),
+            100.0 * classes.iter().filter(|t| weak.contains(t)).count() as f64
+                / classes.len().max(1) as f64,
+            twist_ok,
+            weak.len()
+        );
+        let mut feats: Vec<(&str, BTreeMap<String, (u64, u64)>)> = vec![
+            ("v2(D)", BTreeMap::new()),
+            ("v3(D)", BTreeMap::new()),
+            ("t mod 3", BTreeMap::new()),
+            ("t mod 8", BTreeMap::new()),
+            ("class size proxy (uniform hits)", BTreeMap::new()),
+        ];
+        for &t in &classes {
+            let d = t * t - 4 * q3;
+            let w = weak.contains(&t) as u64;
+            let um = *umult.get(&t).unwrap_or(&0);
+            let vals = [
+                format!("{}", val(d, 2)),
+                format!("{}", val(d, 3)),
+                format!("{}", t.rem_euclid(3)),
+                format!("{}", t.rem_euclid(8)),
+                format!("{}", um.min(4)),
+            ];
+            for (i, v) in vals.into_iter().enumerate() {
+                let e = feats[i].1.entry(v).or_insert((0, 0));
+                e.0 += w;
+                e.1 += 1;
+            }
+        }
+        for (name, m) in &feats {
+            let cells: Vec<String> = m
+                .iter()
+                .map(|(v, (w, n))| format!("{v}: {:.2} ({n})", *w as f64 / *n as f64))
+                .collect();
+            let separates = m.values().all(|(w, n)| *w == 0 || *w == *n);
+            let _ = writeln!(
+                out,
+                "- {name}{}: {}",
+                if separates { " — SEPARATES" } else { "" },
+                cells.join(" · ")
+            );
+        }
+    }
+    out
 }
 
 /// The derived tables of ledger §17.5, printed from frozen `Walk2Report`s
@@ -2102,6 +2325,46 @@ pub fn summarize_walk2(reports: &[Walk2Report]) -> String {
 mod tests {
     use super::*;
     use crate::cryptanalysis::jv_cover::generate_spec;
+
+    #[test]
+    fn iso1_trace_filter_preserves_weak_instances_and_rejects_before_walking() {
+        for p in [7_u64, 11, 13, 17] {
+            let spec = generate_spec(p, 1);
+            let trace = (p as i128).pow(6) + 1 - 4 * spec.l as i128;
+            assert!(trace_may_hold_weak_curve(p, trace), "p={p}");
+        }
+
+        let p = 11_u64;
+        let ctx = WalkCtx::new(p);
+        let mut rng = StdRng::seed_from_u64(0x1501);
+        let (curve, trace) = (0..40)
+            .find_map(|_| {
+                let curve = random_curve(&ctx.f, &mut rng);
+                let order = curve_order(&ctx.f, &curve, &mut rng);
+                let trace = (p as i128).pow(6) + 1 - order as i128;
+                (!trace_may_hold_weak_curve(p, trace)).then_some((curve, trace))
+            })
+            .expect("a depth-1 trace among deterministic random curves");
+        ctx.f.reset_muls();
+        assert!(walk_to_weak_record(&ctx, curve, &[3, 5, 7], 100, trace, &mut rng).is_none());
+        assert_eq!(ctx.f.muls(), 0, "trace refusal must precede field work");
+    }
+
+    #[test]
+    fn fp_nonsquare_is_not_an_fp2_square_class_representative() {
+        for p in [7_u64, 11, 13, 17, 37] {
+            let f = Fq3::new(p);
+            let old = E2([f.f.w, 0]);
+            assert!(
+                f.f.is_square(&old),
+                "p={p}: F_p element must square in F_p2"
+            );
+            let q = p * p;
+            let e2 = |k: u64| E2([k % p, k / p]);
+            let w = (1..q).map(e2).find(|x| !f.f.is_square(x)).unwrap();
+            assert!(!f.f.is_square(&w), "p={p}: missing second square class");
+        }
+    }
 
     #[test]
     fn the_constructed_weak_curves_pass_the_test_and_random_ones_mostly_fail() {

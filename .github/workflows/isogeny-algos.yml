@@ -1,0 +1,58 @@
+name: isogeny_algos
+
+# The standalone isogeny-computation crate (its own workspace, no dependencies): formatting,
+# clippy with -D warnings, the full test suite (each algorithm against an independent
+# computation) and a smoke test of the isogeny-algos command line.
+
+on:
+  pull_request:
+    paths:
+      - 'isogeny_algos/**'
+      - '.github/workflows/isogeny-algos.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'isogeny_algos/**'
+      - '.github/workflows/isogeny-algos.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: isogeny_algos
+      - name: Formatting and lint
+        run: |
+          cargo fmt --manifest-path isogeny_algos/Cargo.toml --check
+          cargo clippy --manifest-path isogeny_algos/Cargo.toml --locked --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test --manifest-path isogeny_algos/Cargo.toml --locked --release
+      - name: Command-line smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --manifest-path isogeny_algos/Cargo.toml --locked --release --bin isogeny-algos
+          B=isogeny_algos/target/release/isogeny-algos
+          # P-256 with its published order: certified, and the ICV1 slug the curve registry lists
+          $B count --curve p256 --order 115792089210356248762697446949407573529996955224135760342422259061068512044369 | tee /tmp/p256.json
+          grep -q '"slug":"icv1-fp256-t89188191154553853111372247798585809583-f188c491"' /tmp/p256.json
+          grep -q '"status":"PASS"' /tmp/p256.json
+          # a wrong order must fail with exit code 1
+          set +e; $B count --curve p256 --order 1 > /dev/null; code=$?; set -e
+          test "$code" -eq 1

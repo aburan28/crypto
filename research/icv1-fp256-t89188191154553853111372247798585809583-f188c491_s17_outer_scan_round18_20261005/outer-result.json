@@ -1,0 +1,751 @@
+{
+  "schema": "p256.s17_outer_scan/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "field_prime": "0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff",
+  "curve_a": "0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc",
+  "curve_b": "0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b",
+  "round17_sha256": "57cf49ffbab65356b4ef69848e7824f0377bc058ddd57fe0bf6a8f7b77089ce7",
+  "factor_base": {
+    "spec": "dickson-torus:depth=18,root_exponent=0x2b6fdc73dc04e7667129",
+    "fb_id": "FB1h2f8621cda105",
+    "fb_sha256": "2f8621cda105a51f8703dabe38dec87f3715ab855770acd7b2af0a14906f9e42",
+    "points_sha256": "70ab21cbda76205ff43ab6bf85c68607be9f6b89df6399e6fa98e3489b888cf1",
+    "terminal": "0x5b17195299a3158b93389ad04c776fff2a8bb23ca8659b5b0c2b75f9009b65e5",
+    "columns": 131458,
+    "signed_points": 262916,
+    "complete_rebuild_verified": true
+  },
+  "atom_kind": "hash-0",
+  "packed_atom_hex": "6fee18b6823879fa8e115b51b7a20941cdef561cce39f27829cab20d3a0a5fa568a47cc5",
+  "atom_columns": [
+    114616,
+    101224,
+    36382,
+    129678,
+    17773,
+    72570,
+    33360,
+    118255,
+    88179,
+    58271,
+    40458,
+    117426,
+    13544,
+    42490,
+    88617,
+    31941
+  ],
+  "outer_offset": 90322,
+  "outer_stride": 23509,
+  "checkpoint_depths": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "planted_outer_position": 7,
+  "planted_outer_column": 123427,
+  "targets": [
+    {
+      "kind": "planted-control",
+      "scalar": null,
+      "target": [
+        "0x86ddca1672b9a8c6f2f87b790d8e19499348e163da65f7a057e2726f5ac91b67",
+        "0x4a2ddae278aec3f35f679a841966d9957cdb2ef71df110ead9c262e61722461"
+      ],
+      "planted": true
+    },
+    {
+      "kind": "hash-public",
+      "scalar": "0x77b340b378fd735bc07016816590020379a287c0df90e8e29834b13e1fd767c5",
+      "target": [
+        "0x2ad3e1a4c525f7abf27bcba1e9c1d4f386aeb9edc499736adc7ef43620f47663",
+        "0x16ab9b3d9d875eea2f46a2c8069221a72ca4c8d6b323889a749862a421118cc2"
+      ],
+      "planted": false
+    }
+  ],
+  "scalar_build_multiplication_counts": {
+    "coefficients": 1672,
+    "discriminants": 304,
+    "square_roots": 43928,
+    "inversions": 58368,
+    "root_construction": 304,
+    "total": 104576
+  },
+  "batched_build_multiplication_counts": {
+    "coefficients": 1672,
+    "discriminants": 304,
+    "square_roots": 43928,
+    "inversions": 5802,
+    "root_construction": 304,
+    "total": 52010
+  },
+  "build_inversion_profile": {
+    "batch_sizes": [
+      4,
+      4,
+      64,
+      4,
+      4,
+      64
+    ],
+    "batch_inversions": 6,
+    "scalar_fallbacks": 8
+  },
+  "reference_signed_sums": 65536,
+  "reference_build_group_additions": 131070,
+  "intermediate_reference_group_additions": 1188,
+  "checkpoints": [
+    {
+      "depth": 4,
+      "stream_positions": 16,
+      "skipped_atom_columns": 0,
+      "eligible_outer_columns": 16,
+      "targets": [
+        {
+          "kind": "planted-control",
+          "signed_branch_cells": 32,
+          "oracle_calls": 32,
+          "quadratic_solves": 4096,
+          "quadratic_roots_returned": 8192,
+          "algebra_index_lookups": 8192,
+          "algebra_hits": 1,
+          "candidate_positive_trials": 1,
+          "reference_positive_trials": 1,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 45056,
+            "discriminants": 8192,
+            "square_roots": 1183744,
+            "inversions": 24544,
+            "root_construction": 8192,
+            "total": 1269728
+          },
+          "target_adjustment_group_additions": 32,
+          "reference_index_lookups": 32,
+          "direct_relation_verification_additions": 17,
+          "batch_profile": {
+            "sizes": {
+              "128": 32
+            },
+            "batch_inversions": 32,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 1,
+          "relation_sha256": "3fc3a488b3fcd61828469e2982fd606f345b2022e38269fccb9711ba221fba4d",
+          "trial_stream_sha256": "a7ec1dc62ffa44a7ed3999b90d649f4fe830a356bbd0a18a7b35a2d63f5e0368",
+          "exact": true
+        },
+        {
+          "kind": "hash-public",
+          "signed_branch_cells": 32,
+          "oracle_calls": 32,
+          "quadratic_solves": 4096,
+          "quadratic_roots_returned": 8192,
+          "algebra_index_lookups": 8192,
+          "algebra_hits": 0,
+          "candidate_positive_trials": 0,
+          "reference_positive_trials": 0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 45056,
+            "discriminants": 8192,
+            "square_roots": 1183744,
+            "inversions": 24544,
+            "root_construction": 8192,
+            "total": 1269728
+          },
+          "target_adjustment_group_additions": 32,
+          "reference_index_lookups": 32,
+          "direct_relation_verification_additions": 0,
+          "batch_profile": {
+            "sizes": {
+              "128": 32
+            },
+            "batch_inversions": 32,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 0,
+          "relation_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "trial_stream_sha256": "7b814ae0a5520a1ba521775a82d8113820943ff47f983f0397ce64597eb3c991",
+          "exact": true
+        }
+      ]
+    },
+    {
+      "depth": 5,
+      "stream_positions": 32,
+      "skipped_atom_columns": 0,
+      "eligible_outer_columns": 32,
+      "targets": [
+        {
+          "kind": "planted-control",
+          "signed_branch_cells": 64,
+          "oracle_calls": 64,
+          "quadratic_solves": 8192,
+          "quadratic_roots_returned": 16384,
+          "algebra_index_lookups": 16384,
+          "algebra_hits": 1,
+          "candidate_positive_trials": 1,
+          "reference_positive_trials": 1,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 90112,
+            "discriminants": 16384,
+            "square_roots": 2367488,
+            "inversions": 49088,
+            "root_construction": 16384,
+            "total": 2539456
+          },
+          "target_adjustment_group_additions": 64,
+          "reference_index_lookups": 64,
+          "direct_relation_verification_additions": 17,
+          "batch_profile": {
+            "sizes": {
+              "128": 64
+            },
+            "batch_inversions": 64,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 1,
+          "relation_sha256": "3fc3a488b3fcd61828469e2982fd606f345b2022e38269fccb9711ba221fba4d",
+          "trial_stream_sha256": "6446f3d4964cafbfb1f14621bf351a94483cfac7a586b693a7515e423f84025b",
+          "exact": true
+        },
+        {
+          "kind": "hash-public",
+          "signed_branch_cells": 64,
+          "oracle_calls": 64,
+          "quadratic_solves": 8192,
+          "quadratic_roots_returned": 16384,
+          "algebra_index_lookups": 16384,
+          "algebra_hits": 0,
+          "candidate_positive_trials": 0,
+          "reference_positive_trials": 0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 90112,
+            "discriminants": 16384,
+            "square_roots": 2367488,
+            "inversions": 49088,
+            "root_construction": 16384,
+            "total": 2539456
+          },
+          "target_adjustment_group_additions": 64,
+          "reference_index_lookups": 64,
+          "direct_relation_verification_additions": 0,
+          "batch_profile": {
+            "sizes": {
+              "128": 64
+            },
+            "batch_inversions": 64,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 0,
+          "relation_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "trial_stream_sha256": "8589d59f8c65b2eef0672504a5e7aa39be83ec33cb4f1ef12136770cfffb4eb8",
+          "exact": true
+        }
+      ]
+    },
+    {
+      "depth": 6,
+      "stream_positions": 64,
+      "skipped_atom_columns": 0,
+      "eligible_outer_columns": 64,
+      "targets": [
+        {
+          "kind": "planted-control",
+          "signed_branch_cells": 128,
+          "oracle_calls": 128,
+          "quadratic_solves": 16384,
+          "quadratic_roots_returned": 32768,
+          "algebra_index_lookups": 32768,
+          "algebra_hits": 1,
+          "candidate_positive_trials": 1,
+          "reference_positive_trials": 1,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 180224,
+            "discriminants": 32768,
+            "square_roots": 4734976,
+            "inversions": 98176,
+            "root_construction": 32768,
+            "total": 5078912
+          },
+          "target_adjustment_group_additions": 128,
+          "reference_index_lookups": 128,
+          "direct_relation_verification_additions": 17,
+          "batch_profile": {
+            "sizes": {
+              "128": 128
+            },
+            "batch_inversions": 128,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 1,
+          "relation_sha256": "3fc3a488b3fcd61828469e2982fd606f345b2022e38269fccb9711ba221fba4d",
+          "trial_stream_sha256": "c7395f15091b10f13983afbfd778c8b7a4a2d9cb7b2e4757700111748d3a9420",
+          "exact": true
+        },
+        {
+          "kind": "hash-public",
+          "signed_branch_cells": 128,
+          "oracle_calls": 128,
+          "quadratic_solves": 16384,
+          "quadratic_roots_returned": 32768,
+          "algebra_index_lookups": 32768,
+          "algebra_hits": 0,
+          "candidate_positive_trials": 0,
+          "reference_positive_trials": 0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 180224,
+            "discriminants": 32768,
+            "square_roots": 4734976,
+            "inversions": 98176,
+            "root_construction": 32768,
+            "total": 5078912
+          },
+          "target_adjustment_group_additions": 128,
+          "reference_index_lookups": 128,
+          "direct_relation_verification_additions": 0,
+          "batch_profile": {
+            "sizes": {
+              "128": 128
+            },
+            "batch_inversions": 128,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 0,
+          "relation_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "trial_stream_sha256": "2c00a7f87c90b3219f82fdd5b10f5f706e0f8e24e5705ab08b0501c4ccc0cc66",
+          "exact": true
+        }
+      ]
+    },
+    {
+      "depth": 7,
+      "stream_positions": 128,
+      "skipped_atom_columns": 0,
+      "eligible_outer_columns": 128,
+      "targets": [
+        {
+          "kind": "planted-control",
+          "signed_branch_cells": 256,
+          "oracle_calls": 256,
+          "quadratic_solves": 32768,
+          "quadratic_roots_returned": 65536,
+          "algebra_index_lookups": 65536,
+          "algebra_hits": 1,
+          "candidate_positive_trials": 1,
+          "reference_positive_trials": 1,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 360448,
+            "discriminants": 65536,
+            "square_roots": 9469952,
+            "inversions": 196352,
+            "root_construction": 65536,
+            "total": 10157824
+          },
+          "target_adjustment_group_additions": 256,
+          "reference_index_lookups": 256,
+          "direct_relation_verification_additions": 17,
+          "batch_profile": {
+            "sizes": {
+              "128": 256
+            },
+            "batch_inversions": 256,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 1,
+          "relation_sha256": "3fc3a488b3fcd61828469e2982fd606f345b2022e38269fccb9711ba221fba4d",
+          "trial_stream_sha256": "99dd194ada6bd15e53a555b41345abce27c1a1aa7e78153dff4e80e7c66031d2",
+          "exact": true
+        },
+        {
+          "kind": "hash-public",
+          "signed_branch_cells": 256,
+          "oracle_calls": 256,
+          "quadratic_solves": 32768,
+          "quadratic_roots_returned": 65536,
+          "algebra_index_lookups": 65536,
+          "algebra_hits": 0,
+          "candidate_positive_trials": 0,
+          "reference_positive_trials": 0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 360448,
+            "discriminants": 65536,
+            "square_roots": 9469952,
+            "inversions": 196352,
+            "root_construction": 65536,
+            "total": 10157824
+          },
+          "target_adjustment_group_additions": 256,
+          "reference_index_lookups": 256,
+          "direct_relation_verification_additions": 0,
+          "batch_profile": {
+            "sizes": {
+              "128": 256
+            },
+            "batch_inversions": 256,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 0,
+          "relation_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "trial_stream_sha256": "2befdb8106c496f0d501abab879cdca45c4fc9b4c434af6b66d766f2d26934de",
+          "exact": true
+        }
+      ]
+    },
+    {
+      "depth": 8,
+      "stream_positions": 256,
+      "skipped_atom_columns": 0,
+      "eligible_outer_columns": 256,
+      "targets": [
+        {
+          "kind": "planted-control",
+          "signed_branch_cells": 512,
+          "oracle_calls": 512,
+          "quadratic_solves": 65536,
+          "quadratic_roots_returned": 131072,
+          "algebra_index_lookups": 131072,
+          "algebra_hits": 1,
+          "candidate_positive_trials": 1,
+          "reference_positive_trials": 1,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 720896,
+            "discriminants": 131072,
+            "square_roots": 18939904,
+            "inversions": 392704,
+            "root_construction": 131072,
+            "total": 20315648
+          },
+          "target_adjustment_group_additions": 512,
+          "reference_index_lookups": 512,
+          "direct_relation_verification_additions": 17,
+          "batch_profile": {
+            "sizes": {
+              "128": 512
+            },
+            "batch_inversions": 512,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 1,
+          "relation_sha256": "3fc3a488b3fcd61828469e2982fd606f345b2022e38269fccb9711ba221fba4d",
+          "trial_stream_sha256": "3df65de16797a596e480195d586dac2f0c633ff0af59efcf6de4562d2431434d",
+          "exact": true
+        },
+        {
+          "kind": "hash-public",
+          "signed_branch_cells": 512,
+          "oracle_calls": 512,
+          "quadratic_solves": 65536,
+          "quadratic_roots_returned": 131072,
+          "algebra_index_lookups": 131072,
+          "algebra_hits": 0,
+          "candidate_positive_trials": 0,
+          "reference_positive_trials": 0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 720896,
+            "discriminants": 131072,
+            "square_roots": 18939904,
+            "inversions": 392704,
+            "root_construction": 131072,
+            "total": 20315648
+          },
+          "target_adjustment_group_additions": 512,
+          "reference_index_lookups": 512,
+          "direct_relation_verification_additions": 0,
+          "batch_profile": {
+            "sizes": {
+              "128": 512
+            },
+            "batch_inversions": 512,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 0,
+          "relation_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "trial_stream_sha256": "2a461bdcc24e3142b193ac713682336bd7266cb07ac138476a0f0e2b7b211dd7",
+          "exact": true
+        }
+      ]
+    },
+    {
+      "depth": 9,
+      "stream_positions": 512,
+      "skipped_atom_columns": 0,
+      "eligible_outer_columns": 512,
+      "targets": [
+        {
+          "kind": "planted-control",
+          "signed_branch_cells": 1024,
+          "oracle_calls": 1024,
+          "quadratic_solves": 131072,
+          "quadratic_roots_returned": 262144,
+          "algebra_index_lookups": 262144,
+          "algebra_hits": 1,
+          "candidate_positive_trials": 1,
+          "reference_positive_trials": 1,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 1441792,
+            "discriminants": 262144,
+            "square_roots": 37879808,
+            "inversions": 785408,
+            "root_construction": 262144,
+            "total": 40631296
+          },
+          "target_adjustment_group_additions": 1024,
+          "reference_index_lookups": 1024,
+          "direct_relation_verification_additions": 17,
+          "batch_profile": {
+            "sizes": {
+              "128": 1024
+            },
+            "batch_inversions": 1024,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 1,
+          "relation_sha256": "3fc3a488b3fcd61828469e2982fd606f345b2022e38269fccb9711ba221fba4d",
+          "trial_stream_sha256": "b5ee736245dd74ee6ebf848e117517f9e16968d2a212d4a0ee59baaac374ceeb",
+          "exact": true
+        },
+        {
+          "kind": "hash-public",
+          "signed_branch_cells": 1024,
+          "oracle_calls": 1024,
+          "quadratic_solves": 131072,
+          "quadratic_roots_returned": 262144,
+          "algebra_index_lookups": 262144,
+          "algebra_hits": 0,
+          "candidate_positive_trials": 0,
+          "reference_positive_trials": 0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 1441792,
+            "discriminants": 262144,
+            "square_roots": 37879808,
+            "inversions": 785408,
+            "root_construction": 262144,
+            "total": 40631296
+          },
+          "target_adjustment_group_additions": 1024,
+          "reference_index_lookups": 1024,
+          "direct_relation_verification_additions": 0,
+          "batch_profile": {
+            "sizes": {
+              "128": 1024
+            },
+            "batch_inversions": 1024,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 0,
+          "relation_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "trial_stream_sha256": "924b5891ac92d0012a28565ee0a072afe947b885e472823f380921b1bfdfcb0d",
+          "exact": true
+        }
+      ]
+    },
+    {
+      "depth": 10,
+      "stream_positions": 1024,
+      "skipped_atom_columns": 0,
+      "eligible_outer_columns": 1024,
+      "targets": [
+        {
+          "kind": "planted-control",
+          "signed_branch_cells": 2048,
+          "oracle_calls": 2048,
+          "quadratic_solves": 262144,
+          "quadratic_roots_returned": 524288,
+          "algebra_index_lookups": 524288,
+          "algebra_hits": 1,
+          "candidate_positive_trials": 1,
+          "reference_positive_trials": 1,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 2883584,
+            "discriminants": 524288,
+            "square_roots": 75759616,
+            "inversions": 1570816,
+            "root_construction": 524288,
+            "total": 81262592
+          },
+          "target_adjustment_group_additions": 2048,
+          "reference_index_lookups": 2048,
+          "direct_relation_verification_additions": 17,
+          "batch_profile": {
+            "sizes": {
+              "128": 2048
+            },
+            "batch_inversions": 2048,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 1,
+          "relation_sha256": "3fc3a488b3fcd61828469e2982fd606f345b2022e38269fccb9711ba221fba4d",
+          "trial_stream_sha256": "14efa92f1b6ff5a587926fc4f97c8ed2fef355f4844ec03947d7cfc45b42405b",
+          "exact": true
+        },
+        {
+          "kind": "hash-public",
+          "signed_branch_cells": 2048,
+          "oracle_calls": 2048,
+          "quadratic_solves": 262144,
+          "quadratic_roots_returned": 524288,
+          "algebra_index_lookups": 524288,
+          "algebra_hits": 0,
+          "candidate_positive_trials": 0,
+          "reference_positive_trials": 0,
+          "false_negatives": 0,
+          "false_positives": 0,
+          "multiplication_counts": {
+            "coefficients": 2883584,
+            "discriminants": 524288,
+            "square_roots": 75759616,
+            "inversions": 1570816,
+            "root_construction": 524288,
+            "total": 81262592
+          },
+          "target_adjustment_group_additions": 2048,
+          "reference_index_lookups": 2048,
+          "direct_relation_verification_additions": 0,
+          "batch_profile": {
+            "sizes": {
+              "128": 2048
+            },
+            "batch_inversions": 2048,
+            "scalar_fallbacks": 0
+          },
+          "relation_count": 0,
+          "relation_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "trial_stream_sha256": "a861f6e0392aa33d28fc7991cbdaa66601fa20a93e3befed84a7f54cdb60deca",
+          "exact": true
+        }
+      ]
+    }
+  ],
+  "growth_fit": {
+    "depths": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "public_field_multiplications": [
+      1321738,
+      2591466,
+      5130922,
+      10209834,
+      20367658,
+      40683306,
+      81314602
+    ],
+    "log2_multiplication_slope_per_depth": 0.9915429334574785,
+    "outer_calls_growth_per_depth": 1.0
+  },
+  "residual_degree_evidence": {
+    "round6_sha256": "71d63031111ba48ff831e79430bc87e6c7bac34626d7d0de4acfb4eaa65d40f4",
+    "maximum_by_residual_depth": {
+      "1": 3,
+      "2": 3,
+      "3": 4
+    },
+    "every_component_complete_and_correct": true,
+    "promotion_degree_gate_at_most_five": true
+  },
+  "local_maximum_degree": 2,
+  "memory": {
+    "persistent_atom_bytes": 36,
+    "reconstructed_image_raw_bytes": 8192,
+    "candidate_peak_logical_bytes": 75008,
+    "factor_base_point_raw_bytes": 12619968,
+    "reference_entries": 65536,
+    "reference_final_logical_bytes": 4521984,
+    "reference_build_peak_logical_bytes": 13074432,
+    "reference_memory_excluded_from_candidate": true
+  },
+  "collection_projection": {
+    "classification": "rejected: enumeration exponent exceeds rho",
+    "distinct_sixteen_column_atoms": "379818644896935897531886053293722324029315526042580642955413667491880",
+    "distinct_sixteen_column_atoms_log2": 227.81642117994525,
+    "distinct_seventeen_column_sets": "2936713077796649896669774506884320571474193610240522639490910781321628880",
+    "distinct_seventeen_column_sets_log2": 240.73302515051142,
+    "eligible_outer_columns_per_atom": 131442,
+    "signed_oracle_calls_per_complete_atom_scan": 262884,
+    "signed_candidate_domain_per_atom": "17228365824",
+    "poisson_mean_per_atom": 1.4878707121953478e-67,
+    "poisson_success_per_atom": 1.4878707121953478e-67,
+    "expected_atom_scans_per_relation": 6.721014076044979e+66,
+    "expected_atom_scans_log2": 221.99593318784758,
+    "measured_public_multiplications_per_oracle_call": 39679.0,
+    "projected_complete_atom_scan_multiplications": 10431026246.0,
+    "projected_complete_atom_scan_multiplications_log2": 33.28016205181096,
+    "projected_multiplications_per_relation": 7.010707422696061e+76,
+    "projected_multiplications_per_relation_log2": 255.27609523965853,
+    "whole_factor_base_signed_domain": "384920856532962495256300684166341665944265504881445783403352657929388540559360",
+    "whole_factor_base_poisson_mean": 3.3242413981639762,
+    "whole_factor_base_poisson_success": 0.9640001820745058,
+    "relation_rows": 138031,
+    "projected_targets_for_relation_rows": 143185.6576032595,
+    "projected_collection_multiplications": 1.003832752582788e+82,
+    "projected_collection_multiplications_log2": 272.4036227043168,
+    "below_2_pow_120": false,
+    "below_2_pow_128": false,
+    "bits_above_2_pow_128": 144.40362270431677,
+    "optimistic_lower_projection": true
+  },
+  "sparse_linear_algebra_projection": {
+    "rows": 138031,
+    "columns": 131458,
+    "row_weight": 17,
+    "nonzeros": 2346527,
+    "csr_entry_bytes": 11732635,
+    "csr_row_offset_bytes": 1104256,
+    "csr_total_bytes": 12836891,
+    "wiedemann_sparse_matvecs": 262916,
+    "wiedemann_nonzero_additions": 616939492732,
+    "berlekamp_massey_scalar_operations": 17281205764,
+    "field_vectors": 3,
+    "field_vector_bytes": 12619968,
+    "modeled_working_bytes": 25456859,
+    "operation_unit_separate_from_collection": true
+  },
+  "relations": [
+    {
+      "target_kind": "planted-control",
+      "stream_position": 7,
+      "outer_column": 123427,
+      "outer_negative": false,
+      "atom_negative_mask": 0,
+      "direct_verified": true
+    }
+  ],
+  "exact": true,
+  "attack_promotion_gate": false
+}

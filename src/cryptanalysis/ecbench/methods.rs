@@ -30,9 +30,12 @@ use crate::cryptanalysis::ecbench_large_prime::{
     self as large_prime, SolveConfig as LargePrimeConfig,
 };
 use crate::cryptanalysis::ic_boundary::{
-    rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup, BinaryInstance,
-    Calibration, CountedGroup, GroupOps, NegationClasses, PhaseCost, PointClasses, PrimeInstance,
-    PrimePoint, RhoResult, RhoWalk,
+    price_phase, rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup,
+    BinaryInstance, Calibration, CountedGroup, FieldOps, GroupOps, NegationClasses, PhaseCost,
+    PointClasses, PrimeInstance, PrimePoint, RhoResult, RhoWalk,
+};
+use crate::cryptanalysis::ic_framework::fiber::{
+    FiberDescentOracle, FiberFrobeniusMitmOracle, FiberMitmOracle,
 };
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle,
@@ -90,6 +93,46 @@ const RHO_PARAMS: &[ParamDecl] = &[ParamDecl {
     default: Some("64"),
     help: "step budget as a multiple of √r before the run counts as exhausted",
 }];
+
+// Keep the defaults of the frozen `ic.pipeline_counted` sessions. The
+// existing `ic.pipeline` declaration below retains main's newer options.
+const IC_COUNTED_PARAMS: &[ParamDecl] = &[
+    ParamDecl {
+        name: "factor_base",
+        default: None,
+        help: "factor-base plug-in spec",
+    },
+    ParamDecl {
+        name: "oracle",
+        default: None,
+        help: "decomposition oracle plug-in spec",
+    },
+    ParamDecl {
+        name: "solver",
+        default: Some(""),
+        help: "algebraic solver plug-in spec",
+    },
+    ParamDecl {
+        name: "linalg",
+        default: Some("incremental-gauss"),
+        help: "linear algebra plug-in",
+    },
+    ParamDecl {
+        name: "targets",
+        default: Some("walk"),
+        help: "random or walk",
+    },
+    ParamDecl {
+        name: "max_trials",
+        default: Some("100000000"),
+        help: "relation trial cap",
+    },
+    ParamDecl {
+        name: "solver_budget_seconds",
+        default: Some("0"),
+        help: "per-call solver wall budget",
+    },
+];
 
 /// Every method `ecbench` knows.  Adding one is an entry here and an arm
 /// in [`solve`]; nothing else changes.
@@ -246,12 +289,12 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "oracle",
                     default: None,
-                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N on koblitz-standard-subspace",
+                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N on koblitz-standard-subspace",
                 },
                 ParamDecl {
                     name: "solver",
                     default: Some(""),
-                    help: "descent-algebraic only: buchberger-f2, sat-cdcl, exhaustive (with :k=v options)",
+                    help: "descent-algebraic and descent-algebraic-fiber only: f4-f2, buchberger-f2, sat-cdcl, exhaustive (with :k=v options)",
                 },
                 ParamDecl {
                     name: "linalg",
@@ -274,6 +317,14 @@ pub fn registry() -> &'static [MethodDecl] {
                     help: "per-call wall budget for an algebraic solver; nonzero makes the run nondeterministic",
                 },
             ],
+        },
+        MethodDecl {
+            id: "ic.pipeline_counted",
+            family: "ic",
+            summary: "index calculus with solver wall pricing excluded by deterministic phase recomputation; unpriced solver work remains explicit",
+            entry: "ic_framework::run_pipeline + ecbench::ic_report(counted)",
+            applies: Applies::Any,
+            params: IC_COUNTED_PARAMS,
         },
         MethodDecl {
             id: "ic.large_prime",
@@ -639,6 +690,20 @@ pub struct SolveReport {
     /// oracles; `None` for table oracles and generic methods.
     #[serde(default)]
     pub solver: Option<SolverStats>,
+    /// The field operations behind the group operations — modular
+    /// multiplications, squarings and inversions — summed over every
+    /// phase of the solve, when the group counted them
+    /// ([`CountedGroup::counts_field_ops`]: the prime-field curve
+    /// arithmetic the generic walks and tables run on).  `None` is
+    /// unknown, never zero: binary and Koblitz curves do not count, and
+    /// the index-calculus pipeline does field arithmetic outside the
+    /// group law (square roots, Legendre symbols, the oracles, the
+    /// elimination) that this tally would not see, so it reports none.
+    /// Kept out of `counters` and `phases`, so what a committed record's
+    /// replay compares is unchanged; the audit compares the block only
+    /// when both the record and the replay carry it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub field_ops: Option<FieldOps>,
 }
 
 fn ops_phase(name: &str, ops: GroupOps) -> PhaseRecord {
@@ -667,7 +732,18 @@ fn param_u64(m: &ResolvedMethod, name: &str) -> Result<u64, String> {
         .map_err(|_| format!("parameter `{name}` is not an integer: `{}`", m.params[name]))
 }
 
-fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
+/// The field operations of a solve from its ledgers, when the group
+/// counts them; `None` (unknown) when it does not.
+fn field_ops_of<G: CountedGroup>(g: &G, ledgers: &[GroupOps]) -> Option<FieldOps> {
+    g.counts_field_ops().then(|| FieldOps::total(ledgers))
+}
+
+fn generic_report(
+    out: GenericOutcome,
+    wall: u64,
+    a: u32,
+    field_ops: Option<FieldOps>,
+) -> SolveReport {
     let total = out.setup.gae() + out.search.gae();
     SolveReport {
         recovered: out.recovered.map(u128::from),
@@ -688,12 +764,13 @@ fn generic_report(out: GenericOutcome, wall: u64, a: u32) -> SolveReport {
         online: None,
         online_error: None,
         solver: None,
+        field_ops,
     }
 }
 
 /// Split a tuned rho run into set-up, walk and verification from its own
 /// counters; the frozen walk has none and stays one phase.
-fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
+fn rho_report(res: RhoResult, wall: u64, field_ops: Option<FieldOps>) -> SolveReport {
     let c = &res.counters;
     let get = |k: &str| c.get(k).copied().unwrap_or(0);
     let phases = if c.is_empty() {
@@ -735,6 +812,7 @@ fn rho_report(res: RhoResult, wall: u64) -> SolveReport {
         online: None,
         online_error: None,
         solver: None,
+        field_ops,
     }
 }
 
@@ -752,10 +830,22 @@ fn solve_generic<G: CountedGroup>(
     // Everything these methods do depends on the target (rho's jump table
     // is [a]G + [b]Q), so the whole solve is the online window.
     measurement::begin_online(Phase::RhoSolve);
+    // The rho walks keep one ledger for the whole solve; the tables and
+    // the kangaroo keep set-up and search apart.  Either way the field
+    // operations reported are the solve's total, known only when the
+    // group counts them.
+    let rho = |res: RhoResult, wall: u64| {
+        let f = field_ops_of(g, &[res.group_ops]);
+        rho_report(res, wall, f)
+    };
+    let generic = |o: GenericOutcome, wall: u64, a: u32| {
+        let f = field_ops_of(g, &[o.setup, o.search]);
+        generic_report(o, wall, a, f)
+    };
     let rep = match m.id.as_str() {
         "rho.frozen_reference" => {
             let res = rho_reference(g, gen, target, r, seed, cap()?);
-            rho_report(res, t.elapsed().as_nanos() as u64)
+            rho(res, t.elapsed().as_nanos() as u64)
         }
         "rho.plain" => {
             let res = rho_walk_with(
@@ -768,7 +858,7 @@ fn solve_generic<G: CountedGroup>(
                 cap()?,
                 RhoWalk::plain(),
             );
-            rho_report(res, t.elapsed().as_nanos() as u64)
+            rho(res, t.elapsed().as_nanos() as u64)
         }
         "rho.negation" => {
             let res = rho_walk_with(
@@ -781,23 +871,23 @@ fn solve_generic<G: CountedGroup>(
                 cap()?,
                 RhoWalk::negation(),
             );
-            rho_report(res, t.elapsed().as_nanos() as u64)
+            rho(res, t.elapsed().as_nanos() as u64)
         }
         "bsgs.textbook" => {
             let o = bsgs_textbook(g, gen, target, r);
-            generic_report(o, t.elapsed().as_nanos() as u64, 1)
+            generic(o, t.elapsed().as_nanos() as u64, 1)
         }
         "bsgs.interleaved" => {
             let o = bsgs_interleaved(g, gen, target, r);
-            generic_report(o, t.elapsed().as_nanos() as u64, 1)
+            generic(o, t.elapsed().as_nanos() as u64, 1)
         }
         "bsgs.negation" => {
             let o = bsgs_negation(g, gen, target, r);
-            generic_report(o, t.elapsed().as_nanos() as u64, 2)
+            generic(o, t.elapsed().as_nanos() as u64, 2)
         }
         "kangaroo.vow" => {
             let o = kangaroo(g, gen, target, r, seed, cap()?);
-            generic_report(o, t.elapsed().as_nanos() as u64, 1)
+            generic(o, t.elapsed().as_nanos() as u64, 1)
         }
         other => return Err(format!("`{other}` is not a generic method")),
     };
@@ -918,7 +1008,8 @@ fn solve_inner(
             )
             .ok_or("not a Koblitz instance")?;
             measurement::end_online();
-            Ok(rho_report(res, t.elapsed().as_nanos() as u64))
+            // A Koblitz walk does not count its field operations: unknown.
+            Ok(rho_report(res, t.elapsed().as_nanos() as u64, None))
         }
         (Instance::Prime(i), _) => solve_generic(
             m,
@@ -1084,6 +1175,9 @@ fn solve_large_prime(
         online: None,
         online_error: None,
         solver: None,
+        // Binary-field index calculus: the field work is outside the group law
+        // this tally sees, so it stays unknown rather than understated.
+        field_ops: None,
     })
 }
 
@@ -1236,6 +1330,7 @@ fn claw_report(o: ClawOutcome, shape: ClawShape, r: u128, n: u32, wall: u64) -> 
         online: None,
         online_error: None,
         solver: None,
+        field_ops: None,
     }
 }
 
@@ -1333,6 +1428,7 @@ fn strong_run<F: RhoField, S: RhoScalar>(
             online: None,
             online_error: None,
             solver: None,
+            field_ops: None,
         });
     };
     let c = o.charges;
@@ -1388,6 +1484,7 @@ fn strong_run<F: RhoField, S: RhoScalar>(
         online: None,
         online_error: None,
         solver: None,
+        field_ops: None,
     })
 }
 
@@ -1459,7 +1556,9 @@ fn ic_report(
     // (`audit::legacy_solver_rounding` reproduces those records).
     let mut total = rep.total_gae;
     if let Some(s) = &rep.decomposition.solver {
-        if s.gae > 0.0 && s.priced_by != "pinned" {
+        if (s.gae > 0.0 || (m.id == "ic.pipeline_counted" && s.calls > 0))
+            && s.priced_by != "pinned"
+        {
             phases[2].gae = rep.decomposition.gae_before_solver;
             total = phases.iter().fold(0.0, |acc, p| acc + p.gae);
             unpriced.push(format!("solver_{}_uncharged", s.op_unit.replace(' ', "_")));
@@ -1467,6 +1566,20 @@ fn ic_report(
         if param_u64(m, "solver_budget_seconds").unwrap_or(0) > 0 {
             nondeterminism.push("solver ran under a wall-clock budget".into());
         }
+    }
+    if m.id == "ic.pipeline_counted" {
+        // The frozen counted method reconstructs its relation charge from
+        // integer group/native work, independent of solver wall time.
+        let mut counted = rep.decomposition.cost.clone();
+        price_phase(&mut counted, calib);
+        phases[2].gae = counted.gae
+            + rep
+                .decomposition
+                .solver
+                .as_ref()
+                .filter(|s| s.priced_by == "pinned")
+                .map_or(0.0, |s| s.gae);
+        total = phases.iter().map(|p| p.gae).sum();
     }
     // Native counters with no pinned ratio for this curve.
     for (counter, unit) in PRICED_NATIVE {
@@ -1528,6 +1641,11 @@ fn ic_report(
         online: None,
         online_error: None,
         solver,
+        // The pipeline's field arithmetic outside the group law (square
+        // roots, Legendre symbols, oracle inversions, the elimination) is
+        // counted natively and priced apart; the group-law tally alone
+        // would understate it, so the figure stays unknown.
+        field_ops: None,
     }
 }
 
@@ -1620,9 +1738,11 @@ fn solve_ic_prime(
     let ms = spec.oracle_params.u64_or("m", 2)? as u32;
     let mut subtract = SubtractOracle;
     let mut mitm = MitmOracle::new(ms);
+    let mut mitm_fiber = FiberMitmOracle::new(ms);
     let oracle: &mut dyn DecompositionOracle<_> = match or_name.as_str() {
         "subtract" => &mut subtract,
         "mitm" => &mut mitm,
+        "mitm-fiber" => &mut mitm_fiber,
         other => return Err(format!("oracle `{other}` does not run on a prime curve")),
     };
     let ctx = InstanceCtx {
@@ -1726,6 +1846,26 @@ fn solve_ic_binary(
     let mut mitm = MitmOracle::new(ms);
     let mut frob = FrobeniusMitmOracle::new(ms, inst);
     let mut frob_counted = FrobeniusMitmOracle::new_counted(ms, inst);
+    let mut mitm_fiber = FiberMitmOracle::new(ms);
+    let mut frob_fiber = FiberFrobeniusMitmOracle::new(ms, inst);
+    let mut descent_fiber = match or_name.as_str() {
+        "descent-algebraic-fiber" => {
+            let name = spec
+                .solver
+                .as_deref()
+                .ok_or("descent-algebraic-fiber needs `solver`")?;
+            let budget = (spec.solver_budget_seconds > 0)
+                .then(|| std::time::Duration::from_secs(spec.solver_budget_seconds));
+            Some(FiberDescentOracle::new(
+                ms,
+                inst,
+                solver_by_name(name)?,
+                spec.solver_params.clone(),
+                budget,
+            ))
+        }
+        _ => None,
+    };
     let mut plugin_oracle = binary_plugins().and_then(|p| (p.oracle)(or_name.as_str(), ms, inst));
     let mut algebraic = match or_name.as_str() {
         "descent-algebraic" => {
@@ -1750,7 +1890,10 @@ fn solve_ic_binary(
         "mitm" => &mut mitm,
         "mitm-frobenius" => &mut frob,
         "mitm-frobenius-counted" => &mut frob_counted,
+        "mitm-fiber" => &mut mitm_fiber,
+        "mitm-frobenius-fiber" => &mut frob_fiber,
         "descent-algebraic" => algebraic.as_mut().expect("built above"),
+        "descent-algebraic-fiber" => descent_fiber.as_mut().expect("built above"),
         other => match plugin_oracle.as_deref_mut() {
             Some(o) => o,
             None => return Err(format!("oracle `{other}` does not run on a binary curve")),
@@ -1955,6 +2098,7 @@ fn solve_shared_rank(
         online: Some(online),
         online_error: None,
         solver: None,
+        field_ops: None,
     })
 }
 
@@ -2238,6 +2382,76 @@ mod tests {
         );
         assert_eq!(s.sat_conflicts, None);
         assert_eq!(s.n_vars, None);
+    }
+
+    /// A prime-curve solve reports the field operations behind its group
+    /// operations; a Koblitz solve, whose arithmetic does not count them,
+    /// reports none — and never a zero.
+    #[test]
+    fn field_operations_are_reported_on_prime_curves_and_unknown_elsewhere() {
+        use crate::cryptanalysis::ecbench::workload::CurveSpec;
+        let m = resolve(&MethodSpec {
+            id: "bsgs.negation".into(),
+            params: BTreeMap::new(),
+        })
+        .unwrap();
+        let spec = CurveSpec::PrimeSearch {
+            bits: 12,
+            seed: 59297,
+        };
+        let inst = spec.build().unwrap();
+        let facts = inst.facts(&spec);
+        let Instance::Prime(prime) = &inst else {
+            unreachable!()
+        };
+        let mut scratch = GroupOps::default();
+        let target = prime.curve.mul(&mut scratch, prime.generator_point(), 97);
+        let rep = solve(
+            &m,
+            &inst,
+            &facts,
+            &[format!("0x{:x}", target.x), format!("0x{:x}", target.y)],
+            5,
+        )
+        .unwrap();
+        assert_eq!(rep.recovered, Some(97));
+        let f = rep
+            .field_ops
+            .expect("a prime curve counts its field operations");
+        let group_ops = rep.total_gae;
+        // Every addition or doubling that did field work did exactly one
+        // inversion, at least two multiplications and at least one
+        // squaring; the special cases (∞ + P, P + (−P)) did none.
+        assert!(
+            f.invs > 0 && f.invs as f64 <= group_ops,
+            "{f:?} over {group_ops} group operations"
+        );
+        assert!(f.muls >= 2 * f.invs && f.sqrs >= f.invs, "{f:?}");
+        // The block is its own: counters and phases, which committed
+        // replays compare, do not carry it.
+        assert!(rep.counters.keys().all(|k| !k.contains("field")));
+        let v = serde_json::to_value(&rep).unwrap();
+        assert_eq!(v["field_ops"]["invs"], f.invs);
+
+        let spec = CurveSpec::Koblitz { a: 1, n: 17 };
+        let inst = spec.build().unwrap();
+        let facts = inst.facts(&spec);
+        let Instance::Binary(binary) = &inst else {
+            unreachable!()
+        };
+        let target = binary.fast.mul_u64(binary.generator, 113);
+        let rep = solve(
+            &m,
+            &inst,
+            &facts,
+            &[format!("0x{:x}", target.x), format!("0x{:x}", target.y)],
+            5,
+        )
+        .unwrap();
+        assert_eq!(rep.recovered, Some(u128::from(113 % binary.r)));
+        assert!(rep.field_ops.is_none(), "unknown is not zero");
+        let v = serde_json::to_value(&rep).unwrap();
+        assert!(v.get("field_ops").is_none(), "absent, not null");
     }
 
     #[test]

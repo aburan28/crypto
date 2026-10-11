@@ -1,0 +1,167 @@
+[
+  {
+    "candidate_id": "IC1N61Ckb1fb73200PDP4rootRCguidedLAgaussTDdirectISO0h9885b61504c4",
+    "curve_id": "EC1N61Ckb1hd0e02e3be112",
+    "workload_id": "dc3bf2cde46d",
+    "run_id": "IC1N61Ckb1fb73200PDP4rootRCguidedLAgaussTDdirectISO0h9885b61504c4Wdc3bf2cde46d1",
+    "target_count_per_invocation": 1,
+    "target_Q": [
+      1588112318113170368,
+      826967756768709220
+    ],
+    "target_scalar_known_answer_sidecar": 133245742055150,
+    "ic": {
+      "status": "verified",
+      "online_ms": 91.275459,
+      "phase_ms": {
+        "query": 0.0,
+        "PDP_and_relation_check": 91.224708,
+        "descent": 0.000625,
+        "recovery_check": 0.05
+      },
+      "target_independent_process_total_ms": 142391.36458300002,
+      "target_independent_setup_total_ms": 51340.678167,
+      "rank_stage_ms": 90925.252166,
+      "probes": 57215,
+      "recovered_scalar": 133245742055150,
+      "group_verified": true
+    },
+    "rho": {
+      "status": "verified",
+      "online_ms": 3828.421292,
+      "phase_ms": {
+        "target_specific_jump_setup": 19.1555,
+        "walk": 3804.16075,
+        "verification": 5.105042
+      },
+      "walk_steps": 911082,
+      "charges": {
+        "canonicalizations": 911319,
+        "failed_collisions": 236,
+        "frobenius_maps": 54679140,
+        "fruitless_cycle_restarts": 236,
+        "group_additions": 911351,
+        "negations_examined": 55590459,
+        "partition_hashes": 911082,
+        "scalar_multiplications": 540,
+        "table_inserts": 911082,
+        "table_queries": 911319
+      },
+      "recovered_scalar": 133245742055150,
+      "reference_group_validation": true
+    },
+    "online_speedup_rho_over_ic": 41.943599450976194,
+    "independent_replay": "PASS",
+    "rho_walk_seed": 20260925
+  },
+  {
+    "candidate_id": "IC1N61Ckb1fb73200PDP4rootRCguidedLAgaussTDdirectISO0h9885b61504c4",
+    "curve_id": "EC1N61Ckb1hd0e02e3be112",
+    "workload_id": "dc3bf2cde46d",
+    "run_id": "IC1N61Ckb1fb73200PDP4rootRCguidedLAgaussTDdirectISO0h9885b61504c4Wdc3bf2cde46d2",
+    "target_count_per_invocation": 1,
+    "target_Q": [
+      1588112318113170368,
+      826967756768709220
+    ],
+    "target_scalar_known_answer_sidecar": 133245742055150,
+    "ic": {
+      "status": "verified",
+      "online_ms": 25.585041999999998,
+      "phase_ms": {
+        "query": 4.2e-05,
+        "PDP_and_relation_check": 25.482042,
+        "descent": 0.000584,
+        "recovery_check": 0.102209
+      },
+      "target_independent_process_total_ms": 32053.777875,
+      "target_independent_setup_total_ms": 15545.874417,
+      "rank_stage_ms": 16459.695416,
+      "probes": 57215,
+      "recovered_scalar": 133245742055150,
+      "group_verified": true
+    },
+    "rho": {
+      "status": "verified",
+      "online_ms": 4881.014915999999,
+      "phase_ms": {
+        "target_specific_jump_setup": 22.943958000000002,
+        "walk": 4853.023999999999,
+        "verification": 5.046958
+      },
+      "walk_steps": 1025854,
+      "charges": {
+        "canonicalizations": 1026112,
+        "failed_collisions": 257,
+        "frobenius_maps": 61566720,
+        "fruitless_cycle_restarts": 257,
+        "group_additions": 1026144,
+        "negations_examined": 62592832,
+        "partition_hashes": 1025854,
+        "scalar_multiplications": 582,
+        "table_inserts": 1025854,
+        "table_queries": 1026112
+      },
+      "recovered_scalar": 133245742055150,
+      "reference_group_validation": true
+    },
+    "online_speedup_rho_over_ic": 190.7761150440949,
+    "independent_replay": "PASS",
+    "rho_walk_seed": 20260926
+  },
+  {
+    "candidate_id": "IC1N61Ckb1fb73200PDP4rootRCguidedLAgaussTDdirectISO0h9885b61504c4",
+    "curve_id": "EC1N61Ckb1hd0e02e3be112",
+    "workload_id": "dc3bf2cde46d",
+    "run_id": "IC1N61Ckb1fb73200PDP4rootRCguidedLAgaussTDdirectISO0h9885b61504c4Wdc3bf2cde46d3",
+    "target_count_per_invocation": 1,
+    "target_Q": [
+      1588112318113170368,
+      826967756768709220
+    ],
+    "target_scalar_known_answer_sidecar": 133245742055150,
+    "ic": {
+      "status": "verified",
+      "online_ms": 37.293667,
+      "phase_ms": {
+        "query": 4.2e-05,
+        "PDP_and_relation_check": 37.242416,
+        "descent": 0.000875,
+        "recovery_check": 0.050083
+      },
+      "target_independent_process_total_ms": 32742.579584,
+      "target_independent_setup_total_ms": 18468.685542,
+      "rank_stage_ms": 14199.733375,
+      "probes": 57215,
+      "recovered_scalar": 133245742055150,
+      "group_verified": true
+    },
+    "rho": {
+      "status": "verified",
+      "online_ms": 4431.064833,
+      "phase_ms": {
+        "target_specific_jump_setup": 21.31175,
+        "walk": 4384.373666,
+        "verification": 25.379417
+      },
+      "walk_steps": 1129598,
+      "charges": {
+        "canonicalizations": 1129892,
+        "failed_collisions": 293,
+        "frobenius_maps": 67793520,
+        "fruitless_cycle_restarts": 293,
+        "group_additions": 1129924,
+        "negations_examined": 68923412,
+        "partition_hashes": 1129598,
+        "scalar_multiplications": 654,
+        "table_inserts": 1129598,
+        "table_queries": 1129892
+      },
+      "recovered_scalar": 133245742055150,
+      "reference_group_validation": true
+    },
+    "online_speedup_rho_over_ic": 118.81547698165484,
+    "independent_replay": "PASS",
+    "rho_walk_seed": 20260927
+  }
+]

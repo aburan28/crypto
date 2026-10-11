@@ -1,0 +1,21 @@
+{
+  "direct_fixture_scalar": 333438554656,
+  "direct_public_q": [
+    1449233660742,
+    1458580003288
+  ],
+  "kind": "single_target_pairing_revalidation",
+  "online_target_count_per_arm": 1,
+  "prior_claim_check_meaning": "required schema fields only; PASS did not establish same-target pairing",
+  "reason": "the IC and rho producers used independent fixture seeds and emitted different public target points; this row is not a paired single-target comparison and must not be promoted",
+  "rho_fixture_scalar": 301011581851,
+  "rho_public_q": [
+    231924015792,
+    446643714743
+  ],
+  "run_id": "20261001T020900Z-d7138bdf44",
+  "same_fixture_scalar": false,
+  "same_public_point": false,
+  "speedup_claim_valid": false,
+  "status": "PAIRING_REJECTED"
+}

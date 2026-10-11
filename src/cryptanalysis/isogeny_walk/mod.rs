@@ -23,6 +23,8 @@
 pub mod curve;
 pub mod field;
 pub mod kernel;
+pub mod million;
+pub mod million_store;
 pub mod modpoly;
 pub mod poly;
 pub mod queue;

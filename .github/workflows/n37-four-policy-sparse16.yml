@@ -15,6 +15,12 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same pull request cancels this workflow's run for the older commit.
+# Every other event (push, schedule, dispatch) gets a group of its own and is never cancelled.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.workflow_ref || format('run-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   replay:
     runs-on: ubuntu-24.04
@@ -42,6 +48,10 @@ jobs:
             research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b03.points.jsonl
             research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b04.points.jsonl
             research/notes/ecc2k130/n37_four_policy_sparse16_20261004
+      - name: Restore the measured Cargo manifest and lockfile
+        run: |
+          note=research/notes/ecc2k130/n37_four_policy_sparse16_20261004
+          cp "$note/SOURCE_Cargo.toml" Cargo.toml
       - name: Restore the measured source tree, manifest and lockfile
         run: |
           note=research/notes/ecc2k130/n37_four_policy_sparse16_20261004

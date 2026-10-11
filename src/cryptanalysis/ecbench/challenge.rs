@@ -20,8 +20,13 @@
 //! audit clean, has too few sizes or runs, or a measured run did not
 //! verify.  An advance names the level it moved: `exponent` when the
 //! fitted α intervals are disjoint across four or more sizes, `constant`
-//! otherwise.  Counted-but-unpriced work is reported beside the result and
-//! becomes an axis only when the challenge says so.
+//! otherwise when `ops` moved, and `primitive` when `ops` did not move but
+//! a field-operation axis (`field_muls`, `field_sqrs`, `field_invs`) did.
+//! Counted-but-unpriced work is reported beside the result and decides only
+//! when the challenge says so; the field-operation axes are carried when a
+//! run of either arm counted them or the challenge names one, and decide
+//! only when named, so a verdict over a session that counted nothing is the
+//! verdict it always was.
 //!
 //! An admissible `advances` or `trade` verdict yields the candidate's
 //! bound with `improves_on` set, and the frontier is rebuilt from the
@@ -34,12 +39,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::cryptanalysis::ecbench::audit::{audit_with, AuditReport, REPLAY_ALL};
 use crate::cryptanalysis::ecbench::bounds::{
-    bound_from_sessions, field_size, memory_entries, read_sealed, seal_document, tier_of_bits,
-    uncharged_work, Bound, Domain, Estimate, FitInputs, FitOptions, MIN_SIZES_FOR_SCALING,
+    bound_from_sessions, field_axis, field_size, memory_entries, read_sealed, seal_document,
+    tier_of_bits, uncharged_work, Bound, Domain, Estimate, FitInputs, FitOptions, FIELD_AXES,
+    MIN_SIZES_FOR_SCALING,
 };
 use crate::cryptanalysis::ecbench::canonical::derive_u64;
 use crate::cryptanalysis::ecbench::compare::compare;
-use crate::cryptanalysis::ecbench::frontier::load_bounds;
+use crate::cryptanalysis::ecbench::frontier::{axis_names, is_axis, load_bounds};
 use crate::cryptanalysis::ecbench::methods::MethodSpec;
 use crate::cryptanalysis::ecbench::record::Record;
 use crate::cryptanalysis::ecbench::runner::{read_records, read_session, PlanDoc};
@@ -79,7 +85,8 @@ fn default_tolerance() -> f64 {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Acceptance {
-    /// Axes dominance reads: `ops`, `memory`, `uncharged`.
+    /// Axes dominance reads: `ops`, `memory`, `uncharged`, and the
+    /// primitive-level `field_muls`, `field_sqrs`, `field_invs`.
     #[serde(default = "default_axes")]
     pub axes: Vec<String>,
     /// Sizes the session must cover for an exponent to be read.
@@ -248,8 +255,11 @@ pub fn validate(ch: &Challenge) -> Result<(), String> {
         ));
     }
     for a in &ch.acceptance.axes {
-        if !["ops", "memory", "uncharged"].contains(&a.as_str()) {
-            return Err(format!("unknown acceptance axis `{a}`"));
+        if !is_axis(a) {
+            return Err(format!(
+                "unknown acceptance axis `{a}`; axes are {}",
+                axis_names()
+            ));
         }
     }
     if !ch.acceptance.axes.iter().any(|a| a == "ops") {
@@ -437,8 +447,11 @@ pub struct Verdict {
     /// The deciding axes the candidate is clearly better on, and worse on.
     pub advances_on: Vec<String>,
     pub regresses_on: Vec<String>,
-    /// `exponent` or `constant` when the advance includes ops; `null`
-    /// otherwise: a level is a statement about operations.
+    /// `exponent` or `constant` when the advance includes `ops`;
+    /// `primitive` when it does not and includes a field-operation axis
+    /// (fewer multiplications, squarings or inversions per group operation
+    /// at the same count of group operations); `null` otherwise: a level
+    /// is a statement about operations, and memory alone names none.
     pub level_moved: Option<String>,
     pub reasons: Vec<String>,
     pub statement: String,
@@ -551,6 +564,33 @@ fn axis_verdict(
         Some(_) => "indistinguishable",
         None => "unknown",
     }
+}
+
+/// The level an advance moved (README §2).  `exponent` or `constant`
+/// when `ops` is among the axes advanced on, by whether the fitted `α`
+/// intervals moved apart; `primitive` when `ops` is not but a
+/// field-operation axis is — the group-operation count held and the
+/// field work behind it fell; `None` for any other outcome or an advance
+/// on memory alone.
+pub fn level_of(
+    outcome: &str,
+    advances_on: &[String],
+    exponent_moved: Option<bool>,
+) -> Option<&'static str> {
+    if outcome != "advances" {
+        return None;
+    }
+    if advances_on.iter().any(|a| a == "ops") {
+        return Some(if exponent_moved == Some(true) {
+            "exponent"
+        } else {
+            "constant"
+        });
+    }
+    if advances_on.iter().any(|a| FIELD_AXES.contains(&a.as_str())) {
+        return Some("primitive");
+    }
+    None
 }
 
 /// Pareto outcome over the deciding axes.
@@ -826,20 +866,49 @@ pub fn verdict(inputs: &VerdictInputs) -> Result<VerdictOutput, String> {
         .into(),
         decides: true,
     }];
-    for (name, f) in [
+    // Memory and unpriced work as before.  The field-operation axes ride
+    // on a verdict only when a measured run of either arm counted them or
+    // the challenge names one: a session that counted nothing under a
+    // challenge that asked nothing gives the verdict it always gave, so a
+    // committed verdict re-derives byte for byte.  Named but uncounted, an
+    // axis is `unknown` and decides nothing (unknown is not zero).  Their
+    // seeds are distinct from the first two axes' (`seed ^ name.len()`: 6
+    // and 9), which stay as they were.
+    let mut reads: Vec<(&str, Box<dyn Fn(&Record) -> Option<f64>>, u64)> = vec![
+        ("memory", Box::new(memory_entries), inputs.seed ^ 6),
         (
-            "memory",
-            Box::new(memory_entries) as Box<dyn Fn(&Record) -> Option<f64>>,
+            "uncharged",
+            Box::new(|r: &Record| Some(uncharged_work(r))),
+            inputs.seed ^ 9,
         ),
-        ("uncharged", Box::new(|r: &Record| Some(uncharged_work(r)))),
-    ] {
+    ];
+    let field_counted = recs.iter().any(|r| {
+        !r.warmup
+            && (r.arm == inputs.incumbent_arm || r.arm == inputs.candidate_arm)
+            && r.field_ops.is_some()
+    });
+    let field_named = ch
+        .acceptance
+        .axes
+        .iter()
+        .any(|a| FIELD_AXES.contains(&a.as_str()));
+    if field_counted || field_named {
+        for (i, name) in FIELD_AXES.iter().enumerate() {
+            reads.push((
+                name,
+                Box::new(move |r: &Record| field_axis(r, name)),
+                inputs.seed ^ (11 + i as u64),
+            ));
+        }
+    }
+    for (name, f, seed) in reads {
         let (known, ma, mb, ratio, ci, method, pairs) = paired_axis(
             &recs,
             inputs.incumbent_arm,
             inputs.candidate_arm,
             |r| f(r),
             inputs.resamples,
-            inputs.seed ^ (name.len() as u64),
+            seed,
         );
         axes.push(AxisVerdict {
             axis: name.into(),
@@ -1008,18 +1077,7 @@ pub fn verdict(inputs: &VerdictInputs) -> Result<VerdictOutput, String> {
     } else {
         (on("better"), on("worse"))
     };
-    let level_moved = if outcome == "advances" && advances_on.iter().any(|a| a == "ops") {
-        Some(
-            if fits.exponent_moved == Some(true) {
-                "exponent"
-            } else {
-                "constant"
-            }
-            .to_string(),
-        )
-    } else {
-        None
-    };
+    let level_moved = level_of(outcome, &advances_on, fits.exponent_moved).map(String::from);
     let ops = &axes[0];
     let fmt_ci = |c: Option<(f64, f64)>| {
         c.map(|(l, h)| format!(" [{l:.3}, {h:.3}]"))
@@ -1233,6 +1291,54 @@ mod tests {
             ]),
             "advances"
         );
+    }
+
+    #[test]
+    fn the_level_is_named_from_the_axes_advanced_on() {
+        let v = |xs: &[&str]| xs.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        assert_eq!(
+            level_of("advances", &v(&["ops"]), Some(true)),
+            Some("exponent")
+        );
+        assert_eq!(
+            level_of("advances", &v(&["ops"]), Some(false)),
+            Some("constant")
+        );
+        assert_eq!(level_of("advances", &v(&["ops"]), None), Some("constant"));
+        // Operations held, the field work behind them fell: primitive.
+        assert_eq!(
+            level_of("advances", &v(&["field_sqrs"]), None),
+            Some("primitive")
+        );
+        assert_eq!(
+            level_of(
+                "advances",
+                &v(&["memory", "field_muls", "field_invs"]),
+                Some(true)
+            ),
+            Some("primitive")
+        );
+        // Ops among the axes names its own level even when field axes moved too.
+        assert_eq!(
+            level_of("advances", &v(&["ops", "field_sqrs"]), Some(false)),
+            Some("constant")
+        );
+        // Memory alone names no level; nothing but an advance does.
+        assert_eq!(level_of("advances", &v(&["memory"]), Some(true)), None);
+        assert_eq!(level_of("trade", &v(&["ops"]), Some(true)), None);
+        assert_eq!(level_of("matches", &[], None), None);
+        assert_eq!(level_of("inadmissible", &v(&["field_sqrs"]), None), None);
+    }
+
+    #[test]
+    fn a_challenge_may_name_a_field_axis_and_nothing_else_new() {
+        let mut c = challenge();
+        c.acceptance.axes = vec!["ops".into(), "field_sqrs".into()];
+        validate(&c).unwrap();
+        c.acceptance.axes = vec!["ops".into(), "field_cubes".into()];
+        assert!(validate(&c)
+            .unwrap_err()
+            .contains("unknown acceptance axis"));
     }
 
     #[test]

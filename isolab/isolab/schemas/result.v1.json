@@ -26,6 +26,7 @@
         "policy": {"enum": ["strict", "standard", "best_effort"]},
         "grade": {"enum": ["A", "B", "C", "D", "none"]},
         "contended": {"type": "boolean"},
+        "shared_host": {"type": "boolean", "description": "another slot's job ran during a summarised repeat; caps the grade at B"},
         "checks": {"type": "array", "items": {
           "type": "object", "required": ["name", "phase", "status"],
           "properties": {

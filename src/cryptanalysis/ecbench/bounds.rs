@@ -548,6 +548,38 @@ pub fn uncharged_work(r: &Record) -> f64 {
     total as f64 / (r.workload.curve.r as f64).sqrt()
 }
 
+/// The primitive-level axes: modular multiplications, squarings and
+/// inversions behind the group operations, per `√r`, read from a record's
+/// `field_ops` block.  A bound carries them only when every verified run
+/// of the arm reports the block (prime-field curves through the generic
+/// walks and tables); a verdict reports them always and lets them decide
+/// only when the challenge names them.
+pub const FIELD_AXES: &[&str] = &["field_muls", "field_sqrs", "field_invs"];
+
+/// What a field axis counts, for the record's `statistic` and `source`.
+pub fn field_axis_describes(axis: &str) -> Option<(&'static str, &'static str)> {
+    match axis {
+        "field_muls" => Some(("field multiplications", "field_ops.muls")),
+        "field_sqrs" => Some(("field squarings", "field_ops.sqrs")),
+        "field_invs" => Some(("field inversions", "field_ops.invs")),
+        _ => None,
+    }
+}
+
+/// One field axis of a run as a multiple of `√r`, or `None` when the
+/// record carries no field-operation block (unknown, not zero) or `axis`
+/// is not one of [`FIELD_AXES`].
+pub fn field_axis(r: &Record, axis: &str) -> Option<f64> {
+    let f = r.field_ops.as_ref()?;
+    let count = match axis {
+        "field_muls" => f.muls,
+        "field_sqrs" => f.sqrs,
+        "field_invs" => f.invs,
+        _ => return None,
+    };
+    Some(count as f64 / (r.workload.curve.r as f64).sqrt())
+}
+
 /// What `bound fit` reads besides the sessions.
 pub struct FitInputs<'a> {
     pub dirs: &'a [PathBuf],
@@ -891,6 +923,42 @@ pub fn bound_from_sessions(inputs: &FitInputs) -> Result<Bound, String> {
             ci95: u_est.as_ref().and_then(|e| e.ci95),
         },
     );
+    // The field-operation axes, with the same two-stage interval, only
+    // when there are verified runs and every one of them carries the
+    // block.  Otherwise nothing is added — not an unknown axis — so a
+    // bound fitted from records written before the block existed is
+    // byte for byte the bound it was.
+    for (i, axis) in FIELD_AXES.iter().enumerate() {
+        let mut strata: Vec<Vec<f64>> = Vec::new();
+        let mut known = !verified.is_empty();
+        for row in &sizes {
+            let mine: Vec<&&Record> = verified
+                .iter()
+                .filter(|r| r.workload.curve.slug == row.slug)
+                .collect();
+            let vals: Vec<f64> = mine.iter().filter_map(|r| field_axis(r, axis)).collect();
+            if vals.len() != mine.len() {
+                known = false;
+            }
+            strata.push(vals);
+        }
+        if !known {
+            continue;
+        }
+        let (what, source) = field_axis_describes(axis).expect("a field axis");
+        let est = estimate(&strata, opts.resamples, opts.seed ^ (0x11 + 2 * i as u64));
+        dimensions.insert(
+            axis.to_string(),
+            Dimension {
+                statistic: format!("mean {what} / sqrt(r) over verified runs"),
+                source: format!("{source}, workload.curve.r"),
+                lower_is_better: true,
+                known: est.is_some(),
+                value: est.as_ref().map(|e| e.value),
+                ci95: est.as_ref().and_then(|e| e.ci95),
+            },
+        );
+    }
 
     // Stages.
     let mut names: Vec<String> = Vec::new();

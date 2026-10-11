@@ -522,6 +522,7 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
         strategy: DecompositionStrategy::Sat,
         engine: SolverEngine::default(),
         f6_ic: false,
+        f6_pair_index: false,
         // Caller-owned precomputation that this panel does not use; the field
         // was added to KoblitzIcOptions without updating this initializer.
         weil_charts: None,
@@ -534,7 +535,9 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
             restrict_to_factor_base: true,
             trace_constraint: true,
             conflict_budget: profile.conflict_budget(),
+            wall_budget: None,
             symmetry_breaking: false,
+            wall_budget: None,
         },
         collapse_negation: true,
         stop_on_verified_rank: true,

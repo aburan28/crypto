@@ -924,7 +924,7 @@ pub fn symmetrised_groebner_decompose_accepting(
         n_vars: sys.n_vars,
         n_equations: sys.equations.len(),
         degree: system_degree(&sys.equations),
-        effort: stats.splits as u64,
+        effort: stats.effort() as u64,
         built_degree: stats.max_degree_built,
         oversize: stats.oversize,
     })
@@ -972,7 +972,7 @@ pub fn direct_x_groebner_decompose(
         n_vars,
         n_equations: equations.len(),
         degree: system_degree(&equations),
-        effort: stats.splits as u64,
+        effort: stats.effort() as u64,
         built_degree: stats.max_degree_built,
         oversize: stats.oversize,
     })

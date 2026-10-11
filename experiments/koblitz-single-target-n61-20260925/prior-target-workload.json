@@ -1,0 +1,25 @@
+{
+  "workload_id": "dc3bf2cde46d",
+  "curve_id": "EC1N61Ckb1hd0e02e3be112",
+  "target_count": 1,
+  "targets": [
+    {
+      "encoding": "public point Q coordinates",
+      "Q": [
+        1588112318113170368,
+        826967756768709220
+      ]
+    }
+  ],
+  "input_law": "fixed public synthetic target point; supplied directly; scalar is validation-only external sidecar",
+  "target_generation": "not applicable to timed solver input; fixture scalar is not supplied to IC",
+  "cache_policy": "warm target query: factor base, root index, and factor-base logs are ready before online clock",
+  "resource_limit": "single process per invocation; one IC target and one rho target solve; same machine",
+  "target_seed": "not_applicable; exact public point frozen",
+  "rho_walk_seeds": [
+    20260925,
+    20260926,
+    20260927
+  ],
+  "repetitions": 3
+}

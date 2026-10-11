@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "kind": "factor_base_n53_independent_validation_receipt",
+  "generated_at": "2026-09-15T13:08:49Z",
+  "original_run_id": "20260915T122253Z-229f0ee245",
+  "claim_check_original": "PASS",
+  "original": {
+    "F": 19928,
+    "K": 188,
+    "base_hash": "e2c0276a010a4787cdd617043ad9833a528c919e9e3882b7de377a0e9e4f7015",
+    "construction_wall_ms": 2238.314125,
+    "whole_process_wall_ms": 175518.599583,
+    "retained_bytes": 74906400,
+    "support_table_allocated_bytes": 83886080,
+    "frobenius_closed": true,
+    "negation_closed": true,
+    "seed": {
+      "direct": 13655157592039865889
+    },
+    "point_selection": "point_defined / coordinate-order (seed-independent factor base)"
+  },
+  "same_seed_replay": {
+    "note": "Producer replay; factor_base_seed observed from JSONL (point-defined construction).",
+    "factor_base_seed_observed": 15111065706836454659,
+    "fixture_seed_observed": 2353860850721137779,
+    "F": 19928,
+    "K": 188,
+    "hash": "e2c0276a010a4787cdd617043ad9833a528c919e9e3882b7de377a0e9e4f7015",
+    "frobenius_closed": true,
+    "negation_closed": true,
+    "subgroup_membership_verified": true,
+    "total_setup_ms": 2279.747833,
+    "support_table_allocated_bytes": 83886080,
+    "whole_process_wall_s": 175.91,
+    "match_F": true,
+    "match_K": true,
+    "match_hash": true,
+    "match_closures": true,
+    "relation_path": {
+      "admitted_relations": 273,
+      "full_rank_at_relation": 241,
+      "linear_solution_verified": true,
+      "all_relations_group_verified": true,
+      "recovered_fixture_scalar": 15386236969683
+    }
+  },
+  "second_seed_replay": {
+    "note": "Second fixture seed changes relation collection only. Factor base is point-defined, so F/K/base_hash remain invariant \u2014 expected.",
+    "requested_seed_tag": 2026091512550000001,
+    "factor_base_seed_observed": 15111065706836454659,
+    "fixture_seed_observed": 6163735209766355293,
+    "F": 19928,
+    "K": 188,
+    "hash": "e2c0276a010a4787cdd617043ad9833a528c919e9e3882b7de377a0e9e4f7015",
+    "frobenius_closed": true,
+    "negation_closed": true,
+    "total_setup_ms": 2275.4218330000003,
+    "whole_process_wall_s": 270.0,
+    "match_factor_base_to_original": true,
+    "fixture_seed_differs_from_same_seed": true,
+    "relation_path": {
+      "admitted_relations": 440,
+      "full_rank_at_relation": null,
+      "linear_solution_verified": false,
+      "all_relations_group_verified": true,
+      "recovered_fixture_scalar": null
+    }
+  },
+  "verdict": "CONSTRUCTION_INDEPENDENTLY_REPLAYED",
+  "ledger_promotion": false,
+  "claim_boundary": "Independent producer replay of public-synthetic factor_base n53 construction only. Same-seed F/K/base_hash/closures match draft. Point-defined base is seed-invariant. Not ledger promotion, not vs_rho, not key recovery.",
+  "claim_boundary_non_claims": [
+    "not key recovery",
+    "not asymptotic sub-sqrt",
+    "not imported/external points",
+    "not ledger promotion",
+    "not vs_rho win"
+  ]
+}

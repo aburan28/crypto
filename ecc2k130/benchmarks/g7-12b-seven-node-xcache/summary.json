@@ -1,0 +1,116 @@
+{
+  "correctness": {
+    "xcache_5": {
+      "actual_walk_launches": 1088,
+      "actual_walk_scenarios": 136,
+      "cpu_replays": 64,
+      "dp_records": 38835,
+      "drops": 0,
+      "memcheck": "passed",
+      "shared_initcheck": "passed"
+    },
+    "xcache_6": {
+      "actual_walk_launches": 1088,
+      "actual_walk_scenarios": 136,
+      "cpu_replays": 64,
+      "dp_records": 38835,
+      "drops": 0,
+      "memcheck": "passed",
+      "shared_initcheck": "passed"
+    }
+  },
+  "experiment": "seven-node shared-X cache",
+  "full_dlp_S": null,
+  "generic_work_boundary": "sqrt(n/262)",
+  "generic_work_ratio": 1,
+  "goal_billion_updates_per_second": 12,
+  "goal_met": false,
+  "gpu_uuid": "GPU-827e82b5-4739-d339-d95e-b7214337553e",
+  "hardware_key": "1f924b694c2e82c4fb97249871bafb50f5ab75057f69c87cc45661d87529a2e7",
+  "passed": true,
+  "raw_labels": [
+    "timing-r0-selected",
+    "timing-r0-xcache-4",
+    "timing-r0-xcache-5",
+    "timing-r0-xcache-6",
+    "timing-r1-xcache-6",
+    "timing-r1-xcache-5",
+    "timing-r1-xcache-4",
+    "timing-r1-selected",
+    "timing-r2-xcache-4",
+    "timing-r2-selected",
+    "timing-r2-xcache-6",
+    "timing-r2-xcache-5"
+  ],
+  "rows": [
+    {
+      "decision": "reference",
+      "median_billion_updates_per_second": 6.26243,
+      "paired_geomean_speedup": 1.0,
+      "paired_speedup_95_ci": [
+        1.0,
+        1.0
+      ],
+      "rate_over_12b": 0.5218691666666667,
+      "rates": [
+        6.379309,
+        6.26243,
+        6.235024999999999
+      ],
+      "variant": "selected"
+    },
+    {
+      "decision": "unconfirmed or regression",
+      "median_billion_updates_per_second": 6.243798,
+      "paired_geomean_speedup": 0.9956992217290567,
+      "paired_speedup_95_ci": [
+        0.9870722464468114,
+        1.0044015964593043
+      ],
+      "rate_over_12b": 0.5203165,
+      "rates": [
+        6.326685,
+        6.243798,
+        6.224639
+      ],
+      "variant": "xcache-4"
+    },
+    {
+      "decision": "unconfirmed or regression",
+      "median_billion_updates_per_second": 6.295065999999999,
+      "paired_geomean_speedup": 1.0002498972766771,
+      "paired_speedup_95_ci": [
+        0.989534866336322,
+        1.0110809543339065
+      ],
+      "rate_over_12b": 0.5245888333333333,
+      "rates": [
+        6.360939,
+        6.295065999999999,
+        6.225278
+      ],
+      "variant": "xcache-5"
+    },
+    {
+      "decision": "unconfirmed or regression",
+      "median_billion_updates_per_second": 6.37405,
+      "paired_geomean_speedup": 1.009801189579386,
+      "paired_speedup_95_ci": [
+        0.9914279341523308,
+        1.0285149402692424
+      ],
+      "rate_over_12b": 0.5311708333333334,
+      "rates": [
+        6.398645,
+        6.37405,
+        6.288671
+      ],
+      "variant": "xcache-6"
+    }
+  ],
+  "selected_binary_sha256": "8c4ed76a152cc135280a68fd3559c3bf71bef726ab73eae0e04014c2e27c6d02",
+  "selected_decision": "retain selected executable; no candidate CI lower bound exceeds 1",
+  "timing_samples": 12,
+  "unit": "billion_complete_scalar_updates_per_second",
+  "updates_per_sample": 34359738368
+}

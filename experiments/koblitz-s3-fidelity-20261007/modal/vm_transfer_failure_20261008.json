@@ -1,0 +1,12 @@
+{
+  "kind": "modal_vm_s3_panel_transfer_failure_v1",
+  "date_local": "2026-10-08",
+  "sandbox_id": "sb-hOQMtnhoWPSnxE3dxu8g2C",
+  "attempted_targets_per_curve": 12,
+  "transfer_method": "gzip+base64 via Sandbox stdout after process exit",
+  "error": "EOFError: Compressed file ended before the end-of-stream marker was reached",
+  "raw_panel_available": false,
+  "run_status": "unverified_transfer_failure",
+  "included_in_statistics": false,
+  "follow_up": "A six-megabyte temporary-Volume transfer test passed; the full panel was rerun with a Volume and its complete raw ledger was hashed before analysis."
+}

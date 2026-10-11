@@ -218,11 +218,17 @@ pub fn koblitz(a: u8, n: u32, modulus: &BigUint, order: &BigUint) -> Option<Curv
 }
 
 /// `y² = x³ + a·x + b` over `GF(p)`, `p` an odd prime above 3.
-pub fn prime(p: &BigUint, a: &BigUint, b: &BigUint, order: &BigUint) -> Option<CurveId> {
+fn prime_identity(
+    p: &BigUint,
+    a: &BigUint,
+    b: &BigUint,
+    order: &BigUint,
+    j: &BigUint,
+) -> Option<CurveId> {
     let (a, b) = (a % p, b % p);
     let a3 = a.modpow(&BigUint::from(3u8), p);
     let disc = (BigUint::from(4u8) * &a3 + BigUint::from(27u8) * &b * &b) % p;
-    if disc.is_zero() || !hasse_ok(p, order) {
+    if disc.is_zero() || j >= p || !hasse_ok(p, order) {
         return None;
     }
     let field = format!("fp-{p}");
@@ -230,8 +236,6 @@ pub fn prime(p: &BigUint, a: &BigUint, b: &BigUint, order: &BigUint) -> Option<C
         r#"{{"a":"{a}","b":"{b}","field":"{field}","form":"y^2=x^3+a*x+b","p":"{p}","v":"{VERSION}"}}"#
     );
     let trace = BigInt::from(p.clone()) + 1 - BigInt::from(order.clone());
-    let inv = disc.modpow(&(p - BigUint::from(2u8)), p);
-    let j = (BigUint::from(1728u32 * 4) * a3 * inv) % p;
     Some(identity(
         &field,
         &format!("fp{}", p.bits()),
@@ -241,6 +245,33 @@ pub fn prime(p: &BigUint, a: &BigUint, b: &BigUint, order: &BigUint) -> Option<C
         "unk",
         model_json,
     ))
+}
+
+pub fn prime(p: &BigUint, a: &BigUint, b: &BigUint, order: &BigUint) -> Option<CurveId> {
+    let (a, b) = (a % p, b % p);
+    let a3 = a.modpow(&BigUint::from(3u8), p);
+    let disc = (BigUint::from(4u8) * &a3 + BigUint::from(27u8) * &b * &b) % p;
+    if disc.is_zero() {
+        return None;
+    }
+    let inv = disc.modpow(&(p - BigUint::from(2u8)), p);
+    let j = (BigUint::from(1728u32 * 4) * a3 * inv) % p;
+    prime_identity(p, &a, &b, order, &j)
+}
+
+/// Build the prime-field identity when the caller has already recomputed and
+/// checked the model's j-invariant.  This avoids a second full-width inversion
+/// in streaming verifiers that have just evaluated [`Model::j`](crate::cryptanalysis::isogeny_walk::curve::Model::j).
+/// The model is still rejected when it is singular, outside the Hasse interval,
+/// or `j` is not a canonical field element.
+pub fn prime_with_verified_j(
+    p: &BigUint,
+    a: &BigUint,
+    b: &BigUint,
+    order: &BigUint,
+    j: &BigUint,
+) -> Option<CurveId> {
+    prime_identity(p, a, b, order, j)
 }
 
 /// The comparison key for a spelling: case, whitespace, braces,

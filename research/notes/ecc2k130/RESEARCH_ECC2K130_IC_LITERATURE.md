@@ -227,6 +227,56 @@ changed four things.  The survey text above is left as it was, except that
   (2016, §9.2) call exploiting larger symmetry groups in the chain "an open
   problem".  That is absence in 10 sources, not evidence of absence.
 
+## Addendum, 2026-10-07: which `ω` §2's formula may use
+
+§2 evaluates the Kousidis–Wiemers formula at `ω = log₂ 7`.  The formula is
+linear in `ω` (`c = 2ω/3`), and two new upper bounds on `ω` from a corpus
+review (`ECDLP_REVIEW.md` §6, `openai/math`, not vendored here) raise the
+question of which `ω` a characteristic-2 cost may use.
+[`src/cryptanalysis/matmul_exponent.rs`](../../../src/cryptanalysis/matmul_exponent.rs)
+now records each bound with its construction, proof status and
+characteristic scope, and evaluates both §2 formulas.  `icx estimate` prints
+the table for every curve over `F_{2^n}`.  At `n = 131` (`icx estimate
+sect131r1`):
+
+| `ω` bound | construction | in characteristic 2 | `log₂ T` at `n = 131` | turning point `n` |
+|---|---|---|---|---|
+| `3` (schoolbook) | practical | established | 91.95 | 1696 |
+| `log₂ 7` (Strassen; §2's value) | practical | established | 86.05 | 1144 |
+| `< 2.371339` (Alman et al., SODA 2025) | galactic | established | 72.68 | 357 |
+| `< 2.258` (corpus) | existence only | **undetermined** | 69.21 | 235 |
+| `≤ 9/4` (corpus family 107) | existence only | **conditional** | 68.96 | 227 |
+
+Generic `2^{n/2}` is `2^65.5`; the rho reference is `2^60.8`.
+
+- **Characteristic 2.**  The `2.258` bound transfers from characteristic 0
+  by a Nullstellensatz descent whose excluded primes divide a denominator it
+  never computes, so it cannot be applied at `p = 2`.  The `9/4` bound's
+  only characteristic-dependent step is a root-of-unity separation that
+  needs an `L`-th root of unity with `L` invertible.  Any odd `L | 2^k − 1`
+  supplies one, so the bound holds in characteristic 2 **if** its
+  characteristic-0 proof is right.  Nobody here has verified that proof.
+  The module's tests run the separation step on every field from `GF(2^3)`
+  to `GF(2^18)`.
+- **At `n = 131` nothing changes.**  The table is a model under the
+  contested first-fall-degree assumption (§1).  Even at `ω = 9/4` it gives
+  `2^69.0`, above both generic and rho.  §2's "about `2^25` short" becomes
+  about `2^8` short, and only at an exponent no algorithm reaches.
+- **The turning point is what moves.**  The heuristic and `n/2` are nearly
+  parallel where they cross, so the 5.1% smaller constant from `9/4`
+  against the best published bound moves the crossing from `n = 357` to
+  `n = 227`.  That is below the deployed binary fields `233`, `239`, `283`,
+  `409` and `571`.
+  - This is the formula evaluated at an existence-only exponent under a
+    contested assumption, not an attack.
+  - The galactic `2.371339` row already crosses below `409` and `571`.
+  - It is recorded rather than dismissed, per AGENTS.md's intermediate-cost
+    rule.
+- **Correction of convention, not of result.**  §2's turning points
+  (`≈ 1250`, `≈ 2000`) are the papers' rounded figures.  The exact crossings
+  of the formulas at `ω = log₂ 7` are `n = 1144` (Kousidis–Wiemers) and
+  `n = 1876` (Petit–Quisquater).
+
 ## Honest limits
 
 - This is a literature survey, not a result. It says what has been

@@ -48,11 +48,14 @@ empirical pattern (INDOCRYPT 2014, §4) for `S_3` over small `n`.
 
 ## Why it matters for the "FFD controversy"
 
-Huang–Kiltz–Petit (Crypto 2015) conjectured an `O(log n)` FFD for
-Semaev systems, which would give a quasi-polynomial classical attack.
-Galbraith and Petit pushed back: their experiments showed the FFD
-*looks* like a small constant at small `n`, but extrapolation is
-unsafe because the constant of proportionality jumps.
+Petit–Quisquater (ASIACRYPT 2012) assumed the solving degree tracks the
+first fall degree, which for Semaev systems gives a subexponential
+attack. Huang–Kosters–Yeo (CRYPTO 2015) introduced the last fall degree
+and raised doubt on that assumption, and Kosters–Yeo showed the `S_3`
+first fall degree is generically 2 for a structural reason (a trace
+morphism), far below any solving degree. The FFD *looks* like a small
+constant at small `n`, but extrapolation is unsafe. Proved bounds on
+both degrees are ledgered in `RESEARCH_FALL_DEGREE_BOUNDS.md`.
 
 This harness lets you **run the experiment yourself** in a few
 seconds.  At `n = 7` the Macaulay matrix at `D = 4` already has 742
@@ -85,12 +88,13 @@ exactly the regime the controversy lives in.
 
 ## References
 
-- M.-D. Huang, M. Kiltz, C. Petit, *Last fall degree, HFE, and Weil
+- M.-D. Huang, M. Kosters, S. L. Yeo, *Last fall degree, HFE, and Weil
   descent attacks on ECDLP*, Crypto 2015.
 - S. Galbraith, S. Gebregiyorgis, *Summation polynomial algorithms for
   elliptic curves in characteristic two*, INDOCRYPT 2014.
-- C. Petit, *Notes on summation polynomials*, 2015 — the "backlash"
-  the harness here is calibrated against.
+- M. Kosters, S. L. Yeo, *Notes on summation polynomials*,
+  arXiv:1503.08001, 2015 — the "backlash" the harness here is
+  calibrated against.
 - J.-C. Faugère, L. Perret, C. Petit, G. Renault, *Improving the
   complexity of index calculus algorithms in elliptic curves over
   binary fields*, EUROCRYPT 2012.

@@ -116,3 +116,28 @@ size regresses. A rejected B0 is fixed and declared again.
   later arms carry its change.
 - **Nothing else changes:** the acceptance rule, the A/A bands and the
   other measurements.
+
+## Amendment 2 (2026-10-05, before any measurement)
+
+**B0 is measured on main's head, with native tools.**
+- **Why.** R07 re-bases the programme on main's head, `995ea207`.
+  AGENTS.md also excludes Python from the programme's tooling
+  (plan §10a).
+- **B0's arm** is `tbarm-B0` (`2177afa8`). Each step's arm is one merge of
+  that step's tip into the arm before it, starting from main's head.
+  The arms are on record in
+  [`../../track-b/stack-20261005-main.bundle`](../../track-b/stack-20261005-main.bundle),
+  and [`../../track-b/README.md`](../../track-b/README.md) states the rules
+  that resolve their conflicts.
+- **The base** is main's head, `995ea207`: v3, if R07 accepts it. No
+  Track B run starts before R07's decision. If R07 is not accepted, this
+  amendment is revisited first.
+- **The runners.** `icprog conformance` replaces `conformance/run.py`,
+  and `icprog bround` replaces `harness/bround.py`. Each keeps the
+  script's steps and rules.
+- **The A/A bands.** This host is not R01's, so the bands are the run's
+  own, as the acceptance rule already allows. `icprog bround aa` runs
+  the base against a byte-identical copy, on `M1`'s 22 rows, five
+  rounds, in the chain's run tree.
+- **The chain** gains B4 after B3b, as B4's protocol declares.
+- **Nothing else changes:** the cases, the pins, the acceptance rules.

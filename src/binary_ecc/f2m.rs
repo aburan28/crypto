@@ -565,8 +565,10 @@ impl F2mElement {
         Some(beta.square(irreducible))
     }
 
-    /// Internal: construct from a `&[u64]` raw word slice.
-    fn from_words(words: &[u64], m: u32) -> Self {
+    /// Construct from little-endian 64-bit words, the layout
+    /// [`F2mElement::raw_bits`] returns.  Words and bits beyond `m` are
+    /// dropped.
+    pub fn from_words(words: &[u64], m: u32) -> Self {
         let mut e = Self::zero(m);
         for (b, w) in e.bits.iter_mut().zip(words) {
             *b = *w;
@@ -660,16 +662,14 @@ fn split_at(bits: &[u64], at: u32) -> (Vec<u64>, Vec<u64>) {
                 low.push(bits[i] & mask);
                 high.push(bits[i] >> bit_at);
             }
+        } else if bit_at == 0 {
+            high.push(bits[i]);
         } else {
-            if bit_at == 0 {
-                high.push(bits[i]);
-            } else {
-                // bits[i] contributes to high at offset (i - word_at).
-                if let Some(last) = high.last_mut() {
-                    *last ^= bits[i] << (64 - bit_at);
-                }
-                high.push(bits[i] >> bit_at);
+            // bits[i] contributes to high at offset (i - word_at).
+            if let Some(last) = high.last_mut() {
+                *last ^= bits[i] << (64 - bit_at);
             }
+            high.push(bits[i] >> bit_at);
         }
     }
     if low.is_empty() {

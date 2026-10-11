@@ -1,0 +1,57 @@
+{
+ "schema_version": 2,
+ "name": "B5a G1: icv1-fp9k3-tm4575-aba104ba, a known logarithm's multiple",
+ "field": {
+  "kind": "prime_extension",
+  "p": "271",
+  "degree": 3,
+  "modulus": [
+   "269",
+   "0",
+   "0"
+  ]
+ },
+ "curve": {
+  "form": "short_weierstrass",
+  "a": [
+   "168",
+   "59",
+   "35"
+  ],
+  "b": [
+   "212",
+   "72",
+   "29"
+  ]
+ },
+ "subgroup": {
+  "order": "19907087",
+  "cofactor": "1",
+  "generator": {
+   "x": [
+    "14",
+    "102",
+    "40"
+   ],
+   "y": [
+    "152",
+    "203",
+    "44"
+   ]
+  }
+ },
+ "target": {
+  "known_log": "13736502"
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "auto",
+   "recipe": "auto"
+  },
+  "rho": {
+   "pipeline": "auto",
+   "seed": 2293761
+  }
+ }
+}

@@ -1,0 +1,239 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index 0e92a514a..348b60eee 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -4309,6 +4309,165 @@ impl PairSumTable {
+         (bucket_start, rests, present, present_mask)
+     }
+ 
++    /// Widest bucket index [`Self::fold_partitioned_tagged`] takes: a
++    /// bucket's place inside its partition must fit sixteen bits beside
++    /// the hash's sixteen.  Every table the partitioned tier admits
++    /// does, since that tier stops at [`Self::FOLD_PARTITION_BYTES`].
++    const TAGGED_STREAM_BUCKET_BITS: u32 = 24;
++
++    /// [`Self::fold_partitioned`] for a tagged table, at four bytes a
++    /// pair in flight rather than twelve.
++    ///
++    /// A tagged word is the orbit of the row's summand over the low
++    /// sixteen bits of the key's hash, and a partition's stream holds a
++    /// row's pairs together and in row order.  So an entry need hold only
++    /// the bucket's place inside its partition and those sixteen bits;
++    /// the orbit comes back from how many entries each row put in each
++    /// partition.  The presence filter, which needs the whole hash, is
++    /// set as each pair is keyed.  Each run writes one stream a
++    /// partition, a region of one buffer, spilling past it only when a
++    /// partition exceeds its share by six standard deviations.
++    ///
++    /// Memory the build first touches is what costs here: on this
++    /// programme's host a page fault costs about 2.3 µs, a third of a
++    /// nanosecond a byte.  The table is [`Self::fold_partitioned`]'s,
++    /// word for word.
++    #[allow(clippy::type_complexity)]
++    fn fold_partitioned_tagged(
++        row_lens: &[usize],
++        row_orbits: &[u32],
++        bucket_bits: u32,
++        each_row: &(dyn Fn(usize, &mut dyn FnMut(&[u64], u32)) + Sync),
++    ) -> (Vec<u32>, Vec<u32>, Vec<u64>, u64) {
++        struct Run {
++            rows: std::ops::Range<usize>,
++            room: usize,
++            entries: Vec<u32>,
++            lens: Vec<usize>,
++            spill: Vec<Vec<u32>>,
++            /// Entries row `rows.start + i` put in partition `p`, at
++            /// `i * parts + p`.
++            counts: Vec<u32>,
++        }
++        assert!(bucket_bits <= Self::TAGGED_STREAM_BUCKET_BITS);
++        let rows = row_lens.len();
++        let total: usize = row_lens.iter().sum();
++        let bucket_shift = 64 - bucket_bits;
++        let buckets = 1usize << bucket_bits;
++        let part_bits = bucket_bits.min(8);
++        let parts = 1usize << part_bits;
++        let part_shift = 64 - part_bits;
++        let per_part = buckets / parts;
++        let filter_bits = filter_bits_for(total);
++        let present_mask = (1u64 << filter_bits) - 1;
++        let present_atomic: Vec<AtomicU64> = (0..(1usize << filter_bits) / 64)
++            .map(|_| AtomicU64::new(0))
++            .collect();
++        // 1. Every row keyed once, straight into its run's streams.
++        let runs = rayon::current_num_threads().clamp(1, rows.max(1));
++        let per_run = rows.div_ceil(runs);
++        let streams: Vec<Run> = (0..runs)
++            .into_par_iter()
++            .map(|run| {
++                let here = (run * per_run).min(rows)..((run + 1) * per_run).min(rows);
++                let mean = row_lens[here.clone()].iter().sum::<usize>() / parts;
++                let room = mean + 6 * (mean as f64).sqrt() as usize + 16;
++                let mut entries = vec![0u32; parts * room];
++                let mut lens = vec![0usize; parts];
++                let mut spill: Vec<Vec<u32>> = vec![Vec::new(); parts];
++                let mut counts = Vec::with_capacity(here.len() * parts);
++                let mut row_counts = vec![0u32; parts];
++                for r in here.clone() {
++                    row_counts.fill(0);
++                    each_row(r, &mut |keys, _| {
++                        for &key in keys {
++                            let h = pair_filter_hash(key);
++                            let p = (h >> part_shift) as usize;
++                            let place = ((h >> bucket_shift) as usize) & (per_part - 1);
++                            let entry = ((place as u32) << 16) | (h as u32 & 0xffff);
++                            let len = lens[p];
++                            if len < room {
++                                entries[p * room + len] = entry;
++                                lens[p] = len + 1;
++                            } else {
++                                spill[p].push(entry);
++                            }
++                            row_counts[p] += 1;
++                            let (word, bits) = filter_slot(h, present_mask, FILTER_EXTRA);
++                            present_atomic[word].fetch_or(bits, Ordering::Relaxed);
++                        }
++                    });
++                    counts.extend_from_slice(&row_counts);
++                }
++                Run {
++                    rows: here,
++                    room,
++                    entries,
++                    lens,
++                    spill,
++                    counts,
++                }
++            })
++            .collect();
++        let entry = |s: &Run, p: usize, k: usize| {
++            if k < s.lens[p] {
++                s.entries[p * s.room + k]
++            } else {
++                s.spill[p][k - s.lens[p]]
++            }
++        };
++        let mut part_start = vec![0usize; parts + 1];
++        for p in 0..parts {
++            let len: usize = streams.iter().map(|s| s.lens[p] + s.spill[p].len()).sum();
++            part_start[p + 1] = part_start[p] + len;
++        }
++        // 2. Each partition counting-sorted into its own bucket range,
++        // each word made from its row's orbit as the rows are replayed.
++        let mut bucket_start = vec![0u32; buckets + 1];
++        let mut rests = vec![0u32; total];
++        let rp = rests.as_mut_ptr() as usize;
++        bucket_start[..buckets]
++            .par_chunks_mut(per_part)
++            .enumerate()
++            .for_each(|(p, starts)| {
++                let mut at = vec![0usize; per_part];
++                for s in &streams {
++                    for k in 0..s.lens[p] + s.spill[p].len() {
++                        at[(entry(s, p, k) >> 16) as usize] += 1;
++                    }
++                }
++                let mut next = part_start[p];
++                for (b, slot) in at.iter_mut().enumerate() {
++                    starts[b] = next as u32;
++                    let n = *slot;
++                    *slot = next;
++                    next += n;
++                }
++                for s in &streams {
++                    let mut k = 0;
++                    for (i, r) in s.rows.clone().enumerate() {
++                        let tag = row_orbits[r] << 16;
++                        for _ in 0..s.counts[i * parts + p] {
++                            let e = entry(s, p, k);
++                            k += 1;
++                            let b = (e >> 16) as usize;
++                            // SAFETY: partition `p` owns
++                            // `rests[part_start[p]..part_start[p + 1]]`, and
++                            // its bucket cursors stay inside it.
++                            unsafe { *(rp as *mut u32).add(at[b]) = tag | (e & 0xffff) };
++                            at[b] += 1;
++                        }
++                    }
++                }
++            });
++        bucket_start[buckets] = total as u32;
++        let present = present_atomic
++            .iter()
++            .map(|w| w.load(Ordering::Relaxed))
++            .collect();
++        (bucket_start, rests, present, present_mask)
++    }
++
+     pub fn build_folded_within(
+         kc: &KoblitzCurve,
+         fb: &FrobeniusFactorBase,
+@@ -4435,7 +4594,12 @@ impl PairSumTable {
+                 .iter()
+                 .map(|&(orbit, _)| n_points - suffix[orbit as usize] as usize)
+                 .collect();
+-            Self::fold_partitioned(&row_lens, bucket_bits, tagged, &each_row)
++            if tagged && bucket_bits <= Self::TAGGED_STREAM_BUCKET_BITS {
++                let row_orbits: Vec<u32> = reps.iter().map(|&(orbit, _)| orbit).collect();
++                Self::fold_partitioned_tagged(&row_lens, &row_orbits, bucket_bits, &each_row)
++            } else {
++                Self::fold_partitioned(&row_lens, bucket_bits, tagged, &each_row)
++            }
+         } else {
+             let counts: Vec<AtomicU32> = (0..buckets + 1).map(|_| AtomicU32::new(0)).collect();
+             (0..reps.len()).into_par_iter().for_each(|r| {
+@@ -14571,6 +14735,54 @@ mod tests {
+         }
+     }
+ 
++    #[test]
++    fn the_tagged_stream_build_stores_the_twelve_byte_build_word_for_word() {
++        // Synthetic rows: keys from a fixed stream, rows of every length
++        // from none up, and one row whose keys all hash into partition 0,
++        // so that partition's stream overflows into its spill.
++        let mix = |x: u64| {
++            let mut z = x.wrapping_add(0x9e37_79b9_7f4a_7c15);
++            z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
++            z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
++            z ^ (z >> 31)
++        };
++        for bucket_bits in [3u32, 9, 12, 17] {
++            let part_shift = 64 - bucket_bits.min(8);
++            let crowded: Vec<u64> = (0u64..)
++                .map(mix)
++                .filter(|&k| pair_filter_hash(k) >> part_shift == 0)
++                .take(4000)
++                .collect();
++            let mut rows: Vec<Vec<u64>> = (0..40u64)
++                .map(|r| (0..r * 37).map(|i| mix((r << 32) | i)).collect())
++                .collect();
++            rows.insert(7, crowded);
++            let row_lens: Vec<usize> = rows.iter().map(Vec::len).collect();
++            let row_orbits: Vec<u32> = (0..rows.len() as u32)
++                .map(|r| r.wrapping_mul(2_654_435_761) >> 16)
++                .collect();
++            let each_row = |r: usize, f: &mut dyn FnMut(&[u64], u32)| f(&rows[r], row_orbits[r]);
++            for threads in [1, 3] {
++                let pool = rayon::ThreadPoolBuilder::new()
++                    .num_threads(threads)
++                    .build()
++                    .unwrap();
++                let (want, got) = pool.install(|| {
++                    (
++                        PairSumTable::fold_partitioned(&row_lens, bucket_bits, true, &each_row),
++                        PairSumTable::fold_partitioned_tagged(
++                            &row_lens,
++                            &row_orbits,
++                            bucket_bits,
++                            &each_row,
++                        ),
++                    )
++                });
++                assert_eq!(got, want, "{bucket_bits} bucket bits, {threads} threads");
++            }
++        }
++    }
++
+     #[test]
+     fn a_folded_table_loads_from_its_own_words_in_any_order() {
+         let kc = KoblitzCurve::new(0, 31).unwrap();

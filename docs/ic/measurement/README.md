@@ -458,6 +458,9 @@ lands in `TASKQ_OUTPUT_DIR` with its own capsule.
   schemas.
 - [`specs/`](specs): specifications.
 - [`sessions/`](sessions): frozen sessions the page cites.
+- `reports/<session>/`: each session's run report, graph and PDF, kept
+  outside the add-only `sessions/` tree (the `research-visuals` skill,
+  "Every experiment run").
 - [`audit.json`](audit.json): the comparability findings that motivated
   this standard, each with its evidence path.
 - [`tools/icms/`](../../../tools/icms): the implementation and its tests.

@@ -1,0 +1,38 @@
+{
+  "status": "complete-map-pipelined-classification-screen",
+  "checkpoint_mismatches": {
+    "pipeline": 0
+  },
+  "collision_work_ratio_vs_selected": 1.0066958832826605,
+  "rows": [
+    {
+      "variant": "bridge13",
+      "rates_billion_per_second": [
+        10.969741,
+        10.918451999999998,
+        10.782902
+      ],
+      "median_billion_per_second": 10.918451999999998,
+      "paired_geomean_vs_bridge13": 1.0,
+      "paired_95_ci": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "variant": "pipeline",
+      "rates_billion_per_second": [
+        11.322700999999999,
+        11.159678,
+        11.123496999999999
+      ],
+      "median_billion_per_second": 11.159678,
+      "paired_geomean_vs_bridge13": 1.0286081976665462,
+      "paired_95_ci": [
+        1.0146252235351647,
+        1.0427838770067313
+      ]
+    }
+  ],
+  "decision": "retain pipelined bridge-1/bridge-3 as the fastest verified complete map; continue toward 12 B/s"
+}

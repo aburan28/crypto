@@ -1,0 +1,14 @@
+==13227== Callgrind, a call-graph generating cache profiler
+==13227== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==13227== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==13227== Command: /tmp/claude-0/-home-user/7f658e4a-7634-5acc-b973-cdb225b38f41/scratchpad/arms/ic-baseline price --params research/ic_single_target_20260930/runs/k0n53/T01.params.json --repeats 1 --repeats-fast 1 --price-rounds 1 --json --out research/canon_laned_keys_20261008/runs/callgrind/k0n53-baseline.price.json
+==13227== 
+==13227== For interactive control, run 'callgrind_control -h'.
+==13227== brk segment overflow in thread #2: can't grow to 0x4840000
+==13227== (see section Limitations in user manual)
+==13227== NOTE: further instances of this message will not be shown
+==13227== 
+==13227== Events    : Ir
+==13227== Collected : 13354911993
+==13227== 
+==13227== I   refs:      13,354,911,993

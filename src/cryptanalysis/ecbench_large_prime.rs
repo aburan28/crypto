@@ -259,6 +259,7 @@ pub fn binary_explicit_instance(
             a_index: a,
             b_index: 1,
             subfield_basis: vec![F2mElement::one(n)],
+            frobenius_is_endomorphism: true,
         })
     } else {
         None

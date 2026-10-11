@@ -529,6 +529,25 @@ impl BinaryCurve {
             }
         }
     }
+
+    /// Validate a non-identity point as a member of the curve's declared
+    /// prime-order subgroup.
+    ///
+    /// [`scalar_mul`] is deliberately a low-level arithmetic primitive: it
+    /// does not call this method and therefore accepts formula-compatible
+    /// points from other equations. Protocols that process attacker-selected
+    /// points must perform this check (or an equivalent, proved validation)
+    /// before multiplying by a secret scalar.
+    pub fn is_valid_public_point(&self, p: &BinaryPoint) -> bool {
+        match p {
+            BinaryPoint::Infinity => false,
+            BinaryPoint::Affine { x, y } if x.m_value() != self.m || y.m_value() != self.m => false,
+            BinaryPoint::Affine { .. } => {
+                self.is_on_curve(p)
+                    && matches!(scalar_mul(self, p, &self.order), BinaryPoint::Infinity)
+            }
+        }
+    }
 }
 
 /// Negation: `−(x, y) = (x, y + x)`.
@@ -907,6 +926,62 @@ mod tests {
                 name
             );
         }
+    }
+
+    #[test]
+    fn sect113r1_public_point_validation_accepts_generator() {
+        let curve = BinaryCurve::sect113r1();
+        assert!(curve.is_valid_public_point(&curve.generator));
+    }
+
+    #[test]
+    fn sect113r1_public_point_validation_rejects_same_a_singular_point() {
+        let curve = BinaryCurve::sect113r1();
+        let singular_point = BinaryPoint::Affine {
+            x: curve.a.clone(),
+            y: F2mElement::zero(curve.m),
+        };
+
+        let singular_curve = BinaryCurve {
+            b: F2mElement::zero(curve.m),
+            ..curve.clone()
+        };
+        assert!(singular_curve.is_on_curve(&singular_point));
+        assert!(!curve.is_on_curve(&singular_point));
+        assert!(!curve.is_valid_public_point(&singular_point));
+    }
+
+    #[test]
+    fn sect113r1_public_point_validation_rejects_nominal_order_two_point() {
+        let curve = BinaryCurve::sect113r1();
+        let order_two = BinaryPoint::Affine {
+            x: F2mElement::zero(curve.m),
+            // In characteristic two, sqrt(b) = b^(2^(m-1)).
+            y: curve.b.square_k_times(curve.m - 1, &curve.irreducible),
+        };
+
+        assert!(curve.is_on_curve(&order_two));
+        assert!(matches!(
+            scalar_mul(&curve, &order_two, &BigUint::from(2u32)),
+            BinaryPoint::Infinity
+        ));
+        assert_eq!(scalar_mul(&curve, &order_two, &curve.order), order_two);
+        assert!(!curve.is_valid_public_point(&order_two));
+    }
+
+    #[test]
+    fn public_point_validation_rejects_malformed_coordinate_width_without_panicking() {
+        let curve = BinaryCurve::sect113r1();
+        let (x, y) = match &curve.generator {
+            BinaryPoint::Affine { x, y } => (x, y),
+            BinaryPoint::Infinity => unreachable!("sect113r1 generator is affine"),
+        };
+        let malformed = BinaryPoint::Affine {
+            x: F2mElement::from_biguint(&x.to_biguint(), curve.m + 1),
+            y: F2mElement::from_biguint(&y.to_biguint(), curve.m + 1),
+        };
+
+        assert!(!curve.is_valid_public_point(&malformed));
     }
 
     /// `[n]·G = O` where `n` is the generator's order.  This is

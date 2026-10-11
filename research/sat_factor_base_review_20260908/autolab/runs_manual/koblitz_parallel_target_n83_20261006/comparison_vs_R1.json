@@ -1,0 +1,13 @@
+{
+ "claim_boundary": "online-stage path change with identical published relation; no new vs_rho claim; KIC_TARGET_THREADS=1 (default) preserves the frozen sequential path",
+ "finding": "no wall-time speedup: the deterministic first hit sits at ~0.1% of the scan space (8.8M of ~1e10 probes), inside the first worker block, so the parallel wall equals the sequential wall. The online stage is probe-rate bound (~1.1M probes/s single-core, dominated by the S3 quadratic solve per probe), not scan-length bound. The parallel extraction bounds only the unlucky-deep-hit tail.",
+ "kind": "parallel_target_extraction_vs_frozen_R1_row",
+ "non_timing_fields_identical": true,
+ "order_preserving_merge": true,
+ "probes": 8845441,
+ "probes_identical": true,
+ "target_ms_parallel": 8382.238707999999,
+ "target_ms_sequential_R1": 7939.137707999999,
+ "threads": 12,
+ "verdict": "PARALLEL_TARGET_EXTRACTION_REPRODUCES_FROZEN_ROW_NO_SPEEDUP_RATE_BOUND"
+}
