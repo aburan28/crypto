@@ -64,7 +64,8 @@ fig.tight_layout()
 fig.savefig(HERE / "degrees.svg")
 
 # --- arms.svg: word_xors ratios (deterministic) and wall per round
-TCELLS = [("k1n17", "K1/2^17 dim 6"), ("k0n23", "K0/2^23 dim 8"), ("k0n31", "K0/2^31 dim 9")]
+# Timing cells: the raw file keys of CELLS without the dim suffix (K1/2^23 was traced only).
+TCELLS = [(key.split("_")[0], label.split("\n")[0]) for key, label in CELLS if key != CELLS[1][0]]
 ARMS = [("orig", "original 4b6e09b78", "#555555"), ("prev", "previous (EA=0)", "#2ca02c"),
         ("cand1", "candidate EA=1", "#1f77b4"), ("cand2", "candidate EA=2", "#d62728")]
 fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))
