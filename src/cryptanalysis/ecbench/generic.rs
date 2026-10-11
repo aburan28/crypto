@@ -15,7 +15,7 @@
 
 use std::collections::BTreeMap;
 
-use crate::cryptanalysis::ic_boundary::{CountedGroup, GroupOps};
+use crate::cryptanalysis::ic_boundary::{addmod, mulmod, CountedGroup, GroupOps};
 
 /// What one generic solve did.
 #[derive(Clone, Debug, Default)]
@@ -34,14 +34,6 @@ impl GenericOutcome {
     fn count(&mut self, name: &str, by: u64) {
         *self.counters.entry(name.to_string()).or_insert(0) += by;
     }
-}
-
-fn mulmod(a: u64, b: u64, m: u64) -> u64 {
-    ((a as u128 * b as u128) % m as u128) as u64
-}
-
-fn addmod(a: u64, b: u64, m: u64) -> u64 {
-    ((a as u128 + b as u128) % m as u128) as u64
 }
 
 fn submod(a: u64, b: u64, m: u64) -> u64 {

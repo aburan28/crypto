@@ -740,15 +740,40 @@ pub(crate) fn fast_map<V>(capacity: usize) -> FastMap<V> {
 
 // ── Modular arithmetic on u64 ──────────────────────────────────────
 
+/// `a·b mod m`, the value of `(a·b) % m` on 128-bit integers exactly.
+///
+/// A 128-bit remainder is a library call on every target (`__umodti3`,
+/// a loop of word divisions), and it sat under every multiplication of
+/// the prime-curve group law.  When the modulus fits 32 bits and both
+/// operands are reduced — every curve `ecbench` registers, and every
+/// operand the group law forms — the product fits a word and one
+/// hardware division gives the same value.  Anything else takes the
+/// 128-bit path unchanged, so no input changes its result.
 #[inline]
-fn mulmod(a: u64, b: u64, m: u64) -> u64 {
-    ((a as u128 * b as u128) % m as u128) as u64
+pub(crate) fn mulmod(a: u64, b: u64, m: u64) -> u64 {
+    if m <= u64::from(u32::MAX) && a < m && b < m {
+        (a * b) % m
+    } else {
+        ((a as u128 * b as u128) % m as u128) as u64
+    }
 }
 
+/// `a + b mod m`, the value of `(a + b) % m` on 128-bit integers exactly.
+/// Reduced operands need one compare-and-subtract instead of the
+/// 128-bit remainder's library call; the carry handles a modulus above
+/// `2^63`.
 #[inline]
-fn addmod(a: u64, b: u64, m: u64) -> u64 {
-    let s = a as u128 + b as u128;
-    (s % m as u128) as u64
+pub(crate) fn addmod(a: u64, b: u64, m: u64) -> u64 {
+    if a < m && b < m {
+        let (s, carry) = a.overflowing_add(b);
+        if carry || s >= m {
+            s.wrapping_sub(m)
+        } else {
+            s
+        }
+    } else {
+        ((a as u128 + b as u128) % m as u128) as u64
+    }
 }
 
 #[inline]
@@ -773,23 +798,38 @@ fn powmod(mut a: u64, mut e: u64, m: u64) -> u64 {
     r
 }
 
-/// Modular inverse by the extended Euclidean algorithm.
+/// Modular inverse by the extended Euclidean algorithm: `a⁻¹ mod m` in
+/// `[0, m)`, `None` when `gcd(a, m) ≠ 1`.
+///
+/// Remainders and quotients are words, so each step is one hardware
+/// division; the earlier 128-bit form paid a library call (`__divti3`)
+/// per step, and one inversion sits in every affine group operation.
+/// The Bézout coefficient is kept as a magnitude with its sign tracked
+/// separately: successive coefficients alternate in sign, so the update
+/// `s₀ − q·s₁` only ever adds magnitudes, and every magnitude stays at
+/// most `m`.  The inverse is unique, so the result is the one the
+/// 128-bit form returned.
 pub fn invmod(a: u64, m: u64) -> Option<u64> {
-    let (mut old_r, mut r) = (a as i128 % m as i128, m as i128);
-    let (mut old_s, mut s) = (1i128, 0i128);
-    while r != 0 {
-        let q = old_r / r;
-        (old_r, r) = (r, old_r - q * r);
-        (old_s, s) = (s, old_s - q * s);
+    let (mut r0, mut r1) = (m, a % m);
+    // `r0 ≡ ±t0·a`, `r1 ≡ ∓t1·a (mod m)`; `neg0` is the sign of `t0`'s
+    // coefficient.  Initially `m ≡ 0·a` and `a ≡ +1·a`.
+    let (mut t0, mut t1) = (0u64, 1u64);
+    let mut neg0 = true;
+    while r1 != 0 {
+        let q = r0 / r1;
+        (r0, r1) = (r1, r0 - q * r1);
+        (t0, t1) = (t1, t0 + q * t1);
+        neg0 = !neg0;
     }
-    if old_r != 1 {
+    if r0 != 1 {
         return None;
     }
-    let mut v = old_s % m as i128;
-    if v < 0 {
-        v += m as i128;
-    }
-    Some(v as u64)
+    Some(if neg0 {
+        // `t0 == m` only when `m == 1`, where the inverse is `0`.
+        (m - t0) % m
+    } else {
+        t0 % m
+    })
 }
 
 // ── Incremental Gauss–Jordan over Z/rZ ─────────────────────────────
@@ -7108,6 +7148,115 @@ pub fn format_markdown(ledger: &BoundaryLedger) -> String {
 
 #[cfg(test)]
 mod tests {
+    /// The 128-bit forms the word-sized helpers replaced; every result
+    /// of the fast paths must equal theirs.
+    mod reference {
+        pub fn mulmod(a: u64, b: u64, m: u64) -> u64 {
+            ((a as u128 * b as u128) % m as u128) as u64
+        }
+        pub fn addmod(a: u64, b: u64, m: u64) -> u64 {
+            ((a as u128 + b as u128) % m as u128) as u64
+        }
+        pub fn invmod(a: u64, m: u64) -> Option<u64> {
+            let (mut old_r, mut r) = (a as i128 % m as i128, m as i128);
+            let (mut old_s, mut s) = (1i128, 0i128);
+            while r != 0 {
+                let q = old_r / r;
+                (old_r, r) = (r, old_r - q * r);
+                (old_s, s) = (s, old_s - q * s);
+            }
+            if old_r != 1 {
+                return None;
+            }
+            let mut v = old_s % m as i128;
+            if v < 0 {
+                v += m as i128;
+            }
+            Some(v as u64)
+        }
+    }
+
+    /// Moduli at every edge the fast paths branch on: tiny, either side
+    /// of `2^32`, above `2^63`, and the largest word.
+    fn edge_moduli() -> Vec<u64> {
+        vec![
+            1,
+            2,
+            3,
+            7,
+            53117,
+            (1u64 << 32) - 5,
+            (1u64 << 32) - 1,
+            1u64 << 32,
+            (1u64 << 32) + 15,
+            (1u64 << 63) - 25,
+            (1u64 << 63) + 11,
+            u64::MAX - 58,
+            u64::MAX,
+        ]
+    }
+
+    #[test]
+    fn word_sized_field_helpers_match_the_128_bit_forms() {
+        use rand::{Rng, SeedableRng};
+        let mut rng = rand::rngs::StdRng::seed_from_u64(0x6d75_6c6d_6f64);
+        for round in 0..200_000u32 {
+            let m = if round % 4 == 0 {
+                edge_moduli()[(round as usize / 4) % edge_moduli().len()]
+            } else if round % 4 == 1 {
+                rng.gen_range(1..=u64::from(u32::MAX))
+            } else {
+                rng.gen_range(1..=u64::MAX)
+            };
+            // Reduced operands take the fast paths; unreduced ones and
+            // the edge values must fall back to the same answers.
+            let pick = |rng: &mut rand::rngs::StdRng| match rng.gen_range(0..6) {
+                0 => 0,
+                1 => m - 1,
+                2 => m,
+                3 => rng.gen::<u64>(),
+                _ => rng.gen_range(0..m),
+            };
+            let (a, b) = (pick(&mut rng), pick(&mut rng));
+            assert_eq!(
+                super::mulmod(a, b, m),
+                reference::mulmod(a, b, m),
+                "mulmod({a}, {b}, {m})"
+            );
+            assert_eq!(
+                super::addmod(a, b, m),
+                reference::addmod(a, b, m),
+                "addmod({a}, {b}, {m})"
+            );
+            assert_eq!(
+                super::invmod(a, m),
+                reference::invmod(a, m),
+                "invmod({a}, {m})"
+            );
+        }
+    }
+
+    #[test]
+    fn invmod_inverts_every_unit_of_small_moduli() {
+        for m in [1u64, 2, 3, 4, 6, 7, 12, 97, 53117] {
+            for a in 0..m.min(1 << 12) {
+                match super::invmod(a, m) {
+                    Some(v) => {
+                        assert!(v < m, "invmod({a}, {m}) = {v} not reduced");
+                        assert_eq!(super::mulmod(a, v, m) % m, 1 % m, "invmod({a}, {m}) = {v}");
+                    }
+                    None => assert_ne!(gcd(a, m), 1, "invmod({a}, {m}) missing"),
+                }
+            }
+        }
+    }
+
+    fn gcd(mut a: u64, mut b: u64) -> u64 {
+        while b != 0 {
+            (a, b) = (b, a % b);
+        }
+        a
+    }
     use super::*;
 
     #[test]
