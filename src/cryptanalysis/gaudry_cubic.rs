@@ -51,6 +51,8 @@ use std::cell::Cell;
 use std::collections::HashMap;
 use std::time::Instant;
 
+use num_bigint::{BigUint, RandBigInt};
+use num_traits::{One, Zero};
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use serde::Serialize;
@@ -3372,6 +3374,135 @@ pub fn wiedemann_u64(
     None
 }
 
+/// Sparse linear equation over a prime field whose modulus can exceed `u64`.
+/// Coefficients and the right-hand side are reduced by `wiedemann_big`.
+#[derive(Clone, Debug)]
+pub struct WideSparseRel {
+    pub cols: Vec<(usize, BigUint)>,
+    pub rhs: BigUint,
+}
+
+fn wide_sub(a: &BigUint, b: &BigUint, n: &BigUint) -> BigUint {
+    if a >= b {
+        a - b
+    } else {
+        n - (b - a)
+    }
+}
+
+/// Berlekamp--Massey over a prime modulus. The caller supplies field elements.
+fn berlekamp_massey_big(seq: &[BigUint], n: &BigUint, ops: &mut u64) -> Vec<BigUint> {
+    let mut c = vec![BigUint::one()];
+    let mut b = vec![BigUint::one()];
+    let mut l = 0usize;
+    let mut m = 1usize;
+    let mut bb = BigUint::one();
+    let inverse_exponent = n - 2u8;
+    for i in 0..seq.len() {
+        let mut d = seq[i].clone();
+        for j in 1..=l {
+            if j < c.len() {
+                d = (d + (&c[j] * &seq[i - j]) % n) % n;
+                *ops += 1;
+            }
+        }
+        if d.is_zero() {
+            m += 1;
+            continue;
+        }
+        let coef = (&d * bb.modpow(&inverse_exponent, n)) % n;
+        let t = c.clone();
+        if c.len() < b.len() + m {
+            c.resize(b.len() + m, BigUint::zero());
+        }
+        for j in 0..b.len() {
+            let product = (&coef * &b[j]) % n;
+            c[j + m] = wide_sub(&c[j + m], &product, n);
+            *ops += 1;
+        }
+        if 2 * l <= i {
+            l = i + 1 - l;
+            b = t;
+            bb = d;
+            m = 1;
+        } else {
+            m += 1;
+        }
+    }
+    c.truncate(l + 1);
+    c
+}
+
+/// Sequential Wiedemann over a prime modulus of arbitrary width. Returns a
+/// solution only after checking every supplied row. This is intentionally a
+/// separate path: the existing `u64` solver remains the measured fast path.
+pub fn wiedemann_big(
+    rows: &[WideSparseRel],
+    ncols: usize,
+    n: &BigUint,
+    rng: &mut StdRng,
+    ops: &mut u64,
+) -> Option<Vec<BigUint>> {
+    assert_eq!(rows.len(), ncols);
+    assert!(*n > BigUint::from(2u8), "prime modulus must exceed two");
+    assert!(rows.iter().all(|r| r.cols.iter().all(|(c, _)| *c < ncols)));
+    let rows: Vec<WideSparseRel> = rows
+        .iter()
+        .map(|r| WideSparseRel {
+            cols: r.cols.iter().map(|(c, a)| (*c, a % n)).collect(),
+            rhs: &r.rhs % n,
+        })
+        .collect();
+    let mat_vec = |v: &[BigUint], ops: &mut u64| -> Vec<BigUint> {
+        rows.iter()
+            .map(|r| {
+                let mut acc = BigUint::zero();
+                for (c, a) in &r.cols {
+                    acc = (acc + a * &v[*c]) % n;
+                }
+                *ops += r.cols.len() as u64;
+                acc
+            })
+            .collect()
+    };
+    let b: Vec<BigUint> = rows.iter().map(|r| r.rhs.clone()).collect();
+    for _attempt in 0..3 {
+        let u: Vec<BigUint> = (0..ncols).map(|_| rng.gen_biguint_below(n)).collect();
+        let mut seq = Vec::with_capacity(2 * ncols);
+        let mut v = b.clone();
+        for _ in 0..2 * ncols {
+            let mut d = BigUint::zero();
+            for i in 0..ncols {
+                d = (d + &u[i] * &v[i]) % n;
+            }
+            *ops += ncols as u64;
+            seq.push(d);
+            v = mat_vec(&v, ops);
+        }
+        let c = berlekamp_massey_big(&seq, n, ops);
+        let l = c.len() - 1;
+        if l == 0 || c[l].is_zero() {
+            continue;
+        }
+        let mut acc = vec![BigUint::zero(); ncols];
+        for cj in c.iter().take(l) {
+            acc = mat_vec(&acc, ops);
+            for i in 0..ncols {
+                acc[i] = (&acc[i] + cj * &b[i]) % n;
+            }
+            *ops += ncols as u64;
+        }
+        let inv = c[l].modpow(&(n - 2u8), n);
+        let neg_inv = n - inv;
+        let x: Vec<BigUint> = acc.iter().map(|a| (a * &neg_inv) % n).collect();
+        *ops += ncols as u64;
+        if mat_vec(&x, ops) == b {
+            return Some(x);
+        }
+    }
+    None
+}
+
 /// Which triple oracle a run uses.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 pub enum Solver {
@@ -4214,6 +4345,40 @@ mod tests {
         let mut ops = 0u64;
         let c = berlekamp_massey_u64(&seq, n, &mut ops);
         assert_eq!(c, vec![1, n - 1, n - 1]);
+    }
+
+    #[test]
+    fn wiedemann_wide_prime_orders() {
+        // The 113-bit prime is fixed independently of the solver. The second
+        // modulus is the specified subgroup order of NIST P-192.
+        for (label, hex) in [
+            ("113", "1000000000000000000000000303f"),
+            ("P-192", "FFFFFFFFFFFFFFFFFFFFFFFF99DEF836146BC9B1B4D22831"),
+        ] {
+            let n = BigUint::parse_bytes(hex.as_bytes(), 16).unwrap();
+            let mut rng = StdRng::seed_from_u64(0x1131_0192);
+            let m = 29;
+            let expected: Vec<BigUint> = (0..m).map(|_| rng.gen_biguint_below(&n)).collect();
+            // Upper triangular, with nonzero diagonal: rank is certified
+            // independently of the Wiedemann recurrence.
+            let rows: Vec<WideSparseRel> = (0..m)
+                .map(|i| {
+                    let mut cols = vec![(i, BigUint::from(1u8 + (i % 7) as u8))];
+                    for j in (i + 1)..(i + 4).min(m) {
+                        cols.push((j, rng.gen_biguint_below(&n)));
+                    }
+                    let rhs = cols.iter().fold(BigUint::zero(), |acc, (j, a)| {
+                        (acc + a * &expected[*j]) % &n
+                    });
+                    WideSparseRel { cols, rhs }
+                })
+                .collect();
+            let mut ops = 0;
+            let got = wiedemann_big(&rows, m, &n, &mut rng, &mut ops)
+                .unwrap_or_else(|| panic!("{label}: nonsingular system did not solve"));
+            assert_eq!(got, expected, "{label}");
+            assert!(ops > 0);
+        }
     }
 
     #[test]

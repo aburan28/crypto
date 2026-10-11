@@ -1,0 +1,42 @@
+{
+  "categories": {
+    "class_transfer": 1,
+    "conditional_transfer": 3,
+    "cover_family": 9,
+    "implementation_condition": 1,
+    "input_domain": 1,
+    "structural_lead": 3,
+    "subgroup_reduction": 3
+  },
+  "class_oracle_counts": {
+    "both": 88,
+    "combined": 248,
+    "combined_zero": 46,
+    "cubic": 126,
+    "eligible": 294,
+    "quadratic": 210
+  },
+  "count_scope": "inventory counts; postselected replay models and independent sources are separate input laws",
+  "families": 21,
+  "global_completeness": "open",
+  "inventory_counts": {
+    "combined_class:exact_family_zero": 1,
+    "combined_class:geometric_support_exact": 276,
+    "combined_class:outside_domain": 153,
+    "combined_class:unresolved": 384,
+    "higher_family_class:geometric_control_witness": 25,
+    "higher_family_class:outside_domain": 384,
+    "higher_family_class:unresolved": 128,
+    "inventory:independent_model_law_large_source": 512,
+    "inventory:postselected_replayed_route_or_control": 302,
+    "model_g3_cubic:no": 263,
+    "model_g3_cubic:outside_domain": 153,
+    "model_g3_cubic:unclassified_in_this_index": 384,
+    "model_g3_cubic:yes": 14,
+    "model_g3_quadratic:no": 267,
+    "model_g3_quadratic:outside_domain": 153,
+    "model_g3_quadratic:unclassified_in_this_index": 384,
+    "model_g3_quadratic:yes": 10
+  },
+  "models": 814
+}

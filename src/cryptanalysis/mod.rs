@@ -165,6 +165,7 @@ pub mod gf3m;
 pub mod ghs_descent;
 pub mod ghs_full_attack;
 pub mod ghs_screen;
+pub mod ghs_transport;
 pub mod gls_fp2;
 pub mod glv_gaudry;
 pub mod glv_invariant_base;

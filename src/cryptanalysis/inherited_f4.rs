@@ -211,6 +211,12 @@ impl RewritePlan {
     /// The segments of source word `w` of `map`.
     fn segments_of(map: &[u32], w: usize) -> Box<[Segment]> {
         let mut segments = Vec::new();
+        Self::segments_into(map, w, &mut segments);
+        segments.into_boxed_slice()
+    }
+
+    /// [`RewritePlan::segments_of`], appended to `segments`.
+    fn segments_into(map: &[u32], w: usize, segments: &mut Vec<Segment>) {
         let base = w * 64;
         let end = (base + 64).min(map.len());
         let mut current: Option<(Segment, u32)> = None;
@@ -245,7 +251,6 @@ impl RewritePlan {
         if let Some((seg, _)) = current {
             segments.push(seg);
         }
-        segments.into_boxed_slice()
     }
 
     /// Segments of source word `w`, built on first use.
@@ -253,6 +258,85 @@ impl RewritePlan {
     fn of(&self, w: usize) -> &[Segment] {
         self.words[w].get_or_init(|| Self::segments_of(&self.map, w))
     }
+}
+
+/// One layout step's rewrite plan, built whole as flat arrays: under eager
+/// specialisation every kept row of a node goes through it, so nothing is
+/// gained by building it a word at a time.
+#[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
+struct StepPlan {
+    /// Source word `w`'s segments are `segments[first[w]..first[w + 1]]`.
+    first: Vec<u32>,
+    segments: Vec<Segment>,
+    /// `low[w]`: the smallest destination word of any column in source
+    /// words `w ..` (`u32::MAX` if every one is deleted).  A row read from
+    /// its word `lead` writes nothing before `low[lead]`.
+    low: Vec<u32>,
+}
+
+impl StepPlan {
+    fn new(map: &[u32]) -> Self {
+        let n = map.len().div_ceil(64);
+        let mut first = Vec::with_capacity(n + 1);
+        let mut segments = Vec::new();
+        for w in 0..n {
+            first.push(segments.len() as u32);
+            RewritePlan::segments_into(map, w, &mut segments);
+        }
+        first.push(segments.len() as u32);
+        let mut low = vec![u32::MAX; n + 1];
+        for w in (0..n).rev() {
+            let here = segments[first[w] as usize..first[w + 1] as usize]
+                .iter()
+                .map(|s| s.dst_word)
+                .min()
+                .unwrap_or(u32::MAX);
+            low[w] = here.min(low[w + 1]);
+        }
+        Self {
+            first,
+            segments,
+            low,
+        }
+    }
+}
+
+/// Apply a [`StepPlan`] to the live words of a row (`live[i]` is source
+/// word `lead + i`), XORing the image into `out`, which holds destination
+/// words `lo ..` with `lo ≤ plan.low[lead]`.
+///
+/// # Safety
+/// BMI2 must be available on this CPU.
+#[cfg(target_arch = "x86_64")]
+#[target_feature(enable = "bmi2")]
+unsafe fn apply_step_bmi2(plan: &StepPlan, live: &[u64], lead: usize, out: &mut [u64], lo: usize) {
+    use std::arch::x86_64::{_pdep_u64, _pext_u64};
+    for (i, &word) in live.iter().enumerate() {
+        if word == 0 {
+            continue;
+        }
+        let w = lead + i;
+        let segments = &plan.segments[plan.first[w] as usize..plan.first[w + 1] as usize];
+        for seg in segments {
+            out[seg.dst_word as usize - lo] ^=
+                _pdep_u64(_pext_u64(word, seg.src_mask), seg.dst_mask);
+        }
+    }
+}
+
+/// Whether a specialisation rewrites every kept row into the child's
+/// layout at once, through the step's own plan, instead of leaving each
+/// to be rewritten from wherever it was last current when something first
+/// reads it.  At every node most rows are read (on `K₀/2²³` dim 8, 70 %
+/// of them were rewritten lazily anyway), and the lazy rewrite paid for a
+/// composed map and a plan per pair of layouts.  Needs BMI2, as the
+/// word-wise rewrite does; `KIC_F4_EAGER=0` keeps the lazy rows as a
+/// same-binary control.  The row space, and so every verdict, is the
+/// same; the specialisation word count charges every kept row's rewrite.
+fn eager_rewrite() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED
+        .get_or_init(|| std::env::var("KIC_F4_EAGER").as_deref() != Ok("0") && wordwise_rewrite())
 }
 
 /// Whether the word-wise rewrite is used: `pext`/`pdep` need BMI2, and
@@ -546,7 +630,45 @@ struct LazyRow {
     /// from here.
     lead: u32,
     /// Words `start ..` to the end of the layout of `version`.
-    data: Rc<[u64]>,
+    data: RowWords,
+}
+
+/// The words of a basis row: a range of a shared buffer.  A row inserted
+/// on its own owns its buffer; the kept rows of an eager specialisation
+/// share one ([`ReducedBasis::rewrite_kept`]), which spares an allocation,
+/// a staging pass and a copy per row.
+#[derive(Clone, Debug)]
+struct RowWords {
+    buf: Rc<[u64]>,
+    off: u32,
+    len: u32,
+}
+
+impl std::ops::Deref for RowWords {
+    type Target = [u64];
+    #[inline]
+    fn deref(&self) -> &[u64] {
+        &self.buf[self.off as usize..(self.off + self.len) as usize]
+    }
+}
+
+impl From<Rc<[u64]>> for RowWords {
+    fn from(buf: Rc<[u64]>) -> Self {
+        let len = buf.len() as u32;
+        Self { buf, off: 0, len }
+    }
+}
+
+impl From<Vec<u64>> for RowWords {
+    fn from(words: Vec<u64>) -> Self {
+        Rc::<[u64]>::from(words).into()
+    }
+}
+
+/// A zeroed shared buffer of `n` words, allocated once (an `Rc<[u64]>`
+/// made from a `Vec` would copy it).
+fn zeroed_words(n: usize) -> Rc<[u64]> {
+    std::iter::repeat_n(0u64, n).collect()
 }
 
 impl LazyRow {
@@ -999,7 +1121,7 @@ impl ReducedBasis {
                 version: 0,
                 start: 0,
                 lead: 0,
-                data: Rc::from([1u64].as_slice()),
+                data: Rc::<[u64]>::from([1u64].as_slice()).into(),
             }];
             self.pivot_col = vec![0];
             self.pivot_of = vec![Some(0)];
@@ -1285,6 +1407,106 @@ impl ReducedBasis {
         })
     }
 
+    /// Rewrite every kept row that was current in the parent's layout into
+    /// this one through the step's plan, all into one shared buffer, each
+    /// trimmed to the plan's bound on its first word.  A row from an older
+    /// layout (none, unless a lazy ancestor left one) is materialised as
+    /// before.  Charged as [`ReducedBasis::rewrite`] charges: the words
+    /// read, and the words from the image's first nonzero one to the end.
+    #[cfg(target_arch = "x86_64")]
+    fn rewrite_kept(&mut self, plan: &StepPlan, cost: &mut InheritCost) {
+        let to = self.epoch();
+        let words = self.words;
+        let mut spans: Vec<(usize, usize)> = Vec::with_capacity(self.rows.len());
+        let mut total = 0usize;
+        for row in &self.rows {
+            if row.version + 1 == to {
+                let lo = plan.low[row.lead as usize] as usize;
+                debug_assert!(lo < words, "a kept pivot survives");
+                spans.push((total, lo));
+                total += words - lo;
+            } else {
+                spans.push((usize::MAX, 0));
+            }
+        }
+        let mut buf = zeroed_words(total);
+        {
+            let data = Rc::get_mut(&mut buf).expect("just allocated");
+            for (row, &(off, lo)) in self.rows.iter().zip(&spans) {
+                if off != usize::MAX {
+                    let live = row.live();
+                    cost.specialise_word_ops += live.len() as u64;
+                    let out = &mut data[off..off + words - lo];
+                    // SAFETY: `eager_rewrite` checked BMI2 for this process.
+                    unsafe { apply_step_bmi2(plan, live, row.lead as usize, out, lo) };
+                }
+            }
+        }
+        for (r, &(off, lo)) in spans.iter().enumerate() {
+            if off == usize::MAX {
+                self.ensure_current(r, cost);
+                continue;
+            }
+            let len = words - lo;
+            let first = buf[off..off + len]
+                .iter()
+                .position(|&w| w != 0)
+                .expect("a kept pivot survives");
+            cost.specialise_word_ops += (len - first) as u64;
+            self.rows[r] = LazyRow {
+                version: to,
+                start: lo as u32,
+                lead: (lo + first) as u32,
+                data: RowWords {
+                    buf: buf.clone(),
+                    off: off as u32,
+                    len: len as u32,
+                },
+            };
+        }
+    }
+
+    #[cfg(not(target_arch = "x86_64"))]
+    fn rewrite_kept(&mut self, _plan: &StepPlan, _cost: &mut InheritCost) {
+        unreachable!("eager rewrite needs BMI2")
+    }
+
+    /// [`ReducedBasis::rewrite`] of a row current in the parent's layout,
+    /// through the step's plan.
+    #[cfg(target_arch = "x86_64")]
+    fn rewrite_step(
+        &self,
+        plan: &StepPlan,
+        row: &LazyRow,
+        cost: &mut InheritCost,
+    ) -> Option<Draft> {
+        debug_assert_eq!(row.version + 1, self.epoch());
+        let words = self.words;
+        let live = row.live();
+        cost.specialise_word_ops += live.len() as u64;
+        let lo = plan.low[row.lead as usize] as usize;
+        if lo >= words {
+            return None;
+        }
+        let mut data = zeroed_words(words - lo);
+        let out = Rc::get_mut(&mut data).expect("just allocated");
+        // SAFETY: `eager_rewrite` checked BMI2 for this process.
+        unsafe { apply_step_bmi2(plan, live, row.lead as usize, out, lo) };
+        let first = out.iter().position(|&w| w != 0)?;
+        cost.specialise_word_ops += (words - lo - first) as u64;
+        Some(Draft { start: lo, data })
+    }
+
+    #[cfg(not(target_arch = "x86_64"))]
+    fn rewrite_step(
+        &self,
+        _plan: &StepPlan,
+        _row: &LazyRow,
+        _cost: &mut InheritCost,
+    ) -> Option<Draft> {
+        unreachable!("eager rewrite needs BMI2")
+    }
+
     /// Bring row `r` into the current layout if it is not there yet.  A
     /// kept row's leading monomial survives every step, so its image is
     /// nonzero.
@@ -1308,7 +1530,7 @@ impl ReducedBasis {
             version: self.epoch(),
             start: start as u32,
             lead: lead as u32,
-            data,
+            data: data.into(),
         };
     }
 
@@ -1420,7 +1642,7 @@ impl ReducedBasis {
                         version: self.epoch(),
                         start: row.start as u32,
                         lead: w as u32,
-                        data: row.data,
+                        data: row.data.into(),
                     });
                     return Some(self.rows.len() - 1);
                 }
@@ -1601,7 +1823,11 @@ impl ReducedBasis {
                 displaced.push((pc, row.clone()));
             }
         }
+        let step = eager_rewrite().then(|| StepPlan::new(&map));
         out.adopt_layout(new_columns, map);
+        if let Some(step) = &step {
+            out.rewrite_kept(step, &mut cost);
+        }
         cost.displaced_rows = displaced.len() as u64;
         // Lowest pivot first.  The order changes neither the child's row
         // space nor, measurably, the cost of building it; it changes how
@@ -1611,7 +1837,13 @@ impl ReducedBasis {
         // the whole basis are touched (`RESEARCH_INHERITED_F4.md` §3.7).
         displaced.sort_unstable_by_key(|&(pc, _)| std::cmp::Reverse(pc));
         for (_, row) in displaced {
-            if let Some(image) = out.rewrite(&row, &mut cost) {
+            let image = match &step {
+                Some(step) if row.version + 1 == out.epoch() => {
+                    out.rewrite_step(step, &row, &mut cost)
+                }
+                _ => out.rewrite(&row, &mut cost),
+            };
+            if let Some(image) = image {
                 let inserted = out.insert(image, &mut cost);
                 if out.refutes(inserted) {
                     return (out, cost);
