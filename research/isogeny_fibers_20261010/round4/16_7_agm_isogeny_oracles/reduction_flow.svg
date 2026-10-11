@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333"/>
+    </marker>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b03a2e"/>
+    </marker>
+  </defs>
+  <rect width="960" height="560" fill="#ffffff"/>
+  <text x="480" y="26" text-anchor="middle" font-size="16" font-weight="bold">Lead 16.7: oracle simulation in the isogeny-oracle AGM (diagram of the proof, not data)</text>
+
+  <!-- Adversary -->
+  <rect x="20" y="60" width="250" height="190" rx="8" fill="#eef3fb" stroke="#2f5d9b"/>
+  <text x="145" y="84" text-anchor="middle" font-weight="bold">Adversary A (oracle-algebraic)</text>
+  <text x="34" y="108">reads coordinates freely:</text>
+  <text x="34" y="126">rho, index calculus, Semaev S_m,</text>
+  <text x="34" y="144">Weil descent, Groebner bases</text>
+  <text x="34" y="168">constraint: every oracle query</text>
+  <text x="34" y="186">(psi, Z, z) has Z = sum_t z_t L_s[t]</text>
+  <text x="34" y="204">over points A has RECEIVED</text>
+  <text x="34" y="228">output: x* in Z/r (no representation)</text>
+
+  <!-- Simulator -->
+  <rect x="350" y="60" width="290" height="190" rx="8" fill="#eef7ee" stroke="#2e7d32"/>
+  <text x="495" y="84" text-anchor="middle" font-weight="bold">Simulator B (no oracle, no evaluation)</text>
+  <text x="364" y="108">keeps (u_t, v_t) for every received</text>
+  <text x="364" y="126">point: L_j[t] = u_t P_j + v_t X_j</text>
+  <text x="364" y="150">on query: (u, v) = sum_t z_t (u_t, v_t)</text>
+  <text x="364" y="168">answer  lambda_psi (u P_j + v X_j)</text>
+  <text x="364" y="186">= psi(Z) exactly (Lemma 1)</text>
+  <text x="364" y="210">cost per query: O(len z) in Z/r</text>
+  <text x="364" y="228">+ 2 scalar mults on E_j</text>
+
+  <line x1="270" y1="120" x2="348" y2="120" stroke="#333" stroke-width="1.6" marker-end="url(#ar)"/>
+  <text x="309" y="112" text-anchor="middle" font-size="11">query</text>
+  <line x1="348" y1="190" x2="272" y2="190" stroke="#333" stroke-width="1.6" marker-end="url(#ar)"/>
+  <text x="309" y="182" text-anchor="middle" font-size="11">psi(Z)</text>
+
+  <!-- scalar calculus -->
+  <rect x="700" y="60" width="240" height="190" rx="8" fill="#fff8e6" stroke="#b7791f"/>
+  <text x="820" y="84" text-anchor="middle" font-weight="bold">Elliptic input (Lemma 2)</text>
+  <text x="714" y="108">psi|G_i = 0 or lambda_psi * transport</text>
+  <text x="714" y="128">lambda(psi2 psi1) = lambda2 lambda1</text>
+  <text x="714" y="148">lambda(dual) lambda(psi) = deg psi</text>
+  <text x="714" y="168">alpha = (a + b pi)/f in End(E):</text>
+  <text x="714" y="186">lambda(alpha) = (a + b)/f mod r</text>
+  <text x="714" y="206">(pi fixes G pointwise)</text>
+  <text x="714" y="230">instance-independent data</text>
+  <line x1="698" y1="150" x2="642" y2="150" stroke="#333" stroke-width="1.6" marker-end="url(#ar)"/>
+
+  <!-- class-joint instance -->
+  <rect x="300" y="300" width="390" height="92" rx="8" fill="#f3eefb" stroke="#6a3d9a"/>
+  <text x="495" y="324" text-anchor="middle" font-weight="bold">Class-joint instance CJ-DLP_J</text>
+  <text x="314" y="348">(P_j, X_j = x P_j) for every curve E_j touched by Psi</text>
+  <text x="314" y="370">Thm 2: oracle-DLP and CJ-DLP_J are equivalent (|J|-1 queries)</text>
+  <line x1="495" y1="298" x2="495" y2="252" stroke="#333" stroke-width="1.6" marker-end="url(#ar)"/>
+
+  <rect x="20" y="430" width="400" height="104" rx="8" fill="#eef7ee" stroke="#2e7d32"/>
+  <text x="220" y="454" text-anchor="middle" font-weight="bold">Cor. 3: transport computable</text>
+  <text x="34" y="478">X_j from X by |J|-1 spanning-tree evaluations</text>
+  <text x="34" y="498">(Velu O(l) / sqrt-elu O~(sqrt l) per prime step)</text>
+  <text x="34" y="520">=> oracle-DLP on E_1 reduces to plain DLP on E_1</text>
+  <line x1="220" y1="428" x2="380" y2="394" stroke="#333" stroke-width="1.6" marker-end="url(#ar)"/>
+
+  <rect x="540" y="430" width="400" height="104" rx="8" fill="#fbeeee" stroke="#b03a2e"/>
+  <text x="740" y="454" text-anchor="middle" font-weight="bold">Not simulable: unrestricted query (Prop. 5)</text>
+  <text x="554" y="478">Z with no representation (factor-base point):</text>
+  <text x="554" y="498">Z = [e_G]Z + [e_h]Z; h-part from a table of size h,</text>
+  <text x="554" y="520">G-part needs transport = an evaluation of psi</text>
+  <line x1="740" y1="428" x2="560" y2="254" stroke="#b03a2e" stroke-width="1.6" stroke-dasharray="6,4" marker-end="url(#arr)"/>
+  <text x="690" y="300" fill="#b03a2e" font-size="11">breaks bookkeeping</text>
+</svg>

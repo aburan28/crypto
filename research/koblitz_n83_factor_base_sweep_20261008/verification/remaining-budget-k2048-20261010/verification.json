@@ -1,0 +1,16 @@
+{
+  "binary_build_commit": "032e4a6953a96ee7005f4a5a9ed4d3934c144629",
+  "compiled_rust_sources_unchanged_since_binary_build": true,
+  "container_cleanup_check": "docker ps -aq exact config container name returned empty with exit 0",
+  "container_cleanup_verified": true,
+  "image_id": "sha256:7c4ae649a84014c467d79319bbf17ce2632ae8b8be123ac2fb2ea5be46823f31",
+  "limitations": "same-host receipts and generic arithmetic replay; no natural relation/rank/complete runtime",
+  "object_sha256": "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a",
+  "object_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851.jsonl.gz",
+  "point_count": 339968,
+  "point_set_blake3": "d528f5828a05a00add4252212bc909ece481f33093e4074ff7dd8c6a51d3c97e",
+  "representatives_checked": 2048,
+  "schema": "n83.k2048-independent-receipt-check/v1",
+  "source_commit": "8d199b0a3bf227b9a21ab19183fe0bdeba9d604e",
+  "status": "PASS_receipt_integrity"
+}

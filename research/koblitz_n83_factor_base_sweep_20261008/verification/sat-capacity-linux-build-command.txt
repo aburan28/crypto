@@ -1,0 +1,7 @@
+Build-only cross compilation from /Volumes/SSD990/crypto/worktrees/codex-n83-factor-base-sweep-20261008; this does not construct an N83 SAT model.
+Rust compiler: /Users/adamburan/.rustup/toolchains/stable-aarch64-apple-darwin/bin/rustc (1.98.0)
+Zig: 0.16.0
+
+CARGO_BUILD_JOBS=4 CARGO_PROFILE_RELEASE_CODEGEN_UNITS=256 CARGO_TARGET_DIR=/private/tmp/n83-linux-target RUSTC=/Users/adamburan/.rustup/toolchains/stable-aarch64-apple-darwin/bin/rustc CARGO_ZIGBUILD_CACHE_DIR=/Volumes/SSD990/llm/tmp/n83-cargo-zigbuild-cache ZIG_LOCAL_CACHE_DIR=/Volumes/SSD990/llm/tmp/n83-zig-cache ZIG_GLOBAL_CACHE_DIR=/Volumes/SSD990/llm/tmp/n83-zig-cache cargo zigbuild --release --no-default-features --target x86_64-unknown-linux-musl --example koblitz_n83_factor_base_export --locked --offline
+
+Executable SHA-256: a67c516b6914fe25399e5e8d759163280695d46d272c9835e0320456e50a10c5

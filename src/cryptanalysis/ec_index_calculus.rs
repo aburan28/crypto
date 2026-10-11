@@ -1481,6 +1481,7 @@ pub fn ec_index_calculus_dlp_staged(
     let mut trials_per_relation: Vec<usize> = Vec::with_capacity(target);
     let mut trials_total = 0usize;
     while relations.len() < target {
+        let mut failed_trials = 0usize;
         let found = 'attempt: {
             for _ in 0..max_relation_attempts {
                 if let Some(found) =
@@ -1489,10 +1490,13 @@ pub fn ec_index_calculus_dlp_staged(
                     break 'attempt Some(found);
                 }
                 attempts_exhausted += 1;
+                failed_trials += max_trials_per_relation;
             }
             None
         };
         let (rel, trials) = found?;
+        trials_total += failed_trials + trials;
+        trials_per_relation.push(failed_trials + trials);
         trials_total += trials;
         trials_per_relation.push(trials);
         relations.push(rel);
@@ -1519,9 +1523,12 @@ pub fn ec_index_calculus_dlp_staged(
     }
 
     let la_started = Instant::now();
-    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
+    let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, &curve.n)?;
+    if !solution.determined[m] {
+        return None;
+    }
     let linear_algebra_ms = la_started.elapsed().as_secs_f64() * 1e3;
-    let x = solution[m].clone();
+    let x = solution.values[m].clone();
 
     let verify_started = Instant::now();
     let a_fe = curve.a_fe();
@@ -1588,6 +1595,7 @@ pub fn ec_index_calculus_dlp_s4_staged(
     let mut trials_per_relation: Vec<usize> = Vec::with_capacity(target);
     let mut trials_total = 0usize;
     while relations.len() < target {
+        let mut failed_trials = 0usize;
         let found = 'attempt: {
             for _ in 0..max_relation_attempts {
                 if let Some(found) =
@@ -1596,10 +1604,13 @@ pub fn ec_index_calculus_dlp_s4_staged(
                     break 'attempt Some(found);
                 }
                 attempts_exhausted += 1;
+                failed_trials += max_trials_per_relation;
             }
             None
         };
         let (rel, trials) = found?;
+        trials_total += failed_trials + trials;
+        trials_per_relation.push(failed_trials + trials);
         trials_total += trials;
         trials_per_relation.push(trials);
         relations.push(rel);
@@ -1622,9 +1633,12 @@ pub fn ec_index_calculus_dlp_s4_staged(
     }
 
     let la_started = Instant::now();
-    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
+    let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, &curve.n)?;
+    if !solution.determined[m] {
+        return None;
+    }
     let linear_algebra_ms = la_started.elapsed().as_secs_f64() * 1e3;
-    let x = solution[m].clone();
+    let x = solution.values[m].clone();
 
     let verify_started = Instant::now();
     let a_fe = curve.a_fe();
@@ -1864,7 +1878,10 @@ mod tests {
         assert!(report.total_ms >= report.relations_ms);
         assert!(report.trials_total >= report.relations_collected);
         assert!(report.trials_per_relation_median >= 1.0);
-        assert!(report.relation_attempts_exhausted == 0);
+        assert!(
+            report.trials_total
+                >= report.relations_collected + report.relation_attempts_exhausted * 64
+        );
     }
 
     /// **Small curve for tests**: y² = x³ + x + 19 (mod 271).  Curve

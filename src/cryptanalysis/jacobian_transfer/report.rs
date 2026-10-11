@@ -5,7 +5,7 @@
 
 use super::{CurveTransfers, RouteClass, TransferFile};
 
-fn best<'a>(c: &'a CurveTransfers) -> Option<&'a super::TransferRoute> {
+fn best(c: &CurveTransfers) -> Option<&super::TransferRoute> {
     c.best_route.map(|i| &c.routes[i])
 }
 
@@ -19,7 +19,9 @@ pub fn markdown_table(file: &TransferFile) -> String {
             !c.standard_names.is_empty()
                 || matches!(
                     c.verdict,
-                    RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal | RouteClass::Unresolved
+                    RouteClass::FormulaAdvantage
+                        | RouteClass::FormulaMarginal
+                        | RouteClass::Unresolved
                 )
         })
         .collect();
@@ -41,7 +43,11 @@ pub fn markdown_table(file: &TransferFile) -> String {
             .unwrap_or_else(|| format!("`{}`", c.slug));
         let field = match c.field.kind.as_str() {
             "binary" => format!("GF(2^{})", c.field.degree),
-            "extension" => format!("GF(p^{}), p {} bits", c.field.degree, c.field.log2_base.round()),
+            "extension" => format!(
+                "GF(p^{}), p {} bits",
+                c.field.degree,
+                c.field.log2_base.round()
+            ),
             _ => format!("GF(p), {} bits", c.field.log2_size.round()),
         };
         match best(c) {
@@ -50,7 +56,11 @@ pub fn markdown_table(file: &TransferFile) -> String {
                 c.subgroup.bits,
                 c.reference_log2,
                 r.label,
-                if r.destination.genus.len() > 12 { format!("2^{:.0}", r.destination.log2_genus) } else { r.destination.genus.clone() },
+                if r.destination.genus.len() > 12 {
+                    format!("2^{:.0}", r.destination.log2_genus)
+                } else {
+                    r.destination.genus.clone()
+                },
                 r.cost.log2_total,
                 r.cost.exponent_ratio_log2,
                 r.cost.ratio_log2,
@@ -79,7 +89,10 @@ pub fn points(file: &TransferFile) -> Vec<(f64, f64, String, String, RouteClass)
                     r.cost.ratio_log2,
                     c.family.clone(),
                     // Standard name when there is one: the chart labels it.
-                    c.standard_names.first().cloned().unwrap_or_else(|| c.slug.clone()),
+                    c.standard_names
+                        .first()
+                        .cloned()
+                        .unwrap_or_else(|| c.slug.clone()),
                     c.verdict,
                 )
             })
@@ -176,14 +189,22 @@ pub fn svg_chart(file: &TransferFile) -> String {
     ));
     s.push_str(&format!(
         "<text x=\"{}\" y=\"{}\" text-anchor=\"middle\">subgroup order r, bits</text>\n",
-        ml + pw / 2.0, h - 16.0
+        ml + pw / 2.0,
+        h - 16.0
     ));
     s.push_str(&format!(
         "<text transform=\"translate(18,{}) rotate(-90)\" text-anchor=\"middle\">log2(rho on E) − log2(best carried route), bits</text>\n",
         mt + ph / 2.0
     ));
     for (xv, yv, family, slug, class) in &pts {
-        let r = if matches!(class, RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal | RouteClass::Unresolved) { 6.0 } else { 3.5 };
+        let r = if matches!(
+            class,
+            RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal | RouteClass::Unresolved
+        ) {
+            6.0
+        } else {
+            3.5
+        };
         s.push_str(&format!(
             "<circle cx=\"{:.1}\" cy=\"{:.1}\" r=\"{r}\" fill=\"{}\" fill-opacity=\"0.8\" stroke=\"{}\"><title>{slug}: ratio {yv:+.1} bits</title></circle>\n",
             sx(*xv),
@@ -195,7 +216,10 @@ pub fn svg_chart(file: &TransferFile) -> String {
     // Label the advantage points.
     let mut dy = 0.0;
     for (xv, yv, _, slug, class) in &pts {
-        if matches!(class, RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal | RouteClass::Unresolved) {
+        if matches!(
+            class,
+            RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal | RouteClass::Unresolved
+        ) {
             s.push_str(&format!(
                 "<text x=\"{:.1}\" y=\"{:.1}\" font-size=\"11\">{slug}</text>\n",
                 sx(*xv) + 8.0,
@@ -230,27 +254,42 @@ pub fn tikz_chart(file: &TransferFile) -> String {
     let sy = |y: f64| (y - ax.y_min) / (ax.y_max - ax.y_min) * ph;
     let mut s = String::new();
     s.push_str("\\begin{tikzpicture}[x=1cm,y=1cm]\n");
-    s.push_str(&format!("\\draw[->] (0,0) -- ({:.2},0) node[below right] {{$r$ bits}};\n", pw + 0.3));
-    s.push_str(&format!("\\draw[->] (0,0) -- (0,{:.2}) node[above] {{ratio, bits}};\n", ph + 0.3));
+    s.push_str(&format!(
+        "\\draw[->] (0,0) -- ({:.2},0) node[below right] {{$r$ bits}};\n",
+        pw + 0.3
+    ));
+    s.push_str(&format!(
+        "\\draw[->] (0,0) -- (0,{:.2}) node[above] {{ratio, bits}};\n",
+        ph + 0.3
+    ));
     let x_step = if ax.x_max > 400.0 { 100.0 } else { 50.0 };
     let mut x = 0.0;
     while x <= ax.x_max {
-        s.push_str(&format!("\\draw ({:.2},0) -- ++(0,-0.1) node[below] {{\\tiny {x}}};\n", sx(x)));
+        s.push_str(&format!(
+            "\\draw ({:.2},0) -- ++(0,-0.1) node[below] {{\\tiny {x}}};\n",
+            sx(x)
+        ));
         x += x_step;
     }
     let y_step = ((ax.y_max - ax.y_min) / 8.0).max(1.0).round();
     let mut y = (ax.y_min / y_step).ceil() * y_step;
     while y <= ax.y_max {
-        s.push_str(&format!("\\draw (0,{:.2}) -- ++(-0.1,0) node[left] {{\\tiny {y}}};\n", sy(y)));
+        s.push_str(&format!(
+            "\\draw (0,{:.2}) -- ++(-0.1,0) node[left] {{\\tiny {y}}};\n",
+            sy(y)
+        ));
         y += y_step;
     }
     s.push_str(&format!(
         "\\draw[dashed] (0,{0:.2}) -- ({1:.2},{0:.2}) node[right] {{\\tiny rho}};\n",
-        sy(0.0), pw
+        sy(0.0),
+        pw
     ));
     s.push_str(&format!(
         "\\draw[dotted] (0,{0:.2}) -- ({1:.2},{0:.2}) node[right] {{\\tiny +{2} margin}};\n",
-        sy(file.cost_model.advantage_margin_bits), pw, file.cost_model.advantage_margin_bits
+        sy(file.cost_model.advantage_margin_bits),
+        pw,
+        file.cost_model.advantage_margin_bits
     ));
     for (xv, yv, family, slug, class) in &pts {
         let (r, draw) = match class {
@@ -270,7 +309,10 @@ pub fn tikz_chart(file: &TransferFile) -> String {
             sx(*xv),
             sy(*yv)
         ));
-        if matches!(class, RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal | RouteClass::Unresolved) {
+        if matches!(
+            class,
+            RouteClass::FormulaAdvantage | RouteClass::FormulaMarginal | RouteClass::Unresolved
+        ) {
             s.push_str(&format!(
                 "\\node[right,font=\\tiny] at ({:.2},{:.2}) {{\\texttt{{{}}}}};\n",
                 sx(*xv) + 0.15,

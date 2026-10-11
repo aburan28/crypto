@@ -1108,7 +1108,9 @@ pub struct BatchScratch {
     dens: Vec<u64>,
     acc: Vec<u64>,
     /// Structure-of-arrays copies of a block's addends, for the SIMD path.
+    #[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
     qx: Vec<u64>,
+    #[cfg_attr(not(target_arch = "x86_64"), allow(dead_code))]
     qy: Vec<u64>,
 }
 
