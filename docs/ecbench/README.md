@@ -354,7 +354,13 @@ entries), `lifts` probes or descends every lift (`h` calls), `combined`
 descends one system with the target abscissa free and the fiber polynomial
 adjoined, and `blind` is the landed oracle.  The fiber the oracle found is
 in `oracle_setup` (`fiber_size`, `fiber_complete`); with `h = 1` every mode
-is the blind oracle.
+is the blind oracle.  All three take `fiber_gen=legacy|coset` and
+`fiber_scale=d` (`research/isogeny_conductor_gap_round2_20261011/`).
+`legacy`, the default, is the round-1 subgroup closure, kept so that
+committed sessions replay.  It overcounts set-up when `E(F_q)[h]` needs
+several generators.  `coset` stops the closure at the first multiple already
+in the subgroup.  `fiber_scale=d` (coset only) uses the subgroup
+`[d]E(F_q)[h]` instead of the whole fiber.
 
 `koblitz-standard-subspace:dimension=d` with
 `pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N` runs
