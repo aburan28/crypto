@@ -34,6 +34,9 @@ use crate::cryptanalysis::ic_boundary::{
     Calibration, CountedGroup, FieldOps, GroupOps, NegationClasses, PhaseCost, PointClasses,
     PrimeInstance, PrimePoint, RhoResult, RhoWalk,
 };
+use crate::cryptanalysis::ic_framework::fiber::{
+    FiberDescentOracle, FiberFrobeniusMitmOracle, FiberMitmOracle,
+};
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle,
     GlvOrbitBase, KoblitzOrbitBase, MitmOracle, PrimeAbscissaBase, SubtractOracle,
@@ -246,12 +249,12 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "oracle",
                     default: None,
-                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N on koblitz-standard-subspace",
+                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N on koblitz-standard-subspace",
                 },
                 ParamDecl {
                     name: "solver",
                     default: Some(""),
-                    help: "descent-algebraic only: buchberger-f2, sat-cdcl, exhaustive (with :k=v options)",
+                    help: "descent-algebraic and descent-algebraic-fiber only: f4-f2, buchberger-f2, sat-cdcl, exhaustive (with :k=v options)",
                 },
                 ParamDecl {
                     name: "linalg",
@@ -1671,9 +1674,11 @@ fn solve_ic_prime(
     let ms = spec.oracle_params.u64_or("m", 2)? as u32;
     let mut subtract = SubtractOracle;
     let mut mitm = MitmOracle::new(ms);
+    let mut mitm_fiber = FiberMitmOracle::new(ms);
     let oracle: &mut dyn DecompositionOracle<_> = match or_name.as_str() {
         "subtract" => &mut subtract,
         "mitm" => &mut mitm,
+        "mitm-fiber" => &mut mitm_fiber,
         other => return Err(format!("oracle `{other}` does not run on a prime curve")),
     };
     let ctx = InstanceCtx {
@@ -1777,6 +1782,26 @@ fn solve_ic_binary(
     let mut mitm = MitmOracle::new(ms);
     let mut frob = FrobeniusMitmOracle::new(ms, inst);
     let mut frob_counted = FrobeniusMitmOracle::new_counted(ms, inst);
+    let mut mitm_fiber = FiberMitmOracle::new(ms);
+    let mut frob_fiber = FiberFrobeniusMitmOracle::new(ms, inst);
+    let mut descent_fiber = match or_name.as_str() {
+        "descent-algebraic-fiber" => {
+            let name = spec
+                .solver
+                .as_deref()
+                .ok_or("descent-algebraic-fiber needs `solver`")?;
+            let budget = (spec.solver_budget_seconds > 0)
+                .then(|| std::time::Duration::from_secs(spec.solver_budget_seconds));
+            Some(FiberDescentOracle::new(
+                ms,
+                inst,
+                solver_by_name(name)?,
+                spec.solver_params.clone(),
+                budget,
+            ))
+        }
+        _ => None,
+    };
     let mut plugin_oracle = binary_plugins().and_then(|p| (p.oracle)(or_name.as_str(), ms, inst));
     let mut algebraic = match or_name.as_str() {
         "descent-algebraic" => {
@@ -1801,7 +1826,10 @@ fn solve_ic_binary(
         "mitm" => &mut mitm,
         "mitm-frobenius" => &mut frob,
         "mitm-frobenius-counted" => &mut frob_counted,
+        "mitm-fiber" => &mut mitm_fiber,
+        "mitm-frobenius-fiber" => &mut frob_fiber,
         "descent-algebraic" => algebraic.as_mut().expect("built above"),
+        "descent-algebraic-fiber" => descent_fiber.as_mut().expect("built above"),
         other => match plugin_oracle.as_deref_mut() {
             Some(o) => o,
             None => return Err(format!("oracle `{other}` does not run on a binary curve")),

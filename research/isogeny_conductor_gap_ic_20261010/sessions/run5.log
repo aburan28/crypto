@@ -1,0 +1,26 @@
+== fiber_prime: exists
+== fiber_koblitz_k1_n17: exists
+== fiber_koblitz_k0_n19: exists
+== fiber_koblitz_k1_n19: exists
+== fiber_binary_n17: exists
+== fiber_binary_n19: exists
+== koblitz_gap_n17: exists
+== koblitz_gap_n19: exists
+== binary_gap_n17: exists
+== binary_gap_n19: exists
+== koblitz_gap_crater_folds: exists
+== fiber_koblitz_k0_n23: exists
+== koblitz_gap_n23: exists
+== binary_gap_n23: start 2026-10-11T05:13:50Z
+   exit 0 after 0 busy retries at 2026-10-11T06:11:44Z; session ECBS1hea175ac37aa8 complete -> research/isogeny_conductor_gap_ic_20261010/sessions/binary_gap_n23 (128 records: {"verified": 128})
+   verify exit 0: audit OK: 128 records, 128 verified, 12 replays reproduced, 0 problems
+== fiber_prime_large_h: start 2026-10-11T06:11:44Z
+   exit 0 after 2 busy retries at 2026-10-11T06:18:07Z; session ECBS1h2e0ea18cdf87 complete -> research/isogeny_conductor_gap_ic_20261010/sessions/fiber_prime_large_h (1600 records: {"exhausted": 80, "verified": 1520})
+   verify exit 0: audit OK: 1600 records, 1520 verified, 12 replays reproduced, 0 problems
+== prime_gap_22_fiber: start 2026-10-11T06:18:11Z
+   exit 0 after 0 busy retries at 2026-10-11T06:23:31Z; session ECBS1h4d6111413151 complete -> research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_22_fiber (2736 records: {"verified": 2736})
+   verify exit 0: audit OK: 2736 records, 2736 verified, 12 replays reproduced, 0 problems
+== prime_gap_26_fiber: start 2026-10-11T06:23:34Z
+   exit 0 after 0 busy retries at 2026-10-11T06:33:10Z; session ECBS1h52fe3de04846 complete -> research/isogeny_conductor_gap_ic_20261010/sessions/prime_gap_26_fiber (2736 records: {"verified": 2736})
+   verify exit 0: audit OK: 2736 records, 2736 verified, 12 replays reproduced, 0 problems
+== fiber_combined_n17: start 2026-10-11T06:33:13Z
