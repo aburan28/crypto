@@ -1,0 +1,15 @@
+
+running 1 test
+
+thread 'cryptanalysis::koblitz_index_calculus::tests::constructs_n71_a0_with_expected_subgroup' (94215) panicked at src/cryptanalysis/koblitz_index_calculus.rs:15439:46:
+K_0/F_2^71 must construct
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test cryptanalysis::koblitz_index_calculus::tests::constructs_n71_a0_with_expected_subgroup ... FAILED
+
+failures:
+
+failures:
+    cryptanalysis::koblitz_index_calculus::tests::constructs_n71_a0_with_expected_subgroup
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3916 filtered out; finished in 0.01s
+

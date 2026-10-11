@@ -889,14 +889,21 @@ mod tests {
         let a_fe = curve.a_fe();
         let g = curve.generator();
         let q = g.scalar_mul(&num_bigint::BigUint::from(123u32), &a_fe);
-        let plain = j0_index_calculus_dlp(&curve, &g, &q, 6, 2, 5000);
-        let staged = j0_index_calculus_dlp_staged(&curve, &g, &q, 6, 2, 5000, 64);
-        let (staged_x, report) = staged.expect("staged j0 solve succeeds on the toy curve");
-        let plain_x = plain.expect("plain j0 solve succeeds on the toy curve");
+        // Two extra random rows need not complete the relation rank. This
+        // checks stage accounting on a public fixture, with enough redundant
+        // rows that ordinary rank variance does not dominate the test.
+        let extra_relations = 32;
+        let plain = j0_index_calculus_dlp(&curve, &g, &q, 6, extra_relations, 5000);
+        let staged = j0_index_calculus_dlp_staged(&curve, &g, &q, 6, extra_relations, 5000, 64);
+        let (staged_x, report) = staged.expect("staged j0 public fixture succeeds");
+        let plain_x = plain.expect("plain j0 public fixture succeeds");
         assert_eq!(staged_x, plain_x);
         assert_eq!(g.scalar_mul(&staged_x, &a_fe), q);
         assert!(report.orbit_count > 0);
-        assert_eq!(report.relations_collected, report.orbit_count + 2);
+        assert_eq!(
+            report.relations_collected,
+            report.orbit_count + extra_relations
+        );
         assert!(report.factor_base_ms >= 0.0);
         assert!(report.relations_ms >= 0.0);
         assert!(report.linear_algebra_ms >= 0.0);

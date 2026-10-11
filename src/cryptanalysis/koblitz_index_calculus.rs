@@ -2047,22 +2047,28 @@ pub fn q_linearised_kernel_basis(
 /// Kernel basis of an `F_2`-linear map on `F_{2^n}` given by its action
 /// on the polynomial basis.
 fn kernel_basis_of(n: u32, image: impl Fn(&F2mElement) -> F2mElement) -> Vec<F2mElement> {
-    // Column i = F(z^i), packed into the low n bits of a u64.
-    let mut rows: Vec<(u64, u64)> = Vec::with_capacity(n as usize);
+    assert!(
+        n <= 128,
+        "linearised kernel packing supports at most 128 bits"
+    );
+    // Column i = F(z^i). Preserve both field words at the wide rungs.
+    let mut rows: Vec<(u128, u128)> = Vec::with_capacity(n as usize);
     for i in 0..n {
         let basis = F2mElement::from_bit_positions(&[i], n);
         let img = image(&basis);
-        let img_bits = img.raw_bits().first().copied().unwrap_or(0);
-        rows.push((img_bits, 1u64 << i));
+        let words = img.raw_bits();
+        let img_bits = u128::from(words.first().copied().unwrap_or(0))
+            | (u128::from(words.get(1).copied().unwrap_or(0)) << 64);
+        rows.push((img_bits, 1u128 << i));
     }
 
     // Gaussian elimination on the image halves; whatever reduces to
     // zero contributes its preimage to the kernel basis.
-    let mut pivots: Vec<(u64, u64)> = Vec::new();
-    let mut kernel_basis: Vec<u64> = Vec::new();
+    let mut pivots: Vec<(u128, u128)> = Vec::new();
+    let mut kernel_basis: Vec<u128> = Vec::new();
     for (mut img, mut pre) in rows {
         for &(pimg, ppre) in &pivots {
-            let lead = 1u64 << (63 - pimg.leading_zeros());
+            let lead = 1u128 << (127 - pimg.leading_zeros());
             if img & lead != 0 {
                 img ^= pimg;
                 pre ^= ppre;
@@ -3170,8 +3176,8 @@ fn finish_factor_base_domain(
     // representation.  `factor_base_orbit_maps_agree_in_both_representations`
     // pins that on every usable degree.
     let (orbit_of, orbits, signed_orbit_of, signed_orbits) = match &fast {
-        Some(curve) => orbit_maps_packed(kc, curve, &points)?,
-        None => orbit_maps_bigint(kc, &points)?,
+        Some(curve) if kc.frobenius_is_endomorphism => orbit_maps_packed(kc, curve, &points)?,
+        _ => orbit_maps_bigint(kc, &points)?,
     };
     if signed_orbits.iter().map(Vec::len).sum::<usize>() != points.len() {
         return None;
@@ -15447,6 +15453,25 @@ mod tests {
             scalar_mul(&curve.curve, curve.generator(), &curve.subgroup_order),
             BinaryPoint::Infinity
         );
+    }
+
+    #[test]
+    fn wide_linearised_kernels_preserve_high_coordinates() {
+        let n = 71;
+        let irr = find_irreducible_sparse_wide(n).unwrap();
+        // X^2 + X has exactly the prime subfield as its kernel.
+        assert_eq!(
+            linearised_kernel_basis(&[0, 1], n, &irr),
+            vec![F2mElement::one(n)]
+        );
+        // The identity has no kernel; the zero map preserves every basis
+        // coordinate, including those beyond the first machine word.
+        assert!(linearised_kernel_basis(&[0], n, &irr).is_empty());
+        let zero = linearised_kernel_basis(&[], n, &irr);
+        assert_eq!(zero.len(), n as usize);
+        for (i, basis) in zero.iter().enumerate() {
+            assert_eq!(*basis, F2mElement::from_bit_positions(&[i as u32], n));
+        }
     }
 
     #[test]

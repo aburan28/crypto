@@ -79,11 +79,15 @@ Execution lookup uses a build-generated compact index while `curves` returns the
 complete embedded inventory. Receipt/executable SHA-256 uses a pinned native backend
 with runtime CPU detection and a portable fallback checked against independent hashes.
 
-`--method auto` uses the validated extension-field kernel construction at P224/1471
-and P192/10453. Those cases construct one Frobenius eigenline of two and report
+`--method auto` uses extension-field kernel construction for P192/P224 at prime
+degrees above 1009 when the smaller Frobenius eigenvalue order is at most 16.
+The recorded cases include P224/1117, P224/1471, P192/2341 and P192/10453.
+The constructor checks the extension field, torsion order, Frobenius eigenline
+and descent of the kernel; independent replay then checks the resulting map.
+These runs construct one Frobenius eigenline of two and report
 `degree_coverage: PARTIAL`. Other supported split prime degrees use full
-modular-polynomial enumeration. `--method kernel` restricts the run to the two
-validated kernel cases; `--method modpoly` selects full enumeration explicitly.
+modular-polynomial enumeration. `--method kernel` explicitly selects the checked
+kernel route where supported; `--method modpoly` selects full enumeration.
 Search and screening currently accept odd prime degrees up to 1000000. These are
 implementation bounds; a bounded construction timeout does not establish nonexistence.
 

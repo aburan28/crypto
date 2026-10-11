@@ -1,0 +1,34 @@
+
+running 13 tests
+test cryptanalysis::jv_cover::tests::charpoly_satisfies_cayley_hamilton_and_has_the_right_roots ... ok
+test cryptanalysis::jv_cover::tests::cover_map_lands_on_the_curve ... ok
+test cryptanalysis::jv_cover::tests::distinguished_point_rho_finds_the_planted_logarithm ... ok
+test cryptanalysis::jv_cover::tests::instance_transfers_the_dlp ... ok
+test cryptanalysis::jv_cover::tests::jacobian_group_law ... ok
+test cryptanalysis::jv_cover::tests::nagao_finds_planted_six_sums_and_agrees_with_the_oracle ... trial 0: NagaoCost { weil_muls: 2730, f4_muls: 4498415, lin_muls: 712369, post_muls: 5000, delta: 64, degree_reached: 10, max_rows: 768, max_cols: 724, f4_ms: 20.280167000000002, lin_ms: 2.5132079999999997, total_ms: 25.557625, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 3, split: 1, decompositions: 1 }
+trial 1: NagaoCost { weil_muls: 2730, f4_muls: 4523297, lin_muls: 966189, post_muls: 6292, delta: 64, degree_reached: 10, max_rows: 768, max_cols: 724, f4_ms: 15.855, lin_ms: 2.338208, total_ms: 18.317166, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 5, split: 1, decompositions: 1 }
+trial 2: NagaoCost { weil_muls: 2730, f4_muls: 4549918, lin_muls: 575066, post_muls: 3288, delta: 64, degree_reached: 10, max_rows: 768, max_cols: 724, f4_ms: 18.352292, lin_ms: 1.713417, total_ms: 20.177583, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 2, split: 1, decompositions: 1 }
+trial 3: NagaoCost { weil_muls: 2730, f4_muls: 4521486, lin_muls: 455261, post_muls: 2471, delta: 64, degree_reached: 10, max_rows: 768, max_cols: 724, f4_ms: 15.80575, lin_ms: 1.446917, total_ms: 17.400665999999998, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 1, split: 1, decompositions: 1 }
+trial 4: NagaoCost { weil_muls: 2730, f4_muls: 4529762, lin_muls: 581070, post_muls: 3676, delta: 64, degree_reached: 10, max_rows: 768, max_cols: 724, f4_ms: 54.796209, lin_ms: 1.965292, total_ms: 56.938042, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 2, split: 1, decompositions: 1 }
+trial 5: NagaoCost { weil_muls: 2730, f4_muls: 4539055, lin_muls: 581359, post_muls: 3659, delta: 64, degree_reached: 10, max_rows: 768, max_cols: 724, f4_ms: 121.29712500000001, lin_ms: 2.659792, total_ms: 124.139583, inconsistent: false, incomplete: false, timed_out: false, degenerate: false, nonseparating: 0, stopped_at: None, replayed: false, trace_mismatch: false, fp_solutions: 2, split: 1, decompositions: 1 }
+ok
+test cryptanalysis::jv_cover::tests::polynomial_gcd_and_division ... ok
+test cryptanalysis::jv_cover::tests::replayed_f4_agrees_with_the_full_solver_and_the_oracle ... full f4 2627405 (553 × 504, degree 7) vs replay 946494 (453 × 494, degree 7)
+full f4 2632795 (556 × 507, degree 7) vs replay 950640 (456 × 497, degree 7)
+full f4 2652776 (556 × 507, degree 7) vs replay 960531 (456 × 497, degree 7)
+replayed 31 of 40, cheaper 31, mismatches 8
+  trace step 0: degree 2 useful rows 3 new lms 2
+  trace step 1: degree 3 useful rows 17 new lms 9
+  trace step 2: degree 4 useful rows 34 new lms 10
+  trace step 3: degree 5 useful rows 47 new lms 9
+  trace step 4: degree 6 useful rows 70 new lms 5
+  trace step 5: degree 7 useful rows 37 new lms 1
+ok
+test cryptanalysis::jv_cover::tests::solver_is_exact_on_1500_planted_sums_at_p61 ... ignored
+test cryptanalysis::jv_cover::tests::stopped_f4_agrees_with_the_full_solver_and_the_oracle ... ok
+test cryptanalysis::jv_cover::tests::the_solver_loses_no_rational_solution_at_small_p ... ok
+test cryptanalysis::jv_cover::tests::tower_arithmetic ... ok
+test cryptanalysis::jv_cover::tests::transfer_is_a_homomorphism_into_the_jacobian_over_fq ... ok
+
+test result: ok. 12 passed; 0 failed; 1 ignored; 0 measured; 3904 filtered out; finished in 22.06s
+

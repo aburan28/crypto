@@ -1,0 +1,268 @@
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008)
+warning: unused import: `BinaryCurve`
+    --> src/cryptanalysis/koblitz_fast_arith.rs:1195:29
+     |
+1195 |     use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement};
+     |                             ^^^^^^^^^^^
+     |
+     = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::binary_ecc::F2mElement`
+    --> src/cryptanalysis/semaev_decomp.rs:2166:13
+     |
+2166 |         use crate::binary_ecc::F2mElement;
+     |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::binary_ecc::F2mElement`
+    --> src/cryptanalysis/semaev_decomp.rs:3803:9
+     |
+3803 |     use crate::binary_ecc::F2mElement;
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/ec_index_calculus.rs:397:9
+    |
+397 |     let mut g = poly_gcd(&monic, &shifted, p);
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/ec_index_calculus.rs:406:20
+    |
+406 |     while let Some(mut h) = queue.pop() {
+    |                    ----^
+    |                    |
+    |                    help: remove this `mut`
+
+warning: unused variable: `deg`
+   --> src/cryptanalysis/ec_index_calculus.rs:386:9
+    |
+386 |     let deg = monic.len() - 1;
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_deg`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/ec_index_calculus.rs:576:9
+    |
+576 |     let mut b = poly_rem(base, f, p);
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2301:13
+     |
+2301 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+
+warning: variable does not need to be mutable
+   --> src/pqc/fast/keccak4.rs:500:13
+    |
+500 |         let mut v = vec![Backend::Portable];
+    |             ----^
+    |             |
+    |             help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/pqc/fast/ml_kem.rs:420:13
+    |
+420 |         let mut buf = buf;
+    |             ----^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1063:5
+     |
+1061 | enum Lanes {
+     |      ----- variants in this enum
+1062 |     Scalar,
+1063 |     Avx2,
+     |     ^^^^
+1064 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `DEFAULT_TTL_SECS` is never used
+  --> src/cryptanalysis/groebner_cache.rs:15:7
+   |
+15 | const DEFAULT_TTL_SECS: u64 = 7 * 24 * 60 * 60;
+   |       ^^^^^^^^^^^^^^^^
+
+warning: constant `DEFAULT_MAX_BYTES` is never used
+  --> src/cryptanalysis/groebner_cache.rs:16:7
+   |
+16 | const DEFAULT_MAX_BYTES: usize = 16 * 1024 * 1024;
+   |       ^^^^^^^^^^^^^^^^^
+
+warning: struct `GroebnerCache` is never constructed
+  --> src/cryptanalysis/groebner_cache.rs:27:19
+   |
+27 | pub(crate) struct GroebnerCache {
+   |                   ^^^^^^^^^^^^^
+
+warning: static `CACHE` is never used
+  --> src/cryptanalysis/groebner_cache.rs:34:8
+   |
+34 | static CACHE: OnceLock<Option<GroebnerCache>> = OnceLock::new();
+   |        ^^^^^
+
+warning: static `CONFIG_WARNING_EMITTED` is never used
+  --> src/cryptanalysis/groebner_cache.rs:35:8
+   |
+35 | static CONFIG_WARNING_EMITTED: OnceLock<()> = OnceLock::new();
+   |        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: associated items `from_env`, `key`, `get`, and `put` are never used
+   --> src/cryptanalysis/groebner_cache.rs:38:8
+    |
+ 37 | impl GroebnerCache {
+    | ------------------ associated items in this implementation
+ 38 |     fn from_env() -> Option<Self> {
+    |        ^^^^^^^^
+...
+ 65 |     fn key(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32) -> String {
+    |        ^^^
+...
+ 88 |     fn get(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<Vec<F2BoolPoly>> {
+    |        ^^^
+...
+134 |     fn put(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32, rows: &[F2BoolPoly]) {
+    |        ^^^
+
+warning: function `get_or_compute` is never used
+   --> src/cryptanalysis/groebner_cache.rs:162:15
+    |
+162 | pub(crate) fn get_or_compute(
+    |               ^^^^^^^^^^^^^^
+
+warning: function `parse_env_u64` is never used
+   --> src/cryptanalysis/groebner_cache.rs:180:4
+    |
+180 | fn parse_env_u64(name: &str, default: u64) -> u64 {
+    |    ^^^^^^^^^^^^^
+
+warning: function `parse_env_usize` is never used
+   --> src/cryptanalysis/groebner_cache.rs:187:4
+    |
+187 | fn parse_env_usize(name: &str, default: usize) -> usize {
+    |    ^^^^^^^^^^^^^^^
+
+warning: function `warn_once` is never used
+   --> src/cryptanalysis/groebner_cache.rs:194:4
+    |
+194 | fn warn_once(message: String) {
+    |    ^^^^^^^^^
+
+warning: fields `qx` and `qy` are never read
+    --> src/cryptanalysis/koblitz_fast.rs:1111:5
+     |
+1107 | pub struct BatchScratch {
+     |            ------------ fields in this struct
+...
+1111 |     qx: Vec<u64>,
+     |     ^^
+1112 |     qy: Vec<u64>,
+     |     ^^
+     |
+     = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: constant `RC` is never used
+  --> src/pqc/fast/keccak4.rs:27:7
+   |
+27 | const RC: [u64; 24] = [
+   |       ^^
+
+warning: function `use_avx2` is never used
+   --> src/pqc/fast/ml_kem.rs:343:4
+    |
+343 | fn use_avx2() -> bool {
+    |    ^^^^^^^^
+
+warning: `crypto` (lib test) generated 26 warnings (run `cargo fix --lib -p crypto --tests` to apply 12 suggestions)
+    Finished `release` profile [optimized] target(s) in 3m 16s
+     Running unittests src/lib.rs (target/isogeny-root-gate-20261010/release/deps/crypto_lib-38a76fd507a8b9e3)
+
+running 57 tests
+test cryptanalysis::binary_velu::tests::wide_point_map_retains_high_bits_and_rejects_width_mismatches ... ok
+test cryptanalysis::ecbench::claw::tests::wide_claw_recovers_planted_logs ... ok
+test cryptanalysis::f4_fp::tests::narrow_arithmetic_matches_wide_rref ... ok
+test cryptanalysis::f4_fp::tests::narrow_f4_matches_wide_basis ... ok
+test cryptanalysis::f6_wide_geometry::tests::n83_batch_add_matches_reference_with_exceptions ... ok
+test cryptanalysis::f6_wide_geometry::tests::n83_k0_confidence_gate_generator_and_frobenius_match ... ok
+test cryptanalysis::f6_wide_geometry::tests::n83_packed_row_sums_match_reference_with_exceptions ... ok
+test cryptanalysis::f6_wide_geometry::tests::n83_pair_closure_matches_exhaustive_group_search ... ok
+test cryptanalysis::f6_wide_geometry::tests::n83_pmull_batch_keys_match_reference_with_exceptions ... ok
+test cryptanalysis::f6_wide_geometry::tests::n83_pmull_field_matches_reference ... ok
+test cryptanalysis::f6_wide_geometry::tests::n83_pmull_pair_build_matches_k0_reference ... ok
+test cryptanalysis::f6_wide_geometry::tests::n83_registered_curve_and_subgroup_usable_base_close_exactly ... ok
+test cryptanalysis::f6_wide_geometry::tests::n83_signed_batch_add_matches_reference_with_exceptions ... ok
+test cryptanalysis::f6_wide_geometry::tests::n83_signed_pair_index_matches_exhaustive_small_base ... ok
+test cryptanalysis::f6_wide_geometry::tests::n83_signed_pair_index_parallel_paths_agree ... ok
+test cryptanalysis::ic_framework::solvers::tests::the_wide_search_filters_the_equations_past_a_lane ... ok
+test cryptanalysis::koblitz_fast_arith::wide_tests::wide_artin_schreier_matches_scalar_solver ... ok
+test cryptanalysis::koblitz_fast_arith::wide_tests::wide_group_law_matches_general_curve_at_71 ... ok
+test cryptanalysis::koblitz_fast_arith::wide_tests::wide_points_with_x_match_general_lift ... ok
+test cryptanalysis::koblitz_fast_arith::wide_tests::wide_s3_roots_zero_the_scalar_polynomial ... ok
+test cryptanalysis::koblitz_index_calculus::tests::wide_linearised_kernels_preserve_high_coordinates ... ok
+test cryptanalysis::koblitz_index_calculus::tests::wide_rabin_agrees_with_narrow_on_small_inputs ... ok
+test cryptanalysis::koblitz_index_calculus::tests::wide_rabin_matches_sympy_vectors_at_71 ... ok
+test cryptanalysis::koblitz_index_calculus::tests::wide_sparse_search_finds_71_pentanomial ... ok
+test cryptanalysis::koblitz_strong_rho::tests::the_wide_field_walks_exactly_as_the_one_word_field ... ok
+test cryptanalysis::koblitz_strong_rho::tests::the_wide_instantiation_solves_planted_targets ... ok
+test cryptanalysis::koblitz_wide::tests::the_wide_order_agrees_with_the_one_word_constructor_where_both_exist ... ok
+test cryptanalysis::mq_fes::tests::the_wide_search_finds_exactly_what_the_scalar_one_does ... ok
+test cryptanalysis::p256_dickson_factor_base::tests::wide_dump_writes_repository_sql ... ok
+test cryptanalysis::semaev_decomp::reference_994784af::quartic_route_matches_994784af_at_wide_fields ... ok
+test cryptanalysis::semaev_decomp::wide_tests::wide_batch_inv_agrees_with_pointwise ... ok
+test cryptanalysis::semaev_decomp::wide_tests::wide_field_matches_general_arithmetic_at_71 ... ok
+test cryptanalysis::semaev_decomp::wide_tests::wide_field_matches_hand_vectors ... ok
+test cryptanalysis::wide_gf2m::tests::frobenius_has_order_n ... ok
+test cryptanalysis::wide_gf2m::tests::half_trace_solves_artin_schreier ... ok
+test cryptanalysis::wide_gf2m::tests::inverses_and_batches_invert ... ok
+test cryptanalysis::wide_gf2m::tests::mul_matches_the_library_at_the_width_limits ... ok
+test cryptanalysis::wide_gf2m::tests::mul_matches_the_library_field_on_both_kernels ... ok
+test cryptanalysis::wide_groebner::tests::degree_runs_merge_to_ascending_order ... ok
+test cryptanalysis::wide_groebner::tests::finds_planted_decompositions_on_small_curves ... ok
+test cryptanalysis::wide_groebner::tests::indexed_coordinates_match_curve_lift_reference ... ok
+test cryptanalysis::wide_groebner::tests::n83_three_summand_block_and_cofactor_bridge_replay ... ok
+test cryptanalysis::wide_groebner::tests::substitution_and_arithmetic_agree_with_evaluation ... ok
+test cryptanalysis::wide_groebner::tests::the_order_test_refuses_only_definite_violations ... ok
+test cryptanalysis::wide_groebner::tests::the_suffix_recursion_finds_planted_decompositions ... ok
+test cryptanalysis::wide_groebner::tests::two_word_field_table_matches_legacy_and_reference ... ok
+test cryptanalysis::wide_groebner::tests::wide_system_matches_the_64_bit_builder ... ok
+test cryptanalysis::wide_sixsum::tests::exact_linear_consequence_replays ... ok
+test cryptanalysis::wide_sixsum::tests::private_degree_four_distinguishes_unique_and_shared_columns ... ok
+test cryptanalysis::wide_sixsum::tests::private_degree_three_counts_original_equations ... ok
+test cryptanalysis::wide_sixsum::tests::selective_source_prolongation_preserves_planted_zero ... ok
+test cryptanalysis::wide_sixsum::tests::source_code_substitution_preserves_evaluation_and_cancellation ... ok
+test cryptanalysis::wide_sixsum::tests::word_boundaries_and_boolean_cancellation ... ok
+test ct_bignum::tests::mul_wide_high_zero_for_small_operands ... ok
+test ct_bignum::tests::mul_wide_matches_biguint ... ok
+test ct_bignum::tests::u1024_mul_wide_matches_biguint ... ok
+test utils::tests::mod_inverse_wide_moduli_return_normalised_inverses ... ok
+
+test result: ok. 57 passed; 0 failed; 0 ignored; 0 measured; 3861 filtered out; finished in 14.28s
+
