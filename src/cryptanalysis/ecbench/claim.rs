@@ -26,6 +26,7 @@ use serde_json::{json, Map, Value};
 
 use crate::cryptanalysis::ecbench::audit::{audit, AuditReport};
 use crate::cryptanalysis::ecbench::canonical::sha256_hex;
+use crate::cryptanalysis::ecbench::host::{self, HostCapsule};
 use crate::cryptanalysis::ecbench::methods::{dump_factor_base, FactorBaseFacts, ResolvedMethod};
 use crate::cryptanalysis::ecbench::record::Record;
 use crate::cryptanalysis::ecbench::runner::{read_records, read_session, PlanDoc, Session};
@@ -643,10 +644,29 @@ pub struct Independent {
     pub pointer: String,
 }
 
+/// A changed toolchain can change `env_class_id` on one machine. The
+/// hardware class is a second, conservative gate against that false positive.
+fn hardware_independence_problem(
+    session_host: &HostCapsule,
+    auditor_class: Option<&str>,
+) -> Option<String> {
+    let measured = match host::hardware_class_id(session_host) {
+        Ok(c) => c,
+        Err(e) => return Some(format!("cannot derive the session hardware class: {e}")),
+    };
+    match auditor_class {
+        None => Some("it records no auditor hardware class".into()),
+        Some(c) if c == measured => Some(format!(
+            "it ran on the session's own hardware class {c}; a compiler or kernel change is not an independent host"
+        )),
+        Some(_) => None,
+    }
+}
+
 /// Why `i` is not an independent replay of `runs` in the session at
-/// `dir`: empty when it is one.  It must be a passing audit of this
-/// session's exact files, run on another host class, that reproduced
-/// every one of the runs.
+/// `dir`: empty when it is one. It must be a passing audit of this
+/// session's exact files, run on another environment and hardware class,
+/// that reproduced every one of the runs.
 fn independent_problems(
     i: &Independent,
     dir: &Path,
@@ -670,6 +690,19 @@ fn independent_problems(
             problems.push(format!("it ran on the session's own host class {c}"))
         }
         Some(_) => {}
+    }
+    match std::fs::read(dir.join("host.json"))
+        .map_err(|e| e.to_string())
+        .and_then(|bytes| serde_json::from_slice::<HostCapsule>(&bytes).map_err(|e| e.to_string()))
+    {
+        Ok(session_host) => {
+            if let Some(problem) =
+                hardware_independence_problem(&session_host, r.auditor_hardware_class_id.as_deref())
+            {
+                problems.push(problem);
+            }
+        }
+        Err(e) => problems.push(format!("cannot read the session host capsule: {e}")),
     }
     for name in [
         "session.json",
@@ -1079,6 +1112,7 @@ fn build_from_session(
             json!({
                 "receipt_sha256": i.receipt_sha256,
                 "auditor_env_class_id": i.receipt.auditor_env_class_id,
+                "auditor_hardware_class_id": i.receipt.auditor_hardware_class_id,
                 "auditor_binary_sha256": i.receipt.auditor_binary_sha256,
                 "replays": i.receipt.replays.len(),
             })
@@ -1499,6 +1533,26 @@ pub fn check_problems(check: &Value) -> Vec<String> {
 mod tests {
     use super::*;
     use crate::cryptanalysis::ic_boundary::koblitz_instance;
+
+    #[test]
+    fn compiler_change_on_one_machine_cannot_supply_independence() {
+        let original = host::capture().unwrap();
+        let mut alternate = original.clone();
+        alternate.stable.rustc_vv = Some("other toolchain".into());
+        assert_ne!(
+            host::recompute_class(&original).unwrap(),
+            host::recompute_class(&alternate).unwrap()
+        );
+        let alternate_hardware = host::hardware_class_id(&alternate).unwrap();
+        assert!(
+            hardware_independence_problem(&original, Some(&alternate_hardware))
+                .unwrap()
+                .contains("own hardware class")
+        );
+        assert!(hardware_independence_problem(&original, None)
+            .unwrap()
+            .contains("no auditor hardware class"));
+    }
 
     #[test]
     fn canonical_utf8_writes_non_ascii_raw() {
