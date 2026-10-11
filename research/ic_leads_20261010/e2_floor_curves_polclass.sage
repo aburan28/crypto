@@ -8,6 +8,7 @@
 # selects the twist; keep the twist whose order is #K_0 = 2^N + 1 - t, checked on random points.
 # Output: one JSON record with the modulus, every j as an integer bitmask, b, a2, and the Frobenius orbit id,
 # matching the encoding of research/isogeny_conductor_gap_20261007/e1_floor_panel.py (--model-b).
+# The committed outputs are gzip -9 -n compressed (e2_floor_n*_ell*.json.gz); read with gzip.open.
 import json, sys
 from sage.all import *
 

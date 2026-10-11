@@ -138,6 +138,6 @@ baseline is the per-lead ratios above, not this column.
   in `F_{2^23}`, all 966 with `#E = #K_0` on the `a₂` twist chosen by order
   check, in 42 Frobenius orbits of 23, and the set of `b` coefficients is
   **identical** to the Vélu-built T23 family of the parallel workspace
-  (966 of 966 in common): `e2_floor_n23_ell967.json`. The same script is
+  (966 of 966 in common): `e2_floor_n23_ell967.json.gz`. The same script is
   the E2 constructor for `n = 41/409`, `61/1951`, `83/6473` (class
   polynomial degrees 410, 1952, 6474).

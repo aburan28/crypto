@@ -153,8 +153,8 @@ optimum before any lead is read against them. The same sweep at n = 41
 
 Floor curves by the CM route, all with `#E = #K_0` on the `a₂ = 0` twist:
 n = 23 (966 curves, 42 orbits; identical to the Vélu family), n = 41
-(410 curves, 10 orbits; `e2_floor_n41_ell409.json`), n = 61 (1,952 curves,
-32 orbits of 61; `e2_floor_n61_ell1951.json`). The n = 41 twin under the
+(410 curves, 10 orbits; `e2_floor_n41_ell409.json.gz`), n = 61 (1,952 curves,
+32 orbits of 61; `e2_floor_n61_ell1951.json.gz`). The n = 41 twin under the
 table pipeline is in `runs/20261011T001107Z`.
 
 ## Base sizing at n = 41 (K_0, 39-bit r, m = 2, 4 targets each)

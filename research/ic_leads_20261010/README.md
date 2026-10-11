@@ -12,7 +12,7 @@ Working directory for `docs/ic/LEAD_LADDER_METHODOLOGY_20261010.md`.
 | `RESULTS_ROUND2.md` | round 2: L2 priced (closed), L3 residual collector (closed negative), L5 in table form and in algebraic form (`koblitz-closure` + `descent-algebraic:slots=all`), L8 floor twins at n = 23 and 41, base sizing at n = 23/41 for m = 2 and 3, A1 multiplier closure (`compact-orbit-scan:norm=N`, after the per-orbit pair-table fix), §7 item status |
 | `sweeps/` | every sweep file, named by lead or §7 item |
 | `runs/` | raw reports and logs, gzip-compressed (`report_n*.json.gz`, `stdout_n*.txt.gz`; `summarise_runs.py` reads them directly, `zcat` for a look); wall time in them is not evidence (host load 90–150) |
-| `e2_floor_curves_polclass.sage` | L8 / E2: floor curves one level down from K_0 by the CM route (ring class polynomial mod 2) |
+| `e2_floor_curves_polclass.sage`, `e2_floor_n*_ell*.json.gz` | L8 / E2: floor curves one level down from K_0 by the CM route (ring class polynomial mod 2), at n = 23/967, 41/409, 61/1951; gzip-compressed |
 
 ## E7 result (2026-10-10, arithmetic model, no Sage)
 
