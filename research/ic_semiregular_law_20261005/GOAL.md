@@ -30,3 +30,13 @@ found on the same data, so it is a hypothesis, not evidence.
 otherwise.
 
 Rounds under this goal: [PREREGISTRATION.md](PREREGISTRATION.md) (round 1).
+
+## Status after round 1 (2026-10-11)
+
+Added after the round; the text above is unchanged. Round 1's registered verdict is
+**neither** ([RESULTS.md](RESULTS.md)). The fixed-`ℓ` fit failed on all seven
+discriminating cells. The generic law held on every one of the 32 `x4` draws, including
+the six cells where it disagreed with the fit. It failed for `rr` on two cells, where `rr`
+refutes below its window. A post-hoc diagnostic traces that to duplicated equations plus
+extra top-form relations. The goal stays open. The next step is two separate registrations
+on fresh draws: the window for `x4` alone, and a structural model for `rr`.
