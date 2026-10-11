@@ -7,6 +7,7 @@ on:
       - 'examples/iso1_theorem_check.rs'
       - 'research/iso1_weak_classes_20261007/**'
       - 'research/weak_curve_catalog_20261010/**'
+      - 'research/weak_curve_properties_20261010/**'
       - 'docs/curves/weak-families/**'
       - 'src/hash/sha256.rs'
       - 'src/cryptanalysis/identity_certificate.rs'
@@ -35,6 +36,15 @@ jobs:
           cargo run --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bin weak_curve_catalog -- check .
           cargo run --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bin iso1_two_branch_seal -- docs/curves/weak-families --check
           cargo run --release --locked --manifest-path research/iso1_weak_classes_20261007/report_check_runtime/Cargo.toml --bin iso1_two_branch_seal -- research/weak_curve_catalog_20261010 --check
+      - name: Certified curve properties and independent PARI replay
+        run: |
+          runtime=research/iso1_weak_classes_20261007/report_check_runtime
+          props=research/weak_curve_properties_20261010
+          cargo run --release --locked --manifest-path "$runtime/Cargo.toml" --bin weak_curve_properties -- check .
+          cargo run --release --locked --manifest-path "$runtime/Cargo.toml" --bin iso1_two_branch_seal -- "$props" --check
+          WEAK_PROPERTIES_INPUTS="$props/inputs.gp" gp -q -f -s 128M "$props/replay.gp" > property_replay.txt 2> property_replay.stderr
+          test ! -s property_replay.stderr
+          cmp property_replay.txt "$props/audit_run2/stdout.txt"
       - name: Exact algebra and generalized finite-field controls
         run: |
           study=research/iso1_weak_classes_20261007

@@ -1,0 +1,2589 @@
+[
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1hbe2d903bf49a14ea",
+    "statement": {
+      "name": "Cubic discriminant from three distinct zero-sum roots",
+      "source": "weak_curve_properties_20261010/REPORT.md; torsion criterion",
+      "variables": [
+        "r",
+        "s"
+      ],
+      "degree_bound": 6,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "r"
+                  },
+                  {
+                    "op": "neg",
+                    "args": {
+                      "op": "var",
+                      "args": "s"
+                    }
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "r"
+                  },
+                  {
+                    "op": "neg",
+                    "args": {
+                      "op": "var",
+                      "args": "s"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "const",
+                        "args": 2
+                      },
+                      {
+                        "op": "var",
+                        "args": "r"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "var",
+                    "args": "s"
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "const",
+                        "args": 2
+                      },
+                      {
+                        "op": "var",
+                        "args": "r"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "var",
+                    "args": "s"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "r"
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "const",
+                        "args": 2
+                      },
+                      {
+                        "op": "var",
+                        "args": "s"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "r"
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "const",
+                        "args": 2
+                      },
+                      {
+                        "op": "var",
+                        "args": "s"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "const",
+                "args": -4
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "neg",
+                    "args": {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "var",
+                              "args": "r"
+                            },
+                            {
+                              "op": "var",
+                              "args": "r"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "var",
+                              "args": "r"
+                            },
+                            {
+                              "op": "var",
+                              "args": "s"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "var",
+                              "args": "s"
+                            },
+                            {
+                              "op": "var",
+                              "args": "s"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "neg",
+                    "args": {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "var",
+                              "args": "r"
+                            },
+                            {
+                              "op": "var",
+                              "args": "r"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "var",
+                              "args": "r"
+                            },
+                            {
+                              "op": "var",
+                              "args": "s"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "var",
+                              "args": "s"
+                            },
+                            {
+                              "op": "var",
+                              "args": "s"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "op": "neg",
+                    "args": {
+                      "op": "add",
+                      "args": [
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "var",
+                              "args": "r"
+                            },
+                            {
+                              "op": "var",
+                              "args": "r"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "var",
+                              "args": "r"
+                            },
+                            {
+                              "op": "var",
+                              "args": "s"
+                            }
+                          ]
+                        },
+                        {
+                          "op": "mul",
+                          "args": [
+                            {
+                              "op": "var",
+                              "args": "s"
+                            },
+                            {
+                              "op": "var",
+                              "args": "s"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "const",
+                "args": -27
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "r"
+                      },
+                      {
+                        "op": "var",
+                        "args": "s"
+                      },
+                      {
+                        "op": "add",
+                        "args": [
+                          {
+                            "op": "var",
+                            "args": "r"
+                          },
+                          {
+                            "op": "var",
+                            "args": "s"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "r"
+                      },
+                      {
+                        "op": "var",
+                        "args": "s"
+                      },
+                      {
+                        "op": "add",
+                        "args": [
+                          {
+                            "op": "var",
+                            "args": "r"
+                          },
+                          {
+                            "op": "var",
+                            "args": "s"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 64,
+    "seed": 202610102601,
+    "value_digest": "5145bb97d29e954665cc18af450a506cffc87388bb7e6b21e0c932c10585eb44",
+    "independence": "Native exact integer expansion plus portable evaluations; field and integrality hypotheses have deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1hfcb76cf22432aec6",
+    "statement": {
+      "name": "Cleared normalized j coefficient",
+      "source": "weak_curve_properties_20261010/REPORT.md; generic twist normalization",
+      "variables": [
+        "a",
+        "b"
+      ],
+      "degree_bound": 6,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "const",
+                "args": 6912
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "a"
+                  },
+                  {
+                    "op": "var",
+                    "args": "a"
+                  },
+                  {
+                    "op": "var",
+                    "args": "a"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": 27
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "b"
+              },
+              {
+                "op": "var",
+                "args": "b"
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "const",
+            "args": 4
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "a"
+              },
+              {
+                "op": "var",
+                "args": "a"
+              },
+              {
+                "op": "var",
+                "args": "a"
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 1728
+                  },
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "op": "const",
+                            "args": 4
+                          },
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "op": "var",
+                                "args": "a"
+                              },
+                              {
+                                "op": "var",
+                                "args": "a"
+                              },
+                              {
+                                "op": "var",
+                                "args": "a"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "op": "mul",
+                        "args": [
+                          {
+                            "op": "const",
+                            "args": 27
+                          },
+                          {
+                            "op": "mul",
+                            "args": [
+                              {
+                                "op": "var",
+                                "args": "b"
+                              },
+                              {
+                                "op": "var",
+                                "args": "b"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "neg",
+                "args": {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "const",
+                      "args": 6912
+                    },
+                    {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "a"
+                        },
+                        {
+                          "op": "var",
+                          "args": "a"
+                        },
+                        {
+                          "op": "var",
+                          "args": "a"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 64,
+    "seed": 202610102601,
+    "value_digest": "5156b27434e062f3926985e066a791a237afbfb67ac4e8a34829f22cdec468c2",
+    "independence": "Native exact integer expansion plus portable evaluations; field and integrality hypotheses have deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1h6f49accd9dcbe782",
+    "statement": {
+      "name": "Cleared quadratic-twist a coefficient",
+      "source": "weak_curve_properties_20261010/REPORT.md; D=3b/(2a)",
+      "variables": [
+        "a",
+        "b"
+      ],
+      "degree_bound": 5,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 3
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 3
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": 4
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "a"
+              },
+              {
+                "op": "var",
+                "args": "a"
+              },
+              {
+                "op": "var",
+                "args": "a"
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "var",
+            "args": "a"
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 2
+                  },
+                  {
+                    "op": "var",
+                    "args": "a"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 2
+                  },
+                  {
+                    "op": "var",
+                    "args": "a"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": 9
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "b"
+              },
+              {
+                "op": "var",
+                "args": "b"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 64,
+    "seed": 202610102601,
+    "value_digest": "614d36fe0ac9b36f55be11f2bbce24b3e2758f9da9e42c042268d12d2953fa13",
+    "independence": "Native exact integer expansion plus portable evaluations; field and integrality hypotheses have deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1h147787079919c710",
+    "statement": {
+      "name": "Cleared quadratic-twist b coefficient",
+      "source": "weak_curve_properties_20261010/REPORT.md; D=3b/(2a)",
+      "variables": [
+        "a",
+        "b"
+      ],
+      "degree_bound": 6,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 3
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 3
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 3
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": 8
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "a"
+              },
+              {
+                "op": "var",
+                "args": "a"
+              },
+              {
+                "op": "var",
+                "args": "a"
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "var",
+            "args": "b"
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 2
+                  },
+                  {
+                    "op": "var",
+                    "args": "a"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 2
+                  },
+                  {
+                    "op": "var",
+                    "args": "a"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 2
+                  },
+                  {
+                    "op": "var",
+                    "args": "a"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": 27
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "b"
+              },
+              {
+                "op": "var",
+                "args": "b"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 64,
+    "seed": 202610102601,
+    "value_digest": "8bd98705d6842ca63aa7038df651c2f1a37599846d6957e33fce37e7a283703f",
+    "independence": "Native exact integer expansion plus portable evaluations; field and integrality hypotheses have deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1h804e5c83abc76a76",
+    "statement": {
+      "name": "Translated Frobenius norm",
+      "source": "weak_curve_properties_20261010/REPORT.md; independent integral-basis scan",
+      "variables": [
+        "x",
+        "y",
+        "c"
+      ],
+      "degree_bound": 2,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "x"
+              },
+              {
+                "op": "neg",
+                "args": {
+                  "op": "var",
+                  "args": "c"
+                }
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "y"
+              },
+              {
+                "op": "neg",
+                "args": {
+                  "op": "var",
+                  "args": "c"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "x"
+              },
+              {
+                "op": "var",
+                "args": "y"
+              }
+            ]
+          },
+          {
+            "op": "neg",
+            "args": {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "c"
+                },
+                {
+                  "op": "add",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "x"
+                    },
+                    {
+                      "op": "var",
+                      "args": "y"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "c"
+              },
+              {
+                "op": "var",
+                "args": "c"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 64,
+    "seed": 202610102601,
+    "value_digest": "ea24c10eebd5621700d025eb1b602a399dee07a6bb25927b51f969c567bdebc3",
+    "independence": "Native exact integer expansion plus portable evaluations; field and integrality hypotheses have deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1h35630da796a98325",
+    "statement": {
+      "name": "Degree-1 unit-group index",
+      "source": "weak_curve_properties_20261010/REPORT.md; finite cyclic twist descent",
+      "variables": [
+        "q"
+      ],
+      "degree_bound": 1,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "const",
+                "args": -1
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": []
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": -1
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 64,
+    "seed": 202610102601,
+    "value_digest": "fed631d824848a9e667763cc508cfcadc073444d517bd6ba80ba4e4420f0e790",
+    "independence": "Native exact integer expansion plus portable evaluations; field and integrality hypotheses have deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1h84e6c7c6625fd509",
+    "statement": {
+      "name": "Degree-2 unit-group index",
+      "source": "weak_curve_properties_20261010/REPORT.md; finite cyclic twist descent",
+      "variables": [
+        "q"
+      ],
+      "degree_bound": 2,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "const",
+                "args": -1
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": []
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": -1
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 64,
+    "seed": 202610102601,
+    "value_digest": "b79a17d4d98fb8b623cf83af019dc1bc1024a3b2ec4dbb920d3a43307bb893f2",
+    "independence": "Native exact integer expansion plus portable evaluations; field and integrality hypotheses have deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1hb43d551d5c10b86e",
+    "statement": {
+      "name": "Degree-3 unit-group index",
+      "source": "weak_curve_properties_20261010/REPORT.md; finite cyclic twist descent",
+      "variables": [
+        "q"
+      ],
+      "degree_bound": 3,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "const",
+                "args": -1
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": []
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": -1
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 64,
+    "seed": 202610102601,
+    "value_digest": "127dfa3b1cacd3fbf95e6142a072a48939442abae7756c0d526b2419e647d7f9",
+    "independence": "Native exact integer expansion plus portable evaluations; field and integrality hypotheses have deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1hb8686d3351c32a4e",
+    "statement": {
+      "name": "Degree-5 unit-group index",
+      "source": "weak_curve_properties_20261010/REPORT.md; finite cyclic twist descent",
+      "variables": [
+        "q"
+      ],
+      "degree_bound": 5,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "const",
+                "args": -1
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": []
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": -1
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 64,
+    "seed": 202610102601,
+    "value_digest": "aa8903d064b34a030ce2554431f7aeac3d2d8b31456e4176cde04dba5c9997d7",
+    "independence": "Native exact integer expansion plus portable evaluations; field and integrality hypotheses have deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1h66444a7f2efc9508",
+    "statement": {
+      "name": "Degree-6 unit-group index",
+      "source": "weak_curve_properties_20261010/REPORT.md; finite cyclic twist descent",
+      "variables": [
+        "q"
+      ],
+      "degree_bound": 6,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "const",
+                "args": -1
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": []
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": -1
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 64,
+    "seed": 202610102601,
+    "value_digest": "e0705f83b663d41aaa12aba86e3179d005a79cbbbdbd8a3a5e136af01909f5ae",
+    "independence": "Native exact integer expansion plus portable evaluations; field and integrality hypotheses have deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1h9f63df24babbd075",
+    "statement": {
+      "name": "Degree-7 unit-group index",
+      "source": "weak_curve_properties_20261010/REPORT.md; finite cyclic twist descent",
+      "variables": [
+        "q"
+      ],
+      "degree_bound": 7,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "const",
+                "args": -1
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": []
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": -1
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 64,
+    "seed": 202610102601,
+    "value_digest": "21240dd1dd30ce87255433d3ab06e8356a211dedea920eaad07f1672e89b19f7",
+    "independence": "Native exact integer expansion plus portable evaluations; field and integrality hypotheses have deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1hca62343608685982",
+    "statement": {
+      "name": "Degree-10 unit-group index",
+      "source": "weak_curve_properties_20261010/REPORT.md; finite cyclic twist descent",
+      "variables": [
+        "q"
+      ],
+      "degree_bound": 10,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "const",
+                "args": -1
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": []
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": -1
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 64,
+    "seed": 202610102601,
+    "value_digest": "4be85e68344c21238dfddb228bffc8a4601dfcdd559715b1d3446cd0768de1f0",
+    "independence": "Native exact integer expansion plus portable evaluations; field and integrality hypotheses have deductive proofs.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1h67bd0090ad8a22e5",
+    "statement": {
+      "name": "Degree-14 unit-group index",
+      "source": "weak_curve_properties_20261010/REPORT.md; finite cyclic twist descent",
+      "variables": [
+        "q"
+      ],
+      "degree_bound": 14,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "const",
+                "args": -1
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": []
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  },
+                  {
+                    "op": "var",
+                    "args": "q"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              },
+              {
+                "op": "var",
+                "args": "q"
+              }
+            ]
+          },
+          {
+            "op": "const",
+            "args": -1
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 64,
+    "seed": 202610102601,
+    "value_digest": "f1dbbef3bcb45a198a7b3afa7f8cdd62b3e23162033792f1f4b67de8606e9289",
+    "independence": "Native exact integer expansion plus portable evaluations; field and integrality hypotheses have deductive proofs.",
+    "proof": null
+  }
+]
