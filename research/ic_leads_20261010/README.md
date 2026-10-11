@@ -5,10 +5,11 @@ Working directory for `docs/ic/LEAD_LADDER_METHODOLOGY_20261010.md`.
 | file | what |
 |---|---|
 | `sweeps/baseline_l1_l4.json` | the baseline configuration and the L1 (signed Frobenius folding) and L4 (invariant base) toggles as a matrix (paired by seed) |
-| `run_baseline.sh` | runs `ic bench` on `K_0` per rung, operation counts, one report per rung under `runs/<stamp>/` with command, commit and binary hash |
+| `run_baseline.sh` | runs `ic bench` on `K_0` (or `K_1`, `KOBLITZ_A=1`; or a floor curve, `MODEL_B=<bitmask>`) per rung, operation counts, one report per rung under `runs/<stamp>/` with command, commit and binary hash |
 | `summarise_runs.py` | turns the reports into the per-phase ratio table of the methodology §3 |
 | `e7_vertical_step_costs.py`, `e7_vertical_step_costs.json` | L8 / E7: order-of-magnitude cost of one vertical isogeny step per `(n, ell)` in `F_q`-multiplications, three routes, against rho |
 | `RESULTS.md`, `RESULTS_TABLES.md` | the first baseline run (n = 13, 17, 23): L1 and L4 measured, readings, what was not measured |
+| `RESULTS_ROUND2.md` | round 2: L2 priced (closed), L3 residual collector (closed negative), L5 in table form (orbit union wins), L8 floor twins |
 | `runs/` | raw reports; wall time in them is not evidence (host load 90–150) |
 | `e2_floor_curves_polclass.sage` | L8 / E2: floor curves one level down from K_0 by the CM route (ring class polynomial mod 2) |
 

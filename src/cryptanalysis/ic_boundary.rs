@@ -3714,6 +3714,43 @@ pub fn koblitz_instance(a: u8, n: u32) -> Option<BinaryInstance> {
     })
 }
 
+/// A curve of the Koblitz isogeny class that is **not** the Koblitz model:
+/// `y² + xy = x³ + a x² + b` with `b ∉ F₂`, the same group order as `K_a`
+/// (certified on sampled points by [`KoblitzCurve::isogenous_model`]),
+/// no Frobenius endomorphism.  This is the floor-curve control of the
+/// conductor-gap experiments (`docs/ic/LEAD_LADDER_METHODOLOGY_20261010.md`
+/// L8): every lead that claims a gain *from* `τ` must vanish on it.
+/// `b` is a bitmask in the instance's own sparse modulus (the one
+/// `KoblitzCurve::new` selects), so a `b` built elsewhere must be in the
+/// same representation; `koblitz` is `None`, so only negation folds.
+pub fn koblitz_floor_instance(a: u8, n: u32, b: u64) -> Option<BinaryInstance> {
+    use num_bigint::BigUint as Big;
+    if n == 0 || n > 63 || b < 2 {
+        return None;
+    }
+    let b_fe = crate::binary_ecc::F2mElement::from_biguint(&Big::from(b), n);
+    let kc = KoblitzCurve::isogenous_model(a, n, b_fe, None)?;
+    let fast = FastCurve::new(&kc.curve)?;
+    let gf = Gf2::new(&kc.curve.irreducible);
+    let ash = ArtinSchreier::new(&gf);
+    let generator = fast.lift(kc.generator());
+    Some(BinaryInstance {
+        name: format!("{}-floor-b{b:x}", kc.label()),
+        n,
+        irreducible: kc.curve.irreducible.clone(),
+        a: u64::from(a),
+        b,
+        group_order: kc.group_order.to_u64()?,
+        r: kc.subgroup_order.to_u64()?,
+        cofactor: kc.cofactor.to_u64()?,
+        generator,
+        fast,
+        gf,
+        artin_schreier: ash,
+        koblitz: None,
+    })
+}
+
 // ── Factor bases ───────────────────────────────────────────────────
 
 /// How factor-base points map to relation columns.
@@ -6077,6 +6114,22 @@ fn calibrate_binary(inst: &BinaryInstance, calib: &mut Calibration) {
     calib.ns_per_frobenius = Some(start.elapsed().as_nanos() as f64 / samples as f64);
     std::hint::black_box(acc);
     calib.ns_per_word_xor = Some(calibrate_word_xor());
+    // The Frobenius-orbit canonicalisation (lead L2): priced here so the
+    // framework's `canonicalisations` counter is charged like every other
+    // non-addition instead of riding along unpriced.
+    if inst.koblitz.is_some() {
+        if let Some(canon) = FrobeniusCanon::new(&inst.gf, inst.n) {
+            let xs: Vec<u64> = (0..1024).map(|_| rng.gen::<u64>() & inst.gf.mask).collect();
+            let start = Instant::now();
+            let mut acc = 0u64;
+            for i in 0..samples {
+                let (c, t) = canon.canon_with_shift(xs[(i % 1024) as usize]);
+                acc ^= c.wrapping_add(t as u64);
+            }
+            calib.ns_per_canon = Some(start.elapsed().as_nanos() as f64 / samples as f64);
+            std::hint::black_box(acc);
+        }
+    }
 }
 
 /// Nanoseconds per pair of the `S₄` pairs-and-solve loop, measured on

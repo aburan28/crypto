@@ -1,0 +1,21 @@
+{
+ "_comment": "L8 floor twin at n=23: the same prefix subspace base and negation-folded table on the floor curve (MODEL_B=6975299, orbit O00 of the 967-level, no Frobenius endomorphism) as on K_0; the only admissible difference is the curve. Prediction: identical columns, trials per relation within the binomial spread, identical table cost.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 23
+ },
+ "repeats": 8,
+ "seed": 20261010,
+ "max_trials": 4000000,
+ "matrix": {
+  "factor_base": [
+   "binary-subspace:dimension=11"
+  ],
+  "oracle": [
+   "mitm:negation_folded=1"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

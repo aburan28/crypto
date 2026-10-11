@@ -1,0 +1,24 @@
+{
+ "_comment": "n=23 with three summands: the L1/L4/L5 comparison (invariant subspace, orbit union, prefix subspace; Frobenius-folded and negation-folded tables) at the ledger's arity, to confirm the m=2 ratios carry over.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 23
+ },
+ "repeats": 8,
+ "seed": 20261010,
+ "max_trials": 4000000,
+ "matrix": {
+  "factor_base": [
+   "koblitz-orbit:divisor=1",
+   "compact-orbit-scan:columns=45,raw_x_cap=4000000",
+   "binary-subspace:dimension=11"
+  ],
+  "oracle": [
+   "mitm-frobenius:m=3",
+   "mitm:negation_folded=1,m=3"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

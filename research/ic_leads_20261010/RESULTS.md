@@ -7,6 +7,11 @@ commands: `runs/20261010T19*/`. Tables as the summariser prints them:
 during the runs, so **no wall-clock figure here is evidence**; every ratio
 below is read from counted group operations or native counters.
 
+**Arity note (added 2026-10-11):** every `mitm` row in this file is a
+2-sum (one table probe per target); the oracle's `m` defaults to 2 and no
+sweep set `m=3`. The pre-registered predictions and the ratios do not depend
+on the arity; the absolute `S` values and the n = 41 feasibility do.
+
 ## What was run
 
 | rung | curve | `log₂ r` | base | points | configurations | repeats |

@@ -91,7 +91,7 @@ One frozen configuration per rung, on the ECC2K-130 family member `K_0`
 |---|---|---|
 | curve | `K_0` over `F_{2^n}` | the challenge curve's family |
 | factor base | `koblitz-orbit:divisor=1` (the smallest non-trivial Frobenius-invariant subspace, trace-zero), signed Frobenius orbits folded | the structure the leads are about |
-| oracle | `mitm-frobenius-counted`, `m = 3` | the production shape of the landed rungs (pair table + one addition), with the native setup counters on |
+| oracle | `mitm-frobenius`, `m = 2` (one table probe per target; `m = 3` probes `R − P` for every base point and is the n = 41 shape) | the pair-table family of the engineering ledger; the first round ran m = 2 throughout, which is what the tables in `research/ic_leads_20261010/RESULTS*.md` report |
 | targets | `walk` (r-adding walk, one addition each) | the engineering ledger's `_walk` row |
 | linear algebra | `incremental-gauss` over `Z/rZ`, stop at first log | the framework default |
 | reference | counted matched rho, 16 runs, `A = 2n` | `rho.measured_matched` |
@@ -202,7 +202,10 @@ cost drop below 1.5× (then the rotation was not the bottleneck). **Class:**
 engineering. **Honest note:** `KIC_TARGET_THREADS` showed the online stage is
 probe-rate bound (≈ 1.1 M probes/s single core, dominated by the S3 solve,
 not the canonicalisation), so this lead's ceiling is the canonicalisation's
-share of a probe, which the baseline measures first.
+share of a probe, which the baseline measures first. **Measured
+2026-10-11** (`research/ic_leads_20261010/RESULTS_ROUND2.md`): 4.6–17 ns per
+canonicalisation against 205–238 ns per addition, a 2–7 % share of a probe;
+ceiling ≈ 1.04×. **Closed**, no key prototype warranted.
 
 ### L3. Residual matching
 
@@ -219,7 +222,11 @@ direct oracle's `r/(poly(B))`-type scan cost, so at small `B` it wins by the
 ratio of those two and loses once the direct hit rate exceeds the collision
 rate; the exponent in `r` is unchanged (it is rho on the quotient). **Falsifier:**
 no rung where relations/operation exceeds the baseline's. **Class:** at best
-engineering; a win here does not move `B·D²/N`.
+engineering; a win here does not move `B·D²/N`. **Measured 2026-10-11**
+(`ic bench --targets residual`, `ic_framework::residual`): relation-phase
+additions 4×, 7×, 53× the baseline's at n = 13, 17, 23, widening with `n`
+as the birthday bound says; **closed as a negative** on every base above
+`r^{1/4}` points.
 
 ### L4. Orbit-invariant factor base
 
@@ -263,6 +270,12 @@ unchanged, `n^{m−1}` systems available per target, LA unchanged.
 the solver was already exploiting the symmetry, as a symmetrised system
 would). **Class:** engineering (`log₂ m!` bits of relation collection; it is
 the *only* τ-dependent IC resource a non-stable base keeps, per LEADS V1).
+**Measured 2026-10-11 in table form** (`compact-orbit-scan` registered in
+`ic bench`): the signed-Frobenius closure of a seed set is the ordered-slot
+relation space, and at n = 23 it decomposes targets 2.8× more often per
+trial than the prefix base of equal point count (and 1.7× more often than
+the invariant subspace of equal columns). The algebraic-oracle form remains
+unimplemented.
 
 ### L6. Phase-aware quotient summation
 
@@ -325,7 +338,10 @@ Every lead row therefore has an optional **floor-curve twin** at `n = 23`
 (conductor 967, curves built in `research/isogeny_conductor_gap_20261007/`).
 **Prediction:** L1, L4, L5, L6 vanish on the floor; L2, L3, L7 do not.
 **Class:** control, not a lead; a hardness *difference* is reported only
-under the V11 pre-registration.
+under the V11 pre-registration. **Measured 2026-10-11** (`ic bench
+--model-b`, floor curves built by the CM route at n = 23, 41, 61): the n = 23
+twin is level-blind (trials per relation 4.28 vs 4.42, same columns, same
+table); V11 unmet.
 
 ## 5. Budget and order
 
@@ -346,3 +362,77 @@ about the challenge curve. The ladder's rungs are at most 41-bit subgroups;
 the challenge is 129 bits and has no Frobenius-stable subspace, so the
 subspace rows do not extrapolate to it and the orbit-union arm is the one
 that does. Wall time from this session is not evidence.
+
+## 7. Other speedup opportunities the measurements point at
+
+Ordered by what the measured rows say the cost is, not by novelty. Each is
+stated with the phase it moves, the evidence, and the bar it must clear.
+
+1. **Size the base to the family optimum per rung (setup dominates).** At
+   every subspace rung the pair-table build is 90–99 % of the total
+   (47,565 of 49,000 GAE at n = 23 folded; 1.03 M of 1.03 M unfolded) while
+   the relation phase is ≈ 1,000. `ic_boundary::family_optimum_base` gives
+   `|F| = (#E·t/k)^{1/3}` (`t` the table fold, `k` the column fold): at
+   n = 23 with `t = k = 23` that is ≈ 200 signed points, a tenth of the
+   2,025 used, with a 100× smaller table and a relation phase ≈ 10× longer.
+   This is the ledger's `_balanced` row, never run on the orbit-union base.
+   **Measured 2026-10-11** (`RESULTS_ROUND2.md`): 5 columns against 45 at
+   n = 23 cuts the one-target total 22× and lands within 1.55× of the
+   counted signed-Frobenius rho; the n = 41 sweep is in `runs/`. Engineering,
+   and the largest single constant on the ladder.
+2. **The orbit-union base beats the invariant subspace at equal size
+   (L5).** 1.7× in trials per relation at n = 23. Since the orbit union is
+   the only base at n = 131, the subspace rows of the old ladders understate
+   the production shape; re-base the leaderboard's Koblitz rows on
+   `compact-orbit-scan`. Measurement, not code.
+3. **Charge-free base build.** The orbit scan's lifts, projections and
+   key squares are 16× the subspace build in measured GAE (2,870 vs 182 at
+   n = 23) and are mostly `_uncharged` counters; a half-trace table and
+   batched inversion (Montgomery's trick across the scanned abscissae)
+   remove the inversions, which are the charged part. Engineering, bounded
+   by the build's share (≈ 5 % of a one-target total at n = 23, more at
+   K = 600 rungs).
+4. **Single large prime on the Frobenius-folded table.** Residual matching
+   (L3) fails because it matches on the whole group. The classical large-prime
+   variation matches instead on a *bounded* set: accept `R − P₃ − P₄ = L`
+   with `L` in a large-prime domain `D` of size `|D| ≫ |F|`, store `(R, L)`
+   keyed by the canonical orbit of `L`, and merge two relations on the same
+   `L`. Yield per probe rises by `|D|/|F|` at a merge cost that is a hash
+   join, and the table is still `|F|²/(4n)`. On the compact-orbit pipeline
+   this is the `K` lever (§2 of the feasibility note) without the `K²`
+   table. Prediction: trials per relation ÷ 3–10 at n = 23 with
+   `|D| = 10|F|`; falsifier: merge rate below `1/|D|` per stored residual.
+   Unimplemented; it needs a second table and the relation merge in the
+   matrix. Engineering with a real constant.
+5. **`Z[τ]`-multiplier closure (A1 of the directions note).** The orbit
+   union uses `{±τ^k}`; adding the norm-≤16 elements of `Z[τ]` multiplies
+   the usable points per column by ≈ 19 at no column cost. In the table
+   pipeline the table grows with the square of the points, so this is a
+   fixed-memory trade: 19× fewer columns at equal table. Unmeasured;
+   `compact-orbit-scan` is the place to add a `multipliers` parameter.
+6. **Batch the probe.** The probe is add + canonicalise + lookup; the
+   addition is 95 % of it and is an affine addition with an inversion.
+   Probing 64 targets' `R − P₃` with one shared inversion (the
+   `canon_in_place` / `point_keys` batching already exists for keys) turns
+   the 238 ns addition into ≈ 60 ns of multiplications. 3–4× on the relation
+   phase; engineering; invisible in operation counts (same additions), so it
+   only shows in the wall-clock window on an isolated host.
+7. **Pin the calibration for the `K_0` instances.** Not a speedup but a
+   prerequisite: without pins the GAE of `as_solves`, `row_ops` and now
+   `canonicalisations` is host-priced and the `S` column moves between
+   identical runs (0.22 vs 8.7 LA GAE for the same 225 row operations).
+   `calibration.json` has pins for `K_1` n = 17 but not `K_0` n = 23 or 41.
+8. **Algebraic τ-slots (L5/L6 proper) for the no-table regime.** The table
+   form is realised; at n = 131 the table does not fit (`K² n` states), so
+   the gain has to be carried by the S3-chain extraction (`extract128`) or
+   an algebraic oracle with per-summand rotations. This is the one item on
+   this list that touches the challenge rung; everything above is a
+   constant on the toy ladder.
+9. **Higher arity (5-sums) and the implicit S3 index** remain the levers
+   the feasibility note names; nothing measured here changes that reading.
+
+What is **not** an opportunity, measured: cheaper canonicalisation (L2,
+≤ 4 %), residual matching (L3, birthday-bound), equivariant F4 over
+gauge-fixing (L7/G2), and any isogeny move away from `K_0` (L8: the floor
+curve loses `τ` and gains nothing).
+

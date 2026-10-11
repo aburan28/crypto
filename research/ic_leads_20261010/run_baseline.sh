@@ -29,7 +29,8 @@ import json, sys
 s = json.load(open(sys.argv[1])); s["instance"]["degree"] = int(sys.argv[2])
 json.dump(s, open(sys.argv[3], "w"), indent=1)
 EOF
-  cmd=("$ic" --out "$out/report_n$n.json" bench --sweep "$tmp" --koblitz-a "${KOBLITZ_A:-0}" --rho-runs 16)
+  cmd=("$ic" --out "$out/report_n$n.json" bench --sweep "$tmp" --koblitz-a "${KOBLITZ_A:-0}" --rho-runs "${RHO_RUNS:-16}")
+  [ -n "${MODEL_B:-}" ] && cmd+=(--model-b "$MODEL_B")
   printf '%q ' "${cmd[@]}" > "$out/cmd_n$n.txt"; echo >> "$out/cmd_n$n.txt"
   echo "== n=$n"; "${cmd[@]}" 2>&1 | tee "$out/stdout_n$n.txt" | tail -20
 done

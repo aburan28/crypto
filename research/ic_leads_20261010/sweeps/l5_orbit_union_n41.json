@@ -1,0 +1,23 @@
+{
+ "_comment": "Orbit-union arm at n=41 (K_0): compact-orbit-scan at K=600 against a prefix subspace of 2^13 abscissae with the negation-folded table, both oracles where they apply. The prefix row is also the floor-twin baseline (run again with MODEL_B=817567783691).",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 17
+ },
+ "repeats": 4,
+ "seed": 20261010,
+ "max_trials": 4000000,
+ "matrix": {
+  "factor_base": [
+   "compact-orbit-scan:columns=600,raw_x_cap=400000000",
+   "binary-subspace:dimension=13"
+  ],
+  "oracle": [
+   "mitm-frobenius",
+   "mitm:negation_folded=1"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

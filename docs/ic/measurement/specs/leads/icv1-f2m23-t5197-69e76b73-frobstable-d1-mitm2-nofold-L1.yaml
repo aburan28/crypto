@@ -1,20 +1,21 @@
 icms: icms.spec/v1
-label: "lead ladder baseline (K_0, n = 23): Frobenius-stable subspace divisor 1, signed-Frobenius fold, mitm-frobenius m=3"
+label: "lead L1 control (K_0, n = 23): same subspace, no Frobenius fold, mitm m=2"
 description: >
-  Baseline B2 of docs/ic/LEAD_LADDER_METHODOLOGY_20261010.md section 2 on the ECC2K-130
-  family member K_0.  Every lead spec in this directory differs from this file in exactly
-  one declared field.  Operation counts are the metric; the wall-clock window needs an
-  isolated host this ladder's first session did not have.
-role: baseline
+  Lead L1 (signed Frobenius folding) of docs/ic/LEAD_LADDER_METHODOLOGY_20261010.md section 4,
+  as the unfolded control against icv1-f2m23-t5197-69e76b73-frobstable-d1-mitmfrob2-baseline.yaml.  Declared
+  differences: factor_base.quotient (frobenius dropped) and decomposition.method (mitm), which
+  the methodology counts as one lead because the fold is one object seen by two stages.
+  Prediction: columns and rows x 2n = 46, LA operations x (2n)^2, decomposition unchanged.
+role: candidate
 instance:
   curve: {regime: koblitz, degree: 23, koblitz_a: 0}
   workload: {targets: 1, law: known_answer, seeds: [20261010]}
 factor_base:
   family: frobenius_stable_subspace
   params: {divisor: "1"}
-  quotient: [negation, frobenius]
+  quotient: [negation]
   large_primes: {mode: none}
-decomposition: {arity: 3, method: mitm_frobenius}
+decomposition: {arity: 2, method: mitm}
 relations: {collector: walk, stop: first_log, max_trials: 4000000}
 linear_algebra: {method: incremental_gauss}
 reference: {rho: rho.measured_matched, floor: floor.generic, rho_runs: 16}
