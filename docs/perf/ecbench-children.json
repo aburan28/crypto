@@ -1,0 +1,59 @@
+{
+  "schema": "perf.ecbench_children/v1",
+  "comment": "Frozen `ecbench exec` child inputs whose solve instruction count (callgrind Ir between the ecbench_before_solve/ecbench_solve markers) is tracked over time by scripts/perf/perfhistory.py as kernels of the `ecbench` area. Each is one execution of research/ecbench_calibration_20261002 (ecbench profile-input --spec \u2026 --seq \u2026); expected_recovered is the planted logarithm the child must return, and the counted phases must not change, or the row is marked re-based. Add a child by appending an entry; never edit an existing one (change the id instead).",
+  "children": [
+    {
+      "id": "ecbench/rho_negation_prime26_p42652151",
+      "desc": "rho.negation on the 26-bit registered prime curve p=42652151 (calibration prime.json seq 280, target 0)",
+      "input": {
+        "schema": "ecbench.child_input/v1",
+        "curve": {
+          "kind": "prime_explicit",
+          "p": 42652151,
+          "a": 26623966,
+          "b": 14210560,
+          "group_order": 42653927,
+          "r": 42653927,
+          "gx": 40895024,
+          "gy": 26279521
+        },
+        "target_seed": 20261002,
+        "target_index": 0,
+        "expected_workload_id": "Wf9c5da9613ce",
+        "method": {
+          "id": "rho.negation",
+          "params": {
+            "cap_multiple": "64"
+          }
+        },
+        "expected_method_id": "ECM1hefea4e0ebe79",
+        "algorithm_seed": 18071681976372581719
+      },
+      "expected_recovered": 15574975
+    },
+    {
+      "id": "ecbench/rho_signed_frobenius_k0n41",
+      "desc": "rho.signed_frobenius on Koblitz a=0, n=41 (calibration koblitz.json seq 240, target 0)",
+      "input": {
+        "schema": "ecbench.child_input/v1",
+        "curve": {
+          "kind": "koblitz",
+          "a": 0,
+          "n": 41
+        },
+        "target_seed": 20261002,
+        "target_index": 0,
+        "expected_workload_id": "Wfd165f36bfaf",
+        "method": {
+          "id": "rho.signed_frobenius",
+          "params": {
+            "cap_multiple": "64"
+          }
+        },
+        "expected_method_id": "ECM1h64b303e4183b",
+        "algorithm_seed": 15264665645144743329
+      },
+      "expected_recovered": 355415087257
+    }
+  ]
+}

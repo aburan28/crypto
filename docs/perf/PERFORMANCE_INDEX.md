@@ -16,6 +16,40 @@ python3 scripts/perf/perfindex.py compare ... --threads 4 --out /tmp/pi-4t
 python3 scripts/perf/perfindex.py instr --base ... --cand ... --out /tmp/pi-ir
 ```
 
+## Progress over time: the history
+
+The index above compares two revisions.  The **history** records every
+measured revision so progress can be read off a chart instead of a chain
+of PR descriptions: `scripts/perf/perfhistory.py` writes one snapshot per
+commit (callgrind `Ir` and a wall-time reading for every quick kernel, plus
+the frozen `ecbench exec` children in `docs/perf/ecbench-children.json`) and
+renders `HISTORY.md`, `history.svg` and a machine-readable `history.json`
+from them.  The snapshots and the rendered files live on the
+[`perf-history`](https://github.com/aburan28/crypto/tree/perf-history/docs/perf)
+branch, appended by `.github/workflows/perf-history.yml` on every push to
+`main`; pull requests that touch measured code get a comparison against the
+latest snapshot in their job summary.
+
+```bash
+git fetch origin perf-history
+git show origin/perf-history:docs/perf/HISTORY.md | less      # the tables
+git show origin/perf-history:docs/perf/history.json > /tmp/h.json   # per-kernel series
+# locally, for the working tree:
+cargo build --release --example perfbench --bin ecbench
+python3 scripts/perf/perfhistory.py check --binary target/release/examples/perfbench \
+    --ecbench target/release/ecbench --history <checkout of perf-history>/docs/perf/history
+```
+
+The chained index takes no credit across a fingerprint change: a kernel
+that computes something else is re-based, not sped up.  `Ir` is charted
+because it is deterministic for one binary; across two builds of different
+sources the untouched kernels still move by up to a few per cent (the
+release profile's codegen units are partitioned afresh and cross-module
+inlining follows), so one step under about 5 % on one kernel is build
+noise and a trend or an area index is the signal.  The wall column is one
+reading on the recording host and is informational.  Recording a snapshot
+takes about fifteen minutes of callgrind on four cores.
+
 ## What it measures, and what it does not
 
 `examples/perfbench` is a registry of **kernels**: each runs a fixed,
