@@ -21,12 +21,14 @@ $2^{60.91}$--$2^{60.92}$ on completed trails.
 The curve is identified rather than trusted. $E(\FF_2)$ has four
 points, so the Frobenius trace is $t=-1$ and the Koblitz recursion
 $s_m = t\,s_{m-1} - 2 s_{m-2}$ gives $\#E(\FF_{2^{131}}) = 2^{131}+1-s_{131}
-= 4\ell$. The test suite checks the two facts that make this
-\emph{this} curve: $\sigma^2+\sigma+2=0$ on every point, where
-$\sigma(x,y)=(x^2,y^2)$ is the Frobenius, and $\ell\cdot R=\mathcal{O}$
-for points multiplied by the cofactor. The published challenge point
-converts out of the normal basis back to Certicom's polynomial-basis
-hex, \texttt{05 1C99BFA6 F18DE467 C80C23B9 8C7994AA}.\art{ecc2k130/README.md, ``Validation''}
+= 4\ell$. The sibling library's test suite checks the two facts that
+make this \emph{this} curve, on random points multiplied by the
+cofactor: $\sigma^2+\sigma+2=0$, where $\sigma(x,y)=(x^2,y^2)$ is the
+Frobenius, and $\ell\cdot
+R=\mathcal{O}$.\art{cryptanalysis:fpga/README.md}\art{cryptanalysis:fpga/model/ecc2k130_test.c}
+The published challenge point converts out of the normal basis back
+to Certicom's polynomial-basis hex, \texttt{05 1C99BFA6 F18DE467
+C80C23B9 8C7994AA}.\art{ecc2k130/README.md, ``Validation''}
 
 \subsection{A type-II optimal normal basis}
 \label{sec:onb}
@@ -68,9 +70,8 @@ the Hamming weight of the vector is invariant under $\sigma$ and under
 None of this is taken on trust. The code generator models the field
 as the symmetric vectors over $\ZZ/263\ZZ$ modulo the all-ones vector,
 with multiplication as cyclic convolution: a complete and obviously
-correct model of $\FF_{2^{131}}$, and the one every generated routine
-is checked against on 64 random inputs before it is written
-out.\art{ecc2k130/codegen/field.py} The bitsliced multiply, square,
+correct model of $\FF_{2^{131}}$, and the one every generated routine is checked against on 64 random
+inputs before it is written out.\art{ecc2k130/codegen/field.py}\art{ecc2k130/codegen/gen.py} The bitsliced multiply, square,
 inverse, $\sigma^7$ and Hamming weight are differentially tested
 against a reference implementation that shares no code with them;
 the iteration function is checked to commute with Frobenius and with
@@ -111,7 +112,7 @@ Harley and collaborators in 1998~\cite{harley1998}. $2\cdot97+1=195$ is
 composite, so there is no type-II optimal normal basis; the client
 runs a polynomial-basis backend with the orbit-invariant weight taken
 through one generated linear map into a normal basis, which is the
-arrangement Harley's own client used.\art{ecc2k130/README.md, ``ECC2K-95''}
+arrangement Harley's own client used.\art{ecc2k130/README.md, ``ECC2K-130 and ECC2K-95''}
 
 The parameters were recovered from Harley's surviving client source
 and the generator refuses to emit the curve unless both points lie on
@@ -121,7 +122,8 @@ it, both have order $\ell$, and the published answer
 \]
 satisfies $[k]P=Q$. Expected work is about $2^{44}$ iterations;
 Harley's group measured $2.16\cdot10^{13}$ against the
-$1.79\cdot10^{13}$ this walk predicts from $\sqrt{\pi\ell/(4m)}$. Per
+$1.79\cdot10^{13}$ this walk predicts from
+$\sqrt{\pi\ell/(4m)}$.\art{ecc2k130/README.md, ``The problems''} Per
 iteration the polynomial-basis field is about $1.9\times$ cheaper
 than $\mathrm{GF}(2^{131})$ in the normal basis (about $32{,}000$
 against $60{,}000$ bitsliced instructions), so ECC2K-95 is a
