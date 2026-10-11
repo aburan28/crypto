@@ -67,7 +67,7 @@ for key, title in CELLS:
             ax.text(x, v["max"] * 1.3, f"n={v['n']}", ha="center", fontsize=6)
         elif src.get(arm):
             st = src[arm]["statuses"]
-            ax.text(x, 1e6, "\n".join(f"{k} {n}" for k, n in st.items()), ha="center", fontsize=6, rotation=90)
+            ax.text(x, 1e7, "timeout\n(1800 s cap)" if "timeout" in st else ", ".join(st), ha="center", va="bottom", fontsize=6, rotation=90)
         x += 1
     ticks.append((start + x - 1) / 2)
     labels.append(title)
@@ -76,7 +76,7 @@ ax.set_yscale("log")
 ax.set_xticks(ticks, labels, fontsize=8)
 ax.set_ylabel("solver word XORs per run (counted; log scale)")
 ax.set_title("Counted solver work per one-target run, median and range\n"
-             "8 public targets per cell; hatched = SPEC-X19 (1 target, 1800 s cap)", fontsize=10)
+             "8 public targets per cell; m=19 matrix arms: SPEC-X19, 1 target, both reached the 1800 s cap", fontsize=10)
 for _, lab, col in ENGINES:
     ax.bar(0, 0, color=col, label=lab)
 ax.legend(fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=4)
