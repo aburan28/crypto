@@ -2251,12 +2251,20 @@ pub fn q_linearised_kernel_basis(
 /// Kernel basis of an `F_2`-linear map on `F_{2^n}` given by its action
 /// on the polynomial basis.
 fn kernel_basis_of(n: u32, image: impl Fn(&F2mElement) -> F2mElement) -> Vec<F2mElement> {
+    // Column i = F(z^i), packed into the low n bits of a u128 (two raw
+    // limbs): the wide rungs have 64 < n ≤ MAX_N = 127, and a u64 here
+    // silently dropped their top limb and shifted `1 << i` out of range,
+    // so every wide constructor returned `None`.
+    debug_assert!(n <= 128, "kernel_basis_of packs columns into u128");
     // Column i = F(z^i), packed into the low n bits of a u128.
     // Retain both coordinate words for the admitted degrees 64..=127.
     let mut rows: Vec<(u128, u128)> = Vec::with_capacity(n as usize);
     for i in 0..n {
         let basis = F2mElement::from_bit_positions(&[i], n);
         let img = image(&basis);
+        let raw = img.raw_bits();
+        let img_bits = raw.first().copied().unwrap_or(0) as u128
+            | ((raw.get(1).copied().unwrap_or(0) as u128) << 64);
         let words = img.raw_bits();
         let img_bits = u128::from(words.first().copied().unwrap_or(0))
             | (u128::from(words.get(1).copied().unwrap_or(0)) << 64);

@@ -1041,6 +1041,50 @@ mod wide {
             }
         }
 
+        /// Everything before the inversion: `a = (left + right)^2`,
+        /// `p = left·right`, `ps = p^2`, and the denominator `a·ps`
+        /// (zero marks the exceptional path, which `finish` routes to the
+        /// direct solver exactly as the scalar `roots` did).
+        #[inline(always)]
+        fn prepare(&self, gf: &Gf2_128, left: u128, right: u128) -> PreparedRoot128 {
+            let a = self.square.apply(left ^ right);
+            let p = gf.mul(left, right);
+            let ps = self.square.apply(p);
+            let denominator = if a == 0 || ps == 0 { 0 } else { gf.mul(a, ps) };
+            PreparedRoot128 {
+                left,
+                right,
+                a,
+                p,
+                ps,
+                denominator,
+            }
+        }
+
+        /// Everything after the inversion, given `inverse = denominator^{-1}`
+        /// (ignored on the exceptional path).
+        #[inline(always)]
+        fn finish(
+            &self,
+            gf: &Gf2_128,
+            prepared: PreparedRoot128,
+            inverse: u128,
+        ) -> Option<[u128; 2]> {
+            if prepared.denominator == 0 {
+                return s3_x_roots_128(gf, self.b, prepared.left, prepared.right);
+            }
+            let q = gf.mul(prepared.p, gf.mul(prepared.ps, inverse));
+            let c = prepared.ps ^ self.b;
+            let d = gf.mul(gf.mul(c, prepared.a), gf.mul(prepared.a, inverse));
+            if (d & self.trace_mask).count_ones() & 1 == 1 {
+                return None;
+            }
+            let first = gf.mul(q, self.half_trace.apply(d));
+            Some([first, first ^ q])
+        }
+
+        /// Scalar form: one inversion per call, same root order as the
+        /// batched form.
         #[inline(always)]
         fn roots(
             &self,
@@ -1049,22 +1093,86 @@ mod wide {
             left: u128,
             right: u128,
         ) -> Option<[u128; 2]> {
-            let s = left ^ right;
-            let a = self.square.apply(s);
-            let p = gf.mul(left, right);
-            let ps = self.square.apply(p);
-            if a == 0 || ps == 0 {
-                return s3_x_roots_128(gf, self.b, left, right);
+            let prepared = self.prepare(gf, left, right);
+            let inverse = if prepared.denominator == 0 {
+                0
+            } else {
+                invert128(gf, basis, prepared.denominator)
+            };
+            self.finish(gf, prepared, inverse)
+        }
+    }
+
+    #[derive(Clone, Copy)]
+    struct PreparedRoot128 {
+        left: u128,
+        right: u128,
+        a: u128,
+        p: u128,
+        ps: u128,
+        denominator: u128,
+    }
+
+    /// Reusable scratch for solving many S3 root pairs with one shared
+    /// inversion (Montgomery's trick over the non-exceptional
+    /// denominators).  `results[i]` equals `solver.roots(inputs[i])` for
+    /// every `i`; only the inversion count changes.
+    struct RootBatch128 {
+        prepared: Vec<PreparedRoot128>,
+        inverses: Vec<u128>,
+        prefixes: Vec<u128>,
+        regular: Vec<usize>,
+        results: Vec<Option<[u128; 2]>>,
+    }
+
+    impl RootBatch128 {
+        fn with_capacity(entries: usize) -> Self {
+            Self {
+                prepared: Vec::with_capacity(entries),
+                inverses: Vec::with_capacity(entries),
+                prefixes: Vec::with_capacity(entries),
+                regular: Vec::with_capacity(entries),
+                results: Vec::with_capacity(entries),
             }
-            let inv_combined = invert128(gf, basis, gf.mul(a, ps));
-            let q = gf.mul(p, gf.mul(ps, inv_combined));
-            let c = ps ^ self.b;
-            let d = gf.mul(gf.mul(c, a), gf.mul(a, inv_combined));
-            if (d & self.trace_mask).count_ones() & 1 == 1 {
-                return None;
+        }
+
+        fn solve(
+            &mut self,
+            gf: &Gf2_128,
+            basis: &NormalBasis128,
+            solver: &S3Solver128,
+            inputs: &[(u128, u128)],
+        ) {
+            self.prepared.clear();
+            self.inverses.clear();
+            self.prefixes.clear();
+            self.regular.clear();
+            self.results.clear();
+            self.inverses.resize(inputs.len(), 0);
+            self.prefixes.resize(inputs.len(), 0);
+            for (index, &(left, right)) in inputs.iter().enumerate() {
+                let prepared = solver.prepare(gf, left, right);
+                if prepared.denominator != 0 {
+                    self.regular.push(index);
+                }
+                self.prepared.push(prepared);
             }
-            let first = gf.mul(q, self.half_trace.apply(d));
-            Some([first, first ^ q])
+            if !self.regular.is_empty() {
+                let mut product = 1u128;
+                for &index in &self.regular {
+                    self.prefixes[index] = product;
+                    product = gf.mul(product, self.prepared[index].denominator);
+                }
+                // A product of non-zero field elements is non-zero.
+                let mut inverse_product = invert128(gf, basis, product);
+                for &index in self.regular.iter().rev() {
+                    self.inverses[index] = gf.mul(inverse_product, self.prefixes[index]);
+                    inverse_product = gf.mul(inverse_product, self.prepared[index].denominator);
+                }
+            }
+            for (prepared, &inverse) in self.prepared.iter().zip(&self.inverses) {
+                self.results.push(solver.finish(gf, *prepared, inverse));
+            }
         }
     }
 
@@ -1223,6 +1331,7 @@ mod wide {
             None => return (None, 0),
         };
         let n_u32 = gf.n;
+        let chunk = (n_states + threads - 1) / threads;
         let n = n_u32 as usize;
         let chunk = n_states.div_ceil(threads);
         let (sender, receiver) = std::sync::mpsc::channel::<(usize, Relation128, u128)>();
@@ -1242,9 +1351,28 @@ mod wide {
                     let length = pos_hi - pos_lo;
                     let mut relation_check_ns = 0u128;
                     let mut probes = 0u64;
-                    let mut offset = 0usize;
-                    'scan: while offset < length {
+                    let mut scan = StateScan128::new(n_u32);
+                    for offset in 0..length {
                         let state = &index.states[(state_lo + offset) % n_states];
+                        if let Some(relation) = scan_state128(
+                            gf,
+                            fast,
+                            basis,
+                            solver,
+                            index,
+                            base,
+                            target,
+                            target_x,
+                            state,
+                            &mut scan,
+                            &mut probes,
+                            &mut relation_check_ns,
+                        ) {
+                            let position = pos_lo + offset;
+                            sender
+                                .send((position, relation, relation_check_ns))
+                                .expect("target receiver is alive");
+                            break;
                         for shift in 0..n_u32 {
                             let left_x = index.shifted[state.left as usize][shift as usize];
                             let right_x = index.shifted[state.right as usize]
@@ -1294,7 +1422,6 @@ mod wide {
                                 }
                             }
                         }
-                        offset += 1;
                     }
                 }));
             }
@@ -1446,6 +1573,98 @@ mod wide {
         None
     }
 
+    /// Per-state scratch for [`scan_state128`]: the `2n` candidate pairs
+    /// and their batched root solutions.
+    struct StateScan128 {
+        inputs: Vec<(u128, u128)>,
+        batch: RootBatch128,
+    }
+
+    impl StateScan128 {
+        fn new(n: u32) -> Self {
+            let entries = 2 * n as usize;
+            Self {
+                inputs: Vec::with_capacity(entries),
+                batch: RootBatch128::with_capacity(entries),
+            }
+        }
+    }
+
+    /// Scan one index state against `target` in the sequential candidate
+    /// order (shift outer, stored root inner) and return the first lifted
+    /// relation.  The `2n` root-pair solves of the state share one field
+    /// inversion; the candidate order, the probe count at the hit and the
+    /// published relation are exactly those of the per-candidate scan.
+    #[inline(always)]
+    fn scan_state128(
+        gf: &Gf2_128,
+        fast: &FastBinaryCurve128,
+        basis: &NormalBasis128,
+        solver: &S3Solver128,
+        index: &Index128,
+        base: &Base128,
+        target: FastPoint128,
+        target_x: u128,
+        state: &State128,
+        scan: &mut StateScan128,
+        probes: &mut u64,
+        relation_check_ns: &mut u128,
+    ) -> Option<Relation128> {
+        let n = gf.n;
+        scan.inputs.clear();
+        for shift in 0..n {
+            for &normal_root in &state.normal_roots {
+                let absolute = basis.to_poly.apply(basis.rotate(normal_root, shift));
+                scan.inputs.push((absolute, target_x));
+            }
+        }
+        scan.batch.solve(gf, basis, solver, &scan.inputs);
+        let mut candidate = 0usize;
+        for shift in 0..n {
+            let left_x = index.shifted[state.left as usize][shift as usize];
+            let right_x = index.shifted[state.right as usize][(shift as usize + state.relative as usize) % n as usize];
+            for _ in 0..state.normal_roots.len() {
+                let absolute = scan.inputs[candidate].0;
+                let result = scan.batch.results[candidate];
+                candidate += 1;
+                let Some(partners) = result else {
+                    continue;
+                };
+                for partner in partners {
+                    *probes += 1;
+                    let (canonical, partner_shift) = basis.canonical(basis.to_normal.apply(partner));
+                    let Some(value) = index.table.get(canonical) else {
+                        continue;
+                    };
+                    let (left2, right2, relative2, stored_shift) = unpack(value);
+                    let left_shift2 = ((stored_shift + n - partner_shift) % n) as usize;
+                    let right_shift2 = (left_shift2 + relative2) % n as usize;
+                    let codes = [
+                        left_x,
+                        right_x,
+                        index.shifted[left2][left_shift2],
+                        index.shifted[right2][right_shift2],
+                    ];
+                    if let Some(point_indices) = lift128(
+                        fast,
+                        base,
+                        &codes,
+                        target,
+                        relation_check_ns,
+                    ) {
+                        return Some(Relation128 {
+                            point_indices,
+                            x_codes: codes,
+                            intermediates: [absolute, partner],
+                            probes: *probes,
+                        });
+                    }
+                }
+            }
+        }
+        None
+    }
+
     fn extract128(
         gf: &Gf2_128,
         fast: &FastBinaryCurve128,
@@ -1458,10 +1677,25 @@ mod wide {
         relation_check_ns: &mut u128,
     ) -> Option<Relation128> {
         let (target_x, _) = target?;
-        let n = gf.n;
         let mut probes = 0u64;
+        let mut scan = StateScan128::new(gf.n);
         let start = start % index.states.len().max(1);
         for state in index.states[start..].iter().chain(&index.states[..start]) {
+            if let Some(relation) = scan_state128(
+                gf,
+                fast,
+                basis,
+                solver,
+                index,
+                base,
+                target,
+                target_x,
+                state,
+                &mut scan,
+                &mut probes,
+                relation_check_ns,
+            ) {
+                return Some(relation);
             for shift in 0..n {
                 let left_x = index.shifted[state.left as usize][shift as usize];
                 let right_x = index.shifted[state.right as usize]
@@ -2052,8 +2286,51 @@ mod wide {
 
     #[cfg(test)]
     mod wide_json_tests {
-        use super::{decode_pair128, decode_point_list128, encode_pair128};
+        use super::{
+            decode_pair128, decode_point_list128, encode_pair128, Gf2_128, NormalBasis128,
+            RootBatch128, S3Solver128,
+        };
+        use crypto_lib::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse_wide;
         use serde_json::json;
+
+        /// The shared-inversion batch must reproduce the scalar solver
+        /// pair for pair, in order, including the exceptional inputs
+        /// (`left == right`, a zero operand) that bypass the inversion.
+        #[test]
+        fn batched_roots_match_scalar_roots_in_order() {
+            let gf = Gf2_128::new(&find_irreducible_sparse_wide(73).unwrap());
+            let basis = NormalBasis128::new(&gf);
+            let solver = S3Solver128::new(&gf, 1);
+            let mut seed = 0x9E37_79B9_7F4A_7C15u64;
+            let mut next = move || {
+                seed ^= seed << 13;
+                seed ^= seed >> 7;
+                seed ^= seed << 17;
+                seed
+            };
+            let mut inputs = Vec::new();
+            for i in 0..4096usize {
+                let x = (((next() as u128) << 64) | next() as u128) & basis.mask;
+                let y = (((next() as u128) << 64) | next() as u128) & basis.mask;
+                inputs.push(match i % 7 {
+                    0 => (x, x),
+                    1 => (0, y),
+                    2 => (x, 0),
+                    _ => (x, y),
+                });
+            }
+            let mut batch = RootBatch128::with_capacity(146);
+            let mut regular = 0usize;
+            for chunk in inputs.chunks(146) {
+                batch.solve(&gf, &basis, &solver, chunk);
+                assert_eq!(batch.results.len(), chunk.len());
+                regular += batch.regular.len();
+                for (k, &(left, right)) in chunk.iter().enumerate() {
+                    assert_eq!(batch.results[k], solver.roots(&gf, &basis, left, right));
+                }
+            }
+            assert!(regular > 0 && regular < inputs.len());
+        }
 
         #[test]
         fn wide_point_coordinates_round_trip_as_decimal_strings() {
