@@ -171,8 +171,14 @@ mod tests {
 
     #[test]
     fn diagonal_masks_apply_coordinatewise() {
-        let mask = DiagonalMask { first: 3u64, second: 5u64 };
-        let action = EigenAction { first: 7u64, second: 11u64 };
+        let mask = DiagonalMask {
+            first: 3u64,
+            second: 5u64,
+        };
+        let action = EigenAction {
+            first: 7u64,
+            second: 11u64,
+        };
         assert!(mask.commutes_with(action));
         assert_eq!(mask.apply(action, [2, 4], |a, b| a * b), [42, 220]);
     }
