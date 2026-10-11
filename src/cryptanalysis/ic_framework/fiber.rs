@@ -943,7 +943,7 @@ mod tests {
 
     #[test]
     fn the_cofactor_fiber_of_a_koblitz_curve_is_its_rational_torsion() {
-        let inst = koblitz_instance(0, 13).expect("K_0 / F_{2^13}");
+        let inst = koblitz_instance(0, 13).expect("the a = 0 Koblitz curve over F_{2^13}");
         let basis: Vec<u64> = (0..5).map(|k| 1u64 << k).collect();
         let fb = binary_subspace_factor_base(&inst, &basis);
         let g = BinaryGroup(&inst.fast);
@@ -959,7 +959,7 @@ mod tests {
 
     #[test]
     fn the_fiber_closed_table_finds_every_lift_the_plain_table_finds() {
-        let inst = koblitz_instance(0, 13).expect("K_0 / F_{2^13}");
+        let inst = koblitz_instance(0, 13).expect("the a = 0 Koblitz curve over F_{2^13}");
         let basis: Vec<u64> = (0..5).map(|k| 1u64 << k).collect();
         let fb = binary_subspace_factor_base(&inst, &basis);
         let g = BinaryGroup(&inst.fast);
@@ -1003,7 +1003,7 @@ mod tests {
     #[test]
     fn the_combined_descent_names_a_lift() {
         use crate::cryptanalysis::ic_framework::solvers::solver_by_name;
-        let inst = koblitz_instance(0, 13).expect("K_0 / F_{2^13}");
+        let inst = koblitz_instance(0, 13).expect("the a = 0 Koblitz curve over F_{2^13}");
         let basis: Vec<u64> = (0..5).map(|k| 1u64 << k).collect();
         let fb = binary_subspace_factor_base(&inst, &basis);
         let g = BinaryGroup(&inst.fast);
