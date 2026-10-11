@@ -35,7 +35,8 @@ jobs:
           test "$(valgrind --version)" = valgrind-3.22.0
       - name: Freeze dependency resolution
         run: |
-          cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
+          # The committed root lock matches the current manifest. Keep the
+          # tournament's older lock intact for its retained source replays.
           cargo fetch --locked
       - name: Harness and accounting regression tests
         run: |

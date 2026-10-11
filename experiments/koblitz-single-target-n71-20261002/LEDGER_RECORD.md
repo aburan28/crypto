@@ -1,8 +1,9 @@
 # n=71 single-target online `vs_rho` record — ledger evidence (2026-10-02)
 
-Fourth rung of the primary single-target ladder, and the first past the old
-u64-packing ceiling: compact-orbit index calculus on `u128` field words beats
-automorphism-discounted Pollard rho on the identical frozen public point.
+The `u128` compact-orbit implementation recovered the same frozen n=71 public
+point in three paired runs. The median recorded IC and automorphism-discounted
+Pollard-rho online wall ratio is 2,864.1x; independent replay verifies both
+scalars in every pair.
 
 ## Result
 
@@ -16,7 +17,7 @@ sequential, same 16 GiB envelope:
 | ledger-R2 (median) | 10.208 | 29,237.4 | 2,864.1x |
 | ledger-R3 | 11.874 | 18,200.9 | 1,532.8x |
 
-Median paired ratio **2,864.1x** (range 1,532.8x–4,893.5x). The IC relation is
+Median paired wall ratio **2,864.1x** (range 1,532.8x–4,893.5x). The IC relation is
 deterministic: the same 14,554-probe relation on all three runs. Rank 600/600
 with 0 failures and 0 rows without gain on every run (guided policy).
 
@@ -32,15 +33,20 @@ preparation (~39–48 s excluded setup) and at rho's first target-dependent
 walk step. Both arms recover the identical scalar on every run and verify
 `[d]G = Q`. Standalone Python GF(2^71) replay passes 15/15 checks on all
 three runs (`independent-replay-ledger.json`, via `validate_ledger_runs.py`).
-A schema-complete claim report (`claim_report_vs_rho.json`) passes the
-autolab `claim-check` for stage `vs_rho`.
+A current autolab `claim-check --stage vs_rho` returns **FAIL** for the retained
+`claim_report_vs_rho.json`: canonical identity and replay-digest fields, exact
+five-phase IC timing, the complete resource envelope, and rho policy remain
+unrecorded there. The raw pairs and independent replay remain the result
+receipts.
 
-## Explicit non-claims
+## Evidence scope
 
-Public synthetic fixture, 52-bit subgroup; constant-factor win only — no
-asymptotic sub-rho claim (total operation-count boundary not comparable, S
-unknown); not ECC2K-130 evidence; no key recovery, external targets, or
-deployed-curve security impact. Multi-target amortized results stay secondary.
+The field is GF(2^71) and the subgroup has order 5,513,228,015,079,457.
+The recorded wall ratios are exploratory because these runs have no auditable
+host-level CPU isolation receipt. IC probes and rho walk steps use different
+native units; calibrated total work `S` and controlled online speedup remain
+unknown. The three repetitions time one point, so they measure timing
+variation for that point.
 
 ## Provenance notes
 
@@ -52,10 +58,9 @@ deployed-curve security impact. Multi-target amortized results stay secondary.
   range panic; legacy `u64` fixtures are unchanged.
 - `runs/pilot-R1-concurrent-session/` preserves a concurrent session's pilot
   attempt (its rho observation with the wide backend is valid; its IC arm ran
-  against a pre-fix binary and emitted no rows). The top-level `README.md`,
-  `candidate-*.json`, and `single-target-results.csv` are that session's
-  pilot documents (16.78x observation with Sage replay); the ledger record
-  above is independent of them.
+  against a pre-fix binary and emitted no rows). The top-level `README.md`
+  distinguishes this ledger series from the earlier 16.78x pilot pair;
+  `candidate-*.json` and `single-target-results.csv` remain pilot artifacts.
 - `base_n71_K600.jsonl` is the retained base (deterministic x-scan;
   identical hash across independent constructions).
 - `dump_out.jsonl`, `smoke_out.jsonl` are construction smoke receipts
@@ -63,7 +68,8 @@ deployed-curve security impact. Multi-target amortized results stay secondary.
 
 ## Files
 
-- `claim_report_vs_rho.json` — schema-complete claim (R2 median primary).
+- `claim_report_vs_rho.json` — retained claim report and native counter ledger
+  (R2 median row; current claim-check status FAIL).
 - `ledger-freeze/` — frozen target, sidecar scalar, freeze receipt.
 - `runs/ledger-R{1,2,3}/` — paired raw rows (`ic.jsonl`, `rho.jsonl`) plus
   `/usr/bin/time -l` receipts (`ic_time.txt`, `rho_time.txt`).
