@@ -334,3 +334,50 @@ the same table with `10×` fewer relations; unmeasured there.
   show `pinned` units. The pins are from this loaded host and should be
   re-measured on the ledger's isolated host before any `S` from them is
   compared across hosts.
+
+## Next-step scoping (2026-10-11): L6 and L7, decided by reading the code
+
+- **L6, symmetrised slots.** `build_symmetrised_system` takes one `V ∋ 1`
+  for all summands (`w_basis = AS(v_basis[1..])`); the slot form needs one
+  `(v, w)` pair per summand with `w_i = AS(σ^{j_i} v)`, which commutes with
+  `σ`, a `u`-frame closure base that keeps the `T`-translation, and a lift
+  with per-summand bases: ≈ 150 lines mirroring `descend_with_bases`. The
+  expected answer is what decides whether to spend them: the symmetrised
+  variables `(w, s)` are already the symmetric functions of the summands,
+  so the plain symmetrised system counts an unordered decomposition once;
+  the `m!` the slots recover on the plain `x`-system is therefore mostly
+  gone before the slots start, and the realised factor should sit near 1
+  (the registry's "between 1 and `m!`"). Deferred as low value; the table
+  form of L5 already runs on `F_u`.
+- **L7, F4 trace replay (G1).** `pq_f4_f2::groebner_basis_f4` selects every
+  pair of minimal degree per step (normal strategy) and keeps per-step
+  statistics but not the identity of the rows that reduced to zero. The
+  Joux–Vitse record is, per step, the `(multiplier, polynomial)` keys of the
+  rows that survived; a replay mode would form only those rows and skip
+  symbolic preprocessing of the rest. Polynomial indices are target-
+  dependent in general, so the trace must be keyed by position in the
+  degree-sorted basis, which the same-shape argument makes stable. Half a
+  day of Rust with a correctness gate (same reduced basis on every target);
+  the measurement is the n = 31 F4 cell. Not started.
+
+### A1 where relations are dear: n = 41, three summands, equal points (4 targets each, all verified)
+
+| base | points | columns | trials per relation | relations | probes (adds) | table adds | base build GAE | total GAE | `S` | IC / rho (`A = 82`) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 60 plain columns | 4,920 | 60 | 27.3 | 55 | 7.24·10⁶ | 1.5·10⁵ | 6,830 | 7.90·10⁶ | 10.8 | 51× |
+| 20 columns, norm 4 | 4,920 | 20 | 35.2 | 20.5 | 3.24·10⁶ | 1.5·10⁵ | 11,400 | 3.50·10⁶ | 4.94 | 23.6× |
+| 6 columns, norm 16 | 4,920 | 6 | 21.5 | 6.5 | 6.55·10⁵ | 1.5·10⁵ | 11,700 | 8.71·10⁵ | **1.17** | **5.6×** |
+
+The prediction held: equal points give equal yield (21.5–35.2 trials per
+relation, within the spread of 4 targets) and an identical table (the
+Frobenius-folded table is a function of the point set), while the
+relations needed fall with the columns (55 → 6.5), so the probe count,
+which is the dominant phase at `m = 3`, falls 11× and the one-target total
+**9.2×**. The base build is 1.7× dearer (two scalar multiplications per
+image) and is now 1.3 % of the total. This is the first row on the ladder
+within one decimal order of the matched rho at 39 bits, and it is the
+constant-factor mechanism the feasibility note's rank-stage accounting
+(`r/(n²K)` probes with `K` columns) says the compact-orbit pipeline needs:
+`K ÷ 10` at equal table memory, i.e. a 10× smaller rank precompute, or the
+same `K` with the yield of a 10× larger table. Still `B·D²/N ≫ 1` and still
+a pair-table constant, not an exponent.

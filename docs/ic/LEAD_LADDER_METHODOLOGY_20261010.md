@@ -440,7 +440,12 @@ stated with the phase it moves, the evidence, and the bar it must clear.
    square of the points, equal yield and equal table to the 45-column plain
    base with 9× fewer columns (relations 6 vs 30.5); the base build costs
    2.5× more, so the one-target total at 21 bits is 1.3× worse, and the
-   lead pays only where relations are dear (the compact-orbit rank stage).
+   lead pays only where relations are dear. **Where they are dear it pays
+   as predicted**: at n = 41 with three summands, 6 columns of norm 16
+   against 60 plain columns at equal points and equal table cut the
+   one-target total 9.2× (S 10.8 → 1.17, from 51× to 5.6× behind the
+   matched rho), the first ladder row within one decimal order of rho at
+   39 bits (`RESULTS_ROUND2.md` §A1, n = 41).
 6. **Batch the probe.** The probe is add + canonicalise + lookup; the
    addition is 95 % of it and is an affine addition with an inversion.
    Probing 64 targets' `R − P₃` with one shared inversion (the
