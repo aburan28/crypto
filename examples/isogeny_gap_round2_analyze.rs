@@ -55,7 +55,11 @@ impl Agg {
         }
         self.verified += 1;
         let s = r["cost"]["s"].as_f64().unwrap_or(0.0);
-        self.s_min = if self.verified == 1 { s } else { self.s_min.min(s) };
+        self.s_min = if self.verified == 1 {
+            s
+        } else {
+            self.s_min.min(s)
+        };
         self.s_max = self.s_max.max(s);
         self.s_sum += s;
         self.online_ns += r["online"]["wall_ns"].as_f64().unwrap_or(0.0);
@@ -165,7 +169,9 @@ fn load_session(dir: &str, roles: &BTreeMap<String, Role>) -> Option<Table> {
     for line in text.lines() {
         let r: Value = serde_json::from_str(line).expect("record");
         let key = spec_key(&r["workload"]["curve_spec"]);
-        let role = roles.get(&key).expect("every curve is a certified pair curve");
+        let role = roles
+            .get(&key)
+            .expect("every curve is a certified pair curve");
         let arm = r["arm"].as_str().unwrap_or("?").to_string();
         t.entry((role.order, role.pair.clone(), role.role))
             .or_default()
@@ -274,10 +280,7 @@ fn main() {
             writeln!(md).unwrap();
             last_pair = pair.clone();
         }
-        let best = ds
-            .iter()
-            .map(|(_, a)| a.s())
-            .fold(f64::INFINITY, f64::min);
+        let best = ds.iter().map(|(_, a)| a.s()).fold(f64::INFINITY, f64::min);
         let rho = arms.get("rho-neg").map(|a| a.s()).unwrap_or(0.0);
         write!(md, "| {role} | {rho:.2} |").unwrap();
         for (_, a) in &ds {
@@ -319,7 +322,11 @@ fn main() {
 
     // E2
     let e2 = load_session(&format!("{sessions}/e2_glv_crater_floor"), &roles).unwrap_or_default();
-    writeln!(md, "\n## E2. Automorphism fold on the crater against the floor\n").unwrap();
+    writeln!(
+        md,
+        "\n## E2. Automorphism fold on the crater against the floor\n"
+    )
+    .unwrap();
     writeln!(
         md,
         "| pair | role | S rho | S glv auto | S glv negation | auto / negation | set-up auto | set-up negation |"
