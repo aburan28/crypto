@@ -8436,7 +8436,11 @@ fn project_by_frobenius_orbits_generic(
             for phase in 0..kc.n as usize {
                 for negative in [false, true] {
                     if let Some(index) = by_phase[2 * phase + usize::from(negative)] {
-                        let expected = if negative { point_neg(&point) } else { point.clone() };
+                        let expected = if negative {
+                            point_neg(&point)
+                        } else {
+                            point.clone()
+                        };
                         if fb.points[index] == expected {
                             projected[index] = Some(if negative {
                                 point_neg(&image)
@@ -9227,7 +9231,7 @@ fn koblitz_index_calculus_dlp_observed(
     let mut echelon = RelationSolver::new(relation_unknowns, r);
     let mut rng = StdRng::seed_from_u64(opts.seed);
     let r_u64 = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
-    let wide_scalar_upper = (r.bits() > 64).then(|| r - 1u32);
+    let wide_order = (r.bits() > 64).then_some(r);
     let relation_start = std::time::Instant::now();
 
     // Record the exact incremental rank and, when allowed and pinned,
@@ -9303,14 +9307,16 @@ fn koblitz_index_calculus_dlp_observed(
         let batch_size = opts.relation_batch_size.max(1).min(remaining_trials);
         let attempts: Vec<_> = (0..batch_size)
             .map(|_| {
-                let (a, b) = if let Some(upper) = &wide_scalar_upper {
+                // A zero-inclusive additive draw gives full subgroup support;
+                // under uniform RNG bits the query is uniform for fixed b, Q.
+                let (a, b) = if let Some(order) = wide_order {
                     (
-                        rng.gen_biguint_below(upper) + 1u32,
-                        rng.gen_biguint_below(upper) + 1u32,
+                        rng.gen_biguint_below(order),
+                        rng.gen_biguint_below(&(order - 1u32)) + 1u32,
                     )
                 } else {
                     (
-                        BigUint::from(rng.gen_range(1..r_u64)),
+                        BigUint::from(rng.gen_range(0..r_u64)),
                         BigUint::from(rng.gen_range(1..r_u64)),
                     )
                 };
@@ -14877,6 +14883,46 @@ mod tests {
         let (recovered, multiplies) = project_by_frobenius_orbits_generic(&kc, &altered);
         assert_eq!(recovered, expected);
         assert!(multiplies > fb.signed_orbits.len());
+    }
+
+    #[test]
+    fn n83_relation_queries_use_full_width_zero_inclusive_additive_draw() {
+        let kc = KoblitzCurve::known_n83_k0().expect("public N83 curve fixture");
+        let BinaryPoint::Affine { x, .. } = kc.generator() else {
+            panic!("N83 generator must be affine");
+        };
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()])
+            .expect("complete signed orbit");
+        let target = kc.mul(kc.generator(), &BigUint::from(7u32));
+        let opts = KoblitzIcOptions {
+            m: 2,
+            strategy: DecompositionStrategy::Enumerate,
+            max_trials: 8,
+            seed: 2026100901,
+            allow_direct_relation: false,
+            ..Default::default()
+        };
+        let report = koblitz_index_calculus_dlp_with_factor_base(&kc, &target, &fb, &opts)
+            .expect("N83 relation-query report");
+        assert_eq!(report.attempt_records.len(), opts.max_trials);
+        let mut expected_rng = StdRng::seed_from_u64(opts.seed);
+        for attempt in &report.attempt_records {
+            let expected_a = expected_rng.gen_biguint_below(&kc.subgroup_order);
+            let expected_b = expected_rng.gen_biguint_below(&(&kc.subgroup_order - 1u32)) + 1u32;
+            assert_eq!(attempt.coefficient_a, expected_a);
+            assert_eq!(attempt.coefficient_b, expected_b);
+            assert_eq!(
+                attempt.target,
+                kc.add(
+                    &kc.mul(kc.generator(), &attempt.coefficient_a),
+                    &kc.mul(&target, &attempt.coefficient_b),
+                )
+            );
+        }
+        assert!(report
+            .attempt_records
+            .iter()
+            .any(|attempt| attempt.coefficient_a.bits() > 64 && attempt.coefficient_b.bits() > 64));
     }
 
     #[test]
