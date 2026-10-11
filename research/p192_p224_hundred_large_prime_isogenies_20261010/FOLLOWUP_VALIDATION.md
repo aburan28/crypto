@@ -137,6 +137,26 @@ paired invocations (200 successful fixture executions). Their complete outputs
 are retained. This repetition is a regression check, not a deterministic rank
 guarantee. The complete corrected-library run is recorded separately.
 
+## Passing committed-version closeout
+
+The complete release library run on 6742ecd0b37d70e02706214ed8f51368305bc37e
+finished successfully: **3808 passed, 0 failed, 110 existing tests ignored**,
+in 1660.57 seconds. It used two concurrent test threads and localhost access.
+All tests were included except the suite's existing ignored tests; no new
+skip was introduced. The terminal log and exit code 0 are retained as
+root-committed-final-20261010.log and .exit.
+
+The same committed version passes cargo check --workspace --all-targets.
+Its terminal output and exit code 0 are retained separately. The 30 touched
+example tests, 14 repaired-binary tests, generated 449-model trait freshness
+check, 200 paired staged-fixture executions, dedicated isogeny checks and
+original 891-file artifact audit provide the scoped validation described above.
+Hosted CI remains a separate gate for the PR and ReleaseMe publication.
+
+This closeout supersedes the pending library/push status in the frozen campaign
+report. The scientific maps, timings, source/binary archives and original
+manifest retain their historical bytes.
+
 The full command is:
 
 ```sh

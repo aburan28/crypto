@@ -4,7 +4,7 @@ curve data, source provenance and independent exact replay. Crypto's ReleaseMe
 workflow builds Linux glibc, Linux musl, Apple silicon and Windows archives;
 users run the installed binary without Cargo or a checkout.
 
-The completed local continuation found 100 distinct large-prime-degree maps:
+The continuation found 100 distinct large-prime-degree maps:
 
 | Public isogeny class | Prime degree | New maps |
 | --- | ---: | ---: |
@@ -34,7 +34,7 @@ modular-polynomial enumeration. The screen covers primes through 1000000.
 The complete screen found 40 P192 and 38 P224 structural candidates with
 eigenvalue order at most 64; those counts are not constructed-map counts.
 
-The local catalogue has 449 exact models: 304 prime, 72 binary, 60 Koblitz,
+The catalogue has 449 exact models: 304 prime, 72 binary, 60 Koblitz,
 4 subfield and 9 extension models. Prime short-Weierstrass construction supports
 274 models through 640 bits, and 246 have complete public generator data for
 independent replay. Montgomery/Edwards, binary and extension construction
@@ -58,25 +58,39 @@ producer was clean source 49a280dc6; the archived 449-model executable was clean
 source 3c39c5f23. A fresh native audit matches all 891 manifest-bound files.
 The archived executable again replays a saved two-step chain outside a checkout.
 
-Scoped validation passed 62 CLI tests, 3 independent field-reference tests,
+Validation passed 62 CLI tests, 3 independent field-reference tests,
 114 standalone algorithm tests, strict algorithm Clippy, positive chain replay
-and source/generator mutation rejection. The library follow-up also passes
-57 wide-arithmetic tests, the degree-71 constructor, both isogenous-model
-tests and isolated cover/Edwards/gate checks. It fixes two reproduced library
-integration defects: one-word truncation of degree-71 linearised kernels and
-applying a packed Frobenius orbit walk on models without that endomorphism.
-The j=0 accounting fixture now has 32 extra random rows; solver behavior is
-unchanged. Earlier failing and interrupted diagnostics remain committed.
+and source/generator mutation rejection. The complete release library suite
+passed **3808 tests, 0 failed, 110 existing tests ignored**, using two concurrent
+test threads and localhost access on source 6742ecd0b. The workspace all-target
+compile, 30 tests in repaired examples, 14 tests in repaired binaries and the
+449-model trait-index freshness check passed. Both staged accounting fixtures
+also passed 100 paired repetitions (200 successful fixture executions).
 
-**Publication status:** the hundred-map continuation commits 3c39c5f23 and
-2a3f7f2ac are local and have not yet been pushed. The current remote head is
-850e77374. The required `cargo test --release --lib` rerun uses two concurrent
-test threads and localhost access and is still running. The owner's rule
-requires fixing failures before pushing; that gate is in place. An additional
-strict CLI Clippy diagnostic retains 35 inherited/generated-module errors and
-is not presented as passing. The earlier remote head passed all four dedicated
-isogeny platform jobs; those results do not validate the unpushed continuation.
-Hosted checks, merge and ReleaseMe publication remain pending.
+The library follow-up repairs one-word truncation of degree-71 linearised
+kernels and applying a packed Frobenius orbit walk on models without that
+endomorphism. Accounting fixtures now retain enough redundant random rows,
+and the calibration fixture checks finite positive measurements while its
+exact oracle/work assertions remain. Production solver and benchmark behavior
+is unchanged by those fixture corrections. Already merged upstream API and
+union-repair files restore the workspace build. Missing sparse-checkout inputs
+were restored from their exact tracked bytes. All earlier failed and
+interrupted diagnostics remain committed.
+
+The generated traits index now covers all 449 models. Unsupported coordinate
+adapters explicitly retain order certification `not_evaluated`; the earlier
+121-model guide panel is identified as a historical snapshot. The frozen
+scientific manifest continues to match all 891 original bindings; follow-up
+integration receipts are additional commit-bound evidence.
+
+**Publication status:** this ready PR includes the hundred-map source,
+catalogue, maps, standalone archive and passing integration receipts. Hosted
+checks for the continuation are required before merge. The earlier head
+850e77374 passed all four dedicated isogeny platform jobs; those results do
+not validate this newer head. An additional strict CLI Clippy diagnostic
+retains 35 inherited/generated-module errors and is not presented as passing.
+Merge and ReleaseMe publication remain pending; PR dry runs publish build
+artifacts rather than GitHub Releases.
 
 See `research/p192_p224_hundred_large_prime_isogenies_20261010/RESULTS.md`,
 `FOLLOWUP_VALIDATION.md`, `SUMMARY.json`, `MANIFEST.json` and
