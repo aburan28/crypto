@@ -173,7 +173,9 @@ fn construct(spec: &str) -> Value {
     let b = gf.from_element(&curve.curve.b);
     let mut reps = vec![];
     while reps.len() < kk {
-        seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        seed = seed
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         let x = (seed >> 11) & ((1u64 << n) - 1);
         if let Some(&p) = fast.points_with_x(b, x).first() {
             if let Some((x, y)) = fast.scalar_mul(p, &curve.cofactor) {
@@ -225,7 +227,10 @@ fn main() {
     let in_subgroup = reps
         .par_iter()
         .all(|&p| ar.mul(p, &rb).is_none() && ar.frob(p, 1) == ar.mul(p, &lb));
-    assert!(in_subgroup, "representatives must lie in the λ-eigenspace of order r");
+    assert!(
+        in_subgroup,
+        "representatives must lie in the λ-eigenspace of order r"
+    );
     let shifted: Vec<Vec<P>> = reps
         .iter()
         .map(|&p| (0..nn).map(|k| ar.frob(p, k)).collect())

@@ -1,0 +1,15 @@
+{
+  "lead1_cells": [
+    {"cell": "m=4 (9,3) D=7", "columns": 2.8e6, "decides": "confirms 7; does not separate", "source": "RESEARCH_DREG_MEASUREMENT.md Result 10"},
+    {"cell": "m=4 (13,4) sym D=7", "columns": 1.9e7, "decides": "closure at 7 refutes l+4", "source": "sum C(39,k<=7), derived"},
+    {"cell": "m=4 (13,4) sym D=8", "columns": 8.1e7, "decides": "l+4 at l=4", "source": "sum C(39,k<=8), derived"},
+    {"cell": "m=4 (17,5) sym D=9", "columns": 3.8e9, "decides": "registered ask l=5", "source": "derived"},
+    {"cell": "m=4 (21,6) sym D=10", "columns": 1.6e11, "decides": "registered ask l=6", "source": "derived"}
+  ],
+  "measured_d6_ceiling_columns": 2.8e6,
+  "preprocessing": [
+    {"rung": "n = 73", "bl_online_steps": 9470, "ic_target_probes": 457561, "plain_rho_ideal_steps": 30421813},
+    {"rung": "n = 83", "bl_online_steps": 2629, "ic_target_probes": 8845441, "plain_rho_ideal_steps": 9005149}
+  ],
+  "provenance": "lead1 columns from REPORT.md §1 (derived); preprocessing from ../ic_preprocessing_rho_equal_advice_20261011/table.md (Rust calculation from recorded inputs)"
+}

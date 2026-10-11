@@ -1,0 +1,29 @@
+{
+  "source": "recorded values only; every number below is copied from the cited record",
+  "n73": {
+    "fixture": "experiments/koblitz-single-target-n73-20261003",
+    "log2_r": 56.255534029401964,
+    "log2_r_source": "research/ic_free_relation_census_20261011/runs/census_n73.json (KoblitzCurve::new(0, 73).subgroup_order)",
+    "root_table_entries": 26278197,
+    "ic_target_probes": [457561, 457561, 457561],
+    "ic_target_ms": [249.023875, 326.2, 543.8],
+    "ic_rank_probes_mean": [56896974.775, 61530369.92666667, 65475673.415],
+    "rho_walk_steps": [10561809, 43892625, 41590986],
+    "rho_walk_ms": [46018.6515, 683096.952084, 646910.3914999999],
+    "rho_ideal_steps": 30421813.04593814,
+    "records": "runs/*R{1,2,3}/{ic.jsonl, ic_summary.jsonl, rho.jsonl}"
+  },
+  "n83": {
+    "fixture": "experiments/koblitz-single-target-n83-20261006",
+    "log2_r": 52.92818062006404,
+    "log2_r_source": "research/ic_free_relation_census_20261011/runs/census_n83.json",
+    "root_table_entries": 29878182,
+    "ic_target_probes": [8845441, 8845441, 8845441],
+    "ic_target_ms": [7939.137707999999, 7746.0, 5623.3],
+    "ic_rank_probes_mean": [2277409.935, 2420988.7, 2646554.625],
+    "rho_walk_steps": [6608900, 5958775, 12179440],
+    "rho_walk_ms": [64934.39879199999, 42969.1775, 71237.28237500001],
+    "rho_ideal_steps": 9005148.640969077,
+    "records": "runs/N83A1K600W12We2026100{6..8}*/{ic.jsonl, ic_summary.jsonl, rho.jsonl}"
+  }
+}
