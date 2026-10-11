@@ -1,0 +1,36 @@
+[package]
+name = "eigen_seta"
+version = "0.1.0"
+edition = "2021"
+description = "Research implementation of the Eigen-Seta isogeny KEM (secret-endomorphism lollipop decryption), constant-time decapsulation"
+license = "MIT"
+publish = false
+
+# Standalone crate: keep it out of the root crate's build and CI.
+[workspace]
+
+[dependencies]
+subtle = "2.6"
+zeroize = { version = "1.7", features = ["zeroize_derive"] }
+sha3 = "0.10"
+rand_core = { version = "0.6", features = ["getrandom"] }
+# Variable-time big integers: key generation (primality, Cornacchia) and public
+# constants (3^F3, pairing loop bits). Never applied to secret data in
+# encapsulation or decapsulation (see SIDE_CHANNELS.md).
+num-bigint = "0.4"
+num-traits = "0.2"
+num-integer = "0.1"
+
+[lints.clippy]
+needless_range_loop = "allow"
+too_many_arguments = "allow"
+many_single_char_names = "allow"
+
+[profile.release]
+opt-level = 3
+debug = false
+codegen-units = 1
+lto = "thin"
+
+[profile.test]
+opt-level = 3

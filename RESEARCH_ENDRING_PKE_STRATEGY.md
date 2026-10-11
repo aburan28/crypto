@@ -12,6 +12,22 @@ correspondence, Kani/higher-dimensional isogenies, lollipop attacks).
 session (connection refused on localhost:8080); the note is filed under the
 hook's warn-through path.
 
+> **Correction and update (2026-10-11, Rust implementation).** Four statements
+> below are superseded; the inline notes marked *[Correction]* point here.
+> (1) The `walk` special-key variant of §4.3 is **insecure**: its decryption
+> key (s0, c, c') is a function of Δ' = 7·25^k alone and k is public, so an
+> outsider recomputes it (the Sage experiment decrypted 5/5 ciphertexts from
+> the public key and k). Key recovery does *not* require finding ε. (2) The
+> implemented scheme is the single-chain **secret-degree variant
+> (Eigen-Séta v2)**: the trapdoor degree f is secret and drawn from a range
+> of about 2^277 / 2^408 / 2^535 values at L1 / L3 / L5; the measured parameters are p = 1341 / 1991 / 2630 bits
+> at λ = 128 / 192 / 256, not the two-halves estimate p ≈ 2^772 of §4.3. (3)
+> The non-cyclic-ψ' frequency in §5.4 is unverified: in v2 decapsulation
+> requires a full-order image of E_C[3^F3] and never failed (Toy16, Toy32, L1,
+> L3, L5). (4) Status: KeyGen/Encaps/Decaps now run in Rust with
+> constant-time decapsulation at all three NIST sizes; see `eigen_seta/`
+> (README, SIDE_CHANNELS.md). Security remains conjectured.
+
 Sections 1-3 are established results with citations. Section 4 is the
 proposal; the algebra there is ours and is marked as derived. Section 5 is
 the cryptanalysis checklist and Section 6 the experiment protocol. Section 7
@@ -234,6 +250,8 @@ degree-2 endomorphism ω has t = ±1, w = 2, Δ' = 7. Walk away by a secret
 isogeny ε of odd degree D_A and use θ = εωε̂ (t = ±D_A, w = 2D_A², Δ' = 7D_A²).
 This is CV §5.3's backdoor used by its owner: key recovery means finding ε
 (MITM √D_A) or the endomorphism of norm 7D_A² (cycle search √(7)D_A), so
+*[Correction: false when D_A is public — the decryption key depends on Δ'
+only; see the correction box at the top]*
 D_A ≈ 2^{2λ}, Δ' ≈ 2^{4λ}, and with two halves N ≈ d·√Δ' ≈ 2^{4λ}, p ≈ 2^{6λ}
 — the same size as the random-curve variant, with a much cheaper keygen (no
 LLL on End(E_A), no Deuring machinery) but a *different* key-recovery
@@ -305,7 +323,9 @@ Given (E_A, P, Q, E_C, [a]φP, [b]φQ) with a, b random, find φ.
   rejection from day one.
 
 ### 5.4 Correctness corner cases
-* ψ' non-cyclic on E_C[3^f] (part of ker φ θ'-stable): handled by trying the
+* *[Correction: frequency unverified; not observed in the v2 Rust runs — see
+  the correction box at the top.]*
+  ψ' non-cyclic on E_C[3^f] (part of ker φ θ'-stable): handled by trying the
   cyclic order-d subgroups of ker ψ' ∩ E_C[3^f] and keeping the one whose
   codomain is E_A (prototype: observed in 1 of 8 trials at the 44-bit size,
   brute-force enumeration over (Z/d)² at toy size; Smith normal form at real
@@ -390,8 +410,8 @@ two-halves evaluation. Steps 4–6 not started.
 | Research the state of the art on EndRing-based encryption | complete (survey level) | Sections 1–2, sources below; ePrint PDFs were Cloudflare-blocked, mirrors used; items marked abstract-only in the agent reports were not re-verified from full text |
 | Identify primitives/concepts to build on | complete | §3 decoding lemma (CV Lemma 3), Deuring tooling, dimension-2 Kani, FO |
 | Devise a strategy for a novel scheme | complete as a design; prototyped at toy size for two special-key variants; **not analysed beyond §5** | §4–6; `research/eigen_seta_prototype_20261011/`; novelty claim rests on the four surveys finding no eigenbasis-trapdoor PKE; a dedicated search for the exact combination is still advisable before any write-up |
-| Build the scheme (user request of 2026-10-11) | partial: KeyGen/Encaps/Decaps correct in all completed toy trials for the `cm` and `walk` variants; random-curve variant not implemented (needs two-halves Kani) | `results/correctness_runs.txt`; §4.3 "two halves" paragraph |
-| Parameter/efficiency figures | derived estimates only | §4.3; no measurements exist |
+| Build the scheme (user request of 2026-10-11) | done for the secret-degree variant (v2): Rust KeyGen/Encaps/Decaps correct at Toy16, Toy32, L1, L3, L5; the toy `walk` variant is broken (correction box); random-curve variant not implemented (needs two-halves Kani) | `eigen_seta/README.md`; `results/correctness_runs.txt` for the toys |
+| Parameter/efficiency figures | measured for v2 (sizes and timings on one host) | `eigen_seta/README.md` §2; §4.3 holds for the two-halves design only |
 | Security | **not established** | §5 checklist; experiment 3 run at toy size with no early-abort signal (§6) |
 
 ## Sources (primary; see agent reports for the full list)
