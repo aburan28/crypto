@@ -34,7 +34,7 @@ use crate::cryptanalysis::koblitz_fast::FastPoint;
 use crate::cryptanalysis::koblitz_groebner::{
     sym_semaev_s3, sym_semaev_s4, FieldStructure, SymElement, MAX_VARS,
 };
-use crate::cryptanalysis::pq_f4_f2::{groebner_basis_f4, solutions_from_reduced_basis, F4Stats};
+use crate::cryptanalysis::pq_f4_f2::{groebner_basis_f4, F4Stats};
 use crate::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 
 /// A Weil-descended decomposition system for one target abscissa.
@@ -203,6 +203,94 @@ pub fn specialise(sys: &SplitSystem, g: usize, guess: u64) -> Vec<F2BoolPoly> {
     eqs
 }
 
+/// The `F₂` points of the ideal `basis` generates, for any generating set.
+///
+/// `pq_f4_f2::solutions_from_reduced_basis` assumes every linear element's
+/// tail holds free variables only.  F4's output does not always satisfy
+/// that (study amendment 1: a basis whose linear elements reference each
+/// other's leading variables read as no solutions).  Here the linear
+/// elements are brought to reduced row-echelon form first, every
+/// assignment of the remaining free variables is completed through them,
+/// and a point is kept only if every element of `basis` vanishes on it.
+/// `None` above `max_free` free variables.
+pub fn solutions_from_basis(
+    basis: &[F2BoolPoly],
+    n_vars: usize,
+    max_free: usize,
+) -> Option<Vec<u64>> {
+    // A linear row: variable mask and constant bit.
+    let mut rows: Vec<(u64, bool)> = basis
+        .iter()
+        .filter(|p| p.terms.iter().all(|t| t.degree() <= 1))
+        .map(|p| {
+            let mut mask = 0u64;
+            let mut c = false;
+            for t in &p.terms {
+                if t.mask == 0 {
+                    c = !c;
+                } else {
+                    mask ^= t.mask;
+                }
+            }
+            (mask, c)
+        })
+        .collect();
+    // Reduced row-echelon form, pivoting on the highest variable of a row.
+    let mut pivots: Vec<(u32, u64, bool)> = Vec::new();
+    for i in 0..rows.len() {
+        let (mut mask, mut c) = rows[i];
+        for &(pv, pm, pc) in &pivots {
+            if (mask >> pv) & 1 == 1 {
+                mask ^= pm;
+                c ^= pc;
+            }
+        }
+        if mask == 0 {
+            if c {
+                return Some(Vec::new()); // 1 = 0: no points
+            }
+            continue;
+        }
+        let pv = 63 - mask.leading_zeros();
+        for p in pivots.iter_mut() {
+            if (p.1 >> pv) & 1 == 1 {
+                p.1 ^= mask;
+                p.2 ^= c;
+            }
+        }
+        pivots.push((pv, mask, c));
+        rows[i] = (mask, c);
+    }
+    let pivot_mask: u64 = pivots.iter().fold(0, |a, p| a | (1u64 << p.0));
+    let free: Vec<usize> = (0..n_vars)
+        .filter(|&v| (pivot_mask >> v) & 1 == 0)
+        .collect();
+    if free.len() > max_free {
+        return None;
+    }
+    let mut out = Vec::new();
+    for a in 0u64..(1u64 << free.len()) {
+        let mut point = 0u64;
+        for (bit, &v) in free.iter().enumerate() {
+            if (a >> bit) & 1 == 1 {
+                point |= 1u64 << v;
+            }
+        }
+        // Each pivot row is v_p + Σ(free) + c with no other pivot in it.
+        for &(pv, pm, pc) in &pivots {
+            let tail = pm & !(1u64 << pv);
+            let val = ((point & tail).count_ones() & 1 == 1) ^ pc;
+            if val {
+                point |= 1u64 << pv;
+            }
+        }
+        if basis.iter().all(|g| g.eval(point) == 0) {
+            out.push(point);
+        }
+    }
+    Some(out)
+}
+
 /// Solve one branch with the repository's F4 over `F₂[v]/(v² − v)`.
 pub fn solve_branch(
     sys: &SplitSystem,
@@ -216,8 +304,7 @@ pub fn solve_branch(
     let solutions = if st.timed_out {
         None
     } else {
-        let mut tests = 0u64;
-        solutions_from_reduced_basis(&gb, sys.n_vars, max_free, &mut tests)
+        solutions_from_basis(&gb, sys.n_vars, max_free)
     };
     BranchOutcome {
         guess,
@@ -542,6 +629,23 @@ mod tests {
             assert_eq!(run.false_solutions, 0);
             assert_eq!(run.complete_and_exact, Some(true), "{plan:?}");
         }
+    }
+
+    /// Amendment 1's regression: the S₃ chain at `K_0 / GF(2^13)`, `ℓ = 5`,
+    /// target abscissa 4035, `g = 0`.  F4's basis there has linear elements
+    /// that reference each other's leading variables; the decomposition
+    /// `{5, 21, 22}` must still be read out.
+    #[test]
+    fn non_interreduced_basis_still_yields_points() {
+        let inst = koblitz_instance(0, 13).expect("K_0 / GF(2^13)");
+        let words: Vec<u64> = (0..5).map(|t| 1u64 << t).collect();
+        let x_r = 4035;
+        let truth = exhaustive_decompositions(&inst, &words, 3, x_r);
+        assert_eq!(truth.len(), 1);
+        let (sys, ns) = build_for_instance(&inst, &[2, 1], 5, x_r).unwrap();
+        let run = run_hybrid(&inst, &sys, &words, x_r, 0, None, 24, &truth, ns);
+        assert_eq!(run.complete_and_exact, Some(true));
+        assert_eq!(run.verified, vec![vec![5, 21, 22]]);
     }
 
     #[test]
