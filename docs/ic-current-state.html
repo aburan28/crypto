@@ -184,7 +184,7 @@ td.inst { white-space: nowrap; }
   <p class="lede">Each panel on the scoreboard carries a one-line summary under its title: what it measured or decided, and its class. This index lists them in ledger order; each title links to the panel. It is written from the scoreboard by <code>scripts/site/panel_index.py</code> and checked in CI, so it cannot drift from the ledger.</p>
 <!-- BEGIN panel-index -->
   <details>
-    <summary>Show all 296 panels, one line each</summary>
+    <summary>Show all 297 panels, one line each</summary>
     <ol class="index">
       <li><a href="./#lab-results">A promising average. No reliable win.</a><br>Decision: the stricter familywise upper bound is 1.034×. The frozen promotion gate failed.</li>
       <li><a href="./#rho-results-title">How does that incumbent compare with rho?</a><br>This is the pair-table incumbent. It does not rank F5 or SAT. Reusable preparation is excluded; cold costs and other curve sizes answer different questions.</li>
@@ -482,6 +482,7 @@ td.inst { white-space: nowrap; }
       <li><a href="./#p256-factor-base-symmetry-round22-20261006">P-256 factor-base screen: ten geometric bases give zero transport</a> <span class="chip">negative / accounting</span><br>Twenty million exact multiplier images across every frozen depth-18 Dickson coset, the terminal-zero base, and affine bitbox produce zero cross-column hits. Its numerical collision projections are superseded by Round 24; the exact factor-base identities and zero-transport census remain valid.</li>
       <li><a href="./#p256-root-orbit-fb-round23-20261006">P-256 root-orbit bases: coordinate symmetry gives zero log transport</a> <span class="chip">negative</span><br>Sixteen new PGL2 images of exact multiplicative subgroups close globally in the coordinate field, but 34,099,472 exact [1..16]P_i images contain zero cross-column equalities. Every base retains one independent logarithm per column.</li>
       <li><a href="./#p256-negation-cross-colour-round24-20261006">P-256 signed S17: negation folding reaches ideal K=1 constant parity, not end-to-end parity</a> <span class="chip">accounting / negative</span><br>Both L=R and L=-R replay to valid 17-term target relations. The exact negation-quotient collision law puts the ideal known-log K=1 constant at 0.964× rho, but direct generation, storage and every geometric quotient still fail.</li>
+      <li><a href="./#ecbench-sat-pdp-20261009">ecbench SAT/PDP: a lower counted column is not a full-cost win</a> <span class="chip">accounting</span><br>Five arms on eight public icv1-f2m17-tm101-00378d4e targets: 240/240 verified, 200/200 measured replays identical. SAT native-XOR counts 0.854× strong rho in S but leaves 2,755,966 conflicts unpriced; all wall figures are L0 diagnostics.</li>
     </ol>
   </details>
 <!-- END panel-index -->

@@ -39,6 +39,9 @@ gpu/ecc/test_toyj0_mont
 gpu/ecc/test_bsgs_toy
 gpu/ecc/test_bsgs_secp_fast
 gpu/ecc/test_bsgs_secp_mont
+gpu/ecc/test_25519_fast
+gpu/ecc/test_25519_mont
+gpu/ecc/test_bsgs_25519_fast
 gpu/ecc/bench
 
 # GHDL analysis artifacts

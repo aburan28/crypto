@@ -1,0 +1,2304 @@
+[
+  {
+    "name": "P-192",
+    "p_bits": 192,
+    "trace_hex": "0x662107c8eb94364e4b2dd7cf",
+    "trace_is_positive": true,
+    "order_is_prime": true,
+    "cofactor": 1,
+    "embedding_degree_if_at_most": 1000,
+    "embedding_degree": null,
+    "discriminant": {
+      "abs_disc_bits": 194,
+      "trial_bound": 1000000,
+      "small_factors": [
+        [
+          5,
+          1
+        ],
+        [
+          11,
+          1
+        ],
+        [
+          31,
+          1
+        ]
+      ],
+      "square_part_bits_from_small_factors": 1,
+      "residue_bits": 184,
+      "residue_is_perfect_square": false,
+      "residue_is_probable_prime": true
+    },
+    "root_sign": {
+      "seed_derivation_holds": true,
+      "p_mod_4": 3,
+      "sign_choice_selects_twist": true,
+      "published_root_is_smaller": true,
+      "twist_order_is_prime": false,
+      "twist_small_factors": [
+        [
+          23,
+          1
+        ]
+      ],
+      "twist_residue_bits": 188,
+      "twist_residue_is_probable_prime": false,
+      "twist_leak_bits_below_bound": 4.523561956057013,
+      "twist_deep_factors": [
+        [
+          "0x17",
+          1,
+          true
+        ],
+        [
+          "0xb21642c8590b21642c8590b25d4ea13d29723c09f184109",
+          0,
+          false
+        ]
+      ],
+      "twist_largest_prime_factor_bits": 5
+    },
+    "generator": {
+      "generator_on_curve": true,
+      "smallest_valid_x": "0x0",
+      "generator_x_is_smallest_valid_x": false,
+      "generator_y_is_smaller_root": true,
+      "x_values_scanned": 1
+    },
+    "order_neighbours": {
+      "n_minus_1_small_factors": [
+        [
+          2,
+          4
+        ],
+        [
+          5,
+          1
+        ],
+        [
+          2389,
+          1
+        ]
+      ],
+      "n_minus_1_residue_bits": 175,
+      "n_minus_1_residue_is_probable_prime": false,
+      "n_plus_1_small_factors": [
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          41,
+          1
+        ]
+      ],
+      "n_plus_1_residue_bits": 185,
+      "n_plus_1_residue_is_probable_prime": false
+    },
+    "seed_relations": {
+      "checks": [
+        [
+          "SHA-1(\"P-192\")",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"p-192\")",
+          false
+        ],
+        [
+          "SHA-1(\"p-192\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"P192\")",
+          false
+        ],
+        [
+          "SHA-1(\"P192\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"secp192r1\")",
+          false
+        ],
+        [
+          "SHA-1(\"secp192r1\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"prime192v1\")",
+          false
+        ],
+        [
+          "SHA-1(\"prime192v1\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"NIST P-192\")",
+          false
+        ],
+        [
+          "SHA-1(\"NIST P-192\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"6277101735386680763835789423207666416083908700390324961279\")",
+          false
+        ],
+        [
+          "SHA-1(\"6277101735386680763835789423207666416083908700390324961279\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"fffffffffffffffffffffffffffffffeffffffffffffffff\")",
+          false
+        ],
+        [
+          "SHA-1(\"fffffffffffffffffffffffffffffffeffffffffffffffff\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFF\")",
+          false
+        ],
+        [
+          "SHA-1(\"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFFF\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"6277101735386680763835789423176059013767194773182842284081\")",
+          false
+        ],
+        [
+          "SHA-1(\"6277101735386680763835789423176059013767194773182842284081\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"ffffffffffffffffffffffff99def836146bc9b1b4d22831\")",
+          false
+        ],
+        [
+          "SHA-1(\"ffffffffffffffffffffffff99def836146bc9b1b4d22831\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 1)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 2)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 3)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 4)",
+          false
+        ],
+        [
+          "seed(P-224)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 1)",
+          false
+        ],
+        [
+          "seed(P-224) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 2)",
+          false
+        ],
+        [
+          "seed(P-224) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 3)",
+          false
+        ],
+        [
+          "seed(P-224) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 4)",
+          false
+        ],
+        [
+          "seed(P-224) + 4",
+          false
+        ],
+        [
+          "seed(P-256)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 1)",
+          false
+        ],
+        [
+          "seed(P-256) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 2)",
+          false
+        ],
+        [
+          "seed(P-256) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 3)",
+          false
+        ],
+        [
+          "seed(P-256) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 4)",
+          false
+        ],
+        [
+          "seed(P-256) + 4",
+          false
+        ],
+        [
+          "seed(P-384)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 1)",
+          false
+        ],
+        [
+          "seed(P-384) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 2)",
+          false
+        ],
+        [
+          "seed(P-384) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 3)",
+          false
+        ],
+        [
+          "seed(P-384) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 4)",
+          false
+        ],
+        [
+          "seed(P-384) + 4",
+          false
+        ],
+        [
+          "seed(P-521)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 1)",
+          false
+        ],
+        [
+          "seed(P-521) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 2)",
+          false
+        ],
+        [
+          "seed(P-521) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 3)",
+          false
+        ],
+        [
+          "seed(P-521) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 4)",
+          false
+        ],
+        [
+          "seed(P-521) + 4",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 0 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 1 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 2 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 3 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 4 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 5 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 6 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 7 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 8 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 9 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 10 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 11 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 12 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 13 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 14 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 15 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-192\" ‖ 16 as ASCII)",
+          false
+        ]
+      ],
+      "any_match": false
+    }
+  },
+  {
+    "name": "P-224",
+    "p_bits": 224,
+    "trace_hex": "0xe95c1f470fc1ec22d6baa3a3d5c5",
+    "trace_is_positive": true,
+    "order_is_prime": true,
+    "cofactor": 1,
+    "embedding_degree_if_at_most": 1000,
+    "embedding_degree": null,
+    "discriminant": {
+      "abs_disc_bits": 226,
+      "trial_bound": 1000000,
+      "small_factors": [
+        [
+          3,
+          3
+        ],
+        [
+          29,
+          1
+        ],
+        [
+          79,
+          1
+        ],
+        [
+          7523,
+          1
+        ],
+        [
+          40927,
+          1
+        ]
+      ],
+      "square_part_bits_from_small_factors": 4,
+      "residue_bits": 182,
+      "residue_is_perfect_square": false,
+      "residue_is_probable_prime": false
+    },
+    "root_sign": {
+      "seed_derivation_holds": true,
+      "p_mod_4": 1,
+      "sign_choice_selects_twist": false,
+      "published_root_is_smaller": false,
+      "twist_order_is_prime": false,
+      "twist_small_factors": [
+        [
+          3,
+          2
+        ],
+        [
+          11,
+          1
+        ],
+        [
+          47,
+          1
+        ]
+      ],
+      "twist_residue_bits": 212,
+      "twist_residue_is_probable_prime": false,
+      "twist_leak_bits_below_bound": 12.183945471757248,
+      "twist_deep_factors": [
+        [
+          "0x3",
+          2,
+          true
+        ],
+        [
+          "0xb",
+          1,
+          true
+        ],
+        [
+          "0x2f",
+          1,
+          true
+        ],
+        [
+          "0x2e0273",
+          1,
+          true
+        ],
+        [
+          "0x268160f",
+          1,
+          true
+        ],
+        [
+          "0x20905fa28a700b3b10f0d8d3df7028d8feb21bc6ff",
+          0,
+          false
+        ]
+      ],
+      "twist_largest_prime_factor_bits": 26
+    },
+    "generator": {
+      "generator_on_curve": true,
+      "smallest_valid_x": "0x3",
+      "generator_x_is_smallest_valid_x": false,
+      "generator_y_is_smaller_root": false,
+      "x_values_scanned": 4
+    },
+    "order_neighbours": {
+      "n_minus_1_small_factors": [
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          6
+        ],
+        [
+          5,
+          1
+        ],
+        [
+          17,
+          1
+        ],
+        [
+          2153,
+          1
+        ]
+      ],
+      "n_minus_1_residue_bits": 196,
+      "n_minus_1_residue_is_probable_prime": true,
+      "n_plus_1_small_factors": [
+        [
+          2,
+          1
+        ],
+        [
+          7,
+          1
+        ],
+        [
+          19,
+          1
+        ]
+      ],
+      "n_plus_1_residue_bits": 216,
+      "n_plus_1_residue_is_probable_prime": false
+    },
+    "seed_relations": {
+      "checks": [
+        [
+          "SHA-1(\"P-224\")",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"p-224\")",
+          false
+        ],
+        [
+          "SHA-1(\"p-224\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"P224\")",
+          false
+        ],
+        [
+          "SHA-1(\"P224\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"secp224r1\")",
+          false
+        ],
+        [
+          "SHA-1(\"secp224r1\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"prime224v1\")",
+          false
+        ],
+        [
+          "SHA-1(\"prime224v1\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"NIST P-224\")",
+          false
+        ],
+        [
+          "SHA-1(\"NIST P-224\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"26959946667150639794667015087019630673557916260026308143510066298881\")",
+          false
+        ],
+        [
+          "SHA-1(\"26959946667150639794667015087019630673557916260026308143510066298881\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"ffffffffffffffffffffffffffffffff000000000000000000000001\")",
+          false
+        ],
+        [
+          "SHA-1(\"ffffffffffffffffffffffffffffffff000000000000000000000001\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000000001\")",
+          false
+        ],
+        [
+          "SHA-1(\"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000000000000001\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"26959946667150639794667015087019625940457807714424391721682722368061\")",
+          false
+        ],
+        [
+          "SHA-1(\"26959946667150639794667015087019625940457807714424391721682722368061\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"ffffffffffffffffffffffffffff16a2e0b8f03e13dd29455c5c2a3d\")",
+          false
+        ],
+        [
+          "SHA-1(\"ffffffffffffffffffffffffffff16a2e0b8f03e13dd29455c5c2a3d\" ‖ '\\n')",
+          false
+        ],
+        [
+          "seed(P-192)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 1)",
+          false
+        ],
+        [
+          "seed(P-192) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 2)",
+          false
+        ],
+        [
+          "seed(P-192) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 3)",
+          false
+        ],
+        [
+          "seed(P-192) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 4)",
+          false
+        ],
+        [
+          "seed(P-192) + 4",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 1)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 2)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 3)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 4)",
+          false
+        ],
+        [
+          "seed(P-256)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 1)",
+          false
+        ],
+        [
+          "seed(P-256) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 2)",
+          false
+        ],
+        [
+          "seed(P-256) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 3)",
+          false
+        ],
+        [
+          "seed(P-256) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 4)",
+          false
+        ],
+        [
+          "seed(P-256) + 4",
+          false
+        ],
+        [
+          "seed(P-384)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 1)",
+          false
+        ],
+        [
+          "seed(P-384) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 2)",
+          false
+        ],
+        [
+          "seed(P-384) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 3)",
+          false
+        ],
+        [
+          "seed(P-384) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 4)",
+          false
+        ],
+        [
+          "seed(P-384) + 4",
+          false
+        ],
+        [
+          "seed(P-521)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 1)",
+          false
+        ],
+        [
+          "seed(P-521) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 2)",
+          false
+        ],
+        [
+          "seed(P-521) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 3)",
+          false
+        ],
+        [
+          "seed(P-521) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 4)",
+          false
+        ],
+        [
+          "seed(P-521) + 4",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 0 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 1 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 2 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 3 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 4 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 5 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 6 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 7 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 8 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 9 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 10 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 11 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 12 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 13 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 14 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 15 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-224\" ‖ 16 as ASCII)",
+          false
+        ]
+      ],
+      "any_match": false
+    }
+  },
+  {
+    "name": "P-256",
+    "p_bits": 256,
+    "trace_hex": "0x4319055358e8617b0c46353d039cdaaf",
+    "trace_is_positive": true,
+    "order_is_prime": true,
+    "cofactor": 1,
+    "embedding_degree_if_at_most": 1000,
+    "embedding_degree": null,
+    "discriminant": {
+      "abs_disc_bits": 258,
+      "trial_bound": 1000000,
+      "small_factors": [
+        [
+          3,
+          1
+        ],
+        [
+          5,
+          1
+        ]
+      ],
+      "square_part_bits_from_small_factors": 1,
+      "residue_bits": 255,
+      "residue_is_perfect_square": false,
+      "residue_is_probable_prime": false
+    },
+    "root_sign": {
+      "seed_derivation_holds": true,
+      "p_mod_4": 3,
+      "sign_choice_selects_twist": true,
+      "published_root_is_smaller": true,
+      "twist_order_is_prime": false,
+      "twist_small_factors": [
+        [
+          3,
+          1
+        ],
+        [
+          5,
+          1
+        ],
+        [
+          13,
+          1
+        ],
+        [
+          179,
+          1
+        ]
+      ],
+      "twist_residue_bits": 241,
+      "twist_residue_is_probable_prime": true,
+      "twist_leak_bits_below_bound": 15.091146091013867,
+      "twist_deep_factors": [
+        [
+          "0x3",
+          1,
+          true
+        ],
+        [
+          "0x5",
+          1,
+          true
+        ],
+        [
+          "0xd",
+          1,
+          true
+        ],
+        [
+          "0xb3",
+          1,
+          true
+        ],
+        [
+          "0x1e0a75640070a738557cc30f68bd56eaea65c94f98411d17ac4e16ece1a47",
+          1,
+          true
+        ]
+      ],
+      "twist_largest_prime_factor_bits": 241
+    },
+    "generator": {
+      "generator_on_curve": true,
+      "smallest_valid_x": "0x0",
+      "generator_x_is_smallest_valid_x": false,
+      "generator_y_is_smaller_root": true,
+      "x_values_scanned": 1
+    },
+    "order_neighbours": {
+      "n_minus_1_small_factors": [
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          71,
+          1
+        ],
+        [
+          131,
+          1
+        ],
+        [
+          373,
+          1
+        ],
+        [
+          3407,
+          1
+        ],
+        [
+          17449,
+          1
+        ],
+        [
+          38189,
+          1
+        ]
+      ],
+      "n_minus_1_residue_bits": 188,
+      "n_minus_1_residue_is_probable_prime": false,
+      "n_plus_1_small_factors": [
+        [
+          2,
+          1
+        ],
+        [
+          5,
+          1
+        ],
+        [
+          1879,
+          1
+        ]
+      ],
+      "n_plus_1_residue_bits": 242,
+      "n_plus_1_residue_is_probable_prime": false
+    },
+    "seed_relations": {
+      "checks": [
+        [
+          "SHA-1(\"P-256\")",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"p-256\")",
+          false
+        ],
+        [
+          "SHA-1(\"p-256\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"P256\")",
+          false
+        ],
+        [
+          "SHA-1(\"P256\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"secp256r1\")",
+          false
+        ],
+        [
+          "SHA-1(\"secp256r1\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"prime256v1\")",
+          false
+        ],
+        [
+          "SHA-1(\"prime256v1\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"NIST P-256\")",
+          false
+        ],
+        [
+          "SHA-1(\"NIST P-256\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"115792089210356248762697446949407573530086143415290314195533631308867097853951\")",
+          false
+        ],
+        [
+          "SHA-1(\"115792089210356248762697446949407573530086143415290314195533631308867097853951\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"ffffffff00000001000000000000000000000000ffffffffffffffffffffffff\")",
+          false
+        ],
+        [
+          "SHA-1(\"ffffffff00000001000000000000000000000000ffffffffffffffffffffffff\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF\")",
+          false
+        ],
+        [
+          "SHA-1(\"FFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"115792089210356248762697446949407573529996955224135760342422259061068512044369\")",
+          false
+        ],
+        [
+          "SHA-1(\"115792089210356248762697446949407573529996955224135760342422259061068512044369\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551\")",
+          false
+        ],
+        [
+          "SHA-1(\"ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551\" ‖ '\\n')",
+          false
+        ],
+        [
+          "seed(P-192)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 1)",
+          false
+        ],
+        [
+          "seed(P-192) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 2)",
+          false
+        ],
+        [
+          "seed(P-192) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 3)",
+          false
+        ],
+        [
+          "seed(P-192) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 4)",
+          false
+        ],
+        [
+          "seed(P-192) + 4",
+          false
+        ],
+        [
+          "seed(P-224)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 1)",
+          false
+        ],
+        [
+          "seed(P-224) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 2)",
+          false
+        ],
+        [
+          "seed(P-224) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 3)",
+          false
+        ],
+        [
+          "seed(P-224) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 4)",
+          false
+        ],
+        [
+          "seed(P-224) + 4",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 1)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 2)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 3)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 4)",
+          false
+        ],
+        [
+          "seed(P-384)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 1)",
+          false
+        ],
+        [
+          "seed(P-384) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 2)",
+          false
+        ],
+        [
+          "seed(P-384) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 3)",
+          false
+        ],
+        [
+          "seed(P-384) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 4)",
+          false
+        ],
+        [
+          "seed(P-384) + 4",
+          false
+        ],
+        [
+          "seed(P-521)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 1)",
+          false
+        ],
+        [
+          "seed(P-521) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 2)",
+          false
+        ],
+        [
+          "seed(P-521) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 3)",
+          false
+        ],
+        [
+          "seed(P-521) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 4)",
+          false
+        ],
+        [
+          "seed(P-521) + 4",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 0 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 1 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 2 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 3 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 4 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 5 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 6 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 7 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 8 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 9 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 10 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 11 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 12 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 13 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 14 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 15 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-256\" ‖ 16 as ASCII)",
+          false
+        ]
+      ],
+      "any_match": false
+    }
+  },
+  {
+    "name": "P-384",
+    "p_bits": 384,
+    "trace_hex": "0x389cb27e0bc8d21fa7e5f24cb74f58851313e696333ad68d",
+    "trace_is_positive": true,
+    "order_is_prime": true,
+    "cofactor": 1,
+    "embedding_degree_if_at_most": 1000,
+    "embedding_degree": null,
+    "discriminant": {
+      "abs_disc_bits": 386,
+      "trial_bound": 1000000,
+      "small_factors": [],
+      "square_part_bits_from_small_factors": 1,
+      "residue_bits": 386,
+      "residue_is_perfect_square": false,
+      "residue_is_probable_prime": false
+    },
+    "root_sign": {
+      "seed_derivation_holds": true,
+      "p_mod_4": 3,
+      "sign_choice_selects_twist": true,
+      "published_root_is_smaller": false,
+      "twist_order_is_prime": true,
+      "twist_small_factors": [],
+      "twist_residue_bits": 385,
+      "twist_residue_is_probable_prime": true,
+      "twist_leak_bits_below_bound": 0.0,
+      "twist_deep_factors": [
+        [
+          "0x1000000000000000000000000000000000000000000000000389cb27e0bc8d21ea7e5f24bb74f58851313e697333ad68d",
+          1,
+          true
+        ]
+      ],
+      "twist_largest_prime_factor_bits": 385
+    },
+    "generator": {
+      "generator_on_curve": true,
+      "smallest_valid_x": "0x0",
+      "generator_x_is_smallest_valid_x": false,
+      "generator_y_is_smaller_root": true,
+      "x_values_scanned": 1
+    },
+    "order_neighbours": {
+      "n_minus_1_small_factors": [
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          7,
+          2
+        ],
+        [
+          13,
+          1
+        ]
+      ],
+      "n_minus_1_residue_bits": 371,
+      "n_minus_1_residue_is_probable_prime": false,
+      "n_plus_1_small_factors": [
+        [
+          2,
+          2
+        ],
+        [
+          83,
+          1
+        ],
+        [
+          181,
+          1
+        ],
+        [
+          421,
+          1
+        ]
+      ],
+      "n_plus_1_residue_bits": 360,
+      "n_plus_1_residue_is_probable_prime": false
+    },
+    "seed_relations": {
+      "checks": [
+        [
+          "SHA-1(\"P-384\")",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"p-384\")",
+          false
+        ],
+        [
+          "SHA-1(\"p-384\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"P384\")",
+          false
+        ],
+        [
+          "SHA-1(\"P384\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"secp384r1\")",
+          false
+        ],
+        [
+          "SHA-1(\"secp384r1\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"prime384v1\")",
+          false
+        ],
+        [
+          "SHA-1(\"prime384v1\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"NIST P-384\")",
+          false
+        ],
+        [
+          "SHA-1(\"NIST P-384\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"39402006196394479212279040100143613805079739270465446667948293404245721771496870329047266088258938001861606973112319\")",
+          false
+        ],
+        [
+          "SHA-1(\"39402006196394479212279040100143613805079739270465446667948293404245721771496870329047266088258938001861606973112319\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000ffffffff\")",
+          false
+        ],
+        [
+          "SHA-1(\"fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000ffffffff\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFF\")",
+          false
+        ],
+        [
+          "SHA-1(\"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFF0000000000000000FFFFFFFF\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643\")",
+          false
+        ],
+        [
+          "SHA-1(\"39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"ffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973\")",
+          false
+        ],
+        [
+          "SHA-1(\"ffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973\" ‖ '\\n')",
+          false
+        ],
+        [
+          "seed(P-192)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 1)",
+          false
+        ],
+        [
+          "seed(P-192) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 2)",
+          false
+        ],
+        [
+          "seed(P-192) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 3)",
+          false
+        ],
+        [
+          "seed(P-192) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 4)",
+          false
+        ],
+        [
+          "seed(P-192) + 4",
+          false
+        ],
+        [
+          "seed(P-224)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 1)",
+          false
+        ],
+        [
+          "seed(P-224) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 2)",
+          false
+        ],
+        [
+          "seed(P-224) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 3)",
+          false
+        ],
+        [
+          "seed(P-224) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 4)",
+          false
+        ],
+        [
+          "seed(P-224) + 4",
+          false
+        ],
+        [
+          "seed(P-256)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 1)",
+          false
+        ],
+        [
+          "seed(P-256) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 2)",
+          false
+        ],
+        [
+          "seed(P-256) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 3)",
+          false
+        ],
+        [
+          "seed(P-256) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 4)",
+          false
+        ],
+        [
+          "seed(P-256) + 4",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 1)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 2)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 3)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 4)",
+          false
+        ],
+        [
+          "seed(P-521)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 1)",
+          false
+        ],
+        [
+          "seed(P-521) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 2)",
+          false
+        ],
+        [
+          "seed(P-521) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 3)",
+          false
+        ],
+        [
+          "seed(P-521) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 4)",
+          false
+        ],
+        [
+          "seed(P-521) + 4",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 0 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 1 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 2 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 3 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 4 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 5 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 6 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 7 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 8 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 9 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 10 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 11 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 12 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 13 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 14 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 15 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-384\" ‖ 16 as ASCII)",
+          false
+        ]
+      ],
+      "any_match": false
+    }
+  },
+  {
+    "name": "P-521",
+    "p_bits": 521,
+    "trace_hex": "0x5ae79787c40d069948033feb708f65a2fc44a36477663b851449048e16ec79bf7",
+    "trace_is_positive": true,
+    "order_is_prime": true,
+    "cofactor": 1,
+    "embedding_degree_if_at_most": 1000,
+    "embedding_degree": null,
+    "discriminant": {
+      "abs_disc_bits": 523,
+      "trial_bound": 1000000,
+      "small_factors": [
+        [
+          5,
+          1
+        ]
+      ],
+      "square_part_bits_from_small_factors": 1,
+      "residue_bits": 521,
+      "residue_is_perfect_square": false,
+      "residue_is_probable_prime": false
+    },
+    "root_sign": {
+      "seed_derivation_holds": true,
+      "p_mod_4": 3,
+      "sign_choice_selects_twist": true,
+      "published_root_is_smaller": true,
+      "twist_order_is_prime": false,
+      "twist_small_factors": [
+        [
+          5,
+          1
+        ],
+        [
+          7,
+          1
+        ]
+      ],
+      "twist_residue_bits": 516,
+      "twist_residue_is_probable_prime": false,
+      "twist_leak_bits_below_bound": 5.129283016944966,
+      "twist_deep_factors": [
+        [
+          "0x5",
+          1,
+          true
+        ],
+        [
+          "0x7",
+          1,
+          true
+        ],
+        [
+          "0x4277ffb",
+          1,
+          true
+        ],
+        [
+          "0x25e6d2cd",
+          1,
+          true
+        ],
+        [
+          "0x17c8b8fa594c0fc63a5c0043ab498c1762d92f18fdfe2fea8f074695615d886d81bf930a0ac77d01bf9dd8c1a1ae121dab4e860c5dc18e265de3",
+          1,
+          true
+        ]
+      ],
+      "twist_largest_prime_factor_bits": 461
+    },
+    "generator": {
+      "generator_on_curve": true,
+      "smallest_valid_x": "0x0",
+      "generator_x_is_smallest_valid_x": false,
+      "generator_y_is_smaller_root": false,
+      "x_values_scanned": 1
+    },
+    "order_neighbours": {
+      "n_minus_1_small_factors": [
+        [
+          2,
+          3
+        ],
+        [
+          7,
+          1
+        ],
+        [
+          11,
+          1
+        ],
+        [
+          1283,
+          1
+        ]
+      ],
+      "n_minus_1_residue_bits": 502,
+      "n_minus_1_residue_is_probable_prime": false,
+      "n_plus_1_small_factors": [
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          5,
+          2
+        ]
+      ],
+      "n_plus_1_residue_bits": 513,
+      "n_plus_1_residue_is_probable_prime": false
+    },
+    "seed_relations": {
+      "checks": [
+        [
+          "SHA-1(\"P-521\")",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"p-521\")",
+          false
+        ],
+        [
+          "SHA-1(\"p-521\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"P521\")",
+          false
+        ],
+        [
+          "SHA-1(\"P521\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"secp521r1\")",
+          false
+        ],
+        [
+          "SHA-1(\"secp521r1\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"prime521v1\")",
+          false
+        ],
+        [
+          "SHA-1(\"prime521v1\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"NIST P-521\")",
+          false
+        ],
+        [
+          "SHA-1(\"NIST P-521\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"6864797660130609714981900799081393217269435300143305409394463459185543183397656052122559640661454554977296311391480858037121987999716643812574028291115057151\")",
+          false
+        ],
+        [
+          "SHA-1(\"6864797660130609714981900799081393217269435300143305409394463459185543183397656052122559640661454554977296311391480858037121987999716643812574028291115057151\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\")",
+          false
+        ],
+        [
+          "SHA-1(\"1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"1FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\")",
+          false
+        ],
+        [
+          "SHA-1(\"1FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"6864797660130609714981900799081393217269435300143305409394463459185543183397655394245057746333217197532963996371363321113864768612440380340372808892707005449\")",
+          false
+        ],
+        [
+          "SHA-1(\"6864797660130609714981900799081393217269435300143305409394463459185543183397655394245057746333217197532963996371363321113864768612440380340372808892707005449\" ‖ '\\n')",
+          false
+        ],
+        [
+          "SHA-1(\"1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409\")",
+          false
+        ],
+        [
+          "SHA-1(\"1fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa51868783bf2f966b7fcc0148f709a5d03bb5c9b8899c47aebb6fb71e91386409\" ‖ '\\n')",
+          false
+        ],
+        [
+          "seed(P-192)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 1)",
+          false
+        ],
+        [
+          "seed(P-192) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 2)",
+          false
+        ],
+        [
+          "seed(P-192) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 3)",
+          false
+        ],
+        [
+          "seed(P-192) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-192) + 4)",
+          false
+        ],
+        [
+          "seed(P-192) + 4",
+          false
+        ],
+        [
+          "seed(P-224)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 1)",
+          false
+        ],
+        [
+          "seed(P-224) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 2)",
+          false
+        ],
+        [
+          "seed(P-224) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 3)",
+          false
+        ],
+        [
+          "seed(P-224) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-224) + 4)",
+          false
+        ],
+        [
+          "seed(P-224) + 4",
+          false
+        ],
+        [
+          "seed(P-256)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 1)",
+          false
+        ],
+        [
+          "seed(P-256) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 2)",
+          false
+        ],
+        [
+          "seed(P-256) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 3)",
+          false
+        ],
+        [
+          "seed(P-256) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-256) + 4)",
+          false
+        ],
+        [
+          "seed(P-256) + 4",
+          false
+        ],
+        [
+          "seed(P-384)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 1)",
+          false
+        ],
+        [
+          "seed(P-384) + 1",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 2)",
+          false
+        ],
+        [
+          "seed(P-384) + 2",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 3)",
+          false
+        ],
+        [
+          "seed(P-384) + 3",
+          false
+        ],
+        [
+          "SHA-1(seed(P-384) + 4)",
+          false
+        ],
+        [
+          "seed(P-384) + 4",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521))",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 1)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 2)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 3)",
+          false
+        ],
+        [
+          "SHA-1(seed(P-521) + 4)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 0 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 1 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 2 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 3 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 4 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 5 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 6 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 7 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 8 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 9 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 10 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 11 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 12 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 13 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 14 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 15 as ASCII)",
+          false
+        ],
+        [
+          "SHA-1(\"P-521\" ‖ 16 as ASCII)",
+          false
+        ]
+      ],
+      "any_match": false
+    }
+  }
+]

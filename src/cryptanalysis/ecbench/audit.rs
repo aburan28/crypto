@@ -28,7 +28,7 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 
 use crate::cryptanalysis::ecbench::canonical::sha256_hex;
-use crate::cryptanalysis::ecbench::host::{recompute_class, HostCapsule};
+use crate::cryptanalysis::ecbench::host::{self, recompute_class, HostCapsule};
 use crate::cryptanalysis::ecbench::methods::MethodSpec;
 use crate::cryptanalysis::ecbench::record::{
     check_line_seal, child_main, floor_s, grade, json_roundtrip, ChildInput, GradeInput, Record,
@@ -150,10 +150,13 @@ pub struct AuditReport {
     /// SHA-256 of every file the audit read.
     pub files: BTreeMap<String, String>,
     pub auditor_binary_sha256: Option<String>,
-    /// The host class the audit ran on: a replay on a class other than
-    /// the session's is an independent one.
+    /// The measurement environment class the audit ran under.
     #[serde(default)]
     pub auditor_env_class_id: Option<String>,
+    /// Hardware profile class, which omits mutable compiler and OS policy.
+    /// A claim rejects an auditor with the session's same hardware class.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub auditor_hardware_class_id: Option<String>,
     pub audited_unix_ms: u128,
 }
 
@@ -563,6 +566,7 @@ pub fn audit_with(
         .ok()
         .and_then(|p| std::fs::read(p).ok())
         .map(|b| sha256_hex(&b));
+    let auditor_host = host::capture().ok();
     Ok(AuditReport {
         schema: AUDIT_SCHEMA.into(),
         session_status: session.status.clone(),
@@ -576,9 +580,10 @@ pub fn audit_with(
         replays,
         files,
         auditor_binary_sha256,
-        auditor_env_class_id: crate::cryptanalysis::ecbench::host::capture()
-            .ok()
-            .map(|c| c.env_class_id),
+        auditor_env_class_id: auditor_host.as_ref().map(|c| c.env_class_id.clone()),
+        auditor_hardware_class_id: auditor_host
+            .as_ref()
+            .and_then(|c| host::hardware_class_id(c).ok()),
         audited_unix_ms: std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_millis())
