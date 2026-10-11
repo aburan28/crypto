@@ -10,10 +10,14 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   strict-replay:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 45 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

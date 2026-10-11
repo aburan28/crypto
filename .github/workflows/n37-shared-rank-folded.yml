@@ -3,6 +3,11 @@ name: n37 target-blind folded rank replay
 on:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'src/cryptanalysis/ic_framework/**'
       - 'examples/n37_shared_rank_folded.rs'
       - 'examples/n37_shared_rank_replay.rs'
@@ -14,13 +19,18 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   replay:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Build against the archived dependency lock
         run: |
           cp research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock Cargo.lock

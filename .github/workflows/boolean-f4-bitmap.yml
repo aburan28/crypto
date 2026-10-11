@@ -3,6 +3,11 @@ name: Boolean F4 bitmap membership experiment
 on:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'src/cryptanalysis/pq_f4_f2.rs'
       - 'examples/f4_f2_bench.rs'
       - 'research/boolean_f4_bitmap_20260926/PROTOCOL.md'
@@ -15,12 +20,13 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+# PRs retain source, correctness and existing-evidence checks.
+# Fresh timing panels and their result gates run only after merge or by manual dispatch.
 jobs:
   exact-output-and-paired-build:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
     env:
       RAYON_NUM_THREADS: '1'
       CARGO_BUILD_JOBS: '2'
@@ -37,19 +43,21 @@ jobs:
       - name: Build frozen Boolean F4 benchmark
         run: cargo build --release --example f4_f2_bench
       - name: Five A/A and five paired A/B samples per workload
+        if: github.event_name != 'pull_request'
         run: |
           python3 research/boolean_f4_bitmap_20260926/paired_boolean_f4.py \
             target/release/examples/f4_f2_bench \
             research/boolean_f4_bitmap_20260926/ci-result.json \
             --pairs 5 --threads 1
       - name: Four-thread paired control
+        if: github.event_name != 'pull_request'
         run: |
           python3 research/boolean_f4_bitmap_20260926/paired_boolean_f4.py \
             target/release/examples/f4_f2_bench \
             research/boolean_f4_bitmap_20260926/ci-result-threads4.json \
             --pairs 5 --threads 4
       - name: Preserve raw runs and failures
-        if: always()
+        if: github.event_name != 'pull_request' && (always())
         uses: actions/upload-artifact@v4
         with:
           name: boolean-f4-bitmap-${{ github.sha }}

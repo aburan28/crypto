@@ -4,10 +4,10 @@ name: perf history
 # reading) of every quick perfbench kernel and of the frozen ecbench children in
 # docs/perf/ecbench-children.json, appended to the `perf-history` branch together
 # with the rendered HISTORY.md, history.svg and history.json
-# (scripts/perf/perfhistory.py).  Pull requests that touch measured code are
-# compared against the latest snapshot and the comparison goes to the job
-# summary; it fails the check only when the repository variable
-# PERF_HISTORY_FAIL_ON_REGRESSION is "true".
+# (scripts/perf/perfhistory.py). Pull requests that touch measured code test
+# accounting/native-parser contracts and compile both tools. The full
+# instruction comparison is available through check_only
+# manual dispatch; PERF_HISTORY_FAIL_ON_REGRESSION applies to that full run.
 #
 # The snapshots live on their own branch so that a measurement never needs a
 # commit on main and never conflicts with one.  Read them with
@@ -15,6 +15,7 @@ name: perf history
 # or at https://github.com/aburan28/crypto/blob/perf-history/docs/perf/HISTORY.md
 
 on:
+  merge_group:
   push:
     branches: [main]
     paths:
@@ -29,6 +30,9 @@ on:
       - '.github/workflows/perf-history.yml'
   pull_request:
     paths:
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'src/**'
       - 'examples/perfbench/**'
       - 'Cargo.toml'
@@ -40,6 +44,10 @@ on:
       - '.github/workflows/perf-history.yml'
   workflow_dispatch:
     inputs:
+      check_only:
+        description: 'Run the full instruction-count comparison without appending a snapshot'
+        type: boolean
+        default: false
       ref:
         description: 'Revision to measure and append (default: the branch this runs on). Use it to back-fill history.'
         required: false
@@ -64,7 +72,7 @@ env:
 jobs:
   record:
     # Append one snapshot for the pushed (or dispatched) revision.
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && github.event_name != 'merge_group' && !inputs.check_only
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     permissions:
@@ -139,13 +147,14 @@ jobs:
           if-no-files-found: warn
 
   check:
-    # Compare a pull request's tree against the latest snapshot.
-    if: github.event_name == 'pull_request'
+    # PRs validate the history machinery; check_only dispatches retain the full comparison.
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group' || inputs.check_only
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && 25 || 90 }}
     steps:
       - uses: actions/checkout@v4
       - name: Check out the history branch
+        if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
         uses: actions/checkout@v4
         with:
           ref: ${{ env.HISTORY_BRANCH }}
@@ -153,13 +162,20 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Install the frozen profiler
+        if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
         run: |
           sudo apt-get update
           sudo apt-get install -y valgrind
           test "$(valgrind --version)" = valgrind-3.22.0
+      - name: Test history accounting and native parser contracts
+        run: |
+          python3 -m unittest discover -s scripts/perf -p test_perfhistory.py -v
+          cargo test --release --lib cryptanalysis::ecbench::callgrind
+          cargo test --release --example perfbench
       - name: Build perfbench and ecbench
         run: cargo build --release --example perfbench --bin ecbench
       - name: Compare against the latest snapshot
+        if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
         env:
           FAIL: ${{ vars.PERF_HISTORY_FAIL_ON_REGRESSION }}
         run: |
@@ -173,7 +189,7 @@ jobs:
             --threshold 0.10 --md "$RUNNER_TEMP/check.md" $flag
           cat "$RUNNER_TEMP/check.md" >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ !cancelled() && github.event_name != 'pull_request' && github.event_name != 'merge_group' }}
         with:
           name: perf-history-check-${{ github.run_id }}
           path: ${{ runner.temp }}/check.md

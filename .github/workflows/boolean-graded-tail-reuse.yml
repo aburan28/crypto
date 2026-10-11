@@ -2,11 +2,14 @@ name: Graded Boolean tail reuse
 
 on:
   push:
+    branches: [main]
     paths:
+      - 'tools/isolated_bench.py'
       - 'research/boolean_graded_tail_reuse_20261003/**'
       - '.github/workflows/boolean-graded-tail-reuse.yml'
   pull_request:
     paths:
+      - 'tools/isolated_bench.py'
       - 'research/boolean_graded_tail_reuse_20261003/**'
       - '.github/workflows/boolean-graded-tail-reuse.yml'
   workflow_dispatch:
@@ -23,14 +26,15 @@ permissions:
 
 concurrency:
   group: boolean-graded-tail-${{ github.ref }}
-  cancel-in-progress: false
-
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   correctness:
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 360 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Native mathematical and verifier tests
         run: |
           python3 tools/isolated_bench.py busy -- cargo test --locked --release --manifest-path research/boolean_graded_tail_reuse_20261003/Cargo.toml -- --test-threads=1

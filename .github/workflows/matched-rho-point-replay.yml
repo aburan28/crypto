@@ -2,6 +2,11 @@ name: Matched point-only rho replay
 on:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'examples/koblitz_rho_batch_ks.rs'
       - 'research/sat_factor_base_review_20260908/autolab_matched_point_rho_n53_20260925/**'
       - 'research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/point_recovery_20260924_codex/**'
@@ -13,11 +18,17 @@ on:
       - 'research/sat_factor_base_review_20260908/autolab_matched_point_rho_n53_20260925/**'
       - 'research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/point_recovery_20260924_codex/**'
       - '.github/workflows/matched-rho-point-replay.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   replay:
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 360 }}
     steps:
       - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
       - name: Build the point-input rho producer
         run: cargo build --release --example koblitz_rho_batch_ks
       - name: Check point-input behavior and frozen receipts

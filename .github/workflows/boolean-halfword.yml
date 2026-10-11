@@ -3,6 +3,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     paths:
+      - 'tools/isolated_bench.py'
       - 'research/boolean_halfword_20260923/**'
       - '.github/workflows/boolean-halfword.yml'
   workflow_dispatch:
@@ -34,7 +35,8 @@ jobs:
           PYTHONDONTWRITEBYTECODE: '1'
         run: python3 tools/isolated_bench.py busy -- python3 -m unittest discover -s research/boolean_halfword_20260923 -p 'test_*.py' -v
   qualified-discovery:
-    if: github.event.action == 'opened' || (github.event.action == 'labeled' && github.event.label.name == 'halfword-discovery') || (github.event_name == 'workflow_dispatch' && inputs.phase == 'discovery')
+    # Qualified research runs require the existing explicit label or dispatch.
+    if: (github.event.action == 'labeled' && github.event.label.name == 'halfword-discovery') || (github.event_name == 'workflow_dispatch' && inputs.phase == 'discovery')
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 120
     env:

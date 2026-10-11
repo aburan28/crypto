@@ -2,23 +2,32 @@ name: Boolean F5 affine signature
 
 on:
   push:
+    branches: [main]
     paths:
+      - 'tools/isolated_bench.py'
       - 'research/boolean_f5_affine_signature_20261002/**'
       - '.github/workflows/boolean-f5-affine-signature.yml'
   pull_request:
     paths:
+      - 'tools/isolated_bench.py'
       - 'research/boolean_f5_affine_signature_20261002/**'
       - '.github/workflows/boolean-f5-affine-signature.yml'
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   native-replay:
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 360 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Native algebra and verifier tests
         run: |
           python3 tools/isolated_bench.py busy -- cargo test --locked --release --manifest-path research/boolean_f5_affine_signature_20261002/Cargo.toml -- --test-threads=1

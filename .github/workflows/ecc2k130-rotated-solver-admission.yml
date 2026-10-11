@@ -2,6 +2,7 @@ name: ECC2K130 rotated solver admission replay
 
 on:
   push:
+    branches: [main]
     paths:
       - '.github/workflows/ecc2k130-rotated-solver-admission.yml'
       - 'research/notes/ecc2k130/rotated_solver_admission_replay_20260925/**'
@@ -15,6 +16,11 @@ on:
       - 'src/cryptanalysis/koblitz_index_calculus.rs'
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - '.github/workflows/ecc2k130-rotated-solver-admission.yml'
       - 'research/notes/ecc2k130/rotated_solver_admission_replay_20260925/**'
       - 'research/notes/ecc2k130/rotated_solver_admission_20260925/**'
@@ -29,12 +35,17 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   historical-and-current-interface:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

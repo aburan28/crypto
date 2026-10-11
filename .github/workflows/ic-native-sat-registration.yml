@@ -5,6 +5,11 @@ name: Native SAT registration custody
 on:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'examples/prepared_sat_registration_audit.rs'
       - 'src/cryptanalysis/prepared_control_archive.rs'
       - 'src/bin/icprog.rs'
@@ -23,6 +28,10 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   custody:
     strategy:
@@ -30,10 +39,11 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Bootstrap native build serialization
         run: rustc --edition 2021 src/bin/isolated_bench/busy_unix.rs -o "$RUNNER_TEMP/native-busy"
       - name: Native archive rejection controls

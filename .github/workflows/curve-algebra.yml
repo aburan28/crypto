@@ -11,9 +11,14 @@ on:
       - '.github/workflows/curve-algebra.yml'
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   verify-examples:
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 360 }}
     steps:
       - uses: actions/checkout@v4
       - name: Compile native algebraic verifier

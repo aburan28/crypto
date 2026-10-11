@@ -3,6 +3,11 @@ name: Matrix-F5 echelon output experiment
 on:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'src/cryptanalysis/matrix_f5_f2.rs'
       - 'examples/f4_f2_bench.rs'
       - 'research/f5_echelon_20260927/PROTOCOL.md'
@@ -15,12 +20,13 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+# PRs retain source, correctness and existing-evidence checks.
+# Fresh timing panels and their result gates run only after merge or by manual dispatch.
 jobs:
   row-space-and-paired-f5:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
     env:
       RAYON_NUM_THREADS: '1'
       CARGO_BUILD_JOBS: '2'
@@ -35,19 +41,21 @@ jobs:
       - name: Build F5 stage benchmark
         run: cargo build --release --example f4_f2_bench
       - name: Independent one-thread paired repeat
+        if: github.event_name != 'pull_request'
         run: |
           python3 research/f5_echelon_20260927/paired_f5.py \
             target/release/examples/f4_f2_bench \
             research/f5_echelon_20260927/ci-result.json \
             --pairs 5 --threads 1
       - name: Four-thread paired control
+        if: github.event_name != 'pull_request'
         run: |
           python3 research/f5_echelon_20260927/paired_f5.py \
             target/release/examples/f4_f2_bench \
             research/f5_echelon_20260927/ci-result-threads4.json \
             --pairs 5 --threads 4
       - name: Preserve all raw runs and failures
-        if: always()
+        if: github.event_name != 'pull_request' && (always())
         uses: actions/upload-artifact@v4
         with:
           name: f5-echelon-${{ github.sha }}

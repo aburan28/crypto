@@ -2,12 +2,20 @@ name: Boolean F5 support-aware batch
 
 on:
   push:
+    branches: [main]
     paths:
+      - 'tools/isolated_bench.py'
       - 'research/boolean_f5_support_aware_20261002/**'
       - 'src/cryptanalysis/gf2_elim.rs'
       - '.github/workflows/boolean-f5-support-aware.yml'
   pull_request:
     paths:
+      - 'tools/isolated_bench.py'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'research/boolean_f5_support_aware_20261002/**'
       - 'src/cryptanalysis/gf2_elim.rs'
       - '.github/workflows/boolean-f5-support-aware.yml'
@@ -35,8 +43,7 @@ permissions:
 
 concurrency:
   group: boolean-f5-support-aware-${{ github.ref }}
-  cancel-in-progress: false
-
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 env:
   KIC_F5_DIRECT_PACK: '1'
   KIC_F5_UNPACK_DIRECT: '1'
@@ -48,9 +55,11 @@ env:
 jobs:
   correctness:
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 360 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Mathematical and native verifier tests
         run: |
           python3 tools/isolated_bench.py busy -- cargo test --release --locked --manifest-path research/boolean_f5_support_aware_20261002/Cargo.toml -- --test-threads=1

@@ -3,6 +3,11 @@ name: Paired n37 n41 full-rank controls
 on:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'research/notes/ecc2k130/paired_fullrank_20260925/**'
       - 'research/notes/ecc2k130/PAIRED_N37_N41_FULLRANK_PROTOCOL_20260925.md'
       - 'research/notes/ecc2k130/paired_fullrank_clean_evidence_20260925/**'
@@ -11,17 +16,24 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# PRs retain source, correctness and existing-evidence checks.
+# Fresh timing panels and their result gates run only after merge or by manual dispatch.
 jobs:
   clean-source-paired-panel:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -36,10 +48,10 @@ jobs:
             echo "PANEL_ARCHIVED=1" >> "$GITHUB_ENV"
           fi
       - name: Build exact branch source
-        if: env.PANEL_ARCHIVED != '1'
+        if: github.event_name != 'pull_request' && (env.PANEL_ARCHIVED != '1')
         run: cargo build --release --example koblitz_rank_fixture --example koblitz_rho_fixture
       - name: Require clean source and pinned-main ancestry
-        if: env.PANEL_ARCHIVED != '1'
+        if: github.event_name != 'pull_request' && (env.PANEL_ARCHIVED != '1')
         run: |
           git rev-parse HEAD
           git status --porcelain
@@ -47,16 +59,16 @@ jobs:
           git cat-file -t 3bec69ca636cebc71f828a3035c49b8258e13f5f
           git merge-base --is-ancestor 3bec69ca636cebc71f828a3035c49b8258e13f5f HEAD
       - name: Run n37 pilot and holdouts
-        if: env.PANEL_ARCHIVED != '1'
+        if: github.event_name != 'pull_request' && (env.PANEL_ARCHIVED != '1')
         run: |
           python3 research/notes/ecc2k130/paired_fullrank_20260925/run.py --out /tmp/paired-panel/n37_seed0 --n 37 --seed-index 0
           python3 research/notes/ecc2k130/paired_fullrank_20260925/run.py --out /tmp/paired-panel/n37_seed1 --n 37 --seed-index 1
           python3 research/notes/ecc2k130/paired_fullrank_20260925/run.py --out /tmp/paired-panel/n37_seed2 --n 37 --seed-index 2
       - name: Run n41 pilot
-        if: env.PANEL_ARCHIVED != '1'
+        if: github.event_name != 'pull_request' && (env.PANEL_ARCHIVED != '1')
         run: python3 research/notes/ecc2k130/paired_fullrank_20260925/run.py --out /tmp/paired-panel/n41_seed0 --n 41 --seed-index 0
       - name: Enforce n41 pilot resource gate
-        if: env.PANEL_ARCHIVED != '1'
+        if: github.event_name != 'pull_request' && (env.PANEL_ARCHIVED != '1')
         run: |
           python3 - <<'PY'
           import json
@@ -66,32 +78,15 @@ jobs:
           assert all(not arm['timed_out'] and arm['peak_rss_bytes'] < 2 * 1024**3 for arm in report['arms'])
           PY
       - name: Run n41 holdouts
-        if: env.PANEL_ARCHIVED != '1'
+        if: github.event_name != 'pull_request' && (env.PANEL_ARCHIVED != '1')
         run: |
           python3 research/notes/ecc2k130/paired_fullrank_20260925/run.py --out /tmp/paired-panel/n41_seed1 --n 41 --seed-index 1
           python3 research/notes/ecc2k130/paired_fullrank_20260925/run.py --out /tmp/paired-panel/n41_seed2 --n 41 --seed-index 2
       - name: Seal six clean-source replayed pairs
-        if: env.PANEL_ARCHIVED != '1'
+        if: github.event_name != 'pull_request' && (env.PANEL_ARCHIVED != '1')
         run: python3 research/notes/ecc2k130/paired_fullrank_20260925/archive.py --runs /tmp/paired-panel --out /tmp/paired-panel-sealed
-      - name: Commit durable clean-source evidence to PR branch
-        if: github.event_name == 'pull_request' && env.PANEL_ARCHIVED != '1'
-        env:
-          HEAD_BRANCH: ${{ github.head_ref }}
-        run: |
-          git fetch origin "$HEAD_BRANCH:refs/remotes/origin/$HEAD_BRANCH"
-          git checkout -B "$HEAD_BRANCH" "origin/$HEAD_BRANCH"
-          mkdir -p research/notes/ecc2k130/paired_fullrank_clean_evidence_20260925
-          cp /tmp/paired-panel-sealed/clean_evidence.tar.gz research/notes/ecc2k130/paired_fullrank_clean_evidence_20260925/
-          cp /tmp/paired-panel-sealed/clean_summary.json research/notes/ecc2k130/paired_fullrank_clean_evidence_20260925/
-          cp /tmp/paired-panel-sealed/clean_archive_manifest.json research/notes/ecc2k130/paired_fullrank_clean_evidence_20260925/
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add research/notes/ecc2k130/paired_fullrank_clean_evidence_20260925/
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "research: preserve six clean-source paired controls"
-          git push origin HEAD:"$HEAD_BRANCH"
       - name: Archive raw outputs including failures
-        if: always() && env.PANEL_ARCHIVED != '1'
+        if: github.event_name != 'pull_request' && (always() && env.PANEL_ARCHIVED != '1')
         uses: actions/upload-artifact@v4
         with:
           name: paired-n37-n41-fullrank-${{ github.sha }}
