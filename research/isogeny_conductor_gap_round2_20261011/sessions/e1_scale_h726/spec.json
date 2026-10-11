@@ -1,0 +1,146 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "round 2 E1: partial-fiber sweep [d]E[h] on the 26-bit 726-cofactor pair",
+  "description": "Lead E1: the fiber-closed MITM over the subgroup [d]E(F_p)[h] for d in [1, 2, 3, 6, 11, 22, 33, 66], coset closure, on crater, floor and isomorphic floor model. The subgroup sizes differ between crater (rank-2 ell-torsion) and floor (rank 1).",
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-closed-d1",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset,fiber_scale=1"
+        }
+      }
+    },
+    {
+      "name": "ic-closed-d2",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset,fiber_scale=2"
+        }
+      }
+    },
+    {
+      "name": "ic-closed-d3",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset,fiber_scale=3"
+        }
+      }
+    },
+    {
+      "name": "ic-closed-d6",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset,fiber_scale=6"
+        }
+      }
+    },
+    {
+      "name": "ic-closed-d11",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset,fiber_scale=11"
+        }
+      }
+    },
+    {
+      "name": "ic-closed-d22",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset,fiber_scale=22"
+        }
+      }
+    },
+    {
+      "name": "ic-closed-d33",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset,fiber_scale=33"
+        }
+      }
+    },
+    {
+      "name": "ic-closed-d66",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset,fiber_scale=66"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 2,
+    "seed": 1,
+    "timeout_seconds": 900,
+    "warmup": 1
+  },
+  "workloads": {
+    "curves": [
+      {
+        "a": 122566398,
+        "b": 163421864,
+        "group_order": 166800678,
+        "gx": 7236065,
+        "gy": 162683527,
+        "kind": "prime_explicit",
+        "p": 166826507,
+        "r": 229753
+      },
+      {
+        "a": 60855266,
+        "b": 111192483,
+        "group_order": 166800678,
+        "gx": 98820284,
+        "gy": 109973813,
+        "kind": "prime_explicit",
+        "p": 166826507,
+        "r": 229753
+      },
+      {
+        "a": 164358233,
+        "b": 95328491,
+        "group_order": 166800678,
+        "gx": 97317930,
+        "gy": 91297858,
+        "kind": "prime_explicit",
+        "p": 166826507,
+        "r": 229753
+      }
+    ],
+    "target_seed": 20261011,
+    "targets_per_curve": 4
+  }
+}
