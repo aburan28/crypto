@@ -19,7 +19,7 @@ ROOT="$(cd "$HERE/../../.." && pwd)"
 OUT="$HERE/results"
 IC="$ROOT/target/release/ic"
 SEED=123212651130
-REPEATS=3
+REPEATS="${REPEATS:-3}"
 RHO_RUNS=8
 WALL="${WALL:-2h}"
 mkdir -p "$OUT"
