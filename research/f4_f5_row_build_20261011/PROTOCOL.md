@@ -63,13 +63,18 @@ allocations plus at least 20% fewer criterion allocation requests. Retain any
 allocation regressions and qualify the result by workload. Stop and correct
 any correctness mismatch; do not relax the acceptance conditions. No wall
 clock is collected by the audit driver because this host has no demonstrated
-exclusive CPU isolation. A controlled wall-time comparison remains a separate
-measurement obligation.
+exclusive CPU isolation. Retain five additional alternating baseline/candidate
+pairs as a reproducibility control, with the same three repetitions per pair;
+compare each against the primary JSONL files byte for byte. A controlled
+wall-time comparison remains a separate measurement obligation.
 
 Commands: `cargo build --locked --release --example f4_f5_row_build_bench -j 2`;
 save the binary; run baseline and candidate with argument `3`. Run
 `cargo test --locked --release --lib` and the touched example's tests after
-the optimization, plus focused F4/F5 suites. Preserve failure logs.
+the optimization, plus focused F4/F5 suites. Preserve failure logs. Full-library
+verification has a 20-minute execution budget. If a pre-existing test stalls,
+continue the remaining tests independently, preserve the full incomplete log
+and timeout, and do not claim full-suite success or weaken the stalled test.
 
 Workflow limits at setup: `conductor check` could not run because the command
 is not installed and this checkout has no `.conductor/WORKFLOW.md`. The work
