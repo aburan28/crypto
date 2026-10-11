@@ -361,7 +361,10 @@ pub fn run_pipeline<G: CountedGroup>(
     };
     let mut outcome: PipelineOutcome = if spec.targets == Targets::Residual {
         if completion != CompletionRule::TargetPinned {
-            return Err("the residual collector stops when the target is pinned; use incremental-gauss".into());
+            return Err(
+                "the residual collector stops when the target is pinned; use incremental-gauss"
+                    .into(),
+            );
         }
         residual_mod::collect_residual_and_solve(
             ctx.group,

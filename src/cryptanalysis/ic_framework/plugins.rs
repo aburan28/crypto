@@ -566,8 +566,16 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for CompactOrbitScanBase<'_> {
                     for &(a, b) in &multipliers {
                         let sa = to_scalar(a);
                         let sb = to_scalar(b);
-                        let pa = if sa == 0 { g.identity() } else { g.mul(ops, seed, sa) };
-                        let pb = if sb == 0 { g.identity() } else { g.mul(ops, tau_seed, sb) };
+                        let pa = if sa == 0 {
+                            g.identity()
+                        } else {
+                            g.mul(ops, seed, sa)
+                        };
+                        let pb = if sb == 0 {
+                            g.identity()
+                        } else {
+                            g.mul(ops, tau_seed, sb)
+                        };
                         let image = g.add(ops, pa, pb);
                         if g.is_identity(&image) {
                             continue;
@@ -583,7 +591,8 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for CompactOrbitScanBase<'_> {
                         if !local_seen.insert(key) || seen.contains(&key) {
                             continue;
                         }
-                        let weight = ((sa as u128 + (sb as u128 * lambda as u128) % r128) % r128) as u64;
+                        let weight =
+                            ((sa as u128 + (sb as u128 * lambda as u128) % r128) % r128) as u64;
                         let mut member = image;
                         let mut coefficient = weight;
                         for _ in 0..inst.n {
@@ -599,7 +608,9 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for CompactOrbitScanBase<'_> {
                             multiplier_points += 2;
                         }
                         if member != image {
-                            return Err(format!("multiplier orbit from raw x {raw_x} is not closed"));
+                            return Err(format!(
+                                "multiplier orbit from raw x {raw_x} is not closed"
+                            ));
                         }
                     }
                 }
@@ -1181,7 +1192,9 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
             None | Some("0") | Some("none") => None,
             Some("all") => {
                 if self.instance.koblitz.is_none() {
-                    return Err("slots need a Koblitz curve (the Frobenius must be an endomorphism)".into());
+                    return Err(
+                        "slots need a Koblitz curve (the Frobenius must be an endomorphism)".into(),
+                    );
                 }
                 Some(self.instance.n)
             }
@@ -1254,11 +1267,15 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for DescentAlgebraicOracle<'_> {
             };
             for v in solutions {
                 let xs = sys.lift(v);
-                if let Some(indices) =
-                    crate::cryptanalysis::ic_boundary::lift_abscissae(ctx.group, fb, ops, &xs, point)
-                {
+                if let Some(indices) = crate::cryptanalysis::ic_boundary::lift_abscissae(
+                    ctx.group, fb, ops, &xs, point,
+                ) {
                     *self.totals.extra.entry("slot_hits".into()).or_insert(0) += 1;
-                    *self.totals.extra.entry(format!("slot_hit_rotation_{j}")).or_insert(0) += 1;
+                    *self
+                        .totals
+                        .extra
+                        .entry(format!("slot_hit_rotation_{j}"))
+                        .or_insert(0) += 1;
                     return Some(indices);
                 }
                 counters.lift_failures += 1;

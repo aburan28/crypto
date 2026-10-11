@@ -34,8 +34,8 @@ use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 
 use crate::cryptanalysis::ic_boundary::{
-    CountedGroup, FactorBase, GroupOps, OracleCounters, PhaseCost, PipelineOutcome,
-    RelationSolver, RowStatus,
+    CountedGroup, FactorBase, GroupOps, OracleCounters, PhaseCost, PipelineOutcome, RelationSolver,
+    RowStatus,
 };
 
 fn mulmod(a: u64, b: u64, m: u64) -> u64 {
@@ -94,7 +94,9 @@ pub fn collect_residual_and_solve<G: CountedGroup, L: RelationSolver + ?Sized>(
     let mut recovered = None;
     let mut verified = false;
     if f == 0 {
-        return outcome(rel, la, ver, trials, found, matrix, recovered, verified, ctr);
+        return outcome(
+            rel, la, ver, trials, found, matrix, recovered, verified, ctr,
+        );
     }
 
     // Sixteen jumps with tracked coefficients.
@@ -186,7 +188,18 @@ pub fn collect_residual_and_solve<G: CountedGroup, L: RelationSolver + ?Sized>(
             // [a]G + [b]Q = Σ P_j exactly: a classic relation.
             direct_hits += 1;
             found += 1;
-            if add_relation(matrix, &mut la, &mut ver, &mut rel.group_ops, row.clone(), a, b, &mut la_ns, &mut recovered, &mut verified) {
+            if add_relation(
+                matrix,
+                &mut la,
+                &mut ver,
+                &mut rel.group_ops,
+                row.clone(),
+                a,
+                b,
+                &mut la_ns,
+                &mut recovered,
+                &mut verified,
+            ) {
                 break;
             }
             fresh = true;
@@ -199,7 +212,18 @@ pub fn collect_residual_and_solve<G: CountedGroup, L: RelationSolver + ?Sized>(
             let mut full = row.clone();
             let kc = fb.col_of[k];
             full[kc] = addmod(full[kc], fb.coef_of[k], r);
-            if add_relation(matrix, &mut la, &mut ver, &mut rel.group_ops, full, a, b, &mut la_ns, &mut recovered, &mut verified) {
+            if add_relation(
+                matrix,
+                &mut la,
+                &mut ver,
+                &mut rel.group_ops,
+                full,
+                a,
+                b,
+                &mut la_ns,
+                &mut recovered,
+                &mut verified,
+            ) {
                 break;
             }
             fresh = true;
@@ -212,20 +236,40 @@ pub fn collect_residual_and_solve<G: CountedGroup, L: RelationSolver + ?Sized>(
         let (key, sa, sb, srow): (u64, u64, u64, Vec<u64>) = if kp <= kn {
             (kp, a, b, row.clone())
         } else {
-            (kn, submod(0, a, r), submod(0, b, r), row.iter().map(|&c| submod(0, c, r)).collect())
+            (
+                kn,
+                submod(0, a, r),
+                submod(0, b, r),
+                row.iter().map(|&c| submod(0, c, r)).collect(),
+            )
         };
         table_probes += 1;
         if let Some(prev) = table.get(&key) {
             // Same residual: (a − a')G + (b − b')Q = Σ row − Σ row'.
             let da = submod(sa, prev.a, r);
             let db = submod(sb, prev.b, r);
-            let diff: Vec<u64> = srow.iter().zip(&prev.row).map(|(&x, &y)| submod(x, y, r)).collect();
+            let diff: Vec<u64> = srow
+                .iter()
+                .zip(&prev.row)
+                .map(|(&x, &y)| submod(x, y, r))
+                .collect();
             if da == 0 && db == 0 && diff.iter().all(|&c| c == 0) {
                 self_collisions += 1;
             } else {
                 collisions += 1;
                 found += 1;
-                if add_relation(matrix, &mut la, &mut ver, &mut rel.group_ops, diff, da, db, &mut la_ns, &mut recovered, &mut verified) {
+                if add_relation(
+                    matrix,
+                    &mut la,
+                    &mut ver,
+                    &mut rel.group_ops,
+                    diff,
+                    da,
+                    db,
+                    &mut la_ns,
+                    &mut recovered,
+                    &mut verified,
+                ) {
                     break;
                 }
             }
@@ -233,7 +277,14 @@ pub fn collect_residual_and_solve<G: CountedGroup, L: RelationSolver + ?Sized>(
             continue;
         }
         if table.len() < TABLE_CAP {
-            table.insert(key, Stored { a: sa, b: sb, row: srow });
+            table.insert(
+                key,
+                Stored {
+                    a: sa,
+                    b: sb,
+                    row: srow,
+                },
+            );
         }
     }
     rel.wall_ns = rel_start.elapsed().as_nanos() as u64 - la_ns - ver.wall_ns;
@@ -243,7 +294,10 @@ pub fn collect_residual_and_solve<G: CountedGroup, L: RelationSolver + ?Sized>(
     rel.count("residual_self_collisions", self_collisions);
     rel.count("residual_direct_hits", direct_hits);
     rel.count("residual_table_entries", table.len() as u64);
-    rel.count("residual_table_bytes_uncharged", (table.len() * (16 + 8 * d_col)) as u64);
+    rel.count(
+        "residual_table_bytes_uncharged",
+        (table.len() * (16 + 8 * d_col)) as u64,
+    );
     rel.count("lookups", table_probes + trials);
     rel.count("walk_restarts", restarts);
     rel.count("walk_jumps", jump_count as u64);
@@ -253,7 +307,9 @@ pub fn collect_residual_and_solve<G: CountedGroup, L: RelationSolver + ?Sized>(
     la.count("rows", found);
     la.count("columns", cols as u64);
     la.count("rank", matrix.rank() as u64);
-    outcome(rel, la, ver, trials, found, matrix, recovered, verified, ctr)
+    outcome(
+        rel, la, ver, trials, found, matrix, recovered, verified, ctr,
+    )
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -288,7 +344,9 @@ mod tests {
     use super::super::plugins::{MitmOracle, PrimeAbscissaBase};
     use super::super::stages::{InstanceCtx, Params, Targets};
     use super::super::{run_pipeline, PipelineSpec};
-    use crate::cryptanalysis::ic_boundary::{roster_prime_instance, Calibration, CountedGroup, GroupOps};
+    use crate::cryptanalysis::ic_boundary::{
+        roster_prime_instance, Calibration, CountedGroup, GroupOps,
+    };
 
     /// **The residual collector recovers the planted logarithm** on a
     /// prime instance, with the same base and matrix the walk collector
@@ -323,8 +381,16 @@ mod tests {
         spec.factor_base_params.set("size", "24");
         spec.oracle_params.set("negation_folded", "1");
         let mut oracle = MitmOracle::new(2);
-        let report = run_pipeline(&ctx, &spec, &base, &mut oracle, planted, &Calibration::default(), None)
-            .expect("the residual configuration should run");
+        let report = run_pipeline(
+            &ctx,
+            &spec,
+            &base,
+            &mut oracle,
+            planted,
+            &Calibration::default(),
+            None,
+        )
+        .expect("the residual configuration should run");
         assert!(report.verified, "did not recover the planted logarithm");
         assert_eq!(report.recovered, Some(planted));
         let native = &report.decomposition.cost.native;
