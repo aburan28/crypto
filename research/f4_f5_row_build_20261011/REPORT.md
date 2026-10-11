@@ -72,7 +72,7 @@ The stalled test's sources are unchanged and do not call the optimized kernels.
 | Preserve existing output and accounting | Verified on all eight frozen systems, both seeds and all repetitions; exact native comparison and focused suites |
 | Reproducible baseline/candidate evidence | Verified: saved binaries, source/configuration hashes, toolchain, host, input/output digests, A/A and five alternating pairs |
 | Full library verification | Partial: 3,838 distinct tests passed, 110 ignored; one unchanged isogeny test exceeded the 20-minute budget; raw termination and coverage retained |
-| Reviewable delivery | Local feature-branch commits; publication currently blocked by GitHub HTTP 401 credentials |
+| Reviewable delivery | Feature-branch commits ready for review; GitHub authentication restored and push access verified for `aburan28/crypto` |
 | Runtime, peak memory, other coefficient fields, larger systems | Not measured or established |
 
 This iteration uses public synthetic planted Boolean systems. It does not
@@ -119,10 +119,12 @@ those failures. All native audit/compare/replication runs completed with exit 0.
 Conductor was unavailable (`conductor check`: command not found; no
 `.conductor/WORKFLOW.md` in this checkout). Reversible edits were scoped to a
 feature branch, with prerequisite scope expansions recorded before edits.
-`gh api user` returned HTTP 401 Bad credentials; `git push --dry-run` also
-failed because no GitHub username/credential is configured (exit 128).
-Repository publication needs functioning credentials; no pull request has
-been opened. Both access logs are retained in `records/`.
+During the initial audit, `gh api user` returned HTTP 401 Bad credentials;
+`git push --dry-run` also failed without a configured GitHub credential (exit
+128). Subsequent browser authorization restored authentication as `aburan28`.
+Repository push permission and a new-branch upload dry run were verified.
+The initial failure logs and the manifest's original workflow state are
+retained as historical evidence; they do not describe the restored access.
 
 ## Reproduction
 

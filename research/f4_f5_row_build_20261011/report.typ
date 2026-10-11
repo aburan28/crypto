@@ -103,7 +103,10 @@ and the full/remainder/termination logs are retained in `records/`; its sources
 do not call the optimized kernels. Budget enforcement was delayed because
 the checker initially could not identify the executable through `/proc`.
 Work is committed locally on `codex/optimize-f4-f5-row-build`.
-GitHub authentication returned HTTP 401 Bad credentials; no PR has been opened.
+Initial GitHub authentication failed with HTTP 401. Subsequent browser
+authorization restored authentication as `aburan28`; repository push access
+and the branch upload dry run were verified. The original failure records and
+manifest workflow state are retained as historical evidence.
 Conductor is not installed and this checkout has no workflow file.
 
 Native evidence: `records/comparison.json`, both primary JSONL files,
