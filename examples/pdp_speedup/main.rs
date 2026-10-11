@@ -61,7 +61,9 @@ fn cmd_corpus(args: &[String]) {
     let threads: usize = arg(args, "--threads").unwrap_or(3);
     let rung = Rung::new(l);
     let t0 = Instant::now();
-    let recs = build_records(&rung, threads);
+    let n_uniform: usize = arg(args, "--uniform").unwrap_or(N_UNIFORM);
+    let n_planted: usize = arg(args, "--planted").unwrap_or(N_PLANTED);
+    let recs = build_records(&rung, threads, n_uniform, n_planted);
     let text = write_corpus(&rung, &recs);
     std::fs::write(&out, &text).unwrap();
     let found = recs.iter().filter(|r| !r.roots.is_empty()).count();

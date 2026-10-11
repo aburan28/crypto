@@ -255,6 +255,19 @@ pub fn cmd_export(args: &[String]) {
     let (live, outs) = eliminate_dead(&ops, &outputs);
     let bytes = program_bytes(&live, &outs);
     let sha = hex(&crypto_lib::hash::sha256::sha256(&bytes));
+    if let Some(path) = arg::<String>(args, "--out") {
+        // The program as data (`program_bytes`), for the generators of other
+        // back ends (the GPU kernel of PS-5), and a sidecar that says what the
+        // numbered inputs and the outputs are.
+        std::fs::write(&path, &bytes).unwrap();
+        std::fs::write(
+            format!("{path}.json"),
+            format!(
+                "{{\"format\":\"pdp-slp/1\",\"n\":{n},\"l\":{l},\"tasks\":{t},\"inputs\":{n_inputs},\"input_order\":\"per task k: xu, yu, xv, yv, x2, y2, each n planes with plane 0 first; input number = k*6n + field*n + plane\",\"outputs\":\"per task k: hit mask, exceptional mask (two wires each, in task order)\",\"encoding\":\"per op a tag byte (0 input,1 zero,2 ones,3 not,4 xor,5 and,6 or,7 xand=a^(b&c)) then u32 LE operands; 255 then the output wires as u32 LE\",\"sha256\":\"{sha}\"}}\n"
+            ),
+        )
+        .unwrap();
+    }
     let mut g = Gates::default();
     for op in &live {
         match op {
