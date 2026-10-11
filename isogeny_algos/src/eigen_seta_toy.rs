@@ -9,7 +9,9 @@
 //! No FO/CCA transform, constant-time implementation, or random-curve keygen
 //! is claimed.
 
-use crate::curve::{from_j, is_smooth, neg, on_curve, padd, pmul, random_point_f, Curve, Isogeny, Pt};
+use crate::curve::{
+    from_j, is_smooth, neg, on_curve, padd, pmul, random_point_f, Curve, Isogeny, Pt,
+};
 use crate::field::{is_prime, Field, Rng, Zp2};
 use crate::kernel::velu::{velu_cyclic, VeluIso};
 use crate::poly;
@@ -36,12 +38,21 @@ pub struct ToyParameters {
 
 impl ToyParameters {
     pub fn validate(self) -> Result<(u64, u64), ToyError> {
-        let n = 1u64.checked_shl(self.two_exponent).ok_or(ToyError::InvalidParameters)?;
-        let d = 3u64.checked_pow(self.three_exponent).ok_or(ToyError::InvalidParameters)?;
-        if self.two_exponent < 3 || self.three_exponent == 0 || n > 1024 || d > 81
-            || self.prime > 100_000 || !is_prime(self.prime) || self.prime % 4 != 3
+        let n = 1u64
+            .checked_shl(self.two_exponent)
+            .ok_or(ToyError::InvalidParameters)?;
+        let d = 3u64
+            .checked_pow(self.three_exponent)
+            .ok_or(ToyError::InvalidParameters)?;
+        if self.two_exponent < 3
+            || self.three_exponent == 0
+            || n > 1024
+            || d > 81
+            || self.prime > 100_000
+            || !is_prime(self.prime)
+            || self.prime % 4 != 3
             || !matches!(self.prime % 7, 3 | 5 | 6)
-            || (self.prime + 1) % (n * d) != 0
+            || !(self.prime + 1).is_multiple_of(n * d)
             || n * n <= d * d * 7
         {
             return Err(ToyError::InvalidParameters);
@@ -67,15 +78,19 @@ impl ToyPublicKey {
         let (n, d) = self.parameters.validate()?;
         let f = Zp2::new(self.parameters.prime);
         let e = &self.curve;
-        if !is_smooth(&f, e) || [self.eigen_p, self.eigen_q, self.sender_p, self.sender_q]
-            .iter().any(|p| !on_curve(&f, e, p))
+        if !is_smooth(&f, e)
+            || [self.eigen_p, self.eigen_q, self.sender_p, self.sender_q]
+                .iter()
+                .any(|p| !on_curve(&f, e, p))
             || !exact_order(&f, e, &self.eigen_p, n, 2)
             || !exact_order(&f, e, &self.eigen_q, n, 2)
             || pmul(&f, e, &self.eigen_p, (n / 2) as u128)
                 == pmul(&f, e, &self.eigen_q, (n / 2) as u128)
             || !exact_order(&f, e, &self.sender_p, d, 3)
             || !exact_order(&f, e, &self.sender_q, d, 3)
-        { return Err(ToyError::InvalidPublicKey); }
+        {
+            return Err(ToyError::InvalidPublicKey);
+        }
         let p3 = pmul(&f, e, &self.sender_p, (d / 3) as u128);
         let q3 = pmul(&f, e, &self.sender_q, (d / 3) as u128);
         if q3 == p3 || q3 == neg(&f, &p3) {
@@ -115,8 +130,7 @@ pub struct ToyKaniTranscript {
 }
 
 fn exact_order(f: &Zp2, e: &Curve<Fq>, p: &Pt<Fq>, order: u64, prime: u64) -> bool {
-    pmul(f, e, p, order as u128) == Pt::Inf
-        && pmul(f, e, p, (order / prime) as u128) != Pt::Inf
+    pmul(f, e, p, order as u128) == Pt::Inf && pmul(f, e, p, (order / prime) as u128) != Pt::Inf
 }
 
 fn torsion_point(f: &Zp2, e: &Curve<Fq>, order: u64, prime: u64, rng: &mut Rng) -> Option<Pt<Fq>> {
@@ -151,9 +165,7 @@ fn find_theta(f: &Zp2, e: &Curve<Fq>, rng: &mut Rng) -> Option<(Pt<Fq>, Fq, i8)>
         // For E(a,b) -> E(a',b'), x -> x/u^2, y -> y/u^3.
         let u2 = f.div(f.mul(iso.cod.b, e.a), f.mul(e.b, iso.cod.a));
         let Some(scale) = f.sqrt(u2) else { continue };
-        if iso.cod.a != f.mul(f.sq(u2), e.a)
-            || iso.cod.b != f.mul(f.mul(f.sq(u2), u2), e.b)
-        {
+        if iso.cod.a != f.mul(f.sq(u2), e.a) || iso.cod.b != f.mul(f.mul(f.sq(u2), u2), e.b) {
             continue;
         }
         let r = torsion_point(f, e, 8, 2, rng)?;
@@ -162,8 +174,12 @@ fn find_theta(f: &Zp2, e: &Curve<Fq>, rng: &mut Rng) -> Option<(Pt<Fq>, Fq, i8)>
         let two_r = pmul(f, e, &r, 2);
         let plus = padd(f, e, &padd(f, e, &tr2, &neg(f, &tr)), &two_r);
         let minus = padd(f, e, &padd(f, e, &tr2, &tr), &two_r);
-        if plus == Pt::Inf { return Some((kernel, scale, 1)); }
-        if minus == Pt::Inf { return Some((kernel, scale, -1)); }
+        if plus == Pt::Inf {
+            return Some((kernel, scale, 1));
+        }
+        if minus == Pt::Inf {
+            return Some((kernel, scale, -1));
+        }
     }
     None
 }
@@ -178,16 +194,28 @@ fn eigen_roots(n: u64, trace: i8) -> Option<(u64, u64)> {
 }
 
 fn eigen_point(
-    f: &Zp2, e: &Curve<Fq>, iso: &VeluIso<Zp2>, scale: Fq,
-    n: u64, own: u64, other: u64, rng: &mut Rng,
+    f: &Zp2,
+    e: &Curve<Fq>,
+    iso: &VeluIso<Zp2>,
+    scale: Fq,
+    n: u64,
+    own: u64,
+    other: u64,
+    rng: &mut Rng,
 ) -> Option<Pt<Fq>> {
     for _ in 0..4096 {
         let r = torsion_point(f, e, n, 2, rng)?;
-        let p = padd(f, e, &theta_eval(f, iso, scale, &r),
-            &neg(f, &pmul(f, e, &r, other as u128)));
+        let p = padd(
+            f,
+            e,
+            &theta_eval(f, iso, scale, &r),
+            &neg(f, &pmul(f, e, &r, other as u128)),
+        );
         if exact_order(f, e, &p, n, 2)
             && theta_eval(f, iso, scale, &p) == pmul(f, e, &p, own as u128)
-        { return Some(p); }
+        {
+            return Some(p);
+        }
     }
     None
 }
@@ -199,7 +227,9 @@ pub fn toy_keygen(parameters: ToyParameters, rng: &mut Rng) -> Result<ToySecretK
     let f = Zp2::new(parameters.prime);
     let j = f.neg(f.from_u64(3375));
     let e = from_j(&f, j);
-    if !is_smooth(&f, &e) { return Err(ToyError::ConstructionFailed); }
+    if !is_smooth(&f, &e) {
+        return Err(ToyError::ConstructionFailed);
+    }
     let (kernel, scale, trace) = find_theta(&f, &e, rng).ok_or(ToyError::ConstructionFailed)?;
     let iso = velu_cyclic(&f, &e, &kernel, 2);
     let (r0, r1) = eigen_roots(n, trace).ok_or(ToyError::ConstructionFailed)?;
@@ -210,14 +240,30 @@ pub fn toy_keygen(parameters: ToyParameters, rng: &mut Rng) -> Result<ToySecretK
     }
     let pd = torsion_point(&f, &e, d, 3, rng).ok_or(ToyError::ConstructionFailed)?;
     let pd3 = pmul(&f, &e, &pd, (d / 3) as u128);
-    let qd = (0..4096).find_map(|_| {
-        let candidate = torsion_point(&f, &e, d, 3, rng)?;
-        let c3 = pmul(&f, &e, &candidate, (d / 3) as u128);
-        if c3 != pd3 && c3 != neg(&f, &pd3) { Some(candidate) } else { None }
-    }).ok_or(ToyError::ConstructionFailed)?;
+    let qd = (0..4096)
+        .find_map(|_| {
+            let candidate = torsion_point(&f, &e, d, 3, rng)?;
+            let c3 = pmul(&f, &e, &candidate, (d / 3) as u128);
+            if c3 != pd3 && c3 != neg(&f, &pd3) {
+                Some(candidate)
+            } else {
+                None
+            }
+        })
+        .ok_or(ToyError::ConstructionFailed)?;
     let sk = ToySecretKey {
-        public: ToyPublicKey { parameters, curve: e, eigen_p: p, eigen_q: q, sender_p: pd, sender_q: qd },
-        theta_kernel: kernel, theta_scale: scale, trace, eigenvalues: (r0, r1),
+        public: ToyPublicKey {
+            parameters,
+            curve: e,
+            eigen_p: p,
+            eigen_q: q,
+            sender_p: pd,
+            sender_q: qd,
+        },
+        theta_kernel: kernel,
+        theta_scale: scale,
+        trace,
+        eigenvalues: (r0, r1),
     };
     sk.public.validate()?;
     Ok(sk)
@@ -234,9 +280,11 @@ fn odd_mask(seed: u64, order: u64, label: &[u8]) -> u64 {
 fn serialize_point(out: &mut Vec<u8>, p: Pt<Fq>) {
     match p {
         Pt::Inf => out.push(0),
-        Pt::Aff((x0,x1),(y0,y1)) => {
+        Pt::Aff((x0, x1), (y0, y1)) => {
             out.push(1);
-            for value in [x0,x1,y0,y1] { out.extend_from_slice(&value.to_le_bytes()); }
+            for value in [x0, x1, y0, y1] {
+                out.extend_from_slice(&value.to_le_bytes());
+            }
         }
     }
 }
@@ -244,7 +292,7 @@ fn serialize_point(out: &mut Vec<u8>, p: Pt<Fq>) {
 fn derive_key(seed: u64, ct: &ToyCiphertext) -> SharedKey {
     let mut input = b"Eigen-Seta toy shared key v1".to_vec();
     input.extend_from_slice(&seed.to_le_bytes());
-    for value in [ct.curve.a.0,ct.curve.a.1,ct.curve.b.0,ct.curve.b.1] {
+    for value in [ct.curve.a.0, ct.curve.a.1, ct.curve.b.0, ct.curve.b.1] {
         input.extend_from_slice(&value.to_le_bytes());
     }
     serialize_point(&mut input, ct.s);
@@ -254,20 +302,36 @@ fn derive_key(seed: u64, ct: &ToyCiphertext) -> SharedKey {
 
 fn encaps_for_seed(pk: &ToyPublicKey, seed: u64) -> Result<(ToyCiphertext, SharedKey), ToyError> {
     let (n, d) = pk.parameters.validate()?;
-    if seed >= d { return Err(ToyError::InvalidParameters); }
+    if seed >= d {
+        return Err(ToyError::InvalidParameters);
+    }
     let f = Zp2::new(pk.parameters.prime);
-    let k = padd(&f, &pk.curve, &pk.sender_p, &pmul(&f, &pk.curve, &pk.sender_q, seed as u128));
-    if !exact_order(&f, &pk.curve, &k, d, 3) { return Err(ToyError::ConstructionFailed); }
+    let k = padd(
+        &f,
+        &pk.curve,
+        &pk.sender_p,
+        &pmul(&f, &pk.curve, &pk.sender_q, seed as u128),
+    );
+    if !exact_order(&f, &pk.curve, &k, d, 3) {
+        return Err(ToyError::ConstructionFailed);
+    }
     let phi = velu_cyclic(&f, &pk.curve, &k, d);
     let a = odd_mask(seed, n, b"a");
     let b = odd_mask(seed, n, b"b");
     let s = pmul(&f, &phi.cod, &phi.eval(&f, &pk.eigen_p), a as u128);
     let t = pmul(&f, &phi.cod, &phi.eval(&f, &pk.eigen_q), b as u128);
-    let ct = ToyCiphertext { curve: phi.cod, s, t };
+    let ct = ToyCiphertext {
+        curve: phi.cod,
+        s,
+        t,
+    };
     Ok((ct, derive_key(seed, &ct)))
 }
 
-pub fn toy_encaps(pk: &ToyPublicKey, rng: &mut Rng) -> Result<(ToyCiphertext, SharedKey), ToyError> {
+pub fn toy_encaps(
+    pk: &ToyPublicKey,
+    rng: &mut Rng,
+) -> Result<(ToyCiphertext, SharedKey), ToyError> {
     pk.validate()?;
     let (_, d) = pk.parameters.validate()?;
     encaps_for_seed(pk, rng.below(d))
@@ -279,12 +343,19 @@ pub fn toy_public_recover(pk: &ToyPublicKey, ct: &ToyCiphertext) -> Result<Share
     pk.validate()?;
     let (_, d) = pk.parameters.validate()?;
     let f = Zp2::new(pk.parameters.prime);
-    if !is_smooth(&f, &ct.curve) || !on_curve(&f, &ct.curve, &ct.s)
-        || !on_curve(&f, &ct.curve, &ct.t) || ct.s == Pt::Inf || ct.t == Pt::Inf
-    { return Err(ToyError::InvalidCiphertext); }
+    if !is_smooth(&f, &ct.curve)
+        || !on_curve(&f, &ct.curve, &ct.s)
+        || !on_curve(&f, &ct.curve, &ct.t)
+        || ct.s == Pt::Inf
+        || ct.t == Pt::Inf
+    {
+        return Err(ToyError::InvalidCiphertext);
+    }
     for seed in 0..d {
         let (candidate, key) = encaps_for_seed(pk, seed)?;
-        if candidate == *ct { return Ok(key); }
+        if candidate == *ct {
+            return Ok(key);
+        }
     }
     Err(ToyError::InvalidCiphertext)
 }
@@ -305,7 +376,7 @@ pub fn toy_kani_first_half(
     let pk = &sk.public;
     pk.validate()?;
     let (n, d) = pk.parameters.validate()?;
-    if (pk.parameters.prime + 1) % (4 * n) != 0 {
+    if !(pk.parameters.prime + 1).is_multiple_of(4 * n) {
         return Err(ToyError::InvalidParameters);
     }
     let f = Zp2::new(pk.parameters.prime);
@@ -319,29 +390,48 @@ pub fn toy_kani_first_half(
     {
         return Err(ToyError::InvalidCiphertext);
     }
-    let target = (n * n).checked_sub(d * d * 7).ok_or(ToyError::InvalidParameters)?;
-    let (c, cp) = (2..n).step_by(2).find_map(|c| {
-        (1..n).step_by(2).find(|&cp| c * c + cp * cp == target).map(|cp| (c, cp))
-    }).ok_or(ToyError::ConstructionFailed)?;
+    let target = (n * n)
+        .checked_sub(d * d * 7)
+        .ok_or(ToyError::InvalidParameters)?;
+    let (c, cp) = (2..n)
+        .step_by(2)
+        .find_map(|c| {
+            (1..n)
+                .step_by(2)
+                .find(|&cp| c * c + cp * cp == target)
+                .map(|cp| (c, cp))
+        })
+        .ok_or(ToyError::ConstructionFailed)?;
     let scalar = |r: u64| -> u64 {
-        ((d as i128 * (2 * r as i128 - sk.trace as i128) + c as i128)
-            .rem_euclid(n as i128)) as u64
+        ((d as i128 * (2 * r as i128 - sk.trace as i128) + c as i128).rem_euclid(n as i128)) as u64
     };
     let graph = [
-        (pmul(&f, &ct.curve, &ct.s, cp as u128),
-            neg(&f, &pmul(&f, &ct.curve, &ct.s, scalar(sk.eigenvalues.0) as u128))),
-        (pmul(&f, &ct.curve, &ct.t, cp as u128),
-            neg(&f, &pmul(&f, &ct.curve, &ct.t, scalar(sk.eigenvalues.1) as u128))),
+        (
+            pmul(&f, &ct.curve, &ct.s, cp as u128),
+            neg(
+                &f,
+                &pmul(&f, &ct.curve, &ct.s, scalar(sk.eigenvalues.0) as u128),
+            ),
+        ),
+        (
+            pmul(&f, &ct.curve, &ct.t, cp as u128),
+            neg(
+                &f,
+                &pmul(&f, &ct.curve, &ct.t, scalar(sk.eigenvalues.1) as u128),
+            ),
+        ),
     ];
     let mut rng = Rng::new(0xe156_5e7a);
     let order = 4 * n;
-    let basis_p = torsion_point(&f, &ct.curve, order, 2, &mut rng)
-        .ok_or(ToyError::ConstructionFailed)?;
+    let basis_p =
+        torsion_point(&f, &ct.curve, order, 2, &mut rng).ok_or(ToyError::ConstructionFailed)?;
     let p2 = pmul(&f, &ct.curve, &basis_p, (order / 2) as u128);
-    let basis_q = (0..4096).find_map(|_| {
-        let q = torsion_point(&f, &ct.curve, order, 2, &mut rng)?;
-        (pmul(&f, &ct.curve, &q, (order / 2) as u128) != p2).then_some(q)
-    }).ok_or(ToyError::ConstructionFailed)?;
+    let basis_q = (0..4096)
+        .find_map(|_| {
+            let q = torsion_point(&f, &ct.curve, order, 2, &mut rng)?;
+            (pmul(&f, &ct.curve, &q, (order / 2) as u128) != p2).then_some(q)
+        })
+        .ok_or(ToyError::ConstructionFailed)?;
     // Enumerate the 4-division map on E[4N].  The same table lifts the four
     // components of the Kani graph; the cost is O(N^2) and is toy-only.
     let mut lifts = HashMap::new();
@@ -381,20 +471,30 @@ pub fn toy_kani_first_half(
             padd(&f, &curves[0], &g0.0, &g1.0),
             padd(&f, &curves[1], &g0.1, &g1.1),
         );
-        if curves[0] == curves[1] && g0.0 != Pt::Inf && g1.0 != Pt::Inf
-            && g0.0 != g1.0 && g0.0 == g0.1 && g1.0 == g1.1
+        if curves[0] == curves[1]
+            && g0.0 != Pt::Inf
+            && g1.0 != Pt::Inf
+            && g0.0 != g1.0
+            && g0.0 == g0.1
+            && g1.0 == g1.1
         {
-            k = k.map(|(x, y)| (
-                padd(&f, &curves[0], &x, &y),
-                padd(&f, &curves[0], &x, &neg(&f, &y)),
-            ));
+            k = k.map(|(x, y)| {
+                (
+                    padd(&f, &curves[0], &x, &y),
+                    padd(&f, &curves[0], &x, &neg(&f, &y)),
+                )
+            });
         } else {
             let subgroup = [g0, g1, g2];
-            let left = subgroup.iter().find_map(|(x, y)|
-                (*x != Pt::Inf && *y == Pt::Inf).then_some(*x));
-            let right = subgroup.iter().find_map(|(x, y)|
-                (*x == Pt::Inf && *y != Pt::Inf).then_some(*y));
-            let (Some(left), Some(right)) = (left, right) else { break };
+            let left = subgroup
+                .iter()
+                .find_map(|(x, y)| (*x != Pt::Inf && *y == Pt::Inf).then_some(*x));
+            let right = subgroup
+                .iter()
+                .find_map(|(x, y)| (*x == Pt::Inf && *y != Pt::Inf).then_some(*y));
+            let (Some(left), Some(right)) = (left, right) else {
+                break;
+            };
             let iso_left = velu_cyclic(&f, &curves[0], &left, 2);
             let iso_right = velu_cyclic(&f, &curves[1], &right, 2);
             k = k.map(|(x, y)| (iso_left.eval(&f, &x), iso_right.eval(&f, &y)));
@@ -403,9 +503,12 @@ pub fn toy_kani_first_half(
         remaining -= 1;
         product_steps += 1;
     }
-    let res = chain(&f, &curves[0], &curves[1], k, remaining, &[])
-        .ok_or(ToyError::ConstructionFailed)?;
-    Ok(ToyKaniTranscript { product_steps, first_half: res })
+    let res =
+        chain(&f, &curves[0], &curves[1], k, remaining, &[]).ok_or(ToyError::ConstructionFailed)?;
+    Ok(ToyKaniTranscript {
+        product_steps,
+        first_half: res,
+    })
 }
 
 #[cfg(test)]
@@ -414,14 +517,24 @@ mod tests {
 
     #[test]
     fn cm_key_and_all_sender_indices_round_trip() {
-        let parameters = ToyParameters { prime: 16127, two_exponent: 8, three_exponent: 2 };
+        let parameters = ToyParameters {
+            prime: 16127,
+            two_exponent: 8,
+            three_exponent: 2,
+        };
         let mut rng = Rng::new(0x51e7a);
         let sk = toy_keygen(parameters, &mut rng).unwrap();
         let f = Zp2::new(parameters.prime);
         let iso = velu_cyclic(&f, &sk.public.curve, &sk.theta_kernel, 2);
         let n = 1u64 << parameters.two_exponent;
-        for (p, lambda) in [(sk.public.eigen_p, sk.eigenvalues.0), (sk.public.eigen_q, sk.eigenvalues.1)] {
-            assert_eq!(theta_eval(&f, &iso, sk.theta_scale, &p), pmul(&f, &sk.public.curve, &p, lambda as u128));
+        for (p, lambda) in [
+            (sk.public.eigen_p, sk.eigenvalues.0),
+            (sk.public.eigen_q, sk.eigenvalues.1),
+        ] {
+            assert_eq!(
+                theta_eval(&f, &iso, sk.theta_scale, &p),
+                pmul(&f, &sk.public.curve, &p, lambda as u128)
+            );
             assert!(exact_order(&f, &sk.public.curve, &p, n, 2));
         }
         for seed in 0..9 {
@@ -438,23 +551,43 @@ mod tests {
 
     #[test]
     fn invalid_parameters_rejected() {
-        let p = ToyParameters { prime: 16127, two_exponent: 8, three_exponent: 2 };
+        let p = ToyParameters {
+            prime: 16127,
+            two_exponent: 8,
+            three_exponent: 2,
+        };
         assert!(p.validate().is_ok());
-        assert_eq!(ToyParameters { prime: 15, ..p }.validate(), Err(ToyError::InvalidParameters));
-        assert_eq!(ToyParameters { three_exponent: 5, ..p }.validate(), Err(ToyError::InvalidParameters));
+        assert_eq!(
+            ToyParameters { prime: 15, ..p }.validate(),
+            Err(ToyError::InvalidParameters)
+        );
+        assert_eq!(
+            ToyParameters {
+                three_exponent: 5,
+                ..p
+            }
+            .validate(),
+            Err(ToyError::InvalidParameters)
+        );
     }
 
     #[test]
     fn ciphertext_kani_first_half_reaches_jacobian() {
-        let parameters = ToyParameters { prime: 16127, two_exponent: 6, three_exponent: 2 };
+        let parameters = ToyParameters {
+            prime: 16127,
+            two_exponent: 6,
+            three_exponent: 2,
+        };
         let mut rng = Rng::new(0x44c0);
         let sk = toy_keygen(parameters, &mut rng).unwrap();
         for seed in 0..9 {
             let (ct, key) = encaps_for_seed(&sk.public, seed).unwrap();
             let transcript = toy_kani_first_half(&sk, &ct).unwrap();
             assert!(transcript.product_steps > 0);
-            assert_eq!(transcript.product_steps as usize + transcript.first_half.nulls.len(),
-                parameters.two_exponent as usize);
+            assert_eq!(
+                transcript.product_steps as usize + transcript.first_half.nulls.len(),
+                parameters.two_exponent as usize
+            );
             assert_eq!(transcript.first_half.split, None);
             assert_eq!(toy_decaps(&sk, &ct), Ok(key));
         }
