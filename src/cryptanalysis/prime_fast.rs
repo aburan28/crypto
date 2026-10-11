@@ -1637,9 +1637,6 @@ mod tests {
                     expected_y.min(fc.f.p - expected_y),
                 ),
                 "bits={bits}"
-            assert_eq!(
-                (gen.f.p, gen.n, gen.canonical(gg)),
-                (fc.f.p, fc.n, fc.canonical(g))
             );
         }
         let (gen, gg) = find_a3_curve(28, 3).unwrap();

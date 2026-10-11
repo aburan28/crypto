@@ -7,6 +7,7 @@ use crypto_lib::cryptanalysis::matrix_f5_f2::{matrix_f5_f2, F5Criterion};
 use crypto_lib::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
 use serde_json::json;
 use std::alloc::{GlobalAlloc, Layout, System};
+use std::collections::BTreeMap;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
 struct CountingAllocator;
@@ -105,7 +106,65 @@ fn system(vars: &[usize], m: usize, seed: u64) -> Vec<F2BoolPoly> {
         .collect()
 }
 
+fn compare(baseline: &str, candidate: &str) {
+    let read = |path: &str| {
+        let mut rows = BTreeMap::new();
+        for line in std::fs::read_to_string(path).unwrap().lines() {
+            let row: serde_json::Value = serde_json::from_str(line).unwrap();
+            let key = json!([row["case"], row["seed"], row["repeat"], row["arm"]]).to_string();
+            assert!(rows.insert(key, row).is_none(), "duplicate audit row");
+        }
+        rows
+    };
+    let baseline = read(baseline);
+    let candidate = read(candidate);
+    assert_eq!(baseline.len(), 72, "all eight systems and repetitions required");
+    assert_eq!(baseline.keys().collect::<Vec<_>>(), candidate.keys().collect::<Vec<_>>());
+    let mut totals: BTreeMap<String, [u64; 4]> = BTreeMap::new();
+    let mut comparisons = Vec::new();
+    for (key, a) in baseline {
+        let b = &candidate[&key];
+        let mut expected = a.clone();
+        let mut actual = b.clone();
+        for field in ["allocations", "allocated_bytes"] {
+            expected.as_object_mut().unwrap().remove(field);
+            actual.as_object_mut().unwrap().remove(field);
+        }
+        assert_eq!(expected, actual, "output or accounting mismatch: {key}");
+        let counts = [
+            a["allocations"].as_u64().unwrap(), b["allocations"].as_u64().unwrap(),
+            a["allocated_bytes"].as_u64().unwrap(), b["allocated_bytes"].as_u64().unwrap(),
+        ];
+        let total = totals.entry(a["arm"].as_str().unwrap().to_owned()).or_default();
+        for (sum, count) in total.iter_mut().zip(counts) {
+            *sum += count;
+        }
+        comparisons.push(json!({"key": key, "counts": counts}));
+    }
+    let acceptance = totals["f4"][1] < totals["f4"][0]
+        && totals["criterion"][1] * 5 <= totals["criterion"][0] * 4;
+    let arms: Vec<_> = totals.into_iter().map(|(arm, c)| json!({
+        "arm": arm, "calls": 24,
+        "baseline_allocations": c[0], "candidate_allocations": c[1],
+        "allocation_reduction_percent": 100.0 * (1.0 - c[1] as f64 / c[0] as f64),
+        "baseline_allocated_bytes": c[2], "candidate_allocated_bytes": c[3],
+        "allocated_byte_reduction_percent": 100.0 * (1.0 - c[3] as f64 / c[2] as f64),
+    })).collect();
+    println!("{}", serde_json::to_string_pretty(&json!({
+        "scope": "Boolean matrix-F4/F5 allocation diagnostic",
+        "systems": 8, "repeats": 3, "exact_outputs_and_counts": true,
+        "acceptance_met": acceptance, "wall_time_speedup": null,
+        "arms": arms, "comparisons": comparisons,
+    })).unwrap());
+}
+
 fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    if args.get(1).is_some_and(|s| s == "compare") {
+        assert_eq!(args.len(), 4, "compare BASELINE.jsonl CANDIDATE.jsonl");
+        compare(&args[2], &args[3]);
+        return;
+    }
     let repeats = std::env::args()
         .nth(1)
         .map(|s| s.parse::<usize>().expect("positive repeat count"))

@@ -12,14 +12,23 @@ Boolean Macaulay row builder and the Rust Boolean F5 criterion in `crypto`.
 | Deliver reviewable changes | Feature-branch commits and PR, or exact access blocker |
 
 Hypothesis: compacting product parity in place removes a second F4 scratch
-buffer; XOR-packing F5 criterion products directly and retaining scratch rows
+buffer; deduplicating columns during collection avoids materializing and
+sorting repeated monomials; XOR-packing F5 criterion products directly and retaining scratch rows
 removes repeated temporary allocations and sorting. A monotone leading-word
 cursor avoids rescanning known-zero prefix words during criterion reduction.
 
 The reference is repository revision
 `c95a14de9bfa2711643a9318f3728d5d1109367b`, with the pre-existing duplicated
-assertion line in `koblitz_factor_base_search.rs` repaired identically for both
-arms. Record any further prerequisites before performance edits. Save the
+assertion line in `koblitz_factor_base_search.rs`, duplicated constructor and
+field in `koblitz_index_calculus.rs`, and duplicated assertion fragment in
+`prime_fast.rs` repaired identically for both arms. The surviving constructor,
+helper and assertions retain the existing implementations. Further duplicated
+imports, coordinate helpers, legacy return fragments, an Artin-Schreier return
+fragment and two `SolveStats` fields also block the baseline; remove the
+duplicates while preserving the existing fast implementations and field
+defaults. These prerequisite repairs are separate from the optimization.
+Record any further
+prerequisites before performance edits. Save the
 baseline binary before modifying the kernels. Use the same diagnostic source
 and toolchain in both arms.
 
