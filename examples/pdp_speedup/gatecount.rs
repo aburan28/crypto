@@ -211,3 +211,120 @@ pub fn cmd_bscheck(args: &[String]) {
         std::process::exit(1);
     }
 }
+
+/// `export-program --l L --tasks T`: record the straight-line program of a
+/// batch of `T` tasks on the recording lane, eliminate dead operations, hash
+/// it, and check that interpreting it on 64 lanes equals running the same
+/// code directly on `u64` lanes (and that its live gate count equals the
+/// counting lane's).
+pub fn cmd_export(args: &[String]) {
+    let l: u32 = arg(args, "--l").expect("--l");
+    let t: usize = arg(args, "--tasks").unwrap_or(8);
+    let n = 3 * l;
+    let rung = Rung::with(n, l);
+    let f = BsField::new(&rung.gf);
+    let nn = n as usize;
+    // Inputs: per task xu, yu, xv, yv, x2, y2 planes (6n), numbered in order.
+    let mut next = 0u32;
+    let mut take = |_: usize| -> E<Tape> {
+        let mut e = zero_elt::<Tape>();
+        for plane in e.iter_mut().take(nn) {
+            *plane = Tape::input(next);
+            next += 1;
+        }
+        e
+    };
+    tape_reset();
+    let mut rows: Vec<RowPlanes<Tape>> = Vec::new();
+    let mut x2s = Vec::new();
+    let mut y2s = Vec::new();
+    for k in 0..t {
+        rows.push(RowPlanes {
+            xu: take(k),
+            yu: take(k),
+            xv: take(k),
+            yv: take(k),
+        });
+        x2s.push(take(k));
+        y2s.push(take(k));
+    }
+    let n_inputs = next as usize;
+    let res = batch::<Tape>(&f, &rows, &x2s, &y2s, l as usize);
+    let outputs: Vec<Tape> = res.iter().flat_map(|&(h, e)| [h, e]).collect();
+    let ops = tape_take();
+    let (live, outs) = eliminate_dead(&ops, &outputs);
+    let bytes = program_bytes(&live, &outs);
+    let sha = hex(&crypto_lib::hash::sha256::sha256(&bytes));
+    let mut g = Gates::default();
+    for op in &live {
+        match op {
+            TapeOp::Xor(..) => g.xor += 1,
+            TapeOp::And(..) => g.and += 1,
+            TapeOp::Or(..) => g.or += 1,
+            TapeOp::Not(..) => g.not += 1,
+            TapeOp::Xand(..) => g.xand += 1,
+            _ => {}
+        }
+    }
+    // The counting lane on the same code.
+    let rc: Vec<RowPlanes<Cnt>> = (0..t)
+        .map(|_| RowPlanes::<Cnt>::new(nn, 0, 0, 0, 0))
+        .collect();
+    let xc = vec![zero_elt::<Cnt>(); t];
+    gates_reset();
+    let _ = batch::<Cnt>(&f, &rc, &xc, &xc, l as usize);
+    let counted = gates_get();
+    // Interpreter against direct execution on random planes.
+    let mut rng = SplitMix64(20261011 + l as u64);
+    let mut ok = true;
+    for _ in 0..4 {
+        let inputs: Vec<u64> = (0..n_inputs).map(|_| rng.next()).collect();
+        let want = {
+            let mut at = 0usize;
+            let mut take_u = |_: usize| -> E<u64> {
+                let mut e = zero_elt::<u64>();
+                for plane in e.iter_mut().take(nn) {
+                    *plane = inputs[at];
+                    at += 1;
+                }
+                e
+            };
+            let mut rows_u = Vec::new();
+            let mut x2u = Vec::new();
+            let mut y2u = Vec::new();
+            for k in 0..t {
+                rows_u.push(RowPlanes {
+                    xu: take_u(k),
+                    yu: take_u(k),
+                    xv: take_u(k),
+                    yv: take_u(k),
+                });
+                x2u.push(take_u(k));
+                y2u.push(take_u(k));
+            }
+            batch::<u64>(&f, &rows_u, &x2u, &y2u, l as usize)
+                .into_iter()
+                .flat_map(|(h, e)| [h, e])
+                .collect::<Vec<u64>>()
+        };
+        let got = eval_program(&live, &outs, &inputs);
+        ok &= want == got;
+    }
+    println!(
+        "{{\"n\":{n},\"l\":{l},\"tasks\":{t},\"inputs\":{n_inputs},\"outputs\":{},\"recorded_ops\":{},\"live_ops\":{},\"live_gates_fused\":{},\"live_xor\":{},\"live_and\":{},\"live_or\":{},\"live_not\":{},\"live_xand\":{},\"counted_gates_fused\":{},\"program_bytes\":{},\"sha256\":\"{sha}\",\"interpreter_equals_direct\":{ok}}}",
+        outs.len(),
+        ops.len(),
+        live.len(),
+        g.fused(),
+        g.xor,
+        g.and,
+        g.or,
+        g.not,
+        g.xand,
+        counted.fused(),
+        bytes.len()
+    );
+    if !ok {
+        std::process::exit(1);
+    }
+}
