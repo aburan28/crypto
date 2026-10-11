@@ -48,6 +48,10 @@ and the run used binary sha256 `2e183196…b203`. Records: `runs/census_n{61,73,
 
    This is the same generic time–memory line the note itself identifies, at a larger `K`.
 
+**Provenance.** After the run, `examples/koblitz_free_relation_census.rs` was put through
+`rustfmt`. That re-wraps lines only (7 insertions and 2 deletions, layout only). The recorded
+binary hash is the pre-format build's.
+
 ## Scope
 
 - **Covered.** The three committed `point_defined_factor_base` fixtures. Only pair sums of

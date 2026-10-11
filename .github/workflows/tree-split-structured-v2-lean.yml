@@ -1,0 +1,49 @@
+name: Tree-split round-2 Lean checks
+# Re-derives the study's verdict in Lean on every change to it: Data.lean
+# must be what the harness generates from the committed records, and
+# Verdict.lean must close by kernel `decide`. See
+# research/ic_tree_split_structured_v2_20261011/PREREGISTRATION.md §7.
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/tree-split-structured-v2-lean.yml'
+      - 'examples/tree_split_structured_v2.rs'
+      - 'research/ic_tree_split_structured_v2_20261011/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tree-split-structured-v2-lean.yml'
+      - 'examples/tree_split_structured_v2.rs'
+      - 'research/ic_tree_split_structured_v2_20261011/**'
+  workflow_dispatch:
+
+jobs:
+  lean:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: research/ic_tree_split_structured_v2_20261011
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install Lean (toolchain pinned by lean/lean-toolchain)
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Harness self-test, and Data.lean regenerated from the records
+        run: |
+          cargo build --release --example tree_split_structured_v2
+          bin=../../target/release/examples/tree_split_structured_v2
+          $bin selftest
+          $bin lean runs/registered/cells.jsonl /tmp/Data.lean
+          diff -u lean/TreeSplit2/Data.lean /tmp/Data.lean
+          $bin readout runs/registered/cells.jsonl | diff -u runs/registered/readout.txt -
+      - name: Rule hash is the registered one
+        run: |
+          echo "ec513363df351f6559a6d5df31bf107a993fd425c61c46ef986b0f8918bfb1e3  lean/TreeSplit2/Rule.lean" | sha256sum -c -
+      - name: lake build (Rule, Verdict by decide)
+        working-directory: research/ic_tree_split_structured_v2_20261011/lean
+        run: lake build
