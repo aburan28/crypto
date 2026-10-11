@@ -1,0 +1,19 @@
+{
+  "binary": "/private/tmp/n83-structured-capacity-linux-target/release/examples/koblitz_n83_structured_orbit_capacity",
+  "binary_sha256": "14a15974514f4ee776c8dc63863b0215a99d0801d1fbbbea58aef3a44c621c7f",
+  "image": "rust:1.93.1-bookworm",
+  "image_id": "sha256:7c4ae649a84014c467d79319bbf17ce2632ae8b8be123ac2fb2ea5be46823f31",
+  "manifest": "research/koblitz_n83_factor_base_sweep_20261008/verification/structured-d12-orbit-20261010/manifest.json",
+  "manifest_sha256": "bd4202ed599f2659f6279dd07dbdc6b5948594df79db969e66530c19e3cf5dca",
+  "memory_limit_bytes": 4294967296,
+  "object": "/private/tmp/n83-structured-d12-s3-object.jsonl.gz",
+  "object_blake3": "aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389",
+  "object_sha256": "c5de0b26e84ad80bfb7be6a214b89c9682e356effb6079c7abf28cd1151ffb03",
+  "prior_budget_sha256": "e6fad2e41b7c9a8f119e69139cc5d074ef8c1060d68dad240f9437b5c6277f6b",
+  "public_corpus": "research/koblitz_n83_factor_base_sweep_20261008/pilot-01/probe-corpus.json",
+  "public_corpus_sha256": "760ae5c2e88615152e2569653a0e0c0cf3b2f84691f2b0731247f9ee3759dcbd",
+  "schema": "n83.structured-orbit-capacity-config/v1",
+  "scope": "one m5 all-affine N83 construction, no solver search",
+  "source_commit": "765ce99ec84972043d598e2ed8ebada0a3b303cc",
+  "wall_cap_seconds": 240
+}
