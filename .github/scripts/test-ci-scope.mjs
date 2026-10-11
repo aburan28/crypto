@@ -29,6 +29,11 @@ test('crates and languages select their own checks', () => {
   assert.equal(classify(['tools/export.py']).python, true);
   assert.equal(classify(['tools/dashboard.mjs']).javascript, true);
   assert.equal(classify(['ecc2k130/Makefile']).release_cuda, true);
+  for (const file of ['ecc2k130/src/main.cu', 'ecc2k130/include/packedengine.cuh', 'ecc2k130/generated/eccF131.h']) {
+    assert.equal(classify([file]).release_native, true, file);
+    assert.equal(classify([file]).release_cuda, true, file);
+  }
+  assert.equal(classify(['ecc2k130/benchmarks/old/probe.cu']).release_cuda, false);
   assert.equal(classify(['ecc2k130/aws/README.md']).release_native, false);
 });
 

@@ -29,9 +29,13 @@ export function classify(files, embedded = new Set()) {
     result.release_rust ||= /^src\//.test(file) && !prose.test(file) || rustConfig.test(file)
       || file === 'tests/fixtures/ecbench_manifest_small.json'
       || /^docs\/curves\//.test(file) || embedded.has(file);
-    result.release_native ||= /^ecc2k130\/[^/]+\.(c|cc|cpp|h|hpp|cu|cuh)$/.test(file) || file === 'ecc2k130/Makefile'
+    // Both Makefile targets compile src/main.cu against include/ and the
+    // committed generated headers; research benchmark sources are separate.
+    const client = file === 'ecc2k130/src/main.cu' || file === 'ecc2k130/Makefile'
+      || /^ecc2k130\/(include|generated)\/.*\.(h|hpp|cuh|inc)$/.test(file);
+    result.release_native ||= client
       || /^gpu\/(ecc|ecc2k|semaev|macaulay|btcpuzzle)\//.test(file) && !prose.test(file);
-    result.release_cuda ||= /^ecc2k130\/[^/]+\.(c|cc|cpp|h|hpp|cu|cuh)$/.test(file) || file === 'ecc2k130/Makefile';
+    result.release_cuda ||= client;
     result.ecbench_replay ||= root
       || /^docs\/(ecbench|bounds)\//.test(file) && !prose.test(file)
       || /^research\/(ecbench_[^/]+|ghs_curve_comparison_20261009)\//.test(file) && (!prose.test(file) || file.includes('/sessions/'))
