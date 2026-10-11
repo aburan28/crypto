@@ -1,0 +1,24 @@
+{
+ "_comment": "L4/L5 orbit-union arm at n=23: compact-orbit-scan (signed Frobenius closure of the first projected abscissae, the base shape that exists at n=131) at the same column count as the invariant subspace (45), against the invariant subspace and the prefix subspace of equal point count. The closure is the tau-slot relation space: every rotation of every seed point is a usable summand with weight lambda^t on its orbit column.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 17
+ },
+ "repeats": 8,
+ "seed": 20261010,
+ "max_trials": 4000000,
+ "matrix": {
+  "factor_base": [
+   "koblitz-orbit:divisor=1",
+   "compact-orbit-scan:columns=45,raw_x_cap=4000000",
+   "binary-subspace:dimension=11"
+  ],
+  "oracle": [
+   "mitm-frobenius",
+   "mitm:negation_folded=1"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

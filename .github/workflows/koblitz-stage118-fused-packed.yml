@@ -1,11 +1,9 @@
 name: Koblitz Stage 118 n53 fused packed compaction
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage118_fused_packed.py"
-      - ".github/workflows/koblitz-stage118-fused-packed.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

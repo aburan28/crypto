@@ -36,8 +36,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - name: Install frozen dependency lock
-        run: cp research/weil_factor_composition_20260914/validation/dependencies.lock.txt Cargo.lock
       - name: Validate Python custody rules
         run: python3 scripts/test_koblitz_relation_yield_bridge.py
       - name: Validate Rust producer

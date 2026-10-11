@@ -1,0 +1,19 @@
+== walk e30 f4 k2 x25
+variant=walk: p = 2^31 3^4 5^2 * 5 - 1  (45 bits)
+  keygen[walk]: theta trace 25, norm 1250, Delta' 4375; using 2^29 torsion, c=18536, c'=12829; d^2 Delta'/2^e' = 0.053
+  decaps: degenerate chain evaluation, retrying (TypeError: Coordinates [9177638367560*z2 + 2932301366985, 0, )
+RESULT[walk]: 25/25 decapsulations correct
+== walk e36 f5 k2 x25
+variant=walk: p = 2^37 3^5 5^2 * 26 - 1  (55 bits)
+  keygen[walk]: theta trace 25, norm 1250, Delta' 4375; using 2^36 torsion, c=22344, c'=260695; d^2 Delta'/2^e' = 0.004
+RESULT[walk]: 25/25 decapsulations correct
+== walk e44 f6 k3 x10
+variant=walk: p = 2^45 3^6 5^3 * 17 - 1  (66 bits)
+  keygen[walk]: theta trace 125, norm 31250, Delta' 109375; using 2^44 torsion, c=3261804, c'=2625775; d^2 Delta'/2^e' = 0.003
+  trial 0: s = 421, recovered 421, masks a=9482392663379 b=5697703729103 (0.86s)
+  trial 9: s = 255, recovered 255, masks a=15837731371369 b=7119112883153 (0.79s)
+RESULT[walk]: 10/10 decapsulations correct
+== cm e26 f5 x25
+variant=cm: p = 2^27 3^5 5^0 * 60 - 1  (41 bits)
+  keygen[cm]: theta trace 1, norm 2, Delta' 7; using 2^26 torsion, c=7940, c'=1911; d^2 Delta'/2^e' = 0.006
+RESULT[cm]: 25/25 decapsulations correct

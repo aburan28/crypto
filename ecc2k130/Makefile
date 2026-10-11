@@ -265,8 +265,7 @@ SMARCH  ?= sm_90
 
 HDRS = include/durable.h include/bitslice.h include/fieldbs.h include/fieldpb.h include/walk.h \
        include/kernel.h include/ref.h include/solver.h include/bigmod.h include/tablewalk.h \
-       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packednative131.h include/packedfusedsigma131.h include/packedblockinverse131.cuh include/packedblockinversereference131.cuh include/packedxonly23.cuh include/packedkernels.cuh include/packedengine.cuh
-       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedsigmascratch.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packedkernels.cuh include/packedengine.cuh
+       include/curveparams.h include/packed131.h include/packedtransform131.h include/packedsigma131.h include/packedsigmascratch.h include/packedpolyreduce131.h include/packeddirectreduce131.h include/packedgeneratedproduct131.h include/packedcompactstate.cuh include/packednative131.h include/packedfusedsigma131.h include/packedblockinverse131.cuh include/packedblockinversereference131.cuh include/packedxonly23.cuh include/packedkernels.cuh include/packedengine.cuh
 GEN  = generated/eccF131.h generated/eccF83.h generated/eccF41.h generated/eccF23.h \
        generated/eccP97.h generated/eccP41.h generated/eccP19.h generated/eccP13.h
 
@@ -280,8 +279,7 @@ DEFS = -DECC_BATCH=$(BATCH) -DECC_THREADS=$(THREADS) -DECC_MINBLOCKS=$(MINBLOCKS
        -DECC_PACKED_FAST_CONVERT=$(PACKED_FAST_CONVERT) \
        -DECC_PACKED_POLY_CHAIN=$(PACKED_POLY_CHAIN) -DECC_PACKED_UNROLL_INV=$(PACKED_UNROLL_INV) \
        -DECC_PACKED_PAIR_PRODUCTS=$(PACKED_PAIR_PRODUCTS) -DECC_PACKED_POLY_STATE=$(PACKED_POLY_STATE) \
-       -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) -DECC_PACKED_ADD_COMBINE=$(PACKED_ADD_COMBINE)
-       -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) \
+       -DECC_PACKED_DIRECT_REDUCE=$(PACKED_DIRECT_REDUCE) -DECC_PACKED_ADD_COMBINE=$(PACKED_ADD_COMBINE) \
        -DECC_PACKED_GENERATED_PRODUCT=$(PACKED_GENERATED_PRODUCT) \
        -DECC_PACKED_INLINE_POLY=$(PACKED_INLINE_POLY) \
        -DECC_PACKED_CLMAD=$(PACKED_CLMAD) -DECC_PACKED_CLMAD_SQUARE=$(PACKED_CLMAD_SQUARE) -DECC_PACKED_KARAT3=$(PACKED_KARAT3) \

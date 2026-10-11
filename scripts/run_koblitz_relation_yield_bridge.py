@@ -24,8 +24,9 @@ HERE = REPO / "research" / "sat_factor_base_review_20260908" / "continuation-05-
 DEFAULT_PROTOCOL = HERE / "stage-21-relation-yield-protocol.json"
 DEFAULT_METER = REPO / "scripts" / "process_meter.py"
 FROZEN_LOCK = HERE / "stage-20-rust-build" / "Cargo.lock"
-# Current-manifest CI is operational smoke. Production keeps its archived lock.
-SMOKE_LOCK = REPO / "research/weil_factor_composition_20260914/validation/dependencies.lock.txt"
+# Operational smoke uses the tracked workspace lock for the current manifest.
+# Production keeps its separately archived dependency lock.
+SMOKE_LOCK = REPO / "Cargo.lock"
 WORKSPACE_LOCK = REPO / "Cargo.lock"
 DISCOVERY_SOURCE = REPO / "examples" / "koblitz_public_factor_base_discovery.rs"
 YIELD_SOURCE = REPO / "examples" / "koblitz_relation_yield_bridge.rs"

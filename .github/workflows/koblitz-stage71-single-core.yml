@@ -1,10 +1,9 @@
 name: Koblitz Stage 71 n53 single core
 
 on:
-  pull_request:
-    paths:
-      - "scripts/run_koblitz_stage71_single_core.py"
-      - ".github/workflows/koblitz-stage71-single-core.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

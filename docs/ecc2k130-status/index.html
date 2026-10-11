@@ -62,6 +62,10 @@
     </p>
   </noscript>
 
+  <p class="banner mac-current" id="mac-current" role="status">
+    Loading current Mac control uploads&hellip;
+  </p>
+
   <div id="banner" class="banner UNREACHABLE" role="status">Loading snapshot&hellip;</div>
 
   <div class="freshness">
@@ -70,7 +74,7 @@
   </div>
 
   <section class="ops" aria-labelledby="h-ops">
-    <h2 id="h-ops">Group operations walked</h2>
+    <h2 id="h-ops">Original campaign group operations walked</h2>
     <p class="ops-value mono" id="ops-value">&mdash;</p>
     <p class="ops-sub" id="ops-sub">&nbsp;</p>
 
@@ -136,7 +140,7 @@
     </p>
   </section>
 
-  <h2 class="sr-only">Headline counts</h2>
+  <h2 class="sr-only">Original campaign counts</h2>
   <div class="row">
     <div class="card">
       <div class="label">Distinguished points</div>
@@ -186,7 +190,7 @@
         <tbody id="mac-workers"><tr><td colspan="4">Loading&hellip;</td></tr></tbody>
       </table>
     </div>
-    <p class="note">Source: <a href="./mac-control.json">sanitized Mac control snapshot</a>. Private worker manifests, point keys, and walk state are not published.</p>
+    <p class="note">Source: <a href="https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/mac-control.json">live sanitized Mac control feed</a>, with the <a href="./mac-control.json">Pages snapshot</a> as backup. Private worker manifests, point keys, and walk state are not published.</p>
   </section>
 
   <section aria-labelledby="h-rate">
@@ -620,6 +624,8 @@ cd ec2k-gpu-$V-linux-x86_64
   // does not wait on the GitHub Actions publish cadence for current counts.
   var LIVE_FEED_URL =
     "https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/status.json";
+  var MAC_LIVE_FEED_URL =
+    "https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/mac-control.json";
   // Cap on the bars in the per-hour chart. Seven days of UTC hours, matching
   // the interval the snapshot query buckets over — a window in the data, not
   // in the publish cadence, so it does not move when the cron does.
@@ -1557,7 +1563,7 @@ cd ec2k-gpu-$V-linux-x86_64
     var banner = el("banner");
     var known = Object.prototype.hasOwnProperty.call(STATE_TEXT, state) ? state : "UNREACHABLE";
     banner.className = "banner " + known;
-    banner.textContent = STATE_TEXT[known] + (extra ? " " + extra : "");
+    banner.textContent = "Original campaign: " + STATE_TEXT[known] + (extra ? " " + extra : "");
   }
 
   function tickFreshness(status, failure) {
@@ -1696,11 +1702,22 @@ cd ec2k-gpu-$V-linux-x86_64
   async function loadMacControl() {
     var body = el("mac-workers");
     try {
-      var control = await fetchJSON("./mac-control.json");
-      if (control.schema !== "ecc2k130-mac-control-public-v1" ||
-          control.campaign_id !== "ecc2k130-synthetic-metal-h128-v1") {
-        throw new Error("unexpected control campaign");
-      }
+      var responses = await Promise.allSettled([
+        fetchJSON(MAC_LIVE_FEED_URL), fetchJSON("./mac-control.json")
+      ]);
+      var live = responses[0].status === "fulfilled" ? responses[0].value : null;
+      var pages = responses[1].status === "fulfilled" ? responses[1].value : null;
+      var valid = function (value) {
+        return value && value.schema === "ecc2k130-mac-control-public-v1" &&
+          value.campaign_id === "ecc2k130-synthetic-metal-h128-v1";
+      };
+      if (!valid(live)) live = null;
+      if (!valid(pages)) pages = null;
+      var useLive = live && (live.source_state !== "unavailable" || !pages) &&
+        (!pages || generatedMs(live) >= generatedMs(pages));
+      var control = useLive ? live : pages || live;
+      if (!control) throw new Error("live feed and Pages snapshot unavailable");
+      var sourceLabel = useLive ? "live feed" : "Pages snapshot";
       var unavailable = control.source_state === "unavailable";
       el("mac-dps").textContent = unavailable ? "—" : num(control.dp_records);
       el("mac-updates").textContent = unavailable ? "—" : num(control.walk_updates);
@@ -1730,18 +1747,29 @@ cd ec2k-gpu-$V-linux-x86_64
       if (!workers.length) emptyRow(body, 4, "No Mac worker manifests available.");
       var state = control.source_state;
       var source = el("mac-source");
+      var current = el("mac-current");
+      current.className = "banner mac-current";
       if (state === "unavailable") {
-        source.textContent = "Mac upload feed unavailable at the last Pages publish.";
+        source.textContent = "Mac upload feed unavailable at the last " + sourceLabel + " update.";
+        current.textContent = "Mac control uploads are unavailable. Original campaign status is shown below.";
       } else if (state === "mixed_walks" || state === "ambiguous_runs") {
         source.textContent = "Worker identities differ; combined totals are withheld. Individual counters are shown below.";
+        current.textContent = "Mac control workers are reporting, but their combined count needs review.";
       } else if (state === "partial") {
         source.textContent = "Some worker manifests could not be read. Totals include the readable workers only.";
+        current.textContent = "Mac control: " + num(control.worker_count) + " workers reporting; some uploads could not be read.";
       } else if (latest) {
         var age = Date.now() - latest.getTime();
+        current.className += age > 20 * 60 * 1000 ? " stale" : " live";
         source.textContent = "Latest worker upload " + utc(latest, true) + " (" + ago(latest) + ")" +
-          (age > 20 * 60 * 1000 ? ". Upload feed is stale." : ".");
+          (age > 20 * 60 * 1000 ? ". Upload feed is stale." : ".") + " Via " + sourceLabel + ".";
+        current.textContent = "Mac control: " + num(control.worker_count) + " worker" +
+          (control.worker_count === 1 ? "" : "s") + " reporting, " + num(control.walk_updates) +
+          " walk updates; latest upload " + ago(latest) +
+          (age > 20 * 60 * 1000 ? " (stale)." : ".");
       } else {
         source.textContent = "No Mac control worker has reported yet.";
+        current.textContent = "Mac control has no worker uploads yet. Original campaign status is shown below.";
       }
     } catch (err) {
       el("mac-dps").textContent = "—";
@@ -1750,6 +1778,7 @@ cd ec2k-gpu-$V-linux-x86_64
       body.textContent = "";
       emptyRow(body, 4, "Mac upload snapshot could not be read.");
       el("mac-source").textContent = "Mac upload snapshot unavailable (" + err.message + ").";
+      el("mac-current").textContent = "Mac control uploads are unavailable. Original campaign status is shown below.";
     }
   }
 
