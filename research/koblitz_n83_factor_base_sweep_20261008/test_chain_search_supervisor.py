@@ -1,5 +1,6 @@
 """Synthetic process guards for retained N83 chained-S3 search."""
 
+import gzip
 import json
 from pathlib import Path
 import subprocess
@@ -171,6 +172,83 @@ class ChainSearchGuardTests(unittest.TestCase):
         self.assertIn("malformed", guard.receipt_error(worker, worker_config, config))
         relation["row"][0] = "²"
         self.assertIn("malformed", guard.receipt_error(worker, worker_config, config))
+
+    def test_complete_attempt_ledger_requires_nonzero_target_coefficient(self):
+        config = dict(self.config, max_trials=1)
+        worker_config, worker = receipts(config, "UNKNOWN_solver_cap")
+        worker["attempt_records"].clear()
+        self.assertIn("incomplete", guard.receipt_error(worker, worker_config, config))
+        worker_config, worker = receipts(config, "UNKNOWN_solver_cap")
+        worker["attempt_records"][0]["b"] = "0"
+        self.assertIn("malformed", guard.receipt_error(worker, worker_config, config))
+
+    def test_independent_group_replay_checks_queries_and_selected_points(self):
+        generator = guard.PRIMARY_GENERATOR
+        self.assertIsNone(guard.point_mul(generator, guard.PRIMARY_ORDER))
+        published = Path(__file__).parent / "pilot-01"
+        corpus = json.loads((published / "probe-corpus.json").read_text())
+        public_point = tuple(map(int, corpus["targets"][0]["point"]))
+        self.assertEqual(guard.point_mul(generator, 1172698111487078683838919), public_point)
+        with tempfile.TemporaryDirectory(prefix="n83-group-replay-") as temporary:
+            root = Path(temporary)
+            fixture = root / "probe-corpus.json"
+            target = guard.point_mul(generator, 5)
+            fixture.write_text(json.dumps({
+                "schema": "n83.public-probe-corpus/v1", "study": guard.STUDY,
+                "targets": [{"a": 0, "fixture": 0, "point": list(map(str, target))}],
+            }))
+            selected = root / "base.jsonl.gz"
+            header = {
+                "schema": "n83.factor-base/v1", "study": guard.STUDY,
+                "curve_slug": "icv1-f2m83-tm6151469093347-debefd74",
+                "curve_a": 0, "curve_b": "1", "n": 83,
+                "modulus_low_terms": [0, 1, 2, 45],
+                "closure": "signed_frobenius", "cofactor": "4",
+                "orbit_columns": 64, "policy": "public_x_hash", "seed": guard.SEEDS[0],
+                "frobenius_lambda": str(guard.PRIMARY_FROBENIUS_LAMBDA),
+                "generator": list(map(str, generator)),
+                "representatives": [list(map(str, generator))] * 64,
+                "point_count": 166 * 64, "subgroup_order": str(guard.PRIMARY_ORDER),
+            }
+            def write_point(point, include_inverse=False):
+                with gzip.open(selected, "wt", encoding="utf-8") as output:
+                    output.write(json.dumps(header) + "\n")
+                    output.write(json.dumps({
+                        "column": 0, "phase": 0, "negative": False,
+                        "point": list(map(str, point)),
+                    }) + "\n")
+                    if include_inverse:
+                        output.write(json.dumps({
+                            "column": 0, "phase": 0, "negative": True,
+                            "point": list(map(str, (generator[0], generator[0] ^ generator[1]))),
+                        }) + "\n")
+            write_point(generator)
+            worker = {"status": "PASS_verified_target_only", "verified_log": "5",
+                      "orbit_columns": 64, "policy": "public_x_hash", "seed": guard.SEEDS[0],
+                      "report": {"factor_base_size": 166 * 64},
+                      "attempt_records": [{
+                          "trial": 1, "a": "0", "b": "1",
+                          "target": list(map(str, target)),
+                          "disposition": "RelationFound",
+                          "decomposition_indices": [0] * 5,
+                      }]}
+            self.assertEqual(guard.replay_group(worker, fixture, selected),
+                             {"status": "PASS", "queries": 1, "relations": 1})
+            worker["verified_log"] = "6"
+            with self.assertRaisesRegex(ValueError, "verified target scalar"):
+                guard.replay_group(worker, fixture, selected)
+            worker["verified_log"] = "5"
+            worker["attempt_records"][0]["target"] = list(map(str, generator))
+            with self.assertRaisesRegex(ValueError, "query target"):
+                guard.replay_group(worker, fixture, selected)
+            worker["attempt_records"][0]["target"] = list(map(str, target))
+            write_point(guard.point_mul(generator, 2))
+            with self.assertRaisesRegex(ValueError, "signed Frobenius orbit"):
+                guard.replay_group(worker, fixture, selected)
+            write_point(generator, include_inverse=True)
+            worker["attempt_records"][0]["decomposition_indices"] = [0, 0, 0, 0, 1]
+            with self.assertRaisesRegex(ValueError, "relation point sum"):
+                guard.replay_group(worker, fixture, selected)
 
     def test_outer_retains_preflight_timeout_resource_and_bad_receipts(self):
         with tempfile.TemporaryDirectory(prefix="n83-chain-search-guard-") as temporary:

@@ -9,6 +9,7 @@ wall time, disables network, and retains every launched outcome.
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import math
 import os
@@ -35,6 +36,8 @@ PRIMARY_ORDER = 2417851639230796216685689
 PRIMARY_FROBENIUS_LAMBDA = 254512724090651164922414
 FROBENIUS_PHASES = tuple(pow(PRIMARY_FROBENIUS_LAMBDA, phase, PRIMARY_ORDER)
                          for phase in range(83))
+FIELD_MODULUS = (1 << 83) | (1 << 45) | 0b111
+PRIMARY_GENERATOR = (5402229379304697578719232, 3600185575789834070382019)
 COUNTERS = (
     "factor_base_size", "orbit_count", "trials", "relations",
     "independent_relations", "dependent_relations", "inconsistent_relations",
@@ -189,7 +192,7 @@ def receipt_error(worker: object, worker_config: object, config: dict) -> str | 
     attempts = worker.get("attempt_records")
     relations = worker.get("relation_matrix")
     ranks = worker.get("rank_history")
-    if (not isinstance(attempts, list) or len(attempts) > report["trials"] or
+    if (not isinstance(attempts, list) or len(attempts) != report["trials"] or
             not isinstance(relations, list) or len(relations) != report["relations"] or
             not isinstance(ranks, list) or len(ranks) != report["linear_solve_attempts"]):
         return "worker attempt, relation, or rank replay ledger is incomplete"
@@ -197,9 +200,9 @@ def receipt_error(worker: object, worker_config: object, config: dict) -> str | 
         if (not isinstance(attempt, dict) or
                 type(attempt.get("trial")) is not int or attempt["trial"] != position or
                 any(not canonical_decimal(attempt.get(key), PRIMARY_ORDER)
-                    for key in ("a", "b")) or
+                    for key in ("a", "b")) or int(attempt["b"]) == 0 or
                 attempt.get("disposition") not in ("RelationFound", "Refuted", "Unsupported",
-                    "Unknown", "InvalidModel", "DirectSkipped", "DirectSolved") or
+                    "Unknown", "InvalidModel", "DirectSkipped") or
                 any(type(attempt.get(key)) is not int or attempt[key] < 0
                     for key in ("solver_calls", "models", "conflicts", "implied_rows"))):
             return "worker attempt replay record is malformed"
@@ -280,6 +283,157 @@ def receipt_error(worker: object, worker_config: object, config: dict) -> str | 
     elif log is not None:
         return "nonverified run contains a target scalar"
     return None
+
+
+def field_mul(a: int, b: int) -> int:
+    product = 0
+    while b:
+        if b & 1:
+            product ^= a
+        a <<= 1
+        if a & (1 << 83):
+            a ^= FIELD_MODULUS
+        b >>= 1
+    return product
+
+
+def field_inverse(value: int) -> int:
+    if value == 0:
+        raise ValueError("zero has no field inverse")
+    u, v, g, h = value, FIELD_MODULUS, 1, 0
+    while u != 1:
+        shift = u.bit_length() - v.bit_length()
+        if shift < 0:
+            u, v = v, u
+            g, h = h, g
+            shift = -shift
+        u ^= v << shift
+        g ^= h << shift
+    while g.bit_length() > 83:
+        g ^= FIELD_MODULUS << (g.bit_length() - 84)
+    return g
+
+
+def point_add(left: tuple[int, int] | None,
+              right: tuple[int, int] | None) -> tuple[int, int] | None:
+    if left is None:
+        return right
+    if right is None:
+        return left
+    x1, y1 = left
+    x2, y2 = right
+    if x1 == x2:
+        if y1 != y2 or x1 == 0:
+            return None
+        slope = x1 ^ field_mul(y1, field_inverse(x1))
+        x3 = field_mul(slope, slope) ^ slope
+        return x3, field_mul(x1, x1) ^ field_mul(slope ^ 1, x3)
+    slope = field_mul(y1 ^ y2, field_inverse(x1 ^ x2))
+    x3 = field_mul(slope, slope) ^ slope ^ x1 ^ x2
+    return x3, field_mul(slope, x1 ^ x3) ^ x3 ^ y1
+
+
+def point_mul(point: tuple[int, int], scalar: int) -> tuple[int, int] | None:
+    result = None
+    while scalar:
+        if scalar & 1:
+            result = point_add(result, point)
+        point = point_add(point, point)
+        scalar >>= 1
+    return result
+
+
+def parse_point(value: object) -> tuple[int, int] | None:
+    if value is None:
+        return None
+    if (not isinstance(value, list) or len(value) != 2 or
+            any(not canonical_decimal(word, 1 << 83) for word in value)):
+        raise ValueError("point coordinates are malformed")
+    point = int(value[0]), int(value[1])
+    x, y = point
+    if field_mul(y, y) ^ field_mul(x, y) != field_mul(field_mul(x, x), x) ^ 1:
+        raise ValueError("point is outside the pinned a=0 curve")
+    return point
+
+
+def replay_group(worker: dict, fixture_path: Path, object_path: Path) -> dict:
+    """Recompute every emitted query and every found sum outside the Rust worker."""
+    attempts = worker["attempt_records"]
+    if not attempts:
+        return {"status": "NOT_APPLICABLE_no_attempts", "queries": 0, "relations": 0}
+    corpus = json.loads(fixture_path.read_text(encoding="utf-8"))
+    if (corpus.get("schema") != "n83.public-probe-corpus/v1" or
+            corpus.get("study") != STUDY):
+        raise ValueError("public corpus schema is wrong")
+    targets = [row for row in corpus["targets"] if row.get("a") == 0 and row.get("fixture") == 0]
+    if len(targets) != 1:
+        raise ValueError("public target is absent or ambiguous")
+    public_target = parse_point(targets[0]["point"])
+    if public_target is None or point_mul(public_target, PRIMARY_ORDER) is not None:
+        raise ValueError("public target is outside the primary subgroup")
+    with gzip.open(object_path, "rt", encoding="utf-8") as source:
+        header = json.loads(next(source))
+        if (header.get("schema") != "n83.factor-base/v1" or
+                header.get("study") != STUDY or
+                header.get("curve_slug") != "icv1-f2m83-tm6151469093347-debefd74" or
+                header.get("curve_a") != 0 or header.get("curve_b") != "1" or
+                header.get("n") != 83 or header.get("modulus_low_terms") != [0, 1, 2, 45] or
+                header.get("closure") != "signed_frobenius" or
+                header.get("cofactor") != "4" or
+                header.get("orbit_columns") != worker["orbit_columns"] or
+                header.get("policy") != worker["policy"] or
+                header.get("seed") != worker["seed"] or
+                header.get("frobenius_lambda") != str(PRIMARY_FROBENIUS_LAMBDA) or
+                header.get("generator") != [str(word) for word in PRIMARY_GENERATOR] or
+                header.get("point_count") != worker["report"]["factor_base_size"] or
+                header.get("subgroup_order") != str(PRIMARY_ORDER)):
+            raise ValueError("selected object header disagrees with pinned curve")
+        requested = {index for attempt in attempts
+                     for index in (attempt["decomposition_indices"] or [])}
+        points = {}
+        if requested:
+            representatives = header.get("representatives")
+            if not isinstance(representatives, list) or len(representatives) != worker["orbit_columns"]:
+                raise ValueError("selected object representatives are malformed")
+            for index in range(max(requested) + 1):
+                entry = json.loads(next(source))
+                if index in requested:
+                    if (entry.get("column") != index // 166 or
+                            entry.get("phase") != index % 166 // 2 or
+                            entry.get("negative") is not (index % 2 == 1)):
+                        raise ValueError("selected point row has the wrong orbit label")
+                    point = parse_point(entry.get("point"))
+                    if point is None:
+                        raise ValueError("selected point row is the identity")
+                    if point_mul(point, PRIMARY_ORDER) is not None:
+                        raise ValueError("selected point row is outside the primary subgroup")
+                    expected = parse_point(representatives[index // 166])
+                    if expected is None:
+                        raise ValueError("selected orbit representative is the identity")
+                    for _ in range(index % 166 // 2):
+                        expected = (field_mul(expected[0], expected[0]),
+                                    field_mul(expected[1], expected[1]))
+                    if index % 2:
+                        expected = expected[0], expected[0] ^ expected[1]
+                    if point != expected:
+                        raise ValueError("selected point row disagrees with signed Frobenius orbit")
+                    points[index] = point
+    for attempt in attempts:
+        query = point_add(point_mul(PRIMARY_GENERATOR, int(attempt["a"])),
+                          point_mul(public_target, int(attempt["b"])))
+        if query != parse_point(attempt["target"]):
+            raise ValueError(f"trial {attempt['trial']} query target differs from [a]G+[b]Q")
+        if attempt["disposition"] == "RelationFound":
+            total = None
+            for index in attempt["decomposition_indices"]:
+                total = point_add(total, points[index])
+            if total != query:
+                raise ValueError(f"trial {attempt['trial']} relation point sum differs from query")
+    if (worker.get("status") == "PASS_verified_target_only" and
+            point_mul(PRIMARY_GENERATOR, int(worker["verified_log"])) != public_target):
+        raise ValueError("verified target scalar differs from public target")
+    return {"status": "PASS", "queries": len(attempts),
+            "relations": sum(item["disposition"] == "RelationFound" for item in attempts)}
 
 
 def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summands: int,
@@ -453,6 +607,19 @@ def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summa
                  cap.get("strategy") == strategy_name(config) and cap.get("max_trials") == max_trials and
                  cap.get("budget_seconds") == config["worker_wall_seconds"])
     worker_error = receipt_error(worker, worker_config, config)
+    group_replay: dict | None = None
+    group_replay_error: str | None = None
+    if (worker_error is None and not input_changed and not source_changed and
+            not config_changed and not binary_changed and exit_code == 0):
+        try:
+            group_replay = replay_group(worker, fixtures / "probe-corpus.json", selected_path)
+            if (sha256_file(selected_path) != config["selected_object_sha256"] or
+                    sha256_file(fixtures / "probe-corpus.json") !=
+                    config["fixture_sha256"]["probe-corpus.json"]):
+                input_changed = True
+        except (OSError, ValueError, KeyError, TypeError, StopIteration,
+                json.JSONDecodeError, EOFError) as error:
+            group_replay_error = f"{type(error).__name__}: {error}"
     if cleanup_error:
         status = "PRODUCER_FAILURE_container_cleanup"
     elif source_changed or config_changed or binary_changed or input_changed:
@@ -465,7 +632,7 @@ def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summa
         status = "UNKNOWN_resource_or_worker_exit"
     elif exit_code != 0:
         status = "PRODUCER_FAILURE_worker_exit"
-    elif parse_error or cap_path.exists() or worker_error:
+    elif parse_error or cap_path.exists() or worker_error or group_replay_error:
         status = "PRODUCER_FAILURE_worker_receipt"
     else:
         status = worker["status"]
@@ -478,6 +645,7 @@ def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summa
         "worker_exit_code": exit_code, "launch_error": launch_error,
         "cleanup_error": cleanup_error, "parse_error": parse_error,
         "worker_error": worker_error, "source_changed": source_changed,
+        "group_replay": group_replay, "group_replay_error": group_replay_error,
         "config_changed": config_changed, "binary_changed": binary_changed,
         "input_changed": input_changed,
         "process_wall_ms": (time.monotonic() - started) * 1000,
