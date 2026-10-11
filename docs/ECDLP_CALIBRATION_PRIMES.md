@@ -211,7 +211,7 @@ The same identity, applied to the other Solinas shapes:
 | `2ⁿ − 2ᵏ − 1`             | **p + 1**            | p+1 = 2ⁿ − 2ᵏ = 2ᵏ·(2^(n−k) − 1)      |
 | `2ⁿ − 2ᵏ + 1`             | **p − 1**            | (above)                              |
 | `2ⁿ − 1` (Mersenne)       | **p + 1 = 2ⁿ**       | fully 2-smooth                       |
-| `2ⁿ − 2ᵃ + 2ᵇ + 2ᶜ − 1` (P-256) | neither       | no clean cyclotomic factorisation    |
+| `2ⁿ − 2ᵃ + 2ᵇ + 2ᶜ − 1` (P-256) | **p + 1** at the NIST exponents | p+1 = 2ᶜ(2^(n−c) − 2^(a−c) + 2^(b−c) + 1); for P-256 (n+c = a+b) this is 2⁹⁶(2⁶⁴+1)(2⁹⁶−2⁶⁴+1), largest prime 94 bits — not forced for the family, see `research/notes/cm-isogeny/RESEARCH_NIST_CYCLOTOMIC_POINT_HEIGHTS.md` |
 | `2ⁿ − 2ᵃ − 2ᵇ + 2ᶜ − 1` (P-384) | neither       | no clean cyclotomic factorisation    |
 
 Observed in the probe (`p±1 rough bit-length / n`):
