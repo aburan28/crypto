@@ -196,6 +196,21 @@ isolated repetitions. Every output is retained in s4-stage-100-repetitions-20261
 The full merged-tree run follows this committed correction. This is additional
 fixture validation and does not change the frozen map or performance evidence.
 
+## Passing merged-source closeout
+
+Committed merged source bff6dcb274b6fc29c46d49a5603f5bb801cc2db5 passes the
+complete release library suite: **3815 passed, 0 failed, 110 existing tests
+ignored**, in 1926.77 seconds. The command includes every active library test
+and uses two concurrent test threads with localhost access. Its stdout/stderr
+and exit code 0 are retained separately from all earlier failed and interrupted
+runs. The committed merged source also passes the workspace all-target compile.
+
+The release workflow passes Actionlint, the resolved example passes three
+release tests, and the original native artifact audit passes 891 bindings in
+the preserved canonical-output context. Only documentation and terminal
+receipts are appended after this validated source revision. Hosted CI and
+ReleaseMe publication remain separate gates.
+
 The full command is:
 
 ```sh

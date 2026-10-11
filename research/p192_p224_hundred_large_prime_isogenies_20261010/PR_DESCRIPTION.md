@@ -55,17 +55,23 @@ The current scientific artifacts include all 100 maps and transported public
 generators, resource/exit/hash receipts, source and standalone binary archives,
 an editable route graph and a visually reviewed three-page PDF. The scientific
 producer was clean source 49a280dc6; the archived 449-model executable was clean
-source 3c39c5f23. A fresh native audit matches all 891 manifest-bound files.
+source 3c39c5f23. The native audit matches all 891 manifest-bound files against
+the preserved canonical-output context. The ten original canonical outputs
+are archived from clean 12a846a56, so later global browser updates preserve
+the original scientific bindings and manifest bytes.
 The archived executable again replays a saved two-step chain outside a checkout.
 
 Validation passed 62 CLI tests, 3 independent field-reference tests,
 114 standalone algorithm tests, strict algorithm Clippy, positive chain replay
 and source/generator mutation rejection. The complete release library suite
-passed **3808 tests, 0 failed, 110 existing tests ignored**, using two concurrent
-test threads and localhost access on source 6742ecd0b. The workspace all-target
+passed **3815 tests, 0 failed, 110 existing tests ignored**, using two concurrent
+test threads and localhost access on merged source bff6dcb27. The earlier
+pre-merge run passed 3808 tests. The workspace all-target
 compile, 30 tests in repaired examples, 14 tests in repaired binaries and the
 449-model trait-index freshness check passed. Both staged accounting fixtures
-also passed 100 paired repetitions (200 successful fixture executions).
+also passed 100 paired repetitions (200 successful fixture executions). The
+S4 staged-format fixture passed another 100 isolated repetitions, followed
+by the complete merged-tree suite.
 
 The library follow-up repairs one-word truncation of degree-71 linearised
 kernels and applying a packed Frobenius orbit walk on models without that
@@ -81,7 +87,11 @@ The generated traits index now covers all 449 models. Unsupported coordinate
 adapters explicitly retain order certification `not_evaluated`; the earlier
 121-model guide panel is identified as a historical snapshot. The frozen
 scientific manifest continues to match all 891 original bindings; follow-up
-integration receipts are additional commit-bound evidence.
+integration receipts are additional commit-bound evidence. Main 8b6b1384e is
+integrated, with its committed research, ledger and browser additions retained.
+The two textual conflicts are resolved; Actionlint and the affected example's
+three release tests pass. The original archive audit passes in the extracted
+canonical context after integration.
 
 **Publication status:** this ready PR includes the hundred-map source,
 catalogue, maps, standalone archive and passing integration receipts. Hosted
