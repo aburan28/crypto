@@ -4955,10 +4955,6 @@ pub struct SolveStats {
     pub propagations: usize,
     /// Splitting decisions made.
     pub splits: usize,
-    /// Small Boolean cubes closed by direct enumeration.
-    pub tail_enumerations: usize,
-    /// Assignments checked inside those cubes.
-    pub tail_assignments_tested: usize,
     /// Split nodes that deferred an F4 reduction.
     /// Number of algebraically reduced nodes closed by direct enumeration of
     /// the remaining small Boolean cube.

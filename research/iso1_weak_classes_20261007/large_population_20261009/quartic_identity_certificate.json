@@ -1,0 +1,241 @@
+[
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1hb01002991ea88fb4",
+    "statement": {
+      "name": "Cleared root-quartic to Weierstrass coordinate identity",
+      "source": "research/iso1_weak_classes_20261007/large_population_20261009/PRIOR_WORK.md; standard translation and inversion at a rational branch point",
+      "variables": [
+        "X",
+        "c1",
+        "c2",
+        "c3"
+      ],
+      "degree_bound": 5,
+      "lhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "c3"
+              },
+              {
+                "op": "var",
+                "args": "c3"
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "X"
+                  },
+                  {
+                    "op": "var",
+                    "args": "X"
+                  },
+                  {
+                    "op": "var",
+                    "args": "X"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "c2"
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "X"
+                      },
+                      {
+                        "op": "var",
+                        "args": "X"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "c3"
+                  },
+                  {
+                    "op": "var",
+                    "args": "c1"
+                  },
+                  {
+                    "op": "var",
+                    "args": "X"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "c3"
+                  },
+                  {
+                    "op": "var",
+                    "args": "c3"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "c3"
+                  },
+                  {
+                    "op": "var",
+                    "args": "c3"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "X"
+                  },
+                  {
+                    "op": "var",
+                    "args": "X"
+                  },
+                  {
+                    "op": "var",
+                    "args": "X"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "c2"
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "c3"
+                  },
+                  {
+                    "op": "var",
+                    "args": "c3"
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "X"
+                  },
+                  {
+                    "op": "var",
+                    "args": "X"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "c1"
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "c3"
+                  },
+                  {
+                    "op": "var",
+                    "args": "c3"
+                  },
+                  {
+                    "op": "var",
+                    "args": "c3"
+                  }
+                ]
+              },
+              {
+                "op": "var",
+                "args": "X"
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "c3"
+              },
+              {
+                "op": "var",
+                "args": "c3"
+              },
+              {
+                "op": "var",
+                "args": "c3"
+              },
+              {
+                "op": "var",
+                "args": "c3"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 32,
+    "seed": 20261009,
+    "value_digest": "4391b70d07c74f1f8827d807f15e0b5d2cf22036ddde4b814d3ae413592cc7ad",
+    "independence": "Standard coordinate substitution; the quartic Taylor coefficients and root condition are checked on each recorded field model.",
+    "proof": null
+  }
+]

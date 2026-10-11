@@ -1,0 +1,19 @@
+
+running 5 tests
+test cryptanalysis::curve_traits::tests::a_small_koblitz_curve ... FAILED
+test cryptanalysis::curve_traits::tests::ecc2k_130_conductor_is_exact ... FAILED
+test cryptanalysis::curve_traits::tests::endomorphism_rings_from_contained_orders ... FAILED
+test cryptanalysis::curve_traits::tests::every_registry_entry_parses_with_its_order_identity ... FAILED
+test cryptanalysis::curve_traits::tests::the_gf2_18_twist_groups_with_koblitz_by_cm_not_by_descent ... FAILED
+
+failures:
+
+failures:
+    cryptanalysis::curve_traits::tests::a_small_koblitz_curve
+    cryptanalysis::curve_traits::tests::ecc2k_130_conductor_is_exact
+    cryptanalysis::curve_traits::tests::endomorphism_rings_from_contained_orders
+    cryptanalysis::curve_traits::tests::every_registry_entry_parses_with_its_order_identity
+    cryptanalysis::curve_traits::tests::the_gf2_18_twist_groups_with_koblitz_by_cm_not_by_descent
+
+test result: FAILED. 0 passed; 5 failed; 0 ignored; 0 measured; 3918 filtered out; finished in 0.15s
+

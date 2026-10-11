@@ -1,0 +1,48 @@
+ISO-1 p=41 matched-class audit, 2026-10-08
+
+Input: p41_twist_derived.csv, ordinary positive traces with Frobenius
+2-depth >= 2. For each of its 16,810 rows, native PARI/GP qfbclassno was
+evaluated on the row's fundamental_discriminant. The five-column output is
+p41_class_number_rows.csv (SHA-256
+f9acc7e9be463fbf759df9636b03f11832c291806572ebcf15b6c8ee9ff6003c).
+The first input is a randomized point-count census; the class numbers are
+independent exact GP calculations conditional on the listed discriminants.
+
+Search: group rows by (frobenius_2_depth, two_split,
+maximal_order_class_number, trace modulo 2^k), and find a group containing
+both weak_representatives=0 and weak_representatives>0. Positive traces
+alone avoid the duplicate information from quadratic-twist mirrors.
+
+At k=17 there is one mixed group:
+  t=136542: weak=0, D_K=-891748, depth=2, two_split=0,
+            qfbclassno(D_K)=192, t mod 131072=5470.
+  t=5470:   weak=132, D_K=-779524, depth=2, two_split=0,
+            qfbclassno(D_K)=192, t mod 131072=5470.
+Their traces differ by exactly 131072. Thus the exact maximal-order class
+number, conductor depth, splitting of 2, class-number parity, and every
+trace residue through 2^17 jointly fail to decide the observed label.
+
+At k=8 there are 129 mixed groups. One matched pair lies in the same
+outer-fifth Hasse-edge bin and only 256 trace units apart:
+  t=133826: weak=0,  D_K=-17047167, depth=3, two_split=1,
+            qfbclassno(D_K)=1680, t mod 256=194,
+            |t|/(2p^3)=0.9708651935.
+  t=134082: weak=12, D_K=-15975535, depth=3, two_split=1,
+            qfbclassno(D_K)=1680, t mod 256=194,
+            |t|/(2p^3)=0.9727223923.
+
+The matching calculation is reproducible from p41_class_number_rows.csv by
+reading the five integer columns and grouping on the stated tuple. It is a
+counterexample to the proposed feature combination, not a proof that no
+other compact arithmetic class criterion exists. An actual curve's 2-volcano
+level remains distinct from the class-wide Frobenius-order depth used here.
+
+Independent held-out p=47 repetition: p47_class_number_rows.csv has
+25,403 ordinary positive-trace rows at Frobenius depth >=2, with
+qfbclassno evaluated on each fundamental discriminant (SHA-256
+1f19189f86e6dbd9e698002116741e32836fa1afa6c2c4f64580f59933da68a2).
+The pair t=204238 (zero; D_K=-181263) and t=73166 (96 weak;
+D_K=-351015) has depth 3, split 2, exact h_K=336, and the same trace
+modulo 2^17; the traces differ by exactly 131072. Native PARI/GP
+qfbclassno gives 336 for both discriminants. This repeats the
+small-invariant failure at a prime absent from the p=41 pair search.

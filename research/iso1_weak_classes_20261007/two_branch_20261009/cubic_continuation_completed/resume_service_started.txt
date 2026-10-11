@@ -1,0 +1,102 @@
+gui/501/com.aburan.iso1.census.20261009.resume71 = {
+	active count = 1
+	path = /Users/adamburan/Library/LaunchAgents/com.aburan.iso1.census.20261009.resume71.plist
+	type = LaunchAgent
+	state = running
+
+	program = /usr/bin/env
+	arguments = {
+		/usr/bin/env
+		PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin
+		ISO1_QUEUE_RUNTIME_MANIFEST_DIR=/Users/adamburan/Library/Application Support/crypto-iso1/runtime-20261009/research/iso1_weak_classes_20261007/census_runtime
+		/Users/adamburan/Library/Application Support/crypto-iso1/runtime-20261009/bin/iso1_census_queue
+		/Users/adamburan/Library/Application Support/crypto-iso1/census-20261009-run5
+		71
+		73
+		79
+		83
+		89
+		97
+		101
+		103
+		107
+		109
+		113
+		127
+		131
+		137
+		139
+		149
+		151
+		157
+		163
+		167
+		173
+		179
+		181
+		191
+		193
+		197
+		199
+	}
+
+	stdout path = /Users/adamburan/Library/Application Support/crypto-iso1/census-20261009-run5/service.stdout
+	stderr path = /Users/adamburan/Library/Application Support/crypto-iso1/census-20261009-run5/service.stderr
+	inherited environment = {
+		OLLAMA_MODELS => /Volumes/SSD990/ollama/models
+		SSH_AUTH_SOCK => /var/run/com.apple.launchd.1rLmUffe82/Listeners
+	}
+
+	default environment = {
+		PATH => /usr/bin:/bin:/usr/sbin:/sbin
+	}
+
+	environment = {
+		OSLogRateLimit => 64
+		XPC_SERVICE_NAME => com.aburan.iso1.census.20261009.resume71
+	}
+
+	domain = gui/501 [100024]
+	asid = 100024
+	minimum runtime = 10
+	exit timeout = 5
+	runs = 1
+	pid = 49797
+	immediate reason = speculative
+	forks = 8
+	execs = 2
+	initialized = 1
+	trampolined = 1
+	started suspended = 0
+	proxy started suspended = 0
+	checked allocations = 0 (queried = 1)
+	checked allocations reason = no host
+	checked allocations flags = 0x0
+	last exit code = (never exited)
+
+	resource coalition = {
+		ID = 20478
+		type = resource
+		state = active
+		active count = 1
+		name = com.aburan.iso1.census.20261009.resume71
+	}
+
+	jetsam coalition = {
+		ID = 20479
+		type = jetsam
+		state = active
+		active count = 1
+		name = com.aburan.iso1.census.20261009.resume71
+	}
+
+	spawn type = daemon (3)
+	jetsam priority = 40
+	jetsam memory limit (active) = (unlimited)
+	jetsam memory limit (inactive) = (unlimited)
+	jetsamproperties category = daemon
+	jetsam thread limit = 32
+	cpumon = default
+
+	properties = runatload | inferred program
+}

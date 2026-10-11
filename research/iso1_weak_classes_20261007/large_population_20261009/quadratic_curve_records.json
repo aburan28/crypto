@@ -1,0 +1,170 @@
+{
+  "input_law": "100 constructed quartics with a fixed nonsplit h; three exact all-x controls",
+  "raw_sha256": "326b04e252bce2d7090d5e5cf64c08932e688ca5992a1fcf785689ec0ae76119",
+  "records": [
+    {
+      "alpha": [
+        "6",
+        "5",
+        "1",
+        "6",
+        "5",
+        "1"
+      ],
+      "base_field_nonsquare_d": [
+        "6",
+        "0",
+        "2",
+        "2",
+        "4",
+        "1"
+      ],
+      "characteristic": "7",
+      "class_family": "Joux-Vitse quadratic h branch",
+      "endomorphism_order_conductor": null,
+      "field_degree": 6,
+      "frobenius_order_conductor": "18",
+      "fundamental_discriminant": "-1448",
+      "group_order": "117688",
+      "icv1": "ICV1:fpk-7-6-26accc5b:-38:117688:2,4,2,5,6,6:unk:unk:r:cad8e419f1cb",
+      "j_coefficients": [
+        "2",
+        "4",
+        "2",
+        "5",
+        "6",
+        "6"
+      ],
+      "model_json": "{\"a\":[\"4\",\"2\",\"5\",\"3\",\"3\",\"4\"],\"b\":[\"3\",\"1\",\"1\",\"4\",\"6\",\"1\"],\"field\":\"fpk-7-6-26accc5b\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"5\",\"6\",\"5\",\"3\",\"5\",\"5\"],\"p\":\"7\",\"v\":\"1\"}",
+      "model_sha256": "cad8e419f1cb45a43d00895c2ece3d7b140e9ebbb5bcd79cd92bbdc6ae36c3a3",
+      "modulus_low_coefficients": [
+        "5",
+        "6",
+        "5",
+        "3",
+        "5",
+        "5"
+      ],
+      "quartic_model": "y^2=(x^2-d)*(x-alpha)*(x-alpha^49)",
+      "quartic_origin": "(alpha,0)",
+      "quartic_to_cubic_map": "X=c3/(x-alpha);Y=c3*y/(x-alpha)^2;c3=f'(alpha);c2=f''(alpha)/2;c1=f'''(alpha)/6",
+      "sample_number": "3",
+      "seed": "2026100977",
+      "slug": "icv1-fp3k6-tm38-cad8e419",
+      "subgroup_order": null,
+      "trace": "-38",
+      "verification": "ellcard plus complete affine-x count and two infinity points; explicit coordinate-map point replay",
+      "volcano_level": null
+    },
+    {
+      "alpha": [
+        "6",
+        "2",
+        "2",
+        "5",
+        "5",
+        "5"
+      ],
+      "base_field_nonsquare_d": [
+        "6",
+        "0",
+        "2",
+        "2",
+        "4",
+        "1"
+      ],
+      "characteristic": "7",
+      "class_family": "Joux-Vitse quadratic h branch",
+      "endomorphism_order_conductor": null,
+      "field_degree": 6,
+      "frobenius_order_conductor": "26",
+      "fundamental_discriminant": "-696",
+      "group_order": "117660",
+      "icv1": "ICV1:fpk-7-6-26accc5b:-10:117660:3,0,5,0,5,6:unk:unk:r:45cf0757c4f3",
+      "j_coefficients": [
+        "3",
+        "0",
+        "5",
+        "0",
+        "5",
+        "6"
+      ],
+      "model_json": "{\"a\":[\"5\",\"6\",\"6\",\"0\",\"4\",\"6\"],\"b\":[\"3\",\"2\",\"1\",\"3\",\"2\",\"3\"],\"field\":\"fpk-7-6-26accc5b\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"5\",\"6\",\"5\",\"3\",\"5\",\"5\"],\"p\":\"7\",\"v\":\"1\"}",
+      "model_sha256": "45cf0757c4f36b0d6d38a807532fdebc70a664f98800808276d566f6d5b1381a",
+      "modulus_low_coefficients": [
+        "5",
+        "6",
+        "5",
+        "3",
+        "5",
+        "5"
+      ],
+      "quartic_model": "y^2=(x^2-d)*(x-alpha)*(x-alpha^49)",
+      "quartic_origin": "(alpha,0)",
+      "quartic_to_cubic_map": "X=c3/(x-alpha);Y=c3*y/(x-alpha)^2;c3=f'(alpha);c2=f''(alpha)/2;c1=f'''(alpha)/6",
+      "sample_number": "4",
+      "seed": "2026100977",
+      "slug": "icv1-fp3k6-tm10-45cf0757",
+      "subgroup_order": null,
+      "trace": "-10",
+      "verification": "ellcard plus complete affine-x count and two infinity points; explicit coordinate-map point replay",
+      "volcano_level": null
+    },
+    {
+      "alpha": [
+        "6",
+        "6",
+        "4",
+        "3",
+        "6",
+        "2"
+      ],
+      "base_field_nonsquare_d": [
+        "6",
+        "0",
+        "2",
+        "2",
+        "4",
+        "1"
+      ],
+      "characteristic": "7",
+      "class_family": "Joux-Vitse quadratic h branch",
+      "endomorphism_order_conductor": null,
+      "field_degree": 6,
+      "frobenius_order_conductor": "72",
+      "fundamental_discriminant": "-19",
+      "group_order": "117040",
+      "icv1": "ICV1:fpk-7-6-26accc5b:610:117040:0,3,2,4,2,6:unk:unk:r:27f8cee21052",
+      "j_coefficients": [
+        "0",
+        "3",
+        "2",
+        "4",
+        "2",
+        "6"
+      ],
+      "model_json": "{\"a\":[\"5\",\"1\",\"3\",\"5\",\"5\",\"0\"],\"b\":[\"1\",\"5\",\"0\",\"3\",\"1\",\"6\"],\"field\":\"fpk-7-6-26accc5b\",\"form\":\"y^2=x^3+a*x+b\",\"k\":\"6\",\"modulus\":[\"5\",\"6\",\"5\",\"3\",\"5\",\"5\"],\"p\":\"7\",\"v\":\"1\"}",
+      "model_sha256": "27f8cee210525adcbda09dbe1d067969164f1c2178553943a62ce574b819af50",
+      "modulus_low_coefficients": [
+        "5",
+        "6",
+        "5",
+        "3",
+        "5",
+        "5"
+      ],
+      "quartic_model": "y^2=(x^2-d)*(x-alpha)*(x-alpha^49)",
+      "quartic_origin": "(alpha,0)",
+      "quartic_to_cubic_map": "X=c3/(x-alpha);Y=c3*y/(x-alpha)^2;c3=f'(alpha);c2=f''(alpha)/2;c1=f'''(alpha)/6",
+      "sample_number": "98",
+      "seed": "2026100977",
+      "slug": "icv1-fp3k6-t610-27f8cee2",
+      "subgroup_order": null,
+      "trace": "610",
+      "verification": "ellcard plus complete affine-x count and two infinity points; explicit coordinate-map point replay",
+      "volcano_level": null
+    }
+  ],
+  "schema": "iso1-quadratic-scope/v1",
+  "script_sha256": "fc9dbec17c78cefcf0e3e5d465bd104c0e8a1885afcf2a6a219b75d94d84a046"
+}

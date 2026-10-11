@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="420" viewBox="0 0 1000 420">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#354f73"/></marker></defs>
+<rect width="1000" height="420" rx="16" fill="#f4f7fc"/>
+<g font-family="Arial Unicode MS,DejaVu Sans,Arial" fill="#14233b">
+<text x="28" y="36" font-size="24" font-weight="bold">Norm-one parameter → conductor obstruction</text>
+<text x="28" y="65" font-size="15">q ≡ 1 (mod 4), odd n ≥ 3, K = F_(qⁿ), Q = qⁿ</text>
+<g fill="#fff" stroke="#b5c5da" stroke-width="1.5">
+<rect x="28" y="91" width="270" height="115" rx="10"/><rect x="365" y="91" width="270" height="115" rx="10"/><rect x="702" y="91" width="270" height="115" rx="10"/>
+<rect x="28" y="269" width="944" height="117" rx="10"/>
+</g>
+<g font-size="18" font-weight="bold"><text x="45" y="120">λ = α^q / α ∈ T</text><text x="382" y="120">Rational 2-isogeny</text><text x="719" y="120">Full rational 4-torsion</text></g>
+<g font-size="16"><text x="45" y="153">|T| is odd ⇒ λ = μ⁴</text><text x="45" y="181">L_λ: y² = x(x−1)(x−λ)</text><text x="382" y="153">Kernel: O and (0,0)</text><text x="382" y="181">Target root differences square</text><text x="719" y="153">16 divides one twist order</text><text x="719" y="181">Ordinary ⇒ 4 divides f_π</text></g>
+<path d="M301,146 H357 M638,146 H694" stroke="#354f73" stroke-width="2.5" marker-end="url(#arrow)"/>
+<text x="28" y="240" font-size="16">Theorem applies at every size; independent of the census point counter.</text>
+<text x="45" y="301" font-size="19" font-weight="bold">Cubic extension q = p²: exact absolute-Frobenius quotient</text>
+<text x="45" y="334" font-size="17">λ ↦ λ^p and λ ↦ λ⁻¹ preserve the trace pair. Orbit sizes: 2, 6, 12.</text>
+<text x="45" y="366" font-size="17">One point count per orbit: C_p = (p⁴ + 3p² + 8)/12 for p &gt; 3.</text>
+</g></svg>

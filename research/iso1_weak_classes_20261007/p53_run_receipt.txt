@@ -1,0 +1,58 @@
+ISO-1 completed absolute-Frobenius census, p=53
+Completed 2026-10-08 PDT (2026-10-09 UTC)
+Base source commit: 62becf9572fe74cbe8b3d8cebee3bf8a240708a1
+Continuation branch: codex/iso1-theorem-20261009
+Native source and executable hashes: larger_prime_source_freeze.txt
+Host: Apple M4 Pro, arm64, macOS 26.6, 14 logical CPUs, 48 GiB RAM.
+CPU isolation: contended/unverified; wall time is resource accounting.
+RAYON_NUM_THREADS=4
+Field: p=53, q=2809, Q=22164361129, u^2=2, theta^3=1+u.
+q-Frobenius(theta)=(26+24*u)*theta.
+Encoding: E6([E2([a0,b0]),E2([a1,b1]),E2([a2,b2])]) in the power basis.
+Enumeration: both base-field square classes, paired opposite traces,
+least encoded lambda under lambda^(+/-p^j), 0<=j<6, weights 2/6/12.
+Point-count backend: retained randomized two-point Hasse-interval counter.
+RNG: rand 0.8.8 StdRng; per branch/a0 seed law in frozen source is
+0x1501 ^ p.wrapping_mul(0x9e3779b1) ^ a0 ^ ((branch as u64)<<48) ^ (((val==w) as u64)<<49).
+
+Command from the isolated continuation repository root:
+RAYON_NUM_THREADS=4 research/iso1_weak_classes_20261007/census_runtime/target/release/iso1_class_census 53 research/iso1_weak_classes_20261007/p53_absolute.csv --derive-twists --absolute-orbit-quotient
+Census exit code: 0
+Raw stdout: p53_absolute.stdout (empty)
+Raw stderr: p53_absolute.stderr (completed run statistics)
+point_counts=658243
+normalized_representatives=15786580
+all_hasse_rows=148878
+ordinary_rows=146068
+weak_ordinary_rows=72540
+depth1_weak=0; depth1_rows=73034
+high_depth_zero=494; high_depth_rows=73034
+charged_Fp_multiplications=313857554508
+wall_seconds=2057.706
+CSV SHA-256: 70e48434b6e671a4cec1462d11bccfac6c68b003cd0d033a2d65776cc938e1ee
+
+Independent control:
+ISO1_P=53 gp -q -f research/iso1_weak_classes_20261007/gp_large_prime_control.gp
+PARI/GP 2.17.3; ffgen([53,6]); seed 1501; 5000 nonidentity norm-one parameters.
+GP exit code: 0; stderr: empty; 5000 rows.
+Control SHA-256: fb855fa709cfa32ab8d5c08ae937778075295e5e52fbceda9c5966abfccc1a28
+Distinct absolute traces: 4404; missing positive traces: 0.
+Native all-row audit exit code: 0; see p53_absolute_validation.txt.
+Checks: Hasse trace grid, weighted total, twists, discriminants, conductors,
+conductor strata, proved mod-16 condition, all GP controls in the positive set.
+The randomized census's zero labels retain their point-count uncertainty.
+
+Separate random-curve reach sample:
+research/iso1_weak_classes_20261007/census_runtime/target/release/iso1_class_census sample 53 research/iso1_weak_classes_20261007/p53_absolute.csv 4000
+Exit code: 0; stderr empty; seed 1 ^ 0xE8AC7; retained random_curve input law.
+2539/4000 hit=0.634750; Wilson95=[0.619705,0.649536]; 3933 distinct traces.
+Charged Fp multiplications=1866011793; see p53_reach_sample.txt.
+
+Continuation:
+The native queue validated this completed census, then started p=59.
+Queue PID 90592; p59 census PID 9297 at the receipt snapshot.
+Live output: /private/tmp/iso1-larger-primes-20261009/run2
+Sequential remaining primes: 59,61,67,71,73,79,83,89,97,101,103,107,109,
+113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199.
+The dated status snapshot is larger_prime_status_20261008.tsv.
+A launched or queued prime is not a completed result.

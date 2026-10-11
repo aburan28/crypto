@@ -1,0 +1,4 @@
+# Preserve raw diagnostic output while checking handwritten sources normally.
+*.stdout whitespace=-blank-at-eof
+*.stderr whitespace=-blank-at-eof
+*.log -whitespace

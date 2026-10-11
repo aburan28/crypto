@@ -1,0 +1,18 @@
+{
+  "status": "PASS_WEAK_CURVE_CATALOG_BROWSER",
+  "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "checks": [
+    "desktop: 21 family cards, search, 9 covering entries, 814 models, 512 source filter, pagination and exact model detail; 294 classes with 46 zeros and 88 overlaps",
+    "390px and 320px mobile: cards readable with no page overflow",
+    "dark theme rendered",
+    "JavaScript disabled: native source links and scope remain available"
+  ],
+  "script_errors": [],
+  "external_requests": [],
+  "viewport_widths": [
+    1280,
+    390,
+    320
+  ],
+  "page_sha256": "96f29996701f669e34787e0631e5424b0524cdb4802086625177cdab17eac28f"
+}

@@ -1,0 +1,8 @@
+Base commit: 62becf9572fe74cbe8b3d8cebee3bf8a240708a1
+Full original source SHA-256 values:
+src/cryptanalysis/jv_cover.rs 933334abbf38c8b1db5ada51689b2e0608f3fb89bc8a3c3169574c9fedf89457
+src/cryptanalysis/jv_isogeny_walk.rs 90236752a954fbabc6d6635e8666e5858c336029c0193c8dd67aa5c4e734733e
+src/cryptanalysis/gaudry_cubic.rs b0871d2bbbf22c8f82713a4a94f715aac333078703f85b1d2fa33b474fa9fa82
+src/cryptanalysis/residual_walk.rs 3bc15388b34adb6961c6642cfee785ca0d02dc31125caaf0d53ae12e088fa550
+
+Extraction: Fld/Fq/Fq3 and PtE6/EllE; Curve2, norm_q3, weak_by_norms, random_curve, isqrt_u128, curve_order and ell_order; scalar mm/am/sm/pow_mod/inv_mod. The local mul_mod wrapper uses exact u128 reduction. No other library modules are compiled.

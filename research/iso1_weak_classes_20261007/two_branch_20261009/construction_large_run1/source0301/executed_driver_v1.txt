@@ -1,0 +1,36 @@
+//! Bounded native GP driver, preserving every attempted run without overwrites.
+use crypto_lib::hash::sha256::sha256;
+use serde_json::json;
+use std::{env, fs::{self, OpenOptions}, path::Path, process::{Command, Stdio}, thread, time::{Duration, Instant}};
+fn hash(p: &Path) -> String { hex::encode(sha256(&fs::read(p).unwrap())) }
+fn main() {
+    let a: Vec<_> = env::args().skip(1).collect();
+    assert!(a.len() >= 5, "STUDY OUT SCRIPT CAP_SECONDS KEY=VALUE ...");
+    let study = fs::canonicalize(&a[0]).unwrap();
+    let out = Path::new(&a[1]);
+    fs::create_dir_all(out).unwrap();
+    let script = study.join(&a[2]);
+    let cap: u64 = a[3].parse().unwrap();
+    let gp = Path::new("/opt/homebrew/bin/gp");
+    let stdout = OpenOptions::new().write(true).create_new(true).open(out.join("stdout.txt")).unwrap();
+    let stderr = OpenOptions::new().write(true).create_new(true).open(out.join("stderr.txt")).unwrap();
+    let mut vars = serde_json::Map::new();
+    let mut cmd = Command::new(gp);
+    cmd.args(["-q", "-f", "-s", "268435456"]).arg(&script).stdout(Stdio::from(stdout)).stderr(Stdio::from(stderr));
+    for v in &a[4..] { let (k, value) = v.split_once('=').unwrap(); assert!(k.starts_with("ISO1_")); cmd.env(k, value); vars.insert(k.into(), json!(value)); }
+    let version = Command::new(gp).arg("--version-short").output().unwrap();
+    let revision = Command::new("git").args(["rev-parse", "HEAD"]).current_dir(&study).output().unwrap();
+    let freeze = json!({"schema":"iso1.native_gp_run/v1", "revision":String::from_utf8(revision.stdout).unwrap().trim(),"protocol_sha256":hash(&study.join("PROTOCOL.md")),"script":a[2],"script_sha256":hash(&script),"driver_source_sha256":hash(&study.join("run.rs")),"driver_binary_sha256":hash(&env::current_exe().unwrap()),"gp_binary_sha256":hash(gp),"gp_version":String::from_utf8(version.stdout).unwrap().trim(),"cap_seconds":cap,"initial_stack_bytes":268435456,"environment":vars,"timing_scope":"whole GP process, shared host resource diagnostic"});
+    fs::write(out.join("source_freeze.json"),serde_json::to_vec_pretty(&freeze).unwrap()).unwrap();
+    let start = Instant::now(); let mut child = cmd.spawn().unwrap();
+    let mut capped = false;
+    let status = loop { if let Some(s) = child.try_wait().unwrap() { break s; } if start.elapsed() >= Duration::from_secs(cap) { capped = true; child.kill().unwrap(); break child.wait().unwrap(); } thread::sleep(Duration::from_millis(50)); };
+    let text = fs::read_to_string(out.join("stdout.txt")).unwrap();
+    let err = fs::read_to_string(out.join("stderr.txt")).unwrap();
+    let complete = text.lines().any(|l| l.starts_with("TWO_BRANCH_COMPLETE|") || l.starts_with("CONSTRUCTION_COMPLETE|") || l.starts_with("DIRECT_COMPLETE|") || l.starts_with("ALGEBRA_COMPLETE|"));
+    let label = if capped {"PARENT_CAP"} else if !status.success() || !err.trim().is_empty() || !complete {"FAILED_CLOSED"} else {"PASS"};
+    let receipt=json!({"schema":"iso1.native_gp_receipt/v1","status":label,"exit_code":status.code(),"wall_ms":start.elapsed().as_millis().to_string(),"stdout_sha256":hash(&out.join("stdout.txt")),"stderr_sha256":hash(&out.join("stderr.txt")),"complete_marker":complete});
+    fs::write(out.join("receipt.json"),serde_json::to_vec_pretty(&receipt).unwrap()).unwrap();
+    println!("{}",serde_json::to_string(&receipt).unwrap());
+    if label != "PASS" {std::process::exit(1);}
+}

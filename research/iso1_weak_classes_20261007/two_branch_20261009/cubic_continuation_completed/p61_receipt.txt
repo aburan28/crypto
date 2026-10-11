@@ -1,0 +1,13 @@
+prime=61
+command=RAYON_NUM_THREADS=4 /Users/adamburan/Library/Application Support/crypto-iso1/runtime-20261009/bin/iso1_class_census 61 /Users/adamburan/Library/Application Support/crypto-iso1/census-20261009-run4/p61_absolute.csv --derive-twists --absolute-orbit-quotient
+exit_code=0
+resource_wall_seconds=1982.528
+census_binary_sha256=51f14c7022addcee5711d4de3ad67baf632eb84e83c76ce077b9c974be3ff216
+csv_sha256=c6fe50ec3020887b426e345dd56d3f0803f59450a9b366cfeeaf984d7330a69d
+gp_exit_code=0
+gp_samples=5000
+gp_sha256=da352dc22af6273b33432655effbfc703ab0edc9f287b7389898b5fe388f72b7
+audit_exit_code=0
+archive_sha256=fdd59c2ccf11f31aa68b79c42b0c86eee048d621a9b12e406c5fd89f39d7dad5
+archive_replay_sha256=c6fe50ec3020887b426e345dd56d3f0803f59450a9b366cfeeaf984d7330a69d
+status=COMPLETE_DIAGNOSTIC_WITH_GP_CONTROL
