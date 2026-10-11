@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1128" height="806" viewBox="0 0 1128 806" font-family="Helvetica, Arial, sans-serif" font-size="11">
+<svg xmlns="http://www.w3.org/2000/svg" width="1178" height="806" viewBox="0 0 1178 806" font-family="Helvetica, Arial, sans-serif" font-size="11">
 <rect width="100%" height="100%" fill="white"/><text x="10" y="20" font-size="14" font-weight="bold">Controlled re-test (v1): control distributions (grey), target (red ◆), positive controls (green |)</text>
 <text x="10" y="36" fill="#555">Recorded values from rows_v1.jsonl. Band = control 2.5–97.5%. N per row is printed at the right. Seed base 20261011.</text>
 <text x="10" y="62" font-weight="bold">E1 · M1 = log2 of the 2^32-smooth part found (bits)</text>
@@ -963,9 +963,9 @@
 <path d="M1087.7,703.0 l5,6 l-5,6 l-5,-6 z" fill="#d73027"/>
 <text x="1111" y="712" fill="#555" font-size="9">N=100</text>
 <line x1="678" x2="1108" y1="726" y2="726" stroke="#333"/>
-<line x1="678.0" x2="678.0" y1="726" y2="730" stroke="#333"/><text x="678.0" y="741" text-anchor="middle" font-size="9">0.9998</text>
-<line x1="785.5" x2="785.5" y1="726" y2="730" stroke="#333"/><text x="785.5" y="741" text-anchor="middle" font-size="9">0.9999</text>
-<line x1="893.0" x2="893.0" y1="726" y2="730" stroke="#333"/><text x="893.0" y="741" text-anchor="middle" font-size="9">0.9999</text>
-<line x1="1000.5" x2="1000.5" y1="726" y2="730" stroke="#333"/><text x="1000.5" y="741" text-anchor="middle" font-size="9">1.0000</text>
-<line x1="1108.0" x2="1108.0" y1="726" y2="730" stroke="#333"/><text x="1108.0" y="741" text-anchor="middle" font-size="9">1.0000</text>
+<line x1="678.0" x2="678.0" y1="726" y2="730" stroke="#333"/><text x="678.0" y="741" text-anchor="middle" font-size="9">0.999845</text>
+<line x1="785.5" x2="785.5" y1="726" y2="730" stroke="#333"/><text x="785.5" y="741" text-anchor="middle" font-size="9">0.999885</text>
+<line x1="893.0" x2="893.0" y1="726" y2="730" stroke="#333"/><text x="893.0" y="741" text-anchor="middle" font-size="9">0.999925</text>
+<line x1="1000.5" x2="1000.5" y1="726" y2="730" stroke="#333"/><text x="1000.5" y="741" text-anchor="middle" font-size="9">0.999965</text>
+<line x1="1108.0" x2="1108.0" y1="726" y2="730" stroke="#333"/><text x="1108.0" y="741" text-anchor="middle" font-size="9">1.000005</text>
 </svg>

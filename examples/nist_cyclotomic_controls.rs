@@ -600,7 +600,7 @@ fn controls_svg(rows: &[serde_json::Value], mode: &str) -> String {
         col_h[2].max(col_h[3]),
         col_h[4].max(col_h[5]),
     ];
-    let w = 2.0 * (left + pw) + gap + 20.0;
+    let w = 2.0 * (left + pw) + gap + 70.0;
     let h = top + h_row.iter().sum::<f64>() + 40.0;
     let mut s = String::new();
     writeln!(s, r##"<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" font-family="Helvetica, Arial, sans-serif" font-size="11">"##).unwrap();
@@ -739,7 +739,9 @@ fn controls_svg(rows: &[serde_json::Value], mode: &str) -> String {
         .unwrap();
         for k in 0..=4 {
             let v = lo + (hi - lo) * k as f64 / 4.0;
-            let lab = if (hi - lo).abs() < 0.1 {
+            let lab = if (hi - lo).abs() < 0.001 {
+                format!("{v:.6}")
+            } else if (hi - lo).abs() < 0.1 {
                 format!("{v:.4}")
             } else if (hi - lo).abs() < 10.0 {
                 format!("{v:.2}")

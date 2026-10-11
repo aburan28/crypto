@@ -32,7 +32,7 @@ img { max-width: 100%; }
 h1 { font-size: 17pt; } h2 { font-size: 13.5pt; margin-top: 1.2em; } h3 { font-size: 11.5pt; }
 @page { size: A4 landscape; margin: 12mm; }
 CSS
-pandoc "$tmp/report.md" -s --metadata title="Controlled re-test of the NIST cyclotomic / point-height note" \
+pandoc "$tmp/report.md" -f markdown-yaml_metadata_block -s --metadata pagetitle="Controlled re-test of the NIST cyclotomic / point-height note" \
   -c style.css -o "$tmp/report.html"
 "$chrome" --headless=new --no-sandbox --disable-gpu --no-pdf-header-footer \
   --print-to-pdf="$here/REPORT.pdf" "file://$tmp/report.html" 2>/dev/null
