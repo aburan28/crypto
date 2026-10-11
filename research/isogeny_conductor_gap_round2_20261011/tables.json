@@ -1,0 +1,3911 @@
+{
+  "a0": [
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 3,
+          "fiber_size": 121,
+          "fiber_table_entries": 123964,
+          "online_ms_mean": 10.327468416666665,
+          "oracle_setup_gae_mean": 127983.0,
+          "relation_phase_gae_mean": 15138.083333333334,
+          "runs": 12,
+          "s_max": 134.35896172218347,
+          "s_mean": 127.6113577569272,
+          "s_min": 119.28438507757485,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 3,
+          "fiber_size": 121,
+          "fiber_table_entries": 123964,
+          "online_ms_mean": 10.439561833333334,
+          "oracle_setup_gae_mean": 128003.0,
+          "relation_phase_gae_mean": 15138.083333333334,
+          "runs": 12,
+          "s_max": 134.37679090804346,
+          "s_mean": 127.6291869427872,
+          "s_min": 119.30221426343483,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.2858844166666663,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.832166173856984,
+          "s_mean": 1.6113869603696316,
+          "s_min": 0.6222385865131177,
+          "verified": 12
+        }
+      },
+      "pair": "D=-19 11^2 26b h=121",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 3,
+          "fiber_size": 121,
+          "fiber_table_entries": 123964,
+          "online_ms_mean": 10.317474583333334,
+          "oracle_setup_gae_mean": 127983.0,
+          "relation_phase_gae_mean": 14880.666666666666,
+          "runs": 12,
+          "s_max": 136.34780740486366,
+          "s_mean": 127.3829956013707,
+          "s_min": 118.9643511913883,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 3,
+          "fiber_size": 121,
+          "fiber_table_entries": 123964,
+          "online_ms_mean": 10.009336666666666,
+          "oracle_setup_gae_mean": 129323.0,
+          "relation_phase_gae_mean": 14880.666666666666,
+          "runs": 12,
+          "s_max": 137.54236285748198,
+          "s_mean": 128.57755105398903,
+          "s_min": 120.15890664400662,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.76816925,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 3.4249866037011434,
+          "s_mean": 1.4629589880853422,
+          "s_min": 0.570533947519191,
+          "verified": 12
+        }
+      },
+      "pair": "D=-19 11^2 26b h=121",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 1,
+          "fiber_size": 121,
+          "fiber_table_entries": 123964,
+          "online_ms_mean": 10.048041,
+          "oracle_setup_gae_mean": 127925.0,
+          "relation_phase_gae_mean": 15109.333333333334,
+          "runs": 12,
+          "s_max": 133.11805038632923,
+          "s_mean": 127.53201787985034,
+          "s_min": 119.17562704382901,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 1,
+          "fiber_size": 121,
+          "fiber_table_entries": 123964,
+          "online_ms_mean": 13.32529975,
+          "oracle_setup_gae_mean": 128045.0,
+          "relation_phase_gae_mean": 15109.333333333334,
+          "runs": 12,
+          "s_max": 133.22502550148909,
+          "s_mean": 127.63899299501018,
+          "s_min": 119.28260215898885,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.7328054166666664,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.731431273748127,
+          "s_mean": 1.424849103309646,
+          "s_min": 0.6079752378251378,
+          "verified": 12
+        }
+      },
+      "pair": "D=-19 11^2 26b h=121",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 3,
+          "fiber_size": 147,
+          "fiber_table_entries": 150601,
+          "online_ms_mean": 24.54845225,
+          "oracle_setup_gae_mean": 155474.0,
+          "relation_phase_gae_mean": 32569.75,
+          "runs": 12,
+          "s_max": 118.64088888818024,
+          "s_mean": 110.28899604895582,
+          "s_min": 102.6962195909476,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 3,
+          "fiber_size": 147,
+          "fiber_table_entries": 150601,
+          "online_ms_mean": 24.13727433333333,
+          "oracle_setup_gae_mean": 155808.0,
+          "relation_phase_gae_mean": 32569.75,
+          "runs": 12,
+          "s_max": 118.83675205645078,
+          "s_mean": 110.48485921722636,
+          "s_min": 102.89208275921814,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.3664846666666666,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.4213144364940624,
+          "s_mean": 1.2295202878459397,
+          "s_min": 0.37530666973993704,
+          "verified": 12
+        }
+      },
+      "pair": "D=-11 7^3 26b h=147",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 5,
+          "fiber_size": 147,
+          "fiber_table_entries": 150601,
+          "online_ms_mean": 25.67156425,
+          "oracle_setup_gae_mean": 155538.0,
+          "relation_phase_gae_mean": 33749.083333333336,
+          "runs": 12,
+          "s_max": 121.36127582712332,
+          "s_mean": 111.01796083964733,
+          "s_min": 99.44923048102568,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 5,
+          "fiber_size": 147,
+          "fiber_table_entries": 150601,
+          "online_ms_mean": 25.645408333333332,
+          "oracle_setup_gae_mean": 162788.0,
+          "relation_phase_gae_mean": 33749.083333333336,
+          "runs": 12,
+          "s_max": 125.61279669527104,
+          "s_mean": 115.26948170779502,
+          "s_min": 103.7007513491734,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.35719525,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.2524264351110905,
+          "s_mean": 1.1903281069694511,
+          "s_min": 0.5142874208780074,
+          "verified": 12
+        }
+      },
+      "pair": "D=-11 7^3 26b h=147",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 3,
+          "fiber_size": 147,
+          "fiber_table_entries": 150601,
+          "online_ms_mean": 24.279450083333334,
+          "oracle_setup_gae_mean": 155474.0,
+          "relation_phase_gae_mean": 29871.416666666668,
+          "runs": 12,
+          "s_max": 114.97461185815824,
+          "s_mean": 108.70606198043812,
+          "s_min": 103.36649384643627,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 3,
+          "fiber_size": 147,
+          "fiber_table_entries": 150601,
+          "online_ms_mean": 23.034847666666668,
+          "oracle_setup_gae_mean": 156508.0,
+          "relation_phase_gae_mean": 29871.416666666668,
+          "runs": 12,
+          "s_max": 115.58096669645683,
+          "s_mean": 109.31241681873672,
+          "s_min": 103.97284868473486,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.670329,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 1.7510401810053937,
+          "s_mean": 1.0812546060762822,
+          "s_min": 0.2251840018439622,
+          "verified": 12
+        }
+      },
+      "pair": "D=-11 7^3 26b h=147",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 5,
+          "fiber_size": 150,
+          "fiber_table_entries": 153675,
+          "online_ms_mean": 25.19085283333333,
+          "oracle_setup_gae_mean": 158694.0,
+          "relation_phase_gae_mean": 30489.75,
+          "runs": 12,
+          "s_max": 123.38306383166666,
+          "s_mean": 111.90185945093519,
+          "s_min": 97.45680018995256,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 5,
+          "fiber_size": 150,
+          "fiber_table_entries": 153675,
+          "online_ms_mean": 26.424007916666667,
+          "oracle_setup_gae_mean": 158727.0,
+          "relation_phase_gae_mean": 30489.75,
+          "runs": 12,
+          "s_max": 123.40258038580181,
+          "s_mean": 111.92137600507033,
+          "s_min": 97.47631674408771,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 4.2461788333333335,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 1.9806345393517155,
+          "s_mean": 1.375079234658411,
+          "s_min": 0.7960388444214419,
+          "verified": 12
+        }
+      },
+      "pair": "D=-8 5^4 26b h=150",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 3,
+          "fiber_size": 150,
+          "fiber_table_entries": 153675,
+          "online_ms_mean": 31.196066416666667,
+          "oracle_setup_gae_mean": 158636.0,
+          "relation_phase_gae_mean": 36336.583333333336,
+          "runs": 12,
+          "s_max": 120.0244422882273,
+          "s_mean": 115.32602901710116,
+          "s_min": 107.43212499593805,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 3,
+          "fiber_size": 150,
+          "fiber_table_entries": 153675,
+          "online_ms_mean": 27.381611333333332,
+          "oracle_setup_gae_mean": 162359.0,
+          "relation_phase_gae_mean": 36336.583333333336,
+          "runs": 12,
+          "s_max": 122.22626444111069,
+          "s_mean": 117.52785116998456,
+          "s_min": 109.63394714882142,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 4.173245333333334,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.005473790069175,
+          "s_mean": 1.1733096068066657,
+          "s_min": 0.47963410313951665,
+          "verified": 12
+        }
+      },
+      "pair": "D=-8 5^4 26b h=150",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 9,
+          "fiber_size": 150,
+          "fiber_table_entries": 153675,
+          "online_ms_mean": 30.36279408333333,
+          "oracle_setup_gae_mean": 158810.0,
+          "relation_phase_gae_mean": 35531.416666666664,
+          "runs": 12,
+          "s_max": 123.98098008107979,
+          "s_mean": 114.95334168788405,
+          "s_min": 108.84441382244503,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 9,
+          "fiber_size": 150,
+          "fiber_table_entries": 153675,
+          "online_ms_mean": 28.502977333333334,
+          "oracle_setup_gae_mean": 161277.0,
+          "relation_phase_gae_mean": 35531.416666666664,
+          "runs": 12,
+          "s_max": 125.43999035536486,
+          "s_mean": 116.41235196216913,
+          "s_min": 110.3034240967301,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.87661175,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 1.6938003346381945,
+          "s_mean": 1.1262431694352892,
+          "s_min": 0.2625863647274296,
+          "verified": 12
+        }
+      },
+      "pair": "D=-8 5^4 26b h=150",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 3,
+          "fiber_size": 726,
+          "fiber_table_entries": 739431,
+          "online_ms_mean": 2.8802528333333335,
+          "oracle_setup_gae_mean": 767456.0,
+          "relation_phase_gae_mean": 3771.9166666666665,
+          "runs": 12,
+          "s_max": 1613.6318441355618,
+          "s_mean": 1609.0351076351678,
+          "s_min": 1605.2513189364324,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 3,
+          "fiber_size": 726,
+          "fiber_table_entries": 739431,
+          "online_ms_mean": 2.98852825,
+          "oracle_setup_gae_mean": 767509.0,
+          "relation_phase_gae_mean": 3771.9166666666665,
+          "runs": 12,
+          "s_max": 1613.7424161633323,
+          "s_mean": 1609.1456796629388,
+          "s_min": 1605.361890964203,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.3799923333333335,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.0987822629634243,
+          "s_mean": 1.264624103777,
+          "s_min": 0.4276842583573578,
+          "verified": 12
+        }
+      },
+      "pair": "D=-8 11^2 26b h=726",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 1,
+          "fiber_size": 726,
+          "fiber_table_entries": 741609,
+          "online_ms_mean": 2.7655824166666667,
+          "oracle_setup_gae_mean": 767406.0,
+          "relation_phase_gae_mean": 3921.6666666666665,
+          "runs": 12,
+          "s_max": 1612.2820308908924,
+          "s_mean": 1609.246341933503,
+          "s_min": 1605.1866447315101,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 1,
+          "fiber_size": 726,
+          "fiber_table_entries": 741609,
+          "online_ms_mean": 3.2177755833333337,
+          "oracle_setup_gae_mean": 768131.0,
+          "relation_phase_gae_mean": 3921.6666666666665,
+          "runs": 12,
+          "s_max": 1613.794572780205,
+          "s_mean": 1610.758883822816,
+          "s_min": 1606.6991866208227,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.9789501666666665,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.3866867881015477,
+          "s_mean": 1.3437283060341538,
+          "s_min": 0.5758090502762475,
+          "verified": 12
+        }
+      },
+      "pair": "D=-8 11^2 26b h=726",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 3,
+          "fiber_size": 726,
+          "fiber_table_entries": 741609,
+          "online_ms_mean": 2.1773326666666666,
+          "oracle_setup_gae_mean": 767456.0,
+          "relation_phase_gae_mean": 3083.9166666666665,
+          "runs": 12,
+          "s_max": 1611.0782561734673,
+          "s_mean": 1607.5950634433086,
+          "s_min": 1603.7262594590704,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 3,
+          "fiber_size": 726,
+          "fiber_table_entries": 741609,
+          "online_ms_mean": 2.43215375,
+          "oracle_setup_gae_mean": 783448.0,
+          "relation_phase_gae_mean": 3083.9166666666665,
+          "runs": 12,
+          "s_max": 1644.4418008546909,
+          "s_mean": 1640.9586081245325,
+          "s_min": 1637.089804140294,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.510837,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.758041900236229,
+          "s_mean": 1.4438690104300231,
+          "s_min": 0.5069623160040875,
+          "verified": 12
+        }
+      },
+      "pair": "D=-8 11^2 26b h=726",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 3,
+          "fiber_size": 200,
+          "fiber_table_entries": 204901,
+          "online_ms_mean": 11.866226583333335,
+          "oracle_setup_gae_mean": 211486.0,
+          "relation_phase_gae_mean": 16923.25,
+          "runs": 12,
+          "s_max": 197.80087759989004,
+          "s_mean": 193.48232617885674,
+          "s_min": 187.51342958618653,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 3,
+          "fiber_size": 200,
+          "fiber_table_entries": 204901,
+          "online_ms_mean": 12.39003175,
+          "oracle_setup_gae_mean": 211514.0,
+          "relation_phase_gae_mean": 16923.25,
+          "runs": 12,
+          "s_max": 197.8245931065905,
+          "s_mean": 193.50604168555716,
+          "s_min": 187.537145092887,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.1606715833333334,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.4994450097512826,
+          "s_mean": 1.2648270240241437,
+          "s_min": 0.306607622341567,
+          "verified": 12
+        }
+      },
+      "pair": "D=-7 5^4 26b h=200",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 1,
+          "fiber_size": 200,
+          "fiber_table_entries": 204300,
+          "online_ms_mean": 13.802754666666665,
+          "oracle_setup_gae_mean": 211428.0,
+          "relation_phase_gae_mean": 18052.75,
+          "runs": 12,
+          "s_max": 199.67609659399014,
+          "s_mean": 194.38923256455348,
+          "s_min": 188.21811892814284,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 1,
+          "fiber_size": 200,
+          "fiber_table_entries": 204300,
+          "online_ms_mean": 14.512205583333333,
+          "oracle_setup_gae_mean": 211627.0,
+          "relation_phase_gae_mean": 18052.75,
+          "runs": 12,
+          "s_max": 199.84464608803978,
+          "s_mean": 194.55778205860315,
+          "s_min": 188.38666842219249,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.47231525,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.347835163344817,
+          "s_mean": 1.1357327926100727,
+          "s_min": 0.3794481072072432,
+          "verified": 12
+        }
+      },
+      "pair": "D=-7 5^4 26b h=200",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 5,
+          "fiber_size": 200,
+          "fiber_table_entries": 204900,
+          "online_ms_mean": 11.48015925,
+          "oracle_setup_gae_mean": 211544.0,
+          "relation_phase_gae_mean": 15895.75,
+          "runs": 12,
+          "s_max": 197.3739984792819,
+          "s_mean": 192.66456468888222,
+          "s_min": 188.72292042790963,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 5,
+          "fiber_size": 200,
+          "fiber_table_entries": 204900,
+          "online_ms_mean": 11.54151375,
+          "oracle_setup_gae_mean": 221592.0,
+          "relation_phase_gae_mean": 15895.75,
+          "runs": 12,
+          "s_max": 205.88447745521577,
+          "s_mean": 201.17504366481612,
+          "s_min": 197.2333994038435,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.0479069166666664,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 3.193123580739524,
+          "s_mean": 1.2264304893662683,
+          "s_min": 0.33709898809929195,
+          "verified": 12
+        }
+      },
+      "pair": "D=-7 5^4 26b h=200",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 5,
+          "fiber_size": 1568,
+          "fiber_table_entries": 1477841,
+          "online_ms_mean": 0.6776565833333333,
+          "oracle_setup_gae_mean": 1652771.0,
+          "relation_phase_gae_mean": 921.0833333333334,
+          "runs": 12,
+          "s_max": 11257.12223062925,
+          "s_mean": 11254.938113074915,
+          "s_min": 11253.848606499512,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 5,
+          "fiber_size": 1568,
+          "fiber_table_entries": 1477841,
+          "online_ms_mean": 0.7273444166666666,
+          "oracle_setup_gae_mean": 1655262.0,
+          "relation_phase_gae_mean": 921.0833333333334,
+          "runs": 12,
+          "s_max": 11274.075656215891,
+          "s_mean": 11271.891538661555,
+          "s_min": 11270.802032086154,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.5184891666666664,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.8993012042991095,
+          "s_mean": 1.7627206852428856,
+          "s_min": 0.8915691496788342,
+          "verified": 12
+        }
+      },
+      "pair": "D=-7 7^3 26b h=1568",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 3,
+          "fiber_size": 1568,
+          "fiber_table_entries": 1524880,
+          "online_ms_mean": 0.8509715833333333,
+          "oracle_setup_gae_mean": 1657435.0,
+          "relation_phase_gae_mean": 957.0833333333334,
+          "runs": 12,
+          "s_max": 11289.416090287465,
+          "s_mean": 11286.924007053565,
+          "s_min": 11285.808978460518,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 3,
+          "fiber_size": 1568,
+          "fiber_table_entries": 1524880,
+          "online_ms_mean": 0.7556606666666666,
+          "oracle_setup_gae_mean": 2887529.0,
+          "relation_phase_gae_mean": 957.0833333333334,
+          "runs": 12,
+          "s_max": 19661.2776292572,
+          "s_mean": 19658.785546023304,
+          "s_min": 19657.67051743026,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.4561770833333334,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 3.450576785398236,
+          "s_mean": 1.9572551752809517,
+          "s_min": 0.8098986932197043,
+          "verified": 12
+        }
+      },
+      "pair": "D=-7 7^3 26b h=1568",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 1,
+          "fiber_size": 1568,
+          "fiber_table_entries": 1538992,
+          "online_ms_mean": 0.77202375,
+          "oracle_setup_gae_mean": 1657395.0,
+          "relation_phase_gae_mean": 960.4166666666666,
+          "runs": 12,
+          "s_max": 11288.347568482124,
+          "s_mean": 11286.672756968763,
+          "s_min": 11284.69962142695,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 1,
+          "fiber_size": 1568,
+          "fiber_table_entries": 1538992,
+          "online_ms_mean": 0.7497371666666667,
+          "oracle_setup_gae_mean": 1658962.0,
+          "relation_phase_gae_mean": 960.4166666666666,
+          "runs": 12,
+          "s_max": 11299.012368921412,
+          "s_mean": 11297.337557408051,
+          "s_min": 11295.364421866238,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.4587230833333336,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 3.1511184450480934,
+          "s_mean": 1.6175287626488775,
+          "s_min": 0.7690634649901393,
+          "verified": 12
+        }
+      },
+      "pair": "D=-7 7^3 26b h=1568",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 9,
+          "fiber_size": 5408,
+          "fiber_table_entries": 5280913,
+          "online_ms_mean": 0.912528,
+          "oracle_setup_gae_mean": 5716435.0,
+          "relation_phase_gae_mean": 1038.0,
+          "runs": 4,
+          "s_max": 32552.901505977094,
+          "s_mean": 32551.478176689678,
+          "s_min": 32550.083313988012,
+          "verified": 4
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 9,
+          "fiber_size": 5408,
+          "fiber_table_entries": 5280913,
+          "online_ms_mean": 0.7172995,
+          "oracle_setup_gae_mean": 6562055.0,
+          "relation_phase_gae_mean": 1038.0,
+          "runs": 4,
+          "s_max": 37367.28435407218,
+          "s_mean": 37365.86102478476,
+          "s_min": 37364.466162083096,
+          "verified": 4
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.37222275,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 4,
+          "s_max": 2.3342600313604045,
+          "s_mean": 1.5613922282941242,
+          "s_min": 1.1329701127822451,
+          "verified": 4
+        }
+      },
+      "pair": "D=-7 13^2 26b h=5408",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 7,
+          "fiber_size": 5408,
+          "fiber_table_entries": 5394480,
+          "online_ms_mean": 0.87650725,
+          "oracle_setup_gae_mean": 5716395.0,
+          "relation_phase_gae_mean": 1146.25,
+          "runs": 4,
+          "s_max": 32552.548520313816,
+          "s_mean": 32551.889518853743,
+          "s_min": 32551.096724440653,
+          "verified": 4
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 7,
+          "fiber_size": 5408,
+          "fiber_table_entries": 5394480,
+          "online_ms_mean": 0.93662575,
+          "oracle_setup_gae_mean": 20342329.0,
+          "relation_phase_gae_mean": 1146.25,
+          "runs": 4,
+          "s_max": 115822.62939230213,
+          "s_mean": 115821.97039084206,
+          "s_min": 115821.17759642897,
+          "verified": 4
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.7096325,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 4,
+          "s_max": 2.328566714210745,
+          "s_mean": 1.6667185955628254,
+          "s_min": 0.7856777666530143,
+          "verified": 4
+        }
+      },
+      "pair": "D=-7 13^2 26b h=5408",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 1,
+          "fiber_size": 5408,
+          "fiber_table_entries": 5318768,
+          "online_ms_mean": 0.77742025,
+          "oracle_setup_gae_mean": 5716275.0,
+          "relation_phase_gae_mean": 1007.5,
+          "runs": 4,
+          "s_max": 32551.45540342108,
+          "s_mean": 32550.390753114094,
+          "s_min": 32549.496902321596,
+          "verified": 4
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 1,
+          "fiber_size": 5408,
+          "fiber_table_entries": 5318768,
+          "online_ms_mean": 0.774541,
+          "oracle_setup_gae_mean": 5721682.0,
+          "relation_phase_gae_mean": 1007.5,
+          "runs": 4,
+          "s_max": 32582.23916924929,
+          "s_mean": 32581.1745189423,
+          "s_min": 32580.280668149808,
+          "verified": 4
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.005897,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 4,
+          "s_max": 1.7649283163944522,
+          "s_mean": 1.5457356061325607,
+          "s_min": 1.3607027987686262,
+          "verified": 4
+        }
+      },
+      "pair": "D=-7 13^2 26b h=5408",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 5,
+          "fiber_size": 98,
+          "fiber_table_entries": 94227,
+          "online_ms_mean": 7.386520666666667,
+          "oracle_setup_gae_mean": 103720.0,
+          "relation_phase_gae_mean": 11714.833333333334,
+          "runs": 12,
+          "s_max": 128.44279624837569,
+          "s_mean": 122.59687775921633,
+          "s_min": 117.41069118649415,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 5,
+          "fiber_size": 98,
+          "fiber_table_entries": 94227,
+          "online_ms_mean": 7.4039615,
+          "oracle_setup_gae_mean": 103934.0,
+          "relation_phase_gae_mean": 11714.833333333334,
+          "runs": 12,
+          "s_max": 128.6700215114404,
+          "s_mean": 122.82410302228105,
+          "s_min": 117.63791644955889,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.6753143333333336,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 1.8432853115906007,
+          "s_mean": 1.0498550413797274,
+          "s_min": 0.40985491375228794,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 7^3 26b h=98",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 1,
+          "fiber_size": 98,
+          "fiber_table_entries": 100401,
+          "online_ms_mean": 7.567092916666667,
+          "oracle_setup_gae_mean": 103612.0,
+          "relation_phase_gae_mean": 10792.583333333334,
+          "runs": 12,
+          "s_max": 125.96667796114683,
+          "s_mean": 121.5024271054594,
+          "s_min": 117.86514171262363,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 1,
+          "fiber_size": 98,
+          "fiber_table_entries": 100401,
+          "online_ms_mean": 7.92639775,
+          "oracle_setup_gae_mean": 103709.0,
+          "relation_phase_gae_mean": 10792.583333333334,
+          "runs": 12,
+          "s_max": 126.06967258973225,
+          "s_mean": 121.60542173404484,
+          "s_min": 117.96813634120905,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.06196975,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.1427129946946035,
+          "s_mean": 1.0709140805578456,
+          "s_min": 0.28456247897827247,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 7^3 26b h=98",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 3,
+          "fiber_size": 98,
+          "fiber_table_entries": 100401,
+          "online_ms_mean": 6.055347416666667,
+          "oracle_setup_gae_mean": 103666.0,
+          "relation_phase_gae_mean": 9357.25,
+          "runs": 12,
+          "s_max": 125.49842403118632,
+          "s_mean": 120.03360336446457,
+          "s_min": 116.57080715339036,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 3,
+          "fiber_size": 98,
+          "fiber_table_entries": 100401,
+          "online_ms_mean": 6.653629916666667,
+          "oracle_setup_gae_mean": 104357.0,
+          "relation_phase_gae_mean": 9357.25,
+          "runs": 12,
+          "s_max": 126.23212803482059,
+          "s_mean": 120.76730736809886,
+          "s_min": 117.30451115702465,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.9209136666666664,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.1087353852643624,
+          "s_mean": 1.28433593979155,
+          "s_min": 0.8611200389976826,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 7^3 26b h=98",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 3,
+          "fiber_size": 147,
+          "fiber_table_entries": 150307,
+          "online_ms_mean": 10.911919916666665,
+          "oracle_setup_gae_mean": 155453.0,
+          "relation_phase_gae_mean": 15415.5,
+          "runs": 12,
+          "s_max": 170.98727784815497,
+          "s_mean": 166.47962714840523,
+          "s_min": 161.96467029916104,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 3,
+          "fiber_size": 147,
+          "fiber_table_entries": 150307,
+          "online_ms_mean": 10.950749833333333,
+          "oracle_setup_gae_mean": 155479.0,
+          "relation_phase_gae_mean": 15415.5,
+          "runs": 12,
+          "s_max": 171.01260583306902,
+          "s_mean": 166.50495513331927,
+          "s_min": 161.98999828407509,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.437128,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 3.809913423031233,
+          "s_mean": 1.7534758786643365,
+          "s_min": 0.8689447132047711,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 7^3 26b h=147",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 1,
+          "fiber_size": 147,
+          "fiber_table_entries": 150160,
+          "online_ms_mean": 9.084756333333335,
+          "oracle_setup_gae_mean": 155403.0,
+          "relation_phase_gae_mean": 13510.583333333334,
+          "runs": 12,
+          "s_max": 172.24588386772962,
+          "s_mean": 164.5737774630625,
+          "s_min": 156.1499494548569,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 1,
+          "fiber_size": 147,
+          "fiber_table_entries": 150160,
+          "online_ms_mean": 8.948952916666666,
+          "oracle_setup_gae_mean": 155549.0,
+          "relation_phase_gae_mean": 13510.583333333334,
+          "runs": 12,
+          "s_max": 172.3881102445546,
+          "s_mean": 164.71600383988752,
+          "s_min": 156.29217583168193,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.86812,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.0729981498876153,
+          "s_mean": 1.1369992202116987,
+          "s_min": 0.43642066313423483,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 7^3 26b h=147",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-closed-coset": {
+          "fiber_samples": 1,
+          "fiber_size": 147,
+          "fiber_table_entries": 150601,
+          "online_ms_mean": 8.571385583333335,
+          "oracle_setup_gae_mean": 155403.0,
+          "relation_phase_gae_mean": 13342.583333333334,
+          "runs": 12,
+          "s_max": 168.0930684950929,
+          "s_mean": 164.41279863586846,
+          "s_min": 160.0017514683229,
+          "verified": 12
+        },
+        "ic-closed-legacy": {
+          "fiber_samples": 1,
+          "fiber_size": 147,
+          "fiber_table_entries": 150601,
+          "online_ms_mean": 8.228971833333333,
+          "oracle_setup_gae_mean": 155549.0,
+          "relation_phase_gae_mean": 13342.583333333334,
+          "runs": 12,
+          "s_max": 168.2352948719179,
+          "s_mean": 164.55502501269345,
+          "s_min": 160.1439778451479,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.8675141666666666,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.4655819160552417,
+          "s_mean": 1.2873435409194003,
+          "s_min": 0.5094821580785822,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 7^3 26b h=147",
+      "role": "floor-iso"
+    }
+  ],
+  "e1": [
+    {
+      "arms": {
+        "ic-closed-d1": {
+          "fiber_samples": 3,
+          "fiber_size": 726,
+          "fiber_table_entries": 739431,
+          "online_ms_mean": 2.55477775,
+          "oracle_setup_gae_mean": 767456.0,
+          "relation_phase_gae_mean": 3544.375,
+          "runs": 8,
+          "s_max": 1613.6318441355618,
+          "s_mean": 1608.5603954939302,
+          "s_min": 1605.2513189364324,
+          "verified": 8
+        },
+        "ic-closed-d11": {
+          "fiber_samples": 64,
+          "fiber_size": 6,
+          "fiber_table_entries": 6147,
+          "online_ms_mean": 72.965365125,
+          "oracle_setup_gae_mean": 8197.0,
+          "relation_phase_gae_mean": 86594.25,
+          "runs": 8,
+          "s_max": 307.0647799125334,
+          "s_mean": 197.80918515196527,
+          "s_min": 78.97763553354213,
+          "verified": 8
+        },
+        "ic-closed-d2": {
+          "fiber_samples": 64,
+          "fiber_size": 363,
+          "fiber_table_entries": 369715,
+          "online_ms_mean": 3.882376375,
+          "oracle_setup_gae_mean": 385354.0,
+          "relation_phase_gae_mean": 5488.125,
+          "runs": 8,
+          "s_max": 819.165565810934,
+          "s_mean": 815.4496676418279,
+          "s_min": 810.2363530023023,
+          "verified": 8
+        },
+        "ic-closed-d22": {
+          "fiber_samples": 64,
+          "fiber_size": 3,
+          "fiber_table_entries": 3073,
+          "online_ms_mean": 125.4458795,
+          "oracle_setup_gae_mean": 5090.0,
+          "relation_phase_gae_mean": 152470.75,
+          "runs": 8,
+          "s_max": 494.11301187129254,
+          "s_mean": 328.7629756639758,
+          "s_min": 194.9092772538349,
+          "verified": 8
+        },
+        "ic-closed-d3": {
+          "fiber_samples": 64,
+          "fiber_size": 242,
+          "fiber_table_entries": 247929,
+          "online_ms_mean": 4.86360425,
+          "oracle_setup_gae_mean": 257521.0,
+          "relation_phase_gae_mean": 6983.375,
+          "runs": 8,
+          "s_max": 555.1466849358999,
+          "s_mean": 551.8756827087192,
+          "s_min": 543.6284176657,
+          "verified": 8
+        },
+        "ic-closed-d33": {
+          "fiber_samples": 64,
+          "fiber_size": 2,
+          "fiber_table_entries": 2049,
+          "online_ms_mean": 187.2506355,
+          "oracle_setup_gae_mean": 4225.0,
+          "relation_phase_gae_mean": 225515.625,
+          "runs": 8,
+          "s_max": 919.86538913968,
+          "s_mean": 479.3492991161798,
+          "s_min": 242.20906996348376,
+          "verified": 8
+        },
+        "ic-closed-d6": {
+          "fiber_samples": 64,
+          "fiber_size": 121,
+          "fiber_table_entries": 123964,
+          "online_ms_mean": 9.41027,
+          "oracle_setup_gae_mean": 129688.0,
+          "relation_phase_gae_mean": 13595.125,
+          "runs": 8,
+          "s_max": 319.4843135222961,
+          "s_mean": 298.9760709848077,
+          "s_min": 276.9307729480765,
+          "verified": 8
+        },
+        "ic-closed-d66": {
+          "fiber_samples": 64,
+          "fiber_size": 1,
+          "fiber_table_entries": 1024,
+          "online_ms_mean": 181.927610375,
+          "oracle_setup_gae_mean": 3232.0,
+          "relation_phase_gae_mean": 225515.625,
+          "runs": 8,
+          "s_max": 917.7937283174905,
+          "s_mean": 477.27763829399015,
+          "s_min": 240.1374091412942,
+          "verified": 8
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.496496125,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 8,
+          "s_max": 2.0987822629634243,
+          "s_mean": 1.4243972067974928,
+          "s_min": 0.4276842583573578,
+          "verified": 8
+        }
+      },
+      "pair": "D=-8 11^2 26b h=726",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-closed-d1": {
+          "fiber_samples": 1,
+          "fiber_size": 726,
+          "fiber_table_entries": 741609,
+          "online_ms_mean": 3.119509875,
+          "oracle_setup_gae_mean": 767406.0,
+          "relation_phase_gae_mean": 3990.125,
+          "runs": 8,
+          "s_max": 1612.2820308908924,
+          "s_mean": 1609.3891641360399,
+          "s_min": 1605.651881754016,
+          "verified": 8
+        },
+        "ic-closed-d11": {
+          "fiber_samples": 64,
+          "fiber_size": 66,
+          "fiber_table_entries": 67617,
+          "online_ms_mean": 8.582633,
+          "oracle_setup_gae_mean": 71617.0,
+          "relation_phase_gae_mean": 13212.75,
+          "runs": 8,
+          "s_max": 192.61855864077938,
+          "s_mean": 177.0299889898224,
+          "s_min": 160.08534730017138,
+          "verified": 8
+        },
+        "ic-closed-d2": {
+          "fiber_samples": 64,
+          "fiber_size": 363,
+          "fiber_table_entries": 370804,
+          "online_ms_mean": 4.43319975,
+          "oracle_setup_gae_mean": 385354.0,
+          "relation_phase_gae_mean": 6457.375,
+          "runs": 8,
+          "s_max": 822.9583949899276,
+          "s_mean": 817.4749090750005,
+          "s_min": 813.8184694491296,
+          "verified": 8
+        },
+        "ic-closed-d22": {
+          "fiber_samples": 64,
+          "fiber_size": 33,
+          "fiber_table_entries": 33808,
+          "online_ms_mean": 14.70688875,
+          "oracle_setup_gae_mean": 36800.0,
+          "relation_phase_gae_mean": 21796.5,
+          "runs": 8,
+          "s_max": 152.59774338190525,
+          "s_mean": 122.30048620663628,
+          "s_min": 103.16161564514452,
+          "verified": 8
+        },
+        "ic-closed-d3": {
+          "fiber_samples": 64,
+          "fiber_size": 242,
+          "fiber_table_entries": 247203,
+          "online_ms_mean": 6.685668625,
+          "oracle_setup_gae_mean": 257521.0,
+          "relation_phase_gae_mean": 9055.375,
+          "runs": 8,
+          "s_max": 561.8790610418472,
+          "s_mean": 556.2015525121533,
+          "s_min": 548.6813507083416,
+          "verified": 8
+        },
+        "ic-closed-d33": {
+          "fiber_samples": 64,
+          "fiber_size": 22,
+          "fiber_table_entries": 22539,
+          "online_ms_mean": 26.3266795,
+          "oracle_setup_gae_mean": 25365.0,
+          "relation_phase_gae_mean": 37420.25,
+          "runs": 8,
+          "s_max": 159.0693364034883,
+          "s_mean": 131.03932736368208,
+          "s_min": 96.86735512092918,
+          "verified": 8
+        },
+        "ic-closed-d6": {
+          "fiber_samples": 64,
+          "fiber_size": 121,
+          "fiber_table_entries": 123601,
+          "online_ms_mean": 8.673595625,
+          "oracle_setup_gae_mean": 129688.0,
+          "relation_phase_gae_mean": 11370.0,
+          "runs": 8,
+          "s_max": 299.28301267510443,
+          "s_mean": 294.3370006970522,
+          "s_min": 289.06448829737593,
+          "verified": 8
+        },
+        "ic-closed-d66": {
+          "fiber_samples": 64,
+          "fiber_size": 11,
+          "fiber_table_entries": 11269,
+          "online_ms_mean": 29.586137375,
+          "oracle_setup_gae_mean": 13802.0,
+          "relation_phase_gae_mean": 40843.875,
+          "runs": 8,
+          "s_max": 170.03474353483597,
+          "s_mean": 114.05843682530441,
+          "s_min": 72.73553162619962,
+          "verified": 8
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.42070175,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 8,
+          "s_max": 1.996555293892641,
+          "s_mean": 1.4084894386512743,
+          "s_min": 1.0055795733085193,
+          "verified": 8
+        }
+      },
+      "pair": "D=-8 11^2 26b h=726",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-closed-d1": {
+          "fiber_samples": 3,
+          "fiber_size": 726,
+          "fiber_table_entries": 741609,
+          "online_ms_mean": 2.325762375,
+          "oracle_setup_gae_mean": 767456.0,
+          "relation_phase_gae_mean": 3451.625,
+          "runs": 8,
+          "s_max": 1611.0782561734673,
+          "s_mean": 1608.3622003498135,
+          "s_min": 1604.5795417111103,
+          "verified": 8
+        },
+        "ic-closed-d11": {
+          "fiber_samples": 64,
+          "fiber_size": 66,
+          "fiber_table_entries": 67617,
+          "online_ms_mean": 9.699763,
+          "oracle_setup_gae_mean": 71617.0,
+          "relation_phase_gae_mean": 14097.125,
+          "runs": 8,
+          "s_max": 189.7791524182215,
+          "s_mean": 178.86720581916853,
+          "s_min": 169.09383816644979,
+          "verified": 8
+        },
+        "ic-closed-d2": {
+          "fiber_samples": 64,
+          "fiber_size": 363,
+          "fiber_table_entries": 370804,
+          "online_ms_mean": 3.79842825,
+          "oracle_setup_gae_mean": 385354.0,
+          "relation_phase_gae_mean": 5686.875,
+          "runs": 8,
+          "s_max": 821.1683798988514,
+          "s_mean": 815.8596186504484,
+          "s_min": 812.885909139443,
+          "verified": 8
+        },
+        "ic-closed-d22": {
+          "fiber_samples": 64,
+          "fiber_size": 33,
+          "fiber_table_entries": 33808,
+          "online_ms_mean": 12.7690095,
+          "oracle_setup_gae_mean": 36800.0,
+          "relation_phase_gae_mean": 18347.25,
+          "runs": 8,
+          "s_max": 134.8999601446103,
+          "s_mean": 115.09661428415843,
+          "s_min": 98.9682236485675,
+          "verified": 8
+        },
+        "ic-closed-d3": {
+          "fiber_samples": 64,
+          "fiber_size": 242,
+          "fiber_table_entries": 247929,
+          "online_ms_mean": 4.048315875,
+          "oracle_setup_gae_mean": 257521.0,
+          "relation_phase_gae_mean": 5375.5,
+          "runs": 8,
+          "s_max": 555.1153909657762,
+          "s_mean": 548.5165357990234,
+          "s_min": 540.7034745914707,
+          "verified": 8
+        },
+        "ic-closed-d33": {
+          "fiber_samples": 64,
+          "fiber_size": 22,
+          "fiber_table_entries": 22539,
+          "online_ms_mean": 22.95042075,
+          "oracle_setup_gae_mean": 25365.0,
+          "relation_phase_gae_mean": 34739.75,
+          "runs": 8,
+          "s_max": 169.936689095115,
+          "s_mean": 125.43927141004431,
+          "s_min": 85.58692202366949,
+          "verified": 8
+        },
+        "ic-closed-d6": {
+          "fiber_samples": 64,
+          "fiber_size": 121,
+          "fiber_table_entries": 123964,
+          "online_ms_mean": 7.189284,
+          "oracle_setup_gae_mean": 129688.0,
+          "relation_phase_gae_mean": 9528.25,
+          "runs": 8,
+          "s_max": 296.94222370985096,
+          "s_mean": 290.4867992394985,
+          "s_min": 280.38562724973394,
+          "verified": 8
+        },
+        "ic-closed-d66": {
+          "fiber_samples": 64,
+          "fiber_size": 11,
+          "fiber_table_entries": 11269,
+          "online_ms_mean": 28.849720375,
+          "oracle_setup_gae_mean": 13802.0,
+          "relation_phase_gae_mean": 42970.25,
+          "runs": 8,
+          "s_max": 221.40483862524192,
+          "s_mean": 118.48679438089363,
+          "s_min": 62.75484142141133,
+          "verified": 8
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.488484125,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 8,
+          "s_max": 2.758041900236229,
+          "s_mean": 1.5952101270560717,
+          "s_min": 0.5069623160040875,
+          "verified": 8
+        }
+      },
+      "pair": "D=-8 11^2 26b h=726",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-closed-d1": {
+          "fiber_samples": 3,
+          "fiber_size": 200,
+          "fiber_table_entries": 204901,
+          "online_ms_mean": 12.911539875,
+          "oracle_setup_gae_mean": 211486.0,
+          "relation_phase_gae_mean": 16753.875,
+          "runs": 8,
+          "s_max": 197.17665158423884,
+          "s_mean": 193.33886853787854,
+          "s_min": 188.40868996412863,
+          "verified": 8
+        },
+        "ic-closed-d10": {
+          "fiber_samples": 64,
+          "fiber_size": 2,
+          "fiber_table_entries": 2049,
+          "online_ms_mean": 364.050340125,
+          "oracle_setup_gae_mean": 4417.0,
+          "relation_phase_gae_mean": 412899.125,
+          "runs": 8,
+          "s_max": 568.6563485401299,
+          "s_mean": 353.4831211725739,
+          "s_min": 36.565923402569425,
+          "verified": 8
+        },
+        "ic-closed-d2": {
+          "fiber_samples": 64,
+          "fiber_size": 50,
+          "fiber_table_entries": 51225,
+          "online_ms_mean": 31.585088,
+          "oracle_setup_gae_mean": 54769.0,
+          "relation_phase_gae_mean": 40119.25,
+          "runs": 8,
+          "s_max": 96.78891172122258,
+          "s_mean": 80.39239153060156,
+          "s_min": 67.20466409478999,
+          "verified": 8
+        },
+        "ic-closed-d20": {
+          "fiber_samples": 64,
+          "fiber_size": 1,
+          "fiber_table_entries": 1024,
+          "online_ms_mean": 507.55953925,
+          "oracle_setup_gae_mean": 3424.0,
+          "relation_phase_gae_mean": 561181.375,
+          "runs": 8,
+          "s_max": 953.9960651976713,
+          "s_mean": 478.23452100399004,
+          "s_min": 35.72486989708551,
+          "verified": 8
+        },
+        "ic-closed-d25": {
+          "fiber_samples": 64,
+          "fiber_size": 8,
+          "fiber_table_entries": 8197,
+          "online_ms_mean": 124.7293435,
+          "oracle_setup_gae_mean": 10695.0,
+          "relation_phase_gae_mean": 164461.25,
+          "runs": 8,
+          "s_max": 244.5077210640495,
+          "s_mean": 148.37797338174215,
+          "s_min": 41.88666672729242,
+          "verified": 8
+        },
+        "ic-closed-d4": {
+          "fiber_samples": 64,
+          "fiber_size": 25,
+          "fiber_table_entries": 25612,
+          "online_ms_mean": 41.3839125,
+          "oracle_setup_gae_mean": 28408.0,
+          "relation_phase_gae_mean": 56835.875,
+          "runs": 8,
+          "s_max": 83.42945860742827,
+          "s_mean": 72.22377581866661,
+          "s_min": 56.89265359200387,
+          "verified": 8
+        },
+        "ic-closed-d5": {
+          "fiber_samples": 64,
+          "fiber_size": 8,
+          "fiber_table_entries": 8197,
+          "online_ms_mean": 127.605927375,
+          "oracle_setup_gae_mean": 10695.0,
+          "relation_phase_gae_mean": 164461.25,
+          "runs": 8,
+          "s_max": 244.5077210640495,
+          "s_mean": 148.37797338174215,
+          "s_min": 41.88666672729242,
+          "verified": 8
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.412916125,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 8,
+          "s_max": 2.4994450097512826,
+          "s_mean": 1.3387615278001088,
+          "s_min": 0.6030514560972258,
+          "verified": 8
+        }
+      },
+      "pair": "D=-7 5^4 26b h=200",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-closed-d1": {
+          "fiber_samples": 1,
+          "fiber_size": 200,
+          "fiber_table_entries": 204300,
+          "online_ms_mean": 14.56566525,
+          "oracle_setup_gae_mean": 211428.0,
+          "relation_phase_gae_mean": 18347.5,
+          "runs": 8,
+          "s_max": 199.3525493240054,
+          "s_mean": 194.63888062169485,
+          "s_min": 188.21811892814284,
+          "verified": 8
+        },
+        "ic-closed-d10": {
+          "fiber_samples": 64,
+          "fiber_size": 20,
+          "fiber_table_entries": 20490,
+          "online_ms_mean": 74.80387575,
+          "oracle_setup_gae_mean": 23443.0,
+          "relation_phase_gae_mean": 79162.0,
+          "runs": 8,
+          "s_max": 125.10776766870957,
+          "s_mean": 86.92770759134058,
+          "s_min": 36.49901179437886,
+          "verified": 8
+        },
+        "ic-closed-d2": {
+          "fiber_samples": 64,
+          "fiber_size": 100,
+          "fiber_table_entries": 102150,
+          "online_ms_mean": 24.828451375,
+          "oracle_setup_gae_mean": 107619.0,
+          "relation_phase_gae_mean": 30004.25,
+          "runs": 8,
+          "s_max": 124.66479588284041,
+          "s_mean": 116.58754839538088,
+          "s_min": 105.95834299047618,
+          "verified": 8
+        },
+        "ic-closed-d20": {
+          "fiber_samples": 64,
+          "fiber_size": 10,
+          "fiber_table_entries": 10245,
+          "online_ms_mean": 111.12418225,
+          "oracle_setup_gae_mean": 12937.0,
+          "relation_phase_gae_mean": 137163.25,
+          "runs": 8,
+          "s_max": 259.5518221359581,
+          "s_mean": 127.15534757757902,
+          "s_min": 57.495705048101094,
+          "verified": 8
+        },
+        "ic-closed-d25": {
+          "fiber_samples": 64,
+          "fiber_size": 8,
+          "fiber_table_entries": 8196,
+          "online_ms_mean": 166.41088525,
+          "oracle_setup_gae_mean": 10695.0,
+          "relation_phase_gae_mean": 198623.375,
+          "runs": 8,
+          "s_max": 287.6013376859185,
+          "s_mean": 177.31205615706992,
+          "s_min": 91.62570711958116,
+          "verified": 8
+        },
+        "ic-closed-d4": {
+          "fiber_samples": 64,
+          "fiber_size": 50,
+          "fiber_table_entries": 51225,
+          "online_ms_mean": 43.455138375,
+          "oracle_setup_gae_mean": 54833.0,
+          "relation_phase_gae_mean": 50709.875,
+          "runs": 8,
+          "s_max": 128.79214103110132,
+          "s_mean": 89.41603595732605,
+          "s_min": 61.23428528295103,
+          "verified": 8
+        },
+        "ic-closed-d5": {
+          "fiber_samples": 64,
+          "fiber_size": 40,
+          "fiber_table_entries": 40980,
+          "online_ms_mean": 51.052352375,
+          "oracle_setup_gae_mean": 44519.0,
+          "relation_phase_gae_mean": 56170.375,
+          "runs": 8,
+          "s_max": 120.29606075566416,
+          "s_mean": 85.3052069655172,
+          "s_min": 54.35509437505543,
+          "verified": 8
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.58628125,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 8,
+          "s_max": 2.347835163344817,
+          "s_mean": 1.0795849188594473,
+          "s_min": 0.3794481072072432,
+          "verified": 8
+        }
+      },
+      "pair": "D=-7 5^4 26b h=200",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-closed-d1": {
+          "fiber_samples": 5,
+          "fiber_size": 200,
+          "fiber_table_entries": 204900,
+          "online_ms_mean": 13.79067975,
+          "oracle_setup_gae_mean": 211544.0,
+          "relation_phase_gae_mean": 16352.625,
+          "runs": 8,
+          "s_max": 197.3739984792819,
+          "s_mean": 193.0515297647311,
+          "s_min": 188.72292042790963,
+          "verified": 8
+        },
+        "ic-closed-d10": {
+          "fiber_samples": 64,
+          "fiber_size": 20,
+          "fiber_table_entries": 20490,
+          "online_ms_mean": 92.354259375,
+          "oracle_setup_gae_mean": 23443.0,
+          "relation_phase_gae_mean": 109572.875,
+          "runs": 8,
+          "s_max": 143.43477245386654,
+          "s_mean": 112.68920610869618,
+          "s_min": 60.445744685160975,
+          "verified": 8
+        },
+        "ic-closed-d2": {
+          "fiber_samples": 64,
+          "fiber_size": 100,
+          "fiber_table_entries": 102450,
+          "online_ms_mean": 21.806857125,
+          "oracle_setup_gae_mean": 107619.0,
+          "relation_phase_gae_mean": 28883.625,
+          "runs": 8,
+          "s_max": 122.57783129320057,
+          "s_mean": 115.64242192968918,
+          "s_min": 101.57012726851028,
+          "verified": 8
+        },
+        "ic-closed-d20": {
+          "fiber_samples": 64,
+          "fiber_size": 10,
+          "fiber_table_entries": 10245,
+          "online_ms_mean": 156.5486725,
+          "oracle_setup_gae_mean": 12937.0,
+          "relation_phase_gae_mean": 177760.625,
+          "runs": 8,
+          "s_max": 210.11430747171795,
+          "s_mean": 161.54463213079754,
+          "s_min": 98.16356412746667,
+          "verified": 8
+        },
+        "ic-closed-d25": {
+          "fiber_samples": 64,
+          "fiber_size": 8,
+          "fiber_table_entries": 8196,
+          "online_ms_mean": 194.476350875,
+          "oracle_setup_gae_mean": 10695.0,
+          "relation_phase_gae_mean": 203167.75,
+          "runs": 8,
+          "s_max": 245.73753948294438,
+          "s_mean": 181.16508488630907,
+          "s_min": 115.29378280663295,
+          "verified": 8
+        },
+        "ic-closed-d4": {
+          "fiber_samples": 64,
+          "fiber_size": 50,
+          "fiber_table_entries": 51225,
+          "online_ms_mean": 35.796039375,
+          "oracle_setup_gae_mean": 54833.0,
+          "relation_phase_gae_mean": 44581.75,
+          "runs": 8,
+          "s_max": 103.52157467700466,
+          "s_mean": 84.22964521297301,
+          "s_min": 75.00875976400324,
+          "verified": 8
+        },
+        "ic-closed-d5": {
+          "fiber_samples": 64,
+          "fiber_size": 40,
+          "fiber_table_entries": 40980,
+          "online_ms_mean": 51.618248,
+          "oracle_setup_gae_mean": 44519.0,
+          "relation_phase_gae_mean": 66403.75,
+          "runs": 8,
+          "s_max": 149.4576641733994,
+          "s_mean": 93.97671846685908,
+          "s_min": 47.240442364919616,
+          "verified": 8
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.899285875,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 8,
+          "s_max": 3.193123580739524,
+          "s_mean": 1.2055735482056023,
+          "s_min": 0.33709898809929195,
+          "verified": 8
+        }
+      },
+      "pair": "D=-7 5^4 26b h=200",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-closed-d1": {
+          "fiber_samples": 5,
+          "fiber_size": 1568,
+          "fiber_table_entries": 1477841,
+          "online_ms_mean": 0.635312875,
+          "oracle_setup_gae_mean": 1652771.0,
+          "relation_phase_gae_mean": 912.25,
+          "runs": 8,
+          "s_max": 11256.210243865457,
+          "s_mean": 11254.877994544466,
+          "s_min": 11253.848606499512,
+          "verified": 8
+        },
+        "ic-closed-d14": {
+          "fiber_samples": 63,
+          "fiber_size": 8,
+          "fiber_table_entries": 7940,
+          "online_ms_mean": 7.046806875,
+          "oracle_setup_gae_mean": 10069.0,
+          "relation_phase_gae_mean": 10866.125,
+          "runs": 8,
+          "s_max": 188.28443149515226,
+          "s_mean": 142.60427358293376,
+          "s_min": 107.811808397423,
+          "verified": 8
+        },
+        "ic-closed-d2": {
+          "fiber_samples": 63,
+          "fiber_size": 392,
+          "fiber_table_entries": 384356,
+          "online_ms_mean": 1.220115125,
+          "oracle_setup_gae_mean": 414490.0,
+          "relation_phase_gae_mean": 1818.875,
+          "runs": 8,
+          "s_max": 2836.24480604129,
+          "s_mean": 2833.467159787758,
+          "s_min": 2830.1739687778277,
+          "verified": 8
+        },
+        "ic-closed-d28": {
+          "fiber_samples": 63,
+          "fiber_size": 4,
+          "fiber_table_entries": 3970,
+          "online_ms_mean": 15.993514375,
+          "oracle_setup_gae_mean": 5916.0,
+          "relation_phase_gae_mean": 25327.875,
+          "runs": 8,
+          "s_max": 459.6004937237532,
+          "s_mean": 212.76430008485497,
+          "s_min": 94.98274086196801,
+          "verified": 8
+        },
+        "ic-closed-d4": {
+          "fiber_samples": 63,
+          "fiber_size": 196,
+          "fiber_table_entries": 193942,
+          "online_ms_mean": 1.543440125,
+          "oracle_setup_gae_mean": 207969.0,
+          "relation_phase_gae_mean": 2443.375,
+          "runs": 8,
+          "s_max": 1436.331511875345,
+          "s_mean": 1432.162064926322,
+          "s_min": 1428.5864302544708,
+          "verified": 8
+        },
+        "ic-closed-d49": {
+          "fiber_samples": 63,
+          "fiber_size": 32,
+          "fiber_table_entries": 31665,
+          "online_ms_mean": 3.495305625,
+          "oracle_setup_gae_mean": 35302.0,
+          "relation_phase_gae_mean": 5382.0,
+          "runs": 8,
+          "s_max": 307.4144039835363,
+          "s_mean": 277.0125765666253,
+          "s_min": 245.4129157883136,
+          "verified": 8
+        },
+        "ic-closed-d7": {
+          "fiber_samples": 63,
+          "fiber_size": 32,
+          "fiber_table_entries": 31665,
+          "online_ms_mean": 3.243243125,
+          "oracle_setup_gae_mean": 35302.0,
+          "relation_phase_gae_mean": 5382.0,
+          "runs": 8,
+          "s_max": 307.4144039835363,
+          "s_mean": 277.0125765666253,
+          "s_min": 245.4129157883136,
+          "verified": 8
+        },
+        "ic-closed-d8": {
+          "fiber_samples": 63,
+          "fiber_size": 98,
+          "fiber_table_entries": 96971,
+          "online_ms_mean": 2.00901375,
+          "oracle_setup_gae_mean": 104740.0,
+          "relation_phase_gae_mean": 3452.25,
+          "runs": 8,
+          "s_max": 745.1136036334996,
+          "s_mean": 736.4650425880463,
+          "s_min": 730.3925038567414,
+          "verified": 8
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.38546525,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 8,
+          "s_max": 2.8993012042991095,
+          "s_mean": 2.0817459057863617,
+          "s_min": 1.5313210586086845,
+          "verified": 8
+        }
+      },
+      "pair": "D=-7 7^3 26b h=1568",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-closed-d1": {
+          "fiber_samples": 3,
+          "fiber_size": 1568,
+          "fiber_table_entries": 1524880,
+          "online_ms_mean": 0.588560375,
+          "oracle_setup_gae_mean": 1657435.0,
+          "relation_phase_gae_mean": 893.0,
+          "runs": 8,
+          "s_max": 11287.163346863466,
+          "s_mean": 11286.487864129835,
+          "s_min": 11285.808978460518,
+          "verified": 8
+        },
+        "ic-closed-d14": {
+          "fiber_samples": 64,
+          "fiber_size": 112,
+          "fiber_table_entries": 114072,
+          "online_ms_mean": 2.22434525,
+          "oracle_setup_gae_mean": 120047.0,
+          "relation_phase_gae_mean": 3225.875,
+          "runs": 8,
+          "s_max": 844.2751495176263,
+          "s_mean": 839.1001350734506,
+          "s_min": 825.3684388473378,
+          "verified": 8
+        },
+        "ic-closed-d2": {
+          "fiber_samples": 64,
+          "fiber_size": 784,
+          "fiber_table_entries": 773416,
+          "online_ms_mean": 0.831005875,
+          "oracle_setup_gae_mean": 830031.0,
+          "relation_phase_gae_mean": 1158.375,
+          "runs": 8,
+          "s_max": 5659.871526559644,
+          "s_mean": 5657.088775902583,
+          "s_min": 5655.0665813712985,
+          "verified": 8
+        },
+        "ic-closed-d28": {
+          "fiber_samples": 64,
+          "fiber_size": 56,
+          "fiber_table_entries": 57204,
+          "online_ms_mean": 2.81986725,
+          "oracle_setup_gae_mean": 60919.0,
+          "relation_phase_gae_mean": 3909.875,
+          "runs": 8,
+          "s_max": 455.7755940129173,
+          "s_mean": 441.3377886320017,
+          "s_min": 422.93726464497547,
+          "verified": 8
+        },
+        "ic-closed-d4": {
+          "fiber_samples": 64,
+          "fiber_size": 392,
+          "fiber_table_entries": 392588,
+          "online_ms_mean": 1.2638795,
+          "oracle_setup_gae_mean": 415751.0,
+          "relation_phase_gae_mean": 1618.0,
+          "runs": 8,
+          "s_max": 2845.9567844885546,
+          "s_mean": 2840.6805327077263,
+          "s_min": 2835.7139480743053,
+          "verified": 8
+        },
+        "ic-closed-d49": {
+          "fiber_samples": 64,
+          "fiber_size": 32,
+          "fiber_table_entries": 32784,
+          "online_ms_mean": 4.056983875,
+          "oracle_setup_gae_mean": 35423.0,
+          "relation_phase_gae_mean": 5391.25,
+          "runs": 8,
+          "s_max": 312.6957601678934,
+          "s_mean": 277.8973398449325,
+          "s_min": 249.42837989755415,
+          "verified": 8
+        },
+        "ic-closed-d7": {
+          "fiber_samples": 64,
+          "fiber_size": 224,
+          "fiber_table_entries": 227024,
+          "online_ms_mean": 1.427990625,
+          "oracle_setup_gae_mean": 238367.0,
+          "relation_phase_gae_mean": 2120.875,
+          "runs": 8,
+          "s_max": 1643.5634892690155,
+          "s_mean": 1636.850347894859,
+          "s_min": 1630.6663630198445,
+          "verified": 8
+        },
+        "ic-closed-d8": {
+          "fiber_samples": 64,
+          "fiber_size": 196,
+          "fiber_table_entries": 196882,
+          "online_ms_mean": 1.14604775,
+          "oracle_setup_gae_mean": 208643.0,
+          "relation_phase_gae_mean": 1813.875,
+          "runs": 8,
+          "s_max": 1439.870564988574,
+          "s_mean": 1432.4632247345153,
+          "s_min": 1426.1499283034402,
+          "verified": 8
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.12979475,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 8,
+          "s_max": 3.450576785398236,
+          "s_mean": 1.9958217797199855,
+          "s_min": 0.8098986932197043,
+          "verified": 8
+        }
+      },
+      "pair": "D=-7 7^3 26b h=1568",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-closed-d1": {
+          "fiber_samples": 1,
+          "fiber_size": 1568,
+          "fiber_table_entries": 1538992,
+          "online_ms_mean": 0.703959,
+          "oracle_setup_gae_mean": 1657395.0,
+          "relation_phase_gae_mean": 936.25,
+          "runs": 8,
+          "s_max": 11288.095751241375,
+          "s_mean": 11286.508281743949,
+          "s_min": 11284.69962142695,
+          "verified": 8
+        },
+        "ic-closed-d14": {
+          "fiber_samples": 64,
+          "fiber_size": 112,
+          "fiber_table_entries": 114408,
+          "online_ms_mean": 1.887296625,
+          "oracle_setup_gae_mean": 120047.0,
+          "relation_phase_gae_mean": 2962.25,
+          "runs": 8,
+          "s_max": 846.1467641448147,
+          "s_mean": 837.3042357652712,
+          "s_min": 825.2595449053923,
+          "verified": 8
+        },
+        "ic-closed-d2": {
+          "fiber_samples": 64,
+          "fiber_size": 784,
+          "fiber_table_entries": 780472,
+          "online_ms_mean": 0.76082175,
+          "oracle_setup_gae_mean": 830031.0,
+          "relation_phase_gae_mean": 1082.25,
+          "runs": 8,
+          "s_max": 5658.156446974002,
+          "s_mean": 5656.568977476577,
+          "s_min": 5655.522574753195,
+          "verified": 8
+        },
+        "ic-closed-d28": {
+          "fiber_samples": 64,
+          "fiber_size": 56,
+          "fiber_table_entries": 57204,
+          "online_ms_mean": 2.47105975,
+          "oracle_setup_gae_mean": 60919.0,
+          "relation_phase_gae_mean": 3822.625,
+          "runs": 8,
+          "s_max": 449.3372396953892,
+          "s_mean": 440.7422748869873,
+          "s_min": 432.4382610797209,
+          "verified": 8
+        },
+        "ic-closed-d4": {
+          "fiber_samples": 64,
+          "fiber_size": 392,
+          "fiber_table_entries": 394940,
+          "online_ms_mean": 1.12776625,
+          "oracle_setup_gae_mean": 415751.0,
+          "relation_phase_gae_mean": 1739.125,
+          "runs": 8,
+          "s_max": 2845.8274729324944,
+          "s_mean": 2841.5031924097675,
+          "s_min": 2836.864140336105,
+          "verified": 8
+        },
+        "ic-closed-d49": {
+          "fiber_samples": 64,
+          "fiber_size": 32,
+          "fiber_table_entries": 32784,
+          "online_ms_mean": 3.29467275,
+          "oracle_setup_gae_mean": 35423.0,
+          "relation_phase_gae_mean": 5574.5,
+          "runs": 8,
+          "s_max": 307.9248443364059,
+          "s_mean": 279.1428143059342,
+          "s_min": 258.87492936132685,
+          "verified": 8
+        },
+        "ic-closed-d7": {
+          "fiber_samples": 64,
+          "fiber_size": 224,
+          "fiber_table_entries": 228816,
+          "online_ms_mean": 1.52242,
+          "oracle_setup_gae_mean": 238367.0,
+          "relation_phase_gae_mean": 2364.25,
+          "runs": 8,
+          "s_max": 1643.8425299952507,
+          "s_mean": 1638.505025372078,
+          "s_min": 1630.5710808206422,
+          "verified": 8
+        },
+        "ic-closed-d8": {
+          "fiber_samples": 64,
+          "fiber_size": 196,
+          "fiber_table_entries": 198646,
+          "online_ms_mean": 1.51491725,
+          "oracle_setup_gae_mean": 208643.0,
+          "relation_phase_gae_mean": 2446.125,
+          "runs": 8,
+          "s_max": 1440.53754038299,
+          "s_mean": 1436.7645354413626,
+          "s_min": 1434.1196036795768,
+          "verified": 8
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.160670875,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 8,
+          "s_max": 1.9805085691338988,
+          "s_mean": 1.4904858303791197,
+          "s_min": 0.7690634649901393,
+          "verified": 8
+        }
+      },
+      "pair": "D=-7 7^3 26b h=1568",
+      "role": "floor-iso"
+    }
+  ],
+  "e2": [
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 5,
+          "fiber_size": 18,
+          "fiber_table_entries": 67401,
+          "online_ms_mean": 0.7929679166666667,
+          "oracle_setup_gae_mean": 75007.0,
+          "relation_phase_gae_mean": 1232.4166666666667,
+          "runs": 12,
+          "s_max": 208.80787518119064,
+          "s_mean": 207.98613056953914,
+          "s_min": 207.00932279474557,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 5,
+          "fiber_size": 18,
+          "fiber_table_entries": 17199,
+          "online_ms_mean": 1.5544714166666667,
+          "oracle_setup_gae_mean": 19135.0,
+          "relation_phase_gae_mean": 2571.0833333333335,
+          "runs": 12,
+          "s_max": 62.87090041398818,
+          "s_mean": 59.630350763323115,
+          "s_min": 57.44819735410492,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.93087925,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.7938415266131718,
+          "s_mean": 1.7960731788948345,
+          "s_min": 0.7194209545780288,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 3^6 22b h=18",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 3,
+          "fiber_size": 18,
+          "fiber_table_entries": 18351,
+          "online_ms_mean": 1.5606325,
+          "oracle_setup_gae_mean": 19091.0,
+          "relation_phase_gae_mean": 2641.5,
+          "runs": 12,
+          "s_max": 62.21909421078027,
+          "s_mean": 59.70585390235308,
+          "s_min": 58.081071426929206,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 3,
+          "fiber_size": 18,
+          "fiber_table_entries": 18351,
+          "online_ms_mean": 1.5323888333333333,
+          "oracle_setup_gae_mean": 19091.0,
+          "relation_phase_gae_mean": 2641.5,
+          "runs": 12,
+          "s_max": 62.21909421078027,
+          "s_mean": 59.70585390235308,
+          "s_min": 58.081071426929206,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.6998564166666665,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 3.783721486671663,
+          "s_mean": 1.8546726300822678,
+          "s_min": 0.8113770164413858,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 3^6 22b h=18",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 18,
+          "fiber_table_entries": 18441,
+          "online_ms_mean": 1.8622624166666668,
+          "oracle_setup_gae_mean": 19047.0,
+          "relation_phase_gae_mean": 2555.8333333333335,
+          "runs": 12,
+          "s_max": 61.75390472135388,
+          "s_mean": 59.346368807568616,
+          "s_min": 56.66657082826639,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 18,
+          "fiber_table_entries": 18441,
+          "online_ms_mean": 1.5463255,
+          "oracle_setup_gae_mean": 19047.0,
+          "relation_phase_gae_mean": 2555.8333333333335,
+          "runs": 12,
+          "s_max": 61.75390472135388,
+          "s_mean": 59.346368807568616,
+          "s_min": 56.66657082826639,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.86944525,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 1.7065963245817148,
+          "s_mean": 1.2964001662696807,
+          "s_min": 0.6220557126050624,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 3^6 22b h=18",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 13,
+          "fiber_size": 50,
+          "fiber_table_entries": 180825,
+          "online_ms_mean": 0.6317153333333334,
+          "oracle_setup_gae_mean": 208361.0,
+          "relation_phase_gae_mean": 888.0,
+          "runs": 12,
+          "s_max": 961.5225142318626,
+          "s_mean": 960.7122745511115,
+          "s_min": 960.2380157817014,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 13,
+          "fiber_size": 50,
+          "fiber_table_entries": 46775,
+          "online_ms_mean": 0.9674226666666667,
+          "oracle_setup_gae_mean": 53161.0,
+          "relation_phase_gae_mean": 1525.1666666666667,
+          "runs": 12,
+          "s_max": 254.51353988638496,
+          "s_mean": 252.13157997865724,
+          "s_min": 249.45325595639056,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.1392389166666663,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.4867158608102558,
+          "s_mean": 1.6722859419358185,
+          "s_min": 1.179361566340158,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 5^4 22b h=50",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 50,
+          "fiber_table_entries": 50725,
+          "online_ms_mean": 0.8368043333333334,
+          "oracle_setup_gae_mean": 52873.0,
+          "relation_phase_gae_mean": 1364.5,
+          "runs": 12,
+          "s_max": 253.03705234402887,
+          "s_mean": 250.0646497916541,
+          "s_min": 248.19161335053832,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 50,
+          "fiber_table_entries": 50725,
+          "online_ms_mean": 0.8681988333333334,
+          "oracle_setup_gae_mean": 52873.0,
+          "relation_phase_gae_mean": 1364.5,
+          "runs": 12,
+          "s_max": 253.03705234402887,
+          "s_mean": 250.0646497916541,
+          "s_min": 248.19161335053832,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.616955,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.765557161379053,
+          "s_mean": 1.7115218079994605,
+          "s_min": 0.8868067591860104,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 5^4 22b h=50",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 50,
+          "fiber_table_entries": 50225,
+          "online_ms_mean": 1.7830773333333332,
+          "oracle_setup_gae_mean": 52873.0,
+          "relation_phase_gae_mean": 1384.75,
+          "runs": 12,
+          "s_max": 251.61541882801419,
+          "s_mean": 250.14921641559712,
+          "s_min": 248.4156006247657,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 50,
+          "fiber_table_entries": 50225,
+          "online_ms_mean": 0.8871139166666666,
+          "oracle_setup_gae_mean": 52873.0,
+          "relation_phase_gae_mean": 1384.75,
+          "runs": 12,
+          "s_max": 251.61541882801419,
+          "s_mean": 250.14921641559712,
+          "s_min": 248.4156006247657,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.1916255833333333,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 15.564829974373016,
+          "s_mean": 2.803269304488767,
+          "s_min": 0.900520265771361,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 5^4 22b h=50",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 3,
+          "fiber_size": 98,
+          "fiber_table_entries": 383033,
+          "online_ms_mean": 0.7092384166666666,
+          "oracle_setup_gae_mean": 407849.0,
+          "relation_phase_gae_mean": 1007.1666666666666,
+          "runs": 12,
+          "s_max": 1471.5655271405556,
+          "s_mean": 1471.0780426554945,
+          "s_min": 1470.4278639619224,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 3,
+          "fiber_size": 98,
+          "fiber_table_entries": 98931,
+          "online_ms_mean": 1.2760090833333333,
+          "oracle_setup_gae_mean": 103657.0,
+          "relation_phase_gae_mean": 1960.9166666666667,
+          "runs": 12,
+          "s_max": 383.0730841870722,
+          "s_mean": 380.9661343728055,
+          "s_min": 378.69469592861026,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.4443364166666663,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 6.499394373831626,
+          "s_mean": 2.290578939314211,
+          "s_min": 1.3206941632081934,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 7^3 22b h=98",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 98,
+          "fiber_table_entries": 99617,
+          "online_ms_mean": 1.02641375,
+          "oracle_setup_gae_mean": 103609.0,
+          "relation_phase_gae_mean": 1621.6666666666667,
+          "runs": 12,
+          "s_max": 382.86134245981873,
+          "s_mean": 379.56738287794036,
+          "s_min": 377.83337364825707,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 98,
+          "fiber_table_entries": 99617,
+          "online_ms_mean": 1.07570425,
+          "oracle_setup_gae_mean": 103609.0,
+          "relation_phase_gae_mean": 1621.6666666666667,
+          "runs": 12,
+          "s_max": 382.86134245981873,
+          "s_mean": 379.56738287794036,
+          "s_min": 377.83337364825707,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.9147355,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.2860928857707044,
+          "s_mean": 1.452883207623506,
+          "s_min": 0.8362003805095355,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 7^3 22b h=98",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 98,
+          "fiber_table_entries": 98735,
+          "online_ms_mean": 0.9852245,
+          "oracle_setup_gae_mean": 103609.0,
+          "relation_phase_gae_mean": 1682.6666666666667,
+          "runs": 12,
+          "s_max": 381.98566480812633,
+          "s_mean": 379.7871995015721,
+          "s_min": 377.0581835959392,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 98,
+          "fiber_table_entries": 98735,
+          "online_ms_mean": 1.0733299166666668,
+          "oracle_setup_gae_mean": 103609.0,
+          "relation_phase_gae_mean": 1682.6666666666667,
+          "runs": 12,
+          "s_max": 381.98566480812633,
+          "s_mean": 379.7871995015721,
+          "s_min": 377.0581835959392,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.42306225,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 3.0433387239145326,
+          "s_mean": 1.6365123326710223,
+          "s_min": 0.9295102942144622,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 7^3 22b h=98",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 7,
+          "fiber_size": 18,
+          "fiber_table_entries": 69201,
+          "online_ms_mean": 24.6250655,
+          "oracle_setup_gae_mean": 75107.0,
+          "relation_phase_gae_mean": 33485.5,
+          "runs": 12,
+          "s_max": 36.27934329180135,
+          "s_mean": 30.36520866701431,
+          "s_min": 23.411146794167813,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 7,
+          "fiber_size": 18,
+          "fiber_table_entries": 17307,
+          "online_ms_mean": 90.24901133333333,
+          "oracle_setup_gae_mean": 19235.0,
+          "relation_phase_gae_mean": 119513.5,
+          "runs": 12,
+          "s_max": 54.65509676486036,
+          "s_mean": 38.65683597142415,
+          "s_min": 7.791672970027457,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 4.217553666666667,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 1.460678144254532,
+          "s_mean": 0.929760360498901,
+          "s_min": 0.4274206594108581,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 3^6 26b h=18",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 7,
+          "fiber_size": 18,
+          "fiber_table_entries": 18441,
+          "online_ms_mean": 109.85160566666667,
+          "oracle_setup_gae_mean": 19235.0,
+          "relation_phase_gae_mean": 143095.0,
+          "runs": 12,
+          "s_max": 70.91153297610714,
+          "s_mean": 45.210225714423046,
+          "s_min": 21.785114103522215,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 7,
+          "fiber_size": 18,
+          "fiber_table_entries": 18441,
+          "online_ms_mean": 106.01593591666668,
+          "oracle_setup_gae_mean": 19235.0,
+          "relation_phase_gae_mean": 143095.0,
+          "runs": 12,
+          "s_max": 70.91153297610714,
+          "s_mean": 45.210225714423046,
+          "s_min": 21.785114103522215,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 5.029184583333333,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.6754087699273934,
+          "s_mean": 1.4588717500502597,
+          "s_min": 0.3854567325116126,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 3^6 26b h=18",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 3,
+          "fiber_size": 18,
+          "fiber_table_entries": 18441,
+          "online_ms_mean": 94.17051675,
+          "oracle_setup_gae_mean": 19115.0,
+          "relation_phase_gae_mean": 120822.5,
+          "runs": 12,
+          "s_max": 66.67956821569847,
+          "s_mean": 38.98775349430679,
+          "s_min": 21.68034323967443,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 3,
+          "fiber_size": 18,
+          "fiber_table_entries": 18441,
+          "online_ms_mean": 89.06779725,
+          "oracle_setup_gae_mean": 19115.0,
+          "relation_phase_gae_mean": 120822.5,
+          "runs": 12,
+          "s_max": 66.67956821569847,
+          "s_mean": 38.98775349430679,
+          "s_min": 21.68034323967443,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 4.98273775,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.1882381483752256,
+          "s_mean": 1.163039960750612,
+          "s_min": 0.32848583837687534,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 3^6 26b h=18",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 5,
+          "fiber_size": 50,
+          "fiber_table_entries": 179425,
+          "online_ms_mean": 9.177842833333335,
+          "oracle_setup_gae_mean": 208194.0,
+          "relation_phase_gae_mean": 12943.083333333334,
+          "runs": 12,
+          "s_max": 109.58564093248012,
+          "s_mean": 106.61277044584283,
+          "s_min": 102.58959721090513,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 5,
+          "fiber_size": 50,
+          "fiber_table_entries": 45025,
+          "online_ms_mean": 34.355282,
+          "oracle_setup_gae_mean": 52994.0,
+          "relation_phase_gae_mean": 47300.916666666664,
+          "runs": 12,
+          "s_max": 62.13813826189176,
+          "s_mean": 48.38114067661976,
+          "s_min": 39.220957984259265,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.75716175,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 1.4148600636481958,
+          "s_mean": 1.0611450477361466,
+          "s_min": 0.5540375003223678,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 5^4 26b h=50",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 7,
+          "fiber_size": 50,
+          "fiber_table_entries": 51225,
+          "online_ms_mean": 35.58183566666666,
+          "oracle_setup_gae_mean": 53052.0,
+          "relation_phase_gae_mean": 48601.75,
+          "runs": 12,
+          "s_max": 54.09931338719703,
+          "s_mean": 49.03339900762464,
+          "s_min": 32.60227429323313,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 7,
+          "fiber_size": 50,
+          "fiber_table_entries": 51225,
+          "online_ms_mean": 34.09023075,
+          "oracle_setup_gae_mean": 53052.0,
+          "relation_phase_gae_mean": 48601.75,
+          "runs": 12,
+          "s_max": 54.09931338719703,
+          "s_mean": 49.03339900762464,
+          "s_min": 32.60227429323313,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.6234541666666664,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.257918859632665,
+          "s_mean": 1.0298984209487576,
+          "s_min": 0.5958063586655619,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 5^4 26b h=50",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 3,
+          "fiber_size": 50,
+          "fiber_table_entries": 51075,
+          "online_ms_mean": 39.07297583333334,
+          "oracle_setup_gae_mean": 52936.0,
+          "relation_phase_gae_mean": 50062.583333333336,
+          "runs": 12,
+          "s_max": 63.24333265161628,
+          "s_mean": 49.678935913149,
+          "s_min": 40.6742261935104,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 3,
+          "fiber_size": 50,
+          "fiber_table_entries": 51075,
+          "online_ms_mean": 38.49775366666666,
+          "oracle_setup_gae_mean": 52936.0,
+          "relation_phase_gae_mean": 50062.583333333336,
+          "runs": 12,
+          "s_max": 63.24333265161628,
+          "s_mean": 49.678935913149,
+          "s_min": 40.6742261935104,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 4.3123325,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.078840880758971,
+          "s_mean": 1.2423434763150034,
+          "s_min": 0.6366150133686825,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 5^4 26b h=50",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 5,
+          "fiber_size": 98,
+          "fiber_table_entries": 374997,
+          "online_ms_mean": 2.6299880833333336,
+          "oracle_setup_gae_mean": 407912.0,
+          "relation_phase_gae_mean": 3318.9166666666665,
+          "runs": 12,
+          "s_max": 439.9983623183856,
+          "s_mean": 437.76052971395785,
+          "s_min": 436.60378677624556,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 5,
+          "fiber_size": 98,
+          "fiber_table_entries": 94227,
+          "online_ms_mean": 7.967514666666667,
+          "oracle_setup_gae_mean": 103720.0,
+          "relation_phase_gae_mean": 11714.833333333334,
+          "runs": 12,
+          "s_max": 128.98643799925955,
+          "s_mean": 123.14051951010019,
+          "s_min": 117.95433293737801,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.4274736666666663,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 1.8432853115906007,
+          "s_mean": 1.0498550413797274,
+          "s_min": 0.40985491375228794,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 7^3 26b h=98",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 98,
+          "fiber_table_entries": 100401,
+          "online_ms_mean": 7.071103833333333,
+          "oracle_setup_gae_mean": 103612.0,
+          "relation_phase_gae_mean": 10792.583333333334,
+          "runs": 12,
+          "s_max": 126.5103197120307,
+          "s_mean": 122.04606885634325,
+          "s_min": 118.40878346350749,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 98,
+          "fiber_table_entries": 100401,
+          "online_ms_mean": 7.63341075,
+          "oracle_setup_gae_mean": 103612.0,
+          "relation_phase_gae_mean": 10792.583333333334,
+          "runs": 12,
+          "s_max": 126.5103197120307,
+          "s_mean": 122.04606885634325,
+          "s_min": 118.40878346350749,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.6798890833333333,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.1427129946946035,
+          "s_mean": 1.0709140805578456,
+          "s_min": 0.28456247897827247,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 7^3 26b h=98",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 3,
+          "fiber_size": 98,
+          "fiber_table_entries": 100401,
+          "online_ms_mean": 6.144162333333333,
+          "oracle_setup_gae_mean": 103666.0,
+          "relation_phase_gae_mean": 9357.25,
+          "runs": 12,
+          "s_max": 126.04206578207018,
+          "s_mean": 120.57724511534849,
+          "s_min": 117.11444890427423,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 3,
+          "fiber_size": 98,
+          "fiber_table_entries": 100401,
+          "online_ms_mean": 6.119806416666667,
+          "oracle_setup_gae_mean": 103666.0,
+          "relation_phase_gae_mean": 9357.25,
+          "runs": 12,
+          "s_max": 126.04206578207018,
+          "s_mean": 120.57724511534849,
+          "s_min": 117.11444890427423,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.7189826666666663,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.1087353852643624,
+          "s_mean": 1.28433593979155,
+          "s_min": 0.8611200389976826,
+          "verified": 12
+        }
+      },
+      "pair": "D=-4 7^3 26b h=98",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 9,
+          "fiber_size": 12,
+          "fiber_table_entries": 103543,
+          "online_ms_mean": 2.5692366666666664,
+          "oracle_setup_gae_mean": 105203.0,
+          "relation_phase_gae_mean": 3683.3333333333335,
+          "runs": 12,
+          "s_max": 78.9787483069972,
+          "s_mean": 77.98264814015644,
+          "s_min": 76.96118321418862,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 9,
+          "fiber_size": 12,
+          "fiber_table_entries": 11539,
+          "online_ms_mean": 14.49424925,
+          "oracle_setup_gae_mean": 12203.0,
+          "relation_phase_gae_mean": 22166.416666666668,
+          "runs": 12,
+          "s_max": 28.72238948479149,
+          "s_mean": 24.63635199055244,
+          "s_min": 16.338934792836596,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.6505156666666667,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.3809686044142295,
+          "s_mean": 1.3000031687184024,
+          "s_min": 0.37762674102268695,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 2^8 22b h=12",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 12,
+          "fiber_table_entries": 12258,
+          "online_ms_mean": 16.520601333333335,
+          "oracle_setup_gae_mean": 12715.0,
+          "relation_phase_gae_mean": 20344.833333333332,
+          "runs": 12,
+          "s_max": 28.555266539141144,
+          "s_mean": 23.713738509033107,
+          "s_min": 17.08352085281918,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 12,
+          "fiber_table_entries": 12258,
+          "online_ms_mean": 15.9028065,
+          "oracle_setup_gae_mean": 12715.0,
+          "relation_phase_gae_mean": 20344.833333333332,
+          "runs": 12,
+          "s_max": 28.555266539141144,
+          "s_mean": 23.713738509033107,
+          "s_min": 17.08352085281918,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 4.37560925,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 1.8326631103869382,
+          "s_mean": 1.1621563702848228,
+          "s_min": 0.4458982422245286,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 2^8 22b h=12",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 3,
+          "fiber_size": 12,
+          "fiber_table_entries": 12294,
+          "online_ms_mean": 11.379056583333334,
+          "oracle_setup_gae_mean": 12779.0,
+          "relation_phase_gae_mean": 17647.583333333332,
+          "runs": 12,
+          "s_max": 28.551710731786883,
+          "s_mean": 21.841961517749283,
+          "s_min": 14.807092984620272,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 3,
+          "fiber_size": 12,
+          "fiber_table_entries": 12294,
+          "online_ms_mean": 11.122949083333333,
+          "oracle_setup_gae_mean": 12779.0,
+          "relation_phase_gae_mean": 17647.583333333332,
+          "runs": 12,
+          "s_max": 28.551710731786883,
+          "s_mean": 21.841961517749283,
+          "s_min": 14.807092984620272,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 4.280935833333333,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.0872589169521394,
+          "s_mean": 1.182957843307259,
+          "s_min": 0.38971648602717973,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 2^8 22b h=12",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 3,
+          "fiber_size": 25,
+          "fiber_table_entries": 228012,
+          "online_ms_mean": 1.65513325,
+          "oracle_setup_gae_mean": 232908.0,
+          "relation_phase_gae_mean": 2148.5833333333335,
+          "runs": 12,
+          "s_max": 247.98631185173792,
+          "s_mean": 247.45584238950937,
+          "s_min": 246.78797636095732,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 3,
+          "fiber_size": 25,
+          "fiber_table_entries": 25612,
+          "online_ms_mean": 7.555150416666667,
+          "oracle_setup_gae_mean": 26508.0,
+          "relation_phase_gae_mean": 12165.75,
+          "runs": 12,
+          "s_max": 45.824810065717024,
+          "s_mean": 40.941121567559684,
+          "s_min": 34.159893959656614,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.45016375,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.112799549741725,
+          "s_mean": 1.3167025453769698,
+          "s_min": 0.3791935731316333,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 5^4 22b h=25",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 25,
+          "fiber_table_entries": 25612,
+          "online_ms_mean": 7.737512833333333,
+          "oracle_setup_gae_mean": 26452.0,
+          "relation_phase_gae_mean": 12148.583333333334,
+          "runs": 12,
+          "s_max": 47.05247544613214,
+          "s_mean": 40.86264665451978,
+          "s_min": 36.965088403984,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 25,
+          "fiber_table_entries": 25612,
+          "online_ms_mean": 7.747742666666667,
+          "oracle_setup_gae_mean": 26452.0,
+          "relation_phase_gae_mean": 12148.583333333334,
+          "runs": 12,
+          "s_max": 47.05247544613214,
+          "s_mean": 40.86264665451978,
+          "s_min": 36.965088403984,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.4429598333333336,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 3.210575418918387,
+          "s_mean": 1.517036166541127,
+          "s_min": 0.43680585634224056,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 5^4 22b h=25",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 25,
+          "fiber_table_entries": 25612,
+          "online_ms_mean": 7.258626083333333,
+          "oracle_setup_gae_mean": 26452.0,
+          "relation_phase_gae_mean": 11521.833333333334,
+          "runs": 12,
+          "s_max": 46.430262787457586,
+          "s_mean": 40.20769974402101,
+          "s_min": 36.86452878238003,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 25,
+          "fiber_table_entries": 25612,
+          "online_ms_mean": 7.19133425,
+          "oracle_setup_gae_mean": 26452.0,
+          "relation_phase_gae_mean": 11521.833333333334,
+          "runs": 12,
+          "s_max": 46.430262787457586,
+          "s_mean": 40.20769974402101,
+          "s_min": 36.86452878238003,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.2990621666666664,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.16098436842696,
+          "s_mean": 1.3998038993413608,
+          "s_min": 0.9532214131209567,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 5^4 22b h=25",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 3,
+          "fiber_size": 147,
+          "fiber_table_entries": 814159,
+          "online_ms_mean": 0.47046875,
+          "oracle_setup_gae_mean": 1369067.0,
+          "relation_phase_gae_mean": 695.25,
+          "runs": 12,
+          "s_max": 10865.978294058126,
+          "s_mean": 10865.659461547955,
+          "s_min": 10865.257455339477,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 3,
+          "fiber_size": 147,
+          "fiber_table_entries": 138106,
+          "online_ms_mean": 0.5951750833333334,
+          "oracle_setup_gae_mean": 155435.0,
+          "relation_phase_gae_mean": 886.8333333333334,
+          "runs": 12,
+          "s_max": 1245.3954306025064,
+          "s_mean": 1243.4890366286415,
+          "s_min": 1242.1239318024807,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.5628970833333335,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.3922339893650144,
+          "s_mean": 1.8403831021936148,
+          "s_min": 1.037690902671579,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 7^3 22b h=147",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 147,
+          "fiber_table_entries": 141340,
+          "online_ms_mean": 0.6333005833333334,
+          "oracle_setup_gae_mean": 155397.0,
+          "relation_phase_gae_mean": 830.4166666666666,
+          "runs": 12,
+          "s_max": 1244.2943692630304,
+          "s_mean": 1242.7312318218558,
+          "s_min": 1241.506070043638,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 147,
+          "fiber_table_entries": 141340,
+          "online_ms_mean": 0.5860430833333333,
+          "oracle_setup_gae_mean": 155397.0,
+          "relation_phase_gae_mean": 830.4166666666666,
+          "runs": 12,
+          "s_max": 1244.2943692630304,
+          "s_mean": 1242.7312318218558,
+          "s_min": 1241.506070043638,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.9014864166666663,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 3.7467770760584496,
+          "s_mean": 2.3961946416652875,
+          "s_min": 1.4733626557016313,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 7^3 22b h=147",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 7,
+          "fiber_size": 147,
+          "fiber_table_entries": 140752,
+          "online_ms_mean": 0.7198536666666666,
+          "oracle_setup_gae_mean": 155511.0,
+          "relation_phase_gae_mean": 908.75,
+          "runs": 12,
+          "s_max": 1245.9974497521478,
+          "s_mean": 1244.276546327679,
+          "s_min": 1242.6308952969157,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 7,
+          "fiber_size": 147,
+          "fiber_table_entries": 140752,
+          "online_ms_mean": 0.672444,
+          "oracle_setup_gae_mean": 155511.0,
+          "relation_phase_gae_mean": 908.75,
+          "runs": 12,
+          "s_max": 1245.9974497521478,
+          "s_mean": 1244.276546327679,
+          "s_min": 1242.6308952969157,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.3706046666666665,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 3.32694793222949,
+          "s_mean": 2.285296377257638,
+          "s_min": 1.2911726498890639,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 7^3 22b h=147",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 3,
+          "fiber_size": 4,
+          "fiber_table_entries": 36795,
+          "online_ms_mean": 13.227324666666666,
+          "oracle_setup_gae_mean": 37347.0,
+          "relation_phase_gae_mean": 18312.083333333332,
+          "runs": 12,
+          "s_max": 17.336020294163795,
+          "s_mean": 14.832752852476785,
+          "s_min": 10.990509440545612,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 3,
+          "fiber_size": 4,
+          "fiber_table_entries": 4099,
+          "online_ms_mean": 114.24585858333333,
+          "oracle_setup_gae_mean": 4323.0,
+          "relation_phase_gae_mean": 137989.5,
+          "runs": 12,
+          "s_max": 56.2391068022278,
+          "s_mean": 37.68543085093056,
+          "s_min": 14.543625209476543,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 5.273154333333333,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 1.7171761759770428,
+          "s_mean": 1.156576698625121,
+          "s_min": 0.4001983293674162,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 2^8 26b h=4",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 4,
+          "fiber_table_entries": 4098,
+          "online_ms_mean": 126.41277516666668,
+          "oracle_setup_gae_mean": 4259.0,
+          "relation_phase_gae_mean": 175911.25,
+          "runs": 12,
+          "s_max": 66.49058509125156,
+          "s_mean": 47.69832428001419,
+          "s_min": 12.964521424728709,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 4,
+          "fiber_table_entries": 4098,
+          "online_ms_mean": 131.37820558333334,
+          "oracle_setup_gae_mean": 4259.0,
+          "relation_phase_gae_mean": 175911.25,
+          "runs": 12,
+          "s_max": 66.49058509125156,
+          "s_mean": 47.69832428001419,
+          "s_min": 12.964521424728709,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 4.500781,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 1.9544385034341296,
+          "s_mean": 1.053639587028633,
+          "s_min": 0.5189617463442634,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 2^8 26b h=4",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 3,
+          "fiber_size": 4,
+          "fiber_table_entries": 4098,
+          "online_ms_mean": 98.77101725,
+          "oracle_setup_gae_mean": 4323.0,
+          "relation_phase_gae_mean": 139022.83333333334,
+          "runs": 12,
+          "s_max": 59.69197460894442,
+          "s_mean": 37.95815909114113,
+          "s_min": 12.530730770292118,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 3,
+          "fiber_size": 4,
+          "fiber_table_entries": 4098,
+          "online_ms_mean": 96.206642,
+          "oracle_setup_gae_mean": 4323.0,
+          "relation_phase_gae_mean": 139022.83333333334,
+          "runs": 12,
+          "s_max": 59.69197460894442,
+          "s_mean": 37.95815909114113,
+          "s_min": 12.530730770292118,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 4.832456916666667,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 1.7864768780882543,
+          "s_mean": 1.02218535614037,
+          "s_min": 0.17087119680855972,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 2^8 26b h=4",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 3,
+          "fiber_size": 25,
+          "fiber_table_entries": 229962,
+          "online_ms_mean": 3.1941979166666665,
+          "oracle_setup_gae_mean": 232926.0,
+          "relation_phase_gae_mean": 4638.333333333333,
+          "runs": 12,
+          "s_max": 126.69011411515807,
+          "s_mean": 126.08033982685056,
+          "s_min": 125.33766150053147,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 3,
+          "fiber_size": 25,
+          "fiber_table_entries": 25537,
+          "online_ms_mean": 22.44830633333333,
+          "oracle_setup_gae_mean": 26526.0,
+          "relation_phase_gae_mean": 33200.0,
+          "runs": 12,
+          "s_max": 43.840377296306634,
+          "s_mean": 31.75913619329508,
+          "s_min": 22.310451233943656,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.8287275,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.1018201508058736,
+          "s_mean": 1.260255939251001,
+          "s_min": 0.32266635983477104,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 5^4 26b h=25",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 25,
+          "fiber_table_entries": 25537,
+          "online_ms_mean": 23.111494333333333,
+          "oracle_setup_gae_mean": 26458.0,
+          "relation_phase_gae_mean": 36521.75,
+          "runs": 12,
+          "s_max": 44.0605931261775,
+          "s_mean": 33.47663483285749,
+          "s_min": 20.40825118791281,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 25,
+          "fiber_table_entries": 25537,
+          "online_ms_mean": 23.441708583333334,
+          "oracle_setup_gae_mean": 26458.0,
+          "relation_phase_gae_mean": 36521.75,
+          "runs": 12,
+          "s_max": 44.0605931261775,
+          "s_mean": 33.47663483285749,
+          "s_min": 20.40825118791281,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.2511570833333336,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.259192614358675,
+          "s_mean": 1.289741272187348,
+          "s_min": 0.5312640883695249,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 5^4 26b h=25",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 25,
+          "fiber_table_entries": 25612,
+          "online_ms_mean": 27.75949875,
+          "oracle_setup_gae_mean": 26458.0,
+          "relation_phase_gae_mean": 41505.416666666664,
+          "runs": 12,
+          "s_max": 43.401529923110736,
+          "s_mean": 36.109807087952106,
+          "s_min": 29.244873445057205,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 25,
+          "fiber_table_entries": 25612,
+          "online_ms_mean": 28.6856175,
+          "oracle_setup_gae_mean": 26458.0,
+          "relation_phase_gae_mean": 41505.416666666664,
+          "runs": 12,
+          "s_max": 43.401529923110736,
+          "s_mean": 36.109807087952106,
+          "s_min": 29.244873445057205,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.4132445,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.281900721515623,
+          "s_mean": 1.2638205839791268,
+          "s_min": 0.6833555967695479,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 5^4 26b h=25",
+      "role": "floor-iso"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 3,
+          "fiber_size": 147,
+          "fiber_table_entries": 1344682,
+          "online_ms_mean": 1.6656781666666667,
+          "oracle_setup_gae_mean": 1369085.0,
+          "relation_phase_gae_mean": 2226.75,
+          "runs": 12,
+          "s_max": 1338.4729492347205,
+          "s_mean": 1337.765713963659,
+          "s_min": 1336.773051785682,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 3,
+          "fiber_size": 147,
+          "fiber_table_entries": 150307,
+          "online_ms_mean": 10.81817525,
+          "oracle_setup_gae_mean": 155453.0,
+          "relation_phase_gae_mean": 15415.5,
+          "runs": 12,
+          "s_max": 171.61073593834675,
+          "s_mean": 167.103085238597,
+          "s_min": 162.58812838935282,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.543104,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 3.809913423031233,
+          "s_mean": 1.7534758786643365,
+          "s_min": 0.8689447132047711,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 7^3 26b h=147",
+      "role": "crater"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 147,
+          "fiber_table_entries": 150160,
+          "online_ms_mean": 9.447228166666665,
+          "oracle_setup_gae_mean": 155403.0,
+          "relation_phase_gae_mean": 13510.583333333334,
+          "runs": 12,
+          "s_max": 172.86934195792136,
+          "s_mean": 165.19723555325425,
+          "s_min": 156.77340754504868,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 147,
+          "fiber_table_entries": 150160,
+          "online_ms_mean": 8.76923475,
+          "oracle_setup_gae_mean": 155403.0,
+          "relation_phase_gae_mean": 13510.583333333334,
+          "runs": 12,
+          "s_max": 172.86934195792136,
+          "s_mean": 165.19723555325425,
+          "s_min": 156.77340754504868,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 3.3783056666666664,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.0729981498876153,
+          "s_mean": 1.1369992202116987,
+          "s_min": 0.43642066313423483,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 7^3 26b h=147",
+      "role": "floor"
+    },
+    {
+      "arms": {
+        "ic-glv-auto": {
+          "fiber_samples": 1,
+          "fiber_size": 147,
+          "fiber_table_entries": 150601,
+          "online_ms_mean": 10.064132833333334,
+          "oracle_setup_gae_mean": 155403.0,
+          "relation_phase_gae_mean": 13342.583333333334,
+          "runs": 12,
+          "s_max": 168.71652658528467,
+          "s_mean": 165.03625672606026,
+          "s_min": 160.62520955851468,
+          "verified": 12
+        },
+        "ic-glv-neg": {
+          "fiber_samples": 1,
+          "fiber_size": 147,
+          "fiber_table_entries": 150601,
+          "online_ms_mean": 8.619059,
+          "oracle_setup_gae_mean": 155403.0,
+          "relation_phase_gae_mean": 13342.583333333334,
+          "runs": 12,
+          "s_max": 168.71652658528467,
+          "s_mean": 165.03625672606026,
+          "s_min": 160.62520955851468,
+          "verified": 12
+        },
+        "rho-neg": {
+          "fiber_samples": null,
+          "fiber_size": null,
+          "fiber_table_entries": null,
+          "online_ms_mean": 2.9832641666666664,
+          "oracle_setup_gae_mean": 0.0,
+          "relation_phase_gae_mean": 0.0,
+          "runs": 12,
+          "s_max": 2.4655819160552417,
+          "s_mean": 1.2873435409194003,
+          "s_min": 0.5094821580785822,
+          "verified": 12
+        }
+      },
+      "pair": "D=-3 7^3 26b h=147",
+      "role": "floor-iso"
+    }
+  ]
+}
