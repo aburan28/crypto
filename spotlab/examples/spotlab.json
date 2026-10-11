@@ -1,0 +1,31 @@
+{
+  "store": "s3://YOUR-BUCKET/spotlab",
+  "budget": { "max_running": 4, "max_hourly_usd": 2.0 },
+  "aws": {
+    "regions": ["us-east-1", "us-east-2", "us-west-2"],
+    "instance_profile": "spotlab-agent",
+    "catalog": [
+      { "instance_type": "c7a.large",   "vcpus": 2, "memory_gb": 4,  "arch": "x86_64",  "cpu_flags": ["avx2", "avx512", "vpclmulqdq", "pclmulqdq", "sha"], "note": "AMD Zen 4; one vCPU is one core" },
+      { "instance_type": "c7a.xlarge",  "vcpus": 4, "memory_gb": 8,  "arch": "x86_64",  "cpu_flags": ["avx2", "avx512", "vpclmulqdq", "pclmulqdq", "sha"] },
+      { "instance_type": "c7a.2xlarge", "vcpus": 8, "memory_gb": 16, "arch": "x86_64",  "cpu_flags": ["avx2", "avx512", "vpclmulqdq", "pclmulqdq", "sha"] },
+      { "instance_type": "c7i.large",   "vcpus": 2, "memory_gb": 4,  "arch": "x86_64",  "cpu_flags": ["avx2", "avx512", "vpclmulqdq", "pclmulqdq", "sha"], "note": "Intel Sapphire Rapids; two vCPUs are one core" },
+      { "instance_type": "c7i.xlarge",  "vcpus": 4, "memory_gb": 8,  "arch": "x86_64",  "cpu_flags": ["avx2", "avx512", "vpclmulqdq", "pclmulqdq", "sha"] },
+      { "instance_type": "c6a.large",   "vcpus": 2, "memory_gb": 4,  "arch": "x86_64",  "cpu_flags": ["avx2", "vpclmulqdq", "pclmulqdq", "sha"], "note": "AMD Zen 3; no AVX-512" },
+      { "instance_type": "c8g.large",   "vcpus": 2, "memory_gb": 4,  "arch": "aarch64", "cpu_flags": ["neon", "sve2", "aes", "pmull", "sha"], "note": "Graviton4" },
+      { "instance_type": "c8g.xlarge",  "vcpus": 4, "memory_gb": 8,  "arch": "aarch64", "cpu_flags": ["neon", "sve2", "aes", "pmull", "sha"] },
+      { "instance_type": "c7g.large",   "vcpus": 2, "memory_gb": 4,  "arch": "aarch64", "cpu_flags": ["neon", "sve", "aes", "pmull", "sha"], "note": "Graviton3" }
+    ]
+  },
+  "gcp": {
+    "project": "YOUR-PROJECT",
+    "zones": ["us-central1-a", "us-central1-b", "us-east1-b"],
+    "service_account": "spotlab-agent@YOUR-PROJECT.iam.gserviceaccount.com",
+    "catalog": [
+      { "instance_type": "c3d-highcpu-4", "vcpus": 4, "memory_gb": 8,  "arch": "x86_64",  "cpu_flags": ["avx2", "avx512", "vpclmulqdq", "pclmulqdq", "sha"], "spot_hourly_usd": null, "note": "AMD Genoa; set the price from the GCE Spot pricing page" },
+      { "instance_type": "c3-highcpu-4",  "vcpus": 4, "memory_gb": 8,  "arch": "x86_64",  "cpu_flags": ["avx2", "avx512", "vpclmulqdq", "pclmulqdq", "sha"], "spot_hourly_usd": null, "note": "Intel Sapphire Rapids" },
+      { "instance_type": "t2d-standard-4", "vcpus": 4, "memory_gb": 16, "arch": "x86_64", "cpu_flags": ["avx2", "vpclmulqdq", "pclmulqdq", "sha"], "spot_hourly_usd": null, "note": "AMD Milan; no AVX-512" },
+      { "instance_type": "c4a-highcpu-4", "vcpus": 4, "memory_gb": 8,  "arch": "aarch64", "cpu_flags": ["neon", "sve2", "aes", "pmull", "sha"], "spot_hourly_usd": null, "note": "Google Axion" }
+    ],
+    "extra_bootstrap": []
+  }
+}
