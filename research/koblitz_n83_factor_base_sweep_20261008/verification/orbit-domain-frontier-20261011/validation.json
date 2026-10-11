@@ -1,0 +1,31 @@
+{
+  "logs_sha256": {
+    "library-skip-two-jv.log.gz": "10af5fe7414571b2039ced03726d49ceb4f918045c4602a73703a3efce5a8877",
+    "library-unfiltered.log.gz": "f78d24ee1d60b0d67f84feee107b4e9e6ec0fcf118c05f3bc6a2a5f683d88099",
+    "pollard-loopback.log.gz": "38a5ed530b298b4c03a241feeabfe85bdd1238d3a2f56965aba4cc2865ec7737"
+  },
+  "other_tests": {
+    "boundary_python_passed": 39,
+    "exporter_example_passed": 19,
+    "study_python_passed": 29
+  },
+  "pollard_loopback": {
+    "failed": 0,
+    "ignored": 0,
+    "passed": 37
+  },
+  "schema": "n83.orbit-domain-static-validation/v1",
+  "skip_two_jv": {
+    "failed": 9,
+    "failure_cause": "local socket bind denied by sandbox",
+    "filtered_out": 2,
+    "ignored": 110,
+    "passed": 3829
+  },
+  "unfiltered": {
+    "exit_code": 130,
+    "ignored_before_interrupt": 17,
+    "passed_before_interrupt": 1261,
+    "reported_failures": 0
+  }
+}

@@ -1,0 +1,290 @@
+{
+  "capacity_limits": {
+    "domain_clauses": 1000000,
+    "variables": 150000
+  },
+  "field_bits": 83,
+  "inputs": {
+    "research/koblitz_n83_factor_base_sweep_20261008/pilot-01/manifest.json": "5bd862987844f709e03beeab9fd265e3d2024011bcadcb82f5af9c72018df6a6",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/remaining-budget-k2048-20261010/manifest.json": "68b43524198394a2f0d112f86df0d1c1f69ea1ff817695cf21efe2767b7d17b8",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/structured-d12-orbit-20261010/manifest.json": "bd4202ed599f2659f6279dd07dbdc6b5948594df79db969e66530c19e3cf5dca",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/two-hour-extension-20261010/v2-object/manifest.json": "2735f6960233749ac887f68705fd514dfc003e2212d722a8e50e5e9738aadcfa",
+    "src/cryptanalysis/binary_semaev_chain_sat.rs": "febe46589fc045165743ea9a81a16d359f2f7a1982059e3fbe2b40cb8d4034e4"
+  },
+  "measurement_scope": "source and manifest arithmetic only; zero SAT constructions, searches or new S3 transfers",
+  "rows": [
+    {
+      "arities": {
+        "5": {
+          "core_variables": 84743,
+          "domain_clauses": 39350,
+          "domain_variables": 6895,
+          "domain_xor_rows": 3320,
+          "total_variables": 91638,
+          "uniform_target_mean_multiset_count": "4.6691534e-07",
+          "within_150k_variable_and_1m_domain_clause_caps": true
+        },
+        "6": {
+          "core_variables": 105908,
+          "domain_clauses": 47220,
+          "domain_variables": 8274,
+          "domain_xor_rows": 3984,
+          "total_variables": 114182,
+          "uniform_target_mean_multiset_count": "0.00082714053",
+          "within_150k_variable_and_1m_domain_clause_caps": true
+        }
+      },
+      "columns": 64,
+      "point_count_if_constructed": 10624,
+      "stored_object_hashes": [
+        "dbe658b62d852c1511fdd6eca134d414600f873b84aeda77a75c06e67130139f",
+        "156ee3ac73c68d72443e41c77b12016af16561627d8cfdd78187e21a311b8727",
+        "7b9eeddb516d4058d12dfd1ca8ded4b4c1086e5be3bb13b7d56542610587a4a1",
+        "1d0a6695564972f61db13c62c60a300da0cfa7bcd9b363c2e553a34345fae176",
+        "8ecebd133f402a226e25248561e4f32ec3ee25293b7bc01232eb6c378f8be975",
+        "0f312bc5c887b6fb4b552bd3861a5d27a34b2daa7442dc7ab97fec3dc775ae69",
+        "8208e5e9e378c8e65a621fffec6ce49b0f6adcfc846b61fdbf1e05d0eda9cfa9",
+        "696827db1f96dfdd3a11f35d0552efbb12280fec8ebbefcae9409fc5f9d46046",
+        "8ec78c573a3e135004e877f374a26a464f019b891d158063a7f18c582542b9e7"
+      ],
+      "stored_primary_objects": 9
+    },
+    {
+      "arities": {
+        "5": {
+          "core_variables": 84743,
+          "domain_clauses": 121910,
+          "domain_variables": 8815,
+          "domain_xor_rows": 3320,
+          "total_variables": 93558,
+          "uniform_target_mean_multiset_count": "0.00047778396",
+          "within_150k_variable_and_1m_domain_clause_caps": true
+        },
+        "6": {
+          "core_variables": 105908,
+          "domain_clauses": 146292,
+          "domain_variables": 10578,
+          "domain_xor_rows": 3984,
+          "total_variables": 116486,
+          "uniform_target_mean_multiset_count": "3.3843827",
+          "within_150k_variable_and_1m_domain_clause_caps": true
+        }
+      },
+      "columns": 256,
+      "point_count_if_constructed": 42496,
+      "stored_object_hashes": [
+        "9924a0c8520c15aab23a837e1b2e9aa4134ed3039de6a41f9d474b8000a825c2",
+        "77ea50c6bfdec27946dbcce7e734e391255021bfc0c787f950a3c450815c5593",
+        "64b8bf78ba68cb2787348f19bba6434ea90c0473f3509d3a2bcaa992d903bb02",
+        "0b06b75e26cff57a62c28c2502c85f3fc3f1a5027e5620d90969ecae0947b045",
+        "9cda8e35acd428a71c91d04f55499ef1c6708dc1e684bd2e0bfcb740c96d1fb8",
+        "fbf59fc700d0c80bec66ce2af90f9da0ee387bf48ac2267e8754e1431c5390b3",
+        "8dd0c4692b9cc8c5ac38cf38dbb81224cb84c6acc0308a62bbf9c0edbfc719d3",
+        "1340d5f8ad072b0a36a357f58849635a50de79f13318a26fde0ceceffdffcf69",
+        "c5c52c2a2feb2abc42968df2777270bf8ca55a7d4e734d48f3a7aaff99addebd"
+      ],
+      "stored_primary_objects": 9
+    },
+    {
+      "arities": {
+        "5": {
+          "core_variables": 84743,
+          "domain_clauses": 269830,
+          "domain_variables": 12255,
+          "domain_xor_rows": 3320,
+          "total_variables": 96998,
+          "uniform_target_mean_multiset_count": "0.033785426",
+          "within_150k_variable_and_1m_domain_clause_caps": true
+        },
+        "6": {
+          "core_variables": 105908,
+          "domain_clauses": 323796,
+          "domain_variables": 14706,
+          "domain_xor_rows": 3984,
+          "total_variables": 120614,
+          "uniform_target_mean_multiset_count": "560.86623",
+          "within_150k_variable_and_1m_domain_clause_caps": true
+        }
+      },
+      "columns": 600,
+      "point_count_if_constructed": 99600,
+      "stored_object_hashes": [
+        "e5600aa76a88246a4c3f73fce83ba73479e79c34e88d6205fffdb91ce09e0a99",
+        "3888e2597fd3519807c9d722f49f83329c93ce5cb0929501cf7cb7cbc3cab1a0",
+        "7e75c868c4086da4812b9293d1bd80fe1427bdeecb86ef6873a6d9ba1607aeea",
+        "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e",
+        "86e42e891fce80cbbb6705cb4b24648d43cb5383854a53195e785b58e662a7e5",
+        "e3714607e928a7d5597bbfe9f4864888ab3046840fb22784516854506101b3fb",
+        "966a0493c96674f0af6d184615ed05309d08fba5c7342957b4186cd50366dc47",
+        "6102d118c386b616e57f9f9f60a8261e190409290d6c446052f008a9d279cea5",
+        "9f8355a558a4a6f73c51de4a309c261fd2f47ea69d65d82795f7b598ed51efcf"
+      ],
+      "stored_primary_objects": 9
+    },
+    {
+      "arities": {
+        "5": {
+          "core_variables": 84743,
+          "domain_clauses": 520090,
+          "domain_variables": 18075,
+          "domain_xor_rows": 3320,
+          "total_variables": 102818,
+          "uniform_target_mean_multiset_count": "1.0023954",
+          "within_150k_variable_and_1m_domain_clause_caps": true
+        },
+        "6": {
+          "core_variables": 105908,
+          "domain_clauses": 624108,
+          "domain_variables": 21690,
+          "domain_xor_rows": 3984,
+          "total_variables": 127598,
+          "uniform_target_mean_multiset_count": "32781.169",
+          "within_150k_variable_and_1m_domain_clause_caps": true
+        }
+      },
+      "columns": 1182,
+      "point_count_if_constructed": 196212,
+      "stored_object_hashes": [
+        "76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92"
+      ],
+      "stored_primary_objects": 1
+    },
+    {
+      "arities": {
+        "5": {
+          "core_variables": 84743,
+          "domain_clauses": 872260,
+          "domain_variables": 26265,
+          "domain_xor_rows": 3320,
+          "total_variables": 111008,
+          "uniform_target_mean_multiset_count": "13.937281",
+          "within_150k_variable_and_1m_domain_clause_caps": true
+        },
+        "6": {
+          "core_variables": 105908,
+          "domain_clauses": 1046712,
+          "domain_variables": 31518,
+          "domain_xor_rows": 3984,
+          "total_variables": 137426,
+          "uniform_target_mean_multiset_count": "771593.44",
+          "within_150k_variable_and_1m_domain_clause_caps": false
+        }
+      },
+      "columns": 2001,
+      "point_count_if_constructed": 332166,
+      "stored_object_hashes": [
+        "aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389"
+      ],
+      "stored_primary_objects": 1
+    },
+    {
+      "arities": {
+        "5": {
+          "core_variables": 84743,
+          "domain_clauses": 892470,
+          "domain_variables": 26735,
+          "domain_xor_rows": 3320,
+          "total_variables": 111478,
+          "uniform_target_mean_multiset_count": "15.652802",
+          "within_150k_variable_and_1m_domain_clause_caps": true
+        },
+        "6": {
+          "core_variables": 105908,
+          "domain_clauses": 1070964,
+          "domain_variables": 32082,
+          "domain_xor_rows": 3984,
+          "total_variables": 137990,
+          "uniform_target_mean_multiset_count": "886921.65",
+          "within_150k_variable_and_1m_domain_clause_caps": false
+        }
+      },
+      "columns": 2048,
+      "point_count_if_constructed": 339968,
+      "stored_object_hashes": [
+        "82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851"
+      ],
+      "stored_primary_objects": 1
+    },
+    {
+      "arities": {
+        "5": {
+          "core_variables": 84743,
+          "domain_clauses": 1773110,
+          "domain_variables": 47215,
+          "domain_xor_rows": 3320,
+          "total_variables": 131958,
+          "uniform_target_mean_multiset_count": "500.88229",
+          "within_150k_variable_and_1m_domain_clause_caps": false
+        },
+        "6": {
+          "core_variables": 105908,
+          "domain_clauses": 2127732,
+          "domain_variables": 56658,
+          "domain_xor_rows": 3984,
+          "total_variables": 162566,
+          "uniform_target_mean_multiset_count": "56761734",
+          "within_150k_variable_and_1m_domain_clause_caps": false
+        }
+      },
+      "columns": 4096,
+      "point_count_if_constructed": 679936,
+      "stored_object_hashes": [],
+      "stored_primary_objects": 0
+    },
+    {
+      "arities": {
+        "5": {
+          "core_variables": 84743,
+          "domain_clauses": 3534390,
+          "domain_variables": 88175,
+          "domain_xor_rows": 3320,
+          "total_variables": 172918,
+          "uniform_target_mean_multiset_count": "16028.115",
+          "within_150k_variable_and_1m_domain_clause_caps": false
+        },
+        "6": {
+          "core_variables": 105908,
+          "domain_clauses": 4241268,
+          "domain_variables": 105810,
+          "domain_xor_rows": 3984,
+          "total_variables": 211718,
+          "uniform_target_mean_multiset_count": "3.6327109e+09",
+          "within_150k_variable_and_1m_domain_clause_caps": false
+        }
+      },
+      "columns": 8192,
+      "point_count_if_constructed": 1359872,
+      "stored_object_hashes": [],
+      "stored_primary_objects": 0
+    },
+    {
+      "arities": {
+        "5": {
+          "core_variables": 84743,
+          "domain_clauses": 7161440,
+          "domain_variables": 172525,
+          "domain_xor_rows": 3320,
+          "total_variables": 257268,
+          "uniform_target_mean_multiset_count": "552078.21",
+          "within_150k_variable_and_1m_domain_clause_caps": false
+        },
+        "6": {
+          "core_variables": 105908,
+          "domain_clauses": 8593728,
+          "domain_variables": 207030,
+          "domain_xor_rows": 3984,
+          "total_variables": 312938,
+          "uniform_target_mean_multiset_count": "2.5396398e+11",
+          "within_150k_variable_and_1m_domain_clause_caps": false
+        }
+      },
+      "columns": 16627,
+      "point_count_if_constructed": 2760082,
+      "stored_object_hashes": [],
+      "stored_primary_objects": 0
+    }
+  ],
+  "schema": "n83.orbit-domain-static-screen/v1",
+  "stored_primary_object_count": 30,
+  "subgroup_order": "2417851639230796216685689"
+}
