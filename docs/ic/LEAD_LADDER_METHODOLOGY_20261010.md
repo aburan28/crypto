@@ -293,7 +293,14 @@ base, `symmetrised` oracle, `m ≤ 3`, `n ≤ 24`); slots not. **Toggle:** the s
 `slots` parameter on the `symmetrised` oracle. **Prediction:** the realised
 slot factor on the symmetrised system is between 1 and `m!`, and the
 deliverable is that number. **Falsifier:** none needed; this row is a
-measurement. **Class:** engineering.
+measurement. **Class:** engineering. **Status 2026-10-11:** not implemented.
+The table form of L5 applies unchanged to the symmetrised base (the
+`mitm-frobenius` table runs on `F_u`); the algebraic form needs
+`build_symmetrised_system` to take one `u`-subspace per summand, the
+analogue of `descend_with_bases`, plus a Frobenius closure of a `V_u ∋ 1`
+with the `T`-translation kept. Two to three hours of Rust; the measurement
+is then the same `hits per solved system` statistic as L5 algebraic, with
+the prediction that it lands between 1 and 2.
 
 ### L7. Galois-orbit representations (equivariant and trace-reusing solving)
 
@@ -311,6 +318,13 @@ basis on every target. **Prediction (G2):** no gain over gauge-fixing unless
 combined with the `S_m` symmetry; record the negative. **Falsifier (G1):**
 a replayed trace giving a different basis on any target. **Class:**
 engineering; moves the algebraic frontier by rungs of `n`, not to 131.
+**Status 2026-10-11:** not implemented. `groebner_basis_f4` already exposes
+per-step statistics (`steps`, `pairs_reduced`, selection calls, matrix
+sizes) but no record of *which* pairs were selected and which rows
+reduced to zero; G1 is that record (per step: the multiplier–polynomial
+pairs kept) plus a replay mode that skips selection and zero-reduction
+discovery. The measurement is per-system word XORs and wall on 16 fresh
+targets at the n = 31 F4 cell, same basis required.
 
 ### L8. Conductor gap between curves (isogenies)
 
