@@ -1,0 +1,197 @@
+[
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1h90d58cc0e0c48fe3",
+    "statement": {
+      "name": "ISO-1 prime-degree cleared orbit-sum numerator",
+      "source": "research/iso1_weak_classes_20261007/larger_fields_20261009/REPORT.tex; orbit sizes 2,2*n,4*n",
+      "variables": [
+        "n",
+        "e",
+        "A",
+        "B",
+        "N"
+      ],
+      "degree_bound": 3,
+      "lhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "const",
+                "args": 2
+              },
+              {
+                "op": "var",
+                "args": "n"
+              },
+              {
+                "op": "var",
+                "args": "e"
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "n"
+                  },
+                  {
+                    "op": "const",
+                    "args": -1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "const",
+                "args": 2
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "A"
+                  },
+                  {
+                    "op": "var",
+                    "args": "B"
+                  },
+                  {
+                    "op": "const",
+                    "args": -2
+                  },
+                  {
+                    "op": "neg",
+                    "args": {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "e"
+                        },
+                        {
+                          "op": "add",
+                          "args": [
+                            {
+                              "op": "var",
+                              "args": "n"
+                            },
+                            {
+                              "op": "const",
+                              "args": -1
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "N"
+              },
+              {
+                "op": "const",
+                "args": 1
+              },
+              {
+                "op": "neg",
+                "args": {
+                  "op": "var",
+                  "args": "A"
+                }
+              },
+              {
+                "op": "neg",
+                "args": {
+                  "op": "var",
+                  "args": "B"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "var",
+            "args": "N"
+          },
+          {
+            "op": "var",
+            "args": "A"
+          },
+          {
+            "op": "var",
+            "args": "B"
+          },
+          {
+            "op": "const",
+            "args": -3
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "const",
+                "args": 2
+              },
+              {
+                "op": "var",
+                "args": "e"
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "n"
+                  },
+                  {
+                    "op": "const",
+                    "args": -1
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "n"
+                  },
+                  {
+                    "op": "const",
+                    "args": -1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 32,
+    "seed": 20261009,
+    "value_digest": "a336e6e8c845b053cdb7b209d262cbdce02cf4d972875f99a29a58e617e088c6",
+    "independence": "Exact cleared orbit-sum algebra; prime-degree stabilizers have a separate deductive proof and cyclic-group audits.",
+    "proof": null
+  }
+]

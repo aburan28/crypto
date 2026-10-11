@@ -1,0 +1,225 @@
+{
+  "schema": "identity.certificate/v1",
+  "id": "IDC1h7d04feed32d16d24",
+  "statement": {
+    "name": "P-224 f − 1: f(t) − 1 = t^3 · Φ_1(t) · Φ_2(t) · Φ_4(t)",
+    "source": "examples/nist_cyclotomic_point_heights.rs (exact expansion in Z[t], then sealed)",
+    "variables": [
+      "t"
+    ],
+    "degree_bound": 7,
+    "lhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "const",
+              "args": -1
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "const",
+              "args": 1
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 1
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 1
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 1
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": -1
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 1
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 1
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 1
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 1
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 1
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "modulus": 2305843009213693951,
+  "points": 64,
+  "seed": 20261011,
+  "value_digest": "00cd34f6d9ebf45c3c847ca10ce804c0f48fed073af537bec5c25966382faa91",
+  "independence": "issued and checked by the same tool run; the exact Z[t] expansion is the independent check",
+  "proof": null
+}

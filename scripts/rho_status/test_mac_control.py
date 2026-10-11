@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Protect the public Mac snapshot boundary from private worker fields."""
 
+import json
 import unittest
+from unittest.mock import patch
 
-from mac_control import CAMPAIGN_ID, PUBLIC_SCHEMA, SOURCE_SCHEMA, snapshot
+from mac_control import BUCKET, CAMPAIGN_ID, PUBLIC_SCHEMA, SOURCE_SCHEMA, publish_live, snapshot
 
 
 class MacControlTests(unittest.TestCase):
@@ -55,6 +57,27 @@ class MacControlTests(unittest.TestCase):
         self.assertEqual(partial["worker_count"], 1)
         all_bad = snapshot([("m4max-02", bad)], generated_at="2026-10-09T04:25:00Z")
         self.assertIsNone(all_bad["dp_records"])
+
+    def test_public_upload_uses_only_sanitized_document_and_fixed_key(self):
+        public = snapshot([("m4pro-01", self.worker())], generated_at="2026-10-09T04:25:00Z")
+        sent = []
+
+        def upload(command, **kwargs):
+            with open(command[command.index("--body") + 1], "rb") as body:
+                sent.append((command, body.read()))
+            return type("Completed", (), {"returncode": 0})()
+
+        with patch("mac_control.subprocess.run", side_effect=upload):
+            publish_live(public)
+        self.assertEqual(sent[0][0][:7],
+                         ("aws", "s3api", "put-object", "--bucket", BUCKET, "--key", "mac-control.json"))
+        self.assertEqual(sent[0][1].decode(), json.dumps(
+            public, sort_keys=True, separators=(",", ":")) + "\n")
+        self.assertNotIn(b"private", sent[0][1])
+        public["knownScalar"] = "private scalar"
+        with self.assertRaises(ValueError):
+            publish_live(public)
+        self.assertEqual(len(sent), 1)
 
 
 if __name__ == "__main__":

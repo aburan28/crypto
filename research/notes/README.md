@@ -81,6 +81,7 @@ its old name still identify it.
 | [`PAPER_STRUCTURAL_COMPLETENESS.md`](cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md) | Structural completeness of prime-field curves against isogeny-graph cryptanalysis |
 | [`RESEARCH_P256.md`](cm-isogeny/RESEARCH_P256.md) / [`RESEARCH_P256_ISOGENY_COVER.md`](cm-isogeny/RESEARCH_P256_ISOGENY_COVER.md) | P-256 structural findings and the `(N, N)`-split-Jacobian cover search (PDF reports alongside) |
 | [`RESEARCH_NIST_SOLINAS_STRUCTURE.md`](cm-isogeny/RESEARCH_NIST_SOLINAS_STRUCTURE.md) / [`_EXPERIMENTS.md`](cm-isogeny/RESEARCH_NIST_SOLINAS_EXPERIMENTS.md) | Cyclotomic structure in NIST Solinas primes |
+| [`RESEARCH_NIST_CYCLOTOMIC_POINT_HEIGHTS.md`](cm-isogeny/RESEARCH_NIST_CYCLOTOMIC_POINT_HEIGHTS.md) | P-192/224/256 at full size: algebraic factorisation of `p ± 1` (P-256's `p + 1` included), exact embedding degrees, Cheon cost from `n ∓ 1`, cyclotomic norms of `#E(F_{p^k})`, and heights of lifted points (no small points; `ĥ(G̃) ≈ log p`) |
 | [`RESEARCH_PKM_CRITERION.md`](cm-isogeny/RESEARCH_PKM_CRITERION.md) | PKM-resistance audit across standardised curves |
 | [`RESEARCH_EDS_RESIDUE.md`](cm-isogeny/RESEARCH_EDS_RESIDUE.md) | Elliptic divisibility sequences and elliptic nets |
 
