@@ -205,3 +205,10 @@ registered target curve.
    `fiber_combined_n17_koblitz.json`: the same four arms, rounds and
    timeout, on the Koblitz curve alone, four targets instead of two.
    The random-curve timeouts are reported from the interrupted session.
+8. **A3 with two targets.**  The host rebooted twice during the
+   four-target re-run of amendment 7, each time within 25 minutes of its
+   start (`interrupted/fiber_combined_n17_koblitz_run6.run.log`,
+   `..._run7.run.log`); the reboots are not the combined solve's memory,
+   which peaked at 0.78 GB in the warm-ups, against 16 GB on the host.
+   A3 re-runs with the two targets of the frozen spec, so that the
+   session (24 executions, about 45 minutes) can finish between reboots.
