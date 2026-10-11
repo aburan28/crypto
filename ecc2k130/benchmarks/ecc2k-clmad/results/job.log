@@ -1,0 +1,151 @@
+NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05, 2430 MHz, 600.00 W, 12.0
+Build cuda_13.3.r13.3/compiler.38244171_0
+source: 0c1dd525ff6630ba4d6d28c594caf19ab1b7bbd4 (uncommitted changes)
+arch sm_120 reps 3
+=== selftest native
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+[selftest] ecc2k95
+  scalar_mul: 2048 points match the host
+  tau^5: 2048 points match the host
+  canonical class representative: 2048 match
+  rho: 2048 class walks x 64 steps identical to the host, 31419 DPs
+  rho: device DPs replay to the same class on the host
+  rho lowmem variant matches
+selftest OK
+=== selftest software
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+[selftest] ecc2k95
+  scalar_mul: 2048 points match the host
+  tau^5: 2048 points match the host
+  canonical class representative: 2048 match
+  rho: 2048 class walks x 64 steps identical to the host, 31419 DPs
+  rho: device DPs replay to the same class on the host
+  rho lowmem variant matches
+selftest OK
+=== field software rep 1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  mul (throughput): 97.29 Gop/s
+  mul (dependent):  97.22 Gop/s
+  sqr:              345.49 Gop/s  (0.28 mul-equivalents)
+  inv:              2764.91 Mop/s  (35 mul-equivalents)
+  class weight:     68.84 Gop/s  (1.41 mul-equivalents)
+=== rho software rep 1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  385024 class walks (48128 threads x 8), dp g <= 30, variant=lowmem, inversion=repeated squaring
+  376 blocks x 128 threads, 8000 B shared
+  1.415 Gstep/s  (789 M steps in 0.557 s)
+  0.7 ns/step/walk
+  ECC2K-95 needs ~1.791e+13 class-walk steps: 0.0 device-years at this rate
+=== field native rep 1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  mul (throughput): 127.26 Gop/s
+  mul (dependent):  127.09 Gop/s
+  sqr:              341.60 Gop/s  (0.37 mul-equivalents)
+  inv:              3430.90 Mop/s  (37 mul-equivalents)
+  class weight:     68.74 Gop/s  (1.85 mul-equivalents)
+=== rho native rep 1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  385024 class walks (48128 threads x 8), dp g <= 30, variant=lowmem, inversion=repeated squaring
+  376 blocks x 128 threads, 8000 B shared
+  1.684 Gstep/s  (789 M steps in 0.468 s)
+  0.6 ns/step/walk
+  ECC2K-95 needs ~1.791e+13 class-walk steps: 0.0 device-years at this rate
+=== field software rep 2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  mul (throughput): 97.31 Gop/s
+  mul (dependent):  96.87 Gop/s
+  sqr:              346.35 Gop/s  (0.28 mul-equivalents)
+  inv:              2774.64 Mop/s  (35 mul-equivalents)
+  class weight:     68.85 Gop/s  (1.41 mul-equivalents)
+=== rho software rep 2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  385024 class walks (48128 threads x 8), dp g <= 30, variant=lowmem, inversion=repeated squaring
+  376 blocks x 128 threads, 8000 B shared
+  1.415 Gstep/s  (789 M steps in 0.557 s)
+  0.7 ns/step/walk
+  ECC2K-95 needs ~1.791e+13 class-walk steps: 0.0 device-years at this rate
+=== field native rep 2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  mul (throughput): 127.30 Gop/s
+  mul (dependent):  127.19 Gop/s
+  sqr:              342.06 Gop/s  (0.37 mul-equivalents)
+  inv:              3424.72 Mop/s  (37 mul-equivalents)
+  class weight:     68.72 Gop/s  (1.85 mul-equivalents)
+=== rho native rep 2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  385024 class walks (48128 threads x 8), dp g <= 30, variant=lowmem, inversion=repeated squaring
+  376 blocks x 128 threads, 8000 B shared
+  1.685 Gstep/s  (789 M steps in 0.468 s)
+  0.6 ns/step/walk
+  ECC2K-95 needs ~1.791e+13 class-walk steps: 0.0 device-years at this rate
+=== field software rep 3
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  mul (throughput): 97.33 Gop/s
+  mul (dependent):  97.22 Gop/s
+  sqr:              346.69 Gop/s  (0.28 mul-equivalents)
+  inv:              2766.09 Mop/s  (35 mul-equivalents)
+  class weight:     69.03 Gop/s  (1.41 mul-equivalents)
+=== rho software rep 3
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  385024 class walks (48128 threads x 8), dp g <= 30, variant=lowmem, inversion=repeated squaring
+  376 blocks x 128 threads, 8000 B shared
+  1.436 Gstep/s  (789 M steps in 0.549 s)
+  0.7 ns/step/walk
+  ECC2K-95 needs ~1.791e+13 class-walk steps: 0.0 device-years at this rate
+=== field native rep 3
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  mul (throughput): 127.29 Gop/s
+  mul (dependent):  127.20 Gop/s
+  sqr:              342.86 Gop/s  (0.37 mul-equivalents)
+  inv:              3433.99 Mop/s  (37 mul-equivalents)
+  class weight:     68.79 Gop/s  (1.85 mul-equivalents)
+=== rho native rep 3
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  385024 class walks (48128 threads x 8), dp g <= 30, variant=lowmem, inversion=repeated squaring
+  376 blocks x 128 threads, 8000 B shared
+  1.685 Gstep/s  (789 M steps in 0.468 s)
+  0.6 ns/step/walk
+  ECC2K-95 needs ~1.791e+13 class-walk steps: 0.0 device-years at this rate
+JOB_OK

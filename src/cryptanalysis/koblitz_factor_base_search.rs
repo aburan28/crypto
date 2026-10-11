@@ -308,7 +308,7 @@ impl TargetSet {
             }
             (out, false)
         };
-        let points = match FastBinaryCurve::new(&kc.curve.irreducible, kc.a as u64) {
+        let points = match kc.fast_binary_curve() {
             // One batched multi-scalar multiplication for the whole target
             // set (two inversions per scalar bit for all targets together
             // instead of ~1.5 per target per bit).  Bit-exact with the
@@ -841,7 +841,11 @@ fn spec_abscissa_bound(spec: &FactorBaseSpec, n: u32) -> Option<u64> {
         // Saturation is monotone in abscissae (parent x-values are kept),
         // so a parent bound is a lower bound for the child.
         FactorBaseSpec::TwoTorsionSaturated { parent } => spec_abscissa_bound(parent, n),
-        FactorBaseSpec::FrobeniusUnion { .. } | FactorBaseSpec::Pruned { .. } => None,
+        FactorBaseSpec::FrobeniusUnion { .. }
+        | FactorBaseSpec::Pruned { .. }
+        | FactorBaseSpec::StandardSubspace { .. }
+        | FactorBaseSpec::CofactorProjected { .. }
+        | FactorBaseSpec::SubgroupOrbits { .. } => None,
     }
 }
 
@@ -1600,7 +1604,7 @@ mod tests {
         assert!(candidates[0]
             .skipped
             .as_ref()
-            .is_none_or(|s| !s.contains("exceed the cap")));
+            .map_or(true, |s| !s.contains("exceed the cap")));
     }
 
     #[test]

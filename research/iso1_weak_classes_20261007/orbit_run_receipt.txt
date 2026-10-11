@@ -1,0 +1,53 @@
+ISO-1 exact orbit-quotient validation receipt, 2026-10-08
+
+Machine: arm64 macOS, contended host. These runs test correctness and
+operation counts, not isolated CPU wall-time performance. Rustc 1.93.1.
+The new example source (SHA-256
+580a440b44afb097fff50ea6c57c3ae31967ff75558e071e512e7e989d304016)
+was built against the last known buildable library snapshot
+f70c6abc5fd1ee4a1dfa88475bd4d357e80b4501 because current main has
+unrelated duplicate Rust definitions. Build command:
+  CARGO_INCREMENTAL=0 cargo build --release --offline --example iso1_class_census
+New executable SHA-256:
+  568925dc4487caaece26cdd5f60f05850b2d68fedc493c9bce777e240f57ee9b
+Original direct-run executable SHA-256:
+  923d687011fd804adb2fae9c105509f4b2b337b0187a7b0d43d9cdba67864b55
+
+Mode: --derive-twists --orbit-quotient. The representative and point-count
+call totals are asserted in the executable. The orbit selector enumerates
+all normalized alpha values, but counts just the canonical lambda of each
+Frobenius/inversion orbit, weighted by that orbit's cardinality.
+
+p=13, RAYON_NUM_THREADS=4: 57,460 weighted representatives, 4,789 point
+counts, 497,406,336 charged F_p multiplications, 7.259 s exploratory wall.
+The entire orbit CSV was byte-identical to p13_twist_derived.csv, SHA-256
+0deedb7537aae6a6a9d3ee84c752dca1cf68271a6d66fc993e190a742747d230.
+The old twist-derived method used 28,730 point counts.
+
+p=11, RAYON_NUM_THREADS=2: 29,524 weighted representatives, 2,461 point
+counts, 213,403,434 charged F_p multiplications, 3.938 s exploratory wall.
+p11_orbit.csv SHA-256:
+7a7feccd1fd4d6f70fd32f1a1d5315bcc247f4913fa821305a1caaba279f0f1a.
+Relative to p11.csv, trace -2518 changed 101 -> 102 and trace 2102
+changed 49 -> 48; no weak/zero label changed.
+
+p=17, RAYON_NUM_THREADS=2: 167,620 weighted representatives, 13,969 point
+counts, 1,828,943,060 charged F_p multiplications, 18.081 s exploratory wall.
+p17_orbit.csv SHA-256:
+826fccf580357745249d2d4e8626c4a194933782a3e77fed8e63fd1453a56922.
+Relative to p17.csv, trace -3742 changed 251 -> 252 and trace 9154
+changed 37 -> 36; no weak/zero label changed. The held-out fit output
+using p11_orbit.csv and p17_orbit.csv was byte-identical to the original.
+
+p=37, RAYON_NUM_THREADS=2 while another census shared the host:
+3,751,060 weighted representatives, 312,589 point counts,
+94,615,593,688 charged F_p multiplications, 690.713 s exploratory wall.
+The entire orbit CSV was byte-identical to p37_twist_derived.csv, SHA-256
+e57ab6ef3f84675cf6e6dbb23fcab90158b9bbb568115298fa44ee8ce3d82a6c.
+The direct twist-derived run used 1,875,530 point counts and counted
+563,856,133,786 F_p multiplications. The wall times were on different,
+contended workloads and are not a controlled speedup comparison.
+
+All zero-witness rows remain computational labels from a randomized
+point counter. Equality of the p13 and p37 files and the orbit-congruence
+audit are strong structural checks, not certificates of every cardinality.

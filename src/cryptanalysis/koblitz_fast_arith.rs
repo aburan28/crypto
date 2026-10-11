@@ -388,7 +388,12 @@ pub fn artin_schreier_root(gf: &Gf2, n: u32, c: u64) -> Option<u64> {
     if n > 20 {
         return None;
     }
-    (0..(1u64 << n)).find(|&v| (gf.sqr(v) ^ v) == c)
+    for v in 0..(1u64 << n) {
+        if (gf.sqr(v) ^ v) == c {
+            return Some(v);
+        }
+    }
+    None
 }
 
 /// Pack `(x, y)` exactly as [`crate::cryptanalysis::koblitz_index_calculus::pack_point`]
@@ -1358,6 +1363,7 @@ mod wide_tests {
         let mut state = 0x55AAu128;
         for _ in 0..40 {
             state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
+            let x = (state & fast.gf.mask) as u128;
             let x = state & fast.gf.mask;
             let got: std::collections::HashSet<(u128, u128)> =
                 fast.points_with_x(b, x).into_iter().flatten().collect();
