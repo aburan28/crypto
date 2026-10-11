@@ -2875,6 +2875,13 @@ mod gate_tests {
             .enumeration
             .iter()
             .all(|e| e.gae_per_step.is_finite() && e.gae_per_step >= 0.0));
+        assert!(b.gae_per_word_xor.is_finite() && b.gae_per_word_xor > 0.0);
+        assert!(b.enumeration.iter().all(|e| {
+            e.ns_per_step.is_finite()
+                && e.ns_per_step > 0.0
+                && e.gae_per_step.is_finite()
+                && e.gae_per_step > 0.0
+        }));
     }
 }
 

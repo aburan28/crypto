@@ -44,6 +44,8 @@ fn key(point: &BinaryPoint) -> Option<PointKey> {
 }
 
 #[cfg(test)]
+// Signed-index query path, kept for the upcoming batch kernels.
+#[allow(dead_code)]
 fn stored_point(point: &BinaryPoint) -> Option<Option<(u128, u128)>> {
     match point {
         BinaryPoint::Infinity => Some(None),
@@ -52,6 +54,8 @@ fn stored_point(point: &BinaryPoint) -> Option<Option<(u128, u128)>> {
 }
 
 #[cfg(test)]
+// Signed-index query path, kept for the upcoming batch kernels.
+#[allow(dead_code)]
 fn restore_point(point: Option<(u128, u128)>, m: u32) -> BinaryPoint {
     let Some((x, y)) = point else {
         return BinaryPoint::Infinity;
@@ -566,6 +570,7 @@ mod packed83 {
     #[allow(dead_code)]
     #[target_feature(enable = "aes")]
     #[cfg(all(test, target_arch = "aarch64"))]
+    #[cfg(test)]
     pub(super) unsafe fn batch_add_fixed(
         curve: &BinaryCurve,
         fixed: &BinaryPoint,

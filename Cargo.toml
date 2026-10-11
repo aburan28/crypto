@@ -14,6 +14,14 @@ path = "experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs"
 name = "s3_pair_candidate_frozen"
 path = "experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs"
 
+[[example]]
+name = "koblitz_n53_compact_replay"
+path = "experiments/koblitz-n53-compact-cold-20261009/native_replay.rs"
+
+[[example]]
+name = "koblitz_n53_compact_protocol"
+path = "experiments/koblitz-n53-compact-cold-20261009/native_run.rs"
+
 [[bin]]
 name = "crypto"
 path = "src/main.rs"
@@ -60,6 +68,12 @@ path = "src/bin/ecc2k_status.rs"
 name = "jacobian-certificate"
 path = "src/bin/jacobian_certificate.rs"
 
+# `jacobian_transfers` — every route from a registered curve into a Jacobian,
+# priced against rho under one frozen formula cost model (docs/curves/JACOBIAN_TRANSFERS.md).
+[[bin]]
+name = "jacobian_transfers"
+path = "src/bin/jacobian_transfers.rs"
+
 # `cryptopro-b-glv-bench` — GLV-2 with the degree-175 isogeny-chain
 # endomorphism against width-w NAF on GOST CryptoPro-B, same Jacobian
 # arithmetic in both arms (research/cryptopro_b_glv_chain_20261005).
@@ -80,6 +94,11 @@ name = "crypto_lib"
 path = "src/lib.rs"
 
 [features]
+# Keep the existing Redis TLS behavior in normal builds. The isolated,
+# network-disabled N83 capacity worker can omit its unused native OpenSSL
+# dependency when cross-building a static Linux binary.
+default = ["redis-native-tls"]
+redis-native-tls = ["redis/tls-native-tls"]
 f4-four-tables = []
 f4-five-tables = []
 f4-wide-tables = []
@@ -149,7 +168,7 @@ blake3 = "1.5"
 flate2 = "1.0"
 # Base64 codec for cryptopals fixtures (challenge 56 cookie).
 base64 = "0.21"
-redis = { version = "1.7.0", features = ["tls-native-tls"] }
+redis = "1.7.0"
 
 [[bench]]
 name = "pqc_speed"

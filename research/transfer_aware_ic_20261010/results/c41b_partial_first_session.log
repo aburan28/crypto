@@ -1,0 +1,13 @@
+n=41 poly=0x20000000009 #E=2199025563772 = [(2, 2), (549756390943, 1)]  r=549756390943 cofactor=4
+--- arm frob K=72 c=1
+|S|=5904 (2nKc=5904) dup=0
+pairs=17422704 distinct_x=8705448 canonical=212328 (L^2/4n=212544) table 57.6s canon 607.5s
+column touches min=3 max=18 untouched=0
+hits=160 mean_probes=29142.8 median=20185 model 6r/L^2=94630.0 rank=72/72 rows_to_rank=Some(88) degenerate=0 dependent=88 logs_ok=true target_ok=true online_probes=7061 1417.3s
+--- arm tau K=36 c=2
+|S|=5904 (2nKc=5904) dup=0
+pairs=17422704 distinct_x=8687367 canonical=211887 (L^2/4n=212544) table 71.6s canon 920.7s
+column touches min=11 max=25 untouched=0
+hits=160 mean_probes=34570.1 median=23648 model 6r/L^2=94630.0 rank=36/36 rows_to_rank=Some(36) degenerate=0 dependent=124 logs_ok=true target_ok=true online_probes=34817 1497.4s
+--- arm int K=36 c=2
+|S|=5904 (2nKc=5904) dup=0

@@ -1,0 +1,11 @@
+  ***   at top-level: read(getenv("ISO1_INPUTS"))
+  ***                 ^---------------------------
+  ***   in function read: construct_source(7,["5","6","5","3","5","5"],[
+  ***                     ^----------------------------------------------
+  ***   in function construct_source: ...r(poldegree(node[4])+1,i,
+  ***   cv(polcoef(node[4],i-
+  ***   ^---------------------
+  ***   in function cv: ...r(6,i,Str(lift(polcoef(v.pol,i-1))))
+  ***                                               ^-----------
+  *** _.pol: incorrect type in pol (t_INT).
+... skipping file '/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/iso1_weak_classes_20261007/two_branch_20261009/construct_odd.gp'
