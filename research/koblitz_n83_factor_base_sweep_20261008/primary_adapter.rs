@@ -1088,11 +1088,41 @@ fn run_with_config(
         "sat_models":report.sat_models,
         "sat_conflicts":report.sat_conflicts,
         "linear_solve_attempts":report.linear_solve_attempts,
+        "matrix_rows":report.matrix_rows,
+        "matrix_columns":report.matrix_columns,
+        "terminal_matrix_rank":report.terminal_matrix_rank,
+        "rank_checks":report.rank_checks,
         "relation_collection_ns":report.relation_collection_ns.to_string(),
         "linear_algebra_ns":report.linear_algebra_ns.to_string(),
         "m_cofactor_admissible":report.m_cofactor_admissible,
         "direct_relations_skipped":report.direct_relations_skipped
     });
+    let attempt_records: Vec<_> = report.attempt_records.iter().map(|attempt| json!({
+        "trial":attempt.trial,
+        "a":attempt.coefficient_a.to_string(),
+        "b":attempt.coefficient_b.to_string(),
+        "target":point_json(words(&attempt.target)),
+        "disposition":format!("{:?}",attempt.disposition),
+        "decomposition_indices":attempt.decomposition_indices,
+        "solver_calls":attempt.solver_calls,
+        "models":attempt.models,
+        "conflicts":attempt.conflicts,
+        "implied_rows":attempt.implied_rows
+    })).collect();
+    let relation_matrix: Vec<_> = report.relation_matrix.iter().map(|relation| json!({
+        "a":relation.coef_a.to_string(),
+        "b":relation.coef_b.to_string(),
+        "summands":relation.summands,
+        "summand_negated":relation.summand_negated,
+        "row":relation.row.iter().map(ToString::to_string).collect::<Vec<_>>()
+    })).collect();
+    let rank_history: Vec<_> = report.rank_history.iter().map(|rank| json!({
+        "rows":rank.rows,
+        "columns":rank.columns,
+        "rank":rank.rank,
+        "candidate_produced":rank.candidate_produced,
+        "candidate_verified":rank.candidate_verified
+    })).collect();
     let summary = json!({
         "schema":"n83.primary-cold-result/v1", "study":STUDY,
         "status":status, "curve_a":0, "fixture":0,
@@ -1123,6 +1153,9 @@ fn run_with_config(
         "pre_summary_process_wall_ms":start.elapsed().as_secs_f64()*1000.0,
         "solver_stage_executed":if chain.is_some() {report.sat_calls>0} else {report.trials>0},
         "report":report_details,
+        "attempt_records":attempt_records,
+        "relation_matrix":relation_matrix,
+        "rank_history":rank_history,
         "verified_log":if candidate_valid { report.log.as_ref().map(ToString::to_string) } else { None },
         "column_log_verification":false,
         "total_index_calculus_runtime_ms":Value::Null,

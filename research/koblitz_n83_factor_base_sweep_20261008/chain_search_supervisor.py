@@ -35,7 +35,8 @@ COUNTERS = (
     "verification_failures", "sat_unknowns", "sat_invalid_models",
     "sat_group_rejected_models", "sat_calls", "sat_refutations",
     "sat_models", "sat_conflicts", "linear_solve_attempts",
-    "direct_relations_skipped",
+    "direct_relations_skipped", "matrix_rows", "matrix_columns",
+    "terminal_matrix_rank", "rank_checks",
 )
 
 
@@ -119,6 +120,9 @@ def receipt_error(worker: object, worker_config: object, config: dict) -> str | 
     if (report["trials"] > config["max_trials"] or
             report["orbit_count"] != config["columns"] or
             report["factor_base_size"] != 166 * config["columns"] or
+            report["matrix_rows"] != report["relations"] or
+            report["matrix_columns"] != report["orbit_count"] + 1 or
+            report["terminal_matrix_rank"] > min(report["matrix_rows"], report["matrix_columns"]) or
             report["independent_relations"] > report["orbit_count"] or
             report["independent_relations"] + report["dependent_relations"] != report["relations"] or
             report["sat_refutations"] > report["sat_calls"] or
@@ -135,10 +139,65 @@ def receipt_error(worker: object, worker_config: object, config: dict) -> str | 
             return f"worker {key} is not an integer nanosecond count"
     if worker.get("solver_stage_executed") is not (report["sat_calls"] > 0):
         return "worker SAT-stage flag disagrees with solver calls"
+    attempts = worker.get("attempt_records")
+    relations = worker.get("relation_matrix")
+    ranks = worker.get("rank_history")
+    if (not isinstance(attempts, list) or len(attempts) > report["trials"] or
+            not isinstance(relations, list) or len(relations) != report["relations"] or
+            not isinstance(ranks, list) or len(ranks) != report["linear_solve_attempts"]):
+        return "worker attempt, relation, or rank replay ledger is incomplete"
+    for attempt in attempts:
+        if (not isinstance(attempt, dict) or
+                type(attempt.get("trial")) is not int or not 1 <= attempt["trial"] <= report["trials"] or
+                any(not isinstance(attempt.get(key), str) or not attempt[key].isdecimal()
+                    for key in ("a", "b")) or
+                attempt.get("disposition") not in ("RelationFound", "Refuted", "Unsupported",
+                    "Unknown", "InvalidModel", "DirectSkipped", "DirectSolved") or
+                any(type(attempt.get(key)) is not int or attempt[key] < 0
+                    for key in ("solver_calls", "models", "conflicts", "implied_rows"))):
+            return "worker attempt replay record is malformed"
+        target = attempt.get("target")
+        if target is not None and (not isinstance(target, list) or len(target) != 2 or
+                                   any(not isinstance(word, str) or not word.isdecimal() for word in target)):
+            return "worker attempt target is malformed"
+        indices = attempt.get("decomposition_indices")
+        if indices is not None and (not isinstance(indices, list) or
+                                    any(type(index) is not int or not 0 <= index < report["factor_base_size"]
+                                        for index in indices)):
+            return "worker attempt decomposition indices are malformed"
+    if (sum(item["solver_calls"] for item in attempts) != report["sat_calls"] or
+            sum(item["models"] for item in attempts) != report["sat_models"] or
+            sum(item["conflicts"] for item in attempts) != report["sat_conflicts"]):
+        return "worker attempt ledger disagrees with SAT counters"
+    for relation in relations:
+        if (not isinstance(relation, dict) or
+                any(not isinstance(relation.get(key), str) or not relation[key].isdecimal()
+                    for key in ("a", "b")) or
+                not isinstance(relation.get("row"), list) or len(relation["row"]) != report["orbit_count"] or
+                any(not isinstance(value, str) or not value.isdecimal() for value in relation["row"]) or
+                not isinstance(relation.get("summands"), list) or len(relation["summands"]) != config["summands"] or
+                not isinstance(relation.get("summand_negated"), list) or
+                len(relation["summand_negated"]) != config["summands"] or
+                any(type(value) is not bool for value in relation["summand_negated"])):
+            return "worker relation replay row is malformed"
+        for summand in relation["summands"]:
+            if (not isinstance(summand, list) or len(summand) != 2 or
+                    any(type(value) is not int for value in summand) or
+                    not 0 <= summand[0] < report["orbit_count"] or not 0 <= summand[1] < 83):
+                return "worker relation orbit label is malformed"
+    for rank in ranks:
+        if (not isinstance(rank, dict) or
+                any(type(rank.get(key)) is not int or rank[key] < 0 for key in ("rows", "columns", "rank")) or
+                rank["rows"] > report["matrix_rows"] or rank["columns"] != report["matrix_columns"] or
+                rank["rank"] > min(rank["rows"], rank["columns"]) or
+                type(rank.get("candidate_produced")) is not bool or
+                type(rank.get("candidate_verified")) is not bool):
+            return "worker rank replay record is malformed"
     if status == "PREFLIGHT_ONLY":
         if (config["max_trials"] != 0 or report["trials"] != 0 or
                 report["sat_calls"] != 0 or report["relations"] != 0 or
-                report["linear_solve_attempts"] != 0):
+                report["matrix_rows"] != 0 or report["terminal_matrix_rank"] != 0 or
+                report["linear_solve_attempts"] > 1):
             return "preflight unexpectedly searched"
     elif config["max_trials"] == 0:
         return "zero-trial run has a search disposition"

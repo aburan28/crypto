@@ -26,8 +26,11 @@ def receipts(config: dict, status: str = "PREFLIGHT_ONLY") -> tuple[dict, dict]:
         "factor_base_size": 166 * config["columns"],
         "orbit_count": config["columns"], "trials": trials,
         "sat_calls": calls, "sat_unknowns": int(unknown),
+        "sat_models": int(verified),
         "relations": int(verified), "independent_relations": int(verified),
         "linear_solve_attempts": int(verified),
+        "matrix_rows": int(verified), "matrix_columns": config["columns"] + 1,
+        "terminal_matrix_rank": int(verified), "rank_checks": int(verified),
         "relation_collection_ns": "1000", "linear_algebra_ns": "0",
     })
     worker_config = {
@@ -63,6 +66,22 @@ def receipts(config: dict, status: str = "PREFLIGHT_ONLY") -> tuple[dict, dict]:
         "selected_best_total_runtime": None,
         "solver_stage_executed": calls > 0,
         "report": report,
+        "attempt_records": ([{
+            "trial": 1, "a": "1", "b": "2", "target": ["3", "4"],
+            "disposition": "RelationFound" if verified else "Unknown",
+            "decomposition_indices": [0] * config["summands"] if verified else None,
+            "solver_calls": 1, "models": int(verified), "conflicts": 0,
+            "implied_rows": int(verified),
+        }] if calls else []),
+        "relation_matrix": ([{
+            "a": "1", "b": "2", "summands": [[0, 0]] * config["summands"],
+            "summand_negated": [False] * config["summands"],
+            "row": ["0"] * config["columns"],
+        }] if verified else []),
+        "rank_history": ([{
+            "rows": 1, "columns": config["columns"] + 1, "rank": 1,
+            "candidate_produced": True, "candidate_verified": True,
+        }] if verified else []),
         "verified_log": "3" if verified else None,
     }
     return worker_config, summary
@@ -82,9 +101,16 @@ class ChainSearchGuardTests(unittest.TestCase):
     def test_receipt_checks_rank_solver_caps_and_false_completion(self):
         worker_config, worker = receipts(self.config)
         self.assertIsNone(guard.receipt_error(worker, worker_config, self.config))
+        worker["report"]["linear_solve_attempts"] = 1
+        worker["report"]["rank_checks"] = 1
+        worker["rank_history"] = [{
+            "rows": 0, "columns": self.config["columns"] + 1, "rank": 0,
+            "candidate_produced": False, "candidate_verified": False,
+        }]
+        self.assertIsNone(guard.receipt_error(worker, worker_config, self.config))
         worker["report"]["relations"] = 1
         worker["report"]["independent_relations"] = 1
-        self.assertIn("preflight", guard.receipt_error(worker, worker_config, self.config))
+        self.assertIsNotNone(guard.receipt_error(worker, worker_config, self.config))
         config = dict(self.config, max_trials=1)
         worker_config, worker = receipts(config, "UNKNOWN_solver_cap")
         self.assertIsNone(guard.receipt_error(worker, worker_config, config))
@@ -92,6 +118,15 @@ class ChainSearchGuardTests(unittest.TestCase):
         self.assertIn("solver-cap", guard.receipt_error(worker, worker_config, config))
         worker_config, worker = receipts(config, "PASS_verified_target_only")
         self.assertIsNone(guard.receipt_error(worker, worker_config, config))
+        worker["relation_matrix"][0]["row"].pop()
+        self.assertIn("relation replay", guard.receipt_error(worker, worker_config, config))
+        worker_config, worker = receipts(config, "PASS_verified_target_only")
+        worker["rank_history"].clear()
+        self.assertIn("replay ledger", guard.receipt_error(worker, worker_config, config))
+        worker_config, worker = receipts(config, "PASS_verified_target_only")
+        worker["attempt_records"][0]["solver_calls"] = 0
+        self.assertIn("SAT counters", guard.receipt_error(worker, worker_config, config))
+        worker_config, worker = receipts(config, "PASS_verified_target_only")
         worker["report"]["independent_relations"] = 0
         self.assertIsNotNone(guard.receipt_error(worker, worker_config, config))
         worker_config, worker = receipts(config, "PASS_verified_target_only")
