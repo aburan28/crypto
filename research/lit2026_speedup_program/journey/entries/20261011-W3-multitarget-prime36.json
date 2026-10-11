@@ -1,0 +1,24 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W3",
+  "slug": "multitarget-prime36",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1683",
+  "papers": ["ePrint 2026/2253"],
+  "kind": "diagnostic",
+  "workload": {
+    "id": "rho-batch-prime36-k1-16",
+    "description": "Kuhn-Struik batch rho (ic_boundary::rho_batch_with, negation classes, A = 2), k = 1,2,4,8,16, 24 batches each, on the prime-field curve over GF(68723001073) of prime order 68723001023 (ecbench conductor_gap floor curve, ell = 120283, t = 51; whole group, cofactor 1)",
+    "curve_ids": ["prime-floor-q68723001073-N68723001023"]
+  },
+  "metric": "slope of ln(mean total batch cost) on ln k",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 120,
+  "arms": [],
+  "ratio_original_over_candidate": null,
+  "ratio_previous_over_candidate": null,
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w3_ggm_audit_20261011/reports/run-20261011T2012Z/report.pdf",
+  "note": "Slope 0.526, 95% bootstrap [0.453, 0.608], against the Kuhn-Struik finite-k slope 0.539 and the generic sqrt(k*r) asymptote 0.5; total/sqrt(k r/A) flat at 1.38-1.55. All 744 logarithms verified; a rebuild reproduced the JSON byte-for-byte."
+}

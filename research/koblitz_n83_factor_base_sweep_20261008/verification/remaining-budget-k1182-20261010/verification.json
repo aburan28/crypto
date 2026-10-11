@@ -1,0 +1,15 @@
+{
+  "binary_sha256": "8fab524044f7e809e5b246307cd5f45c5effa3c9b07a50d8f96feafdd80ea498",
+  "container_cleanup_check": "docker ps -aq exact config container name returned empty with exit 0",
+  "container_cleanup_verified": true,
+  "limitations": "same-host receipt and source-snapshot check; no SAT model/search/relation or external replay",
+  "panel_manifest_sha256": "2735f6960233749ac887f68705fd514dfc003e2212d722a8e50e5e9738aadcfa",
+  "panel_object_sha256": "eb342b574e244e1e67e8e78c805f33ee88edcdb4f3a14d4114e6f413beede380",
+  "panel_replay_sha256": "6205a6ab30721a7d7700eb36a8c31d769d611e535773f247f56591ca96052e9e",
+  "panel_s3_receipt_sha256": "ebf303210b5220f190ecd46dbde42ad868d775dfe7ebdc0797dd8a9a92bb5d88",
+  "required_domain_clauses": 32142830,
+  "schema": "n83.k1182-capacity-independent-receipt-check/v1",
+  "source_commit": "032e4a6953a96ee7005f4a5a9ed4d3934c144629",
+  "status": "PASS_receipt_integrity",
+  "worker_status": "UNKNOWN_domain_clause_cap"
+}
