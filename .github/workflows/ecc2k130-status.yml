@@ -8,7 +8,7 @@ on:
     # Every 3 minutes. scripts/rho_status/render.py sizes history.json from
     # this interval, and test_rho_status.py pins the two together, so changing
     # it here without changing that constant shortens the published series.
-    - cron: "*/3 * * * *"
+    - cron: "*/10 * * * *"
   workflow_dispatch:
   pull_request:
     paths:

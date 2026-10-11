@@ -55,6 +55,27 @@ embedded-data changes cannot disappear behind an incomplete trigger allowlist.
 
 ## Budgets and evidence coverage
 
+Every job eligible for an ordinary PR or merge group has an explicit execution
+budget of at most 25 minutes. Longer scientific budgets remain available on
+manual dispatch, scheduled work and main-branch recording, and explicitly
+requested one-shot label experiments retain their existing limits. Historical
+campaigns disabled by their owners remain disabled.
+
+The wider research workflows retain correctness tests and frozen evidence
+custody checks on PRs. Fresh paired timing panels, Callgrind/call-count profiles
+and their dependent result verification/upload steps run in the full lane.
+Immutable frozen panels react to their own snapshots and verifier inputs,
+instead of unrelated changes to live source. They keep their existing full
+manual measurement commands and archived results. PR validation does not
+create evidence commits or rewrite frozen sessions. Obsolete PR jobs cancel;
+manual measurements keep their existing cancellation policy.
+
+The event-aware [budget checker](scripts/check-pr-budgets.py) rejects missing,
+unknown or over-budget timeouts on PR/merge-group jobs, accounting for job
+conditions and dependencies. Its fixtures keep labeled/manual/disabled work
+separate from routine validation. This is a runtime contract, not a reason to
+silence errors or alter scientific workloads.
+
 | Lane | Execution budget |
 | --- | --- |
 | Scope / syntax / changed-file format | Five minutes |
@@ -89,8 +110,19 @@ status settings and merge-queue policy still need authenticated inspection.
 ```sh
 node --test .github/scripts/test-ci-scope.mjs
 python3 -B scripts/test_workflows_parse.py -v
+python3 -B .github/scripts/test-pr-budgets.py -v
+python3 -B .github/scripts/check-pr-budgets.py
 actionlint .github/workflows/{codeql,ecbench,release,rust-all-targets,rust-lint,workflows-parse}.yml
 ```
+
+`workflow-lint` also checks all workflow GitHub Actions expressions, triggers
+and job semantics with SHA-256 verified actionlint 1.7.12. Its YAML structure
+check keeps its existing job name. `workflows-parse` owns YAML regression
+fixtures, the historical-stage manual-only rule, classifier fixtures and the
+PR budget contract. Both jobs use sparse checkouts of the metadata they read.
+The status dashboard schedule runs every ten minutes, respecting GitHub's
+five-minute minimum, and disabled historical campaigns use explicit conditions
+that remain false while passing the semantic linter.
 
 The classifier tests exercise real git history, dependencies, unrelated prose,
 workflow changes, embedded data, renames/deletions, newline-containing paths,

@@ -3,6 +3,7 @@ on:
   pull_request:
     paths: ['groebner_compare/**', '.github/workflows/groebner-comparison.yml']
   push:
+    branches: [main]
     paths: ['groebner_compare/**', '.github/workflows/groebner-comparison.yml']
 permissions:
   contents: read
