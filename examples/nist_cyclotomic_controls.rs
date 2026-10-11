@@ -493,6 +493,266 @@ fn pairing_on(e: &CurveQ, pg: &Pt, pr: &Pt) -> (f64, f64) {
     )
 }
 
+// ────────────────────────────── figure ──────────────────────────────
+
+/// One figure row: control values, the target, and positive-control values.
+struct PlotRow {
+    label: String,
+    ctrl: Vec<f64>,
+    target: f64,
+    pos: Vec<f64>,
+}
+
+fn plot_rows(
+    rows: &[serde_json::Value],
+    exp: &str,
+    key: &str,
+    pos_key: Option<&str>,
+) -> Vec<PlotRow> {
+    let f = |r: &serde_json::Value, k: &str| r[k].as_f64();
+    let mut out = Vec::new();
+    for c in CURVES {
+        let values: Vec<Option<&str>> = if exp == "E1" {
+            VN.iter().map(|v| Some(*v)).collect()
+        } else {
+            vec![None]
+        };
+        for v in values {
+            let sel = |arm: &'static str| {
+                rows.iter().filter(move |r| {
+                    r["exp"] == exp
+                        && r["curve"] == c.name
+                        && r["arm"] == arm
+                        && (arm.starts_with("positive") || v.is_none_or(|v| r["value"] == v))
+                })
+            };
+            let ctrl: Vec<f64> = sel("control").filter_map(|r| f(r, key)).collect();
+            if ctrl.is_empty() {
+                continue;
+            }
+            let target = sel("target").find_map(|r| f(r, key)).unwrap_or(f64::NAN);
+            let pos: Vec<f64> = match (exp, pos_key) {
+                ("E1", Some(pk)) if v == Some("n-1") => {
+                    sel("positive").filter_map(|r| f(r, pk)).collect()
+                }
+                ("E3", Some(pk)) => sel("positive_small_x").filter_map(|r| f(r, pk)).collect(),
+                ("E4", Some(pk)) => sel("positive")
+                    .flat_map(|r| {
+                        let i = if pk == "abs_cos" { 0 } else { 1 };
+                        [r["g2"][i].as_f64(), r["g3"][i].as_f64()]
+                    })
+                    .flatten()
+                    .collect(),
+                _ => Vec::new(),
+            };
+            let label = match v {
+                Some(v) => format!("{} {}", c.name, v),
+                None => c.name.to_string(),
+            };
+            out.push(PlotRow {
+                label,
+                ctrl,
+                target,
+                pos,
+            });
+        }
+    }
+    out
+}
+
+/// Six panels (E1 M1, E1 M2, E3 two metrics, E4 two metrics): per row a
+/// histogram of the control arm, its 2.5–97.5% band, the target (red
+/// diamond) and positive controls (green ticks).
+fn controls_svg(rows: &[serde_json::Value], mode: &str) -> String {
+    let panels: Vec<(String, Vec<PlotRow>)> = vec![
+        (
+            "E1 · M1 = log2 of the 2^32-smooth part found (bits)".into(),
+            plot_rows(rows, "E1", "M1", Some("M1")),
+        ),
+        (
+            "E1 · M2 = # distinct primes below 2^32".into(),
+            plot_rows(rows, "E1", "M2", None),
+        ),
+        (
+            "E3 · ĥ/ln p of one-point lift".into(),
+            plot_rows(rows, "E3", "hhat_over_lnp", Some("hhat_over_lnp")),
+        ),
+        (
+            "E3 · h_x − ĥ (nats)".into(),
+            plot_rows(rows, "E3", "hx_minus_hhat", Some("hx_minus_hhat")),
+        ),
+        (
+            "E4 · |cos ∠| of two-point lift".into(),
+            plot_rows(rows, "E4", "abs_cos", Some("abs_cos")),
+        ),
+        (
+            "E4 · det/(ĥĥ) of two-point lift".into(),
+            plot_rows(rows, "E4", "norm_reg", Some("norm_reg")),
+        ),
+    ];
+    let (pw, rh, top, left, gap) = (430.0, 34.0, 46.0, 104.0, 40.0);
+    let col_h: Vec<f64> = panels
+        .iter()
+        .map(|(_, r)| r.len() as f64 * rh + 70.0)
+        .collect();
+    let h_row = [
+        col_h[0].max(col_h[1]),
+        col_h[2].max(col_h[3]),
+        col_h[4].max(col_h[5]),
+    ];
+    let w = 2.0 * (left + pw) + gap + 20.0;
+    let h = top + h_row.iter().sum::<f64>() + 40.0;
+    let mut s = String::new();
+    writeln!(s, r##"<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" font-family="Helvetica, Arial, sans-serif" font-size="11">"##).unwrap();
+    writeln!(s, r##"<rect width="100%" height="100%" fill="white"/><text x="10" y="20" font-size="14" font-weight="bold">Controlled re-test ({mode}): control distributions (grey), target (red ◆), positive controls (green |)</text>"##).unwrap();
+    writeln!(s, r##"<text x="10" y="36" fill="#555">Recorded values from rows_{mode}.jsonl. Band = control 2.5–97.5%. N per row is printed at the right. Seed base {SEED}.</text>"##).unwrap();
+    for (pi, (title, prow)) in panels.iter().enumerate() {
+        let x0 = left + (pi % 2) as f64 * (left + pw + gap);
+        let y0 = top + h_row[..pi / 2].iter().sum::<f64>() + 16.0;
+        writeln!(
+            s,
+            r##"<text x="{}" y="{}" font-weight="bold">{}</text>"##,
+            x0 - left + 10.0,
+            y0,
+            title
+        )
+        .unwrap();
+        // Axis spans controls and target; positive controls outside it are
+        // marked at the edge with their range.
+        let all: Vec<f64> = prow
+            .iter()
+            .flat_map(|r| r.ctrl.iter().chain(std::iter::once(&r.target)))
+            .copied()
+            .filter(|v| v.is_finite())
+            .collect();
+        if all.is_empty() {
+            continue;
+        }
+        let (mut lo, mut hi) = all
+            .iter()
+            .fold((f64::MAX, f64::MIN), |(a, b), &v| (a.min(v), b.max(v)));
+        if hi - lo < 1e-12 {
+            hi = lo + 1.0;
+        }
+        let pad = 0.03 * (hi - lo);
+        lo -= pad;
+        hi += pad;
+        let sx = |v: f64| x0 + (v - lo) / (hi - lo) * pw;
+        for (ri, r) in prow.iter().enumerate() {
+            let yc = y0 + 14.0 + ri as f64 * rh + rh / 2.0;
+            writeln!(
+                s,
+                r##"<text x="{}" y="{}" text-anchor="end">{}</text>"##,
+                x0 - 6.0,
+                yc + 4.0,
+                r.label
+            )
+            .unwrap();
+            let (q1, q2) = (quantile(&r.ctrl, 0.025), quantile(&r.ctrl, 0.975));
+            writeln!(
+                s,
+                r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="#e3e3e3"/>"##,
+                sx(q1),
+                yc - rh / 2.0 + 3.0,
+                (sx(q2) - sx(q1)).max(1.0),
+                rh - 6.0
+            )
+            .unwrap();
+            let bins = 60usize;
+            let mut cnt = vec![0usize; bins];
+            for &v in &r.ctrl {
+                let b = (((v - lo) / (hi - lo)) * bins as f64)
+                    .floor()
+                    .clamp(0.0, bins as f64 - 1.0) as usize;
+                cnt[b] += 1;
+            }
+            let cmax = *cnt.iter().max().unwrap() as f64;
+            for (b, &c) in cnt.iter().enumerate() {
+                if c == 0 {
+                    continue;
+                }
+                let bh = (rh - 8.0) * c as f64 / cmax;
+                writeln!(
+                    s,
+                    r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="#888"/>"##,
+                    x0 + b as f64 * pw / bins as f64,
+                    yc + rh / 2.0 - 4.0 - bh,
+                    pw / bins as f64 - 0.5,
+                    bh
+                )
+                .unwrap();
+            }
+            let (mut below, mut above) = (Vec::new(), Vec::new());
+            for &v in &r.pos {
+                if v < lo {
+                    below.push(v);
+                } else if v > hi {
+                    above.push(v);
+                } else {
+                    writeln!(s, r##"<line x1="{0:.1}" x2="{0:.1}" y1="{1:.1}" y2="{2:.1}" stroke="#1a9850" stroke-width="1.5"/>"##, sx(v), yc - rh / 2.0 + 2.0, yc + rh / 2.0 - 2.0).unwrap();
+                }
+            }
+            let fmt = |v: f64| {
+                if v.abs() >= 10.0 {
+                    format!("{v:.0}")
+                } else {
+                    format!("{v:.3}")
+                }
+            };
+            let span = |v: &[f64]| {
+                v.iter()
+                    .fold((f64::MAX, f64::MIN), |(a, b), &x| (a.min(x), b.max(x)))
+            };
+            if !below.is_empty() {
+                let (a, b) = span(&below);
+                writeln!(s, r##"<path d="M{:.1},{:.1} l8,-5 l0,10 z" fill="#1a9850"/><text x="{:.1}" y="{:.1}" fill="#1a9850" font-size="9">positive: {} to {} (n={})</text>"##, x0, yc, x0 + 10.0, yc - 6.0, fmt(a), fmt(b), below.len()).unwrap();
+            }
+            if !above.is_empty() {
+                let (a, b) = span(&above);
+                writeln!(s, r##"<path d="M{:.1},{:.1} l-8,-5 l0,10 z" fill="#1a9850"/><text x="{:.1}" y="{:.1}" fill="#1a9850" font-size="9" text-anchor="end">positive: {} to {} (n={})</text>"##, x0 + pw, yc, x0 + pw - 10.0, yc - 6.0, fmt(a), fmt(b), above.len()).unwrap();
+            }
+            if r.target.is_finite() {
+                let tx = sx(r.target);
+                writeln!(
+                    s,
+                    r##"<path d="M{:.1},{:.1} l5,6 l-5,6 l-5,-6 z" fill="#d73027"/>"##,
+                    tx,
+                    yc - 6.0
+                )
+                .unwrap();
+            }
+            writeln!(
+                s,
+                r##"<text x="{}" y="{}" fill="#555" font-size="9">N={}</text>"##,
+                x0 + pw + 3.0,
+                yc + 3.0,
+                r.ctrl.len()
+            )
+            .unwrap();
+        }
+        let yb = y0 + 14.0 + prow.len() as f64 * rh;
+        writeln!(
+            s,
+            r##"<line x1="{x0}" x2="{}" y1="{yb}" y2="{yb}" stroke="#333"/>"##,
+            x0 + pw
+        )
+        .unwrap();
+        for k in 0..=4 {
+            let v = lo + (hi - lo) * k as f64 / 4.0;
+            let lab = if (hi - lo).abs() < 0.1 {
+                format!("{v:.4}")
+            } else if (hi - lo).abs() < 10.0 {
+                format!("{v:.2}")
+            } else {
+                format!("{v:.0}")
+            };
+            writeln!(s, r##"<line x1="{0:.1}" x2="{0:.1}" y1="{yb}" y2="{1}" stroke="#333"/><text x="{0:.1}" y="{2}" text-anchor="middle" font-size="9">{3}</text>"##, sx(v), yb + 4.0, yb + 15.0, lab).unwrap();
+        }
+    }
+    s.push_str("</svg>\n");
+    s
+}
+
 // ────────────────────────────── main ──────────────────────────────
 
 fn main() {
@@ -508,6 +768,21 @@ fn main() {
         .map(|i| PathBuf::from(&args[i + 1]))
         .unwrap_or_else(|| PathBuf::from("research/nist_cyclotomic_controls_20261011"));
     fs::create_dir_all(&out).unwrap();
+    if args.iter().any(|a| a == "--plot") {
+        // Lay out recorded rows only; nothing is recomputed.
+        let text = fs::read_to_string(out.join(format!("rows_{mode}.jsonl"))).expect("rows file");
+        let rows: Vec<serde_json::Value> = text
+            .lines()
+            .map(|l| serde_json::from_str(l).unwrap())
+            .collect();
+        fs::write(
+            out.join(format!("controls_{mode}.svg")),
+            controls_svg(&rows, &mode),
+        )
+        .unwrap();
+        eprintln!("wrote controls_{mode}.svg");
+        return;
+    }
     let (n_e1, n_pos1, n_e2, n_e3, n_pos3, n_e4) = match mode.as_str() {
         "quick" => (40, 5, 3, 20, 5, 10),
         "v1" => (400, 20, 10, 200, 20, 100),
@@ -766,6 +1041,7 @@ fn main() {
             writeln!(rows, "{}", json!({"exp":"E3","arm":"positive_small_x","curve":c.name,"hhat_over_lnp":h/lp,"hx_minus_hhat":hx-h,"hx_over_lnp":hx/lp})).unwrap();
         }
         let (h, hx) = one_point_lift_height(&bighex(c.gx_hex), &bighex(c.gy_hex));
+        writeln!(rows, "{}", json!({"exp":"E3","arm":"target","curve":c.name,"hhat_over_lnp":h/lp,"hx_minus_hhat":hx-h})).unwrap();
         for (name, t, cv, sv) in [
             ("ĥ/ln p", h / lp, &r_h, &s_h),
             ("h_x − ĥ", hx - h, &r_d, &s_d),
@@ -810,6 +1086,11 @@ fn main() {
             .par_iter()
             .map(|(p1, p2)| two_point_pairing(p1, p2))
             .collect();
+        eprintln!(
+            "E4 {} random pairs done ({:.0}s)",
+            c.name,
+            started.elapsed().as_secs_f64()
+        );
         for &(cos, reg) in &prs {
             cs.push(cos);
             rs.push(reg);
@@ -836,6 +1117,12 @@ fn main() {
             || two_point_pairing(&g, &r),
             || rayon::join(|| pairing_on(&e1, &gt, &g2), || pairing_on(&e1, &gt, &g3)),
         );
+        writeln!(
+            rows,
+            "{}",
+            json!({"exp":"E4","arm":"target","curve":c.name,"abs_cos":tc,"norm_reg":tr})
+        )
+        .unwrap();
         writeln!(
             rows,
             "{}",
