@@ -538,13 +538,20 @@ fn v2_object_uri(a: u8, object: &str) -> String {
 fn v2_row_is_declared(row: &Value) -> bool {
     row["a"].as_u64().is_some_and(|a| a <= 1)
         && row["policy"].as_str().is_some_and(|policy| {
-            ["public_x_sequential", "public_x_hash", "public_x_gray_prefix"].contains(&policy)
+            [
+                "public_x_sequential",
+                "public_x_hash",
+                "public_x_gray_prefix",
+            ]
+            .contains(&policy)
         })
         && row["columns"]
             .as_u64()
             .and_then(|columns| usize::try_from(columns).ok())
             .is_some_and(|columns| V2_SIZES.contains(&columns))
-        && row["seed"].as_u64().is_some_and(|seed| SEEDS.contains(&seed))
+        && row["seed"]
+            .as_u64()
+            .is_some_and(|seed| SEEDS.contains(&seed))
 }
 
 fn frozen_v2_source_commit() -> Result<String> {
@@ -583,7 +590,12 @@ fn construct_v2_one(
     budget_seconds: u64,
 ) -> Result<()> {
     if a > 1
-        || !["public_x_sequential", "public_x_hash", "public_x_gray_prefix"].contains(&policy)
+        || ![
+            "public_x_sequential",
+            "public_x_hash",
+            "public_x_gray_prefix",
+        ]
+        .contains(&policy)
         || !V2_SIZES.contains(&columns)
         || !SEEDS.contains(&seed)
         || budget_seconds == 0
@@ -758,10 +770,7 @@ fn replay(root: &Path) -> Result<()> {
                 _ => false,
             }
     };
-    if !panel_shape_valid
-        || manifest["study"] != STUDY
-        || rows.is_empty()
-    {
+    if !panel_shape_valid || manifest["study"] != STUDY || rows.is_empty() {
         return Err("incomplete or invalid panel manifest".into());
     }
     let mut checks = Vec::new();
@@ -1435,23 +1444,38 @@ mod tests {
         v2_row["s3_uri"] = json!(v2_object_uri(0, &object));
         fs::remove_file(dir.join("replay.json")).unwrap();
         let mut v2_manifest = json!({"schema":"n83.factor-base-panel/v2-size-frontier","study":STUDY,"status":"completed_factor_base_object","completed_base_count":1,"expected_base_count":1,"size_design_blake3":v2_design_hash(),"bases":[v2_row]});
-        fs::write(dir.join("manifest.json"), serde_json::to_vec(&v2_manifest).unwrap()).unwrap();
+        fs::write(
+            dir.join("manifest.json"),
+            serde_json::to_vec(&v2_manifest).unwrap(),
+        )
+        .unwrap();
         replay(&dir).unwrap();
-        let v2_replay: Value = serde_json::from_slice(&fs::read(dir.join("replay.json")).unwrap()).unwrap();
-        assert_eq!(v2_replay["schema"], "n83.factor-base-replay/v2-size-frontier");
+        let v2_replay: Value =
+            serde_json::from_slice(&fs::read(dir.join("replay.json")).unwrap()).unwrap();
+        assert_eq!(
+            v2_replay["schema"],
+            "n83.factor-base-replay/v2-size-frontier"
+        );
         assert!(replay_v2_one_bounded(&dir, 1)
             .unwrap_err()
             .to_string()
             .contains("declared size-frontier object"));
-        assert!(upload(&dir).unwrap_err().to_string().contains("outside the declared size design"));
+        assert!(upload(&dir)
+            .unwrap_err()
+            .to_string()
+            .contains("outside the declared size design"));
         v2_manifest["size_design_blake3"] = json!("wrong-design");
-        fs::write(dir.join("manifest.json"), serde_json::to_vec(&v2_manifest).unwrap()).unwrap();
+        fs::write(
+            dir.join("manifest.json"),
+            serde_json::to_vec(&v2_manifest).unwrap(),
+        )
+        .unwrap();
         assert!(replay(&dir)
             .unwrap_err()
             .to_string()
             .contains("invalid panel manifest"));
         let invalid_root = dir.join("invalid-v2-size");
-        assert!(construct_v2_one(&invalid_root,0,"public_x_hash",2,SEEDS[0],1).is_err());
+        assert!(construct_v2_one(&invalid_root, 0, "public_x_hash", 2, SEEDS[0], 1).is_err());
         assert!(!invalid_root.exists());
         // Rehash a semantically invalid coefficient: byte hashes alone must
         // not allow it through the separate arithmetic verifier.

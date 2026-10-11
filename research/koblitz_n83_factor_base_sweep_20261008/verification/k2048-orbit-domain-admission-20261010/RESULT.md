@@ -41,7 +41,8 @@ comparison, but would not establish a total-runtime winner.
 
 The [validation manifest](validation-manifest.json) hashes the retained logs.
 The touched exporter example passes 19/19 tests; study and boundary Python
-suites pass 29/29 and 39/39. The required broad release library command ran
+suites pass 29/29 and 39/39. The exporter passes the changed-file rustfmt
+check. The required broad release library command ran
 with two threads and local loopback access, reporting 1,271 passing, 17
 ignored and zero failing tests before it was interrupted while unrelated JV
 end-to-end tests remained active. It is **not a full library-suite pass**.
