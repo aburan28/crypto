@@ -61,6 +61,40 @@ def strategy_name(config: dict) -> str:
     raise ValueError("unsupported chained-S3 domain encoding")
 
 
+def selected_object(panel: Path, columns: int, policy: str, seed: int) -> tuple[dict, Path]:
+    manifest = json.loads((panel / "manifest.json").read_text(encoding="utf-8"))
+    if (not isinstance(manifest, dict) or manifest.get("study") != STUDY or
+            manifest.get("schema") not in ("n83.factor-base-panel/v1",
+                                           "n83.factor-base-panel/v2-size-frontier")):
+        raise ValueError("selected panel manifest is not from this study")
+    bases = manifest.get("bases")
+    if not isinstance(bases, list):
+        raise ValueError("selected panel has no base rows")
+    matches = [row for row in bases if isinstance(row, dict) and
+               type(row.get("a")) is int and row["a"] == 0 and
+               type(row.get("columns")) is int and row["columns"] == columns and
+               row.get("policy") == policy and
+               type(row.get("seed")) is int and row["seed"] == seed]
+    if len(matches) != 1:
+        raise ValueError("selected primary base is absent or ambiguous")
+    row = matches[0]
+    digest = row.get("compressed_blake3")
+    point_set = row.get("point_set_blake3")
+    name = row.get("object")
+    s3_prefix = f"s3://crypto-autoresearcher/factor-bases/icv1/etc/{STUDY}/"
+    if manifest["schema"] == "n83.factor-base-panel/v2-size-frontier":
+        s3_prefix += "v2-size-frontier/"
+    if (not isinstance(digest, str) or HEX64.fullmatch(digest) is None or
+            not isinstance(point_set, str) or HEX64.fullmatch(point_set) is None or
+            name != f"objects/{digest}.jsonl.gz" or
+            row.get("s3_uri") != f"{s3_prefix}a0/{name}"):
+        raise ValueError("selected base object and hash disagree")
+    path = (panel / name).resolve(strict=True)
+    if not path.is_relative_to(panel) or not path.is_file():
+        raise ValueError("selected base object escapes the panel")
+    return row, path
+
+
 def receipt_error(worker: object, worker_config: object, config: dict) -> str | None:
     if not isinstance(worker, dict) or not isinstance(worker_config, dict):
         return "worker summary or config is not a JSON object"
@@ -109,8 +143,9 @@ def receipt_error(worker: object, worker_config: object, config: dict) -> str | 
         digest = worker.get(key)
         if not isinstance(digest, str) or HEX64.fullmatch(digest) is None:
             return f"worker {key} is not a digest"
-    if not isinstance(worker.get("object"), str) or not worker["object"].startswith("objects/"):
-        return "worker selected object is invalid"
+    if (worker.get("object") != config["selected_object"] or
+            worker.get("point_set_blake3") != config["selected_point_set_blake3"]):
+        return "worker selected base disagrees with the frozen manifest row"
     peak = worker.get("memory_cgroup_peak_bytes")
     if type(peak) is not int or not 0 <= peak <= config["memory_cgroup_limit_bytes"]:
         return "worker cgroup peak is invalid"
@@ -275,6 +310,7 @@ def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summa
         raise ValueError("panel needs manifest, replay, and S3 round-trip receipts")
     if not all((fixtures / name).is_file() for name in fixture_files):
         raise ValueError("fixture directory needs the public corpus and validation sidecar")
+    selected_row, selected_path = selected_object(panel, columns, policy, seed)
     checkout = (checkout or Path(__file__).resolve().parents[2]).resolve(strict=True)
     if not binary.is_file() or not os.access(binary, os.X_OK):
         raise ValueError("search worker must be an executable Linux ELF binary")
@@ -310,6 +346,9 @@ def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summa
         "schema": "n83.chain-s3-search-config/v1", "study": STUDY,
         "panel_dir": str(panel), "fixture_dir": str(fixtures),
         "panel_sha256": {name: sha256_file(panel / name) for name in panel_files},
+        "selected_object": selected_row["object"],
+        "selected_object_sha256": sha256_file(selected_path),
+        "selected_point_set_blake3": selected_row["point_set_blake3"],
         "fixture_sha256": {name: sha256_file(fixtures / name) for name in fixture_files},
         "columns": columns, "policy": policy,
         "seed": seed, "summands": summands, "max_trials": max_trials,
@@ -403,6 +442,7 @@ def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summa
         binary_changed = sha256_file(binary) != config["binary_sha256"]
         input_changed = (
             any(sha256_file(panel / name) != digest for name, digest in config["panel_sha256"].items()) or
+            sha256_file(selected_path) != config["selected_object_sha256"] or
             any(sha256_file(fixtures / name) != digest for name, digest in config["fixture_sha256"].items())
         )
     except OSError:

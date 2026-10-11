@@ -51,8 +51,8 @@ def receipts(config: dict, status: str = "PREFLIGHT_ONLY") -> tuple[dict, dict]:
     }
     summary = {
         **worker_config, "schema": guard.WORKER_SCHEMA,
-        "status": status, "object": "objects/" + "b" * 64 + ".jsonl.gz",
-        "point_set_blake3": "c" * 64,
+        "status": status, "object": config["selected_object"],
+        "point_set_blake3": config["selected_point_set_blake3"],
         "panel_manifest_blake3": "d" * 64,
         "public_corpus_canonical_json_blake3": "e" * 64,
         "source_chain_blake3": "f" * 64,
@@ -96,6 +96,8 @@ class ChainSearchGuardTests(unittest.TestCase):
             "conflict_budget": 1000, "worker_wall_seconds": 1,
             "memory_cgroup_limit_bytes": 256 * 1024 * 1024,
             "source_commit": "a" * 40,
+            "selected_object": "objects/" + "b" * 64 + ".jsonl.gz",
+            "selected_point_set_blake3": "c" * 64,
         }
 
     def test_receipt_checks_rank_solver_caps_and_false_completion(self):
@@ -144,6 +146,9 @@ class ChainSearchGuardTests(unittest.TestCase):
         worker_config, worker = receipts(config, "PASS_verified_target_only")
         worker_config["source_commit"] = "0" * 40
         self.assertIn("source_commit", guard.receipt_error(worker, worker_config, config))
+        worker_config, worker = receipts(config, "PASS_verified_target_only")
+        worker["object"] = "objects/" + "9" * 64 + ".jsonl.gz"
+        self.assertIn("frozen manifest", guard.receipt_error(worker, worker_config, config))
         orbit_config = dict(config, domain_encoding="frobenius_orbit_phase")
         worker_config, worker = receipts(orbit_config, "UNKNOWN_solver_cap")
         self.assertIsNone(guard.receipt_error(worker, worker_config, orbit_config))
@@ -172,7 +177,21 @@ class ChainSearchGuardTests(unittest.TestCase):
             root = Path(temporary)
             panel = root / "panel"
             panel.mkdir()
-            (panel / "manifest.json").write_text("{}")
+            (panel / "objects").mkdir()
+            bases = []
+            for columns, digest, point_set in ((64, "b" * 64, "c" * 64),
+                                               (2048, "d" * 64, "e" * 64)):
+                name = f"objects/{digest}.jsonl.gz"
+                (panel / name).write_bytes(f"synthetic {columns}".encode())
+                bases.append({
+                    "a": 0, "columns": columns, "policy": "public_x_hash",
+                    "seed": guard.SEEDS[0], "object": name,
+                    "compressed_blake3": digest, "point_set_blake3": point_set,
+                    "s3_uri": f"s3://crypto-autoresearcher/factor-bases/icv1/etc/{guard.STUDY}/a0/{name}",
+                })
+            (panel / "manifest.json").write_text(json.dumps({
+                "schema": "n83.factor-base-panel/v1", "study": guard.STUDY, "bases": bases,
+            }))
             (panel / "replay.json").write_text("{}")
             (panel / "upload-receipt.json").write_text("{}")
             fixtures = root / "fixtures"
@@ -194,6 +213,7 @@ class ChainSearchGuardTests(unittest.TestCase):
                 "orbit_bad_cap": "PRODUCER_FAILURE_worker_exit",
                 "orbit_bad_strategy": "PRODUCER_FAILURE_worker_receipt",
                 "input_changed": "PRODUCER_FAILURE_frozen_input_changed",
+                "object_changed": "PRODUCER_FAILURE_frozen_input_changed",
             }
             for mode, status in expected.items():
                 with self.subTest(mode=mode):
@@ -253,6 +273,8 @@ class ChainSearchGuardTests(unittest.TestCase):
                             (output / "source" / guard.SOURCES[2]).write_bytes(b"changed")
                         if mode == "input_changed":
                             (fixtures / "probe-corpus.json").write_text('{"changed":true}')
+                        if mode == "object_changed":
+                            (panel / config["selected_object"]).write_bytes(b"changed object")
                         return FakeChild()
 
                     with patch.object(guard, "clean_commit", return_value="a" * 40), \
