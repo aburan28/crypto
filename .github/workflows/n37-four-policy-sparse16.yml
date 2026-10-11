@@ -32,8 +32,6 @@ jobs:
           sparse-checkout: |
             Cargo.toml
             src
-            docs/curves/traits.json
-            docs/identity-certificates/schoenhage-10mult.json
             examples/n37_four_policy_sparse16_prepare.rs
             examples/n37_four_policy_sparse16_inputs_replay.rs
             examples/n37_four_policy_sparse16_pdp.rs
