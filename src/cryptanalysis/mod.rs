@@ -207,6 +207,7 @@ pub mod koblitz_fast_arith;
 pub mod koblitz_groebner;
 pub mod koblitz_index_calculus;
 pub mod koblitz_isogeny_cost;
+pub mod koblitz_sym_s4;
 pub mod koblitz_pdp_phase_a;
 pub mod koblitz_relation_solver;
 pub mod koblitz_rotated_chain;

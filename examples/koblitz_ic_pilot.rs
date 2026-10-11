@@ -49,6 +49,12 @@ fn main() {
         full_group_probes: full,
         basis_seed,
         geometric_basis: geometric,
+        // `KOBLITZ_PILOT_M3=chain|sym|e3`: the m = 3 solver (default chain)
+        m3_solver: match std::env::var("KOBLITZ_PILOT_M3").as_deref() {
+            Ok("sym") => M3Solver::SymmetricGroebner,
+            Ok("e3") => M3Solver::SymmetricE3,
+            _ => M3Solver::Chain,
+        },
         ..Default::default()
     };
     let t = Instant::now();
@@ -65,7 +71,7 @@ fn main() {
         "{}",
         serde_json::json!({
             "n": n, "a2": a2, "a6": a6, "m": m, "l": l, "mode": if full {"full"} else {"exact"},
-            "basis_seed": basis_seed, "geometric": geometric, "probes": row.trials, "seconds": secs,
+            "basis_seed": basis_seed, "geometric": geometric, "m3_solver": format!("{:?}", opts.m3_solver), "probes": row.trials, "seconds": secs,
             "factor_base_points": row.factor_base_points, "unknowns": row.unknowns,
             "us_per_call": ns_call / 1e3,
             "reductions_per_call": row.reductions as f64 / row.groebner_calls.max(1) as f64,

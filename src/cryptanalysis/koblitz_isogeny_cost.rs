@@ -97,9 +97,13 @@ use crate::cryptanalysis::isogeny_class_search::{
 };
 use crate::cryptanalysis::koblitz_fast::{FastCurve, FastPoint};
 use crate::cryptanalysis::koblitz_groebner::{
-    solve_boolean_system_filtered, FieldStructure, SolveOptions, SolverEngine, SplitRule,
+    solve_boolean_system_filtered, FieldStructure, SolveOptions, SolveStats, SolverEngine,
+    SplitRule,
 };
 use crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse;
+use crate::cryptanalysis::koblitz_sym_s4::{
+    build_sym_s4_system, decompose_by_e3, split_in, SymSpaces, WordField,
+};
 use crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing;
 use crate::cryptanalysis::semaev_decomp::Gf2;
 
@@ -386,6 +390,11 @@ pub struct IcCostOptions {
     /// cheap (`subspace-structure-20261004.md`).  `false` reproduces every
     /// committed run.
     pub geometric_basis: bool,
+    /// How m = 3 decompositions are solved ([`M3Solver`]).  The symmetric
+    /// solvers need a geometric `V`: the monomial basis (`basis_seed =
+    /// None`) or `geometric_basis = true`.  `Chain` reproduces every
+    /// committed run.
+    pub m3_solver: M3Solver,
 }
 
 impl Default for IcCostOptions {
@@ -406,6 +415,7 @@ impl Default for IcCostOptions {
             full_group_probes: false,
             basis_seed: None,
             geometric_basis: false,
+            m3_solver: M3Solver::Chain,
         }
     }
 }
@@ -568,6 +578,8 @@ pub enum SkipReason {
     NoGenerator,
     /// No abscissa of the subspace carried a point off the identity.
     EmptyFactorBase,
+    /// `symmetric_s4` was asked for with `m ≠ 3` or a non-geometric `V`.
+    SymmetricNeedsGeometricM3,
 }
 
 /// Diagnose a vertex without running the experiment on it: `Ok` with
@@ -829,6 +841,27 @@ pub fn measure_member(
         seed => factor_base_basis(n, opts.l, seed),
     };
     let st = FieldStructure::new(n, &me.irr);
+    let sym = if opts.m3_solver != M3Solver::Chain {
+        let (theta, g) = match opts.basis_seed {
+            None => (F2mElement::one(n), to_element(2, n)),
+            Some(seed) if opts.geometric_basis => geometric_params(n, seed),
+            Some(_) => return Err(SkipReason::SymmetricNeedsGeometricM3),
+        };
+        if opts.m != 3 {
+            return Err(SkipReason::SymmetricNeedsGeometricM3);
+        }
+        let v_words: Vec<u64> = (0..1u64 << basis.len())
+            .map(|mask| subspace_value(mask, &basis, n))
+            .collect();
+        Some(SymCtx {
+            spaces: SymSpaces::geometric(n, opts.l, &theta, &g, &me.irr),
+            v_values: v_words.iter().map(|&w| to_element(w, n)).collect(),
+            v_words,
+            field: WordField::new(n, &me.irr),
+        })
+    } else {
+        None
+    };
 
     let mut entry_of: HashMap<u64, BaseEntry> = HashMap::new();
     let mut canonical: HashMap<(u64, u64), usize> = HashMap::new();
@@ -935,6 +968,7 @@ pub fn measure_member(
             &mut ops,
             &mut rng,
             &basis,
+            sym.as_ref(),
             &st,
             &solve_opts,
             &entry_of,
@@ -966,6 +1000,7 @@ pub fn measure_member(
             &mut ops,
             &mut rng,
             &basis,
+            sym.as_ref(),
             &st,
             &solve_opts,
             &entry_of,
@@ -1030,6 +1065,7 @@ fn probe_once(
     ops: &mut GroupOps,
     rng: &mut StdRng,
     basis: &[F2mElement],
+    sym: Option<&SymCtx>,
     st: &FieldStructure,
     solve_opts: &SolveOptions,
     entry_of: &HashMap<u64, BaseEntry>,
@@ -1065,29 +1101,73 @@ fn probe_once(
     }
 
     let x_r = to_element(target.x, n);
-    let Some(sys) =
-        build_decomposition_system_reusing(basis, &x_r, &to_element(me.a6, n), opts.m, st)
-    else {
-        row.unknown_probes += 1;
-        return false;
-    };
-
     let mut lifted: Option<Vec<(usize, i8)>> = None;
-    let started = Instant::now();
-    let (_, stats) =
-        solve_boolean_system_filtered(&sys.equations, sys.n_vars, solve_opts, |root| {
-            let xs: Vec<u64> = (0..opts.m)
-                .map(|i| from_element(&sys.summand_x(basis, root, i, n)))
-                .collect();
-            match lift(me, group, entry_of, &xs, target, opts.cofactor_tolerant) {
+    let stats = if let (Some(sym), M3Solver::SymmetricE3) = (sym, opts.m3_solver) {
+        let started = Instant::now();
+        let (_, _e3) = decompose_by_e3(
+            &sym.spaces,
+            &sym.v_words,
+            target.x,
+            me.a6,
+            &sym.field,
+            |roots| match lift(me, group, entry_of, &roots, target, opts.cofactor_tolerant) {
                 Some(terms) => {
                     lifted = Some(terms);
                     true
                 }
                 None => false,
-            }
-        });
-    row.groebner_ns += started.elapsed().as_nanos();
+            },
+        );
+        row.groebner_ns += started.elapsed().as_nanos();
+        SolveStats::default()
+    } else if let Some(sym) = sym {
+        let b_el = to_element(me.a6, n);
+        let Some(equations) = build_sym_s4_system(&sym.spaces, &x_r, &b_el, st, &me.irr) else {
+            row.unknown_probes += 1;
+            return false;
+        };
+        let started = Instant::now();
+        let (_, stats) =
+            solve_boolean_system_filtered(&equations, sym.spaces.n_vars(), solve_opts, |root| {
+                let e = sym.spaces.decode(root, n);
+                let Some(roots) = split_in(n, &e, &sym.v_values, &me.irr) else {
+                    return false;
+                };
+                let xs: Vec<u64> = roots.iter().map(from_element).collect();
+                match lift(me, group, entry_of, &xs, target, opts.cofactor_tolerant) {
+                    Some(terms) => {
+                        lifted = Some(terms);
+                        true
+                    }
+                    None => false,
+                }
+            });
+        row.groebner_ns += started.elapsed().as_nanos();
+        stats
+    } else {
+        let Some(sys) =
+            build_decomposition_system_reusing(basis, &x_r, &to_element(me.a6, n), opts.m, st)
+        else {
+            row.unknown_probes += 1;
+            return false;
+        };
+        let started = Instant::now();
+        let (_, stats) =
+            solve_boolean_system_filtered(&sys.equations, sys.n_vars, solve_opts, |root| {
+                let xs: Vec<u64> = (0..opts.m)
+                    .map(|i| from_element(&sys.summand_x(basis, root, i, n)))
+                    .collect();
+                match lift(me, group, entry_of, &xs, target, opts.cofactor_tolerant) {
+                    Some(terms) => {
+                        lifted = Some(terms);
+                        true
+                    }
+                    None => false,
+                }
+            });
+        row.groebner_ns += started.elapsed().as_nanos();
+        stats
+    };
     row.groebner_calls += 1;
     row.reductions += stats.reductions;
     row.infeasible_branches += stats.infeasible_branches;
@@ -1154,6 +1234,32 @@ pub fn factor_base_basis(n: u32, l: u32, seed: Option<u64>) -> Vec<F2mElement> {
 /// `θ·⟨1, g, …, g^{l−1}⟩` for seeded `θ, g ∉ F_2`.  Independent for prime
 /// `n ≥ l`, since `g` then has degree `n` over `F_2`.
 pub fn geometric_basis(n: u32, l: u32, seed: u64, irr: &IrreduciblePoly) -> Vec<F2mElement> {
+    let (theta, g) = geometric_params(n, seed);
+    let mut out = vec![theta];
+    while out.len() < l as usize {
+        let next = out.last().unwrap().mul(&g, irr);
+        out.push(next);
+    }
+    out
+}
+
+/// The m = 3 decomposition solver.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum M3Solver {
+    /// Two S₃ links through an `n`-bit intermediate point (`3l + n`
+    /// unknowns, `2n` cubic equations), Gröbner-solved.
+    #[default]
+    Chain,
+    /// `S₄` in `e₁, e₂, e₃` over `W₁, W₂, W₃` (`6l − 3` unknowns, `n`
+    /// quadratic equations), Gröbner-solved.
+    SymmetricGroebner,
+    /// The same system solved exactly by enumerating `e₃ ∈ W₃` and one
+    /// linear solve in `(e₁, e₂)` each ([`decompose_by_e3`]).
+    SymmetricE3,
+}
+
+/// The seeded `(θ, g)` behind [`geometric_basis`].
+pub fn geometric_params(n: u32, seed: u64) -> (F2mElement, F2mElement) {
     let mut rng = StdRng::seed_from_u64(seed ^ 0x6e0 ^ ((n as u64) << 32));
     let mut nz = || loop {
         let v = rng.gen::<u64>() & ((1u64 << n) - 1);
@@ -1161,13 +1267,16 @@ pub fn geometric_basis(n: u32, l: u32, seed: u64, irr: &IrreduciblePoly) -> Vec<
             break to_element(v, n);
         }
     };
-    let (theta, g) = (nz(), nz());
-    let mut out = vec![theta];
-    while out.len() < l as usize {
-        let next = out.last().unwrap().mul(&g, irr);
-        out.push(next);
-    }
-    out
+    let theta = nz();
+    (theta, nz())
+}
+
+/// The symmetric-`S₄` state of one member: the `W_k` and every element of `V`.
+struct SymCtx {
+    spaces: SymSpaces,
+    v_values: Vec<F2mElement>,
+    v_words: Vec<u64>,
+    field: WordField,
 }
 
 /// The `F_2`-span value of a coefficient mask over `basis`.
@@ -1829,6 +1938,41 @@ mod tests {
         let row = measure_member(n, &irr, a2, 1, &opts).expect("member");
         assert_eq!(row.inconsistent_relations, 0);
         assert!(row.verified, "IC and BSGS disagreed over a geometric V");
+    }
+
+    #[test]
+    fn symmetric_e3_m3_solves_soundly_and_refuses_random_v() {
+        let n = 13;
+        let irr = field_for(n).expect("field");
+        let (a2, _, _) = preferred_family(n).expect("family");
+        for (basis_seed, geometric) in [(None, false), (Some(4), true)] {
+            let opts = IcCostOptions {
+                l: 4,
+                m: 3,
+                yield_probes: 50,
+                max_trials: 4_000,
+                ffd_targets: 0,
+                full_group_probes: true,
+                basis_seed,
+                geometric_basis: geometric,
+                m3_solver: M3Solver::SymmetricE3,
+                ..Default::default()
+            };
+            let row = measure_member(n, &irr, a2, 1, &opts).expect("member");
+            assert_eq!(row.inconsistent_relations, 0);
+            assert!(row.verified, "IC and BSGS disagreed under symmetric S4");
+        }
+        let random = IcCostOptions {
+            l: 4,
+            m: 3,
+            basis_seed: Some(4),
+            m3_solver: M3Solver::SymmetricGroebner,
+            ..Default::default()
+        };
+        assert_eq!(
+            measure_member(n, &irr, a2, 1, &random).err(),
+            Some(SkipReason::SymmetricNeedsGeometricM3)
+        );
     }
 
     #[test]

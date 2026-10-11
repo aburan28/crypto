@@ -55,3 +55,75 @@ Estimated at 2–4 days of engineering: the symbolic S₄, the descent with thre
 subspace blocks, root-filtering, and the tests. Then a pilot at n = 17, 19 against
 the 295 s/call baseline. Go / no-go: ≥ 10× per-call speed-up at n = 17 with identical
 decomposition sets.
+
+## Results (2026-10-11): built, tested, measured
+
+This section is an additive amendment; the design above is unchanged. Code is in
+`src/cryptanalysis/koblitz_sym_s4.rs`. It is selected with `IcCostOptions::m3_solver`,
+or with `KOBLITZ_PILOT_M3=chain|sym|e3` in `koblitz_ic_pilot`.
+
+### The symmetric S₄
+
+`Res_T(S₃(x₁,x₂,T), S₃(x₃,x₄,T))`, rewritten in `e₁, e₂, e₃` with `x = x_R`, is
+
+    x⁴b² + e₃x³b + e₃²(x⁴+b) + e₃³x + e₃⁴ + e₂²x²b + e₂²e₃x³ + e₂⁴x⁴
+         + e₁²e₃xb + e₁²e₃²x² + e₁⁴b²
+
+That is 11 terms. The Rust test `symmetric_form_equals_the_resultant` checks the
+formula against the resultant at 500 random points over F_{2^17}. `e₁` and `e₂` occur
+only as squares and fourth powers, which are F₂-linear. So the Weil descent is
+**quadratic**, where the S₃ chain is cubic. The design note had expected degree-3
+terms; there are none.
+
+### Two solvers from it
+
+1. **Symmetric Gröbner** (`SymmetricGroebner`). It has 6l − 3 unknowns and n quadratic
+   equations. The design's go/no-go missed one thing: in the useful range,
+   6l − 3 > n. The system is then underdetermined, with about 2^{6l−3−n} roots in
+   (e₁, e₂, e₃). Almost none of those split over V, and the splitting solver pays a
+   Gröbner node for each root.
+2. **e₃ enumeration** (`SymmetricE3`). With e₃ fixed, S₄ is F₂-affine in the bits of
+   (e₁, e₂). So each e₃ ∈ W₃ costs one n × (3l − 1) elimination; Gray-code order
+   makes stepping between e₃ values cheap. It is exact and finds every root. Its
+   cost is `2^{3l−2}·poly(n)`, which is the exponent class of brute force over V³.
+   It is **not** a sub-exponential step.
+
+### Correctness
+
+Test `symmetric_solver_agrees_with_chain_and_brute_force`: n = 11, l = 3, monomial and
+geometric V, 40 random targets each. Brute force over multisets of V, the S₃ chain,
+the symmetric Gröbner solver and e₃ enumeration all return the same decomposition
+sets.
+
+Test `symmetric_e3_m3_solves_soundly_and_refuses_random_v`: n = 13, l = 4, full-group
+probes, monomial and geometric V. The IC log equals the BSGS log. A random
+(non-geometric) V is refused (`SkipReason::SymmetricNeedsGeometricM3`).
+
+### Per-call cost at n = 17, m = 3, a₂ = 1, a₆ = 1, monomial V, 4 probes
+
+Data: `experiments/koblitz_m3/solver_compare_n17.jsonl`. The table is in the run report.
+
+### Full m = 3 solves
+
+These are closed by the e₃ engine and checked against BSGS
+(`experiments/koblitz_m3/full_solves_e3.jsonl`):
+- 4 curves × {monomial, geometric g1} at n = 17, l = 5;
+- 4 curves × {monomial, geometric g1} at n = 19, l = 6.
+
+All 16 solved, and every log equals both the planted secret and the BSGS log. Wall
+time per solve is 3.5–14.5 s at n = 17 and 74–287 s at n = 19. Geometric V costs
+about 2–2.5× monomial per call at both sizes; this is observed, not explained here.
+
+### Reading against the go/no-go
+
+The criterion was a ≥ 10× per-call speed-up at n = 17 with identical decomposition
+sets. The e₃ engine meets it by a wide margin, and the decomposition sets are
+identical on the tested cases. The symmetric Gröbner solver does not meet it at
+l ≥ 4.
+
+The speed-up is against this repository's chain solver. It comes from replacing an
+algebraic solve with an exhaustive, `2^{3l}`-class enumeration, so it says nothing
+about whether a summation-polynomial approach beats generic methods asymptotically.
+
+Next useful step: m = 3 curve-vs-presentation at n = 19–23, which this makes
+affordable. At n ≥ 29 the enumeration is 2^{3l−2} with l ≥ 9, which is out of reach.
