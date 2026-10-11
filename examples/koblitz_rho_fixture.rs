@@ -1256,6 +1256,9 @@ mod wide {
     pub(crate) struct WideBackend {
         pub(crate) fast: FastBinaryCurve128,
         pub(crate) gf: Gf2_128,
+        // Retained for upcoming 128-bit backend work.
+        #[allow(dead_code)]
+        n: u32,
         mask: u128,
     }
 
@@ -1273,6 +1276,7 @@ mod wide {
             Some(Self {
                 fast,
                 gf,
+                n,
                 mask: (1u128 << n) - 1,
             })
         }

@@ -1,11 +1,14 @@
 //! Native-XOR balanced-S5 SAT control over point-defined Koblitz bases.
 //!
+//! Four factor-base points are constrained to sum to one published synthetic
+//! target through three balanced S3 links.  All SAT models are lifted through
+//! the original curve group; no unknown, external, or production point is used.
+
+#![recursion_limit = "1024"]
 //! Four factor-base points are constrained through three balanced S3 links.
 //! SAT controls use published synthetic targets; the optional compact batch
 //! accepts public subgroup points without their scalar labels. All extracted
 //! witnesses are lifted through the curve group before admission.
-
-#![recursion_limit = "512"]
 
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
@@ -6608,6 +6611,7 @@ fn main() {
             result => break result,
         }
     };
+    phase_restart_shots_used += 1;
     if !compact_batch_only {
         phase_restart_shots_used += 1;
     }

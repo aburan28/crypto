@@ -1,0 +1,28 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "binary GHS same-field model comparison",
+  "description": "Koblitz controls and non-Koblitz curves at degrees 13 and 15; generic ECDLP operation counts only",
+  "workloads": {
+    "curves": [
+      {"kind":"binary_explicit","n":13,"modulus":8219,"a":0,"b":1,"group_order":8012,"r":2003,"gx":4793,"gy":7108},
+      {"kind":"binary_explicit","n":13,"modulus":8219,"a":1,"b":5379,"group_order":8182,"r":4091,"gx":6786,"gy":699},
+      {"kind":"binary_explicit","n":15,"modulus":32771,"a":0,"b":1,"group_order":33044,"r":751,"gx":28320,"gy":17349},
+      {"kind":"binary_explicit","n":15,"modulus":32771,"a":0,"b":9363,"group_order":32764,"r":8191,"gx":24746,"gy":15775},
+      {"kind":"binary_explicit","n":15,"modulus":32771,"a":1,"b":28714,"group_order":32954,"r":16477,"gx":18271,"gy":8074}
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 20261009
+  },
+  "arms": [
+    {"name":"rho-neg","role":"reference","method":{"id":"rho.negation"}},
+    {"name":"bsgs-neg","role":"candidate","method":{"id":"bsgs.negation"}}
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 20261009,
+    "isolation_required": "L0",
+    "timeout_seconds": 60
+  }
+}

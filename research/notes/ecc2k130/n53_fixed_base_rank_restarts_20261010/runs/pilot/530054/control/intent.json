@@ -1,0 +1,28 @@
+{
+  "base_input_sha256": "53c9c8454be7f1454c96295ab3d00848bdf6bbda6a9266d47fc2dc1b18e0b22d",
+  "binary_sha256": "3c03013e4a12d5eac74e1737c5549558ddf734aa9a324426914778765da0f51e",
+  "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h3b66c9056640",
+  "command": [
+    "/private/tmp/crypto-compact-target/release/examples/koblitz_orbit_dlp_fast_online",
+    "construct:53:0:220",
+    "/private/tmp/crypto-compact-producer-union-repair-20261010/research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/inputs/development_q.jsonl",
+    "530054",
+    "/private/tmp/crypto-compact-producer-union-repair-20261010/research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530054/control/targets.jsonl"
+  ],
+  "environment_flags": {
+    "KIC_DUMP_BASE": true,
+    "KIC_DUMP_RANK": true,
+    "KIC_RANK_PROBE_CAP": null
+  },
+  "rank_probe_cap": null,
+  "rank_seed": 530054,
+  "resource_envelope": {
+    "observed_rss_cap_bytes": 17179869184,
+    "threads": 1,
+    "wall_cap_seconds": 60
+  },
+  "run_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h3b66c9056640W7e5787b0e1c1R1",
+  "source_sha256": "4dd3c5e7823b453ad1fa9046d9be68a04bddc79343ea29576dd1f32b0bc66299",
+  "target_input_sha256": "c63b2f819562326ad1e1e8f348b0cc350c4530fe56e4a5b3b275770dcf13ee4d",
+  "workload_id": "W7e5787b0e1c1"
+}

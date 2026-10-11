@@ -44,6 +44,8 @@ fn key(point: &BinaryPoint) -> Option<PointKey> {
 }
 
 #[cfg(test)]
+// Signed-index query path, kept for the upcoming batch kernels.
+#[allow(dead_code)]
 fn stored_point(point: &BinaryPoint) -> Option<Option<(u128, u128)>> {
     match point {
         BinaryPoint::Infinity => Some(None),
@@ -52,6 +54,8 @@ fn stored_point(point: &BinaryPoint) -> Option<Option<(u128, u128)>> {
 }
 
 #[cfg(test)]
+// Signed-index query path, kept for the upcoming batch kernels.
+#[allow(dead_code)]
 fn restore_point(point: Option<(u128, u128)>, m: u32) -> BinaryPoint {
     let Some((x, y)) = point else {
         return BinaryPoint::Infinity;
@@ -494,6 +498,8 @@ mod packed83 {
     /// query path avoids rebuilding heap-backed points for every batch.
     /// # Safety
     /// The caller must check the pinned polynomial and ARM64 AES/PMULL.
+    // Kept for the upcoming batch kernels.
+    #[allow(dead_code)]
     #[target_feature(enable = "aes")]
     #[cfg(test)]
     pub(super) unsafe fn batch_x_keys_stored(
@@ -560,6 +566,8 @@ mod packed83 {
     /// # Safety
     /// The caller must have checked ARM64 AES/PMULL support and the pinned
     /// degree-83 irreducible polynomial.
+    // Kept for the upcoming batch kernels.
+    #[allow(dead_code)]
     #[target_feature(enable = "aes")]
     #[cfg(test)]
     pub(super) unsafe fn batch_add_fixed(
@@ -750,9 +758,9 @@ impl F6SignedPairIndex {
         if point_index.len() != points.len() {
             return None;
         }
-        let negatives: Vec<u32> = points
+        let negatives: Vec<usize> = points
             .iter()
-            .map(|point| u32::try_from(*point_index.get(&key(&point_neg(point))?)?).ok())
+            .map(|point| point_index.get(&key(&point_neg(point))?).copied())
             .collect::<Option<_>>()?;
         let capacity = pair_count.div_ceil(2);
         let mut sums = Vec::with_capacity(capacity);
@@ -799,7 +807,7 @@ impl F6SignedPairIndex {
                         sums.push(SignedPairSum {
                             point: sum,
                             pair: (i as u32, j as u32),
-                            neg_pair: (negatives[i], negatives[j]),
+                            neg_pair: (negatives[i] as u32, negatives[j] as u32),
                         });
                     }
                 }
@@ -852,10 +860,10 @@ impl F6SignedPairIndex {
     fn verify(
         &self,
         target: &BinaryPoint,
-        first: (u32, u32),
+        first: (usize, usize),
         second: (usize, usize),
     ) -> Option<[usize; 4]> {
-        let indices = [first.0 as usize, first.1 as usize, second.0, second.1];
+        let indices = [first.0, first.1, second.0, second.1];
         let sum = indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
             point_add(&self.curve, &acc, &self.points[index])
         });
@@ -888,12 +896,12 @@ impl F6SignedPairIndex {
                 chunk.iter().zip(plus.iter()).zip(minus.iter())
             {
                 if let Some(pair) = self.lookup_pair(minus_residual) {
-                    if let Some(witness) = self.verify(target, entry.pair, pair) {
+                    if let Some(witness) = self.verify(target, (entry.pair.0 as usize, entry.pair.1 as usize), pair) {
                         return Some(witness);
                     }
                 }
                 if let Some(pair) = self.lookup_pair(plus_residual) {
-                    if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
+                    if let Some(witness) = self.verify(target, (entry.neg_pair.0 as usize, entry.neg_pair.1 as usize), pair) {
                         return Some(witness);
                     }
                 }
@@ -915,7 +923,7 @@ impl F6SignedPairIndex {
                 let point = unpack_point(entry.point, self.curve.m);
                 let residual = point_add(&self.curve, target, &point_neg(&point));
                 if let Some(pair) = self.pair_at(index, &residual) {
-                    if let Some(witness) = self.verify(target, entry.pair, pair) {
+                    if let Some(witness) = self.verify(target, (entry.pair.0 as usize, entry.pair.1 as usize), pair) {
                         return Some(witness);
                     }
                 }
@@ -924,7 +932,7 @@ impl F6SignedPairIndex {
                 let point = unpack_point(entry.point, self.curve.m);
                 let residual = point_add(&self.curve, target, &point);
                 if let Some(pair) = self.pair_at(index, &residual) {
-                    if let Some(witness) = self.verify(target, entry.neg_pair, pair) {
+                    if let Some(witness) = self.verify(target, (entry.neg_pair.0 as usize, entry.neg_pair.1 as usize), pair) {
                         return Some(witness);
                     }
                 }
