@@ -12,12 +12,14 @@ import chain_capacity_supervisor as guard
 
 def worker_receipt(config: dict, status: str = "PASS_model_construction_only") -> dict:
     built = status == "PASS_model_construction_only"
-    orbit = config.get("domain_encoding") == "frobenius_orbit_phase"
+    encoding = config.get("domain_encoding", "coordinate_trie")
+    orbit = encoding in ("frobenius_orbit_phase", "frobenius_orbit_phase_ordered_first_pair")
+    ordered = encoding == "frobenius_orbit_phase_ordered_first_pair"
     added_variables, orbit_clauses = (
         guard.orbit_domain_size(config["columns"], config["summands"])
         if orbit else (0, None)
     )
-    required_variables = (84743 if config["summands"] == 5 else 105908) + added_variables
+    required_variables = (84743 if config["summands"] == 5 else 105908) + added_variables + (82 if ordered else 0)
     required_clauses = orbit_clauses if orbit else 200000
     return {
         "schema": guard.WORKER_SCHEMA, "study": guard.STUDY,
@@ -31,7 +33,7 @@ def worker_receipt(config: dict, status: str = "PASS_model_construction_only") -
         "memory_cgroup_swap_limit_bytes": 0, "memory_cgroup_peak_bytes": 12345,
         "source_commit": config["source_commit"],
         "source_attestation_mode": "supervised_snapshot",
-        "domain_encoding": "frobenius_orbit_phase" if orbit else "coordinate_trie",
+        "domain_encoding": encoding,
         "domain_representatives": config["columns"] if orbit else None,
         "source_exporter_blake3": "a" * 64,
         "source_adapter_blake3": "b" * 64,
@@ -94,6 +96,11 @@ class ChainCapacityGuardTests(unittest.TestCase):
         self.assertIsNone(guard.receipt_error(orbit_receipt, orbit_config))
         orbit_receipt["required_domain_clauses"] -= 1
         self.assertIsNotNone(guard.receipt_error(orbit_receipt, orbit_config))
+        ordered_config = dict(orbit_config, domain_encoding="frobenius_orbit_phase_ordered_first_pair")
+        ordered_receipt = worker_receipt(ordered_config)
+        self.assertIsNone(guard.receipt_error(ordered_receipt, ordered_config))
+        ordered_receipt["required_max_variables"] -= 82
+        self.assertIsNotNone(guard.receipt_error(ordered_receipt, ordered_config))
         self.assertEqual(guard.orbit_domain_size(2048, 5), (26735, 892470))
         for status in ("UNKNOWN_variable_cap", "UNKNOWN_domain_clause_cap"):
             config = dict(self.config)
@@ -119,6 +126,7 @@ class ChainCapacityGuardTests(unittest.TestCase):
                 ("success", "PASS_model_construction_only"),
                 ("v2_success", "PASS_model_construction_only"),
                 ("orbit_success", "PASS_model_construction_only"),
+                ("ordered_success", "PASS_model_construction_only"),
                 ("variable_cap", "UNKNOWN_variable_cap"),
                 ("domain_cap", "UNKNOWN_domain_clause_cap"),
                 ("timeout", "UNKNOWN_wall_cap"),
@@ -154,6 +162,8 @@ class ChainCapacityGuardTests(unittest.TestCase):
                         config = json.loads((output / "config.json").read_text())
                         if mode == "orbit_success":
                             self.assertIn("primary-orbit-chain-build", command)
+                        if mode == "ordered_success":
+                            self.assertIn("primary-ordered-orbit-chain-build", command)
                         if mode not in ("timeout", "memory"):
                             status = {
                                 "variable_cap": "UNKNOWN_variable_cap",
@@ -171,19 +181,22 @@ class ChainCapacityGuardTests(unittest.TestCase):
                          patch.object(guard.subprocess, "run", side_effect=fake_run), \
                          patch.object(guard.subprocess, "Popen", side_effect=fake_popen):
                         outer = guard.run(
-                            panel, 2048 if mode == "orbit_success" else 1182 if mode == "v2_success" else 64,
+                            panel, 2048 if mode in ("orbit_success", "ordered_success") else 1182 if mode == "v2_success" else 64,
                             "public_x_hash", guard.SEEDS[0], 5, 0,
-                            80000 if mode == "variable_cap" else 150000 if mode == "orbit_success" else 100000,
-                            100000 if mode == "domain_cap" else 1000000 if mode == "orbit_success" else 300000,
+                            80000 if mode == "variable_cap" else 150000 if mode in ("orbit_success", "ordered_success") else 100000,
+                            100000 if mode == "domain_cap" else 1000000 if mode in ("orbit_success", "ordered_success") else 300000,
                             1.0, 256, binary, output,
                             checkout=checkout,
-                            orbit_domain=mode == "orbit_success",
+                            orbit_domain=mode in ("orbit_success", "ordered_success"),
+                            ordered_first_pair=mode == "ordered_success",
                         )
                     self.assertEqual(outer["status"], expected)
                     if mode == "v2_success":
                         self.assertEqual(json.loads((output / "config.json").read_text())["columns"], 1182)
                     if mode == "orbit_success":
                         self.assertEqual(json.loads((output / "config.json").read_text())["domain_encoding"], "frobenius_orbit_phase")
+                    if mode == "ordered_success":
+                        self.assertEqual(json.loads((output / "config.json").read_text())["domain_encoding"], "frobenius_orbit_phase_ordered_first_pair")
                     self.assertEqual(json.loads((output / "outer.json").read_text())["status"], expected)
 
 

@@ -1,5 +1,17 @@
 # Higher-arity chained-S3 SAT source gate
 
+**2026-10-11 ordered first-pair arm:** The orbit-domain m=5/m=6 search now
+has a separate `--orbit-domain --ordered-first-pair` mode in both guarded
+supervisors. It constrains the first two summand x-coordinates to unsigned
+`x0 <= x1`. Swapping those summands preserves the first S3 equation and every
+later node depends on their sum only; the original-curve sign lift still checks
+both point signs. The constraint therefore retains a representative for each
+first-pair swap. At degree 83 it adds exactly 82 SAT variables and 247 CNF
+clauses by source count. Existing unordered-orbit receipts remain distinct.
+The ordered arm has small-width exhaustive comparator and guard-contract tests;
+retained N83 construction and solver performance for this arm are still to be
+measured. This is a symmetry arm, not a measured full-runtime improvement.
+
 **2026-10-10 measured update:** The retained K=64 all-affine m=5 and m=6
 models constructed under the fixed one-CPU, 4 GiB guard. The K=256 m=5
 model required 7,195,450 finite-domain clauses and constructed only after a
