@@ -935,8 +935,31 @@ Verdict for H1 on the combinatorial oracle at m = 31: the mechanism is real
 (unknowns halve), its collection gain is cancelled by the representation
 multiplicity, and the trace-zero base is the better use of the same
 structure. The 1.5× kill criterion of §7.A1 is not met (0.34× per relation
-at m = 3; 1.1× at m = 2). The F4 arms (`symmetrised` oracle with the
-projected fold, m = 2 and m = 3) are reported below when they finish.
+at m = 3; 1.1× at m = 2).
+
+**F4 arms (`symmetrised` oracle, invariants w = u² + u, s = Σu, projected
+fold).**
+
+| arm | cols | hit rate | trials | rels | S | S / S_rho | wall |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| sym, m = 2 (prior round, unprojected columns) | 39 | 0.002 | 604/rel | 4.0 | 67 025 | 63 549× | 84 s |
+| sym, m = 2, projected | 19 | 0.0025 | 2161 | 3.3 | 41 063 | 38 933× | 52 s |
+| x-frame F4, m = 2 (prior round) | 35 | 0.002 | 504/rel | 2.0 | 16 713 | 15 846× | 26 s |
+| sym, m = 3, projected (1 repeat; 3 repeats exceeded 90 min) | 19 | 0.0014 | 4963 | 7 | 10 163 480 | 9.3·10⁶× | 95 min |
+
+The projected fold lowers the m = 2 symmetrised arm by 0.61 (67 025 → 41 063),
+so the prior round's refutation softens from 4.0× to 2.5× worse than the
+x-frame F4 arm, but stands. At m = 3 the symmetrised F4 oracle recovered the
+planted logarithm (verified) but its hit rate, 0.0014, is 160× below the
+exact `mitm-frobenius` hit rate on the *same* base and targets (0.219): the
+degree-4 system in 31 boolean unknowns exhausts the solver's node budget on
+most decomposable targets, so the oracle is incomplete rather than slow, and
+S lands four orders of magnitude above the m = 2 arms. That is the n = 17
+finding of the prior round ("the rewriting is the difference between solving
+and not solving at m = 3") turned around at n = 31: the symmetrised system
+is what can be *run*, but what it finds is a small fraction of what exists,
+and the exact combinatorial oracle on the identical base is 72 000× cheaper
+in S (140 vs 10 163 480). The kill criterion is not met on any arm.
 
 ---
 
