@@ -1,0 +1,29 @@
+name: JV isogeny end-to-end
+
+# The full p=101 sieve is deliberately outside the fast PR library gate.
+# Keep its original assertions in a bounded, independently visible run.
+on:
+  schedule:
+    - cron: "17 8 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jv-isogeny-walk-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  end-to-end:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Run the complete p=101 isogeny walk and sieve check
+        run: >-
+          cargo test --release --locked --lib
+          cryptanalysis::jv_isogeny_walk::tests::end_to_end_from_a_non_weak_curve_recovers_and_verifies
+          -- --exact --ignored --test-threads=1
