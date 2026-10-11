@@ -2917,14 +2917,11 @@ fn lazy_relative_support_update(
 fn assigned_one_hot(assignment: &[Option<bool>], offset: usize, count: usize) -> Option<usize> {
     let mut found = None;
     for index in 0..count {
-        match assignment.get(offset + index).copied().flatten() {
-            Some(true) => {
-                if found.is_some() {
-                    return None;
-                }
-                found = Some(index);
+        if let Some(true) = assignment.get(offset + index).copied().flatten() {
+            if found.is_some() {
+                return None;
             }
-            Some(false) | None => {}
+            found = Some(index);
         }
     }
     found
@@ -5913,7 +5910,7 @@ fn main() {
     let mut compact_relation: Option<ExtractedOrbitRelation> = None;
     let mut compact_batch_relations: Vec<(u64, ExtractedOrbitRelation)> = Vec::new();
     let mut compact_batch_failures: Vec<u64> = Vec::new();
-    let mut compact_batch_targets_requested = 0usize;
+    let _compact_batch_targets_requested = 0usize;
     let mut compact_batch_query_observations = Vec::new();
     let mut compact_batch_targets_requested = 0usize;
     let mut compact_point_batch_relations: Vec<([u64; 2], ExtractedOrbitRelation)> = Vec::new();
@@ -6622,7 +6619,6 @@ fn main() {
         }
     };
     phase_restart_shots_used += 1;
-    drop(theory);
     if !compact_batch_only {
         phase_restart_shots_used += 1;
     }

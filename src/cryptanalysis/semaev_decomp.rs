@@ -844,7 +844,7 @@ impl Gf2_128 {
             bits |= 1u128 << t;
         }
         // z^t mod irr ladders for the two reduction tables.
-        let red_lo_positions = ((128 - n as usize) + 7) / 8;
+        let red_lo_positions = (128 - n as usize).div_ceil(8);
         let pow = bits ^ (1u128 << n); // z^n ≡ the low terms
         let mut red_lo = vec![0u128; red_lo_positions * 256];
         // Byte k of the folded part sits at absolute position n + 8k:
@@ -985,8 +985,8 @@ impl Gf2_128 {
     pub fn sqr(&self, a: u128) -> u128 {
         let lo64 = a as u64;
         let hi64 = (a >> 64) as u64;
-        let lo = (spread32(lo64) as u128) | ((spread32((lo64 >> 32) as u64) as u128) << 64);
-        let hi = (spread32(hi64) as u128) | ((spread32((hi64 >> 32) as u64) as u128) << 64);
+        let lo = (spread32(lo64) as u128) | ((spread32(lo64 >> 32) as u128) << 64);
+        let hi = (spread32(hi64) as u128) | ((spread32(hi64 >> 32) as u128) << 64);
         self.reduce(lo, hi)
     }
 
@@ -2163,7 +2163,6 @@ mod tests {
     /// `inv`, so a chain bug cannot hide).
     #[test]
     fn itoh_tsujii_inverse_is_correct() {
-        use crate::binary_ecc::F2mElement;
         // Exhaustive at n = 7.
         let irr7 = IrreduciblePoly {
             degree: 7,
@@ -3800,7 +3799,6 @@ mod reference_994784af {
 #[cfg(test)]
 mod wide_tests {
     use super::*;
-    use crate::binary_ecc::F2mElement;
 
     fn wide_tests_irr() -> crate::binary_ecc::IrreduciblePoly {
         let irr = crate::cryptanalysis::koblitz_index_calculus::find_irreducible_sparse_wide(71)

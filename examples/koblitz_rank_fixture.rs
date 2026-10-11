@@ -248,6 +248,7 @@ struct RawFiber {
     members: Vec<(usize, u64)>,
 }
 
+#[allow(dead_code)] // kept for reference; no current caller
 #[derive(Default)]
 struct BatchInverseScratch {
     denominators: Vec<u64>,
@@ -335,6 +336,7 @@ impl QuotientPairWitness {
         })
     }
 
+    #[allow(dead_code)] // kept for reference; no current caller
     fn image_y(self) -> u64 {
         self.image_y
     }
@@ -402,6 +404,7 @@ struct CompactPairTable {
 }
 
 impl CompactPairTable {
+    #[allow(dead_code)] // kept for reference; no current caller
     fn with_capacity(expected: usize, x_only: bool, x_domain: usize) -> Self {
         Self::with_capacity_config(expected, x_only, x_domain, 16, 2)
     }
@@ -1780,6 +1783,7 @@ fn reference_fixed_base_table(curve: &KoblitzCurve, point: &BinaryPoint) -> Vec<
     table
 }
 
+#[allow(dead_code)] // kept for reference; no current caller
 fn reference_fixed_base_mul(
     curve: &KoblitzCurve,
     table: &[BinaryPoint],
@@ -3390,6 +3394,7 @@ fn point_defined_base_with_seed(
     }
 }
 
+#[allow(dead_code)] // kept for reference; no current caller
 fn point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
     point_defined_base_with_seed(curve, wanted, DEFAULT_FACTOR_BASE_SEED)
 }
@@ -3841,7 +3846,7 @@ fn main() {
         !shared_factor_log_precomputation || batch_fixtures > 1,
         "KIC_SHARED_FACTOR_LOG_PRECOMPUTATION requires at least two fixtures"
     );
-    let required_rank_surplus: usize = std::env::var("KIC_RANK_SURPLUS")
+    let _required_rank_surplus: usize = std::env::var("KIC_RANK_SURPLUS")
         .ok()
         .map(|value| value.parse().unwrap())
         .unwrap_or(32);
@@ -3891,7 +3896,7 @@ fn main() {
     let modulus = curve.subgroup_order.to_u64().unwrap();
     let lambda = curve.lambda.to_u64().unwrap();
     let automorphisms: Vec<_> = signed_scalars(lambda, modulus, n).into_iter().collect();
-    let signed_size = automorphisms.len();
+    let _signed_size = automorphisms.len();
     if let FixtureTarget::ExplicitScalar(scalar) = fixture_target {
         assert!(
             batch_fixtures == 1,
@@ -4286,9 +4291,9 @@ fn main() {
         return;
     }
     let reference_generator_table_started = Instant::now();
-    let reference_generator_table = fixed_base_reference_validation
+    let _reference_generator_table = fixed_base_reference_validation
         .then(|| reference_fixed_base_table(&curve, curve.generator()));
-    let reference_generator_table_ms =
+    let _reference_generator_table_ms =
         reference_generator_table_started.elapsed().as_secs_f64() * 1000.0;
 
     let batch_started = Instant::now();
@@ -4324,7 +4329,7 @@ fn main() {
         let mut rng = StdRng::seed_from_u64(fixture_seed);
         let fixture_generation_started = Instant::now();
         let generated_scalar = rng.gen_range(1..modulus);
-        let (known_scalar, q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
+        let (known_scalar, q, _fixture_scalar_source, public_hash_seed, public_hash_counter) =
             match fixture_target {
                 FixtureTarget::SeededScalar => (
                     Some(generated_scalar),
@@ -4437,14 +4442,14 @@ fn main() {
         let mut pair_parallel_scratch: Vec<PairPairChunkScratch> =
             (0..parallel_lanes).map(|_| Default::default()).collect();
         let mut pair_parallel_results = Vec::with_capacity(parallel_lanes);
-        let mut query_parallel_waves = 0usize;
-        let mut query_parallel_chunks = 0usize;
-        let mut query_shared_sign_denominator_inputs = 0usize;
+        let mut _query_parallel_waves = 0usize;
+        let mut _query_parallel_chunks = 0usize;
+        let mut _query_shared_sign_denominator_inputs = 0usize;
         let mut guided_bins_visited = 0usize;
         let mut guided_priority_hits = 0usize;
-        let mut rank_targeted_trials = 0usize;
-        let mut rank_targeted_nonincrements = 0usize;
-        let mut rank_target_slot_index_builds = 0usize;
+        let mut _rank_targeted_trials = 0usize;
+        let _rank_targeted_nonincrements = 0usize;
+        let mut _rank_target_slot_index_builds = 0usize;
         let mut rank_target_slot_column = None;
         let mut rank_target_slots = Vec::new();
         let mut dense_rank_recomputations = 0usize;
@@ -4729,14 +4734,14 @@ fn main() {
                 } else {
                     None
                 };
-            rank_targeted_trials += usize::from(targeted_column.is_some());
+            _rank_targeted_trials += usize::from(targeted_column.is_some());
             if let Some(column) = targeted_column {
                 if rank_target_slot_column != Some(column) {
                     rank_target_slots =
                         quotient_pairs.slots_for_column(&base.point_labels, column, columns);
                     assert!(!rank_target_slots.is_empty());
                     rank_target_slot_column = Some(column);
-                    rank_target_slot_index_builds += 1;
+                    _rank_target_slot_index_builds += 1;
                 }
             }
             if let Some(width) = query_mode.pair_pair_width() {
@@ -4780,15 +4785,15 @@ fn main() {
                                 )
                             })
                             .collect_into_vec(&mut pair_parallel_results);
-                        query_parallel_waves += 1;
-                        query_parallel_chunks += pair_parallel_results.len();
+                        _query_parallel_waves += 1;
+                        _query_parallel_chunks += pair_parallel_results.len();
                         for result in pair_parallel_results.drain(..) {
                             query_additions += result.additions;
                             decomposition_queries += result.additions;
                             query_x_filter_rejections += result.x_filter_rejections;
                             query_exact_table_misses += result.exact_table_misses;
                             query_batch_inversions += result.batch_inversions;
-                            query_shared_sign_denominator_inputs +=
+                            _query_shared_sign_denominator_inputs +=
                                 result.shared_denominator_inputs;
                             if witness.is_none() {
                                 if let Some((indices, labels)) = result.witness {

@@ -5,6 +5,10 @@
 //! solver's answer.  Set `IC_GROEBNER_CACHE_URL` to enable it.  For an
 //! ElastiCache replication group with in-transit encryption, use a `rediss://`
 //! URL and provide the auth token in the URL through the deployment secret.
+//!
+//! Nothing in the solver calls [`get_or_compute`] yet, so the module is
+//! compiled but unused outside its tests.
+#![allow(dead_code)]
 
 use crate::cryptanalysis::pq_groebner_f2::F2BoolPoly;
 use redis::Commands;
@@ -103,9 +107,7 @@ impl GroebnerCache {
                 return None;
             }
         };
-        let Some(bytes) = bytes else {
-            return None;
-        };
+        let bytes = bytes?;
         match serde_json::from_slice::<CachedRows>(&bytes) {
             Ok(payload) if payload.version == CACHE_VERSION && payload.n_vars == n_vars => {
                 let rows = payload
@@ -204,7 +206,7 @@ mod tests {
 
     #[test]
     fn cached_rows_round_trip_without_redis() {
-        let rows = vec![F2BoolPoly::from_monos(
+        let rows = [F2BoolPoly::from_monos(
             vec![F2BoolMono::from_mask(0), F2BoolMono::from_mask(5)],
             3,
         )];
