@@ -46,9 +46,10 @@ make test          # seven CPU test suites, plus the inline-asm check
 make ptxcheck      # just the inline-asm check
 make bench         # CUDA benchmark binary (needs nvcc)
 make bench ARCH=sm_100    # datacenter Blackwell; sm_120 for RTX 50-series
+make bench CURVE=curve25519   # Ed25519's group instead of secp256k1
 ```
 
-`make test` needs only Python 3 and a C++17 compiler. It runs seven
+`make test` needs only Python 3 and a C++17 compiler. It runs ten
 configurations:
 
 | Suite | Curve | Reduction | What it covers |
@@ -57,9 +58,12 @@ configurations:
 | `test_secp_mont` | secp256k1 | Montgomery | the generic path on the same curve |
 | `test_toy_mont` | 40-bit toy, a ≠ 0 | Montgomery | generic doubling, and an end-to-end DLP solve |
 | `test_toyj0_mont` | 36-bit toy, j = 0 | Montgomery | the Z/6-folded walk end to end, step counts averaged over 8 solves per fold |
+| `test_25519_fast` | curve25519 (Ed25519's group) | special, 2^256 = 38 | the production path for that curve: field, points, folds 1 and 2, steppers, DP replay, cycles |
+| `test_25519_mont` | curve25519 | Montgomery | the generic path on the same curve; the two reductions agree on canonical values |
 | `test_bsgs_secp_fast` | secp256k1 | special | BSGS table, steppers, a 2^22-wide interval log |
 | `test_bsgs_secp_mont` | secp256k1 | Montgomery | the same on the generic path |
 | `test_bsgs_toy` | 40-bit toy | Montgomery | the same, plus whole-group logs with the cost table below |
+| `test_bsgs_25519_fast` | curve25519 | special | BSGS table, steppers, a 2^22-wide interval log at a random 253-bit offset |
 
 `make test` also runs `ptx_asm_check.py`, which covers the one thing the
 C++ suites structurally cannot: the `FP_PTX` inline assembly is guarded on
@@ -95,6 +99,7 @@ ECC_GPU=H100 modal run modal_app.py::selftest   # both configurations vs the hos
 ECC_GPU=H100 modal run modal_app.py::bench      # does the 55% become throughput?
 ECC_GPU=H100 modal run modal_app.py::tune       # sweep RHO_MIN_BLOCKS
 ECC_GPU=H100 modal run modal_app.py::bsgs --wbits 48   # BSGS: is the giant phase memory-bound?
+ECC_CURVE=curve25519 ECC_GPU=RTX-PRO-6000 modal run modal_app.py::selftest   # Ed25519's group
 ```
 
 `selftest` is the one that matters: it builds `FP_PTX=0` and `FP_PTX=1`,
@@ -472,11 +477,35 @@ BSGS rows themselves are unaffected.
 
 ## Curve support
 
-`ecref.py params --curve <name>` emits the parameter header. `secp256k1`,
-`toyNN` (a deterministically generated NN-bit curve with prime order and
-a ≠ 0) and `toyNNj0` (an NN-bit prime-order curve with a = 0 and
-p ≡ 1 mod 3, so that Aut(E) = Z/6 is available) are built in. Any other
-short-Weierstrass curve over a prime below 2^256 works by adding its
-parameters to `ecref.py`; only the `FP_FAST` path is secp256k1-specific,
-and it falls back to Montgomery automatically. Fold 6 needs a j = 0 curve;
-the generator derives β and λ itself whenever the curve has them.
+`ecref.py params --curve <name>` emits the parameter header. Built in:
+
+| name | what | reduction | folds |
+|---|---|---|---|
+| `secp256k1` | the Bitcoin curve, j = 0, prime order | special, 2^256 = 2^32 + 977 | 1, 2, 6 |
+| `curve25519` (aliases `ed25519`, `x25519`) | Ed25519 / X25519's prime-order group, in short-Weierstrass form: y² = x³ + ax + b over p = 2^255 − 19 with a = 1 − A²/3, b = (2A³ − 9A)/27, A = 486662, order ℓ = 2^252 + 27742317777372353535851937790883648493, cofactor 8 | special, 2^256 = 38 | 1, 2 |
+| `toyNN` | a deterministically generated NN-bit prime-order curve, a ≠ 0 | Montgomery | 1, 2 |
+| `toyNNj0` | an NN-bit prime-order curve with a = 0, p ≡ 1 mod 3 | Montgomery | 1, 2, 6 |
+
+Ed25519's twisted-Edwards curve and the Montgomery curve
+v² = u³ + 486662u² + u are birationally equivalent over F_p, and
+u = x − A/3 takes the latter to the Weierstrass model, so a discrete
+logarithm on `curve25519` here is a discrete logarithm in Ed25519's group;
+the curve model is a coordinate choice, not a different problem. The
+generator recomputes a, b and the base point from A and p and asserts them
+against the RFC 7748 / RFC 8032 constants; it multiplies every random point
+by the cofactor so the vectors live in the order-ℓ subgroup. Fold 6 is not
+available (a ≠ 0), so rho defaults to the negation map on this curve;
+inversion uses the ref10 chain (254 squarings + 11 multiplications, 265
+operations, against 270 on secp256k1).
+
+Any other short-Weierstrass curve over a prime below 2^256 works by adding
+its parameters to `ecref.py`; curves without a special reduction fall back
+to Montgomery automatically. Fold 6 needs a j = 0 curve; the generator
+derives β and λ itself whenever the curve has them.
+
+**Device status.** Like the secp256k1 kernels, the curve25519 path has run
+only on the host (`make test`) — no Modal or Runpod credentials have been
+available where it was written. `ECC_CURVE=curve25519 modal run
+modal_app.py::selftest` is the first device run, and `gpu/run_device_suite.sh`
+runs every family in one go once `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`
+are set.
