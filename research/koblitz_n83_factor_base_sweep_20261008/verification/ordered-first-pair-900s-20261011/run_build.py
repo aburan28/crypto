@@ -12,7 +12,7 @@ import time
 
 IMAGE = "sha256:7c4ae649a84014c467d79319bbf17ce2632ae8b8be123ac2fb2ea5be46823f31"
 NAME = "n83-ordered-pair-build-20261011"
-WALL_CAP = 300
+WALL_CAP = 280
 EXAMPLE = "koblitz_n83_factor_base_export"
 
 
