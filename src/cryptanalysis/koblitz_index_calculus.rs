@@ -2047,22 +2047,28 @@ pub fn q_linearised_kernel_basis(
 /// Kernel basis of an `F_2`-linear map on `F_{2^n}` given by its action
 /// on the polynomial basis.
 fn kernel_basis_of(n: u32, image: impl Fn(&F2mElement) -> F2mElement) -> Vec<F2mElement> {
-    // Column i = F(z^i), packed into the low n bits of a u64.
-    let mut rows: Vec<(u64, u64)> = Vec::with_capacity(n as usize);
+    // Column i = F(z^i), packed into the low n bits of a u128 (two raw
+    // limbs): the wide rungs have 64 < n ≤ MAX_N = 127, and a u64 here
+    // silently dropped their top limb and shifted `1 << i` out of range,
+    // so every wide constructor returned `None`.
+    debug_assert!(n <= 128, "kernel_basis_of packs columns into u128");
+    let mut rows: Vec<(u128, u128)> = Vec::with_capacity(n as usize);
     for i in 0..n {
         let basis = F2mElement::from_bit_positions(&[i], n);
         let img = image(&basis);
-        let img_bits = img.raw_bits().first().copied().unwrap_or(0);
-        rows.push((img_bits, 1u64 << i));
+        let raw = img.raw_bits();
+        let img_bits = raw.first().copied().unwrap_or(0) as u128
+            | ((raw.get(1).copied().unwrap_or(0) as u128) << 64);
+        rows.push((img_bits, 1u128 << i));
     }
 
     // Gaussian elimination on the image halves; whatever reduces to
     // zero contributes its preimage to the kernel basis.
-    let mut pivots: Vec<(u64, u64)> = Vec::new();
-    let mut kernel_basis: Vec<u64> = Vec::new();
+    let mut pivots: Vec<(u128, u128)> = Vec::new();
+    let mut kernel_basis: Vec<u128> = Vec::new();
     for (mut img, mut pre) in rows {
         for &(pimg, ppre) in &pivots {
-            let lead = 1u64 << (63 - pimg.leading_zeros());
+            let lead = 1u128 << (127 - pimg.leading_zeros());
             if img & lead != 0 {
                 img ^= pimg;
                 pre ^= ppre;

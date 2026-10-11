@@ -22,11 +22,11 @@
  * clmad.hi.u64 on sm_80 and later, needing CUDA 13.3 or newer to emit; see
  * ecc2k130/NATIVE-CARRYLESS.md, which measured 22.4% on a complete ECC2K-130
  * walk by switching to it, and ecc2k130/include/packed131.h for the inline
- * asm.  This backend has not been ported to it, and it is still the largest
- * thing left: the six surviving leaves are 96 widening multiplies of the
- * multiply's 304 instructions, where clmad does a 128-bit product in six
- * instructions -- and would make the three-way split here unnecessary for the
- * multiply, though not the reduction.
+ * asm.  The device path now uses it (F2M_CLMAD, "the native product" below):
+ * one or two 64-bit limbs, a 128-bit product in two or six instructions, and
+ * no three-way split.  The software product above is what the host harness
+ * runs and what `bench selftest` checks the device against; -DF2M_CLMAD=0
+ * builds the device with it too.  The reduction is shared and unchanged.
  *
  * With the software product, a multiplication in this three-times-narrower
  * field costs most of what a secp256k1 multiplication costs -- an artefact of
@@ -261,11 +261,88 @@ G2_HD void f2m_base_prod(uint32_t r[2 * F2M_BASEW],
 #endif
 }
 
+/* ---------------------------------------------------------------- *
+ * the native product
+ * ---------------------------------------------------------------- *
+ *
+ * PTX `clmad.lo.u64` / `clmad.hi.u64` (sm_80 and later; CUDA 13.3 or newer
+ * to emit it) is a 64x64 -> 128 carry-less multiply-add.  With it, an
+ * element is one or two 64-bit limbs and the whole product is one `clmad`
+ * pair (m <= 64) or a two-limb Karatsuba of three pairs (m <= 128): six
+ * instructions where the software path above spends 96 widening integer
+ * multiplies plus their masks.  The reduction is unchanged, so the device
+ * path and the software path form bit-identical products; `bench2k selftest`
+ * compares them on the device and the host harness keeps running the
+ * software path it can execute.
+ *
+ * F2M_CLMAD selects it: automatically on a device pass whose toolchain can
+ * emit the instruction, never on the host.  -DF2M_CLMAD=0 forces the
+ * software path for A/B comparison. */
+#ifndef F2M_CLMAD
+#if defined(__CUDA_ARCH__) && (__CUDA_ARCH__ >= 800) && \
+    defined(CUDART_VERSION) && (CUDART_VERSION >= 13030)
+#define F2M_CLMAD 1
+#else
+#define F2M_CLMAD 0
+#endif
+#endif
+#if F2M_CLMAD && !defined(__CUDA_ARCH__)
+#undef F2M_CLMAD
+#define F2M_CLMAD 0
+#endif
+
+#if F2M_CLMAD
+G2_HD uint64_t f2m_clmad_lo(uint64_t a, uint64_t b, uint64_t c) {
+    uint64_t r;
+    asm("clmad.lo.u64 %0, %1, %2, %3;" : "=l"(r) : "l"(a), "l"(b), "l"(c));
+    return r;
+}
+G2_HD uint64_t f2m_clmad_hi(uint64_t a, uint64_t b, uint64_t c) {
+    uint64_t r;
+    asm("clmad.hi.u64 %0, %1, %2, %3;" : "=l"(r) : "l"(a), "l"(b), "l"(c));
+    return r;
+}
+/* Limb i of a reduced element: words 2i and 2i+1, each masked to the bits
+ * a reduced element can set, so the container's unused words never enter. */
+G2_HD uint64_t f2m_limb(const uint32_t a[F2M_WORDS], int i) {
+    const uint32_t lo = (2 * i < F2M_EWORDS) ? (a[2 * i] & f2m_word_mask(2 * i)) : 0u;
+    const uint32_t hi = (2 * i + 1 < F2M_EWORDS) ? (a[2 * i + 1] & f2m_word_mask(2 * i + 1)) : 0u;
+    return (uint64_t)lo | ((uint64_t)hi << 32);
+}
+G2_HD void f2m_prod_native(uint32_t t[F2M_DWORDS],
+                           const uint32_t a[F2M_WORDS], const uint32_t b[F2M_WORDS]) {
+#if F2M_EWORDS <= 2
+    const uint64_t a0 = f2m_limb(a, 0), b0 = f2m_limb(b, 0);
+    const uint64_t l0 = f2m_clmad_lo(a0, b0, 0ull), h0 = f2m_clmad_hi(a0, b0, 0ull);
+    t[0] = (uint32_t)l0; t[1] = (uint32_t)(l0 >> 32);
+    t[2] = (uint32_t)h0; t[3] = (uint32_t)(h0 >> 32);
+#pragma unroll
+    for (int i = 4; i < F2M_DWORDS; i++) t[i] = 0u;
+#elif F2M_EWORDS <= 4
+    /* (a0 + a1 X)(b0 + b1 X) = z0 + (zm + z0 + z2) X + z2 X^2,  X = t^64,
+     * with the Karatsuba corrections folded into clmad's addend. */
+    const uint64_t a0 = f2m_limb(a, 0), a1 = f2m_limb(a, 1);
+    const uint64_t b0 = f2m_limb(b, 0), b1 = f2m_limb(b, 1);
+    const uint64_t l0 = f2m_clmad_lo(a0, b0, 0ull), h0 = f2m_clmad_hi(a0, b0, 0ull);
+    const uint64_t l2 = f2m_clmad_lo(a1, b1, 0ull), h2 = f2m_clmad_hi(a1, b1, 0ull);
+    const uint64_t lm = f2m_clmad_lo(a0 ^ a1, b0 ^ b1, l0 ^ l2);
+    const uint64_t hm = f2m_clmad_hi(a0 ^ a1, b0 ^ b1, h0 ^ h2);
+    const uint64_t w1 = h0 ^ lm, w2 = l2 ^ hm;
+    t[0] = (uint32_t)l0; t[1] = (uint32_t)(l0 >> 32);
+    t[2] = (uint32_t)w1; t[3] = (uint32_t)(w1 >> 32);
+    t[4] = (uint32_t)w2; t[5] = (uint32_t)(w2 >> 32);
+    t[6] = (uint32_t)h2; t[7] = (uint32_t)(h2 >> 32);
+#else
+#error "no native carry-less product at this width"
+#endif
+}
+#endif /* F2M_CLMAD */
+
 /* t = a * b, for reduced a and b.  Words of a and b above F2M_EWORDS are not
  * read and the partial top word is masked, so an unreduced input cannot leak
  * into the product through a word the container merely happens to hold. */
-G2_HD void f2m_prod(uint32_t t[F2M_DWORDS],
-                    const uint32_t a[F2M_WORDS], const uint32_t b[F2M_WORDS]) {
+G2_HD void f2m_prod_software(uint32_t t[F2M_DWORDS],
+                             const uint32_t a[F2M_WORDS], const uint32_t b[F2M_WORDS]) {
     uint32_t p[2 * F2M_BASEW];
     f2m_base_prod(p, a, b);
 #pragma unroll
@@ -288,6 +365,17 @@ G2_HD void f2m_prod(uint32_t t[F2M_DWORDS],
         t[2 * F2M_FULLW] ^= l;
         t[2 * F2M_FULLW + 1] ^= h;
     }
+#endif
+}
+
+/* The product the field takes: native where the device has it, software
+ * everywhere else.  Both form the same unreduced product. */
+G2_HD void f2m_prod(uint32_t t[F2M_DWORDS],
+                    const uint32_t a[F2M_WORDS], const uint32_t b[F2M_WORDS]) {
+#if F2M_CLMAD
+    f2m_prod_native(t, a, b);
+#else
+    f2m_prod_software(t, a, b);
 #endif
 }
 
