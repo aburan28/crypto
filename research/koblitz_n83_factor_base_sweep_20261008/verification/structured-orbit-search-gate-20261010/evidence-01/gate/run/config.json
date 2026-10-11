@@ -1,0 +1,17 @@
+{
+  "budget_seconds": 710,
+  "conflict_budget": 10000,
+  "manifest_blake3": "d6adad9bec74350f37bf917e737006869bc0f343692f668fa4dc893afe332745",
+  "max_models": 32,
+  "max_trials": 1,
+  "memory_cgroup_limit_bytes": 4294967296,
+  "memory_cgroup_swap_limit_bytes": 0,
+  "object_blake3": "aea278aff2d79a592d5164d7437ddde8f8e9377fa481058dfc16afa176a31389",
+  "public_corpus_path": "/corpus.json",
+  "schema": "n83.structured-orbit-cold-config/v1",
+  "source_blake3": "595bf51c10f0cbef0c5bb1978414ae0f2247f915db0daf72dd6332cb97cdf447",
+  "strategy": "ChainedS3FrobeniusOrbit",
+  "study": "koblitz_n83_factor_base_sweep_20261008",
+  "summands": 5,
+  "validation_path": "/validation.json"
+}

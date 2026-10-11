@@ -1,0 +1,23 @@
+{
+  "authorization_sha256": "668a76f82f5887ed1d5a6d25a44236faa42ab362938da2499a7f8676a4160ae9",
+  "binary_sha256": "afe0a8df6d9d761bb6a6e111512ea57a02bebbc3839fc15c000538d619ed2956",
+  "files_sha256": {
+    "build/build.json": "ba7de398dfb655af149a12364b3a6cb10fcd9bf71b22f3617879da010c690da0",
+    "build/stderr.log": "57749326f5c3d705ca013d2ab33dd5ba40e8efdd07b302ee4f85c70698c755c0",
+    "build/stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gate/budget.json": "c7dd373b07678b5ffabe1067feb002210133484dff477b332a23dd1fc334ec87",
+    "gate/config.json": "9cb428aae31817eab1d6dbbfa97c9f7b88bf47d7a21f5088a68c67f983a9882f",
+    "gate/outer.json": "42aea30f3903ad44197387b81243be7aff84ec3f9230e19ff07e750ce502ba80",
+    "gate/run/config.json": "63807fd7908310ff1808e149064dfa887f7e40937ffe39a577d822b65fba526b",
+    "gate/run/events.jsonl": "f316ff29b2e9b3af38efb31cea87b51293f1d3d1cea658da4a9ad5fe70298905",
+    "gate/run/result.json": "7a817298b5750555a92d01c0c94f76f0acefc31638f23f574e9811c0db81d6cb",
+    "gate/search.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gate/search.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gate/verify.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "gate/verify.stdout": "773351f0a1ed73454ae58d396aec1553026bd6e07462c7b0bee1093900561b1e"
+  },
+  "schema": "n83.structured-orbit-search-evidence/v1",
+  "selected_best_total_runtime": null,
+  "source_commit": "5e798094406e11a137f6ce6c906bc95570256c51",
+  "status": "UNKNOWN_solver_cap"
+}

@@ -1,8 +1,8 @@
-# Proposed N83 structured-orbit import and first search gate
+# N83 structured-orbit import and first search gate
 
-**Status: prepared, not authorized or executed.** The existing local pilot ledger
-charges all 7,200 of the user-authorized seconds. A separate explicit approval
-for **1,800 additional local seconds** is required before this gate can launch:
+**Status: executed once; see [the result](RESULT.md).** The prior local pilot ledger
+charged all 7,200 of the previously authorized seconds. The user extended the
+limit for this gate by **1,800 additional local seconds**:
 600 seconds for the capped offline Linux build and 1,200 seconds for the two
 experiment stages and cleanup. The authorization receipt must name this gate,
 the exact fresh build and experiment directories, the earlier 7,200-second
@@ -26,7 +26,8 @@ offline arm64 build command, caps compilation at 450 seconds with the rest of
 its 600-second charge reserved for cleanup, and writes a binary/source/image receipt outside
 the checkout. Record its SHA256, source commit, source-file hashes, local
 Docker image ID, input hashes and exact command before launch. The build
-script has not been executed for this worker.
+script was executed once for the worker; the frozen build receipt is retained
+under `evidence-01/build/`.
 
 `structured_orbit_search_supervisor.py` launches two fresh no-network Linux
 containers with one CPU, 4 GiB memory, zero swap, 64 PIDs, dropped capabilities
@@ -58,9 +59,9 @@ independent investigation. A natural relation, if found, still requires
 independent group replay. This gate does not establish full precomputation,
 an individual log stage, matched cold cost or the best factor base.
 
-## Launch only after additional authorization
+## Authorized launch procedure used
 
-After approval, create a new, local `authorization.json` outside the checkout
+The approved launch used a local `authorization.json` outside the checkout
 with schema `n83.additional-local-budget/v1`, study
 `koblitz_n83_factor_base_sweep_20261008`, purpose
 `structured_orbit_import_and_one_m5_trial`,
@@ -82,7 +83,8 @@ python3 research/koblitz_n83_factor_base_sweep_20261008/structured_orbit_search_
   --output /absolute/path/to/fresh-output
 ```
 
-This command is a prospective protocol, not an experiment receipt. The
-supervisor's synthetic controls validate the missing-budget guard, archive
-receipt rejection, resource command and prevention of search after a failed
-import. They do not substitute for the actual N83 import or SAT search.
+The commands ran once against the frozen source and object. The resulting
+build, import, search, cleanup and budget receipts are under `evidence-01/`.
+The supervisor's synthetic controls also validate the missing-budget guard,
+archive receipt rejection, resource command and prevention of search after a
+failed import; the real bounded result is reported separately in `RESULT.md`.
