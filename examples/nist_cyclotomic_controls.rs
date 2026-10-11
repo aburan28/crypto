@@ -28,6 +28,7 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use crypto_lib::cryptanalysis::curve_traits::arith::{self, is_prime, log2_abs};
+use crypto_lib::cryptanalysis::ecm::ecm_factor;
 use num_bigint::{BigInt, BigUint, RandBigInt};
 use num_integer::Integer;
 use num_traits::{One, Signed, ToPrimitive, Zero};
@@ -181,6 +182,16 @@ impl CurveQ {
     /// limit does not depend on the model), then doubled in Jacobian
     /// coordinates over `Z`, with one gcd per evaluated height.
     fn height_sequence(&self, p: &Pt, doublings: u32) -> Vec<f64> {
+        self.height_sequence_on(p, doublings, false)
+    }
+
+    /// As [`Self::height_sequence`], but with `rational = true` the naive
+    /// height is taken of the reduced rational `x = X/(Z²u²)` on the
+    /// original model, not of `X/Z²` on the denominator-cleared one.  The
+    /// cleared model inflates `h_x` by about `2 log u` (u includes the
+    /// point's own denominators), which survives the `4^{-k}` as a bias.
+    /// Amendment 2 (E4r) uses `rational = true`; v1/v2 keep `false`.
+    fn height_sequence_on(&self, p: &Pt, doublings: u32, rational: bool) -> Vec<f64> {
         let (x, y) = match p {
             None => return vec![0.0; doublings as usize + 1],
             Some(v) => v,
@@ -197,8 +208,9 @@ impl CurveQ {
         let mut seq = Vec::new();
         for k in 0..=doublings {
             let z2 = &zj * &zj;
-            let g = xj.gcd(&z2);
-            let h = ln_abs(&(&xj / &g)).max(ln_abs(&(&z2 / &g)));
+            let den = if rational { &z2 * &u2 } else { z2.clone() };
+            let g = xj.gcd(&den);
+            let h = ln_abs(&(&xj / &g)).max(ln_abs(&(&den / &g)));
             seq.push(h / 4f64.powi(k as i32));
             if k < doublings {
                 // Jacobian doubling: S = 4XY², M = 3X² + aZ⁴, X' = M² − 2S, Y' = M(S − X') − 8Y⁴, Z' = 2YZ.
@@ -493,6 +505,318 @@ fn pairing_on(e: &CurveQ, pg: &Pt, pr: &Pt) -> (f64, f64) {
     )
 }
 
+/// Amendment 2 (E4r): the pairing from rational-model heights, at k = 5
+/// and k = 4 doublings: `(|cos|, det/(ĥĥ), |cos|_k4, det_k4)`.
+fn pairing_on_rational(e: &CurveQ, pg: &Pt, pr: &Pt) -> [f64; 4] {
+    let h = |q: &Pt| e.height_sequence_on(q, 5, true);
+    let ((sg, sr), sgr) = rayon::join(|| rayon::join(|| h(pg), || h(pr)), || h(&e.add(pg, pr)));
+    let at = |k: usize| {
+        let (hg, hr, hgr) = (sg[k], sr[k], sgr[k]);
+        let pair = (hgr - hg - hr) / 2.0;
+        (
+            (pair / (hg * hr).sqrt()).abs(),
+            (hg * hr - pair * pair) / (hg * hr),
+        )
+    };
+    let ((c5, r5), (c4, r4)) = (at(5), at(4));
+    [c5, r5, c4, r4]
+}
+
+fn two_point_curve(p1: &(BigInt, BigInt), p2: &(BigInt, BigInt)) -> (CurveQ, Pt, Pt) {
+    let (x1, y1, x2, y2) = (
+        Rat::int(&p1.0),
+        Rat::int(&p1.1),
+        Rat::int(&p2.0),
+        Rat::int(&p2.1),
+    );
+    let c1 = y1.mul(&y1).sub(&x1.mul(&x1).mul(&x1));
+    let c2 = y2.mul(&y2).sub(&x2.mul(&x2).mul(&x2));
+    let a = c1.sub(&c2).div(&x1.sub(&x2));
+    let b = c1.sub(&a.mul(&x1));
+    let e = CurveQ { a, b };
+    let (pg, pr): (Pt, Pt) = (Some((x1, y1)), Some((x2, y2)));
+    assert!(e.on_curve(&pg) && e.on_curve(&pr));
+    (e, pg, pr)
+}
+
+/// Amendment 2 (E1b): `factor(x, 2^18)` as in E1, then ECM (B1 = 2000,
+/// 20 curves) on every composite it leaves, recursively.  Returns
+/// `(M1, M2, M1_rho, M2_rho, unsplit_composites)`; the `_rho` pair is the
+/// v1/v2 instrument's value on the same input.
+fn small_factor_metrics_ecm(x: &BigInt, seed: u64) -> (f64, f64, f64, f64, usize) {
+    let f = arith::factor(&ubig(x), 1 << 18);
+    let lim = BigUint::one() << 32;
+    let mut primes: Vec<(BigUint, u32)> = f.primes.clone();
+    let (mut m1r, mut m2r) = (0.0, 0.0);
+    for (q, e) in &f.primes {
+        if *q < lim {
+            m1r += *e as f64 * q.to_f64().unwrap().log2();
+            m2r += 1.0;
+        }
+    }
+    let mut stack: Vec<(BigUint, u32)> = f.composites.clone();
+    let mut unsplit = 0usize;
+    let mut s = seed;
+    while let Some((c, e)) = stack.pop() {
+        if is_prime(&c) {
+            primes.push((c, e));
+            continue;
+        }
+        s = s.wrapping_add(1000);
+        match ecm_factor(&c, 2000, 20, s) {
+            Some(d) => {
+                let other = &c / &d;
+                stack.push((d, e));
+                stack.push((other, e));
+            }
+            None => unsplit += 1,
+        }
+    }
+    // Merge repeated primes (ECM may split c = q·q·r into pieces sharing q).
+    primes.sort();
+    let mut merged: Vec<(BigUint, u32)> = Vec::new();
+    for (q, e) in primes {
+        match merged.last_mut() {
+            Some((lq, le)) if *lq == q => *le += e,
+            _ => merged.push((q, e)),
+        }
+    }
+    let (mut m1, mut m2) = (0.0, 0.0);
+    for (q, e) in &merged {
+        if *q < lim {
+            m1 += *e as f64 * q.to_f64().unwrap().log2();
+            m2 += 1.0;
+        }
+    }
+    (m1, m2, m1r, m2r, unsplit)
+}
+
+/// Amendment 2: E1b (ECM-completed small-factor content) and E4r
+/// (rational-model heights for the two-point pairing).  `quick` shrinks N.
+fn run_amendment2(out: &std::path::Path, mode: &str) {
+    let quick = mode == "quick3";
+    let (n_e1b, n_pos1b, n_e4) = if quick { (40, 5, 10) } else { (800, 50, 500) };
+    let mut rows = fs::File::create(out.join(format!("rows_{mode}.jsonl"))).unwrap();
+    let mut md = String::new();
+    let mut summary = Vec::new();
+    let started = Instant::now();
+    writeln!(md, "# Controlled re-test: results ({mode})\n\n{} Seed base {SEED}. Protocol file hashes are recorded in `results_{mode}.json`. Every verdict below is the decision rule applied mechanically.\n", if quick { "QUICK3 smoke run of Amendment 2 at small N. Verdicts are meaningless." } else { "v3, `AMENDMENT_2.md`: E1b and E4r only." }).unwrap();
+
+    // ── E1b ──
+    let alpha = 0.05 / 9.0;
+    let pmin = 2.0 / (n_e1b as f64 + 1.0);
+    writeln!(md, "## E1b — M1 with ECM-completed factoring (rho 2^18, then ECM B1 = 2000 × 20 curves per composite)\n\nNull: the first N = {n_e1b} of v2's Hasse-interval primes per curve (same seeds). Family: 9 targets × M1, Bonferroni α = 0.05/9 = {alpha:.4}. Power check: min attainable p = {pmin:.4}, {}.\n", if pmin < alpha { "passes" } else { "**FAILS**" }).unwrap();
+    writeln!(md, "| curve | value | M1 target (rho → ECM) | control median [2.5%, 97.5%] | rank / N | p (two-sided) | verdict | controls whose M1 changed under ECM | unsplit composites (controls) |\n|:--|:--|--:|:--|--:|--:|:--|--:|--:|").unwrap();
+    let mut pos_lines = Vec::new();
+    for (ci, c) in CURVES.iter().enumerate() {
+        let p = big(c.p);
+        let n = big(c.n);
+        let mut rng = StdRng::seed_from_u64(SEED + ci as u64);
+        let w = (BigInt::from(4) * &p).sqrt();
+        let lo = &p + 1 - &w;
+        let hi = &p + 1 + &w;
+        let nps: Vec<BigInt> = (0..n_e1b)
+            .map(|_| random_prime_in(&mut rng, &lo, &hi))
+            .collect();
+        let vals: Vec<BigInt> = nps
+            .iter()
+            .flat_map(|np| [np - 1, np + 1, BigInt::from(2) * &p + 2 - np])
+            .collect();
+        let base = 0xE1B0_0000u64 + (ci as u64) * 0x10_0000;
+        let mets: Vec<_> = vals
+            .par_iter()
+            .enumerate()
+            .map(|(i, v)| small_factor_metrics_ecm(v, base + i as u64))
+            .collect();
+        let mut ctrl: [Vec<f64>; 3] = Default::default();
+        let mut changed = [0usize; 3];
+        let mut unsplit = [0usize; 3];
+        for (i, &(m1, m2, m1r, m2r, us)) in mets.iter().enumerate() {
+            let k = i % 3;
+            ctrl[k].push(m1);
+            if (m1 - m1r).abs() > 1e-9 {
+                changed[k] += 1;
+            }
+            unsplit[k] += us;
+            writeln!(rows, "{}", json!({"exp":"E1b","arm":"control","curve":c.name,"i":i/3,"value":VN[k],"M1":m1,"M2":m2,"M1_rho":m1r,"M2_rho":m2r,"unsplit":us})).unwrap();
+        }
+        let targets = [&n - 1, &n + 1, BigInt::from(2) * &p + 2 - &n];
+        let tm: Vec<_> = targets
+            .par_iter()
+            .enumerate()
+            .map(|(k, v)| small_factor_metrics_ecm(v, base + 0xF_0000 + k as u64))
+            .collect();
+        for (k, &(m1, m2, m1r, m2r, us)) in tm.iter().enumerate() {
+            writeln!(rows, "{}", json!({"exp":"E1b","arm":"target","curve":c.name,"value":VN[k],"M1":m1,"M2":m2,"M1_rho":m1r,"M2_rho":m2r,"unsplit":us})).unwrap();
+            let cv = &ctrl[k];
+            let (r, pv) = rank_p(m1, cv);
+            let verdict = if pv < alpha {
+                "**unusual**"
+            } else {
+                "within control distribution"
+            };
+            writeln!(md, "| {} | {} | {:.1} → {:.1} | {:.1} [{:.1}, {:.1}] | {}/{} | {:.4} | {} | {}/{} | {} |", c.name, ["n − 1", "n + 1", "twist"][k], m1r, m1, quantile(cv, 0.5), quantile(cv, 0.025), quantile(cv, 0.975), r, cv.len(), pv, verdict, changed[k], cv.len(), unsplit[k]).unwrap();
+            summary.push(json!({"exp":"E1b","curve":c.name,"value":VN[k],"metric":"M1","target":m1,"target_rho":m1r,"median":quantile(cv,0.5),"rank":r,"N":cv.len(),"p":pv,"alpha":alpha,"unusual":pv<alpha,"controls_changed":changed[k],"unsplit":unsplit[k]}));
+        }
+        // Positive control: a prime in [2^31, 2^32) hidden in a value of n's size.
+        let mut prng = StdRng::seed_from_u64(SEED + 400 + ci as u64);
+        let planted: Vec<(BigInt, BigInt)> = (0..n_pos1b)
+            .map(|_| {
+                let q32 =
+                    random_prime_in(&mut prng, &(BigInt::one() << 31), &(BigInt::one() << 32));
+                let q100 =
+                    random_prime_in(&mut prng, &(BigInt::one() << 99), &(BigInt::one() << 100));
+                let rest = n.bits() - 132;
+                let r = random_prime_in(
+                    &mut prng,
+                    &(BigInt::one() << (rest - 1)),
+                    &(BigInt::one() << rest),
+                );
+                (&q32 * &q100 * &r, q32)
+            })
+            .collect();
+        let pm: Vec<_> = planted
+            .par_iter()
+            .enumerate()
+            .map(|(i, (v, _))| small_factor_metrics_ecm(v, base + 0xE_0000 + i as u64))
+            .collect();
+        let mut hits = 0;
+        for ((_, q32), &(m1, _, m1r, _, _)) in planted.iter().zip(&pm) {
+            let want = q32.to_f64().unwrap().log2();
+            let hit = (m1 - want).abs() < 1e-6;
+            hits += hit as usize;
+            writeln!(rows, "{}", json!({"exp":"E1b","arm":"positive","curve":c.name,"M1":m1,"M1_rho":m1r,"planted_log2":want,"found":hit})).unwrap();
+        }
+        pos_lines.push(format!(
+            "| {} | {}/{} planted 32-bit primes recovered exactly |",
+            c.name, hits, n_pos1b
+        ));
+        summary.push(
+            json!({"exp":"E1b","arm":"positive","curve":c.name,"detected":hits,"of":n_pos1b}),
+        );
+        eprintln!(
+            "E1b {} done ({:.0}s)",
+            c.name,
+            started.elapsed().as_secs_f64()
+        );
+    }
+    writeln!(md, "\nPositive control (`q32 · q100 · r`, q32 a random prime in [2^31, 2^32)); pass = M1 equals log2(q32) exactly:\n\n| curve | detection |\n|:--|:--|\n{}\n", pos_lines.join("\n")).unwrap();
+
+    // ── E4r ──
+    let alpha4 = 0.05 / 6.0;
+    let pmin4 = 2.0 / (n_e4 as f64 + 1.0);
+    writeln!(md, "## E4r — two-point-lift pairing from rational-model heights (k = 5; k = 4 for the accuracy check)\n\nNull: the same N = {n_e4} random pairs per curve as v2 (same seeds). Bonferroni α = 0.05/6 = {alpha4:.4}. Power check: min attainable p = {pmin4:.4}, {}. Accuracy gate (pre-registered): on the dependent pairs, abs(|cos| − 1) ≤ 1e-4 and abs(det/(ĥĥ)) ≤ 1e-4 at k = 5 on every curve, else no orthogonality verdict.\n", if pmin4 < alpha4 { "passes" } else { "**FAILS**" }).unwrap();
+    writeln!(md, "| curve | metric | target | random pairs median [2.5%, 97.5%] (N) | rank | p | verdict | dependent pairs ([2]G̃; [3]G̃) | median abs(k5 − k4) over controls |\n|:--|:--|--:|:--|--:|--:|:--|:--|--:|").unwrap();
+    let mut gate = true;
+    for (ci, c) in CURVES.iter().enumerate() {
+        let p = big(c.p);
+        let b = bighex(c.b_hex);
+        let mut rng = StdRng::seed_from_u64(SEED + 300 + ci as u64);
+        let pairs: Vec<_> = (0..n_e4)
+            .map(|_| {
+                (
+                    random_point(&mut rng, &p, &b, None),
+                    random_point(&mut rng, &p, &b, None),
+                )
+            })
+            .collect();
+        let prs: Vec<[f64; 4]> = pairs
+            .par_iter()
+            .map(|(p1, p2)| {
+                let (e, a, r) = two_point_curve(p1, p2);
+                pairing_on_rational(&e, &a, &r)
+            })
+            .collect();
+        eprintln!(
+            "E4r {} random pairs done ({:.0}s)",
+            c.name,
+            started.elapsed().as_secs_f64()
+        );
+        for v in &prs {
+            writeln!(rows, "{}", json!({"exp":"E4r","arm":"control","curve":c.name,"abs_cos":v[0],"norm_reg":v[1],"abs_cos_k4":v[2],"norm_reg_k4":v[3]})).unwrap();
+        }
+        let g = (bighex(c.gx_hex), bighex(c.gy_hex));
+        let r = ec_mul_fp(&p, &BigInt::from(-3), &big("1311768467294899695"), &g);
+        let bq = &g.1 * &g.1 - &g.0 * &g.0 * &g.0 + BigInt::from(3) * &g.0;
+        let e1 = CurveQ {
+            a: Rat::small(-3),
+            b: Rat::int(&bq),
+        };
+        let gt: Pt = Some((Rat::int(&g.0), Rat::int(&g.1)));
+        let g2 = e1.add(&gt, &gt);
+        let g3 = e1.add(&g2, &gt);
+        assert!(e1.on_curve(&g2) && e1.on_curve(&g3));
+        let (t, (d2, d3)) = rayon::join(
+            || {
+                let (e, a, rr) = two_point_curve(&g, &r);
+                pairing_on_rational(&e, &a, &rr)
+            },
+            || {
+                rayon::join(
+                    || pairing_on_rational(&e1, &gt, &g2),
+                    || pairing_on_rational(&e1, &gt, &g3),
+                )
+            },
+        );
+        writeln!(rows, "{}", json!({"exp":"E4r","arm":"target","curve":c.name,"abs_cos":t[0],"norm_reg":t[1],"abs_cos_k4":t[2],"norm_reg_k4":t[3]})).unwrap();
+        writeln!(rows, "{}", json!({"exp":"E4r","arm":"positive","curve":c.name,"g2":[d2[0],d2[1],d2[2],d2[3]],"g3":[d3[0],d3[1],d3[2],d3[3]]})).unwrap();
+        let ok = [d2, d3]
+            .iter()
+            .all(|d| (d[0] - 1.0).abs() <= 1e-4 && d[1].abs() <= 1e-4);
+        gate &= ok;
+        for (mi, name) in [(0usize, "|cos|"), (1, "det/(ĥĥ)")] {
+            let cv: Vec<f64> = prs.iter().map(|v| v[mi]).collect();
+            let dk: Vec<f64> = prs.iter().map(|v| (v[mi] - v[mi + 2]).abs()).collect();
+            let (rk, pv) = rank_p(t[mi], &cv);
+            let verdict = if pv < alpha4 {
+                "**unusual**"
+            } else {
+                "within control distribution"
+            };
+            writeln!(md, "| {} | {} | {:.3e} | {:.3e} [{:.3e}, {:.3e}] ({}) | {}/{} | {:.3} | {} | {:.3e}; {:.3e} | {:.2e} |", c.name, name, t[mi], quantile(&cv, 0.5), quantile(&cv, 0.025), quantile(&cv, 0.975), cv.len(), rk, cv.len(), pv, verdict, d2[mi], d3[mi], quantile(&dk, 0.5)).unwrap();
+            summary.push(json!({"exp":"E4r","curve":c.name,"metric":name,"target":t[mi],"median":quantile(&cv,0.5),"q025":quantile(&cv,0.025),"q975":quantile(&cv,0.975),"rank":rk,"N":cv.len(),"p":pv,"alpha":alpha4,"unusual":pv<alpha4,"dependent":[d2[mi],d3[mi]],"median_abs_k5_minus_k4":quantile(&dk,0.5)}));
+        }
+        eprintln!(
+            "E4r {} done ({:.0}s)",
+            c.name,
+            started.elapsed().as_secs_f64()
+        );
+    }
+    writeln!(
+        md,
+        "\nAccuracy gate: **{}**.\n",
+        if gate {
+            "passed"
+        } else {
+            "FAILED — no orthogonality verdict is licensed"
+        }
+    )
+    .unwrap();
+    summary.push(json!({"exp":"E4r","accuracy_gate_passed":gate}));
+    writeln!(
+        md,
+        "\n---\nRun time {:.0} s. Raw per-sample rows: `rows_{mode}.jsonl`.",
+        started.elapsed().as_secs_f64()
+    )
+    .unwrap();
+    let hash_of = |name: &str| -> String {
+        let bytes = fs::read(format!("research/nist_cyclotomic_controls_20261011/{name}"))
+            .unwrap_or_default();
+        crypto_lib::hash::sha256::sha256(&bytes)
+            .iter()
+            .map(|b| format!("{b:02x}"))
+            .collect()
+    };
+    let hashes = json!({"PROTOCOL.md": hash_of("PROTOCOL.md"), "AMENDMENT_1.md": hash_of("AMENDMENT_1.md"), "AMENDMENT_2.md": hash_of("AMENDMENT_2.md")});
+    fs::write(out.join(format!("RESULTS_{mode}.md")), &md).unwrap();
+    fs::write(
+        out.join(format!("results_{mode}.json")),
+        serde_json::to_string_pretty(&json!({"protocol_sha256": hashes, "seed": SEED, "mode": mode, "N": {"E1b": n_e1b, "E1b_pos": n_pos1b, "E4r": n_e4}, "summary": summary})).unwrap(),
+    )
+    .unwrap();
+    eprintln!("wrote {}", out.display());
+}
+
 // ────────────────────────────── figure ──────────────────────────────
 
 /// One figure row: control values, the target, and positive-control values.
@@ -512,7 +836,7 @@ fn plot_rows(
     let f = |r: &serde_json::Value, k: &str| r[k].as_f64();
     let mut out = Vec::new();
     for c in CURVES {
-        let values: Vec<Option<&str>> = if exp == "E1" {
+        let values: Vec<Option<&str>> = if exp.starts_with("E1") {
             VN.iter().map(|v| Some(*v)).collect()
         } else {
             vec![None]
@@ -532,11 +856,11 @@ fn plot_rows(
             }
             let target = sel("target").find_map(|r| f(r, key)).unwrap_or(f64::NAN);
             let pos: Vec<f64> = match (exp, pos_key) {
-                ("E1", Some(pk)) if v == Some("n-1") => {
+                ("E1" | "E1b", Some(pk)) if v == Some("n-1") => {
                     sel("positive").filter_map(|r| f(r, pk)).collect()
                 }
                 ("E3", Some(pk)) => sel("positive_small_x").filter_map(|r| f(r, pk)).collect(),
-                ("E4", Some(pk)) => sel("positive")
+                ("E4" | "E4r", Some(pk)) => sel("positive")
                     .flat_map(|r| {
                         let i = if pk == "abs_cos" { 0 } else { 1 };
                         [r["g2"][i].as_f64(), r["g3"][i].as_f64()]
@@ -564,42 +888,63 @@ fn plot_rows(
 /// histogram of the control arm, its 2.5–97.5% band, the target (red
 /// diamond) and positive controls (green ticks).
 fn controls_svg(rows: &[serde_json::Value], mode: &str) -> String {
-    let panels: Vec<(String, Vec<PlotRow>)> = vec![
-        (
-            "E1 · M1 = log2 of the 2^32-smooth part found (bits)".into(),
-            plot_rows(rows, "E1", "M1", Some("M1")),
-        ),
-        (
-            "E1 · M2 = # distinct primes below 2^32".into(),
-            plot_rows(rows, "E1", "M2", None),
-        ),
-        (
-            "E3 · ĥ/ln p of one-point lift".into(),
-            plot_rows(rows, "E3", "hhat_over_lnp", Some("hhat_over_lnp")),
-        ),
-        (
-            "E3 · h_x − ĥ (nats)".into(),
-            plot_rows(rows, "E3", "hx_minus_hhat", Some("hx_minus_hhat")),
-        ),
-        (
-            "E4 · |cos ∠| of two-point lift".into(),
-            plot_rows(rows, "E4", "abs_cos", Some("abs_cos")),
-        ),
-        (
-            "E4 · det/(ĥĥ) of two-point lift".into(),
-            plot_rows(rows, "E4", "norm_reg", Some("norm_reg")),
-        ),
-    ];
+    let v3 = mode == "v3" || mode == "quick3";
+    let panels: Vec<(String, Vec<PlotRow>)> = if v3 {
+        vec![
+            (
+                "E1b · M1, ECM-completed (bits)".into(),
+                plot_rows(rows, "E1b", "M1", Some("M1")),
+            ),
+            (
+                "E1b · M1 before ECM (rho only, same inputs)".into(),
+                plot_rows(rows, "E1b", "M1_rho", None),
+            ),
+            (
+                "E4r · |cos ∠|, rational-model heights".into(),
+                plot_rows(rows, "E4r", "abs_cos", Some("abs_cos")),
+            ),
+            (
+                "E4r · det/(ĥĥ), rational-model heights".into(),
+                plot_rows(rows, "E4r", "norm_reg", Some("norm_reg")),
+            ),
+        ]
+    } else {
+        vec![
+            (
+                "E1 · M1 = log2 of the 2^32-smooth part found (bits)".into(),
+                plot_rows(rows, "E1", "M1", Some("M1")),
+            ),
+            (
+                "E1 · M2 = # distinct primes below 2^32".into(),
+                plot_rows(rows, "E1", "M2", None),
+            ),
+            (
+                "E3 · ĥ/ln p of one-point lift".into(),
+                plot_rows(rows, "E3", "hhat_over_lnp", Some("hhat_over_lnp")),
+            ),
+            (
+                "E3 · h_x − ĥ (nats)".into(),
+                plot_rows(rows, "E3", "hx_minus_hhat", Some("hx_minus_hhat")),
+            ),
+            (
+                "E4 · |cos ∠| of two-point lift".into(),
+                plot_rows(rows, "E4", "abs_cos", Some("abs_cos")),
+            ),
+            (
+                "E4 · det/(ĥĥ) of two-point lift".into(),
+                plot_rows(rows, "E4", "norm_reg", Some("norm_reg")),
+            ),
+        ]
+    };
     let (pw, rh, top, left, gap) = (430.0, 34.0, 46.0, 104.0, 40.0);
     let col_h: Vec<f64> = panels
         .iter()
         .map(|(_, r)| r.len() as f64 * rh + 70.0)
         .collect();
-    let h_row = [
-        col_h[0].max(col_h[1]),
-        col_h[2].max(col_h[3]),
-        col_h[4].max(col_h[5]),
-    ];
+    let h_row: Vec<f64> = col_h
+        .chunks(2)
+        .map(|c| c.iter().fold(0.0f64, |a, &b| a.max(b)))
+        .collect();
     let w = 2.0 * (left + pw) + gap + 70.0;
     let h = top + h_row.iter().sum::<f64>() + 40.0;
     let mut s = String::new();
@@ -785,11 +1130,15 @@ fn main() {
         eprintln!("wrote controls_{mode}.svg");
         return;
     }
+    if mode == "v3" || mode == "quick3" {
+        run_amendment2(&out, &mode);
+        return;
+    }
     let (n_e1, n_pos1, n_e2, n_e3, n_pos3, n_e4) = match mode.as_str() {
         "quick" => (40, 5, 3, 20, 5, 10),
         "v1" => (400, 20, 10, 200, 20, 100),
         "v2" => (2000, 20, 0, 1000, 20, 500),
-        m => panic!("--protocol {m}: expected v1, v2 or quick"),
+        m => panic!("--protocol {m}: expected v1, v2, v3, quick or quick3"),
     };
     let run_e2 = n_e2 > 0;
     let mut rows = fs::File::create(out.join(format!("rows_{mode}.jsonl"))).unwrap();
