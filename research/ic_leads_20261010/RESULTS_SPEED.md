@@ -101,22 +101,72 @@ quoting a best total), and this is the framework's table family, not the
 production compact-orbit rank fixture (`koblitz_rank_fixture`), which
 needs the multiplier closure ported separately.
 
+## 2b. Sharded, parallel table build, and the landed n = 53 rung end to end
+
+The profile of §1 put 65 % of the build in cache-missing inserts, so the
+table is now `2^bits` maps (shards of about 2^15 entries, at most 2^10)
+selected by a hash of the key that is independent of the in-shard hash.
+Pair sums are generated in parallel chunks of consecutive representatives,
+each appending to one buffer per shard, and every shard is filled from the
+chunks in chunk order, so the first pair to reach a key wins as in the
+sequential build, **for any thread and shard count** (the equivalence test
+forces 1, 8 and 64 shards on pools of 1 and 5 threads and requires every
+entry, the charged operations and the `m = 3` probes to equal the scalar
+reference). Threads are used only above 2^21 pairs: the first version
+spun up chunks for any table and was slower than scalar in the median at
+n = 23 (0.69×) on this loaded host, so a small build now runs the same
+algorithm on one thread.
+
+K = 600 at n = 41 (14.7 M entries, 14,784,600 charged additions, identical
+in both):
+
+| table build | min | median |
+|---|---:|---:|
+| scalar | 8.9 s | 9.2 s |
+| batched, unsharded (§1) | 1.40 s | 1.45 s |
+| batched, sharded, **one thread** | **0.78 s (11.4×)** | 0.79 s (11.9×) |
+| batched, sharded, all cores | 0.29 s (30×) | 0.50 s (18×) |
+
+Sharding alone, with no extra thread, halves the unsharded batched build.
+
+**The landed n = 53 rung** (`K_0`, 52-bit r, 600 plain columns = the ledger's
+`K`, 63,600 points, 19.1 M charged table additions, `m = 3`), old scalar
+`ic` binary and new binary alternating, 2 rounds × 2 repeats, all verified,
+**counted operations, trials, relations, lookups, canonicalisations and rank
+identical on every paired row**:
+
+| | old scalar | new, one thread (matched) | new, all cores |
+|---|---:|---:|---:|
+| pair-table build | 16.6–22.4 s | 1.08–1.22 s (15–19×) | 0.41–0.76 s (34×) |
+| relation phase | 8.3–10.1 s | 0.61–0.76 s (13×) | 0.62–0.76 s (13×) |
+| **whole pipeline** | **25.5–32.6 s** | **1.8–2.1 s (≈ 14×)** | 1.1–1.6 s (≈ 21×) |
+
+and with the multiplier closure on top (60 columns, norm ≤ 16, the same
+63,600 points and the same table): whole pipeline 1.3–1.4 s on one thread
+(≈ 20× the scalar baseline for the ledger's shape) and 0.6–0.9 s on all
+cores (≈ 30×); its relation phase is 78–94 ms against 608–758 ms for 600
+plain columns, the ÷ 9 of §2. The single-thread column is the
+matched-resource figure; the all-cores column used the host's threads for
+the table build only.
+
 ## 3. What the profile says to do next
 
-1. **Shard and parallelise the table build** (65 % of the build is cache-
-   missing inserts): partition pairs by a mixed hash of the key into
-   cache-sized shards, generate pairs in parallel chunks, merge shards in
-   chunk order so first-wins is preserved, and probe through
-   `shard(key).get`. Expected ≥ 2× on one core (sequential appends and
-   L2-resident shard maps) and near-linear in cores beyond that.
-2. **Batched `canon_with_shift`** (16 %): the lane-parallel least-rotation
-   exists for `canon_in_place`; a with-shift variant removes the scalar loop.
+1. **Batched `canon_with_shift`** (16 % of the unsharded build, now a larger
+   share of what is left): the lane-parallel least-rotation exists for
+   `canon_in_place`; a with-shift variant removes the scalar loop.
+2. **The relation phase at `m = 3`** is now the larger cost at n = 53
+   (0.6–0.76 s against the 1.1 s table build on one thread): per probe it is
+   an `add_many` element, a lane-parallel canonicalisation and a sharded
+   lookup. The lazy variant of `add_many` (no ordinate) saves one of about
+   five field multiplications per element.
 3. **aarch64 field kernel.** The folding reduction and the inlined
    carry-less multiply are x86-only (`fold_tail` is gated on `x86_64`;
    `add_many` has `pclmulqdq` twins only); this host reduces products
    through the byte table and calls PMULL out of line. Applies to every
    binary-field loop on Apple silicon, uncertain gain (`batch_inv` already
    runs four interleaved chains).
-4. **Port the multiplier closure to the production rank fixture**, where the
-   rank precompute at `K = 600` is hours (n = 73: 18,400 s single thread).
-   The ÷ 9.5 above is the estimate of what it buys there.
+4. **Port the multiplier closure to the production rank fixture**
+   (`koblitz_rank_fixture`), where the rank precompute at `K = 600` is
+   hours (n = 73: 18,400 s single thread). The ÷ 9 above is the estimate of
+   what it buys there; the files are free in Conductor since T-261 was
+   cancelled, but PR 1605 still touches them.

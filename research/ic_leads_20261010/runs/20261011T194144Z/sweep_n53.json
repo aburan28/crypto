@@ -1,0 +1,22 @@
+{
+ "_comment": "A1 on the landed n=53 rung (K_0, 52-bit r): 600 plain columns (the ledger's K, 63,600 points) against 60 columns with norm<=16 multipliers (about the same points), three summands, Frobenius-folded table. Prediction: equal trials per relation and table, relations needed 61 instead of 601, so the rank phase falls about 10x. Run with the batched pair table; rho reference off.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 53
+ },
+ "repeats": 2,
+ "seed": 20261010,
+ "max_trials": 5000000,
+ "matrix": {
+  "factor_base": [
+   "compact-orbit-scan:columns=60,raw_x_cap=4000000000,norm=16",
+   "compact-orbit-scan:columns=600,raw_x_cap=4000000000"
+  ],
+  "oracle": [
+   "mitm-frobenius:m=3"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}
