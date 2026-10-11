@@ -1,0 +1,362 @@
+{
+  "schema": "identity.certificate/v1",
+  "id": "IDC1h8c257e9ef061103a",
+  "statement": {
+    "name": "P-256 f − 1: f(t) − 1 = Φ_1(t) · Φ_2(t) · (t^6 - t^5 + 2t^4 - t^3 + 2t^2 + 2)",
+    "source": "examples/nist_cyclotomic_point_heights.rs (exact expansion in Z[t], then sealed)",
+    "variables": [
+      "t"
+    ],
+    "degree_bound": 8,
+    "lhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "const",
+              "args": -2
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "const",
+              "args": 1
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "const",
+              "args": 1
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "const",
+              "args": -1
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "const",
+              "args": 1
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            },
+            {
+              "op": "var",
+              "args": "t"
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": -1
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 1
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 1
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 1
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 2
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 2
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": -1
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 2
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": -1
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "const",
+                  "args": 1
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                },
+                {
+                  "op": "var",
+                  "args": "t"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "modulus": 2305843009213693951,
+  "points": 64,
+  "seed": 20261011,
+  "value_digest": "2211b6944ad4da39c86af1323ffd9e6bb47fe4ca043370c4f9c3717512e153f3",
+  "independence": "issued and checked by the same tool run; the exact Z[t] expansion is the independent check",
+  "proof": null
+}
