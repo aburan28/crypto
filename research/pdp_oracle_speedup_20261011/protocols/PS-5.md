@@ -29,6 +29,10 @@ the hardware block.  **Stop.**  Below 20×.
 `gpu.devices` is empty is labelled a CPU-only measurement.  Nothing is
 launched by merging this plan.
 
+**Layout.**  A device kernel with a CPU emulation of it (the pattern of
+`suite/cuda/f4_gf2_kernel.cu` and `f4_gf2_emulate.c` in `cryptanalysis`), so
+digest parity is checked on a CPU-only host before any device is rented.
+
 **Paired change.**  `fes_gpu.rs` is byte-identical in both repositories; any
 change lands in `cryptanalysis` first and is mirrored in `crypto` in a paired
 PR.
