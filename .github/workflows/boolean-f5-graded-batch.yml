@@ -2,6 +2,7 @@ name: Boolean F5 exact graded batch
 
 on:
   push:
+    branches: [main]
     paths:
       - 'research/boolean_f5_graded_batch_20261002/**'
       - 'src/cryptanalysis/gf2_elim.rs'

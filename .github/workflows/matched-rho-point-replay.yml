@@ -13,6 +13,10 @@ on:
       - 'research/sat_factor_base_review_20260908/autolab_matched_point_rho_n53_20260925/**'
       - 'research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/point_recovery_20260924_codex/**'
       - '.github/workflows/matched-rho-point-replay.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   replay:
     runs-on: ubuntu-latest

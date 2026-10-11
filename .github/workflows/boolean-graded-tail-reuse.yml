@@ -2,6 +2,7 @@ name: Graded Boolean tail reuse
 
 on:
   push:
+    branches: [main]
     paths:
       - 'research/boolean_graded_tail_reuse_20261003/**'
       - '.github/workflows/boolean-graded-tail-reuse.yml'

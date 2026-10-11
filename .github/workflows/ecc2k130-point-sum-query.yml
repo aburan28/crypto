@@ -13,6 +13,10 @@ on:
       - 'examples/koblitz_orbit_dlp_s3_batch.rs'
       - 'research/notes/ecc2k130/point_sum_query_20260930/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   replay:
     runs-on: ubuntu-latest

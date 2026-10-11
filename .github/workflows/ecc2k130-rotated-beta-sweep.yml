@@ -2,6 +2,7 @@ name: ECC2K-130 rotated normal-beta sweep replay
 
 on:
   push:
+    branches: [main]
     paths:
       - research/notes/ecc2k130/rotated_beta_sweep_20260925/**
       - .github/workflows/ecc2k130-rotated-beta-sweep.yml
@@ -9,6 +10,10 @@ on:
     paths:
       - research/notes/ecc2k130/rotated_beta_sweep_20260925/**
       - .github/workflows/ecc2k130-rotated-beta-sweep.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   archive-only-replay:

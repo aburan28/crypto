@@ -2,6 +2,7 @@ name: ECC2K130 rotated m5/m6 exporter semantic gate
 
 on:
   push:
+    branches: [main]
     paths:
       - '.github/workflows/ecc2k130-rotated-m56-export-gate.yml'
       - 'research/notes/ecc2k130/rotated_m56_export_gate_20260925/**'
@@ -13,6 +14,10 @@ on:
       - 'research/notes/ecc2k130/rotated_m56_export_gate_20260925/**'
       - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/**'
       - 'research/notes/ecc2k130/rotated_subspace_support_20260925/verify.py'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   frozen-semantic-replay:

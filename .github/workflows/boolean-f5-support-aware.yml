@@ -2,6 +2,7 @@ name: Boolean F5 support-aware batch
 
 on:
   push:
+    branches: [main]
     paths:
       - 'research/boolean_f5_support_aware_20261002/**'
       - 'src/cryptanalysis/gf2_elim.rs'

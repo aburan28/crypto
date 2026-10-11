@@ -2,6 +2,7 @@ name: Boolean F5 graded-reuse ceiling
 
 on:
   push:
+    branches: [main]
     paths:
       - 'research/boolean_f5_amortized_ceiling_20261002/**'
       - '.github/workflows/boolean-f5-amortized-ceiling.yml'
