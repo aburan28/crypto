@@ -1,0 +1,66 @@
+{
+  "kind": "s3_modal_c1800_native_pilot_freeze_v1",
+  "modal_go_sdk_version": "v0.11.0",
+  "go_version": "go1.25.5",
+  "go_mod_sha256": "78372d345abeeea44ebe597fbc870c976447dc5e272a62ab6dd0e6293dcc6dde",
+  "go_sum_sha256": "c46a978673e78539400777f558d072a75b12dcadb810607e17358ad51de13986",
+  "launch_source_sha256": "68500a040ca8b8aa79665192158e28b030940075bc0488d06ec4a6284a3424f1",
+  "analyzer_source_sha256": "c6d210ee2ab6fcc654b4a7bf0abb7bfbd4bb214e312158a9530c2a07f3143056",
+  "guest_source_sha256": {
+    "cmd/guest/main_linux.go": "5c00d8425aff9be1655fc158617ad520e1d18de746902842d13cbaf7e6b231dc",
+    "cmd/guest/host_linux.go": "b23f3bc9b2fd58836ea913f480015fce3f2abbac62c86b63f405ccf72205c2e9",
+    "internal/topology/topology.go": "a7ec5297771c2f1e50aa7f9728cfdb8c244c0bb00e635ab4d65e99d26f5b722a"
+  },
+  "guest_build_receipt_sha256": "b52bf61551b3154715fde86b402d85a6e2599c513c1e933daf92c96a65ca9a67",
+  "previous_receipt_sha256": "93fb252d2663ab33e4110344dbfe32973705b4ab719cb2ba01f4673f0fdc9865",
+  "bundle_sha256": "623a6dfde05f4fd3a892276a6d85e57ff4dac93cf6fa241f1d306c18993abadc",
+  "binary_sha256": {
+    "baseline": "3b5bbcab65333dc69c9ffb1acbaf41a3b5f4cd6256730641f590843eb0d8c3fb",
+    "expanded": "47223962d292361ed21bbf0ff577cfe3564c74a84773b16b3b467a5c1e24b8dd"
+  },
+  "guest_sha256": "de3029fb3b48ae014de84a2a5590ffcc07957a78c810c11526d187c6a08422a2",
+  "files": [
+    {
+      "local": "/private/tmp/s3-modal-combined-build/target/x86_64-unknown-linux-gnu/release/examples/s3_partial_prepared_fullrank_c2800mixed_targetspan",
+      "remote": "/opt/s3/baseline",
+      "sha256": "3b5bbcab65333dc69c9ffb1acbaf41a3b5f4cd6256730641f590843eb0d8c3fb",
+      "bytes": 1776688
+    },
+    {
+      "local": "/private/tmp/s3-modal-combined-build/target/x86_64-unknown-linux-gnu/release/examples/s3_partial_prepared_fullrank_prefetch_projective_c1800prefix_targetspan",
+      "remote": "/opt/s3/expanded",
+      "sha256": "47223962d292361ed21bbf0ff577cfe3564c74a84773b16b3b467a5c1e24b8dd",
+      "bytes": 1793552
+    },
+    {
+      "local": "../modal/public_bundle.json",
+      "remote": "/opt/s3/public_bundle.json",
+      "sha256": "623a6dfde05f4fd3a892276a6d85e57ff4dac93cf6fa241f1d306c18993abadc",
+      "bytes": 1446
+    },
+    {
+      "local": "/private/tmp/s3-modal-native-guest",
+      "remote": "/opt/s3/guest",
+      "sha256": "de3029fb3b48ae014de84a2a5590ffcc07957a78c810c11526d187c6a08422a2",
+      "bytes": 2613396
+    }
+  ],
+  "transferred_bytes": 6185082,
+  "sandbox_creation_attempts": 1,
+  "cpu_physical_cores_request_and_limit": 8,
+  "memory_mib_request_and_limit": 32768,
+  "logical_execution_cpus_max": 16,
+  "sandbox_timeout_seconds": 1200,
+  "workload_deadline_seconds": 1080,
+  "per_run_timeout_seconds": 240,
+  "minimum_run_seconds": 30,
+  "block_network": true,
+  "vm_runtime": true,
+  "region": null,
+  "image": "debian:bookworm-slim",
+  "app_name": "s3-c1800-n53-t205-native-pilot",
+  "pricing_checked_utc_date": "2026-10-10",
+  "published_base_compute_usd_for_timeout": "0.63456",
+  "host_exclusive_partition_receipt": null,
+  "controlled_speedup": null
+}

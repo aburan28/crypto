@@ -1,0 +1,19 @@
+{
+  "kind": "s3_modal_c1800_native_guest_build_v1",
+  "command": "GOOS=linux GOARCH=amd64 CGO_ENABLED=0 GOTMPDIR=/private/tmp GOCACHE=/private/tmp/s3-go-cache go build -trimpath -ldflags='-s -w -buildid=' -o /private/tmp/s3-modal-native-guest ./cmd/guest",
+  "exit_code": 0,
+  "host_go_version": "go1.25.5",
+  "host_architecture": "darwin/arm64",
+  "target": "linux/amd64",
+  "guest_elf": "ELF 64-bit LSB executable, x86-64, statically linked, stripped",
+  "guest_binary_path": "/private/tmp/s3-modal-native-guest",
+  "guest_binary_bytes": 2613396,
+  "guest_binary_sha256": "de3029fb3b48ae014de84a2a5590ffcc07957a78c810c11526d187c6a08422a2",
+  "go_mod_sha256": "78372d345abeeea44ebe597fbc870c976447dc5e272a62ab6dd0e6293dcc6dde",
+  "go_sum_sha256": "c46a978673e78539400777f558d072a75b12dcadb810607e17358ad51de13986",
+  "guest_source_sha256": {
+    "cmd/guest/main_linux.go": "5c00d8425aff9be1655fc158617ad520e1d18de746902842d13cbaf7e6b231dc",
+    "cmd/guest/host_linux.go": "b23f3bc9b2fd58836ea913f480015fce3f2abbac62c86b63f405ccf72205c2e9",
+    "internal/topology/topology.go": "a7ec5297771c2f1e50aa7f9728cfdb8c244c0bb00e635ab4d65e99d26f5b722a"
+  }
+}
