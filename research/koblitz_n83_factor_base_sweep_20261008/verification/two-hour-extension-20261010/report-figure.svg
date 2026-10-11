@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="790" viewBox="0 0 1000 790" role="img" aria-labelledby="title desc">
+<title id="title">N83 retained-domain capacity and storage gates</title>
+<desc id="desc">Single construction runs fit within a 4 GiB limit. K1182 construction, generic replay and S3 verification passed. Complete-runtime selection remains unmeasured.</desc>
+<rect width="1000" height="790" fill="#f5f7fa"/><g font-family="Arial,sans-serif" fill="#172b4d">
+<text x="38" y="44" font-size="25" font-weight="bold">Degree-83 retained-domain gates · 2026-10-10</text>
+<text x="38" y="75" font-size="14">icv1-f2m83-tm6151469093347-debefd74 · 81-bit subgroup · shared host · one run per model</text>
+<text x="38" y="119" font-size="18" font-weight="bold">Measured cgroup peak memory, GiB · hard limit 4.000 GiB</text>
+<line x1="250" y1="150" x2="930" y2="150" stroke="#8a9bb1"/>
+<g font-size="13"><text x="246" y="140">0</text><text x="414" y="140">1</text><text x="584" y="140">2</text><text x="754" y="140">3</text><text x="922" y="140">4</text></g>
+<text x="38" y="181" font-size="16">K64 factored S4</text><rect x="250" y="163" width="101.77" height="26" rx="3" fill="#2463a2"/><text x="362" y="182" font-size="15">0.599 · 642,768,896 bytes</text>
+<text x="38" y="224" font-size="16">K64 chained S3, m=5</text><rect x="250" y="206" width="116.61" height="26" rx="3" fill="#27836c"/><text x="377" y="225" font-size="15">0.686 · 736,542,720 bytes</text>
+<text x="38" y="267" font-size="16">K64 chained S3, m=6</text><rect x="250" y="249" width="133.16" height="26" rx="3" fill="#27836c"/><text x="394" y="268" font-size="15">0.783 · 841,170,944 bytes</text>
+<text x="38" y="310" font-size="16">K256 chained S3, m=5</text><rect x="250" y="292" width="310.36" height="26" rx="3" fill="#27836c"/><text x="571" y="311" font-size="15">1.826 · 1,960,288,256 bytes</text>
+<line x1="930" y1="155" x2="930" y2="330" stroke="#b45309" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="38" y="365" font-size="14">Construction admission only. Peaks include the cgroup; no timing comparison or uncertainty estimate.</text>
+<text x="38" y="410" font-size="18" font-weight="bold">K1182 signed-Frobenius object · 196,212 exact point records</text>
+<g fill="#e3f3ec" stroke="#27836c"><rect x="38" y="432" width="275" height="70" rx="8"/><rect x="362" y="432" width="275" height="70" rx="8"/><rect x="686" y="432" width="275" height="70" rx="8"/></g>
+<g font-size="17" font-weight="bold"><text x="62" y="462">Construction PASS</text><text x="386" y="462">Generic replay PASS</text><text x="710" y="462">S3 round-trip PASS</text></g>
+<g font-size="13"><text x="62" y="484">Native Gf2_128 producer</text><text x="386" y="484">Every point + 1,182 representatives</text><text x="710" y="484">Downloaded byte hash matched</text></g>
+<g stroke="#526782" stroke-width="2"><line x1="318" y1="467" x2="350" y2="467"/><line x1="642" y1="467" x2="674" y2="467"/></g>
+<text x="38" y="545" font-size="17" font-weight="bold">Required before selecting a minimum-runtime base</text>
+<rect x="38" y="564" width="923" height="108" rx="8" fill="#fff3df" stroke="#b45309"/>
+<text x="60" y="593" font-size="16">Natural relations → rank novelty → full-width linear algebra → individual log</text>
+<text x="60" y="621" font-size="16">→ group verification → fully charged cold comparison and independent-host replay</text>
+<text x="60" y="649" font-size="15" font-weight="bold">Complete index-calculus runtime and selected winner: null</text>
+<text x="38" y="720" font-size="12">Sources: capacity/worker.json; chain*/worker.json; k256-8m-capacity/worker.json; v2-object/ receipts</text>
+<text x="38" y="744" font-size="12">Construction conditions differ by K; this diagram supplies no exhaustive execution or minimum-runtime claim.</text>
+</g></svg>

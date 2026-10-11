@@ -1,0 +1,15 @@
+{
+  "schema": "n83.structured-orbit-budget/v1",
+  "status": "PASS",
+  "prior_readonly_preflight_receipt": "prior-k2048-domain.json",
+  "prior_charged_seconds": "6802.092994294",
+  "build_construct_replay_wall_seconds": 39.69190237500152,
+  "s3_upload_roundtrip_wall_seconds": 37.974145833002694,
+  "measured_active_wall_seconds": "77.666048208004214",
+  "round_conservative_charge_seconds": "120",
+  "round_charge_covers_source_prep_and_controls": true,
+  "cumulative_charged_seconds": "6922.092994294",
+  "authorized_seconds": "7200",
+  "remaining_unused_seconds": "277.907005706",
+  "selected_best_total_runtime": null
+}
