@@ -54,10 +54,22 @@ or other usage outside that figure. [Modal's resource guide](https://modal.com/d
 defines CPU requests as physical cores and describes request/limit billing.
 
 `python3 pilot_modal.py --preview` validates every frozen hash and transfer
-byte count without creating a Sandbox. The preview passed. No Sandbox has
-been created and no source-derived file or guest runner has been sent to
-Modal. The owner authorization required by the prior automatic approval
-review is pending.
+byte count without creating a Sandbox. The preview passed after rebuilding
+both Linux executables byte-for-byte from the pinned source; the
+[rebuild receipt](rebuild-20261010/receipt.json) and
+[build log](rebuild-20261010/build.log) retain the compiler and binary hashes.
+The approved single Sandbox creation attempt ran on 2026-10-10. Its ID is
+`sb-TYtnqJBCkzy0LQ0QULCsG4`; the remote process exited 1 before the first
+benchmark row because the guest's complete-SMT-group selection returned fewer
+than the frozen 16 logical CPUs. The assertion occurred at `remote_pilot.py`
+line 390. The [launch receipt](pilot-T205-20261010.json),
+[attempt marker](pilot-T205-20261010.attempt.json), and
+[analysis](pilot-T205-20261010.analysis.json) preserve this
+`producer_failure` with zero completed rows and `controlled_speedup: null`.
+The pilot's one permitted creation attempt has been consumed; the recorded
+guest stderr does not reveal whether the shortfall came from the affinity mask,
+SMT presentation, or incomplete sibling groups. A subsequent topology probe
+must emit its allowed CPU list and topology before enforcing a selection gate.
 
 After the CPU-selection and affinity correction, the `PILOT_FREEZE.json` SHA-256 is
 `7dfc53e9764e4a5e88966e1f32389d0916d56dba4820299d320d167a265033ae`;

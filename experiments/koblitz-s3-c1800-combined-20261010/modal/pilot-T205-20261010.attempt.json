@@ -1,0 +1,29 @@
+{
+  "cpu_limit_physical_cores": 8,
+  "cpu_request_physical_cores": 8,
+  "freeze_sha256": "7dfc53e9764e4a5e88966e1f32389d0916d56dba4820299d320d167a265033ae",
+  "kind": "s3_modal_c1800_attempt_v1",
+  "logical_execution_cpus": 16,
+  "memory_limit_mib": 32768,
+  "memory_request_mib": 32768,
+  "sandbox_creation_attempts": 1,
+  "sandbox_timeout_seconds": 1200,
+  "started_unix_ns": 1791688307645977000,
+  "transfer_inventory": [
+    {
+      "bytes": 1776688,
+      "remote": "/opt/s3/baseline",
+      "sha256": "3b5bbcab65333dc69c9ffb1acbaf41a3b5f4cd6256730641f590843eb0d8c3fb"
+    },
+    {
+      "bytes": 1793552,
+      "remote": "/opt/s3/expanded",
+      "sha256": "47223962d292361ed21bbf0ff577cfe3564c74a84773b16b3b467a5c1e24b8dd"
+    },
+    {
+      "bytes": 1446,
+      "remote": "/opt/s3/public_bundle.json",
+      "sha256": "623a6dfde05f4fd3a892276a6d85e57ff4dac93cf6fa241f1d306c18993abadc"
+    }
+  ]
+}
