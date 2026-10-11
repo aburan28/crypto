@@ -118,3 +118,18 @@ probable prime to base 2).
   anything here and remains the live part of the cover line.
 
 **Class: boundary** throughout.  No speedup is claimed.
+
+## Correction (2026-10-11)
+
+The B-4 cost row above is superseded; the magic numbers, genera and B-1 to
+B-3 stand.  B-4 priced genus-16 hyperelliptic index calculus with the
+double-large-prime term `q^(2 − 2/g)` alone.  Gaudry's relation-collection
+term `g!·q` is larger at this genus: `16!·2^31 = 2^75.3` against
+`2^58.1` for Oakley group 3, so the "formula ratio" `2^17.7` (and `2^22`
+for group 4) overstated the exponent gain.  The native screen in
+[`research/jacobian_transfer_scan_20261010/`](../jacobian_transfer_scan_20261010/README.md)
+prices the same descents with both terms and with an explicit Enge–Gaudry
+smoothness count, under one stated cost model: **+1.1 bits for group 3
+(`formula_marginal`) and +10.9 bits for group 4 (`formula_advantage`)**.
+It reproduces this note's census exactly (`m = 5, 26, 126` for group 3).
+The rows above are left as written.

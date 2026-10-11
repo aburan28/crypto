@@ -46,7 +46,7 @@ a factor in p ± 1:
 | `2ⁿ − 2ᵏ − 1`                  | P-192 (n=192, k=64)         | **p + 1** = 2ᵏ · (2^(n−k) − 1)                       |
 | `2ⁿ − 2ᵏ + 1`                  | P-224 (n=224, k=96)         | **p − 1** = 2ᵏ · (2^(n−k) − 1)                       |
 | `2ⁿ − 1`                       | P-521                       | **p + 1** = 2ⁿ (fully 2-smooth)                       |
-| `2ⁿ − 2ᵃ + 2ᵇ + 2ᶜ − 1` (5-term) | P-256                     | no clean factorisation                               |
+| `2ⁿ − 2ᵃ + 2ᵇ + 2ᶜ − 1` (5-term) | P-256                     | none forced for the family; **P-256 itself**: p + 1 = 2⁹⁶(2⁶⁴+1)(2⁹⁶−2⁶⁴+1), largest prime 94 bits (corrected 2026-10-11, [`RESEARCH_NIST_CYCLOTOMIC_POINT_HEIGHTS.md`](RESEARCH_NIST_CYCLOTOMIC_POINT_HEIGHTS.md)) |
 | `2ⁿ − 2ᵃ − 2ᵇ + 2ᶜ − 1` (4-term) | P-384                     | no clean factorisation                               |
 
 In every case where the factor is exposed, p ± 1 is forced to be smooth in
@@ -185,13 +185,15 @@ the salient cross-row signal:
    built-in ζ₃-endomorphism. Lets you separately calibrate
    GLV-accelerated ρ.
 4. **Does any 5-term P-256-shape prime admit a hidden cyclotomic
-   factorisation we missed?** The probe found none, but the search
-   space is large; an exhaustive check of (a, b, c) triples would
-   close the question.
-5. **Lift to the actual NIST primes**: re-run the same probe on P-192,
-   P-224, P-256, P-384, P-521 themselves and publish the full
-   factorisations of p − 1 and p + 1, with attribution to the Solinas
-   form that forces them.
+   factorisation we missed?** Yes — P-256 itself: with `n + c = a + b`
+   (`256 + 96 = 224 + 192`) one gets `p + 1 = 2ᶜ(2^(a−c) + 1)(2^(n−a) −
+   2^(a−c) + 1)`. Closed in
+   [`RESEARCH_NIST_CYCLOTOMIC_POINT_HEIGHTS.md`](RESEARCH_NIST_CYCLOTOMIC_POINT_HEIGHTS.md) §1.
+5. **Lift to the actual NIST primes**: done for P-192, P-224, P-256
+   (full factorisations of `p ± 1`, `n ± 1`, twist, trace and CM
+   discriminant, natively verified) in
+   [`RESEARCH_NIST_CYCLOTOMIC_POINT_HEIGHTS.md`](RESEARCH_NIST_CYCLOTOMIC_POINT_HEIGHTS.md);
+   P-384 and P-521 remain open.
 
 ---
 

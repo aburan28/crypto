@@ -1,0 +1,23 @@
+{
+ "_comment": "Opportunity 1 at n=41 (K_0, 39-bit r): orbit-union base sized across the family optimum, columns 20..600 (the ledger's K=600 is the right end).",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 17
+ },
+ "repeats": 4,
+ "seed": 20261010,
+ "max_trials": 400000000,
+ "matrix": {
+  "factor_base": [
+   "compact-orbit-scan:columns=20,raw_x_cap=400000000",
+   "compact-orbit-scan:columns=60,raw_x_cap=400000000",
+   "compact-orbit-scan:columns=200,raw_x_cap=400000000"
+  ],
+  "oracle": [
+   "mitm-frobenius"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

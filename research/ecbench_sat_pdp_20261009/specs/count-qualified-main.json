@@ -1,0 +1,13 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "budget-qualified counted SAT/PDP panel on eight public icv1-f2m17-tm101-00378d4e targets",
+  "workloads": {"curves": [{"kind": "koblitz", "a": 1, "n": 17}], "targets_per_curve": 8, "target_seed": 42018, "target_kind": "public"},
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "rho-aa", "role": "control", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "ic-mitm", "role": "candidate", "method": {"id": "ic.pipeline_counted", "params": {"factor_base": "koblitz-orbit:divisor=0;1", "oracle": "mitm:m=2", "linalg": "incremental-gauss", "targets": "walk", "max_trials": "20000"}}},
+    {"name": "ic-mitm-frob", "role": "candidate", "method": {"id": "ic.pipeline_counted", "params": {"factor_base": "koblitz-orbit:divisor=0;1", "oracle": "mitm-frobenius:m=2", "linalg": "incremental-gauss", "targets": "walk", "max_trials": "20000"}}},
+    {"name": "ic-sat-xor", "role": "candidate", "method": {"id": "ic.pipeline_counted", "params": {"factor_base": "koblitz-orbit:divisor=0;1", "oracle": "descent-algebraic:m=2", "solver": "sat-cdcl:sat_conflict_budget=20000,sat_xor_encoding=native", "linalg": "incremental-gauss", "targets": "walk", "max_trials": "20000", "solver_budget_seconds": "0"}}}
+  ],
+  "measurement": {"rounds": 5, "warmup": 1, "seed": 9123403, "isolation_required": "L2", "timeout_seconds": 120}
+}

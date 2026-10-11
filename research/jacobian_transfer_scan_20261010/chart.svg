@@ -1,0 +1,362 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" font-family="Helvetica, Arial, sans-serif" font-size="12">
+<rect width="100%" height="100%" fill="white"/>
+<text x="450" y="22" text-anchor="middle" font-size="15">Jacobian transfer routes: formula ratio to Pollard rho, every registered curve (schema jacobian-transfers/1)</text>
+<line x1="70" y1="40" x2="70" y2="460" stroke="black"/>
+<line x1="70" y1="460" x2="870" y2="460" stroke="black"/>
+<line x1="70" y1="40" x2="70" y2="460" stroke="#ddd"/><text x="70" y="476" text-anchor="middle">0</text>
+<line x1="189.40298507462686" y1="40" x2="189.40298507462686" y2="460" stroke="#ddd"/><text x="189.40298507462686" y="476" text-anchor="middle">100</text>
+<line x1="308.8059701492537" y1="40" x2="308.8059701492537" y2="460" stroke="#ddd"/><text x="308.8059701492537" y="476" text-anchor="middle">200</text>
+<line x1="428.2089552238806" y1="40" x2="428.2089552238806" y2="460" stroke="#ddd"/><text x="428.2089552238806" y="476" text-anchor="middle">300</text>
+<line x1="547.6119402985074" y1="40" x2="547.6119402985074" y2="460" stroke="#ddd"/><text x="547.6119402985074" y="476" text-anchor="middle">400</text>
+<line x1="667.0149253731344" y1="40" x2="667.0149253731344" y2="460" stroke="#ddd"/><text x="667.0149253731344" y="476" text-anchor="middle">500</text>
+<line x1="786.4179104477612" y1="40" x2="786.4179104477612" y2="460" stroke="#ddd"/><text x="786.4179104477612" y="476" text-anchor="middle">600</text>
+<line x1="70" y1="460" x2="870" y2="460" stroke="#ddd"/><text x="64" y="464" text-anchor="end">-9</text>
+<line x1="70" y1="407.5" x2="870" y2="407.5" stroke="#ddd"/><text x="64" y="411.5" text-anchor="end">0</text>
+<line x1="70" y1="355" x2="870" y2="355" stroke="#ddd"/><text x="64" y="359" text-anchor="end">9</text>
+<line x1="70" y1="302.5" x2="870" y2="302.5" stroke="#ddd"/><text x="64" y="306.5" text-anchor="end">18</text>
+<line x1="70" y1="250" x2="870" y2="250" stroke="#ddd"/><text x="64" y="254" text-anchor="end">27</text>
+<line x1="70" y1="197.5" x2="870" y2="197.5" stroke="#ddd"/><text x="64" y="201.5" text-anchor="end">36</text>
+<line x1="70" y1="145" x2="870" y2="145" stroke="#ddd"/><text x="64" y="149" text-anchor="end">45</text>
+<line x1="70" y1="92.5" x2="870" y2="92.5" stroke="#ddd"/><text x="64" y="96.5" text-anchor="end">54</text>
+<line x1="70" y1="40" x2="870" y2="40" stroke="#ddd"/><text x="64" y="44" text-anchor="end">63</text>
+<line x1="70" y1="407.5" x2="870" y2="407.5" stroke="black" stroke-dasharray="6 3"/>
+<text x="866" y="402.5" text-anchor="end" fill="#333">rho boundary (ratio 0)</text>
+<line x1="70" y1="360.8333333333333" x2="870" y2="360.8333333333333" stroke="#555" stroke-dasharray="2 3"/>
+<text x="866" y="355.8333333333333" text-anchor="end" fill="#555">advantage margin (+8 bits)</text>
+<text x="470" y="504" text-anchor="middle">subgroup order r, bits</text>
+<text transform="translate(18,250) rotate(-90)" text-anchor="middle">log2(rho on E) − log2(best carried route), bits</text>
+<circle cx="75.8" cy="426.6" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m7-t13-616700dd: ratio -3.3 bits</title></circle>
+<circle cx="77.3" cy="426.4" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m7-tm13-ac10a42c: ratio -3.2 bits</title></circle>
+<circle cx="78.3" cy="426.3" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m9-t5-81e744be: ratio -3.2 bits</title></circle>
+<circle cx="76.2" cy="426.5" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m9-tm5-4a3ea183: ratio -3.3 bits</title></circle>
+<circle cx="75.4" cy="426.6" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m11-tm67-f393fc83: ratio -3.3 bits</title></circle>
+<circle cx="81.9" cy="426.1" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m11-t67-05f5aa36: ratio -3.2 bits</title></circle>
+<circle cx="81.9" cy="426.1" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m11-t67-ae0facd2: ratio -3.2 bits</title></circle>
+<circle cx="83.1" cy="426.1" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m13-t181-515ee569: ratio -3.2 bits</title></circle>
+<circle cx="77.5" cy="426.3" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m13-tm181-25e736d2: ratio -3.2 bits</title></circle>
+<circle cx="77.5" cy="426.3" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m13-tm181-e4cd523e: ratio -3.2 bits</title></circle>
+<circle cx="81.4" cy="426.1" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m15-tm275-2d22ff5d: ratio -3.2 bits</title></circle>
+<circle cx="79.2" cy="426.2" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m15-t275-25edae83: ratio -3.2 bits</title></circle>
+<circle cx="79.2" cy="426.2" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m15-t275-b7f03703: ratio -3.2 bits</title></circle>
+<circle cx="79.4" cy="426.2" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m17-t101-e6c4b64d: ratio -3.2 bits</title></circle>
+<circle cx="89.1" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m17-tm101-00378d4e: ratio -3.2 bits</title></circle>
+<circle cx="90.3" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m19-t797-b6cf2467: ratio -3.2 bits</title></circle>
+<circle cx="91.5" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m19-tm797-9c54981b: ratio -3.2 bits</title></circle>
+<circle cx="77.3" cy="426.4" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m21-t2795-26779965: ratio -3.2 bits</title></circle>
+<circle cx="95.1" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m23-t5197-69e76b73: ratio -3.2 bits</title></circle>
+<circle cx="96.3" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m23-tm5197-1f85e9e1: ratio -3.2 bits</title></circle>
+<circle cx="96.3" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m23-tm5197-a023238e: ratio -3.2 bits</title></circle>
+<circle cx="88.4" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m29-tm40309-30c52b96: ratio -3.2 bits</title></circle>
+<circle cx="88.4" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m29-tm40309-6aecea52: ratio -3.2 bits</title></circle>
+<circle cx="94.4" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m31-tm90707-c95f16f5: ratio -3.2 bits</title></circle>
+<circle cx="88.3" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m31-t90707-5fc996f0: ratio -3.2 bits</title></circle>
+<circle cx="88.3" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m31-t90707-8fd18741: ratio -3.2 bits</title></circle>
+<circle cx="103.2" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m37-tm534059-32aad96b: ratio -3.2 bits</title></circle>
+<circle cx="101.1" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m39-t1481485-829ef1d1: ratio -3.2 bits</title></circle>
+<circle cx="116.6" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m41-tm2308219-7f48b14a: ratio -3.2 bits</title></circle>
+<circle cx="108.3" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m43-tm998717-e2e742b0: ratio -3.2 bits</title></circle>
+<circle cx="99.6" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m45-tm6236725-40939294: ratio -3.2 bits</title></circle>
+<circle cx="113.7" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m47-t22705043-f4e44623: ratio -3.2 bits</title></circle>
+<circle cx="122.8" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m53-tm56619371-dac20a85: ratio -3.2 bits</title></circle>
+<circle cx="115.4" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m57-tm747311035-c1f545af: ratio -3.2 bits</title></circle>
+<circle cx="123.2" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m59-tm943548413-98844ecc: ratio -3.2 bits</title></circle>
+<circle cx="126.4" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m61-t158598901-ab42b6c5: ratio -3.2 bits</title></circle>
+<circle cx="101.3" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m67-tm19346764963-82c84cca: ratio -3.2 bits</title></circle>
+<circle cx="113.0" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m67-t19346764963-e760df38: ratio -3.2 bits</title></circle>
+<circle cx="132.4" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m71-t48653080717-2cafaea3: ratio -3.2 bits</title></circle>
+<circle cx="128.6" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m71-tm48653080717-f25c4638: ratio -3.2 bits</title></circle>
+<circle cx="137.2" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m73-tm184271214331-9d25cc67: ratio -3.2 bits</title></circle>
+<circle cx="110.3" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m79-tm420247971347-2a24b892: ratio -3.2 bits</title></circle>
+<circle cx="166.7" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m83-tm6151469093347-debefd74: ratio -3.2 bits</title></circle>
+<circle cx="133.2" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m83-t6151469093347-cdcc5432: ratio -3.2 bits</title></circle>
+<circle cx="183.4" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>ECC2K-95: ratio -3.2 bits</title></circle>
+<circle cx="183.4" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m127-t24589614856193402413-a00e5890: ratio -3.2 bits</title></circle>
+<circle cx="224.0" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>ECC2K-130: ratio -3.2 bits</title></circle>
+<circle cx="199.3" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m137-t574016314927011818501-11ceb4d6: ratio -3.2 bits</title></circle>
+<circle cx="181.1" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m151-tm97937651335354183120307-ee31df7e: ratio -3.2 bits</title></circle>
+<circle cx="256.3" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m157-t158060339213695215877259-816eafb2: ratio -3.2 bits</title></circle>
+<circle cx="263.4" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>sect163k1: ratio -3.2 bits</title></circle>
+<circle cx="210.8" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m173-tm67870783603944754053042229-ddf2de63: ratio -3.2 bits</title></circle>
+<circle cx="223.3" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m179-t1681527843948629186391379613-d1b73c24: ratio -3.2 bits</title></circle>
+<circle cx="345.8" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>sect233k1: ratio -3.2 bits</title></circle>
+<circle cx="353.0" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>sect239k1: ratio -3.2 bits</title></circle>
+<circle cx="405.5" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>sect283k1: ratio -3.2 bits</title></circle>
+<circle cx="556.0" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>sect409k1: ratio -3.2 bits</title></circle>
+<circle cx="749.4" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>sect571k1: ratio -3.2 bits</title></circle>
+<circle cx="731.3" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>icv1-f2m577-tm1291692360366072294584975927365743158796464824452643158538754096040254908300224422995291-5e910562: ratio -3.2 bits</title></circle>
+<circle cx="75.1" cy="426.7" r="3.5" fill="#9467bd" fill-opacity="0.8" stroke="none"><title>icv1-f2m6-tm11-a69b70b8: ratio -3.3 bits</title></circle>
+<circle cx="79.4" cy="426.2" r="3.5" fill="#9467bd" fill-opacity="0.8" stroke="none"><title>icv1-f2m10-t61-31ce0e65: ratio -3.2 bits</title></circle>
+<circle cx="84.4" cy="426.0" r="3.5" fill="#9467bd" fill-opacity="0.8" stroke="none"><title>icv1-f2m14-tm251-b69e8b8b: ratio -3.2 bits</title></circle>
+<circle cx="84.1" cy="410.2" r="3.5" fill="#9467bd" fill-opacity="0.8" stroke="none"><title>icv1-f2m18-t999-40751283: ratio -0.5 bits</title></circle>
+<circle cx="84.3" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m13-t11-f036dc01: ratio -3.2 bits</title></circle>
+<circle cx="84.3" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m13-t11-f12dc95f: ratio -3.2 bits</title></circle>
+<circle cx="84.3" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m13-t79-00b3392a: ratio -3.2 bits</title></circle>
+<circle cx="83.2" cy="426.1" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m13-tm83-b76daa24: ratio -3.2 bits</title></circle>
+<circle cx="82.4" cy="426.1" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m13-tm9-6863a838: ratio -3.2 bits</title></circle>
+<circle cx="86.7" cy="411.5" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m15-t131-ed7256f0: ratio -0.7 bits</title></circle>
+<circle cx="85.5" cy="411.5" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m15-t5-d9fb183e: ratio -0.7 bits</title></circle>
+<circle cx="86.7" cy="411.5" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m15-tm185-565c1669: ratio -0.7 bits</title></circle>
+<circle cx="86.7" cy="411.5" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m15-tm217-f2f901c1: ratio -0.7 bits</title></circle>
+<circle cx="84.8" cy="411.6" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m15-tm237-34b47a4a: ratio -0.7 bits</title></circle>
+<circle cx="86.7" cy="411.5" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m15-tm65-37237277: ratio -0.7 bits</title></circle>
+<circle cx="89.1" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m17-t455-60048e6d: ratio -3.2 bits</title></circle>
+<circle cx="87.2" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m17-t531-2048fb7c: ratio -3.2 bits</title></circle>
+<circle cx="89.1" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m17-tm185-c9e2dceb: ratio -3.2 bits</title></circle>
+<circle cx="87.9" cy="411.4" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m18-t393-d2c04152: ratio -0.7 bits</title></circle>
+<circle cx="91.5" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m19-tm353-a68ceb24: ratio -3.2 bits</title></circle>
+<circle cx="91.5" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m19-tm649-a9133fe6: ratio -3.2 bits</title></circle>
+<circle cx="93.9" cy="411.4" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m21-t2591-de54d72e: ratio -0.7 bits</title></circle>
+<circle cx="92.7" cy="411.4" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m21-t2845-e2683765: ratio -0.7 bits</title></circle>
+<circle cx="91.5" cy="411.4" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m21-tm1495-8bd9aa74: ratio -0.7 bits</title></circle>
+<circle cx="96.3" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m23-tm1957-8891f5a2: ratio -3.2 bits</title></circle>
+<circle cx="96.3" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m23-tm4129-45500fce: ratio -3.2 bits</title></circle>
+<circle cx="95.1" cy="411.4" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m24-t1545-54539071: ratio -0.7 bits</title></circle>
+<circle cx="95.1" cy="411.4" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m24-tm3047-2d0c0e8c: ratio -0.7 bits</title></circle>
+<circle cx="98.7" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m25-t4775-4830dca7: ratio -3.2 bits</title></circle>
+<circle cx="96.8" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m25-tm489-c50a8fb9: ratio -3.2 bits</title></circle>
+<circle cx="99.2" cy="411.3" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m27-t12543-569dca8b: ratio -0.7 bits</title></circle>
+<circle cx="99.2" cy="411.3" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m27-t20811-3d0fd5a1: ratio -0.7 bits</title></circle>
+<circle cx="101.0" cy="411.3" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m27-t6931-1834c541: ratio -0.7 bits</title></circle>
+<circle cx="101.0" cy="411.3" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m27-tm20293-ca4ad8af: ratio -0.7 bits</title></circle>
+<circle cx="203.7" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m113-tm122610772499221213-5de3030f: ratio -3.2 bits</title></circle>
+<circle cx="203.7" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>icv1-f2m113-tm122610772499221213-fd54d0eb: ratio -3.2 bits</title></circle>
+<circle cx="77.2" cy="419.7" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp6-tm7-fc20da94: ratio -2.1 bits</title></circle>
+<circle cx="81.6" cy="419.3" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp10-t5-192cb216: ratio -2.0 bits</title></circle>
+<circle cx="84.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp12-tm53-6c9ff4bb: ratio -2.0 bits</title></circle>
+<circle cx="84.2" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp12-t19-d4a315df: ratio -2.0 bits</title></circle>
+<circle cx="86.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp14-tm63-1a762b57: ratio -2.0 bits</title></circle>
+<circle cx="86.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp14-tm143-dec4cf6b: ratio -2.0 bits</title></circle>
+<circle cx="86.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp14-tm43-158b6914: ratio -2.0 bits</title></circle>
+<circle cx="88.8" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp16-tm393-20f8a24e: ratio -2.0 bits</title></circle>
+<circle cx="88.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp16-t295-8d3c3165: ratio -2.0 bits</title></circle>
+<circle cx="89.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp16-t351-d433f24e: ratio -2.0 bits</title></circle>
+<circle cx="91.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp18-tm337-d28d5e09: ratio -2.0 bits</title></circle>
+<circle cx="91.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp18-t175-45770ebc: ratio -2.0 bits</title></circle>
+<circle cx="92.8" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp20-t727-cd198a38: ratio -2.0 bits</title></circle>
+<circle cx="93.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp20-t1293-3c2999ba: ratio -2.0 bits</title></circle>
+<circle cx="95.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp22-tm1385-475dcb5f: ratio -2.0 bits</title></circle>
+<circle cx="95.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp22-t411-86337907: ratio -2.0 bits</title></circle>
+<circle cx="95.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp22-tm1267-a5acaf6d: ratio -2.0 bits</title></circle>
+<circle cx="96.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp22-t3019-0c6101de: ratio -2.0 bits</title></circle>
+<circle cx="97.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp24-t1577-77336155: ratio -2.0 bits</title></circle>
+<circle cx="98.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp24-t1465-0b7163ca: ratio -2.0 bits</title></circle>
+<circle cx="98.2" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp24-t991-def56de7: ratio -2.0 bits</title></circle>
+<circle cx="98.6" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp24-t1059-6df599df: ratio -2.0 bits</title></circle>
+<circle cx="100.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp26-tm9263-8a144943: ratio -2.0 bits</title></circle>
+<circle cx="100.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp26-tm1775-7e8fb6df: ratio -2.0 bits</title></circle>
+<circle cx="299.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>P-192: ratio -2.0 bits</title></circle>
+<circle cx="337.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>P-224: ratio -2.0 bits</title></circle>
+<circle cx="375.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>P-256: ratio -2.0 bits</title></circle>
+<circle cx="375.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>secp256k1: ratio -2.0 bits</title></circle>
+<circle cx="330.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp221-tm3509210517603025598879416729141978-c324b837: ratio -2.0 bits</title></circle>
+<circle cx="602.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>Curve448: ratio -2.0 bits</title></circle>
+<circle cx="523.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp383-tm1329890207450988128841758359484337226464313875646092906354-f645ebd6: ratio -2.0 bits</title></circle>
+<circle cx="523.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp383-tm2848646777738159098949497252265893762397593991823060136386-1ef4a61c: ratio -2.0 bits</title></circle>
+<circle cx="370.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>Curve25519: ratio -2.0 bits</title></circle>
+<circle cx="676.6" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp511-tm85798038077085980992356252112544974736566053019478664231724326470621400496530-da465f1d: ratio -2.0 bits</title></circle>
+<circle cx="426.2" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp446-tm28343567510342708887552-7a427f01: ratio -2.0 bits</title></circle>
+<circle cx="371.2" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp377-t9586122913090633730-81d91d94: ratio -2.0 bits</title></circle>
+<circle cx="687.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp581-tm5368710016-88dea8e1: ratio -2.0 bits</title></circle>
+<circle cx="433.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp455-t75557872733115725645825-b740b33f: ratio -2.0 bits</title></circle>
+<circle cx="257.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp158-t454233058419889982668807-a7cee044: ratio -2.0 bits</title></circle>
+<circle cx="486.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp350-t35917316178020966140770026648761406645010658995732487-6e1654f7: ratio -2.0 bits</title></circle>
+<circle cx="792.6" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp606-t12222215858006915839141401255556695821975177558367937484927312121315564820050836996405726215-9acd5f3a: ratio -2.0 bits</title></circle>
+<circle cx="372.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp254-t129607518034317099905336561907183648775-8181e611: ratio -2.0 bits</title></circle>
+<circle cx="563.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp414-t154267229207681125708793071161652324726038701923943665681563655-ebea0e02: ratio -2.0 bits</title></circle>
+<circle cx="448.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp318-t548079839685593379889100768354473324754975588407-f4d63804: ratio -2.0 bits</title></circle>
+<circle cx="754.4" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp574-t186496302581962721809830439849867378820456264884631045871326327118225203759963374092295-5d71cb14: ratio -2.0 bits</title></circle>
+<circle cx="639.8" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp478-t662567649291894123450065105820326672097321614256273183056335502227537927-6422afbf: ratio -2.0 bits</title></circle>
+<circle cx="525.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp382-t2353932232174051770881173201777159236219815696568919523335-b80e1e2a: ratio -2.0 bits</title></circle>
+<circle cx="410.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp286-t8366863340207706741299716820480866394308615-195a9122: ratio -2.0 bits</title></circle>
+<circle cx="716.2" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp542-t2845711812853053972806387468884004947678235462567670984735634579507964130977906695-f8fcf71f: ratio -2.0 bits</title></circle>
+<circle cx="601.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp446-t10109980000181489923001201093401906549415298505746886291297633566727-278b8869: ratio -2.0 bits</title></circle>
+<circle cx="678.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp510-t43422033463993573283847164979847511362503473044959842495500254821277109321735-ee4a65f3: ratio -2.0 bits</title></circle>
+<circle cx="334.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp222-t1943310227059934816526534243778567-d3fef779: ratio -2.0 bits</title></circle>
+<circle cx="830.8" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp638-t800995136978371572363525747477255032258950408689114271367829691469194143147501961435441086332935-2ce55ebd: ratio -2.0 bits</title></circle>
+<circle cx="375.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp256-t340282366920936614211651523200128901127-121ca9c1: ratio -2.0 bits</title></circle>
+<circle cx="681.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp512-t115792089237316195423570985008687840101103879741288409693302319863988063823175-9e4bc1d2: ratio -2.0 bits</title></circle>
+<circle cx="261.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>wap-wsg-idm-ecid-wtls9: ratio -2.0 bits</title></circle>
+<circle cx="337.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp224-t5192296858534689624111674181427015-0df4b5a2: ratio -2.0 bits</title></circle>
+<circle cx="528.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp384-t6277101735386680763835754795021643429033562911502587034007-3daf17f4: ratio -2.0 bits</title></circle>
+<circle cx="203.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>wap-wsg-idm-ecid-wtls8: ratio -2.0 bits</title></circle>
+<circle cx="299.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>secp192k1: ratio -2.0 bits</title></circle>
+<circle cx="579.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp638-tm121684554101595739501484314722271-a81b2097: ratio -2.0 bits</title></circle>
+<circle cx="526.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp477-tm246288457138303-a443a69b: ratio -2.0 bits</title></circle>
+<circle cx="374.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp381-tm15132376222941642751-961de9ba: ratio -2.0 bits</title></circle>
+<circle cx="295.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp190-t29710571568175507457408237575-3623cc09: ratio -2.0 bits</title></circle>
+<circle cx="372.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp254-t126611883464401272108868536818127077377-702fee62: ratio -2.0 bits</title></circle>
+<circle cx="337.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>secp224k1: ratio -2.0 bits</title></circle>
+<circle cx="373.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp255-tm885929826233106195063767039-de9f34b7: ratio -2.0 bits</title></circle>
+<circle cx="373.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp255-t885929826233106195063767041-36a53c71: ratio -2.0 bits</title></circle>
+<circle cx="373.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp255-tm86663725065984043395317759-3f693e4d: ratio -2.0 bits</title></circle>
+<circle cx="373.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp255-t86663725065984043395317761-c6e97e85: ratio -2.0 bits</title></circle>
+<circle cx="261.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>secp160k1: ratio -2.0 bits</title></circle>
+<circle cx="274.2" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>DSTU4145-173: ratio -3.2 bits</title></circle>
+<circle cx="374.5" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>DSTU4145-257: ratio -3.2 bits</title></circle>
+<circle cx="288.5" cy="343.7" r="6" fill="#d62728" fill-opacity="0.8" stroke="black"><title>Oakley Group 4: ratio +10.9 bits</title></circle>
+<circle cx="250.8" cy="400.8" r="6" fill="#d62728" fill-opacity="0.8" stroke="#555"><title>Oakley Group 3: ratio +1.1 bits</title></circle>
+<circle cx="299.3" cy="415.5" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>c2pnb208w1: ratio -1.4 bits</title></circle>
+<circle cx="203.7" cy="426.0" r="3.5" fill="#2ca02c" fill-opacity="0.8" stroke="none"><title>wap-wsg-idm-ecid-wtls1: ratio -3.2 bits</title></circle>
+<circle cx="263.4" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>B-163: ratio -3.2 bits</title></circle>
+<circle cx="557.2" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>B-409: ratio -3.2 bits</title></circle>
+<circle cx="406.7" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>B-283: ratio -3.2 bits</title></circle>
+<circle cx="750.6" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>B-571: ratio -3.2 bits</title></circle>
+<circle cx="435.4" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>DSTU4145-307: ratio -3.2 bits</title></circle>
+<circle cx="583.4" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>DSTU4145-431: ratio -3.2 bits</title></circle>
+<circle cx="507.0" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>DSTU4145-367: ratio -3.2 bits</title></circle>
+<circle cx="282.5" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>DSTU4145-179: ratio -3.2 bits</title></circle>
+<circle cx="263.4" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>DSTU4145-163: ratio -3.2 bits</title></circle>
+<circle cx="347.0" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>B-233: ratio -3.2 bits</title></circle>
+<circle cx="347.0" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>DSTU4145-233: ratio -3.2 bits</title></circle>
+<circle cx="268.2" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>DSTU4145-167: ratio -3.2 bits</title></circle>
+<circle cx="296.9" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>DSTU4145-191: ratio -3.2 bits</title></circle>
+<circle cx="263.4" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>c2pnb163v2: ratio -3.2 bits</title></circle>
+<circle cx="351.4" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>c2tnb239v3: ratio -3.2 bits</title></circle>
+<circle cx="299.3" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>sect193r2: ratio -3.2 bits</title></circle>
+<circle cx="299.3" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>sect193r1: ratio -3.2 bits</title></circle>
+<circle cx="568.7" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>c2tnb431r1: ratio -3.2 bits</title></circle>
+<circle cx="296.9" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>c2tnb191v1: ratio -3.2 bits</title></circle>
+<circle cx="203.7" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>sect113r1: ratio -3.2 bits</title></circle>
+<circle cx="353.0" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>c2tnb239v1: ratio -3.2 bits</title></circle>
+<circle cx="225.2" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>sect131r2: ratio -3.2 bits</title></circle>
+<circle cx="295.7" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>c2tnb191v2: ratio -3.2 bits</title></circle>
+<circle cx="352.3" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>c2tnb239v2: ratio -3.2 bits</title></circle>
+<circle cx="491.2" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>c2tnb359v1: ratio -3.2 bits</title></circle>
+<circle cx="203.7" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>sect113r2: ratio -3.2 bits</title></circle>
+<circle cx="295.0" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>c2tnb191v3: ratio -3.2 bits</title></circle>
+<circle cx="263.4" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>wap-wsg-idm-ecid-wtls5: ratio -3.2 bits</title></circle>
+<circle cx="225.2" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>sect131r1: ratio -3.2 bits</title></circle>
+<circle cx="263.4" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>c2pnb163v3: ratio -3.2 bits</title></circle>
+<circle cx="263.4" cy="426.0" r="3.5" fill="#d62728" fill-opacity="0.8" stroke="none"><title>sect163r1: ratio -3.2 bits</title></circle>
+<circle cx="375.7" cy="166.5" r="6" fill="#d62728" fill-opacity="0.8" stroke="#e6a700"><title>c2pnb272w1: ratio +41.3 bits</title></circle>
+<circle cx="490.3" cy="348.9" r="6" fill="#d62728" fill-opacity="0.8" stroke="black"><title>c2pnb368w1: ratio +10.1 bits</title></circle>
+<circle cx="261.0" cy="268.3" r="6" fill="#d62728" fill-opacity="0.8" stroke="#e6a700"><title>c2pnb176w1: ratio +23.9 bits</title></circle>
+<circle cx="413.9" cy="71.7" r="6" fill="#d62728" fill-opacity="0.8" stroke="#e6a700"><title>c2pnb304w1: ratio +57.6 bits</title></circle>
+<circle cx="373.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>id-tc26-gost-3410-2012-256-paramSetA: ratio -2.0 bits</title></circle>
+<circle cx="560.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp414-t266913126910041140166481421552787081431877817603289668716758056-2e80c05a: ratio -2.0 bits</title></circle>
+<circle cx="602.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>E448: ratio -2.0 bits</title></circle>
+<circle cx="602.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>Edwards448: ratio -2.0 bits</title></circle>
+<circle cx="679.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>id-tc26-gost-3410-2012-512-paramSetC: ratio -2.0 bits</title></circle>
+<circle cx="680.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp512-tm119794558906020826009846838880889513832916010681565849916324082451839560751489-f21fca50: ratio -2.0 bits</title></circle>
+<circle cx="375.6" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>FRP256v1: ratio -2.0 bits</title></circle>
+<circle cx="375.6" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp256-t381257165022567524325218360739058995869-37304b30: ratio -2.0 bits</title></circle>
+<circle cx="337.2" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP224r1: ratio -2.0 bits</title></circle>
+<circle cx="260.6" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp160-t651321219629903728864297-6507d78a: ratio -2.0 bits</title></circle>
+<circle cx="375.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp256-t4893961318881196714252176992726657045-cc6a107e: ratio -2.0 bits</title></circle>
+<circle cx="373.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp256-t418276207993188399430123392999835439444-868c4e8c: ratio -2.0 bits</title></circle>
+<circle cx="375.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>SM2: ratio -2.0 bits</title></circle>
+<circle cx="375.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp256-t426868306435604417333899392705351656559-e9588b91: ratio -2.0 bits</title></circle>
+<circle cx="375.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp256-t508360670408157092636158920390626029849-24346e19: ratio -2.0 bits</title></circle>
+<circle cx="375.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>id-GostR3410-2001-CryptoPro-A-ParamSet: ratio -2.0 bits</title></circle>
+<circle cx="375.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp256-t36904200015056198187214188655179355935-f355ae1b: ratio -2.0 bits</title></circle>
+<circle cx="373.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp256-t348701241848424294714378569523362344080-0362fd2b: ratio -2.0 bits</title></circle>
+<circle cx="681.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp512-t70768315919305439621916119611169321777939510542063248003509925176674057912887-376f2b6f: ratio -2.0 bits</title></circle>
+<circle cx="678.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp512-t92612225932029526595254953582299273133950294885929313389535604556760659601388-3fa412df: ratio -2.0 bits</title></circle>
+<circle cx="260.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP160t1: ratio -2.0 bits</title></circle>
+<circle cx="681.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp512-t74524470523323306179098763612522339584975451401095028492149363970074628368491-3351ff9f: ratio -2.0 bits</title></circle>
+<circle cx="681.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>id-tc26-gost-3410-12-512-paramSetA: ratio -2.0 bits</title></circle>
+<circle cx="679.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp512-t159404720256826179419896581546807814173439533036908671852564932616668653549476-97fc6485: ratio -2.0 bits</title></circle>
+<circle cx="337.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp224-t3747123853060838272219601178637605-8eef44cf: ratio -2.0 bits</title></circle>
+<circle cx="356.2" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp240-t3-292fa72c: ratio -2.0 bits</title></circle>
+<circle cx="261.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>secp160r2: ratio -2.0 bits</title></circle>
+<circle cx="261.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>secp160r1: ratio -2.0 bits</title></circle>
+<circle cx="451.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp320-tm1085868569802514034757079818015930522073462377917-0f792894: ratio -2.0 bits</title></circle>
+<circle cx="451.8" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP320t1: ratio -2.0 bits</title></circle>
+<circle cx="527.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP384r1: ratio -2.0 bits</title></circle>
+<circle cx="370.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>W-25519: ratio -2.0 bits</title></circle>
+<circle cx="527.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp383-t2113793218673198987988742457840023505747218554421793635005-14f5c5d7: ratio -2.0 bits</title></circle>
+<circle cx="524.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp383-t1464839725173988384744564724586645286394096642238191820264-987d8f3e: ratio -2.0 bits</title></circle>
+<circle cx="201.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>secp112r2: ratio -2.0 bits</title></circle>
+<circle cx="528.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp384-tm8254077619909260646185522759808830509245368802333014026297-359bbdd8: ratio -2.0 bits</title></circle>
+<circle cx="367.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp251-t45330879683285730139092453152713398836-0733a7fc: ratio -2.0 bits</title></circle>
+<circle cx="337.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp224-tm5342559675359700677494927007229677-97e798c3: ratio -2.0 bits</title></circle>
+<circle cx="337.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp224-t661950337966252150745153098997235-d29026fd: ratio -2.0 bits</title></circle>
+<circle cx="527.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP384t1: ratio -2.0 bits</title></circle>
+<circle cx="330.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp221-t1654906936176842234216578963930838-382ff3f7: ratio -2.0 bits</title></circle>
+<circle cx="337.2" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP224t1: ratio -2.0 bits</title></circle>
+<circle cx="298.8" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP192r1: ratio -2.0 bits</title></circle>
+<circle cx="260.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp160-t3-c2687707: ratio -2.0 bits</title></circle>
+<circle cx="356.2" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp240-t3-1c921d2f: ratio -2.0 bits</title></circle>
+<circle cx="337.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp224-t4923084803502059616306225508536201-ba74de09: ratio -2.0 bits</title></circle>
+<circle cx="527.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp384-t1701501408490564654790464994852023194212354753680992833861-f71c5516: ratio -2.0 bits</title></circle>
+<circle cx="525.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp384-t1037104558255063996430993021778302819497487464052100095380-382a043b: ratio -2.0 bits</title></circle>
+<circle cx="220.4" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>secp128r2: ratio -2.0 bits</title></circle>
+<circle cx="373.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp254-t27241143818186388543882977165641385921-50740db5: ratio -2.0 bits</title></circle>
+<circle cx="370.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp254-t108556614095926661953015356737202789604-4cb9e875: ratio -2.0 bits</title></circle>
+<circle cx="260.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP160r1: ratio -2.0 bits</title></circle>
+<circle cx="528.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp384-t1830295516398814731693771933088720051240442793150265474531-6812454c: ratio -2.0 bits</title></circle>
+<circle cx="692.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp522-t5133182737093516966116292369105062158447915857038956549678982449484591328997963-1e61c44a: ratio -2.0 bits</title></circle>
+<circle cx="678.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp510-t32078124368993265643391527202163889449271294619270894863550237026710955845075-4a5a8504: ratio -2.0 bits</title></circle>
+<circle cx="676.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp510-t72717652038826374726059530590088862195220335511561317766691761739622989347132-ec2add45: ratio -2.0 bits</title></circle>
+<circle cx="222.8" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>secp128r1: ratio -2.0 bits</title></circle>
+<circle cx="259.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp159-t3-55c158e7: ratio -2.0 bits</title></circle>
+<circle cx="413.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp288-tm31717284756189777838455907167263484970467017-b051d78d: ratio -2.0 bits</title></circle>
+<circle cx="528.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>P-384: ratio -2.0 bits</title></circle>
+<circle cx="528.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp384-t6672381345500934243292292194117280177175762633341936873929-fe235546: ratio -2.0 bits</title></circle>
+<circle cx="528.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp384-t1026898053860656322554647929255276885826089607448367308043-fc917784: ratio -2.0 bits</title></circle>
+<circle cx="526.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp384-t1878909691993642469748376292100438552038987804211114559024-098ac8c3: ratio -2.0 bits</title></circle>
+<circle cx="259.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp159-t3-4900a99f: ratio -2.0 bits</title></circle>
+<circle cx="203.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>secp112r1: ratio -2.0 bits</title></circle>
+<circle cx="356.2" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp240-t3-d65da34c: ratio -2.0 bits</title></circle>
+<circle cx="298.8" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP192t1: ratio -2.0 bits</title></circle>
+<circle cx="602.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>W-448: ratio -2.0 bits</title></circle>
+<circle cx="298.8" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp192-tm68374409827948938044418153103-89450af8: ratio -2.0 bits</title></circle>
+<circle cx="355.8" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp240-t3-5d0c27a2: ratio -2.0 bits</title></circle>
+<circle cx="371.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp255-t453928926765356815458045473019830493310-3d08d404: ratio -2.0 bits</title></circle>
+<circle cx="370.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp255-t43182373549099571680785400801115150922-89d626f9: ratio -2.0 bits</title></circle>
+<circle cx="451.8" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP320r1: ratio -2.0 bits</title></circle>
+<circle cx="260.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp160-t3-3b7296c6: ratio -2.0 bits</title></circle>
+<circle cx="375.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP256r1: ratio -2.0 bits</title></circle>
+<circle cx="374.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp255-t161780446515958999764292222349558067737-14f01f35: ratio -2.0 bits</title></circle>
+<circle cx="372.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp255-t186389866128205620941018110855087410992-98107d56: ratio -2.0 bits</title></circle>
+<circle cx="370.9" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>Edwards25519: ratio -2.0 bits</title></circle>
+<circle cx="374.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>id-GostR3410-2001-CryptoPro-B-ParamSet: ratio -2.0 bits</title></circle>
+<circle cx="260.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp160-t3-50cb7013: ratio -2.0 bits</title></circle>
+<circle cx="299.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>prime192v2: ratio -2.0 bits</title></circle>
+<circle cx="299.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>prime192v3: ratio -2.0 bits</title></circle>
+<circle cx="680.6" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP512r1: ratio -2.0 bits</title></circle>
+<circle cx="680.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp511-t51678549499715432469390247103262106461146882586673900608813615929090325752961-86ec43f8: ratio -2.0 bits</title></circle>
+<circle cx="677.8" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp511-t38925736360316473061851127539917683396647984622335777831652671274857142370780-4b842bd6: ratio -2.0 bits</title></circle>
+<circle cx="680.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>id-tc26-gost-3410-12-512-paramSetB: ratio -2.0 bits</title></circle>
+<circle cx="692.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>P-521: ratio -2.0 bits</title></circle>
+<circle cx="679.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>gost512: ratio -2.0 bits</title></circle>
+<circle cx="374.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>gost256: ratio -2.0 bits</title></circle>
+<circle cx="374.8" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>id-GostR3410-2001-CryptoPro-C-ParamSet: ratio -2.0 bits</title></circle>
+<circle cx="523.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp382-t4121212830778224615705967802929256988250492817320673387316-0e676ed0: ratio -2.0 bits</title></circle>
+<circle cx="337.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp226-t300921746732130612121844277365056-c66da16f: ratio -2.0 bits</title></circle>
+<circle cx="375.0" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP256t1: ratio -2.0 bits</title></circle>
+<circle cx="255.5" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp170-tm52213820118540299389901413-869d5d3c: ratio -2.0 bits</title></circle>
+<circle cx="355.4" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>prime239v3: ratio -2.0 bits</title></circle>
+<circle cx="355.4" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>prime239v2: ratio -2.0 bits</title></circle>
+<circle cx="355.4" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>prime239v1: ratio -2.0 bits</title></circle>
+<circle cx="680.6" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>brainpoolP512t1: ratio -2.0 bits</title></circle>
+<circle cx="375.3" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp256-t59929715926598057813127459560221398997-396a9121: ratio -2.0 bits</title></circle>
+<circle cx="526.1" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp382-t2184274201430630331829688577284583194017827823101929639907-81d9b372: ratio -2.0 bits</title></circle>
+<circle cx="523.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp382-t4403250849178144456852012527173770264409251021165796791932-e59c6bd6: ratio -2.0 bits</title></circle>
+<circle cx="332.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp222-t726130336278594909943533816892560-a0ed2404: ratio -2.0 bits</title></circle>
+<circle cx="373.2" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp256-t608269349925928967247598157794165263400-b7ab6ffe: ratio -2.0 bits</title></circle>
+<circle cx="689.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp521-t1350219053034006823156430521675130544287619844856204906474540600343116434623060-37726020: ratio -2.0 bits</title></circle>
+<circle cx="523.7" cy="419.2" r="3.5" fill="#1f77b4" fill-opacity="0.8" stroke="none"><title>icv1-fp382-t4121212830778224615705967802929256988250492817320673387316-1559a571: ratio -2.0 bits</title></circle>
+<circle cx="112.4" cy="415.9" r="3.5" fill="#ff7f0e" fill-opacity="0.8" stroke="none"><title>icv1-fp6k11-tm527622722-07ccd925: ratio -1.4 bits</title></circle>
+<circle cx="88.7" cy="411.4" r="3.5" fill="#ff7f0e" fill-opacity="0.8" stroke="none"><title>icv1-fp9k3-t1227-55c8d640: ratio -0.7 bits</title></circle>
+<circle cx="99.0" cy="411.3" r="3.5" fill="#ff7f0e" fill-opacity="0.8" stroke="none"><title>icv1-fp9k3-tm4575-aba104ba: ratio -0.7 bits</title></circle>
+<circle cx="102.3" cy="411.3" r="3.5" fill="#ff7f0e" fill-opacity="0.8" stroke="none"><title>icv1-fp10k3-t3589-bbd5cc8b: ratio -0.7 bits</title></circle>
+<circle cx="93.1" cy="411.4" r="3.5" fill="#ff7f0e" fill-opacity="0.8" stroke="none"><title>icv1-fp10k3-t41822-dfa3991d: ratio -0.7 bits</title></circle>
+<circle cx="105.9" cy="411.3" r="3.5" fill="#ff7f0e" fill-opacity="0.8" stroke="none"><title>icv1-fp11k3-tm30789-3c2726bc: ratio -0.7 bits</title></circle>
+<circle cx="117.0" cy="405.0" r="6" fill="#ff7f0e" fill-opacity="0.8" stroke="#555"><title>icv1-fp12k5-tm296780010-475f4271: ratio +0.4 bits</title></circle>
+<circle cx="112.5" cy="409.9" r="3.5" fill="#ff7f0e" fill-opacity="0.8" stroke="none"><title>icv1-fp31k2-t1044939202-6687f4aa: ratio -0.4 bits</title></circle>
+<circle cx="120.7" cy="409.9" r="3.5" fill="#ff7f0e" fill-opacity="0.8" stroke="none"><title>icv1-fp36k2-tm52676205250-0d78f787: ratio -0.4 bits</title></circle>
+<text x="296.5" y="347.7" font-size="11">Oakley Group 4</text>
+<text x="258.8" y="417.8" font-size="11">Oakley Group 3</text>
+<text x="383.7" y="196.5" font-size="11">c2pnb272w1</text>
+<text x="498.3" y="391.9" font-size="11">c2pnb368w1</text>
+<text x="269.0" y="324.3" font-size="11">c2pnb176w1</text>
+<text x="421.9" y="140.7" font-size="11">c2pnb304w1</text>
+<text x="125.0" y="487.0" font-size="11">icv1-fp12k5-tm296780010-475f4271</text>
+<circle cx="84" cy="50" r="4" fill="#1f77b4"/><text x="94" y="54">prime</text>
+<circle cx="84" cy="66" r="4" fill="#d62728"/><text x="94" y="70">binary</text>
+<circle cx="84" cy="82" r="4" fill="#2ca02c"/><text x="94" y="86">koblitz</text>
+<circle cx="84" cy="98" r="4" fill="#9467bd"/><text x="94" y="102">subfield</text>
+<circle cx="84" cy="114" r="4" fill="#ff7f0e"/><text x="94" y="118">extension</text>
+<text x="70" y="484" font-size="11" fill="#333">321 curves; large rimmed points: formula_advantage (black), formula_marginal (grey), unresolved (amber; plotted at the favourable bound); every value is a formula under the frozen cost model, not a measurement</text>
+</svg>

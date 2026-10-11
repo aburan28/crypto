@@ -1,0 +1,38 @@
+n=37 poly=0x2000000053 #E=137439487532 = [(2, 2), (149, 1), (230603167, 1)]  r=230603167 cofactor=596
+--- arm frob K=36 c=1
+|S|=2664 (2nKc=2664) dup=0
+pairs=3545784 distinct_x=1755798 canonical=47454 (L^2/4n=47952) table 23.0s canon 89.7s
+hits=64 mean_probes=63.9 median=42 model 6r/L^2=195.0 rank=35/36 rows_to_rank=None degenerate=0 dependent=29 logs_ok=false target_ok=false online_probes=121 112.9s
+--- arm tau K=18 c=2
+|S|=2664 (2nKc=2664) dup=0
+pairs=3545784 distinct_x=1744920 canonical=47160 (L^2/4n=47952) table 8.9s canon 62.6s
+hits=64 mean_probes=78.1 median=59 model 6r/L^2=195.0 rank=18/18 rows_to_rank=Some(21) degenerate=0 dependent=46 logs_ok=true target_ok=true online_probes=129 72.2s
+--- arm int K=18 c=2
+|S|=2664 (2nKc=2664) dup=0
+pairs=3545784 distinct_x=1748990 canonical=47270 (L^2/4n=47952) table 13.0s canon 102.6s
+hits=64 mean_probes=69.0 median=66 model 6r/L^2=195.0 rank=18/18 rows_to_rank=Some(21) degenerate=0 dependent=46 logs_ok=true target_ok=true online_probes=86 116.3s
+--- arm tau K=9 c=4
+|S|=2664 (2nKc=2664) dup=0
+pairs=3545784 distinct_x=1723460 canonical=46580 (L^2/4n=47952) table 12.3s canon 58.4s
+hits=64 mean_probes=74.4 median=52 model 6r/L^2=195.0 rank=9/9 rows_to_rank=Some(9) degenerate=0 dependent=55 logs_ok=true target_ok=true online_probes=70 71.0s
+--- arm int K=9 c=4
+|S|=2664 (2nKc=2664) dup=0
+pairs=3545784 distinct_x=1725125 canonical=46625 (L^2/4n=47952) table 3.9s canon 32.3s
+hits=64 mean_probes=74.1 median=51 model 6r/L^2=195.0 rank=9/9 rows_to_rank=Some(9) degenerate=0 dependent=55 logs_ok=true target_ok=true online_probes=50 36.4s
+--- arm tau K=3 c=12
+|S|=2664 (2nKc=2664) dup=0
+pairs=3545784 distinct_x=1598437 canonical=43201 (L^2/4n=47952) table 3.6s canon 28.5s
+hits=64 mean_probes=80.4 median=69 model 6r/L^2=195.0 rank=3/3 rows_to_rank=Some(3) degenerate=0 dependent=61 logs_ok=true target_ok=true online_probes=16 32.4s
+--- arm int K=3 c=12
+|S|=2664 (2nKc=2664) dup=0
+pairs=3545784 distinct_x=1607909 canonical=43457 (L^2/4n=47952) table 4.7s canon 53.9s
+hits=64 mean_probes=67.0 median=44 model 6r/L^2=195.0 rank=3/3 rows_to_rank=Some(3) degenerate=0 dependent=61 logs_ok=true target_ok=true online_probes=67 59.1s
+--- arm tau K=1 c=36
+|S|=2664 (2nKc=2664) dup=0
+pairs=3545784 distinct_x=1127427 canonical=30471 (L^2/4n=47952) table 10.0s canon 48.8s
+hits=64 mean_probes=109.1 median=71 model 6r/L^2=195.0 rank=1/1 rows_to_rank=Some(1) degenerate=0 dependent=63 logs_ok=true target_ok=true online_probes=201 59.0s
+--- arm int K=1 c=36
+|S|=2664 (2nKc=2664) dup=0
+pairs=3545784 distinct_x=1254559 canonical=33907 (L^2/4n=47952) table 5.3s canon 77.9s
+hits=64 mean_probes=95.4 median=55 model 6r/L^2=195.0 rank=1/1 rows_to_rank=Some(1) degenerate=0 dependent=63 logs_ok=true target_ok=true online_probes=16 84.7s
+wrote results/c37.json

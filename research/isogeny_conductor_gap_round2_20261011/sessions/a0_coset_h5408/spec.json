@@ -1,0 +1,80 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "round 2 A0: legacy vs coset fiber closure on the h = 5408 pair",
+  "description": "Lead A0 on the 26-bit D = -7, ell = 13 pair (cofactor 5408), whose floor paid 20.3M set-up additions in round 1 against 5.7M on its isomorphic model. Two targets per curve and two rounds so the session fits between host reboots.",
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation"
+      }
+    },
+    {
+      "name": "ic-closed-legacy",
+      "role": "control",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1"
+        }
+      }
+    },
+    {
+      "name": "ic-closed-coset",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "prime-abscissa:size=32",
+          "oracle": "mitm-fiber:fiber=closed,negation_folded=1,fiber_gen=coset"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 2,
+    "seed": 1,
+    "timeout_seconds": 900,
+    "warmup": 1
+  },
+  "workloads": {
+    "curves": [
+      {
+        "a": 50325276,
+        "b": 33550184,
+        "group_order": 166842208,
+        "gx": 134152739,
+        "gy": 52077098,
+        "kind": "prime_explicit",
+        "p": 166868027,
+        "r": 30851
+      },
+      {
+        "a": 108237880,
+        "b": 7775727,
+        "group_order": 166842208,
+        "gx": 143941305,
+        "gy": 33525641,
+        "kind": "prime_explicit",
+        "p": 166868027,
+        "r": 30851
+      },
+      {
+        "a": 107169904,
+        "b": 9519614,
+        "group_order": 166842208,
+        "gx": 58823725,
+        "gy": 87663177,
+        "kind": "prime_explicit",
+        "p": 166868027,
+        "r": 30851
+      }
+    ],
+    "target_seed": 20261011,
+    "targets_per_curve": 2
+  }
+}

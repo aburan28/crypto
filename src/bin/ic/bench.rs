@@ -20,15 +20,16 @@ use serde_json::{json, Value};
 use crypto_lib::cryptanalysis::glv_invariant_base::{generate_cm_instance, CmFamily};
 use crypto_lib::cryptanalysis::ic_boundary::{
     calibrate_binary_instance, calibrate_group, calibrate_row_ops, calibrate_word_xor,
-    generic_floor_ops, koblitz_instance, random_binary_instance, rho_reference,
-    rho_reference_negation, roster_prime_instance, signed_frobenius_rho, BinaryGroup,
-    BinaryInstance, Calibration, CountedGroup, GroupOps, PinOutcome, PrimeInstance, RhoResult,
+    generic_floor_ops, koblitz_floor_instance, koblitz_instance, random_binary_instance,
+    rho_reference, rho_reference_negation, roster_prime_instance, signed_frobenius_rho,
+    BinaryGroup, BinaryInstance, Calibration, CountedGroup, GroupOps, PinOutcome, PrimeInstance,
+    RhoResult,
 };
 use crypto_lib::cryptanalysis::ic_framework::linalg::MATRIX_NAMES;
 use crypto_lib::cryptanalysis::ic_framework::plugins::{
-    BinarySubspaceBase, DescentAlgebraicOracle, FrobeniusMitmOracle, GlvOrbitBase,
-    KoblitzOrbitBase, KoblitzSymmetrisedBase, KoblitzTraceZeroBase, MitmOracle, PrimeAbscissaBase,
-    SubtractOracle, SymmetrisedOracle,
+    BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle,
+    GlvOrbitBase, KoblitzClosureBase, KoblitzOrbitBase, KoblitzSymmetrisedBase,
+    KoblitzTraceZeroBase, MitmOracle, PrimeAbscissaBase, SubtractOracle, SymmetrisedOracle,
 };
 use crypto_lib::cryptanalysis::ic_framework::solvers::{
     solver_by_name, solver_registry, validate_solver_params,
@@ -67,6 +68,13 @@ pub struct BenchArgs {
     /// `K_0`, so a ladder over both curves at one degree needs this.
     #[arg(long)]
     pub koblitz_a: Option<u8>,
+    /// With `--koblitz-degree` and `--koblitz-a`: run on the curve
+    /// `y² + xy = x³ + a x² + b` of the same isogeny class instead of the
+    /// Koblitz model (`b` a bitmask in the sparse modulus; built by
+    /// `research/ic_leads_20261010/e2_floor_curves_polclass.sage`).  No
+    /// Frobenius endomorphism: the floor-curve control of the lead ladder.
+    #[arg(long)]
+    pub model_b: Option<u64>,
     /// Largest cofactor a random binary curve may have.  The boundary
     /// ladders use 8, so `S = ops / sqrt(r)` is taken over a subgroup
     /// close to the whole group, as on every ledger row; a larger bound
@@ -227,6 +235,13 @@ fn listing() -> Value {
                      "parameters": [
                         {"name": "divisor", "means": "`;`-separated factor indices, e.g. divisor=0;1; must include 0 (x + 1) so that 1 ∈ V; the base is F_u = {P : 1/(x+1) ∈ V}, T = (0,1) included"},
                         {"name": "no_fold", "means": "1 for one column per abscissa"}]},
+                    {"name": "koblitz-closure", "regimes": ["koblitz"],
+                     "parameters": [
+                        {"name": "dimension", "means": "the Frobenius closure of the prefix subspace of this dimension: the ordered tau-slot relation space, one column per signed orbit, subspace basis kept for descent-algebraic:slots=all"}]},
+                    {"name": "compact-orbit-scan", "regimes": ["koblitz"],
+                     "parameters": [
+                        {"name": "columns", "means": "number of distinct signed Frobenius orbits (the orbit-union base, the shape that exists where no invariant subspace does)"},
+                        {"name": "raw_x_cap", "means": "inclusive maximum raw abscissa scanned; exhaustion is an error"}]},
                 ],
             },
             {
@@ -563,14 +578,18 @@ fn run_binary(
     let orbit = KoblitzOrbitBase { instance: inst };
     let trace_zero = KoblitzTraceZeroBase { instance: inst };
     let symmetrised_base = KoblitzSymmetrisedBase { instance: inst };
+    let compact_orbit = CompactOrbitScanBase { instance: inst };
+    let closure = KoblitzClosureBase { instance: inst };
     let base: &dyn FactorBaseBuilder<BinaryGroup> = match fb_name {
+        "koblitz-closure" => &closure,
         "binary-subspace" => &subspace,
         "koblitz-orbit" => &orbit,
         "koblitz-trace-zero" => &trace_zero,
         "koblitz-symmetrised" => &symmetrised_base,
+        "compact-orbit-scan" => &compact_orbit,
         other => {
             return Err(format!(
-                "factor base `{other}` is not available on a binary curve; try binary-subspace, koblitz-orbit, koblitz-trace-zero or koblitz-symmetrised"
+                "factor base `{other}` is not available on a binary curve; try binary-subspace, koblitz-orbit, koblitz-trace-zero, koblitz-symmetrised or compact-orbit-scan"
             ))
         }
     };
@@ -862,10 +881,16 @@ pub fn run(args: BenchArgs, json_only: bool) -> Result<Value, String> {
                 )
             })?,
         ),
-        "koblitz" => Instance::Binary(match args.koblitz_a {
-            Some(a) => koblitz_instance(a, degree)
+        "koblitz" => Instance::Binary(match (args.koblitz_a, args.model_b) {
+            (Some(a), Some(b)) => koblitz_floor_instance(a, degree, b).ok_or_else(|| {
+                format!(
+                    "no curve y^2 + xy = x^3 + {a}x^2 + b with b = {b:#x} of the K_{a} class at degree {degree} (b is a bitmask in the sparse modulus)"
+                )
+            })?,
+            (None, Some(_)) => return Err("--model-b needs --koblitz-a".into()),
+            (Some(a), None) => koblitz_instance(a, degree)
                 .ok_or_else(|| format!("no Koblitz instance K_{a} at degree {degree}"))?,
-            None => koblitz_instance(1, degree)
+            (None, None) => koblitz_instance(1, degree)
                 .or_else(|| koblitz_instance(0, degree))
                 .ok_or_else(|| format!("no Koblitz instance at degree {degree}"))?,
         }),
