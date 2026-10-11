@@ -17,9 +17,16 @@ networks generated here match their hand-designed chains to within a
 few instructions (Section~\ref{sec:arith-bitsliced}). Bernstein's bit
 operation counts for binary multiplication~\cite{bernstein2009batch}
 are the reference the three-input-logic finding is measured against.
-Bernstein et al.'s later FPGA designs~\cite{bernstein2016fpga} are the
-calibration for the pre-board estimate of Section~\ref{sec:fpga},
-which the measurement then met.
+Bernstein et al.'s later FPGA designs~\cite{bernstein2016fpga}, which
+set the current size record for a completed binary-curve computation
+by solving a $2^{117.35}$-order instance on sect113r2 and were
+extrapolated to a 127-bit field, are the calibration for the pre-board
+estimate of Section~\ref{sec:fpga}, which the measurement then met.
+Harley's group solved ECC2K-95 in 1998 and ECC2K-108 in April 2000,
+the latter with about $1{,}300$ volunteers' machines over four
+months~\cite{harley1998,harley2000}; those two are the only Koblitz
+challenges completed, and their walks are the ancestors of the one in
+Section~\ref{sec:walk-sigma}.
 
 \paragraph{Rho on automorphism classes.} The $\sqrt{2m}$ saving from
 Frobenius and negation on Koblitz curves is due to Wiener and
