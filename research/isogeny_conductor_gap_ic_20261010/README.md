@@ -83,11 +83,113 @@ and certificate.  In short:
 
 ## 3. Results
 
-RESULTS_PLACEHOLDER
+Every number below is quoted from [`TABLES.md`](TABLES.md), which the
+analyzer writes from the committed sessions.  A ratio is a median over the
+curves or pairs named, with the range in brackets.  `S` is the cold
+whole-pipeline cost over √r; every index-calculus `S` here is a lower
+bound and sits above its matched rho.
+
+### 3.1 Part A: fiber-aware relation generation
+
+Ratios against the blind oracle on the same curve, same factor base and
+same targets:
+
+| family | curves, h | arm | S ÷ blind | yield ÷ blind | relation-phase cost per relation ÷ blind |
+|:--|:--|:--|--:|--:|--:|
+| prime, h ≤ 25 | 17, h ∈ {1, 9, 12, 18, 25} | closed | 0.50 [0.21, 2.36] | 11.7 [1.0, 30.8] | 0.094 [0.042, 1.0] |
+| prime, h ≤ 25 | same | lifts | 1.83 [1.00, 3.02] | 11.7 [1.0, 31.1] | 1.01 [0.77, 1.60] |
+| prime, h ≥ 50 | 17, h from 50 to 784 | closed | 4.7 [2.3, 75] | 116 [34, 935] | 0.017 [0.005, 0.062] |
+| prime, h ≥ 50 | same | lifts | 3.8 [1.8, 29] | 114 [34, 933] | 0.86 [0.40, 1.75] |
+| random binary, n = 17, 19 | 8, h ∈ {4, 6, 8} | closed MITM | 5.8 [3.9, 7.9] | 3.5 [3.0, 4.0] | 0.65 [0.57, 0.77] |
+| random binary | same | lifts MITM | 1.02 [1.01, 1.03] | 3.5 [2.9, 4.0] | 0.99 [0.86, 1.11] |
+| random binary | same | lifts F4 | 1.45 [1.26, 1.88] | 3.5 [2.9, 4.0] | 0.99 [0.89, 1.08] |
+| Koblitz, n = 17, 19, 23 | 4, h ∈ {2, 4} | closed MITM | 3.0 [1.9, 4.0] | 2.2 [1.7, 2.8] | 0.78 [0.69, 0.84] |
+| Koblitz | same | lifts MITM | 1.01 [1.00, 1.01] | 2.2 [1.7, 2.8] | 1.04 [0.99, 1.18] |
+| Koblitz | same | lifts F4 | 1.21 [1.07, 1.30] | 2.2 [1.7, 2.8] | 1.03 [0.99, 1.12] |
+| Koblitz, Frobenius-orbit MITM | 2 | closed | 3.0 [1.9, 4.0] | 1.47 [1.45, 1.48] | 0.86 [0.75, 0.97] |
+
+- **Yield scales with the fiber, as predicted (P-A0).**  Probing every lift
+  multiplies relations per trial by up to `h`.  The measured factor falls
+  short of `h` where the factor base is small enough that many lifts
+  repeat a relation already found.
+- **Only the closed table cuts the relation phase's cost per relation, and
+  it pays for that in set-up (P-A1).**  It holds `h` times the blind
+  table's entries.  On prime curves with `h ≤ 25` the cut wins: `S` falls
+  to 0.21 to 0.36 of blind on the 25-bit curves.  With `h ≥ 50`, and on
+  every binary and Koblitz curve, the table costs more than it saves.
+  At `h = 784` closed `S` is 75 times blind.
+- **Lifts gains per target and nothing per operation (P-A2).**  Its cost
+  per relation stays at the blind value; its `S` is the blind `S` plus the
+  extra probes.
+- **The F4 solving degree does not move.**  Blind and lifts descents both
+  solve at mean degree 2.96 to 3.00, maximum 3, with solver operations per
+  relation within 10 percent of each other.
+- **The blind oracle fails on large cofactors.**  On the cofactor-784 curve
+  `icv1-fp24-t6316-2e757e7a` every blind run exhausted its trial cap,
+  while both fiber arms recovered every target; a blind table holds only
+  about `512 / h` in-subgroup sums.
+- **No fiber arm beats rho.**  The best cell, closed MITM on the 25-bit
+  curves, has `S ≥ 21` against rho's 1.0 to 1.4 on the same curves.
+
+COMBINED_PLACEHOLDER
+
+### 3.2 Part B: the same index calculus across the conductor gap
+
+Floor ÷ crater on each certified pair, same arms, factor base and targets:
+
+| family | pairs | gap | arm | S | yield | online wall |
+|:--|--:|:--|:--|--:|--:|--:|
+| prime | 38 | 121 to 1458 | fiber-closed MITM | 1.00 [0.88, 3.10] | 0.99 [0.80, 1.39] | 1.04 [0.64, 1.23] |
+| prime | 38 | same | rho | 0.97 [0.67, 1.71] | – | 1.00 [0.81, 1.48] |
+| Koblitz | 5 | 271, 457, 967 | F4 descent | 0.96 [0.84, 1.00] | 0.95 [0.87, 1.07] | 0.94 [0.83, 1.12] |
+| Koblitz | 5 | same | MITM | 0.96 [0.88, 1.08] | 0.95 [0.87, 1.07] | 0.89 [0.85, 1.08] |
+| Koblitz | 5 | same | rho | 1.01 [0.76, 1.51] | – | 0.95 [0.77, 1.01] |
+| random binary | 3 | 17, 41, 23 | F4 descent | 0.97 [0.92, 1.06] | 1.17 [1.01, 1.22] | 0.93 [0.84, 1.06] |
+| random binary | 3 | same | MITM | 1.13 [0.98, 1.21] | 1.17 [1.01, 1.22] | 1.02 [0.97, 1.06] |
+| random binary | 3 | same | rho | 1.05 [1.03, 1.11] | – | 1.01 [0.88, 1.16] |
+
+- **The solving degree is the same at both ends.**  On all 8 binary and
+  Koblitz pairs, crater and floor F4 descents run at mean degree 2.98 to
+  3.00, maximum 3.
+- **Yield, `S` and wall are unchanged across the gap.**  Every median is
+  between 0.89 and 1.17.  The ranges are those of the run-to-run spread,
+  which rho, a method blind to the endomorphism ring, shows as well.
+- **The prime outliers are set-up, not relations.**  The `S` ratios far
+  from one, up to 3.1, are the five pairs with cofactor 25 or 784 to 5408.
+  There the closed table's set-up cost differs between crater and floor,
+  while relation-phase cost per relation stays within 25 percent.  This
+  round does not explain the set-up difference.
+- **The isomorphic floor model is a null control.**  Its `S` over the
+  floor's is 1.00 [0.28, 1.11] for the closed MITM and 1.01 [0.54, 1.51]
+  for rho, across 38 pairs.
+- **The Koblitz crater keeps its Frobenius folds and the floor has none.**
+  The Frobenius-orbit arms run on the crater only
+  (`koblitz_gap_crater_folds`); the floor's endomorphism ring
+  `Z[π]` admits no extra fold beyond negation.
+
 
 ## 4. Decision
 
-DECISION_PLACEHOLDER
+**Part A is engineering on the relation phase.**  It is not an advance.
+Fiber-aware oracles multiply the relation yield by up to the cofactor.
+The closed table cuts the relation-phase cost per relation by up to 200
+times, and wins whole-pipeline `S` only on prime curves with `h ≤ 25`.
+No fiber arm moves an index-calculus cell below its matched rho.  The
+combined Weil descent is a negative result: adjoining the fiber polynomial
+raises the solving degree and the solver work faster than the fiber adds
+relations.  The oracles stay in `fiber.rs` for any curve with a large
+cofactor, where the blind oracle exhausts.
+
+**Part B is a boundary control for I-4 and I-5.**  Moving between the two
+ends of an `ℓ`-volcano, `End = O_K` to `End = Z[π]`, at gaps up to 1458,
+changes none of the measured quantities beyond run-to-run spread: not the
+solving degree, not the yield, not `S`, not the wall.  Index calculus here
+sees the group and the factor base, not the endomorphism ring.  The one
+place the ring shows is the Frobenius fold, which the Koblitz crater
+admits and its floor does not.  That fold is a rho and orbit-folding
+effect, already priced elsewhere, not an index-calculus one.  No class
+ranking of I-4 or I-5 changes.
+
 
 ## 5. Reproduce
 
