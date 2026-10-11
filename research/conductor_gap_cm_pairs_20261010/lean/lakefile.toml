@@ -4,3 +4,4 @@ defaultTargets = ["GenericInvariance"]
 
 [[lean_lib]]
 name = "GenericInvariance"
+roots = ["GenericInvariance", "TransferBound"]

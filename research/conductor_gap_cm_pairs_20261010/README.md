@@ -83,9 +83,12 @@ Provable now, with Mathlib and no curve-specific library:
   curves are both cyclic of order `N`, so rho, BSGS and the kangaroo
   cannot see the conductor. This is the null hypothesis of
   `PROTOCOL.md`, as a theorem rather than a guess.
-- **The transfer bound** (the formal shape of Jao–Miller–Venkatesan):
-  an ECDLP oracle on one curve in an isogeny class solves the ECDLP on
-  any other at the cost of the isogeny walk.
+- **The transfer bound** (the formal shape of Jao–Miller–Venkatesan), in
+  `lean/TransferBound.lean`: any solver on one curve in the isogeny class,
+  generic or not, solves the ECDLP on any other at two evaluations of the
+  isogeny, returning the same logarithm; with maps both ways the best costs
+  on the two levels differ by at most that. For these pairs the isogeny has
+  degree ℓ, which is what the construction makes large.
 
 Not formalizable today: anything that mentions endomorphism rings,
 conductors, or volcanoes. Mathlib has no isogenies and no `End(E)`. So
