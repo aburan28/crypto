@@ -1,0 +1,110 @@
+{
+ "schema": "ecbench.spec/v1",
+ "label": "conductor gap ell=263: crater (f_E=1) vs floor (f_E=263) over GF(q), q 19 bits",
+ "description": "CM pairs with D=-19: t^2-4q = -19*ell^2, #E = N = 342833 prime on every curve. Curve 1 is the crater (j = -884736, End = O_K); the rest are floor curves (End has conductor ell = 263). Same q, same N, same group structure; only the endomorphism conductor differs. Paired cost(floor)/cost(crater) is the measurement. Source: research/conductor_gap_cm_pairs_20261010/results/ell_263_q19.txt.",
+ "workloads": {
+  "curves": [
+   {
+    "kind": "prime_explicit",
+    "p": 343073,
+    "a": 36086,
+    "b": 72172,
+    "group_order": 342833,
+    "r": 342833,
+    "gx": 0,
+    "gy": 2882
+   },
+   {
+    "kind": "prime_explicit",
+    "p": 343073,
+    "a": 43182,
+    "b": 57354,
+    "group_order": 342833,
+    "r": 342833,
+    "gx": 2,
+    "gy": 20047
+   },
+   {
+    "kind": "prime_explicit",
+    "p": 343073,
+    "a": 248905,
+    "b": 168314,
+    "group_order": 342833,
+    "r": 342833,
+    "gx": 0,
+    "gy": 109658
+   },
+   {
+    "kind": "prime_explicit",
+    "p": 343073,
+    "a": 4202,
+    "b": 45429,
+    "group_order": 342833,
+    "r": 342833,
+    "gx": 0,
+    "gy": 108085
+   },
+   {
+    "kind": "prime_explicit",
+    "p": 343073,
+    "a": 145160,
+    "b": 299911,
+    "group_order": 342833,
+    "r": 342833,
+    "gx": 0,
+    "gy": 16679
+   }
+  ],
+  "targets_per_curve": 4,
+  "target_seed": 20261010
+ },
+ "arms": [
+  {
+   "name": "rho-neg",
+   "role": "reference",
+   "method": {
+    "id": "rho.negation"
+   }
+  },
+  {
+   "name": "bsgs-neg",
+   "role": "candidate",
+   "method": {
+    "id": "bsgs.negation"
+   }
+  },
+  {
+   "name": "kangaroo",
+   "role": "candidate",
+   "method": {
+    "id": "kangaroo.vow"
+   }
+  },
+  {
+   "name": "rho-neg-aa",
+   "role": "control",
+   "method": {
+    "id": "rho.negation"
+   }
+  },
+  {
+   "name": "ic-mitm",
+   "role": "candidate",
+   "method": {
+    "id": "ic.pipeline",
+    "params": {
+     "factor_base": "prime-abscissa:size=64",
+     "oracle": "mitm:negation_folded=1"
+    }
+   }
+  }
+ ],
+ "measurement": {
+  "rounds": 5,
+  "warmup": 1,
+  "order": "alternate",
+  "seed": 1,
+  "isolation_required": "L2",
+  "timeout_seconds": 300
+ }
+}

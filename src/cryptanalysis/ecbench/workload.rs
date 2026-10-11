@@ -18,6 +18,7 @@ use serde_json::{json, Value};
 
 use crate::binary_ecc::IrreduciblePoly;
 use crate::cryptanalysis::ecbench::canonical::{bare_id, compat_u128, derive_u128, derive_u64};
+use crate::cryptanalysis::ecbench::conductor_gap::{self, GapLevel};
 use crate::cryptanalysis::ecbench_large_prime::binary_explicit_instance;
 use crate::cryptanalysis::ic_boundary::{
     find_prime_order_curve, koblitz_instance, random_binary_instance, roster_prime_instance,
@@ -45,6 +46,17 @@ pub enum CurveSpec {
         n: u32,
         seed: u64,
         max_cofactor: u64,
+    },
+    /// `conductor_gap::{crater, floor}(params(ell, t), seed)`: a curve of
+    /// the CM pair over `GF((t² + 19ℓ²)/4)` with prime order `q + 1 − t`,
+    /// at the crater (endomorphism conductor 1) or the floor (conductor
+    /// `ℓ`), certified from the Frobenius discriminant `−19ℓ²` alone.
+    /// `seed` drives the floor search and is ignored at the crater.
+    ConductorGap {
+        ell: u64,
+        t: u64,
+        level: GapLevel,
+        seed: u64,
     },
     /// A prime curve given outright: `y² = x³ + ax + b` over `F_p`, the
     /// group order, the prime subgroup order `r` and a generator of it.
@@ -115,6 +127,19 @@ impl CurveSpec {
             } => random_binary_instance(n, seed, max_cofactor)
                 .map(|i| Instance::Binary(Box::new(i)))
                 .ok_or_else(|| format!("no binary curve found for n={n} seed={seed}")),
+            CurveSpec::ConductorGap {
+                ell,
+                t,
+                level,
+                seed,
+            } => {
+                let p = conductor_gap::params(ell, t)?;
+                match level {
+                    GapLevel::Crater => conductor_gap::crater(p),
+                    GapLevel::Floor => conductor_gap::floor(p, seed),
+                }
+                .map(Instance::Prime)
+            }
             CurveSpec::PrimeExplicit {
                 p,
                 a,
@@ -217,6 +242,15 @@ impl CurveSpec {
                 seed,
                 max_cofactor,
             } => format!("random_binary_instance({n}, {seed}, {max_cofactor})"),
+            CurveSpec::ConductorGap {
+                ell,
+                t,
+                level,
+                seed,
+            } => match level {
+                GapLevel::Crater => format!("conductor_gap::crater(params({ell}, {t}))"),
+                GapLevel::Floor => format!("conductor_gap::floor(params({ell}, {t}), {seed})"),
+            },
             CurveSpec::PrimeExplicit { p, a, b, .. } => {
                 format!("PrimeCurve {{ p: {p}, a: {a}, b: {b} }} (explicit)")
             }
@@ -865,6 +899,61 @@ mod tests {
         assert!(d < 1.63 / (n as f64).sqrt(), "KS D = {d}");
         let gap = xs.iter().map(|x| (x - 0.5).abs()).sum::<f64>() / n as f64;
         assert!((gap - 0.25).abs() < 0.005, "mean gap {gap}");
+    }
+
+    #[test]
+    fn conductor_gap_pair_shares_order_and_differs_in_j() {
+        let crater = CurveSpec::ConductorGap {
+            ell: 263,
+            t: 241,
+            level: GapLevel::Crater,
+            seed: 0,
+        };
+        let floor = CurveSpec::ConductorGap {
+            ell: 263,
+            t: 241,
+            level: GapLevel::Floor,
+            seed: 3,
+        };
+        let (Instance::Prime(c), Instance::Prime(f)) =
+            (crater.build().unwrap(), floor.build().unwrap())
+        else {
+            panic!("conductor_gap builds prime instances");
+        };
+        assert_eq!(
+            (c.curve.p, c.group_order, c.cofactor),
+            (343_073, 342_833, 1)
+        );
+        assert_eq!(
+            (f.curve.p, f.group_order, f.cofactor),
+            (343_073, 342_833, 1)
+        );
+        assert_ne!(
+            conductor_gap::j_invariant(&c.curve),
+            conductor_gap::j_invariant(&f.curve)
+        );
+        assert_eq!(
+            conductor_gap::j_invariant(&c.curve),
+            343_073 - 884_736 % 343_073
+        );
+        // The explicit form a measured child receives rebuilds the same curve.
+        let ex = CurveSpec::explicit(&Instance::Prime(f.clone())).unwrap();
+        let Instance::Prime(f2) = ex.build().unwrap() else {
+            panic!()
+        };
+        assert_eq!(
+            (f2.curve.a, f2.curve.b, f2.generator),
+            (f.curve.a, f.curve.b, f.generator)
+        );
+        assert_eq!(crater.call(), "conductor_gap::crater(params(263, 241))");
+        assert!(CurveSpec::ConductorGap {
+            ell: 263,
+            t: 3,
+            level: GapLevel::Crater,
+            seed: 0
+        }
+        .build()
+        .is_err());
     }
 
     #[test]

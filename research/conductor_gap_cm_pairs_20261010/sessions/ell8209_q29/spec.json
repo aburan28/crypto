@@ -1,0 +1,89 @@
+{
+ "schema": "ecbench.spec/v1",
+ "label": "conductor gap ell=8209: crater (f_E=1) vs floor (f_E=8209) over GF(q), q 29 bits",
+ "description": "CM pairs with D=-19: t^2-4q = -19*ell^2, #E = N = 320091991 prime on every curve. Curve 1 is the crater (j = -884736, End = O_K); the rest are floor curves (End has conductor ell = 8209). Same q, same N, same group structure; only the endomorphism conductor differs. Paired cost(floor)/cost(crater) is the measurement. Source: research/conductor_gap_cm_pairs_20261010/results/ell_8209_q29.txt.",
+ "workloads": {
+  "curves": [
+   {
+    "kind": "prime_explicit",
+    "p": 320092037,
+    "a": 254576120,
+    "b": 276414759,
+    "group_order": 320091991,
+    "r": 320091991,
+    "gx": 1,
+    "gy": 23879176
+   },
+   {
+    "kind": "prime_explicit",
+    "p": 320092037,
+    "a": 101186781,
+    "b": 57596093,
+    "group_order": 320091991,
+    "r": 320091991,
+    "gx": 0,
+    "gy": 112219098
+   },
+   {
+    "kind": "prime_explicit",
+    "p": 320092037,
+    "a": 64570613,
+    "b": 54195252,
+    "group_order": 320091991,
+    "r": 320091991,
+    "gx": 0,
+    "gy": 5368294
+   },
+   {
+    "kind": "prime_explicit",
+    "p": 320092037,
+    "a": 234001141,
+    "b": 79995391,
+    "group_order": 320091991,
+    "r": 320091991,
+    "gx": 5,
+    "gy": 53527325
+   }
+  ],
+  "targets_per_curve": 4,
+  "target_seed": 20261010
+ },
+ "arms": [
+  {
+   "name": "rho-neg",
+   "role": "reference",
+   "method": {
+    "id": "rho.negation"
+   }
+  },
+  {
+   "name": "bsgs-neg",
+   "role": "candidate",
+   "method": {
+    "id": "bsgs.negation"
+   }
+  },
+  {
+   "name": "kangaroo",
+   "role": "candidate",
+   "method": {
+    "id": "kangaroo.vow"
+   }
+  },
+  {
+   "name": "rho-neg-aa",
+   "role": "control",
+   "method": {
+    "id": "rho.negation"
+   }
+  }
+ ],
+ "measurement": {
+  "rounds": 5,
+  "warmup": 1,
+  "order": "alternate",
+  "seed": 1,
+  "isolation_required": "L2",
+  "timeout_seconds": 600
+ }
+}
