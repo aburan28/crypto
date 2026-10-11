@@ -394,6 +394,7 @@ pub fn artin_schreier_root(gf: &Gf2, n: u32, c: u64) -> Option<u64> {
         }
     }
     None
+    (0..(1u64 << n)).find(|&v| (gf.sqr(v) ^ v) == c)
 }
 
 /// Pack `(x, y)` exactly as [`crate::cryptanalysis::koblitz_index_calculus::pack_point`]
@@ -1192,7 +1193,7 @@ mod tests {
 mod wide_tests {
     use super::*;
     use crate::binary_ecc::curve::{point_add, point_double, point_neg, scalar_mul};
-    use crate::binary_ecc::{BinaryCurve, BinaryPoint, F2mElement};
+    use crate::binary_ecc::{BinaryPoint, F2mElement};
     use crate::cryptanalysis::binary_semaev::{binary_semaev_s3, solve_artin_schreier};
     use crate::cryptanalysis::koblitz_index_calculus::{
         find_irreducible_sparse_wide, KoblitzCurve,
@@ -1364,6 +1365,7 @@ mod wide_tests {
         for _ in 0..40 {
             state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
             let x = (state & fast.gf.mask) as u128;
+            let x = state & fast.gf.mask;
             let got: std::collections::HashSet<(u128, u128)> =
                 fast.points_with_x(b, x).into_iter().flatten().collect();
             let xe = fast.element(x);

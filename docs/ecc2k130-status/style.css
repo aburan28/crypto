@@ -156,6 +156,17 @@ h2 {
 }
 section { margin: 34px 0; }
 
+.mac-control {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+}
+.mac-control .note { margin: 8px 0 14px; }
+.mac-control .mac-row { margin: 16px 0 10px; }
+.mac-control .card { background: var(--panel-2); }
+.mac-source { margin: 10px 0; color: var(--muted); font-size: 13px; }
+
 /* ---- banner + freshness ---- */
 
 .banner {

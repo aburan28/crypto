@@ -1,4 +1,8 @@
-# LaTeX paper draft
+# LaTeX paper drafts
+
+This directory holds the structural-completeness paper (below) and, in
+[`ecc2k130/`](ecc2k130/), the ECC2K-130 campaign paper with its own
+Makefile and README.
 
 `structural_completeness.tex` is a paper-quality LaTeX version of
 [`research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md`](../research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md).

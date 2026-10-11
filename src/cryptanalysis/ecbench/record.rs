@@ -728,6 +728,19 @@ mod tests {
         // serde_json feature set used by the current build.
         assert_eq!(legacy.gae.to_bits(), 4_660_869_402_834_764_135);
         assert_eq!(legacy.nested[0].to_bits(), 4_600_377_059_258_432_959);
+        assert_eq!(
+            legacy.gae.to_bits(),
+            legacy_json_float(current.gae).unwrap().to_bits()
+        );
+        assert_eq!(
+            legacy.nested[0].to_bits(),
+            legacy_json_float(current.nested[0]).unwrap().to_bits()
+        );
+        // serde_json >= 1.0.15x parses decimals exactly under
+        // arbitrary_precision, so the default path now agrees bit for bit
+        // with the legacy reproducer instead of losing the tail.
+        assert_eq!(legacy.gae.to_bits(), current.gae.to_bits());
+        assert_eq!(legacy.nested[0].to_bits(), current.nested[0].to_bits());
         assert_eq!(legacy.integer, 17);
     }
 

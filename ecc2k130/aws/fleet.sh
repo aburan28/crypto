@@ -104,6 +104,8 @@ defaultSubnets() {
 asgExists() {
     [ "$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$ASG" \
          --query 'length(AutoScalingGroups)' --output text)" != 0 ]
+}
+
 # Tab-separated instance ids the fleet currently considers active. The
 # fleet's real membership, not the aggregate FulfilledCapacity field, which
 # lags terminate-instances and can be moved by unrelated churn elsewhere.
@@ -123,7 +125,8 @@ activeGpuCapacity() {
     # would leave total=0, which roll treats as "already restored".
     types=$(aws ec2 describe-fleet-instances --fleet-id "$1" \
         --query 'ActiveInstances[].InstanceType' --output text) || return 1
-    # shellcheck disable=SC2086 -- word-split on purpose, instance types only
+    # Word-split on purpose: the output contains instance types only.
+    # shellcheck disable=SC2086
     for type in $types; do
         total=$((total + $(gpusOf "$type")))
     done
@@ -364,7 +367,8 @@ roll)
     if [ "$batch" -lt 1 ]; then echo "--batch must be >= 1" >&2; exit 1; fi
     timeout=${ROLL_TIMEOUT_SECONDS:-1800}
     instances=$(activeInstanceIds "$id")
-    # shellcheck disable=SC2086 -- word-split on purpose, instance ids only
+    # Word-split on purpose: the output contains instance ids only.
+    # shellcheck disable=SC2086
     set -- $instances
     total=$#
     if [ "$total" -eq 0 ]; then echo "fleet $id has no active instances"; exit 0; fi
@@ -389,7 +393,8 @@ roll)
         # lost GPU capacity is still missing.
         capacityBefore=$(activeGpuCapacity "$id")
         echo "terminating:$group"
-        # shellcheck disable=SC2086 -- word-split on purpose, instance ids only
+        # Word-split on purpose: the output contains instance ids only.
+        # shellcheck disable=SC2086
         aws ec2 terminate-instances --instance-ids $group >/dev/null
         # FulfilledCapacity is an aggregate: it lags terminate-instances, and
         # unrelated fleet churn (an interruption elsewhere, a concurrent

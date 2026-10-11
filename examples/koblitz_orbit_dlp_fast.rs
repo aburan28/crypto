@@ -5,6 +5,10 @@
 //! regular-root index once (no pair table, no edge selectors), then
 //!   1. rank stage: decomposes random `[a]G` until the K orbit logs are fixed,
 //!   2. target stage: decomposes each published target and recovers its log.
+//!
+//! 1. rank stage: decomposes random `[a]G` until the K orbit logs are fixed,
+//! 2. target stage: decomposes each published target and recovers its log.
+//!
 //! Every stage is timed in this one process.
 //!
 //! Frobenius is a bit rotation in a normal basis, so a demanded partner
@@ -30,6 +34,7 @@ struct Linear {
 impl Linear {
     fn from_images(images: &[u64]) -> Self {
         let chunks = (images.len() + 7) / 8;
+        let chunks = images.len().div_ceil(8);
         let mut tables = vec![[0u64; 256]; chunks];
         for (chunk, table) in tables.iter_mut().enumerate() {
             for byte in 1usize..256 {
@@ -635,6 +640,7 @@ fn peak_rss_bytes() -> Option<u64> {
 // through `n = 127`); only field elements move to the wider word.
 mod wide {
     use super::{mulmod, pack, peak_rss_bytes, unpack, Echelon};
+    use super::{pack, unpack};
     use crypto_lib::cryptanalysis::koblitz_fast_arith::{
         s3_x_roots_128, FastBinaryCurve128, FastPoint128,
     };
@@ -654,7 +660,7 @@ mod wide {
 
     impl Linear128 {
         fn from_images(images: &[u128]) -> Self {
-            let chunks = (images.len() + 7) / 8;
+            let chunks = images.len().div_ceil(8);
             let mut tables = vec![[0u128; 256]; chunks];
             for (chunk, table) in tables.iter_mut().enumerate() {
                 for byte in 1usize..256 {
@@ -997,18 +1003,12 @@ mod wide {
         };
         let n_u32 = gf.n;
         let n = n_u32 as usize;
-        let chunk = (n_states + threads - 1) / threads;
+        let chunk = n_states.div_ceil(threads);
         let (sender, receiver) = std::sync::mpsc::channel::<(usize, Relation128, u128)>();
         std::thread::scope(|scope| {
             let mut handles = Vec::with_capacity(threads);
             for thread in 0..threads {
                 let sender = sender.clone();
-                let gf = gf;
-                let fast = fast;
-                let basis = basis;
-                let solver = solver;
-                let index = index;
-                let base = base;
                 handles.push(scope.spawn(move || {
                     let pos_lo = thread * chunk;
                     let pos_hi = ((thread + 1) * chunk).min(n_states);
@@ -1082,7 +1082,7 @@ mod wide {
             let mut check_ns_total = 0u128;
             for (position, relation, check_ns) in receiver {
                 check_ns_total += check_ns;
-                if best.as_ref().map_or(true, |(pos, _, _)| position < *pos) {
+                if best.as_ref().is_none_or(|(pos, _, _)| position < *pos) {
                     best = Some((position, relation, check_ns));
                 }
             }

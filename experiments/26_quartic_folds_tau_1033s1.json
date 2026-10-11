@@ -1,0 +1,356 @@
+[
+  {
+    "base_points": 524,
+    "bits": 38.050497570621246,
+    "cofactor": 4,
+    "control": {
+      "arm": "control",
+      "columns": 524,
+      "correct": true,
+      "duplicate_rows": 0,
+      "filtered_out": 43,
+      "la_attempts": 1,
+      "la_ops": 4649373,
+      "la_ops_last": 4649373,
+      "phi": 0.9198473282442748,
+      "relations": 525,
+      "residuals_at_solve": 49597,
+      "row_weight": 5.0,
+      "solved": true,
+      "unknowns": 482,
+      "wiedemann_constant": 20.012452437113687
+    },
+    "decomposition_rate": 0.08362903225806452,
+    "decompositions": 4148,
+    "decompositions_per_target": [
+      49075,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      514,
+      1
+    ],
+    "experiment": "e18",
+    "family": "Translation",
+    "folded": {
+      "arm": "2torsion-tau",
+      "columns": 262,
+      "correct": true,
+      "duplicate_rows": 0,
+      "filtered_out": 23,
+      "la_attempts": 1,
+      "la_ops": 1148394,
+      "la_ops_last": 1148394,
+      "phi": 0.916030534351145,
+      "relations": 263,
+      "residuals_at_solve": 24069,
+      "row_weight": 4.973384030418251,
+      "solved": true,
+      "unknowns": 240,
+      "wiedemann_constant": 19.937395833333333
+    },
+    "fp_muls_per_add": 97.0,
+    "group_order": 1138678472324,
+    "n": 284669618081,
+    "p": 1033,
+    "points_per_column": 2.0,
+    "residuals": 49600,
+    "rho": [
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 90226446,
+        "group_ops": 929758,
+        "seed": 1000,
+        "steps": 926035
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 62907316,
+        "group_ops": 648112,
+        "seed": 1001,
+        "steps": 644346
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 54987991,
+        "group_ops": 566473,
+        "seed": 1002,
+        "steps": 562743
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 58713915,
+        "group_ops": 604884,
+        "seed": 1003,
+        "steps": 601159
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 109024730,
+        "group_ops": 1123552,
+        "seed": 1004,
+        "steps": 1119828
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 101061490,
+        "group_ops": 1041454,
+        "seed": 1005,
+        "steps": 1037690
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 29227857,
+        "group_ops": 300905,
+        "seed": 1006,
+        "steps": 297152
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 82777656,
+        "group_ops": 852964,
+        "seed": 1007,
+        "steps": 849231
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 70571043,
+        "group_ops": 727124,
+        "seed": 1008,
+        "steps": 723396
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 82641118,
+        "group_ops": 851556,
+        "seed": 1009,
+        "steps": 847809
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 40628678,
+        "group_ops": 418441,
+        "seed": 1010,
+        "steps": 414724
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 37140982,
+        "group_ops": 382484,
+        "seed": 1011,
+        "steps": 378772
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 38250169,
+        "group_ops": 393915,
+        "seed": 1012,
+        "steps": 390173
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 73493480,
+        "group_ops": 757253,
+        "seed": 1013,
+        "steps": 753526
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 36713777,
+        "group_ops": 378081,
+        "seed": 1014,
+        "steps": 374385
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 0,
+        "fold": "None",
+        "fp_muls": 158630783,
+        "group_ops": 1634955,
+        "seed": 1015,
+        "steps": 1631201
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 1062,
+        "fold": "Negation",
+        "fp_muls": 79269716,
+        "group_ops": 816594,
+        "seed": 1000,
+        "steps": 788163
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 550,
+        "fold": "Negation",
+        "fp_muls": 44563717,
+        "group_ops": 458895,
+        "seed": 1001,
+        "steps": 441525
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 353,
+        "fold": "Negation",
+        "fp_muls": 26528108,
+        "group_ops": 273003,
+        "seed": 1002,
+        "steps": 261128
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 308,
+        "fold": "Negation",
+        "fp_muls": 24215703,
+        "group_ops": 249172,
+        "seed": 1003,
+        "steps": 238026
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 576,
+        "fold": "Negation",
+        "fp_muls": 50172582,
+        "group_ops": 516716,
+        "seed": 1004,
+        "steps": 497489
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 226,
+        "fold": "Negation",
+        "fp_muls": 17018582,
+        "group_ops": 174988,
+        "seed": 1005,
+        "steps": 165992
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 137,
+        "fold": "Negation",
+        "fp_muls": 12294939,
+        "group_ops": 126312,
+        "seed": 1006,
+        "steps": 118844
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 1414,
+        "fold": "Negation",
+        "fp_muls": 109889347,
+        "group_ops": 1132189,
+        "seed": 1007,
+        "steps": 1094132
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 581,
+        "fold": "Negation",
+        "fp_muls": 45570632,
+        "group_ops": 469274,
+        "seed": 1008,
+        "steps": 451435
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 400,
+        "fold": "Negation",
+        "fp_muls": 32720781,
+        "group_ops": 336835,
+        "seed": 1009,
+        "steps": 323079
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 543,
+        "fold": "Negation",
+        "fp_muls": 46599742,
+        "group_ops": 479892,
+        "seed": 1010,
+        "steps": 461759
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 404,
+        "fold": "Negation",
+        "fp_muls": 33076210,
+        "group_ops": 340500,
+        "seed": 1011,
+        "steps": 326583
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 585,
+        "fold": "Negation",
+        "fp_muls": 46962087,
+        "group_ops": 483614,
+        "seed": 1012,
+        "steps": 465252
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 761,
+        "fold": "Negation",
+        "fp_muls": 62773337,
+        "group_ops": 646587,
+        "seed": 1013,
+        "steps": 623303
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 815,
+        "fold": "Negation",
+        "fp_muls": 64493572,
+        "group_ops": 664311,
+        "seed": 1014,
+        "steps": 640615
+      },
+      {
+        "correct": true,
+        "cycle_escapes": 834,
+        "fold": "Negation",
+        "fp_muls": 62802287,
+        "group_ops": 646869,
+        "seed": 1015,
+        "steps": 623593
+      }
+    ],
+    "seed": 1,
+    "targets_decomposed": 525,
+    "wall_ms": 2764823.413598
+  }
+]

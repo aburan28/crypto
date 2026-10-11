@@ -1362,24 +1362,6 @@ fn max_f4_cols() -> usize {
 ///
 /// Returns `None` if the matrix would exceed the size limits.
 pub fn matrix_f4_f2(polys: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<Vec<F2BoolPoly>> {
-    crate::cryptanalysis::groebner_cache::get_or_compute(polys, n_vars, degree, || {
-        matrix_f4_f2_uncached(polys, n_vars, degree)
-    })
-}
-
-fn matrix_f4_f2_uncached(
-    polys: &[F2BoolPoly],
-    n_vars: usize,
-    degree: u32,
-) -> Option<Vec<F2BoolPoly>> {
-    if polys.is_empty() {
-        return Some(Vec::new());
-    }
-    let (cols, mut matrix) = build_macaulay(polys, n_vars, degree)?;
-    if matrix.is_empty() {
-        return Some(Vec::new());
-    }
-    let rank = rref_f2(&mut matrix, cols.len());
     matrix_f4_f2_counted(polys, n_vars, degree).map(|(rows, _)| rows)
 }
 
@@ -2406,7 +2388,6 @@ pub(crate) fn f5_rows_packed_full_columns(
             *seen |= word;
         }
     }
-
     let last_bits = full_cols % 64;
     let last_mask = if last_bits == 0 {
         u64::MAX
@@ -4971,6 +4952,16 @@ pub struct SolveStats {
     /// Assignments checked inside those cubes.
     pub tail_assignments_tested: usize,
     /// Split nodes that deferred an F4 reduction.
+    /// Number of algebraically reduced nodes closed by direct enumeration of
+    /// the remaining small Boolean cube.
+    #[serde(default)]
+    pub tail_enumerations: usize,
+    /// Complete assignments checked inside those tail cubes.
+    #[serde(default)]
+    pub tail_assignments_tested: usize,
+    /// Split nodes that deliberately deferred F4 until the configured batch
+    /// of Boolean decisions was complete.
+    #[serde(default)]
     pub deferred_splits: usize,
     /// True if the node budget ran out or the input was unsupported, so
     /// results may be incomplete. Check `unsupported` to distinguish them.
@@ -5033,6 +5024,8 @@ pub struct SolveStats {
 
 impl SolveStats {
     /// Search effort including hybrid tail assignments.
+    /// Comparable search effort including assignments checked by the hybrid
+    /// tail enumerator.
     pub fn effort(&self) -> usize {
         self.splits + self.tail_assignments_tested
     }

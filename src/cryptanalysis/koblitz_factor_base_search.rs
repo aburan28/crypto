@@ -74,6 +74,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::binary_ecc::{BinaryPoint, F2mElement};
 
+use super::koblitz_fast_arith::FastBinaryCurve;
 use super::koblitz_groebner::{f4_word_ops_thread, FieldStructure, SolverEngine};
 use super::koblitz_index_calculus::{
     all_factors_of_x_n_minus_1, build_frobenius_factor_base,
@@ -827,6 +828,16 @@ fn spec_abscissa_bound(spec: &FactorBaseSpec, n: u32) -> Option<u64> {
             }
             1u64.checked_shl(total)
         }
+        FactorBaseSpec::StandardSubspace { dimension } => {
+            if *dimension == 0 || *dimension > 20 || *dimension >= n {
+                return None;
+            }
+            1u64.checked_shl(*dimension)
+        }
+        // A cofactor image can merge abscissae, so the parent bound is
+        // not a lower bound for the child; sampled orbits have no bound
+        // at all.
+        FactorBaseSpec::CofactorProjected { .. } | FactorBaseSpec::SubgroupOrbits { .. } => None,
         // Saturation is monotone in abscissae (parent x-values are kept),
         // so a parent bound is a lower bound for the child.
         FactorBaseSpec::TwoTorsionSaturated { parent } => spec_abscissa_bound(parent, n),
@@ -1556,9 +1567,11 @@ mod tests {
         let kc = KoblitzCurve::new(0, 41).unwrap();
         assert_eq!(order_of_2_mod_n(41), Some(20));
         let targets = TargetSet::new(&kc, 8, 4096, 11);
-        let mut opts = SearchOptions::default();
-        opts.m = 2;
-        opts.max_abscissae = 2048;
+        let opts = SearchOptions {
+            m: 2,
+            max_abscissae: 2048,
+            ..SearchOptions::default()
+        };
         for spec in [
             FactorBaseSpec::Factor { index: 1 },
             FactorBaseSpec::Divisor {
@@ -1592,6 +1605,7 @@ mod tests {
             .skipped
             .as_ref()
             .map_or(true, |s| { !s.contains("exceed the cap") }));
+            .is_none_or(|s| !s.contains("exceed the cap")));
     }
 
     #[test]

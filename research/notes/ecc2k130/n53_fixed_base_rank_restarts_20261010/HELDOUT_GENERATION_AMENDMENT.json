@@ -1,0 +1,15 @@
+{
+  "schema": "n53-rank-restart-heldout-generation-amendment-v1",
+  "original_generation_rule_sha256": "52dddfa5a45b7becf2be3c7c95ad1947ab223dd37d4c25ad2377665c86c320de",
+  "failed_attempt_receipt_sha256": "bab348c2c7293a3842bbe99ac26e9548c68c9f77a2508a7ecab9f92535960e48",
+  "failed_attempt_status": "INVALID_OR_INCOMPLETE",
+  "failed_attempt_exit_code": 101,
+  "failure": "The fixture CLI rejected its documented strong backend at an earlier reference-or-packed assertion, before public point generation.",
+  "repair": "Remove the redundant earlier backend assertion; retain the later reference/packed/strong validation. Apply rustfmt to the changed example.",
+  "overrides": {
+    "generator_source_sha256": "e6484ed5fb0ecc1e3382b0cd8b1a5f517582d4eb3aa2efbcef7755e0371e01ee",
+    "generator_binary_sha256": "4a5f9bcae529e9407c7664a1ae6b74558d38c5aaa4ee331d06f6a61549c5b230"
+  },
+  "unchanged": ["public_hash_seed", "generator_command", "generator_method", "selected_rank_probe_cap", "rank_seeds", "rho_seeds", "rho_online_configuration", "ic_candidate_ids", "per_arm_resource_envelope"],
+  "attempt_policy": "Retry exactly once with the same preregistered hash seed after committing and pushing this repair; preserve the failed first attempt and stop on a duplicate prior input."
+}

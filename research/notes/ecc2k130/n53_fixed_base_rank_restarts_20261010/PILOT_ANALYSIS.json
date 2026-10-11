@@ -1,0 +1,417 @@
+{
+  "base_hash_blake3": "7af2460c8b5a2c29f9d1aa7fefecbcde3a6ce761293d0dab0cecfc3bc980b973",
+  "binary_sha256": "3c03013e4a12d5eac74e1737c5549558ddf734aa9a324426914778765da0f51e",
+  "by_candidate": {
+    "cap200000": {
+      "all_verified": true,
+      "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h6c8de5cfb242",
+      "cold_range_ms": [
+        6704.194458,
+        10881.242083
+      ],
+      "median_cold_ms": 6910.438542999999,
+      "median_paired_cold_ratio": 1.091008996201352,
+      "median_paired_probe_reduction_fraction": 0.08940975343372448,
+      "median_total_rank_probes": 16993325,
+      "paired": [
+        {
+          "cold_ratio_to_control": 1.840468147056805,
+          "probe_reduction_fraction": 0.09942861295064687,
+          "seed": 530053
+        },
+        {
+          "cold_ratio_to_control": 1.091008996201352,
+          "probe_reduction_fraction": 0.08940975343372448,
+          "seed": 530054
+        },
+        {
+          "cold_ratio_to_control": 1.068696536748899,
+          "probe_reduction_fraction": -0.056879632520795864,
+          "seed": 530055
+        }
+      ]
+    },
+    "cap400000": {
+      "all_verified": true,
+      "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h7f0d28c1d4ff",
+      "cold_range_ms": [
+        5936.395792,
+        6940.423417
+      ],
+      "median_cold_ms": 6575.209667,
+      "median_paired_cold_ratio": 1.0168535261251628,
+      "median_paired_probe_reduction_fraction": 0.027138183038820207,
+      "median_total_rank_probes": 17104035,
+      "paired": [
+        {
+          "cold_ratio_to_control": 1.173912695686843,
+          "probe_reduction_fraction": 0.027138183038820207,
+          "seed": 530053
+        },
+        {
+          "cold_ratio_to_control": 0.9660610614233246,
+          "probe_reduction_fraction": 0.08347733901821996,
+          "seed": 530054
+        },
+        {
+          "cold_ratio_to_control": 1.0168535261251628,
+          "probe_reduction_fraction": 0.0,
+          "seed": 530055
+        }
+      ]
+    },
+    "control": {
+      "all_verified": true,
+      "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h3b66c9056640",
+      "cold_range_ms": [
+        5912.214292,
+        6466.230876
+      ],
+      "median_cold_ms": 6144.948833,
+      "median_paired_cold_ratio": 1.0,
+      "median_paired_probe_reduction_fraction": 0.0,
+      "median_total_rank_probes": 18413613,
+      "paired": [
+        {
+          "cold_ratio_to_control": 1.0,
+          "probe_reduction_fraction": 0.0,
+          "seed": 530053
+        },
+        {
+          "cold_ratio_to_control": 1.0,
+          "probe_reduction_fraction": 0.0,
+          "seed": 530054
+        },
+        {
+          "cold_ratio_to_control": 1.0,
+          "probe_reduction_fraction": 0.0,
+          "seed": 530055
+        }
+      ]
+    }
+  },
+  "cells": [
+    {
+      "cold_in_process_ms": 5912.214292,
+      "cold_phase_ms": {
+        "factor_base": 19.561792,
+        "isogeny": 0.0,
+        "precompute_basis_and_selftest": 3.1923749999999997,
+        "precompute_index": 1108.137917,
+        "rank_matrix_build": 233.942172,
+        "rank_pdp": 4526.345439,
+        "rank_query": 10.269669,
+        "rank_relation_check": 3.305387,
+        "relation_la": 1.021875,
+        "setup_input_control": 0.10241600000000001,
+        "target_descent": 0.00125,
+        "target_pdp": 6.268125,
+        "target_query": 0.0,
+        "target_recovery_check": 0.04725,
+        "target_relation_check": 0.018625
+      },
+      "external_wall_ms": 5945.57283299946,
+      "label": "control",
+      "peak_rss_bytes": 348848128,
+      "rank": 220,
+      "rank_attempts": 220,
+      "rank_capped_attempts": 0,
+      "rank_failures": 0,
+      "rank_probes_total": 18413613,
+      "rank_relations": 220,
+      "rank_trace_sha256": "5a33ede02d30f6a540820380ab0e5e66b55ccee5c188d5004e3b10de5d22ec71",
+      "run_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h3b66c9056640W190194d8394aR1",
+      "seed": 530053,
+      "status": "VERIFIED",
+      "target_online_ms": 6.335249999999999
+    },
+    {
+      "cold_in_process_ms": 10881.242083,
+      "cold_phase_ms": {
+        "factor_base": 27.015458,
+        "isogeny": 0.0,
+        "precompute_basis_and_selftest": 3.894834,
+        "precompute_index": 2043.7436249999998,
+        "rank_matrix_build": 416.092845,
+        "rank_pdp": 8358.423739999998,
+        "rank_query": 13.314247,
+        "rank_relation_check": 11.008792999999999,
+        "relation_la": 1.079708,
+        "setup_input_control": 0.15520799999999998,
+        "target_descent": 0.00075,
+        "target_pdp": 6.442209,
+        "target_query": 0.0,
+        "target_recovery_check": 0.051625000000000004,
+        "target_relation_check": 0.019041
+      },
+      "external_wall_ms": 10952.385041000525,
+      "label": "cap200000",
+      "peak_rss_bytes": 349847552,
+      "rank": 220,
+      "rank_attempts": 237,
+      "rank_capped_attempts": 17,
+      "rank_failures": 17,
+      "rank_probes_total": 16582773,
+      "rank_relations": 220,
+      "rank_trace_sha256": "0d46c2ef6358a2c11d292337b68e6d7d39723566af6b13a9b17b7c4a4b7fb522",
+      "run_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h6c8de5cfb242W190194d8394aR1",
+      "seed": 530053,
+      "status": "VERIFIED",
+      "target_online_ms": 6.513625
+    },
+    {
+      "cold_in_process_ms": 6940.423417,
+      "cold_phase_ms": {
+        "factor_base": 23.965125,
+        "isogeny": 0.0,
+        "precompute_basis_and_selftest": 4.155291,
+        "precompute_index": 1277.484708,
+        "rank_matrix_build": 286.158707,
+        "rank_pdp": 5315.597858,
+        "rank_query": 12.870838000000001,
+        "rank_relation_check": 4.013929999999999,
+        "relation_la": 1.206042,
+        "setup_input_control": 0.17787599999999998,
+        "target_descent": 0.001,
+        "target_pdp": 14.711958000000001,
+        "target_query": 4.2e-05,
+        "target_recovery_check": 0.057042,
+        "target_relation_check": 0.023
+      },
+      "external_wall_ms": 6963.752457999362,
+      "label": "cap400000",
+      "peak_rss_bytes": 350552064,
+      "rank": 220,
+      "rank_attempts": 224,
+      "rank_capped_attempts": 4,
+      "rank_failures": 4,
+      "rank_probes_total": 17913901,
+      "rank_relations": 220,
+      "rank_trace_sha256": "0ce6e90a547debe023f8b3dc91a4e4c145be44ed6da19476c038c4373c1f6bb6",
+      "run_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h7f0d28c1d4ffW190194d8394aR1",
+      "seed": 530053,
+      "status": "VERIFIED",
+      "target_online_ms": 14.793042
+    },
+    {
+      "cold_in_process_ms": 6144.948833,
+      "cold_phase_ms": {
+        "factor_base": 17.346500000000002,
+        "isogeny": 0.0,
+        "precompute_basis_and_selftest": 2.7754160000000003,
+        "precompute_index": 1060.7530000000002,
+        "rank_matrix_build": 234.66503899999998,
+        "rank_pdp": 4807.309297,
+        "rank_query": 10.688998,
+        "rank_relation_check": 3.519707,
+        "relation_la": 1.003375,
+        "setup_input_control": 0.13416799999999998,
+        "target_descent": 0.001333,
+        "target_pdp": 6.6867920000000005,
+        "target_query": 0.0,
+        "target_recovery_check": 0.046958,
+        "target_relation_check": 0.01825
+      },
+      "external_wall_ms": 6170.867417000409,
+      "label": "control",
+      "peak_rss_bytes": 348962816,
+      "rank": 220,
+      "rank_attempts": 220,
+      "rank_capped_attempts": 0,
+      "rank_failures": 0,
+      "rank_probes_total": 18661879,
+      "rank_relations": 220,
+      "rank_trace_sha256": "cb2235c6efb1a1bd4e8ef6fbd1ebcc5b08ccad3369ea4060d43fcde31dbe4a6c",
+      "run_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h3b66c9056640W7e5787b0e1c1R1",
+      "seed": 530054,
+      "status": "VERIFIED",
+      "target_online_ms": 6.7533330000000005
+    },
+    {
+      "cold_in_process_ms": 6704.194458,
+      "cold_phase_ms": {
+        "factor_base": 25.225209,
+        "isogeny": 0.0,
+        "precompute_basis_and_selftest": 3.953791,
+        "precompute_index": 1340.847417,
+        "rank_matrix_build": 285.43799800000005,
+        "rank_pdp": 5020.685966,
+        "rank_query": 14.605045,
+        "rank_relation_check": 3.9915740000000004,
+        "relation_la": 1.426334,
+        "setup_input_control": 0.16454100000000002,
+        "target_descent": 0.000792,
+        "target_pdp": 7.7762910000000005,
+        "target_query": 4.2e-05,
+        "target_recovery_check": 0.057583,
+        "target_relation_check": 0.021875
+      },
+      "external_wall_ms": 6763.517249997676,
+      "label": "cap200000",
+      "peak_rss_bytes": 348454912,
+      "rank": 220,
+      "rank_attempts": 240,
+      "rank_capped_attempts": 20,
+      "rank_failures": 20,
+      "rank_probes_total": 16993325,
+      "rank_relations": 220,
+      "rank_trace_sha256": "a98ab660eb5350db49aaaf9eaf1f8ad40fc038ac03aa90425575f77b3cd6fba3",
+      "run_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h6c8de5cfb242W7e5787b0e1c1R1",
+      "seed": 530054,
+      "status": "VERIFIED",
+      "target_online_ms": 7.8565830000000005
+    },
+    {
+      "cold_in_process_ms": 5936.395792,
+      "cold_phase_ms": {
+        "factor_base": 27.269167,
+        "isogeny": 0.0,
+        "precompute_basis_and_selftest": 3.920334,
+        "precompute_index": 1263.9762079999998,
+        "rank_matrix_build": 248.547088,
+        "rank_pdp": 4371.029969,
+        "rank_query": 11.052496,
+        "rank_relation_check": 3.3985719999999997,
+        "relation_la": 1.000041,
+        "setup_input_control": 0.158542,
+        "target_descent": 0.001209,
+        "target_pdp": 5.976291,
+        "target_query": 0.0,
+        "target_recovery_check": 0.047125,
+        "target_relation_check": 0.01875
+      },
+      "external_wall_ms": 5968.981166999583,
+      "label": "cap400000",
+      "peak_rss_bytes": 348192768,
+      "rank": 220,
+      "rank_attempts": 222,
+      "rank_capped_attempts": 2,
+      "rank_failures": 2,
+      "rank_probes_total": 17104035,
+      "rank_relations": 220,
+      "rank_trace_sha256": "150c0619a3af9a84ca5d39d6f4adafd9ec0b1dc87b5e8a4183f337c72ea263bc",
+      "run_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h7f0d28c1d4ffW7e5787b0e1c1R1",
+      "seed": 530054,
+      "status": "VERIFIED",
+      "target_online_ms": 6.043375
+    },
+    {
+      "cold_in_process_ms": 6466.230876,
+      "cold_phase_ms": {
+        "factor_base": 29.936999999999998,
+        "isogeny": 0.0,
+        "precompute_basis_and_selftest": 3.918917,
+        "precompute_index": 1286.872917,
+        "rank_matrix_build": 291.286178,
+        "rank_pdp": 4831.132904,
+        "rank_query": 11.062327999999999,
+        "rank_relation_check": 3.66584,
+        "relation_la": 1.2045000000000001,
+        "setup_input_control": 0.631875,
+        "target_descent": 0.001333,
+        "target_pdp": 6.451459,
+        "target_query": 0.0,
+        "target_recovery_check": 0.046667,
+        "target_relation_check": 0.018958
+      },
+      "external_wall_ms": 6506.656459001533,
+      "label": "control",
+      "peak_rss_bytes": 348520448,
+      "rank": 220,
+      "rank_attempts": 220,
+      "rank_capped_attempts": 0,
+      "rank_failures": 0,
+      "rank_probes_total": 16807264,
+      "rank_relations": 220,
+      "rank_trace_sha256": "d6bb11ca4520a22f9f5b7270f53f9693378150ce50c5699540dfbdb88b29e0f0",
+      "run_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h3b66c9056640W37dd28032416R1",
+      "seed": 530055,
+      "status": "VERIFIED",
+      "target_online_ms": 6.518417
+    },
+    {
+      "cold_in_process_ms": 6910.438542999999,
+      "cold_phase_ms": {
+        "factor_base": 26.192375000000002,
+        "isogeny": 0.0,
+        "precompute_basis_and_selftest": 3.502125,
+        "precompute_index": 1247.671208,
+        "rank_matrix_build": 281.255295,
+        "rank_pdp": 5326.872386,
+        "rank_query": 12.810992,
+        "rank_relation_check": 3.792786,
+        "relation_la": 1.155375,
+        "setup_input_control": 0.18204199999999998,
+        "target_descent": 0.001166,
+        "target_pdp": 6.9246669999999995,
+        "target_query": 4.2e-05,
+        "target_recovery_check": 0.056959,
+        "target_relation_check": 0.021124999999999998
+      },
+      "external_wall_ms": 6953.411416001472,
+      "label": "cap200000",
+      "peak_rss_bytes": 348258304,
+      "rank": 220,
+      "rank_attempts": 240,
+      "rank_capped_attempts": 20,
+      "rank_failures": 20,
+      "rank_probes_total": 17763255,
+      "rank_relations": 220,
+      "rank_trace_sha256": "5c27430c4d1f8ae9b1c678a96cf1b7684c9a25345c8e6e9ca5ab662461409ead",
+      "run_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h6c8de5cfb242W37dd28032416R1",
+      "seed": 530055,
+      "status": "VERIFIED",
+      "target_online_ms": 7.003959
+    },
+    {
+      "cold_in_process_ms": 6575.209667,
+      "cold_phase_ms": {
+        "factor_base": 26.019292,
+        "isogeny": 0.0,
+        "precompute_basis_and_selftest": 3.896375,
+        "precompute_index": 1304.443917,
+        "rank_matrix_build": 280.21483,
+        "rank_pdp": 4937.372927,
+        "rank_query": 11.870832,
+        "rank_relation_check": 3.677203,
+        "relation_la": 1.0648330000000001,
+        "setup_input_control": 0.15904100000000002,
+        "target_descent": 0.001375,
+        "target_pdp": 6.4086669999999994,
+        "target_query": 4.2e-05,
+        "target_recovery_check": 0.057791999999999996,
+        "target_relation_check": 0.022541
+      },
+      "external_wall_ms": 6631.162082998344,
+      "label": "cap400000",
+      "peak_rss_bytes": 350552064,
+      "rank": 220,
+      "rank_attempts": 220,
+      "rank_capped_attempts": 0,
+      "rank_failures": 0,
+      "rank_probes_total": 16807264,
+      "rank_relations": 220,
+      "rank_trace_sha256": "8ac65fcb6e47d45173c70074a7aa811e0bbb8bda7faf1bebb2494434e670675b",
+      "run_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h7f0d28c1d4ffW37dd28032416R1",
+      "seed": 530055,
+      "status": "VERIFIED",
+      "target_online_ms": 6.490417
+    }
+  ],
+  "independently_replayed_scalar": 17385600002971,
+  "public_target": [
+    7960849849661793,
+    7443722527872608
+  ],
+  "rank_seeds": [
+    530053,
+    530054,
+    530055
+  ],
+  "schema": "n53-fixed-base-rank-restart-pilot-analysis-v1",
+  "selected_cap_for_heldout": "cap400000",
+  "selection_rule": "lowest median complete cold ms among capped variants verified on all three pilot seeds",
+  "source_sha256": "4dd3c5e7823b453ad1fa9046d9be68a04bddc79343ea29576dd1f32b0bc66299",
+  "status": "PASS",
+  "timing_class": "exploratory_shared_host"
+}

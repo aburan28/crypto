@@ -237,7 +237,7 @@ impl Fp64 {
         let mut m = s;
         let mut c = self.pow(self.to_mont(z), q);
         let mut t = self.pow(a, q);
-        let mut r = self.pow(a, (q + 1) / 2);
+        let mut r = self.pow(a, q.div_ceil(2));
         loop {
             if t == self.one {
                 return Some(r);
@@ -1637,6 +1637,9 @@ mod tests {
                     expected_y.min(fc.f.p - expected_y),
                 ),
                 "bits={bits}"
+            assert_eq!(
+                (gen.f.p, gen.n, gen.canonical(gg)),
+                (fc.f.p, fc.n, fc.canonical(g))
             );
         }
         let (gen, gg) = find_a3_curve(28, 3).unwrap();

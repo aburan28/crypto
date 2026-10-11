@@ -165,6 +165,30 @@
     </div>
   </div>
 
+  <section class="mac-control" aria-labelledby="h-mac-control">
+    <h2 id="h-mac-control">Mac control uploads</h2>
+    <p class="note">
+      These Macs upload a separate synthetic signed-Frobenius control run,
+      <span class="mono">ecc2k130-synthetic-metal-h128-v1</span>. Its points and
+      walk updates are excluded from the original campaign totals and collision
+      odds above. This panel shows only cumulative counters from worker uploads.
+    </p>
+    <div class="row mac-row">
+      <div class="card"><div class="label">Control DP records</div><div class="value mono" id="mac-dps">&mdash;</div></div>
+      <div class="card"><div class="label">Walk updates</div><div class="value mono" id="mac-updates">&mdash;</div></div>
+      <div class="card"><div class="label">Workers reporting</div><div class="value mono" id="mac-count">&mdash;</div></div>
+    </div>
+    <p class="mac-source" id="mac-source" role="status">Loading Mac uploads&hellip;</p>
+    <div class="scroll" tabindex="0">
+      <table>
+        <caption class="sr-only">Mac control worker uploads</caption>
+        <thead><tr><th scope="col">Worker</th><th scope="col" class="num">DP records</th><th scope="col" class="num">Walk updates</th><th scope="col">Last upload (UTC)</th></tr></thead>
+        <tbody id="mac-workers"><tr><td colspan="4">Loading&hellip;</td></tr></tbody>
+      </table>
+    </div>
+    <p class="note">Source: <a href="./mac-control.json">sanitized Mac control snapshot</a>. Private worker manifests, point keys, and walk state are not published.</p>
+  </section>
+
   <section aria-labelledby="h-rate">
     <h2 id="h-rate">Distinguished points per hour</h2>
     <p class="note">
@@ -1669,7 +1693,70 @@ cd ec2k-gpu-$V-linux-x86_64
   var lastStatus = null;
   var historyLoaded = false;
 
+  async function loadMacControl() {
+    var body = el("mac-workers");
+    try {
+      var control = await fetchJSON("./mac-control.json");
+      if (control.schema !== "ecc2k130-mac-control-public-v1" ||
+          control.campaign_id !== "ecc2k130-synthetic-metal-h128-v1") {
+        throw new Error("unexpected control campaign");
+      }
+      var unavailable = control.source_state === "unavailable";
+      el("mac-dps").textContent = unavailable ? "—" : num(control.dp_records);
+      el("mac-updates").textContent = unavailable ? "—" : num(control.walk_updates);
+      el("mac-count").textContent = unavailable ? "—" : num(control.worker_count);
+      body.textContent = "";
+      var workers = Array.isArray(control.workers) ? control.workers : [];
+      var latest = null;
+      workers.forEach(function (worker) {
+        var row = document.createElement("tr");
+        var name = document.createElement("th");
+        name.scope = "row";
+        name.textContent = worker.worker_id;
+        row.appendChild(name);
+        [worker.dp_records, worker.walk_updates].forEach(function (value) {
+          var cell = document.createElement("td");
+          cell.className = "num mono";
+          cell.textContent = num(value);
+          row.appendChild(cell);
+        });
+        var at = parseTime(worker.updated_at);
+        var dateCell = document.createElement("td");
+        dateCell.textContent = utc(at, true);
+        row.appendChild(dateCell);
+        body.appendChild(row);
+        if (at && (!latest || at > latest)) latest = at;
+      });
+      if (!workers.length) emptyRow(body, 4, "No Mac worker manifests available.");
+      var state = control.source_state;
+      var source = el("mac-source");
+      if (state === "unavailable") {
+        source.textContent = "Mac upload feed unavailable at the last Pages publish.";
+      } else if (state === "mixed_walks" || state === "ambiguous_runs") {
+        source.textContent = "Worker identities differ; combined totals are withheld. Individual counters are shown below.";
+      } else if (state === "partial") {
+        source.textContent = "Some worker manifests could not be read. Totals include the readable workers only.";
+      } else if (latest) {
+        var age = Date.now() - latest.getTime();
+        source.textContent = "Latest worker upload " + utc(latest, true) + " (" + ago(latest) + ")" +
+          (age > 20 * 60 * 1000 ? ". Upload feed is stale." : ".");
+      } else {
+        source.textContent = "No Mac control worker has reported yet.";
+      }
+    } catch (err) {
+      el("mac-dps").textContent = "—";
+      el("mac-updates").textContent = "—";
+      el("mac-count").textContent = "—";
+      body.textContent = "";
+      emptyRow(body, 4, "Mac upload snapshot could not be read.");
+      el("mac-source").textContent = "Mac upload snapshot unavailable (" + err.message + ").";
+    }
+  }
+
   async function load() {
+    // This feed is independent: an original-campaign outage must not hide
+    // the Macs, and a Mac feed outage must not hide the original campaign.
+    loadMacControl();
     var status;
     try {
       status = await loadStatus();

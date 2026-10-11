@@ -1,12 +1,9 @@
 name: Koblitz Stage 101 n53 compact fixed-base five-pair panel
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage94_filter_inverse.py"
-      - "scripts/run_koblitz_stage101_selected_panel.py"
-      - ".github/workflows/koblitz-stage101-selected-panel.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

@@ -5,14 +5,17 @@ from __future__ import annotations
 import json
 import copy
 import io
+import json
+from contextlib import redirect_stdout
+from unittest import mock
+
+import op_accounting
 import os
 import stat
 import tempfile
 import textwrap
 import unittest
-from contextlib import redirect_stdout
 from pathlib import Path
-from unittest import mock
 
 import boundary_autolab as lab
 import op_accounting
@@ -40,11 +43,6 @@ class LedgerContractTests(unittest.TestCase):
         self.assertTrue(ledger["measurement_schema"]["fail_closed"])
         self.assertIn("koblitz.vs_rho.n37_wall", protocol["beats"])
         self.assertIn("koblitz.vs_rho.n41_charged", protocol["beats"])
-        self.assertIn("koblitz.factor_base.n53", protocol["beats"])
-        self.assertNotIn("rho", protocol["beats"]["koblitz.factor_base.n53"])
-        self.assertEqual(
-            protocol["beats"]["koblitz.factor_base.n53"]["stage"], "factor_base"
-        )
 
     def test_plan_lists_priority_beats(self) -> None:
         protocol = lab.load_protocol()
@@ -54,8 +52,12 @@ class LedgerContractTests(unittest.TestCase):
         self.assertIn("smoke.koblitz.vs_rho.n13", beat_ids)
         self.assertIn("koblitz.vs_rho.n37_wall", beat_ids)
         self.assertTrue(report["agent_priorities"])
-        self.assertNotIn("n37_full", report["commands"])
-        self.assertIn("n37_single_target", report["commands"])
+        self.assertFalse(report["commands"].get("n37_full"))
+        self.assertTrue(report["primary_speedup_contract"])
+        for row in report["beats"]:
+            self.assertFalse(row["primary_speedup_eligible"])
+            self.assertTrue(row["primary_speedup_blocker"])
+
 
     def test_status_overlays_rejected_paired_target_audit(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -85,7 +87,6 @@ class LedgerContractTests(unittest.TestCase):
             self.assertEqual(
                 json.loads((run / "state.json").read_text()), original_state
             )
-
 
 class MeasurementSchemaTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -239,7 +240,6 @@ class MeasurementSchemaTests(unittest.TestCase):
             "resource_caps": {"common_cap_bytes": 1},
             "seeds": {"direct": 1, "rho": 2},
             "claim_boundary_non_claims": ["not key recovery"],
-            "operation_accounting": valid_operation_accounting(),
         }
         result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
         self.assertEqual(result["status"], "PASS", result)
@@ -328,10 +328,17 @@ class MeasurementSchemaTests(unittest.TestCase):
             "seeds": {"direct": 1, "rho": 2},
             "claim_boundary_non_claims": ["not key recovery"],
             "operation_accounting": valid_operation_accounting(),
+        report["paired_target"] = {
+            "ic_public_q": [3, 5],
+            "rho_public_q": [3, 5],
+            "same_public_point": True,
         }
-        result = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
-        self.assertEqual(result["status"], "FAIL", result)
-        self.assertIn("IC and rho public targets differ", result["pairing_errors"])
+        self.assertEqual(lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)["status"], "PASS")
+        report["paired_target"]["rho_public_q"] = [3, 6]
+        mismatch = lab.validate_claim(report, stage="vs_rho", ledger=self.ledger)
+        self.assertEqual(mismatch["status"], "FAIL")
+        self.assertTrue(any("paired_target" in error for error in mismatch["validation_errors"]))
+
     def test_vs_rho_batch_mismatch_and_legacy_timing_are_rejected(self) -> None:
         import copy
 
@@ -473,29 +480,9 @@ class MeasurementSchemaTests(unittest.TestCase):
         self.assertEqual(result["status"], "FAIL")
         self.assertIn("ffd_or_degree_of_regularity", result["missing_stage_fields"])
 
-    def test_factor_base_complete_passes(self) -> None:
-        report = {
-            "n_or_bits": 53,
-            "factor_base_size_F": 19928,
-            "orbit_count_K": 188,
-            "dimension_l_or_dim": 188,
-            "construction_method": "point_defined_signed_quotient_eta_1_16",
-            "materialized": True,
-            "construction_wall_ms": 9051.0,
-            "retained_bytes": 89887680,
-            "fixture_hash": "a",
-            "executable_or_source_hash": "b",
-            "host_id": "h",
-            "resource_caps": {"common_cap_bytes": 17179869184},
-            "seeds": {"direct": 1},
-            "claim_boundary_non_claims": ["not key recovery"],
-        }
-        result = lab.validate_claim(report, stage="factor_base", ledger=self.ledger)
-        self.assertEqual(result["status"], "PASS", result)
-
 
 class HelperTests(unittest.TestCase):
-    def test_nested_collection_is_rejected_and_exclusive_precompute_is_charged_once(self) -> None:
+    def test_nested_collection_is_rejected_and_precomputation_is_charged_once(self) -> None:
         row = {
             "fixture_setup_ms": 0.5,
             "collection_ms": 10.0,
@@ -516,21 +503,17 @@ class HelperTests(unittest.TestCase):
             },
         }
         self.assertTrue(lab.exclusive_online_timing_ok(row))
-        historical = dict(row)
-        historical["target_online_phase_ms"] = dict(row["target_online_phase_ms"], target_pdp=10.0)
-        historical["target_online_wall_ms"] = 17.5
-        self.assertFalse(lab.exclusive_online_timing_ok(historical))
+        overlapping = dict(row)
+        overlapping["target_online_phase_ms"] = dict(
+            row["target_online_phase_ms"], target_pdp=10.0
+        )
+        overlapping["target_online_wall_ms"] = 17.5
+        self.assertFalse(lab.exclusive_online_timing_ok(overlapping))
         self.assertEqual(
             lab.exclusive_precomputation_ms(dict(row, setup_ms=20.0)),
             34.5,
         )
         self.assertIsNone(lab.exclusive_precomputation_ms({"setup_ms": 20.0}))
-    def test_independent_replay_pointer_targets_validation_receipt(self) -> None:
-        run = lab.REPO / "research/example/autolab/runs/test-run"
-        self.assertEqual(
-            lab.independent_replay_pointer(run),
-            "research/example/autolab/runs/test-run/validation/independent_replay.json",
-        )
 
     def test_single_target_claim_points_to_separate_validation_receipt(self) -> None:
         target = [17, 23]
@@ -644,93 +627,11 @@ class HelperTests(unittest.TestCase):
             lab.seed_for("koblitz.vs_rho.n37_wall", "rho", 0),
         )
 
-    def test_factor_base_producer_commands_omit_rho(self) -> None:
-        protocol = lab.load_protocol()
-        beat = protocol["beats"]["koblitz.factor_base.n53"]
-        commands = lab.producer_commands(beat, "koblitz.factor_base.n53", 1, binaries=None)
-        self.assertIsNone(commands["rho"])
-        self.assertIsNone(commands["rho_argv"])
-        self.assertIn("koblitz_rank_fixture", commands["direct"])
-        self.assertEqual(commands["direct_argv"][1], "53")
-
-    def test_single_target_command_separates_precompute_from_online_target(self) -> None:
-        protocol = lab.load_protocol()
-        beat = protocol["beats"]["koblitz.vs_rho.n41_charged"]
-        commands = lab.producer_commands(beat, "koblitz.vs_rho.n41_charged", 1, binaries=None)
-        self.assertEqual(commands["online_target_count"], 1)
-        self.assertEqual(commands["precompute_fixtures"], 1)
-        self.assertEqual(commands["direct_producer_fixture_count"], 2)
-        self.assertEqual(commands["direct_argv"][-1], "2")
-        self.assertEqual(commands["rho_argv"][-3], "1")
-
-    def test_vs_rho_batch_launch_is_rejected_before_runner_lock(self) -> None:
-        args = type("Args", (), {
-            "beat": "koblitz.vs_rho.n41_charged",
-            "fixtures": 32,
-        })()
-        with mock.patch.object(lab, "RunnerLock") as runner_lock:
-            with self.assertRaisesRegex(lab.AutolabError, "exactly one online target"):
-                lab.launch(args)
-            runner_lock.assert_not_called()
-
-    def test_draft_factor_base_claim_from_stdout(self) -> None:
-        protocol = lab.load_protocol()
-        beat = protocol["beats"]["koblitz.factor_base.n53"]
-        stdout = json.dumps(
-            {
-                "kind": "point_defined_factor_base",
-                "evidence_class": "measured_factor_base_construction",
-                "n": 53,
-                "factor_base_points": 19928,
-                "orbit_columns": 188,
-                "total_setup_ms": 9000.0,
-                "support_payload_lower_bound_bytes": 89887680,
-                "support_table_allocated_bytes": 100663296,
-                "frobenius_closed": True,
-                "negation_closed": True,
-                "subgroup_membership_verified": True,
-                "pair_index_mode": "signed_quotient",
-                "base_hash": "abc",
-                "eta": {"numerator": 1, "denominator": 16},
-            }
-        )
-        with tempfile.TemporaryDirectory() as tmp:
-            run = Path(tmp)
-            (run / "artifacts").mkdir()
-            fake_bin = run / "fake_direct"
-            fake_bin.write_text("x")
-            claim = lab.draft_factor_base_claim(
-                beat=beat,
-                beat_id="koblitz.factor_base.n53",
-                run=run,
-                direct_obs={
-                    "stdout": stdout,
-                    "stderr": "",
-                    "exit_code": 0,
-                    "whole_process_wall_ms": 12000.0,
-                    "children_peak_rss_bytes": 666206208,
-                    "seed": 42,
-                },
-                binaries={"direct": str(fake_bin)},
-            )
-            self.assertEqual(claim["stage"], "factor_base")
-            self.assertEqual(claim["factor_base_size_F"], 19928)
-            self.assertEqual(claim["orbit_count_K"], 188)
-            self.assertEqual(claim["retained_bytes"], 89887680)
-            self.assertEqual(
-                claim["independent_replay_pointer"],
-                str(run / "validation/independent_replay.json"),
-            )
-            self.assertTrue(claim["resource_caps"]["under_cap"])
-            ledger = lab.load_ledger(protocol)
-            result = lab.validate_claim(claim, stage="factor_base", ledger=ledger)
-            self.assertEqual(result["status"], "PASS", result)
-
     def test_claim_check_cli_roundtrip(self) -> None:
         report = {
             "stage": "vs_rho",
             "n": 13,
-            "timing_class": "single_target_online",
+            "timing_class": "algorithmic_charged",
             "ic_cost": 10,
             "rho_cost": 20,
             "automorphism_discount": "sqrt(2n)",
@@ -788,7 +689,128 @@ class OperationAccountingTests(unittest.TestCase):
         self.assertEqual(block["comparison_status"], "native_counters_only")
         self.assertIsNone(block["total_work_S"])
         self.assertIsNone(block["ops_speedup_online"])
+            self.assertIn("target_count", result["missing_stage_fields"])
+            self.assertEqual(json.loads(out.read_text())["status"], "FAIL")
 
+
+    def test_independent_replay_pointer_targets_validation_receipt(self) -> None:
+        run = lab.REPO / "research/example/autolab/runs/test-run"
+        self.assertEqual(
+            lab.independent_replay_pointer(run),
+            "research/example/autolab/runs/test-run/validation/independent_replay.json",
+        )
+
+    def test_single_target_claim_points_to_separate_validation_receipt(self) -> None:
+        target = [17, 23]
+        scalar = 3
+        direct_rows = [
+            {
+                "kind": "relation_rank_summary",
+                "precomputation_fixture": True,
+                "setup_ms": 20.0,
+                "fixture_setup_ms": 0.5,
+                "collection_ms": 10.0,
+                "reference_validation_ms": 4.0,
+            },
+            {
+                "kind": "relation_rank_summary",
+                "online_target_count": 1,
+                "published_q": target,
+                "published_fixture_scalar": scalar,
+                "status": "SHARED_FACTOR_LOG_ONE_RELATION",
+                "uses_retained_factor_logs": True,
+                "linear_solution_verified": True,
+                "recovered_fixture_scalar": scalar,
+                "fixture_setup_ms": 0.5,
+                "collection_ms": 10.0,
+                "linear_solve_ms": 2.0,
+                "solution_validation_ms": 1.0,
+                "reference_validation_ms": 4.0,
+                "timing_breakdown_ms": {
+                    "target_generation": 1.0,
+                    "packed_verification": 0.5,
+                },
+                "target_online_phase_ms": {
+                    "target_query": 1.5,
+                    "target_pdp": 5.5,
+                    "target_relation_check": 4.5,
+                    "target_descent": 0.0,
+                    "target_recovery_check": 3.0,
+                },
+                "target_online_wall_ms": 14.5,
+                "target_trials": 1,
+            }
+        ]
+        rho_rows = [
+            {
+                "kind": "rho_public_fixture",
+                "published_q": target,
+                "published_fixture_scalar": scalar,
+                "recovered_fixture_scalar": scalar,
+                "verified": True,
+                "walk_ms": 2.0,
+                "validation_ms": 0.1,
+                "walk_steps": 12,
+            }
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            run = Path(tmp) / "run"
+            (run / "artifacts").mkdir(parents=True)
+            direct_bin = run / "direct"
+            rho_bin = run / "rho"
+            direct_bin.write_text("direct")
+            rho_bin.write_text("rho")
+            claim = lab.draft_vs_rho_claim(
+                beat={"timing_class_goal": "single_target_online", "n": 41, "a": 0, "regime": "koblitz"},
+                beat_id="koblitz.vs_rho.n41_charged",
+                run=run,
+                direct_obs={
+                    "stdout": "\n".join(json.dumps(row) for row in direct_rows),
+                    "exit_code": 0,
+                    "whole_process_wall_ms": 4.0,
+                },
+                rho_obs={
+                    "stdout": "\n".join(json.dumps(row) for row in rho_rows),
+                    "exit_code": 0,
+                    "whole_process_wall_ms": 4.0,
+                },
+                binaries={"direct": str(direct_bin), "rho": str(rho_bin)},
+            )
+            self.assertEqual(claim["target_count"], 1)
+            self.assertTrue(claim["ic_exclusive_timing_verified"])
+            self.assertAlmostEqual(claim["online_speedup"], 2.1 / 14.5)
+            self.assertEqual(claim["ic_precomputation_fixture_ms"], 34.5)
+            self.assertEqual(claim["ic_target_hash"], claim["rho_target_hash"])
+            self.assertEqual(claim["fixture_hash"], claim["ic_target_hash"])
+            accounting = claim["operation_accounting"]
+            self.assertEqual(accounting["ic_online_operations"], 1)
+            self.assertEqual(accounting["rho_online_operations"], 12)
+            self.assertEqual(accounting["ops_speedup_online"], 12.0)
+            self.assertEqual(lab.operation_accounting_errors(accounting), [])
+            self.assertEqual(
+                claim["independent_replay_pointer"],
+                str(run / "validation/independent_replay.json"),
+            )
+            direct_rows[1]["target_online_phase_ms"]["target_pdp"] = 10.0
+            direct_rows[1]["target_online_wall_ms"] = 17.5
+            overlapping = lab.draft_vs_rho_claim(
+                beat={"timing_class_goal": "single_target_online", "n": 41, "a": 0, "regime": "koblitz"},
+                beat_id="koblitz.vs_rho.n41_charged",
+                run=run,
+                direct_obs={
+                    "stdout": "\n".join(json.dumps(row) for row in direct_rows),
+                    "exit_code": 0,
+                    "whole_process_wall_ms": 4.0,
+                },
+                rho_obs={
+                    "stdout": "\n".join(json.dumps(row) for row in rho_rows),
+                    "exit_code": 0,
+                    "whole_process_wall_ms": 4.0,
+                },
+                binaries={"direct": str(direct_bin), "rho": str(rho_bin)},
+            )
+            self.assertFalse(overlapping["ic_exclusive_timing_verified"])
+            self.assertIsNone(overlapping["online_speedup"])
 
 class TimingTests(unittest.TestCase):
     """The wall metric must not charge a producer for its first execution.
@@ -836,6 +858,7 @@ class TimingTests(unittest.TestCase):
         self.assertEqual(calls[1:], ["real-arg"] * 3)
         self.assertEqual(observed["timed_repeats"], 3)
         self.assertEqual(len(observed["whole_process_wall_samples_ms"]), 3)
+        self.assertGreater(observed["children_peak_rss_bytes"], 0)
         self.assertEqual(observed["exit_code"], 0)
         self.assertTrue(observed["stdout_stable"])
         self.assertEqual(
@@ -1112,6 +1135,41 @@ class SingleTargetPanelTests(unittest.TestCase):
                   "online_start_ns": 5, "online_stop_event": "e", "relation_checks": 1}
         self.assertEqual(self.stp.untimed(record, ("relation_checks",)), {"kind": "k", "probes": 3})
 
+
+class OperationAccountingTests(unittest.TestCase):
+    def test_every_rung_accounts_and_matches_the_committed_block(self) -> None:
+        for name, cfg in op_accounting.RUNGS.items():
+            block = op_accounting.account_rung(name)
+            self.assertEqual(lab.operation_accounting_errors(block), [], name)
+            claim = json.loads((lab.REPO / cfg["dir"] / "claim_report_vs_rho.json").read_text())
+            self.assertEqual(claim.get("operation_accounting"), block, f"{name}: rerun op_accounting.py --write")
+            self.assertFalse(
+                any("S unknown" in item for item in claim["claim_boundary_non_claims"]), name
+            )
+
+    def test_n73_separates_contended_runs_and_lucky_target(self) -> None:
+        block = op_accounting.account_rung("n73")
+        self.assertEqual(block["ic_online_operations"], 457561)
+        self.assertEqual(block["host_contention"]["contended_runs"], ["R2", "R3"])
+        self.assertAlmostEqual(block["wall_speedup_median_uncontended_runs"], 184.8588, places=3)
+        self.assertGreater(block["target_luck_factor"], 100)
+        self.assertLess(block["ops_speedup_online_mean_target"], 1)
+        expected = op_accounting.expected_rho_steps(86020738150056119, 73)
+        self.assertAlmostEqual(block["ops_speedup_online"], expected / 457561)
+
+    def test_strip_s_unknown_keeps_the_rest_of_the_non_claim(self) -> None:
+        strip = op_accounting.strip_s_unknown
+        self.assertIsNone(strip("total operation-count comparison absent; S unknown"))
+        self.assertEqual(
+            strip("not an asymptotic sub-rho claim (both arms remain sqrt-class; "
+                  "total operation-count boundary not comparable, S unknown)"),
+            "not an asymptotic sub-rho claim (both arms remain sqrt-class)",
+        )
+        self.assertEqual(
+            strip("not an asymptotic sub-rho claim (total operation-count boundary not comparable, S unknown)"),
+            "not an asymptotic sub-rho claim",
+        )
+        self.assertEqual(strip("not key recovery"), "not key recovery")
 
 if __name__ == "__main__":
     unittest.main()

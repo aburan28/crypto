@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="330" viewBox="0 0 820 330" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <rect width="820" height="330" fill="#ffffff"/>
+  <text x="410" y="26" text-anchor="middle" font-size="16" font-weight="bold">Where a solver constant sits in the index-calculus product law (ECC2K-130, Frobenius-stable base)</text>
+  <!-- three boxes -->
+  <g stroke="#1f6f8b" stroke-width="1.5" fill="#eef6f9">
+    <rect x="30" y="60" width="200" height="90" rx="6"/><rect x="290" y="60" width="200" height="90" rx="6"/><rect x="550" y="60" width="240" height="90" rx="6"/>
+  </g>
+  <g text-anchor="middle" fill="#123">
+    <text x="130" y="84" font-weight="bold">relations needed</text><text x="130" y="106">|F| / n = 2^l / 131</text><text x="130" y="128" fill="#555" font-size="12">Frobenius collapse: ÷ n</text>
+    <text x="390" y="84" font-weight="bold">targets per relation</text><text x="390" y="106">2^131 / C(2^l, m)</text><text x="390" y="128" fill="#555" font-size="12">yield law, measured on 12 toy cells</text>
+    <text x="670" y="84" font-weight="bold">oracle per target</text><text x="670" y="106">c · C(2^l, m−1)</text><text x="670" y="128" fill="#555" font-size="12">c = solver constant vs. enumeration</text>
+  </g>
+  <text x="260" y="110" text-anchor="middle" font-size="22">×</text><text x="520" y="110" text-anchor="middle" font-size="22">×</text>
+  <!-- result -->
+  <text x="410" y="190" text-anchor="middle" font-size="15">=  c · m · 2^131 / 131   (every 2^l cancels: l, m and the base move work between boxes, never the total)</text>
+  <line x1="60" y1="205" x2="760" y2="205" stroke="#999"/>
+  <g font-size="13">
+    <text x="60" y="230">Pollard rho with ⟨−1⟩ × ⟨π⟩ (reference):</text><text x="430" y="230" font-family="monospace">2^60.81</text>
+    <text x="60" y="252">c needed to reach rho (m = 3):</text><text x="430" y="252" font-family="monospace" fill="#b03a2e">2^−64.8</text>
+    <text x="60" y="274">c measured for every SAT / SMT / WDSat arm in the tree:</text><text x="430" y="274" font-family="monospace" fill="#b03a2e">2^l / m  ≥  1</text>
+    <text x="60" y="296">c for pairs-and-solve, pair table, MITM:</text><text x="430" y="296" font-family="monospace">1  (2^−l with 2^(2l) memory)</text>
+  </g>
+  <text x="410" y="320" text-anchor="middle" fill="#555" font-size="11">Sources: RESEARCH_ECC2K130_DECOMPOSITION.md §5.1–5.3 and §6 (derived), the §2 table of this note (measured). Nothing here is a run.</text>
+</svg>

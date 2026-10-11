@@ -1,11 +1,9 @@
 name: Koblitz Stage 76 n53 insert-hash reuse
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage76_insert_hash_reuse.py"
-      - ".github/workflows/koblitz-stage76-insert-hash-reuse.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

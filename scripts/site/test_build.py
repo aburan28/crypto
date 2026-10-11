@@ -75,6 +75,7 @@ class BuildTests(unittest.TestCase):
             "status/rho-toy.js",
             "status/status.json",
             "status/history.json",
+            "status/mac-control.json",
             "status.json",
             "history.json",
             "robots.txt",
@@ -98,6 +99,17 @@ class BuildTests(unittest.TestCase):
             source = read(os.path.join(ROOT, "docs", "ecc2k130-status", name), "rb")
             self.assertEqual(read(os.path.join(self.out, name), "rb"), source, name)
             self.assertEqual(read(os.path.join(self.out, "status", name), "rb"), source, name)
+
+    def test_mac_control_stays_separate_from_original_campaign(self):
+        import json
+
+        mac = json.loads(read(os.path.join(self.out, "status", "mac-control.json")))
+        original = json.loads(read(os.path.join(self.out, "status", "status.json")))
+        self.assertEqual(mac["campaign_id"], "ecc2k130-synthetic-metal-h128-v1")
+        self.assertEqual(original["campaign_id"], "ecc2k-130")
+        page = read(os.path.join(self.out, "status", "index.html"))
+        self.assertIn('fetchJSON("./mac-control.json")', page)
+        self.assertIn("excluded from the original campaign totals", page)
 
     def test_scoreboard_is_a_copy_of_the_canonical_repository_file(self):
         # AGENTS.md §7: the repository file is canonical and a published copy
