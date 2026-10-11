@@ -349,12 +349,85 @@ fn invert(gf: &Gf2, basis: &NormalBasis, a: u64) -> u64 {
     gf.sqr(c)
 }
 
+/// Optional prefilter for canonical normal-basis S3 roots. The table inserts
+/// each key into this filter at the same time as the exact slot, so a negative
+/// filter answer can skip the exact lookup without changing a positive hit.
+struct RootBloom {
+    words: Vec<u64>,
+    bit_mask: usize,
+}
+
+impl RootBloom {
+    const HASHES: usize = 3;
+
+    fn with_capacity(keys: usize) -> Self {
+        let bits = keys
+            .checked_mul(8)
+            .and_then(usize::checked_next_power_of_two)
+            .expect("root Bloom size overflow")
+            .max(64);
+        Self {
+            words: vec![0; bits / 64],
+            bit_mask: bits - 1,
+        }
+    }
+
+    #[inline(always)]
+    fn hash_pair(key: u128) -> (u64, u64) {
+        let low = key as u64;
+        let high = (key >> 64) as u64;
+        (
+            mix_root_bloom(low ^ high.rotate_left(23) ^ 0xA5A5_38F9_9328_6F3D),
+            mix_root_bloom(high ^ low.rotate_left(17) ^ 0xD4C9_3E72_B719_485B) | 1,
+        )
+    }
+
+    #[inline(always)]
+    fn insert(&mut self, key: u128) {
+        let (first, step) = Self::hash_pair(key);
+        for index in 0..Self::HASHES {
+            let bit =
+                first.wrapping_add((index as u64).wrapping_mul(step)) as usize & self.bit_mask;
+            self.words[bit >> 6] |= 1u64 << (bit & 63);
+        }
+    }
+
+    #[inline(always)]
+    fn contains(&self, key: u128) -> bool {
+        let (first, step) = Self::hash_pair(key);
+        for index in 0..Self::HASHES {
+            let bit =
+                first.wrapping_add((index as u64).wrapping_mul(step)) as usize & self.bit_mask;
+            if self.words[bit >> 6] & (1u64 << (bit & 63)) == 0 {
+                return false;
+            }
+        }
+        true
+    }
+
+    fn bytes(&self) -> usize {
+        self.words.len() * std::mem::size_of::<u64>()
+    }
+}
+
+#[inline(always)]
+fn mix_root_bloom(mut value: u64) -> u64 {
+    value = (value ^ (value >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    value = (value ^ (value >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    value ^ (value >> 31)
+}
+
+fn root_bloom_enabled() -> bool {
+    std::env::var("KIC_ROOT_BLOOM").as_deref() == Ok("1")
+}
+
 /// Open-addressing u64 -> u64 table; keys are < 2^63 so u64::MAX marks empty.
 /// Key and value share a slot so a probe touches one cache line.
 struct RootTable {
     slots: Vec<(u64, u64)>,
     shift: u32,
     len: usize,
+    bloom: Option<RootBloom>,
 }
 
 impl RootTable {
@@ -364,6 +437,7 @@ impl RootTable {
             slots: vec![(u64::MAX, 0); slots],
             shift: 64 - slots.trailing_zeros(),
             len: 0,
+            bloom: root_bloom_enabled().then(|| RootBloom::with_capacity(entries)),
         }
     }
 
@@ -379,6 +453,9 @@ impl RootTable {
             if self.slots[slot].0 == u64::MAX {
                 self.slots[slot] = (key, value);
                 self.len += 1;
+                if let Some(bloom) = &mut self.bloom {
+                    bloom.insert(key as u128);
+                }
                 return;
             }
             if self.slots[slot].0 == key {
@@ -390,6 +467,13 @@ impl RootTable {
 
     #[inline(always)]
     fn get(&self, key: u64) -> Option<u64> {
+        if self
+            .bloom
+            .as_ref()
+            .is_some_and(|bloom| !bloom.contains(key as u128))
+        {
+            return None;
+        }
         let mask = self.slots.len() - 1;
         let mut slot = self.slot(key);
         loop {
@@ -401,6 +485,36 @@ impl RootTable {
                 return None;
             }
             slot = (slot + 1) & mask;
+        }
+    }
+}
+
+#[cfg(test)]
+mod root_bloom_table_tests {
+    use super::{mix_root_bloom, RootBloom, RootTable};
+
+    #[test]
+    fn canonical_u64_lookup_matches_unscreened_table() {
+        let mut reference = RootTable::with_capacity(4096);
+        reference.bloom = None;
+        let mut screened = RootTable::with_capacity(4096);
+        screened.bloom = Some(RootBloom::with_capacity(4096));
+        for i in 0..4096u64 {
+            let key = mix_root_bloom(i) & (u64::MAX >> 1);
+            reference.insert_if_absent(key, i);
+            screened.insert_if_absent(key, i);
+            reference.insert_if_absent(key, i + 1);
+            screened.insert_if_absent(key, i + 1);
+        }
+        for i in 0..100_000u64 {
+            let key = mix_root_bloom(i ^ 0xD1B5_4A32_D192_ED03) & (u64::MAX >> 1);
+            assert_eq!(screened.get(key), reference.get(key));
+        }
+        for &(key, value) in &reference.slots {
+            if key != u64::MAX {
+                assert!(screened.bloom.as_ref().unwrap().contains(key as u128));
+                assert_eq!(screened.get(key), Some(value));
+            }
         }
     }
 }
@@ -746,6 +860,7 @@ fn peak_rss_bytes() -> Option<u64> {
 // and the rank linear algebra stay `u64` (every admitted `r < 2^64`
 // through `n = 127`); only field elements move to the wider word.
 mod wide {
+    use super::{pack, root_bloom_enabled, unpack, RootBloom};
     use super::{mulmod, pack, peak_rss_bytes, unpack, Echelon};
     use super::{pack, unpack};
     use crypto_lib::cryptanalysis::koblitz_fast_arith::{
@@ -1202,6 +1317,7 @@ mod wide {
         slots: Vec<(u128, u64)>,
         shift: u32,
         len: usize,
+        bloom: Option<RootBloom>,
     }
 
     impl RootTable128 {
@@ -1211,6 +1327,7 @@ mod wide {
                 slots: vec![(u128::MAX, 0); slots],
                 shift: 128 - slots.trailing_zeros(),
                 len: 0,
+                bloom: root_bloom_enabled().then(|| RootBloom::with_capacity(entries)),
             }
         }
 
@@ -1226,6 +1343,9 @@ mod wide {
                 if self.slots[slot].0 == u128::MAX {
                     self.slots[slot] = (key, value);
                     self.len += 1;
+                    if let Some(bloom) = &mut self.bloom {
+                        bloom.insert(key);
+                    }
                     return;
                 }
                 if self.slots[slot].0 == key {
@@ -1237,6 +1357,13 @@ mod wide {
 
         #[inline(always)]
         fn get(&self, key: u128) -> Option<u64> {
+            if self
+                .bloom
+                .as_ref()
+                .is_some_and(|bloom| !bloom.contains(key))
+            {
+                return None;
+            }
             let mask = self.slots.len() - 1;
             let mut slot = self.slot(key);
             loop {
@@ -1248,6 +1375,41 @@ mod wide {
                     return None;
                 }
                 slot = (slot + 1) & mask;
+            }
+        }
+    }
+
+    #[cfg(test)]
+    mod root_bloom_table_tests {
+        use super::{RootBloom, RootTable128};
+        use crate::mix_root_bloom;
+
+        #[test]
+        fn canonical_u128_lookup_matches_unscreened_table() {
+            let mut reference = RootTable128::with_capacity(4096);
+            reference.bloom = None;
+            let mut screened = RootTable128::with_capacity(4096);
+            screened.bloom = Some(RootBloom::with_capacity(4096));
+            for i in 0..4096u64 {
+                let key = ((mix_root_bloom(i) as u128 & (u64::MAX as u128 >> 1)) << 64)
+                    | mix_root_bloom(i ^ 0xA7C1_D9E4_356B_F208) as u128;
+                reference.insert_if_absent(key, i);
+                screened.insert_if_absent(key, i);
+                reference.insert_if_absent(key, i + 1);
+                screened.insert_if_absent(key, i + 1);
+            }
+            for i in 0..100_000u64 {
+                let key = ((mix_root_bloom(i ^ 0xD1B5_4A32_D192_ED03) as u128
+                    & (u64::MAX as u128 >> 1))
+                    << 64)
+                    | mix_root_bloom(i ^ 0x3F19_7C2B_74A8_65ED) as u128;
+                assert_eq!(screened.get(key), reference.get(key));
+            }
+            for &(key, value) in &reference.slots {
+                if key != u128::MAX {
+                    assert!(screened.bloom.as_ref().unwrap().contains(key));
+                    assert_eq!(screened.get(key), Some(value));
+                }
             }
         }
     }
@@ -2231,6 +2393,8 @@ mod wide {
             "factor_base_points":base.points.len(),
             "regular_states":index.states.len(),
             "root_table_entries":index.table.len,
+            "root_bloom_enabled":index.table.bloom.is_some(),
+            "root_bloom_bytes":index.table.bloom.as_ref().map_or(0, RootBloom::bytes),
             "sparse_canonical_enabled":basis.sparse_canonical,
             "pair_table_entries":0,
             "edge_selectors":0,
@@ -2739,6 +2903,8 @@ fn main() {
         "factor_base_points":base.points.len(),
         "regular_states":index.states.len(),
         "root_table_entries":index.table.len,
+        "root_bloom_enabled":index.table.bloom.is_some(),
+        "root_bloom_bytes":index.table.bloom.as_ref().map_or(0, RootBloom::bytes),
         "sparse_canonical_enabled":basis.sparse_canonical,
         "pair_table_entries":0,
         "edge_selectors":0,
