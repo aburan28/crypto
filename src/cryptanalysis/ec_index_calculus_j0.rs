@@ -680,8 +680,8 @@ pub fn j0_index_calculus_dlp_staged(
     if !solution.determined[m] {
         return None;
     }
-    let x = solution.values[m].clone();
     let linear_algebra_ms = la_started.elapsed().as_secs_f64() * 1e3;
+    let x = solution.values[m].clone();
 
     let verify_started = Instant::now();
     let a_fe = curve.a_fe();

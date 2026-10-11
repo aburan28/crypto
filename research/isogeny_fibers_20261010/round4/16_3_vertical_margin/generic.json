@@ -1,0 +1,5891 @@
+{
+  "argv": [
+    "/tmp/claude-0/-home-user/717e4727-b5a7-5b25-924a-7b31edb43331/scratchpad/r4target/release/examples/r4_16_3_vertical_margin",
+    "generic",
+    "1000",
+    "420",
+    "research/isogeny_fibers_20261010/round4/16_3_vertical_margin/generic.json"
+  ],
+  "field_bits": 61,
+  "mode": "generic",
+  "rows": [
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 26,
+        "Meq": 117
+      },
+      "codomain_j": 761875833482863475,
+      "cofactor_bits": 117,
+      "crater_j": 1724632261250767624,
+      "ell": 5,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 20,
+        "Meq": 202
+      },
+      "ext_modulus": [
+        2,
+        1,
+        1148425669679557761
+      ],
+      "find": {
+        "I": 7,
+        "M": 12801,
+        "Meq": 13438
+      },
+      "find_incl_setup": {
+        "I": 9,
+        "M": 13304,
+        "Meq": 14123
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.000332249,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 1,
+      "k": 2,
+      "ladder": {
+        "I": 0,
+        "M": 12738,
+        "Meq": 12738
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 2,
+      "lib_codomain_j": 761875833482863475,
+      "minpoly": {
+        "I": 7,
+        "M": 63,
+        "Meq": 700
+      },
+      "p": 1724632261250770999,
+      "setup": {
+        "I": 2,
+        "M": 503,
+        "Meq": 685
+      },
+      "side": "twist",
+      "t": 2623432464,
+      "v": 48004690,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 36,
+        "Meq": 127
+      },
+      "codomain_j": 2099655697495182735,
+      "cofactor_bits": 298,
+      "crater_j": 2194022016159814396,
+      "ell": 11,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 32,
+        "Meq": 214
+      },
+      "ext_modulus": [
+        5,
+        3,
+        1983322341699442710
+      ],
+      "find": {
+        "I": 16,
+        "M": 94087,
+        "Meq": 95543
+      },
+      "find_incl_setup": {
+        "I": 39,
+        "M": 110065,
+        "Meq": 113614
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.000823667,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 5,
+      "k": 5,
+      "ladder": {
+        "I": 0,
+        "M": 93586,
+        "Meq": 93586
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": 2099655697495182735,
+      "minpoly": {
+        "I": 16,
+        "M": 501,
+        "Meq": 1957
+      },
+      "p": 2194022016159817771,
+      "setup": {
+        "I": 23,
+        "M": 15978,
+        "Meq": 18071
+      },
+      "side": "twist",
+      "t": 2814258044,
+      "v": 349701858,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 38,
+        "Meq": 129
+      },
+      "codomain_j": 687738175619517841,
+      "cofactor_bits": 359,
+      "crater_j": 2151853678799530468,
+      "ell": 13,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 36,
+        "Meq": 218
+      },
+      "ext_modulus": [
+        6,
+        3,
+        398468868500737231
+      ],
+      "find": {
+        "I": 19,
+        "M": 160393,
+        "Meq": 162122
+      },
+      "find_incl_setup": {
+        "I": 29,
+        "M": 171094,
+        "Meq": 173733
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.001042918,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 1,
+      "k": 6,
+      "ladder": {
+        "I": 0,
+        "M": 159606,
+        "Meq": 159606
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": 687738175619517841,
+      "minpoly": {
+        "I": 19,
+        "M": 787,
+        "Meq": 2516
+      },
+      "p": 2151853678799533843,
+      "setup": {
+        "I": 10,
+        "M": 10701,
+        "Meq": 11611
+      },
+      "side": "twist",
+      "t": 2897735052,
+      "v": 173430218,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 42,
+        "Meq": 133
+      },
+      "codomain_j": 290053664709031721,
+      "cofactor_bits": 472,
+      "crater_j": 1163510948089642202,
+      "ell": 17,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 44,
+        "Meq": 226
+      },
+      "ext_modulus": [
+        8,
+        3,
+        938927013888493945
+      ],
+      "find": {
+        "I": 25,
+        "M": 1472155,
+        "Meq": 1474430
+      },
+      "find_incl_setup": {
+        "I": 125,
+        "M": 1583706,
+        "Meq": 1595081
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.006643026,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 12,
+      "k": 8,
+      "ladder": {
+        "I": 0,
+        "M": 1470514,
+        "Meq": 1470514
+      },
+      "ladder_attempts_final_find": 4,
+      "ladder_attempts_total": 4,
+      "lambda": 3,
+      "lib_codomain_j": 290053664709031721,
+      "minpoly": {
+        "I": 25,
+        "M": 1641,
+        "Meq": 3916
+      },
+      "p": 1163510948089645577,
+      "setup": {
+        "I": 100,
+        "M": 111551,
+        "Meq": 120651
+      },
+      "side": "twist",
+      "t": 2112005750,
+      "v": 166250888,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 46,
+        "Meq": 137
+      },
+      "codomain_j": 1350464088593671610,
+      "cofactor_bits": 536,
+      "crater_j": 1629698833169254534,
+      "ell": 19,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 48,
+        "Meq": 230
+      },
+      "ext_modulus": [
+        9,
+        1,
+        178757330445045803
+      ],
+      "find": {
+        "I": 28,
+        "M": 1046464,
+        "Meq": 1049012
+      },
+      "find_incl_setup": {
+        "I": 86,
+        "M": 1104610,
+        "Meq": 1112436
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.00423096,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 4,
+      "k": 9,
+      "ladder": {
+        "I": 0,
+        "M": 1044231,
+        "Meq": 1044231
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 2,
+      "lib_codomain_j": 1350464088593671610,
+      "minpoly": {
+        "I": 28,
+        "M": 2233,
+        "Meq": 4781
+      },
+      "p": 1629698833169257909,
+      "setup": {
+        "I": 58,
+        "M": 58146,
+        "Meq": 63424
+      },
+      "side": "twist",
+      "t": 2047071594,
+      "v": 576726380,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 52,
+        "Meq": 143
+      },
+      "codomain_j": 1366719134926566087,
+      "cofactor_bits": 662,
+      "crater_j": 2203562403569374438,
+      "ell": 23,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 56,
+        "Meq": 238
+      },
+      "ext_modulus": [
+        11,
+        10,
+        574868006291046281
+      ],
+      "find": {
+        "I": 34,
+        "M": 950082,
+        "Meq": 953176
+      },
+      "find_incl_setup": {
+        "I": 205,
+        "M": 1137456,
+        "Meq": 1156111
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.003671175,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 8,
+      "k": 11,
+      "ladder": {
+        "I": 0,
+        "M": 946275,
+        "Meq": 946275
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 5,
+      "lib_codomain_j": 1366719134926566087,
+      "minpoly": {
+        "I": 34,
+        "M": 3807,
+        "Meq": 6901
+      },
+      "p": 2203562403569377813,
+      "setup": {
+        "I": 171,
+        "M": 187374,
+        "Meq": 202935
+      },
+      "side": "twist",
+      "t": 990880950,
+      "v": 1057787756,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 58,
+        "Meq": 149
+      },
+      "codomain_j": 642678678951462262,
+      "cofactor_bits": 838,
+      "crater_j": 1652449555620521708,
+      "ell": 29,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 68,
+        "Meq": 250
+      },
+      "ext_modulus": [
+        14,
+        5,
+        168013934554037523
+      ],
+      "find": {
+        "I": 43,
+        "M": 1921006,
+        "Meq": 1924919
+      },
+      "find_incl_setup": {
+        "I": 411,
+        "M": 2505804,
+        "Meq": 2543205
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.006672632,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 16,
+      "k": 14,
+      "ladder": {
+        "I": 0,
+        "M": 1913683,
+        "Meq": 1913683
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": 642678678951462262,
+      "minpoly": {
+        "I": 43,
+        "M": 7323,
+        "Meq": 11236
+      },
+      "p": 1652449555620525083,
+      "setup": {
+        "I": 368,
+        "M": 584798,
+        "Meq": 618286
+      },
+      "side": "twist",
+      "t": 678815068,
+      "v": 937245838,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 62,
+        "Meq": 153
+      },
+      "codomain_j": 279892164185982939,
+      "cofactor_bits": 898,
+      "crater_j": 1635704326435175228,
+      "ell": 31,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 72,
+        "Meq": 254
+      },
+      "ext_modulus": [
+        15,
+        1,
+        1114623544348680626
+      ],
+      "find": {
+        "I": 46,
+        "M": 2354742,
+        "Meq": 2358928
+      },
+      "find_incl_setup": {
+        "I": 1191,
+        "M": 4338516,
+        "Meq": 4446897
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.010694517,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 42,
+      "k": 15,
+      "ladder": {
+        "I": 0,
+        "M": 2345891,
+        "Meq": 2345891
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 3,
+      "lib_codomain_j": 279892164185982939,
+      "minpoly": {
+        "I": 46,
+        "M": 8851,
+        "Meq": 13037
+      },
+      "p": 1635704326435178603,
+      "setup": {
+        "I": 1145,
+        "M": 1983774,
+        "Meq": 2087969
+      },
+      "side": "twist",
+      "t": 498187180,
+      "v": 948278654,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 66,
+        "Meq": 157
+      },
+      "codomain_j": 1153094279313149253,
+      "cofactor_bits": 1082,
+      "crater_j": 1844593701334062976,
+      "ell": 37,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 84,
+        "Meq": 266
+      },
+      "ext_modulus": [
+        18,
+        9,
+        87517328033414286
+      ],
+      "find": {
+        "I": 55,
+        "M": 20296684,
+        "Meq": 20301689
+      },
+      "find_incl_setup": {
+        "I": 187,
+        "M": 20767277,
+        "Meq": 20784294
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.044916936,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 6,
+      "k": 18,
+      "ladder": {
+        "I": 0,
+        "M": 20282013,
+        "Meq": 20282013
+      },
+      "ladder_attempts_final_find": 5,
+      "ladder_attempts_total": 5,
+      "lambda": 2,
+      "lib_codomain_j": 1153094279313149253,
+      "minpoly": {
+        "I": 55,
+        "M": 14671,
+        "Meq": 19676
+      },
+      "p": 1844593701334066351,
+      "setup": {
+        "I": 132,
+        "M": 470593,
+        "Meq": 482605
+      },
+      "side": "twist",
+      "t": 1871086304,
+      "v": 744255222,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 70,
+        "Meq": 161
+      },
+      "codomain_j": 91105412158970076,
+      "cofactor_bits": 1192,
+      "crater_j": 1241259864072622024,
+      "ell": 41,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 92,
+        "Meq": 274
+      },
+      "ext_modulus": [
+        20,
+        15,
+        654575397030066189
+      ],
+      "find": {
+        "I": 61,
+        "M": 10987015,
+        "Meq": 10992566
+      },
+      "find_incl_setup": {
+        "I": 171,
+        "M": 11387695,
+        "Meq": 11403256
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.023359881,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 1,
+      "k": 20,
+      "ladder": {
+        "I": 0,
+        "M": 10967314,
+        "Meq": 10967314
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 6,
+      "lib_codomain_j": 91105412158970076,
+      "minpoly": {
+        "I": 61,
+        "M": 19701,
+        "Meq": 25252
+      },
+      "p": 1241259864072625399,
+      "setup": {
+        "I": 110,
+        "M": 400680,
+        "Meq": 410690
+      },
+      "side": "twist",
+      "t": 1524833472,
+      "v": 614110546,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 74,
+        "Meq": 165
+      },
+      "codomain_j": 1259883824135733870,
+      "cofactor_bits": 1263,
+      "crater_j": 1775774648433386224,
+      "ell": 43,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 96,
+        "Meq": 278
+      },
+      "ext_modulus": [
+        21,
+        15,
+        96729880926664132
+      ],
+      "find": {
+        "I": 64,
+        "M": 6401504,
+        "Meq": 6407328
+      },
+      "find_incl_setup": {
+        "I": 469,
+        "M": 7500222,
+        "Meq": 7542901
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.015184194,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 11,
+      "k": 21,
+      "ladder": {
+        "I": 0,
+        "M": 6378907,
+        "Meq": 6378907
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 3,
+      "lib_codomain_j": 1259883824135733870,
+      "minpoly": {
+        "I": 64,
+        "M": 22597,
+        "Meq": 28421
+      },
+      "p": 1775774648433389599,
+      "setup": {
+        "I": 405,
+        "M": 1098718,
+        "Meq": 1135573
+      },
+      "side": "twist",
+      "t": 1995305528,
+      "v": 667816746,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 80,
+        "Meq": 171
+      },
+      "codomain_j": 1183062112066797884,
+      "cofactor_bits": 1390,
+      "crater_j": 2137810375054325714,
+      "ell": 47,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 104,
+        "Meq": 286
+      },
+      "ext_modulus": [
+        23,
+        18,
+        1439207333108266909
+      ],
+      "find": {
+        "I": 70,
+        "M": 8422441,
+        "Meq": 8428811
+      },
+      "find_incl_setup": {
+        "I": 760,
+        "M": 9881512,
+        "Meq": 9950672
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.018998127,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 16,
+      "k": 23,
+      "ladder": {
+        "I": 0,
+        "M": 8393230,
+        "Meq": 8393230
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 5,
+      "lib_codomain_j": 1183062112066797884,
+      "minpoly": {
+        "I": 70,
+        "M": 29211,
+        "Meq": 35581
+      },
+      "p": 2137810375054329089,
+      "setup": {
+        "I": 690,
+        "M": 1459071,
+        "Meq": 1521861
+      },
+      "side": "twist",
+      "t": 2177197742,
+      "v": 737859016,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 84,
+        "Meq": 175
+      },
+      "codomain_j": 1170948823700120661,
+      "cofactor_bits": 1558,
+      "crater_j": 1474333440139610018,
+      "ell": 53,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 116,
+        "Meq": 298
+      },
+      "ext_modulus": [
+        26,
+        2,
+        1154449161943849807
+      ],
+      "find": {
+        "I": 79,
+        "M": 9100479,
+        "Meq": 9107668
+      },
+      "find_incl_setup": {
+        "I": 2026,
+        "M": 12978700,
+        "Meq": 13163066
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.039180568,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 26,
+      "k": 26,
+      "ladder": {
+        "I": 0,
+        "M": 9068069,
+        "Meq": 9068069
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": 1170948823700120661,
+      "minpoly": {
+        "I": 79,
+        "M": 32410,
+        "Meq": 39599
+      },
+      "p": 1474333440139613393,
+      "setup": {
+        "I": 1947,
+        "M": 3878221,
+        "Meq": 4055398
+      },
+      "side": "twist",
+      "t": 2107177502,
+      "v": 456248168,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 92,
+        "Meq": 183
+      },
+      "codomain_j": 867955529465570571,
+      "cofactor_bits": 1742,
+      "crater_j": 1567272531692920388,
+      "ell": 59,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 128,
+        "Meq": 310
+      },
+      "ext_modulus": [
+        29,
+        20,
+        1424595240886163947
+      ],
+      "find": {
+        "I": 88,
+        "M": 12898824,
+        "Meq": 12906832
+      },
+      "find_incl_setup": {
+        "I": 522,
+        "M": 13779657,
+        "Meq": 13827159
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.047770596,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 2,
+      "k": 29,
+      "ladder": {
+        "I": 0,
+        "M": 12853836,
+        "Meq": 12853836
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": 867955529465570571,
+      "minpoly": {
+        "I": 88,
+        "M": 44988,
+        "Meq": 52996
+      },
+      "p": 1567272531692923763,
+      "setup": {
+        "I": 434,
+        "M": 880833,
+        "Meq": 920327
+      },
+      "side": "twist",
+      "t": 1848735268,
+      "v": 638219402,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 94,
+        "Meq": 185
+      },
+      "codomain_j": 26235390198959975,
+      "cofactor_bits": 1798,
+      "crater_j": 1426669526274820318,
+      "ell": 61,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 132,
+        "Meq": 314
+      },
+      "ext_modulus": [
+        30,
+        23,
+        508450785219568237
+      ],
+      "find": {
+        "I": 91,
+        "M": 41704497,
+        "Meq": 41712778
+      },
+      "find_incl_setup": {
+        "I": 1459,
+        "M": 45635995,
+        "Meq": 45768764
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.149499277,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 16,
+      "k": 30,
+      "ladder": {
+        "I": 0,
+        "M": 41655971,
+        "Meq": 41655971
+      },
+      "ladder_attempts_final_find": 3,
+      "ladder_attempts_total": 3,
+      "lambda": 2,
+      "lib_codomain_j": 26235390198959975,
+      "minpoly": {
+        "I": 91,
+        "M": 48526,
+        "Meq": 56807
+      },
+      "p": 1426669526274823693,
+      "setup": {
+        "I": 1368,
+        "M": 3931498,
+        "Meq": 4055986
+      },
+      "side": "twist",
+      "t": 2118776078,
+      "v": 417041628,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 98,
+        "Meq": 189
+      },
+      "codomain_j": 932451476811241322,
+      "cofactor_bits": 1994,
+      "crater_j": 1985260336010091616,
+      "ell": 67,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 144,
+        "Meq": 326
+      },
+      "ext_modulus": [
+        33,
+        6,
+        1810409208362829928
+      ],
+      "find": {
+        "I": 100,
+        "M": 18988018,
+        "Meq": 18997118
+      },
+      "find_incl_setup": {
+        "I": 432,
+        "M": 20276037,
+        "Meq": 20315349
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.05417156,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 1,
+      "k": 33,
+      "ladder": {
+        "I": 0,
+        "M": 18923262,
+        "Meq": 18923262
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": 932451476811241322,
+      "minpoly": {
+        "I": 100,
+        "M": 64756,
+        "Meq": 73856
+      },
+      "p": 1985260336010094991,
+      "setup": {
+        "I": 332,
+        "M": 1288019,
+        "Meq": 1318231
+      },
+      "side": "twist",
+      "t": 1108539392,
+      "v": 979225770,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 104,
+        "Meq": 195
+      },
+      "codomain_j": 394994274511293839,
+      "cofactor_bits": 2095,
+      "crater_j": 1330772634996475028,
+      "ell": 71,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 152,
+        "Meq": 334
+      },
+      "ext_modulus": [
+        35,
+        1,
+        987078590031394524
+      ],
+      "find": {
+        "I": 106,
+        "M": 22373581,
+        "Meq": 22383227
+      },
+      "find_incl_setup": {
+        "I": 2734,
+        "M": 29800043,
+        "Meq": 30048837
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.078199468,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 39,
+      "k": 35,
+      "ladder": {
+        "I": 0,
+        "M": 22297078,
+        "Meq": 22297078
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 7,
+      "lib_codomain_j": 394994274511293839,
+      "minpoly": {
+        "I": 106,
+        "M": 76503,
+        "Meq": 86149
+      },
+      "p": 1330772634996478403,
+      "setup": {
+        "I": 2628,
+        "M": 7426462,
+        "Meq": 7665610
+      },
+      "side": "twist",
+      "t": 2307144020,
+      "v": 5028646,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 104,
+        "Meq": 195
+      },
+      "codomain_j": 28673830247955415,
+      "cofactor_bits": 2168,
+      "crater_j": 1675389574605064808,
+      "ell": 73,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 156,
+        "Meq": 338
+      },
+      "ext_modulus": [
+        36,
+        17,
+        242663461417398409
+      ],
+      "find": {
+        "I": 109,
+        "M": 144008221,
+        "Meq": 144018140
+      },
+      "find_incl_setup": {
+        "I": 8841,
+        "M": 172274182,
+        "Meq": 173078713
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.443150085,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 84,
+      "k": 36,
+      "ladder": {
+        "I": 0,
+        "M": 143926716,
+        "Meq": 143926716
+      },
+      "ladder_attempts_final_find": 6,
+      "ladder_attempts_total": 6,
+      "lambda": 5,
+      "lib_codomain_j": 28673830247955415,
+      "minpoly": {
+        "I": 109,
+        "M": 81505,
+        "Meq": 91424
+      },
+      "p": 1675389574605068183,
+      "setup": {
+        "I": 8732,
+        "M": 28265961,
+        "Meq": 29060573
+      },
+      "side": "twist",
+      "t": 2277337648,
+      "v": 465263602,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 114,
+        "Meq": 205
+      },
+      "codomain_j": 306771593135007317,
+      "cofactor_bits": 2342,
+      "crater_j": 1476584453352521282,
+      "ell": 79,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 168,
+        "Meq": 350
+      },
+      "ext_modulus": [
+        39,
+        8,
+        464179971228545199
+      ],
+      "find": {
+        "I": 118,
+        "M": 92638792,
+        "Meq": 92649530
+      },
+      "find_incl_setup": {
+        "I": 3870,
+        "M": 104737015,
+        "Meq": 105089185
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.357042081,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 32,
+      "k": 39,
+      "ladder": {
+        "I": 0,
+        "M": 92534709,
+        "Meq": 92534709
+      },
+      "ladder_attempts_final_find": 3,
+      "ladder_attempts_total": 3,
+      "lambda": 3,
+      "lib_codomain_j": 306771593135007317,
+      "minpoly": {
+        "I": 118,
+        "M": 104083,
+        "Meq": 114821
+      },
+      "p": 1476584453352524657,
+      "setup": {
+        "I": 3752,
+        "M": 12098223,
+        "Meq": 12439655
+      },
+      "side": "twist",
+      "t": 1992024190,
+      "v": 526196248,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 116,
+        "Meq": 207
+      },
+      "codomain_j": 1170509321491511055,
+      "cofactor_bits": 2488,
+      "crater_j": 2275777745638114784,
+      "ell": 83,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 176,
+        "Meq": 358
+      },
+      "ext_modulus": [
+        41,
+        19,
+        2225663485877063871
+      ],
+      "find": {
+        "I": 124,
+        "M": 36187126,
+        "Meq": 36198410
+      },
+      "find_incl_setup": {
+        "I": 1378,
+        "M": 40283577,
+        "Meq": 40408975
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.112032641,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 8,
+      "k": 41,
+      "ladder": {
+        "I": 0,
+        "M": 36067066,
+        "Meq": 36067066
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": 1170509321491511055,
+      "minpoly": {
+        "I": 124,
+        "M": 120060,
+        "Meq": 131344
+      },
+      "p": 2275777745638118159,
+      "setup": {
+        "I": 1254,
+        "M": 4096451,
+        "Meq": 4210565
+      },
+      "side": "twist",
+      "t": 2996150272,
+      "v": 134267606,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 122,
+        "Meq": 213
+      },
+      "codomain_j": 581330034756125654,
+      "cofactor_bits": 2649,
+      "crater_j": 1626714809642600716,
+      "ell": 89,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 188,
+        "Meq": 370
+      },
+      "ext_modulus": [
+        44,
+        2,
+        838116377309495480
+      ],
+      "find": {
+        "I": 133,
+        "M": 43576759,
+        "Meq": 43588862
+      },
+      "find_incl_setup": {
+        "I": 2638,
+        "M": 52191496,
+        "Meq": 52431554
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.12328519,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 20,
+      "k": 44,
+      "ladder": {
+        "I": 0,
+        "M": 43431822,
+        "Meq": 43431822
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 3,
+      "lib_codomain_j": 581330034756125654,
+      "minpoly": {
+        "I": 133,
+        "M": 144937,
+        "Meq": 157040
+      },
+      "p": 1626714809642604091,
+      "setup": {
+        "I": 2505,
+        "M": 8614737,
+        "Meq": 8842692
+      },
+      "side": "twist",
+      "t": 2550786108,
+      "v": 7065710,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 128,
+        "Meq": 219
+      },
+      "codomain_j": 1279809867759025773,
+      "cofactor_bits": 2900,
+      "crater_j": 1861522094205077312,
+      "ell": 97,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 204,
+        "Meq": 386
+      },
+      "ext_modulus": [
+        48,
+        3,
+        1622948119676712137
+      ],
+      "find": {
+        "I": 145,
+        "M": 56651188,
+        "Meq": 56664383
+      },
+      "find_incl_setup": {
+        "I": 1327,
+        "M": 62864481,
+        "Meq": 62985238
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.171493176,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 3,
+      "k": 48,
+      "ladder": {
+        "I": 0,
+        "M": 56464899,
+        "Meq": 56464899
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 5,
+      "lib_codomain_j": 1279809867759025773,
+      "minpoly": {
+        "I": 145,
+        "M": 186289,
+        "Meq": 199484
+      },
+      "p": 1861522094205080687,
+      "setup": {
+        "I": 1182,
+        "M": 6213293,
+        "Meq": 6320855
+      },
+      "side": "twist",
+      "t": 2405890040,
+      "v": 486647642,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 134,
+        "Meq": 225
+      },
+      "codomain_j": 130646452412982847,
+      "cofactor_bits": 2991,
+      "crater_j": 1211860784581945172,
+      "ell": 101,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 212,
+        "Meq": 394
+      },
+      "ext_modulus": [
+        50,
+        47,
+        756844413048569659
+      ],
+      "find": {
+        "I": 151,
+        "M": 196446637,
+        "Meq": 196460378
+      },
+      "find_incl_setup": {
+        "I": 5340,
+        "M": 213131170,
+        "Meq": 213617110
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.791774136,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 33,
+      "k": 50,
+      "ladder": {
+        "I": 0,
+        "M": 196280340,
+        "Meq": 196280340
+      },
+      "ladder_attempts_final_find": 4,
+      "ladder_attempts_total": 4,
+      "lambda": 2,
+      "lib_codomain_j": 130646452412982847,
+      "minpoly": {
+        "I": 151,
+        "M": 166297,
+        "Meq": 180038
+      },
+      "p": 1211860784581948547,
+      "setup": {
+        "I": 5189,
+        "M": 16684533,
+        "Meq": 17156732
+      },
+      "side": "twist",
+      "t": 1350115484,
+      "v": 657335674,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 138,
+        "Meq": 229
+      },
+      "codomain_j": 1686385835031972536,
+      "cofactor_bits": 3084,
+      "crater_j": 1914630251581032112,
+      "ell": 103,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 216,
+        "Meq": 398
+      },
+      "ext_modulus": [
+        51,
+        27,
+        1291071988365985158
+      ],
+      "find": {
+        "I": 154,
+        "M": 104761056,
+        "Meq": 104775070
+      },
+      "find_incl_setup": {
+        "I": 2969,
+        "M": 114190236,
+        "Meq": 114460415
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.433608183,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 17,
+      "k": 51,
+      "ladder": {
+        "I": 0,
+        "M": 104585904,
+        "Meq": 104585904
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 5,
+      "lib_codomain_j": 1686385835031972536,
+      "minpoly": {
+        "I": 154,
+        "M": 175152,
+        "Meq": 189166
+      },
+      "p": 1914630251581035487,
+      "setup": {
+        "I": 2815,
+        "M": 9429180,
+        "Meq": 9685345
+      },
+      "side": "twist",
+      "t": 2742285400,
+      "v": 140606742,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 142,
+        "Meq": 233
+      },
+      "codomain_j": 961556231385171780,
+      "cofactor_bits": 3203,
+      "crater_j": 1854574314790828876,
+      "ell": 107,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 224,
+        "Meq": 406
+      },
+      "ext_modulus": [
+        53,
+        40,
+        3195662059340932
+      ],
+      "find": {
+        "I": 160,
+        "M": 295685455,
+        "Meq": 295700015
+      },
+      "find_incl_setup": {
+        "I": 11570,
+        "M": 330907667,
+        "Meq": 331960537
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 1.297037096,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 82,
+      "k": 53,
+      "ladder": {
+        "I": 0,
+        "M": 295488414,
+        "Meq": 295488414
+      },
+      "ladder_attempts_final_find": 5,
+      "ladder_attempts_total": 5,
+      "lambda": 2,
+      "lib_codomain_j": 961556231385171780,
+      "minpoly": {
+        "I": 160,
+        "M": 197041,
+        "Meq": 211601
+      },
+      "p": 1854574314790832251,
+      "setup": {
+        "I": 11410,
+        "M": 35222212,
+        "Meq": 36260522
+      },
+      "side": "twist",
+      "t": 2308231396,
+      "v": 546464622,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 144,
+        "Meq": 235
+      },
+      "codomain_j": 1538294806400499918,
+      "cofactor_bits": 3271,
+      "crater_j": 2037277396452347042,
+      "ell": 109,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 228,
+        "Meq": 410
+      },
+      "ext_modulus": [
+        54,
+        13,
+        667960563137735421
+      ],
+      "find": {
+        "I": 163,
+        "M": 124787449,
+        "Meq": 124802282
+      },
+      "find_incl_setup": {
+        "I": 6627,
+        "M": 148735459,
+        "Meq": 149338516
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.542232863,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 56,
+      "k": 54,
+      "ladder": {
+        "I": 0,
+        "M": 124580403,
+        "Meq": 124580403
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 6,
+      "lib_codomain_j": 1538294806400499918,
+      "minpoly": {
+        "I": 163,
+        "M": 207046,
+        "Meq": 221879
+      },
+      "p": 2037277396452350417,
+      "setup": {
+        "I": 6464,
+        "M": 23948010,
+        "Meq": 24536234
+      },
+      "side": "twist",
+      "t": 1630350290,
+      "v": 885685168,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 146,
+        "Meq": 237
+      },
+      "codomain_j": 1054376775799612374,
+      "cofactor_bits": 3373,
+      "crater_j": 1599161618640225388,
+      "ell": 113,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 236,
+        "Meq": 418
+      },
+      "ext_modulus": [
+        56,
+        42,
+        1569170598405772437
+      ],
+      "find": {
+        "I": 169,
+        "M": 134827819,
+        "Meq": 134843198
+      },
+      "find_incl_setup": {
+        "I": 4109,
+        "M": 155579357,
+        "Meq": 155953276
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.518231732,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 30,
+      "k": 56,
+      "ladder": {
+        "I": 0,
+        "M": 134603118,
+        "Meq": 134603118
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 3,
+      "lib_codomain_j": 1054376775799612374,
+      "minpoly": {
+        "I": 169,
+        "M": 224701,
+        "Meq": 240080
+      },
+      "p": 1599161618640228763,
+      "setup": {
+        "I": 3940,
+        "M": 20751538,
+        "Meq": 21110078
+      },
+      "side": "twist",
+      "t": 2230712892,
+      "v": 450486478,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 166,
+        "Meq": 257
+      },
+      "codomain_j": 1352023984069101877,
+      "cofactor_bits": 3801,
+      "crater_j": 1678853643754615744,
+      "ell": 127,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 264,
+        "Meq": 446
+      },
+      "ext_modulus": [
+        63,
+        21,
+        1556724196053619065
+      ],
+      "find": {
+        "I": 190,
+        "M": 97629379,
+        "Meq": 97646669
+      },
+      "find_incl_setup": {
+        "I": 2699,
+        "M": 112841419,
+        "Meq": 113087028
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.364532411,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 20,
+      "k": 63,
+      "ladder": {
+        "I": 0,
+        "M": 97308640,
+        "Meq": 97308640
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 3,
+      "lib_codomain_j": 1352023984069101877,
+      "minpoly": {
+        "I": 190,
+        "M": 320739,
+        "Meq": 338029
+      },
+      "p": 1678853643754619119,
+      "setup": {
+        "I": 2509,
+        "M": 15212040,
+        "Meq": 15440359
+      },
+      "side": "twist",
+      "t": 508550424,
+      "v": 960415910,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 164,
+        "Meq": 255
+      },
+      "codomain_j": 1317492765926926461,
+      "cofactor_bits": 3915,
+      "crater_j": 1561706451657183952,
+      "ell": 131,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 272,
+        "Meq": 454
+      },
+      "ext_modulus": [
+        65,
+        51,
+        585319681415497310
+      ],
+      "find": {
+        "I": 196,
+        "M": 107704046,
+        "Meq": 107721882
+      },
+      "find_incl_setup": {
+        "I": 6850,
+        "M": 135517280,
+        "Meq": 136140630
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.456121442,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 24,
+      "k": 65,
+      "ladder": {
+        "I": 0,
+        "M": 107350804,
+        "Meq": 107350804
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": 1317492765926926461,
+      "minpoly": {
+        "I": 196,
+        "M": 353242,
+        "Meq": 371078
+      },
+      "p": 1561706451657187327,
+      "setup": {
+        "I": 6654,
+        "M": 27813234,
+        "Meq": 28418748
+      },
+      "side": "twist",
+      "t": 2474626160,
+      "v": 132584838,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 170,
+        "Meq": 261
+      },
+      "codomain_j": 884854153917315664,
+      "cofactor_bits": 4114,
+      "crater_j": 1872951576214452616,
+      "ell": 137,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 284,
+        "Meq": 466
+      },
+      "ext_modulus": [
+        68,
+        55,
+        735438169241866997
+      ],
+      "find": {
+        "I": 205,
+        "M": 120782231,
+        "Meq": 120800886
+      },
+      "find_incl_setup": {
+        "I": 37975,
+        "M": 276083908,
+        "Meq": 279539633
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.892899814,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 199,
+      "k": 68,
+      "ladder": {
+        "I": 0,
+        "M": 120388561,
+        "Meq": 120388561
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 3,
+      "lib_codomain_j": 884854153917315664,
+      "minpoly": {
+        "I": 205,
+        "M": 393670,
+        "Meq": 412325
+      },
+      "p": 1872951576214455991,
+      "setup": {
+        "I": 37770,
+        "M": 155301677,
+        "Meq": 158738747
+      },
+      "side": "twist",
+      "t": 1775356976,
+      "v": 787392978,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 174,
+        "Meq": 265
+      },
+      "codomain_j": 137776868226929889,
+      "cofactor_bits": 4159,
+      "crater_j": 1595960493157620002,
+      "ell": 139,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 288,
+        "Meq": 470
+      },
+      "ext_modulus": [
+        69,
+        10,
+        1017625386079249090
+      ],
+      "find": {
+        "I": 208,
+        "M": 256961741,
+        "Meq": 256980669
+      },
+      "find_incl_setup": {
+        "I": 11195,
+        "M": 304547401,
+        "Meq": 305566146
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.906348808,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 40,
+      "k": 69,
+      "ladder": {
+        "I": 0,
+        "M": 256542308,
+        "Meq": 256542308
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 2,
+      "lib_codomain_j": 137776868226929889,
+      "minpoly": {
+        "I": 208,
+        "M": 419433,
+        "Meq": 438361
+      },
+      "p": 1595960493157623377,
+      "setup": {
+        "I": 10987,
+        "M": 47585660,
+        "Meq": 48585477
+      },
+      "side": "twist",
+      "t": 2308271534,
+      "v": 388352656,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 184,
+        "Meq": 275
+      },
+      "codomain_j": 1408019166309631353,
+      "cofactor_bits": 4488,
+      "crater_j": 2066628511614867718,
+      "ell": 149,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 308,
+        "Meq": 490
+      },
+      "ext_modulus": [
+        74,
+        36,
+        1224645122407734056
+      ],
+      "find": {
+        "I": 223,
+        "M": 316992163,
+        "Meq": 317012456
+      },
+      "find_incl_setup": {
+        "I": 3757,
+        "M": 332062492,
+        "Meq": 332404379
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.945783694,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 9,
+      "k": 74,
+      "ladder": {
+        "I": 0,
+        "M": 316480422,
+        "Meq": 316480422
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 2,
+      "lib_codomain_j": 1408019166309631353,
+      "minpoly": {
+        "I": 223,
+        "M": 511741,
+        "Meq": 532034
+      },
+      "p": 2066628511614871093,
+      "setup": {
+        "I": 3534,
+        "M": 15070329,
+        "Meq": 15391923
+      },
+      "side": "twist",
+      "t": 2821517942,
+      "v": 208926012,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 188,
+        "Meq": 279
+      },
+      "codomain_j": 458827023466278715,
+      "cofactor_bits": 4533,
+      "crater_j": 1784918006217934826,
+      "ell": 151,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 312,
+        "Meq": 494
+      },
+      "ext_modulus": [
+        75,
+        2,
+        211483969839031315
+      ],
+      "find": {
+        "I": 226,
+        "M": 163958392,
+        "Meq": 163978958
+      },
+      "find_incl_setup": {
+        "I": 8384,
+        "M": 206896208,
+        "Meq": 207659152
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.580362413,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 24,
+      "k": 75,
+      "ladder": {
+        "I": 0,
+        "M": 163428004,
+        "Meq": 163428004
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 6,
+      "lib_codomain_j": 458827023466278715,
+      "minpoly": {
+        "I": 226,
+        "M": 530388,
+        "Meq": 550954
+      },
+      "p": 1784918006217938201,
+      "setup": {
+        "I": 8158,
+        "M": 42937816,
+        "Meq": 43680194
+      },
+      "side": "twist",
+      "t": 2667909386,
+      "v": 55973888,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 194,
+        "Meq": 285
+      },
+      "codomain_j": 816912275829017815,
+      "cofactor_bits": 4699,
+      "crater_j": 1552887481257996082,
+      "ell": 157,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 324,
+        "Meq": 506
+      },
+      "ext_modulus": [
+        78,
+        67,
+        302653257009936204
+      ],
+      "find": {
+        "I": 235,
+        "M": 735706512,
+        "Meq": 735727897
+      },
+      "find_incl_setup": {
+        "I": 6195,
+        "M": 766439722,
+        "Meq": 767003467
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 2.085303797,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 21,
+      "k": 78,
+      "ladder": {
+        "I": 0,
+        "M": 735110618,
+        "Meq": 735110618
+      },
+      "ladder_attempts_final_find": 4,
+      "ladder_attempts_total": 4,
+      "lambda": 5,
+      "lib_codomain_j": 816912275829017815,
+      "minpoly": {
+        "I": 235,
+        "M": 595894,
+        "Meq": 617279
+      },
+      "p": 1552887481257999457,
+      "setup": {
+        "I": 5960,
+        "M": 30733210,
+        "Meq": 31275570
+      },
+      "side": "twist",
+      "t": 2488834974,
+      "v": 49642144,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 198,
+        "Meq": 289
+      },
+      "codomain_j": 568519840215870692,
+      "cofactor_bits": 4878,
+      "crater_j": 1512813528497661022,
+      "ell": 163,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 336,
+        "Meq": 518
+      },
+      "ext_modulus": [
+        81,
+        51,
+        355619800266794749
+      ],
+      "find": {
+        "I": 244,
+        "M": 618612770,
+        "Meq": 618634974
+      },
+      "find_incl_setup": {
+        "I": 2352,
+        "M": 632644543,
+        "Meq": 632858575
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 2.277023438,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 1,
+      "k": 81,
+      "ladder": {
+        "I": 0,
+        "M": 617946344,
+        "Meq": 617946344
+      },
+      "ladder_attempts_final_find": 3,
+      "ladder_attempts_total": 3,
+      "lambda": 2,
+      "lib_codomain_j": 568519840215870692,
+      "minpoly": {
+        "I": 244,
+        "M": 666426,
+        "Meq": 688630
+      },
+      "p": 1512813528497664397,
+      "setup": {
+        "I": 2108,
+        "M": 14031773,
+        "Meq": 14223601
+      },
+      "side": "twist",
+      "t": 2259437870,
+      "v": 367655628,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 204,
+        "Meq": 295
+      },
+      "codomain_j": 813472273617609038,
+      "cofactor_bits": 4974,
+      "crater_j": 1233577462874510372,
+      "ell": 167,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 344,
+        "Meq": 526
+      },
+      "ext_modulus": [
+        83,
+        63,
+        625238716840979424
+      ],
+      "find": {
+        "I": 250,
+        "M": 438822684,
+        "Meq": 438845434
+      },
+      "find_incl_setup": {
+        "I": 20267,
+        "M": 524451386,
+        "Meq": 526295683
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 1.399235545,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 79,
+      "k": 83,
+      "ladder": {
+        "I": 0,
+        "M": 438111180,
+        "Meq": 438111180
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 5,
+      "lib_codomain_j": 813472273617609038,
+      "minpoly": {
+        "I": 250,
+        "M": 711504,
+        "Meq": 734254
+      },
+      "p": 1233577462874513747,
+      "setup": {
+        "I": 20017,
+        "M": 85628702,
+        "Meq": 87450249
+      },
+      "side": "twist",
+      "t": 2135335156,
+      "v": 231348106,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 210,
+        "Meq": 301
+      },
+      "codomain_j": 490809464212352669,
+      "cofactor_bits": 5154,
+      "crater_j": 1237456869509319742,
+      "ell": 173,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 356,
+        "Meq": 538
+      },
+      "ext_modulus": [
+        86,
+        71,
+        1054861574658566966
+      ],
+      "find": {
+        "I": 259,
+        "M": 244706165,
+        "Meq": 244729734
+      },
+      "find_incl_setup": {
+        "I": 35595,
+        "M": 415406611,
+        "Meq": 418645756
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 1.121521646,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 150,
+      "k": 86,
+      "ladder": {
+        "I": 0,
+        "M": 243915295,
+        "Meq": 243915295
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": 490809464212352669,
+      "minpoly": {
+        "I": 259,
+        "M": 790870,
+        "Meq": 814439
+      },
+      "p": 1237456869509323117,
+      "setup": {
+        "I": 35336,
+        "M": 170700446,
+        "Meq": 173916022
+      },
+      "side": "twist",
+      "t": 1882342766,
+      "v": 448268604,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 216,
+        "Meq": 307
+      },
+      "codomain_j": 351726127865798388,
+      "cofactor_bits": 5399,
+      "crater_j": 2037498265866729506,
+      "ell": 179,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 368,
+        "Meq": 550
+      },
+      "ext_modulus": [
+        89,
+        27,
+        506421013277764096
+      ],
+      "find": {
+        "I": 268,
+        "M": 274890902,
+        "Meq": 274915290
+      },
+      "find_incl_setup": {
+        "I": 27728,
+        "M": 406954178,
+        "Meq": 409477426
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 1.034483427,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 84,
+      "k": 89,
+      "ladder": {
+        "I": 0,
+        "M": 274015144,
+        "Meq": 274015144
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": 351726127865798388,
+      "minpoly": {
+        "I": 268,
+        "M": 875758,
+        "Meq": 900146
+      },
+      "p": 2037498265866732881,
+      "setup": {
+        "I": 27460,
+        "M": 132063276,
+        "Meq": 134562136
+      },
+      "side": "twist",
+      "t": 4077982,
+      "v": 1079019160,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 218,
+        "Meq": 309
+      },
+      "codomain_j": 941673267324227352,
+      "cofactor_bits": 5431,
+      "crater_j": 1630544491100505058,
+      "ell": 181,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 372,
+        "Meq": 554
+      },
+      "ext_modulus": [
+        90,
+        27,
+        1361928951463392994
+      ],
+      "find": {
+        "I": 271,
+        "M": 281972193,
+        "Meq": 281996854
+      },
+      "find_incl_setup": {
+        "I": 3318,
+        "M": 308068557,
+        "Meq": 308370495
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 0.747062684,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 7,
+      "k": 90,
+      "ladder": {
+        "I": 0,
+        "M": 281069636,
+        "Meq": 281069636
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": 941673267324227352,
+      "minpoly": {
+        "I": 271,
+        "M": 902557,
+        "Meq": 927218
+      },
+      "p": 1630544491100508433,
+      "setup": {
+        "I": 3047,
+        "M": 26096364,
+        "Meq": 26373641
+      },
+      "side": "twist",
+      "t": 2527624098,
+      "v": 137992952,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 232,
+        "Meq": 323
+      },
+      "codomain_j": 1410403310372269212,
+      "cofactor_bits": 5734,
+      "crater_j": 1640166149859903464,
+      "ell": 191,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 392,
+        "Meq": 574
+      },
+      "ext_modulus": [
+        95,
+        69,
+        475447747989983427
+      ],
+      "find": {
+        "I": 286,
+        "M": 989687035,
+        "Meq": 989713061
+      },
+      "find_incl_setup": {
+        "I": 17304,
+        "M": 1085671627,
+        "Meq": 1087246291
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 3.011691225,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 55,
+      "k": 95,
+      "ladder": {
+        "I": 0,
+        "M": 988633192,
+        "Meq": 988633192
+      },
+      "ladder_attempts_final_find": 3,
+      "ladder_attempts_total": 3,
+      "lambda": 19,
+      "lib_codomain_j": 1410403310372269212,
+      "minpoly": {
+        "I": 286,
+        "M": 1053843,
+        "Meq": 1079869
+      },
+      "p": 1640166149859906839,
+      "setup": {
+        "I": 17018,
+        "M": 95984592,
+        "Meq": 97533230
+      },
+      "side": "twist",
+      "t": 2557660792,
+      "v": 52147966,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 226,
+        "Meq": 317
+      },
+      "codomain_j": 2239059701539283082,
+      "cofactor_bits": 5841,
+      "crater_j": 2302675858933554856,
+      "ell": 193,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 396,
+        "Meq": 578
+      },
+      "ext_modulus": [
+        96,
+        80,
+        596840799185657927
+      ],
+      "find": {
+        "I": 289,
+        "M": 339546309,
+        "Meq": 339572608
+      },
+      "find_incl_setup": {
+        "I": 16923,
+        "M": 479838896,
+        "Meq": 481378889
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 1.303030403,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 56,
+      "k": 96,
+      "ladder": {
+        "I": 0,
+        "M": 338471588,
+        "Meq": 338471588
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 5,
+      "lib_codomain_j": 2239059701539283082,
+      "minpoly": {
+        "I": 289,
+        "M": 1074721,
+        "Meq": 1101020
+      },
+      "p": 2302675858933558231,
+      "setup": {
+        "I": 16634,
+        "M": 140292587,
+        "Meq": 141806281
+      },
+      "side": "twist",
+      "t": 508140832,
+      "v": 1130897010,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 232,
+        "Meq": 323
+      },
+      "codomain_j": 1109828989557415128,
+      "cofactor_bits": 5876,
+      "crater_j": 1242775903361883626,
+      "ell": 197,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 404,
+        "Meq": 586
+      },
+      "ext_modulus": [
+        98,
+        4,
+        205936142546490556
+      ],
+      "find": {
+        "I": 295,
+        "M": 609585049,
+        "Meq": 609611894
+      },
+      "find_incl_setup": {
+        "I": 29826,
+        "M": 764364347,
+        "Meq": 767078513
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 2.948048651,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 106,
+      "k": 98,
+      "ladder": {
+        "I": 0,
+        "M": 608597586,
+        "Meq": 608597586
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 2,
+      "lib_codomain_j": 1109828989557415128,
+      "minpoly": {
+        "I": 295,
+        "M": 987463,
+        "Meq": 1014308
+      },
+      "p": 1242775903361887001,
+      "setup": {
+        "I": 29531,
+        "M": 154779298,
+        "Meq": 157466619
+      },
+      "side": "twist",
+      "t": 367247798,
+      "v": 831198160,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 236,
+        "Meq": 327
+      },
+      "codomain_j": 1726478458148439773,
+      "cofactor_bits": 5995,
+      "crater_j": 1878310162486405054,
+      "ell": 199,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 408,
+        "Meq": 590
+      },
+      "ext_modulus": [
+        99,
+        30,
+        989285420274811508
+      ],
+      "find": {
+        "I": 298,
+        "M": 298860100,
+        "Meq": 298887218
+      },
+      "find_incl_setup": {
+        "I": 4349,
+        "M": 321153959,
+        "Meq": 321549718
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 1.302838608,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 4,
+      "k": 99,
+      "ladder": {
+        "I": 0,
+        "M": 297899228,
+        "Meq": 297899228
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 3,
+      "lib_codomain_j": 1726478458148439773,
+      "minpoly": {
+        "I": 298,
+        "M": 960872,
+        "Meq": 987990
+      },
+      "p": 1878310162486408429,
+      "setup": {
+        "I": 4051,
+        "M": 22293859,
+        "Meq": 22662500
+      },
+      "side": "twist",
+      "t": 2211030898,
+      "v": 612323796,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain",
+        "lib_verify_kernel_and_j"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 248,
+        "Meq": 339
+      },
+      "codomain_j": 1481806334923799822,
+      "cofactor_bits": 6338,
+      "crater_j": 1635626956581000064,
+      "ell": 211,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 432,
+        "Meq": 614
+      },
+      "ext_modulus": [
+        105,
+        94,
+        107132482296295679
+      ],
+      "find": {
+        "I": 316,
+        "M": 680466601,
+        "Meq": 680495357
+      },
+      "find_incl_setup": {
+        "I": 10658,
+        "M": 736946097,
+        "Meq": 737915975
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 3.149757844,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 28,
+      "k": 105,
+      "ladder": {
+        "I": 0,
+        "M": 679369506,
+        "Meq": 679369506
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 2,
+      "lib_codomain_j": 1481806334923799822,
+      "minpoly": {
+        "I": 316,
+        "M": 1097095,
+        "Meq": 1125851
+      },
+      "p": 1635626956581003439,
+      "setup": {
+        "I": 10342,
+        "M": 56479496,
+        "Meq": 57420618
+      },
+      "side": "twist",
+      "t": 668009968,
+      "v": 933217974,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 264,
+        "Meq": 355
+      },
+      "codomain_j": 1453239786928891031,
+      "cofactor_bits": 6715,
+      "crater_j": 1789013777644681288,
+      "ell": 223,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 456,
+        "Meq": 638
+      },
+      "ext_modulus": [
+        111,
+        76,
+        1556150168520568254
+      ],
+      "find": {
+        "I": 334,
+        "M": 397227804,
+        "Meq": 397258198
+      },
+      "find_incl_setup": {
+        "I": 85041,
+        "M": 848833997,
+        "Meq": 856572728
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 3.049314137,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 275,
+      "k": 111,
+      "ladder": {
+        "I": 0,
+        "M": 395954585,
+        "Meq": 395954585
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 3,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 334,
+        "M": 1273219,
+        "Meq": 1303613
+      },
+      "p": 1789013777644684663,
+      "setup": {
+        "I": 84707,
+        "M": 451606193,
+        "Meq": 459314530
+      },
+      "side": "twist",
+      "t": 1910213992,
+      "v": 707827422,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 264,
+        "Meq": 355
+      },
+      "codomain_j": 102145133861185763,
+      "cofactor_bits": 6800,
+      "crater_j": 1428912872217485516,
+      "ell": 227,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 464,
+        "Meq": 646
+      },
+      "ext_modulus": [
+        113,
+        71,
+        824186754703412825
+      ],
+      "find": {
+        "I": 340,
+        "M": 1684648818,
+        "Meq": 1684679758
+      },
+      "find_incl_setup": {
+        "I": 18849,
+        "M": 1773961401,
+        "Meq": 1775676660
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 6.659949295,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 48,
+      "k": 113,
+      "ladder": {
+        "I": 0,
+        "M": 1683292152,
+        "Meq": 1683292152
+      },
+      "ladder_attempts_final_find": 4,
+      "ladder_attempts_total": 4,
+      "lambda": 2,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 340,
+        "M": 1356666,
+        "Meq": 1387606
+      },
+      "p": 1428912872217488891,
+      "setup": {
+        "I": 18509,
+        "M": 89312583,
+        "Meq": 90996902
+      },
+      "side": "twist",
+      "t": 1622628692,
+      "v": 663618610,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 266,
+        "Meq": 357
+      },
+      "codomain_j": 263392897855330869,
+      "cofactor_bits": 6848,
+      "crater_j": 1326657785256930148,
+      "ell": 229,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 468,
+        "Meq": 650
+      },
+      "ext_modulus": [
+        114,
+        40,
+        216312968117138505
+      ],
+      "find": {
+        "I": 343,
+        "M": 433646646,
+        "Meq": 433677859
+      },
+      "find_incl_setup": {
+        "I": 34535,
+        "M": 626985764,
+        "Meq": 630128449
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 2.319084183,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 69,
+      "k": 114,
+      "ladder": {
+        "I": 0,
+        "M": 432250547,
+        "Meq": 432250547
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 6,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 343,
+        "M": 1396099,
+        "Meq": 1427312
+      },
+      "p": 1326657785256933523,
+      "setup": {
+        "I": 34192,
+        "M": 193339118,
+        "Meq": 196450590
+      },
+      "side": "twist",
+      "t": 700040188,
+      "v": 829507158,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 270,
+        "Meq": 361
+      },
+      "codomain_j": 995721473166454896,
+      "cofactor_bits": 6959,
+      "crater_j": 1254194398571308874,
+      "ell": 233,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 476,
+        "Meq": 658
+      },
+      "ext_modulus": [
+        116,
+        48,
+        757941729884853336
+      ],
+      "find": {
+        "I": 349,
+        "M": 907364419,
+        "Meq": 907396178
+      },
+      "find_incl_setup": {
+        "I": 24116,
+        "M": 1048012159,
+        "Meq": 1050206715
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 3.840379633,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 65,
+      "k": 116,
+      "ladder": {
+        "I": 0,
+        "M": 905901528,
+        "Meq": 905901528
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 3,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 349,
+        "M": 1462891,
+        "Meq": 1494650
+      },
+      "p": 1254194398571312249,
+      "setup": {
+        "I": 23767,
+        "M": 140647740,
+        "Meq": 142810537
+      },
+      "side": "twist",
+      "t": 847449898,
+      "v": 783636784,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 280,
+        "Meq": 371
+      },
+      "codomain_j": 479543621394764379,
+      "cofactor_bits": 7173,
+      "crater_j": 1526895579257509352,
+      "ell": 239,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 488,
+        "Meq": 670
+      },
+      "ext_modulus": [
+        119,
+        57,
+        831818495399076436
+      ],
+      "find": {
+        "I": 358,
+        "M": 486691544,
+        "Meq": 486724122
+      },
+      "find_incl_setup": {
+        "I": 9928,
+        "M": 531229871,
+        "Meq": 532133319
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 1.939129881,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 10,
+      "k": 119,
+      "ladder": {
+        "I": 0,
+        "M": 485132666,
+        "Meq": 485132666
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 7,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 358,
+        "M": 1558878,
+        "Meq": 1591456
+      },
+      "p": 1526895579257512727,
+      "setup": {
+        "I": 9570,
+        "M": 44538327,
+        "Meq": 45409197
+      },
+      "side": "twist",
+      "t": 2471311160,
+      "v": 5391362,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 278,
+        "Meq": 369
+      },
+      "codomain_j": 1024696591873471183,
+      "cofactor_bits": 7266,
+      "crater_j": 1841043786623775464,
+      "ell": 241,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 492,
+        "Meq": 674
+      },
+      "ext_modulus": [
+        120,
+        111,
+        325162491864750665
+      ],
+      "find": {
+        "I": 361,
+        "M": 495381885,
+        "Meq": 495414736
+      },
+      "find_incl_setup": {
+        "I": 21901,
+        "M": 635841582,
+        "Meq": 637834573
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 2.33942544,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 64,
+      "k": 120,
+      "ladder": {
+        "I": 0,
+        "M": 493802009,
+        "Meq": 493802009
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 7,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 361,
+        "M": 1579876,
+        "Meq": 1612727
+      },
+      "p": 1841043786623778839,
+      "setup": {
+        "I": 21540,
+        "M": 140459697,
+        "Meq": 142419837
+      },
+      "side": "twist",
+      "t": 2435779784,
+      "v": 452161790,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 292,
+        "Meq": 383
+      },
+      "codomain_j": 1211624891900446151,
+      "cofactor_bits": 7519,
+      "crater_j": 1391749423792346878,
+      "ell": 251,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 512,
+        "Meq": 694
+      },
+      "ext_modulus": [
+        125,
+        87,
+        1036790489270564952
+      ],
+      "find": {
+        "I": 376,
+        "M": 3411305665,
+        "Meq": 3411339881
+      },
+      "find_incl_setup": {
+        "I": 15363,
+        "M": 3492922101,
+        "Meq": 3494320134
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 12.695085465,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 21,
+      "k": 125,
+      "ladder": {
+        "I": 0,
+        "M": 3409484032,
+        "Meq": 3409484032
+      },
+      "ladder_attempts_final_find": 6,
+      "ladder_attempts_total": 6,
+      "lambda": 6,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 376,
+        "M": 1821633,
+        "Meq": 1855849
+      },
+      "p": 1391749423792350253,
+      "setup": {
+        "I": 14987,
+        "M": 81616436,
+        "Meq": 82980253
+      },
+      "side": "twist",
+      "t": 1653669838,
+      "v": 636101268,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 290,
+        "Meq": 381
+      },
+      "codomain_j": 98377100181345850,
+      "cofactor_bits": 7694,
+      "crater_j": 1354089359660772778,
+      "ell": 257,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 524,
+        "Meq": 706
+      },
+      "ext_modulus": [
+        128,
+        117,
+        856461189721984364
+      ],
+      "find": {
+        "I": 385,
+        "M": 1191352981,
+        "Meq": 1191388016
+      },
+      "find_incl_setup": {
+        "I": 37462,
+        "M": 1426932902,
+        "Meq": 1430341944
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 5.241011137,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 69,
+      "k": 128,
+      "ladder": {
+        "I": 0,
+        "M": 1189444884,
+        "Meq": 1189444884
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 3,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 385,
+        "M": 1908097,
+        "Meq": 1943132
+      },
+      "p": 1354089359660776153,
+      "setup": {
+        "I": 37077,
+        "M": 235579921,
+        "Meq": 238953928
+      },
+      "side": "twist",
+      "t": 2042640118,
+      "v": 421558128,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 300,
+        "Meq": 391
+      },
+      "codomain_j": 582313891017425552,
+      "cofactor_bits": 7903,
+      "crater_j": 1570931802422091116,
+      "ell": 263,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 536,
+        "Meq": 718
+      },
+      "ext_modulus": [
+        131,
+        12,
+        1158510760551203668
+      ],
+      "find": {
+        "I": 394,
+        "M": 1973556824,
+        "Meq": 1973592678
+      },
+      "find_incl_setup": {
+        "I": 59931,
+        "M": 2303247627,
+        "Meq": 2308701348
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 7.561098239,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 122,
+      "k": 131,
+      "ladder": {
+        "I": 0,
+        "M": 1971462160,
+        "Meq": 1971462160
+      },
+      "ladder_attempts_final_find": 3,
+      "ladder_attempts_total": 3,
+      "lambda": 5,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 394,
+        "M": 2094664,
+        "Meq": 2130518
+      },
+      "p": 1570931802422094491,
+      "setup": {
+        "I": 59537,
+        "M": 329690803,
+        "Meq": 335108670
+      },
+      "side": "twist",
+      "t": 181402156,
+      "v": 944973202,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 306,
+        "Meq": 397
+      },
+      "codomain_j": 58830447244884194,
+      "cofactor_bits": 8118,
+      "crater_j": 1876057194665650312,
+      "ell": 269,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 548,
+        "Meq": 730
+      },
+      "ext_modulus": [
+        134,
+        109,
+        1718886373660815158
+      ],
+      "find": {
+        "I": 403,
+        "M": 700566222,
+        "Meq": 700602895
+      },
+      "find_incl_setup": {
+        "I": 67247,
+        "M": 1052006329,
+        "Meq": 1058125806
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 3.565528874,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 117,
+      "k": 134,
+      "ladder": {
+        "I": 0,
+        "M": 698349527,
+        "Meq": 698349527
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 403,
+        "M": 2216695,
+        "Meq": 2253368
+      },
+      "p": 1876057194665653687,
+      "setup": {
+        "I": 66844,
+        "M": 351440107,
+        "Meq": 357522911
+      },
+      "side": "twist",
+      "t": 2269450784,
+      "v": 579879534,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 310,
+        "Meq": 401
+      },
+      "codomain_j": 1074626039250568912,
+      "cofactor_bits": 8140,
+      "crater_j": 1536159315353598286,
+      "ell": 271,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 552,
+        "Meq": 734
+      },
+      "ext_modulus": [
+        135,
+        45,
+        992805112728019494
+      ],
+      "find": {
+        "I": 406,
+        "M": 708481094,
+        "Meq": 708518040
+      },
+      "find_incl_setup": {
+        "I": 104585,
+        "M": 1661037029,
+        "Meq": 1670554264
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 5.361072214,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 225,
+      "k": 135,
+      "ladder": {
+        "I": 0,
+        "M": 706228948,
+        "Meq": 706228948
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 6,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 406,
+        "M": 2252146,
+        "Meq": 2289092
+      },
+      "p": 1536159315353601661,
+      "setup": {
+        "I": 104179,
+        "M": 952555935,
+        "Meq": 962036224
+      },
+      "side": "twist",
+      "t": 2459407938,
+      "v": 117077420,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 314,
+        "Meq": 405
+      },
+      "codomain_j": 1036971692819401879,
+      "cofactor_bits": 8279,
+      "crater_j": 1243153045712623216,
+      "ell": 277,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 564,
+        "Meq": 746
+      },
+      "ext_modulus": [
+        138,
+        84,
+        528819865048717347
+      ],
+      "find": {
+        "I": 415,
+        "M": 1522796023,
+        "Meq": 1522833788
+      },
+      "find_incl_setup": {
+        "I": 14858,
+        "M": 1660387674,
+        "Meq": 1661739752
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 5.19525381,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 26,
+      "k": 138,
+      "ladder": {
+        "I": 0,
+        "M": 1520365209,
+        "Meq": 1520365209
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 5,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 415,
+        "M": 2430814,
+        "Meq": 2468579
+      },
+      "p": 1243153045712626591,
+      "setup": {
+        "I": 14443,
+        "M": 137591651,
+        "Meq": 138905964
+      },
+      "side": "twist",
+      "t": 2162531808,
+      "v": 205658650,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 318,
+        "Meq": 409
+      },
+      "codomain_j": 1023249293466382271,
+      "cofactor_bits": 8523,
+      "crater_j": 2292821421651388246,
+      "ell": 281,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 572,
+        "Meq": 754
+      },
+      "ext_modulus": [
+        140,
+        5,
+        194034565278636135
+      ],
+      "find": {
+        "I": 421,
+        "M": 804552870,
+        "Meq": 804591181
+      },
+      "find_incl_setup": {
+        "I": 50532,
+        "M": 1351102840,
+        "Meq": 1355701252
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 4.03137557,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 129,
+      "k": 140,
+      "ladder": {
+        "I": 0,
+        "M": 802025696,
+        "Meq": 802025696
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 3,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 421,
+        "M": 2527174,
+        "Meq": 2565485
+      },
+      "p": 2292821421651391621,
+      "setup": {
+        "I": 50111,
+        "M": 546549970,
+        "Meq": 551110071
+      },
+      "side": "twist",
+      "t": 1371873478,
+      "v": 1020451500,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 322,
+        "Meq": 413
+      },
+      "codomain_j": 382308303424498146,
+      "cofactor_bits": 8467,
+      "crater_j": 1291647034731259144,
+      "ell": 283,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 576,
+        "Meq": 758
+      },
+      "ext_modulus": [
+        141,
+        139,
+        1068040301754787352
+      ],
+      "find": {
+        "I": 424,
+        "M": 812474465,
+        "Meq": 812513049
+      },
+      "find_incl_setup": {
+        "I": 303457,
+        "M": 2922212383,
+        "Meq": 2949826970
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 8.769722227,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 711,
+      "k": 141,
+      "ladder": {
+        "I": 0,
+        "M": 809888552,
+        "Meq": 809888552
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 3,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 424,
+        "M": 2585913,
+        "Meq": 2624497
+      },
+      "p": 1291647034731262519,
+      "setup": {
+        "I": 303033,
+        "M": 2109737918,
+        "Meq": 2137313921
+      },
+      "side": "twist",
+      "t": 2247773352,
+      "v": 127673186,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 330,
+        "Meq": 421
+      },
+      "codomain_j": 690084092612943676,
+      "cofactor_bits": 8764,
+      "crater_j": 1268585883808884628,
+      "ell": 293,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 596,
+        "Meq": 778
+      },
+      "ext_modulus": [
+        146,
+        119,
+        1114928168033738559
+      ],
+      "find": {
+        "I": 439,
+        "M": 1800518755,
+        "Meq": 1800558704
+      },
+      "find_incl_setup": {
+        "I": 147418,
+        "M": 2679059556,
+        "Meq": 2692474594
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 7.887942576,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 251,
+      "k": 146,
+      "ladder": {
+        "I": 0,
+        "M": 1797654240,
+        "Meq": 1797654240
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 2,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 439,
+        "M": 2864515,
+        "Meq": 2904464
+      },
+      "p": 1268585883808888003,
+      "setup": {
+        "I": 146979,
+        "M": 878540801,
+        "Meq": 891915890
+      },
+      "side": "twist",
+      "t": 2139959492,
+      "v": 265899258,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 346,
+        "Meq": 437
+      },
+      "codomain_j": 1366551336700412887,
+      "cofactor_bits": 9281,
+      "crater_j": 1962394007343671996,
+      "ell": 307,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 624,
+        "Meq": 806
+      },
+      "ext_modulus": [
+        153,
+        109,
+        1876910366306527913
+      ],
+      "find": {
+        "I": 460,
+        "M": 2085257938,
+        "Meq": 2085299798
+      },
+      "find_incl_setup": {
+        "I": 121402,
+        "M": 3024410354,
+        "Meq": 3035457936
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 8.956024032,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 274,
+      "k": 153,
+      "ladder": {
+        "I": 0,
+        "M": 2081981787,
+        "Meq": 2081981787
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 5,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 460,
+        "M": 3276151,
+        "Meq": 3318011
+      },
+      "p": 1962394007343675371,
+      "setup": {
+        "I": 120942,
+        "M": 939152416,
+        "Meq": 950158138
+      },
+      "side": "twist",
+      "t": 2255921356,
+      "v": 627966658,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 352,
+        "Meq": 443
+      },
+      "codomain_j": 1742573915267125973,
+      "cofactor_bits": 9406,
+      "crater_j": 1991235377346038344,
+      "ell": 311,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 632,
+        "Meq": 814
+      },
+      "ext_modulus": [
+        155,
+        123,
+        943790188126513517
+      ],
+      "find": {
+        "I": 466,
+        "M": 1090415094,
+        "Meq": 1090457500
+      },
+      "find_incl_setup": {
+        "I": 194959,
+        "M": 2456501916,
+        "Meq": 2474243185
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 7.286901939,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 360,
+      "k": 155,
+      "ladder": {
+        "I": 0,
+        "M": 1086996737,
+        "Meq": 1086996737
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 17,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 466,
+        "M": 3418357,
+        "Meq": 3460763
+      },
+      "p": 1991235377346041719,
+      "setup": {
+        "I": 194493,
+        "M": 1366086822,
+        "Meq": 1383785685
+      },
+      "side": "twist",
+      "t": 2437710712,
+      "v": 537521826,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 352,
+        "Meq": 443
+      },
+      "codomain_j": 456632303755306686,
+      "cofactor_bits": 9372,
+      "crater_j": 1308857842094781874,
+      "ell": 313,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 636,
+        "Meq": 818
+      },
+      "ext_modulus": [
+        156,
+        95,
+        433314251678332727
+      ],
+      "find": {
+        "I": 469,
+        "M": 3279045918,
+        "Meq": 3279088597
+      },
+      "find_incl_setup": {
+        "I": 14689,
+        "M": 3382338579,
+        "Meq": 3383675278
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 9.369204703,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 12,
+      "k": 156,
+      "ladder": {
+        "I": 0,
+        "M": 3275579912,
+        "Meq": 3275579912
+      },
+      "ladder_attempts_final_find": 3,
+      "ladder_attempts_total": 3,
+      "lambda": 10,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 469,
+        "M": 3466006,
+        "Meq": 3508685
+      },
+      "p": 1308857842094785249,
+      "setup": {
+        "I": 14220,
+        "M": 103292661,
+        "Meq": 104586681
+      },
+      "side": "twist",
+      "t": 529986018,
+      "v": 841303936,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 358,
+        "Meq": 449
+      },
+      "codomain_j": 462042638452170525,
+      "cofactor_bits": 9535,
+      "crater_j": 1576312462088895244,
+      "ell": 317,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 644,
+        "Meq": 826
+      },
+      "ext_modulus": [
+        158,
+        2,
+        869817431464010349
+      ],
+      "find": {
+        "I": 475,
+        "M": 3410303816,
+        "Meq": 3410347041
+      },
+      "find_incl_setup": {
+        "I": 72153,
+        "M": 3868157508,
+        "Meq": 3874723431
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 11.556879732,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 112,
+      "k": 158,
+      "ladder": {
+        "I": 0,
+        "M": 3406716802,
+        "Meq": 3406716802
+      },
+      "ladder_attempts_final_find": 3,
+      "ladder_attempts_total": 3,
+      "lambda": 2,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 475,
+        "M": 3587014,
+        "Meq": 3630239
+      },
+      "p": 1576312462088898619,
+      "setup": {
+        "I": 71678,
+        "M": 457853692,
+        "Meq": 464376390
+      },
+      "side": "twist",
+      "t": 1509876076,
+      "v": 758336910,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 370,
+        "Meq": 461
+      },
+      "codomain_j": 985553140838546736,
+      "cofactor_bits": 10048,
+      "crater_j": 2299299076277462462,
+      "ell": 331,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 672,
+        "Meq": 854
+      },
+      "ext_modulus": [
+        165,
+        98,
+        1014031630243650982
+      ],
+      "find": {
+        "I": 496,
+        "M": 1313352194,
+        "Meq": 1313397330
+      },
+      "find_incl_setup": {
+        "I": 42658,
+        "M": 1656813024,
+        "Meq": 1660694902
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 4.507561118,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 60,
+      "k": 165,
+      "ladder": {
+        "I": 0,
+        "M": 1309260206,
+        "Meq": 1309260206
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 3,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 496,
+        "M": 4091988,
+        "Meq": 4137124
+      },
+      "p": 2299299076277465837,
+      "setup": {
+        "I": 42162,
+        "M": 343460830,
+        "Meq": 347297572
+      },
+      "side": "twist",
+      "t": 580629614,
+      "v": 1125043844,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 374,
+        "Meq": 465
+      },
+      "codomain_j": 1781417257287476753,
+      "cofactor_bits": 10195,
+      "crater_j": 1983260373198360488,
+      "ell": 337,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 684,
+        "Meq": 866
+      },
+      "ext_modulus": [
+        168,
+        164,
+        338138458802573141
+      ],
+      "find": {
+        "I": 505,
+        "M": 1355921660,
+        "Meq": 1355967615
+      },
+      "find_incl_setup": {
+        "I": 105842,
+        "M": 2476723601,
+        "Meq": 2486355223
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 7.014011676,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 209,
+      "k": 168,
+      "ladder": {
+        "I": 0,
+        "M": 1351682368,
+        "Meq": 1351682368
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 10,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 505,
+        "M": 4239292,
+        "Meq": 4285247
+      },
+      "p": 1983260373198363863,
+      "setup": {
+        "I": 105337,
+        "M": 1120801941,
+        "Meq": 1130387608
+      },
+      "side": "twist",
+      "t": 1547173760,
+      "v": 889566094,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 388,
+        "Meq": 479
+      },
+      "codomain_j": 1476242993220644245,
+      "cofactor_bits": 10477,
+      "crater_j": 1812776784006853834,
+      "ell": 347,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 704,
+        "Meq": 886
+      },
+      "ext_modulus": [
+        173,
+        95,
+        1347974985616011995
+      ],
+      "find": {
+        "I": 520,
+        "M": 4502979157,
+        "Meq": 4503026477
+      },
+      "find_incl_setup": {
+        "I": 42158,
+        "M": 4799802070,
+        "Meq": 4803638448
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 13.608507618,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 63,
+      "k": 173,
+      "ladder": {
+        "I": 0,
+        "M": 4498278868,
+        "Meq": 4498278868
+      },
+      "ladder_attempts_final_find": 3,
+      "ladder_attempts_total": 3,
+      "lambda": 2,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 520,
+        "M": 4700289,
+        "Meq": 4747609
+      },
+      "p": 1812776784006857209,
+      "setup": {
+        "I": 41638,
+        "M": 296822913,
+        "Meq": 300611971
+      },
+      "side": "twist",
+      "t": 1991708522,
+      "v": 684961344,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 390,
+        "Meq": 481
+      },
+      "codomain_j": 1474717363444665727,
+      "cofactor_bits": 10486,
+      "crater_j": 1477055294294839658,
+      "ell": 349,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 708,
+        "Meq": 890
+      },
+      "ext_modulus": [
+        174,
+        20,
+        211332835941392828
+      ],
+      "find": {
+        "I": 523,
+        "M": 7559269660,
+        "Meq": 7559317253
+      },
+      "find_incl_setup": {
+        "I": 32866,
+        "M": 7832757908,
+        "Meq": 7835748714
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 21.978696537,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 50,
+      "k": 174,
+      "ladder": {
+        "I": 0,
+        "M": 7554510870,
+        "Meq": 7554510870
+      },
+      "ladder_attempts_final_find": 5,
+      "ladder_attempts_total": 5,
+      "lambda": 2,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 523,
+        "M": 4758790,
+        "Meq": 4806383
+      },
+      "p": 1477055294294843033,
+      "setup": {
+        "I": 32343,
+        "M": 273488248,
+        "Meq": 276431461
+      },
+      "side": "twist",
+      "t": 1748711270,
+      "v": 638103224,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 390,
+        "Meq": 481
+      },
+      "codomain_j": 1437967013207121134,
+      "cofactor_bits": 10718,
+      "crater_j": 2290503060146651192,
+      "ell": 353,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 716,
+        "Meq": 898
+      },
+      "ext_modulus": [
+        176,
+        104,
+        1428590300129187990
+      ],
+      "find": {
+        "I": 529,
+        "M": 4683489356,
+        "Meq": 4683537495
+      },
+      "find_incl_setup": {
+        "I": 105565,
+        "M": 5627510558,
+        "Meq": 5637116973
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 15.25196172,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 224,
+      "k": 176,
+      "ladder": {
+        "I": 0,
+        "M": 4678627663,
+        "Meq": 4678627663
+      },
+      "ladder_attempts_final_find": 3,
+      "ladder_attempts_total": 3,
+      "lambda": 3,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 529,
+        "M": 4861693,
+        "Meq": 4909832
+      },
+      "p": 2290503060146654567,
+      "setup": {
+        "I": 105036,
+        "M": 944021202,
+        "Meq": 953579478
+      },
+      "side": "twist",
+      "t": 1456552136,
+      "v": 1002886414,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 400,
+        "Meq": 491
+      },
+      "codomain_j": 1120427943987573274,
+      "cofactor_bits": 10876,
+      "crater_j": 2082340970069485604,
+      "ell": 359,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 728,
+        "Meq": 910
+      },
+      "ext_modulus": [
+        179,
+        178,
+        1978381036832604729
+      ],
+      "find": {
+        "I": 538,
+        "M": 1673384898,
+        "Meq": 1673433856
+      },
+      "find_incl_setup": {
+        "I": 55228,
+        "M": 2098522116,
+        "Meq": 2103547864
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 5.575493965,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 79,
+      "k": 179,
+      "ladder": {
+        "I": 0,
+        "M": 1668177782,
+        "Meq": 1668177782
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 7,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 538,
+        "M": 5207116,
+        "Meq": 5256074
+      },
+      "p": 2082340970069488979,
+      "setup": {
+        "I": 54690,
+        "M": 425137218,
+        "Meq": 430114008
+      },
+      "side": "twist",
+      "t": 1358637668,
+      "v": 962397866,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 410,
+        "Meq": 501
+      },
+      "codomain_j": 1632277714725792096,
+      "cofactor_bits": 11112,
+      "crater_j": 2021611206330916844,
+      "ell": 367,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 744,
+        "Meq": 926
+      },
+      "ext_modulus": [
+        183,
+        89,
+        59519222523257576
+      ],
+      "find": {
+        "I": 550,
+        "M": 3526420744,
+        "Meq": 3526470794
+      },
+      "find_incl_setup": {
+        "I": 176669,
+        "M": 4955247470,
+        "Meq": 4971324349
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 13.096934893,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 273,
+      "k": 183,
+      "ladder": {
+        "I": 0,
+        "M": 3520926570,
+        "Meq": 3520926570
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 6,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 550,
+        "M": 5494174,
+        "Meq": 5544224
+      },
+      "p": 2021611206330920219,
+      "setup": {
+        "I": 176119,
+        "M": 1428826726,
+        "Meq": 1444853555
+      },
+      "side": "twist",
+      "t": 2332240972,
+      "v": 614944466,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 414,
+        "Meq": 505
+      },
+      "codomain_j": 866498338612244508,
+      "cofactor_bits": 11156,
+      "crater_j": 1208083479412953272,
+      "ell": 373,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 756,
+        "Meq": 938
+      },
+      "ext_modulus": [
+        186,
+        98,
+        1008816473567504467
+      ],
+      "find": {
+        "I": 559,
+        "M": 1847660756,
+        "Meq": 1847711625
+      },
+      "find_incl_setup": {
+        "I": 30510,
+        "M": 2090854277,
+        "Meq": 2093630687
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 5.794090917,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 32,
+      "k": 186,
+      "ladder": {
+        "I": 0,
+        "M": 1841845126,
+        "Meq": 1841845126
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 559,
+        "M": 5815630,
+        "Meq": 5866499
+      },
+      "p": 1208083479412956647,
+      "setup": {
+        "I": 29951,
+        "M": 243193521,
+        "Meq": 245919062
+      },
+      "side": "twist",
+      "t": 118391696,
+      "v": 829657186,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 422,
+        "Meq": 513
+      },
+      "codomain_j": 165838075586400731,
+      "cofactor_bits": 11372,
+      "crater_j": 1376218778216857036,
+      "ell": 379,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 768,
+        "Meq": 950
+      },
+      "ext_modulus": [
+        189,
+        178,
+        1351721181326250534
+      ],
+      "find": {
+        "I": 568,
+        "M": 1942714500,
+        "Meq": 1942766188
+      },
+      "find_incl_setup": {
+        "I": 55692,
+        "M": 2472420570,
+        "Meq": 2477488542
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 7.300917222,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 39,
+      "k": 189,
+      "ladder": {
+        "I": 0,
+        "M": 1936622643,
+        "Meq": 1936622643
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 568,
+        "M": 6091857,
+        "Meq": 6143545
+      },
+      "p": 1376218778216860411,
+      "setup": {
+        "I": 55124,
+        "M": 529706070,
+        "Meq": 534722354
+      },
+      "side": "twist",
+      "t": 2249271012,
+      "v": 252319250,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 428,
+        "Meq": 519
+      },
+      "codomain_j": 1081529752156116573,
+      "cofactor_bits": 11496,
+      "crater_j": 1394263575007706774,
+      "ell": 383,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 776,
+        "Meq": 958
+      },
+      "ext_modulus": [
+        191,
+        92,
+        432187139474592535
+      ],
+      "find": {
+        "I": 574,
+        "M": 3971133534,
+        "Meq": 3971185768
+      },
+      "find_incl_setup": {
+        "I": 96566,
+        "M": 4741554598,
+        "Meq": 4750342104
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 13.17549797,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 124,
+      "k": 191,
+      "ladder": {
+        "I": 0,
+        "M": 3964902315,
+        "Meq": 3964902315
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 5,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 574,
+        "M": 6231219,
+        "Meq": 6283453
+      },
+      "p": 1394263575007710149,
+      "setup": {
+        "I": 95992,
+        "M": 770421064,
+        "Meq": 779156336
+      },
+      "side": "twist",
+      "t": 1956745478,
+      "v": 499742996,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 426,
+        "Meq": 517
+      },
+      "codomain_j": 80949894573017557,
+      "cofactor_bits": 11676,
+      "crater_j": 1389983214670068418,
+      "ell": 389,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 788,
+        "Meq": 970
+      },
+      "ext_modulus": [
+        194,
+        84,
+        1220814645324580456
+      ],
+      "find": {
+        "I": 583,
+        "M": 3755494675,
+        "Meq": 3755547728
+      },
+      "find_incl_setup": {
+        "I": 315752,
+        "M": 5978225663,
+        "Meq": 6006959095
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 20.368137291,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 409,
+      "k": 194,
+      "ladder": {
+        "I": 0,
+        "M": 3749581680,
+        "Meq": 3749581680
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 2,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 583,
+        "M": 5912995,
+        "Meq": 5966048
+      },
+      "p": 1389983214670071793,
+      "setup": {
+        "I": 315169,
+        "M": 2222730988,
+        "Meq": 2251411367
+      },
+      "side": "twist",
+      "t": 102611202,
+      "v": 890377432,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 436,
+        "Meq": 527
+      },
+      "codomain_j": 849070271881430651,
+      "cofactor_bits": 12036,
+      "crater_j": 2112635712076214384,
+      "ell": 397,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 804,
+        "Meq": 986
+      },
+      "ext_modulus": [
+        198,
+        177,
+        950808249273312556
+      ],
+      "find": {
+        "I": 595,
+        "M": 1788442100,
+        "Meq": 1788496245
+      },
+      "find_incl_setup": {
+        "I": 38931,
+        "M": 2109468023,
+        "Meq": 2113010744
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 8.038319597,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 65,
+      "k": 198,
+      "ladder": {
+        "I": 0,
+        "M": 1782848965,
+        "Meq": 1782848965
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 5,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 595,
+        "M": 5593135,
+        "Meq": 5647280
+      },
+      "p": 2112635712076217759,
+      "setup": {
+        "I": 38336,
+        "M": 321025923,
+        "Meq": 324514499
+      },
+      "side": "twist",
+      "t": 2646490144,
+      "v": 454600730,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 438,
+        "Meq": 529
+      },
+      "codomain_j": 1674921684348240293,
+      "cofactor_bits": 12108,
+      "crater_j": 1775927670046442426,
+      "ell": 401,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 812,
+        "Meq": 994
+      },
+      "ext_modulus": [
+        200,
+        5,
+        279907068870904118
+      ],
+      "find": {
+        "I": 601,
+        "M": 5276419250,
+        "Meq": 5276473941
+      },
+      "find_incl_setup": {
+        "I": 30820,
+        "M": 5686447956,
+        "Meq": 5689252576
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 23.830915298,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 35,
+      "k": 200,
+      "ladder": {
+        "I": 0,
+        "M": 5270879635,
+        "Meq": 5270879635
+      },
+      "ladder_attempts_final_find": 3,
+      "ladder_attempts_total": 3,
+      "lambda": 3,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 601,
+        "M": 5539615,
+        "Meq": 5594306
+      },
+      "p": 1775927670046445801,
+      "setup": {
+        "I": 30219,
+        "M": 410028706,
+        "Meq": 412778635
+      },
+      "side": "twist",
+      "t": 2502965014,
+      "v": 346178488,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 448,
+        "Meq": 539
+      },
+      "codomain_j": 2011285406462854746,
+      "cofactor_bits": 12390,
+      "crater_j": 2034495997889435206,
+      "ell": 409,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 828,
+        "Meq": 1010
+      },
+      "ext_modulus": [
+        204,
+        27,
+        921294833151535124
+      ],
+      "find": {
+        "I": 613,
+        "M": 7444977911,
+        "Meq": 7445033694
+      },
+      "find_incl_setup": {
+        "I": 16787,
+        "M": 7608034369,
+        "Meq": 7609561986
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 32.775430751,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 4,
+      "k": 204,
+      "ladder": {
+        "I": 0,
+        "M": 7439137186,
+        "Meq": 7439137186
+      },
+      "ladder_attempts_final_find": 4,
+      "ladder_attempts_total": 4,
+      "lambda": 21,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 613,
+        "M": 5840725,
+        "Meq": 5896508
+      },
+      "p": 2034495997889438581,
+      "setup": {
+        "I": 16174,
+        "M": 163056458,
+        "Meq": 164528292
+      },
+      "side": "twist",
+      "t": 835734282,
+      "v": 1030917220,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 458,
+        "Meq": 549
+      },
+      "codomain_j": 1166740960307551887,
+      "cofactor_bits": 12603,
+      "crater_j": 1502942996161073246,
+      "ell": 419,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 848,
+        "Meq": 1030
+      },
+      "ext_modulus": [
+        209,
+        69,
+        1192219410295931048
+      ],
+      "find": {
+        "I": 628,
+        "M": 1988741145,
+        "Meq": 1988798293
+      },
+      "find_incl_setup": {
+        "I": 182457,
+        "M": 3290465934,
+        "Meq": 3307069521
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 13.571293429,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 264,
+      "k": 209,
+      "ladder": {
+        "I": 0,
+        "M": 1982473952,
+        "Meq": 1982473952
+      },
+      "ladder_attempts_final_find": 1,
+      "ladder_attempts_total": 1,
+      "lambda": 2,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 628,
+        "M": 6267193,
+        "Meq": 6324341
+      },
+      "p": 1502942996161076621,
+      "setup": {
+        "I": 181829,
+        "M": 1301724789,
+        "Meq": 1318271228
+      },
+      "side": "twist",
+      "t": 1966785166,
+      "v": 553369948,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 460,
+        "Meq": 551
+      },
+      "codomain_j": 238841223544635524,
+      "cofactor_bits": 12762,
+      "crater_j": 2082421077680441708,
+      "ell": 421,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 852,
+        "Meq": 1034
+      },
+      "ext_modulus": [
+        210,
+        43,
+        563582249204386803
+      ],
+      "find": {
+        "I": 631,
+        "M": 4083591979,
+        "Meq": 4083649400
+      },
+      "find_incl_setup": {
+        "I": 59021,
+        "M": 4674922967,
+        "Meq": 4680293878
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 18.385309794,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 62,
+      "k": 210,
+      "ladder": {
+        "I": 0,
+        "M": 4077202251,
+        "Meq": 4077202251
+      },
+      "ladder_attempts_final_find": 2,
+      "ladder_attempts_total": 2,
+      "lambda": 2,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 631,
+        "M": 6389728,
+        "Meq": 6447149
+      },
+      "p": 2082421077680445083,
+      "setup": {
+        "I": 58390,
+        "M": 591330988,
+        "Meq": 596644478
+      },
+      "side": "twist",
+      "t": 1460017900,
+      "v": 940974574,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 474,
+        "Meq": 565
+      },
+      "codomain_j": 1403621313526474395,
+      "cofactor_bits": 13076,
+      "crater_j": 2144940478062306746,
+      "ell": 431,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 872,
+        "Meq": 1054
+      },
+      "ext_modulus": [
+        215,
+        11,
+        1293537409285893934
+      ],
+      "find": {
+        "I": 646,
+        "M": 6602012144,
+        "Meq": 6602070930
+      },
+      "find_incl_setup": {
+        "I": 36055,
+        "M": 6848669324,
+        "Meq": 6851950329
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 27.116078946,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 15,
+      "k": 215,
+      "ladder": {
+        "I": 0,
+        "M": 6595136185,
+        "Meq": 6595136185
+      },
+      "ladder_attempts_final_find": 3,
+      "ladder_attempts_total": 3,
+      "lambda": 7,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 646,
+        "M": 6875959,
+        "Meq": 6934745
+      },
+      "p": 2144940478062310121,
+      "setup": {
+        "I": 35409,
+        "M": 246657180,
+        "Meq": 249879399
+      },
+      "side": "twist",
+      "t": 2470660966,
+      "v": 594690352,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    },
+    {
+      "checks": [
+        "minpoly_vanishes",
+        "images_order_N_on_codomain"
+      ],
+      "codomain_from_h": {
+        "I": 1,
+        "M": 472,
+        "Meq": 563
+      },
+      "codomain_j": 589875133233963134,
+      "cofactor_bits": 13092,
+      "crater_j": 1858587632366120918,
+      "ell": 433,
+      "eval_2pt_from_h": {
+        "I": 2,
+        "M": 876,
+        "Meq": 1058
+      },
+      "ext_modulus": [
+        216,
+        64,
+        782532509429876716
+      ],
+      "find": {
+        "I": 649,
+        "M": 6633838686,
+        "Meq": 6633897745
+      },
+      "find_incl_setup": {
+        "I": 16776,
+        "M": 6948503611,
+        "Meq": 6950030227
+      },
+      "find_wall_includes": "setup and horizontal retries",
+      "find_wall_s_contended": 28.189562006,
+      "horizontal_retries": 0,
+      "instances_rejected": 0,
+      "irreducible_candidates": 12,
+      "k": 216,
+      "ladder": {
+        "I": 0,
+        "M": 6626905706,
+        "Meq": 6626905706
+      },
+      "ladder_attempts_final_find": 3,
+      "ladder_attempts_total": 3,
+      "lambda": 5,
+      "lib_codomain_j": null,
+      "minpoly": {
+        "I": 649,
+        "M": 6932980,
+        "Meq": 6992039
+      },
+      "p": 1858587632366124293,
+      "setup": {
+        "I": 16127,
+        "M": 314664925,
+        "Meq": 316132482
+      },
+      "side": "twist",
+      "t": 2225308250,
+      "v": 595501436,
+      "v_ell_E": 0,
+      "v_ell_twist": 2,
+      "vertical": true,
+      "wasted_on_horizontal": {
+        "I": 0,
+        "M": 0,
+        "Meq": 0
+      }
+    }
+  ],
+  "total_wall_s_contended": 436.361480332,
+  "unit": "M = F_p multiplications+squarings (incl. inside polynomial/extension arithmetic); I = F_p inversions; Meq = M + 91 I"
+}

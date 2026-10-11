@@ -2,6 +2,7 @@
 //!
 //! Public synthetic Koblitz fixtures only. Reads a retained
 //! `point_defined_factor_base` header, builds the Frobenius-quotiented S3
+//! regular-root index once (no pair table, no edge selectors), then:
 //! regular-root index once (no pair table, no edge selectors), then
 //!   1. rank stage: decomposes random `[a]G` until the K orbit logs are fixed,
 //!   2. target stage: decomposes each published target and recovers its log.
@@ -33,7 +34,6 @@ struct Linear {
 
 impl Linear {
     fn from_images(images: &[u64]) -> Self {
-        let chunks = (images.len() + 7) / 8;
         let chunks = images.len().div_ceil(8);
         let mut tables = vec![[0u64; 256]; chunks];
         for (chunk, table) in tables.iter_mut().enumerate() {
@@ -134,8 +134,8 @@ impl NormalBasis {
                 zero_runs[level] = 0;
                 continue;
             }
-            zero_runs[level] = zero_runs[level - 1]
-                & self.rotate(zero_runs[level - 1], previous_length as u32);
+            zero_runs[level] =
+                zero_runs[level - 1] & self.rotate(zero_runs[level - 1], previous_length as u32);
         }
 
         let mut longest_gap = 0usize;
@@ -169,7 +169,11 @@ impl NormalBasis {
 
     #[inline(always)]
     fn canonical_selected(&self, v: u64) -> (u64, u32) {
-        if self.sparse_canonical { self.canonical_sparse(v) } else { self.canonical(v) }
+        if self.sparse_canonical {
+            self.canonical_sparse(v)
+        } else {
+            self.canonical(v)
+        }
     }
 }
 
@@ -193,8 +197,11 @@ mod sparse_canonical_tests {
             let reference = basis(n, false);
             let sparse = basis(n, true);
             for value in 0..=reference.mask {
-                assert_eq!(sparse.canonical_selected(value), reference.canonical_selected(value),
-                           "degree={n}, value={value:#x}");
+                assert_eq!(
+                    sparse.canonical_selected(value),
+                    reference.canonical_selected(value),
+                    "degree={n}, value={value:#x}"
+                );
             }
         }
     }
@@ -208,8 +215,11 @@ mod sparse_canonical_tests {
             for bit in 0..n {
                 let singleton = 1u64 << bit;
                 for value in [singleton, reference.mask ^ singleton] {
-                    assert_eq!(sparse.canonical_selected(value), reference.canonical_selected(value),
-                               "degree={n}, value={value:#x}");
+                    assert_eq!(
+                        sparse.canonical_selected(value),
+                        reference.canonical_selected(value),
+                        "degree={n}, value={value:#x}"
+                    );
                 }
             }
             for _ in 0..20_000 {
@@ -217,8 +227,11 @@ mod sparse_canonical_tests {
                 seed ^= seed << 25;
                 seed ^= seed >> 27;
                 let value = seed.wrapping_mul(0x2545_F491_4F6C_DD1D) & reference.mask;
-                assert_eq!(sparse.canonical_selected(value), reference.canonical_selected(value),
-                           "degree={n}, value={value:#x}");
+                assert_eq!(
+                    sparse.canonical_selected(value),
+                    reference.canonical_selected(value),
+                    "degree={n}, value={value:#x}"
+                );
             }
         }
     }
@@ -582,8 +595,16 @@ fn build_index(gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, reps: &[u64]) -
     let mut table = RootTable::with_capacity(states.len() * 2);
     for state in &states {
         for &root in &state.normal_roots {
+            let (canonical, shift) = basis.canonical(root);
+            table.insert_if_absent(
+                canonical,
+                pack(state.left, state.right, state.relative, shift),
+            );
             let (canonical, shift) = basis.canonical_selected(root);
-            table.insert_if_absent(canonical, pack(state.left, state.right, state.relative, shift));
+            table.insert_if_absent(
+                canonical,
+                pack(state.left, state.right, state.relative, shift),
+            );
         }
     }
     Index {
@@ -861,8 +882,6 @@ fn peak_rss_bytes() -> Option<u64> {
 // through `n = 127`); only field elements move to the wider word.
 mod wide {
     use super::{pack, root_bloom_enabled, unpack, RootBloom};
-    use super::{mulmod, pack, peak_rss_bytes, unpack, Echelon};
-    use super::{pack, unpack};
     use crypto_lib::cryptanalysis::koblitz_fast_arith::{
         s3_x_roots_128, FastBinaryCurve128, FastPoint128,
     };
@@ -1014,7 +1033,11 @@ mod wide {
 
         #[inline(always)]
         fn canonical_selected(&self, v: u128) -> (u128, u32) {
-            if self.sparse_canonical { self.canonical_sparse(v) } else { self.canonical(v) }
+            if self.sparse_canonical {
+                self.canonical_sparse(v)
+            } else {
+                self.canonical(v)
+            }
         }
     }
 
@@ -1038,8 +1061,11 @@ mod wide {
                 let reference = basis(n, false);
                 let sparse = basis(n, true);
                 for value in 0..=reference.mask {
-                    assert_eq!(sparse.canonical_selected(value), reference.canonical_selected(value),
-                               "degree={n}, value={value:#x}");
+                    assert_eq!(
+                        sparse.canonical_selected(value),
+                        reference.canonical_selected(value),
+                        "degree={n}, value={value:#x}"
+                    );
                 }
             }
         }
@@ -1053,8 +1079,11 @@ mod wide {
                 for bit in 0..n {
                     let singleton = 1u128 << bit;
                     for value in [singleton, reference.mask ^ singleton] {
-                        assert_eq!(sparse.canonical_selected(value), reference.canonical_selected(value),
-                                   "degree={n}, value={value:#x}");
+                        assert_eq!(
+                            sparse.canonical_selected(value),
+                            reference.canonical_selected(value),
+                            "degree={n}, value={value:#x}"
+                        );
                     }
                 }
                 for _ in 0..20_000 {
@@ -1067,8 +1096,11 @@ mod wide {
                     seed ^= seed >> 27;
                     let low = seed.wrapping_mul(0x2545_F491_4F6C_DD1D);
                     let value = (((high as u128) << 64) | low as u128) & reference.mask;
-                    assert_eq!(sparse.canonical_selected(value), reference.canonical_selected(value),
-                               "degree={n}, value={value:#x}");
+                    assert_eq!(
+                        sparse.canonical_selected(value),
+                        reference.canonical_selected(value),
+                        "degree={n}, value={value:#x}"
+                    );
                 }
             }
         }
@@ -1493,8 +1525,6 @@ mod wide {
             None => return (None, 0),
         };
         let n_u32 = gf.n;
-        let chunk = (n_states + threads - 1) / threads;
-        let n = n_u32 as usize;
         let chunk = n_states.div_ceil(threads);
         let (sender, receiver) = std::sync::mpsc::channel::<(usize, Relation128, u128)>();
         std::thread::scope(|scope| {
@@ -1535,54 +1565,6 @@ mod wide {
                                 .send((position, relation, relation_check_ns))
                                 .expect("target receiver is alive");
                             break;
-                        for shift in 0..n_u32 {
-                            let left_x = index.shifted[state.left as usize][shift as usize];
-                            let right_x = index.shifted[state.right as usize]
-                                [(shift as usize + state.relative as usize) % n];
-                            for &normal_root in &state.normal_roots {
-                                let absolute =
-                                    basis.to_poly.apply(basis.rotate(normal_root, shift));
-                                let Some(partners) = solver.roots(gf, basis, absolute, target_x)
-                                else {
-                                    continue;
-                                };
-                                for partner in partners {
-                                    probes += 1;
-                                    let (canonical, partner_shift) =
-                                        basis.canonical_selected(basis.to_normal.apply(partner));
-                                    let Some(value) = index.table.get(canonical) else {
-                                        continue;
-                                    };
-                                    let (left2, right2, relative2, stored_shift) = unpack(value);
-                                    let left_shift2 =
-                                        ((stored_shift + n_u32 - partner_shift) % n_u32) as usize;
-                                    let right_shift2 = (left_shift2 + relative2 as usize) % n;
-                                    let codes = [
-                                        left_x,
-                                        right_x,
-                                        index.shifted[left2][left_shift2],
-                                        index.shifted[right2][right_shift2],
-                                    ];
-                                    if let Some(point_indices) =
-                                        lift128(fast, base, &codes, target, &mut relation_check_ns)
-                                    {
-                                        let position = pos_lo + offset;
-                                        sender
-                                            .send((
-                                                position,
-                                                Relation128 {
-                                                    point_indices,
-                                                    x_codes: codes,
-                                                    intermediates: [absolute, partner],
-                                                    probes,
-                                                },
-                                                relation_check_ns,
-                                            ))
-                                            .expect("target receiver is alive");
-                                        break 'scan;
-                                    }
-                                }
-                            }
                         }
                     }
                 }));
@@ -1695,7 +1677,10 @@ mod wide {
         for state in &states {
             for &root in &state.normal_roots {
                 let (canonical, shift) = basis.canonical_selected(root);
-                table.insert_if_absent(canonical, pack(state.left, state.right, state.relative, shift));
+                table.insert_if_absent(
+                    canonical,
+                    pack(state.left, state.right, state.relative, shift),
+                );
             }
         }
         Index128 {
@@ -1784,7 +1769,8 @@ mod wide {
         let mut candidate = 0usize;
         for shift in 0..n {
             let left_x = index.shifted[state.left as usize][shift as usize];
-            let right_x = index.shifted[state.right as usize][(shift as usize + state.relative as usize) % n as usize];
+            let right_x = index.shifted[state.right as usize]
+                [(shift as usize + state.relative as usize) % n as usize];
             for _ in 0..state.normal_roots.len() {
                 let absolute = scan.inputs[candidate].0;
                 let result = scan.batch.results[candidate];
@@ -1794,7 +1780,8 @@ mod wide {
                 };
                 for partner in partners {
                     *probes += 1;
-                    let (canonical, partner_shift) = basis.canonical(basis.to_normal.apply(partner));
+                    let (canonical, partner_shift) =
+                        basis.canonical(basis.to_normal.apply(partner));
                     let Some(value) = index.table.get(canonical) else {
                         continue;
                     };
@@ -1807,13 +1794,9 @@ mod wide {
                         index.shifted[left2][left_shift2],
                         index.shifted[right2][right_shift2],
                     ];
-                    if let Some(point_indices) = lift128(
-                        fast,
-                        base,
-                        &codes,
-                        target,
-                        relation_check_ns,
-                    ) {
+                    if let Some(point_indices) =
+                        lift128(fast, base, &codes, target, relation_check_ns)
+                    {
                         return Some(Relation128 {
                             point_indices,
                             x_codes: codes,
@@ -1858,43 +1841,6 @@ mod wide {
                 relation_check_ns,
             ) {
                 return Some(relation);
-            for shift in 0..n {
-                let left_x = index.shifted[state.left as usize][shift as usize];
-                let right_x = index.shifted[state.right as usize]
-                    [(shift as usize + state.relative as usize) % n as usize];
-                for &normal_root in &state.normal_roots {
-                    let absolute = basis.to_poly.apply(basis.rotate(normal_root, shift));
-                    let Some(partners) = solver.roots(gf, basis, absolute, target_x) else {
-                        continue;
-                    };
-                    for partner in partners {
-                        probes += 1;
-                        let (canonical, partner_shift) =
-                            basis.canonical_selected(basis.to_normal.apply(partner));
-                        let Some(value) = index.table.get(canonical) else {
-                            continue;
-                        };
-                        let (left2, right2, relative2, stored_shift) = unpack(value);
-                        let left_shift2 = ((stored_shift + n - partner_shift) % n) as usize;
-                        let right_shift2 = (left_shift2 + relative2) % n as usize;
-                        let codes = [
-                            left_x,
-                            right_x,
-                            index.shifted[left2][left_shift2],
-                            index.shifted[right2][right_shift2],
-                        ];
-                        if let Some(point_indices) =
-                            lift128(fast, base, &codes, target, relation_check_ns)
-                        {
-                            return Some(Relation128 {
-                                point_indices,
-                                x_codes: codes,
-                                intermediates: [absolute, partner],
-                                probes,
-                            });
-                        }
-                    }
-                }
             }
         }
         None

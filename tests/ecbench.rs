@@ -817,6 +817,67 @@ fn pdp3_koblitz_f4_and_f6_verify_on_one_query_stream() {
     assert!(ok, "replay: {err}");
 }
 
+#[test]
+fn pdp3_binary_runs_every_engine_on_a_generic_binary_curve() {
+    // The PDP3 plug-in on a random binary curve (b ∉ F_2, no Frobenius
+    // endomorphism) through its Frobenius-free view, with all four engines:
+    // every run verifies; matrix F5 builds matrix F4's matrices less the
+    // rows its criterion predicts reduce to zero, so the two share a tree
+    // and find the same relations; F6-IC charges its gate's additions.
+    let dir = scratch("pdp3-binary");
+    let arm = |name: &str, engine: &str| {
+        format!(
+            r#"{{"name": "{name}", "role": "candidate", "method": {{"id": "ic.pipeline", "params": {{
+              "factor_base": "binary-standard-subspace:dimension=5",
+              "oracle": "pdp3-binary:m=3,engine={engine},degree=3,node_budget=8192"}}}}}}"#
+        )
+    };
+    let spec = format!(
+        r#"{{
+      "schema": "ecbench.spec/v1",
+      "label": "pdp3-binary test",
+      "workloads": {{"curves": [{{"kind": "binary_random", "n": 13, "seed": 59297, "max_cofactor": 8}}],
+                    "targets_per_curve": 1, "target_seed": 7, "target_kind": "public"}},
+      "arms": [{}, {}, {}, {}],
+      "measurement": {{"rounds": 1, "warmup": 0, "seed": 5, "isolation_required": "L0", "timeout_seconds": 300}}
+    }}"#,
+        arm("f4m", "matrix-f4"),
+        arm("f5m", "matrix-f5"),
+        arm("f4i", "inherited-f4"),
+        arm("f6", "f6-ic"),
+    );
+    std::fs::write(dir.join("spec.json"), spec).unwrap();
+    let out = dir.join("s");
+    let (ok, err) = run_spec(&dir, &out, &[]);
+    assert!(ok, "{err}");
+    let text = std::fs::read_to_string(out.join("records.jsonl")).unwrap();
+    let mut by_arm: std::collections::BTreeMap<String, Value> = Default::default();
+    for line in text.lines() {
+        let r: Value = serde_json::from_str(line).unwrap();
+        assert_eq!(r["outcome"]["status"], "verified", "{line}");
+        assert!(r["solver"]["ops"].as_u64().unwrap() > 0, "{line}");
+        by_arm.insert(r["arm"].as_str().unwrap().to_string(), r);
+    }
+    assert_eq!(by_arm.len(), 4);
+    for key in ["targets_tried", "relations_found", "matrix_rank"] {
+        assert_eq!(
+            by_arm["f4m"]["counters"][key], by_arm["f5m"]["counters"][key],
+            "matrix F4 and F5 diverged at {key}"
+        );
+    }
+    let geometry = |a: &str| by_arm[a]["solver"]["extra"]["geometric_group_additions"].as_u64();
+    assert!(geometry("f6").unwrap() > 0, "F6-IC charged no geometry");
+    assert_eq!(geometry("f4i"), Some(0));
+    let (ok, _, err) = ecbench(&[
+        "verify",
+        "--dir",
+        out.to_str().unwrap(),
+        "--replay-all",
+        "--exit-code",
+    ]);
+    assert!(ok, "replay: {err}");
+}
+
 const BOUNDS_SPEC: &str = r#"{
   "schema": "ecbench.spec/v1",
   "label": "bounds integration test: four sizes",

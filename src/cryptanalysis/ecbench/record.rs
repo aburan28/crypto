@@ -737,6 +737,13 @@ mod tests {
             legacy.nested[0].to_bits(),
             legacy_json_float(current.nested[0]).unwrap().to_bits()
         );
+        // A newer serde_json parser may already yield the historical value.
+        // Compatibility is the archived bit pattern, independent of whether
+        // the current parser happens to differ on this decimal fixture.
+        assert_eq!(legacy.gae.to_bits(), 3934.013766884967_f64.to_bits());
+        // serde_json's v1 integer-significand path parses this sealed decimal
+        // one ULP below its correctly rounded value (see the archived audit).
+        assert_eq!(legacy.nested[0].to_bits(), 4_600_377_059_258_432_959);
         // Some serde_json feature sets already use the legacy decimal
         // parser. Pin the historical bit patterns instead of assuming the
         // current parser differs from them.

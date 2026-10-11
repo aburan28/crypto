@@ -1,6 +1,6 @@
 # Research Note: Point-Decomposition Speed-ups and the Isogenous-Curve Hypothesis
 
-**Date.** 2026-10-08.  **Status.** Measured on public synthetic toy instances.
+**Date.** 2026-10-08.  **Status.** Measured on public synthetic small-field instances.
 **Goal addressed.** (1) a drastic speed-up for the point-decomposition problem
 (PDP) in Semaev-polynomial index calculus; (2) whether isogenous curves give
 better relation yield or lower Gröbner degrees.

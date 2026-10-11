@@ -1711,6 +1711,8 @@ fn f4_solver_linear_tail_flat(
     (low, rank)
 }
 
+// No caller since the #1587 merge dropped it; kept for re-wiring.
+#[allow(dead_code)]
 fn rref_f2_full(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
     let words = n_cols.div_ceil(64);
     let mut pivot_row = 0usize;
@@ -1739,6 +1741,7 @@ fn rref_f2_full(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
 
 /// Active-suffix Gauss-Jordan kernel. Every eligible pivot row is zero before
 /// the pivot word, so those words do not need to be XORed.
+#[cfg(test)]
 fn rref_f2_suffix(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
     let words = n_cols.div_ceil(64);
     let mut pivot_row = 0usize;
@@ -1775,6 +1778,7 @@ fn rref_f2_suffix(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
 /// Method of Four Russians elimination over `F_2`. Up to eight pivot rows are
 /// reduced as one block; all combinations of those rows are materialized once,
 /// then each non-pivot row clears the whole block with a single suffix XOR.
+#[cfg(test)]
 fn rref_f2_m4ri(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
     let block_width = std::env::var("KIC_F4_M4RI_BLOCK")
         .ok()
@@ -2123,6 +2127,8 @@ pub(crate) fn pack_rows(rows_monos: &[Vec<u64>], cols: &[u64]) -> Vec<Vec<u64>> 
     }
 }
 
+// No caller since the #1587 merge dropped it; kept for re-wiring.
+#[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum SplitHeuristic {
     Lowest,
@@ -2130,6 +2136,7 @@ enum SplitHeuristic {
     MaxNonlinearOccurrence,
 }
 
+#[allow(dead_code)]
 fn choose_split_variable(
     system: &[F2BoolPoly],
     assignment: &[Option<bool>],
@@ -2172,6 +2179,7 @@ fn choose_split_variable(
 /// coefficient vector is converted to a truth table by the subset zeta
 /// transform: `f(x) = XOR_{m subset x} a_m`. Returned entries are true exactly
 /// for assignments satisfying all equations.
+#[allow(dead_code)]
 fn tail_zero_assignments(
     equations: &[F2BoolPoly],
     assignment: &[Option<bool>],
