@@ -12645,6 +12645,33 @@ impl<'a> IndividualLogSolver<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // The production table builder no longer uses radix sorting. Retain
+    // the historical utility for its stable-order regression below.
+    fn radix_sort_entries_by_key(entries: &mut [(u64, u32, u32)]) {
+        if entries.len() < 2 {
+            return;
+        }
+        let mut scratch = vec![(0, 0, 0); entries.len()];
+        for shift in (0..64).step_by(8) {
+            let mut offsets = [0usize; 256];
+            for entry in entries.iter() {
+                offsets[((entry.0 >> shift) & 255) as usize] += 1;
+            }
+            let mut start = 0;
+            for offset in &mut offsets {
+                let count = *offset;
+                *offset = start;
+                start += count;
+            }
+            for &entry in entries.iter() {
+                let bucket = ((entry.0 >> shift) & 255) as usize;
+                scratch[offsets[bucket]] = entry;
+                offsets[bucket] += 1;
+            }
+            entries.copy_from_slice(&scratch);
+        }
+    }
     use crate::cryptanalysis::koblitz_groebner::build_decomposition_system;
 
     #[test]

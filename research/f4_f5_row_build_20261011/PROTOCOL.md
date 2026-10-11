@@ -32,6 +32,14 @@ prerequisites before performance edits. Save the
 baseline binary before modifying the kernels. Use the same diagnostic source
 and toolchain in both arms.
 
+The test build additionally exposed an undefined current-parser fixture and
+a removed sorting utility still referenced by the historical stable-sort
+regression. Restore the fixture declaration and a test-only radix utility;
+retain the original assertions. These repairs are outside production calls.
+After formatting the diagnostic driver, rebuild it against the saved baseline
+library and retain an A/A audit; require exact allocation and output agreement
+with the first baseline before comparing the candidate.
+
 Frozen workloads: eight planted quadratic Boolean systems, `(n, m, degree)`
 in `(8, 8, 3)`, `(8, 8, 4)`, `(10, 10, 4)`, `(10, 10, 5)`, with seeds
 `0x2545f4914f6cdd1d` and `0x9e3779b97f4a7c15`. The second seed is a fresh

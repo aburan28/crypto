@@ -118,8 +118,15 @@ fn compare(baseline: &str, candidate: &str) {
     };
     let baseline = read(baseline);
     let candidate = read(candidate);
-    assert_eq!(baseline.len(), 72, "all eight systems and repetitions required");
-    assert_eq!(baseline.keys().collect::<Vec<_>>(), candidate.keys().collect::<Vec<_>>());
+    assert_eq!(
+        baseline.len(),
+        72,
+        "all eight systems and repetitions required"
+    );
+    assert_eq!(
+        baseline.keys().collect::<Vec<_>>(),
+        candidate.keys().collect::<Vec<_>>()
+    );
     let mut totals: BTreeMap<String, [u64; 4]> = BTreeMap::new();
     let mut comparisons = Vec::new();
     for (key, a) in baseline {
@@ -132,10 +139,14 @@ fn compare(baseline: &str, candidate: &str) {
         }
         assert_eq!(expected, actual, "output or accounting mismatch: {key}");
         let counts = [
-            a["allocations"].as_u64().unwrap(), b["allocations"].as_u64().unwrap(),
-            a["allocated_bytes"].as_u64().unwrap(), b["allocated_bytes"].as_u64().unwrap(),
+            a["allocations"].as_u64().unwrap(),
+            b["allocations"].as_u64().unwrap(),
+            a["allocated_bytes"].as_u64().unwrap(),
+            b["allocated_bytes"].as_u64().unwrap(),
         ];
-        let total = totals.entry(a["arm"].as_str().unwrap().to_owned()).or_default();
+        let total = totals
+            .entry(a["arm"].as_str().unwrap().to_owned())
+            .or_default();
         for (sum, count) in total.iter_mut().zip(counts) {
             *sum += count;
         }
@@ -143,19 +154,28 @@ fn compare(baseline: &str, candidate: &str) {
     }
     let acceptance = totals["f4"][1] < totals["f4"][0]
         && totals["criterion"][1] * 5 <= totals["criterion"][0] * 4;
-    let arms: Vec<_> = totals.into_iter().map(|(arm, c)| json!({
-        "arm": arm, "calls": 24,
-        "baseline_allocations": c[0], "candidate_allocations": c[1],
-        "allocation_reduction_percent": 100.0 * (1.0 - c[1] as f64 / c[0] as f64),
-        "baseline_allocated_bytes": c[2], "candidate_allocated_bytes": c[3],
-        "allocated_byte_reduction_percent": 100.0 * (1.0 - c[3] as f64 / c[2] as f64),
-    })).collect();
-    println!("{}", serde_json::to_string_pretty(&json!({
-        "scope": "Boolean matrix-F4/F5 allocation diagnostic",
-        "systems": 8, "repeats": 3, "exact_outputs_and_counts": true,
-        "acceptance_met": acceptance, "wall_time_speedup": null,
-        "arms": arms, "comparisons": comparisons,
-    })).unwrap());
+    let arms: Vec<_> = totals
+        .into_iter()
+        .map(|(arm, c)| {
+            json!({
+                "arm": arm, "calls": 24,
+                "baseline_allocations": c[0], "candidate_allocations": c[1],
+                "allocation_reduction_percent": 100.0 * (1.0 - c[1] as f64 / c[0] as f64),
+                "baseline_allocated_bytes": c[2], "candidate_allocated_bytes": c[3],
+                "allocated_byte_reduction_percent": 100.0 * (1.0 - c[3] as f64 / c[2] as f64),
+            })
+        })
+        .collect();
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&json!({
+            "scope": "Boolean matrix-F4/F5 allocation diagnostic",
+            "systems": 8, "repeats": 3, "exact_outputs_and_counts": true,
+            "acceptance_met": acceptance, "wall_time_speedup": null,
+            "arms": arms, "comparisons": comparisons,
+        }))
+        .unwrap()
+    );
 }
 
 fn main() {
@@ -194,34 +214,43 @@ fn main() {
                 let (f4, allocations, bytes) =
                     audited(|| matrix_f4_f2_counted(&polys, n_vars, degree).unwrap());
                 assert_eq!(f4, expected_f4);
-                println!("{}", json!({
-                    "case": case, "seed": seed, "repeat": repeat, "arm": "f4",
-                    "input_digest": input_digest, "output_digest": digest(&f4.0),
-                    "allocations": allocations, "allocated_bytes": bytes,
-                    "rank": f4.0.len(), "word_ops": f4.1,
-                }));
+                println!(
+                    "{}",
+                    json!({
+                        "case": case, "seed": seed, "repeat": repeat, "arm": "f4",
+                        "input_digest": input_digest, "output_digest": digest(&f4.0),
+                        "allocations": allocations, "allocated_bytes": bytes,
+                        "rank": f4.0.len(), "word_ops": f4.1,
+                    })
+                );
                 let (f5, allocations, bytes) =
                     audited(|| matrix_f5_f2(&polys, n_vars, degree).unwrap());
                 assert_eq!(f5.0, expected_f5.0);
                 assert_eq!(f5.1, expected_f5.1);
-                println!("{}", json!({
-                    "case": case, "seed": seed, "repeat": repeat, "arm": "f5",
-                    "input_digest": input_digest, "output_digest": digest(&f5.0),
-                    "allocations": allocations, "allocated_bytes": bytes,
-                    "report": f5.1,
-                }));
+                println!(
+                    "{}",
+                    json!({
+                        "case": case, "seed": seed, "repeat": repeat, "arm": "f5",
+                        "input_digest": input_digest, "output_digest": digest(&f5.0),
+                        "allocations": allocations, "allocated_bytes": bytes,
+                        "report": f5.1,
+                    })
+                );
                 let (criterion, allocations, bytes) =
                     audited(|| F5Criterion::new(&polys, n_vars, degree, mask));
                 assert_eq!(criterion.pruned_count(), expected_criterion.pruned_count());
                 assert_eq!(criterion.word_ops(), expected_criterion.word_ops());
-                println!("{}", json!({
-                    "case": case, "seed": seed, "repeat": repeat, "arm": "criterion",
-                    "input_digest": input_digest,
-                    "allocations": allocations, "allocated_bytes": bytes,
-                    "pruned": criterion.pruned_count(), "word_ops": criterion.word_ops(),
-                    "lower_rows": criterion.lower_level_rows(),
-                    "pruned_by_part": criterion.pruned_by_part(),
-                }));
+                println!(
+                    "{}",
+                    json!({
+                        "case": case, "seed": seed, "repeat": repeat, "arm": "criterion",
+                        "input_digest": input_digest,
+                        "allocations": allocations, "allocated_bytes": bytes,
+                        "pruned": criterion.pruned_count(), "word_ops": criterion.word_ops(),
+                        "lower_rows": criterion.lower_level_rows(),
+                        "pruned_by_part": criterion.pruned_by_part(),
+                    })
+                );
             }
         }
     }
