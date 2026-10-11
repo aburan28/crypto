@@ -92,3 +92,29 @@ row or scalar-recovery receipt has been produced for this variant;
 execution is one bounded full-pipeline correctness pilot on a host with
 adequate memory, followed by the 34-target paired confirmation if fidelity
 passes.
+
+## Bounded local integration control
+
+Before the larger N53 run, run one full scalar-recovery process at N41 C244
+on the existing public T220 point `[894799855104,217979605451]`, whose point
+file SHA-256 is
+`936adbe6776117c8f5a1eff1b26e760a88e896a7c2f9a1899c769edbb9e2f770`.
+The already checked Sage fixture gives scalar `254961180376`. Use relation
+seed `20260928`, four preparation workers, rank 244, one target worker, and a
+90-second process cap with five seconds to terminate. Record the full native
+report, stdout, stderr, exit status, base digest, rank, recovered scalar, and
+online phase sum. This is an integration correctness control; its local wall
+time is not part of the N53 speedup estimate.
+
+The bounded process exited **0** and recovered scalar **254961180376** on
+that point. Its projective scalar replay returned `group_verified: true`, the
+factor-base digest matched the earlier C244 fixture, and the prepared and
+final ranks were **244/244**. It processed **608 states / 1,216 S3 queries**
+with 32-state target batches. The charged one-target online interval and its
+five-phase sum both read **0.202041 ms**; setup read **1,429.808125 ms**.
+These times are local diagnostics from a contended host. The [execution
+receipt](n41_c244_T220_receipt.json) binds the exact command, hashes, cap,
+host preflight, exit status, and the byte-exact compressed [report](n41_c244_T220_report.jsonl.gz),
+[stdout](n41_c244_T220_stdout.txt.gz), and [stderr](n41_c244_T220_stderr.txt.gz).
+The scalar also matches the prior [checked Sage fixture](../koblitz-s3-directlookup-n41-20261010/local/smoke_replay.json)
+for this same public point.

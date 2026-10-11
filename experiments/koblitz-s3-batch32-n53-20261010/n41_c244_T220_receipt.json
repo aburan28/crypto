@@ -1,0 +1,63 @@
+{
+  "kind": "s3_batch32_n41_c244_full_pipeline_correctness_control_v1",
+  "status": "completed",
+  "exit_code": 0,
+  "timeout_seconds": 90,
+  "termination_grace_seconds": 5,
+  "command_argv": [
+    "/private/tmp/s3-batch32-cargo-target/release/examples/s3_partial_prepared_fullrank_prefetch_projective_c1800prefix_batch32_targetspan",
+    "41",
+    "0",
+    "244",
+    "20260928",
+    "experiments/koblitz-s3-c1200-fold-n41-confirmation48-20261010/fixtures/T220/public_target.json",
+    "experiments/koblitz-s3-batch32-n53-20261010/n41_c244_T220_report.jsonl",
+    "4",
+    "244",
+    "1"
+  ],
+  "source_sha256": "ff5abc14341e9a801e6d94c4cd6c7234077a78325d7a756d45d4bbdfb4a3f082",
+  "binary_sha256": "e9a36bbf612bb7193266dc31178c8b3405639227b350fe51b98714e4e42739ef",
+  "point_sha256": "936adbe6776117c8f5a1eff1b26e760a88e896a7c2f9a1899c769edbb9e2f770",
+  "public_point": [894799855104, 217979605451],
+  "expected_scalar_from_prior_checked_sage_fixture": 254961180376,
+  "factor_base_points": 20008,
+  "factor_base_digest": "994ebecce7d2a7ff0da957b7a58cbcf97ef5bf364b4cf17e12f58bfc61cda64a",
+  "prepared_rank": 244,
+  "final_rank": 244,
+  "target_relation_found": true,
+  "recovered_scalar": 254961180376,
+  "group_verified": true,
+  "target_query_batch_width": 32,
+  "target_s3_calls": 1216,
+  "target_state_probes": 608,
+  "reusable_setup_ms_diagnostic": "1429.808125",
+  "target_online_ms_diagnostic": "0.202041",
+  "target_online_phase_sum_ms_diagnostic": "0.202041",
+  "target_pdp_charged_ms_diagnostic": "0.164750",
+  "peak_rss_bytes": null,
+  "host_isolation_receipt": null,
+  "controlled_speedup": null,
+  "host_preflight": {
+    "arch": "arm64",
+    "load_average": ["72.70", "81.54", "54.36"],
+    "logical_cpus": 14,
+    "memory_total_bytes": 51539607552,
+    "memory_free_percent": 52
+  },
+  "raw_report": {
+    "path": "n41_c244_T220_report.jsonl.gz",
+    "gzip_sha256": "fa6ee0cdd40dd8a778aa3abe2153d8c4bb4022d8d0b55817afdf5245e7a6ff9b",
+    "uncompressed_sha256": "a398f41956d75f36bebbeeaad11e69dc07f99eee95bd8be52761cf2161a7e33f"
+  },
+  "raw_stdout": {
+    "path": "n41_c244_T220_stdout.txt.gz",
+    "gzip_sha256": "fa6ee0cdd40dd8a778aa3abe2153d8c4bb4022d8d0b55817afdf5245e7a6ff9b",
+    "uncompressed_sha256": "a398f41956d75f36bebbeeaad11e69dc07f99eee95bd8be52761cf2161a7e33f"
+  },
+  "raw_stderr": {
+    "path": "n41_c244_T220_stderr.txt.gz",
+    "gzip_sha256": "59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2",
+    "uncompressed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
