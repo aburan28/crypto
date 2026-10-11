@@ -14,7 +14,7 @@
 //! development probe: wall times on a shared host are indicative only.
 
 use crypto_lib::cryptanalysis::koblitz_groebner::{
-    f4_word_ops_thread, FieldStructure, SolveStats, SolverEngine,
+    f4_profile, f4_profile_reset, f4_word_ops_thread, FieldStructure, SolveStats, SolverEngine,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_standard_subspace_factor_base, groebner_decompose, groebner_decompose_f6_ic,
@@ -60,6 +60,7 @@ fn main() {
         let mut total = SolveStats::default();
         let mut total_xors = 0u64;
         let mut total_oracle_ns = 0u64;
+        f4_profile_reset();
         for k in 1..=targets {
             let target = kc.mul(kc.generator(), &BigUint::from(k));
             let mut best_ns = u128::MAX;
@@ -132,6 +133,21 @@ fn main() {
             total.geometric_group_additions,
             total_oracle_ns as f64 / 1e6,
             total_xors
+        );
+        // The solver's own timers over the arm (all repetitions): the
+        // Macaulay build (specialisation included), the reduction and the
+        // read-back, and the word reads and writes of specialisation.
+        let prof = f4_profile();
+        println!(
+            "{{\"arm\":\"{arm}\",\"profile\":{{\"calls\":{},\"build_ms\":{:.3},\"reduce_ms\":{:.3},\"readback_ms\":{:.3},\"rows\":{},\"cols\":{},\"word_ops\":{},\"specialise_word_ops\":{}}}}}",
+            prof.calls,
+            prof.build_ns as f64 / 1e6,
+            prof.reduce_ns as f64 / 1e6,
+            prof.readback_ns as f64 / 1e6,
+            prof.rows,
+            prof.cols,
+            prof.word_ops,
+            prof.specialise_word_ops
         );
         verdicts.push(arm_verdicts);
     }

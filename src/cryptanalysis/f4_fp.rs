@@ -804,76 +804,128 @@ fn normalize_lazy(acc: &mut [u64], fp: Barrett) {
     }
 }
 
+/// Rows of a step reduced together against the pivots known so far.  A
+/// chunk's rows are independent of each other until they are stored, so
+/// their reductions run in parallel; a smaller chunk finds pivots sooner
+/// for the rows after it, a larger one spreads better.
+const DEFERRED_CHUNK: usize = 64;
+
+/// `F4_FP_DEFERRED_PAR=0` runs the deferred elimination row by row on one
+/// thread, as it did before the chunks; a same-binary control.
+fn deferred_parallel() -> bool {
+    static PAR: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *PAR.get_or_init(|| std::env::var("F4_FP_DEFERRED_PAR").as_deref() != Ok("0"))
+}
+
+/// Reduce `acc` (64-bit lazy accumulators of one row) by `known`, in
+/// increasing pivot column, with the bounded normalisation that keeps the
+/// accumulators far below `u64` overflow; `pending` carries the count of
+/// unnormalised updates in and out.
+#[inline]
+fn reduce_lazy_by(
+    acc: &mut [u64],
+    known: &[(usize, Vec<u32>)],
+    fp: Barrett,
+    simd: u8,
+    pending: &mut usize,
+) {
+    const NORMALIZE_AFTER: usize = 256;
+    for (c, pivot) in known {
+        let f = fp.reduce(acc[*c]);
+        if f != 0 {
+            add_lazy(acc, pivot, *c, fp.p - f, simd);
+            *pending += 1;
+            if *pending == NORMALIZE_AFTER {
+                normalize_lazy(acc, fp);
+                *pending = 0;
+            }
+        }
+    }
+}
+
 /// Row-oriented RREF.  Each row keeps a 64-bit scratch accumulator while
 /// it meets the existing 32-bit pivots, reducing only the next pivot
 /// coefficient and the row when it is stored.  A bounded normalization
 /// keeps even the largest supported prime far below `u64` overflow.
+///
+/// Rows are taken in chunks of [`DEFERRED_CHUNK`]: every row of a chunk is
+/// reduced in parallel against the pivots known before the chunk, then the
+/// rows are stored one at a time, each first reduced again against the
+/// whole pivot list so the pivots its chunk-mates contributed (and any
+/// earlier pivot column those re-dirtied) are cleared — a pass that costs
+/// one coefficient reduction per pivot already clear.  The result is the
+/// unique reduced echelon form either way.  Back-substitution reduces every
+/// pivot row by the *unreduced* later pivots in increasing column order,
+/// which clears each later pivot column for good and so gives the same
+/// fully reduced rows as the sequential pass did, with the rows now
+/// independent and in parallel.
 fn rref32_deferred(
     rows: &mut Vec<Vec<u32>>,
     fp32: Barrett32,
     fp: Barrett,
     deadline: Option<Instant>,
 ) -> Option<Vec<usize>> {
-    const NORMALIZE_AFTER: usize = 256;
     let simd = lazy_simd_kind();
+    let parallel = deferred_parallel();
     let mut known: Vec<(usize, Vec<u32>)> = Vec::new();
-    for source in std::mem::take(rows) {
+    let sources = std::mem::take(rows);
+    let chunk_rows = if parallel { DEFERRED_CHUNK } else { 1 };
+    for chunk in sources.chunks(chunk_rows) {
         if deadline.is_some_and(|d| Instant::now() > d) {
             return None;
         }
-        let mut acc: Vec<u64> = source.into_iter().map(u64::from).collect();
-        let mut pending = 0usize;
-        for (j, (c, pivot)) in known.iter().enumerate() {
-            if j % 32 == 0 && deadline.is_some_and(|d| Instant::now() > d) {
-                return None;
-            }
-            let f = fp.reduce(acc[*c]);
-            if f != 0 {
-                add_lazy(&mut acc, pivot, *c, fp.p - f, simd);
-                pending += 1;
-                if pending == NORMALIZE_AFTER {
-                    normalize_lazy(&mut acc, fp);
-                    pending = 0;
-                }
-            }
-        }
-        let mut row: Vec<u32> = acc.into_iter().map(|v| fp.reduce(v) as u32).collect();
-        let Some(c) = row.iter().position(|&v| v != 0) else {
-            continue;
+        let n_cols = chunk[0].len();
+        let reduce_one = |source: &Vec<u32>| -> (Vec<u64>, usize) {
+            let mut acc: Vec<u64> = source.iter().copied().map(u64::from).collect();
+            let mut pending = 0usize;
+            reduce_lazy_by(&mut acc, &known, fp, simd, &mut pending);
+            (acc, pending)
         };
-        let inv = invmod(u64::from(row[c]), fp.p) as u32;
-        for x in &mut row[c..] {
-            *x = fp32.reduce(*x * inv);
+        let mut reduced: Vec<(Vec<u64>, usize)> =
+            if chunk.len() > 1 && chunk.len() * known.len().max(1) * n_cols > PAR_WORK {
+                chunk.par_iter().map(reduce_one).collect()
+            } else {
+                chunk.iter().map(reduce_one).collect()
+            };
+        let known_before = known.len();
+        for (acc, pending) in reduced.iter_mut() {
+            if known.len() > known_before {
+                // chunk-mates became pivots: clear them, and whatever
+                // earlier pivot columns they re-dirtied
+                reduce_lazy_by(acc, &known, fp, simd, pending);
+            }
+            let mut row: Vec<u32> = acc.iter().map(|&v| fp.reduce(v) as u32).collect();
+            let Some(c) = row.iter().position(|&v| v != 0) else {
+                continue;
+            };
+            let inv = invmod(u64::from(row[c]), fp.p) as u32;
+            for x in &mut row[c..] {
+                *x = fp32.reduce(*x * inv);
+            }
+            count_ops(row.len() - c);
+            let at = known.partition_point(|(pc, _)| *pc < c);
+            known.insert(at, (c, row));
         }
-        count_ops(row.len() - c);
-        let at = known.partition_point(|(pc, _)| *pc < c);
-        known.insert(at, (c, row));
     }
-    for i in (0..known.len()).rev() {
-        if deadline.is_some_and(|d| Instant::now() > d) {
-            return None;
-        }
-        let (earlier, later) = known.split_at_mut(i + 1);
-        let row = &mut earlier[i].1;
+    if deadline.is_some_and(|d| Instant::now() > d) {
+        return None;
+    }
+    let n_cols = known.first().map_or(0, |(_, r)| r.len());
+    let back = |i: usize| -> Vec<u32> {
+        let (c0, row) = &known[i];
         let mut acc: Vec<u64> = row.iter().copied().map(u64::from).collect();
         let mut pending = 0usize;
-        for (c, pivot) in later.iter().rev() {
-            let f = fp.reduce(acc[*c]);
-            if f != 0 {
-                add_lazy(&mut acc, pivot, *c, fp.p - f, simd);
-                pending += 1;
-                if pending == NORMALIZE_AFTER {
-                    normalize_lazy(&mut acc, fp);
-                    pending = 0;
-                }
-            }
-        }
-        for (x, v) in row.iter_mut().zip(acc) {
-            *x = fp.reduce(v) as u32;
-        }
-    }
+        reduce_lazy_by(&mut acc[..], &known[i + 1..], fp, simd, &mut pending);
+        let _ = c0;
+        acc.into_iter().map(|v| fp.reduce(v) as u32).collect()
+    };
+    let reduced: Vec<Vec<u32>> = if parallel && known.len() * n_cols > PAR_WORK {
+        (0..known.len()).into_par_iter().map(back).collect()
+    } else {
+        (0..known.len()).map(back).collect()
+    };
     let pivots = known.iter().map(|(c, _)| *c).collect();
-    *rows = known.into_iter().map(|(_, row)| row).collect();
+    *rows = reduced;
     Some(pivots)
 }
 

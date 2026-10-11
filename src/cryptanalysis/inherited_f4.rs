@@ -185,63 +185,73 @@ struct Segment {
 /// the folds, exactly as the bit scatter did.  Two sources folding onto one
 /// destination are never in one segment (the destination would not be
 /// strictly increasing), so they meet in the XOR as before.
+///
+/// A word's segments are built the first time a rewrite reads that word:
+/// rows are trimmed to their leading word and few rows of a given epoch
+/// are rewritten at a node, so building every word of the layout up front
+/// cost as much as the rewrites it served.
 #[derive(Debug)]
 struct RewritePlan {
-    /// Segments of source word `w` are `segments[offsets[w]..offsets[w+1]]`.
-    offsets: Vec<u32>,
-    segments: Vec<Segment>,
+    map: Rc<Vec<u32>>,
+    words: Vec<std::cell::OnceCell<Box<[Segment]>>>,
 }
 
 impl RewritePlan {
-    /// The plan of `map` for `n_src_words` source words.
-    fn new(map: &[u32], n_src_words: usize) -> Self {
-        let mut offsets = Vec::with_capacity(n_src_words + 1);
-        let mut segments = Vec::new();
-        for w in 0..n_src_words {
-            offsets.push(segments.len() as u32);
-            let base = w * 64;
-            let end = (base + 64).min(map.len());
-            let mut current: Option<(Segment, u32)> = None;
-            for c in base..end {
-                let d = map[c];
-                if d == DELETED {
-                    continue;
-                }
-                let (dw, db) = (d / 64, d % 64);
-                let extend = match &current {
-                    Some((seg, last_bit)) => seg.dst_word == dw && db > *last_bit,
-                    None => false,
-                };
-                if !extend {
-                    if let Some((seg, _)) = current.take() {
-                        segments.push(seg);
-                    }
-                    current = Some((
-                        Segment {
-                            src_mask: 0,
-                            dst_mask: 0,
-                            dst_word: dw,
-                        },
-                        0,
-                    ));
-                }
-                let (seg, last_bit) = current.as_mut().expect("just set");
-                seg.src_mask |= 1u64 << (c - base);
-                seg.dst_mask |= 1u64 << db;
-                *last_bit = db;
-            }
-            if let Some((seg, _)) = current {
-                segments.push(seg);
-            }
+    /// The plan of `map`, with nothing built yet.
+    fn new(map: Rc<Vec<u32>>) -> Self {
+        let n_src_words = map.len().div_ceil(64);
+        Self {
+            map,
+            words: (0..n_src_words)
+                .map(|_| std::cell::OnceCell::new())
+                .collect(),
         }
-        offsets.push(segments.len() as u32);
-        Self { offsets, segments }
     }
 
-    /// Segments of source word `w`.
+    /// The segments of source word `w` of `map`.
+    fn segments_of(map: &[u32], w: usize) -> Box<[Segment]> {
+        let mut segments = Vec::new();
+        let base = w * 64;
+        let end = (base + 64).min(map.len());
+        let mut current: Option<(Segment, u32)> = None;
+        for c in base..end {
+            let d = map[c];
+            if d == DELETED {
+                continue;
+            }
+            let (dw, db) = (d / 64, d % 64);
+            let extend = match &current {
+                Some((seg, last_bit)) => seg.dst_word == dw && db > *last_bit,
+                None => false,
+            };
+            if !extend {
+                if let Some((seg, _)) = current.take() {
+                    segments.push(seg);
+                }
+                current = Some((
+                    Segment {
+                        src_mask: 0,
+                        dst_mask: 0,
+                        dst_word: dw,
+                    },
+                    0,
+                ));
+            }
+            let (seg, last_bit) = current.as_mut().expect("just set");
+            seg.src_mask |= 1u64 << (c - base);
+            seg.dst_mask |= 1u64 << db;
+            *last_bit = db;
+        }
+        if let Some((seg, _)) = current {
+            segments.push(seg);
+        }
+        segments.into_boxed_slice()
+    }
+
+    /// Segments of source word `w`, built on first use.
     #[inline(always)]
     fn of(&self, w: usize) -> &[Segment] {
-        &self.segments[self.offsets[w] as usize..self.offsets[w + 1] as usize]
+        self.words[w].get_or_init(|| Self::segments_of(&self.map, w))
     }
 }
 
@@ -1169,8 +1179,7 @@ impl ReducedBasis {
         if let Some(p) = step.plans.borrow().get(&from) {
             return p.clone();
         }
-        let map = self.composite(from);
-        let plan = Rc::new(RewritePlan::new(&map, map.len().div_ceil(64)));
+        let plan = Rc::new(RewritePlan::new(self.composite(from)));
         step.plans.borrow_mut().insert(from, plan.clone());
         plan
     }
@@ -2036,7 +2045,7 @@ mod tests {
             }
             let src_words = n_old.div_ceil(64);
             let dst_words = layout.len().div_ceil(64).max(1);
-            let plan = RewritePlan::new(&composed, src_words);
+            let plan = RewritePlan::new(Rc::new(composed.clone()));
             for _ in 0..8 {
                 let lead = (next() % src_words as u64) as usize;
                 let live: Vec<u64> = (lead..src_words)
