@@ -1,0 +1,22 @@
+{
+ "_comment": "End-to-end wall comparison of the scalar and the batched Frobenius pair table, n=41, same sweep through two binaries (pre- and post-batching), interleaved by the driver; the counted operations must be identical.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 41
+ },
+ "repeats": 4,
+ "seed": 20261010,
+ "max_trials": 4000000,
+ "matrix": {
+  "factor_base": [
+   "compact-orbit-scan:columns=60,raw_x_cap=400000000",
+   "compact-orbit-scan:columns=6,raw_x_cap=400000000,norm=16"
+  ],
+  "oracle": [
+   "mitm-frobenius:m=3"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

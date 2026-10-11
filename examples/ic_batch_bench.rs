@@ -2,7 +2,9 @@
 //! probing**, same process, same inputs, interleaved.
 //!
 //! ```text
-//! ic_batch_bench N A BASE REPS [TARGETS]
+//! ic_batch_bench N A BASE REPS [TARGETS [phases]]
+//!   `phases` instead times where a batched build's time goes (additions,
+//!   canonicalisation with shift, hash-map inserts) and exits.
 //!   BASE = scan:COLUMNS[:NORM]   compact-orbit-scan (raw-x cap 4e8)
 //!        | subspace:CAP          Frobenius-invariant subspace of at most CAP points
 //! ```
@@ -93,6 +95,52 @@ fn main() -> Result<(), String> {
         fb.points.len(),
         fb.columns
     );
+
+    if args.get(5).map(String::as_str) == Some("phases") {
+        // Where the batched build's time goes: the additions, the
+        // canonicalisation with its shift, and the hash-map inserts.
+        use crypto_lib::cryptanalysis::koblitz_fast::{BatchScratch, FrobeniusCanon};
+        use std::collections::HashMap;
+        let canon = FrobeniusCanon::new(&inst.gf, inst.n).ok_or("normal basis")?;
+        let reps: Vec<usize> = (0..fb.points.len()).step_by(2 * n as usize).collect();
+        let mut scratch = BatchScratch::default();
+        let (mut t_add, mut t_canon, mut t_map) = (0f64, 0f64, 0f64);
+        let mut sums: Vec<FastPoint> = Vec::new();
+        let mut keyed: Vec<(u64, u32)> = Vec::new();
+        let mut map: HashMap<u64, (u32, u32)> =
+            HashMap::with_capacity(reps.len() * fb.points.len() / 2);
+        let mut pairs = 0u64;
+        for (o, &rep) in reps.iter().enumerate() {
+            let qs = &fb.points[..];
+            sums.clear();
+            let t = Instant::now();
+            inst.fast
+                .add_many(fb.points[rep], qs, &mut sums, &mut scratch);
+            t_add += t.elapsed().as_secs_f64();
+            keyed.clear();
+            let t = Instant::now();
+            for u in sums.iter().filter(|u| !u.infinity) {
+                keyed.push(canon.canon_with_shift(u.x));
+            }
+            t_canon += t.elapsed().as_secs_f64();
+            let t = Instant::now();
+            for (j, &(key, shift)) in keyed.iter().enumerate() {
+                map.entry(key)
+                    .or_insert((o as u32, j as u32 | (shift << 26)));
+            }
+            t_map += t.elapsed().as_secs_f64();
+            pairs += keyed.len() as u64;
+        }
+        let total = t_add + t_canon + t_map;
+        println!(
+            "build phases over {} representatives, {} pairs ({} entries): add_many {:.0} ms ({:.1} ns/pair, {:.0} %), canon_with_shift {:.0} ms ({:.1} ns/pair, {:.0} %), map insert {:.0} ms ({:.1} ns/pair, {:.0} %)",
+            reps.len(), pairs, map.len(),
+            t_add * 1e3, t_add * 1e9 / pairs as f64, 100.0 * t_add / total,
+            t_canon * 1e3, t_canon * 1e9 / pairs as f64, 100.0 * t_canon / total,
+            t_map * 1e3, t_map * 1e9 / pairs as f64, 100.0 * t_map / total,
+        );
+        return Ok(());
+    }
 
     // Targets: random subgroup points, fixed across repeats.
     let mut rng = StdRng::seed_from_u64(0x1CBA7C4);
