@@ -92,3 +92,17 @@ exponent.  No size above the measured range crosses rho.
 Each session gets a run report with a graph and a PDF under
 `reports/run-<UTC>/`.  The README carries the envelope-against-size graph
 and a PDF.
+
+## Amendment 1 (2026-10-11, after reading `scaling_h72`; before running the new session)
+
+On six of the eight cofactor-72 curves, the cheapest closed arm was the
+smallest factor base swept (`B = 16`).  The derivation puts the optimum at
+`B ∝ (N/h²)^{1/3}`, about 4 to 10 at 18 to 26 bits.  So the envelope there
+is not resolved, and the slope fit is biased low.
+
+Session `scaling_h72_small_b` reruns the same curves and targets with the
+closed table at `B ∈ {4, 8}` and with rho.  It is analysed in two ways:
+- with the envelope taken over both sessions;
+- with the original `scaling_h72` alone, kept as the pre-registered test.
+
+This amendment was added after reading the data and is reported as such.

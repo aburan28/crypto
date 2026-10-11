@@ -6,7 +6,7 @@ set -u
 cd "$(dirname "$0")/../.."
 B=./target/release/ecbench
 D=research/fiber_ic_scaling_20261011
-order="scaling_h4 scaling_h72"
+order="scaling_h4 scaling_h72 scaling_h72_small_b"
 while pgrep -f "ecbench run" > /dev/null; do sleep 15; done
 for name in $order; do
   spec=$D/specs/$name.json
