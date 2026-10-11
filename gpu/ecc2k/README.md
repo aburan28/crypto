@@ -93,7 +93,11 @@ otherwise with the software product the host harness runs. The two form the
 same unreduced product and share the reduction; `./bench selftest` is the
 check that the native path agrees with the host on a device, and the
 `-DF2M_CLMAD=0` build above is its paired control for `./bench field` and
-`./bench rho`. **The native path has not yet been run on a GPU.**
+`./bench rho`. Measured on one RTX PRO 6000 (CUDA 13.3, sm_120): both builds
+pass `selftest`; the native product runs `mul` at 127.3 against 97.3 Gop/s
+(1.31x), `inv` 1.24x and the ECC2K-95 class walk at 1.685 against 1.42
+Gstep/s (1.19x), three repetitions each. Receipts:
+[`ecc2k130/benchmarks/ecc2k-clmad/RESULTS.md`](../../ecc2k130/benchmarks/ecc2k-clmad/RESULTS.md).
 
 | Suite | Curve | Subgroup | What it covers |
 |---|---|---|---|

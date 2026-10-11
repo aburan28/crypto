@@ -1,0 +1,12 @@
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+[selftest] ecc2k95
+  scalar_mul: 2048 points match the host
+  tau^5: 2048 points match the host
+  canonical class representative: 2048 match
+  rho: 2048 class walks x 64 steps identical to the host, 31419 DPs
+  rho: device DPs replay to the same class on the host
+  rho lowmem variant matches
+selftest OK

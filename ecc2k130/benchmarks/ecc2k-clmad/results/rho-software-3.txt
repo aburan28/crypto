@@ -1,0 +1,9 @@
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  385024 class walks (48128 threads x 8), dp g <= 30, variant=lowmem, inversion=repeated squaring
+  376 blocks x 128 threads, 8000 B shared
+  1.436 Gstep/s  (789 M steps in 0.549 s)
+  0.7 ns/step/walk
+  ECC2K-95 needs ~1.791e+13 class-walk steps: 0.0 device-years at this rate

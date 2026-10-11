@@ -60,10 +60,12 @@ static void print_device() {
     CU(cudaGetDevice(&dev));
     CU(cudaGetDeviceProperties(&p, dev));
     g_sms = p.multiProcessorCount;
-    int smem_optin = 0;
+    int smem_optin = 0, clock_khz = 0;
     CU(cudaDeviceGetAttribute(&smem_optin, cudaDevAttrMaxSharedMemoryPerBlockOptin, dev));
+    /* cudaDeviceProp::clockRate is gone in CUDA 13; the attribute remains. */
+    CU(cudaDeviceGetAttribute(&clock_khz, cudaDevAttrClockRate, dev));
     printf("device: %s  sm_%d%d  %d SMs  %.1f GHz\n", p.name, p.major, p.minor,
-           g_sms, p.clockRate / 1e6);
+           g_sms, clock_khz / 1e6);
     printf("        %d threads/SM, %d KB shared/SM, %d KB shared/block (opt-in)\n",
            p.maxThreadsPerMultiProcessor, (int)(p.sharedMemPerMultiprocessor >> 10),
            smem_optin >> 10);
