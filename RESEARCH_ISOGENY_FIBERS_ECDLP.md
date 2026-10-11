@@ -106,7 +106,7 @@ hypothesis it uses (rationality of φ, r ∤ deg φ, GRH only for
 random-self-reducibility within a level, smoothness of the conductor for
 vertical moves). Proven results are labelled Prop./Thm.; the heuristic layer
 (Semaev/Gaudry/Diem yield, degree-of-regularity assumptions) is marked as
-such where used. References are collected in §12.
+such where used. References are collected in §14.
 ---
 
 ## 2. Mathematical model: fibers, Galois action, relation generation
@@ -1197,7 +1197,7 @@ live in E(F_q)/G, where they are Pohlig–Hellman in disguise, or they are the
 [r]- and G-fibers, where they *are* the DLP and cost the embedding degree
 or √r. Everything in between is a constant factor on a factor base.
 
-## 12. References
+## 14. References
 
 * Faugère, Huot, Joux, Renault, Vitse. Symmetrized summation polynomials: using small order torsion points to speed up elliptic curve index calculus. EUROCRYPT 2014.
 * Galbraith, Gebregiyorgis. Summation polynomial algorithms for elliptic curves in characteristic two. INDOCRYPT 2014; ePrint 2014/806.
