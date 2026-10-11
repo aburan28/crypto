@@ -1,0 +1,38 @@
+{
+  "base_file_sha256": "53c9c8454be7f1454c96295ab3d00848bdf6bbda6a9266d47fc2dc1b18e0b22d",
+  "base_hash_blake3": "7af2460c8b5a2c29f9d1aa7fefecbcde3a6ce761293d0dab0cecfc3bc980b973",
+  "binary_sha256": "ee1c28fe6374ed0253ed57ebd9eb3e03c0c9e45a1fd707a4e1505a220fe9f384",
+  "candidate_ids": {
+    "cap200000": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h4473025f5a16",
+    "cap400000": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0hb8e77e148baf",
+    "control": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h9bc770c69100"
+  },
+  "cargo_lock_sha256": "ac5cd7a3459be776180afe1eb2975c76b1a88f84bd1e99aa20475927ec260a90",
+  "development_q_sha256": "c63b2f819562326ad1e1e8f348b0cc350c4530fe56e4a5b3b275770dcf13ee4d",
+  "expected_raw_x_scanned": 464,
+  "parent_fixture_sha256": "ccb3beeba506645e006de7a958b4c33d8468dee4cca517fc4e87b1dcc61150e1",
+  "pilot_probe_caps": [
+    null,
+    200000,
+    400000
+  ],
+  "pilot_rank_seeds": [
+    530053,
+    530054,
+    530055
+  ],
+  "protocol_sha256": "b215c50c27626648d018379463fdf4c345d7bfb884c72b3a7d782d8aeaf55f80",
+  "resource_envelope": {
+    "observed_rss_cap_bytes": 17179869184,
+    "threads": 1,
+    "wall_cap_seconds": 60
+  },
+  "schema": "n53-fixed-base-rank-restart-freeze-v1",
+  "source_parent_commit": "1ac61222583ce43d5d986c925807e6d43070639c",
+  "source_sha256": "788a24f03c874a344c5e3bb17668549e7f5c555ebac9101812a8aed5ddb24468",
+  "workload_ids": {
+    "530053": "W190194d8394a",
+    "530054": "W7e5787b0e1c1",
+    "530055": "W37dd28032416"
+  }
+}

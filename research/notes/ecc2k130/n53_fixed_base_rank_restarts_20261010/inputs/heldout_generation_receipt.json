@@ -1,0 +1,28 @@
+{
+  "amendment_sha256": "65951762f010accc1ae0cb3c48e7d3dc59114037d38bf9ea2eed4fb53918c932",
+  "command": [
+    "/private/tmp/crypto-compact-target/release/examples/koblitz_rho_fixture",
+    "53",
+    "0",
+    "signed_frobenius",
+    "1",
+    "strong",
+    "700001",
+    "hash:53261307"
+  ],
+  "exit_code": 0,
+  "fixture_sha256": "360ca7e31a0226d9ceb51d129aacbe1ecfc013bbee17d79eede2772ea369823d",
+  "generator_binary_sha256": "4a5f9bcae529e9407c7664a1ae6b74558d38c5aaa4ee331d06f6a61549c5b230",
+  "head_commit": "bf98a886395300e5cafbbb1d18d4182053ce3fac",
+  "independent_scalar_replay": true,
+  "manifest_sha256": "52dddfa5a45b7becf2be3c7c95ad1947ab223dd37d4c25ad2377665c86c320de",
+  "point": [
+    2939726529610565,
+    1384157319972946
+  ],
+  "point_sha256": "4b32ce8b5c559f68518eca609d4a97f095e49bffdb579746636aafaee77dcabf",
+  "prior_committed_matches": [],
+  "public_hash_counter": 1,
+  "schema": "n53-rank-restart-heldout-generation-receipt-v1",
+  "status": "ELIGIBLE"
+}

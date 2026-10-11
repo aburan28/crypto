@@ -1,0 +1,6 @@
+{
+  "error": "",
+  "error_type": "AssertionError",
+  "status": "FAIL",
+  "traceback": "Traceback (most recent call last):\n  File \"/private/tmp/crypto-compact-producer-union-repair-20261010/research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py\", line 182, in main\n    result = verify(args.trace, args.base, args.summary)\n  File \"/private/tmp/crypto-compact-producer-union-repair-20261010/research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py\", line 81, in verify\n    assert summary['kind'] == 'compact_orbit_dlp_summary'\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+}

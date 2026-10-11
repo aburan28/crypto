@@ -1,0 +1,162 @@
+{
+ "mode": "selftest",
+ "DK": -71,
+ "p": 1076168309,
+ "trace": -65610,
+ "f_pi": 4,
+ "r": 6263,
+ "h": 7,
+ "primes": [
+  {
+   "ell": 2,
+   "frob_eig": 1,
+   "order": 7
+  },
+  {
+   "ell": 3,
+   "frob_eig": 1,
+   "order": 7
+  },
+  {
+   "ell": 5,
+   "frob_eig": 1,
+   "order": 7
+  }
+ ],
+ "loops": [
+  {
+   "exponents": {
+    "2": 7
+   },
+   "chain": [
+    [
+     2,
+     1062038673
+    ],
+    [
+     2,
+     830122925
+    ],
+    [
+     2,
+     1049105082
+    ],
+    [
+     2,
+     789344292
+    ],
+    [
+     2,
+     207404529
+    ],
+    [
+     2,
+     760788716
+    ],
+    [
+     2,
+     201205532
+    ]
+   ],
+   "alpha": "(-21 + 1*sqrt(-71))/2",
+   "degree": 128,
+   "trace": -21,
+   "lambda_": 1928,
+   "lambda_conj": 4314,
+   "action": "lambda",
+   "cost_M": 105.0
+  },
+  {
+   "exponents": {
+    "2": 1,
+    "3": -2
+   },
+   "chain": [
+    [
+     2,
+     1062038673
+    ],
+    [
+     3,
+     789344292
+    ],
+    [
+     3,
+     201205532
+    ]
+   ],
+   "alpha": "(1 + -1*sqrt(-71))/2",
+   "degree": 18,
+   "trace": 1,
+   "lambda_": 4325,
+   "lambda_conj": 1939,
+   "action": "-lambda",
+   "cost_M": 60.0
+  },
+  {
+   "exponents": {
+    "2": -1,
+    "3": 2
+   },
+   "chain": [
+    [
+     2,
+     760788716
+    ],
+    [
+     3,
+     1049105082
+    ],
+    [
+     3,
+     201205532
+    ]
+   ],
+   "alpha": "(1 + 1*sqrt(-71))/2",
+   "degree": 18,
+   "trace": 1,
+   "lambda_": 1939,
+   "lambda_conj": 4325,
+   "action": "lambda",
+   "cost_M": 60.0
+  },
+  {
+   "exponents": {
+    "2": 2,
+    "5": -1
+   },
+   "chain": [
+    [
+     2,
+     1062038673
+    ],
+    [
+     2,
+     830122925
+    ],
+    [
+     5,
+     201205532
+    ]
+   ],
+   "alpha": "(3 + 1*sqrt(-71))/2",
+   "degree": 20,
+   "trace": 3,
+   "lambda_": 1940,
+   "lambda_conj": 4326,
+   "action": "lambda",
+   "cost_M": 67.5
+  }
+ ],
+ "all_loops_act_as_lambda": true,
+ "log": [
+  "D = -71, h = 7, Cl = [7]",
+  "p = 1076168309 (31 bits), t = +-65610, f_pi = 4; 7 crater j-invariants",
+  "E0: j = 201205532, #E0 = 1076233920 = 171840 * 6263, trace -65610",
+  "crater labelled by Cl(O) via primes [3, 5]; primes needing label orientation (l | f_pi): [2]",
+  "loop {2: 7}: degree 128, alpha = (-21 + 1*sqrt(-71))/2, acts as lambda",
+  "loop {2: 1, 3: -2}: degree 18, alpha = (1 + -1*sqrt(-71))/2, acts as -lambda",
+  "loop {2: -1, 3: 2}: degree 18, alpha = (1 + 1*sqrt(-71))/2, acts as lambda",
+  "loop {2: 2, 5: -1}: degree 20, alpha = (3 + 1*sqrt(-71))/2, acts as lambda"
+ ]
+}

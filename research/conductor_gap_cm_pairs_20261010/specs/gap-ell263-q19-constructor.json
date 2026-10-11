@@ -1,0 +1,20 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "conductor gap ell=263 via the conductor_gap constructor (crater + 3 floor seeds)",
+  "description": "Same pair as gap-ell263-q19.json, but built in-harness from (ell, t, level, seed) so the record replays the construction instead of pasted coordinates. Not run; a plan check of the constructor.",
+  "workloads": {
+    "curves": [
+      {"kind": "conductor_gap", "ell": 263, "t": 241, "level": "crater", "seed": 0},
+      {"kind": "conductor_gap", "ell": 263, "t": 241, "level": "floor", "seed": 1},
+      {"kind": "conductor_gap", "ell": 263, "t": 241, "level": "floor", "seed": 2},
+      {"kind": "conductor_gap", "ell": 263, "t": 241, "level": "floor", "seed": 3}
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 20261010
+  },
+  "arms": [
+    {"name": "rho-neg", "role": "reference", "method": {"id": "rho.negation"}},
+    {"name": "rho-neg-aa", "role": "control", "method": {"id": "rho.negation"}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "order": "alternate", "seed": 1, "isolation_required": "L2", "timeout_seconds": 300}
+}

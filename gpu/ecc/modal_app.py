@@ -1,9 +1,15 @@
-"""Run the secp256k1 GPU kernels on Modal, on an actual GPU.
+"""Run the gpu/ecc kernels on Modal, on an actual GPU.
 
     ECC_GPU=H100 modal run modal_app.py::selftest
     ECC_GPU=H100 modal run modal_app.py::bench
     ECC_GPU=H100 modal run modal_app.py::tune
     ECC_GPU=H100 modal run modal_app.py::bsgs
+    ECC_GPU=RTX-PRO-6000 ECC_CURVE=curve25519 modal run modal_app.py::selftest
+
+ECC_CURVE picks the curve the bench binary is built for: secp256k1 (the
+default) or curve25519, Ed25519's prime-order group in short-Weierstrass
+form with its own 2^256 = 38 special reduction.  Both are read at import
+time and baked into the image and function definitions.
 
 The reason this file exists is `selftest`.  `FP_PTX=1` replaces seven
 multiprecision primitives in `fp256.cuh` with hand-written carry chains worth
@@ -50,6 +56,9 @@ import modal
 CUDA_VERSION = "12.8.1"
 
 DEFAULT_GPU = os.environ.get("ECC_GPU", "H100")
+CURVE = os.environ.get("ECC_CURVE", "secp256k1")
+if CURVE not in ("secp256k1", "curve25519"):
+    raise SystemExit("ECC_CURVE must be secp256k1 or curve25519")
 
 # Compute capability per Modal GPU type.  sm_120 is the Blackwell workstation
 # part (RTX PRO 6000), sm_100 is B200/B300, sm_90 is H100/H200, sm_89 is
@@ -78,8 +87,10 @@ image = (
         # test_cpu.cpp and the image's `make test` with it.
         ignore=[
             "bench", "bench_0", "bench_1", "bench_tune",
-            "test_secp_fast", "test_secp_mont", "test_toy_mont",
+            "test_secp_fast", "test_secp_mont", "test_toy_mont", "test_toyj0_mont",
+            "test_25519_fast", "test_25519_mont",
             "test_bsgs_toy", "test_bsgs_secp_fast", "test_bsgs_secp_mont",
+            "test_bsgs_25519_fast",
             "__pycache__", "*.pyc", "*.o",
         ],
     )
@@ -93,7 +104,7 @@ image = (
     )
 )
 
-app = modal.App("ecc-secp256k1")
+app = modal.App("ecc-" + CURVE)
 
 
 def onGpu(fn, gpu):
@@ -138,7 +149,7 @@ def gpuInfo():
 def build(ptx, arch, minBlocks=0, out="bench"):
     """Build the bench binary for one configuration.  Returns (ok, log)."""
     rc, log = sh(
-        f"make -B bench ARCH=sm_{arch} FP_PTX={int(ptx)} "
+        f"make -B bench ARCH=sm_{arch} CURVE={CURVE} FP_PTX={int(ptx)} "
         f"MIN_BLOCKS={minBlocks} && mv bench {out}",
         timeout=30 * 60,
     )
@@ -157,7 +168,7 @@ def confName(ptx, minBlocks=0):
 def runSelftest():
     """Build both configurations and check each against the host reference."""
     name, cap = gpuInfo()
-    print(f"GPU: {name}, sm_{cap}\n")
+    print(f"GPU: {name}, sm_{cap}; curve {CURVE}\n")
 
     results = {}
     for ptx in (False, True):
@@ -180,7 +191,8 @@ def runSelftest():
     bad = [c for c, (v, _) in results.items() if v != "PASS"]
     if bad:
         print(f"\n{', '.join(bad)} did not pass -- FP_PTX must stay off.")
-        return {"ok": False, "gpu": name, "results": {k: v for k, (v, _) in results.items()}}
+        return {"ok": False, "gpu": name, "curve": CURVE,
+                "results": {k: v for k, (v, _) in results.items()}}
 
     print(
         "\nBoth configurations agree with the host reference on real hardware.\n"
@@ -188,7 +200,8 @@ def runSelftest():
         "inline assembly is now executed, not merely assembled and interpreted.\n"
         "FP_PTX=1 can be made the default on this architecture."
     )
-    return {"ok": True, "gpu": name, "results": {k: v for k, (v, _) in results.items()}}
+    return {"ok": True, "gpu": name, "curve": CURVE,
+            "results": {k: v for k, (v, _) in results.items()}}
 
 
 RATE = re.compile(r"([\d.]+)\s*([MG])\s*(?:it|step)s?/s", re.I)
@@ -250,7 +263,7 @@ def runBench(walks: int = 0, iters: int = 0, w: int = 0, variant: str = "",
                 "  A smaller ratio here means the kernel is not instruction-issue\n"
                 "  bound -- occupancy or memory, which `tune` probes."
             )
-    return {"gpu": name, "rates": rates}
+    return {"gpu": name, "curve": CURVE, "rates": rates}
 
 
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=4 * HOUR)
@@ -298,7 +311,7 @@ def runTune(minBlocks: str = "0,3,4", ptxBoth: bool = True,
             "  OPTIMIZATION_BLACKWELL.md section 3 with this, per architecture:\n"
             "  the offline register figures do not decide it."
         )
-    return {"gpu": name, "rows": rows}
+    return {"gpu": name, "curve": CURVE, "rows": rows}
 
 
 @app.function(image=image, gpu=DEFAULT_GPU, timeout=2 * HOUR)
@@ -335,7 +348,7 @@ def runBsgs(wbits: int = 40, w: int = 0, iters: int = 0, neg: int = 1,
     print("\n" + "=" * 60)
     for conf, verdict in results.items():
         print(f"  {conf:<24} {verdict}")
-    return {"gpu": name, "results": results}
+    return {"gpu": name, "curve": CURVE, "results": results}
 
 
 # ---------------------------------------------------------------------------

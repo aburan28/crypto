@@ -1,0 +1,42 @@
+{
+  "binary_sha256": "f6a1be30979fda8d57fac4dc571c69c76af0cd7cff18e102191de0f1b06ac133",
+  "command": [
+    "/private/tmp/crypto-compact-target/release/examples/koblitz_rho_batch_ks_strong_online",
+    "53",
+    "0",
+    "signed_frobenius",
+    "1",
+    "530155"
+  ],
+  "environment_flags": {
+    "KIC_RANK_PROBE_CAP": null,
+    "KIC_RHO_DP_BITS": "4",
+    "KIC_RHO_LANES": "32",
+    "KIC_RHO_RUNG": "3",
+    "KIC_RHO_TARGET_POINT": "2939726529610565,1384157319972946"
+  },
+  "exit_code": 0,
+  "external_wall_ms": 186.11574999886216,
+  "label": "rho",
+  "peak_rss_bytes": 13402112,
+  "public_point_sha256": "4b32ce8b5c559f68518eca609d4a97f095e49bffdb579746636aafaee77dcabf",
+  "rank_probe_cap": null,
+  "rank_seed": 531055,
+  "recovered_scalar": 11184763905218,
+  "resource_envelope": {
+    "observed_rss_cap_bytes": 17179869184,
+    "threads": 1,
+    "wall_cap_seconds": 60
+  },
+  "rho_online_ms": 147.744584,
+  "rho_replay_sha256": "7329a90669fc22370900bde3a56f3e2815ad643ce2d8cc50d7dd79881998010c",
+  "rho_seed": 530155,
+  "rho_sha256": "6414bbca9c64c706a35b9201c9ef6dfdf8450c9be34243bc025fbce454366a9e",
+  "rho_walk_steps": 438896,
+  "run_id": "RHO1N53Ce0W70add07d1871R1",
+  "runner_sha256": "93e213e2a4caa1678f094d7dcbf4aa61dd60fb7b393b51c10ba8eb93e5bccfdf",
+  "source_sha256": "575c1739f37e24d9130cc2fef8ea2c7554c762cf822e52708a13263b2875ccb0",
+  "status": "VERIFIED",
+  "timed_out": false,
+  "workload_id": "W70add07d1871"
+}

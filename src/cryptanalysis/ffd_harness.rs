@@ -1075,7 +1075,7 @@ fn merge_squarefree_monomials(a: &[u32], b: &[u32]) -> Vec<u32> {
 /// Lets a caller cap the degree before committing to the allocation.
 pub fn macaulay_memory_estimate_monomial(eqs: &[Vec<Vec<u32>>], num_vars: u32, d: u32) -> u64 {
     let cols = num_monomials_upto_degree(num_vars, d);
-    let words = (cols + 63) / 64;
+    let words = cols.div_ceil(64);
     let mut rows: u64 = 0;
     for eq in eqs {
         if eq.is_empty() {
@@ -1102,7 +1102,7 @@ pub fn build_macaulay_rows_monomial(
     if cols == 0 || eqs.is_empty() {
         return (Vec::new(), cols, 0);
     }
-    let row_words = (cols + 63) / 64;
+    let row_words = cols.div_ceil(64);
     let mut rows: Vec<Vec<u64>> = Vec::new();
     for eq in eqs {
         if eq.is_empty() {
@@ -1151,8 +1151,7 @@ pub fn measure_monomial_system(
     let mut per_degree = Vec::new();
     let mut fall_degree: Option<u32> = None;
     for d in d_min..=d_max {
-        let (mut rows, cols, rows_constructed) =
-            build_macaulay_rows_monomial(eqs, num_vars, d);
+        let (mut rows, cols, rows_constructed) = build_macaulay_rows_monomial(eqs, num_vars, d);
         let rank = if rows.is_empty() {
             0
         } else {

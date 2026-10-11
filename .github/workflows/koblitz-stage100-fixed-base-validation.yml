@@ -1,11 +1,9 @@
 name: Koblitz Stage 100 n53 fixed-base validation
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage100_fixed_base_validation.py"
-      - ".github/workflows/koblitz-stage100-fixed-base-validation.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

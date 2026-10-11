@@ -161,7 +161,7 @@ fn hex_digest(digest: [u8; 32]) -> String {
 pub fn digest_reader<R: Read>(mut reader: R) -> Result<FileDigest, String> {
     let mut state = Sha256::new();
     let mut bytes = 0u64;
-    let mut buffer = [0u8; 1024 * 1024];
+    let mut buffer = vec![0u8; 1024 * 1024];
     loop {
         let read = reader
             .read(&mut buffer)
@@ -960,6 +960,15 @@ mod tests {
 
     #[test]
     fn staged_parts_reconstruct_the_exact_verified_certificate() {
+        std::thread::Builder::new()
+            .stack_size(8 * 1024 * 1024)
+            .spawn(staged_parts_reconstruct_the_exact_verified_certificate_inner)
+            .unwrap()
+            .join()
+            .unwrap();
+    }
+
+    fn staged_parts_reconstruct_the_exact_verified_certificate_inner() {
         let root = temporary();
         fs::create_dir_all(&root).unwrap();
         let mut raw = Vec::new();

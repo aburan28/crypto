@@ -165,6 +165,7 @@ namespace eccPacked131 {
 #if ECC_SIGMA_FUSED_SHARED_SLOTS != 0 && ECC_SIGMA_FUSED_SHARED_SLOTS != 2 && \
     ECC_SIGMA_FUSED_SHARED_SLOTS != 3 && ECC_SIGMA_FUSED_SHARED_SLOTS != 4
 #error "ECC_SIGMA_FUSED_SHARED_SLOTS must be 0, 2, 3 or 4"
+#endif
 #if ECC_SIGMA_SQUARE_TABLE && (!ECC_SIGMA_FUSED || ECC_WALK_TABLE || !ECC_PACKED_POLY_STATE)
 #error "ECC_SIGMA_SQUARE_TABLE requires the polynomial-state sigma-fused walk"
 #endif
@@ -795,6 +796,7 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
     sigmaFusedScratchStoreOrGlobal131<SIGMA_FUSED_SCRATCH_DENOMINATOR>(
         denominators, slot, tid, p.threads, tagged);
 }
+#endif  // ECC_SIGMA_FUSED
 
 #if ECC_PACKED_XONLY_23 && ECC_WALK_TABLE
 #error "ECC_PACKED_XONLY_23 and ECC_WALK_TABLE select different walks"
@@ -803,7 +805,8 @@ __device__ __forceinline__ void sigmaFusedSelect(const WalkParams<unsigned> &p,
 #if ECC_PACKED_BATCH_SPLIT != 1 || ECC_PACKED_BLOCK_INVERSE || ECC_PACKED_SHARED_X_SLOTS || ECC_PACKED_LAST_SLOT_CACHE || ECC_PACKED_FUSED_SIGMA
 #error "Split batches, block inversion, shared-X slots, the last-slot cache and fused sigma are implemented only by the x-only walk (ECC_PACKED_XONLY_23)"
 #endif
-#if ECC_TABLE_FUSED
+#if ECC_SIGMA_FUSED
+// Forward work and the reverse pass share the sigma fused walk below.
 static __global__ void ECC_BOUNDS walk(WalkParams<unsigned> p, unsigned *denominators) {
     const int tid = blockIdx.x * blockDim.x + threadIdx.x;
 #if ECC_SIGMA_SQUARE_TABLE

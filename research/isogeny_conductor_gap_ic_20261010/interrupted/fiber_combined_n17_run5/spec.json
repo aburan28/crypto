@@ -1,0 +1,81 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "descent-algebraic:m=2",
+          "solver": "f4-f2"
+        }
+      },
+      "name": "f4-blind",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "descent-algebraic-fiber:fiber=lifts",
+          "solver": "f4-f2"
+        }
+      },
+      "name": "f4-lifts",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "descent-algebraic-fiber:fiber=combined",
+          "solver": "f4-f2"
+        }
+      },
+      "name": "f4-combined",
+      "role": "candidate"
+    }
+  ],
+  "description": "Part A, arm A3: one Weil-descended system per target with the target abscissa free and the fiber polynomial adjoined, against the blind and all-lifts descents, on K_1 and two random binary curves over F_2^17.",
+  "label": "fiber-combined algebraic descent at n = 17",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 2,
+    "seed": 1,
+    "timeout_seconds": 3600,
+    "warmup": 1
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 17
+      },
+      {
+        "kind": "binary_random",
+        "max_cofactor": 8,
+        "n": 17,
+        "seed": 1
+      },
+      {
+        "kind": "binary_random",
+        "max_cofactor": 8,
+        "n": 17,
+        "seed": 2
+      }
+    ],
+    "target_seed": 20261010,
+    "targets_per_curve": 2
+  }
+}

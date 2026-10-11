@@ -164,3 +164,24 @@ model budget as a refutation; comparing cvc5 decisions or Z3 conflicts
 with native conflicts as one unit; reporting a wall-time ratio from this
 unisolated host as a speed; reading any outcome at `n ≤ 23` as a
 statement about `n = 83` or `n = 131`.
+
+## Amendment 3 (2026-10-11, before the `n = 19` and `n = 23` runs)
+
+The ladder is completed in a different cloud container from the `n = 13`
+run.  Three deviations from the frozen inputs, each forced by what the
+container can reach, are recorded before the runs and not revised after:
+
+- **cvc5 1.1.2** (Ubuntu 24.04 package) in place of 1.4.2: the static
+  release is on `github.com`, which the environment's network policy denies
+  (403), and the PyPI `cvc5` wheel carries no executable.  The two cvc5 arms
+  are therefore a different solver version from the `n = 13` arms and their
+  cross-`n` comparison is labelled as such.
+- **Z3 5.1.0** as frozen, extracted from the `z3-solver` 5.1.0 wheel
+  (`z3_solver-5.1.0.0.data/data/bin/z3`).
+- **Host:** 4-vCPU shared container, the `n = 19` and `n = 23` runs
+  concurrent with each other and with other work; wall time remains a
+  practicality note.
+
+The partial `n = 19` file of 2026-10-08 (`n19-m3-ell7.jsonl`, 23 cells) is
+kept unchanged and not scored; the complete run is written to
+`n19-m3-ell7-complete.jsonl` with the frozen seed and targets.

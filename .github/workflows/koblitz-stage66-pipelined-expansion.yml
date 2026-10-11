@@ -1,11 +1,9 @@
 name: Koblitz Stage 66 n53 pipelined expansion
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage64_parallel_expansion.py"
-      - ".github/workflows/koblitz-stage66-pipelined-expansion.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

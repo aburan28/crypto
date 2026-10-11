@@ -343,6 +343,19 @@ probe but adds canonicalisation, Frobenius-map, lookup, entry and
 representative counts to `oracle_setup`. Use `mitm-frobenius:m=3` on the
 same base as its accounting control.
 
+`mitm-fiber:fiber=closed|lifts|blind`, `mitm-frobenius-fiber:fiber=closed|lifts|blind`
+and `descent-algebraic-fiber:fiber=combined|lifts|blind` (with a `solver`) are
+the cofactor-fiber-aware oracles of `ic_framework::fiber`
+(`research/isogeny_conductor_gap_ic_20261010/`).  A subgroup target `T` is
+decomposed as `Σ P_i = T + K` for any `K` in the rational `h`-torsion, which
+the relation loop's `[h]` projection makes an exact row: `closed` holds
+`P_i + P_j + K` for every `K` in the pair table (one probe, `h` times the
+entries), `lifts` probes or descends every lift (`h` calls), `combined`
+descends one system with the target abscissa free and the fiber polynomial
+adjoined, and `blind` is the landed oracle.  The fiber the oracle found is
+in `oracle_setup` (`fiber_size`, `fiber_complete`); with `h = 1` every mode
+is the blind oracle.
+
 `koblitz-standard-subspace:dimension=d` with
 `pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N` runs
 PR #1333's Groebner decomposers unmodified inside `ic.pipeline`, with no
@@ -625,7 +638,12 @@ FROM method_by_curve ORDER BY curve_slug, mean_s;
   The `ecbench-extend` skill walks through it.
 - **A curve construction:** a variant of `workload::CurveSpec` that calls
   an existing constructor. Register any new curve before citing its slug
-  (AGENTS.md §11).
+  (AGENTS.md §11). `conductor_gap` (`{"kind": "conductor_gap", "ell": 263,
+  "t": 241, "level": "crater" | "floor", "seed": 1}`) builds CM pairs over
+  `GF((t² + 19ℓ²)/4)` of prime order `q + 1 − t` whose endomorphism
+  conductor is 1 at the crater and the prime `ℓ` at the floor, certified
+  without computing an isogeny; it is the construction behind
+  `research/conductor_gap_cm_pairs_20261010/`.
 - **A factor base or oracle:** add it to `ic_framework` as a plug-in;
   `ic.pipeline` reaches it through its name. Dump it with `ecbench fb` to
   store its points.

@@ -32,10 +32,7 @@ use std::time::Instant;
 
 fn main() {
     let arguments: Vec<String> = std::env::args().collect();
-    let bits: u32 = arguments
-        .get(1)
-        .and_then(|a| a.parse().ok())
-        .unwrap_or(20);
+    let bits: u32 = arguments.get(1).and_then(|a| a.parse().ok()).unwrap_or(20);
     let target_seed: u64 = arguments
         .get(2)
         .and_then(|a| a.parse().ok())
@@ -44,7 +41,7 @@ fn main() {
 
     let Some((_, curve)) = bench_curves_a_minus_3()
         .into_iter()
-        .find(|(b, c)| *b == bits && class_filter.as_deref().map_or(true, |f| c.name.contains(f)))
+        .find(|(b, c)| *b == bits && class_filter.as_deref().is_none_or(|f| c.name.contains(f)))
     else {
         eprintln!("no a=-3 bench curve at {bits} bits matching {class_filter:?}");
         std::process::exit(2);
@@ -82,7 +79,7 @@ fn main() {
     let mut x_truth = BigUint::zero();
     for i in 0..limbs {
         let word: u64 = rng.gen();
-        x_truth = x_truth | (BigUint::from(word) << (64 * i));
+        x_truth |= BigUint::from(word) << (64 * i);
     }
     x_truth = (x_truth % (&curve.n - 1u32)) + 1u32;
     if x_truth.is_zero() || x_truth >= curve.n {

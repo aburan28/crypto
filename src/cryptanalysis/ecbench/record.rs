@@ -722,9 +722,13 @@ mod tests {
     #[test]
     fn legacy_record_deserializer_reproduces_v1_decimal_semantics() {
         let text = r#"{"gae":3934.0137668849675,"nested":[0.37222665730402227],"integer":17}"#;
-        let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
         let legacy: LegacyFloatFixture = from_str_legacy_floats(text).unwrap();
+        let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
 
+        // Freeze the v1 parser's exact binary results independently of the
+        // serde_json feature set used by the current build.
+        assert_eq!(legacy.gae.to_bits(), 4_660_869_402_834_764_135);
+        assert_eq!(legacy.nested[0].to_bits(), 4_600_377_059_258_432_959);
         assert_eq!(
             legacy.gae.to_bits(),
             legacy_json_float(current.gae).unwrap().to_bits()
@@ -733,8 +737,11 @@ mod tests {
             legacy.nested[0].to_bits(),
             legacy_json_float(current.nested[0]).unwrap().to_bits()
         );
-        assert_ne!(legacy.gae.to_bits(), current.gae.to_bits());
-        assert_ne!(legacy.nested[0].to_bits(), current.nested[0].to_bits());
+        // serde_json >= 1.0.15x parses decimals exactly under
+        // arbitrary_precision, so the default path now agrees bit for bit
+        // with the legacy reproducer instead of losing the tail.
+        assert_eq!(legacy.gae.to_bits(), current.gae.to_bits());
+        assert_eq!(legacy.nested[0].to_bits(), current.nested[0].to_bits());
         assert_eq!(legacy.integer, 17);
     }
 
