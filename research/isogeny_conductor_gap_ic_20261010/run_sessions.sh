@@ -6,7 +6,7 @@ set -u
 cd "$(dirname "$0")/../.."
 B=./target/release/ecbench
 D=research/isogeny_conductor_gap_ic_20261010
-order="fiber_prime fiber_koblitz_k1_n17 fiber_koblitz_k0_n19 fiber_koblitz_k1_n19 fiber_binary_n17 fiber_binary_n19 koblitz_gap_n17 koblitz_gap_n19 binary_gap_n17 binary_gap_n19 koblitz_gap_crater_folds fiber_koblitz_k0_n23 koblitz_gap_n23 binary_gap_n23 fiber_prime_large_h prime_gap_22_fiber prime_gap_26_fiber fiber_combined_n17"
+order="fiber_prime fiber_koblitz_k1_n17 fiber_koblitz_k0_n19 fiber_koblitz_k1_n19 fiber_binary_n17 fiber_binary_n19 koblitz_gap_n17 koblitz_gap_n19 binary_gap_n17 binary_gap_n19 koblitz_gap_crater_folds fiber_koblitz_k0_n23 koblitz_gap_n23 binary_gap_n23 fiber_prime_large_h prime_gap_22_fiber prime_gap_26_fiber fiber_combined_n17_koblitz"
 while pgrep -f "ecbench run" > /dev/null; do sleep 15; done
 for name in $order; do
   spec=$D/specs/$name.json

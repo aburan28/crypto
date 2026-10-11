@@ -193,3 +193,15 @@ registered target curve.
    `prime_gap_26_fiber`).  The blind oracle's failure on large cofactors
    is itself a part-A result and is measured, capped at two million
    trials, in `fiber_prime_large_h`.
+7. **A3 on the Koblitz curve only.**  The first `fiber_combined_n17`
+   session (kept as `interrupted/fiber_combined_n17_run5`, 19 of 72
+   executions, stopped by a host restart) measured the combined descent
+   on its warm-ups: on `icv1-f2m17-tm101-00378d4e` it verified in 335 and
+   515 s, at solving degree 3.05 and 3.07 and 629 to 654 times the blind
+   descent's solver operations; on the random curve
+   `icv1-f2m17-tm285-f6a04bec` (`h = 6`) both runs reached the
+   3600-second timeout.  A full re-run would spend about twelve hours on
+   the two random curves' timeouts, so A3 re-runs as
+   `fiber_combined_n17_koblitz.json`: the same four arms, rounds and
+   timeout, on the Koblitz curve alone, four targets instead of two.
+   The random-curve timeouts are reported from the interrupted session.
