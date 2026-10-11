@@ -19186,6 +19186,45 @@
         "construction": "prime_quadratic_pullback_v1",
         "degree": 2,
         "f": [
+          "0x5a4814a08",
+          "0x0",
+          "0xb498c8630",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "genus": 2,
+        "h": [],
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "dlp_advantage": null,
+      "exists": true,
+      "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
+      "field_relation": "same_field",
+      "map_direction": "H -> E",
+      "minimal_degree": null,
+      "minimal_genus": null,
+      "model_sha256": "ff3fd2db00710c31927a68a0fee4aa088f44e398be21f078a88f47852daa6009",
+      "reason": "polynomial substitution and genus/degree conditions checked; smooth projective models understood",
+      "slug": "icv1-fp37-t51-ff3fd2db",
+      "status": "verified_over_declared_field",
+      "subfield_descent": "not_tested",
+      "subgroup_transfer": "not_tested"
+    },
+    {
+      "certificate": {
+        "construction": "prime_quadratic_pullback_v1",
+        "degree": 2,
+        "f": [
           "0xffd932cf6",
           "0x0",
           "0x16979b318",
@@ -77447,12 +77486,12 @@
   ],
   "generated_by": "cargo run --bin curve_cover_check --",
   "proof": "docs/curves/COVERS.md",
-  "registry_sha256": "359cf3da05c8fbcd6d4003355f1bdf455bf4343bc6ead476e15498c73c50e950",
+  "registry_sha256": "aab033421ffb68e2b9a638a0cabb5ddd5373f6de91494e04a7d5b714fee7fa41",
   "schema_version": "curve-covers/v1",
   "scope": "same-field existence for the supplied elliptic model; no optimality, descent, subgroup-map or DLP-cost claim",
   "summary": {
     "invalid_input": 0,
     "unsupported": 0,
-    "verified": 1923
+    "verified": 1924
   }
 }

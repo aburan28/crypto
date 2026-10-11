@@ -92,7 +92,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "359cf3da05c8fbcd6d4003355f1bdf455bf4343bc6ead476e15498c73c50e950"
+   "sha256": "aab033421ffb68e2b9a638a0cabb5ddd5373f6de91494e04a7d5b714fee7fa41"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -14305,6 +14305,20 @@
    "field": "GF(p), p = 1018663027",
    "coefficients": "a = 231747828, b = 874681434",
    "order_bits": 30,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp37-t51-ff3fd2db",
+   "family": "prime",
+   "field": "GF(p), p = 68723001073",
+   "coefficients": "a = 48478586416, b = 24234773000",
+   "order_bits": 37,
    "standard": [],
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",

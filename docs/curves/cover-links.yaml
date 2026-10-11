@@ -3099,6 +3099,29 @@
         "schema_version": "hyperelliptic-model/v1"
       }
     },
+    "urn:hc-model:1:sha256:0c48c2e01b3bf7a0f061a141e26ac679ef3525ef8dd1ada517cf6cccdd6b273c": {
+      "cover_id": "HC1G2h0c48c2e01b3b",
+      "cover_uid": "urn:hc-model:1:sha256:0c48c2e01b3bf7a0f061a141e26ac679ef3525ef8dd1ada517cf6cccdd6b273c",
+      "record": {
+        "f": [
+          "0x5a4814a08",
+          "0x0",
+          "0xb498c8630",
+          "0x0",
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "field": {
+          "label": "fp-68723001073",
+          "p": "68723001073"
+        },
+        "form": "v^2+h(u)*v=f(u)",
+        "genus": 2,
+        "h": [],
+        "schema_version": "hyperelliptic-model/v1"
+      }
+    },
     "urn:hc-model:1:sha256:0c874db55fc9b910c176d451e689358083f5db3b5cf0a6fcc68a6ba2b219c473": {
       "cover_id": "HC1G2h0c874db55fc9",
       "cover_uid": "urn:hc-model:1:sha256:0c874db55fc9b910c176d451e689358083f5db3b5cf0a6fcc68a6ba2b219c473",
@@ -80632,6 +80655,25 @@
       },
       "model_json": "{\"a\":\"231747828\",\"b\":\"874681434\",\"field\":\"fp-1018663027\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1018663027\",\"v\":\"1\"}",
       "model_sha256": "31aed113d651f69c19dcf794cb56a45d152647eb60ce5846debf01da4749bd90",
+      "representations": [],
+      "standard_names": [],
+      "standards_provenance": null,
+      "status": "verified_over_declared_field"
+    },
+    {
+      "cover_links": [
+        {
+          "cover_uid": "urn:hc-model:1:sha256:0c48c2e01b3bf7a0f061a141e26ac679ef3525ef8dd1ada517cf6cccdd6b273c",
+          "direction": "H -> E",
+          "map_uid": "urn:curve-cover-map:1:sha256:ebd32c4255acd7292eab34559e0103bc7071c63ae8a9a2ad19b55d9d741a9135"
+        }
+      ],
+      "icv1_identity": {
+        "full": "ICV1:fp-68723001073:51:68723001023:31674567464:unk:unk:r:ff3fd2db0071",
+        "slug": "icv1-fp37-t51-ff3fd2db"
+      },
+      "model_json": "{\"a\":\"48478586416\",\"b\":\"24234773000\",\"field\":\"fp-68723001073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"68723001073\",\"v\":\"1\"}",
+      "model_sha256": "ff3fd2db00710c31927a68a0fee4aa088f44e398be21f078a88f47852daa6009",
       "representations": [],
       "standard_names": [],
       "standards_provenance": null,
@@ -162848,6 +162890,32 @@
       },
       "verification_status": "verified_over_declared_field"
     },
+    "urn:curve-cover-map:1:sha256:ebd32c4255acd7292eab34559e0103bc7071c63ae8a9a2ad19b55d9d741a9135": {
+      "field_check": "20_fixed_base_probable_prime_screen; primality remains an input assumption",
+      "map_id": "CV1D2hebd32c4255ac",
+      "map_uid": "urn:curve-cover-map:1:sha256:ebd32c4255acd7292eab34559e0103bc7071c63ae8a9a2ad19b55d9d741a9135",
+      "proof_refs": [
+        "docs/curves/COVERS.md"
+      ],
+      "record": {
+        "degree": 2,
+        "schema_version": "curve-cover-map/v1",
+        "source_cover_uid": "urn:hc-model:1:sha256:0c48c2e01b3bf7a0f061a141e26ac679ef3525ef8dd1ada517cf6cccdd6b273c",
+        "target_model_json": "{\"a\":\"48478586416\",\"b\":\"24234773000\",\"field\":\"fp-68723001073\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"68723001073\",\"v\":\"1\"}",
+        "target_model_map": null,
+        "target_model_sha256": "ff3fd2db00710c31927a68a0fee4aa088f44e398be21f078a88f47852daa6009",
+        "x": [
+          "0x0",
+          "0x0",
+          "0x1"
+        ],
+        "y_0": [],
+        "y_v": [
+          "0x1"
+        ]
+      },
+      "verification_status": "verified_over_declared_field"
+    },
     "urn:curve-cover-map:1:sha256:ec01eca7109ac21b38f73893138549ac50c2ee3230654721cb5f3dc0c4c17b62": {
       "field_check": "20_fixed_base_probable_prime_screen of p, whose primality remains an input assumption; irreducibility of the modulus over GF(p) proved by Rabin",
       "map_id": "CV1D2hec01eca7109a",
@@ -167315,6 +167383,6 @@
       "verification_status": "verified_over_declared_field"
     }
   },
-  "registry_sha256": "359cf3da05c8fbcd6d4003355f1bdf455bf4343bc6ead476e15498c73c50e950",
+  "registry_sha256": "aab033421ffb68e2b9a638a0cabb5ddd5373f6de91494e04a7d5b714fee7fa41",
   "schema_version": "curve-cover-graph/v1"
 }
