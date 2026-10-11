@@ -4295,7 +4295,29 @@ pub struct FrobeniusPairTable {
 impl FrobeniusPairTable {
     /// `None` when the base is not closed under the Frobenius, has more
     /// than `2^26` points, or the field yields no normal basis.
+    ///
+    /// The pair sums of one representative against the rest of the base
+    /// are formed with one shared field inversion
+    /// ([`FastCurve::add_many`], Montgomery's trick); the table, its
+    /// counters and the charged group operations are those of
+    /// [`Self::build_scalar`] exactly.
     pub fn build(inst: &BinaryInstance, fb: &FactorBase<FastPoint>) -> Option<Self> {
+        Self::build_impl(inst, fb, true)
+    }
+
+    /// The reference construction: one scalar affine addition (one field
+    /// inversion) per pair.  Kept so the batched [`Self::build`] can be
+    /// held to it entry for entry, and as the baseline of
+    /// `examples/ic_batch_bench.rs`.
+    pub fn build_scalar(inst: &BinaryInstance, fb: &FactorBase<FastPoint>) -> Option<Self> {
+        Self::build_impl(inst, fb, false)
+    }
+
+    fn build_impl(
+        inst: &BinaryInstance,
+        fb: &FactorBase<FastPoint>,
+        batched: bool,
+    ) -> Option<Self> {
         let start = Instant::now();
         let g = BinaryGroup(&inst.fast);
         let n = inst.n as usize;
@@ -4341,7 +4363,36 @@ impl FrobeniusPairTable {
         let mut ops = GroupOps::default();
         let mut canons = 0u64;
         let mut map: FastMap<(u32, u32)> = fast_map(f * f / (4 * n) + 1);
+        let mut scratch = BatchScratch::default();
+        let mut addends: Vec<FastPoint> = Vec::new();
+        let mut indices: Vec<u32> = Vec::new();
+        let mut sums: Vec<FastPoint> = Vec::new();
         for (orbit, &rep) in rep_of_orbit.iter().enumerate() {
+            if batched {
+                addends.clear();
+                indices.clear();
+                sums.clear();
+                for j in 0..f {
+                    if (orbit_of[j] as usize) >= orbit {
+                        addends.push(fb.points[j]);
+                        indices.push(j as u32);
+                    }
+                }
+                inst.fast
+                    .add_many(fb.points[rep], &addends, &mut sums, &mut scratch);
+                // One charged addition per pair, as the scalar loop pays.
+                ops.adds += addends.len() as u64;
+                for (u, &j) in sums.iter().zip(&indices) {
+                    if u.infinity {
+                        continue;
+                    }
+                    canons += 1;
+                    let (key, t_u) = canon.canon_with_shift(u.x);
+                    map.entry(key)
+                        .or_insert((rep as u32, j | (t_u << FROB_INDEX_BITS)));
+                }
+                continue;
+            }
             for j in 0..f {
                 if (orbit_of[j] as usize) < orbit {
                     continue;
@@ -4385,6 +4436,23 @@ impl FrobeniusPairTable {
         ctr.canonicalisations += 1;
         let (key, t_r) = self.canon.canon_with_shift(target.x);
         ctr.lookups += 1;
+        self.resolve(g, fb, ops, ctr, target, key, t_r)
+    }
+
+    /// The rest of [`Self::probe`] once `target` has been canonicalised
+    /// (`key`, shift `t_r`) and counted: the table lookup, the rotation
+    /// and the confirming addition.
+    #[allow(clippy::too_many_arguments)]
+    fn resolve(
+        &self,
+        g: &BinaryGroup,
+        fb: &FactorBase<FastPoint>,
+        ops: &mut GroupOps,
+        ctr: &mut OracleCounters,
+        target: FastPoint,
+        key: u64,
+        t_r: u32,
+    ) -> Option<(usize, usize)> {
         let &(i, packed) = self.map.get(&key)?;
         let n = self.n;
         let j = (packed & ((1u32 << FROB_INDEX_BITS) - 1)) as usize;
@@ -4403,6 +4471,81 @@ impl FrobeniusPairTable {
             ctr.frobfold_mismatches += 1;
             None
         }
+    }
+
+    /// `(i, j, k)` with `P_i + P_j + P_k = target`, scanning `i` upward:
+    /// the three-summand form of [`Self::probe`].  Each block of
+    /// `target − P_i` is formed with one shared field inversion, its
+    /// abscissae are canonicalised side by side, and only the few whose
+    /// canonical name is in the table are resolved.  The decomposition,
+    /// the charged additions, and the canonicalisation and lookup counters
+    /// are those of the scalar loop (additions and probes are charged up
+    /// to the first success, not for the rest of its block).
+    pub fn probe_three(
+        &self,
+        g: &BinaryGroup,
+        fb: &FactorBase<FastPoint>,
+        ops: &mut GroupOps,
+        ctr: &mut OracleCounters,
+        target: FastPoint,
+    ) -> Option<Vec<usize>> {
+        self.probe_three_blocked(g, fb, ops, ctr, target, 16, 2048)
+    }
+
+    /// [`Self::probe_three`] with explicit block lengths: the first block
+    /// has `first` points and each later block doubles, up to `max`.  A
+    /// scan that succeeds early computes at most about twice the points it
+    /// needed; one that runs the whole base reaches the full batch rate.
+    /// (A test pins `first == max` to put the first success at every
+    /// position of a block.)
+    #[allow(clippy::too_many_arguments)]
+    pub fn probe_three_blocked(
+        &self,
+        g: &BinaryGroup,
+        fb: &FactorBase<FastPoint>,
+        ops: &mut GroupOps,
+        ctr: &mut OracleCounters,
+        target: FastPoint,
+        first: usize,
+        max: usize,
+    ) -> Option<Vec<usize>> {
+        let max = max.max(1);
+        let mut block = first.clamp(1, max);
+        let f = fb.points.len();
+        let mut scratch = BatchScratch::default();
+        let mut negs: Vec<FastPoint> = Vec::with_capacity(max.min(f));
+        let mut sums: Vec<FastPoint> = Vec::with_capacity(max.min(f));
+        let mut keys: Vec<u64> = Vec::with_capacity(max.min(f));
+        let mut lo = 0usize;
+        while lo < f {
+            let hi = (lo + block).min(f);
+            negs.clear();
+            sums.clear();
+            negs.extend(fb.points[lo..hi].iter().map(|&p| g.0.neg(p)));
+            g.0.add_many(target, &negs, &mut sums, &mut scratch);
+            keys.clear();
+            keys.extend(sums.iter().map(|s| s.x));
+            self.canon.canon_in_place(&mut keys);
+            for (offset, s) in sums.iter().enumerate() {
+                ops.adds += 1;
+                if s.infinity {
+                    continue;
+                }
+                ctr.canonicalisations += 1;
+                ctr.lookups += 1;
+                let key = keys[offset];
+                if !self.map.contains_key(&key) {
+                    continue;
+                }
+                let (_, t_r) = self.canon.canon_with_shift(s.x);
+                if let Some((j, k)) = self.resolve(g, fb, ops, ctr, *s, key, t_r) {
+                    return Some(vec![lo + offset, j, k]);
+                }
+            }
+            lo = hi;
+            block = (block * 2).min(max);
+        }
+        None
     }
 
     pub fn calibrate_lookup(&self, samples: u64) -> f64 {
@@ -4671,6 +4814,27 @@ pub fn decompose_mitm<G: CountedGroup>(
 /// Meet in the middle on the Frobenius-folded table: the same loop as
 /// [`decompose_mitm`] with the folded probe.
 pub fn decompose_mitm_frobenius(
+    g: &BinaryGroup,
+    fb: &FactorBase<FastPoint>,
+    table: &FrobeniusPairTable,
+    m: u32,
+    ops: &mut GroupOps,
+    ctr: &mut OracleCounters,
+    target: FastPoint,
+) -> Option<Vec<usize>> {
+    match m {
+        2 => table
+            .probe(g, fb, ops, ctr, target)
+            .map(|(i, j)| vec![i, j]),
+        3 => table.probe_three(g, fb, ops, ctr, target),
+        _ => None,
+    }
+}
+
+/// The reference form of [`decompose_mitm_frobenius`]: one scalar
+/// subtraction and one probe per base point at `m = 3`.  The batched form
+/// returns the same decomposition and charges the same counters.
+pub fn decompose_mitm_frobenius_scalar(
     g: &BinaryGroup,
     fb: &FactorBase<FastPoint>,
     table: &FrobeniusPairTable,
@@ -8500,6 +8664,111 @@ mod tests {
             if let Some(w) = b {
                 let s = curve.add(&mut ops, fb.points[w[0]], fb.points[w[1]]);
                 assert_eq!(s, q);
+            }
+        }
+    }
+
+    /// **The batched build and probe are the scalar ones, faster.**  The
+    /// table (every entry), its counters and charged operations, and for
+    /// random targets at `m = 2` and `m = 3` the decomposition, the charged
+    /// operations and every oracle counter agree between
+    /// [`FrobeniusPairTable::build`] / [`decompose_mitm_frobenius`] and the
+    /// scalar references.
+    #[test]
+    fn batched_frobenius_table_and_probe_equal_the_scalar_reference() {
+        for (n, cap) in [(17u32, 6000usize), (23, 3000)] {
+            let inst = koblitz_instance_best(n).expect("Koblitz instance");
+            let (frob, desc) = choose_koblitz_base(&inst, 1, cap).expect("base");
+            let folded =
+                koblitz_factor_base(&inst, &frob, ColumnFold::SignedFrobeniusOrbit, desc).unwrap();
+            let g = BinaryGroup(&inst.fast);
+            let batched = FrobeniusPairTable::build(&inst, &folded).expect("batched table");
+            let scalar = FrobeniusPairTable::build_scalar(&inst, &folded).expect("scalar table");
+            assert_eq!(batched.entries, scalar.entries, "n = {n}");
+            assert_eq!(batched.representatives, scalar.representatives);
+            assert_eq!(batched.build_ops, scalar.build_ops, "charged operations");
+            assert_eq!(
+                batched.build_canonicalisations,
+                scalar.build_canonicalisations
+            );
+            assert_eq!(batched.build_frobenius_maps, scalar.build_frobenius_maps);
+            assert_eq!(batched.build_lookups, scalar.build_lookups);
+            assert_eq!(batched.map.len(), scalar.map.len());
+            for (key, value) in batched.map.iter() {
+                assert_eq!(scalar.map.get(key), Some(value), "n = {n}, key {key}");
+            }
+            let mut rng = StdRng::seed_from_u64(0xBA7C);
+            let f = folded.points.len();
+            for m in [2u32, 3] {
+                let trials = if m == 2 { 1500 } else { 160 };
+                let mut hits = 0;
+                for t in 0..trials {
+                    // Half random subgroup points, half sums of m base
+                    // points, which are decomposable by construction and
+                    // put the first success at varied scan positions.
+                    let q = if t % 2 == 0 {
+                        g.mul(
+                            &mut GroupOps::default(),
+                            inst.generator,
+                            rng.gen_range(1..inst.r),
+                        )
+                    } else {
+                        let mut acc = g.identity();
+                        let mut scratch = GroupOps::default();
+                        for _ in 0..m {
+                            acc = g.add(&mut scratch, acc, folded.points[rng.gen_range(0..f)]);
+                        }
+                        if g.is_identity(&acc) {
+                            continue;
+                        }
+                        acc
+                    };
+                    let (mut ops_a, mut ops_b) = (GroupOps::default(), GroupOps::default());
+                    let (mut ctr_a, mut ctr_b) =
+                        (OracleCounters::default(), OracleCounters::default());
+                    let a = decompose_mitm_frobenius(
+                        &g, &folded, &batched, m, &mut ops_a, &mut ctr_a, q,
+                    );
+                    let b = decompose_mitm_frobenius_scalar(
+                        &g, &folded, &scalar, m, &mut ops_b, &mut ctr_b, q,
+                    );
+                    assert_eq!(a, b, "n = {n}, m = {m}: decomposition");
+                    assert_eq!(ops_a, ops_b, "n = {n}, m = {m}: charged operations");
+                    assert_eq!(ctr_a.lookups, ctr_b.lookups);
+                    assert_eq!(ctr_a.canonicalisations, ctr_b.canonicalisations);
+                    assert_eq!(ctr_a.frobfold_mismatches, ctr_b.frobfold_mismatches);
+                    hits += usize::from(a.is_some());
+                    if m == 3 {
+                        // Short blocks: the first success lands at every
+                        // offset, and the charge must still stop there.
+                        for (first, max) in [
+                            (1usize, 1usize),
+                            (3, 3),
+                            (7, 7),
+                            (64, 64),
+                            (1, 64),
+                            (4, 4096),
+                        ] {
+                            let block = (first, max);
+                            let (mut ops_c, mut ctr_c) =
+                                (GroupOps::default(), OracleCounters::default());
+                            let c = batched.probe_three_blocked(
+                                &g, &folded, &mut ops_c, &mut ctr_c, q, first, max,
+                            );
+                            assert_eq!(c, b, "block {block:?}: decomposition");
+                            assert_eq!(ops_c, ops_b, "block {block:?}: charged operations");
+                            assert_eq!(ctr_c.lookups, ctr_b.lookups, "block {block:?}");
+                            assert_eq!(
+                                ctr_c.canonicalisations, ctr_b.canonicalisations,
+                                "block {block:?}"
+                            );
+                        }
+                    }
+                }
+                assert!(
+                    hits > 0,
+                    "n = {n}, m = {m}: no target decomposed, the test checks nothing"
+                );
             }
         }
     }
