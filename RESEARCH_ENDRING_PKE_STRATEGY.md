@@ -12,6 +12,19 @@ correspondence, Kani/higher-dimensional isogenies, lollipop attacks).
 session (connection refused on localhost:8080); the note is filed under the
 hook's warn-through path.
 
+> **Correction and implementation update (2026-10-11).** The `walk` special-key
+> variant in §4.3 is insecure: its decryption key depends on
+> Δ' = 7·25^k, where k is public. In a toy attack, an outsider recomputed
+> the key and decrypted 5/5 ciphertexts. The implemented Rust KEM is instead
+> the **secret-degree single-chain variant (Eigen-Séta v2)** in `eigen_seta/`.
+> Its KeyGen, Encaps and Decaps run at Toy16, Toy32, L1, L3 and L5; an
+> authenticated KEM–DEM layer encrypts and decrypts plaintexts. Its full-size
+> parameters are 1341, 1991 and 2630 bits. This does **not** implement
+> the original random-curve, two-halves design, whose ≈772-bit estimate is
+> inapplicable to v2. The non-cyclic-ψ' frequency claimed in §5.4 was not
+> verified in v2. Security of v2 is conjectural; successful round trips are
+> correctness evidence, not a security proof or a production recommendation.
+
 Sections 1-3 are established results with citations. Section 4 is the
 proposal; the algebra there is ours and is marked as derived. Section 5 is
 the cryptanalysis checklist and Section 6 the experiment protocol. Section 7
@@ -234,6 +247,8 @@ degree-2 endomorphism ω has t = ±1, w = 2, Δ' = 7. Walk away by a secret
 isogeny ε of odd degree D_A and use θ = εωε̂ (t = ±D_A, w = 2D_A², Δ' = 7D_A²).
 This is CV §5.3's backdoor used by its owner: key recovery means finding ε
 (MITM √D_A) or the endomorphism of norm 7D_A² (cycle search √(7)D_A), so
+*[Correction: this key-recovery estimate is false when D_A is public; see the
+implementation update at the top.]*
 D_A ≈ 2^{2λ}, Δ' ≈ 2^{4λ}, and with two halves N ≈ d·√Δ' ≈ 2^{4λ}, p ≈ 2^{6λ}
 — the same size as the random-curve variant, with a much cheaper keygen (no
 LLL on End(E_A), no Deuring machinery) but a *different* key-recovery
@@ -305,6 +320,8 @@ Given (E_A, P, Q, E_C, [a]φP, [b]φQ) with a, b random, find φ.
   rejection from day one.
 
 ### 5.4 Correctness corner cases
+* *[Correction: the following frequency estimate is unverified in the v2
+  implementation.]*
 * ψ' non-cyclic on E_C[3^f] (part of ker φ θ'-stable): handled by trying the
   cyclic order-d subgroups of ker ψ' ∩ E_C[3^f] and keeping the one whose
   codomain is E_A (prototype: observed in 1 of 8 trials at the 44-bit size,
@@ -390,8 +407,8 @@ two-halves evaluation. Steps 4–6 not started.
 | Research the state of the art on EndRing-based encryption | complete (survey level) | Sections 1–2, sources below; ePrint PDFs were Cloudflare-blocked, mirrors used; items marked abstract-only in the agent reports were not re-verified from full text |
 | Identify primitives/concepts to build on | complete | §3 decoding lemma (CV Lemma 3), Deuring tooling, dimension-2 Kani, FO |
 | Devise a strategy for a novel scheme | complete as a design; prototyped at toy size for two special-key variants; **not analysed beyond §5** | §4–6; `research/eigen_seta_prototype_20261011/`; novelty claim rests on the four surveys finding no eigenbasis-trapdoor PKE; a dedicated search for the exact combination is still advisable before any write-up |
-| Build the scheme (user request of 2026-10-11) | partial: KeyGen/Encaps/Decaps correct in all completed toy trials for the `cm` and `walk` variants; random-curve variant not implemented (needs two-halves Kani) | `results/correctness_runs.txt`; §4.3 "two halves" paragraph |
-| Parameter/efficiency figures | derived estimates only | §4.3; no measurements exist |
+| Build the scheme (user request of 2026-10-11) | secret-degree single-chain v2 KeyGen/Encaps/Decaps operational at Toy16, Toy32, L1, L3 and L5; authenticated plaintext PKE uses KEM–DEM; original random-curve two-halves variant remains unimplemented; toy `walk` is insecure | `eigen_seta/README.md`; Rust run reports; toy `results/correctness_runs.txt` |
+| Parameter/efficiency figures | measured for v2 on one host; §4.3's two-halves estimates do not apply to v2 | `eigen_seta/README.md` and Rust benchmark report |
 | Security | **not established** | §5 checklist; experiment 3 run at toy size with no early-abort signal (§6) |
 
 ## Sources (primary; see agent reports for the full list)
