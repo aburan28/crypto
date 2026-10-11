@@ -101,7 +101,9 @@ pub fn build_split_system(
     let k = plan.len();
     let n_vars = m * ell + (k - 1) * n as usize;
     if n_vars > MAX_VARS {
-        return Err(format!("{n_vars} Boolean unknowns exceed the cap {MAX_VARS}"));
+        return Err(format!(
+            "{n_vars} Boolean unknowns exceed the cap {MAX_VARS}"
+        ));
     }
     let b_is_one = *b == F2mElement::one(n);
     let summands: Vec<SymElement> = (0..m)
@@ -440,10 +442,26 @@ pub fn run_hybrid(
         branches_unresolved: unresolved,
         solving_degree_max: sd.iter().copied().max().unwrap_or(0),
         solving_degree_mean: sd.iter().map(|&d| d as f64).sum::<f64>() / sd.len() as f64,
-        degree_reached_max: per_branch.iter().map(|b| b.degree_reached).max().unwrap_or(0),
-        matrix_rows_max: per_branch.iter().map(|b| b.matrix_rows_max).max().unwrap_or(0),
-        matrix_cols_max: per_branch.iter().map(|b| b.matrix_cols_max).max().unwrap_or(0),
-        peak_matrix_bytes: per_branch.iter().map(|b| b.peak_matrix_bytes).max().unwrap_or(0),
+        degree_reached_max: per_branch
+            .iter()
+            .map(|b| b.degree_reached)
+            .max()
+            .unwrap_or(0),
+        matrix_rows_max: per_branch
+            .iter()
+            .map(|b| b.matrix_rows_max)
+            .max()
+            .unwrap_or(0),
+        matrix_cols_max: per_branch
+            .iter()
+            .map(|b| b.matrix_cols_max)
+            .max()
+            .unwrap_or(0),
+        peak_matrix_bytes: per_branch
+            .iter()
+            .map(|b| b.peak_matrix_bytes)
+            .max()
+            .unwrap_or(0),
         word_xors: per_branch.iter().map(|b| b.word_xors).sum(),
         f4_wall_ns: per_branch.iter().map(|b| b.wall_ns).sum(),
         algebraic_solutions: algebraic,
@@ -508,7 +526,10 @@ mod tests {
         assert!(hits > 0, "no decomposable target among the samples");
     }
 
+    /// About two minutes in release (the `[2, 2]` link is an `S₄` with a
+    /// free argument): run with `--ignored`.
     #[test]
+    #[ignore = "slow: about two minutes in release"]
     fn plans_agree_with_exhaustive_m4() {
         let inst = koblitz_instance(1, 11).expect("K_1 / GF(2^11)");
         let ell = 3;

@@ -48,7 +48,10 @@ fn main() {
     };
     let num = |name: &str, default: u64| {
         flag(name)
-            .map(|v| v.parse().unwrap_or_else(|_| panic!("{name} takes a number")))
+            .map(|v| {
+                v.parse()
+                    .unwrap_or_else(|_| panic!("{name} takes a number"))
+            })
             .unwrap_or(default)
     };
     let cells: Vec<(usize, u8, u32, usize)> = flag("--cells")
@@ -70,13 +73,18 @@ fn main() {
         .collect();
     let plan_override: Option<Vec<Vec<usize>>> = flag("--plans").map(|s| {
         s.split('|')
-            .map(|p| p.split('+').map(|x| x.parse().expect("plan is a+b+c")).collect())
+            .map(|p| {
+                p.split('+')
+                    .map(|x| x.parse().expect("plan is a+b+c"))
+                    .collect()
+            })
             .collect()
     });
     let targets = num("--targets", 4);
     let seed = num("--seed", 20261011);
     let budget = Duration::from_secs(num("--budget-secs", 120));
-    let max_free = num("--max-free", 16) as usize;
+    let max_free = num("--max-free", 24) as usize;
+    let lambda_targets = num("--lambda-targets", 256);
     let out_path = flag("--out").expect("--out FILE (must not exist)");
     let mut out = OpenOptions::new()
         .write(true)
@@ -106,6 +114,7 @@ fn main() {
         "seed": seed,
         "budget_secs": budget.as_secs(),
         "max_free": max_free,
+        "lambda_targets": lambda_targets,
         "solver": "pq_f4_f2::groebner_basis_f4",
         "factor_base": "standard subspace span(1, z, ..., z^(l-1))",
     }));
@@ -116,6 +125,21 @@ fn main() {
         let fb = factor_base_size(&inst, &words);
         let plans = plan_override.clone().unwrap_or_else(|| default_plans(m));
         let curve_id = inst.curve_id();
+        // The decomposition yield λ (decompositions of a random subgroup
+        // target over V), by exhaustive enumeration on its own target
+        // stream: independent of every solver.
+        let mut lrng = StdRng::seed_from_u64(
+            seed ^ 0x4c41_4d42 ^ ((n as u64) << 40) ^ ((m * 64 + ell) as u64),
+        );
+        let mut lambda_hits = 0usize;
+        let mut lambda_decomps = 0usize;
+        for _ in 0..lambda_targets {
+            let k = lrng.gen_range(1..inst.r);
+            let x = inst.fast.mul_u64(inst.generator, k).x;
+            let d = exhaustive_decompositions(&inst, &words, m, x).len();
+            lambda_decomps += d;
+            lambda_hits += usize::from(d > 0);
+        }
         emit(serde_json::json!({
             "kind": "cell",
             "m": m, "a": a, "n": n, "ell": ell,
@@ -127,6 +151,9 @@ fn main() {
             "cofactor": inst.cofactor,
             "factor_base_liftable_abscissae": fb,
             "surplus_n_minus_m_ell": n as i64 - (m * ell) as i64,
+            "lambda_targets": lambda_targets,
+            "lambda_decompositions": lambda_decomps,
+            "lambda_targets_decomposable": lambda_hits,
             "plans": plans,
         }));
         eprintln!("cell m={m} K_{a}/GF(2^{n}) l={ell}: r={} fb={fb}", inst.r);
