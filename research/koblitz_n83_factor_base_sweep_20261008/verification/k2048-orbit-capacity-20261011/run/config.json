@@ -1,0 +1,33 @@
+{
+  "binary": "/private/tmp/n83-k2048-capacity-linux-target/release/examples/koblitz_n83_factor_base_export",
+  "binary_sha256": "f826e602a09eddefabc28f1697c7d37761b1b4e6e49d42c7fa34982075b9eb0f",
+  "columns": 2048,
+  "container_image": "sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce",
+  "container_image_id": "sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce",
+  "container_name": "n83-chain-capacity-9f73b0bab09e4a0d",
+  "cpu_limit": 1.0,
+  "domain_encoding": "frobenius_orbit_phase",
+  "identity_mask": 0,
+  "max_domain_clauses": 1000000,
+  "max_variables": 150000,
+  "memory_cgroup_limit_bytes": 4294967296,
+  "memory_cgroup_swap_limit_bytes": 0,
+  "panel_dir": "/private/tmp/n83-k2048-panel-20261011",
+  "policy": "public_x_hash",
+  "schema": "n83.chain-s3-capacity-config/v1",
+  "seed": 2026100801,
+  "selected_best_total_runtime": null,
+  "solver_search_executed": false,
+  "source_commit": "0127778e14e6942d36e1223031d4edc99464bcea",
+  "source_sha256": {
+    "attestation.json": "d8d486b130912ce481e7ed2871565ab55bedafadead7038466cb0ea523c169a7",
+    "examples/koblitz_n83_factor_base_export.rs": "92322f6efd38fcec059bb7f8549be356c0e47af35af39b5db32cfe194b76b7b8",
+    "research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs": "66c4213dc0f6a4afda84c162ecab8550ca13b3cc151aef9a27641e7d19e98706",
+    "research/koblitz_n83_factor_base_sweep_20261008/size-frontier-v2.json": "7526b6218dfe0b074368901f3869ddf4a978cb0bacffe8654056056700f8a972",
+    "src/cryptanalysis/binary_semaev_chain_sat.rs": "febe46589fc045165743ea9a81a16d359f2f7a1982059e3fbe2b40cb8d4034e4",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "6d5d32c1387ee011018ea2a4219af560e4271a33f8a3992a00ab2f032c11f761"
+  },
+  "study": "koblitz_n83_factor_base_sweep_20261008",
+  "summands": 5,
+  "wall_seconds": 180.0
+}

@@ -1,0 +1,36 @@
+{
+  "bases": [
+    {
+      "a": 0,
+      "bytes": 10313647,
+      "columns": 2048,
+      "compressed_blake3": "82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851",
+      "construction_elapsed_ms_informational_L0": 132359.660645,
+      "matrix_rank": null,
+      "object": "objects/82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851.jsonl.gz",
+      "plain_blake3": "20f2c0d7ac825b46e3297816730abebe7b7d812f8ef77805ed2e48bae592b2d9",
+      "point_set_blake3": "d528f5828a05a00add4252212bc909ece481f33093e4074ff7dd8c6a51d3c97e",
+      "points": 339968,
+      "policy": "public_x_hash",
+      "raw_x_candidates": 4094,
+      "relation_yield": null,
+      "runtime_rank_eligible": false,
+      "s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851.jsonl.gz",
+      "seed": 2026100801,
+      "total_index_calculus_runtime_ms": null,
+      "verified_dlp": null
+    }
+  ],
+  "budget_seconds": 240,
+  "completed_base_count": 1,
+  "elapsed_process_wall_ms": 132448.915187,
+  "expected_base_count": 1,
+  "measurement_scope": "one factor-base construction only; no relation, rank, individual log or total runtime",
+  "schema": "n83.factor-base-panel/v2-size-frontier",
+  "selected_best_total_runtime": null,
+  "size_design_blake3": "6ad8fb34f586b328193773f4bae23650a95cdcaa508f4216146ab27ea5708484",
+  "source_blake3": "6a0818c1f86ec0d8f4ad6b3766825e9135c8bbc13756ed8fd69731f13a207edd",
+  "source_commit": "8d199b0a3bf227b9a21ab19183fe0bdeba9d604e",
+  "status": "completed_factor_base_object",
+  "study": "koblitz_n83_factor_base_sweep_20261008"
+}
