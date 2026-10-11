@@ -654,7 +654,11 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for CompactOrbitScanBase<'_> {
         fb.cost
             .count("min_key_field_squares_uncharged", key_squares);
         fb.cost.count("frobenius_maps", frobenius_maps);
-        fb.cost.count("multiplier_points", multiplier_points);
+        // Only with multipliers: a plain scan's counters (and the frozen
+        // evidence built from them) stay exactly what they were.
+        if !multipliers.is_empty() {
+            fb.cost.count("multiplier_points", multiplier_points);
+        }
         fb.cost.count(
             "hash_probes_uncharged",
             projected + fb.points.len() as u64 * 3,
