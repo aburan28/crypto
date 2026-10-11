@@ -18,9 +18,13 @@ use std::path::Path;
 use std::process::Command;
 use std::time::{Duration, Instant};
 
+// Archived research snapshots, compiled here unchanged. research/ is not
+// linted (rust-lint.yml), so their lints are allowed at the include.
 #[path = "../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs"]
+#[allow(dead_code, unused_imports, clippy::all)]
 mod compact_cold;
 #[path = "../research/koblitz_n83_factor_base_sweep_20261008/primary_adapter.rs"]
+#[allow(dead_code, unused_imports, clippy::all)]
 mod primary_adapter;
 
 const STUDY: &str = "koblitz_n83_factor_base_sweep_20261008";
@@ -850,7 +854,7 @@ fn replay(root: &Path) -> Result<()> {
         for ((rep, source), index) in reps.iter().zip(&sources).zip(&indices) {
             let gp = general(*rep);
             let sp = general(*source);
-            if *rep == None
+            if rep.is_none()
                 || source.map(|p| p.0)
                     != Some(public_x(
                         policy,

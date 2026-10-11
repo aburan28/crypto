@@ -795,37 +795,6 @@ fn factorise_big(mut v: BigUint) -> Vec<(BigUint, u32)> {
     out
 }
 
-/// `Some(v)` as a native word when the [`BigUint`] fits in 128 bits.
-fn biguint_to_u128(v: &BigUint) -> Option<u128> {
-    let limbs = v.to_u64_digits();
-    if limbs.len() > 2 {
-        return None;
-    }
-    Some(limbs[0] as u128 | ((limbs.get(1).copied().unwrap_or(0) as u128) << 64))
-}
-
-/// Native-word trial division: same factor list as [`factorise`], no
-/// allocations.  `d * d` cannot overflow: `d ≤ √v < 2^64`.
-fn factorise_u128(mut v: u128) -> Vec<(u128, u32)> {
-    let mut out: Vec<(u128, u32)> = Vec::new();
-    let mut d = 2u128;
-    while d * d <= v {
-        let mut e = 0;
-        while v.is_multiple_of(d) {
-            v /= d;
-            e += 1;
-        }
-        if e > 0 {
-            out.push((d, e));
-        }
-        d += 1;
-    }
-    if v > 1 {
-        out.push((v, 1));
-    }
-    out
-}
-
 impl KoblitzCurve {
     /// Word arithmetic with the curve's actual field-encoded coefficient.
     /// A subfield model's `a` tag is a basis index, not that coefficient.
@@ -2392,7 +2361,17 @@ fn poly_mul_full(a: u64, b: u64) -> Option<u64> {
 /// [`factor_x_n_minus_1`] returns only the non-trivial factors; a
 /// divisor may use `x + 1` too, so the divisor-based constructions take
 /// their indices into this list.
+///
+/// Memoised (pure in `n`); the uncached scan follows.
 pub fn all_factors_of_x_n_minus_1(n: u32) -> Vec<u64> {
+    if let Some(hit) = memo_get(&ALL_FACTORS_MEMO, n) {
+        return hit;
+    }
+    memo_put(&ALL_FACTORS_MEMO, n, all_factors_of_x_n_minus_1_uncached(n))
+}
+
+/// Uncached scan behind [`all_factors_of_x_n_minus_1`].
+fn all_factors_of_x_n_minus_1_uncached(n: u32) -> Vec<u64> {
     let mut out = vec![0b11u64]; // x + 1
                                  // The degrees that occur are exactly the cyclotomic coset sizes;
                                  // the size-1 coset is {0}, already covered by x + 1 above.
@@ -8793,7 +8772,6 @@ fn build_projected_signed_orbit_map(
     if let Some(map) = projected_signed_orbit_map_fast(kc, fb) {
         return map;
     }
-    let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
     projected_signed_orbit_map_slow(kc, fb)
 }
 
@@ -8868,6 +8846,8 @@ fn projected_signed_orbit_map_slow(
 /// Project one representative per signed orbit, deriving its labelled
 /// members from [h]pi^k(P) = pi^k([h]P) and [h](-P) = -[h]P. A stale or
 /// malformed orbit label falls back to the original pointwise operation.
+/// Test-only since the projected-map builder stopped calling it.
+#[cfg(test)]
 fn project_by_frobenius_orbits_generic(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
@@ -15331,7 +15311,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("N83 generator must be affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()])
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x))
             .expect("complete signed orbit");
         let expected: Vec<_> = fb
             .points
@@ -15356,7 +15336,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("N83 generator must be affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()])
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x))
             .expect("complete signed orbit");
         let target = kc.mul(kc.generator(), &BigUint::from(7u32));
         let opts = KoblitzIcOptions {
@@ -15396,7 +15376,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("generator must be affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x)).unwrap();
         let index = fb.index_map();
         let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
         let target = kc.mul(&fb.points[0], &BigUint::from(3u32));
@@ -15478,7 +15458,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("generator is affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x)).unwrap();
         for m in [5usize, 6] {
             let target = kc.mul(&fb.points[0], &BigUint::from(m as u32));
             let (found, stats) = sat_decompose_chained_s3(
@@ -15626,7 +15606,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("generator is affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x)).unwrap();
         let known = BigUint::from(3u32) % &kc.subgroup_order;
         let target = kc.mul(kc.generator(), &known);
         let opts = KoblitzIcOptions {
