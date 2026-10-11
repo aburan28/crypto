@@ -1,0 +1,10 @@
+pilot-*/objects/
+pilot-*/download-check.jsonl.gz
+pilot-*/cold-*/legacy-base.jsonl
+*.aux
+*.log
+*.out
+!verification/*.log
+!verification/Cargo.lock
+__pycache__/
+*.pyc

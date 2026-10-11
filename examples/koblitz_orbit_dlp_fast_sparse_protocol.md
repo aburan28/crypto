@@ -58,7 +58,7 @@ on the same main base while preparing the related root-Bloom port. The suite
 compiled but had failures in unchanged library code. A focused rerun of
 `cryptanalysis::koblitz_fast_arith::wide_tests::wide_group_law_matches_general_curve_at_71`
 failed at `src/cryptanalysis/koblitz_fast_arith.rs:1207` with
-`K_0/F_2^71 must construct`. The present patch changes only this example and
+`icv1-f2m71-t48653080717-2cafaea3 must construct`. The present patch changes only this example and
 this protocol. A full N53 active-example comparison and an isolated CPU
 measurement are the next performance checks before enabling this option by
 default or promoting a measured speedup.

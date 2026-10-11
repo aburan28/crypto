@@ -1,0 +1,10 @@
+source src/cryptanalysis/binary_semaev_s4.rs sha256=aa3099e4718efe1549d08bacc3fe8a736fac03e26268639fa4a28635381096e9
+source src/cryptanalysis/semaev_sat.rs sha256=8be86e0fdbcfbc04d21d707ed025fcae7b27825cfa8cbdabac34d7915aae067e
+small_block_enumeration l=1..5 PASS
+n83 core=910 x_quadratic_aux=20667 x_cubic_aux=571787
+n83 sat_variables_lower_bound=593364
+n83 and_definition_clauses_lower_bound=2349149
+n83 factored_pair_coefficients=495 factored_x_and_gates=34362 possible_e_quadratic_aux_at_most=122265
+n83 factored_sat_variables_before_domain_at_most=158032
+n83 factored_and_definition_clauses_at_most=469881
+status PASS source-derived bounds only; no N83 solver memory or runtime claim

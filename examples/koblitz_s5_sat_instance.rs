@@ -5910,7 +5910,6 @@ fn main() {
     let mut compact_relation: Option<ExtractedOrbitRelation> = None;
     let mut compact_batch_relations: Vec<(u64, ExtractedOrbitRelation)> = Vec::new();
     let mut compact_batch_failures: Vec<u64> = Vec::new();
-    let mut compact_batch_targets_requested = 0usize;
     let mut compact_batch_query_observations = Vec::new();
     let mut compact_batch_targets_requested = 0usize;
     let mut compact_point_batch_relations: Vec<([u64; 2], ExtractedOrbitRelation)> = Vec::new();
