@@ -18,6 +18,7 @@ matched rho.  No deployed-curve claim; no key recovery.
 | `pairs/` | the certified pairs (`*_pairs.json`), the constructor logs, the negative scans |
 | `specs/` | the `ecbench` specs, one per family and part |
 | `sessions/` | the `ecbench` sessions, audit receipts (`*.audit.json`), `ecbench table` outputs, run logs |
+| `interrupted/` | sessions and run logs that a host restart cut short; not audited, kept as the evidence amendments 6 to 8 cite |
 | `run_sessions.sh` | the exact run order and the audit command |
 | `examples/isogeny_gap_pairs.rs` | the pair constructor and spec writer (repository root) |
 | `src/cryptanalysis/ic_framework/fiber.rs` | the fiber-aware oracles |
@@ -121,8 +122,8 @@ same targets:
 - **Lifts gains per target and nothing per operation (P-A2).**  Its cost
   per relation stays at the blind value; its `S` is the blind `S` plus the
   extra probes.
-- **The F4 solving degree does not move.**  Blind and lifts descents both
-  solve at mean degree 2.96 to 3.00, maximum 3, with solver operations per
+- **The F4 solving degree does not move for lifts.**  Blind and lifts
+  descents both solve at mean degree 2.96 to 3.00, maximum 3, with solver operations per
   relation within 10 percent of each other.
 - **The blind oracle fails on large cofactors.**  On the cofactor-784 curve
   `icv1-fp24-t6316-2e757e7a` every blind run exhausted its trial cap,
@@ -131,7 +132,27 @@ same targets:
 - **No fiber arm beats rho.**  The best cell, closed MITM on the 25-bit
   curves, has `S ≥ 21` against rho's 1.0 to 1.4 on the same curves.
 
-COMBINED_PLACEHOLDER
+**The combined Weil descent is a negative result, measured on warm-up runs
+only.**  Host reboots ended all four attempts at the A3 session before it
+finished (amendments 7 and 8; the partial sessions and run logs are in
+`interrupted/`).  A reboot leaves a session marked `running`, which
+`ecbench verify` does not audit, so the figures below come from records
+that the harness wrote but that no audit has checked:
+
+| curve | arm | runs | online wall per target | F4 solver operations ÷ blind | solving degree, mean (max) | peak memory |
+|:--|:--|--:|--:|--:|--:|--:|
+| `icv1-f2m17-tm101-00378d4e` (`h = 2`) | combined | 3 verified, 2 targets | 335 to 578 s | 629 and 654 | 3.05 to 3.07 (4) | 0.70 to 0.76 GB |
+| same | blind | 6 verified | 0.7 to 1.4 s | 1 | 2.96 to 3.00 (3) | 14 MB |
+| `icv1-f2m17-tm285-f6a04bec` (`h = 6`) | combined | 2, both timed out | over 3600 s | – | – | 0.27 GB at timeout |
+| same | blind | 2 verified | 1.1 to 1.9 s | 1 | 2.98 to 2.99 (3) | 14 MB |
+
+The first Koblitz target was run twice, in two different sessions, and
+both runs counted exactly 59,916,380,641 solver operations.  Adjoining the
+fiber polynomial raises the maximum solving degree from 3 to 4.  It costs
+more than 600 times the blind solver work for at most `h` times the
+relations, and on the `h = 6` curve it does not finish within the hour.
+A3 should be re-run with `specs/fiber_combined_n17_koblitz.json` on a host
+that stays up for an hour.
 
 ### 3.2 Part B: the same index calculus across the conductor gap
 
