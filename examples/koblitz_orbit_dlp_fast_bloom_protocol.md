@@ -53,7 +53,7 @@ in both modes. The candidate allocated 4096 Bloom bytes.
 The required release library suite was attempted on this current-main base.
 It entered its 3923-test run and reported failures in library modules outside
 this example. The exact N71 wide group-law failure was reproduced by itself:
-`K_0/F_2^71 must construct` at `koblitz_fast_arith.rs:1207`. The run was
+`icv1-f2m71-t48653080717-2cafaea3 must construct` at `koblitz_fast_arith.rs:1207`. The run was
 stopped after multiple nonlocal failures. The PR changes neither `src/` nor
 `Cargo.toml` nor `Cargo.lock`; the complete library gate remains open for
 mainline repair and rerun.

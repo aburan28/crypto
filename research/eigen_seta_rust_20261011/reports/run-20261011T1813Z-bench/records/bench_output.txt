@@ -1,0 +1,30 @@
+Toy16  limbs  4  mul       54 ns  fermat      18403 ns  safegcd      4741 ns  ratio   3.9  safegcd/mul    88
+Toy32  limbs  6  mul       72 ns  fermat      67657 ns  safegcd     10316 ns  ratio   6.6  safegcd/mul   144
+L1     limbs 21  mul      611 ns  fermat    1426022 ns  safegcd     35608 ns  ratio  40.0  safegcd/mul    58
+L3     limbs 32  mul     1516 ns  fermat    6708390 ns  safegcd    109506 ns  ratio  61.3  safegcd/mul    72
+L5     limbs 42  mul     2449 ns  fermat   13453052 ns  safegcd     96327 ns  ratio 139.7  safegcd/mul    39
+Toy16 keygen_s 0.381 pk_bytes 216 ct_bytes 216 f_bits 51
+Toy16 trial 0 encaps_s 0.0055 decaps_s 0.131 ok true
+Toy16 trial 1 encaps_s 0.0070 decaps_s 0.159 ok true
+Toy16 trial 2 encaps_s 0.0070 decaps_s 0.186 ok true
+Toy16 trial 3 encaps_s 0.0084 decaps_s 0.126 ok true
+Toy16 trial 4 encaps_s 0.0052 decaps_s 0.118 ok true
+Toy16 RESULT 5/5 decapsulations correct
+Toy32 keygen_s 2.341 pk_bytes 376 ct_bytes 376 f_bits 80
+Toy32 trial 0 encaps_s 0.0095 decaps_s 0.510 ok true
+Toy32 trial 1 encaps_s 0.0116 decaps_s 0.446 ok true
+Toy32 trial 2 encaps_s 0.0091 decaps_s 0.591 ok true
+Toy32 RESULT 3/3 decapsulations correct
+L1 keygen_s 32.279 pk_bytes 1344 ct_bytes 1344 f_bits 278
+L1 trial 0 encaps_s 0.2448 decaps_s 14.223 ok true
+L1 trial 1 encaps_s 0.2588 decaps_s 14.997 ok true
+L1 trial 2 encaps_s 0.2394 decaps_s 13.424 ok true
+L1 RESULT 3/3 decapsulations correct
+L3 keygen_s 118.589 pk_bytes 1992 ct_bytes 1992 f_bits 409
+L3 trial 0 encaps_s 1.0256 decaps_s 51.834 ok true
+L3 trial 1 encaps_s 1.0304 decaps_s 53.940 ok true
+L3 RESULT 2/2 decapsulations correct
+L5 keygen_s 271.791 pk_bytes 2632 ct_bytes 2632 f_bits 536
+L5 trial 0 encaps_s 2.2045 decaps_s 123.953 ok true
+L5 trial 1 encaps_s 2.1651 decaps_s 120.180 ok true
+L5 RESULT 2/2 decapsulations correct

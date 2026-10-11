@@ -116,7 +116,10 @@ fn show(c: &CurveTransfers) {
         c.subgroup.bits, c.subgroup.status, c.reference_log2
     );
     println!("  verdict {}", class_name(c.verdict));
-    println!("  {:<4} {:<24} {:<8} {:>10} {:>9} {:>9} {:<17} {:<17} {}", "#", "route", "genus", "dest log2", "total", "ratio", "transport", "class", "evidence");
+    println!(
+        "  {:<4} {:<24} {:<8} {:>10} {:>9} {:>9} {:<17} {:<17} evidence",
+        "#", "route", "genus", "dest log2", "total", "ratio", "transport", "class"
+    );
     for (i, r) in c.routes.iter().enumerate() {
         let mark = if Some(i) == c.best_route { "*" } else { " " };
         let genus = if r.destination.genus.len() > 8 {
@@ -132,12 +135,22 @@ fn show(c: &CurveTransfers) {
             r.cost.destination.log2_cost,
             r.cost.log2_total,
             r.cost.ratio_log2,
-            serde_json::to_value(r.transport).unwrap().as_str().unwrap_or(""),
+            serde_json::to_value(r.transport)
+                .unwrap()
+                .as_str()
+                .unwrap_or(""),
             class_name(r.class),
-            serde_json::to_value(r.evidence).unwrap().as_str().unwrap_or("")
+            serde_json::to_value(r.evidence)
+                .unwrap()
+                .as_str()
+                .unwrap_or("")
         );
         println!("        {}", r.label);
-        let inv: Vec<String> = r.invariants.iter().map(|(k, v)| format!("{k}={v}")).collect();
+        let inv: Vec<String> = r
+            .invariants
+            .iter()
+            .map(|(k, v)| format!("{k}={v}"))
+            .collect();
         if !inv.is_empty() {
             println!("        {}", inv.join("  "));
         }
@@ -162,7 +175,8 @@ fn run(cli: Cli) -> Result<bool, String> {
             out,
             budget,
         } => {
-            let text = std::fs::read_to_string(&registry).map_err(|e| format!("{registry}: {e}"))?;
+            let text =
+                std::fs::read_to_string(&registry).map_err(|e| format!("{registry}: {e}"))?;
             let file = TransferFile::build(&text, CostModel::default(), budget)?;
             std::fs::write(&out, file.to_json()).map_err(|e| format!("{out}: {e}"))?;
             eprintln!(
@@ -172,10 +186,14 @@ fn run(cli: Cli) -> Result<bool, String> {
             Ok(true)
         }
         Cmd::Check { registry, report } => {
-            let committed = std::fs::read_to_string(&report).map_err(|e| format!("{report}: {e}"))?;
+            let committed =
+                std::fs::read_to_string(&report).map_err(|e| format!("{report}: {e}"))?;
             let parsed = load(&report)?;
-            let text = std::fs::read_to_string(&registry).map_err(|e| format!("{registry}: {e}"))?;
-            let fresh = TransferFile::build(&text, parsed.cost_model.clone(), parsed.factor_budget)?.to_json();
+            let text =
+                std::fs::read_to_string(&registry).map_err(|e| format!("{registry}: {e}"))?;
+            let fresh =
+                TransferFile::build(&text, parsed.cost_model.clone(), parsed.factor_budget)?
+                    .to_json();
             if fresh == committed {
                 eprintln!("{report} is current");
                 return Ok(true);
@@ -232,12 +250,22 @@ fn run(cli: Cli) -> Result<bool, String> {
                         })
                     })
                     .collect();
-                println!("{}", serde_json::to_string_pretty(&v).expect("serialisable"));
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&v).expect("serialisable")
+                );
                 return Ok(true);
             }
-            println!("{:>4}  {:>7}  {:<18}  {:<10}  {:<50}  route", "rank", "ratio", "verdict", "family", "curve");
+            println!(
+                "{:>4}  {:>7}  {:<18}  {:<10}  {:<50}  route",
+                "rank", "ratio", "verdict", "family", "curve"
+            );
             for (i, c) in rows.iter().enumerate() {
-                let name = c.standard_names.first().cloned().unwrap_or_else(|| c.slug.clone());
+                let name = c
+                    .standard_names
+                    .first()
+                    .cloned()
+                    .unwrap_or_else(|| c.slug.clone());
                 println!(
                     "{:>4}  {:>+7.1}  {:<18}  {:<10}  {:<50}  {}",
                     i + 1,
@@ -245,7 +273,9 @@ fn run(cli: Cli) -> Result<bool, String> {
                     class_name(c.verdict),
                     c.family,
                     name,
-                    c.best_route.map(|j| c.routes[j].label.as_str()).unwrap_or("none carried")
+                    c.best_route
+                        .map(|j| c.routes[j].label.as_str())
+                        .unwrap_or("none carried")
                 );
             }
             let adv = file

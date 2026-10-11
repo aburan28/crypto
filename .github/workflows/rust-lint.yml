@@ -19,6 +19,7 @@ on:
       - 'Cargo.lock'
       - 'cd_attack/Cargo.toml'
       - '.github/workflows/rust-lint.yml'
+      - 'scripts/clippy-maintained.sh'
   push:
     branches: [main]
     paths:
@@ -27,6 +28,7 @@ on:
       - 'Cargo.lock'
       - 'cd_attack/Cargo.toml'
       - '.github/workflows/rust-lint.yml'
+      - 'scripts/clippy-maintained.sh'
   workflow_dispatch:
 
 permissions:
@@ -107,4 +109,9 @@ jobs:
         with:
           workspaces: ${{ matrix.dir }}
       - name: Clippy
-        run: cargo clippy --all-targets -- -D warnings
+        run: |
+          if [ "${{ matrix.crate }}" = "crypto" ]; then
+            bash scripts/clippy-maintained.sh
+          else
+            cargo clippy --all-targets -- -D warnings
+          fi
