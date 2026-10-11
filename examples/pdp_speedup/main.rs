@@ -345,6 +345,8 @@ fn cmd_summarize(args: &[String]) {
     // (l, round) -> (a ns, b ns)
     let mut rows: BTreeMap<(u32, u32), (Option<f64>, Option<f64>)> = BTreeMap::new();
     let mut n_cont: BTreeMap<u32, usize> = BTreeMap::new();
+    let exclude_contended = args.iter().any(|a| a == "--exclude-contended");
+    let mut dropped: std::collections::BTreeSet<(u32, u32)> = Default::default();
     for line in times.lines() {
         let v: serde_json::Value = serde_json::from_str(line).unwrap();
         let label = v["label"].as_str().unwrap().to_string();
@@ -354,8 +356,16 @@ fn cmd_summarize(args: &[String]) {
         let parts: Vec<&str> = label.rsplitn(3, '-').collect();
         let round: u32 = parts[0].trim_start_matches('r').parse().unwrap();
         let tag = parts[2];
-        if contended.get(&label).copied().unwrap_or(true) {
+        let is_cont = contended.get(&label).copied().unwrap_or(true);
+        if tag != a_tag && tag != b_tag {
+            continue; // not one of the two arms being compared
+        }
+        if is_cont {
             *n_cont.entry(l).or_default() += 1;
+            if exclude_contended {
+                // Drop the whole round: a pair with one contended side is not a pair.
+                dropped.insert((l, round));
+            }
         }
         let e = rows.entry((l, round)).or_default();
         if tag == a_tag {
@@ -375,7 +385,7 @@ fn cmd_summarize(args: &[String]) {
     for l in ls {
         let pairs: Vec<(f64, f64)> = rows
             .iter()
-            .filter(|(k, v)| k.0 == l && v.0.is_some() && v.1.is_some())
+            .filter(|(k, v)| k.0 == l && v.0.is_some() && v.1.is_some() && !dropped.contains(k))
             .map(|(_, v)| (v.0.unwrap(), v.1.unwrap()))
             .collect();
         let a: Vec<f64> = pairs.iter().map(|p| p.0).collect();
