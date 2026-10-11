@@ -1,0 +1,5 @@
+samples/class 1000; median ns: fixed 122373850, random 120844155
+t(raw) = +1.17
+t(crop <= p50) = +0.14  (n = 473, 528)
+t(crop <= p75) = +1.46  (n = 730, 771)
+t(crop <= p90) = +2.36  (n = 899, 902)

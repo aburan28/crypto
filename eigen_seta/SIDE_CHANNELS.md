@@ -97,32 +97,53 @@ valgrind --tool=callgrind --toggle-collect='*probe_core*' \
 It goes through the whole trapdoor and is rejected by the FO
 re-encryption check.
 
-**Results.** Run `run-20261011T1827Z-sidechannel`, built from commit
-19c641d12 with rustc 1.97.0 in release mode with debuginfo, on x86-64 with
-glibc malloc. Toy16 parameters, 4 key seeds, each with two valid
-ciphertexts and one foreign ciphertext. "Non-allocator" is the total minus
-the glibc allocator and `mem*` routines. Records are in
-`research/eigen_seta_rust_20261011/reports/run-20261011T1827Z-sidechannel/records/`.
+**Results.** These come from run `run-20261011T1955Z-verify`, built from
+commit d504af28e with a clean worktree, using rustc 1.97.0 in release mode
+with debuginfo, on x86-64 with glibc malloc. Records are in
+`research/eigen_seta_rust_20261011/reports/run-20261011T1955Z-verify/records/`.
 
-| key seed | ciphertext | accepted | total instructions | glibc allocator and `mem*` | non-allocator |
-|---|---|---|---|---|---|
-| 1 | valid 1 | yes | 1,147,512,199 | 31,326,196 | **1,116,186,003** |
-| 1 | valid 2 | yes | 1,147,512,199 | 31,326,196 | **1,116,186,003** |
-| 1 | foreign | no | 1,147,807,708 | 31,621,705 | **1,116,186,003** |
-| 2 | valid 1 | yes | 1,147,639,699 | 31,453,696 | **1,116,186,003** |
-| 2 | valid 2 | yes | 1,147,639,699 | 31,453,696 | **1,116,186,003** |
-| 2 | foreign | no | 1,147,306,795 | 31,120,792 | **1,116,186,003** |
-| 3 | valid 1 | yes | 1,147,928,378 | 31,742,375 | **1,116,186,003** |
-| 3 | valid 2 | yes | 1,147,928,378 | 31,742,375 | **1,116,186,003** |
-| 3 | foreign | no | 1,147,958,199 | 31,772,196 | **1,116,186,003** |
-| 4 | valid 1 | yes | 1,147,848,114 | 31,662,111 | **1,116,186,003** |
-| 4 | valid 2 | yes | 1,147,848,114 | 31,662,111 | **1,116,186,003** |
-| 4 | foreign | no | 1,147,424,282 | 31,238,279 | **1,116,186,003** |
+* **Toy16.** 4 key seeds, each with two valid ciphertexts and one foreign
+  ciphertext.
+* **L1, the NIST level-1 parameters.** Two keys, two valid ciphertexts under
+  key 1, and one foreign ciphertext.
 
-The non-allocator count is identical in all 12 runs. The allocator count
-varies with the key and with the mode, because the heap state on entry
-depends on the earlier, variable-time key generation and public phase. For
-a given key it is the same for both valid ciphertexts. See R6.
+"Allocator" means glibc's malloc and arena code, heap growth (`sbrk`, `brk`,
+`morecore`) and the `mem*` routines.
+
+| set | key seed | ciphertext | accepted | total instructions | allocator | non-allocator |
+|---|---|---|---|---|---|---|
+| Toy16 | 1 | foreign | no | 1,148,059,231 | 31,850,015 | **1,116,209,216** |
+| Toy16 | 1 | valid 1 | yes | 1,147,950,979 | 31,741,763 | **1,116,209,216** |
+| Toy16 | 1 | valid 2 | yes | 1,147,950,979 | 31,741,763 | **1,116,209,216** |
+| Toy16 | 2 | foreign | no | 1,147,693,051 | 31,483,835 | **1,116,209,216** |
+| Toy16 | 2 | valid 1 | yes | 1,147,388,400 | 31,179,184 | **1,116,209,216** |
+| Toy16 | 2 | valid 2 | yes | 1,147,388,400 | 31,179,184 | **1,116,209,216** |
+| Toy16 | 3 | foreign | no | 1,147,849,768 | 31,640,552 | **1,116,209,216** |
+| Toy16 | 3 | valid 1 | yes | 1,147,459,087 | 31,249,871 | **1,116,209,216** |
+| Toy16 | 3 | valid 2 | yes | 1,147,459,087 | 31,249,871 | **1,116,209,216** |
+| Toy16 | 4 | foreign | no | 1,147,787,126 | 31,577,910 | **1,116,209,216** |
+| Toy16 | 4 | valid 1 | yes | 1,147,477,368 | 31,268,152 | **1,116,209,216** |
+| Toy16 | 4 | valid 2 | yes | 1,147,477,368 | 31,268,152 | **1,116,209,216** |
+| L1 | 1 | foreign | no | 124,257,288,150 | 3,260,858,540 | **120,996,429,610** |
+| L1 | 1 | valid 1 | yes | 124,250,795,358 | 3,254,365,748 | **120,996,429,610** |
+| L1 | 1 | valid 2 | yes | 124,250,795,358 | 3,254,365,748 | **120,996,429,610** |
+| L1 | 2 | valid 1 | yes | 124,262,712,389 | 3,266,282,779 | **120,996,429,610** |
+
+The non-allocator count is identical in all 12 Toy16 runs and in all 4 L1
+runs. The allocator count varies with the key and with the mode, because the
+heap state on entry depends on the earlier, variable-time key generation and
+public phase. For a given key it is the same for both valid ciphertexts.
+See R6.
+
+At L1 the heap grows during the secret phase. A first summary that did not
+count `sbrk` and `brk` as allocator code showed a 174-instruction
+difference between the two keys. All of it was in those two libc
+heap-growth routines, so it is allocator work, not code of this crate.
+
+An earlier run, `run-20261011T1827Z-sidechannel` on commit 19c641d12, gave
+the same picture at Toy16, with 1,116,186,003 non-allocator instructions in
+all 12 runs. The count is different here because the hardening commit adds
+buffer wiping to the secret phase.
 
 **A leak this check found and fixed.** The first version of the probe showed
 counts that differed between keys and between ciphertexts in
@@ -139,17 +160,18 @@ catch this class of problem.
 phase on one Toy16 key for two classes, interleaved in random order. Class 0
 is one fixed ciphertext. Class 1 is a pool of 16 fresh ciphertexts, half of
 them FO-rejected. It reports Welch's t, the dudect method. The result
-with 1,000 samples per class, in the same run:
+with 1,000 samples per class, in the same verification run, after the
+probes and alone on the machine:
 
 ```
-samples/class 1000; median ns: fixed 122309563, random 122318589
-t(raw) = +0.75
-t(crop <= p50) = +0.84  (n = 501, 500)
-t(crop <= p75) = -0.19  (n = 743, 758)
-t(crop <= p90) = +0.68  (n = 898, 903)
+samples/class 1000; median ns: fixed 122373850, random 120844155
+t(raw) = +1.17
+t(crop <= p50) = +0.14  (n = 473, 528)
+t(crop <= p75) = +1.46  (n = 730, 771)
+t(crop <= p90) = +2.36  (n = 899, 902)
 ```
 
-|t| stays well under the usual 4.5 threshold. This is weaker evidence than
+|t| stays under the usual 4.5 threshold; the largest value is 2.36. This is weaker evidence than
 the instruction counts: it is one key, wall-clock time on a shared VM, and
 it compares ciphertext classes rather than keys. It does add coverage of
 effects that instruction counts miss, such as variable-latency
@@ -185,24 +207,27 @@ What this check does and does not show:
   implementation must not mix secret data into them.
 * **R3. Degenerate scalar edge case.** `smul_ct` with y-recovery returns the
   point at infinity when [k + 1]P = O, that is k ≡ −1 modulo the order of P.
-  For the secret scalars that would need c′, λ_S or λ_T ≡ −1 mod 2^E, with
-  probability about 2^−E per key, or c, c′ or the DLP value ≡ −1 mod 3^F3,
-  with probability about 3^−F3. Key generation does not exclude these cases
-  today. The code has no branch here: the result is wrong but the timing is
-  the same. The FO check then rejects it.
+  Key generation now rejects keys whose c′, λ_S or λ_T is ≡ −1 mod 2^E, or
+  whose c or c′ is ≡ −1 mod 3^F3, so the secret-key scalars never hit it.
+  One case remains: the ciphertext-dependent DLP value k used to recover
+  ker φ̂, which hits it with probability about 3^−F3, below 2^−256 at L1.
+  The code has no branch there: the result is wrong, the timing is the same,
+  and the FO check rejects.
 * **R4. Degenerate inputs to the (2,2)-chain.** If a formula hits a zero
   denominator, for example an intermediate divisor that is not in general
-  position, the output is garbage. There is no branch or early exit, and the
-  FO check rejects. For honest ciphertexts the probability is negligible at
-  real sizes. It was never observed in the Toy16, Toy32, L1, L3 or L5 runs.
-  An adversary could try to induce it with crafted ciphertexts. The outcome
-  is then a rejection that takes the same time, but the *rate* of such
-  rejections might depend on the key, which would be a CCA-style failure
-  oracle. This has not been analysed.
-* **R5. Temporaries are not zeroised.** `SecretKey` is
-  `Zeroize + ZeroizeOnDrop`, and its `Debug` impl redacts the secrets. The
-  stack and heap temporaries of decapsulation (scalars, points, `Vec`s) are
-  not wiped.
+  position, the output is garbage, with no branch or early exit. This gives
+  an attacker no oracle. Any ciphertext that is not an honest encryption is
+  answered with H_R(z, ct), whether or not a degenerate input occurred. Only
+  the failure of an *honest* ciphertext would be visible, as a mismatch with
+  the encapsulated key. Its probability is heuristically O(E/p), and none
+  occurred in the recorded runs: 3,000 trials at Toy16, plus Toy32, L1, L3
+  and L5 trials, and the robustness test.
+* **R5. Temporaries are only partly wiped.** `SecretKey` is
+  `Zeroize + ZeroizeOnDrop`, and its `Debug` impl redacts the secrets. Secret
+  scalars (`Scalar` is `ZeroizeOnDrop`) are wiped on drop, and so are the
+  secret byte buffers: the encoding of s, the mask hash, the shared secret
+  and the rejection key. Points and field elements of decapsulation are not
+  wiped.
 * **R6. Heap allocation in the secret phase.** `Vec`s are allocated with
   sizes fixed by the parameter set, so the allocator calls do not depend on
   secrets. glibc malloc's own instruction count does depend on heap state

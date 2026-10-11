@@ -15,18 +15,24 @@ hook's warn-through path.
 > **Correction and update (2026-10-11, Rust implementation).** Four statements
 > below are superseded; the inline notes marked *[Correction]* point here.
 > (1) The `walk` special-key variant of §4.3 is **insecure**: its decryption
-> key (s0, c, c') is a function of Δ' = 7·25^k alone and k is public, so an
-> outsider recomputes it (the Sage experiment decrypted 5/5 ciphertexts from
-> the public key and k). Key recovery does *not* require finding ε. (2) The
-> implemented scheme is the single-chain **secret-degree variant
-> (Eigen-Séta v2)**: the trapdoor degree f is secret and drawn from a range
-> of about 2^277 / 2^408 / 2^535 values at L1 / L3 / L5; the measured parameters are p = 1341 / 1991 / 2630 bits
-> at λ = 128 / 192 / 256, not the two-halves estimate p ≈ 2^772 of §4.3. (3)
-> The non-cyclic-ψ' frequency in §5.4 is unverified: in v2 decapsulation
-> requires a full-order image of E_C[3^F3] and never failed (Toy16, Toy32, L1,
-> L3, L5). (4) Status: KeyGen/Encaps/Decaps now run in Rust with
-> constant-time decapsulation at all three NIST sizes; see `eigen_seta/`
-> (README, SIDE_CHANNELS.md). Security remains conjectured.
+> key (s0, c, c') is computed from Δ' = 7·25^k alone (see
+> `research/eigen_seta_prototype_20261011/eigen_seta_toy.py` lines 133–155)
+> and k is public, so an outsider recomputes it; an exploratory run, not
+> archived, decrypted 5/5 toy ciphertexts this way. Key recovery does *not*
+> require finding ε. (2) The implemented scheme is the single-chain
+> **secret-degree variant (Eigen-Séta v2)**: the trapdoor degree f is secret
+> and drawn from a range of about 2^277 / 2^408 / 2^535 values at
+> L1 / L3 / L5; the measured parameters are p = 1341 / 1991 / 2630 bits at
+> λ = 128 / 192 / 256, not the two-halves estimate p ≈ 2^772 of §4.3.
+> (3) The non-cyclic-ψ' case of §5.4 cannot occur in v2: τ has no eigenline
+> mod 3 because −7 is a non-square mod 3 (Proposition 3 of the paper in
+> `papers/eigen-seta/`); the cause of the toy observation was not isolated.
+> (4) Status: KeyGen/Encaps/Decaps run in Rust with constant-time
+> decapsulation at all three NIST sizes; see `eigen_seta/` (README,
+> SIDE_CHANNELS.md) and the specification and analysis paper
+> `papers/eigen-seta/`. Security remains conjectured: the binding attack is
+> guessing the mask ratio modulo about √(3^F3), about 2^λ classically and
+> 2^(λ/2) Grover iterations, the same shape as AES key search.
 
 Sections 1-3 are established results with citations. Section 4 is the
 proposal; the algebra there is ours and is marked as derived. Section 5 is
@@ -323,8 +329,8 @@ Given (E_A, P, Q, E_C, [a]φP, [b]φQ) with a, b random, find φ.
   rejection from day one.
 
 ### 5.4 Correctness corner cases
-* *[Correction: frequency unverified; not observed in the v2 Rust runs — see
-  the correction box at the top.]*
+* *[Correction: cannot occur in v2 (Proposition 3 of `papers/eigen-seta/`) —
+  see the correction box at the top.]*
   ψ' non-cyclic on E_C[3^f] (part of ker φ θ'-stable): handled by trying the
   cyclic order-d subgroups of ker ψ' ∩ E_C[3^f] and keeping the one whose
   codomain is E_A (prototype: observed in 1 of 8 trials at the 44-bit size,

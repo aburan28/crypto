@@ -1,0 +1,118 @@
+\section{The scheme}\label{sec:scheme}
+
+\subsection{Parameters}
+A parameter set consists of the following data.
+\begin{itemize}
+\item Exponents $E$ and $F$ and a cofactor $c$ such that
+  $p=2^{E+1}3^Fc-1$ is prime and $p\equiv3,5,6\pmod 7$.
+\item $d=3^F$, the sender's isogeny degree.
+\item A lower bound $f_{\mathrm{lo}}$ for the secret degree, which ranges over
+  $[f_{\mathrm{lo}},2f_{\mathrm{lo}})$.
+\item The curve $\ED$, its endomorphism $\omega$ with trace $t$, the values
+  $s_D,\mu,\nu$ and the eigenbasis $(P_D,Q_D)$ of \S\ref{sec:prelim}.
+\item Domain-separated instances of SHAKE256: $G$ (masks), $H_P$ (public-key
+  hash), $H_K$ (shared secret) and $H_R$ (rejection key).
+\end{itemize}
+The concrete sets are in \S\ref{sec:params}.
+
+\paragraph{Canonical bases.} $\textsf{Basis}_3(A)$ deterministically
+computes a basis $(P_3,Q_3)$ of $E[3^F]$ on the Montgomery curve
+$E:y^2=x^3+Ax^2+x$. It tries $x=1+i,2+i,\dots$, lifts each to a point,
+multiplies by $(p+1)/d$, and keeps the first two points whose
+$3^{F-1}$-multiples generate $E[3]$. It depends only on $A$, so sender and
+receiver agree on it.
+
+\subsection{Key generation}
+
+\begin{algorithm}[h]
+\caption[$\textsf{KeyGen}()$]{$\textsf{KeyGen}()$}\label{alg:keygen}
+\begin{algorithmic}[1]
+\Repeat \Comment{secret degree and Kani scalars}
+  \State $f\gets$ uniform odd integer in $[f_{\mathrm{lo}},2f_{\mathrm{lo}})$
+  \State reject if $3\mid f$, $7\mid f$ or $2f\equiv 2^E\pmod d$
+  \State $m\gets 2^E-7d^2f^2$; find $c,c'$ with $c^2+c'^2=m$, $c$ even, or reject
+  \State $s_0\gets f s_D \bmod 2^E$
+  \State choose signs of $c,c'$ with $\max(v_2(c'-\lambda_S),v_2(c'+\lambda_S))=2$, where $\lambda_S=ds_0+c$, or reject
+\Until{accepted}
+\State $g\gets 2^E-f$
+\Repeat \Comment{endomorphism of norm $fg$ that uses Frobenius}
+  \State pick $(y_0,y_1)\ne(0,0)$ with $T\gets fg-p\,N(y_0+y_1\omega)>0$ prime, $T\equiv1,2,4\pmod7$
+  \State solve $x^2+7y'^2=T$ (Cornacchia); $x_0\gets x-ty'$, $x_1\gets 2y'$
+\Until{found}
+\State $\alpha\gets x_0+x_1\omega+(y_0+y_1\omega)\pi$ \Comment{$\pi$ the $p$-Frobenius; $\Nrd\alpha=fg$}
+\State compute the $(2^E,2^E)$-isogeny with kernel $\{([f]R,\alpha R):R\in\ED[2^E]\}$; reject unless its first step is a gluing
+\State from its codomain $E_1\times E_2$, pick the factor $\EA$ whose map $\varepsilon:\ED\to\EA$ has degree $f$ (test $e(\varepsilon X,\varepsilon Y)=e(X,Y)^f$ on $\ED[3^F]$)
+\State $\lambda_1,\lambda_2\gets$ uniform odd residues modulo $2^E$
+\State $P_A\gets\lambda_1\varepsilon(P_D)$, $Q_A\gets\lambda_2\varepsilon(Q_D)$; bring $\EA$ to Montgomery form $y^2=x^3+Ax^2+x$
+\State $\lambda_T\gets c-ds_0$; reject if $\lambda_S,\lambda_T$ or $c'\equiv-1\pmod{2^E}$, or $c$ or $c'\equiv-1\pmod d$
+\State $\mathit{pk}\gets(A,x(P_A),x(Q_A),x(P_A-Q_A))$; \ $z\gets$ 32 random bytes
+\State $\mathit{sk}\gets(\lambda_S,\lambda_T,c'\bmod 2^E,c\bmod d,c'\bmod d,z,\mathit{pk})$
+\State \Return $(\mathit{pk},\mathit{sk})$ after a self-test encapsulation and decapsulation
+\end{algorithmic}
+\end{algorithm}
+
+The degree-$f$ factor $\varepsilon$ exists by Kani's lemma applied to
+$\alpha$, since $\deg\alpha+f^2=f\cdot2^E$ and $\gcd(f,g)=1$
+(see~\cite[\S2]{Rob23}). The requirement $(y_0,y_1)\ne(0,0)$ excludes
+$\alpha\in\Z[\omega]$, for which $\EA$ would lie in the small orbit of $\ED$
+under the class group of $\mathcal{O}_K$ (\S\ref{sec:weak}). The
+endomorphism the public key is built around is
+\[
+\tau=\varepsilon\omega\hat\varepsilon\in\End(\EA),\qquad \deg\tau=2f^2,\quad \Tr\tau=tf,
+\]
+and since $\tau\varepsilon=f\,\varepsilon\omega$, the points
+$P_A,Q_A$ are eigenvectors of $\tau$ on $\EA[2^E]$ with eigenvalues $f\mu$ and
+$f\nu$. The scalars $\lambda_1,\lambda_2$ make the Weil pairing
+$e(P_A,Q_A)=e(P_D,Q_D)^{\lambda_1\lambda_2 f}$ uniform among
+values of the same order, so it carries no information on $f$.
+
+\subsection{Encapsulation}
+
+\begin{algorithm}[h]
+\caption[$\textsf{Encaps}(\mathit{pk})$ and the deterministic core $\textsf{Enc}(\mathit{pk},s)$]{$\textsf{Encaps}(\mathit{pk})$ and the deterministic core $\textsf{Enc}(\mathit{pk},s)$}\label{alg:encaps}
+\begin{algorithmic}[1]
+\State $s\gets$ uniform in $\Z/d$; \ $\mathit{ct}\gets\textsf{Enc}(\mathit{pk},s)$; \ \Return $(\mathit{ct},\,H_K(s,\mathit{ct}))$
+\Statex
+\Function{Enc}{$\mathit{pk}=(A,x_P,x_Q,x_{P-Q}),s$}
+  \State $(P_3,Q_3)\gets\textsf{Basis}_3(A)$; \ $K\gets P_3+sQ_3$ \Comment{3-point ladder}
+  \State $\varphi:\EA\to\EC=\EA/\langle K\rangle$ \Comment{chain of $F$ 3-isogenies, fixed strategy}
+  \State push $x_P,x_Q,x_{P-Q}$ through $\varphi$: $P'=\varphi(P_A)$, $Q'=\varphi(Q_A)$
+  \State $(a,b)\gets G(s,H_P(\mathit{pk}))$, odd residues modulo $2^E$
+  \State \Return $(A_C,\ x(aP'),\ x(bQ'),\ x(aP'-bQ'))$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Decapsulation}
+
+Write $S=aP'$ and $T=bQ'$, and
+$\theta=\varphi\tau\hat\varphi\in\End(\EC)$. Section~\ref{sec:correctness}
+shows that $\psi=2\theta-tdf$ has degree $7d^2f^2$ and trace~0, and acts on
+$S$ and $T$ by $\pm ds_0$. Decapsulation applies Kani's lemma to
+$\gamma=\psi+c$, whose degree is $7d^2f^2+c^2=2^E-c'^2$.
+
+\begin{algorithm}[h]
+\caption[$\textsf{Decaps}(\mathit{sk},\mathit{ct})$]{$\textsf{Decaps}(\mathit{sk},\mathit{ct})$}\label{alg:decaps}
+\begin{algorithmic}[1]
+\State parse $\mathit{ct}=(A_C,x_S,x_T,x_{S-T})$; lift $S,T$ on $\EC$ with $x(S-T)=x_{S-T}$; on failure \Return $H_R(z,\mathit{ct})$ \Comment{public}
+\State $(X_1,X_2)\gets\textsf{Basis}_3(A_C)$; \ $(P_3,Q_3)\gets\textsf{Basis}_3(A)$ \Comment{public}
+\State $\Phi\gets$ the $(2^E,2^E)$-isogeny of $\EC^2$ with kernel $\langle(c'S,-\lambda_SS),(c'T,-\lambda_TT)\rangle$, fixed schedule
+\State evaluate $\Phi$ at $(X_1,0),(0,X_1),(X_2,0)$; identify both codomain factors with $\EC$ among the $8$ sign and order choices by comparing with $c'X_i$; read off $\gamma(X_1),\gamma(X_2)$
+\State $\psi(X_i)\gets\gamma(X_i)-cX_i$ for $i=1,2$
+\State $G\gets$ whichever of $\psi(X_1),\psi(X_2)$ has order $d$; $H\gets$ the other; find $k$ with $H=kG$ \Comment{pairings, DLP in $\mu_d$}
+\State $\hat\varphi\gets\EC/\langle X_h-kX_g\rangle\to\EA$; \ $K_g\gets$ the image of $X_1$ or $X_2$ that has order $d$
+\State $s\gets\log(e(P_3,K_g))/\log(e(K_g,Q_3))$ in $\mu_d$
+\State $\mathit{ct}'\gets\textsf{Enc}(\mathit{pk},s)$
+\State \Return $H_K(s,\mathit{ct})$ if $\mathit{ct}'=\mathit{ct}$, else $H_R(z,\mathit{ct})$ \Comment{constant-time selection}
+\end{algorithmic}
+\end{algorithm}
+
+All steps after line~2 run in constant time with respect to $\mathit{sk}$ and
+$s$ (\S\ref{sec:impl}). Lines~1--2 depend only on public data.
+
+\subsection{The transform}
+$\textsf{Enc}$ is a deterministic public-key encryption of the message
+$s\in\Z/d$, derandomised by deriving the masks from $G(s,H_P(\mathit{pk}))$.
+The KEM is the $U^{\not\perp}$ transform with implicit rejection of Hofheinz,
+H\"ovelmanns and Kiltz~\cite{HHK17} applied to it. The re-encryption check
+compares the entire ciphertext, including the curve coefficient.

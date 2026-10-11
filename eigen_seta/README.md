@@ -85,18 +85,43 @@ Multiplication is the best of 15 runs and inversion the mean of 200.
 
 ## 3. Security, as conjectured
 
-The design targets λ = 128, 192 and 256 classical bits. The arguments are
-heuristic.
+The full analysis, with proofs of correctness and an attack-cost table, is
+the paper in `papers/eigen-seta/`. The design targets λ = 128, 192 and 256
+classical bits, and the arguments are heuristic. No third party has analysed
+the scheme.
 
-* **Key recovery** needs α or f. The degree f is drawn from [f_lo, 2 f_lo),
-  a range of about 2^277, 2^408 and 2^535 values at L1, L3 and L5. Every
-  known way to use the public torsion images first needs f. Endomorphism-ring computation for E_A is the generic attack. Its
-  cost is above 2^λ at these p sizes.
-* **Message recovery** is a FESTA-type problem: recover a 3^F3-isogeny from
-  masked torsion images. Guessing the masks or a meet-in-the-middle on the
-  3^F3-isogeny costs about 2^λ classically. Grover-type search costs about
-  2^(λ/2) quantum. That is the same exposure as FESTA, so the quantum
-  security is not at the NIST level of the same name.
+* **Key recovery.** Knowing f gives a working secret key in polynomial time,
+  so key recovery means finding f. The best attacks we know are these:
+  * Exhaustive search over the admissible f. Keygen's public filters keep
+    about 2^-8.1 to 2^-9.0 of the odd candidates, leaving about 2^268, 2^399
+    and 2^525 values at L1, L3 and L5.
+  * Finding any isogeny from E_D to E_A, after which lattice reduction yields
+    the unique short isogeny of degree f. This costs at least p^(1/3) ≈ 2^447
+    classically and p^(1/4) ≈ 2^335 quantumly at L1.
+  * A meet in the middle on a smooth f, at cost at least √f ≈ 2^138 at L1.
+
+  The structural assumption to scrutinise is that the eigenbasis, which
+  reveals τ = εωε̂ on E_A[2^E] up to the unknown scalar f, gives no handle
+  on f.
+* **Message recovery, the binding constraint.** The ciphertext is a
+  FESTA-type masked-torsion instance. Guessing the mask ratio modulo about
+  √(3^F3) and then running Robert's dimension-8 attack costs about 2^128,
+  2^192 and 2^256 trials classically. With Grover it costs the square root:
+  2^64, 2^96 and 2^128 trials. Claw finding on the 3^F3-isogeny costs √d
+  classically. Its degree exceeds that of the SIKE parameter sets assessed at
+  the same categories.
+* **NIST categories.** Categories 1, 3 and 5 are defined by AES key search,
+  which is itself a 2^λ search classically and a 2^(λ/2) Grover search
+  quantumly. The binding attack has the same shape, with a far more
+  expensive oracle. We therefore conjecture categories 1, 3 and 5.
+
+  This corrects the statement in the first version of this README, which
+  said the quantum security fell below the category of the same name. The
+  margin rests on the oracle cost. Any attack that needs fewer than about
+  √d bits of mask information would break the claim.
+* **Chosen-ciphertext security.** The FO transform with implicit rejection
+  gives IND-CCA from one-wayness. The correctness error is heuristically
+  O(E/p), and no decapsulation failure has been observed.
 * **Earlier variants are broken.** The Sage prototype's `walk` variant leaks
   its trapdoor through a public degree. See section 4.
 
@@ -104,17 +129,16 @@ heuristic.
 
 * **The `walk` variant is insecure.** The README and the design note in
   `research/eigen_seta_prototype_20261011/` described it as a hidden CM curve
-  behind a secret 5^k-walk. Its decryption key (s0, c, c′) depends only on
-  Δ′ = 7·25^k, and k is public. An outsider recomputes the key from public
-  data. The Sage experiment recovered s for 5 of 5 ciphertexts using only the
-  public key and k. The `cm` variant was already labelled insecure. v2 fixes
-  this by making the degree f secret.
+  behind a secret 5^k-walk. Its decryption key (s0, c, c′) is computed from
+  Δ′ = 7·25^k alone, as `eigen_seta_toy.py` lines 133–155 show, and k is
+  public. So anyone can compute the key and decrypt. An exploratory run, not
+  archived, decrypted 5 of 5 toy ciphertexts this way. The `cm` variant was
+  already labelled insecure. v2 fixes this by making the degree f secret.
 * **Non-cyclic kernels.** The note (§5.4) reported ψ′ non-cyclic on
-  E_C[3^f] in 1 of 8 toy trials at the 44-bit size, and the toy README
-  listed it as a corner case. Its cause was never isolated, so the
-  observation is unverified. It does not occur in v2: decapsulation here
-  requires a full-order image of E_C[3^F3] under ψ′, and it has never failed
-  at Toy16, Toy32, L1, L3 or L5.
+  E_C[3^f] in 1 of 8 toy trials at the 44-bit size, and its cause was never
+  isolated. In v2 the case cannot occur. Proposition 3 of the paper shows
+  that τ has no eigenline mod 3, because −7 is a non-square mod 3, so ψ maps
+  E_C[3^F3] onto a cyclic group of order 3^F3.
 
 ## 5. Layout
 
@@ -131,9 +155,13 @@ heuristic.
 ## 6. Running
 
 ```
-cargo test --release                       # Toy16 KEM, chain, pairing, field tests
-cargo run --release --example run -- L1 3  # keygen + 3 encaps/decaps at L1
-cargo run --release --example bench_field  # F_p mul and inversion timings
+cargo test --release                        # KEM, KATs, robustness, chain, pairing, field tests
+cargo test --release -- --ignored           # also Toy32 round trips and the L1 KAT
+cargo run --release --example run -- L1 3   # keygen + 3 encaps/decaps at L1
+cargo run --release --example bench_field   # F_p mul and inversion timings
+cargo run --release --example ct_probe -- 1 1 valid L1   # constant-time probe (run under callgrind)
+cargo run --release --example dudect_decaps -- 1000      # Welch t-test of decaps timing
+cargo run --release --example f_filter_rate -- L1 200    # acceptance rate of keygen's public f filters
 cargo run --release --example gen_params > src/params_generated.rs
 ```
 

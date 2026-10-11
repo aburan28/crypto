@@ -1,0 +1,62 @@
+\section{Introduction}\label{sec:intro}
+
+After the 2022 attacks on SIDH~\cite{CD23,MMPPW23,Rob23}, isogeny-based public-key
+encryption needs a trapdoor that does not reveal enough torsion information to
+let the attacker run those same attacks. Two families
+survive. In the first, torsion images are masked so that the attacker cannot
+recover them exactly, as in M-SIDH~\cite{FMP23} and FESTA~\cite{BMP23}; in the
+second, the scheme avoids torsion images altogether. FESTA decrypts by running
+the torsion attack itself with the help of a secret: the legitimate receiver
+knows a matrix that commutes with the masks.
+
+Castryck and Vercauteren~\cite{CV23} observed that a torsion basis which is an
+eigenbasis of a \emph{known} endomorphism of small degree makes masked-torsion
+instances easy: the masks act diagonally on the eigenvectors, so the
+endomorphism's action on the masked points is known exactly, and a lollipop
+endomorphism can be decoded with Kani's lemma. They presented this as an
+attack, and as a backdoor available to whoever chose the basis.
+
+\paragraph{This work.} Eigen-S\'eta turns that observation into a trapdoor. The
+public key is a curve $\EA$ with an eigenbasis of an endomorphism
+$\tau\in\End(\EA)$ whose degree $2f^2$ is \emph{secret}. The sender masks the
+images of the eigenbasis under a $3^F$-isogeny $\varphi$ with a random diagonal
+matrix. The receiver, who knows $f$, knows how
+$\theta=\varphi\tau\hat\varphi$ acts on the masked points and recovers $\varphi$
+from one $(2^E,2^E)$-isogeny between products of elliptic curves. Without $f$,
+the ciphertext is a FESTA-type masked-torsion instance, and the public key is
+an isogeny instance of unknown degree from a known curve.
+
+An earlier variant~\cite{EigenSetaNote} took $\tau=\varepsilon\omega\hat\varepsilon$
+with $\varepsilon$ of \emph{public} degree $5^k$. That variant is insecure:
+its decryption key is a function of the public degree alone
+(\S\ref{sec:walk}). Version~2, specified here, draws $f$ from an interval of
+about $2^{277}$, $2^{408}$ or $2^{535}$ values, depending on the level, and keeps it secret.
+
+\paragraph{Contributions.}
+\begin{itemize}
+\item A complete specification of the KEM (\S\ref{sec:scheme}) with the
+  Fujisaki--Okamoto transform with implicit rejection~\cite{HHK17}.
+\item Proofs that decryption is correct (\S\ref{sec:correctness}). These
+  include a proposition that the kernel recovered during decryption is always
+  cyclic, which settles a corner case reported for the earlier toy prototype.
+\item Parameter sets for $\lambda=128,192,256$ (\S\ref{sec:params}) and a
+  heuristic analysis of key recovery, message recovery, quantum attacks,
+  chosen-ciphertext attacks and decryption failures (\S\ref{sec:security}).
+  The concrete figures are summarised in Table~\ref{tab:attacks}.
+\item A Rust implementation with constant-time decapsulation, checked with an
+  instruction-count probe and a statistical timing test. The probe found one
+  compiler-introduced branch, which we fixed (\S\ref{sec:impl}).
+\item Measured sizes, timings and correctness rates at all parameter sets, and
+  constant-time evidence at Toy16 and L1 (\S\ref{sec:results}), each
+  traceable to a committed record.
+\end{itemize}
+
+\paragraph{What this paper does not claim.} Security is a conjecture backed by
+the attacks we considered; no third party has analysed the scheme. The
+implementation is research code. Its decapsulation is slow, mainly because
+the dimension-2 chain is computed in Mumford coordinates; a theta-coordinate
+chain~\cite{DMPR23} is future work. Key generation is not constant time.
+
+\paragraph{Evidence conventions.} Each measured number carries the path of the
+record it comes from, relative to the root of the repository
+(\art{crypto:}). Derived quantities are marked as such.
