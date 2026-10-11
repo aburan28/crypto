@@ -539,12 +539,6 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
             symmetry_breaking: false,
             wall_budget: None,
         },
-        chain_s3_limits: ChainS3Limits {
-            max_variables: 0,
-            max_domain_clauses: 0,
-            max_models: 0,
-            conflict_budget: 0,
-        },
         collapse_negation: true,
         stop_on_verified_rank: true,
         relation_batch_size: 1,
@@ -553,6 +547,12 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
         crossbred: None,
         wdsat_binary: None,
         wdsat_timeout_ms: 5_000,
+        chain_s3_limits: ChainS3Limits {
+            max_variables: 0,
+            max_domain_clauses: 0,
+            max_models: 0,
+            conflict_budget: 0,
+        },
         linear_algebra: LinearAlgebra::Dense,
     };
     let solve_started = Instant::now();
