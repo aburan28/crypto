@@ -20,6 +20,7 @@ The campaign utility has separate launch and read-only integrity status modes:
 isogeny-campaign launch /absolute/path/isogeny /fresh/campaign/root /absolute/path/PROTOCOL.md /absolute/path/old-hundred-study
 isogeny-campaign status /absolute/path/old-hundred-study /absolute/path/campaign/root
 isogeny-campaign report /absolute/path/old-hundred-study /absolute/path/campaign/root /fresh/report/directory
+isogeny-campaign manifest /absolute/path/frozen-study
 ```
 
 `status` checks the frozen earlier kernels and all sealed current replay hashes,

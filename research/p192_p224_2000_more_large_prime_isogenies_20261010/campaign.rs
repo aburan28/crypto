@@ -121,6 +121,21 @@ fn save(p: &Path, v: &Value) {
     .unwrap();
     fs::rename(tmp, p).unwrap();
 }
+fn inventory(root: &Path, dir: &Path, rows: &mut Vec<Value>) {
+    let mut paths: Vec<_> = fs::read_dir(dir)
+        .unwrap()
+        .map(|e| e.unwrap().path())
+        .collect();
+    paths.sort();
+    for path in paths {
+        if path.is_dir() {
+            inventory(root, &path, rows);
+        } else if path.file_name().unwrap() != "FILES.json" {
+            let bytes = fs::read(&path).unwrap();
+            rows.push(json!({"path":path.strip_prefix(root).unwrap().to_str().unwrap(),"bytes":bytes.len(),"sha256":hash(&bytes)}));
+        }
+    }
+}
 fn copy_tree(source: &Path, target: &Path) {
     fs::create_dir_all(target).unwrap();
     for entry in fs::read_dir(source).unwrap() {
@@ -169,6 +184,26 @@ fn identity(doc: &Value) -> String {
     assert_eq!(maps.len(), 1);
     let kernel = maps[0]["kernel"].as_array().unwrap();
     assert_eq!(kernel.len() as u64, (ell - 1) / 2 + 1);
+    let p = doc["curve"]["p"]
+        .as_str()
+        .expect("decimal field characteristic");
+    assert!(
+        !p.is_empty() && p.bytes().all(|c| c.is_ascii_digit()) && !p.starts_with('0'),
+        "canonical positive characteristic required"
+    );
+    for coefficient in kernel {
+        let s = coefficient.as_str().unwrap();
+        assert!(
+            !s.is_empty()
+                && s.bytes().all(|c| c.is_ascii_digit())
+                && (s == "0" || !s.starts_with('0')),
+            "canonical decimal coefficient required"
+        );
+        assert!(
+            s.len() < p.len() || (s.len() == p.len() && s < p),
+            "coefficient must be reduced modulo the field characteristic"
+        );
+    }
     assert_eq!(kernel.last().unwrap(), "1", "kernel must be monic");
     hash(&serde_json::to_vec(&json!([doc["result"]["source_icv1"]["icv1"], ell, kernel])).unwrap())
 }
@@ -344,6 +379,16 @@ fn launch(binary: &Path, out: &Path, protocol: &Path, old: &Path) {
 fn main() {
     let a: Vec<_> = std::env::args().collect();
     match a.get(1).map(String::as_str) {
+        Some("manifest") => {
+            assert_eq!(a.len(), 3, "manifest STUDY");
+            let root = Path::new(&a[2]);
+            let mut files = vec![];
+            inventory(root, root, &mut files);
+            save(
+                &root.join("FILES.json"),
+                &json!({"schema":"additional-prime-artifacts/v1","scope":"frozen study artifacts; live output is separate until archived","files":files}),
+            );
+        }
         Some("check-long-prefix") => {
             assert_eq!(
                 a.len(),
@@ -403,7 +448,7 @@ mod tests {
     use super::*;
     #[test]
     fn novelty_excludes_receipt_changes_but_detects_kernel_changes() {
-        let mut doc = json!({"result":{"ell":5,"source_icv1":{"icv1":"ICV1:test-source"},"isogenies":[{"kernel":["2","3","1"]}]}});
+        let mut doc = json!({"curve":{"p":"101"},"result":{"ell":5,"source_icv1":{"icv1":"ICV1:test-source"},"isogenies":[{"kernel":["2","3","1"]}]}});
         let first = identity(&doc);
         doc["elapsed_ms"] = json!(9000);
         assert_eq!(identity(&doc), first);
@@ -416,7 +461,21 @@ mod tests {
     #[should_panic(expected = "kernel must be monic")]
     fn malformed_kernel_does_not_count() {
         identity(
-            &json!({"result":{"ell":5,"source_icv1":{"icv1":"ICV1:test-source"},"isogenies":[{"kernel":["2","3","2"]}]}}),
+            &json!({"curve":{"p":"101"},"result":{"ell":5,"source_icv1":{"icv1":"ICV1:test-source"},"isogenies":[{"kernel":["2","3","2"]}]}}),
+        );
+    }
+    #[test]
+    #[should_panic(expected = "canonical decimal coefficient required")]
+    fn alternate_decimal_spelling_cannot_inflate_novelty() {
+        identity(
+            &json!({"curve":{"p":"101"},"result":{"ell":5,"source_icv1":{"icv1":"ICV1:test-source"},"isogenies":[{"kernel":["02","3","1"]}]}}),
+        );
+    }
+    #[test]
+    #[should_panic(expected = "coefficient must be reduced")]
+    fn unreduced_coefficient_cannot_inflate_novelty() {
+        identity(
+            &json!({"curve":{"p":"101"},"result":{"ell":5,"source_icv1":{"icv1":"ICV1:test-source"},"isogenies":[{"kernel":["103","3","1"]}]}}),
         );
     }
 }
