@@ -39,6 +39,17 @@ SOURCES = (
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 
 
+def orbit_domain_size(columns: int, summands: int) -> tuple[int, int]:
+    """Independent count for the n=83 selector and binary-phase domain."""
+    n = 83
+    bits = (n - 1).bit_length()
+    variables = summands * (2 * columns - 1 + n + bits + 2 * n * bits)
+    clauses = summands * (
+        columns * n + 3 * columns - 3 + (1 << bits) - n + 4 * n * bits
+    )
+    return variables, clauses
+
+
 def receipt_error(worker: object, config: dict) -> str | None:
     if not isinstance(worker, dict):
         return "worker receipt is not an object"
@@ -53,6 +64,10 @@ def receipt_error(worker: object, config: dict) -> str | None:
         "memory_cgroup_swap_limit_bytes": 0,
         "source_commit": config["source_commit"],
         "source_attestation_mode": "supervised_snapshot",
+        "domain_encoding": config.get("domain_encoding", "coordinate_trie"),
+        "domain_representatives": (
+            config["columns"] if config.get("domain_encoding") == "frobenius_orbit_phase" else None
+        ),
         "solver_search_executed": False, "relation_stage_executed": False,
         "rank_stage_executed": False, "total_index_calculus_runtime_ms": None,
         "selected_best_total_runtime": None,
@@ -79,8 +94,16 @@ def receipt_error(worker: object, config: dict) -> str | None:
         value = worker.get(key)
         if type(value) is not int or value < 0:
             return f"worker {key} is not a nonnegative count"
-    if worker["required_max_variables"] != {5: 84743, 6: 105908}[config["summands"]]:
+    core_variables = {5: 84743, 6: 105908}[config["summands"]]
+    orbit_domain = config.get("domain_encoding") == "frobenius_orbit_phase"
+    added_variables, expected_clauses = (
+        orbit_domain_size(config["columns"], config["summands"])
+        if orbit_domain else (0, None)
+    )
+    if worker["required_max_variables"] != core_variables + added_variables:
         return "worker source variable count disagrees with the pinned arity"
+    if orbit_domain and worker["required_domain_clauses"] != expected_clauses:
+        return "worker orbit-domain clause count disagrees with the pinned size"
     if worker.get("legal_x_coordinates") != 83 * config["columns"] or worker["required_domain_clauses"] == 0:
         return "worker coordinate domain disagrees with retained base"
     if not isinstance(worker.get("object"), str) or not worker["object"]:
@@ -114,6 +137,7 @@ def run(
     identity_mask: int, max_variables: int, max_domain_clauses: int,
     wall_seconds: float, memory_mib: int, binary: Path, output_dir: Path,
     image: str = "python:3.11-slim", checkout: Path | None = None,
+    orbit_domain: bool = False,
 ) -> dict:
     if columns not in (64, 256, 600, *V2_SIZES) or policy not in POLICIES or seed not in SEEDS:
         raise ValueError("chain selection is outside retained primary panel")
@@ -161,6 +185,7 @@ def run(
         "schema": "n83.chain-s3-capacity-config/v1", "study": STUDY,
         "panel_dir": str(panel), "columns": columns, "policy": policy, "seed": seed,
         "summands": summands, "identity_mask": identity_mask,
+        "domain_encoding": "frobenius_orbit_phase" if orbit_domain else "coordinate_trie",
         "max_variables": max_variables, "max_domain_clauses": max_domain_clauses,
         "wall_seconds": wall_seconds, "memory_cgroup_limit_bytes": memory_mib * 1024 * 1024,
         "memory_cgroup_swap_limit_bytes": 0, "cpu_limit": 1.0,
@@ -183,7 +208,8 @@ def run(
         "--mount", f"type=bind,src={source_dir},dst=/source,readonly",
         "--mount", f"type=bind,src={output_dir},dst=/out",
         "--env", "ICV1_FROZEN_SOURCE_DIR=/source", image_id,
-        "/worker", "primary-chain-build", "/panel", str(columns), policy, str(seed),
+        "/worker", "primary-orbit-chain-build" if orbit_domain else "primary-chain-build",
+        "/panel", str(columns), policy, str(seed),
         str(summands), str(identity_mask), str(max_variables), str(max_domain_clauses),
         str(memory_mib), "/out/worker.json",
     ]
@@ -214,16 +240,15 @@ def run(
                     exit_code = child.wait()
         except (OSError, subprocess.SubprocessError) as error:
             launch_error = f"{type(error).__name__}: {error}"
-    if timed_out:
-        try:
-            remaining = subprocess.run(
-                ["docker", "ps", "-aq", "--filter", f"name=^{config['container_name']}$"],
-                capture_output=True, text=True, timeout=15, check=False,
-            )
-            if remaining.returncode != 0 or remaining.stdout.strip():
-                cleanup_error = cleanup_error or "timed-out container still present"
-        except (OSError, subprocess.SubprocessError) as error:
-            cleanup_error = cleanup_error or f"container cleanup unverified: {error}"
+    try:
+        remaining = subprocess.run(
+            ["docker", "ps", "-aq", "--filter", f"name=^{config['container_name']}$"],
+            capture_output=True, text=True, timeout=15, check=False,
+        )
+        if remaining.returncode != 0 or remaining.stdout.strip():
+            cleanup_error = cleanup_error or "capacity container still present"
+    except (OSError, subprocess.SubprocessError) as error:
+        cleanup_error = cleanup_error or f"container cleanup unverified: {error}"
     worker_path = output_dir / "worker.json"
     worker: object = None
     worker_error: str | None = None
@@ -287,12 +312,14 @@ def main() -> int:
     parser.add_argument("--memory-mib", type=int, required=True)
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--image", default="python:3.11-slim")
+    parser.add_argument("--orbit-domain", action="store_true")
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
     outer = run(
         args.panel, args.columns, args.policy, args.seed, args.summands,
         args.identity_mask, args.max_variables, args.max_domain_clauses,
         args.wall_seconds, args.memory_mib, args.binary, args.output_dir, args.image,
+        orbit_domain=args.orbit_domain,
     )
     print(json.dumps(outer, sort_keys=True))
     return 1 if outer["status"].startswith("PRODUCER_FAILURE") else 0

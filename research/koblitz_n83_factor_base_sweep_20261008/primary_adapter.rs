@@ -11,7 +11,8 @@ use super::{
 use crypto_lib::binary_ecc::curve::point_neg;
 use crypto_lib::binary_ecc::{BinaryPoint, F2mElement};
 use crypto_lib::cryptanalysis::binary_semaev_chain_sat::{
-    chain_s3_max_variables, finite_domain_clause_count, ChainedS3Encoding,
+    chain_s3_max_variables, finite_domain_clause_count, frobenius_orbit_domain_size,
+    ChainedS3Encoding,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_explicit_frobenius_point_factor_base, build_union_s4_encoding,
@@ -488,7 +489,7 @@ fn frozen_chain_source() -> Result<(String, &'static str)> {
 pub(super) fn chain_capacity_cli(
     root: &Path, columns: usize, policy: &str, seed: u64, m: usize,
     identity_mask: u32, max_variables: u32, max_domain_clauses: usize,
-    memory_mib: u64, output: &Path,
+    memory_mib: u64, output: &Path, frobenius_orbits: bool,
 ) -> Result<Value> {
     if !([64, 256, 600].contains(&columns) || V2_SIZES.contains(&columns))
         || !(5..=6).contains(&m)
@@ -509,8 +510,35 @@ pub(super) fn chain_capacity_cli(
     if codes.len() != 83 * columns {
         return Err("primary coordinate domain does not contain 83 distinct x values per column".into());
     }
-    let required_variables = chain_s3_max_variables(83, m).ok_or("unsupported chained-S3 arity")?;
-    let required_domain_clauses = finite_domain_clause_count(&codes, 83, m).ok_or("invalid chained-S3 domain")?;
+    let representatives: Vec<BigUint> = if frobenius_orbits {
+        base.factor_base.signed_orbits.iter().map(|orbit| {
+            match orbit.first().and_then(|&index| base.factor_base.points.get(index)) {
+                Some(BinaryPoint::Affine { x, .. }) => Ok(x.to_biguint()),
+                _ => Err("replayed primary orbit lacks an affine representative".into()),
+            }
+        }).collect::<Result<_>>()?
+    } else {
+        Vec::new()
+    };
+    let orbit_size = if frobenius_orbits {
+        if representatives.len() != columns
+            || representatives.iter().collect::<HashSet<_>>().len() != columns {
+            return Err("primary orbit domain lacks distinct representatives".into());
+        }
+        Some(frobenius_orbit_domain_size(83, m, representatives.len())
+            .ok_or("invalid Frobenius-orbit domain")?)
+    } else {
+        None
+    };
+    let required_variables = chain_s3_max_variables(83, m)
+        .ok_or("unsupported chained-S3 arity")?
+        .checked_add(orbit_size.map_or(0, |size| size.variables))
+        .ok_or("chained-S3 variable count overflow")?;
+    let required_domain_clauses = if let Some(size) = orbit_size {
+        size.clauses
+    } else {
+        finite_domain_clause_count(&codes, 83, m).ok_or("invalid chained-S3 domain")?
+    };
     let model_start = Instant::now();
     let mut enc = None;
     let status = if required_variables > u64::from(max_variables) {
@@ -523,8 +551,14 @@ pub(super) fn chain_capacity_cli(
             m, &base.curve.curve.irreducible, &base.curve.curve.b,
             target_x, identity_mask, max_variables,
         ).map_err(|_| "chained-S3 model build failed after preflight")?;
-        built.constrain_summands(&codes, max_domain_clauses)
-            .map_err(|_| "chained-S3 finite-domain install failed after preflight")?;
+        if frobenius_orbits {
+            built.constrain_frobenius_orbit_summands(
+                &representatives, max_variables, max_domain_clauses,
+            ).map_err(|_| "chained-S3 orbit-domain install failed after preflight")?;
+        } else {
+            built.constrain_summands(&codes, max_domain_clauses)
+                .map_err(|_| "chained-S3 finite-domain install failed after preflight")?;
+        }
         enc = Some(built);
         "PASS_model_construction_only"
     };
@@ -534,6 +568,8 @@ pub(super) fn chain_capacity_cli(
         "schema":"n83.chain-s3-capacity-worker/v1", "study":STUDY, "status":status,
         "curve_a":0, "fixture":0, "orbit_columns":columns, "policy":policy, "seed":seed,
         "summands":m, "identity_mask":identity_mask, "object":row["object"],
+        "domain_encoding":if frobenius_orbits { "frobenius_orbit_phase" } else { "coordinate_trie" },
+        "domain_representatives":if frobenius_orbits { Some(representatives.len()) } else { None },
         "point_set_blake3":row["point_set_blake3"], "panel_manifest_blake3":manifest_hash,
         "public_corpus_canonical_json_blake3":corpus_hash,
         "source_commit":source_commit, "source_attestation_mode":source_attestation_mode,
@@ -852,7 +888,7 @@ struct ChainRunConfig<'a> {
 pub(super) fn run_chain_cli(
     root: &Path, fixture_root: &Path, columns: usize, policy: &str, seed: u64, m: usize,
     max_trials: usize, limits: ChainS3Limits, budget_seconds: u64,
-    memory_mib: u64, run_dir: &Path,
+    memory_mib: u64, run_dir: &Path, frobenius_orbits: bool,
 ) -> Result<Value> {
     if ![64, 256, 600].contains(&columns) && !V2_SIZES.contains(&columns)
         || !fixture_root.join("probe-corpus.json").is_file()
@@ -876,7 +912,8 @@ pub(super) fn run_chain_cli(
         policy, seed, fixture_root, limits, memory_limit_bytes, source_commit,
         source_attestation_mode,
     };
-    run_with_config(root, columns, m, "chain-s3", max_trials, budget_seconds, run_dir, Some(&config))
+    let strategy = if frobenius_orbits { "orbit-chain-s3" } else { "chain-s3" };
+    run_with_config(root, columns, m, strategy, max_trials, budget_seconds, run_dir, Some(&config))
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -894,7 +931,9 @@ fn run_with_config(
         "enumerate" => DecompositionStrategy::Enumerate,
         "sat-m3" => return Err("primary SAT S4 model replay and resource-capacity gate is incomplete for F2^83".into()),
         "chain-s3" if chain.is_some() && (5..=6).contains(&m) => DecompositionStrategy::ChainedS3,
-        _ => return Err("primary strategy must be enumerate".into()),
+        "orbit-chain-s3" if chain.is_some() && (5..=6).contains(&m) =>
+            DecompositionStrategy::ChainedS3FrobeniusOrbit,
+        _ => return Err("unsupported or unguarded primary strategy".into()),
     };
     if budget_seconds == 0 || budget_seconds > 86_400 {
         return Err("primary wall cap must be 1..86400 seconds".into());
@@ -1349,15 +1388,17 @@ mod tests {
         let unguarded_chain = root.join("unguarded-chain");
         assert!(run_cli(&root, 64, 5, "chain-s3", 1, 1, &unguarded_chain).is_err());
         assert!(!unguarded_chain.exists());
-        let invalid_caps = root.join("invalid-chain-caps");
-        let error = run_chain_cli(
-            &root, &root, 64, "public_x_hash", SEEDS[0], 5, 1,
-            ChainS3Limits { max_variables: 0, max_domain_clauses: 1,
-                max_models: 1, conflict_budget: 1 },
-            1, 256, &invalid_caps,
-        ).unwrap_err();
-        assert!(error.to_string().contains("outside supported domain"));
-        assert!(!invalid_caps.exists());
+        for orbit_domain in [false, true] {
+            let invalid_caps = root.join(format!("invalid-chain-caps-{orbit_domain}"));
+            let error = run_chain_cli(
+                &root, &root, 64, "public_x_hash", SEEDS[0], 5, 1,
+                ChainS3Limits { max_variables: 0, max_domain_clauses: 1,
+                    max_models: 1, conflict_budget: 1 },
+                1, 256, &invalid_caps, orbit_domain,
+            ).unwrap_err();
+            assert!(error.to_string().contains("outside supported domain"));
+            assert!(!invalid_caps.exists());
+        }
         fs::remove_dir_all(root).unwrap();
     }
 

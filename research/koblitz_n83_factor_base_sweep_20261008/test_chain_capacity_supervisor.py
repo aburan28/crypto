@@ -12,8 +12,13 @@ import chain_capacity_supervisor as guard
 
 def worker_receipt(config: dict, status: str = "PASS_model_construction_only") -> dict:
     built = status == "PASS_model_construction_only"
-    required_variables = 84743 if config["summands"] == 5 else 105908
-    required_clauses = 200000
+    orbit = config.get("domain_encoding") == "frobenius_orbit_phase"
+    added_variables, orbit_clauses = (
+        guard.orbit_domain_size(config["columns"], config["summands"])
+        if orbit else (0, None)
+    )
+    required_variables = (84743 if config["summands"] == 5 else 105908) + added_variables
+    required_clauses = orbit_clauses if orbit else 200000
     return {
         "schema": guard.WORKER_SCHEMA, "study": guard.STUDY,
         "status": status, "curve_a": 0, "fixture": 0,
@@ -26,6 +31,8 @@ def worker_receipt(config: dict, status: str = "PASS_model_construction_only") -
         "memory_cgroup_swap_limit_bytes": 0, "memory_cgroup_peak_bytes": 12345,
         "source_commit": config["source_commit"],
         "source_attestation_mode": "supervised_snapshot",
+        "domain_encoding": "frobenius_orbit_phase" if orbit else "coordinate_trie",
+        "domain_representatives": config["columns"] if orbit else None,
         "source_exporter_blake3": "a" * 64,
         "source_adapter_blake3": "b" * 64,
         "source_chain_blake3": "c" * 64,
@@ -37,8 +44,8 @@ def worker_receipt(config: dict, status: str = "PASS_model_construction_only") -
         "required_max_variables": required_variables,
         "required_domain_clauses": required_clauses,
         "legal_x_coordinates": 83 * config["columns"],
-        "sat_variables": 84743 if built else None,
-        "sat_clauses": 250000 if built else None,
+        "sat_variables": required_variables if built else None,
+        "sat_clauses": max(250000, required_clauses + 248087) if built else None,
         "sat_xor_rows": 1000 if built else None,
         "sat_and_gates": 82668 if built else None,
         "sat_s3_nodes": 4 if built else None,
@@ -79,6 +86,15 @@ class ChainCapacityGuardTests(unittest.TestCase):
         receipt = worker_receipt(self.config)
         receipt["sat_clauses"] = 1
         self.assertIsNotNone(guard.receipt_error(receipt, self.config))
+        orbit_config = dict(
+            self.config, columns=2048, domain_encoding="frobenius_orbit_phase",
+            max_variables=150000, max_domain_clauses=1000000,
+        )
+        orbit_receipt = worker_receipt(orbit_config)
+        self.assertIsNone(guard.receipt_error(orbit_receipt, orbit_config))
+        orbit_receipt["required_domain_clauses"] -= 1
+        self.assertIsNotNone(guard.receipt_error(orbit_receipt, orbit_config))
+        self.assertEqual(guard.orbit_domain_size(2048, 5), (26735, 892470))
         for status in ("UNKNOWN_variable_cap", "UNKNOWN_domain_clause_cap"):
             config = dict(self.config)
             if status == "UNKNOWN_variable_cap":
@@ -102,10 +118,12 @@ class ChainCapacityGuardTests(unittest.TestCase):
             modes = (
                 ("success", "PASS_model_construction_only"),
                 ("v2_success", "PASS_model_construction_only"),
+                ("orbit_success", "PASS_model_construction_only"),
                 ("variable_cap", "UNKNOWN_variable_cap"),
                 ("domain_cap", "UNKNOWN_domain_clause_cap"),
                 ("timeout", "UNKNOWN_wall_cap"),
                 ("memory", "UNKNOWN_resource_or_worker_exit"),
+                ("container_left", "PRODUCER_FAILURE_container_cleanup"),
                 ("malformed", "PRODUCER_FAILURE_worker_receipt"),
                 ("source_changed", "PRODUCER_FAILURE_frozen_input_changed"),
             )
@@ -116,6 +134,8 @@ class ChainCapacityGuardTests(unittest.TestCase):
                     def fake_run(command, **_kwargs):
                         if command[:3] == ["docker", "image", "inspect"]:
                             return subprocess.CompletedProcess(command, 0, "sha256:" + "f" * 64 + "\n", "")
+                        if mode == "container_left" and command[:3] == ["docker", "ps", "-aq"]:
+                            return subprocess.CompletedProcess(command, 0, "stale-container\n", "")
                         return subprocess.CompletedProcess(command, 0, "", "")
 
                     class FakeChild:
@@ -132,6 +152,8 @@ class ChainCapacityGuardTests(unittest.TestCase):
 
                     def fake_popen(command, **_kwargs):
                         config = json.loads((output / "config.json").read_text())
+                        if mode == "orbit_success":
+                            self.assertIn("primary-orbit-chain-build", command)
                         if mode not in ("timeout", "memory"):
                             status = {
                                 "variable_cap": "UNKNOWN_variable_cap",
@@ -149,16 +171,19 @@ class ChainCapacityGuardTests(unittest.TestCase):
                          patch.object(guard.subprocess, "run", side_effect=fake_run), \
                          patch.object(guard.subprocess, "Popen", side_effect=fake_popen):
                         outer = guard.run(
-                            panel, 1182 if mode == "v2_success" else 64,
+                            panel, 2048 if mode == "orbit_success" else 1182 if mode == "v2_success" else 64,
                             "public_x_hash", guard.SEEDS[0], 5, 0,
-                            80000 if mode == "variable_cap" else 100000,
-                            100000 if mode == "domain_cap" else 300000,
+                            80000 if mode == "variable_cap" else 150000 if mode == "orbit_success" else 100000,
+                            100000 if mode == "domain_cap" else 1000000 if mode == "orbit_success" else 300000,
                             1.0, 256, binary, output,
                             checkout=checkout,
+                            orbit_domain=mode == "orbit_success",
                         )
                     self.assertEqual(outer["status"], expected)
                     if mode == "v2_success":
                         self.assertEqual(json.loads((output / "config.json").read_text())["columns"], 1182)
+                    if mode == "orbit_success":
+                        self.assertEqual(json.loads((output / "config.json").read_text())["domain_encoding"], "frobenius_orbit_phase")
                     self.assertEqual(json.loads((output / "outer.json").read_text())["status"], expected)
 
 
