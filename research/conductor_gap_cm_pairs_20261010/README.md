@@ -1,7 +1,7 @@
 # Conductor-gap CM pairs: crater vs floor curves with a certified large gap
 
-**Status: construction and verification, 2026-10-10. No ECDLP measurement
-has been run on these pairs yet; `PROTOCOL.md` is frozen for that.**
+**Status: constructed, Sage-verified, measured (five ecbench sessions,
+2026-10-10). Result: no implemented method sees the gap; see §5.**
 
 ## 1. Why these pairs
 
@@ -93,15 +93,43 @@ Lean proves the generic methods are blind, and the experiment asks whether
 the implemented non-generic ones (`ic.pipeline` and any structural
 candidate) are too.
 
-## 5. ecbench
+## 5. ecbench: the measurement (2026-10-10)
 
-`specs/*.json` are `ecbench.spec/v1` specs, one per pair, crater first,
-as `prime_explicit` constructions (`make_spec.py` derives them from
-`results/`). They are not yet run. The intended `CurveSpec` variant that
-builds a pair from `(ℓ, t, seed)` inside ecbench, so the search is
-replayed from the record instead of pasted, lives in
-`src/cryptanalysis`, which is held by T-237 at the time of writing; it is
-the follow-up, not part of this directory.
+Five sessions, all on this Mac at L0 (operation counts only; wall time is
+never read), every record verified, every audit `OK` with 12 exact replays
+(`sessions/*.audit.json`). `crater_vs_floor.py` pairs each arm's mean `S`
+on the crater's workloads against its mean on the floor workloads, with a
+bootstrap over workloads; `results/crater_vs_floor.md` has every row.
+
+| ℓ | q bits | session | arms | targets per curve | floor/crater (95%) |
+|---|---|---|---|---|---|
+| 263 | 19 | `ell263_q19` | rho, bsgs, kangaroo, ic.pipeline, control | 4 | rho 0.97 [0.78, 1.28], bsgs 0.84 [0.61, 1.32], kangaroo 0.80 [0.58, 1.20], ic 0.974 [0.953, 0.992] |
+| 8209 | 29 | `ell8209_q29` | rho, bsgs, kangaroo, control | 4 | rho 1.22 [1.005, 1.46], bsgs 0.98 [0.65, 1.50], kangaroo 0.95 [0.68, 1.49] |
+| 131101 | 37 | `ell131101_q37` | rho, bsgs, kangaroo, control | 4 | rho 1.28 [0.81, 2.16], bsgs 1.25 [0.82, 1.79], kangaroo 1.06 [0.68, 1.46] |
+| 263 | 19 | `ell263_q19_ic16` | rho, ic.pipeline, control | 16 | ic 0.998 [0.970, 1.026], rho 1.05 [0.96, 1.16] |
+| 8209 | 29 | `ell8209_q29_ic16` | rho, ic.pipeline, control | 16 | ic 0.96 [0.87, 1.07], rho 1.04 [0.91, 1.19] |
+
+Reading, by the decision rule of `PROTOCOL.md`:
+
+- The two intervals that excluded 1 in the first three sessions (ic at
+  ℓ = 263, rho at ℓ = 8209) each rested on four crater workloads and had
+  opposite signs across ℓ. Rho is a generic method, so its deviation is
+  noise by theorem (§4); the ic lead was the one worth chasing.
+- The follow-up with 16 targets per curve and a fresh target seed puts
+  `ic.pipeline` at 0.998 [0.970, 1.026] at ℓ = 263 and 0.96 [0.87, 1.07] at
+  ℓ = 8209, with the control arm at 1 in both. **No implemented method sees
+  the conductor gap**, at gaps of 2^8, 2^13 and 2^17, on curves that share
+  q, N, t and the Frobenius discriminant and differ only in `End(E)`.
+- This is the honest negative the falsifiers section predicted: it extends
+  the small-gap negative of the volcano probe to the largest gaps the
+  construction gives at these sizes, at no isogeny cost.
+
+`specs/gap-ell263-q19-constructor.json` is the same pair expressed through
+the in-harness `conductor_gap` constructor (`src/cryptanalysis/ecbench/
+conductor_gap.rs`, `CurveSpec::ConductorGap`), which rebuilds the pair from
+`(ℓ, t, level, seed)` so a record replays the search; it passes `ecbench
+plan` and is not run here because the explicit-form sessions above already
+measure the same curves.
 
 ## 6. Falsifiers
 

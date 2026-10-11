@@ -43,7 +43,7 @@ def parse(path):
         curves.append((m.group(1), int(m.group(3)), int(m.group(4))))
     return q, ell, N, curves
 
-def spec(path, arms, rounds, timeout, label_suffix=""):
+def spec(path, arms, rounds, timeout, label_suffix="", targets=4, target_seed=20261010):
     q, ell, N, curves = parse(path)
     cs = []
     for level, a, b in curves:
@@ -58,7 +58,7 @@ def spec(path, arms, rounds, timeout, label_suffix=""):
                         f"(End has conductor ell = {ell}). Same q, same N, same group structure; only the "
                         f"endomorphism conductor differs. Paired cost(floor)/cost(crater) is the measurement. "
                         f"Source: research/conductor_gap_cm_pairs_20261010/results/{path.split('/')[-1]}."),
-        "workloads": {"curves": cs, "targets_per_curve": 4, "target_seed": 20261010},
+        "workloads": {"curves": cs, "targets_per_curve": targets, "target_seed": target_seed},
         "arms": arms,
         "measurement": {"rounds": rounds, "warmup": 1, "order": "alternate", "seed": 1,
                         "isolation_required": "L2", "timeout_seconds": timeout},
@@ -78,4 +78,15 @@ if __name__ == "__main__":
     json.dump(spec("results/ell_263_q19.txt", GENERIC + IC, 5, 300), open(f"{out}/gap-ell263-q19.json", "w"), indent=1)
     json.dump(spec("results/ell_8209_q29.txt", GENERIC, 5, 600), open(f"{out}/gap-ell8209-q29.json", "w"), indent=1)
     json.dump(spec("results/ell_131101_q37.txt", GENERIC, 3, 1800), open(f"{out}/gap-ell131101-q37.json", "w"), indent=1)
-    print("wrote 3 specs")
+    # Follow-up after the first three sessions (results/crater_vs_floor.md): the
+    # index-calculus arm at ell = 263 showed floor/crater = 0.974 [0.953, 0.992]
+    # on 4 crater workloads. PROTOCOL.md needs the same sign at a second ell
+    # with the control arm at 1, so: 16 independent targets per curve, fresh
+    # target seed, ic + reference + control only, at both ell.
+    ICONLY = [{"name": "rho-neg", "role": "reference", "method": {"id": "rho.negation"}},
+              {"name": "rho-neg-aa", "role": "control", "method": {"id": "rho.negation"}}] + IC
+    json.dump(spec("results/ell_263_q19.txt", ICONLY, 3, 600, " (ic follow-up, 16 targets)", 16, 20261011),
+              open(f"{out}/gap-ell263-q19-ic16.json", "w"), indent=1)
+    json.dump(spec("results/ell_8209_q29.txt", ICONLY, 3, 1800, " (ic follow-up, 16 targets)", 16, 20261011),
+              open(f"{out}/gap-ell8209-q29-ic16.json", "w"), indent=1)
+    print("wrote 5 specs")

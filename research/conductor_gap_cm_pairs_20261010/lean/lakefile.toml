@@ -1,0 +1,6 @@
+name = "generic_invariance"
+version = "0.1.0"
+defaultTargets = ["GenericInvariance"]
+
+[[lean_lib]]
+name = "GenericInvariance"

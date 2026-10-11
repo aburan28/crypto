@@ -13,6 +13,7 @@
 //! | [`methods`] | the method registry and the one `solve` every method goes through |
 //! | [`generic`] | counted BSGS (three forms) and the kangaroo on any [`CountedGroup`] |
 //! | [`claw`] | the four-point signed-Frobenius pair claw (aburan28/cryptanalysis#175) on a Koblitz curve |
+//! | [`conductor_gap`] | CM crater/floor curve pairs with a certified prime endomorphism-conductor gap |
 //! | [`spec`] | the experiment spec and its deterministic expansion |
 //! | [`host`] | the host capsule and its environment class |
 //! | [`isolation`] | CPU reservation, eviction, pinning, NUMA binding, kernel counters |
@@ -38,6 +39,7 @@ pub mod challenge;
 pub mod claim;
 pub mod claw;
 pub mod compare;
+pub mod conductor_gap;
 pub mod db;
 pub mod frontier;
 pub mod generic;
