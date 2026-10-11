@@ -33,13 +33,17 @@
 <main id="main" tabindex="-1">
   <p class="kicker">Certicom ECC2K-130 · Pollard rho · distinguished points</p>
   <h1>Campaign status</h1>
+  <div class="mode-tabs" role="tablist" aria-label="Campaign feed">
+    <button type="button" class="mode-tab" id="mode-tab-32" data-campaign-mode="32" role="tab" aria-selected="true" aria-controls="mode-panel">DP32 · production</button>
+    <button type="button" class="mode-tab" id="mode-tab-34" data-campaign-mode="34" role="tab" aria-selected="false" aria-controls="mode-panel">DP34 · table-walk</button>
+  </div>
+  <p class="mode-note" id="mode-note" role="status"></p>
+  <div id="mode-panel" role="tabpanel" aria-live="polite">
   <p class="sub">
-    Read-only snapshot of the shared <span class="mono">ecc2k-130</span>
-    distinguished-point table. The browser loads the live feed from the
-    campaign store and the GitHub Pages copy together, and keeps whichever
-    fields each one actually has: counts from the store, walk rate from the
-    snapshot history when the live document is missing it. Refresh is every
-    minute. The page publishes counts only &mdash; walk
+    Read-only snapshots of the two ECC2K-130 distinguished-point feeds. The
+    production tab loads its live feed and GitHub Pages copy together; the
+    table-walk tab reads its separate Pages snapshot. Refresh is every minute.
+    The page publishes counts only &mdash; walk
     coefficients <span class="mono">(a, b)</span>, point keys and seeds stay in
     the private store and never reach this page.
   </p>
@@ -55,10 +59,11 @@
 
   <noscript>
     <p class="banner UNREACHABLE">
-      This dashboard renders two JSON files in the browser, so it needs
-      JavaScript. Without it, read the data directly:
-      <a href="./status.json">status.json</a> and
-      <a href="./history.json">history.json</a>.
+      This dashboard renders separate JSON feeds in the browser, so it needs
+      JavaScript. Without it, read <a href="./status.json">DP32 status</a>,
+      <a href="./history.json">DP32 history</a>,
+      <a href="./status34.json">DP34 status</a>, or
+      <a href="./history34.json">DP34 history</a> directly.
     </p>
   </noscript>
 
@@ -139,27 +144,27 @@
   <h2 class="sr-only">Headline counts</h2>
   <div class="row">
     <div class="card">
-      <div class="label">Distinguished points</div>
+      <div class="label" id="dps-label">Distinguished points</div>
       <div class="value mono" id="dps">&mdash;</div>
       <div class="foot" id="dps-foot">&nbsp;</div>
     </div>
     <div class="card">
-      <div class="label">Last hour</div>
+      <div class="label" id="dps-last-hour-label">Last hour</div>
       <div class="value mono" id="dps_last_hour">&mdash;</div>
       <div class="foot" id="rate-foot">&nbsp;</div>
     </div>
     <div class="card">
-      <div class="label">Last 24 hours</div>
+      <div class="label" id="dps-last-day-label">Last 24 hours</div>
       <div class="value mono" id="dps_last_day">&mdash;</div>
       <div class="foot">&nbsp;</div>
     </div>
     <div class="card">
-      <div class="label">GPUs running</div>
+      <div class="label" id="gpus-label">GPUs running</div>
       <div class="value mono" id="gpus">&mdash;</div>
       <div class="foot" id="gpus-foot">&nbsp;</div>
     </div>
     <div class="card" id="collision-card">
-      <div class="label">Collisions</div>
+      <div class="label" id="collisions-label">Collisions</div>
       <div class="value mono" id="collisions">&mdash;</div>
       <div class="foot" id="collisions-foot">&nbsp;</div>
     </div>
@@ -190,7 +195,7 @@
   </section>
 
   <section aria-labelledby="h-rate">
-    <h2 id="h-rate">Distinguished points per hour</h2>
+    <h2 id="h-rate"><span id="rate-heading">Distinguished points per hour</span></h2>
     <p class="note">
       One bar per UTC hour over the window the snapshot covers. Hours in which
       no point was recorded are drawn as gaps at zero rather than omitted, so
@@ -211,7 +216,7 @@
   </section>
 
   <section aria-labelledby="h-total">
-    <h2 id="h-total">Cumulative distinguished points</h2>
+    <h2 id="h-total"><span id="total-heading">Cumulative distinguished points</span></h2>
     <p class="note">
       Total table size at each published snapshot, from
       <span class="mono">history.json</span>. The series starts when this page
@@ -225,13 +230,13 @@
   <section aria-labelledby="h-forest">
     <h2 id="h-forest">What the walk builds</h2>
     <p class="note">
-      These are real walks on the challenge curve from a separate client run,
-      using a weight-34 cutoff so short trails can be drawn. The live campaign
-      uses weight 32; none of the endpoints in this figure were uploaded to
-      its table or counted above. Each step depends only on the orbit the
-      walk is standing on, so trails that meet follow the same path to a
-      distinguished point. The sample below has no meetings; the live
-      campaign's collision count is shown above.
+      These are real walks on the challenge curve from a separate client run.
+      The DP34 tab reports the live table-walk namespace; the DP32 tab reports
+      the production namespace. They are separate walk functions and tables,
+      so neither feed is silently folded into the other. Each step depends
+      only on the orbit the walk is standing on, so trails that meet follow
+      the same path to a distinguished point. The sample below has no
+      meetings; the production campaign's collision count is shown above.
     </p>
     <figure class="figure">
       <div class="figure-frame forest" id="forest">
@@ -367,6 +372,7 @@
         <thead>
           <tr>
             <th scope="col">worker_id</th>
+            <th scope="col" id="worker-device-heading">GPU/device</th>
             <th scope="col" class="num">DPs</th>
             <th scope="col" class="num">share</th>
             <th scope="col">first point</th>
@@ -591,12 +597,13 @@ cd ec2k-gpu-$V-linux-x86_64
     <p>
       Raw data:
       <a id="live-feed-link" href="https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/status.json">live feed</a>
-      · <a href="./status.json">status.json</a> ·
-      <a href="./history.json">history.json</a>. How the snapshot is taken,
+      · <a id="status-link" href="./status.json">status.json</a> ·
+      <a id="history-link" href="./history.json">history.json</a>. How the snapshot is taken,
       and what is deliberately withheld:
       <a href="https://github.com/aburan28/crypto/blob/main/scripts/rho_status/README.md">scripts/rho_status/README.md</a>.
     </p>
   </footer>
+  </div>
 </main>
 
 <script src="./walk-forest.js" defer></script>
@@ -641,6 +648,42 @@ cd ec2k-gpu-$V-linux-x86_64
   // Expected iterations to a collision: Bailey et al., Breaking ECC2K-130.
   var EXPECTED_ITERATIONS_LOG2 = 60.9;
 
+  // These feeds are intentionally not merged.  DP34 is the table-walk
+  // research namespace currently running on the RTX PRO 6000; its rate is
+  // useful to watch, but it is not an ECC2K-130 DP32 collision statistic.
+  var MODE_CONFIG = {
+    "32": {
+      campaign: "ecc2k-130",
+      statusPath: "./status.json",
+      historyPath: "./history.json",
+      liveFeedUrl: LIVE_FEED_URL,
+      dpWeight: 32,
+      reportIntervalLog2: 25.27,
+      expectedIterationsLog2: 60.9,
+      collisionModel: true,
+      shortLabel: "DP32 · production",
+      note: "DP32 production campaign: live store counts plus the GitHub Pages snapshot, with collision odds kept on the published DP32 work model.",
+      recordLabel: "Distinguished points",
+      sourceLabel: "live feed"
+    },
+    "34": {
+      campaign: "ecc2k130-table8-22b-v1",
+      statusPath: "./status34.json",
+      historyPath: "./history34.json",
+      liveFeedUrl: null,
+      dpWeight: 34,
+      reportIntervalLog2: 25.27,
+      expectedIterationsLog2: null,
+      collisionModel: false,
+      shortLabel: "DP34 · table-walk",
+      note: "DP34 table-walk research campaign: uploaded-record and checkpoint telemetry from its own namespace. It is displayed separately and is not merged into DP32 totals or collision odds.",
+      recordLabel: "DP34 records",
+      sourceLabel: "Pages snapshot"
+    }
+  };
+  var ACTIVE_MODE = "32";
+  var loadGeneration = 0;
+
   var STATE_TEXT = {
     COLLECTING: "Collecting. New distinguished points arrived in the last hour.",
     IDLE_OR_STALE: "Store has points, but none in the last hour.",
@@ -653,6 +696,43 @@ cd ec2k-gpu-$V-linux-x86_64
   var el = function (id) { return document.getElementById(id); };
   var loadedAt = null;
   var timer = null;
+
+  function activeMode() {
+    return MODE_CONFIG[ACTIVE_MODE] || MODE_CONFIG["32"];
+  }
+
+  function applyModeConfig(mode) {
+    if (!MODE_CONFIG[mode]) mode = "32";
+    ACTIVE_MODE = mode;
+    var config = activeMode();
+    CAMPAIGN = config.campaign;
+    ITERATIONS_PER_DP_LOG2 = config.reportIntervalLog2;
+    EXPECTED_ITERATIONS_LOG2 = config.expectedIterationsLog2;
+    document.querySelectorAll("[data-campaign-mode]").forEach(function (button) {
+      var selected = button.getAttribute("data-campaign-mode") === ACTIVE_MODE;
+      button.setAttribute("aria-selected", selected ? "true" : "false");
+      button.tabIndex = selected ? 0 : -1;
+    });
+    el("mode-note").textContent = config.note;
+    el("h-ops").textContent = config.collisionModel ? "Group operations walked" : "Table-walk operations checkpointed";
+    el("rate-heading").textContent = config.recordLabel + " per hour";
+    el("total-heading").textContent = "Cumulative " + config.recordLabel.toLowerCase();
+    el("dps-label").textContent = config.recordLabel;
+    el("dps-last-hour-label").textContent = config.recordLabel + " · last hour";
+    el("dps-last-day-label").textContent = config.recordLabel + " · last 24 hours";
+    el("gpus-label").textContent = config.collisionModel ? "GPUs running" : "GPU slots walking";
+    el("collisions-label").textContent = config.collisionModel ? "Collisions" : "Collision checks";
+    el("odds-block").hidden = !config.collisionModel;
+    el("eta-block").hidden = !config.collisionModel;
+    el("collision-card").hidden = !config.collisionModel;
+    el("iterations-note").textContent = config.collisionModel
+      ? "Where these three numbers come from. Every walker checkpoints its own iteration count every 600 seconds; the campaign sums those checkpoints and publishes the total, so the operation figure above is counted by the workers rather than inferred from the points they reported. The rate is that total's increase between two of these snapshots divided by the time between them — a measurement of the fleet that was running over the window named beside it, not a projection — and the ETA is the work still expected at exactly that rate. A collision is expected after 2^60.9 operations (Bailey et al., Breaking ECC2K-130); it is an expectation, not a deadline."
+      : "The DP34 tab reports the separate table-walk's checkpointed iteration total and uploaded records. Its records are not de-duplicated or collision-checked by this public snapshot, and no DP32 collision probability or ETA is derived from them.";
+    el("live-feed-link").textContent = config.liveFeedUrl ? "live feed" : "no public live feed";
+    el("live-feed-link").href = config.liveFeedUrl || config.statusPath;
+    el("status-link").href = config.statusPath;
+    el("history-link").href = config.historyPath;
+  }
 
   function num(value) {
     if (value === null || value === undefined || value === "") return "—";
@@ -765,7 +845,7 @@ cd ec2k-gpu-$V-linux-x86_64
   // the board; negative when the walked total has passed the expected cost
   // without a recorded collision (birthday variance — say so in the UI).
   function etaSeconds(status) {
-    if (!status || status.campaign_id !== CAMPAIGN) return null;
+    if (!activeMode().collisionModel || EXPECTED_ITERATIONS_LOG2 === null || !status || status.campaign_id !== CAMPAIGN) return null;
     if ((Number(status.collisions) || 0) > 0) return 0;
     var log2ops = iterationsLog2(status);
     var rate = opsPerSecond(status);
@@ -882,7 +962,7 @@ cd ec2k-gpu-$V-linux-x86_64
   // Only fills tables that are still empty, so a failed refresh never wipes
   // rows that loaded successfully a minute ago.
   function placeholderTables(text) {
-    var targets = [["workers-body", 5], ["hourly-body", 2], ["history-body", 7]];
+    var targets = [["workers-body", 6], ["hourly-body", 2], ["history-body", 7]];
     for (var i = 0; i < targets.length; i++) {
       var body = el(targets[i][0]);
       if (body && !body.children.length) emptyRow(body, targets[i][1], text);
@@ -966,10 +1046,11 @@ cd ec2k-gpu-$V-linux-x86_64
     var slot = plotW / series.length;
     var barW = Math.max(1, Math.min(slot - 1, slot * 0.82));
 
+    var recordLabel = activeMode().recordLabel.toLowerCase();
     var chart = svg(W, H,
       series.length + " hourly buckets from " + utc(series[0].at) + " to " +
       utc(series[series.length - 1].at) + ", peak " + num(peak) +
-      " distinguished points in one hour, " + num(total) + " in the window");
+      " " + recordLabel + " in one hour, " + num(total) + " in the window");
 
     chart.appendChild(shape("line", { x1: PAD_L, y1: PAD_T + plotH, x2: W - PAD_R, y2: PAD_T + plotH, "class": "axis" }));
     if (peak > 0) {
@@ -987,7 +1068,7 @@ cd ec2k-gpu-$V-linux-x86_64
           x: x, y: PAD_T + plotH - height, width: barW, height: height, rx: Math.min(2, barW / 2), "class": "bar"
         });
         var tip = document.createElementNS("http://www.w3.org/2000/svg", "title");
-        tip.textContent = utc(point.at) + " · " + num(point.dps) + " DPs";
+        tip.textContent = utc(point.at) + " · " + num(point.dps) + " " + recordLabel;
         bar.appendChild(tip);
         chart.appendChild(bar);
       }
@@ -1060,8 +1141,9 @@ cd ec2k-gpu-$V-linux-x86_64
     var x = function (date) { return PAD_L + ((date.getTime() - first) / spanMs) * plotW; };
     var y = function (value) { return PAD_T + plotH - (value / top) * plotH; };
 
+    var recordLabel = activeMode().recordLabel.toLowerCase();
     var chart = svg(W, H,
-      "Cumulative distinguished points across " + series.length + " snapshots, from " +
+      "Cumulative " + recordLabel + " across " + series.length + " snapshots, from " +
       num(series[0].dps) + " on " + utc(series[0].at) + " to " + num(series[series.length - 1].dps) +
       " on " + utc(series[series.length - 1].at));
 
@@ -1094,7 +1176,7 @@ cd ec2k-gpu-$V-linux-x86_64
     var hours = (last - first) / HOUR_MS;
     var perHour = hours > 0 ? Math.round(gained / hours) : 0;
     el("total-note").textContent =
-      series.length + " snapshots · " + num(gained) + " points added over " +
+      series.length + " snapshots · " + num(gained) + " " + recordLabel + " added over " +
       (hours >= 1 ? Math.round(hours) + (Math.round(hours) === 1 ? " hour" : " hours") : "under an hour") +
       (perHour > 0 ? " · mean " + num(perHour) + " per hour across the feed" : "");
   }
@@ -1160,7 +1242,7 @@ cd ec2k-gpu-$V-linux-x86_64
       // Live ingest omits per_worker even when the store holds points.
       // Do not read that as "no workers" (272M DPs, 2026-09-21).
       if (!ingestOnly && Number(status && status.dps) > 0) ingestOnly = true;
-      emptyRow(body, 5, ingestOnly
+      emptyRow(body, 6, ingestOnly
         ? "Per-worker counts need the walker hop; this snapshot is from the ingest feed."
         : "No workers have reported points.");
       note.textContent = "";
@@ -1192,6 +1274,7 @@ cd ec2k-gpu-$V-linux-x86_64
         idCell.appendChild(chip);
       }
       tr.appendChild(idCell);
+      cell(tr, worker.gpu || "—");
       cell(tr, num(dps), "num mono");
       cell(tr, totalDps > 0 ? (100 * dps / totalDps).toFixed(1) + "%" : "—", "num mono");
       cell(tr, timeCell(worker.first_dp_at));
@@ -1240,7 +1323,7 @@ cd ec2k-gpu-$V-linux-x86_64
       ["Campaign opened", timeCell(status.campaign_created_at, true), false],
       ["First point", timeCell(status.first_dp_at, true), false],
       ["Latest point", timeCell(status.last_dp_at, true), false],
-      ["Latest collision", status.latest_collision_at ? timeCell(status.latest_collision_at, true) : "none recorded", false],
+      ["Latest collision", status.latest_collision_at ? timeCell(status.latest_collision_at, true) : (activeMode().collisionModel ? "none recorded" : "not tracked for this feed"), false],
       ["Re-reported points, 24 h", reReportCell(status), false],
       ["Slots off the DP weight", offWeightCell(status), false],
       ["Snapshot generated", timeCell(status.generated_at, true), false],
@@ -1300,6 +1383,15 @@ cd ec2k-gpu-$V-linux-x86_64
       return;
     }
 
+    if (!activeMode().collisionModel || EXPECTED_ITERATIONS_LOG2 === null) {
+      el("ops-value").textContent = "2^" + log2ops.toFixed(1);
+      el("ops-sub").textContent = reportedIterations(status) !== null
+        ? "≈ " + magnitude(log2ops) + " group operations, summed from the DP34 table-walk checkpoints"
+        : "≈ " + magnitude(log2ops) + " from the separate DP34 record feed";
+      el("ops-percent").textContent = "—";
+      return;
+    }
+
     // The share of the expected work is around 2^-8 at the time of writing
     // and was 2^-21 when the page was first published: a bar filled from it
     // is empty, and a bar filled from the ratio of the exponents would read
@@ -1327,7 +1419,7 @@ cd ec2k-gpu-$V-linux-x86_64
   // 1.71 E, which is why an "ETA" to E is not a deadline. Conditional on the
   // walk behaving as a random map, which is the heuristic behind E.
   function collisionOdds(log2ops) {
-    if (log2ops === null || !isFinite(log2ops)) return null;
+    if (EXPECTED_ITERATIONS_LOG2 === null || log2ops === null || !isFinite(log2ops)) return null;
     var ratio = Math.pow(2, log2ops - EXPECTED_ITERATIONS_LOG2);
     // expm1 keeps the answer exact where 1 - exp(-x) would round to zero.
     return -Math.expm1(-Math.PI / 4 * ratio * ratio);
@@ -1359,6 +1451,7 @@ cd ec2k-gpu-$V-linux-x86_64
       tiles.median.textContent = "—";
       tiles.ninety.textContent = "—";
     };
+    if (!activeMode().collisionModel) return clear("Collision odds are only published for the DP32 production campaign.");
     if (!status || status.campaign_id !== CAMPAIGN) return clear("Derived for " + CAMPAIGN + " only.");
     if ((Number(status.collisions) || 0) > 0) {
       return clear("A collision is on the board — not independently verified here — so the odds are no longer a forecast.");
@@ -1500,6 +1593,11 @@ cd ec2k-gpu-$V-linux-x86_64
   function drawEta(status) {
     var value = el("eta-value");
     var sub = el("eta-sub");
+    if (!activeMode().collisionModel) {
+      value.textContent = "not published";
+      sub.textContent = "DP34 is a separate table-walk feed; this page publishes its throughput and checkpoint total without a DP32 collision ETA.";
+      return;
+    }
     if (!status || status.campaign_id !== CAMPAIGN) {
       value.textContent = "—";
       sub.textContent = "Derived for " + CAMPAIGN + " only.";
@@ -1669,18 +1767,24 @@ cd ec2k-gpu-$V-linux-x86_64
     return status;
   }
 
-  async function loadStatus() {
+  async function loadStatus(mode) {
+    var config = MODE_CONFIG[mode] || MODE_CONFIG["32"];
+    if (!config.liveFeedUrl) {
+      var onlyPages = await fetchJSON(config.statusPath);
+      onlyPages._fetch_label = config.sourceLabel;
+      return onlyPages;
+    }
     var live = null;
     var pages = null;
     var errors = [];
     try {
-      live = await fetchJSON(LIVE_FEED_URL);
+      live = await fetchJSON(config.liveFeedUrl);
       live._fetch_label = "live feed";
     } catch (err) {
       errors.push("live feed: " + err.message);
     }
     try {
-      pages = await fetchJSON("./status.json");
+      pages = await fetchJSON(config.statusPath);
       pages._fetch_label = "Pages snapshot";
     } catch (err) {
       errors.push("Pages snapshot: " + err.message);
@@ -1754,13 +1858,18 @@ cd ec2k-gpu-$V-linux-x86_64
   }
 
   async function load() {
+    var requestMode = ACTIVE_MODE;
+    var requestGeneration = ++loadGeneration;
+    var config = MODE_CONFIG[requestMode] || MODE_CONFIG["32"];
     // This feed is independent: an original-campaign outage must not hide
     // the Macs, and a Mac feed outage must not hide the original campaign.
     loadMacControl();
     var status;
     try {
-      status = await loadStatus();
+      status = await loadStatus(requestMode);
+      if (requestGeneration !== loadGeneration || requestMode !== ACTIVE_MODE) return;
     } catch (err) {
+      if (requestGeneration !== loadGeneration || requestMode !== ACTIVE_MODE) return;
       setBanner("UNREACHABLE", "Could not read the live feed or Pages snapshot (" + err.message + ").");
       tickFreshness(lastStatus, "status unavailable · last try " + utc(new Date(), true));
       placeholderTables("No data — the snapshot could not be read.");
@@ -1769,16 +1878,18 @@ cd ec2k-gpu-$V-linux-x86_64
     lastStatus = status;
     loadedAt = new Date();
 
-    // history.json is optional: the dashboard is still useful without it, so
-    // a failure here must not take the page down with it, and must not wipe
-    // a chart or table that already loaded.
+    // The mode's history file is optional: the dashboard is still useful
+    // without it, so a failure here must not take the page down with it, and
+    // must not wipe a chart or table that already loaded.
     var history = null;
     var historyError = "";
     try {
-      history = await fetchJSON("./history.json");
+      history = await fetchJSON(config.historyPath);
+      if (requestGeneration !== loadGeneration || requestMode !== ACTIVE_MODE) return;
     } catch (err) {
       historyError = err.message;
     }
+    if (requestGeneration !== loadGeneration || requestMode !== ACTIVE_MODE) return;
     attachRateFromHistory(status, history);
 
     var generated = parseTime(status.generated_at);
@@ -1863,14 +1974,14 @@ cd ec2k-gpu-$V-linux-x86_64
       var historyBody = el("history-body");
       if (historyBody) {
         historyBody.textContent = "";
-        emptyRow(historyBody, 7, "Could not read history.json (" + historyError + ").");
+        emptyRow(historyBody, 7, "Could not read " + config.historyPath + " (" + historyError + ").");
       }
     }
     drawWorkers(status.per_worker || [], generated, status);
     drawCampaign(status);
 
     if (historyError) {
-      el("total-note").textContent = "Could not read history.json (" + historyError + ").";
+      el("total-note").textContent = "Could not read " + config.historyPath + " (" + historyError + ").";
     }
     el("claim").textContent = status.claim_boundary ||
       "No claim boundary published in this snapshot.";
@@ -1898,6 +2009,18 @@ cd ec2k-gpu-$V-linux-x86_64
     if (!document.hidden) load();
   });
 
+  document.querySelectorAll("[data-campaign-mode]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      var mode = button.getAttribute("data-campaign-mode");
+      if (mode === ACTIVE_MODE) return;
+      applyModeConfig(mode);
+      lastStatus = null;
+      historyLoaded = false;
+      load();
+    });
+  });
+
+  applyModeConfig("32");
   load();
   schedule();
 })();

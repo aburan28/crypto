@@ -94,6 +94,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Offline snapshot tests
         run: python3 scripts/rho_status/test_rho_status.py
+      - name: DP34 telemetry snapshot tests
+        run: python3 scripts/rho_status/test_weight_status.py
       - name: Mac control snapshot tests
         run: python3 scripts/rho_status/test_mac_control.py
       - name: Site build tests
@@ -129,6 +131,8 @@ jobs:
       # run before anything is deployed, as `needs: test` used to.
       - name: Offline snapshot tests
         run: python3 scripts/rho_status/test_rho_status.py
+      - name: DP34 telemetry snapshot tests
+        run: python3 scripts/rho_status/test_weight_status.py
       - name: Mac control snapshot tests
         run: python3 scripts/rho_status/test_mac_control.py
       - name: Site build tests
@@ -151,6 +155,18 @@ jobs:
           aws-region: us-west-2
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: DP34 telemetry snapshot
+        # This is a counts-only view of the separate table-walk namespace.
+        # It is deliberately fail-soft: the DP32 page must continue to publish
+        # if this research bucket or boto3 is temporarily unavailable.
+        continue-on-error: true
+        run: |
+          python3 -m pip install --quiet --disable-pip-version-check boto3
+          python3 scripts/rho_status/weight_status.py \
+            --bucket ecc2k130-590183823895 \
+            --prefix campaigns/ecc2k130-table8-22b-v1 \
+            --out docs/ecc2k130-status/status34.json
 
       - name: Read Mac control workers
         # The source manifests are private and can contain storage keys or
@@ -220,6 +236,28 @@ jobs:
             --history-in /tmp/history-prev.json \
             --history-out docs/ecc2k130-status/history.json \
             --status-out docs/ecc2k130-status/status.json
+
+      - name: Merge previous DP34 Pages history
+        env:
+          PAGES_HISTORY34_URL: https://aburan28.github.io/crypto/history34.json
+        run: |
+          set -euo pipefail
+          set +e
+          http_code=$(curl -sS -L --retry 5 --retry-all-errors --retry-delay 3 --max-time 60 \
+            -o /tmp/history34-prev.json -w "%{http_code}" "$PAGES_HISTORY34_URL")
+          curl_exit=$?
+          set -e
+          if [ "$http_code" = "404" ]; then
+            echo '{"points":[]}' > /tmp/history34-prev.json
+          elif [ "$curl_exit" -ne 0 ] || [ "$http_code" != "200" ]; then
+            echo "Could not fetch live history34.json (curl=$curl_exit HTTP=$http_code); retaining the checked-in DP34 history." >&2
+            cp docs/ecc2k130-status/history34.json /tmp/history34-prev.json
+          fi
+          python3 scripts/rho_status/render.py \
+            --status docs/ecc2k130-status/status34.json \
+            --history-in /tmp/history34-prev.json \
+            --history-out docs/ecc2k130-status/history34.json \
+            --status-out docs/ecc2k130-status/status34.json
 
       - uses: actions/configure-pages@v5
       - name: Assemble site
