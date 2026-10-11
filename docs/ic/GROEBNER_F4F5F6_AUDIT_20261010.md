@@ -135,7 +135,9 @@ control.
 | root echelon of the inherited engine and every other `echelon_f2_counted` caller now reaches `gf2_elim` at ≥ 128 × 256 (it never did: only `rref_f2_counted` routed there) | `koblitz_groebner.rs` | `KIC_F4_KERNEL=legacy` | kernel alone 1.8–3.2× on the oracle's own Macaulay matrices (`gf2_elim_bench --quick`, table below); reach ladder 1.0–1.1× (its matrices are mostly below the gate and build-dominated) |
 | child nodes ask the node oracle **before** specialising the parent's bases | `koblitz_groebner.rs::solve_rec` | `KIC_F4_EARLY_ORACLE=0` | n = 17, dim 6, m = 3, 8 targets: F6-IC 197.7 → 185.4 ms with both changes; the same 463 reductions, 280 refutations, 58 341 additions |
 | partial support pruning: a summand with some bits assigned refutes as soon as no base code agrees with them | `koblitz_index_calculus.rs::F6GeometricGate::decide` | `KIC_F6_PARTIAL_SUPPORT=0` | n = 17: reductions 508 → 463 (−9 %), 45 extra refutations; larger cells in §4.2 |
-| `gf2_elim` selects AVX2 on hosts without AVX-512 (they ran scalar) | `gf2_elim.rs::simd_kind` | `KIC_GF2_SIMD=0` | §4.3; no change on AVX-512 hosts |
+| `gf2_elim` selects AVX2 on hosts without AVX-512 (they ran scalar) | `gf2_elim.rs::simd_kind` | `KIC_GF2_SIMD=0` | §4.4; no change on AVX-512 hosts |
+| inherited-basis rewrite word by word: a `RewritePlan` of `pext`/`pdep` segments per composed column map (memoised beside the map) replaces the bit scatter; drafts become pivot rows without a second copy | `inherited_f4.rs` | `KIC_F4_REWRITE=scatter` | §4.3: F4 and F6-IC 10–14 % faster at n = 23, noise at n = 17; counters identical |
+| F6-IC pair-index arm: the pair-sum index is cached per base across targets and attempts, built eagerly, and the 256-point closure cap is lifted when an index exists | `koblitz_index_calculus.rs` (`groebner_decompose_f6_ic_pair_index`) | the reference arm `groebner_decompose_f6_ic` is unchanged | §4.3: at 275 points 1.36× over both other arms, 61 % fewer reductions; the reference arm's measurements are untouched |
 | `f4_fp::solve` candidate filter (§2.1) | `f4_fp.rs` | — | correctness |
 | `examples/f6_ic_probe.rs`: same-binary F4/F6-IC timing probe with verdict agreement | new | — | tooling |
 
@@ -184,7 +186,47 @@ walking the tree, and the n = 31 cell exhausts a 2 000-node budget in
 2.3 s a target where meet in the middle answers in under a millisecond
 (`OPTIMIZATION_PLAN.md` §6).
 
-### 4.3 Kernel row update on this host
+### 4.3 Second round: specialisation rewrite and the shared pair index
+
+Callgrind on the F6-IC probe at n = 17 (after §4.2) put the rewrite of a
+row into the child's layout at about 30 % of instructions (inlined into
+`specialise_shared` and `materialise`), `insert` at 19 %, map composition
+at 5 %, allocation and memset at about 12 %. Every layout step is a merge
+of monotone pieces, so the columns of one source word fall into a few
+runs that stay in order inside one destination word; a plan of
+`(src_mask, dst_mask, dst_word)` segments rewrites a row with one
+`pext`/`pdep` per segment, and the XOR performs the folds. A test checks
+the plan against the scatter on random composed layouts and rows.
+
+`f6_ic_probe`, best of 3 a target, same binary:
+
+| cell | arm | before (scatter) | after (plan) | after + shared pair index (`f6p`) |
+|:--|:--|--:|--:|--:|
+| K₁/2²³ dim 7 (107 pts), 4 targets | inherited F4 | 588 ms | 530 ms | — |
+| | F6-IC | 532 ms | 528 ms | 472 ms |
+| K₀/2²³ dim 8 (275 pts), 4 targets | inherited F4 | 1 794 ms | 1 536 ms | — |
+| | F6-IC | 1 788 ms | 1 570 ms | **1 135 ms** (reductions 2 692 → 1 045, word XORs 158.5 M → 124.9 M) |
+| K₁/2¹⁷ dim 6 (62 pts), 8 targets | F6-IC | 193 ms | 189 ms | 185 ms |
+
+Reductions, splits, gate counters and word XORs are identical between the
+scatter and the plan. An AVX2 build of the row XOR in `insert` was
+measured 2–8 % slower on the n = 23 cells (rows are a few dozen words) and
+was not kept.
+
+The pair-sum index (every unordered pair sum of the packed base, keyed by
+the sum) depends on the base alone, so the opt-in pair-index arm now keeps
+it in a thread-local cache keyed by a fingerprint of the packed points and
+reuses it for every target and attempt on that base; it is built eagerly
+on the first one-fixed closure (|F|(|F|+1)/2 batched additions once:
+37 950 at 275 points, charged to the target that builds it) instead of
+after a legacy-scan budget, and the 256-point closure cap does not apply
+when an index serves the closure. Below the cap the arms agree to within
+noise (the legacy scan was 4–7 ms of the 190–470 ms); above it the
+one-fixed closure, which the reference arm skips, prunes the tree. The
+reference arm `groebner_decompose_f6_ic` and its ladder measurements are
+unchanged.
+
+### 4.4 Kernel row update on this host
 
 `gf2_elim_bench --quick`, ms per cell, two runs (3 and 5 repetitions):
 

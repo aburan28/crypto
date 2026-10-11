@@ -3,10 +3,11 @@
 //!
 //! ```bash
 //! cargo run --release --example f6_ic_probe -- [--a 0] [--n 17] [--dim 6] [--m 3] \
-//!     [--targets 8] [--budget 20000] [--engines f4,f6] [--reps 2]
+//!     [--targets 8] [--budget 20000] [--engines f4,f6,f6p] [--reps 2]
 //! ```
 //!
-//! Targets are `[k]G` for `k = 1 …`.  Each arm decides every target with
+//! Arms: `f4` inherited F4, `f6` F6-IC, `f6p` F6-IC with the shared pair-sum
+//! index.  Targets are `[k]G` for `k = 1 …`.  Each arm decides every target with
 //! the same node budget; the probe prints one JSON line per arm and target
 //! (wall, verdict, reductions, splits, geometric counters, word XORs) and a
 //! per-arm total, and checks that the arms agree on every verdict.  It is a
@@ -16,7 +17,8 @@ use crypto_lib::cryptanalysis::koblitz_groebner::{
     f4_word_ops_thread, FieldStructure, SolveStats, SolverEngine,
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    build_standard_subspace_factor_base, groebner_decompose, groebner_decompose_f6_ic, KoblitzCurve,
+    build_standard_subspace_factor_base, groebner_decompose, groebner_decompose_f6_ic,
+    groebner_decompose_f6_ic_pair_index, KoblitzCurve,
 };
 use num_bigint::BigUint;
 use std::time::Instant;
@@ -57,6 +59,7 @@ fn main() {
         let mut total_ns = 0u128;
         let mut total = SolveStats::default();
         let mut total_xors = 0u64;
+        let mut total_oracle_ns = 0u64;
         for k in 1..=targets {
             let target = kc.mul(kc.generator(), &BigUint::from(k));
             let mut best_ns = u128::MAX;
@@ -71,7 +74,10 @@ fn main() {
                     "f6" => groebner_decompose_f6_ic(
                         &kc, &fb, &index_of, &st, &target, m, engine, budget,
                     ),
-                    other => panic!("unknown engine {other}; use f4 or f6"),
+                    "f6p" => groebner_decompose_f6_ic_pair_index(
+                        &kc, &fb, &index_of, &st, &target, m, engine, budget,
+                    ),
+                    other => panic!("unknown engine {other}; use f4, f6 or f6p"),
                 };
                 let ns = t0.elapsed().as_nanos();
                 let xors = f4_word_ops_thread() - x0;
@@ -88,7 +94,7 @@ fn main() {
                 assert_eq!(sum, target, "{arm}: witness for target {k} does not add up");
             }
             println!(
-                "{{\"arm\":\"{arm}\",\"target\":{k},\"ms\":{:.3},\"hit\":{},\"exhausted\":{},\"reductions\":{},\"splits\":{},\"propagations\":{},\"infeasible\":{},\"geo_refute\":{},\"geo_witness\":{},\"partial_refute\":{},\"geo_adds\":{},\"word_xors\":{}}}",
+                "{{\"arm\":\"{arm}\",\"target\":{k},\"ms\":{:.3},\"hit\":{},\"exhausted\":{},\"reductions\":{},\"splits\":{},\"propagations\":{},\"infeasible\":{},\"geo_refute\":{},\"geo_witness\":{},\"partial_refute\":{},\"geo_adds\":{},\"oracle_ms\":{:.3},\"pair_builds\":{},\"pair_lookups\":{},\"word_xors\":{}}}",
                 best_ns as f64 / 1e6,
                 hit.is_some(),
                 stats.exhausted,
@@ -100,6 +106,9 @@ fn main() {
                 stats.geometric_witnesses,
                 stats.geometric_partial_support_refutations,
                 stats.geometric_group_additions,
+                stats.geometric_oracle_ns as f64 / 1e6,
+                stats.geometric_pair_index_builds,
+                stats.geometric_pair_index_lookups,
                 xors
             );
             arm_verdicts.push(hit.is_some());
@@ -109,10 +118,11 @@ fn main() {
             total.geometric_refutations += stats.geometric_refutations;
             total.geometric_witnesses += stats.geometric_witnesses;
             total.geometric_group_additions += stats.geometric_group_additions;
+            total_oracle_ns += stats.geometric_oracle_ns;
             total_xors += xors;
         }
         println!(
-            "{{\"arm\":\"{arm}\",\"total_ms\":{:.3},\"hits\":{},\"reductions\":{},\"splits\":{},\"geo_refute\":{},\"geo_witness\":{},\"geo_adds\":{},\"word_xors\":{}}}",
+            "{{\"arm\":\"{arm}\",\"total_ms\":{:.3},\"hits\":{},\"reductions\":{},\"splits\":{},\"geo_refute\":{},\"geo_witness\":{},\"geo_adds\":{},\"oracle_ms\":{:.3},\"word_xors\":{}}}",
             total_ns as f64 / 1e6,
             arm_verdicts.iter().filter(|h| **h).count(),
             total.reductions,
@@ -120,6 +130,7 @@ fn main() {
             total.geometric_refutations,
             total.geometric_witnesses,
             total.geometric_group_additions,
+            total_oracle_ns as f64 / 1e6,
             total_xors
         );
         verdicts.push(arm_verdicts);

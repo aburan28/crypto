@@ -124,7 +124,9 @@
 //!   Pollard lambda search on anomalous binary curves*, Math. Comp. 69
 //!   (2000) — the `√n` rho speed-up we compare against.
 
+use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 use std::sync::{Arc, OnceLock};
 
@@ -6242,6 +6244,14 @@ impl F6CoordinateEncoder {
     }
 }
 
+thread_local! {
+    /// The pair-sum index of the last base an F6-IC pair-index gate built
+    /// one for, keyed by the base's fingerprint: the index depends on the
+    /// base alone, so every target and attempt on that base reuses it.
+    static SHARED_PAIR_INDEX: RefCell<Option<(u64, Rc<HashMap<FastPoint, Vec<(usize, usize)>>>)>> =
+        const { RefCell::new(None) };
+}
+
 /// `KIC_F6_PARTIAL_SUPPORT=0` turns the gate's partial support test off, as
 /// a same-binary control; read once per process.
 fn partial_support_enabled() -> bool {
@@ -6267,7 +6277,13 @@ struct F6GeometricGate<'a> {
     fast: Option<F6FastGeometry>,
     batch_fast: bool,
     pair_index_enabled: bool,
-    pair_index: Option<HashMap<FastPoint, Vec<(usize, usize)>>>,
+    /// Every unordered pair sum of the packed base, keyed by the sum.  It
+    /// depends on the base alone, so one index serves every target and
+    /// every attempt on the same base: built once (eagerly, in the
+    /// pair-index arm) and kept in [`SHARED_PAIR_INDEX`].
+    pair_index: Option<Rc<HashMap<FastPoint, Vec<(usize, usize)>>>>,
+    /// Fingerprint of the packed base the index is for.
+    pair_index_key: u64,
     pair_index_builds: u64,
     pair_index_lookups: u64,
     one_fixed_additions: u64,
@@ -6340,6 +6356,16 @@ impl<'a> F6GeometricGate<'a> {
                 codes,
             })
         });
+        let pair_index_key = fast
+            .as_ref()
+            .map(|f| {
+                use std::hash::{Hash, Hasher};
+                let mut h = std::collections::hash_map::DefaultHasher::new();
+                (kc.a, kc.n, f.points.len()).hash(&mut h);
+                f.points.hash(&mut h);
+                h.finish()
+            })
+            .unwrap_or(0);
         let vars = (0..m)
             .map(|i| {
                 (0..ell)
@@ -6363,6 +6389,7 @@ impl<'a> F6GeometricGate<'a> {
             batch_fast: true,
             pair_index_enabled: false,
             pair_index: None,
+            pair_index_key,
             pair_index_builds: 0,
             pair_index_lookups: 0,
             one_fixed_additions: 0,
@@ -6430,12 +6457,25 @@ impl<'a> F6GeometricGate<'a> {
         defined_mask: u64,
     ) -> bool {
         if self.pair_index_enabled && self.fast.is_some() {
-            let size = self.fb.points.len() as u64;
-            if self.pair_index.is_none()
-                && self.one_fixed_additions >= size.saturating_mul(size + 1)
-                && self.by_x.contains_key(&fixed.1)
-            {
+            // The index is a property of the base: take the one a previous
+            // gate on this base left, or build it now and leave it for the
+            // next.  Its additions are charged to the target that builds it.
+            if self.pair_index.is_none() {
+                self.pair_index = SHARED_PAIR_INDEX.with(|cache| {
+                    cache
+                        .borrow()
+                        .as_ref()
+                        .filter(|(key, _)| *key == self.pair_index_key)
+                        .map(|(_, index)| index.clone())
+                });
+            }
+            if self.pair_index.is_none() {
                 self.build_pair_index();
+                if let Some(index) = &self.pair_index {
+                    SHARED_PAIR_INDEX.with(|cache| {
+                        *cache.borrow_mut() = Some((self.pair_index_key, index.clone()));
+                    });
+                }
             }
             if self.pair_index.is_some() {
                 return match self.close_one_fixed_fast_pair(fixed, assignment, defined_mask) {
@@ -6473,7 +6513,7 @@ impl<'a> F6GeometricGate<'a> {
                 index.entry(sum).or_default().push((first, first + offset));
             }
         }
-        self.pair_index = Some(index);
+        self.pair_index = Some(Rc::new(index));
         self.pair_index_builds += 1;
     }
 
@@ -6797,7 +6837,11 @@ impl<'a> F6GeometricGate<'a> {
                 fixed.push((i, key));
             }
         }
-        if self.vars.len() == 3 && fixed.len() == 1 && self.fb.points.len() <= 256 {
+        // One-fixed closure scans the base (Θ(|F|) additions a call), so it
+        // is capped at 256 points; with a pair index a call is two lookups,
+        // and the cap does not apply.
+        let indexed = self.pair_index_enabled && self.fast.is_some();
+        if self.vars.len() == 3 && fixed.len() == 1 && (self.fb.points.len() <= 256 || indexed) {
             return if self.close_one_fixed(&fixed[0], assignment, defined_mask) {
                 NodeOracleDecision::Witness
             } else {
