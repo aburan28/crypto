@@ -1,15 +1,10 @@
 name: Koblitz Stage 53 gate audit
 
 on:
-  pull_request:
-    paths:
-      - "docs/ic/boundary_targets.json"
-      - "docs/ic/BOUNDARY_TARGETS.md"
-      - "scripts/compose_koblitz_stage50_gate_audit.py"
-      - "scripts/compose_koblitz_stage53_gate_audit.py"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/GATE_STATUS.md"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-53-current-gate-audit-20260912/**"
-      - ".github/workflows/koblitz-stage53-gate-audit.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
+  workflow_dispatch:
 
 permissions:
   contents: read

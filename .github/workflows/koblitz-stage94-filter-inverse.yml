@@ -1,11 +1,9 @@
 name: Koblitz Stage 94 n53 filter and inverse
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage94_filter_inverse.py"
-      - ".github/workflows/koblitz-stage94-filter-inverse.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:
