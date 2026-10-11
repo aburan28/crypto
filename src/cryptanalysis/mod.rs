@@ -189,6 +189,7 @@ pub mod identity_certificate;
 pub mod inherited_f4;
 pub mod invalid_curve_attack;
 pub mod isogeny_class_search;
+pub mod jacobian_transfer;
 pub mod isogeny_degree_search;
 pub mod isogeny_walk;
 pub mod j0_twists;

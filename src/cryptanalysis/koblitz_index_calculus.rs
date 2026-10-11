@@ -124,7 +124,9 @@
 //!   Pollard lambda search on anomalous binary curves*, Math. Comp. 69
 //!   (2000) — the `√n` rho speed-up we compare against.
 
+use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 use std::sync::{Arc, OnceLock};
 
@@ -152,7 +154,6 @@ use crate::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint, Fro
 use crate::cryptanalysis::koblitz_fast_arith::{
     pack_fast, FastBinaryCurve, FastPoint as ArithFastPoint,
 };
-use crate::cryptanalysis::koblitz_fast_arith::FastBinaryCurve;
 use crate::cryptanalysis::koblitz_groebner::{
     chain_order_interleaved, invert_permutation, matrix_f4_f2, permute_mask, permute_poly,
     solve_boolean_system_filtered, solve_boolean_system_with_node_oracle, split_rule_default,
@@ -161,7 +162,6 @@ use crate::cryptanalysis::koblitz_groebner::{
 use crate::cryptanalysis::koblitz_relation_solver::{
     to_u64_mod, IncrementalRelationSolver, RowStatus, U64RankTracker,
 };
-use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
 use crate::cryptanalysis::koblitz_sparse_la::{
     self, SparseCoreSolver, SparseRow, SparseSolveOptions, SparseSolveOutcome, SparseSolveReport,
 };
@@ -864,113 +864,6 @@ impl KoblitzCurve {
         Self::subfield(1, n, u64::from(a), 1)
     }
 
-    /// Build an **isogenous member of the class of `K_a`**: the model
-    /// `y² + xy = x³ + a x² + b` over `F_{2^n}` with `b` arbitrary (in
-    /// practice `b ∉ F_2`, a floor curve of the isogeny volcano).
-    ///
-    /// Isogenous curves have equal point counts, so `#E` is taken from the
-    /// Koblitz recurrence for the class and then **certified** on sampled
-    /// points: every sample is killed by `#E`, and some sample realises the
-    /// full 2-part of `#E`.  With `r > 2√q` (every admitted rung) `#E` is
-    /// the only multiple of `r` in the Hasse interval, so the certificate
-    /// pins `#E`; a `b` whose curve is not in the class fails it and yields
-    /// `None`.
-    ///
-    /// The 2-power Frobenius is **not** an endomorphism of such a model:
-    /// `frobenius_is_endomorphism` is false, [`KoblitzCurve::frobenius`]
-    /// is the identity, `λ = 1`, and the factor-base machinery folds only
-    /// by negation.  `modulus` fixes the field representation (`None`
-    /// selects the same sparse search as [`KoblitzCurve::new`], so toy
-    /// classes built on that modulus can pass `b` verbatim).
-    pub fn isogenous_model(
-        a: u8,
-        n: u32,
-        b: F2mElement,
-        modulus: Option<IrreduciblePoly>,
-    ) -> Option<Self> {
-        if a > 1 || !(3..=MAX_N).contains(&n) {
-            return None;
-        }
-        let irreducible = match modulus {
-            Some(m) => {
-                if m.degree != n {
-                    return None;
-                }
-                m
-            }
-            None if n <= 63 => find_irreducible_sparse(n)?,
-            None => find_irreducible_sparse_wide(n)?,
-        };
-        let a_fe = if a == 0 {
-            F2mElement::zero(n)
-        } else {
-            F2mElement::one(n)
-        };
-        if b.is_zero() {
-            return None; // singular
-        }
-        let mut curve = BinaryCurve {
-            m: n,
-            irreducible,
-            a: a_fe,
-            b,
-            generator: BinaryPoint::Infinity,
-            order: BigUint::zero(),
-            cofactor: BigUint::one(),
-        };
-        let group_order = koblitz_point_count(a, n);
-
-        // Certify the class order on sampled points.
-        let half_order = &group_order >> 1u32;
-        let mask = if n >= 64 { u64::MAX } else { (1u64 << n) - 1 };
-        let mut state = 0x2545_f491_4f6c_dd1du64 ^ (n as u64) ^ ((a as u64) << 32);
-        let mut samples = 0usize;
-        // Every sample must be killed by `#E`; with `r > 2√q` (every admitted
-        // rung) `#E` is the only multiple of `r` in the Hasse interval, so a
-        // point of order `r` plus this check pins `#E`.  The second check,
-        // that some sample realises the full 2-part of `#E`, is a cheap extra
-        // guard against a twist of the same `r`-part.
-        let mut saw_full_two_part = false;
-        let mut tries = 0u32;
-        while samples < 16 && tries < 4096 {
-            tries += 1;
-            state = state
-                .wrapping_mul(6364136223846793005)
-                .wrapping_add(1442695040888963407);
-            let x = F2mElement::from_biguint(&BigUint::from(state & mask), n);
-            for p in points_with_x(&curve, &x) {
-                samples += 1;
-                if scalar_mul(&curve, &p, &group_order) != BinaryPoint::Infinity {
-                    return None;
-                }
-                if scalar_mul(&curve, &p, &half_order) != BinaryPoint::Infinity {
-                    saw_full_two_part = true;
-                }
-            }
-        }
-        if samples < 8 || !saw_full_two_part {
-            return None;
-        }
-
-        let (r, cofactor) = attach_prime_subgroup(&mut curve, a, n, &group_order)?;
-        let trace: i64 = if a == 0 { -1 } else { 1 };
-        Some(Self {
-            a,
-            n,
-            curve,
-            trace,
-            group_order,
-            subgroup_order: r,
-            cofactor,
-            lambda: BigUint::one(),
-            frobenius_is_endomorphism: false,
-            k: 1,
-            q: 2,
-            a_index: u64::from(a),
-            b_index: 1,
-            subfield_basis: vec![F2mElement::one(n)],
-        })
-    }
 
     /// The pinned K_1 model over GF(2^83) used by the two-word IC stage
     /// gate. Its parameters are the C082 public fixture.
@@ -1059,7 +952,6 @@ impl KoblitzCurve {
             a_index: u64::from(a),
             b_index: 1,
             subfield_basis: vec![F2mElement::one(n)],
-            frobenius_is_endomorphism: true,
         })
     }
 
@@ -1320,97 +1212,6 @@ impl KoblitzCurve {
     }
 }
 
-/// Factor `#E`, split off the largest prime `r` (which must be simple
-/// and exceed the cofactor), find a generator of the order-`r` subgroup,
-/// and store generator / order / cofactor on `curve`.  Shared by
-/// [`KoblitzCurve::new`] and [`KoblitzCurve::isogenous_model`].
-fn attach_prime_subgroup(
-    curve: &mut BinaryCurve,
-    a: u8,
-    n: u32,
-    group_order: &BigUint,
-) -> Option<(BigUint, BigUint)> {
-    {
-        let factors = factorise(group_order.clone());
-        let (r, e) = factors.last()?.clone();
-        if e != 1 {
-            return None;
-        }
-        let cofactor = &group_order / &r;
-        if r <= cofactor {
-            return None;
-        }
-
-        // A generator of the order-r subgroup: kill the cofactor on
-        // curve points until the result is non-trivial.  Exhaustive
-        // abscissa search is fine through ~24 bits; past that a full
-        // `2^n` sweep is impossible, so sample deterministically from
-        // a fixed LCG (reproducible across hosts).
-        let mut generator = BinaryPoint::Infinity;
-        let mask = if n >= 64 { u64::MAX } else { (1u64 << n) - 1 };
-        let exhaustive = n <= 24;
-        let budget = if exhaustive {
-            1u64 << n
-        } else {
-            // ~1M trials is plenty: a random x hits the curve ~1/2 of
-            // the time and survives the cofactor map with probability
-            // ≈ 1 − 1/r ≫ 2^{-20} on admitted rungs.
-            1u64 << 20
-        };
-        let mut state = 0x9e37_79b9_7f4a_7c15u64 ^ (n as u64) ^ ((a as u64) << 32);
-        for i in 0..budget {
-            let raw = if exhaustive {
-                i
-            } else {
-                state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
-                state & mask
-            };
-            let x = F2mElement::from_biguint(&BigUint::from(raw), n);
-            let pts = points_with_x(&curve, &x);
-            let mut found = false;
-            for p in pts {
-                let cand = scalar_mul(&curve, &p, &cofactor);
-                if cand != BinaryPoint::Infinity {
-                    // Confirm order divides r (reject accidental torsion).
-                    if scalar_mul(&curve, &cand, &r) == BinaryPoint::Infinity {
-                        generator = cand;
-                        found = true;
-                        break;
-                    }
-                }
-            }
-            if found {
-                break;
-            }
-        }
-        if generator == BinaryPoint::Infinity {
-            return None;
-        }
-        curve.generator = generator;
-        curve.order = r.clone();
-        curve.cofactor = cofactor.clone();
-        Some((r, cofactor))
-
-        let trace = i64::try_from(trace).ok()?;
-        let lambda = frobenius_eigenvalue_q(&curve, trace, q, k, &r)?;
-
-        Some(Self {
-            a,
-            n,
-            curve,
-            trace,
-            group_order,
-            subgroup_order: r,
-            cofactor,
-            lambda,
-            frobenius_is_endomorphism: true,
-            k,
-            q,
-            a_index,
-            b_index,
-            subfield_basis,
-        })
-    }
 
 impl KoblitzCurve {
     /// The `2`-power Frobenius `π(x, y) = (x², y²)`; the identity on an
@@ -1999,10 +1800,6 @@ impl FrobeniusFactorBase {
                 .map(|p| kc.mul(p, &kc.subgroup_order))
                 .collect(),
         }
-        self.points
-            .iter()
-            .map(|p| kc.mul(p, &kc.subgroup_order))
-            .collect()
     }
 
     /// Distinct h-torsion classes `[r]P`, derived with one scalar
@@ -2059,7 +1856,6 @@ impl FrobeniusFactorBase {
                         .or_insert_with(|| from_fast_point(&fast, candidate));
                 }
                 current = fast_frobenius(kc, &fast, current);
-                current = kc.frobenius(&current);
             }
         }
         classes.into_values().collect()
@@ -3842,32 +3638,6 @@ pub fn pack_point(p: &BinaryPoint) -> u64 {
     }
 }
 
-/// Project a general point to single-word coordinates for the fast field
-/// of [`crate::cryptanalysis::koblitz_fast_arith`].
-pub(crate) fn to_fast_point(
-    fast: &FastBinaryCurve,
-    p: &BinaryPoint,
-) -> crate::cryptanalysis::koblitz_fast_arith::FastPoint {
-    match p {
-        BinaryPoint::Infinity => None,
-        BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
-    }
-}
-
-/// Lift single-word coordinates back to a general point.
-pub(crate) fn from_fast_point(
-    fast: &FastBinaryCurve,
-    p: crate::cryptanalysis::koblitz_fast_arith::FastPoint,
-) -> BinaryPoint {
-    match p {
-        None => BinaryPoint::Infinity,
-        Some((x, y)) => BinaryPoint::Affine {
-            x: fast.element(x),
-            y: fast.element(y),
-        },
-    }
-}
-
 /// Ask the processor to start fetching this address.
 ///
 /// The three-summand search probes the presence filter once per base
@@ -4489,6 +4259,136 @@ impl Default for ProbeBudget {
             summands_scanned: 351_750_000,
             descent_probes: 51_328_107,
         }
+    }
+}
+
+/// Least-significant-digit radix sort of table entries by packed key.
+///
+/// Stable 16-bit counting-sort passes over two buffers, one pass per
+/// 16-bit group that can discriminate (a key-OR pre-pass finds the top
+/// group; higher groups permute nothing).  Work is split into a few
+/// wide chunks across the rayon pool in both the counting and scatter
+/// phases — those phases are memory-bandwidth bound, so more threads
+/// add contention rather than throughput, while the serial prefix costs
+/// `chunks × 64K`.  A short serial prefix over the per-chunk histograms
+/// assigns disjoint output ranges, so no atomics or locks are needed.
+///
+/// Stability preserves the build's row-major `(i, j)` order within each
+/// key group.  Callers need key-grouped order only (binary-search lookup
+/// ranges, key-grouped `m = 4` walk); the previous comparison sort made
+/// no order guarantee within a group either, and every gate checks
+/// verdicts, witness validity, and sortedness rather than exact order.
+fn radix_sort_entries_by_key(entries: &mut [(u64, u32, u32)]) {
+    const BITS: u32 = 16;
+    const BUCKETS: usize = 1 << BITS;
+    const MASK: u64 = (1 << BITS) - 1;
+    let n = entries.len();
+    if n < 2 {
+        return;
+    }
+    // Few wide chunks: counting and scatter are memory-bandwidth bound
+    // (more threads add contention, not throughput), while the serial
+    // prefix below costs `chunks × 64K` operations.
+    let parallelism = std::thread::available_parallelism()
+        .map(|t| t.get())
+        .unwrap_or(1)
+        .clamp(1, 8);
+    let chunks = parallelism.min(n).max(1);
+    // Balanced division bounds: chunk c covers [c*n/chunks, (c+1)*n/chunks).
+    // Every bound satisfies lo <= hi <= n (empty tail chunks become (n, n),
+    // which slice harmlessly), and sizes differ by at most one entry.
+    let bounds: Vec<(usize, usize)> = (0..chunks)
+        .map(|c| ((c * n) / chunks, ((c + 1) * n) / chunks))
+        .collect();
+    let mut scratch: Vec<(u64, u32, u32)> = vec![(0, 0, 0); n];
+    // One histogram row and one cursor row per chunk, reused across passes.
+    let mut hists: Vec<Vec<usize>> = (0..chunks).map(|_| vec![0usize; BUCKETS]).collect();
+    let mut starts: Vec<Vec<usize>> = (0..chunks).map(|_| vec![0usize; BUCKETS]).collect();
+    // Only the 16-bit groups that can discriminate need passes: groups
+    // above the highest set key bit permute nothing.  (At n = 13 every
+    // packed key fits 15 bits, so one pass sorts the whole table.)
+    let key_or: u64 = entries
+        .par_iter()
+        .map(|e| e.0)
+        .reduce(|| 0u64, |a, b| a | b);
+    let passes = ((64 - key_or.leading_zeros()) as usize).div_ceil(16).max(1);
+    let mut from_scratch = false;
+    for pass in 0..passes as u32 {
+        let shift = BITS * pass;
+        for hist in hists.iter_mut() {
+            hist.iter_mut().for_each(|c| *c = 0);
+        }
+        // Phase A: count chunk histograms in parallel.
+        {
+            let src: &[(u64, u32, u32)] = if from_scratch { &scratch } else { entries };
+            bounds
+                .par_iter()
+                .zip(hists.par_iter_mut())
+                .for_each(|(&(lo, hi), hist)| {
+                    for e in &src[lo..hi] {
+                        hist[((e.0 >> shift) & MASK) as usize] += 1;
+                    }
+                });
+        }
+        // Phase B (serial): per-chunk scatter cursors.  Chunk c's items
+        // in bucket b follow all earlier buckets (`base`) plus earlier
+        // chunks' items in bucket b; `base` then advances by the
+        // bucket total.
+        {
+            let mut base = 0usize;
+            for b in 0..BUCKETS {
+                for (c, hist) in hists.iter().enumerate() {
+                    starts[c][b] = base;
+                    base += hist[b];
+                }
+            }
+        }
+        // Phase C: scatter chunks in parallel.  Positions written by
+        // different chunks are disjoint by construction (each output
+        // slot belongs to exactly one (chunk, bucket) segment), so the
+        // destination base address travels as a plain `usize` (natively
+        // `Send + Sync`, unlike a raw pointer) and each worker casts it
+        // back locally.  rayon::scope joins every worker before return.
+        //
+        // SAFETY: `starts[c][b]` is `base[b]` plus bucket-`b` items of
+        // earlier chunks, and exactly `hists[c][b]` items of chunk `c`
+        // fall in bucket `b`; hence chunk `c` writes precisely
+        // `[starts[c][b], starts[c][b] + hists[c][b])`, and these
+        // segments partition `[0, n)` across all `(c, b)`.  Every slot
+        // is therefore written exactly once, no two threads ever write
+        // the same slot, and no thread reads the destination.  All
+        // scoped threads join before either buffer is touched again, so
+        // the address-derived pointers never outlive their buffer.
+        {
+            let dst_addr = (if from_scratch {
+                entries.as_mut_ptr()
+            } else {
+                scratch.as_mut_ptr()
+            }) as usize;
+            let src_all: &[(u64, u32, u32)] = if from_scratch { &scratch } else { entries };
+            rayon::scope(|s| {
+                for ((lo, hi), starts_c) in bounds.iter().copied().zip(starts.iter()) {
+                    let mut cur = starts_c.clone();
+                    s.spawn(move |_| {
+                        let dst = dst_addr as *mut (u64, u32, u32);
+                        for e in &src_all[lo..hi] {
+                            let b = ((e.0 >> shift) & MASK) as usize;
+                            // SAFETY: justified above; `cur[b]` stays
+                            // inside this chunk's segment by counting.
+                            unsafe {
+                                dst.add(cur[b]).write(*e);
+                            }
+                            cur[b] += 1;
+                        }
+                    });
+                }
+            });
+        }
+        from_scratch = !from_scratch;
+    }
+    // An odd pass count leaves the sorted output in the scratch buffer.
+    if from_scratch {
+        entries.copy_from_slice(&scratch);
     }
 }
 
@@ -6699,6 +6599,21 @@ impl F6CoordinateEncoder {
     }
 }
 
+thread_local! {
+    /// The pair-sum index of the last base an F6-IC pair-index gate built
+    /// one for, keyed by the base's fingerprint: the index depends on the
+    /// base alone, so every target and attempt on that base reuses it.
+    static SHARED_PAIR_INDEX: RefCell<Option<(u64, Rc<HashMap<FastPoint, Vec<(usize, usize)>>>)>> =
+        const { RefCell::new(None) };
+}
+
+/// `KIC_F6_PARTIAL_SUPPORT=0` turns the gate's partial support test off, as
+/// a same-binary control; read once per process.
+fn partial_support_enabled() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("KIC_F6_PARTIAL_SUPPORT").as_deref() != Ok("0"))
+}
+
 /// F6-IC's target-specific geometric branch oracle. It may close a branch
 /// only against the exact enumerated base, or return a group-verified
 /// relation; it never treats an x-only Semaev root as a relation.
@@ -6710,15 +6625,27 @@ struct F6GeometricGate<'a> {
     vars: Vec<Vec<usize>>,
     encoder: F6CoordinateEncoder,
     by_x: HashMap<BigUint, Vec<usize>>,
+    /// The distinct subspace codes of the usable base points, for the
+    /// partial support test: a summand whose assigned bits match none of
+    /// them cannot be a base point whatever its free bits become.
+    codes: Vec<u64>,
     fast: Option<F6FastGeometry>,
     batch_fast: bool,
     pair_index_enabled: bool,
-    pair_index: Option<HashMap<FastPoint, Vec<(usize, usize)>>>,
+    /// Every unordered pair sum of the packed base, keyed by the sum.  It
+    /// depends on the base alone, so one index serves every target and
+    /// every attempt on the same base: built once (eagerly, in the
+    /// pair-index arm) and kept in [`SHARED_PAIR_INDEX`].
+    pair_index: Option<Rc<HashMap<FastPoint, Vec<(usize, usize)>>>>,
+    /// Fingerprint of the packed base the index is for.
+    pair_index_key: u64,
     pair_index_builds: u64,
     pair_index_lookups: u64,
     one_fixed_additions: u64,
     witness: Option<Vec<usize>>,
     support_checks: u64,
+    partial_support_checks: u64,
+    partial_support_refutations: u64,
     residual_lookups: u64,
     fast_residual_lookups: u64,
     batch_groups: u64,
@@ -6743,6 +6670,7 @@ impl<'a> F6GeometricGate<'a> {
         }
         let encoder = F6CoordinateEncoder::new(&fb.subspace_basis)?;
         let mut by_x: HashMap<BigUint, Vec<usize>> = HashMap::new();
+        let mut codes: Vec<u64> = Vec::with_capacity(fb.points.len());
         for (index, point) in fb.points.iter().enumerate() {
             if index_of.get(&point_key(point)) != Some(&index) {
                 return None;
@@ -6750,9 +6678,11 @@ impl<'a> F6GeometricGate<'a> {
             let BinaryPoint::Affine { x, .. } = point else {
                 continue;
             };
-            encoder.encode(x)?;
+            codes.push(encoder.encode(x)?);
             by_x.entry(x.to_biguint()).or_default().push(index);
         }
+        codes.sort_unstable();
+        codes.dedup();
         let fast = FastCurve::new(&kc.curve).and_then(|curve| {
             let points: Vec<_> = fb.points.iter().map(|p| curve.lift(p)).collect();
             let target_fast = curve.lift(target);
@@ -6781,6 +6711,16 @@ impl<'a> F6GeometricGate<'a> {
                 codes,
             })
         });
+        let pair_index_key = fast
+            .as_ref()
+            .map(|f| {
+                use std::hash::{Hash, Hasher};
+                let mut h = std::collections::hash_map::DefaultHasher::new();
+                (kc.a, kc.n, f.points.len()).hash(&mut h);
+                f.points.hash(&mut h);
+                h.finish()
+            })
+            .unwrap_or(0);
         let vars = (0..m)
             .map(|i| {
                 (0..ell)
@@ -6799,15 +6739,19 @@ impl<'a> F6GeometricGate<'a> {
             vars,
             encoder,
             by_x,
+            codes,
             fast,
             batch_fast: true,
             pair_index_enabled: false,
             pair_index: None,
+            pair_index_key,
             pair_index_builds: 0,
             pair_index_lookups: 0,
             one_fixed_additions: 0,
             witness: None,
             support_checks: 0,
+            partial_support_checks: 0,
+            partial_support_refutations: 0,
             residual_lookups: 0,
             fast_residual_lookups: 0,
             batch_groups: 0,
@@ -6868,12 +6812,25 @@ impl<'a> F6GeometricGate<'a> {
         defined_mask: u64,
     ) -> bool {
         if self.pair_index_enabled && self.fast.is_some() {
-            let size = self.fb.points.len() as u64;
-            if self.pair_index.is_none()
-                && self.one_fixed_additions >= size.saturating_mul(size + 1)
-                && self.by_x.contains_key(&fixed.1)
-            {
+            // The index is a property of the base: take the one a previous
+            // gate on this base left, or build it now and leave it for the
+            // next.  Its additions are charged to the target that builds it.
+            if self.pair_index.is_none() {
+                self.pair_index = SHARED_PAIR_INDEX.with(|cache| {
+                    cache
+                        .borrow()
+                        .as_ref()
+                        .filter(|(key, _)| *key == self.pair_index_key)
+                        .map(|(_, index)| index.clone())
+                });
+            }
+            if self.pair_index.is_none() {
                 self.build_pair_index();
+                if let Some(index) = &self.pair_index {
+                    SHARED_PAIR_INDEX.with(|cache| {
+                        *cache.borrow_mut() = Some((self.pair_index_key, index.clone()));
+                    });
+                }
             }
             if self.pair_index.is_some() {
                 return match self.close_one_fixed_fast_pair(fixed, assignment, defined_mask) {
@@ -6911,7 +6868,7 @@ impl<'a> F6GeometricGate<'a> {
                 index.entry(sum).or_default().push((first, first + offset));
             }
         }
-        self.pair_index = Some(index);
+        self.pair_index = Some(Rc::new(index));
         self.pair_index_builds += 1;
     }
 
@@ -7188,18 +7145,42 @@ impl<'a> F6GeometricGate<'a> {
         for (i, vars) in self.vars.iter().enumerate() {
             let mut x = F2mElement::zero(self.kc.n);
             let mut complete = true;
+            // The summand's assigned, undefined bits as a code mask and
+            // value: any base point this summand can still be has a code
+            // agreeing with them.
+            let mut assigned_mask = 0u64;
+            let mut assigned_code = 0u64;
             for (j, &var) in vars.iter().enumerate() {
                 if defined_mask & (1u64 << var) != 0 {
                     complete = false;
-                    break;
+                    continue;
                 }
                 match assignment[var] {
-                    Some(true) => x.add_assign(&self.fb.subspace_basis[j]),
-                    Some(false) => {}
-                    None => {
-                        complete = false;
-                        break;
+                    Some(true) => {
+                        assigned_mask |= 1u64 << j;
+                        assigned_code |= 1u64 << j;
+                        if complete {
+                            x.add_assign(&self.fb.subspace_basis[j]);
+                        }
                     }
+                    Some(false) => assigned_mask |= 1u64 << j,
+                    None => complete = false,
+                }
+            }
+            if !complete && assigned_mask != 0 && partial_support_enabled() {
+                // Exact partial support: refute as soon as the bits fixed
+                // so far rule out every base code.  Sound for every
+                // decomposition over the enumerated base, since each of its
+                // summands has one of these codes; this is the SAT path's
+                // coordinate domain, applied inside the algebraic tree.
+                self.partial_support_checks += 1;
+                if !self
+                    .codes
+                    .iter()
+                    .any(|&code| code & assigned_mask == assigned_code)
+                {
+                    self.partial_support_refutations += 1;
+                    return NodeOracleDecision::Refute;
                 }
             }
             if complete {
@@ -7211,7 +7192,11 @@ impl<'a> F6GeometricGate<'a> {
                 fixed.push((i, key));
             }
         }
-        if self.vars.len() == 3 && fixed.len() == 1 && self.fb.points.len() <= 256 {
+        // One-fixed closure scans the base (Θ(|F|) additions a call), so it
+        // is capped at 256 points; with a pair index a call is two lookups,
+        // and the cap does not apply.
+        let indexed = self.pair_index_enabled && self.fast.is_some();
+        if self.vars.len() == 3 && fixed.len() == 1 && (self.fb.points.len() <= 256 || indexed) {
             return if self.close_one_fixed(&fixed[0], assignment, defined_mask) {
                 NodeOracleDecision::Witness
             } else {
@@ -7478,6 +7463,8 @@ fn groebner_decompose_with_geometry(
             stats.geometric_oracle_calls = oracle_calls;
             stats.geometric_oracle_ns = oracle_ns;
             stats.geometric_support_checks = gate.support_checks;
+            stats.geometric_partial_support_checks = gate.partial_support_checks;
+            stats.geometric_partial_support_refutations = gate.partial_support_refutations;
             stats.geometric_residual_lookups = gate.residual_lookups;
             stats.geometric_fast_residual_lookups = gate.fast_residual_lookups;
             stats.geometric_batch_groups = gate.batch_groups;
@@ -8268,6 +8255,13 @@ impl<'a> ProjectedFactorBase<'a> {
     /// Nonzero signed-Frobenius columns after cofactor projection.
     pub fn columns(&self) -> usize {
         self.map.representatives.len()
+    }
+
+    /// The signed-Frobenius location of `[h]P_i` among the projected
+    /// columns, `(column, shift, negated)`, or `None` when `[h]P_i = O`
+    /// and the point contributes to no column.
+    pub fn location_of(&self, index: usize) -> Option<(usize, u32, bool)> {
+        self.map.orbit_of.get(index).copied().flatten()
     }
 
     /// Native construction counts for full-cost reporting.

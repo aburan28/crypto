@@ -118,6 +118,7 @@ use crate::cryptanalysis::koblitz_index_calculus::{
     build_frobenius_factor_base_from_divisor, build_frobenius_union_factor_base,
     find_irreducible_sparse, koblitz_signed_frobenius_rho_reference,
     saturate_factor_base_two_torsion, FrobeniusFactorBase, KoblitzCurve, KoblitzSignedRhoOptions,
+    ProjectedFactorBase,
 };
 use crate::cryptanalysis::research_bench::{bench_curves, linear_fit};
 use crate::cryptanalysis::residual_walk::is_prime_u64;
@@ -3754,6 +3755,43 @@ pub fn koblitz_instance(a: u8, n: u32) -> Option<BinaryInstance> {
     })
 }
 
+/// A curve of the Koblitz isogeny class that is **not** the Koblitz model:
+/// `y² + xy = x³ + a x² + b` with `b ∉ F₂`, the same group order as `K_a`
+/// (certified on sampled points by [`KoblitzCurve::isogenous_model`]),
+/// no Frobenius endomorphism.  This is the floor-curve control of the
+/// conductor-gap experiments (`docs/ic/LEAD_LADDER_METHODOLOGY_20261010.md`
+/// L8): every lead that claims a gain *from* `τ` must vanish on it.
+/// `b` is a bitmask in the instance's own sparse modulus (the one
+/// `KoblitzCurve::new` selects), so a `b` built elsewhere must be in the
+/// same representation; `koblitz` is `None`, so only negation folds.
+pub fn koblitz_floor_instance(a: u8, n: u32, b: u64) -> Option<BinaryInstance> {
+    use num_bigint::BigUint as Big;
+    if n == 0 || n > 63 || b < 2 {
+        return None;
+    }
+    let b_fe = crate::binary_ecc::F2mElement::from_biguint(&Big::from(b), n);
+    let kc = KoblitzCurve::isogenous_model(a, n, b_fe, None)?;
+    let fast = FastCurve::new(&kc.curve)?;
+    let gf = Gf2::new(&kc.curve.irreducible);
+    let ash = ArtinSchreier::new(&gf);
+    let generator = fast.lift(kc.generator());
+    Some(BinaryInstance {
+        name: format!("{}-floor-b{b:x}", kc.label()),
+        n,
+        irreducible: kc.curve.irreducible.clone(),
+        a: u64::from(a),
+        b,
+        group_order: kc.group_order.to_u64()?,
+        r: kc.subgroup_order.to_u64()?,
+        cofactor: kc.cofactor.to_u64()?,
+        generator,
+        fast,
+        gf,
+        artin_schreier: ash,
+        koblitz: None,
+    })
+}
+
 // ── Factor bases ───────────────────────────────────────────────────
 
 /// How factor-base points map to relation columns.
@@ -3764,6 +3802,13 @@ pub enum ColumnFold {
     /// One column per signed Frobenius orbit; `(−1)^s π^k(rep)` carries
     /// `(−1)^s λ^k`.  Koblitz only.
     SignedFrobeniusOrbit,
+    /// One column per signed Frobenius orbit *of the cofactor
+    /// projections* `[h]P`: two raw orbits whose projections coincide
+    /// or are signed Frobenius translates of each other share a column
+    /// (for a base closed under translation by the 2-torsion point `T`,
+    /// `P` and `P + T` do).  A point with `[h]P = O` carries
+    /// coefficient `0`.  Koblitz only.
+    ProjectedSignedFrobeniusOrbit,
 }
 
 /// A materialised factor base with its column map.  Both `P` and `−P`
@@ -3998,6 +4043,10 @@ pub fn koblitz_factor_base(
     let mut out = FactorBase::empty(description);
     let mut abscissa_col: FastMap<usize> = fast_map(fb.points.len());
     let mut key_to_index: FastMap<usize> = fast_map(fb.points.len());
+    let projected = match fold {
+        ColumnFold::ProjectedSignedFrobeniusOrbit => Some(ProjectedFactorBase::new(kc, fb)),
+        _ => None,
+    };
     for (i, p) in fb.points.iter().enumerate() {
         let fp = inst.fast.lift(p);
         key_to_index.insert(fp.pack(), i);
@@ -4007,6 +4056,15 @@ pub fn koblitz_factor_base(
                 let (orbit, k, negated) = fb.signed_orbit_of[i];
                 let c = powmod(lambda, k as u64, r);
                 (orbit, if negated { submod(0, c, r) } else { c })
+            }
+            ColumnFold::ProjectedSignedFrobeniusOrbit => {
+                match projected.as_ref().and_then(|map| map.location_of(i)) {
+                    Some((orbit, k, negated)) => {
+                        let c = powmod(lambda, u64::from(k), r);
+                        (orbit, if negated { submod(0, c, r) } else { c })
+                    }
+                    None => (0, 0),
+                }
             }
             ColumnFold::Abscissa => {
                 let next = abscissa_col.len();
@@ -4036,8 +4094,20 @@ pub fn koblitz_factor_base(
     out.abscissa_list.sort_unstable();
     out.columns = match fold {
         ColumnFold::SignedFrobeniusOrbit => fb.signed_orbits.len(),
+        ColumnFold::ProjectedSignedFrobeniusOrbit => {
+            projected.as_ref().map_or(0, |map| map.columns())
+        }
         ColumnFold::Abscissa => abscissa_col.len(),
     };
+    if let Some(map) = projected.as_ref() {
+        let c = map.cost();
+        out.cost
+            .count("cofactor_multiplications", c.cofactor_multiplications);
+        out.cost.count(
+            "frobenius_coordinate_squarings",
+            c.derived_frobenius_coordinate_squarings + c.canonical_frobenius_coordinate_squarings,
+        );
+    }
     if !fb.uses_ambient_basis() {
         out.dimension = Some(fb.ell);
         out.subspace_basis = Some(
@@ -4320,25 +4390,33 @@ impl FrobeniusPairTable {
                 member_of[i * n + t] = idx as u32;
             }
         }
-        // One representative per column, the first point of it: any
-        // member of a signed orbit serves, the orbit being its own
-        // ⟨σ, −1⟩-image.
-        let mut rep_of_col = vec![usize::MAX; fb.columns];
-        for i in 0..f {
-            let c = fb.col_of[i];
-            if rep_of_col[c] == usize::MAX {
-                rep_of_col[c] = i;
+        // One representative per signed Frobenius orbit, the first point
+        // of it: any member serves, the orbit being its own ⟨σ, −1⟩-image.
+        // Orbits are found by the canonical name of the abscissa, not by
+        // column: a column may hold several orbits (the `Z[τ]`-multiplier
+        // closure of `compact-orbit-scan`), and a table built from one
+        // representative per column would miss every pair whose first
+        // member lies in another orbit of the column.
+        let mut orbit_of = vec![0u32; f];
+        let mut rep_of_orbit: Vec<usize> = Vec::new();
+        {
+            let mut orbit_index: FastMap<u32> = fast_map(f / n + 1);
+            for i in 0..f {
+                let key = canon.canon(fb.points[i].x);
+                let next = rep_of_orbit.len() as u32;
+                let id = *orbit_index.entry(key).or_insert(next);
+                if id == next {
+                    rep_of_orbit.push(i);
+                }
+                orbit_of[i] = id;
             }
         }
         let mut ops = GroupOps::default();
         let mut canons = 0u64;
         let mut map: FastMap<(u32, u32)> = fast_map(f * f / (4 * n) + 1);
-        for (col, &rep) in rep_of_col.iter().enumerate() {
-            if rep == usize::MAX {
-                continue;
-            }
+        for (orbit, &rep) in rep_of_orbit.iter().enumerate() {
             for j in 0..f {
-                if fb.col_of[j] < col {
+                if (orbit_of[j] as usize) < orbit {
                     continue;
                 }
                 let u = g.add(&mut ops, fb.points[rep], fb.points[j]);
@@ -4353,7 +4431,7 @@ impl FrobeniusPairTable {
         }
         Some(Self {
             entries: map.len() as u64,
-            representatives: rep_of_col.iter().filter(|&&r| r != usize::MAX).count() as u64,
+            representatives: rep_of_orbit.len() as u64,
             map,
             canon,
             member_of,
@@ -6117,6 +6195,22 @@ fn calibrate_binary(inst: &BinaryInstance, calib: &mut Calibration) {
     calib.ns_per_frobenius = Some(start.elapsed().as_nanos() as f64 / samples as f64);
     std::hint::black_box(acc);
     calib.ns_per_word_xor = Some(calibrate_word_xor());
+    // The Frobenius-orbit canonicalisation (lead L2): priced here so the
+    // framework's `canonicalisations` counter is charged like every other
+    // non-addition instead of riding along unpriced.
+    if inst.koblitz.is_some() {
+        if let Some(canon) = FrobeniusCanon::new(&inst.gf, inst.n) {
+            let xs: Vec<u64> = (0..1024).map(|_| rng.gen::<u64>() & inst.gf.mask).collect();
+            let start = Instant::now();
+            let mut acc = 0u64;
+            for i in 0..samples {
+                let (c, t) = canon.canon_with_shift(xs[(i % 1024) as usize]);
+                acc ^= c.wrapping_add(t as u64);
+            }
+            calib.ns_per_canon = Some(start.elapsed().as_nanos() as f64 / samples as f64);
+            std::hint::black_box(acc);
+        }
+    }
 }
 
 /// Nanoseconds per pair of the `S₄` pairs-and-solve loop, measured on
