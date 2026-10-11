@@ -124,10 +124,6 @@ fn signed_orbit(curve: &KoblitzCurve, point: &BinaryPoint) -> Vec<BinaryPoint> {
 }
 
 fn point_defined_base(curve: &KoblitzCurve, columns: usize) -> PointBase {
-    // Single-word field for the hot arithmetic below (per-x lifts and the
-    // cofactor/subgroup/label scalar multiplications).  Every swap is
-    // covered by lib bit-exactness tests; the collected sets, sort orders,
-    // keys, and labels are unchanged, so the emitted base is identical.
     point_defined_base_with_selection(curve, columns, false)
 }
 
@@ -5629,7 +5625,7 @@ fn main() {
                 .map(|bit| (encoding.problem_variables + bit + 1) as u32)
                 .collect()
         } else {
-            (1..=(4 * n) as u32).collect()
+            (1..=4 * n).collect()
         };
         priorities.extend(&theory_selectors);
         encoding.solver.set_branch_priority(&priorities);
@@ -5879,8 +5875,6 @@ fn main() {
     let lazy_relative_support = algebra_encoding == "orbit_factorized"
         && std::env::var("KIC_ORBIT_LAZY_RELATIVE_SUPPORT").as_deref() == Ok("1");
     let compact_batch_only = std::env::var("KIC_ORBIT_BATCH_ONLY").as_deref() == Ok("1");
-    let disable_compact_extract =
-        std::env::var("KIC_ORBIT_DISABLE_COMPACT_EXTRACT").as_deref() == Ok("1");
     let regular_scan_policy = RegularScanPolicy::from_env();
     assert!(
         lazy_relative_support || regular_scan_policy == RegularScanPolicy::Lex,
@@ -6685,7 +6679,6 @@ fn main() {
             "schema_version":"1.0",
             "task_id":task_id,
             "kind":"balanced_s5_native_xor_observation",
-            "evidence_class":if outcome==SolveResult::Unknown {"censored_operational_observation"} else {"measured_solver_observation"},
             "evidence_class":if compact_batch_targets_requested > 0 || compact_point_batch_targets_requested > 0 {
                 "measured_compact_batch_extraction"
             } else if outcome==SolveResult::Unknown {
@@ -6736,8 +6729,6 @@ fn main() {
                 "forced_intermediate_bits":lazy_relative_forced_bits
             },
             "compact_orbit_extraction":{
-                "enabled":lazy_relative_support && !disable_compact_extract,
-                "disabled_for_unpinned_search":disable_compact_extract,
                 "enabled":lazy_relative_support,
                 "regular_scan_policy":regular_scan_policy.name(),
                 "pair_table_entries":0,
@@ -6752,8 +6743,6 @@ fn main() {
             "compact_orbit_batch":if compact_batch_targets_requested > 0 {
                 Some(json!({
                     "targets_requested":compact_batch_targets_requested,
-                    "targets_extracted":compact_batch_relations.len(),
-                    "failed_target_scalars":compact_batch_failures,
                     "regular_scan_policy":regular_scan_policy.name(),
                     "targets_extracted":compact_batch_relations.len(),
                     "failed_target_scalars":compact_batch_failures,
@@ -6771,11 +6760,6 @@ fn main() {
                     "regular_state_scan_ms":lazy_relative_scan_ms,
                     "root_index_build_ms":compact_batch_index_build_ms,
                     "query_ms_sum":compact_batch_query_ms,
-                    "charged_total_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_query_ms,
-                    "sat_verification_included":false,
-                    // The batch loop checks each group lift, but does not
-                    // run SAT on every extracted relation. `solve_ms` spans
-                    // extraction too and must not be added a second time.
                     "batch_loop_wall_ms":compact_batch_loop_ms,
                     "charged_total_ms":base_ms + lazy_relative_scan_ms + compact_batch_index_build_ms + compact_batch_loop_ms,
                     "charged_total_scope":"base, regular scan, root index, and full target loop; process start/curve setup/encoding excluded",
