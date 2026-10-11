@@ -1,0 +1,6 @@
+
+thread 'main' (481660) panicked at ../../weak_curve_properties_20261010/main.rs:26:5:
+assertion `left == right` failed: fixed model input changed
+  left: "8dccdb638d1d3770b4c675cc8052354824b4da52af458536a8ce5aa23c6ba4ff"
+ right: "9738f6bd6c016732f88e4e7979ac09e9aa6fd16eba96220ec8781c0017b6055e"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

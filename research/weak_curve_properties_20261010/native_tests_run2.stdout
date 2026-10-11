@@ -1,0 +1,12 @@
+
+running 7 tests
+test tests::root_mutation_is_rejected ... ok
+test field::tests::prime_and_extension_arithmetic ... ok
+test field::tests::reject_reducible_modulus - should panic ... ok
+test tests::discriminant_two_cases ... ok
+test tests::descent_distinguishes_j_and_model ... ok
+test tests::torsion_certifies_local_endomorphism_level ... ok
+test identities::tests::identities_and_mutation ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
