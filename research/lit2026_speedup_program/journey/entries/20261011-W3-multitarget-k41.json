@@ -1,0 +1,24 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W3",
+  "slug": "multitarget-k41",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1683",
+  "papers": ["ePrint 2026/2253"],
+  "kind": "diagnostic",
+  "workload": {
+    "id": "rho-batch-koblitz-n41-k1-16",
+    "description": "Kuhn-Struik batch rho on signed-Frobenius classes (A = 82), k = 1,2,4,8,16, 24 batches each, on icv1-f2m41-tm2308219-7f48b14a (K_0/GF(2^41)), subgroup r = 549756390943, cofactor 4",
+    "curve_ids": ["icv1-f2m41-tm2308219-7f48b14a"]
+  },
+  "metric": "slope of ln(mean total batch cost) on ln k",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 120,
+  "arms": [],
+  "ratio_original_over_candidate": null,
+  "ratio_previous_over_candidate": null,
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w3_ggm_audit_20261011/reports/run-20261011T2012Z/report.pdf",
+  "note": "Slope 0.561, 95% bootstrap [0.500, 0.637], against the Kuhn-Struik finite-k slope 0.539; committed records on the same curve (k = 1,4,16,32) give 0.547 [0.487, 0.622]. All 744 logarithms verified."
+}
