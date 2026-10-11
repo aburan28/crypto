@@ -79,6 +79,11 @@ fn theta_dimension_one() {
         let t = theta1_structure(&f, &e, &p4, &q4).unwrap();
         assert_eq!(j_from_theta1(&f, &t.null(&f)), jinv(&f, &e));
         let s = t.s;
+        let s4 = f.sq(f.sq(s));
+        let a_from_theta =
+            f.neg(f.div(f.mul(f.from_u64(2), f.add(s4, f.one())), f.sub(s4, f.one())));
+        let a_from_curve = f.mul(f.from_u64(3), f.mul(t.e0, t.kappa));
+        assert_eq!(a_from_theta, a_from_curve);
         let pr = |x: [E2; 2], y: [E2; 2]| f.mul(x[0], y[1]) == f.mul(x[1], y[0]);
         assert!(pr(t.point(&f, &pmul(&f, &e, &p4, 2)), [f.one(), f.neg(s)]));
         assert!(pr(t.point(&f, &pmul(&f, &e, &q4, 2)), [s, f.one()]));
@@ -183,6 +188,20 @@ fn theta_kani_chain_splits_at_e0_times_x() {
             &[],
         )
         .expect("chain");
+        let prefix = chain_until_first_split(
+            &f,
+            &c,
+            &e,
+            [(im_gam[0], im_phi[0]), (im_gam[1], im_phi[1])],
+            a,
+            &[],
+        )
+        .expect("complete chain prefix");
+        assert_eq!(prefix.remaining_steps, 0);
+        assert_eq!(prefix.result.split, res.split);
+        for (x, y) in prefix.result.nulls.iter().zip(res.nulls.iter()) {
+            assert!(proj_eq(&f, x, y));
+        }
         assert_eq!(res.nulls.len(), a as usize);
         // intermediate codomains are Jacobians
         for nl in &res.nulls[..res.nulls.len() - 1] {
