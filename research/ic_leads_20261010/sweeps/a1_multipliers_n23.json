@@ -1,0 +1,25 @@
+{
+ "_comment": "Lead A1 (Z[tau] multiplier closure) at n=23: compact-orbit-scan with norm<=0 (plain), 4, 8, 16 at 5 columns, and the plain 45-column base for the equal-table comparison; Frobenius-folded table, 2-sums. Prediction: points per column x |A|, trials per relation falls with the square of the points at fixed columns, relations needed unchanged (columns fixed), table grows with the square of the points.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 17
+ },
+ "repeats": 8,
+ "seed": 20261010,
+ "max_trials": 40000000,
+ "matrix": {
+  "factor_base": [
+   "compact-orbit-scan:columns=5,raw_x_cap=4000000",
+   "compact-orbit-scan:columns=5,raw_x_cap=4000000,norm=4",
+   "compact-orbit-scan:columns=5,raw_x_cap=4000000,norm=8",
+   "compact-orbit-scan:columns=5,raw_x_cap=4000000,norm=16",
+   "compact-orbit-scan:columns=45,raw_x_cap=4000000"
+  ],
+  "oracle": [
+   "mitm-frobenius"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

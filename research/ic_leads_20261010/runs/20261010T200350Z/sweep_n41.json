@@ -1,0 +1,22 @@
+{
+ "_comment": "Orbit-union arm at n=41 (K_0, r prime, 39 bits): compact-orbit-scan at the ledger's K=600 columns (49,200 signed points) with the Frobenius-folded and the negation-folded pair tables; no invariant subspace fits a pair table at this rung.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 41
+ },
+ "repeats": 4,
+ "seed": 20261010,
+ "max_trials": 4000000,
+ "matrix": {
+  "factor_base": [
+   "compact-orbit-scan:columns=600,raw_x_cap=400000000"
+  ],
+  "oracle": [
+   "mitm-frobenius",
+   "mitm:negation_folded=1"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

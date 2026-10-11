@@ -491,6 +491,10 @@ pub enum Targets {
     /// An r-adding walk: one group addition per trial, with the guard
     /// that no target is presented twice.
     Walk,
+    /// Residual matching (lead L3): the walk subtracts a base point at
+    /// every step and relations come from collisions of the residuals;
+    /// the oracle is not consulted.  See `ic_framework::residual`.
+    Residual,
 }
 
 impl Targets {
@@ -498,6 +502,7 @@ impl Targets {
         match self {
             Targets::Random => "random",
             Targets::Walk => "walk",
+            Targets::Residual => "residual",
         }
     }
 
@@ -505,8 +510,9 @@ impl Targets {
         match s {
             "random" => Ok(Targets::Random),
             "walk" => Ok(Targets::Walk),
+            "residual" => Ok(Targets::Residual),
             other => Err(format!(
-                "unknown target source `{other}`; try random or walk"
+                "unknown target source `{other}`; try random, walk or residual"
             )),
         }
     }
