@@ -490,6 +490,27 @@ cube-and-conquer on the descended system (its natural cubes are the `m − 1`
 summand prefixes, which is pairs-and-solve under another name); Semaev's 2015
 cubic model (first-fall assumption contradicted at `n = 45`, Kosters–Yeo).
 
+### 6.1 Outcomes (2026-10-11)
+
+The seven items were attempted in one cloud session; evidence and protocols
+are in [`research/pdp_followups_20261010/`](../../pdp_followups_20261010/)
+(PR #1650).  Every outcome is a stage diagnostic and none moves a ratio to
+the floor.
+
+| # | item | outcome | class |
+|--:|:--|:--|:--|
+| 1 | XOR-learning CDCL | **blocked**: the Xorricane source is unreachable under the environment's network policy; protocol frozen in `blocked/PROTOCOLS.md` | pending |
+| 2 | WDSat `-x` audit, SATIC | **blocked**: upstream sources unreachable, Python runner needs a native replacement first; protocol frozen | pending |
+| 3 | Hamming-weight ONB base under SAT | **run** with a native emitter (`examples/hamming_nb_sat_panel.rs`): **run** with a native emitter (`examples/hamming_nb_sat_panel.rs`; 128 cells, 75 verified relations, zero disagreements with the exact oracle): at `n = 23, m = 3` neither CryptoMiniSat nor CaDiCaL decides any of 8 targets in 180 s (P2 fails) although the pair table decides each in at most 0.36 s; at `n = 23, m = 2` every proved refutation (`w = 2`) costs `117 … 174×` the `m − 1` floor in conflicts, and no refutation is proved at `w = 3`; PB-XOR arm blocked (see `hamming_nb_sat/RESULTS.md`) | boundary (off-the-shelf CDCL on this base at `m = 3`, `n = 23`, 180 s) |
+| 4 | Bosphorus preprocessing | **blocked**: source unreachable; protocol frozen | pending |
+| 5 | SMT ladder to `n = 23` | **done**: P1 pass, P2 fail, P3 fail (cvc5-bv1 found 5/12 to the native solver's 4/12 at `n = 19`, nothing refuted by any arm), P4 unscorable; at `n = 23` every arm exhausted 120 s on all 8 targets.  cvc5 ran as 1.1.2 (amendment 3) | engineering candidate for the constant, by the registered rule |
+| 6 | yield-law cross-check | **done**: thesis Table 7.7's `P` is `#sat/#unsat`; the exact census on `y² + xy = x³ + x² + 1` over `F_{2^24}` gives a satisfiable fraction `0.56–0.83×` the `2^{3ℓ}/(3!·2^n)` heuristic (curve) and `0.85–1.1×` (twist); the mean yield law holds to three digits; at `λ ≈ 1.3` the hit probability is `0.46` against Poisson's `0.72`.  The thesis' `2×` is not reproduced and cannot come from the yield law | accounting |
+| 7 | GPU pairs-and-solve leaf | **blocked** (no GPU); the CPU reference arm is measured to `ℓ = 11` (0.651 s per refuting target, `2^{21}` pairs) | pending |
+
+Two of the §6 falsifiers were testable and neither fired: item 5 found no
+SMT arm refuting a cell above `n = 13`, and item 3 found every proved
+refutation at `≥ 117×` the enumeration floor.  The §1 verdict stands.
+
 ---
 
 ## 7. Closed: do not re-run
