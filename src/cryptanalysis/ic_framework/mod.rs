@@ -62,8 +62,10 @@
 //! worked example of adding a solver, how to run a sweep, and how to
 //! report what comes out.
 
+pub mod fiber;
 pub mod linalg;
 pub mod plugins;
+pub mod residual;
 pub mod shared_rank;
 pub mod solvers;
 pub mod stages;
@@ -76,6 +78,7 @@ use crate::cryptanalysis::ic_boundary::{
     collect_and_solve_with_completion, price_phase, Calibration, CompletionRule, CountedGroup,
     FactorBase, GroupOps, PhaseCost, PipelineOutcome, RelationSolver, RestartPool, TargetSource,
 };
+use crate::cryptanalysis::ic_framework::residual as residual_mod;
 use crate::cryptanalysis::ic_measurement as measurement;
 use linalg::matrix_by_name;
 use stages::{DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SystemShape, Targets};
@@ -348,7 +351,7 @@ pub fn run_pipeline<G: CountedGroup>(
     let mut matrix: Box<dyn RelationSolver> = matrix_by_name(linalg_name, fb.columns + 1, ctx.r)?;
     let source = match spec.targets {
         Targets::Random => TargetSource::Random,
-        Targets::Walk => TargetSource::Walk,
+        Targets::Walk | Targets::Residual => TargetSource::Walk,
     };
     measurement::begin_online(measurement::Phase::TargetQuery);
     let checked_full_rank = linalg_name == "incremental-gauss-full-rank-checked";
@@ -357,21 +360,41 @@ pub fn run_pipeline<G: CountedGroup>(
     } else {
         CompletionRule::TargetPinned
     };
-    let mut outcome: PipelineOutcome = collect_and_solve_with_completion(
-        ctx.group,
-        ctx.generator,
-        ctx.target,
-        ctx.r,
-        ctx.cofactor,
-        &fb,
-        spec.seed,
-        spec.max_trials,
-        source,
-        RestartPool::Lazy,
-        matrix.as_mut(),
-        completion,
-        |ops, counters, point| oracle.decompose(ctx, &fb, ops, counters, point),
-    );
+    let mut outcome: PipelineOutcome = if spec.targets == Targets::Residual {
+        if completion != CompletionRule::TargetPinned {
+            return Err(
+                "the residual collector stops when the target is pinned; use incremental-gauss"
+                    .into(),
+            );
+        }
+        residual_mod::collect_residual_and_solve(
+            ctx.group,
+            ctx.generator,
+            ctx.target,
+            ctx.r,
+            ctx.cofactor,
+            &fb,
+            spec.seed,
+            spec.max_trials,
+            matrix.as_mut(),
+        )
+    } else {
+        collect_and_solve_with_completion(
+            ctx.group,
+            ctx.generator,
+            ctx.target,
+            ctx.r,
+            ctx.cofactor,
+            &fb,
+            spec.seed,
+            spec.max_trials,
+            source,
+            RestartPool::Lazy,
+            matrix.as_mut(),
+            completion,
+            |ops, counters, point| oracle.decompose(ctx, &fb, ops, counters, point),
+        )
+    };
     // Kept opt-in so the previously recorded full-rank sessions retain
     // byte-identical replay and charging. A checked run cannot claim a
     // verified full-rank solution solely from the target-point check.

@@ -1,11 +1,9 @@
 name: Koblitz Stage 80 n53 specialized support expansion
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage80_specialized_support_expansion.py"
-      - ".github/workflows/koblitz-stage80-specialized-support-expansion.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

@@ -1,0 +1,14 @@
+  ***   Warning: new maximum stack size = 2147483648 (2048.000 Mbytes).
+  ***   at top-level: read(getenv("WEAK_PROPERTIES_INPUTS"))
+  ***                 ^--------------------------------------
+  ***   in function read: audit(0,1099511627689,6,[53,5,33,5,7,5],[83375
+  ***                     ^----------------------------------------------
+  ***   in function audit: my(z=field(p,n,m),A=element(av,z),B=element(bv
+  ***                           ^-----------------------------------------
+  ***   in function field: my(k=Str(p,n,m),z);if(mapisdefined(FIELDS,k,&z
+  ***                                            ^------------------------
+  *** mapisdefined: incorrect type in mapisdefined (t_POL).
+... skipping file './research/weak_curve_properties_20261010/replay.gp'
+  ***   at top-level: if(COUNTER!=814,error("incomplete model replay
+  ***                                 ^------------------------------
+  ***   user error: incomplete model replay

@@ -106,24 +106,15 @@ pub enum Model {
     },
     /// `y² = x³ + ax + b` over `GF(p)`.
     Prime { p: BigUint, a: BigUint, b: BigUint },
-    /// `y² = x³ + ax + b` over `GF(p^k)`, with coefficients in the
-    /// polynomial basis recorded by the registry. Arithmetic certificates
-    /// for this model are not implemented here.
-    PrimeExtension {
+    /// Short Weierstrass model over `GF(p^k)`, in the registered polynomial basis.
+    Extension {
         p: BigUint,
         k: u32,
+        q: BigUint,
+        field_id: String,
+        modulus: Vec<BigUint>,
         a: Vec<BigUint>,
         b: Vec<BigUint>,
-        modulus: Vec<BigUint>,
-    },
-    /// A registered prime-field model without a native group-arithmetic
-    /// certificate here. Preserve its equation and coefficients, and mark
-    /// its order check as not evaluated instead of treating it as a short
-    /// Weierstrass curve.
-    PrimeOther {
-        p: BigUint,
-        form: String,
-        parameters: BTreeMap<String, BigUint>,
     },
 }
 
@@ -132,8 +123,8 @@ impl Model {
     pub fn q(&self) -> BigUint {
         match self {
             Model::Binary { n, .. } => BigUint::one() << *n,
-            Model::Prime { p, .. } | Model::PrimeOther { p, .. } => p.clone(),
-            Model::PrimeExtension { p, k, .. } => p.pow(*k),
+            Model::Prime { p, .. } => p.clone(),
+            Model::Extension { q, .. } => q.clone(),
         }
     }
 
@@ -141,16 +132,24 @@ impl Model {
     pub fn size_bits(&self) -> u64 {
         match self {
             Model::Binary { n, .. } => u64::from(*n),
-            Model::Prime { p, .. } | Model::PrimeOther { p, .. } => p.bits(),
-            Model::PrimeExtension { p, k, .. } => p.pow(*k).bits(),
+            Model::Prime { p, .. } => p.bits(),
+            Model::Extension { q, .. } => q.bits(),
         }
     }
 }
 
-/// One recorded representation: a generator of the prime subgroup.
+/// Generator coordinates in the model's declared field representation.
+#[derive(Clone, Debug)]
+pub enum GeneratorCoords {
+    Affine(BigUint, BigUint),
+    Extension(Vec<BigUint>, Vec<BigUint>),
+}
+
+/// One recorded representation, mapped into `Model` coordinates: a generator
+/// of the prime subgroup.
 #[derive(Clone, Debug)]
 pub struct Representation {
-    pub generator: (BigUint, BigUint),
+    pub generator: GeneratorCoords,
     pub subgroup_order: BigUint,
     pub cofactor: BigUint,
 }
@@ -175,6 +174,26 @@ fn parse_uint(s: &str) -> Option<BigUint> {
     }
 }
 
+fn value_uint(value: &Value) -> Option<BigUint> {
+    match value {
+        Value::String(s) => parse_uint(s),
+        Value::Number(n) => parse_uint(&n.to_string()),
+        _ => None,
+    }
+}
+
+fn extension_coordinates(value: &Value, k: u32, p: &BigUint) -> Option<Vec<BigUint>> {
+    let coefficients = value.as_array()?;
+    if coefficients.len() != k as usize {
+        return None;
+    }
+    let coordinates: Vec<BigUint> = coefficients.iter().map(value_uint).collect::<Option<_>>()?;
+    coordinates
+        .iter()
+        .all(|coordinate| coordinate < p)
+        .then_some(coordinates)
+}
+
 fn str_field<'a>(v: &'a Value, key: &str) -> Result<&'a str, String> {
     v[key]
         .as_str()
@@ -189,7 +208,95 @@ fn irreducible(modulus: &BigUint) -> IrreduciblePoly {
     }
 }
 
-fn parse_model(model_json: &str) -> Result<Model, String> {
+/// Coordinate conversion from a registered prime-field model to the
+/// short Weierstrass model used for order certification.
+#[derive(Clone, Debug)]
+enum CoordinateMap {
+    Identity,
+    Montgomery {
+        a_over_three: BigUint,
+        inv_b: BigUint,
+    },
+    Edwards {
+        a_over_three: BigUint,
+        inv_b: BigUint,
+        inv_scale: BigUint,
+    },
+}
+
+fn inverse_mod(value: &BigUint, p: &BigUint) -> Option<BigUint> {
+    let modulus = BigInt::from(p.clone());
+    let egcd = BigInt::from(value % p).extended_gcd(&modulus);
+    if egcd.gcd != BigInt::one() {
+        return None;
+    }
+    egcd.x.mod_floor(&modulus).to_biguint()
+}
+
+fn subtract_mod(a: &BigUint, b: &BigUint, p: &BigUint) -> BigUint {
+    (a + p - (b % p)) % p
+}
+
+/// B*v² = u³ + A*u² + u, with X=(u+A/3)/B and Y=v/B.
+fn montgomery_short(
+    p: &BigUint,
+    a: &BigUint,
+    b: &BigUint,
+) -> Result<(BigUint, BigUint, BigUint, BigUint), String> {
+    if p <= &BigUint::from(3u8) {
+        return Err("Montgomery conversion needs characteristic above three".into());
+    }
+    let a = a % p;
+    let b = b % p;
+    let inv_three =
+        inverse_mod(&BigUint::from(3u8), p).ok_or("three is not invertible in the prime field")?;
+    let inv_b = inverse_mod(&b, p).ok_or("Montgomery B is not invertible")?;
+    let a_over_three = &a * &inv_three % p;
+    let a2 = &a * &a % p;
+    let a3 = &a2 * &a % p;
+    let inv_b2 = &inv_b * &inv_b % p;
+    let inv_b3 = &inv_b2 * &inv_b % p;
+    let inv_27 = &inv_three * &inv_three % p * &inv_three % p;
+    let short_a = subtract_mod(&BigUint::one(), &(&a2 * &inv_three % p), p) * &inv_b2 % p;
+    let short_b =
+        subtract_mod(&(BigUint::from(2u8) * &a3 * inv_27 % p), &a_over_three, p) * &inv_b3 % p;
+    Ok((short_a, short_b, a_over_three, inv_b))
+}
+
+fn edwards_short(
+    p: BigUint,
+    a: BigUint,
+    d: BigUint,
+    scale: BigUint,
+) -> Result<(Model, CoordinateMap), String> {
+    if p <= BigUint::from(3u8) {
+        return Err("Edwards conversion needs characteristic above three".into());
+    }
+    let inv_scale = inverse_mod(&scale, &p).ok_or("Edwards scale is not invertible")?;
+    // x'=x/c, y'=y/c turns x²+y²=c²(1+d*x²*y²)
+    // into a*x'²+y'²=1+(d*c⁴)*x'²*y'².
+    let d = d * scale.modpow(&BigUint::from(4u8), &p) % &p;
+    let a = a % &p;
+    let inv_a_minus_d =
+        inverse_mod(&subtract_mod(&a, &d, &p), &p).ok_or("Edwards a-d is not invertible")?;
+    let mont_a = BigUint::from(2u8) * (&a + &d) * &inv_a_minus_d % &p;
+    let mont_b = BigUint::from(4u8) * inv_a_minus_d % &p;
+    let (short_a, short_b, a_over_three, inv_b) = montgomery_short(&p, &mont_a, &mont_b)?;
+    Ok((
+        Model::Prime {
+            p,
+            a: short_a,
+            b: short_b,
+        },
+        CoordinateMap::Edwards {
+            a_over_three,
+            inv_b,
+            inv_scale,
+        },
+    ))
+}
+
+fn parse_model(model_json: &str) -> Result<(Model, CoordinateMap), String> {
     let m: Value = serde_json::from_str(model_json).map_err(|e| format!("model JSON: {e}"))?;
     let num = |key: &str| {
         str_field(&m, key).and_then(|s| parse_uint(s).ok_or_else(|| format!("bad {key}: {s}")))
@@ -202,78 +309,144 @@ fn parse_model(model_json: &str) -> Result<Model, String> {
             if !field.starts_with(&format!("f2m-{n}-")) {
                 return Err(format!("field {field} is not of degree {n}"));
             }
-            Ok(Model::Binary {
-                n,
-                irr: irreducible(&modulus),
-                a: F2mElement::from_biguint(&num("a")?, n),
-                b: F2mElement::from_biguint(&num("b")?, n),
-                modulus,
-            })
+            Ok((
+                Model::Binary {
+                    n,
+                    irr: irreducible(&modulus),
+                    a: F2mElement::from_biguint(&num("a")?, n),
+                    b: F2mElement::from_biguint(&num("b")?, n),
+                    modulus,
+                },
+                CoordinateMap::Identity,
+            ))
         }
-        "y^2=x^3+a*x+b" => {
-            let k = m["k"].as_str().map_or(Ok(1), |s| {
-                s.parse::<u32>().map_err(|_| format!("bad k: {s}"))
-            })?;
-            if k > 1 {
-                let coefficients = |key: &str| -> Result<Vec<BigUint>, String> {
-                    let entries = m[key]
-                        .as_array()
-                        .ok_or_else(|| format!("missing coefficient array {key}"))?;
-                    if entries.len() != k as usize {
-                        return Err(format!(
-                            "{key} has {} coefficients, expected {k}",
-                            entries.len()
-                        ));
-                    }
-                    entries
-                        .iter()
-                        .map(|v| {
-                            v.as_str()
-                                .and_then(parse_uint)
-                                .ok_or_else(|| format!("bad {key} coefficient: {v}"))
-                        })
-                        .collect()
-                };
-                Ok(Model::PrimeExtension {
-                    p: num("p")?,
-                    k,
-                    a: coefficients("a")?,
-                    b: coefficients("b")?,
-                    modulus: coefficients("modulus")?,
-                })
-            } else {
-                Ok(Model::Prime {
-                    p: num("p")?,
-                    a: num("a")?,
-                    b: num("b")?,
-                })
+        "y^2=x^3+a*x+b" if m["a"].is_array() => {
+            let p = num("p")?;
+            let k: u32 = str_field(&m, "k")?
+                .parse()
+                .map_err(|_| "bad extension degree k")?;
+            if p <= BigUint::one() || k < 2 {
+                return Err("invalid extension field size".into());
             }
-        }
-        form @ ("B*y^2=x^3+A*x^2+x" | "a*x^2+y^2=1+d*x^2*y^2" | "x^2+y^2=c^2*(1+d*x^2*y^2)") => {
-            let names: &[&str] = match form {
-                "B*y^2=x^3+A*x^2+x" => &["A", "B"],
-                "a*x^2+y^2=1+d*x^2*y^2" => &["a", "d"],
-                _ => &["c", "d"],
+            let field_id = str_field(&m, "field")?.to_string();
+            if !field_id.starts_with(&format!("fpk-{p}-{k}-")) {
+                return Err(format!("field {field_id} is not GF({p}^{k})"));
+            }
+            let coeffs = |key: &str| -> Result<Vec<BigUint>, String> {
+                m[key]
+                    .as_array()
+                    .ok_or_else(|| format!("missing coefficient array {key}"))?
+                    .iter()
+                    .map(|value| {
+                        value
+                            .as_str()
+                            .and_then(parse_uint)
+                            .ok_or_else(|| format!("bad coefficient in {key}"))
+                    })
+                    .collect()
             };
-            let parameters = names
+            let modulus = coeffs("modulus")?;
+            let a = coeffs("a")?;
+            let b = coeffs("b")?;
+            if [modulus.len(), a.len(), b.len()]
                 .iter()
-                .map(|&key| num(key).map(|value| (key.to_string(), value)))
-                .collect::<Result<_, _>>()?;
-            Ok(Model::PrimeOther {
+                .any(|&len| len != k as usize)
+                || modulus
+                    .iter()
+                    .chain(&a)
+                    .chain(&b)
+                    .any(|coefficient| coefficient >= &p)
+            {
+                return Err("extension coefficients are not canonical k-vectors".into());
+            }
+            let q = p.pow(k);
+            Ok((
+                Model::Extension {
+                    p,
+                    k,
+                    q,
+                    field_id,
+                    modulus,
+                    a,
+                    b,
+                },
+                CoordinateMap::Identity,
+            ))
+        }
+        "y^2=x^3+a*x+b" => Ok((
+            Model::Prime {
                 p: num("p")?,
-                form: form.to_string(),
-                parameters,
-            })
+                a: num("a")?,
+                b: num("b")?,
+            },
+            CoordinateMap::Identity,
+        )),
+        "B*y^2=x^3+A*x^2+x" => {
+            let p = num("p")?;
+            let (short_a, short_b, a_over_three, inv_b) =
+                montgomery_short(&p, &num("A")?, &num("B")?)?;
+            Ok((
+                Model::Prime {
+                    p,
+                    a: short_a,
+                    b: short_b,
+                },
+                CoordinateMap::Montgomery {
+                    a_over_three,
+                    inv_b,
+                },
+            ))
+        }
+        "a*x^2+y^2=1+d*x^2*y^2" => edwards_short(num("p")?, num("a")?, num("d")?, BigUint::one()),
+        "x^2+y^2=c^2*(1+d*x^2*y^2)" => {
+            edwards_short(num("p")?, BigUint::one(), num("d")?, num("c")?)
         }
         other => Err(format!("unknown form {other}")),
     }
 }
 
-/// A representation's generator, when it is recorded in this model's
-/// field: polynomial basis under the model's modulus, or the prime field.
+fn montgomery_coordinates(
+    u: &BigUint,
+    v: &BigUint,
+    p: &BigUint,
+    a_over_three: &BigUint,
+    inv_b: &BigUint,
+) -> (BigUint, BigUint) {
+    ((u + a_over_three) * inv_b % p, v * inv_b % p)
+}
+
+fn short_coordinates(
+    x: BigUint,
+    y: BigUint,
+    p: &BigUint,
+    map: &CoordinateMap,
+) -> Option<(BigUint, BigUint)> {
+    match map {
+        CoordinateMap::Identity => Some((x, y)),
+        CoordinateMap::Montgomery {
+            a_over_three,
+            inv_b,
+        } => Some(montgomery_coordinates(&x, &y, p, a_over_three, inv_b)),
+        CoordinateMap::Edwards {
+            a_over_three,
+            inv_b,
+            inv_scale,
+        } => {
+            let x = x * inv_scale % p;
+            let y = y * inv_scale % p;
+            let inv_one_minus_y = inverse_mod(&subtract_mod(&BigUint::one(), &y, p), p)?;
+            let u = (&y + BigUint::one()) * inv_one_minus_y % p;
+            let v = &u * inverse_mod(&x, p)? % p;
+            Some(montgomery_coordinates(&u, &v, p, a_over_three, inv_b))
+        }
+    }
+}
+
+/// A representation's generator, mapped from its registered model to the
+/// short Weierstrass model when its prime-field form requires conversion.
 /// Big integers in representations are bare JSON numbers, which this
 /// parser would round, so only string-typed and small fields are read.
-fn parse_representation(rep: &Value, model: &Model) -> Option<Representation> {
+fn parse_representation(rep: &Value, model: &Model, map: &CoordinateMap) -> Option<Representation> {
     let field = &rep["field"];
     let curve = &rep["curve"];
     match model {
@@ -287,21 +460,50 @@ fn parse_representation(rep: &Value, model: &Model) -> Option<Representation> {
                 return None;
             }
         }
-        Model::Prime { .. } | Model::PrimeOther { .. } => {
+        Model::Prime { .. } => {
             if field["degree"].as_u64()? != 1 {
                 return None;
             }
         }
-        Model::PrimeExtension { .. } => return None,
+        Model::Extension { p, k, modulus, .. } => {
+            if field["degree"].as_u64()? != u64::from(*k)
+                || value_uint(&field["characteristic"])? != *p
+                || !field["representation"].as_str()?.starts_with("polynomial")
+            {
+                return None;
+            }
+            let field_modulus = field["modulus"].as_array()?;
+            if field_modulus.len() != *k as usize + 1
+                || value_uint(field_modulus.last()?)? != BigUint::one()
+                || !field_modulus[..*k as usize]
+                    .iter()
+                    .zip(modulus)
+                    .all(|(value, coefficient)| value_uint(value).as_ref() == Some(coefficient))
+            {
+                return None;
+            }
+        }
     }
     let gen = curve["generator"].as_array()?;
-    let coord = |v: &Value| parse_uint(v.as_str()?);
-    let cofactor = match &curve["cofactor"] {
-        Value::String(s) => parse_uint(s)?,
-        v => BigUint::from(v.as_u64()?),
+    let cofactor = value_uint(&curve["cofactor"])?;
+    let generator = match model {
+        Model::Binary { .. } => GeneratorCoords::Affine(
+            parse_uint(gen.first()?.as_str()?)?,
+            parse_uint(gen.get(1)?.as_str()?)?,
+        ),
+        Model::Prime { p, .. } => {
+            let x = parse_uint(gen.first()?.as_str()?)?;
+            let y = parse_uint(gen.get(1)?.as_str()?)?;
+            let (x, y) = short_coordinates(x, y, p, map)?;
+            GeneratorCoords::Affine(x, y)
+        }
+        Model::Extension { p, k, .. } => GeneratorCoords::Extension(
+            extension_coordinates(gen.first()?, *k, p)?,
+            extension_coordinates(gen.get(1)?, *k, p)?,
+        ),
     };
     Some(Representation {
-        generator: (coord(gen.first()?)?, coord(gen.get(1)?)?),
+        generator,
         subgroup_order: parse_uint(curve["subgroup_order"].as_str()?)?,
         cofactor,
     })
@@ -316,7 +518,7 @@ pub fn read_registry(text: &str) -> Result<Vec<RegistryCurve>, String> {
     for c in curves {
         let slug = str_field(c, "slug")?.to_string();
         let ctx = |e: String| format!("{slug}: {e}");
-        let model = parse_model(str_field(c, "model_json")?).map_err(ctx)?;
+        let (model, coord_map) = parse_model(str_field(c, "model_json")?).map_err(ctx)?;
         let icv1: Vec<&str> = str_field(c, "icv1")?.split(':').collect();
         let trace: BigInt = icv1
             .get(2)
@@ -337,7 +539,7 @@ pub fn read_registry(text: &str) -> Result<Vec<RegistryCurve>, String> {
             .as_array()
             .into_iter()
             .flatten()
-            .filter_map(|r| parse_representation(r, &model))
+            .filter_map(|r| parse_representation(r, &model, &coord_map))
             .collect();
         out.push(RegistryCurve {
             slug,
@@ -573,6 +775,16 @@ fn small_primes(delta: &BigInt, characteristic: &BigUint) -> Vec<SmallPrime> {
 }
 
 fn subfield_record(c: &RegistryCurve) -> Result<SubfieldRecord, String> {
+    if matches!(&c.model, Model::Extension { .. }) {
+        return Ok(SubfieldRecord {
+            j_field_degree: None,
+            definition_degree: None,
+            base_trace: None,
+            base_trace_sign_free: false,
+            status: Status::NotEvaluated,
+            method: "extension-field subfield analysis is not implemented".into(),
+        });
+    }
     let Model::Binary { n, irr, a, b, .. } = &c.model else {
         return Ok(SubfieldRecord {
             j_field_degree: None,
@@ -791,9 +1003,7 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
     let q = c.model.q();
     let characteristic = match &c.model {
         Model::Binary { .. } => BigUint::from(2u8),
-        Model::Prime { p, .. } | Model::PrimeOther { p, .. } | Model::PrimeExtension { p, .. } => {
-            p.clone()
-        }
+        Model::Prime { p, .. } | Model::Extension { p, .. } => p.clone(),
     };
     let (status, method) =
         certify::check_order(&c.model, &c.order, &c.representations).map_err(ctx)?;
@@ -813,15 +1023,14 @@ pub fn compute(c: &RegistryCurve, budget: u64) -> Result<CurveTraits, String> {
         field: FieldInfo {
             kind: match c.model {
                 Model::Binary { .. } => "binary",
-                Model::Prime { .. } | Model::PrimeOther { .. } | Model::PrimeExtension { .. } => {
-                    "prime"
-                }
+                Model::Prime { .. } => "prime",
+                Model::Extension { .. } => "extension",
             }
             .into(),
             degree: match &c.model {
                 Model::Binary { n, .. } => *n,
-                Model::Prime { .. } | Model::PrimeOther { .. } => 1,
-                Model::PrimeExtension { k, .. } => *k,
+                Model::Prime { .. } => 1,
+                Model::Extension { k, .. } => *k,
             },
             size_bits: c.model.size_bits(),
         },
@@ -1092,38 +1301,75 @@ mod tests {
     }
 
     #[test]
-    fn other_prime_models_parse_without_an_unchecked_order_certificate() {
+    fn extension_registry_preserves_field_and_subgroup_records() {
         let curves = read_registry(REGISTRY).unwrap();
-        let mut count = 0;
-        let mut extension_count = 0;
-        for curve in &curves {
-            if let Model::PrimeOther {
-                form, parameters, ..
+        let extensions: Vec<_> = curves
+            .iter()
+            .filter(|curve| matches!(&curve.model, Model::Extension { .. }))
+            .collect();
+        assert_eq!(extensions.len(), 1313);
+        for curve in extensions {
+            let Model::Extension {
+                p,
+                k,
+                q,
+                field_id,
+                modulus,
+                a,
+                b,
             } = &curve.model
-            {
-                count += 1;
-                assert!(!form.is_empty() && !parameters.is_empty());
-                let (status, _) =
-                    certify::check_order(&curve.model, &curve.order, &curve.representations)
-                        .unwrap();
-                assert_eq!(status, Status::NotEvaluated);
-            }
-            if let Model::PrimeExtension {
-                k, a, b, modulus, ..
-            } = &curve.model
-            {
-                extension_count += 1;
-                assert!(*k > 1 && a.len() == *k as usize);
-                assert_eq!(b.len(), a.len());
-                assert_eq!(modulus.len(), a.len());
-                let (status, _) =
-                    certify::check_order(&curve.model, &curve.order, &curve.representations)
-                        .unwrap();
-                assert_eq!(status, Status::NotEvaluated);
-            }
+            else {
+                unreachable!()
+            };
+            assert_eq!(q, &p.pow(*k));
+            assert!(field_id.starts_with(&format!("fpk-{p}-{k}-")));
+            assert_eq!(
+                (modulus.len(), a.len(), b.len()),
+                (*k as usize, *k as usize, *k as usize)
+            );
+            let Some(rep) = curve.representations.first() else {
+                // Catalogue entries may record field data without a
+                // generator representation.
+                continue;
+            };
+            assert_eq!(&rep.subgroup_order * &rep.cofactor, curve.order);
+            assert!(matches!(
+                &rep.generator,
+                GeneratorCoords::Extension(x, y) if x.len() == *k as usize && y.len() == *k as usize
+            ));
+            assert_eq!(
+                certify::check_order(&curve.model, &curve.order, &curve.representations)
+                    .unwrap()
+                    .0,
+                Status::NotEvaluated
+            );
         }
-        assert_eq!(count, 30);
-        assert_eq!(extension_count, 9);
+    }
+
+    #[test]
+    fn registered_montgomery_and_edwards_generators_certify() {
+        let doc: Value = serde_json::from_str(REGISTRY).unwrap();
+        let curves = read_registry(REGISTRY).unwrap();
+        let mut checked = 0;
+        for raw in doc["curves"].as_array().unwrap() {
+            let model: Value = serde_json::from_str(raw["model_json"].as_str().unwrap()).unwrap();
+            let form = model["form"].as_str().unwrap();
+            if !matches!(
+                form,
+                "B*y^2=x^3+A*x^2+x" | "a*x^2+y^2=1+d*x^2*y^2" | "x^2+y^2=c^2*(1+d*x^2*y^2)"
+            ) || raw["representations"].as_array().unwrap().is_empty()
+            {
+                continue;
+            }
+            let slug = raw["slug"].as_str().unwrap();
+            let curve = curves.iter().find(|c| c.slug == slug).unwrap();
+            assert!(!curve.representations.is_empty(), "{slug}");
+            let (status, _) =
+                certify::check_order(&curve.model, &curve.order, &curve.representations).unwrap();
+            assert!(status <= Status::Bounded, "{slug}: {status:?}");
+            checked += 1;
+        }
+        assert_eq!(checked, 20);
     }
 
     #[test]

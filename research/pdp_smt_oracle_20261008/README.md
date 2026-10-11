@@ -88,8 +88,61 @@ engineering candidate (P4 unscored).  Completing the ladder is a follow-on:
 20261010, `--native-wall-budget-s 120`, on an isolated host, then
 `pdp_smt_oracle_score` over all three files.
 
+## Completed ladder (2026-10-11, amendment 3)
+
+`n = 19` (`ℓ = 7`, 12 targets, 139 factor-base points) and `n = 23`
+(`ℓ = 8`, 8 targets, 275 points) were run with the frozen seed, budget and
+rows; cvc5 is 1.1.2 (see amendment 3), Z3 5.1.0 as frozen.  Scored with
+`pdp_smt_oracle_score` over the three files
+([`research/pdp_followups_20261010/smt_ladder/score_n13_n19_n23.txt`](../pdp_followups_20261010/smt_ladder/score_n13_n19_n23.txt)).
+
+### n = 19
+
+| arm | cells | found | refuted | exhausted (120 s) | disagree | spurious | median wall found, ms |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| native-cdcl-xor | 12 | 4 | 0 | 8 | 0 | 0 | 17,541 |
+| cvc5-bool (1.1.2) | 12 | 0 | 0 | 12 | 0 | 0 | — |
+| cvc5-bv1 (1.1.2) | 12 | 5 | 0 | 7 | 0 | 0 | 60,452 |
+| z3-bool | 12 | 1 | 0 | 11 | 0 | 0 | 25,536 |
+| z3-bv1 | 12 | 0 | 0 | 12 | 0 | 0 | — |
+
+The native arm's found cells took 4.8 s, 11.6 s, 17.5 s and 32.8 s
+(0.14–0.59 M conflicts); its exhausted cells stop at 1.37–1.46 M conflicts.
+cvc5-bv1 found targets 3, 6, 8, 9, 10 in 62.3, 11.6, 6.6, 61.3 and 60.5 s;
+the native arm found targets 1, 6, 7, 10.  Two of cvc5-bv1's five are
+targets the native arm did not decide, and one of the native arm's four
+(target 1) cvc5-bv1 did not.  No arm refuted anything at `n = 19`.
+
+### n = 23
+
+Every arm exhausted its 120 s budget on all 8 targets (native: 1.09–1.23 M
+conflicts per cell).  No cell was decided; nothing is comparable.
+
+### Scoring
+
+- **P1 (correctness): PASS** — 100 + 60 + 40 cells, every decided verdict
+  agrees with enumeration, zero spurious models.
+- **P2: FAIL** (unchanged from `n = 13`; no refuting cells exist above it).
+- **P3: FAIL** — at `n = 19` cvc5-bv1 decided 5 cells to the native arm's 4.
+- **P4: not scorable** — no arm refutes a cell at `n = 23` (none at `n = 19`
+  either); the prediction's precondition is never met at the frozen budget.
+
+### Class
+
+By the registered decision rule, "P1 passes and P3 fails for some arm":
+**cvc5-bv1 is an engineering candidate for the oracle constant only**, on
+the strength of one extra decided cell out of twelve at `n = 19`, with a
+different cvc5 version from the `n = 13` run.  The mechanism the protocol
+hypothesised (parity reasoning) is refuted at `n = 13` and untestable above
+it.  The exponent is untouched: at `n = 23` no solver decides a single
+uniform target in 120 s, while the pair table decides each in microseconds
+(`RESEARCH_IC_BOUNDARY_LEDGER.md` §5).  Carrying cvc5-bv1 to the §8a
+`m = 83` gate would need a protocol of its own; nothing here proposes one,
+because the §3 argument of the survey note says what it would find.
+
 ## Follow-ons (not started)
 
+- (Done 2026-10-11) complete the ladder; see above.
 - Wire `DecompositionStrategy::Smt` into the `ic` pipeline beside `wdsat`
   so the oracle can be charged inside relation collection.
 - An XOR-aware SMT route (a Gauss–Jordan parity theory, or cvc5/Z3 over

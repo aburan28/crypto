@@ -536,6 +536,7 @@ fn run_ic(profile: Profile, target_id: &str, x: &str, y: &str, seed: u64) -> Res
             restrict_to_factor_base: true,
             trace_constraint: true,
             conflict_budget: profile.conflict_budget(),
+            wall_budget: None,
             symmetry_breaking: false,
             wall_budget: None,
         },

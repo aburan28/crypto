@@ -1,11 +1,9 @@
 name: Koblitz Stage 75 n53 split-index Bloom filter
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage75_split_bloom.py"
-      - ".github/workflows/koblitz-stage75-split-bloom.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:
