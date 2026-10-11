@@ -284,6 +284,20 @@ arm:
 | quad_n8_p65521 | 5 668 × 4 991 | 1 000–1 137 ms | 1 114 ms | 1 079 ms | 942–1 079 ms |
 | quad_n9_p65521 | 15 164 × 12 589 | 10 251–10 668 ms | 9 042 ms | 7 180 ms | **6 691–6 850 ms** |
 
+Then two exact refinements: a row of `B'` is zero left of its reducer's
+lead, so updates start there; and symbolic preprocessing fills one scratch
+monomial and allocates only for monomials not seen (allocation, copying and
+hashing had been about 30 % of instructions after the FL change). Same
+binary, three repetitions, fingerprints identical on all 13 cases:
+
+| case | cascade (`F4_FP_FL=0`) | **default** | first-round baseline (scalar cascade) |
+|:--|--:|--:|--:|
+| quad_n8_p65521 | 939 ms | **729 ms** | 1 000–1 137 ms |
+| quad_n9_p65521 | 8 461 ms | **5 117 ms** | 10 251–10 668 ms |
+| overdet_n12_m24_p65521 | 102 ms | **64 ms** | |
+
+quad_n9 is now 2.0× faster than where the audit started.
+
 At the standard sizes (≤ 1 674 rows) the three modes are within run-to-run
 spread over three runs of five repetitions (quad_n7 115–154 ms in every
 mode); an apparent cubic_n4 slowdown in a single run did not repeat.
