@@ -57,6 +57,46 @@ pub fn finite_domain_clause_count(codes: &[BigUint], n: u32, m: usize) -> Option
     count(&sorted, n as usize)?.checked_mul(m)
 }
 
+/// Exact additions for a signed-Frobenius x-domain represented by distinct
+/// orbit representatives. Each summand chooses one representative and one
+/// phase in `0..n`; sign does not alter x. The root point and every phase
+/// transform are tied to the original summand bits, so this is an exact
+/// finite-domain constraint rather than a post-solve filter.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct FrobeniusOrbitDomainSize {
+    pub variables: u64,
+    pub clauses: usize,
+    pub xor_rows: usize,
+}
+
+pub fn frobenius_orbit_domain_size(
+    n: u32,
+    m: usize,
+    representatives: usize,
+) -> Option<FrobeniusOrbitDomainSize> {
+    if !(2..=127).contains(&n) || m == 0 || representatives < 2 {
+        return None;
+    }
+    let bits = (u32::BITS - (n - 1).leading_zeros()) as usize;
+    let n = n as usize;
+    let vars_per = representatives
+        .checked_mul(2)?
+        .checked_sub(1)?
+        .checked_add(n)?
+        .checked_add(bits)?
+        .checked_add(2usize.checked_mul(n)?.checked_mul(bits)?)?;
+    let clauses_per = representatives
+        .checked_mul(n)?
+        .checked_add(3usize.checked_mul(representatives)?.checked_sub(3)?)?
+        .checked_add((1usize << bits).checked_sub(n)?)?
+        .checked_add(4usize.checked_mul(n)?.checked_mul(bits)?)?;
+    Some(FrobeniusOrbitDomainSize {
+        variables: u64::try_from(vars_per.checked_mul(m)?).ok()?,
+        clauses: clauses_per.checked_mul(m)?,
+        xor_rows: bits.checked_add(1)?.checked_mul(n)?.checked_mul(m)?,
+    })
+}
+
 fn reduced_monomial(degree: usize, irr: &IrreduciblePoly) -> Vec<usize> {
     let n = irr.degree as usize;
     let mut bits = vec![false; 2 * n - 1];
@@ -318,6 +358,49 @@ impl ChainedS3Encoding {
         Ok(required)
     }
 
+    /// Install the exact union of all binary-Frobenius phases of the given
+    /// representative x-coordinates. One-hot representative selection and
+    /// a bounded binary phase are linked to each summand by native XOR rows.
+    /// All caps are checked before the solver is mutated.
+    pub fn constrain_frobenius_orbit_summands(
+        &mut self,
+        representatives: &[BigUint],
+        max_variables: u32,
+        max_domain_clauses: usize,
+    ) -> Result<FrobeniusOrbitDomainSize, ChainBuildError> {
+        if self.domain_installed || representatives.iter().any(|x| x.bits() > u64::from(self.n)) {
+            return Err(ChainBuildError::Unsupported);
+        }
+        let mut sorted = representatives.to_vec();
+        sorted.sort_unstable();
+        sorted.dedup();
+        if sorted.len() != representatives.len() {
+            return Err(ChainBuildError::Unsupported);
+        }
+        let required = frobenius_orbit_domain_size(self.n, self.m, sorted.len())
+            .ok_or(ChainBuildError::Unsupported)?;
+        let total = u64::from(self.solver.n_vars())
+            .checked_add(required.variables)
+            .ok_or(ChainBuildError::Unsupported)?;
+        if total > u64::from(max_variables) || total > i32::MAX as u64 {
+            return Err(ChainBuildError::VariableCap {
+                required: total,
+                maximum: max_variables,
+            });
+        }
+        if required.clauses > max_domain_clauses {
+            return Err(ChainBuildError::DomainClauseCap {
+                required: required.clauses,
+                maximum: max_domain_clauses,
+            });
+        }
+        for block in &self.blocks[..self.m] {
+            add_frobenius_orbit_domain(&mut self.solver, block, &sorted, &self.irr);
+        }
+        self.domain_installed = true;
+        Ok(required)
+    }
+
     fn decode_block(&self, block: &[u32], model: &[bool]) -> F2mElement {
         let set: Vec<u32> = block
             .iter()
@@ -377,6 +460,101 @@ impl ChainedS3Encoding {
         }
         true
     }
+}
+
+fn add_frobenius_orbit_domain(
+    solver: &mut Solver,
+    block: &[u32],
+    representatives: &[BigUint],
+    irr: &IrreduciblePoly,
+) {
+    fn take(next: &mut u32, count: usize) -> Vec<u32> {
+        let start = *next;
+        *next += count as u32;
+        (start..*next).collect()
+    }
+
+    let n = block.len();
+    let r = representatives.len();
+    let bits = (u32::BITS - ((n as u32) - 1).leading_zeros()) as usize;
+    let size = frobenius_orbit_domain_size(n as u32, 1, r).expect("preflighted domain");
+    let allocated = solver.add_vars(size.variables as u32);
+    let mut next = *allocated.start();
+    let selectors = take(&mut next, r);
+    let prefix = take(&mut next, r - 1);
+    let root = take(&mut next, n);
+    let phase = take(&mut next, bits);
+
+    // Sequential exactly-one selection. No quadratic pairwise clauses.
+    solver.add_clause(selectors.iter().map(|&v| v as Lit).collect());
+    solver.add_clause(vec![-(selectors[0] as Lit), prefix[0] as Lit]);
+    for i in 1..r - 1 {
+        solver.add_clause(vec![-(selectors[i] as Lit), prefix[i] as Lit]);
+        solver.add_clause(vec![-(prefix[i - 1] as Lit), prefix[i] as Lit]);
+        solver.add_clause(vec![-(selectors[i] as Lit), -(prefix[i - 1] as Lit)]);
+    }
+    solver.add_clause(vec![-(selectors[r - 1] as Lit), -(prefix[r - 2] as Lit)]);
+    for (&selector, rep) in selectors.iter().zip(representatives) {
+        for (bit, &wire) in root.iter().enumerate() {
+            solver.add_clause(vec![
+                -(selector as Lit),
+                if rep.bit(bit as u64) {
+                    wire as Lit
+                } else {
+                    -(wire as Lit)
+                },
+            ]);
+        }
+    }
+
+    // Bits encode an exponent in 0..n-1; every other 7-bit value at N83
+    // is explicitly forbidden. Compose powers 1,2,4,... of Frobenius.
+    for value in n..(1usize << bits) {
+        solver.add_clause(
+            phase
+                .iter()
+                .enumerate()
+                .map(|(bit, &wire)| {
+                    if (value >> bit) & 1 == 1 {
+                        -(wire as Lit)
+                    } else {
+                        wire as Lit
+                    }
+                })
+                .collect(),
+        );
+    }
+    let mut current = root;
+    for (power, &choose) in phase.iter().enumerate() {
+        let shifted = take(&mut next, n);
+        let output = take(&mut next, n);
+        let mut rows = vec![Vec::new(); n];
+        for (input, &wire) in current.iter().enumerate() {
+            let basis = F2mElement::from_bit_positions(&[input as u32], n as u32);
+            let image = basis.square_k_times(1u32 << power, irr).to_biguint();
+            for (bit, row) in rows.iter_mut().enumerate() {
+                if image.bit(bit as u64) {
+                    row.push(wire);
+                }
+            }
+        }
+        for bit in 0..n {
+            rows[bit].push(shifted[bit]);
+            solver.add_xor(&rows[bit], false);
+            let (input, transformed, result) =
+                (current[bit] as Lit, shifted[bit] as Lit, output[bit] as Lit);
+            let choose = choose as Lit;
+            solver.add_clause(vec![choose, -input, result]);
+            solver.add_clause(vec![choose, input, -result]);
+            solver.add_clause(vec![-choose, -transformed, result]);
+            solver.add_clause(vec![-choose, transformed, -result]);
+        }
+        current = output;
+    }
+    for (&output, &summand) in current.iter().zip(block) {
+        solver.add_xor(&[output, summand], false);
+    }
+    debug_assert_eq!(next - 1, *allocated.end());
 }
 
 fn add_coordinate_domain(solver: &mut Solver, block: &[u32], codes: &[BigUint], bit: usize) {
@@ -616,5 +794,104 @@ mod tests {
         assert_eq!(enc.solver.n_clauses(), before);
         assert_eq!(enc.constrain_summands(&codes, required), Ok(required));
         assert_eq!(enc.solver.n_clauses(), before + required);
+    }
+
+    #[test]
+    fn frobenius_orbit_domain_accepts_exactly_the_small_field_closure() {
+        let irr = IrreduciblePoly {
+            degree: 3,
+            low_terms: vec![0, 1],
+        };
+        let representatives = [BigUint::from(1u8), BigUint::from(2u8)];
+        let mut closure = std::collections::BTreeSet::new();
+        for representative in &representatives {
+            let mut value = F2mElement::from_biguint(representative, 3);
+            for _ in 0..3 {
+                closure.insert(value.to_biguint());
+                value = value.square(&irr);
+            }
+        }
+        assert_eq!(closure.len(), 4);
+        for x in 0..8u8 {
+            let mut solver = Solver::new(3);
+            let before = (solver.n_vars(), solver.n_clauses(), solver.n_xors());
+            add_frobenius_orbit_domain(&mut solver, &[1, 2, 3], &representatives, &irr);
+            let size = frobenius_orbit_domain_size(3, 1, 2).unwrap();
+            assert_eq!(solver.n_vars() as u64 - before.0 as u64, size.variables);
+            assert_eq!(solver.n_clauses() - before.1, size.clauses);
+            assert_eq!(solver.n_xors() - before.2, size.xor_rows);
+            for bit in 0..3 {
+                solver.add_clause(vec![if x & (1 << bit) != 0 {
+                    (bit + 1) as Lit
+                } else {
+                    -((bit + 1) as Lit)
+                }]);
+            }
+            assert_eq!(
+                solver.solve() == SolveResult::Sat,
+                closure.contains(&BigUint::from(x)),
+                "x={x}"
+            );
+        }
+    }
+
+    #[test]
+    fn frobenius_orbit_preflight_caps_before_mutation_and_counts_n83() {
+        assert_eq!(
+            frobenius_orbit_domain_size(83, 5, 2_001),
+            Some(FrobeniusOrbitDomainSize {
+                variables: 26_265,
+                clauses: 872_260,
+                xor_rows: 3_320,
+            })
+        );
+        let kc = KoblitzCurve::new(0, 7).unwrap();
+        let mut enc =
+            ChainedS3Encoding::build(5, &kc.curve.irreducible, &kc.curve.b, None, 0, 2_000)
+                .unwrap();
+        let reps = [BigUint::from(1u8), BigUint::from(2u8)];
+        let size = frobenius_orbit_domain_size(7, 5, reps.len()).unwrap();
+        let before = (
+            enc.solver.n_vars(),
+            enc.solver.n_clauses(),
+            enc.solver.n_xors(),
+        );
+        assert_eq!(
+            enc.constrain_frobenius_orbit_summands(&reps, before.0, size.clauses),
+            Err(ChainBuildError::VariableCap {
+                required: before.0 as u64 + size.variables,
+                maximum: before.0,
+            })
+        );
+        assert_eq!(
+            enc.constrain_frobenius_orbit_summands(
+                &reps,
+                before.0 + size.variables as u32,
+                size.clauses - 1,
+            ),
+            Err(ChainBuildError::DomainClauseCap {
+                required: size.clauses,
+                maximum: size.clauses - 1,
+            })
+        );
+        assert_eq!(
+            (
+                enc.solver.n_vars(),
+                enc.solver.n_clauses(),
+                enc.solver.n_xors(),
+            ),
+            before
+        );
+        assert_eq!(
+            enc.constrain_frobenius_orbit_summands(
+                &reps,
+                before.0 + size.variables as u32,
+                size.clauses,
+            ),
+            Ok(size)
+        );
+        assert_eq!(enc.solver.n_vars() as u64 - before.0 as u64, size.variables);
+        assert_eq!(enc.solver.n_clauses() - before.1, size.clauses);
+        assert_eq!(enc.solver.n_xors() - before.2, size.xor_rows);
     }
 }
