@@ -749,21 +749,28 @@ unsafe fn add_lazy_avx512(acc: &mut [u64], pivot: &[u32], from: usize, factor: u
     }
 }
 
-/// Zero selects scalar accumulation, one forces AVX2, and two forces
-/// AVX-512F. Both vector paths remain explicit opt-ins.
+/// Zero selects scalar accumulation, one AVX2, two AVX-512F.  The widest
+/// vector path the CPU has is the default, since the Faugère–Lachartre
+/// step runs its dense updates through this kernel (`f4_fp_bench 2 large`
+/// on an AVX-512 host: quad_n9 6.7 s with AVX-512, 7.2 s with AVX2, 8.5 s
+/// scalar); `F4_FP_LAZY_SIMD=0` forces scalar, `F4_FP_LAZY_AVX2=1` forces
+/// AVX2 and `F4_FP_LAZY_AVX512=1` AVX-512, as before.
 fn lazy_simd_kind() -> u8 {
     #[cfg(target_arch = "x86_64")]
     {
         static KIND: std::sync::OnceLock<u8> = std::sync::OnceLock::new();
         *KIND.get_or_init(|| {
-            if std::env::var("F4_FP_LAZY_AVX512").as_deref() == Ok("1")
-                && std::arch::is_x86_feature_detected!("avx512f")
-                && std::arch::is_x86_feature_detected!("avx2")
-            {
+            let avx2 = std::arch::is_x86_feature_detected!("avx2");
+            let avx512 = avx2 && std::arch::is_x86_feature_detected!("avx512f");
+            if std::env::var("F4_FP_LAZY_SIMD").as_deref() == Ok("0") {
+                0
+            } else if std::env::var("F4_FP_LAZY_AVX512").as_deref() == Ok("1") && avx512 {
                 2
-            } else if std::env::var("F4_FP_LAZY_AVX2").as_deref() == Ok("1")
-                && std::arch::is_x86_feature_detected!("avx2")
-            {
+            } else if std::env::var("F4_FP_LAZY_AVX2").as_deref() == Ok("1") && avx2 {
+                1
+            } else if avx512 {
+                2
+            } else if avx2 {
                 1
             } else {
                 0
@@ -912,11 +919,10 @@ fn rref32_deferred(
     }
     let n_cols = known.first().map_or(0, |(_, r)| r.len());
     let back = |i: usize| -> Vec<u32> {
-        let (c0, row) = &known[i];
+        let (_, row) = &known[i];
         let mut acc: Vec<u64> = row.iter().copied().map(u64::from).collect();
         let mut pending = 0usize;
-        reduce_lazy_by(&mut acc[..], &known[i + 1..], fp, simd, &mut pending);
-        let _ = c0;
+        reduce_lazy_by(&mut acc, &known[i + 1..], fp, simd, &mut pending);
         acc.into_iter().map(|v| fp.reduce(v) as u32).collect()
     };
     let reduced: Vec<Vec<u32>> = if parallel && known.len() * n_cols > PAR_WORK {
@@ -936,6 +942,9 @@ const FL_MAX_ENTRIES: usize = 1 << 28;
 
 /// Reducers finished together in [`reduce_pairs_fl`].
 const FL_BLOCK: usize = 64;
+
+/// Columns a step needs before the Faugère–Lachartre form is used.
+const FL_MIN_COLS: usize = 256;
 
 /// `F4_FP_FL=0` keeps the per-pair-row reducer cascade; a same-binary
 /// control for the Faugère–Lachartre form.
@@ -1564,8 +1573,11 @@ fn f4_with_arithmetic(
             // `A` has a unit diagonal.  `B'` is built rightmost lead first
             // in blocks: a block's rows are reduced in parallel against the
             // blocks before it, then finished in order against each other.
-            let fl =
-                fl_enabled() && reducers.len().saturating_mul(free_cols.len()) <= FL_MAX_ENTRIES;
+            // Tiny steps (most of `solve`'s specialised runs) keep the
+            // cascade: building `B'` there costs more than it saves.
+            let fl = fl_enabled()
+                && n_cols >= FL_MIN_COLS
+                && reducers.len().saturating_mul(free_cols.len()) <= FL_MAX_ENTRIES;
             let reduced: Option<Vec<Vec<u32>>> = if fl {
                 reduce_pairs_fl(
                     pair_rows,

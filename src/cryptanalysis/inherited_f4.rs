@@ -2051,7 +2051,7 @@ mod tests {
                 let live: Vec<u64> = (lead..src_words)
                     .map(|w| {
                         let mut x = next() & next();
-                        if w + 1 == src_words && n_old % 64 != 0 {
+                        if w + 1 == src_words && !n_old.is_multiple_of(64) {
                             x &= (1u64 << (n_old % 64)) - 1;
                         }
                         x

@@ -140,6 +140,7 @@ control.
 | F6-IC pair-index arm: the pair-sum index is cached per base across targets and attempts, built eagerly, and the 256-point closure cap is lifted when an index exists | `koblitz_index_calculus.rs` (`groebner_decompose_f6_ic_pair_index`) | the reference arm `groebner_decompose_f6_ic` is unchanged | §4.3: at 275 points 1.36× over both other arms, 61 % fewer reductions; the reference arm's measurements are untouched |
 | rewrite-plan segments built per source word on first use (a plan for every column of a layout had cost as much as the rewrites it served, 16.5 % of instructions) | `inherited_f4.rs` | — | §4.3 |
 | `f4_fp` narrow deferred RREF in chunks of 64 rows reduced in parallel, independent parallel back-substitution | `f4_fp.rs::rref32_deferred` | `F4_FP_DEFERRED_PAR=0` | §4.5: output identical (same basis fingerprints), 3–11 % on the large bench cases; the dense step is not the bottleneck of `f4_fp` |
+| `f4_fp` Faugère–Lachartre reducer block: reducers reduced once to `B' = A⁻¹B` over the free columns, each pair row becomes `D − C·B'` (no reducer cascade per row); widest lazy SIMD kernel by default; FL only for steps of ≥ 256 columns | `f4_fp.rs::reduce_pairs_fl`, `lazy_simd_kind` | `F4_FP_FL=0`, `F4_FP_LAZY_SIMD=0` | §4.6: quad_n9 10.25 s → 6.85 s (1.50×), basis fingerprints identical on every case |
 | `f4_fp::solve` candidate filter (§2.1) | `f4_fp.rs` | — | correctness |
 | `examples/f6_ic_probe.rs`: same-binary F4/F6-IC timing probe with verdict agreement | new | — | tooling |
 
@@ -265,6 +266,27 @@ share of a step at these sizes; the symbolic preprocessing and the sparse
 pair-row reduction (`f4_fp.rs`, the per-monomial reducer scan and the
 `Vec<u32>` monomials) are the larger part, as the first-round audit
 listed.
+
+### 4.6 `f4_fp`: the reducer cascade
+
+Callgrind on `perfbench fp_gb/f4_quad_n8_p65521` put 58 % of instructions
+in the pair-row reduction (each pair row re-ran the cascade through the
+unreduced sparse reducers) and 12 % in the dense residue elimination.
+Reducing the reducer block once (Faugère–Lachartre `B' = A⁻¹B`, built
+rightmost lead first in parallel blocks of 64) turns every pair row into
+one dense lazy update per entry at a reducer column.
+
+`examples/f4_fp_bench`, same binary, basis fingerprints identical in every
+arm:
+
+| case | rows × cols | cascade, scalar (control) | cascade, AVX-512 | FL, AVX2 | **FL, AVX-512 (default)** |
+|:--|--:|--:|--:|--:|--:|
+| quad_n8_p65521 | 5 668 × 4 991 | 1 000–1 137 ms | 1 114 ms | 1 079 ms | 942–1 079 ms |
+| quad_n9_p65521 | 15 164 × 12 589 | 10 251–10 668 ms | 9 042 ms | 7 180 ms | **6 691–6 850 ms** |
+
+At the standard sizes (≤ 1 674 rows) the three modes are within run-to-run
+spread over three runs of five repetitions (quad_n7 115–154 ms in every
+mode); an apparent cubic_n4 slowdown in a single run did not repeat.
 
 ### 4.4 Kernel row update on this host
 
