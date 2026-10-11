@@ -710,6 +710,8 @@ fn subfield_point_count(curve: &BinaryCurve, basis: &[F2mElement], k: u32) -> u6
     count
 }
 
+/// Trial-division helper kept for upcoming cofactor work.
+#[allow(dead_code)]
 fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
     let mut out = Vec::new();
     // Whether what is left is prime changes only when a division changes
@@ -780,6 +782,8 @@ fn is_prime_u64(n: u64) -> bool {
     true
 }
 
+/// Trial-division helper kept for upcoming cofactor work.
+#[allow(dead_code)]
 fn factorise_big(mut v: BigUint) -> Vec<(BigUint, u32)> {
     let mut out: Vec<(BigUint, u32)> = Vec::new();
     let mut d = BigUint::from(2u32);
@@ -816,7 +820,7 @@ fn factorise_u128(mut v: u128) -> Vec<(u128, u32)> {
     let mut d = 2u128;
     while d * d <= v {
         let mut e = 0;
-        while v % d == 0 {
+        while v.is_multiple_of(d) {
             v /= d;
             e += 1;
         }
@@ -870,7 +874,7 @@ impl KoblitzCurve {
         b: F2mElement,
         modulus: Option<IrreduciblePoly>,
     ) -> Option<Self> {
-        if a > 1 || n < 3 || n > MAX_N {
+        if a > 1 || !(3..=MAX_N).contains(&n) {
             return None;
         }
         let irreducible = match modulus {

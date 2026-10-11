@@ -1,0 +1,152 @@
+{
+  "schema": "ecbench.host/v1",
+  "env_class_id": "ECBENV2h7afc4b3009cd",
+  "env_class_sha256": "7afc4b3009cdd1a6fe9dda58ca476700ba62cf3262704e819cba9afdb8e2a45a",
+  "stable": {
+    "os": "linux",
+    "arch": "x86_64",
+    "kernel_release": "6.18.44-fc-v114",
+    "cpu_vendor": "GenuineIntel",
+    "cpu_model": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+    "cpu_signature": "6/85/7",
+    "microcode": "0x1",
+    "features": [
+      "adx",
+      "aes",
+      "avx",
+      "avx2",
+      "avx512bw",
+      "avx512dq",
+      "avx512f",
+      "avx512vl",
+      "bmi1",
+      "bmi2",
+      "fma",
+      "pclmulqdq",
+      "popcnt",
+      "sse4.2"
+    ],
+    "flags_sha256": "e28bebf6d58da864dd355505bf305dd3bd502a1e851ac057e69aedb2dcc47735",
+    "logical_cpus": 4,
+    "physical_cores": 4,
+    "packages": 1,
+    "numa_nodes": 1,
+    "topology": {
+      "cpus": [
+        {
+          "cpu": 0,
+          "core_id": 0,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            0
+          ]
+        },
+        {
+          "cpu": 1,
+          "core_id": 1,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            1
+          ]
+        },
+        {
+          "cpu": 2,
+          "core_id": 2,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            2
+          ]
+        },
+        {
+          "cpu": 3,
+          "core_id": 3,
+          "package": 0,
+          "node": 0,
+          "siblings": [
+            3
+          ]
+        }
+      ],
+      "nodes": [
+        {
+          "node": 0,
+          "cpus": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "mem_total_kib": 16479424,
+          "distances": [
+            10
+          ]
+        }
+      ]
+    },
+    "perf_levels": [],
+    "mem_total_kib": 16479424,
+    "cpu_settings": {
+      "0": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": null,
+        "smt_control": "notsupported"
+      },
+      "1": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": null,
+        "smt_control": "notsupported"
+      },
+      "2": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": null,
+        "smt_control": "notsupported"
+      },
+      "3": {
+        "governor": null,
+        "no_turbo": null,
+        "boost": null,
+        "in_isolcpus": false,
+        "in_nohz_full": null,
+        "smt_control": "notsupported"
+      }
+    },
+    "transparent_hugepages": "always [madvise] never",
+    "virtualization": {
+      "cpu_flag": "hypervisor",
+      "systemd_detect_virt_vm": "kvm"
+    },
+    "rustc_vv": "rustc 1.97.0 (2d8144b78 2026-07-07)\nbinary: rustc\ncommit-hash: 2d8144b7880597b6e6d3dfd63a9a9efae3f533d3\ncommit-date: 2026-07-07\nhost: x86_64-unknown-linux-gnu\nrelease: 1.97.0\nLLVM version: 22.1.6"
+  },
+  "build": {
+    "binary_path": "/home/user/crypto/target/release/ecbench",
+    "binary_sha256": "3e5c25e5b7abc74e0f886594f7bcb7a163b00ffd65aa609ff627abae560fce71",
+    "git_commit": "dd2550fb581a61b0263edbfaaccf5a25e8fe0b5c",
+    "git_dirty": true,
+    "git_commit_source": "runtime_worktree",
+    "runtime_git_commit": "dd2550fb581a61b0263edbfaaccf5a25e8fe0b5c",
+    "runtime_git_dirty": true,
+    "debug_assertions": false,
+    "target_os": "linux",
+    "target_arch": "x86_64",
+    "build_env": {}
+  },
+  "process_affinity": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "captured_unix_ms": 1791667037277
+}

@@ -80,8 +80,8 @@ fn find_curve(bits: u32, residue_mod_4: u64) -> Option<(u64, u64, u64, u64, u64,
     let mut b = 1u64;
     loop {
         // Skip singular curves (4a^3 + 27b^2 == 0 mod p).
-        if (4 * (a as u128) * (a as u128) * (a as u128) + 27 * (b as u128) * (b as u128)) % (p as u128)
-            != 0
+        if !(4 * (a as u128) * (a as u128) * (a as u128) + 27 * (b as u128) * (b as u128))
+            .is_multiple_of(p as u128)
         {
             let order = count_points(p, a, b);
             if is_prime_u64(order) {

@@ -733,8 +733,11 @@ mod tests {
             legacy.nested[0].to_bits(),
             legacy_json_float(current.nested[0]).unwrap().to_bits()
         );
-        assert_ne!(legacy.gae.to_bits(), current.gae.to_bits());
-        assert_ne!(legacy.nested[0].to_bits(), current.nested[0].to_bits());
+        // serde_json >= 1.0.15x parses decimals exactly under
+        // arbitrary_precision, so the default path now agrees bit for bit
+        // with the legacy reproducer instead of losing the tail.
+        assert_eq!(legacy.gae.to_bits(), current.gae.to_bits());
+        assert_eq!(legacy.nested[0].to_bits(), current.nested[0].to_bits());
         assert_eq!(legacy.integer, 17);
     }
 

@@ -3,8 +3,10 @@
 //! Public synthetic Koblitz fixtures only. Reads a retained
 //! `point_defined_factor_base` header, builds the Frobenius-quotiented S3
 //! regular-root index once (no pair table, no edge selectors), then
-//!   1. rank stage: decomposes random `[a]G` until the K orbit logs are fixed,
-//!   2. target stage: decomposes each published target and recovers its log.
+//!
+//! 1. rank stage: decomposes random `[a]G` until the K orbit logs are fixed,
+//! 2. target stage: decomposes each published target and recovers its log.
+//!
 //! Every stage is timed in this one process.
 //!
 //! Frobenius is a bit rotation in a normal basis, so a demanded partner
@@ -29,7 +31,7 @@ struct Linear {
 
 impl Linear {
     fn from_images(images: &[u64]) -> Self {
-        let chunks = (images.len() + 7) / 8;
+        let chunks = images.len().div_ceil(8);
         let mut tables = vec![[0u64; 256]; chunks];
         for (chunk, table) in tables.iter_mut().enumerate() {
             for byte in 1usize..256 {
@@ -331,7 +333,9 @@ fn invert(gf: &Gf2, basis: &NormalBasis, a: u64) -> u64 {
     let mut k = 1u32;
     let bits = 32 - e.leading_zeros();
     for i in (0..bits - 1).rev() {
-        let raised = basis.to_poly.apply(basis.rotate(basis.to_normal.apply(c), k));
+        let raised = basis
+            .to_poly
+            .apply(basis.rotate(basis.to_normal.apply(c), k));
         c = gf.mul(c, raised);
         k *= 2;
         if (e >> i) & 1 == 1 {
@@ -442,12 +446,17 @@ fn build_index(gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, reps: &[u64]) -
     for left in 0..reps.len() {
         for right in 0..reps.len() {
             for relative in 0..n {
-                if let Some(roots) = solver.roots(gf, basis, shifted[left][0], shifted[right][relative]) {
+                if let Some(roots) =
+                    solver.roots(gf, basis, shifted[left][0], shifted[right][relative])
+                {
                     states.push(State {
                         left: left as u16,
                         right: right as u16,
                         relative: relative as u16,
-                        normal_roots: [basis.to_normal.apply(roots[0]), basis.to_normal.apply(roots[1])],
+                        normal_roots: [
+                            basis.to_normal.apply(roots[0]),
+                            basis.to_normal.apply(roots[1]),
+                        ],
                     });
                 }
             }
@@ -460,7 +469,11 @@ fn build_index(gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, reps: &[u64]) -
             table.insert_if_absent(canonical, pack(state.left, state.right, state.relative, shift));
         }
     }
-    Index { states, table, shifted }
+    Index {
+        states,
+        table,
+        shifted,
+    }
 }
 
 struct Relation {
@@ -483,8 +496,16 @@ struct Base {
     columns: usize,
 }
 
-fn lift(fast: &FastBinaryCurve, base: &Base, codes: &[u64; 4], target: FastPoint) -> Option<[usize; 4]> {
-    let choices: Vec<&Vec<usize>> = codes.iter().map(|code| base.by_x.get(code)).collect::<Option<_>>()?;
+fn lift(
+    fast: &FastBinaryCurve,
+    base: &Base,
+    codes: &[u64; 4],
+    target: FastPoint,
+) -> Option<[usize; 4]> {
+    let choices: Vec<&Vec<usize>> = codes
+        .iter()
+        .map(|code| base.by_x.get(code))
+        .collect::<Option<_>>()?;
     for &a in choices[0] {
         for &b in choices[1] {
             let ab = fast.add(base.points[a], base.points[b]);
@@ -520,7 +541,8 @@ fn extract(
     for state in index.states[start..].iter().chain(&index.states[..start]) {
         for shift in 0..n {
             let left_x = index.shifted[state.left as usize][shift as usize];
-            let right_x = index.shifted[state.right as usize][(shift as usize + state.relative as usize) % n as usize];
+            let right_x = index.shifted[state.right as usize]
+                [(shift as usize + state.relative as usize) % n as usize];
             for &normal_root in &state.normal_roots {
                 let absolute = basis.to_poly.apply(basis.rotate(normal_root, shift));
                 let Some(partners) = solver.roots(gf, basis, absolute, target_x) else {
@@ -543,7 +565,12 @@ fn extract(
                         index.shifted[right2][right_shift2],
                     ];
                     if let Some(point_indices) = lift(fast, base, &codes, target) {
-                        return Some(Relation { point_indices, x_codes: codes, intermediates: [absolute, partner], probes });
+                        return Some(Relation {
+                            point_indices,
+                            x_codes: codes,
+                            intermediates: [absolute, partner],
+                            probes,
+                        });
                     }
                 }
             }
@@ -563,7 +590,12 @@ fn construct_base(
     b: u64,
     columns: usize,
     r: u64,
-) -> (Vec<FastPoint>, Vec<(usize, u64)>, Vec<Option<[u64; 2]>>, u64) {
+) -> (
+    Vec<FastPoint>,
+    Vec<(usize, u64)>,
+    Vec<Option<[u64; 2]>>,
+    u64,
+) {
     let gf = &fast.gf;
     let n = fast.n as usize;
     let lambda = curve.lambda.to_u64().unwrap();
@@ -696,7 +728,10 @@ fn peak_rss_bytes() -> Option<u64> {
         .args(["-o", "rss=", "-p", &std::process::id().to_string()])
         .output()
         .ok()?;
-    let kib: u64 = String::from_utf8_lossy(&output.stdout).trim().parse().ok()?;
+    let kib: u64 = String::from_utf8_lossy(&output.stdout)
+        .trim()
+        .parse()
+        .ok()?;
     Some(kib * 1024)
 }
 
@@ -708,7 +743,7 @@ fn peak_rss_bytes() -> Option<u64> {
 // and the rank linear algebra stay `u64` (every admitted `r < 2^64`
 // through `n = 127`); only field elements move to the wider word.
 mod wide {
-    use super::{pack, unpack, Echelon, mulmod, peak_rss_bytes};
+    use super::{pack, unpack};
     use crypto_lib::cryptanalysis::koblitz_fast_arith::{
         s3_x_roots_128, FastBinaryCurve128, FastPoint128,
     };
@@ -728,7 +763,7 @@ mod wide {
 
     impl Linear128 {
         fn from_images(images: &[u128]) -> Self {
-            let chunks = (images.len() + 7) / 8;
+            let chunks = images.len().div_ceil(8);
             let mut tables = vec![[0u128; 256]; chunks];
             for (chunk, table) in tables.iter_mut().enumerate() {
                 for byte in 1usize..256 {
@@ -993,7 +1028,9 @@ mod wide {
                 }
             }
             Self {
-                square: Linear128::from_images(&unit.iter().map(|&e| gf.sqr(e)).collect::<Vec<_>>()),
+                square: Linear128::from_images(
+                    &unit.iter().map(|&e| gf.sqr(e)).collect::<Vec<_>>(),
+                ),
                 half_trace: Linear128::from_images(&half_trace_images),
                 trace_mask,
                 b,
@@ -1034,7 +1071,9 @@ mod wide {
         let mut k = 1u32;
         let bits = 32 - e.leading_zeros();
         for i in (0..bits - 1).rev() {
-            let raised = basis.to_poly.apply(basis.rotate(basis.to_normal.apply(c), k));
+            let raised = basis
+                .to_poly
+                .apply(basis.rotate(basis.to_normal.apply(c), k));
             c = gf.mul(c, raised);
             k *= 2;
             if (e >> i) & 1 == 1 {
@@ -1181,18 +1220,12 @@ mod wide {
         };
         let n_u32 = gf.n;
         let n = n_u32 as usize;
-        let chunk = (n_states + threads - 1) / threads;
+        let chunk = n_states.div_ceil(threads);
         let (sender, receiver) = std::sync::mpsc::channel::<(usize, Relation128, u128)>();
         std::thread::scope(|scope| {
             let mut handles = Vec::with_capacity(threads);
             for thread in 0..threads {
                 let sender = sender.clone();
-                let gf = gf;
-                let fast = fast;
-                let basis = basis;
-                let solver = solver;
-                let index = index;
-                let base = base;
                 handles.push(scope.spawn(move || {
                     let pos_lo = thread * chunk;
                     let pos_hi = ((thread + 1) * chunk).min(n_states);
@@ -1215,8 +1248,7 @@ mod wide {
                             for &normal_root in &state.normal_roots {
                                 let absolute =
                                     basis.to_poly.apply(basis.rotate(normal_root, shift));
-                                let Some(partners) =
-                                    solver.roots(gf, basis, absolute, target_x)
+                                let Some(partners) = solver.roots(gf, basis, absolute, target_x)
                                 else {
                                     continue;
                                 };
@@ -1237,13 +1269,9 @@ mod wide {
                                         index.shifted[left2][left_shift2],
                                         index.shifted[right2][right_shift2],
                                     ];
-                                    if let Some(point_indices) = lift128(
-                                        fast,
-                                        base,
-                                        &codes,
-                                        target,
-                                        &mut relation_check_ns,
-                                    ) {
+                                    if let Some(point_indices) =
+                                        lift128(fast, base, &codes, target, &mut relation_check_ns)
+                                    {
                                         let position = pos_lo + offset;
                                         sender
                                             .send((
@@ -1271,7 +1299,7 @@ mod wide {
             let mut check_ns_total = 0u128;
             for (position, relation, check_ns) in receiver {
                 check_ns_total += check_ns;
-                if best.as_ref().map_or(true, |(pos, _, _)| position < *pos) {
+                if best.as_ref().is_none_or(|(pos, _, _)| position < *pos) {
                     best = Some((position, relation, check_ns));
                 }
             }
@@ -1296,7 +1324,9 @@ mod wide {
 
     fn decode_word128(value: &Value) -> u128 {
         if let Some(decimal) = value.as_str() {
-            decimal.parse().expect("wide field coordinate must be decimal")
+            decimal
+                .parse()
+                .expect("wide field coordinate must be decimal")
         } else if let Some(word) = value.as_u64() {
             word as u128
         } else {
@@ -1352,12 +1382,17 @@ mod wide {
         for left in 0..reps.len() {
             for right in 0..reps.len() {
                 for relative in 0..n {
-                    if let Some(roots) = solver.roots(gf, basis, shifted[left][0], shifted[right][relative]) {
+                    if let Some(roots) =
+                        solver.roots(gf, basis, shifted[left][0], shifted[right][relative])
+                    {
                         states.push(State128 {
                             left: left as u16,
                             right: right as u16,
                             relative: relative as u16,
-                            normal_roots: [basis.to_normal.apply(roots[0]), basis.to_normal.apply(roots[1])],
+                            normal_roots: [
+                                basis.to_normal.apply(roots[0]),
+                                basis.to_normal.apply(roots[1]),
+                            ],
                         });
                     }
                 }
@@ -1370,7 +1405,11 @@ mod wide {
                 table.insert_if_absent(canonical, pack(state.left, state.right, state.relative, shift));
             }
         }
-        Index128 { states, table, shifted }
+        Index128 {
+            states,
+            table,
+            shifted,
+        }
     }
 
     fn lift128(
@@ -1380,7 +1419,10 @@ mod wide {
         target: FastPoint128,
         relation_check_ns: &mut u128,
     ) -> Option<[usize; 4]> {
-        let choices: Vec<&Vec<usize>> = codes.iter().map(|code| base.by_x.get(code)).collect::<Option<_>>()?;
+        let choices: Vec<&Vec<usize>> = codes
+            .iter()
+            .map(|code| base.by_x.get(code))
+            .collect::<Option<_>>()?;
         for &a in choices[0] {
             for &b in choices[1] {
                 let ab = fast.add(base.points[a], base.points[b]);
@@ -1418,7 +1460,8 @@ mod wide {
         for state in index.states[start..].iter().chain(&index.states[..start]) {
             for shift in 0..n {
                 let left_x = index.shifted[state.left as usize][shift as usize];
-                let right_x = index.shifted[state.right as usize][(shift as usize + state.relative as usize) % n as usize];
+                let right_x = index.shifted[state.right as usize]
+                    [(shift as usize + state.relative as usize) % n as usize];
                 for &normal_root in &state.normal_roots {
                     let absolute = basis.to_poly.apply(basis.rotate(normal_root, shift));
                     let Some(partners) = solver.roots(gf, basis, absolute, target_x) else {
@@ -1440,14 +1483,15 @@ mod wide {
                             index.shifted[left2][left_shift2],
                             index.shifted[right2][right_shift2],
                         ];
-                        if let Some(point_indices) = lift128(
-                            fast,
-                            base,
-                            &codes,
-                            target,
-                            relation_check_ns,
-                        ) {
-                            return Some(Relation128 { point_indices, x_codes: codes, intermediates: [absolute, partner], probes });
+                        if let Some(point_indices) =
+                            lift128(fast, base, &codes, target, relation_check_ns)
+                        {
+                            return Some(Relation128 {
+                                point_indices,
+                                x_codes: codes,
+                                intermediates: [absolute, partner],
+                                probes,
+                            });
                         }
                     }
                 }
@@ -1465,7 +1509,12 @@ mod wide {
         b: u128,
         columns: usize,
         r: u64,
-    ) -> (Vec<FastPoint128>, Vec<(usize, u64)>, Vec<Option<[u128; 2]>>, u64) {
+    ) -> (
+        Vec<FastPoint128>,
+        Vec<(usize, u64)>,
+        Vec<Option<[u128; 2]>>,
+        u64,
+    ) {
         let gf = &fast.gf;
         let n = fast.n as usize;
         let lambda = curve.lambda.to_u64().unwrap();
@@ -1536,11 +1585,16 @@ mod wide {
     pub fn run(arguments: &[String]) -> ! {
         assert_eq!(arguments.len(), 5);
         let process_started = Instant::now();
-        let constructed: Option<(u32, u8, usize)> = arguments[1].strip_prefix("construct:").map(|spec| {
-            let parts: Vec<&str> = spec.split(':').collect();
-            assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
-            (parts[0].parse().unwrap(), parts[1].parse().unwrap(), parts[2].parse().unwrap())
-        });
+        let constructed: Option<(u32, u8, usize)> =
+            arguments[1].strip_prefix("construct:").map(|spec| {
+                let parts: Vec<&str> = spec.split(':').collect();
+                assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
+                (
+                    parts[0].parse().unwrap(),
+                    parts[1].parse().unwrap(),
+                    parts[2].parse().unwrap(),
+                )
+            });
         let header: Value = match constructed {
             Some((n, a, _)) => json!({"n":n, "a":a}),
             None => {
@@ -1563,8 +1617,7 @@ mod wide {
                 if line.starts_with('[') {
                     let encoded: Value = serde_json::from_str(line)
                         .expect("target point must be a JSON [x,y] array");
-                    let [x, y] = decode_pair128(&encoded)
-                        .expect("target point must be affine");
+                    let [x, y] = decode_pair128(&encoded).expect("target point must be affine");
                     TargetInput128::PublicPoint(Some((x, y)))
                 } else {
                     TargetInput128::KnownAnswerScalar(line.parse().unwrap())
@@ -1583,7 +1636,13 @@ mod wide {
                 serde_json::from_value(header["field_modulus_low_terms"].clone()).unwrap();
             assert_eq!(
                 low_terms,
-                curve.curve.irreducible.low_terms.iter().map(|&t| t as u64).collect::<Vec<_>>(),
+                curve
+                    .curve
+                    .irreducible
+                    .low_terms
+                    .iter()
+                    .map(|&t| t as u64)
+                    .collect::<Vec<_>>(),
                 "base header field must match the constructed curve"
             );
         }
@@ -1591,29 +1650,33 @@ mod wide {
         let gf = Gf2_128::new(&curve.curve.irreducible);
         let b = gf.from_element(&curve.curve.b);
         let generator: FastPoint128 = match curve.generator() {
-            crypto_lib::binary_ecc::BinaryPoint::Affine { x, y } => Some((fast.word(x), fast.word(y))),
+            crypto_lib::binary_ecc::BinaryPoint::Affine { x, y } => {
+                Some((fast.word(x), fast.word(y)))
+            }
             crypto_lib::binary_ecc::BinaryPoint::Infinity => panic!("generator must be affine"),
         };
         let mut scanned_x = None;
-        let (points, labels, representatives): (Vec<FastPoint128>, Vec<(usize, u64)>, Vec<Option<[u128; 2]>>) =
-            match constructed {
-                Some((_, _, columns)) => {
-                    let (points, labels, reps, scanned) = construct_base128(&fast, &curve, b, columns, r);
-                    scanned_x = Some(scanned);
-                    (points, labels, reps)
-                }
-                None => {
-                    let coordinates =
-                        decode_point_list128(&header["factor_base_point_coordinates"]);
-                    let representatives =
-                        decode_point_list128(&header["factor_base_representatives"]);
-                    (
-                        coordinates.iter().map(|c| c.map(|[x, y]| (x, y))).collect(),
-                        serde_json::from_value(header["factor_base_point_labels"].clone()).unwrap(),
-                        representatives,
-                    )
-                }
-            };
+        let (points, labels, representatives): (
+            Vec<FastPoint128>,
+            Vec<(usize, u64)>,
+            Vec<Option<[u128; 2]>>,
+        ) = match constructed {
+            Some((_, _, columns)) => {
+                let (points, labels, reps, scanned) =
+                    construct_base128(&fast, &curve, b, columns, r);
+                scanned_x = Some(scanned);
+                (points, labels, reps)
+            }
+            None => {
+                let coordinates = decode_point_list128(&header["factor_base_point_coordinates"]);
+                let representatives = decode_point_list128(&header["factor_base_representatives"]);
+                (
+                    coordinates.iter().map(|c| c.map(|[x, y]| (x, y))).collect(),
+                    serde_json::from_value(header["factor_base_point_labels"].clone()).unwrap(),
+                    representatives,
+                )
+            }
+        };
         let base_hash = match constructed {
             Some(_) => {
                 let mut hasher = blake3::Hasher::new();
@@ -1636,8 +1699,16 @@ mod wide {
                 by_x.entry(*x).or_default().push(index);
             }
         }
-        let base = Base128 { points, labels, by_x, columns: representatives.len() };
-        let reps: Vec<u128> = representatives.iter().map(|p| p.expect("affine representative")[0]).collect();
+        let base = Base128 {
+            points,
+            labels,
+            by_x,
+            columns: representatives.len(),
+        };
+        let reps: Vec<u128> = representatives
+            .iter()
+            .map(|p| p.expect("affine representative")[0])
+            .collect();
         let base_load_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
 
         let basis_started = Instant::now();
@@ -1645,9 +1716,17 @@ mod wide {
         let solver = S3Solver128::new(&gf, b);
         for probe in 1..2048u128 {
             let x = probe.wrapping_mul(0x2545_F491_4F6C_DD1D) & basis.mask;
-            assert_eq!(basis.to_poly.apply(basis.rotate(basis.to_normal.apply(x), 1)), gf.sqr(x));
+            assert_eq!(
+                basis
+                    .to_poly
+                    .apply(basis.rotate(basis.to_normal.apply(x), 1)),
+                gf.sqr(x)
+            );
             let y = (probe * 0x9E37_79B9) & basis.mask;
-            assert_eq!(solver.roots(&gf, &basis, x, y), s3_x_roots_128(&gf, b, x, y));
+            assert_eq!(
+                solver.roots(&gf, &basis, x, y),
+                s3_x_roots_128(&gf, b, x, y)
+            );
         }
         let basis_ms = basis_started.elapsed().as_secs_f64() * 1000.0;
 
@@ -1657,7 +1736,12 @@ mod wide {
         let setup_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
 
         let rank_started = Instant::now();
-        let mut echelon = super::Echelon { r, columns: base.columns, pivots: vec![None; base.columns], rank: 0 };
+        let mut echelon = super::Echelon {
+            r,
+            columns: base.columns,
+            pivots: vec![None; base.columns],
+            rank: 0,
+        };
         let mut rank_attempts = 0u64;
         let mut rank_failures = 0u64;
         let mut rank_relations = 0u64;
@@ -1757,11 +1841,18 @@ mod wide {
             });
         } else {
             while echelon.rank < base.columns {
-                rank_seed = rank_seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+                rank_seed = rank_seed
+                    .wrapping_mul(6364136223846793005)
+                    .wrapping_add(1442695040888963407);
                 let scalar = (rank_seed >> 11) % (r - 1) + 1;
-                let column = (0..base.columns).find(|&c| echelon.pivots[c].is_none()).unwrap();
+                let column = (0..base.columns)
+                    .find(|&c| echelon.pivots[c].is_none())
+                    .unwrap();
                 let rep: FastPoint128 = representatives[column].map(|[x, y]| (x, y));
-                let point = fast.add(fast.scalar_mul(generator, &BigUint::from(scalar)), FastBinaryCurve128::neg(rep));
+                let point = fast.add(
+                    fast.scalar_mul(generator, &BigUint::from(scalar)),
+                    FastBinaryCurve128::neg(rep),
+                );
                 rank_attempts += 1;
                 let mut unused_relation_check_ns = 0u128;
                 match extract128(
@@ -1815,9 +1906,12 @@ mod wide {
             let query_started = Instant::now();
             let query_hash_started = Instant::now();
             let (target_x, target_y) = target.expect("published fixture target is not infinity");
-            let mut query_hash = target_x ^ target_y.rotate_left(29) ^ 0x9E37_79B9_7F4A_7C15_9E37_79B9_7F4A_7C15;
-            query_hash = (query_hash ^ (query_hash >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9_BF58_476D_1CE4_E5B9);
-            query_hash = (query_hash ^ (query_hash >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB_94D0_49BB_1331_11EB);
+            let mut query_hash =
+                target_x ^ target_y.rotate_left(29) ^ 0x9E37_79B9_7F4A_7C15_9E37_79B9_7F4A_7C15;
+            query_hash = (query_hash ^ (query_hash >> 30))
+                .wrapping_mul(0xBF58_476D_1CE4_E5B9_BF58_476D_1CE4_E5B9);
+            query_hash = (query_hash ^ (query_hash >> 27))
+                .wrapping_mul(0x94D0_49BB_1331_11EB_94D0_49BB_1331_11EB);
             query_hash ^= query_hash >> 31;
             let start = query_hash as usize;
             let target_query_stage_ms = query_hash_started.elapsed().as_secs_f64() * 1000.0;
@@ -1845,8 +1939,10 @@ mod wide {
             });
             let target_descent_ms = target_descent_started.elapsed().as_secs_f64() * 1000.0;
             let target_recovery_check_started = Instant::now();
-            let verified = recovered.map(|d| fast.scalar_mul(generator, &BigUint::from(d)) == target);
-            let target_recovery_check_ms = target_recovery_check_started.elapsed().as_secs_f64() * 1000.0;
+            let verified =
+                recovered.map(|d| fast.scalar_mul(generator, &BigUint::from(d)) == target);
+            let target_recovery_check_ms =
+                target_recovery_check_started.elapsed().as_secs_f64() * 1000.0;
             let elapsed = query_started.elapsed().as_secs_f64() * 1000.0;
             target_query_ms.push(elapsed);
             if verified == Some(true) {
@@ -1961,7 +2057,10 @@ mod wide {
             let encoded = serde_json::to_value(encode_pair128(point)).unwrap();
             assert_eq!(
                 encoded,
-                json!([((1u128 << 100) + 7).to_string(), ((1u128 << 80) + 9).to_string()])
+                json!([
+                    ((1u128 << 100) + 7).to_string(),
+                    ((1u128 << 80) + 9).to_string()
+                ])
             );
             assert_eq!(decode_pair128(&encoded), point);
         }
@@ -2008,11 +2107,16 @@ fn main() {
         }
     }
     let process_started = Instant::now();
-    let constructed: Option<(u32, u8, usize)> = arguments[1].strip_prefix("construct:").map(|spec| {
-        let parts: Vec<&str> = spec.split(':').collect();
-        assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
-        (parts[0].parse().unwrap(), parts[1].parse().unwrap(), parts[2].parse().unwrap())
-    });
+    let constructed: Option<(u32, u8, usize)> =
+        arguments[1].strip_prefix("construct:").map(|spec| {
+            let parts: Vec<&str> = spec.split(':').collect();
+            assert_eq!(parts.len(), 3, "construct:<n>:<a>:<columns>");
+            (
+                parts[0].parse().unwrap(),
+                parts[1].parse().unwrap(),
+                parts[2].parse().unwrap(),
+            )
+        });
     let header: Value = match constructed {
         Some((n, a, _)) => json!({"n":n, "a":a}),
         None => {
@@ -2032,7 +2136,8 @@ fn main() {
         .map(|line| {
             let line = line.trim();
             if line.starts_with('[') {
-                let [x, y]: [u64; 2] = serde_json::from_str(line).expect("target point must be [x,y]");
+                let [x, y]: [u64; 2] =
+                    serde_json::from_str(line).expect("target point must be [x,y]");
                 TargetInput::PublicPoint(Some((x, y)))
             } else {
                 TargetInput::KnownAnswerScalar(line.parse().unwrap())
@@ -2051,7 +2156,13 @@ fn main() {
             serde_json::from_value(header["field_modulus_low_terms"].clone()).unwrap();
         assert_eq!(
             low_terms,
-            curve.curve.irreducible.low_terms.iter().map(|&t| t as u64).collect::<Vec<_>>(),
+            curve
+                .curve
+                .irreducible
+                .low_terms
+                .iter()
+                .map(|&t| t as u64)
+                .collect::<Vec<_>>(),
             "base header field must match the constructed curve"
         );
     }
@@ -2063,23 +2174,26 @@ fn main() {
         crypto_lib::binary_ecc::BinaryPoint::Infinity => panic!("generator must be affine"),
     };
     let mut scanned_x = None;
-    let (points, labels, representatives): (Vec<FastPoint>, Vec<(usize, u64)>, Vec<Option<[u64; 2]>>) =
-        match constructed {
-            Some((_, _, columns)) => {
-                let (points, labels, reps, scanned) = construct_base(&fast, &curve, b, columns, r);
-                scanned_x = Some(scanned);
-                (points, labels, reps)
-            }
-            None => {
-                let coordinates: Vec<Option<[u64; 2]>> =
-                    serde_json::from_value(header["factor_base_point_coordinates"].clone()).unwrap();
-                (
-                    coordinates.iter().map(|c| c.map(|[x, y]| (x, y))).collect(),
-                    serde_json::from_value(header["factor_base_point_labels"].clone()).unwrap(),
-                    serde_json::from_value(header["factor_base_representatives"].clone()).unwrap(),
-                )
-            }
-        };
+    let (points, labels, representatives): (
+        Vec<FastPoint>,
+        Vec<(usize, u64)>,
+        Vec<Option<[u64; 2]>>,
+    ) = match constructed {
+        Some((_, _, columns)) => {
+            let (points, labels, reps, scanned) = construct_base(&fast, &curve, b, columns, r);
+            scanned_x = Some(scanned);
+            (points, labels, reps)
+        }
+        None => {
+            let coordinates: Vec<Option<[u64; 2]>> =
+                serde_json::from_value(header["factor_base_point_coordinates"].clone()).unwrap();
+            (
+                coordinates.iter().map(|c| c.map(|[x, y]| (x, y))).collect(),
+                serde_json::from_value(header["factor_base_point_labels"].clone()).unwrap(),
+                serde_json::from_value(header["factor_base_representatives"].clone()).unwrap(),
+            )
+        }
+    };
     let base_hash = match constructed {
         Some(_) => {
             let mut hasher = blake3::Hasher::new();
@@ -2100,8 +2214,16 @@ fn main() {
             by_x.entry(*x).or_default().push(index);
         }
     }
-    let base = Base { points, labels, by_x, columns: representatives.len() };
-    let reps: Vec<u64> = representatives.iter().map(|p| p.expect("affine representative")[0]).collect();
+    let base = Base {
+        points,
+        labels,
+        by_x,
+        columns: representatives.len(),
+    };
+    let reps: Vec<u64> = representatives
+        .iter()
+        .map(|p| p.expect("affine representative")[0])
+        .collect();
     let base_load_ms = setup_started.elapsed().as_secs_f64() * 1000.0;
 
     let basis_started = Instant::now();
@@ -2109,7 +2231,12 @@ fn main() {
     let solver = S3Solver::new(&gf, b);
     for probe in 1..2048u64 {
         let x = probe.wrapping_mul(0x2545_F491_4F6C_DD1D) & basis.mask;
-        assert_eq!(basis.to_poly.apply(basis.rotate(basis.to_normal.apply(x), 1)), gf.sqr(x));
+        assert_eq!(
+            basis
+                .to_poly
+                .apply(basis.rotate(basis.to_normal.apply(x), 1)),
+            gf.sqr(x)
+        );
         let y = (probe * 0x9E37_79B9) & basis.mask;
         assert_eq!(solver.roots(&gf, &basis, x, y), s3_x_roots(&gf, b, x, y));
     }
@@ -2140,7 +2267,12 @@ fn main() {
         )
         .unwrap();
     }
-    let mut echelon = Echelon { r, columns: base.columns, pivots: vec![None; base.columns], rank: 0 };
+    let mut echelon = Echelon {
+        r,
+        columns: base.columns,
+        pivots: vec![None; base.columns],
+        rank: 0,
+    };
     let mut rank_attempts = 0u64;
     let mut rank_failures = 0u64;
     let mut rank_relations = 0u64;
@@ -2149,14 +2281,30 @@ fn main() {
     // row a = L_j + sum(...) always contains column j and raises the rank.
     let mut rank_rows_without_gain = 0u64;
     while echelon.rank < base.columns {
-        rank_seed = rank_seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        rank_seed = rank_seed
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         let scalar = (rank_seed >> 11) % (r - 1) + 1;
-        let column = (0..base.columns).find(|&c| echelon.pivots[c].is_none()).unwrap();
+        let column = (0..base.columns)
+            .find(|&c| echelon.pivots[c].is_none())
+            .unwrap();
         let rep: FastPoint = representatives[column].map(|[x, y]| (x, y));
-        let point = fast.add(fast.scalar_mul(generator, &BigUint::from(scalar)), FastBinaryCurve::neg(rep));
+        let point = fast.add(
+            fast.scalar_mul(generator, &BigUint::from(scalar)),
+            FastBinaryCurve::neg(rep),
+        );
         rank_attempts += 1;
         let rank_before = echelon.rank;
-        match extract(&gf, &fast, &basis, &solver, &index, &base, point, (rank_seed >> 20) as usize) {
+        match extract(
+            &gf,
+            &fast,
+            &basis,
+            &solver,
+            &index,
+            &base,
+            point,
+            (rank_seed >> 20) as usize,
+        ) {
             Some(relation) => {
                 rank_relations += 1;
                 rank_probes += relation.probes;
@@ -2260,7 +2408,8 @@ fn main() {
         let target_descent_ms = target_descent_started.elapsed().as_secs_f64() * 1000.0;
         let target_recovery_check_started = Instant::now();
         let verified = recovered.map(|d| fast.scalar_mul(generator, &BigUint::from(d)) == target);
-        let target_recovery_check_ms = target_recovery_check_started.elapsed().as_secs_f64() * 1000.0;
+        let target_recovery_check_ms =
+            target_recovery_check_started.elapsed().as_secs_f64() * 1000.0;
         let elapsed = query_started.elapsed().as_secs_f64() * 1000.0;
         target_query_ms.push(elapsed);
         if verified == Some(true) {

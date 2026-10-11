@@ -3758,6 +3758,9 @@ fn expand_support_batch_selected(
 }
 
 fn main() {
+    // Diagnostic counters (parallel waves, rank-targeted trials, …) are
+    // accumulated for manual inspection and not always printed.
+    #![allow(unused_assignments)]
     let arguments: Vec<_> = std::env::args().collect();
     assert!(
         (6..=11).contains(&arguments.len()),
