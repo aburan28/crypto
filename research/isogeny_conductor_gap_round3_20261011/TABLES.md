@@ -59,4 +59,25 @@
 
 ## E5. Combined Weil descent, audited sessions
 
-No completed E5 session.
+### `e5_combined_n17_t0`
+
+| arm | runs | verified | S | solver ops | max solving degree | online wall (s) |
+|:--|--:|--:|--:|--:|--:|--:|
+| f4-blind | 2 | 2 | 5.11 | 65072207–133408080 | 3 | 1.4 |
+| f4-combined | 2 | 2 | 6.48 | 32012560285–70613284746 | 4 | 468.9 |
+| f4-lifts | 2 | 2 | 5.74 | 104216038–106694797 | 3 | 1.5 |
+| rho-neg | 2 | 2 | 1.84 | – | – | 0.0 |
+
+Combined over blind solver operations: 517.1×.
+
+### `e5_combined_n17_t1`
+
+| arm | runs | verified | S | solver ops | max solving degree | online wall (s) |
+|:--|--:|--:|--:|--:|--:|--:|
+| f4-blind | 2 | 2 | 5.85 | 84877444–164172136 | 3 | 1.7 |
+| f4-combined | 2 | 2 | 5.95 | 34853985256–38387092945 | 4 | 459.0 |
+| f4-lifts | 2 | 2 | 6.00 | 114545148–116831490 | 3 | 1.5 |
+| rho-neg | 2 | 2 | 1.64 | – | – | 0.0 |
+
+Combined over blind solver operations: 294.1×.
+

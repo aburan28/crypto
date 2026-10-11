@@ -77,11 +77,11 @@ fn pow(mut a: u64, mut e: u64, p: u64) -> u64 {
     r
 }
 fn inv(a: u64, p: u64) -> u64 {
-    assert!(a % p != 0, "inverse of zero");
+    assert!(!a.is_multiple_of(p), "inverse of zero");
     pow(a, p - 2, p)
 }
 fn is_square(a: u64, p: u64) -> bool {
-    a % p == 0 || pow(a, (p - 1) / 2, p) == 1
+    a.is_multiple_of(p) || pow(a, (p - 1) / 2, p) == 1
 }
 fn sqrt(a: u64, p: u64) -> Option<u64> {
     let a = a % p;
@@ -93,7 +93,7 @@ fn sqrt(a: u64, p: u64) -> Option<u64> {
     }
     // Tonelli–Shanks.
     let (mut q, mut s) = (p - 1, 0u32);
-    while q % 2 == 0 {
+    while q.is_multiple_of(2) {
         q /= 2;
         s += 1;
     }
@@ -484,7 +484,7 @@ fn main() {
         .expect("open out");
 
     for pr in pairs["pairs"].as_array().unwrap() {
-        if pr["cofactor"].as_u64().unwrap() % 2 != 0 {
+        if !pr["cofactor"].as_u64().unwrap().is_multiple_of(2) {
             continue;
         }
         let pair = format!(

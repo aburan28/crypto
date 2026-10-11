@@ -670,10 +670,10 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
         <tr><td>Prime, h &le; 25 (17)</td><td>closed MITM</td><td>11.7</td><td>0.094</td><td><strong>0.50</strong> <small>[0.21, 2.36]</small></td><td><span class="chip">engineering</span></td></tr>
         <tr><td>Prime, h &ge; 50 (17)</td><td>closed MITM</td><td>116</td><td>0.017</td><td>4.7 <small>[2.3, 75]</small></td><td><span class="chip">engineering</span></td></tr>
         <tr><td>Binary and Koblitz (12)</td><td>closed MITM</td><td>2.2&ndash;3.5</td><td>0.65&ndash;0.78</td><td>3.0&ndash;5.8</td><td><span class="chip">engineering</span></td></tr>
-        <tr><td>Koblitz, n = 17 (warm-ups only)</td><td>combined Weil descent</td><td>&ndash;</td><td>&ndash;</td><td>F4 work 629&ndash;654&times; blind; degree 4; timeout at h = 6</td><td><span class="chip">engineering</span> negative</td></tr>
+        <tr><td>Koblitz, n = 17 (audited in round 3)</td><td>combined Weil descent</td><td>&ndash;</td><td>&ndash;</td><td>F4 work 234&ndash;529&times; blind, paired by run; degree 4; h = 6 timeout not rerun</td><td><span class="chip">engineering</span> negative</td></tr>
       </tbody>
     </table></div>
-    <p class="dash-footnote">The best cold cell, an F4 descent on <code>icv1-f2m23-tm5197-d29bcbd9</code>, reads S &ge; 2.37 against its own rho at 1.18 (2.0&times;); no cell crosses rho. The combined-descent row comes from warm-up records of sessions that host reboots interrupted, and has not been audited. <a href="https://github.com/aburan28/crypto/blob/main/research/isogeny_conductor_gap_ic_20261010/README.md">Note, sessions and tables</a></p>
+    <p class="dash-footnote">The best cold cell, an F4 descent on <code>icv1-f2m23-tm5197-d29bcbd9</code>, reads S &ge; 2.37 against its own rho at 1.18 (2.0&times;); no cell crosses rho. The combined-descent row on the Koblitz curve is from two audited round-3 sessions (four runs, 16 replays reproduced); the h = 6 timeout is still from unaudited warm-ups. <a href="https://github.com/aburan28/crypto/blob/main/research/isogeny_conductor_gap_ic_20261010/README.md">Note, sessions and tables</a></p>
   </section></div></details>
 <details class="dash-details"><summary>Conductor gap round 2: partial fibers and crater automorphisms · 11 October 2026</summary><div class="dash-detail-body"><section class="dash-section" id="isogeny-conductor-gap-round2-20261011" aria-labelledby="isogeny-gap-r2-title">
     <div class="dash-section-head"><div><p class="dash-kicker">Accounting correction and relation-phase engineering · 11 October 2026</p><h2 id="isogeny-gap-r2-title">A partial cofactor fiber beats the whole one by up to 79&times;; the conductor gap still changes nothing at matched structure.</h2>
@@ -691,6 +691,21 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
       </tbody>
     </table></div>
     <p class="dash-footnote">At matched subgroup size, crater and floor agree within 1 to 3 percent; the gap changes only which sizes <code>[d]E[h]</code> reaches, because the crater&rsquo;s &#8467;-torsion has rank 2. The best cell, 14.8 against rho 1.16 (12.8&times;), is against negation-only rho; a rho over the order-6 group would widen it by up to &radic;3. <a href="https://github.com/aburan28/crypto/blob/main/research/isogeny_conductor_gap_round2_20261011/README.md">Note, sessions and tables</a></p>
+  </section></div></details>
+<details class="dash-details"><summary>Conductor gap round 3: two-torsion summation polynomials and the combined descent audited · 11 October 2026</summary><div class="dash-detail-body"><section class="dash-section" id="isogeny-conductor-gap-round3-20261011" aria-labelledby="isogeny-gap-r3-title">
+    <div class="dash-section-head"><div><p class="dash-kicker">Stage diagnostic and audited negative · 11 October 2026</p><h2 id="isogeny-gap-r3-title">Two-torsion symmetrisation is a quotient isogeny: it cuts F4 work 4&ndash;20&times;, identically on crater and floor.</h2>
+<p class="panel-summary">1,128 F4 systems over F_p on 72 certified curves show the symmetrised S3 system costs exactly what its quotient degree predicts, with crater E[2] and floor C4 equal; two audited sessions confirm round 1's combined Weil descent is negative.</p></div><span class="status neutral">Stage diagnostic &middot; no rho comparison</span></div>
+    <p class="dash-section-intro">E4 writes the S3 decomposition system for an H-stable factor base on the Vélu quotient E/H (H = C2, C4, or E[2] where rational) and solves it with the repository's F4 over F_p, against the direct system on E. E5 reruns round 1's combined descent (target abscissa free, fiber polynomial adjoined) in two short ecbench sessions so they fit between host reboots.</p>
+    <div class="table-scroll"><table>
+      <caption>From <code>TABLES.md</code>; F4 counts are exact and deterministic.</caption>
+      <thead><tr><th>Lead</th><th>Comparison</th><th>Measured</th><th>Class</th></tr></thead>
+      <tbody>
+        <tr><td>E4 gain</td><td>direct &divide; quotient at matched base B = 32, 64</td><td>solving degree 1.9&ndash;3.7&times;; F_p work 4.1&ndash;4.3&times; (|H| = 2), 17.6&ndash;19.6&times; (|H| = 4)</td><td><span class="chip">stage</span> diagnostic</td></tr>
+        <tr><td>E4 gap</td><td>crater E[2] vs floor and floor-model C4, 12 pairs</td><td>same degree and matrix; work within 6 of 34,158 at B = 64</td><td><span class="chip">boundary</span> control</td></tr>
+        <tr><td>E5 combined descent</td><td>vs blind F4, Koblitz n = 17, 4 audited runs</td><td>work 234&ndash;529&times;, wall 324&ndash;613 s vs 0.9&ndash;2.0 s, degree 4 vs 3</td><td><span class="chip">engineering</span> negative</td></tr>
+      </tbody>
+    </table></div>
+    <p class="dash-footnote">E4 makes no whole-method or rho comparison; the gap changes which subgroups exist (rational E[2] on all D = &minus;7 craters and the &#8467; = 2 craters), not what a subgroup of given order costs. <a href="https://github.com/aburan28/crypto/blob/main/research/isogeny_conductor_gap_round3_20261011/README.md">Note, records, sessions and run reports</a></p>
   </section></div></details>
 <details class="dash-details"><summary>Cross-method evidence · every measured candidate</summary><div class="dash-detail-body"><section class="dash-section" id="lab-ecbench-all" aria-labelledby="ecbench-all-title" data-collapse="open"><div class="dash-section-head"><div><p class="dash-kicker">Every candidate, one harness / 3 October 2026</p><h2 id="ecbench-all-title">Every ECDLP method this repository has, measured cold in one unit on the same targets.</h2>
 <p class="panel-summary">Records a cold one-unit baseline of every rho, BSGS, kangaroo and index-calculus arm on eight curves, with no index-calculus arm below its matched rho and the gap widening with subgroup size.</p></div><span class="status neutral">Baseline &middot; no method changed</span></div>
