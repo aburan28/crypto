@@ -231,9 +231,6 @@ impl Lin {
             c: self.c ^ o.c,
         }
     }
-    fn is_zero(&self) -> bool {
-        self.vars.is_empty() && !self.c
-    }
 }
 
 struct SymField {
@@ -779,18 +776,16 @@ fn main() {
             let mut total_conflicts = 0u64;
             let mut conflicts_known = true;
             let mut blocked = 0usize;
-            let mut verdict = "undecided";
             let mut relation: Option<Vec<u128>> = None;
             let mut calls = 0usize;
             let (nvars, nclauses) = cnf.write_dimacs(&path, solver.native_xor());
-            loop {
+            let verdict = loop {
                 if total_wall >= args.timeout || blocked >= args.max_models {
-                    verdict = if blocked >= args.max_models {
+                    break if blocked >= args.max_models {
                         "model_budget"
                     } else {
                         "timeout"
                     };
-                    break;
                 }
                 let remaining = args.timeout - total_wall;
                 let o = run_solver(solver, &path, remaining, nvars);
@@ -801,10 +796,7 @@ fn main() {
                     None => conflicts_known = false,
                 }
                 match o.status {
-                    "unsat" => {
-                        verdict = "unsat";
-                        break;
-                    }
+                    "unsat" => break "unsat",
                     "sat" => {
                         let xs: Vec<u128> = inst
                             .summands
@@ -820,9 +812,8 @@ fn main() {
                             })
                             .collect();
                         if verify_model(curve, args.m, &xs, *r, args.w).is_some() {
-                            verdict = "found";
                             relation = Some(xs);
-                            break;
+                            break "found";
                         }
                         // Block this abscissa assignment and continue.
                         blocked += 1;
@@ -835,16 +826,10 @@ fn main() {
                         cnf.clauses.push(clause);
                         cnf.write_dimacs(&path, solver.native_xor());
                     }
-                    "timeout" => {
-                        verdict = "timeout";
-                        break;
-                    }
-                    _ => {
-                        verdict = "error";
-                        break;
-                    }
+                    "timeout" => break "timeout",
+                    _ => break "error",
                 }
-            }
+            };
             let agrees = match verdict {
                 "found" => truth,
                 "unsat" => !truth,
