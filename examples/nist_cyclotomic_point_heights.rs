@@ -778,7 +778,7 @@ fn main() {
         // ── 1. algebraic factorisation of f ± 1 ──
         writeln!(md, "### 1. Algebraic factorisation of `f ± 1` in `Z[t]`\n").unwrap();
         writeln!(md, "| value | factorisation | factor sizes at `t = 2^32` | certificate |\n|:--|:--|:--|:--|").unwrap();
-        let mut certs = Vec::new();
+        let mut identity_records = Vec::new();
         for (label, target, factors) in
             [("f − 1", -1i128, c.f_minus_1), ("f + 1", 1i128, c.f_plus_1)]
         {
@@ -832,7 +832,7 @@ fn main() {
                     )
                 })
                 .collect();
-            let cert_id = if factors.len() > 1 {
+            let identity_ref = if factors.len() > 1 {
                 let rhs_terms: Vec<Expr> = factors
                     .iter()
                     .flat_map(|(_, g, e)| (0..*e).map(move |_| poly_expr(g)))
@@ -845,7 +845,7 @@ fn main() {
                     lhs: poly_expr(&lhs),
                     rhs: Expr::product(rhs_terms),
                 };
-                let cert = issue(st, 20261011, 64, "issued and checked by the same tool run; the exact Z[t] expansion is the independent check", None)
+                let record = issue(st, 20261011, 64, "issued and checked by the same tool run; the exact Z[t] expansion is the independent check", None)
                     .expect("identity holds");
                 let fname = format!(
                     "identity_{}_{}.json",
@@ -854,11 +854,11 @@ fn main() {
                 );
                 fs::write(
                     opts.out.join(&fname),
-                    serde_json::to_string_pretty(&cert).unwrap(),
+                    serde_json::to_string_pretty(&record).unwrap(),
                 )
                 .unwrap();
-                certs.push(json!({"file": fname, "id": cert.id}));
-                format!("`{}`", cert.id)
+                identity_records.push(json!({"file": fname, "id": record.id}));
+                format!("`{}`", record.id)
             } else {
                 "— (irreducible)".into()
             };
@@ -867,11 +867,14 @@ fn main() {
                 "| `{label}` | `{}` | {} | {} |",
                 fstr.join(" · "),
                 sizes.join("; "),
-                cert_id
+                identity_ref
             )
             .unwrap();
         }
-        cj.insert("identity_certificates".into(), Value::Array(certs));
+        cj.insert(
+            "identity_certificates".into(),
+            Value::Array(identity_records),
+        );
 
         // ── 2. frozen integer factorisations, verified ──
         writeln!(
@@ -1237,7 +1240,6 @@ fn main() {
         serde_json::to_string_pretty(&Value::Object(js)).unwrap(),
     )
     .unwrap();
-    print!("{md}");
     eprintln!("wrote {}/RESULTS.md and results.json", opts.out.display());
 }
 
