@@ -49,7 +49,8 @@ resident-memory cap. Independent replay follows construction; its cost is separa
 from that construction timeout and memory cap.
 
 `walk` requires a fresh directory and a prime degree above 1009. The native kernel
-route accepts P192/P224 eigenvalue orders through 16. Each step retains its exact
+route accepts P192/P224 eigenvalue orders through 16 and requests of 1 through
+10,000 maps. Each step retains its exact
 map, resource receipt, independently transported subgroup generator, and linked
 hashes. `walk.json` records verified progress after every step. The independent
 `verify-walk` command replays the entire chain from the embedded public source,
