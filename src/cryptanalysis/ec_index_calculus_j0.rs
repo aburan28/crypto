@@ -652,9 +652,7 @@ pub fn j0_index_calculus_dlp_staged(
             }
             None
         };
-        let Some((batch, trials)) = batch_and_trials else {
-            return None;
-        };
+        let (batch, trials) = batch_and_trials?;
         trials_total += trials;
         trials_per_relation.push(trials);
         if let Some(first) = batch.into_iter().next() {
