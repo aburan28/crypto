@@ -175,8 +175,10 @@ fn a_pinned_file_is_restored_to_its_frozen_bytes() {
         0,
         "the base already holds the frozen bytes: {r}"
     );
-    assert_eq!(r["pinned_matching_base"], json!(["src/a.rs"]));
-    assert_eq!(r["live"], json!(["res/b.txt"]));
+    assert_eq!(r["schema"], "compact-frozen-source-materialization-v1");
+    assert_eq!(r["pinned_files"], 2);
+    assert_eq!(r["live"], json!(["res/b.txt", "src/a.rs"]));
+    assert_eq!(r["base"]["commit"], "0123456789abcdef");
     // The checkout itself is never modified.
     assert_eq!(
         fs::read(fx.root.join("src/a.rs")).unwrap(),

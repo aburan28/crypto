@@ -82,9 +82,13 @@ files laid over it.
 
 **What did not change.** Every `FROZEN.json`, `SOURCE_FROZEN.json`, fixture,
 recorded measurement, snapshot and pin is untouched. The panel and verifier
-scripts run unmodified from the materialized tree. The receipt schema is
-`compact-frozen-source-materialization-v2` (v1 plus `pinned_matching_base`
-and a `base` block).
+scripts run unmodified from the materialized tree. The receipt keeps the
+schema string `compact-frozen-source-materialization-v1` and the v1 fields
+(`freezes`, `pinned_files`, `live`, `replayed_from_snapshot`), because the
+frozen panels (`run_panel.py`, `run_cold.py`, `run_screen.py`) assert them on
+the receipt they are handed; `live` lists every pinned file that needed no
+snapshot, as in v1. A `base` block (commit, basis, archive hash, files
+restored) is added.
 
 **Local check, 2026-10-12.** From a sparse root shaped like the workflows'
 checkouts, the three distinct freezes materialize and build with their

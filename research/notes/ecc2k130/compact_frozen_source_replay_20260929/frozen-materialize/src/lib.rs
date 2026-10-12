@@ -42,7 +42,10 @@ pub const MAX_BASE_BYTES: u64 = 256 * 1024 * 1024;
 
 pub const SNAPSHOTS_SCHEMA: &str = "compact-frozen-source-snapshots-v1";
 pub const BASES_SCHEMA: &str = "compact-frozen-source-bases-v1";
-pub const RECEIPT_SCHEMA: &str = "compact-frozen-source-materialization-v2";
+/// The receipt keeps the v1 schema string: the frozen panels (`run_panel.py`,
+/// `run_cold.py`, `run_screen.py`) assert it and `pinned_files` on the receipt
+/// they are handed. The `base` block is additive.
+pub const RECEIPT_SCHEMA: &str = "compact-frozen-source-materialization-v1";
 
 /// The inputs of a build that no freeze pins, restored from the base commit.
 /// A path that does not exist at the base commit is removed from the tree, so
@@ -370,16 +373,12 @@ pub fn materialize(root: &Path, freezes: &[PathBuf], dest: &Path, replay_dir: &P
 
     let mut replayed = serde_json::Map::new();
     let mut live: Vec<&String> = Vec::new();
-    let mut from_base: Vec<&String> = Vec::new();
     for (path, digest) in &pins {
         let target = dest.join(path);
         let current = fs::read(&target).ok().map(|b| sha_hex(&b));
         if current.as_deref() == Some(digest.as_str()) {
-            if is_base_path(path) {
-                from_base.push(path);
-            } else {
-                live.push(path);
-            }
+            // As in v1: a pinned file that needed no snapshot.
+            live.push(path);
             continue;
         }
         if let Some(dir) = target.parent() {
@@ -405,7 +404,6 @@ pub fn materialize(root: &Path, freezes: &[PathBuf], dest: &Path, replay_dir: &P
         "freezes": rels,
         "pinned_files": pins.len(),
         "live": live,
-        "pinned_matching_base": from_base,
         "replayed_from_snapshot": replayed,
         "base": {
             "commit": base.commit,
