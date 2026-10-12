@@ -9898,8 +9898,6 @@ fn koblitz_index_calculus_dlp_observed(
         let batch_size = opts.relation_batch_size.max(1).min(remaining_trials);
         let attempts: Vec<_> = (0..batch_size)
             .map(|_| {
-                let a = sample_relation_scalar(r, &mut rng);
-                let b = sample_relation_scalar(r, &mut rng);
                 // A zero-inclusive additive draw gives full subgroup support;
                 // under uniform RNG bits the query is uniform for fixed b, Q.
                 let (a, b) = if let Some(order) = wide_order {

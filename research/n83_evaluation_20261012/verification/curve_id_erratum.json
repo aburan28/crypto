@@ -1,0 +1,17 @@
+{
+  "kind": "unsealed_metadata_erratum",
+  "dated": "2026-10-12",
+  "original_receipt": "receipt.json",
+  "original_receipt_sha256": "7d4e290524ea9b83ff75d48d20b17449fb60a6991bae787fdfee53ef28d461d5",
+  "incorrect_field": "curve_model_slug",
+  "incorrect_value": "icv1-f2m83-t6151469093347-cdcc5432",
+  "correct_value": "icv1-f2m83-t6151469093347-9eba6cd5",
+  "correct_full_model_identity": "ICV1:f2m-83-a5fd0d39:6151469093347:9671406556910881928556062:0x1:-7:unk:r:9eba6cd5d359",
+  "correct_identity_provenance": "fresh strong producer identity computed from explicit legacy field; supplied by parent source audit",
+  "verified_fixture_modulus_low_terms": [0, 2, 4, 7],
+  "incorrect_alias_modulus_low_terms": [0, 1, 2, 45],
+  "native_arithmetic_result_affected": false,
+  "fresh_checker_depends_on_slug": false,
+  "frozen_evidence_mutated": false,
+  "timed_execution_affected": false
+}
