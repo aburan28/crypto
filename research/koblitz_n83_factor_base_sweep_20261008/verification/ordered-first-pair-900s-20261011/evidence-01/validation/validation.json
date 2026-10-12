@@ -1,0 +1,44 @@
+{
+  "broad_library": {
+    "command": "RUST_MIN_STACK=16777216 gtimeout 900 cargo test --release --lib -- --test-threads=8",
+    "complete_summary": false,
+    "exit_code": 124,
+    "reported_failures": [
+      "cryptanalysis::jv_cover::tests::replayed_f4_agrees_with_the_full_solver_and_the_oracle",
+      "cryptanalysis::jv_cover::tests::stopped_f4_agrees_with_the_full_solver_and_the_oracle",
+      "cryptanalysis::jv_cover::tests::the_solver_loses_no_rational_solution_at_small_p"
+    ],
+    "status": "INCOMPLETE_wall_cap"
+  },
+  "exporter_release": {
+    "command": "cargo test --release --example koblitz_n83_factor_base_export --quiet",
+    "failed": 0,
+    "passed": 19
+  },
+  "first_pair_release": {
+    "command": "cargo test --release --lib first_pair_ --quiet",
+    "failed": 0,
+    "passed": 2
+  },
+  "orbit_lifting_release": {
+    "command": "cargo test --release --lib chained_s3_frobenius_domain_lifts_and_rejects_incomplete_orbits --quiet",
+    "failed": 0,
+    "passed": 1
+  },
+  "schema": "n83.ordered-first-pair-validation/v1",
+  "serial_jv_cover": {
+    "command": "RUST_MIN_STACK=16777216 gtimeout 300 cargo test --release --lib cryptanalysis::jv_cover::tests -- --test-threads=1",
+    "exit_code": 0,
+    "failed": 0,
+    "ignored": 1,
+    "log_sha256": "2323385459c3b2daa0962cddc2e8b330e77434a6950b6c889a31d00cb1fbdb29",
+    "log_trailing_blank_line_trimmed": true,
+    "passed": 12
+  },
+  "source_commit": "b7f55cf1528f13419ba079711d3c817d764a7dae",
+  "study_python": {
+    "command": "python3 -m unittest discover -s research/koblitz_n83_factor_base_sweep_20261008 -p test_*.py -q",
+    "failed": 0,
+    "passed": 36
+  }
+}
