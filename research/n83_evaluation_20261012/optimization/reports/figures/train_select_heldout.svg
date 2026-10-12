@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="660" viewBox="0 0 1440 660" role="img" aria-labelledby="title description">
+  <title id="title">Training and selection are separate from held-out evidence</title>
+  <desc id="description">A declared native grid retains all attempted outcomes. A selection receipt freezes configuration, objective, source and binary identity before held-out execution. New seeds on one repeated point remain distinct from independent public targets. Held-out native statistics and independent replay determine the reported result. No optimization value is shown.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 Z" fill="#087F83"/></marker>
+    <style>
+      text { font-family: "DejaVu Sans", sans-serif; fill: #25354A; }
+      .title { font-size: 36px; font-weight: 700; fill: #142B45; }
+      .heading { font-size: 27px; font-weight: 700; fill: #142B45; }
+      .label { font-size: 18px; font-weight: 700; letter-spacing: 1px; fill: #087F83; }
+      .body { font-size: 22px; }
+      .small { font-size: 20px; fill: #5B6A7A; }
+      .box { fill: #F4F7F9; stroke: #DAE4EB; stroke-width: 2; }
+      .accent { fill: #EFF6F7; stroke: #087F83; stroke-width: 2; }
+      .arrow { fill: none; stroke: #087F83; stroke-width: 3; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1440" height="660" fill="#FFFFFF"/>
+  <rect x="36" y="32" width="70" height="5" fill="#087F83"/>
+  <text class="title" x="36" y="86">A selection boundary before the held-out result</text>
+  <text class="small" x="36" y="126">One exact field/subgroup/point binding; actual configuration and outcome come from native receipts.</text>
+  <rect class="box" x="36" y="166" width="408" height="269" rx="10"/>
+  <text class="label" x="56" y="204">01 / TRAINING GRID</text>
+  <text class="heading" x="56" y="249">Declared candidate policies</text>
+  <text class="body" x="56" y="291">Retain every native attempt.</text>
+  <text class="body" x="56" y="325">Controls, seeds, targets, caps,</text>
+  <text class="body" x="56" y="359">failures and actual costs stay visible.</text>
+  <text class="small" x="56" y="406">Training best is selection evidence.</text>
+
+  <rect class="accent" x="516" y="166" width="408" height="269" rx="10"/>
+  <text class="label" x="536" y="204">02 / FROZEN SELECTION</text>
+  <text class="heading" x="536" y="249">Configuration + objective</text>
+  <text class="body" x="536" y="291">Source / binary / input hashes</text>
+  <text class="body" x="536" y="325">and a selection receipt freeze</text>
+  <text class="body" x="536" y="359">before inspecting holdout.</text>
+  <text class="small" x="536" y="406">No post-holdout selector adjustment.</text>
+
+  <rect class="box" x="996" y="166" width="408" height="269" rx="10"/>
+  <text class="label" x="1016" y="204">03 / HELD-OUT EVIDENCE</text>
+  <text class="heading" x="1016" y="249">Explicit sampling unit</text>
+  <text class="body" x="1016" y="291">New seeds on the same Q</text>
+  <text class="body" x="1016" y="325">≠ independent public targets.</text>
+  <text class="body" x="1016" y="359">Use native complete intervals</text>
+  <text class="body" x="1016" y="393">and independent answer replay.</text>
+
+  <path class="arrow" d="M456,299 L503,299"/>
+  <path class="arrow" d="M936,299 L983,299"/>
+  <rect class="accent" x="36" y="478" width="1368" height="101" rx="10"/>
+  <text class="label" x="56" y="511">REPORT THE NATIVE ESTIMATOR AT ITS ACTUAL SCOPE</text>
+  <text class="body" x="56" y="551">Ratio direction, conditional n, recorded interval, all failure/cap dispositions and exact timing boundaries.</text>
+  <text class="small" x="36" y="620">No measured optimization result appears in this diagram; it explains the evidence flow.</text>
+  <text class="small" x="36" y="650">Prior default-policy pages remain historically frozen; this addendum supplies separately source-bound new evidence.</text>
+</svg>

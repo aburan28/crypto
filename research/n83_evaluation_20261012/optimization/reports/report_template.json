@@ -1,0 +1,127 @@
+{
+  "title": "Fair rho tuning: degree-83 optimization addendum",
+  "subtitle": "Training, frozen selection and held-out evaluation on the exact retained a=1 fixture",
+  "date": "PENDING: native campaign date and UTC start",
+  "author": "Source-bound research evaluation",
+  "cover_label": "NEW OPTIMIZATION ADDENDUM · NATIVE RESULTS PENDING",
+  "running_header": "N83 OPTIMIZED RHO  /  TRAINING AND HELD-OUT EVALUATION",
+  "cover_meta": [
+    "Exact field model: icv1-f2m83-t6151469093347-9eba6cd5.",
+    "PENDING: campaign ID, executed source/binary/input manifest and holdout unit."
+  ],
+  "cover_note": "PENDING: native held-out conclusion. The appended prior 48-page report and its default-policy measurements are historically frozen. Use this addendum for the new tuning campaign; it does not revise old raw receipts or presume an optimization gain.",
+  "contents_intro": "The tuning question, the selection boundary, field-backend fairness, native held-out measurements and their remaining limits.",
+  "sections": [
+    {
+      "title": "New question and status of the prior reference",
+      "callout": "PENDING: completed campaign disposition and exact native selected-policy comparison, including unsuccessful/capped arms. No optimization result has yet been supplied to this scaffold.",
+      "paragraphs": [
+        "The new question is whether fairly tuning rho's permitted implementation and policy changes the comparison with retained degree-83 IC. The historical default strong-rho result is a measured default configuration, not a search certificate for the best possible rho implementation. The old packed reference remains inadmissible as the primary strong control.",
+        "The exact retained model is icv1-f2m83-t6151469093347-9eba6cd5, with polynomial low terms [0,2,4,7], subgroup order 8569786107849059 and the frozen legacy G/Q. The wrong-modulus cdcc5432 alias remains historical metadata only. Field degree 83, approximately 53-bit subgroup size, field representation and factor-base membership are distinct.",
+        "This new addendum leads the combined PDF. The prior 14-page default evaluation and the prior 48-page combined report retain their recorded numbers, sources and status. A new selected-policy result is separately source-bound and is never presented as a retiming of the old executable."
+      ],
+      "table": {
+        "headers": ["Evidence", "Role", "Result status"],
+        "widths": [1.3, 2.5, 1.2],
+        "rows": [
+          ["Historical packed control", "Historical observation; excluded as strong baseline", "Frozen"],
+          ["Prior default strong policy", "Recorded prior default; not a global rho optimum", "Frozen"],
+          ["New training grid", "Selection data with all attempts retained", "PENDING: native"],
+          ["Frozen selected rho / holdout", "Primary new comparison after selection is fixed", "PENDING: native"]
+        ]
+      },
+      "source_note": "Prior evidence: ../../reports/run-20261012T0226Z/ and ../../verification/CURVE_ID_ERRATUM.md. PENDING: durable new protocol, campaign and executed manifest links."
+    },
+    {
+      "title": "Train, select, freeze and evaluate held out",
+      "paragraphs": [
+        "PENDING: list the prospectively declared training grid, objectives, seeds/targets, controls, native run IDs and failure rules. Mark training observations as selection data; do not use their best observed ratio as the held-out performance claim.",
+        "PENDING: identify the selected configuration, its frozen selection receipt and when it was fixed relative to holdout. State whether held out means new seeds on the same Q, independent public targets, or both. New seeds on a repeated point do not supply a fresh-target population sample.",
+        "The held-out records retain every attempted arm, status and cap. The report inserts the native estimator, units, resampling rule and interval verbatim. It computes no new mean, ratio, interval, selection statistic or bootstrap in Python."
+      ],
+      "figure": {
+        "path": "figures/train_select_heldout.png",
+        "caption": "Campaign evidence flow. The chosen configuration and selector must be frozen before held-out results are inspected; the sampling unit is explicit. PENDING: native campaign ID and source receipt.",
+        "max_height": 320
+      },
+      "source_note": "PENDING: training protocol/grid records, selection receipt and held-out protocol/records."
+    },
+    {
+      "title": "Field backend and policy fairness",
+      "paragraphs": [
+        "Every compared backend must preserve the exact field polynomial, subgroup, generator and public target binding. A different registered degree-83 modulus is a different coordinate instance, even when subgroup order agrees. Normal-basis conversion/canonicalization is an arithmetic representation choice, not a new factor base or relation-vector basis.",
+        "PENDING: name each measured field kernel, rho walk/collision policy and source/binary hash. State which changes apply to rho only and which are available to both rho and IC. Keep a shared field-kernel change distinct from a rho-only tuning result, and disclose any unequal implementation opportunity.",
+        "PENDING: state reusable-preparation, conversion, target-start, validation, walk/collision and replay boundaries for every selected arm. Charge target-dependent work online and retain conversion/setup costs separately. Shared mathematical invariants do not justify assuming equal runtime."
+      ],
+      "figure": {
+        "path": "figures/backend_fairness.png",
+        "caption": "One exact mathematical instance, explicit backend and policy changes, and charged state/validation boundaries. This is a fairness diagram, not a measured optimization result.",
+        "max_height": 280
+      },
+      "source_note": "PENDING: executed backend/configuration manifests and native source-level boundary audit. Prior invariant explanation: ../../verification/INVARIANTS.md."
+    },
+    {
+      "title": "Native held-out values and uncertainty",
+      "callout": "PENDING: native complete-online selected-rho/IC comparison, ratio direction, pair count, interval and scope. Do not substitute training-best or an arithmetic mean-time ratio for the declared native estimator.",
+      "paragraphs": [
+        "PENDING: report all held-out matched rows, default/selected controls and their independent answer replay. Include the native grid and held-out run IDs, source/executable/input hashes and failed/capped dispositions. Use only uncensored, verified complete online intervals for the qualified online comparison.",
+        "PENDING: state conditional sample size, native estimator/resampling seed/draw count and interval. If the sampling unit is new seeds on the same Q, its interval remains within-point and within-host; it does not generalize to independently drawn targets or hosts."
+      ],
+      "table": {
+        "headers": ["Native recorded metric", "Default rho", "Selected rho", "IC / scope"],
+        "widths": [1.4, 1.1, 1.1, 1.4],
+        "rows": [
+          ["Complete online interval", "PENDING: native", "PENDING: native", "PENDING: native"],
+          ["Declared paired ratio / interval", "PENDING: native", "PENDING: native", "PENDING: scope"],
+          ["Reusable preparation", "PENDING: native", "PENDING: native", "PENDING: native"],
+          ["Process wall / child CPU / RSS", "PENDING: native", "PENDING: native", "PENDING: native"],
+          ["Attempts / failures / caps", "PENDING: native", "PENDING: native", "PENDING: native"]
+        ]
+      },
+      "source_note": "PENDING: native result/export JSON and independent replay receipts. Quantitative figures are added only when recorded native values arrive."
+    },
+    {
+      "title": "Stop rules and complete cost boundaries",
+      "paragraphs": [
+        "The new rho arms share a 60-second whole-process cap. IC has a 1800-second whole-process cap to accommodate reusable preparation. These are unequal stop envelopes; common CPU/memory settings must be separately documented. A censored or failed arm never counts as a performance win, and all attempted process costs remain records.",
+        "IC has no 20-million-probe cap. Its third command-line argument 29 is a rank seed. extract128 traverses the full index.states once; exhausting that finite cycle is an algorithmic termination, not an invented probe budget. Keep the actual whole-process timeout separate from extraction exhaustion and producer probe units.",
+        "Fresh-process IC cost begins with the retained base file. It measures base loading, root-index construction and rank/log work, but not original selection/construction of the 600 representatives. OS page cache is not flushed. Rho curve/normal-basis/jump construction is measured; supplied subgroup/catalog facts are not a newly timed discovery or factorization procedure.",
+        "PENDING: retain both producer phase residuals and the new runner's before-spawn/exit-observation boundaries exactly. Use native complete online intervals as declared, not silently corrected phase sums. Preserve child CPU and producer process timestamps alongside outer wall."
+      ],
+      "table": {
+        "headers": ["Boundary", "Declared scope", "Required record"],
+        "widths": [1.1, 2.2, 1.7],
+        "rows": [
+          ["Prepared online", "Complete target-dependent interval including declared replay", "Native phases, residual and complete interval"],
+          ["Rho stop", "60 s process cap for each rho arm", "Uncensored/capped disposition and actual cost"],
+          ["IC stop", "1800 s process cap; full single-cycle extraction", "Rank seed 29 and exhaustion/timeout distinction"],
+          ["Fresh process", "Retained-base input; not original base construction or OS-cold", "Wall, CPU, RSS and reusable preparation"],
+          ["Common work", "Named counters keep their native units", "Calibrated common S remains PENDING/unknown unless natively supplied"]
+        ]
+      },
+      "source_note": "PENDING: frozen new command/protocol and boundary receipts. Existing IC extraction source: examples/koblitz_orbit_dlp_fast.rs extract128, full index.states cycle."
+    },
+    {
+      "title": "Validation, evidence register and updated interpretation",
+      "paragraphs": [
+        "PENDING: independent replay, exact-input/backend equivalence checks, source/configuration tests, A/A controls, host/isolation observations and all final dispositions. Distinguish a correct recovered scalar from a complete rank/log transcript or independent timing reproduction.",
+        "PENDING: state precisely what the selected held-out native result changes relative to the historical default. Limit the conclusion to its exact instance, sampling unit, source, resources and charged boundaries. A training-selected configuration is not a universal optimum.",
+        "Remaining gates include any missing full factor-log/rank transcript, calibrated common-cost accounting, exact sealed ecbench integration, required isolation and independent-host replay. Canonical graph/ledger changes are made only from evidence admitted at the relevant gate; this layout scaffold performs no promotion.",
+        "The combined document starts with this new addendum and then includes the unchanged historical 48-page PDF. Its old default-policy observations are labeled historical on this cover and in the first section; their frozen pages and raw records remain intact."
+      ],
+      "table": {
+        "headers": ["Native evidence", "Durable path / executed hash"],
+        "widths": [1.5, 3.5],
+        "rows": [
+          ["Campaign and exact fixture", "PENDING: native"],
+          ["Executed source/binaries/inputs", "PENDING: authoritative executed manifest"],
+          ["Training grid and failures", "PENDING: native"],
+          ["Frozen selected configuration", "PENDING: native"],
+          ["Held-out statistics and replay", "PENDING: native"],
+          ["Validation and host records", "PENDING: native"]
+        ]
+      },
+      "source_note": "PENDING: complete source-linked evidence register and canonical graph disposition. This source is a pending scaffold, not a completed experiment report."
+    }
+  ]
+}

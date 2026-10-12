@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="740" viewBox="0 0 1440 740" role="img" aria-labelledby="title description">
+  <title id="title">Fair field-backend comparison keeps exact instance and cost boundaries visible</title>
+  <desc id="description">One exact degree-83 polynomial field, subgroup, generator and target are bound by native inputs. Representation and arithmetic kernel differ from walk/collision policy. Default rho, selected rho and retained IC disclose their applied backend, code path and charged conversion, setup, target work and replay. Rho has a 60-second process cap and IC has 1800 seconds; those stop envelopes are unequal. No optimization result is shown.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 Z" fill="#087F83"/></marker>
+    <style>
+      text { font-family: "DejaVu Sans", sans-serif; fill: #25354A; }
+      .title { font-size: 35px; font-weight: 700; fill: #142B45; }
+      .heading { font-size: 27px; font-weight: 700; fill: #142B45; }
+      .label { font-size: 18px; font-weight: 700; letter-spacing: 1px; fill: #087F83; }
+      .body { font-size: 22px; }
+      .small { font-size: 20px; fill: #5B6A7A; }
+      .box { fill: #F4F7F9; stroke: #DAE4EB; stroke-width: 2; }
+      .accent { fill: #EFF6F7; stroke: #087F83; stroke-width: 2; }
+      .arrow { fill: none; stroke: #087F83; stroke-width: 3; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1440" height="740" fill="#FFFFFF"/>
+  <rect x="36" y="32" width="70" height="5" fill="#087F83"/>
+  <text class="title" x="36" y="86">One exact instance, explicit implementation opportunities</text>
+  <text class="small" x="36" y="126">icv1-f2m83-t6151469093347-9eba6cd5 · field low terms [0,2,4,7] · exact r, G and Q</text>
+  <rect class="box" x="36" y="166" width="654" height="181" rx="10"/>
+  <text class="label" x="56" y="204">FIELD REPRESENTATION / KERNEL</text>
+  <text class="body" x="56" y="247">83 F₂ coordinates: polynomial or normal basis</text>
+  <text class="body" x="56" y="282">Arithmetic, conversion and canonicalization costs</text>
+  <text class="small" x="56" y="323">Representation does not change the factor-base point set.</text>
+  <rect class="box" x="750" y="166" width="654" height="181" rx="10"/>
+  <text class="label" x="770" y="204">RHO WALK / COLLISION POLICY</text>
+  <text class="body" x="770" y="247">Lane, jump, distinguished-point and cycle settings</text>
+  <text class="body" x="770" y="282">Prepared state, target starts, walk and recovery</text>
+  <text class="small" x="770" y="323">Policy changes are distinct from shared field improvements.</text>
+  <path class="arrow" d="M363,358 L363,391"/>
+  <path class="arrow" d="M1077,358 L1077,391"/>
+  <rect class="accent" x="36" y="405" width="1368" height="167" rx="10"/>
+  <text class="label" x="56" y="442">PER ARM: DEFAULT RHO / SELECTED RHO / RETAINED IC</text>
+  <text class="body" x="56" y="484">Name the applied backend and actual code path; declare rho-only versus shared opportunities.</text>
+  <text class="body" x="56" y="520">Charge conversion + reusable setup + all target-dependent attempts + scalar replay at their declared boundaries.</text>
+  <text class="small" x="56" y="553">Keep complete online intervals, native residuals, process wall, child CPU and peak RSS as separate records.</text>
+  <line x1="36" y1="610" x2="1404" y2="610" stroke="#DAE4EB" stroke-width="2"/>
+  <text class="body" x="36" y="652">Stop envelopes: rho 60 s process cap; IC 1800 s for setup. They are unequal and must remain explicit.</text>
+  <text class="small" x="36" y="690">IC rank seed 29 is not a probe limit; extraction traverses full index.states once, with no 20-million-probe cap.</text>
+  <text class="small" x="36" y="730">Diagram only; no field-backend or policy optimization result is claimed.</text>
+</svg>
