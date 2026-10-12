@@ -8,8 +8,12 @@ asymptotic group-operation count of index calculus is unchanged. No
 deployed-curve, key-recovery, or sub-rho claim is made or implied.
 **Code.** `src/cryptanalysis/prime_fast.rs` (prime engine),
 `src/cryptanalysis/koblitz_index_calculus.rs` (`DecompositionStrategy::PairTable`,
-now the default), `examples/semaev_root_vs_groebner_bench.rs` (this note's
-tables), `research/semaev_root_vs_groebner_20261012/` (raw console + JSON).
+now the default), `examples/semaev_root_vs_groebner_bench.rs` (§1–2 tables),
+`examples/semaev_rootfind_scaling_bench.rs` (§5),
+`examples/semaev_rootfind_nist_bench.rs` (§6, NIST P-192…P-521);
+raw console + JSON under `research/semaev_root_vs_groebner_20261012/`,
+`research/semaev_rootfind_scaling_20261012/`,
+`research/semaev_rootfind_nist_20261012/`.
 
 ---
 
@@ -204,14 +208,95 @@ dominant per-target work) scales with the subspace as expected:
    subspace / factor base, isolating the decomposition cost from the
    regime's own barrier.
 
-## 6. Reproduce
+## 6. NIST prime curves P-192, P-224, P-256, P-384, P-521
+
+Measured by `examples/semaev_rootfind_nist_bench.rs`
+(`research/semaev_rootfind_nist_20261012/`), on the five NIST P-curves with
+their real FIPS 186-4 parameters (`a = −3` on all of them, which is exactly
+the form the prime engine is built around). The question asked was: does
+the root-finding decomposition *keep working* at 192–521-bit field sizes,
+and does it still beat F4 there? Both, on every curve.
+
+**Read this first.** Only the per-target decomposition *subroutine* is
+measured, on a bounded synthetic factor base of small-`x` points. A fast
+decomposition oracle says nothing about the ECDLP on these curves: the
+relation-collection and linear-algebra stages of index calculus remain
+exponentially out of reach at these sizes and the asymptotics are unchanged
+(§4). This section is an engineering result about a subroutine, not a
+security result about P-192…P-521.
+
+**A. Head-to-head vs F4, same field, same ideal, same targets.**
+`|F| = 6` (the largest at which a Gröbner basis over a 192–521-bit field is
+still practical per target), 10 targets per curve: 5 constructed
+`R = F_i + F_j`, 5 random on-curve points. Root finding is direct
+subtraction with one batched inversion per target; F4 is the crate's
+`groebner_f4::buchberger` on `{S₃(X, Y; x_R), ∏(X−x_i), ∏(Y−x_i)}`. Every
+target passed the fail-closed cross-checks: a found pair re-adds to `R` in
+the group, makes Semaev `S₃` vanish, and makes *every* Gröbner basis
+element vanish; every refuted target produced the unit ideal `{1}` from F4.
+
+| curve | bits | root-find / target | F4 / target | factor | decomposed / refuted |
+|---|---:|---:|---:|---:|---:|
+| P-192 | 192 | 120 µs | 414 ms | **3455×** | 5 / 5 |
+| P-224 | 224 | 218 µs | 1.27 s | **5802×** | 5 / 5 |
+| P-256 | 256 | 203 µs | 613 ms | **3021×** | 5 / 5 |
+| P-384 | 384 | 337 µs | 1.09 s | **3235×** | 5 / 5 |
+| P-521 | 521 | 747 µs | 2.54 s | **3395×** | 5 / 5 |
+
+The factor is roughly flat in the field size because both sides pay the
+same arbitrary-precision field arithmetic; what separates them is that the
+root finder does `O(|F|)` field operations and the Gröbner solve does a
+basis computation whose coefficient arithmetic is all in that field.
+
+**B. Root-finder scaling, `|F| = 64`, generic (`BigUint`) field.** 200
+random on-curve targets (the rejection path, which dominates in practice)
+and 100 constructed `R = F_i ± F_j` controls per curve, every control
+re-verified in the group and against `S₃`:
+
+| curve | rejection / target | controls verified | control / target |
+|---|---:|---:|---:|
+| P-192 | 369 µs | 100/100 | 301 µs |
+| P-224 | 428 µs | 100/100 | 268 µs |
+| P-256 | 433 µs | 100/100 | 324 µs |
+| P-384 | 583 µs | 100/100 | 394 µs |
+| P-521 | 1.28 ms | 100/100 | 3.66 ms* |
+
+\* run-to-run jitter on a shared desktop; the previous run measured
+1.13 ms. The ratios in table A are stable to within ~2× across runs.
+
+**C. Per-curve specialisation.** Each NIST prime has its own Solinas
+reduction, so the natural "specialised code per curve" is a dedicated
+field. The crate already ships one for P-256
+(`ecc::p256_field::P256FieldElement`, constant-time Montgomery over
+`U256`); the identical oracle on it, with the same batched inversion:
+
+| P-256, `|F| = 64` | generic `BigUint` | `P256FieldElement` | factor |
+|---|---:|---:|---:|
+| rejection / target | 433 µs | 41 µs | **11×** |
+| control / target | 324 µs | 28 µs | **12×** |
+
+Both paths agree on every target (0 hits on the 200 random targets,
+100/100 controls, same relations). P-192/224/384/521 run on the generic
+field in this bench; their Solinas fields are the same follow-on
+specialisation and would move them by a similar constant. Nothing about
+the algorithm changes per curve — only the field it is instantiated over.
+
+**Closing check.** Root finding beats F4 on all five NIST P-curves, with
+every fail-closed check passing; the bench asserts this and exits non-zero
+otherwise. The claim is bounded exactly as stated at the top of this
+section.
+
+## 7. Reproduce
 
 ```bash
 cargo run --release --example semaev_root_vs_groebner_bench
 cargo run --release --example semaev_rootfind_scaling_bench
+cargo run --release --example semaev_rootfind_nist_bench
 # raw evidence:
 BENCH_OUT=research/semaev_root_vs_groebner_20261012 \
   cargo run --release --example semaev_root_vs_groebner_bench
 BENCH_OUT=research/semaev_rootfind_scaling_20261012 \
   cargo run --release --example semaev_rootfind_scaling_bench
+F4_CONSTRUCTED=5 F4_RANDOM=5 BENCH_OUT=research/semaev_rootfind_nist_20261012 \
+  cargo run --release --example semaev_rootfind_nist_bench
 ```
