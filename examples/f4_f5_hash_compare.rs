@@ -82,10 +82,12 @@ fn parse_dump(text: &str) -> Result<Option<(String, u64)>> {
         .iter()
         .position(|&event| event == "Ir")
         .ok_or("Ir missing")?;
+    // After ZERO_STATS, Callgrind 3.24's incremental `summary` can wrap.
+    // The file's `totals` is the sum of its actual self-cost records.
     let counts: Vec<u64> = text
         .lines()
-        .find_map(|line| line.strip_prefix("summary: "))
-        .ok_or("summary missing")?
+        .find_map(|line| line.strip_prefix("totals: "))
+        .ok_or("totals missing")?
         .split_whitespace()
         .map(|n| n.parse::<u64>().map_err(|e| e.to_string()))
         .collect::<Result<_>>()?;
@@ -103,6 +105,13 @@ struct Run {
 
 fn read_run(root: &Path, name: &str, repeats: u64) -> Result<Run> {
     let directory = root.join(name);
+    if std::fs::read_to_string(directory.join("exit-status.txt"))
+        .map_err(|e| e.to_string())?
+        .trim()
+        != "0"
+    {
+        return Err(format!("{name}: run did not complete successfully"));
+    }
     let records = std::fs::read(directory.join("records.jsonl")).map_err(|e| e.to_string())?;
     let mut rows = BTreeMap::new();
     for line in std::str::from_utf8(&records)
@@ -188,6 +197,13 @@ fn read_run(root: &Path, name: &str, repeats: u64) -> Result<Run> {
         if let Some((key, count)) =
             parse_dump(std::str::from_utf8(&bytes).map_err(|e| e.to_string())?)?
         {
+            let text = std::str::from_utf8(&bytes).map_err(|e| e.to_string())?;
+            if self_costs(text, &BTreeMap::new())?.values().sum::<u64>() != count {
+                return Err(format!(
+                    "self costs do not sum to recorded totals at {}",
+                    path.display()
+                ));
+            }
             if ir.insert(key, count).is_some() {
                 return Err("duplicate Callgrind request dump".into());
             }
@@ -199,7 +215,16 @@ fn read_run(root: &Path, name: &str, repeats: u64) -> Result<Run> {
     }
     let mut seen = BTreeMap::new();
     let mut outputs = BTreeMap::<String, String>::new();
+    let mut inputs = BTreeMap::<String, String>::new();
     for row in rows.values() {
+        let input_key = json!([row["case"], row["seed"], row["repeat"]]).to_string();
+        let input = row["input_digest"].as_str().unwrap().to_string();
+        if inputs
+            .insert(input_key, input.clone())
+            .is_some_and(|old| old != input)
+        {
+            return Err("F4/F5/criterion used different inputs".into());
+        }
         let case_key = key(row, false);
         if seen
             .insert(case_key.clone(), comparable(row))
@@ -241,7 +266,7 @@ fn check_against(reference: &Run, run: &Run) -> Result<()> {
 fn median(mut v: Vec<f64>) -> f64 {
     v.sort_by(f64::total_cmp);
     let middle = v.len() / 2;
-    if v.len() % 2 == 0 {
+    if v.len().is_multiple_of(2) {
         (v[middle - 1] + v[middle]) / 2.0
     } else {
         v[middle]
@@ -270,16 +295,11 @@ fn stats(a: &[u64], b: &[u64], ap: &[u64]) -> Value {
     for _ in 0..2000 {
         let mut sample = Vec::with_capacity(5);
         for _ in 0..5 {
-            // Rejection sampling avoids a modulo bias over the five rounds.
-            let draw = loop {
-                state ^= state << 13;
-                state ^= state >> 7;
-                state ^= state << 17;
-                if state < u64::MAX - u64::MAX % 5 {
-                    break state;
-                }
-            };
-            sample.push(d[(draw % 5) as usize]);
+            // Xorshift64's nonzero cycle has 2^64-1 states, divisible by 5.
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            sample.push(d[(state % 5) as usize]);
         }
         boot.push(median(sample));
     }
@@ -299,7 +319,8 @@ fn stats(a: &[u64], b: &[u64], ap: &[u64]) -> Value {
         "baseline_median_ir":base,"candidate_median_ir":candidate,
         "median_log_ratio":observed,"instruction_ratio":observed.exp(),
         "instruction_reduction_percent":100.0*(1.0-(-observed).exp()),
-        "log_ratio_ci95":interval,"aa_sigma":sigma,"log_threshold":threshold,"verdict":verdict})
+        "log_ratio_ci95":interval,"instruction_reduction_ci95_percent":interval.map(|x|100.0*(1.0-(-x).exp())),
+        "aa_sigma":sigma,"log_threshold":threshold,"verdict":verdict})
 }
 
 fn total(run: &Run, arm: &str) -> u64 {
@@ -308,6 +329,138 @@ fn total(run: &Run, arm: &str) -> u64 {
         .filter(|(_, v)| v["arm"] == arm)
         .map(|(key, _)| run.ir[key])
         .sum()
+}
+
+fn function_names(text: &str) -> Result<BTreeMap<String, String>> {
+    let mut names = BTreeMap::new();
+    for line in text.lines() {
+        if let Some(function) = line
+            .strip_prefix("fn=")
+            .or_else(|| line.strip_prefix("cfn="))
+        {
+            if let Some(rest) = function.strip_prefix('(') {
+                let (id, name) = rest.split_once(')').ok_or("malformed function id")?;
+                if !name.trim().is_empty() {
+                    names.insert(id.to_string(), name.trim().to_string());
+                }
+            }
+        }
+    }
+    Ok(names)
+}
+
+fn self_costs(text: &str, known_names: &BTreeMap<String, String>) -> Result<BTreeMap<String, u64>> {
+    let mut names = known_names.clone();
+    let mut costs = BTreeMap::<String, u64>::new();
+    let mut current = String::new();
+    let mut called_cost = false;
+    for line in text.lines() {
+        if let Some(function) = line
+            .strip_prefix("fn=")
+            .or_else(|| line.strip_prefix("cfn="))
+        {
+            let (id, name) = if let Some(rest) = function.strip_prefix('(') {
+                let (id, rest) = rest.split_once(')').ok_or("malformed function id")?;
+                (id.to_string(), rest.trim())
+            } else {
+                (function.to_string(), function)
+            };
+            if !name.is_empty() {
+                names.insert(id.clone(), name.to_string());
+            }
+            if line.starts_with("fn=") {
+                current = id;
+                called_cost = false;
+            }
+        } else if line.starts_with("calls=") {
+            called_cost = true;
+        } else if !current.is_empty()
+            && line
+                .as_bytes()
+                .first()
+                .is_some_and(|b| b.is_ascii_digit() || b"+-*".contains(b))
+        {
+            let fields: Vec<_> = line.split_whitespace().collect();
+            if fields.len() != 2 {
+                return Err("self-cost inspection requires positions: line and events: Ir".into());
+            }
+            let cost: u64 = fields[1].parse::<u64>().map_err(|e| e.to_string())?;
+            if !called_cost {
+                *costs.entry(current.clone()).or_default() += cost;
+            }
+            called_cost = false;
+        }
+    }
+    let mut result = BTreeMap::new();
+    for (id, cost) in costs {
+        *result
+            .entry(
+                names
+                    .get(&id)
+                    .cloned()
+                    .unwrap_or_else(|| format!("<function {id}>")),
+            )
+            .or_default() += cost;
+    }
+    Ok(result)
+}
+
+fn inspect(root: &Path, name: &str, repeats: u64) -> Result<Value> {
+    let run = read_run(root, name, repeats)?;
+    let mut profile = BTreeMap::<String, u64>::new();
+    let mut criterion_summary = 0u64;
+    let mut names = BTreeMap::new();
+    for source in &run.sources {
+        let path = source["path"].as_str().unwrap();
+        if !path.ends_with("records.jsonl") {
+            let text = std::fs::read_to_string(root.join(path)).map_err(|e| e.to_string())?;
+            names.extend(function_names(&text)?);
+        }
+    }
+    for source in &run.sources {
+        let path = source["path"].as_str().unwrap();
+        if path.ends_with("records.jsonl") {
+            continue;
+        }
+        let text = std::fs::read_to_string(root.join(path)).map_err(|e| e.to_string())?;
+        let (label, ir) = parse_dump(&text)?.ok_or("request missing")?;
+        let label: Value = serde_json::from_str(&label).map_err(|e| e.to_string())?;
+        if label[3] != "criterion" {
+            continue;
+        }
+        let costs = self_costs(&text, &names)?;
+        if costs.values().sum::<u64>() != ir {
+            return Err(format!(
+                "self costs {} do not sum to Ir {ir} at {path}",
+                costs.values().sum::<u64>()
+            ));
+        }
+        criterion_summary += ir;
+        for (function, cost) in costs {
+            *profile.entry(function).or_default() += cost;
+        }
+    }
+    let mut functions: Vec<_> = profile.into_iter().collect();
+    functions.sort_by_key(|(_, cost)| std::cmp::Reverse(*cost));
+    let hashing_ir: u64 = functions
+        .iter()
+        .filter(|(name, _)| {
+            name.contains("::hash::sip::")
+                || (name.contains("RandomState") && name.contains("hash_one"))
+        })
+        .map(|(_, ir)| ir)
+        .sum();
+    let arms: Vec<_> = ["f4", "f5", "criterion"]
+        .into_iter()
+        .map(|arm| json!({"arm":arm,"calls":11*repeats,"ir":total(&run,arm)}))
+        .collect();
+    Ok(
+        json!({"run":name,"repeats":repeats,"systems":11,"merged_worker_profile":true,
+        "arms":arms,
+        "criterion_self_cost_sum":criterion_summary,"standard_hash_self_ir":hashing_ir,
+        "standard_hash_self_percent":100.0*hashing_ir as f64/criterion_summary as f64,
+        "criterion_hotspots":functions.into_iter().take(20).map(|(function,ir)|json!({"function":function,"ir":ir})).collect::<Vec<_>>(),"sources":run.sources}),
+    )
 }
 
 fn analyze(root: &Path) -> Result<Value> {
@@ -334,6 +487,7 @@ fn analyze(root: &Path) -> Result<Value> {
         let mb = number(br, "peak_live_bytes")? - number(br, "live_at_entry_bytes")?;
         if number(br, "allocations")? > number(ar, "allocations")?
             || number(br, "allocated_bytes")? > number(ar, "allocated_bytes")?
+            || number(br, "peak_live_bytes")? > number(ar, "peak_live_bytes")?
             || mb > ma
         {
             memory_regressions.push(label.clone());
@@ -345,6 +499,64 @@ fn analyze(root: &Path) -> Result<Value> {
             "baseline_live_at_entry_bytes":ar["live_at_entry_bytes"],"candidate_live_at_entry_bytes":br["live_at_entry_bytes"],
             "baseline_peak_live_bytes":ar["peak_live_bytes"],"candidate_peak_live_bytes":br["peak_live_bytes"],
             "baseline_peak_additional_live_bytes":ma,"candidate_peak_additional_live_bytes":mb}));
+    }
+    let mut memory_cases = Vec::new();
+    let mut keys_seen = BTreeSet::new();
+    for row in a.rows.values() {
+        let case_key = key(row, false);
+        if !keys_seen.insert(case_key.clone()) {
+            continue;
+        }
+        let mut result = json!({"key":case_key,"case":row["case"],"seed":row["seed"],"arm":row["arm"],"samples":3});
+        for (role, run) in [("baseline", &a), ("candidate", &b)] {
+            for field in [
+                "allocations",
+                "allocated_bytes",
+                "live_at_entry_bytes",
+                "peak_live_bytes",
+            ] {
+                let values: Vec<_> = run
+                    .rows
+                    .values()
+                    .filter(|r| key(r, false) == case_key)
+                    .map(|r| number(r, field).unwrap() as f64)
+                    .collect();
+                result[format!("{role}_{field}")] = json!(median(values));
+            }
+            let values: Vec<_> = run
+                .rows
+                .values()
+                .filter(|r| key(r, false) == case_key)
+                .map(|r| {
+                    (number(r, "peak_live_bytes").unwrap()
+                        - number(r, "live_at_entry_bytes").unwrap()) as f64
+                })
+                .collect();
+            result[format!("{role}_peak_additional_live_bytes")] = json!(median(values));
+        }
+        result["additional_live_byte_reduction"] = json!(
+            result["baseline_peak_additional_live_bytes"]
+                .as_f64()
+                .unwrap()
+                - result["candidate_peak_additional_live_bytes"]
+                    .as_f64()
+                    .unwrap()
+        );
+        memory_cases.push(result);
+    }
+    for (round, (ar, br, _)) in rounds.iter().enumerate() {
+        for (label, a) in &ar.rows {
+            let b = &br.rows[label];
+            let ma = number(a, "peak_live_bytes")? - number(a, "live_at_entry_bytes")?;
+            let mb = number(b, "peak_live_bytes")? - number(b, "live_at_entry_bytes")?;
+            if number(b, "allocations")? > number(a, "allocations")?
+                || number(b, "allocated_bytes")? > number(a, "allocated_bytes")?
+                || number(b, "peak_live_bytes")? > number(a, "peak_live_bytes")?
+                || mb > ma
+            {
+                memory_regressions.push(format!("round-{round}:{label}"));
+            }
+        }
     }
     let mut arms = Vec::new();
     let mut case_verdicts = Vec::new();
@@ -401,14 +613,20 @@ fn analyze(root: &Path) -> Result<Value> {
         "bootstrap_resamples":2000,"bootstrap_seed":"0x243f6a8885a308d3","exact_outputs_and_counts":true,
         "measurement":"Callgrind Ir, instrumented complete calls, merged worker coverage",
         "runtime_speedup":null,"rss":null,"acceptance_met":accepted,"memory_regressions":memory_regressions,
-        "arms":arms,"case_verdicts":case_verdicts,"primary_cases":per_case,"sources":sources}),
+        "arms":arms,"case_verdicts":case_verdicts,"primary_cases":per_case,"memory_cases":memory_cases,"sources":sources}),
     )
 }
 
 fn main() {
     let args: Vec<_> = std::env::args().collect();
-    assert_eq!(args.len(), 2, "RECORDS_DIRECTORY");
-    match analyze(Path::new(&args[1])) {
+    let result = if args.get(1).is_some_and(|s| s == "inspect") {
+        assert_eq!(args.len(), 5, "inspect RECORDS_DIRECTORY RUN_NAME REPEATS");
+        inspect(Path::new(&args[2]), &args[3], args[4].parse().unwrap())
+    } else {
+        assert_eq!(args.len(), 2, "RECORDS_DIRECTORY");
+        analyze(Path::new(&args[1]))
+    };
+    match result {
         Ok(value) => println!("{}", serde_json::to_string_pretty(&value).unwrap()),
         Err(error) => {
             eprintln!("INVALID comparison: {error}");
@@ -450,11 +668,11 @@ mod tests {
     #[test]
     fn profile_parser_rejects_missing_zero_and_partial_thread_counts() {
         let header = "desc: Trigger: Client Request: [\"x\",1,0,\"f5\"]\n";
-        assert!(parse_dump(&format!("{header}events: Ir\nsummary: 0\n")).is_err());
+        assert!(parse_dump(&format!("{header}events: Ir\ntotals: 0\n")).is_err());
         assert!(parse_dump(&format!("{header}events: Ir\n")).is_err());
-        assert!(parse_dump(&format!("{header}thread: 1\nevents: Ir\nsummary: 100\n")).is_err());
+        assert!(parse_dump(&format!("{header}thread: 1\nevents: Ir\ntotals: 100\n")).is_err());
         assert_eq!(
-            parse_dump(&format!("{header}events: Dr Ir\nsummary: 12 100\n"))
+            parse_dump(&format!("{header}events: Dr Ir\ntotals: 12 100\n"))
                 .unwrap()
                 .unwrap()
                 .1,
@@ -473,5 +691,17 @@ mod tests {
             ])
             .to_string()
         ));
+    }
+    #[test]
+    fn self_costs_exclude_inclusive_call_edges_and_resolve_late_names() {
+        let text = "fn=(1) caller\n0 10\ncfn=(2)\ncalls=1 0\n0 30\n0 5\nfn=(2) callee\n0 30\n";
+        let costs = self_costs(text, &BTreeMap::new()).unwrap();
+        assert_eq!(costs["caller"], 15);
+        assert_eq!(costs["callee"], 30);
+    }
+    #[test]
+    fn wrapped_incremental_summary_does_not_replace_the_file_totals() {
+        let text = "desc: Trigger: Client Request: [\"x\",1,0,\"f5\"]\nevents: Ir\nsummary: 18446744073709499096\ntotals: 13432\n";
+        assert_eq!(parse_dump(text).unwrap().unwrap().1, 13432);
     }
 }

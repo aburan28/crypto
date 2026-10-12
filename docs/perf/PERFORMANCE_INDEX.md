@@ -69,6 +69,14 @@ recorded profiler scope has incomplete worker coverage. Lines break when the
 fingerprint, host, compiler, harness or profiler changes. These displays make
 no new runtime-speedup or complete-DLP claim.
 
+The [native F5 hashing follow-up](../../research/f4_f5_hash_20261012/REPORT.md)
+adds its own fixed eleven-system instruction-history and peak-live-allocation
+groups, with SVGs, group PDFs and a combined PDF. Five paired A/B/A′ rounds
+record 3.71% fewer complete-F5 instructions and 45.14% fewer criterion
+instructions; F4 is neutral. Its merged-worker profiler contract, native
+controls and live-byte intervals stay separate from earlier CI diagnostics.
+Runtime and process RSS remain unmeasured.
+
 ## What it measures, and what it does not
 
 `examples/perfbench` is a registry of **kernels**: each runs a fixed,

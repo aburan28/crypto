@@ -18,3 +18,5 @@ Rebuild command, from the repository root:
 ```
 
 The virtualenv is environment-local; the rendering dependency is already pinned in `scripts/perf/groebner-render-requirements.txt`.
+
+Follow-up refresh: the diagram and PDF now explicitly identify the original planning snapshot and point to the current execution status in `NEXT_STEPS.md`. The refreshed one-page PDF was opened and inspected with the hashing-study reports; its SHA-256 is `2ce7eb49b71ef823a25481f47af4503d7903407e051b1eae3a952c6e33093eb3`. The earlier hash and checks above describe the historical planning version. New execution and full-library verification are recorded in the hashing study.
