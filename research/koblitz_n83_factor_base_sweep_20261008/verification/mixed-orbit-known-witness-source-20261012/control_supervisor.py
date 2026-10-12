@@ -41,6 +41,9 @@ PRIOR_AUDIT = f"research/{STUDY}/verification/mixed-orbit-search-15000-20261012/
 PRIOR_AUDIT_SHA = "32420a62bb6ccf8f9df7f03dea9040e518606740968110dc8c0ac47cb50cafd5"
 SMALL_SHA = "eb342b574e244e1e67e8e78c805f33ee88edcdb4f3a14d4114e6f413beede380"
 ENVELOPE_SHA = "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a"
+SMALL_BLAKE3 = "76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92"
+ENVELOPE_BLAKE3 = "82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851"
+FIXTURE_BLAKE3 = "7e257cf3f278051094e27bd6df30ac8e78a0f55739b11f8b6837f23e5637703d"
 BUILD_CAP, VERIFY_CAP, SEARCH_CAP, CLEANUP_RESERVE = 300, 120, 900, 180
 BUILD_WALL, VERIFY_WALL, SEARCH_WALL, WORKER_WALL = 260, 90, 850, 840
 TOTAL_CHARGE = BUILD_CAP + VERIFY_CAP + SEARCH_CAP + CLEANUP_RESERVE
@@ -195,6 +198,9 @@ def control_receipt_error(config: object, result: object,
     expected_config = {
         "schema": "n83.mixed-orbit-known-witness-config/v1",
         "scope": "known_answer_control_only", "study": STUDY,
+        "fixture_blake3": FIXTURE_BLAKE3,
+        "small_object_blake3": SMALL_BLAKE3,
+        "envelope_object_blake3": ENVELOPE_BLAKE3,
         "small_summands": 3, "residual_summands": 2,
         "conflict_budget": CONFLICTS, "max_models": MODELS,
         "budget_seconds": WORKER_WALL,

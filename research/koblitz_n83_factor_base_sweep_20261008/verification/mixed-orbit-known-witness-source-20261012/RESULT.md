@@ -48,10 +48,19 @@ execution; retains raw stdout/stderr, container state, cleanup, an outer
 disposition and the conservative budget ledger; and independently replays any
 successful candidate against the archived point domains and group equation.
 Its [four source-only tests](test_control_supervisor.py) verify stale and
-underfunded grants are rejected before launch, a fake solver success cannot
-pass the receipt check, a cap cannot be called a success, and the worker wall
+underfunded grants are rejected before launch, a bare success label cannot
+pass without a candidate, a cap cannot be called a success, and the worker wall
 cap needs a matching receipt. Preparing and testing this supervisor has not
 launched a container or SAT search.
+
+The [constructed replay check](replay-check.json) opens the same compressed
+archive bytes and passes the five-point witness through the supervisor's
+candidate validator. It then changes a small-point index, replaces a residual
+point with a small-base point, and changes the fixture digest; each mutation
+is rejected. [replay_check.py](replay_check.py) reproduces this record. These
+are deliberately constructed receipts for auditing the validator, not output
+from a solver. The supervisor now also requires the worker's fixture and both
+object BLAKE3 values to match the pinned identities.
 
 The next controlled experiment is exactly one `control-run` call under a
 separate authorized local budget and this external container supervisor, with the

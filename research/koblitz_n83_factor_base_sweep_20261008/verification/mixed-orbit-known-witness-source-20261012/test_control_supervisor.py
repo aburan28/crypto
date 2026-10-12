@@ -61,6 +61,9 @@ class ControlSupervisorTests(unittest.TestCase):
         config = {
             "schema": "n83.mixed-orbit-known-witness-config/v1",
             "scope": "known_answer_control_only", "study": gate.STUDY,
+            "fixture_blake3": gate.FIXTURE_BLAKE3,
+            "small_object_blake3": gate.SMALL_BLAKE3,
+            "envelope_object_blake3": gate.ENVELOPE_BLAKE3,
             "small_summands": 3, "residual_summands": 2,
             "conflict_budget": gate.CONFLICTS, "max_models": gate.MODELS,
             "budget_seconds": gate.WORKER_WALL,
@@ -81,6 +84,10 @@ class ControlSupervisorTests(unittest.TestCase):
         }
         self.assertIsNone(gate.control_receipt_error(config, result, fixture,
                                                       Path("unused"), Path("unused")))
+        for key in ("fixture_blake3", "small_object_blake3", "envelope_object_blake3"):
+            altered_config = {**config, key: "0" * 64}
+            self.assertIsNotNone(gate.control_receipt_error(altered_config, result, fixture,
+                                                            Path("unused"), Path("unused")))
         fake = copy.deepcopy(result)
         fake["status"] = "PASS_known_witness_solver_access"
         self.assertIsNotNone(gate.control_receipt_error(config, fake, fixture,
