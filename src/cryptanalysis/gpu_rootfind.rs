@@ -11,9 +11,10 @@
 //!
 //! - exposes it through [`decompose64`] (any odd prime `p < 2^62`, the
 //!   [`prime_fast::Fp64`] bound) and [`decompose_p256`] (NIST P-256), both
-//!   available only with the `gpu-rootfind` cargo feature, which builds
-//!   the host-emulation backend through `build.rs` (no CUDA needed) or
-//!   links a CUDA-enabled library when `GPU_ROOTFIND_CUDA_LIB_DIR` is set;
+//!   available only with the `gpu-rootfind` cargo feature, which pulls in
+//!   the `gpu-rootfind-sys` path crate (`gpu/rootfind/sys/`) whose build
+//!   script compiles the host-emulation backend (no CUDA needed) or links
+//!   a CUDA-enabled library when `GPU_ROOTFIND_CUDA_LIB_DIR` is set;
 //! - provides [`cpu_reference64`], the identical sweep written directly
 //!   on [`prime_fast`] primitives (`Fp64::batch_inv`,
 //!   `FastFactorBase::lookup`), so a harness can demand set equality
@@ -129,77 +130,10 @@ impl std::error::Error for Error {}
 
 // ── FFI ───────────────────────────────────────────────────────────────
 
+/// Raw C ABI, declared (and the native library compiled or linked) by the
+/// `gpu-rootfind-sys` path crate in `gpu/rootfind/sys/`.
 #[cfg(feature = "gpu-rootfind")]
-mod ffi {
-    use std::os::raw::{c_char, c_int};
-
-    #[repr(C)]
-    #[derive(Clone, Copy, Default)]
-    pub struct RfRelation {
-        pub target: u32,
-        pub i: u32,
-        pub j: u32,
-        pub eps: i8,
-        pub tau: i8,
-        pub pad: [u8; 2],
-    }
-
-    #[repr(C)]
-    pub struct RfOptions {
-        pub backend: c_int,
-        pub lookup: c_int,
-        pub chunk: u32,
-    }
-
-    #[repr(C)]
-    #[derive(Default)]
-    pub struct RfResult {
-        pub n_written: u32,
-        pub n_found: u32,
-        pub backend_used: c_int,
-        pub lookup_used: c_int,
-        pub chunk_used: u32,
-        pub seconds: f64,
-    }
-
-    pub const RF_OK: c_int = 0;
-    pub const RF_ERR_OVERFLOW: c_int = 1;
-    pub const RF_ERR_BAD_ARG: c_int = -1;
-    pub const RF_ERR_NO_CUDA: c_int = -2;
-    pub const RF_ERR_CUDA: c_int = -3;
-    pub const RF_ERR_BAD_CHUNK: c_int = -4;
-    pub const RF_ERR_NOMEM: c_int = -5;
-
-    extern "C" {
-        pub fn rf64_decompose(
-            p: u64,
-            fb_x: *const u64,
-            fb_y: *const u64,
-            n_fb: u32,
-            tx: *const u64,
-            ty: *const u64,
-            n_targets: u32,
-            out: *mut RfRelation,
-            cap: u32,
-            opt: *const RfOptions,
-            res: *mut RfResult,
-        ) -> c_int;
-        pub fn rf256_decompose(
-            fb_x: *const u64,
-            fb_y: *const u64,
-            n_fb: u32,
-            tx: *const u64,
-            ty: *const u64,
-            n_targets: u32,
-            out: *mut RfRelation,
-            cap: u32,
-            opt: *const RfOptions,
-            res: *mut RfResult,
-        ) -> c_int;
-        pub fn rf_cuda_available() -> c_int;
-        pub fn rf_backend_info() -> *const c_char;
-    }
-}
+use gpu_rootfind_sys as ffi;
 
 #[cfg(feature = "gpu-rootfind")]
 fn backend_code(b: Backend) -> i32 {

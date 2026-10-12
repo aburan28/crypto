@@ -22,6 +22,7 @@ against the CPU `prime_fast` oracle (`examples/gpu_rootfind_validate.rs`).
 | `bench.cu` | `selftest` / `throughput` / `p256` on a device |
 | `test_cpu.cpp` | host self-test (`make test`) |
 | `Makefile`, `CMakeLists.txt` | CUDA optional in both |
+| `sys/` | `gpu-rootfind-sys` path crate: raw FFI + `build.rs` (optional dep of the root crate, feature `gpu-rootfind`) |
 
 ```bash
 make test                      # no GPU needed

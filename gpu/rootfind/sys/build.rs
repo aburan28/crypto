@@ -1,11 +1,11 @@
-//! Build script: compiles the GPU root-finding oracle's host library when
-//! the `gpu-rootfind` cargo feature is enabled.  Without the feature this
-//! script does nothing, so the default build is unaffected.
+//! Build script for `gpu-rootfind-sys`: compiles the GPU root-finding
+//! oracle's host library in `gpu/rootfind/` (the parent directory).  This
+//! crate is only built when the root crate's `gpu-rootfind` feature is on.
 //!
 //! Two modes, selected by the environment:
 //!
-//! - default: compile `gpu/rootfind/rootfind_api.cpp` with `-DRF_HAVE_CUDA=0`
-//!   through the `cc` crate.  No CUDA toolchain needed; the oracle runs the
+//! - default: compile `../rootfind_api.cpp` with `-DRF_HAVE_CUDA=0` through
+//!   the `cc` crate.  No CUDA toolchain needed; the oracle runs the
 //!   kernel's per-thread function on the host (emulation).
 //! - `GPU_ROOTFIND_CUDA_LIB_DIR=<dir>`: link the prebuilt
 //!   `librootfind_cuda.a` from that directory (built with
@@ -15,32 +15,33 @@
 //!
 //! See RESEARCH_GPU_ROOTFIND_DECOMPOSITION.md §5 for the exact commands.
 
+use std::path::PathBuf;
+
 fn main() {
-    if std::env::var_os("CARGO_FEATURE_GPU_ROOTFIND").is_none() {
-        return;
-    }
+    let src = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"))
+        .join("..");
     println!("cargo:rerun-if-env-changed=GPU_ROOTFIND_CUDA_LIB_DIR");
     println!("cargo:rerun-if-env-changed=CUDA_PATH");
     println!("cargo:rerun-if-env-changed=CUDA_HOME");
     for f in [
-        "gpu/rootfind/rootfind_api.cpp",
-        "gpu/rootfind/rootfind_api.h",
-        "gpu/rootfind/rootfind.cuh",
-        "gpu/rootfind/rootfind_host.hpp",
-        "gpu/rootfind/fp64.cuh",
-        "gpu/rootfind/fp256x64.cuh",
+        "rootfind_api.cpp",
+        "rootfind_api.h",
+        "rootfind.cuh",
+        "rootfind_host.hpp",
+        "fp64.cuh",
+        "fp256x64.cuh",
     ] {
-        println!("cargo:rerun-if-changed={f}");
+        println!("cargo:rerun-if-changed={}", src.join(f).display());
     }
 
     if let Some(dir) = std::env::var_os("GPU_ROOTFIND_CUDA_LIB_DIR") {
-        let dir = std::path::PathBuf::from(dir);
+        let dir = PathBuf::from(dir);
         println!("cargo:rustc-link-search=native={}", dir.display());
         println!("cargo:rustc-link-lib=static=rootfind_cuda");
         let cuda = std::env::var_os("CUDA_PATH")
             .or_else(|| std::env::var_os("CUDA_HOME"))
-            .map(std::path::PathBuf::from)
-            .unwrap_or_else(|| std::path::PathBuf::from("/usr/local/cuda"));
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from("/usr/local/cuda"));
         println!("cargo:rustc-link-search=native={}", cuda.join("lib64").display());
         println!("cargo:rustc-link-search=native={}", cuda.join("lib").display());
         println!("cargo:rustc-link-lib=dylib=cudart");
@@ -51,8 +52,8 @@ fn main() {
     let mut build = cc::Build::new();
     build
         .cpp(true)
-        .file("gpu/rootfind/rootfind_api.cpp")
-        .include("gpu/rootfind")
+        .file(src.join("rootfind_api.cpp"))
+        .include(&src)
         .define("RF_HAVE_CUDA", "0")
         .flag_if_supported("-std=c++17")
         .flag_if_supported("-pthread")

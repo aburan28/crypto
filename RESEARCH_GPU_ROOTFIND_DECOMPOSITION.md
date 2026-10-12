@@ -8,8 +8,8 @@ written on an Apple-silicon Mac with no NVIDIA device and no `nvcc`
 **ESTIMATE** from published hardware parameters, not a measurement.
 **No security claim** (§6).
 **Code.** `gpu/rootfind/` (headers shared by device and host, CUDA backend,
-C ABI, CPU self-test, Makefile + CMake), `build.rs` + cargo feature
-`gpu-rootfind`, `src/cryptanalysis/gpu_rootfind.rs` (Rust bindings + CPU
+C ABI, CPU self-test, Makefile + CMake), `gpu/rootfind/sys/` (path crate
+`gpu-rootfind-sys`: FFI + build script) behind cargo feature `gpu-rootfind`, `src/cryptanalysis/gpu_rootfind.rs` (Rust bindings + CPU
 reference), `examples/gpu_rootfind_validate.rs` (harness); evidence under
 `research/gpu_rootfind_decomposition_20261012/`.
 **Builds on.** `RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md` (the identity
@@ -138,11 +138,17 @@ so that it can be dropped in (§5, future work).
   management, event timing. Compiled only with `RF_HAVE_CUDA=1`.
 - `Makefile` (`test`, `lib`, `lib-cuda`, `bench`, `ptxas-info`) and
   `CMakeLists.txt` (`check_language(CUDA)` → optional, as `gpu/mlwe`).
-- `build.rs` + cargo feature `gpu-rootfind`: compiles the emulation
+- `gpu/rootfind/sys/` — path crate `gpu-rootfind-sys` (raw FFI +
+  `build.rs`), an *optional* dependency of the root crate enabled by the
+  cargo feature `gpu-rootfind`. Its build script compiles the emulation
   library with the `cc` crate (no CUDA needed), or links a prebuilt
   `librootfind_cuda.a` + `cudart` when `GPU_ROOTFIND_CUDA_LIB_DIR` is
-  set. The default build is unaffected (the script exits immediately
-  without the feature).
+  set. The root crate deliberately has **no** build script: cargo
+  fingerprints a package with a build script by walking every file under
+  it, and for the whole repository that walk fails on the CI runners
+  (gix "Failed to update the excludes stack", from the tracked directory
+  symlinks under `.claude/skills/`); scoped to `gpu/rootfind/sys` it is a
+  handful of files, and with the feature off nothing native is built.
 - `src/cryptanalysis/gpu_rootfind.rs`: safe wrappers `decompose64`,
   `decompose_p256`; `cpu_reference64` (the same sweep on `Fp64::batch_inv`
   + `FastFactorBase::lookup`); `verify_relation64` (group re-addition).
@@ -155,7 +161,7 @@ so that it can be dropped in (§5, future work).
 make -C gpu/rootfind test                                  # C++ self-test: ALL PASS
 cmake -S gpu/rootfind -B /tmp/build-rootfind && cmake --build /tmp/build-rootfind \
   && ctest --test-dir /tmp/build-rootfind                 # 1/1 passed (CUDA NOTFOUND → emulation only)
-cargo build --release                                      # feature off: build.rs is a no-op
+cargo build --release                                      # feature off: no build script, no C++
 cargo test --release --lib --features gpu-rootfind gpu_rootfind   # 4 passed
 cargo run --release --features gpu-rootfind --example gpu_rootfind_validate   # PASS (§4)
 cargo test --release --lib                                 # full suite (see PR)
