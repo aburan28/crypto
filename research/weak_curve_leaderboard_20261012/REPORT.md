@@ -7,7 +7,7 @@ databases and the repository's named-curve and transfer registries to a
 static catalog. The snapshot contains 814 prior exact models, 103 named
 curves (101 standards-provenance curves and two challenge curves), 36
 published odd-characteristic parameter cases, three exact prime-field
-examples and thirteen criterion entries. Each evaluated finding has a
+examples and sixteen criterion entries. Each evaluated finding has a
 [WID1 identifier](IDENTIFIERS.md) distinct from its curve's ICV1 identity.
 
 ## What the leaderboard ranks
@@ -111,7 +111,7 @@ independent `ellgroup` result is `[10,10]`.
 ## Mechanism map
 
 The [machine-readable registry](criteria.json) specifies domain, recognition,
-required witness, construction and primary source for thirteen criteria. The
+required witness, construction and primary source for sixteen criteria. The
 entries make four crucial separations.
 
 First, the [MOV reduction](https://doi.org/10.1145/103418.103434) uses a
@@ -153,6 +153,18 @@ selected-group claim. A model over an extension field only yields a
 smaller-field route if the selected points descend. These distinctions
 prevent a cover, field degree, or factorization from silently becoming a
 measured advantage.
+
+Fifth, the graph and filters separate finite-field isogeny-class membership
+from an explicit route. Equal field size and trace put elliptic curves in the
+same isogeny class by Tate's theorem. The [graph export](ISOGENY_GRAPH.md)
+contains 1,090 indexed curves in 674 classes and 232 certified directed
+isogeny maps from the P-192/P-224 walk records. An atlas node receives an
+isogeny-transfer map tag only when it is an endpoint of a certified edge;
+the 319 atlas nodes in multi-model classes are not thereby assigned a map.
+The GLV filter currently finds seven exact prime-field models with a rational
+`j=0` or `j=1728` automorphism screen. These are structural leads until the
+selected-subgroup endomorphism action and method cost are checked. GLS has a
+published recognition entry and no exact atlas-model match in this export.
 
 ## Construction and search method
 

@@ -154,5 +154,41 @@
     "status": "model_controls_present_point_gate_open",
     "source": "Local weak-curve database",
     "url": "https://github.com/aburan28/crypto/tree/main/research/weak_curve_database_20261012"
+  },
+  {
+    "id": "isogeny_transfer",
+    "name": "Isogeny transfer to an assessed neighbor",
+    "method": "Explicit same-field isogeny and selected-subgroup transport",
+    "domain": "E/F_q with a recorded separable isogeny and selected subgroup order r",
+    "recognition": "Find a certified map to a curve with a separately assessed criterion; same point count identifies an isogeny class but does not supply a map or advantage.",
+    "witness": "Exact endpoint models and UIDs, degree, kernel, forward map, image order of the selected generator, target transport, and construction cost.",
+    "construction": "Enumerate rational kernels for chosen degrees, compute and verify Vélu codomains, then replay generator and target transport along an ordered route.",
+    "status": "verified_map_edges_present_destination_advantage_unassessed",
+    "source": "Verified P-192 isogeny route archive",
+    "url": "https://github.com/aburan28/crypto/tree/main/research/isogeny_walk_p192_20261004"
+  },
+  {
+    "id": "glv_endomorphism",
+    "name": "GLV endomorphism screen",
+    "method": "Subgroup automorphism / scalar decomposition",
+    "domain": "Prime-field curves with a computable endomorphism; the j=0 and j=1728 automorphisms are simple sufficient screens",
+    "recognition": "For j=0 require a nontrivial cube root of unity in F_p; for j=1728 require a square root of -1. Certify the endomorphism's action on the selected r-subgroup.",
+    "witness": "Explicit endomorphism, eigenvalue modulo r, orbit size, scalar-decomposition or rho implementation, and matched cost.",
+    "construction": "Choose a compatible CM curve and subgroup, construct its rational endomorphism, and certify its subgroup eigenvalue.",
+    "status": "automorphism_screen_present_cost_unassessed",
+    "source": "Gallant–Lambert–Vanstone (2001)",
+    "url": "https://doi.org/10.1007/3-540-44647-8_11"
+  },
+  {
+    "id": "gls_frobenius",
+    "name": "GLS Frobenius-twist screen",
+    "method": "Quadratic-extension endomorphism / scalar decomposition",
+    "domain": "Curves over F_(p²) built as a quadratic twist of an F_p curve",
+    "recognition": "Verify the twist descent and the induced Frobenius endomorphism on the exact F_(p²) model; extension degree two alone is insufficient.",
+    "witness": "Twist isomorphism over its defining extension, endomorphism formula, selected-subgroup eigenvalue, and measured orbit or decomposition gain.",
+    "construction": "Construct a GLS twist from a prime-field curve, retain its field representation and maps, and check the subgroup action.",
+    "status": "published_criterion_no_exact_atlas_screen",
+    "source": "Galbraith–Lin–Scott (2009)",
+    "url": "https://eprint.iacr.org/2008/194"
   }
 ]

@@ -5,9 +5,14 @@ const thead = table.querySelector('thead');
 const search = $('#search');
 const fieldFilter = $('#field-filter');
 const evidenceFilter = $('#evidence-filter');
+const criterionFilter = $('#criterion-filter');
+const checkFilter = $('#check-filter');
 const more = $('#more');
 const tabs = [...document.querySelectorAll('[data-tab]')];
 let snapshot = null;
+let graphData = null;
+let graphNodes = new Map();
+let criteriaById = new Map();
 let tab = 'signals';
 let shown = 50;
 
@@ -83,6 +88,8 @@ function openRecord(record) {
   if (record.proof) facts.push(['Evidence',record.proof]);
   if (record.source) facts.push(['Source',record.source]);
   if (record.findings?.length) facts.push(['Weakness IDs',record.findings.map(f=>f.id).join(' · ')]);
+  const node = graphNodes.get(record.id);
+  if (node) facts.push(['Isogeny class',`${node.class_id} · ${node.class_size} indexed model${node.class_size===1?'':'s'}`]);
   const dl = $('#dialog-facts');
   dl.replaceChildren();
   for (const [key,value] of facts) {
@@ -99,11 +106,26 @@ function openRecord(record) {
       : record.attack_ready
         ? 'The model and selected order satisfy a published discrete-log criterion. This snapshot reports no measured attack cost.'
         : 'This catalog record retains its exact identity and current classification status.';
+  const selectedCheck=graphNodes.get(record.id)?.checks?.[criterionFilter.value];
+  if(selectedCheck) {
+    const labels={condition:'Exact condition',geometry:'Covering geometry',map:'Verified map',candidate:'Candidate',screen:'Structural screen'};
+    const styles={condition:'verified',geometry:'geometry',map:'geometry',candidate:'candidate',screen:'candidate'};
+    $('#dialog-grade').textContent=labels[selectedCheck.status];
+    $('#dialog-grade').className=`badge ${styles[selectedCheck.status]}`;
+    $('#dialog-explain').textContent=selectedCheck.detail;
+  }
   const oldEvidence=dialog.querySelector('.finding-evidence');
   if(oldEvidence)oldEvidence.remove();
   const evidence=document.createElement('div');evidence.className='finding-evidence';
   for(const f of record.findings||[]) {
     const p=document.createElement('p');p.textContent=`${f.id} · ${f.grade}: ${f.statement}`;evidence.append(p);
+  }
+  for(const [id,check] of Object.entries(node?.checks||{})) {
+    const p=document.createElement('p');p.textContent=`${criteriaById.get(id)?.name||id} · ${check.status}: ${check.detail}`;evidence.append(p);
+  }
+  if (node?.class_size>1 || node?.checks?.isogeny_transfer) {
+    const a=document.createElement('a');a.href='#graph';a.textContent='Explore isogeny class ↗';
+    a.addEventListener('click',()=>{dialog.close();window.dispatchEvent(new CustomEvent('weakcurves-focus-graph',{detail:{id:record.id}}));});evidence.append(a);
   }
   const urls=record.source_urls||[record.source_url].filter(Boolean);
   for(const url of urls) {
@@ -117,10 +139,11 @@ function openRecord(record) {
 
 function filteredCurves() {
   let rows = curveRecords();
-  if (tab === 'signals') rows = rows.filter(r => kind[r.signal].rank <= 2);
+  if (tab === 'signals' && criterionFilter.value === 'all' && checkFilter.value === 'all') rows = rows.filter(r => kind[r.signal].rank <= 2);
   const q = search.value.trim().toLowerCase();
   if (q) rows = rows.filter(r => [r.id,r.slug,r.legacy_id,labelFor(r),fieldFor(r),kind[r.signal].label,r.trace,
-    ...(r.aliases||[]),...(r.findings||[]).flatMap(f=>[f.id,f.mechanism,f.criterion_id])]
+    ...(r.aliases||[]),...(r.findings||[]).flatMap(f=>[f.id,f.mechanism,f.criterion_id]),
+    ...Object.keys(graphNodes.get(r.id)?.checks||{})]
     .some(x => String(x||'').toLowerCase().includes(q)));
   const field = fieldFilter.value;
   if (field === 'prime') rows = rows.filter(r => r.degree === 1);
@@ -131,6 +154,11 @@ function filteredCurves() {
   if (grade === 'cover') rows = rows.filter(r => kind[r.signal].rank === 1);
   if (grade === 'candidate') rows = rows.filter(r => kind[r.signal].rank === 2);
   if (grade === 'open') rows = rows.filter(r => kind[r.signal].rank >= 3);
+  const criterion = criterionFilter.value, stage = checkFilter.value;
+  if (criterion !== 'all' || stage !== 'all') rows = rows.filter(r => {
+    const checks = graphNodes.get(r.id)?.checks||{};
+    return Object.entries(checks).some(([id,check]) => (criterion==='all'||criterion===id) && (stage==='all'||stage===check.status));
+  });
   return rows;
 }
 
@@ -148,9 +176,14 @@ function renderCurves() {
     button.textContent=labelFor(r);button.title='Open curve evidence';button.addEventListener('click',()=>openRecord(r));
     name.append(button);const small=document.createElement('small');small.textContent=r.id;name.append(small);
     textCell(row,fieldFor(r),'mono');
-    textCell(row,kind[r.signal].label);
+    const selected=criterionFilter.value, check=graphNodes.get(r.id)?.checks?.[selected];
+    textCell(row,selected==='all'?kind[r.signal].label:`${criteriaById.get(selected)?.name||selected} · ${check?.status||'—'}`);
     textCell(row,r.findings?.map(f=>f.id).join(' · ')||'—','mono');
-    const grade=textCell(row,'');const badge=document.createElement('span');badge.className=`badge ${kind[r.signal].badge}`;badge.textContent=kind[r.signal].grade;grade.append(badge);
+    const grade=textCell(row,'');const badge=document.createElement('span');
+    const stageStyle={condition:'verified',geometry:'geometry',map:'geometry',candidate:'candidate',screen:'candidate'};
+    badge.className=`badge ${check?stageStyle[check.status]:kind[r.signal].badge}`;
+    badge.textContent=check?{condition:'Exact condition',geometry:'Covering geometry',map:'Verified map',candidate:'Candidate',screen:'Structural screen'}[check.status]:kind[r.signal].grade;
+    grade.append(badge);
     textCell(row,String(r.trace),'mono');textCell(row,String(r.order),'mono');
     tbody.append(row);
   });
@@ -178,17 +211,25 @@ function renderCases() {
 function render() {
   if (!snapshot) return;
   $('#model-controls').style.display=tab==='families'?'none':'flex';
+  $('#criterion-controls').style.display=tab==='families'?'none':'flex';
   if (tab==='families') renderCases();else renderCurves();
 }
 
 function setTab(next) {
-  tab=next;shown=50;search.value='';fieldFilter.value='all';evidenceFilter.value='all';
+  tab=next;shown=50;search.value='';fieldFilter.value='all';evidenceFilter.value='all';criterionFilter.value='all';checkFilter.value='all';
   tabs.forEach(t=>{const active=t.dataset.tab===next;t.classList.toggle('active',active);t.setAttribute('aria-selected',String(active));});
   render();
 }
 
 function renderCriteria(criteria) {
   const grid=$('#criteria-grid');grid.replaceChildren();
+  $('#criterion-count').textContent=criteria.length;
+  criteriaById=new Map(criteria.map(c=>[c.id,c]));
+  for (const c of criteria) {
+    const option=document.createElement('option');option.value=c.id;
+    option.textContent=`${c.name} (${graphData.counts.atlas_checks[c.id]||0})`;
+    criterionFilter.append(option);
+  }
   criteria.forEach((c,i)=>{
     const article=document.createElement('article');article.className='criterion';
     const top=document.createElement('div');top.className='criterion-top';
@@ -213,9 +254,9 @@ function initDialog() {
   dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 }
 
-Promise.all([fetch('snapshot.json').then(r=>{if(!r.ok)throw Error('snapshot unavailable');return r.json()}),fetch('criteria.json').then(r=>{if(!r.ok)throw Error('criteria unavailable');return r.json()})])
-  .then(([data,criteria])=>{
-    snapshot=data;initDialog();renderCriteria(criteria);
+Promise.all([fetch('snapshot.json').then(r=>{if(!r.ok)throw Error('snapshot unavailable');return r.json()}),fetch('criteria.json').then(r=>{if(!r.ok)throw Error('criteria unavailable');return r.json()}),fetch('isogeny_graph.json').then(r=>{if(!r.ok)throw Error('isogeny graph unavailable');return r.json()})])
+  .then(([data,criteria,graph])=>{
+    snapshot=data;graphData=graph;graphNodes=new Map(graph.nodes.map(n=>[n.id,n]));initDialog();renderCriteria(criteria);
     $('#stat-models').textContent=data.counts.exact_models.toLocaleString();
     $('#stat-covers').textContent=data.counts.exact_covering_models.toLocaleString();
     $('#stat-cases').textContent=data.counts.published_cases.toLocaleString();
@@ -224,9 +265,10 @@ Promise.all([fetch('snapshot.json').then(r=>{if(!r.ok)throw Error('snapshot unav
     $('#corpus-count').textContent=data.counts.exact_models+data.counts.prime_field_examples+data.counts.named_curves;
     $('#case-count').textContent=data.counts.published_cases;
     render();
+    window.dispatchEvent(new CustomEvent('weakcurves-ready',{detail:{graph,criteria,records:curveRecords(),openRecord}}));
   })
   .catch(error=>{$('#result-count').textContent=`Could not load atlas data: ${error.message}`;});
 
 tabs.forEach(t=>t.addEventListener('click',()=>setTab(t.dataset.tab)));
-[search,fieldFilter,evidenceFilter].forEach(el=>el.addEventListener('input',()=>{shown=50;render()}));
+[search,fieldFilter,evidenceFilter,criterionFilter,checkFilter].forEach(el=>el.addEventListener('input',()=>{shown=50;render()}));
 more.addEventListener('click',()=>{shown+=50;render()});

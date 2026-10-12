@@ -1,5 +1,42 @@
 # Validation record
 
+## Vulnerability filters and isogeny graph, 12 October 2026
+
+- `python3 research/weak_curve_leaderboard_20261012/build_isogeny_graph.py --check`
+  passed. The builder checked the P-192 walk's `VERIFY.json` digest and
+  71-node/132-edge counts, all 100 large-prime map artifact SHA-256 digests,
+  endpoint field/trace consistency, and unique edge IDs. The deterministic
+  export has 1,090 nodes, 674 classes, 73 multi-model classes, and 232
+  certified directed map edges. Of its nodes, 920 are atlas records and 170
+  are additional verified-walk identities. All source digests are embedded
+  in `isogeny_graph.json`.
+- A separate Python integrity check verified every node/class membership,
+  every edge's class equality, 319 atlas nodes in multi-model classes and
+  172 graph nodes incident to certified maps. The 16 criterion IDs are
+  unique. Source and site copies of `criteria.json` and `isogeny_graph.json`
+  are byte-identical. An HTML parser found unique element IDs and both
+  JavaScript entrypoints and filter controls.
+- `cargo test --release --locked --offline` in the leaderboard crate:
+  four passed. `cargo run --release --locked --offline -- check snapshot.json`
+  passed. `node --check` passed for `app.js` and `graph.js`; `git diff --check`
+  passed. Browser-control infrastructure was unavailable, so visual and
+  pointer-interaction checks were not performed in a browser.
+- `CARGO_NET_OFFLINE=true cargo test --release --lib --quiet` at repository
+  root completed in 632.33 seconds with **3,991 passed, nine failed, 113
+  ignored**. The nine failures are the same existing
+  `cryptanalysis::pollard_collab::{cairn,net}` local-socket permission cases
+  recorded in [root_lib_v3.log](validation/root_lib_v3.log) and the previous
+  [root-suite baseline](validation/root_lib_v2.log). No Rust library source
+  changed in this addition.
+- The Sites source helper pushed commit
+  `2400a588268a505818d2830f99b7ad0230d38f29`, packaged
+  `/Volumes/SSD990/llm/tmp/weakcurves-static-v10.tar.gz`, saved version
+  `appgprj_6acd13c887f0819194ae65d7f61c7b33~appgver_4551e69d3b248191adca19281129e313`,
+  and deployed it publicly as `appgdep_6acd3b772e308191a1b89d9abf555e62`
+  with status `succeeded` at
+  <https://weakcurves.aburan28.chatgpt.site>. The existing public audience
+  was read before publication and preserved.
+
 ## Extension-field coverage audit, 12 October 2026
 
 - The source-linked [coverage audit](COVERAGE_AUDIT.md) adds three distinct

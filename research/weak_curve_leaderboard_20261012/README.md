@@ -5,12 +5,18 @@ weak-curve database, **103 named curves** from the repository's curve registry,
 and **36 published odd-characteristic covering cases**. The named roster
 includes Oakley Groups 3 and 4, with exact GHS invariant candidates and
 separate WID1 finding IDs. It adds three exhaustively checked prime-field
-examples and a thirteen-criterion
+examples and a sixteen-criterion
 registry for anomalous, smooth-order, MOV, Frey–Rück, supersingular,
 binary-GHS, odd-characteristic GHS, cubic norm-one, quadratic-torus and
 proper-subfield mechanisms, plus direct extension-field decomposition,
 cover-and-decomposition, and cubic Jacobian-isogeny routes. The first [WeakCurves site](../../website/weakcurves/)
 uses this exact export.
+
+The [isogeny graph](ISOGENY_GRAPH.md) adds 170 verified-walk curve identities
+to the 920-model atlas, grouping 1,090 nodes into 674 finite-field isogeny
+classes and displaying 232 certified directed maps. Its criterion checks
+power the site's vulnerability filters; check stages distinguish exact
+conditions, geometry, explicit maps, candidates and structural screens.
 
 The default leaderboard contains 29 finding rows: two prime-field models
 meeting a published DLP criterion, 24 exact small-field covering-model
@@ -30,12 +36,16 @@ cargo test --release --locked
 cargo run --release --locked -- build snapshot.json
 cargo run --release --locked -- check snapshot.json
 node --check ../../website/weakcurves/dist/app.js
+python3 build_isogeny_graph.py --check
+node --check ../../website/weakcurves/dist/graph.js
 ```
 
-The exporter reopens both frozen SQLite inputs and both existing JSON
+The Rust exporter reopens both frozen SQLite inputs and both existing JSON
 registries, hashes their bytes, checks the exact import counts, enumerates
 the three prime-field models, and emits stable JSON with no time- or
-host-dependent fields. Copy `snapshot.json`, `criteria.json`, and
+host-dependent fields. The graph builder binds the snapshot to verified
+P-192/P-224 walk records and their receipt. Copy `snapshot.json`,
+`criteria.json`, `isogeny_graph.json`, and
 `IDENTIFIERS.md` into `../../website/weakcurves/dist/` when they change.
 The site is static and reads the JSON files in the browser.
 
