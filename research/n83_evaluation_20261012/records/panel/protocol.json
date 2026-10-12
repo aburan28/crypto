@@ -1,0 +1,359 @@
+{
+  "analysis": {
+    "bootstrap_resamples": 20000,
+    "bootstrap_seed": 2026101283,
+    "cold": "whole-process separately; launch/load, reusable preparation, online and replay included",
+    "failures": "retained, excluded from ratio with explicit disposition; never wins",
+    "operation_equivalent_S": null,
+    "phase_residual": "Retain five IC fields and target_ms minus their sum; exact-conformance false when residual nonzero",
+    "primary_estimator": "geometric mean of within-pair strong_online_ms / IC_online_ms; percentile paired bootstrap resampling mean log ratio",
+    "promotion": "diagnostic only; independent replay plus applicable common-cost/ecbench/independent-host gates required",
+    "uncertainty_scope": "seed/repeat variation on one target and one host"
+  },
+  "cpu": 3,
+  "cwd": "/workspace/repos/crypto",
+  "description": "Exact retained n83 a1 K600: one excluded warmup per arm, five same-seed strong A/A pairs, five interleaved strong/IC repeats of the identical frozen public point. No independent-target population claim.",
+  "expected_base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+  "frozen_before_execution": true,
+  "memory_bytes": 12884901888,
+  "pairs": [
+    {
+      "baseline_id": "aa_1_a",
+      "candidate_id": "aa_1_b",
+      "kind": "aa",
+      "pair_id": "AA1"
+    },
+    {
+      "baseline_id": "aa_2_a",
+      "candidate_id": "aa_2_b",
+      "kind": "aa",
+      "pair_id": "AA2"
+    },
+    {
+      "baseline_id": "aa_3_a",
+      "candidate_id": "aa_3_b",
+      "kind": "aa",
+      "pair_id": "AA3"
+    },
+    {
+      "baseline_id": "aa_4_a",
+      "candidate_id": "aa_4_b",
+      "kind": "aa",
+      "pair_id": "AA4"
+    },
+    {
+      "baseline_id": "aa_5_a",
+      "candidate_id": "aa_5_b",
+      "kind": "aa",
+      "pair_id": "AA5"
+    },
+    {
+      "baseline_id": "matched_1_rho",
+      "candidate_id": "matched_1_ic",
+      "kind": "matched",
+      "pair_id": "M1"
+    },
+    {
+      "baseline_id": "matched_2_rho",
+      "candidate_id": "matched_2_ic",
+      "kind": "matched",
+      "pair_id": "M2"
+    },
+    {
+      "baseline_id": "matched_3_rho",
+      "candidate_id": "matched_3_ic",
+      "kind": "matched",
+      "pair_id": "M3"
+    },
+    {
+      "baseline_id": "matched_4_rho",
+      "candidate_id": "matched_4_ic",
+      "kind": "matched",
+      "pair_id": "M4"
+    },
+    {
+      "baseline_id": "matched_5_rho",
+      "candidate_id": "matched_5_ic",
+      "kind": "matched",
+      "pair_id": "M5"
+    }
+  ],
+  "runs": [
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610060",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": true,
+      "id": "warmup_rho"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/ic_baseline_a8194d61",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "20",
+        "{OUT}/target.jsonl"
+      ],
+      "arm": "ic",
+      "env": {
+        "KIC_RANK_THREADS": "1"
+      },
+      "excluded_warmup": true,
+      "id": "warmup_ic",
+      "semantic_file": "{OUT}/target.jsonl"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610061",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "aa_1_a"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610061",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "aa_1_b"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610062",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "aa_2_a"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610062",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "aa_2_b"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610063",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "aa_3_a"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610063",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "aa_3_b"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610064",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "aa_4_a"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610064",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "aa_4_b"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610065",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "aa_5_a"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610065",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "aa_5_b"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610061",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "matched_1_rho"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/ic_baseline_a8194d61",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "21",
+        "{OUT}/target.jsonl"
+      ],
+      "arm": "ic",
+      "env": {
+        "KIC_RANK_THREADS": "1"
+      },
+      "excluded_warmup": false,
+      "id": "matched_1_ic",
+      "semantic_file": "{OUT}/target.jsonl"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/ic_baseline_a8194d61",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "22",
+        "{OUT}/target.jsonl"
+      ],
+      "arm": "ic",
+      "env": {
+        "KIC_RANK_THREADS": "1"
+      },
+      "excluded_warmup": false,
+      "id": "matched_2_ic",
+      "semantic_file": "{OUT}/target.jsonl"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610062",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "matched_2_rho"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610063",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "matched_3_rho"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/ic_baseline_a8194d61",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "23",
+        "{OUT}/target.jsonl"
+      ],
+      "arm": "ic",
+      "env": {
+        "KIC_RANK_THREADS": "1"
+      },
+      "excluded_warmup": false,
+      "id": "matched_3_ic",
+      "semantic_file": "{OUT}/target.jsonl"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/ic_baseline_a8194d61",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "24",
+        "{OUT}/target.jsonl"
+      ],
+      "arm": "ic",
+      "env": {
+        "KIC_RANK_THREADS": "1"
+      },
+      "excluded_warmup": false,
+      "id": "matched_4_ic",
+      "semantic_file": "{OUT}/target.jsonl"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610064",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "matched_4_rho"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/rho_strong",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "202610065",
+        "{OUT}/producer.json"
+      ],
+      "arm": "rho",
+      "excluded_warmup": false,
+      "id": "matched_5_rho"
+    },
+    {
+      "argv": [
+        "/workspace/n83_evaluation/frozen_binaries/ic_baseline_a8194d61",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+        "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+        "25",
+        "{OUT}/target.jsonl"
+      ],
+      "arm": "ic",
+      "env": {
+        "KIC_RANK_THREADS": "1"
+      },
+      "excluded_warmup": false,
+      "id": "matched_5_ic",
+      "semantic_file": "{OUT}/target.jsonl"
+    }
+  ],
+  "schema": "n83.sequential-panel/v1",
+  "source_baseline": "a8194d616ed8c04489ec46177d369f1b1670360a",
+  "target_file": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/frozen/target_points.jsonl",
+  "timeout_s": 1800
+}

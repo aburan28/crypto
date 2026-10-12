@@ -61,6 +61,8 @@ def strategy_name(config: dict) -> str:
         return "chain-s3"
     if encoding == "frobenius_orbit_phase":
         return "orbit-chain-s3"
+    if encoding == "frobenius_orbit_phase_ordered_first_pair":
+        return "ordered-orbit-chain-s3"
     raise ValueError("unsupported chained-S3 domain encoding")
 
 
@@ -444,9 +446,11 @@ def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summa
         max_models: int, conflict_budget: int, wall_seconds: float,
         memory_mib: int, binary: Path, output_dir: Path,
         image: str = "python:3.11-slim", checkout: Path | None = None,
-        orbit_domain: bool = False) -> dict:
+        orbit_domain: bool = False, ordered_first_pair: bool = False) -> dict:
     if columns not in SIZES or policy not in POLICIES or seed not in SEEDS:
         raise ValueError("search selection is outside the retained primary panel")
+    if ordered_first_pair and not orbit_domain:
+        raise ValueError("first-pair order requires the Frobenius-orbit domain")
     if summands not in (5, 6) or not 0 <= max_trials <= 1000:
         raise ValueError("search arity or trial cap is unsupported")
     if (not 0 < max_variables <= 2**31 - 1 or
@@ -509,7 +513,8 @@ def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summa
         "fixture_sha256": {name: sha256_file(fixtures / name) for name in fixture_files},
         "columns": columns, "policy": policy,
         "seed": seed, "summands": summands, "max_trials": max_trials,
-        "domain_encoding": "frobenius_orbit_phase" if orbit_domain else "coordinate_trie",
+        "domain_encoding": ("frobenius_orbit_phase_ordered_first_pair" if ordered_first_pair else
+                            "frobenius_orbit_phase" if orbit_domain else "coordinate_trie"),
         "max_variables": max_variables, "max_domain_clauses": max_domain_clauses,
         "max_models": max_models, "conflict_budget": conflict_budget,
         "wall_seconds": wall_seconds, "worker_wall_seconds": math.ceil(wall_seconds),
@@ -535,7 +540,8 @@ def run(panel: Path, fixtures: Path, columns: int, policy: str, seed: int, summa
         "--mount", f"type=bind,src={source_dir},dst=/source,readonly",
         "--mount", f"type=bind,src={output_dir},dst=/out",
         "--env", "ICV1_FROZEN_SOURCE_DIR=/source", image_id,
-        "/worker", "primary-orbit-chain-cold" if orbit_domain else "primary-chain-cold",
+        "/worker", ("primary-ordered-orbit-chain-cold" if ordered_first_pair else
+                    "primary-orbit-chain-cold" if orbit_domain else "primary-chain-cold"),
         "/panel", "/fixtures", str(columns), policy, str(seed),
         str(summands), str(max_trials), str(max_variables), str(max_domain_clauses),
         str(max_models), str(conflict_budget), str(config["worker_wall_seconds"]),
@@ -680,13 +686,14 @@ def main() -> int:
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--image", default="python:3.11-slim")
     parser.add_argument("--orbit-domain", action="store_true")
+    parser.add_argument("--ordered-first-pair", action="store_true")
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
     outer = run(args.panel, args.fixtures, args.columns, args.policy, args.seed, args.summands,
                 args.max_trials, args.max_variables, args.max_domain_clauses,
                 args.max_models, args.conflict_budget, args.wall_seconds,
                 args.memory_mib, args.binary, args.output_dir, args.image,
-                orbit_domain=args.orbit_domain)
+        orbit_domain=args.orbit_domain, ordered_first_pair=args.ordered_first_pair)
     print(json.dumps(outer, sort_keys=True))
     return 1 if outer["status"].startswith("PRODUCER_FAILURE") else 0
 

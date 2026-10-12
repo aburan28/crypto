@@ -7,10 +7,14 @@ on:
       - 'research/notes/ecc2k130/compact_ir_ledger_20260930/**'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   validate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,6 +23,9 @@ jobs:
           sparse-checkout: |
             Cargo.toml
             docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            docs/ecbench/schema.sql
+            docs/curves/registry.json
             src
             examples/koblitz_orbit_dlp_s3_batch.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs
@@ -35,11 +42,11 @@ jobs:
       - name: Check frozen inputs, parser and materializer failure cases
         run: |
           python3 -m unittest discover -s research/notes/ecc2k130/compact_ir_ledger_20260930 -p 'test_panel.py' -v
-          python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v
+          cargo test --release --locked --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml
       - name: Materialize exact measured source
         run: |
           mkdir -p "${{ runner.temp }}/compact-ir"
-          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+          cargo run --release --locked --quiet --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml -- materialize \
             --freeze research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json \
             --dest "${{ runner.temp }}/compact-ir-frozen-src" \
             --receipt "${{ runner.temp }}/compact-ir/materialization.json"
@@ -85,6 +92,9 @@ jobs:
           sparse-checkout: |
             Cargo.toml
             docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            docs/ecbench/schema.sql
+            docs/curves/registry.json
             src
             examples/koblitz_orbit_dlp_s3_batch.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs
@@ -98,6 +108,7 @@ jobs:
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             tools/isolated_bench.py
             .github/workflows/compact-s3-prefilter.yml
+      - uses: Swatinem/rust-cache@v2
       - name: Install Callgrind
         run: |
           sudo apt-get update -qq
@@ -106,7 +117,7 @@ jobs:
       - name: Materialize exact measured source and build
         run: |
           mkdir -p "${{ runner.temp }}/compact-ir"
-          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+          cargo run --release --locked --quiet --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml -- materialize \
             --freeze research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json \
             --dest "${{ runner.temp }}/compact-ir-frozen-src" \
             --receipt "${{ runner.temp }}/compact-ir/materialization.json"
