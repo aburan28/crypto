@@ -1,0 +1,536 @@
+{
+  "c_dbl": 8.0,
+  "kappa": {
+    "affine": 5.04743802857166,
+    "projective": 14.195919455357794,
+    "xonly": 3.7855785214287447
+  },
+  "rows": [
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 5.04743802857166,
+          "ratio": 0.00970661159340704
+        },
+        "projective": {
+          "bound_M": 14.195919455357794,
+          "ratio": 0.027299845106457298
+        },
+        "xonly": {
+          "bound_M": 3.7855785214287447,
+          "ratio": 0.0072799586950552785
+        }
+      },
+      "cheapest_found_M": 2.0,
+      "curve": "ECC2K-130",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "koblitz",
+      "log2_dmin": 1.0,
+      "log2_r": 130,
+      "saving_M": 520.0,
+      "source": "research/isogeny_loop_glv_20261010/group_a_koblitz_and_known.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 5.04743802857166,
+          "ratio": 0.015388530574913599
+        },
+        "projective": {
+          "bound_M": 14.195919455357794,
+          "ratio": 0.043280242241944496
+        },
+        "xonly": {
+          "bound_M": 3.7855785214287447,
+          "ratio": 0.011541397931185197
+        }
+      },
+      "cheapest_found_M": 2.0,
+      "curve": "icv1-f2m83-tm6151469093347-debefd74",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "koblitz",
+      "log2_dmin": 1.0,
+      "log2_r": 82,
+      "saving_M": 328.0,
+      "source": "research/isogeny_loop_glv_20261010/group_a_koblitz_and_known.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 5.04743802857166,
+          "ratio": 0.023367768650794724
+        },
+        "projective": {
+          "bound_M": 14.195919455357794,
+          "ratio": 0.06572184933036015
+        },
+        "xonly": {
+          "bound_M": 3.7855785214287447,
+          "ratio": 0.01752582648809604
+        }
+      },
+      "cheapest_found_M": 2.0,
+      "curve": "icv1-f2m83-t6151469093347-cdcc5432",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "koblitz",
+      "log2_dmin": 1.0,
+      "log2_r": 53,
+      "saving_M": 216.0,
+      "source": "research/isogeny_loop_glv_20261010/group_a_koblitz_and_known.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 5.04743802857166,
+          "ratio": 0.013144369866072031
+        },
+        "projective": {
+          "bound_M": 14.195919455357794,
+          "ratio": 0.03696854024832759
+        },
+        "xonly": {
+          "bound_M": 3.7855785214287447,
+          "ratio": 0.009858277399554022
+        }
+      },
+      "cheapest_found_M": 2.0,
+      "curve": "ECC2K-95",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "koblitz",
+      "log2_dmin": 1.0,
+      "log2_r": 95,
+      "saving_M": 384.0,
+      "source": "research/isogeny_loop_glv_20261010/group_a_koblitz_and_known.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 5.04743802857166,
+          "ratio": 0.011683884325397362
+        },
+        "projective": {
+          "bound_M": 14.195919455357794,
+          "ratio": 0.03286092466518008
+        },
+        "xonly": {
+          "bound_M": 3.7855785214287447,
+          "ratio": 0.00876291324404802
+        }
+      },
+      "cheapest_found_M": 2.0,
+      "curve": "ECC2K-108",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "koblitz",
+      "log2_dmin": 1.0,
+      "log2_r": 108,
+      "saving_M": 432.0,
+      "source": "research/isogeny_loop_glv_20261010/group_a_koblitz_and_known.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 0.0,
+          "ratio": 0.0
+        },
+        "projective": {
+          "bound_M": 0.0,
+          "ratio": 0.0
+        },
+        "xonly": {
+          "bound_M": 0.0,
+          "ratio": 0.0
+        }
+      },
+      "cheapest_found_M": 52.5,
+      "curve": "secp256k1",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "prime",
+      "log2_dmin": 0.0,
+      "log2_r": 256,
+      "saving_M": 1024.0,
+      "source": "research/isogeny_loop_glv_20261010/group_a_koblitz_and_known.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 36.72578702379954,
+          "ratio": 0.03586502639042924
+        },
+        "projective": {
+          "bound_M": 103.29127600443621,
+          "ratio": 0.10087038672308224
+        },
+        "xonly": {
+          "bound_M": 27.544340267849652,
+          "ratio": 0.026898769792821926
+        }
+      },
+      "cheapest_found_M": 127.5,
+      "curve": "id-GostR3410-2001-CryptoPro-B-ParamSet",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "prime",
+      "log2_dmin": 7.2761244052742375,
+      "log2_r": 256,
+      "saving_M": 1024.0,
+      "source": "research/isogeny_loop_glv_20261010/group_a_koblitz_and_known.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 1291.5121446068501,
+          "ratio": 1.261242328717627
+        },
+        "projective": {
+          "bound_M": 3632.3779067067658,
+          "ratio": 3.547244049518326
+        },
+        "xonly": {
+          "bound_M": 968.6341084551374,
+          "ratio": 0.9459317465382201
+        }
+      },
+      "cheapest_found_M": null,
+      "curve": "id-GostR3410-2001-CryptoPro-A-ParamSet",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "prime",
+      "log2_dmin": 255.87478980347703,
+      "log2_r": 256,
+      "saving_M": 1024.0,
+      "source": "research/isogeny_loop_glv_20261010/group_a_koblitz_and_known.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 567.0888403443203,
+          "ratio": 1.2436158779480708
+        },
+        "projective": {
+          "bound_M": 1594.937363468401,
+          "ratio": 3.4976696567289496
+        },
+        "xonly": {
+          "bound_M": 425.3166302582402,
+          "ratio": 0.932711908461053
+        }
+      },
+      "cheapest_found_M": 9594.5,
+      "curve": "sect113r1",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "binary",
+      "log2_dmin": 112.35181831539929,
+      "log2_r": 113,
+      "saving_M": 456.0,
+      "source": "research/isogeny_loop_glv_20261010/group_a_koblitz_and_known.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 651.6747811276297,
+          "ratio": 1.23423254001445
+        },
+        "projective": {
+          "bound_M": 1832.8353219214584,
+          "ratio": 3.471279018790641
+        },
+        "xonly": {
+          "bound_M": 488.75608584572217,
+          "ratio": 0.9256744050108374
+        }
+      },
+      "cheapest_found_M": 21449.5,
+      "curve": "ECC2-131",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "binary",
+      "log2_dmin": 129.11001134411998,
+      "log2_r": 131,
+      "saving_M": 528.0,
+      "source": "research/isogeny_loop_glv_20261010/group_b_binary131.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 654.5314621926585,
+          "ratio": 1.239642920819429
+        },
+        "projective": {
+          "bound_M": 1840.869737416852,
+          "ratio": 3.486495714804644
+        },
+        "xonly": {
+          "bound_M": 490.89859664449386,
+          "ratio": 0.9297321906145717
+        }
+      },
+      "cheapest_found_M": 82224.5,
+      "curve": "sect131r1",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "binary",
+      "log2_dmin": 129.67597788969385,
+      "log2_r": 131,
+      "saving_M": 528.0,
+      "source": "research/isogeny_loop_glv_20261010/group_b_binary131.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 659.1289848300105,
+          "ratio": 1.248350350056838
+        },
+        "projective": {
+          "bound_M": 1853.8002698344044,
+          "ratio": 3.510985359534857
+        },
+        "xonly": {
+          "bound_M": 494.3467386225078,
+          "ratio": 0.9362627625426284
+        }
+      },
+      "cheapest_found_M": 19806.0,
+      "curve": "sect131r2",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "binary",
+      "log2_dmin": 130.5868405117463,
+      "log2_r": 131,
+      "saving_M": 528.0,
+      "source": "research/isogeny_loop_glv_20261010/group_b_binary131.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 656.0096076333436,
+          "ratio": 1.2424424386995145
+        },
+        "projective": {
+          "bound_M": 1845.0270214687791,
+          "ratio": 3.4943693588423845
+        },
+        "xonly": {
+          "bound_M": 492.00720572500774,
+          "ratio": 0.9318318290246359
+        }
+      },
+      "cheapest_found_M": 49072.5,
+      "curve": "ECCp-131",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "prime",
+      "log2_dmin": 129.9688285264561,
+      "log2_r": 131,
+      "saving_M": 528.0,
+      "source": "research/isogeny_loop_glv_20261010/group_c_certicom_mid.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 521.8066312529704,
+          "ratio": 1.1859241619385692
+        },
+        "projective": {
+          "bound_M": 1467.5811503989792,
+          "ratio": 3.335411705452225
+        },
+        "xonly": {
+          "bound_M": 391.35497343972776,
+          "ratio": 0.8894431214539267
+        }
+      },
+      "cheapest_found_M": 15836.5,
+      "curve": "ECC2-109",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "binary",
+      "log2_dmin": 103.38049289544875,
+      "log2_r": 109,
+      "saving_M": 440.0,
+      "source": "research/isogeny_loop_glv_20261010/group_c_certicom_mid.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 546.9249874692412,
+          "ratio": 1.2430113351573662
+        },
+        "projective": {
+          "bound_M": 1538.2265272572408,
+          "ratio": 3.495969380130093
+        },
+        "xonly": {
+          "bound_M": 410.19374060193087,
+          "ratio": 0.9322585013680247
+        }
+      },
+      "cheapest_found_M": 21075.0,
+      "curve": "ECCp-109",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "prime",
+      "log2_dmin": 108.35694948076693,
+      "log2_r": 109,
+      "saving_M": 440.0,
+      "source": "research/isogeny_loop_glv_20261010/group_c_certicom_mid.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 460.4797453777447,
+          "ratio": 1.1746932280044506
+        },
+        "projective": {
+          "bound_M": 1295.0992838749069,
+          "ratio": 3.3038247037625177
+        },
+        "xonly": {
+          "bound_M": 345.35980903330847,
+          "ratio": 0.8810199210033379
+        }
+      },
+      "cheapest_found_M": 21601.0,
+      "curve": "ECC2-97",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "binary",
+      "log2_dmin": 91.23039109566892,
+      "log2_r": 97,
+      "saving_M": 392.0,
+      "source": "research/isogeny_loop_glv_20261010/group_c_certicom_mid.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 487.1691116529592,
+          "ratio": 1.2427783460534674
+        },
+        "projective": {
+          "bound_M": 1370.1631265239478,
+          "ratio": 3.4953140982753768
+        },
+        "xonly": {
+          "bound_M": 365.37683373971936,
+          "ratio": 0.9320837595401004
+        }
+      },
+      "cheapest_found_M": 8422.5,
+      "curve": "ECCp-97",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "prime",
+      "log2_dmin": 96.51809668494728,
+      "log2_r": 97,
+      "saving_M": 392.0,
+      "source": "research/isogeny_loop_glv_20261010/group_c_certicom_mid.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 418.811453002765,
+          "ratio": 1.1633651472299027
+        },
+        "projective": {
+          "bound_M": 1177.9072115702766,
+          "ratio": 3.2719644765841016
+        },
+        "xonly": {
+          "bound_M": 314.1085897520737,
+          "ratio": 0.872523860422427
+        }
+      },
+      "cheapest_found_M": 7345.5,
+      "curve": "ECC2-89",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "binary",
+      "log2_dmin": 82.97505598524042,
+      "log2_r": 89,
+      "saving_M": 360.0,
+      "source": "research/isogeny_loop_glv_20261010/group_d_certicom_small.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 439.2793544225945,
+          "ratio": 1.2202204289516514
+        },
+        "projective": {
+          "bound_M": 1235.4731843135469,
+          "ratio": 3.431869956426519
+        },
+        "xonly": {
+          "bound_M": 329.45951581694584,
+          "ratio": 0.9151653217137384
+        }
+      },
+      "cheapest_found_M": 17790.0,
+      "curve": "ECCp-89",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "prime",
+      "log2_dmin": 87.03016301260129,
+      "log2_r": 89,
+      "saving_M": 360.0,
+      "source": "research/isogeny_loop_glv_20261010/group_d_certicom_small.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 397.59738898200277,
+          "ratio": 1.2424918405687586
+        },
+        "projective": {
+          "bound_M": 1118.2426565118828,
+          "ratio": 3.494508301599634
+        },
+        "xonly": {
+          "bound_M": 298.19804173650203,
+          "ratio": 0.9318688804265689
+        }
+      },
+      "cheapest_found_M": 7500.0,
+      "curve": "ECC2-79",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "binary",
+      "log2_dmin": 78.77211899013966,
+      "log2_r": 79,
+      "saving_M": 320.0,
+      "source": "research/isogeny_loop_glv_20261010/group_d_certicom_small.json"
+    },
+    {
+      "bounds": {
+        "affine": {
+          "bound_M": 394.2247709662745,
+          "ratio": 1.2319524092696077
+        },
+        "projective": {
+          "bound_M": 1108.757168342647,
+          "ratio": 3.4648661510707717
+        },
+        "xonly": {
+          "bound_M": 295.66857822470587,
+          "ratio": 0.9239643069522059
+        }
+      },
+      "cheapest_found_M": 6517.5,
+      "curve": "ECCp-79",
+      "delta_verified": true,
+      "factorization_complete": true,
+      "family": "prime",
+      "log2_dmin": 78.10393485461643,
+      "log2_r": 79,
+      "saving_M": 320.0,
+      "source": "research/isogeny_loop_glv_20261010/group_d_certicom_small.json"
+    }
+  ],
+  "schema": "isogeny_loop_degree_bound/v1"
+}

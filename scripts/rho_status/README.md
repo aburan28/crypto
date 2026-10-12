@@ -6,6 +6,15 @@ store and publishes **aggregates only** to GitHub Pages.
 The page never includes point keys, walk coefficients `(a, b)`, seeds, or
 the database URL.
 
+The status page has two explicit feed tabs. **DP32 · production** is the
+original `ecc2k-130` campaign and keeps its live feed, collision count, and
+collision model. **DP34 · table-walk** is the separate
+`ecc2k130-table8-22b-v1` research namespace currently used by the table-walk
+GPU fleet. `weight_status.py` publishes only S3 object-size counts, sanitized
+slot counters, and checkpoint totals for that feed. Its records and rate are
+never merged into the DP32 totals: the two walk namespaces cannot be treated
+as one collision corpus.
+
 ## Live Mac control uploads
 
 The separate `ecc2k130-synthetic-metal-h128-v1` Mac run has its own panel.
@@ -26,6 +35,7 @@ GitHub Actions queue. The existing Pages workflow still publishes a fallback
 copy on each successful deployment. The public object must be readable at
 `https://ecc2k130-status-590183823895.s3.us-west-2.amazonaws.com/mac-control.json`
 from the Pages origin through the bucket's existing CORS rule.
+
 
 ## Where the snapshot comes from, and why there are two sources
 

@@ -6,8 +6,12 @@ name: ic end-to-end benchmark
 # same-host ρ/IC end-to-end wall ratio within tolerance, and any rung that
 # crossed ρ end to end when frozen still crossing.  See docs/ic/ci/README.md.
 on:
+  merge_group:
   pull_request:
     paths:
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - "src/**"
       - "Cargo.toml"
       - "Cargo.lock"
@@ -37,7 +41,7 @@ env:
 jobs:
   e2e-benchmark:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && 25 || 40 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -63,7 +67,7 @@ jobs:
                      docs/ic/params/k0n41-subgroup-wide.json \
                      docs/ic/params/k0n53-subgroup-wide.json
       - name: Gate against the frozen reference
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           set +e
           python scripts/ic_e2e_benchmark.py check \
@@ -82,7 +86,7 @@ jobs:
       # relations, certified logs, solutions, baseline), the manifest and the
       # summary.  A re-freeze on CI hardware starts from this artifact.
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           name: ic-e2e-benchmark-${{ github.run_id }}
           path: /tmp/ic-e2e

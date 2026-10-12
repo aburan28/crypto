@@ -1,0 +1,153 @@
+{
+  "schema": "n83-source-audit-manifest/v1",
+  "repository": "aburan28/crypto",
+  "base_snapshot": "a8194d616ed8c04489ec46177d369f1b1670360a",
+  "remote_main_at_audit": "a8194d616ed8c04489ec46177d369f1b1670360a",
+  "new_worker_status": "compiled_by_parent; initial_tiny_curve_test_failed_due_to_DP_policy; test_only_policy_fixed; rerun_pending",
+  "files": [
+    {
+      "local_path": "AUDIT.md",
+      "source_path": "AUDIT.md",
+      "bytes": 13859,
+      "sha256": "03b0e6fc47a4270213f27cd5e881a228ceee3e790cc90096260f68fd2f4152ec",
+      "git_blob": null,
+      "kind": "new_audit_or_worker",
+      "url": null
+    },
+    {
+      "local_path": "examples__koblitz_orbit_dlp_fast.rs",
+      "source_path": "examples/koblitz_orbit_dlp_fast.rs",
+      "bytes": 110398,
+      "sha256": "5d6cca46e56a582108fc4bf97e6658a5af4a3a09a11fff3eeec26e4304d58ef1",
+      "git_blob": "0cf5be61913c5a925f637c87dc82670cb020ba3b",
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/examples/koblitz_orbit_dlp_fast.rs"
+    },
+    {
+      "local_path": "examples__koblitz_rho_fixture.rs",
+      "source_path": "examples/koblitz_rho_fixture.rs",
+      "bytes": 76988,
+      "sha256": "a5f1146ff06700b0f7984214c8c54d2cd701018313357c42ec1bc49c81a81752",
+      "git_blob": "38e9223ff89d7f967d4bf9f0ddd290a66f25e5a7",
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/examples/koblitz_rho_fixture.rs"
+    },
+    {
+      "local_path": "examples__strong_rho_step_rate.rs",
+      "source_path": "examples/strong_rho_step_rate.rs",
+      "bytes": 3919,
+      "sha256": "1b1dff7a432fa9ef434c1ec093bea4aa150d9c580696e036264f8a8c7353edde",
+      "git_blob": null,
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/examples/strong_rho_step_rate.rs"
+    },
+    {
+      "local_path": "experiments__koblitz-single-target-n83-20261006__README.md",
+      "source_path": "experiments/koblitz-single-target-n83-20261006/README.md",
+      "bytes": 3814,
+      "sha256": "b628a3695c3604ebbb2c18b5a7a93fcb05e0d9c6a94cbcbbbba11b7af7d518c3",
+      "git_blob": null,
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/experiments/koblitz-single-target-n83-20261006/README.md"
+    },
+    {
+      "local_path": "experiments__koblitz-single-target-n83-20261006__derived_exploratory_claim_report.json",
+      "source_path": "experiments/koblitz-single-target-n83-20261006/derived_exploratory_claim_report.json",
+      "bytes": 6695,
+      "sha256": "6647479f763a4ab41cedca5f7bf9a5e775edaf475270eee02cbfcaa7a861cdcb",
+      "git_blob": null,
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/experiments/koblitz-single-target-n83-20261006/derived_exploratory_claim_report.json"
+    },
+    {
+      "local_path": "experiments__koblitz-single-target-n83-20261006__run_n83_pairs.py",
+      "source_path": "experiments/koblitz-single-target-n83-20261006/run_n83_pairs.py",
+      "bytes": 8420,
+      "sha256": "20affd5bebcc10ffd97e375283af8c200f594a0f3b23fa7fa5821c2a5e17a87d",
+      "git_blob": "546163f88b15e694b4fdd4ee256ef293c8818e37",
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/experiments/koblitz-single-target-n83-20261006/run_n83_pairs.py"
+    },
+    {
+      "local_path": "experiments__koblitz-single-target-n83-20261006__verify_n83_runs.py",
+      "source_path": "experiments/koblitz-single-target-n83-20261006/verify_n83_runs.py",
+      "bytes": 8822,
+      "sha256": "0cdc68451fd84f30728d1ebb836f8dae93096ffe01950410f20e70ef3a1021a9",
+      "git_blob": "0d34426ecb4171d89b6cd1dc49d44bb7eeabf8ee",
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/experiments/koblitz-single-target-n83-20261006/verify_n83_runs.py"
+    },
+    {
+      "local_path": "n83_strong_point_eval.rs",
+      "source_path": "n83_strong_point_eval.rs",
+      "bytes": 17403,
+      "sha256": "ee877ac9175e5030bf8e24cca874982868de7998d5fa3a2a7d4bd0a3dd813191",
+      "git_blob": null,
+      "kind": "new_audit_or_worker",
+      "url": null
+    },
+    {
+      "local_path": "research__notes__index-calculus__RESEARCH_FIXED_REFERENCE_RHO_20261001.md",
+      "source_path": "research/notes/index-calculus/RESEARCH_FIXED_REFERENCE_RHO_20261001.md",
+      "bytes": 5037,
+      "sha256": "6c8b4efe8f3811085b3beb54a77eaed079132c29e9c382138e0b38ef551b7b80",
+      "git_blob": null,
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/research/notes/index-calculus/RESEARCH_FIXED_REFERENCE_RHO_20261001.md"
+    },
+    {
+      "local_path": "src__cryptanalysis__koblitz_fast_arith.rs",
+      "source_path": "src/cryptanalysis/koblitz_fast_arith.rs",
+      "bytes": 55063,
+      "sha256": "ab156d57e983a8f248bf4fd6c2f6d46d2c38da813a4eadd31e715fc443ad7c1a",
+      "git_blob": "3ec1da4e6c6b101ebde0b8ae81862895fdcd5566",
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/src/cryptanalysis/koblitz_fast_arith.rs"
+    },
+    {
+      "local_path": "src__cryptanalysis__koblitz_index_calculus.rs",
+      "source_path": "src/cryptanalysis/koblitz_index_calculus.rs",
+      "bytes": 845404,
+      "sha256": "1f27b770ae134976a65650fc800e5440074064dffb59dec67340c2509f920820",
+      "git_blob": "82f63978252bd9f50c1e48d7f3dcccdf61e03a13",
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/src/cryptanalysis/koblitz_index_calculus.rs"
+    },
+    {
+      "local_path": "src__cryptanalysis__koblitz_strong_rho.rs",
+      "source_path": "src/cryptanalysis/koblitz_strong_rho.rs",
+      "bytes": 60529,
+      "sha256": "3e45be340df4fe5b73998b8f907ad0a1a77d58c06609c73f77f17f2babd90108",
+      "git_blob": "88917d4dda83ef1bcc87c0b4d83cb3305ed6a6d0",
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/src/cryptanalysis/koblitz_strong_rho.rs"
+    },
+    {
+      "local_path": "src__cryptanalysis__koblitz_wide.rs",
+      "source_path": "src/cryptanalysis/koblitz_wide.rs",
+      "bytes": 11635,
+      "sha256": "fa20c82aa8b0145848f9f9652303fc57731566e3852ffc6b432e55e8736e78c3",
+      "git_blob": null,
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/src/cryptanalysis/koblitz_wide.rs"
+    },
+    {
+      "local_path": "src__cryptanalysis__semaev_decomp.rs",
+      "source_path": "src/cryptanalysis/semaev_decomp.rs",
+      "bytes": 163688,
+      "sha256": "be551d55d574b89bab1e9cd6fe1b1ad298966dd4fcf48a7cd1262d3e5ef4925a",
+      "git_blob": "d6cae7366bfca318698e26d1df953749a1069324",
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/src/cryptanalysis/semaev_decomp.rs"
+    },
+    {
+      "local_path": "src__cryptanalysis__wide_gf2m.rs",
+      "source_path": "src/cryptanalysis/wide_gf2m.rs",
+      "bytes": 11806,
+      "sha256": "086c786cdb2410c852c4242abc543255776a5ec3fff873ab972d08978907c701",
+      "git_blob": "649789b6c8aa06a6d7cb0de33b52d4cddf9fa50b",
+      "kind": "copied_primary_source",
+      "url": "https://github.com/aburan28/crypto/blob/a8194d616ed8c04489ec46177d369f1b1670360a/src/cryptanalysis/wide_gf2m.rs"
+    }
+  ]
+}

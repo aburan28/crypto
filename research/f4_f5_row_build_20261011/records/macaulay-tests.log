@@ -1,0 +1,48 @@
+
+running 43 tests
+test cryptanalysis::koblitz_groebner::tests::auto_split_rule_follows_the_engine ... ok
+test cryptanalysis::koblitz_groebner::tests::degree_reporting_duplicate_rows_can_trigger_rank_proxy ... ok
+test cryptanalysis::koblitz_groebner::tests::degree_reporting_multiple_roots_need_not_pin ... ok
+test cryptanalysis::koblitz_groebner::tests::direct_fused_pack_matches_sorted_parity_and_exact_layout ... ok
+test cryptanalysis::koblitz_groebner::tests::eliminate_linear_generators_refutes_and_defines ... ok
+test cryptanalysis::koblitz_groebner::tests::every_split_rule_finds_exactly_the_solutions ... ok
+test cryptanalysis::koblitz_groebner::tests::field_coefficient_products_match_pairwise_sums ... ok
+test cryptanalysis::koblitz_groebner::tests::fixed_x1_specialisation_matches_the_generic_s4_system ... ok
+test cryptanalysis::koblitz_groebner::tests::fixing_x1_leaves_a_system_in_two_summands ... ok
+test cryptanalysis::koblitz_groebner::tests::fused_f5_count_applies_the_full_f4_row_cap ... ok
+test cryptanalysis::koblitz_groebner::tests::generic_cached_direct_pack_matches_sorted_and_repairs_stale_layout ... ok
+test cryptanalysis::koblitz_groebner::tests::infeasible_system_is_closed_by_the_basis ... ok
+test cryptanalysis::koblitz_groebner::tests::inherited_and_f5_engines_walk_the_same_tree_as_matrix_f4 ... ok
+test cryptanalysis::koblitz_groebner::tests::inherited_engine_matches_matrix_f4_on_random_systems ... ok
+test cryptanalysis::koblitz_groebner::tests::interleaved_chain_solve_has_the_same_roots ... ok
+test cryptanalysis::koblitz_groebner::tests::interleaved_order_puts_the_last_summand_highest ... ok
+test cryptanalysis::koblitz_groebner::tests::known_decomposition_is_a_root_of_the_system ... ok
+test cryptanalysis::koblitz_groebner::tests::linear_elimination_keeps_every_root ... ok
+test cryptanalysis::koblitz_groebner::tests::low_columns_are_a_suffix_in_monomial_order ... ok
+test cryptanalysis::koblitz_groebner::tests::macaulay_columns_deduplicate_high_bit_support_in_monomial_order ... ok
+test cryptanalysis::koblitz_groebner::tests::macaulay_products_preserve_boolean_cancellation_and_row_order ... ok
+test cryptanalysis::koblitz_groebner::tests::macaulay_profile_agrees_with_sparse ... ok
+test cryptanalysis::koblitz_groebner::tests::node_oracle_never_treats_affine_placeholders_as_fixed_bits ... ok
+test cryptanalysis::koblitz_groebner::tests::s3_over_supports_matches_coordinate_operations ... ok
+test cryptanalysis::koblitz_groebner::tests::solving_degree_agrees_with_brute_force ... ok
+test cryptanalysis::koblitz_groebner::tests::solving_degree_detects_refutation ... ok
+test cryptanalysis::koblitz_groebner::tests::solving_degree_ignores_variables_that_never_occur ... ok
+test cryptanalysis::koblitz_groebner::tests::solving_degree_pins_a_linear_system ... ok
+test cryptanalysis::koblitz_groebner::tests::solving_profile_agrees_with_sparse ... ok
+test cryptanalysis::koblitz_groebner::tests::sparse_row_addition_cancels_shared_indices ... ok
+test cryptanalysis::koblitz_groebner::tests::splitting_solver_agrees_with_exhaustive_evaluation ... ok
+test cryptanalysis::koblitz_groebner::tests::structure_constants_match_the_curve_field ... ok
+test cryptanalysis::koblitz_groebner::tests::support_local_bitmap_columns_match_exact_sorted_columns ... ok
+test cryptanalysis::koblitz_groebner::tests::support_local_rows_are_occurring_rows ... ok
+test cryptanalysis::koblitz_groebner::tests::support_local_stream_matches_materialized_rows_and_cap ... ok
+test cryptanalysis::koblitz_groebner::tests::support_local_timers_preserve_rows_and_count_delegation ... ok
+test cryptanalysis::koblitz_groebner::tests::symbolic_mul_matches_field_mul ... ok
+test cryptanalysis::koblitz_groebner::tests::symbolic_s3_matches_scalar_s3 ... ok
+test cryptanalysis::koblitz_groebner::tests::symbolic_s4_matches_the_scalar_symmetrised_s4 ... ok
+test cryptanalysis::koblitz_groebner::tests::symbolic_square_matches_mul_by_self ... ok
+test cryptanalysis::koblitz_groebner::tests::system_degree_is_two_for_m2_and_three_when_chained ... ok
+test cryptanalysis::koblitz_groebner::tests::the_blocked_macaulay_returns_only_ideal_members ... ok
+test cryptanalysis::koblitz_groebner::tests::the_decomposition_systems_are_multilinear_in_their_blocks ... ok
+
+test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 3906 filtered out; finished in 28.03s
+

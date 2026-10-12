@@ -1,0 +1,1713 @@
+{
+  "bits": [
+    9,
+    10,
+    11,
+    12
+  ],
+  "experiment": "census",
+  "family": "torsion",
+  "lead": "16.4",
+  "rows": [
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.3472222222222222,
+      "base_size_ratio_Fc_over_F": 1.0416666666666667,
+      "bases": {
+        "E_prime_line_points": 432,
+        "F2_points_on_E_prime": 150,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 450,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 216,
+        "U_b": 72,
+        "U_c18_on_E": 25,
+        "U_c6_on_E": 75,
+        "U_c_neg_on_E_prime": 75,
+        "U_c_on_E_prime": 25,
+        "build_wall_s_contended": 0.049825437,
+        "c_arm_valid": true,
+        "cube_test_agree": 432,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 432,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 9,
+      "experiment": "census",
+      "hit2_b": 0.486,
+      "hit2_c": 0.229,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          256,
+          242
+        ],
+        "cofactor": 471,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 186987,
+        "lambda_zeta": 362,
+        "lambda_zeta_prime": 362,
+        "log2_r": 8.632995197142957,
+        "nu": 5,
+        "omega": 198,
+        "order_is_base_change_product_N1_N2": [
+          397,
+          471
+        ],
+        "p": 433,
+        "r": 397,
+        "rational_3_torsion": true,
+        "trace_fp2": 503
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.604,
+      "mean_n2_proj_b": 0.604,
+      "mean_n2_proj_c18": 0.271,
+      "mean_n2_proj_c6": 0.271,
+      "mean_n2_raw_F": 0.604,
+      "mean_n2_raw_Fc": 0.813,
+      "mean_n3_proj_a": 71.761,
+      "mean_n3_proj_b": 71.157,
+      "mean_n3_proj_c18": 8.208,
+      "mean_n3_proj_c6": 8.479,
+      "mean_n3_raw_F": 71.761,
+      "mean_n3_raw_Fc": 74.97,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.44867549668874174,
+        0.39351851851851855,
+        0.5123239436619719
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.11535056283991736,
+        0.1128625033129211,
+        0.11788939051918736
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        1.2921854304635618,
+        1.1306336939721668,
+        1.4668930390492185
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.33220962097896006,
+        0.3242285426629736,
+        0.33961269984237674
+      ],
+      "seed": 1,
+      "size_matched_distinct_rows_c_over_b": [
+        0.4134993377483443,
+        0.10205479556473711
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        1.2404980132450192,
+        0.30616438669420953
+      ],
+      "targets": 1000,
+      "wall_s_contended": 1.1719242
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.39215686274509803,
+      "base_size_ratio_Fc_over_F": 1.1764705882352942,
+      "bases": {
+        "E_prime_line_points": 306,
+        "F2_points_on_E_prime": 120,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 360,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 153,
+        "U_b": 51,
+        "U_c18_on_E": 20,
+        "U_c6_on_E": 60,
+        "U_c_neg_on_E_prime": 60,
+        "U_c_on_E_prime": 20,
+        "build_wall_s_contended": 0.010707062,
+        "c_arm_valid": true,
+        "cube_test_agree": 306,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 306,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 9,
+      "experiment": "census",
+      "hit2_b": 0.545,
+      "hit2_c": 0.231,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          146,
+          148
+        ],
+        "cofactor": 273,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 77259,
+        "lambda_zeta": 238,
+        "lambda_zeta_prime": 238,
+        "log2_r": 8.144658242831882,
+        "nu": 2,
+        "omega": 160,
+        "order_is_base_change_product_N1_N2": [
+          273,
+          283
+        ],
+        "p": 277,
+        "r": 283,
+        "rational_3_torsion": true,
+        "trace_fp2": -529
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.726,
+      "mean_n2_proj_b": 0.726,
+      "mean_n2_proj_c18": 0.249,
+      "mean_n2_proj_c6": 0.249,
+      "mean_n2_raw_F": 0.726,
+      "mean_n2_raw_Fc": 0.747,
+      "mean_n3_proj_a": 64.474,
+      "mean_n3_proj_b": 63.748,
+      "mean_n3_proj_c18": 10.578,
+      "mean_n3_proj_c6": 10.827,
+      "mean_n3_raw_F": 64.474,
+      "mean_n3_raw_Fc": 95.631,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.34297520661157027,
+        0.2984869325997249,
+        0.39233038348082594
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.16593461755662922,
+        0.1621419209885789,
+        0.1700092952909111
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        0.8745867768595096,
+        0.7650000000000037,
+        0.9975000000000068
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.42313327476940377,
+        0.41321927733370745,
+        0.4327097505668926
+      ],
+      "seed": 2,
+      "size_matched_distinct_rows_c_over_b": [
+        0.2477995867768595,
+        0.10190459700696491
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        0.7433987603305832,
+        0.3057137910208942
+      ],
+      "targets": 1000,
+      "wall_s_contended": 0.621403837
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.32857142857142857,
+      "base_size_ratio_Fc_over_F": 0.9857142857142858,
+      "bases": {
+        "E_prime_line_points": 420,
+        "F2_points_on_E_prime": 138,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 414,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 210,
+        "U_b": 70,
+        "U_c18_on_E": 23,
+        "U_c6_on_E": 69,
+        "U_c_neg_on_E_prime": 69,
+        "U_c_on_E_prime": 23,
+        "build_wall_s_contended": 0.028006904,
+        "c_arm_valid": true,
+        "cube_test_agree": 420,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 420,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 9,
+      "experiment": "census",
+      "hit2_b": 0.369,
+      "hit2_c": 0.154,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          93,
+          14
+        ],
+        "cofactor": 381,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 176403,
+        "lambda_zeta": 441,
+        "lambda_zeta_prime": 441,
+        "log2_r": 8.854868383260236,
+        "nu": 2,
+        "omega": 400,
+        "order_is_base_change_product_N1_N2": [
+          381,
+          463
+        ],
+        "p": 421,
+        "r": 463,
+        "rational_3_torsion": true,
+        "trace_fp2": 839
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.448,
+      "mean_n2_proj_b": 0.448,
+      "mean_n2_proj_c18": 0.17,
+      "mean_n2_proj_c6": 0.17,
+      "mean_n2_raw_F": 0.448,
+      "mean_n2_raw_Fc": 0.51,
+      "mean_n3_proj_a": 71.018,
+      "mean_n3_proj_b": 70.57,
+      "mean_n3_proj_c18": 7.24,
+      "mean_n3_proj_c6": 7.41,
+      "mean_n3_raw_F": 71.018,
+      "mean_n3_raw_Fc": 65.523,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.3794642857142857,
+        0.3125,
+        0.4515366430260047
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.10259316990222474,
+        0.09992376542338426,
+        0.1054356151947573
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        1.154891304347833,
+        0.9607590272660335,
+        1.3780397936624984
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.31224008231111683,
+        0.3042787797038148,
+        0.3202119317475367
+      ],
+      "seed": 3,
+      "size_matched_distinct_rows_c_over_b": [
+        0.39054295316110055,
+        0.10711870078586302
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        1.1716288594833089,
+        0.3213561023575871
+      ],
+      "targets": 1000,
+      "wall_s_contended": 0.85726359
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.34545454545454546,
+      "base_size_ratio_Fc_over_F": 1.0363636363636364,
+      "bases": {
+        "E_prime_line_points": 330,
+        "F2_points_on_E_prime": 114,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 342,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 165,
+        "U_b": 55,
+        "U_c18_on_E": 19,
+        "U_c6_on_E": 57,
+        "U_c_neg_on_E_prime": 57,
+        "U_c_on_E_prime": 19,
+        "build_wall_s_contended": 0.023667896,
+        "c_arm_valid": true,
+        "cube_test_agree": 330,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 330,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 9,
+      "experiment": "census",
+      "hit2_b": 0.369,
+      "hit2_c": 0.201,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          209,
+          74
+        ],
+        "cofactor": 327,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 121971,
+        "lambda_zeta": 88,
+        "lambda_zeta_prime": 88,
+        "log2_r": 8.543031820255237,
+        "nu": 2,
+        "omega": 226,
+        "order_is_base_change_product_N1_N2": [
+          373,
+          327
+        ],
+        "p": 349,
+        "r": 373,
+        "rational_3_torsion": true,
+        "trace_fp2": -169
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.444,
+      "mean_n2_proj_b": 0.444,
+      "mean_n2_proj_c18": 0.201,
+      "mean_n2_proj_c6": 0.201,
+      "mean_n2_raw_F": 0.444,
+      "mean_n2_raw_Fc": 0.603,
+      "mean_n3_proj_a": 48.326,
+      "mean_n3_proj_b": 47.882,
+      "mean_n3_proj_c18": 5.342,
+      "mean_n3_proj_c6": 5.543,
+      "mean_n3_raw_F": 48.326,
+      "mean_n3_raw_Fc": 48.654,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.4527027027027027,
+        0.38826185101580135,
+        0.5243619489559165
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.11156593291842445,
+        0.10856551009839462,
+        0.11449709722717079
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        1.3104551920341294,
+        1.124295112781947,
+        1.5175641181475505
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.3229540163428102,
+        0.3143235348816886,
+        0.33129292408030847
+      ],
+      "seed": 4,
+      "size_matched_distinct_rows_c_over_b": [
+        0.4214914360343723,
+        0.10022939360182548
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        1.2644743081031073,
+        0.3006881808054788
+      ],
+      "targets": 1000,
+      "wall_s_contended": 0.762574272
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.35526315789473684,
+      "base_size_ratio_Fc_over_F": 1.0657894736842106,
+      "bases": {
+        "E_prime_line_points": 912,
+        "F2_points_on_E_prime": 324,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 972,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 456,
+        "U_b": 152,
+        "U_c18_on_E": 54,
+        "U_c6_on_E": 162,
+        "U_c_neg_on_E_prime": 162,
+        "U_c_on_E_prime": 54,
+        "build_wall_s_contended": 0.036906078,
+        "c_arm_valid": true,
+        "cube_test_agree": 912,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 912,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 10,
+      "experiment": "census",
+      "hit2_b": 0.347,
+      "hit2_c": 0.121,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          688,
+          74
+        ],
+        "cofactor": 921,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 846399,
+        "lambda_zeta": 866,
+        "lambda_zeta_prime": 866,
+        "log2_r": 9.843921051289035,
+        "nu": 3,
+        "omega": 52,
+        "order_is_base_change_product_N1_N2": [
+          919,
+          921
+        ],
+        "p": 919,
+        "r": 919,
+        "rational_3_torsion": true,
+        "trace_fp2": -1837
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.416,
+      "mean_n2_proj_b": 0.416,
+      "mean_n2_proj_c18": 0.131,
+      "mean_n2_proj_c6": 0.131,
+      "mean_n2_raw_F": 0.416,
+      "mean_n2_raw_Fc": 0.393,
+      "mean_n3_proj_a": 151.463,
+      "mean_n3_proj_b": 151.047,
+      "mean_n3_proj_c18": 20.091,
+      "mean_n3_proj_c6": 20.222,
+      "mean_n3_raw_F": 151.463,
+      "mean_n3_raw_Fc": 180.9,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.31490384615384615,
+        0.25272331154684097,
+        0.3855721393034826
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.13301157917734216,
+        0.13096824412575694,
+        0.13508361781544306
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        0.8863960113960112,
+        0.7175018155410302,
+        1.0888888888888901
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.3744029636102963,
+        0.3687746792250393,
+        0.3802816175826633
+      ],
+      "seed": 1,
+      "size_matched_distinct_rows_c_over_b": [
+        0.2772267360744726,
+        0.10986899953325567
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        0.8316802082234178,
+        0.32960699859976694
+      ],
+      "targets": 1000,
+      "wall_s_contended": 2.801971127
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.29559748427672955,
+      "base_size_ratio_Fc_over_F": 0.8867924528301887,
+      "bases": {
+        "E_prime_line_points": 954,
+        "F2_points_on_E_prime": 282,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 846,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 477,
+        "U_b": 159,
+        "U_c18_on_E": 47,
+        "U_c6_on_E": 141,
+        "U_c_neg_on_E_prime": 141,
+        "U_c_on_E_prime": 47,
+        "build_wall_s_contended": 0.070898508,
+        "c_arm_valid": true,
+        "cube_test_agree": 954,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 954,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 10,
+      "experiment": "census",
+      "hit2_b": 0.361,
+      "hit2_c": 0.085,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          729,
+          158
+        ],
+        "cofactor": 921,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 846399,
+        "lambda_zeta": 866,
+        "lambda_zeta_prime": 866,
+        "log2_r": 9.843921051289035,
+        "nu": 3,
+        "omega": 52,
+        "order_is_base_change_product_N1_N2": [
+          919,
+          921
+        ],
+        "p": 919,
+        "r": 919,
+        "rational_3_torsion": true,
+        "trace_fp2": -1837
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.479,
+      "mean_n2_proj_b": 0.479,
+      "mean_n2_proj_c18": 0.085,
+      "mean_n2_proj_c6": 0.085,
+      "mean_n2_raw_F": 0.479,
+      "mean_n2_raw_Fc": 0.255,
+      "mean_n3_proj_a": 170.933,
+      "mean_n3_proj_b": 170.454,
+      "mean_n3_proj_c18": 12.735,
+      "mean_n3_proj_c6": 12.82,
+      "mean_n3_raw_F": 170.933,
+      "mean_n3_raw_Fc": 114.729,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.17745302713987474,
+        0.13859275053304904,
+        0.2183406113537118
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.07471223907916505,
+        0.07331103991768585,
+        0.07605897083201073
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        0.6003198152178694,
+        0.4740479739802107,
+        0.7310674359898971
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.25274991518270834,
+        0.24821383192366472,
+        0.2574154563686028
+      ],
+      "seed": 2,
+      "size_matched_distinct_rows_c_over_b": [
+        0.22565212912444912,
+        0.10713362181201519
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        0.6769563873733421,
+        0.32140086543604696
+      ],
+      "targets": 1000,
+      "wall_s_contended": 3.264396607
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.2966101694915254,
+      "base_size_ratio_Fc_over_F": 0.8898305084745762,
+      "bases": {
+        "E_prime_line_points": 708,
+        "F2_points_on_E_prime": 210,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 630,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 354,
+        "U_b": 118,
+        "U_c18_on_E": 35,
+        "U_c6_on_E": 105,
+        "U_c_neg_on_E_prime": 105,
+        "U_c_on_E_prime": 35,
+        "build_wall_s_contended": 0.055436142,
+        "c_arm_valid": true,
+        "cube_test_agree": 708,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 708,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 10,
+      "experiment": "census",
+      "hit2_b": 0.357,
+      "hit2_c": 0.177,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          517,
+          513
+        ],
+        "cofactor": 741,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 538707,
+        "lambda_zeta": 445,
+        "lambda_zeta_prime": 445,
+        "log2_r": 9.505811553919594,
+        "nu": 2,
+        "omega": 425,
+        "order_is_base_change_product_N1_N2": [
+          727,
+          741
+        ],
+        "p": 733,
+        "r": 727,
+        "rational_3_torsion": true,
+        "trace_fp2": -1417
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.461,
+      "mean_n2_proj_b": 0.461,
+      "mean_n2_proj_c18": 0.19,
+      "mean_n2_proj_c6": 0.19,
+      "mean_n2_raw_F": 0.461,
+      "mean_n2_raw_Fc": 0.57,
+      "mean_n3_proj_a": 109.702,
+      "mean_n3_proj_b": 109.241,
+      "mean_n3_proj_c18": 8.534,
+      "mean_n3_proj_c6": 8.724,
+      "mean_n3_raw_F": 109.702,
+      "mean_n3_raw_Fc": 77.796,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.4121475054229935,
+        0.3425196850393701,
+        0.4939759036144578
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.07812085206103936,
+        0.07641489662210801,
+        0.07984212061547437
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        1.3895258754260915,
+        1.1529993815708097,
+        1.6489795918367336
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.2633788726629338,
+        0.2573513123798391,
+        0.26918696453591023
+      ],
+      "seed": 3,
+      "size_matched_distinct_rows_c_over_b": [
+        0.5205208041278696,
+        0.11087792662006578
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        1.5615624123836076,
+        0.3326337798601987
+      ],
+      "targets": 1000,
+      "wall_s_contended": 1.803608627
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.35,
+      "base_size_ratio_Fc_over_F": 1.05,
+      "bases": {
+        "E_prime_line_points": 720,
+        "F2_points_on_E_prime": 252,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 756,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 360,
+        "U_b": 120,
+        "U_c18_on_E": 42,
+        "U_c6_on_E": 126,
+        "U_c_neg_on_E_prime": 126,
+        "U_c_on_E_prime": 42,
+        "build_wall_s_contended": 0.030310428,
+        "c_arm_valid": true,
+        "cube_test_agree": 720,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 720,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 10,
+      "experiment": "census",
+      "hit2_b": 0.344,
+      "hit2_c": 0.175,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          681,
+          218
+        ],
+        "cofactor": 2379,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 544791,
+        "lambda_zeta": 134,
+        "lambda_zeta_prime": 134,
+        "log2_r": 7.839203788096944,
+        "nu": 2,
+        "omega": 320,
+        "order_is_base_change_product_N1_N2": [
+          687,
+          793
+        ],
+        "p": 739,
+        "r": 229,
+        "rational_3_torsion": true,
+        "trace_fp2": 1331
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.479,
+      "mean_n2_proj_b": 0.479,
+      "mean_n2_proj_c18": 0.199,
+      "mean_n2_proj_c6": 0.199,
+      "mean_n2_raw_F": 0.479,
+      "mean_n2_raw_Fc": 0.597,
+      "mean_n3_proj_a": 117.576,
+      "mean_n3_proj_b": 117.097,
+      "mean_n3_proj_c18": 13.892,
+      "mean_n3_proj_c6": 14.091,
+      "mean_n3_raw_F": 117.576,
+      "mean_n3_raw_Fc": 125.721,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.4154488517745303,
+        0.34530938123752497,
+        0.4988962472406181
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.11863668582457279,
+        0.11650892177734458,
+        0.12077670234667988
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        1.1869967193558009,
+        0.9830411037654493,
+        1.4188532555879496
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.3389619594987779,
+        0.3331056228287471,
+        0.34522094944283166
+      ],
+      "seed": 4,
+      "size_matched_distinct_rows_c_over_b": [
+        0.37682435535104786,
+        0.10248282978043216
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        1.1304730660531437,
+        0.30744848934129515
+      ],
+      "targets": 1000,
+      "wall_s_contended": 1.994216956
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.3593073593073593,
+      "base_size_ratio_Fc_over_F": 1.077922077922078,
+      "bases": {
+        "E_prime_line_points": 1386,
+        "F2_points_on_E_prime": 498,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 1494,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 693,
+        "U_b": 231,
+        "U_c18_on_E": 83,
+        "U_c6_on_E": 249,
+        "U_c_neg_on_E_prime": 249,
+        "U_c_on_E_prime": 83,
+        "build_wall_s_contended": 0.06684602,
+        "c_arm_valid": true,
+        "cube_test_agree": 1386,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 1386,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 11,
+      "experiment": "census",
+      "hit2_b": 0.324,
+      "hit2_c": 0.159,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          482,
+          1215
+        ],
+        "cofactor": 1407,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 2095023,
+        "lambda_zeta": 1005,
+        "lambda_zeta_prime": 1005,
+        "log2_r": 10.5401280385821,
+        "nu": 3,
+        "omega": 742,
+        "order_is_base_change_product_N1_N2": [
+          1489,
+          1407
+        ],
+        "p": 1447,
+        "r": 1489,
+        "rational_3_torsion": true,
+        "trace_fp2": -1213
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.391,
+      "mean_n2_proj_b": 0.391,
+      "mean_n2_proj_c18": 0.173,
+      "mean_n2_proj_c6": 0.173,
+      "mean_n2_raw_F": 0.391,
+      "mean_n2_raw_Fc": 0.519,
+      "mean_n3_proj_a": 211.797,
+      "mean_n3_proj_b": 211.406,
+      "mean_n3_proj_c18": 29.538,
+      "mean_n3_proj_c6": 29.711,
+      "mean_n3_raw_F": 211.797,
+      "mean_n3_raw_Fc": 266.286,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.4424552429667519,
+        0.3740648379052369,
+        0.5167597765363129
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.13972167298941374,
+        0.13800522804269252,
+        0.14146496152062174
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        1.2314115798231322,
+        1.032339885859229,
+        1.4531399936027334
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.3888639332596931,
+        0.3841358724373657,
+        0.3937962931864851
+      ],
+      "seed": 1,
+      "size_matched_distinct_rows_c_over_b": [
+        0.38079795841920044,
+        0.11155824552652652
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        1.1423938752576046,
+        0.3346747365795791
+      ],
+      "targets": 1000,
+      "wall_s_contended": 5.976765707
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.3359375,
+      "base_size_ratio_Fc_over_F": 1.0078125,
+      "bases": {
+        "E_prime_line_points": 1536,
+        "F2_points_on_E_prime": 516,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 1548,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 768,
+        "U_b": 256,
+        "U_c18_on_E": 86,
+        "U_c6_on_E": 258,
+        "U_c_neg_on_E_prime": 258,
+        "U_c_on_E_prime": 86,
+        "build_wall_s_contended": 0.070757042,
+        "c_arm_valid": true,
+        "cube_test_agree": 1536,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 1536,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 11,
+      "experiment": "census",
+      "hit2_b": 0.374,
+      "hit2_c": 0.115,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          285,
+          63
+        ],
+        "cofactor": 4809,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 2341983,
+        "lambda_zeta": 254,
+        "lambda_zeta_prime": 254,
+        "log2_r": 8.927777962082342,
+        "nu": 2,
+        "omega": 884,
+        "order_is_base_change_product_N1_N2": [
+          1461,
+          1603
+        ],
+        "p": 1531,
+        "r": 487,
+        "rational_3_torsion": true,
+        "trace_fp2": 1979
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.473,
+      "mean_n2_proj_b": 0.473,
+      "mean_n2_proj_c18": 0.135,
+      "mean_n2_proj_c6": 0.135,
+      "mean_n2_raw_F": 0.473,
+      "mean_n2_raw_Fc": 0.405,
+      "mean_n3_proj_a": 258.184,
+      "mean_n3_proj_b": 257.711,
+      "mean_n3_proj_c18": 28.464,
+      "mean_n3_proj_c6": 28.599,
+      "mean_n3_raw_F": 258.184,
+      "mean_n3_raw_Fc": 256.389,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.2854122621564482,
+        0.23,
+        0.3508771929824561
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.11044930173721727,
+        0.1088869822462235,
+        0.11202254933640636
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        0.8495992920005908,
+        0.6798736721217349,
+        1.0362964572918945
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.32877931679915817,
+        0.32426233840065366,
+        0.333294034106553
+      ],
+      "seed": 2,
+      "size_matched_distinct_rows_c_over_b": [
+        0.2810044169924432,
+        0.1079005734118024
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        0.8430132509773304,
+        0.323701720235407
+      ],
+      "targets": 1000,
+      "wall_s_contended": 7.078589461
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.3247232472324723,
+      "base_size_ratio_Fc_over_F": 0.974169741697417,
+      "bases": {
+        "E_prime_line_points": 1626,
+        "F2_points_on_E_prime": 528,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 1584,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 813,
+        "U_b": 271,
+        "U_c18_on_E": 88,
+        "U_c6_on_E": 264,
+        "U_c_neg_on_E_prime": 264,
+        "U_c_on_E_prime": 88,
+        "build_wall_s_contended": 0.145520106,
+        "c_arm_valid": true,
+        "cube_test_agree": 1626,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 1626,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 11,
+      "experiment": "census",
+      "hit2_b": 0.401,
+      "hit2_c": 0.138,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          1355,
+          1632
+        ],
+        "cofactor": 1677,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 2788851,
+        "lambda_zeta": 1344,
+        "lambda_zeta_prime": 1344,
+        "log2_r": 10.699572453287269,
+        "nu": 2,
+        "omega": 248,
+        "order_is_base_change_product_N1_N2": [
+          1663,
+          1677
+        ],
+        "p": 1669,
+        "r": 1663,
+        "rational_3_torsion": true,
+        "trace_fp2": -3289
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.502,
+      "mean_n2_proj_b": 0.502,
+      "mean_n2_proj_c18": 0.144,
+      "mean_n2_proj_c6": 0.144,
+      "mean_n2_raw_F": 0.502,
+      "mean_n2_raw_Fc": 0.432,
+      "mean_n3_proj_a": 258.041,
+      "mean_n3_proj_b": 257.539,
+      "mean_n3_proj_c18": 26.562,
+      "mean_n3_proj_c6": 26.706,
+      "mean_n3_raw_F": 258.041,
+      "mean_n3_raw_Fc": 239.595,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.2868525896414343,
+        0.23674242424242425,
+        0.33970276008492567
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.10313777719102737,
+        0.10176706391359298,
+        0.1045260839331984
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        0.8833755885548802,
+        0.7143584972532406,
+        1.0588100102145155
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.31761747294054943,
+        0.31341600718086465,
+        0.3217875746509794
+      ],
+      "seed": 3,
+      "size_matched_distinct_rows_c_over_b": [
+        0.30226614204339664,
+        0.11156137525934988
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        0.906798426130199,
+        0.3346841257780488
+      ],
+      "targets": 1000,
+      "wall_s_contended": 6.91330398
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.3688212927756654,
+      "base_size_ratio_Fc_over_F": 1.1064638783269962,
+      "bases": {
+        "E_prime_line_points": 1578,
+        "F2_points_on_E_prime": 582,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 1746,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 789,
+        "U_b": 263,
+        "U_c18_on_E": 97,
+        "U_c6_on_E": 291,
+        "U_c_neg_on_E_prime": 291,
+        "U_c_on_E_prime": 97,
+        "build_wall_s_contended": 0.134302333,
+        "c_arm_valid": true,
+        "cube_test_agree": 1578,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 1578,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 11,
+      "experiment": "census",
+      "hit2_b": 0.391,
+      "hit2_c": 0.216,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          650,
+          1531
+        ],
+        "cofactor": 4431,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 2397171,
+        "lambda_zeta": 411,
+        "lambda_zeta_prime": 411,
+        "log2_r": 9.079484783826816,
+        "nu": 2,
+        "omega": 1273,
+        "order_is_base_change_product_N1_N2": [
+          1477,
+          1623
+        ],
+        "p": 1549,
+        "r": 541,
+        "rational_3_torsion": true,
+        "trace_fp2": 2231
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.511,
+      "mean_n2_proj_b": 0.511,
+      "mean_n2_proj_c18": 0.239,
+      "mean_n2_proj_c6": 0.239,
+      "mean_n2_raw_F": 0.511,
+      "mean_n2_raw_Fc": 0.717,
+      "mean_n3_proj_a": 273.198,
+      "mean_n3_proj_b": 272.687,
+      "mean_n3_proj_c18": 40.627,
+      "mean_n3_proj_c6": 40.866,
+      "mean_n3_raw_F": 273.198,
+      "mean_n3_raw_Fc": 366.567,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.46771037181996084,
+        0.3985239852398524,
+        0.5460385438972163
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.14898766717885342,
+        0.14753092282626962,
+        0.150491071100631
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        1.2681219359654623,
+        1.073749557241662,
+        1.4874306962659496
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.40395625224781956,
+        0.40013161681930565,
+        0.4079532973381846
+      ],
+      "seed": 4,
+      "size_matched_distinct_rows_c_over_b": [
+        0.3820344434810037,
+        0.10998630157780138
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        1.1461033304430124,
+        0.32995890473340456
+      ],
+      "targets": 1000,
+      "wall_s_contended": 7.541676109
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.34831460674157305,
+      "base_size_ratio_Fc_over_F": 1.0449438202247192,
+      "bases": {
+        "E_prime_line_points": 2670,
+        "F2_points_on_E_prime": 930,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 2790,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 1335,
+        "U_b": 445,
+        "U_c18_on_E": 155,
+        "U_c6_on_E": 465,
+        "U_c_neg_on_E_prime": 465,
+        "U_c_on_E_prime": 155,
+        "build_wall_s_contended": 0.237128437,
+        "c_arm_valid": true,
+        "cube_test_agree": 2670,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 2670,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 12,
+      "experiment": "census",
+      "hit2_b": 0.365,
+      "hit2_c": 0.18,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          1859,
+          2175
+        ],
+        "cofactor": 2577,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 7006863,
+        "lambda_zeta": 1453,
+        "lambda_zeta_prime": 1453,
+        "log2_r": 11.40886043602476,
+        "nu": 3,
+        "omega": 2461,
+        "order_is_base_change_product_N1_N2": [
+          2719,
+          2577
+        ],
+        "p": 2647,
+        "r": 2719,
+        "rational_3_torsion": true,
+        "trace_fp2": -253
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.494,
+      "mean_n2_proj_b": 0.494,
+      "mean_n2_proj_c18": 0.196,
+      "mean_n2_proj_c6": 0.196,
+      "mean_n2_raw_F": 0.494,
+      "mean_n2_raw_Fc": 0.588,
+      "mean_n3_proj_a": 453.649,
+      "mean_n3_proj_b": 453.155,
+      "mean_n3_proj_c18": 57.037,
+      "mean_n3_proj_c6": 57.233,
+      "mean_n3_raw_F": 453.649,
+      "mean_n3_raw_Fc": 514.101,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.3967611336032389,
+        0.33608247422680415,
+        0.46881720430107526
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.12586642539528417,
+        0.12469973199219138,
+        0.1270318126653801
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        1.1390884158286552,
+        0.9588918104277577,
+        1.3352005666087157
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.36135844710258896,
+        0.358033487481379,
+        0.3646249929391248
+      ],
+      "seed": 1,
+      "size_matched_distinct_rows_c_over_b": [
+        0.3633651218951618,
+        0.11031411182408812
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        1.090095365685487,
+        0.3309423354722634
+      ],
+      "targets": 1000,
+      "wall_s_contended": 17.500919771
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.3411764705882353,
+      "base_size_ratio_Fc_over_F": 1.0235294117647058,
+      "bases": {
+        "E_prime_line_points": 2550,
+        "F2_points_on_E_prime": 870,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 2610,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 1275,
+        "U_b": 425,
+        "U_c18_on_E": 145,
+        "U_c6_on_E": 435,
+        "U_c_neg_on_E_prime": 435,
+        "U_c_on_E_prime": 145,
+        "build_wall_s_contended": 0.230636368,
+        "c_arm_valid": true,
+        "cube_test_agree": 2550,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 2550,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 12,
+      "experiment": "census",
+      "hit2_b": 0.418,
+      "hit2_c": 0.145,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          1104,
+          871
+        ],
+        "cofactor": 2613,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 6540339,
+        "lambda_zeta": 1226,
+        "lambda_zeta_prime": 1226,
+        "log2_r": 11.289442575688332,
+        "nu": 2,
+        "omega": 835,
+        "order_is_base_change_product_N1_N2": [
+          2613,
+          2503
+        ],
+        "p": 2557,
+        "r": 2503,
+        "rational_3_torsion": true,
+        "trace_fp2": -2089
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.534,
+      "mean_n2_proj_b": 0.534,
+      "mean_n2_proj_c18": 0.147,
+      "mean_n2_proj_c6": 0.147,
+      "mean_n2_raw_F": 0.534,
+      "mean_n2_raw_Fc": 0.441,
+      "mean_n3_proj_a": 423.153,
+      "mean_n3_proj_b": 422.619,
+      "mean_n3_proj_c18": 50.249,
+      "mean_n3_proj_c6": 50.396,
+      "mean_n3_raw_F": 423.153,
+      "mean_n3_raw_Fc": 452.439,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.2752808988764045,
+        0.22692307692307692,
+        0.32751937984496127
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.11889905565059782,
+        0.11779100856854957,
+        0.12002594899696235
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        0.8068578070515298,
+        0.6634252447060321,
+        0.9606939745158737
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.3484972320793397,
+        0.34528190772624023,
+        0.35167422851417984
+      ],
+      "seed": 2,
+      "size_matched_distinct_rows_c_over_b": [
+        0.26276978390567085,
+        0.11088618055107326
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        0.7883093517170119,
+        0.33265854165322095
+      ],
+      "targets": 1000,
+      "wall_s_contended": 16.96106228
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.332089552238806,
+      "base_size_ratio_Fc_over_F": 0.996268656716418,
+      "bases": {
+        "E_prime_line_points": 3216,
+        "F2_points_on_E_prime": 1068,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 3204,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 1608,
+        "U_b": 536,
+        "U_c18_on_E": 178,
+        "U_c6_on_E": 534,
+        "U_c_neg_on_E_prime": 534,
+        "U_c_on_E_prime": 178,
+        "build_wall_s_contended": 0.166638514,
+        "c_arm_valid": true,
+        "cube_test_agree": 3216,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 3216,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 12,
+      "experiment": "census",
+      "hit2_b": 0.46,
+      "hit2_c": 0.166,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          753,
+          322
+        ],
+        "cofactor": 3171,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 10048899,
+        "lambda_zeta": 3071,
+        "lambda_zeta_prime": 3071,
+        "log2_r": 11.629811944382233,
+        "nu": 7,
+        "omega": 97,
+        "order_is_base_change_product_N1_N2": [
+          3169,
+          3171
+        ],
+        "p": 3169,
+        "r": 3169,
+        "rational_3_torsion": true,
+        "trace_fp2": -6337
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.587,
+      "mean_n2_proj_b": 0.587,
+      "mean_n2_proj_c18": 0.189,
+      "mean_n2_proj_c6": 0.189,
+      "mean_n2_raw_F": 0.587,
+      "mean_n2_raw_Fc": 0.567,
+      "mean_n3_proj_a": 550.147,
+      "mean_n3_proj_b": 549.56,
+      "mean_n3_proj_c18": 60.899,
+      "mean_n3_proj_c6": 61.088,
+      "mean_n3_raw_F": 550.147,
+      "mean_n3_raw_Fc": 548.742,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.3219761499148211,
+        0.2687296416938111,
+        0.3779816513761468
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.11081410583011864,
+        0.10987729346947984,
+        0.11179903540785631
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        0.9695461592940651,
+        0.8249268246624483,
+        1.1355502591457587
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.3336874198030543,
+        0.3309285117936106,
+        0.33637710831655104
+      ],
+      "seed": 3,
+      "size_matched_distinct_rows_c_over_b": [
+        0.32439247277254707,
+        0.11206387726921188
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        0.9731774183176383,
+        0.33619163180763606
+      ],
+      "targets": 1000,
+      "wall_s_contended": 22.169809714
+    },
+    {
+      "U_b_over_U_a": 0.3333333333333333,
+      "U_c_over_U_b": 0.32805429864253394,
+      "base_size_ratio_Fc_over_F": 0.9841628959276018,
+      "bases": {
+        "E_prime_line_points": 2652,
+        "F2_points_on_E_prime": 870,
+        "Fc_on_E_built": true,
+        "Fc_points_on_E": 2610,
+        "Fc_preimage_checks_ok": true,
+        "U_a": 1326,
+        "U_b": 442,
+        "U_c18_on_E": 145,
+        "U_c6_on_E": 435,
+        "U_c_neg_on_E_prime": 435,
+        "U_c_on_E_prime": 145,
+        "build_wall_s_contended": 0.132240263,
+        "c_arm_valid": true,
+        "cube_test_agree": 2652,
+        "cube_test_disagree": 0,
+        "fraction_of_F_in_G": 0.0,
+        "points_a": 2652,
+        "points_per_col_a": 2.0,
+        "points_per_col_b": 6.0,
+        "zeta_closed_strict": true
+      },
+      "bits": 12,
+      "experiment": "census",
+      "hit2_b": 0.316,
+      "hit2_c": 0.152,
+      "hit3_b": 1.0,
+      "hit3_c": 1.0,
+      "instance": {
+        "b": [
+          1267,
+          1304
+        ],
+        "cofactor": 10992,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 8123088,
+        "lambda_zeta": 418,
+        "lambda_zeta_prime": 418,
+        "log2_r": 9.52943055414615,
+        "nu": 2,
+        "omega": 1014,
+        "order_is_base_change_product_N1_N2": [
+          2748,
+          2956
+        ],
+        "p": 2851,
+        "r": 739,
+        "rational_3_torsion": true,
+        "trace_fp2": 5114
+      },
+      "law_distinct_rows_c_over_b": [
+        0.3333333333333333,
+        0.1111111111111111
+      ],
+      "law_rows_per_unknown_c_over_b": [
+        1.0,
+        0.3333333333333333
+      ],
+      "mean_n2_proj_a": 0.389,
+      "mean_n2_proj_b": 0.389,
+      "mean_n2_proj_c18": 0.152,
+      "mean_n2_proj_c6": 0.152,
+      "mean_n2_raw_F": 0.389,
+      "mean_n2_raw_Fc": 0.456,
+      "mean_n3_proj_a": 383.882,
+      "mean_n3_proj_b": 383.493,
+      "mean_n3_proj_c18": 40.479,
+      "mean_n3_proj_c6": 40.631,
+      "mean_n3_raw_F": 383.882,
+      "mean_n3_raw_Fc": 364.692,
+      "ratio_distinct_rows_c_over_b_m2": [
+        0.390745501285347,
+        0.33002481389578164,
+        0.4601063829787234
+      ],
+      "ratio_distinct_rows_c_over_b_m3": [
+        0.1055534260077759,
+        0.10445362420062988,
+        0.10672366644203274
+      ],
+      "ratio_rows_per_unknown_c_over_b_m2": [
+        1.1911000797801663,
+        1.005697151424292,
+        1.4209410919540288
+      ],
+      "ratio_rows_per_unknown_c_over_b_m3": [
+        0.3217559606581876,
+        0.31816318328010473,
+        0.32518378982955604
+      ],
+      "seed": 4,
+      "size_matched_distinct_rows_c_over_b": [
+        0.4034224025002539,
+        0.11073154797732122
+      ],
+      "size_matched_rows_per_unknown_c_over_b": [
+        1.2102672075007668,
+        0.3321946439319655
+      ],
+      "targets": 1000,
+      "wall_s_contended": 16.915744939
+    }
+  ],
+  "seeds": 4,
+  "targets": 1000,
+  "unit": "F_p multiplications (ext_curve thread-local counter + LineOracle solver count); inversions reported, not priced; wall times are contended",
+  "wall_s_contended": 114.345715242
+}

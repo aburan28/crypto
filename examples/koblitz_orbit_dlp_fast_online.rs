@@ -301,7 +301,10 @@ impl RootBloom {
             .and_then(usize::checked_next_power_of_two)
             .expect("root Bloom size overflow")
             .max(64);
-        Self { words: vec![0; bits / 64], bit_mask: bits - 1 }
+        Self {
+            words: vec![0; bits / 64],
+            bit_mask: bits - 1,
+        }
     }
 
     #[inline(always)]
@@ -320,10 +323,14 @@ impl RootBloom {
 
     #[inline(always)]
     fn contains(&self, key: u64) -> bool {
-        self.positions(key).into_iter().all(|bit| self.words[bit >> 6] & (1u64 << (bit & 63)) != 0)
+        self.positions(key)
+            .into_iter()
+            .all(|bit| self.words[bit >> 6] & (1u64 << (bit & 63)) != 0)
     }
 
-    fn bytes(&self) -> usize { self.words.len() * std::mem::size_of::<u64>() }
+    fn bytes(&self) -> usize {
+        self.words.len() * std::mem::size_of::<u64>()
+    }
 }
 
 #[inline(always)]
@@ -364,7 +371,9 @@ impl RootTable {
             if self.slots[slot].0 == u64::MAX {
                 self.slots[slot] = (key, value);
                 self.len += 1;
-                if let Some(bloom) = &mut self.bloom { bloom.insert(key); }
+                if let Some(bloom) = &mut self.bloom {
+                    bloom.insert(key);
+                }
                 return;
             }
             if self.slots[slot].0 == key {
@@ -376,7 +385,11 @@ impl RootTable {
 
     #[inline(always)]
     fn get(&self, key: u64) -> Option<u64> {
-        if self.bloom.as_ref().is_some_and(|bloom| !bloom.contains(key)) {
+        if self
+            .bloom
+            .as_ref()
+            .is_some_and(|bloom| !bloom.contains(key))
+        {
             return None;
         }
         let mask = self.slots.len() - 1;
@@ -394,7 +407,6 @@ impl RootTable {
     }
 }
 
-#[derive(Clone, Copy)]
 #[cfg(test)]
 mod root_bloom_table_tests {
     use super::{mix_root_bloom, RootBloom, RootTable};
@@ -424,6 +436,7 @@ mod root_bloom_table_tests {
     }
 }
 
+#[derive(Clone, Copy)]
 struct State {
     left: u16,
     right: u16,

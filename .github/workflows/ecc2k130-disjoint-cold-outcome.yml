@@ -1,14 +1,10 @@
 name: ECC2K130 disjoint-Q cold outcome replay
 
 on:
-  pull_request:
-    paths:
-      - .github/workflows/ecc2k130-disjoint-cold-outcome.yml
-      - research/notes/ecc2k130/disjoint_cold_outcome_20261001/**
-      - research/notes/ecc2k130/disjoint_cold_q_20260930/**
-      - research/notes/ecc2k130/compact_ir_ledger_20260930/archive.py
-      - research/notes/ecc2k130/compact_ir_ledger_20260930/run_panel.py
-      - docs/index-calculus-scoreboard.html
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -22,7 +18,7 @@ concurrency:
 jobs:
   replay:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 35 }}
     steps:
       - uses: actions/checkout@v4
         with:

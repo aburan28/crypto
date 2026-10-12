@@ -1,10 +1,8 @@
 name: Standalone Boolean half-word study
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, labeled]
-    paths:
-      - 'research/boolean_halfword_20260923/**'
-      - '.github/workflows/boolean-halfword.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
     inputs:
       phase:
@@ -34,7 +32,8 @@ jobs:
           PYTHONDONTWRITEBYTECODE: '1'
         run: python3 tools/isolated_bench.py busy -- python3 -m unittest discover -s research/boolean_halfword_20260923 -p 'test_*.py' -v
   qualified-discovery:
-    if: github.event.action == 'opened' || (github.event.action == 'labeled' && github.event.label.name == 'halfword-discovery') || (github.event_name == 'workflow_dispatch' && inputs.phase == 'discovery')
+    # Qualified research runs require the existing explicit label or dispatch.
+    if: (github.event.action == 'labeled' && github.event.label.name == 'halfword-discovery') || (github.event_name == 'workflow_dispatch' && inputs.phase == 'discovery')
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 120
     env:

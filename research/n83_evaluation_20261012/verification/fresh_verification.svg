@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="410" viewBox="0 0 1000 410">
+<style>text{font-family:Arial,sans-serif;fill:#153449}.title{font-size:23px;font-weight:bold}.body{font-size:18px}.small{font-size:16px}rect{fill:#edf5f7;stroke:#315f75;stroke-width:2}.line{fill:none;stroke:#315f75;stroke-width:3}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#315f75"/></marker></defs>
+<text x="30" y="32" class="title">Fresh native replay: 22 retained answers checked after timing completed</text>
+<rect x="30" y="70" width="310" height="120" rx="12"/><text x="50" y="100" class="body">One exact public point</text><text x="50" y="131" class="small">Field low terms [0,2,4,7]; r, G, Q</text><text x="50" y="158" class="small">600 reps; 99,600 signed orbit points</text>
+<path d="M340 130H410" class="line" marker-end="url(#arrow)"/>
+<rect x="420" y="70" width="260" height="120" rx="12"/><text x="440" y="100" class="body">Standalone native C++</text><text x="440" y="131" class="small">Exact scalar and witness replay</text><text x="440" y="158" class="small">No solver imports or retiming</text>
+<path d="M680 130H735" class="line" marker-end="url(#arrow)"/>
+<rect x="745" y="70" width="225" height="120" rx="12"/><text x="765" y="100" class="body">Checks PASS</text><text x="765" y="131" class="small">16 / 16 strong rho answers</text><text x="765" y="158" class="small">6 / 6 IC answers + witnesses</text>
+<rect x="100" y="240" width="800" height="115" rx="12"/><text x="122" y="270" class="body">Retained outcomes: 22 completed and verified; zero invalid rows</text><text x="122" y="302" class="small">Warmups and A/A included; one public target. No independent-target success estimate.</text><text x="122" y="330" class="small">Still unverified: full 600-row rank/log transcript, timing/operation replay and second-host gates.</text>
+<text x="30" y="393" class="small">Receipt: native_independent_fresh_panel_answer_replay, 2026-10-12. Correct curve suffix: 9eba6cd5.</text>
+</svg>

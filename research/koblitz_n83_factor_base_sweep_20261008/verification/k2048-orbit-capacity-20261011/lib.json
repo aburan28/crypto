@@ -1,0 +1,15 @@
+{
+  "RUST_TEST_THREADS": 2,
+  "command": [
+    "cargo",
+    "test",
+    "--release",
+    "--lib"
+  ],
+  "exit_code": -9,
+  "schema": "n83.k2048-orbit-capacity-library-check/v1",
+  "status": "INCOMPLETE_timeout",
+  "timed_out": true,
+  "wall_cap_seconds": 450,
+  "wall_elapsed_seconds_L0": 450.01581966699996
+}
