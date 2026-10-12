@@ -16,12 +16,15 @@
 mod algebra;
 mod arms;
 mod bitslice;
+mod bskernel;
 mod bspairs;
 mod common;
 mod corpus;
 mod gatecount;
 mod group;
 mod kernel;
+#[cfg(target_arch = "x86_64")]
+mod lanes_x86;
 
 use arms::Arm;
 use common::*;
@@ -493,6 +496,8 @@ fn main() {
         Some("torsion") => algebra::cmd_torsion(&args),
         Some("corpus-check") => algebra::cmd_corpus_check(&args),
         Some("bs-check") => gatecount::cmd_bscheck(&args),
+        Some("bs-micro") => gatecount::cmd_micro(&args),
+        Some("bs-util") => gatecount::cmd_util(&args),
         _ => {
             eprintln!("usage: pdp_speedup corpus|verify|brute|time|one|count|summarize ...");
             std::process::exit(2);

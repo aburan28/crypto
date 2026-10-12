@@ -7,6 +7,33 @@ use crate::common::*;
 use crate::group::*;
 use std::sync::atomic::{AtomicU64, Ordering};
 
+/// Call a function generic over the field degree for a runtime `n`.
+macro_rules! dispatch_n {
+    ($n:expr, $f:ident($($a:expr),*)) => {
+        match $n {
+            5 => $f::<5>($($a),*),
+            6 => $f::<6>($($a),*),
+            7 => $f::<7>($($a),*),
+            8 => $f::<8>($($a),*),
+            9 => $f::<9>($($a),*),
+            10 => $f::<10>($($a),*),
+            11 => $f::<11>($($a),*),
+            12 => $f::<12>($($a),*),
+            13 => $f::<13>($($a),*),
+            15 => $f::<15>($($a),*),
+            18 => $f::<18>($($a),*),
+            21 => $f::<21>($($a),*),
+            24 => $f::<24>($($a),*),
+            27 => $f::<27>($($a),*),
+            30 => $f::<30>($($a),*),
+            33 => $f::<33>($($a),*),
+            36 => $f::<36>($($a),*),
+            39 => $f::<39>($($a),*),
+            other => panic!("no instantiation for n = {other}"),
+        }
+    };
+}
+
 fn arg<T: std::str::FromStr>(args: &[String], name: &str) -> Option<T> {
     args.iter()
         .position(|a| a == name)
@@ -23,12 +50,19 @@ fn counted<R>(f: impl FnOnce() -> R) -> (R, Gates) {
 /// Gate tallies of the bit-sliced primitives and of one task of the
 /// group-law pipeline, for the field of rung `(n, l)`.
 pub fn cmd_gates(args: &[String]) {
+    let l: u32 = arg(args, "--l").expect("--l");
+    let n: u32 = arg(args, "--n").unwrap_or(0);
+    let n = if n == 0 { 3 * l } else { n };
+    dispatch_n!(n as usize, gates_run(args));
+}
+
+fn gates_run<const N: usize>(args: &[String]) {
     let n: u32 = arg(args, "--n").unwrap_or(0);
     let l: u32 = arg(args, "--l").expect("--l");
     let n = if n == 0 { 3 * l } else { n };
     let t_batch: usize = arg(args, "--batch").unwrap_or(64);
     let rung = Rung::with(n, l);
-    let f = BsField::new(&rung.gf);
+    let f = BsField::<N>::new(&rung.gf);
     let nn = n as usize;
     let e = zero_elt::<Cnt>();
 
@@ -101,12 +135,16 @@ pub fn cmd_gates(args: &[String]) {
 /// Run the 64-lane pipeline over every row against one target and compare
 /// each pair's hit with the exact reference.  Returns (pairs, mismatches,
 /// exceptional pairs).
-fn check_target(rung: &Rung, base: &[(u64, u64)], r: (u64, u64)) -> (u64, u64, u64) {
+fn check_target<const N: usize>(
+    rung: &Rung,
+    base: &[(u64, u64)],
+    r: (u64, u64),
+) -> (u64, u64, u64) {
     let gf = &rung.gf;
     let n = rung.n as usize;
     let l = rung.l as usize;
     let span = rung.span();
-    let f = BsField::new(gf);
+    let f = BsField::<N>::new(gf);
     let m = base.len();
     let blocks = m.div_ceil(64);
     // Pre-transposed base blocks.
@@ -169,6 +207,11 @@ fn check_target(rung: &Rung, base: &[(u64, u64)], r: (u64, u64)) -> (u64, u64, u
 /// exact reference, per pair, for every rational target (or the first `K`).
 pub fn cmd_bscheck(args: &[String]) {
     let n: u32 = arg(args, "--n").expect("--n");
+    dispatch_n!(n as usize, bscheck_run(args));
+}
+
+fn bscheck_run<const N: usize>(args: &[String]) {
+    let n: u32 = arg(args, "--n").expect("--n");
     let l: u32 = arg(args, "--l").expect("--l");
     let k: usize = arg(args, "--targets").unwrap_or(usize::MAX);
     let threads: usize = arg(args, "--threads").unwrap_or(3);
@@ -190,7 +233,7 @@ pub fn cmd_bscheck(args: &[String]) {
                 if i >= targets.len() {
                     break;
                 }
-                let (p, b, e) = check_target(&rung, &base, targets[i]);
+                let (p, b, e) = check_target::<N>(&rung, &base, targets[i]);
                 let mut t = tot.lock().unwrap();
                 t.0 += p;
                 t.1 += b;
@@ -219,10 +262,15 @@ pub fn cmd_bscheck(args: &[String]) {
 /// counting lane's).
 pub fn cmd_export(args: &[String]) {
     let l: u32 = arg(args, "--l").expect("--l");
+    dispatch_n!((3 * l) as usize, export_run(args));
+}
+
+fn export_run<const N: usize>(args: &[String]) {
+    let l: u32 = arg(args, "--l").expect("--l");
     let t: usize = arg(args, "--tasks").unwrap_or(8);
     let n = 3 * l;
     let rung = Rung::with(n, l);
-    let f = BsField::new(&rung.gf);
+    let f = BsField::<N>::new(&rung.gf);
     let nn = n as usize;
     // Inputs: per task xu, yu, xv, yv, x2, y2 planes (6n), numbered in order.
     let mut next = 0u32;
@@ -249,7 +297,13 @@ pub fn cmd_export(args: &[String]) {
         y2s.push(take(k));
     }
     let n_inputs = next as usize;
-    let res = batch::<Tape>(&f, &rows, &x2s, &y2s, l as usize);
+    let res = batch::<Tape, N>(
+        &f,
+        &rows.iter().collect::<Vec<_>>(),
+        &x2s.iter().collect::<Vec<_>>(),
+        &y2s.iter().collect::<Vec<_>>(),
+        l as usize,
+    );
     let outputs: Vec<Tape> = res.iter().flat_map(|&(h, e)| [h, e]).collect();
     let ops = tape_take();
     let (live, outs) = eliminate_dead(&ops, &outputs);
@@ -285,7 +339,13 @@ pub fn cmd_export(args: &[String]) {
         .collect();
     let xc = vec![zero_elt::<Cnt>(); t];
     gates_reset();
-    let _ = batch::<Cnt>(&f, &rc, &xc, &xc, l as usize);
+    let _ = batch::<Cnt, N>(
+        &f,
+        &rc.iter().collect::<Vec<_>>(),
+        &xc.iter().collect::<Vec<_>>(),
+        &xc.iter().collect::<Vec<_>>(),
+        l as usize,
+    );
     let counted = gates_get();
     // Interpreter against direct execution on random planes.
     let mut rng = SplitMix64(20261011 + l as u64);
@@ -315,10 +375,16 @@ pub fn cmd_export(args: &[String]) {
                 x2u.push(take_u(k));
                 y2u.push(take_u(k));
             }
-            batch::<u64>(&f, &rows_u, &x2u, &y2u, l as usize)
-                .into_iter()
-                .flat_map(|(h, e)| [h, e])
-                .collect::<Vec<u64>>()
+            batch::<u64, N>(
+                &f,
+                &rows_u.iter().collect::<Vec<_>>(),
+                &x2u.iter().collect::<Vec<_>>(),
+                &y2u.iter().collect::<Vec<_>>(),
+                l as usize,
+            )
+            .into_iter()
+            .flat_map(|(h, e)| [h, e])
+            .collect::<Vec<u64>>()
         };
         let got = eval_program(&live, &outs, &inputs);
         ok &= want == got;
@@ -339,5 +405,68 @@ pub fn cmd_export(args: &[String]) {
     );
     if !ok {
         std::process::exit(1);
+    }
+}
+
+// ── bs-micro: the product (and squaring) on its own, per width ──────────────
+
+pub fn cmd_micro(args: &[String]) {
+    let l: u32 = arg(args, "--l").expect("--l");
+    let n = 3 * l as usize;
+    dispatch_n!(n, micro_run(args));
+}
+
+fn micro_run<const N: usize>(args: &[String]) {
+    use crate::bskernel::Dispatch;
+    use crate::lanes_x86::{W256, W512};
+    let l: u32 = arg(args, "--l").expect("--l");
+    let iters: usize = arg(args, "--iters").unwrap_or(20_000);
+    let rung = Rung::with(N as u32, l);
+    let f = BsField::<N>::new(&rung.gf);
+    fn time<L: Dispatch, const N: usize>(f: &BsField<N>, iters: usize, mode: u8) -> (f64, u64) {
+        let t = std::time::Instant::now();
+        let c = L::micro::<N>(f, iters, mode);
+        (t.elapsed().as_secs_f64() * 1e9 / iters as f64, c)
+    }
+    for (mode, what) in [
+        (0u8, "mul"),
+        (1, "sqr"),
+        (2, "mul-outputstationary"),
+        (3, "mul-columnwise"),
+        (4, "mul-tile4"),
+        (5, "mul-tile8"),
+        (6, "batch8"),
+        (7, "montgomery8"),
+        (8, "stage_c_x8"),
+        (9, "stage_a_x8"),
+    ] {
+        for (name, lanes, (ns, c)) in [
+            ("u64", 64usize, time::<u64, N>(&f, iters, mode)),
+            ("avx2", 256, time::<W256, N>(&f, iters, mode)),
+            ("avx512", 512, time::<W512, N>(&f, iters, mode)),
+        ] {
+            println!(
+                "{{\"op\":\"{what}\",\"width\":\"{name}\",\"lanes\":{lanes},\"n\":{N},\"ns_per_op\":{ns:.1},\"cycles_at_2.8GHz\":{:.0},\"ns_per_op_per_lane\":{:.4},\"checksum\":\"{c:016x}\"}}",
+                ns * 2.8,
+                ns / lanes as f64
+            );
+        }
+    }
+}
+
+/// `bs-util`: for each width, the lane slots a target occupies against the valid pairs it needs.
+pub fn cmd_util(args: &[String]) {
+    let l: u32 = arg(args, "--l").expect("--l");
+    let rung = Rung::new(l);
+    let solver = ArtinSchreier::new(&rung.gf);
+    let m = base_points(&rung.gf, &solver, l).len() as u64;
+    let valid = m * (m + 1) / 2;
+    for lanes in [64u64, 256, 512] {
+        let blocks = m.div_ceil(lanes);
+        let slots: u64 = (0..m).map(|i1| (blocks - i1 / lanes) * lanes).sum();
+        println!(
+            "{{\"l\":{l},\"base_points\":{m},\"lanes\":{lanes},\"valid_pairs\":{valid},\"lane_slots\":{slots},\"utilisation\":{:.4}}}",
+            valid as f64 / slots as f64
+        );
     }
 }
