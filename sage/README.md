@@ -31,9 +31,15 @@ space contains `1`: the Polynomial-Calculus refutation degree, which is
 what `RESEARCH_FFD_PROOF_COMPLEXITY.md` identifies as the security number.
 
 The factor base is an `F_2`-subspace `V` of x-coordinates on the Koblitz
-curve `y^2 + xy = x^3 + 1` over a toy field `F_{2^n}`. Structures:
-`subfield`, `frobenius` (squaring-stable), `standard`
-(`span{1, z, ..., z^{n'-1}}`), and `random`.
+curve `y^2 + xy = x^3 + 1` over a toy field `F_{2^n}`, and each summand may
+use its own subspace. Structures: `subfield`, `frobenius`
+(squaring-stable), `standard` (`span{1, z, ..., z^{n'-1}}`), `random`, and
+two normal-basis windows: `nb_window` puts both summands in
+`V1 = <θ^(2^j) : j < n'>`, and `nb_break` is the symmetry breaking of
+Galbraith–Granger–Merz–Petit (SAC 2020, §3.1): `P1` from `V1`, `P2` from
+`V2 = π^{n'}(V1)`, with the relation folded back onto `F1` by Frobenius.
+The report includes the fraction of targets that decompose, so the
+relation-probability gain and the degree cost appear side by side.
 
 ```
 sage factor_base_dor.sage --field 8 --dim 4 --selftest 8   # validate first
@@ -46,12 +52,24 @@ and that a satisfiable target never derives `1`.
 
 What it does not cover:
 
-- **ECC2K-130 directly.** `131` is prime, so there is no proper subfield,
-  and `x^131 - 1 = (x+1)·(irreducible of degree 130)`, so the only
-  Frobenius-stable subspaces have dimension 0, 1, 130 or 131. Neither
-  structured family exists there. The campaign's Hamming-weight base is not
-  a subspace (membership is a cardinality constraint), so it cannot be
-  descended this way at all. `--field 11` mirrors that factorization.
+- **The Frobenius-invariant speedup itself.** At `n = 131` there is no
+  Frobenius-stable *subspace* of useful size:
+  `x^131 - 1 = (x+1)·(irreducible of degree 130)`, so the `subfield` and
+  `frobenius` structures here do not exist there. Frobenius-invariant
+  factor *bases* do: the weight-2 ONB base from `low_hw_factor_base.sage`
+  (14 orbits) and the Couveignes–Lercier sets GGMP build. GGMP show such a
+  base cuts the relations needed by about `n` and the linear algebra by
+  about `n^2`, while their invariant vector spaces solve no slower than
+  random ones. That saving is in the number of systems, not in `D*`, so
+  this engine does not show it. The ONB weight base is not a subspace, so
+  it cannot be descended linearly here (membership is a cardinality
+  constraint; the repo's SAT oracle handles it).
+- **`nb_break` does apply at 131.** It needs only a normal basis, which
+  ECC2K-130 has. `--field 11` has the same `x^n - 1` factorization as 131.
+- **Symmetric-function rewriting** (Faugère–Gaudry–Huot–Renault). Writing
+  the summands in elementary symmetric variables drops binary `S_4` from
+  total degree 12 to degree 4. The engine descends the raw summand
+  coordinates, so it does not yet measure this lever.
 - **Prime fields.** There is no subfield to descend into, so the degree of
   regularity is a different object (Diem's degree-`k` extension, or the
   symmetric Semaev system over `F_p`). `--curve p256` prints this note.
