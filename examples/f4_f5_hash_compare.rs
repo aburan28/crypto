@@ -405,10 +405,13 @@ fn self_costs(text: &str, known_names: &BTreeMap<String, String>) -> Result<BTre
     Ok(result)
 }
 
-fn inspect(root: &Path, name: &str, repeats: u64) -> Result<Value> {
+fn inspect(root: &Path, name: &str, repeats: u64, arm: &str) -> Result<Value> {
+    if !["f4", "f5", "criterion"].contains(&arm) {
+        return Err(format!("unknown profile arm: {arm}"));
+    }
     let run = read_run(root, name, repeats)?;
     let mut profile = BTreeMap::<String, u64>::new();
-    let mut criterion_summary = 0u64;
+    let mut summary = 0u64;
     let mut names = BTreeMap::new();
     for source in &run.sources {
         let path = source["path"].as_str().unwrap();
@@ -425,7 +428,7 @@ fn inspect(root: &Path, name: &str, repeats: u64) -> Result<Value> {
         let text = std::fs::read_to_string(root.join(path)).map_err(|e| e.to_string())?;
         let (label, ir) = parse_dump(&text)?.ok_or("request missing")?;
         let label: Value = serde_json::from_str(&label).map_err(|e| e.to_string())?;
-        if label[3] != "criterion" {
+        if label[3] != arm {
             continue;
         }
         let costs = self_costs(&text, &names)?;
@@ -435,7 +438,7 @@ fn inspect(root: &Path, name: &str, repeats: u64) -> Result<Value> {
                 costs.values().sum::<u64>()
             ));
         }
-        criterion_summary += ir;
+        summary += ir;
         for (function, cost) in costs {
             *profile.entry(function).or_default() += cost;
         }
@@ -454,13 +457,22 @@ fn inspect(root: &Path, name: &str, repeats: u64) -> Result<Value> {
         .into_iter()
         .map(|arm| json!({"arm":arm,"calls":11*repeats,"ir":total(&run,arm)}))
         .collect();
-    Ok(
-        json!({"run":name,"repeats":repeats,"systems":11,"merged_worker_profile":true,
-        "arms":arms,
-        "criterion_self_cost_sum":criterion_summary,"standard_hash_self_ir":hashing_ir,
-        "standard_hash_self_percent":100.0*hashing_ir as f64/criterion_summary as f64,
-        "criterion_hotspots":functions.into_iter().take(20).map(|(function,ir)|json!({"function":function,"ir":ir})).collect::<Vec<_>>(),"sources":run.sources}),
-    )
+    let hotspots: Vec<_> = functions
+        .into_iter()
+        .take(20)
+        .map(|(function, ir)| json!({"function":function,"ir":ir}))
+        .collect();
+    let mut result = json!({"run":name,"repeats":repeats,"systems":11,"merged_worker_profile":true,
+        "arms":arms,"profile_arm":arm,"self_cost_sum":summary,
+        "standard_hash_self_ir":hashing_ir,
+        "standard_hash_self_percent":100.0*hashing_ir as f64/summary as f64,
+        "hotspots":hotspots,"sources":run.sources});
+    // Keep the original criterion fields for frozen-study consumers.
+    if arm == "criterion" {
+        result["criterion_self_cost_sum"] = json!(summary);
+        result["criterion_hotspots"] = result["hotspots"].clone();
+    }
+    Ok(result)
 }
 
 fn analyze(root: &Path) -> Result<Value> {
@@ -620,8 +632,16 @@ fn analyze(root: &Path) -> Result<Value> {
 fn main() {
     let args: Vec<_> = std::env::args().collect();
     let result = if args.get(1).is_some_and(|s| s == "inspect") {
-        assert_eq!(args.len(), 5, "inspect RECORDS_DIRECTORY RUN_NAME REPEATS");
-        inspect(Path::new(&args[2]), &args[3], args[4].parse().unwrap())
+        assert!(
+            matches!(args.len(), 5 | 6),
+            "inspect RECORDS_DIRECTORY RUN_NAME REPEATS [f4|f5|criterion]"
+        );
+        inspect(
+            Path::new(&args[2]),
+            &args[3],
+            args[4].parse().unwrap(),
+            args.get(5).map_or("criterion", String::as_str),
+        )
     } else {
         assert_eq!(args.len(), 2, "RECORDS_DIRECTORY");
         analyze(Path::new(&args[1]))
