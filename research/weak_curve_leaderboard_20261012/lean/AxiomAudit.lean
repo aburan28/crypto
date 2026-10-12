@@ -1,4 +1,5 @@
 import PrimeExamples
+import OakleyOrders
 
 #print axioms WeakCurveLeaderboard.anomalous_F101_affine
 #print axioms WeakCurveLeaderboard.smooth_F101_affine
@@ -12,3 +13,10 @@ import PrimeExamples
 #print axioms WeakCurveLeaderboard.smooth_point_on_curve
 #print axioms WeakCurveLeaderboard.pairing_point_on_curve
 #print axioms WeakCurveLeaderboard.pairing_selected_order_divides_group_order
+#print axioms WeakCurveLeaderboard.oakley3_full_order_factor
+#print axioms WeakCurveLeaderboard.oakley4_full_order_factor
+#print axioms WeakCurveLeaderboard.oakley3_extension_factor
+#print axioms WeakCurveLeaderboard.oakley4_extension_factor
+#print axioms WeakCurveLeaderboard.selected_order_of_generator
+#print axioms WeakCurveLeaderboard.oakley3_selected_order
+#print axioms WeakCurveLeaderboard.oakley4_selected_order

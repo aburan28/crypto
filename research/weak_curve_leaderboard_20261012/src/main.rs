@@ -7,6 +7,8 @@ type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 const DB: &str = "../weak_curve_database_20261012/weak_curves.sqlite";
 const CASES: &str = "../weak_curve_case_index_20261012/published_cases.sqlite";
+const CURVE_REGISTRY: &str = "../../docs/curves/registry.json";
+const TRANSFER_REGISTRY: &str = "../../docs/curves/jacobian-transfers.json";
 
 fn file_hash(path: &str) -> Result<String> {
     let bytes = fs::read(path)?;
@@ -74,6 +76,241 @@ fn cases(db: &Connection) -> Result<Vec<Value>> {
     })?;
     rows.collect::<rusqlite::Result<Vec<_>>>()
         .map_err(Into::into)
+}
+
+fn finding(
+    subject_id: &str,
+    code: &str,
+    criterion: &str,
+    scope: &str,
+    selector: &str,
+    grade: &str,
+    statement: &str,
+) -> Value {
+    // Canonical compact JSON is sorted by serde_json's map implementation.
+    // Evidence grades, source URLs and measurements are deliberately outside
+    // the identity so a finding keeps its ID as its verification improves.
+    let key = json!({"v":1,"subject_id":subject_id,"mechanism":code,"criterion":criterion,
+        "scope":scope,"selector":selector});
+    let digest = format!("{:x}", Sha256::digest(serde_json::to_vec(&key).unwrap()));
+    json!({"id":format!("WID1:{code}:{}", &digest[..12]),"criterion_id":criterion,
+        "mechanism":code,"scope":scope,"selector":selector,"grade":grade,
+        "statement":statement})
+}
+
+fn attach_findings(records: &mut [Value]) {
+    for record in records {
+        let id = record["id"].as_str().unwrap();
+        let mut findings = Vec::new();
+        match record["signal"].as_str().unwrap() {
+            "anomalous_prime_field" => findings.push(finding(
+                id,
+                "ANOM",
+                "anomalous_prime",
+                "selected_subgroup",
+                "r=101",
+                "exact_condition",
+                "Trace one: #E(F_101)=101 for the selected order-101 point.",
+            )),
+            "smooth_selected_group" => findings.push(finding(
+                id,
+                "PH",
+                "smooth_selected_order",
+                "selected_subgroup",
+                "r=10",
+                "exact_condition",
+                "The selected cyclic group has order 10=2·5.",
+            )),
+            "low_embedding_degree_candidate" => findings.push(finding(
+                id,
+                "MOV",
+                "mov_weil_pairing",
+                "selected_subgroup",
+                "r=13;k=2",
+                "candidate",
+                "The selected order has embedding degree two; pairing transfer remains open.",
+            )),
+            "exact_covering_model" => {
+                if record["cubic"] == "yes" {
+                    findings.push(finding(
+                        id,
+                        "GHS3C",
+                        "cubic_norm_one",
+                        "model",
+                        "genus3-cubic",
+                        "covering_model",
+                        "The exact model has the recorded cubic genus-three covering label.",
+                    ));
+                }
+                if record["quadratic"] == "yes" {
+                    findings.push(finding(
+                        id,
+                        "GHS3Q",
+                        "quadratic_torus",
+                        "model",
+                        "genus3-quadratic",
+                        "covering_model",
+                        "The exact model has the recorded quadratic genus-three covering label.",
+                    ));
+                }
+            }
+            _ => {}
+        }
+        record["findings"] = json!(findings);
+    }
+}
+
+fn named_curves() -> Result<Vec<Value>> {
+    let registry: Value = serde_json::from_slice(&fs::read(CURVE_REGISTRY)?)?;
+    let transfers: Value = serde_json::from_slice(&fs::read(TRANSFER_REGISTRY)?)?;
+    let registry_curves = registry["curves"]
+        .as_array()
+        .ok_or("curve registry has no curves")?;
+    let transfer_curves = transfers["curves"]
+        .as_array()
+        .ok_or("transfer registry has no curves")?;
+    let mut records = Vec::new();
+    for c in registry_curves {
+        let names = c["standard_names"]
+            .as_array()
+            .ok_or("missing standard_names")?;
+        if names.is_empty() {
+            continue;
+        }
+        let id = c["icv1"].as_str().ok_or("missing ICV1")?;
+        let slug = c["slug"].as_str().ok_or("missing slug")?;
+        let degree = if c["family"] == "prime" {
+            1
+        } else {
+            c["params"]["m"]
+                .as_i64()
+                .or_else(|| c["params"]["n"].as_i64())
+                .ok_or("missing binary degree")?
+        };
+        let p = if degree == 1 {
+            c["params"]["p"].as_str().ok_or("missing prime modulus")?
+        } else {
+            "2"
+        };
+        let bits = if degree == 1 {
+            slug.split('-')
+                .nth(1)
+                .ok_or("missing field tag")?
+                .strip_prefix("fp")
+                .ok_or("bad prime field tag")?
+                .parse::<i64>()?
+        } else {
+            degree
+        };
+        let trace = id.split(':').nth(2).ok_or("missing ICV1 trace")?;
+        let name = names[0].as_str().ok_or("invalid standard name")?;
+        let source_url = c["standards_provenance"]
+            .as_array()
+            .and_then(|provenance| {
+                provenance
+                    .iter()
+                    .flat_map(|p| p["sources"].as_array().into_iter().flatten())
+                    .find_map(|s| s["url"].as_str())
+            })
+            .unwrap_or("https://github.com/aburan28/crypto/blob/main/docs/curves/registry.json");
+        let mut record = json!({"id":id,"slug":slug,"name":name,"aliases":names,
+            "p":p,"degree":degree,"bits":bits,"trace":trace,"order":c["order"],
+            "field_modulus":c["params"]["modulus"],"model_a":c["params"]["a"],
+            "model_b":if c["family"] == "koblitz" {json!("0x1")} else {c["params"]["b"].clone()},
+            "signal":"named_curve_unassessed","attack_ready":false,
+            "source":"named_curve_registry","source_url":source_url,
+            "subgroup_advantage":"not_evaluated_in_this_snapshot","findings":[]});
+        if name == "Oakley Group 3" || name == "Oakley Group 4" {
+            let transfer = transfer_curves
+                .iter()
+                .find(|t| t["icv1"] == id)
+                .ok_or("Oakley transfer record absent")?;
+            let best = transfer["best_route"]
+                .as_u64()
+                .ok_or("Oakley best route absent")? as usize;
+            let route = &transfer["routes"][best];
+            if route["kind"] != "ghs_weil_descent" || route["evidence"] != "exact_invariant" {
+                return Err("Oakley best route is not an exact GHS invariant".into());
+            }
+            let (
+                expected_degree,
+                expected_b,
+                expected_order,
+                r,
+                cofactor,
+                generator_multiplier,
+                generator,
+            ) = if name == "Oakley Group 3" {
+                (
+                    155,
+                    "0x7338f",
+                    "45671926166590716193865565914344635196769237316",
+                    "3805993847215893016155463826195386266397436443",
+                    12,
+                    4,
+                    [123, 456],
+                )
+            } else {
+                (
+                    185,
+                    "0x1ee9",
+                    "49039857307708443467467104857652682248052385001045053116",
+                    "12259964326927110866866776214413170562013096250261263279",
+                    4,
+                    2,
+                    [24, 13],
+                )
+            };
+            if degree != expected_degree
+                || c["params"]["b"] != expected_b
+                || c["order"] != expected_order
+                || transfer["subgroup"]["order"] != r
+                || route["invariants"]["relative_degree"] != 5
+                || route["invariants"]["magic_number"] != 5
+                || route["destination"]["genus"] != "15"
+                || route["cost"]["destination"]["enge_gaudry_hypothesis_holds"] != false
+            {
+                return Err(
+                    "Oakley source or route drifted from checked RFC and transfer values".into(),
+                );
+            }
+            let base_degree = route["invariants"]["base_degree"].as_i64().unwrap();
+            let selector = format!("r={r};tower=5x{base_degree};g=15");
+            let finding = finding(id,"GHS","ghs_binary","selected_subgroup",&selector,
+                "exact_invariant_candidate",
+                "The degree-five binary tower has GHS magic number five and predicted genus 15; a cover and subgroup transport are still needed.");
+            record["signal"] = json!("binary_ghs_invariant");
+            record["r"] = json!(r);
+            record["full_order_cofactor"] = json!(cofactor);
+            record["published_generator_order_multiplier"] = json!(generator_multiplier);
+            record["published_generator"] = json!(generator);
+            record["extension_factorization"] = json!([5, base_degree]);
+            record["ghs_magic_number"] = json!(5);
+            record["ghs_genus_formula"] = json!(15);
+            record["ghs_base_degree"] = json!(base_degree);
+            record["ghs_cover_constructed"] = json!(false);
+            record["ghs_subgroup_map_certified"] = json!(false);
+            record["projection"] = json!({"model":route["cost"]["destination"]["solver"],
+                "log2_total":route["cost"]["log2_total"],
+                "log2_rho_reference":transfer["reference_log2"],
+                "hypothesis_satisfied":false,"status":"formula_only"});
+            record["source_url"] = json!("https://www.rfc-editor.org/rfc/rfc2412.html");
+            record["source_urls"] = json!([
+                "https://www.rfc-editor.org/rfc/rfc2412.html",
+                "https://www.rfc-editor.org/rfc/rfc2409.html",
+                "https://github.com/aburan28/crypto/blob/main/docs/curves/JACOBIAN_TRANSFERS.md"
+            ]);
+            record["subgroup_advantage"] =
+                json!("GHS invariant exact; cover, transport and qualified cost open");
+            record["findings"] = json!([finding]);
+        }
+        records.push(record);
+    }
+    records.sort_by(|a, b| a["id"].as_str().cmp(&b["id"].as_str()));
+    if records.len() != 103 {
+        return Err("named curve registry count drifted".into());
+    }
+    Ok(records)
 }
 
 fn mul(a: u64, b: u64, p: u64) -> u64 {
@@ -166,7 +403,10 @@ fn prime_examples() -> Vec<Value> {
             if order == p && anomalous.is_none() {
                 let point = first_point(a, b, p).unwrap();
                 assert_eq!(point_order(Some(point), a, p, order), p);
-                anomalous = Some(json!({"id":format!("EX1:F101:a{a}:b{b}:anomalous"),
+                assert_eq!((a, b), (1, 32));
+                anomalous = Some(json!({"id":"ICV1:fp-101:1:101:99:unk:unk:r:da77b88029ba",
+                    "slug":"icv1-fp7-t1-da77b880",
+                    "legacy_id":format!("EX1:F101:a{a}:b{b}:anomalous"),
                     "p":"101","degree":1,"bits":7,"a":a,"b":b,"order":order,
                     "trace":1,"generator":point,"generator_order":p,
                     "signal":"anomalous_prime_field","attack_ready":true,
@@ -186,7 +426,10 @@ fn prime_examples() -> Vec<Value> {
                     }
                 }
                 assert_eq!(best.1, 10);
-                smooth = Some(json!({"id":format!("EX1:F101:a{a}:b{b}:smooth"),
+                assert_eq!((a, b), (1, 0));
+                smooth = Some(json!({"id":"ICV1:fp-101:2:100:11:unk:unk:r:6861181a950c",
+                    "slug":"icv1-fp7-t2-6861181a",
+                    "legacy_id":format!("EX1:F101:a{a}:b{b}:smooth"),
                     "p":"101","degree":1,"bits":7,"a":a,"b":b,"order":order,
                     "trace":2,"generator":best.0,"generator_order":best.1,
                     "curve_order_factors":{"2":2,"5":2},
@@ -228,7 +471,10 @@ fn prime_examples() -> Vec<Value> {
         anomalous.unwrap(),
         smooth.unwrap(),
         json!({
-            "id":"EX1:F103:a1:b0:pairing_candidate","p":"103","degree":1,
+            "id":"ICV1:fp-103:0:104:80:unk:unk:r:8c4948d207a4",
+            "slug":"icv1-fp7-t0-8c4948d2",
+            "legacy_id":"EX1:F103:a1:b0:pairing_candidate",
+            "p":"103","degree":1,
             "bits":7,"a":a2,"b":b2,"order":order2,"trace":0,
             "generator":pair_point,"generator_order":13,"embedding_degree":2,
             "signal":"low_embedding_degree_candidate","attack_ready":false,
@@ -241,9 +487,35 @@ fn prime_examples() -> Vec<Value> {
 fn snapshot() -> Result<Value> {
     let db = connect(DB)?;
     let case_db = connect(CASES)?;
-    let models = models(&db)?;
+    let mut models = models(&db)?;
     let cases = cases(&case_db)?;
-    let examples = prime_examples();
+    let mut examples = prime_examples();
+    attach_findings(&mut models);
+    attach_findings(&mut examples);
+    let named = named_curves()?;
+    let mut curve_ids = std::collections::HashSet::new();
+    let mut finding_ids = std::collections::HashSet::new();
+    for record in models.iter().chain(&examples).chain(&named) {
+        let id = record["id"].as_str().ok_or("curve ID missing")?;
+        if !curve_ids.insert(id) {
+            return Err(format!("duplicate curve ID: {id}").into());
+        }
+        for entry in record["findings"]
+            .as_array()
+            .ok_or("finding list missing")?
+        {
+            let id = entry["id"].as_str().ok_or("finding ID missing")?;
+            if !finding_ids.insert(id) {
+                return Err(format!("duplicate finding ID: {id}").into());
+            }
+        }
+    }
+    if finding_ids.len() != 29 {
+        return Err("finding count drifted".into());
+    }
+    if curve_ids.len() != 920 {
+        return Err("curve identity count drifted".into());
+    }
     let positive = models
         .iter()
         .filter(|m| m["signal"] == "exact_covering_model")
@@ -282,13 +554,18 @@ fn snapshot() -> Result<Value> {
         ),
         (814, 24, 537, 247, 137, 153, 36)
     );
-    Ok(json!({"schema":"weakcurves.snapshot.v1", "sources": {
-        "model_database_sha256": file_hash(DB)?, "case_database_sha256": file_hash(CASES)?},
+    Ok(json!({"schema":"weakcurves.snapshot.v2", "sources": {
+        "model_database_sha256": file_hash(DB)?, "case_database_sha256": file_hash(CASES)?,
+        "curve_registry_sha256":file_hash(CURVE_REGISTRY)?,
+        "transfer_registry_sha256":file_hash(TRANSFER_REGISTRY)?},
         "counts":{"exact_models":models.len(),"exact_covering_models":positive,
             "large_models":large,"large_cubic_screen_survivors":large_survivors,
             "large_cubic_depth_excluded":large_depth_excluded,"large_outside_domain":large_outside,
-            "published_cases":cases.len(),"prime_field_examples":examples.len()},
-        "models":models,"published_cases":cases,"prime_examples":examples}))
+            "published_cases":cases.len(),"prime_field_examples":examples.len(),
+            "named_curves":named.len(),"oakley_ghs_candidates":2,
+            "findings":finding_ids.len()},
+        "models":models,"published_cases":cases,"prime_examples":examples,
+        "named_curves":named}))
 }
 
 fn main() -> Result<()> {
@@ -332,5 +609,58 @@ mod tests {
     fn pairing_candidate_has_exact_degree_two() {
         assert_eq!(103 % 13, 12);
         assert_eq!((103 * 103) % 13, 1);
+    }
+    #[test]
+    fn named_curve_findings_preserve_exact_subjects() {
+        let records = named_curves().unwrap();
+        assert_eq!(records.len(), 103);
+        let oakley: Vec<_> = records
+            .iter()
+            .filter(|c| c["name"].as_str().unwrap().starts_with("Oakley Group "))
+            .collect();
+        assert_eq!(oakley.len(), 2);
+        let mut ids = std::collections::HashSet::new();
+        for c in oakley {
+            assert_eq!(c["ghs_magic_number"], 5);
+            assert_eq!(c["ghs_genus_formula"], 15);
+            assert_eq!(c["projection"]["hypothesis_satisfied"], false);
+            let f = &c["findings"][0];
+            assert!(f["id"].as_str().unwrap().starts_with("WID1:GHS:"));
+            assert!(ids.insert(f["id"].as_str().unwrap()));
+        }
+    }
+    #[test]
+    fn finding_id_is_stable_across_grade_changes() {
+        let a = finding(
+            "ICV1:example",
+            "GHS",
+            "ghs_binary",
+            "selected_subgroup",
+            "r=13;tower=5x31;g=15",
+            "candidate",
+            "first statement",
+        );
+        let b = finding(
+            "ICV1:example",
+            "GHS",
+            "ghs_binary",
+            "selected_subgroup",
+            "r=13;tower=5x31;g=15",
+            "verified_map",
+            "updated statement",
+        );
+        assert_eq!(a["id"], b["id"]);
+        assert_ne!(
+            a["id"],
+            finding(
+                "ICV1:other",
+                "GHS",
+                "ghs_binary",
+                "selected_subgroup",
+                "r=13;tower=5x31;g=15",
+                "candidate",
+                "first statement"
+            )["id"]
+        );
     }
 }

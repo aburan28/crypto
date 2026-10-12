@@ -64,10 +64,10 @@
     "name": "Binary-field GHS descent",
     "method": "Weil restriction to a Jacobian",
     "domain": "E/F_(2^m) with a specified subfield tower",
-    "recognition": "Construct a lower-genus covering curve and the induced Jacobian map.",
+    "recognition": "A composite field tower selects a possible descent; compute the exact coefficient magic number and genus formula, then construct a cover and induced Jacobian map.",
     "witness": "Cover equation, genus, maps, selected subgroup kernel check, and destination solver cost.",
     "construction": "Screen extension-field coefficients by the published GHS descent conditions, then construct and check the cover.",
-    "status": "published_family_import_open",
+    "status": "oakley_exact_invariant_candidates_cover_open",
     "source": "Gaudry–Hess–Smart (2002)",
     "url": "https://www.iacr.org/cryptodb/data/paper.php?pubkey=14115"
   },

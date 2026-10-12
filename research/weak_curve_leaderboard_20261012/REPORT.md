@@ -1,11 +1,14 @@
-# WeakCurves: evidence-graded criteria and first leaderboard
+# WeakCurves: source-linked names and weakness findings
 
-The first WeakCurves snapshot combines exact model identities, published
+The WeakCurves snapshot combines exact model identities, published
 covering cases, and selected-subgroup attack criteria in one queryable atlas.
 It provides a deterministic route from the two source-locked research
-databases to a public-facing static catalog. The snapshot contains 814
-previous exact models, 36 published odd-characteristic parameter cases,
-three new exact prime-field examples and ten criterion entries.
+databases and the repository's named-curve and transfer registries to a
+static catalog. The snapshot contains 814 prior exact models, 103 named
+curves (101 standards-provenance curves and two challenge curves), 36
+published odd-characteristic parameter cases, three exact prime-field
+examples and ten criterion entries. Each evaluated finding has a
+[WID1 identifier](IDENTIFIERS.md) distinct from its curve's ICV1 identity.
 
 ## What the leaderboard ranks
 
@@ -19,8 +22,8 @@ published parameter case is not an exact model and appears in its own view.
 
 | View | Rows | Meaning |
 | --- | ---: | --- |
-| Exact signals | 27 | 2 prime-field DLP conditions, 24 covering-model signals, 1 pairing candidate |
-| Full exact corpus | 817 | 814 source-locked models plus 3 new prime-field examples |
+| Findings | 29 | 2 prime-field DLP conditions, 24 covering-model signals, 1 pairing candidate, 2 Oakley GHS invariant candidates |
+| Full exact corpus | 920 | 814 source-locked models, 103 named curves, 3 prime-field examples |
 | Published cases | 36 | Iijima–Momose–Chao odd-characteristic `(2,…,2)` covering cases |
 | Large-field subset | 537 | 192–252-bit models; 384 unclassified in this index, 153 outside its domain |
 
@@ -30,8 +33,42 @@ depth condition. All 384 fail the recorded quadratic-model necessary
 conditions. The remaining 153 degree-ten or degree-fourteen models are
 outside the present genus-three domain. These statuses are extracted from
 each model's linked `curve_property.family_checks_json` and rechecked by the
-exporter's count assertions; passing the cubic screen does not decide a
+exporter’s count assertions; passing the cubic screen does not decide a
 covering or subgroup advantage.
+
+The 103 named curves are a tracked roster, not a census of all published
+curves. They have exact ICV1 model identities and standard or challenge aliases;
+an unassessed row has no WID1 finding. WID1 is assigned only to a stated
+condition, with its own selected scope and evidence grade.
+
+## Oakley Groups 3 and 4
+
+[RFC 2409](https://www.rfc-editor.org/rfc/rfc2409.html) names the binary
+elliptic curves over `GF(2^155)` and `GF(2^185)` as IKE Groups 3 and 4.
+[RFC 2412 Appendix E](https://www.rfc-editor.org/rfc/rfc2412.html) gives
+their field polynomials, coefficients, points and group orders. The
+existing [transfer registry](../../docs/curves/JACOBIAN_TRANSFERS.md)
+calculates an exact GHS magic number of five for the degree-five towers.
+
+| Standard name | Field tower | Full order | RFC generator order | Derived selected order | WID1 | Recorded route |
+| --- | --- | --- | --- | --- | --- | --- |
+| Oakley Group 3 | `2^155 = (2^31)^5` | `12r` | `4r` | `r = 3805993847215893016155463826195386266397436443` | `WID1:GHS:d089b2bdf750` | Exact magic number 5; formula genus 15 over `GF(2^31)` |
+| Oakley Group 4 | `2^185 = (2^37)^5` | `4r` | `2r` | `r = 12259964326927110866866776214413170562013096250261263279` | `WID1:GHS:419192b724ad` | Exact magic number 5; formula genus 15 over `GF(2^37)` |
+
+The full group cofactors 12 and 4 are **not** the selected DLP order:
+the RFC generators have respective orders `4r` and `2r`, and
+`[4]P` or `[2]P` has exact prime order `r`. The
+[checked Sage replay](validation/oakley.sage) verified irreducibility of
+both field polynomials, the RFC points on the specified curves, primality of
+both `r` values, and the derived subgroup orders. It did not recompute the
+RFC's full curve point counts. The conditional group-order step and the
+integer factorizations are proved in [Lean](lean/OakleyOrders.lean).
+
+The GHS findings are graded `exact_invariant_candidate`: the model-specific
+invariant is exact, while the cover and injective map on the selected group
+have not been constructed. The transfer registry's displayed cost numbers
+are formula projections whose chosen Enge–Gaudry solver hypothesis is false
+for these rows. They do not enter a measured-advantage ranking.
 
 For a comparison of attack costs, the model, selected subgroup, explicit
 transfer map, target distribution, construction cost and destination DLP cost
