@@ -44,7 +44,10 @@ fi
   --run-id 35 --dp-file "$R/dp-sigma.bin" > "$R/verify-sigma.log" 2>&1 || fail=1
 grep -E "MISMATCH|OVERFLOW|finished|table walk|resident|registers" \
   "$R/verify-sigma.log" | tee "$R/verify-sigma.txt" || true
-grep -Eq "finished:|$VERIFY_REPORTS verified against the reference" "$R/verify-sigma.log" || fail=1
+grep -q '^packed sigma table: 1 ' "$R/verify-sigma.log" || fail=1
+grep -qx 'packed sigma fused: 1' "$R/verify-sigma.log" || fail=1
+grep -Eq "\($VERIFY_REPORTS verified against the reference, 0 dropped\)" \
+  "$R/verify-sigma.log" || fail=1
 ! grep -Eq "MISMATCH|OVERFLOW" "$R/verify-sigma.log" || fail=1
 
 if [ "$fail" != 0 ]; then
