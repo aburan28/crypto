@@ -1,8 +1,8 @@
 # Extension-field and Jacobian-transfer coverage audit
 
-The atlas now names sixteen criteria, including direct extension-field
+The atlas now names twenty-three criteria, including direct extension-field
 index calculus, cover-and-decomposition, and cubic Weil-restriction Jacobian
-isogenies. Its 920 exact curve rows are **not** a census of every curve to
+isogenies. Its 922 exact curve rows are **not** a census of every curve to
 which those methods apply. The `criteria.json` entries describe recognition
 and witness requirements; they do not add WID1 findings until an exact model
 and claim scope are checked.
@@ -69,7 +69,7 @@ unproved or unmeasured bridge for each.
 
 ## Attack families and assessment layers still missing
 
-The sixteen-criterion registry is a method index, not a complete attack audit.
+The twenty-three-criterion registry is a method index, not a complete attack audit.
 In particular, its MOV and Frey–Rück entries share an embedding-degree screen,
 and several geometric entries have no constructed map on an atlas model. The
 following additions need separate records for an exact curve, selected subgroup,
@@ -81,7 +81,7 @@ candidate until its stated gate passes.
 | Twist and invalid-input exposure | Count and factor the curve and its relevant twists; record input format, accepted point set, subgroup validation, cofactor handling, secret-scalar policy, and whether a multiplication result is observable. Test the implementation or protocol path against the actual small-order or invalid inputs. | `smooth_selected_order` covers only the selected subgroup on the listed model. Twist and invalid-curve attacks depend on input handling; [RFC 7748](https://www.rfc-editor.org/rfc/rfc7748) discusses low-order inputs and the all-zero check, and [Bernstein–Lange](https://eprint.iacr.org/2024/1265) analyze twist, small-subgroup, and invalid-curve exposure. |
 | Cheon auxiliary-input DLP | Factor `r−1` and `r+1` for the selected prime subgroup order `r`, then record the *actual* supplied powers of one secret, such as `G,[x]G,[x^d]G` with `d | r−1`; estimate the best attack for that input set. | The factors alone never establish the attack precondition. [Cheon](https://doi.org/10.1007/11761679_1) gives the auxiliary-input algorithm; [pairing-curve analysis](https://eprint.iacr.org/2020/351) applies it to structured-reference-string power sequences. |
 | Trace-zero subgroup index calculus | Specify `E/F_q`, the extension `F_(q^n)`, trace map, and selected point's membership in its kernel. Build the trace-zero factor base and record natural-query relations, rank, linear algebra, descent, and one-target cost. | `extension_index_calculus` analyzes decomposition on the whole elliptic group, while [Gorla–Massierer](https://eprint.iacr.org/2014/318) analyze a distinct algorithm on the trace-zero variety. The generator's trace-zero membership is a required gate. |
-| Pairing destination cost | After certifying a MOV or Frey–Rück transfer, record `k=ord_r(q)`, the field `F_(q^k)`, characteristic and polynomial shape, tower, finite-field DLP algorithm, and transfer plus individual-log cost. | The present `k` screen does not estimate target-field hardness. [Tower NFS](https://eprint.iacr.org/2015/505), [extended TNFS](https://eprint.iacr.org/2015/1027), and [pairing-curve cost estimates](https://eprint.iacr.org/2019/1371) show why `k` and field size alone are insufficient. |
+| Pairing destination cost | The new `minimal_pairing_field` and `pairing_target_field_dlp` entries record `d=ord_r(p)` and exact G1/G2/GT roles. Next, certify the pairing image, field tower, finite-field DLP algorithm, and transfer plus individual-log cost. | The two named pairing variants have checked `d=k=12` and checked G1/G2 generators. A calibrated GT discrete-log estimate remains open. [Hitt](https://eprint.iacr.org/2006/415), [Tower NFS](https://eprint.iacr.org/2015/505), and [pairing-curve cost estimates](https://eprint.iacr.org/2019/1371) distinguish the parameters and cost models. |
 | Other efficient automorphisms and endomorphisms | Construct the endomorphism, verify its action and orbit size on the selected subgroup, and compare the resulting rho cost on matched inputs. Include binary Koblitz Frobenius and endomorphisms beyond the `j=0,1728` prime-field screens. | Current GLV and GLS entries are narrow structural screens. [Koblitz-curve analysis](https://eprint.iacr.org/2016/603) discusses Frobenius rho speedups; [SafeCurves' discriminant analysis](https://safecurves.cr.yp.to/disc.html) explains the small-CM-discriminant signal and its limits. |
 | Prime-field summation-polynomial index calculus | Fix a prime-field factor base and exact decomposition system, then measure ordinary-query relation yield, rank, final linear algebra, target descent, and matched one-target cost. | `extension_index_calculus` is scoped to `d>1`; [Amadori–Pintore–Sala](https://eprint.iacr.org/2017/609) study the prime-field branch. A proposed decomposition formula supplies a research route, while a weakness finding needs the complete pipeline. |
 | Restricted secrets, nonce leakage, and faults | Attach a separate application or implementation record: secret-key distribution, signature samples and nonce relation, observable side channel or fault model, and a reproducible key-recovery check. | These conditions concern use of a curve rather than its ECDLP subgroup. [Sun–Espitau–Tibouchi–Abe](https://eprint.iacr.org/2021/455) analyze partial ECDSA nonce leakage, and [Neves–Tibouchi](https://eprint.iacr.org/2015/1233) analyze fault-induced degenerate-curve behavior. |
@@ -103,3 +103,19 @@ candidate until its stated gate passes.
 
 Future mathematical recognition results follow the [proof map](PROOF_MAP.md)
 and the repository's Lean requirement before promotion to theorem status.
+
+## Security goals and protocol-specific records added in snapshot 03
+
+The new DDH criterion asks for a nondegenerate pairing on the **challenge
+inputs**; the F103 supersingular example is a structural candidate pending an
+explicit distortion-map pairing witness. Static DH asks for a reused-secret
+oracle and therefore has no curve-only positive tag. Both tests distinguish
+their security goal from elliptic DLP. The named Ethereum BN_SNARK1 and
+BLS12-381 rows carry exact G1/G2/GT roles and subgroup parameters; membership
+misuse is an implementation claim that needs a parser and accepted input.
+The SIKEp434 case is a separate protocol record because its published
+Castryck–Decru attack relies on auxiliary torsion images in SIDH public keys,
+not an ordinary finite-field isogeny edge. See [Galbraith–Rotger](https://eprint.iacr.org/2004/070),
+[Granger](https://eprint.iacr.org/2010/177), the [CFRG pairing draft](https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/),
+[EIP-197](https://eips.ethereum.org/EIPS/eip-197), and
+[Castryck–Decru](https://eprint.iacr.org/2022/975).

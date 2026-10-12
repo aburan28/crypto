@@ -7,9 +7,11 @@
     "large_cubic_screen_survivors": 247,
     "large_models": 537,
     "large_outside_domain": 153,
-    "named_curves": 103,
+    "named_curves": 105,
     "oakley_ghs_candidates": 2,
+    "pairing_curves": 2,
     "prime_field_examples": 3,
+    "protocol_cases": 1,
     "published_cases": 36
   },
   "models": [
@@ -18929,6 +18931,100 @@
       "source_url": "https://datatracker.ietf.org/doc/html/rfc5639",
       "subgroup_advantage": "not_evaluated_in_this_snapshot",
       "trace": "133911538952573548431982907995132016398065354869678696041884562716142492272779"
+    },
+    {
+      "aliases": [
+        "alt_bn128",
+        "BN_SNARK1",
+        "Ethereum BN254"
+      ],
+      "attack_ready": false,
+      "bits": 254,
+      "degree": 1,
+      "embedding_degree": 12,
+      "findings": [],
+      "g1_cofactor": "1",
+      "g1_generator": [
+        "1",
+        "2"
+      ],
+      "g2_cofactor": null,
+      "g2_generator": [
+        [
+          "10857046999023057135944570762232829481370756359578518086990519993285655852781",
+          "11559732032986387107991004021392285783925812861821192530917403151452391805634"
+        ],
+        [
+          "8495653923123431417604973247489272438418190587263600148770280649306958101930",
+          "4082367875863433681332203403145435568316851327593401208105741076214120093531"
+        ]
+      ],
+      "g2_twist": "y²=x³+3/(i+9), i²=-1 over Fp²",
+      "gt_field_degree": 12,
+      "gt_order": "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "id": "WCP1:fp254:59852b639b56dc93",
+      "model_a": 0,
+      "model_b": 3,
+      "name": "Ethereum alt_bn128 (BN_SNARK1)",
+      "order": "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "p": "21888242871839275222246405745257275088696311157297823662689037894645226208583",
+      "r": "21888242871839275222246405745257275088548364400416034343698204186575808495617",
+      "signal": "pairing_friendly_catalog",
+      "slug": "wcp1-fp254-59852b639b56dc93",
+      "source": "pairing_standards",
+      "source_note": "EIP-196/EIP-197 exact Ethereum variant; the label BN254 alone is ambiguous",
+      "source_urls": [
+        "https://eips.ethereum.org/EIPS/eip-196",
+        "https://eips.ethereum.org/EIPS/eip-197"
+      ],
+      "subgroup_advantage": "pairing-compatible groups; security depends on G1/G2/GT and protocol goals",
+      "trace": "147946756881789318990833708069417712967"
+    },
+    {
+      "aliases": [
+        "BLS12-381"
+      ],
+      "attack_ready": false,
+      "bits": 381,
+      "degree": 1,
+      "embedding_degree": 12,
+      "findings": [],
+      "g1_cofactor": "76329603384216526031706109802092473003",
+      "g1_generator": [
+        "0x17f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb",
+        "0x08b3f481e3aaa0f1a09e30ed741d8ae4fcf5e095d5d00af600db18cb2c04b3edd03cc744a2888ae40caa232946c5e7e1"
+      ],
+      "g2_cofactor": "0x5d543a95414e7f1091d50792876a202cd91de4547085abaa68a205b2e5a7ddfa628f1cb4d9e82ef21537e293a6691ae1616ec6e786f0c70cf1c38e31c7238e5",
+      "g2_generator": [
+        [
+          "0x024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
+          "0x13e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e"
+        ],
+        [
+          "0x0ce5d527727d6e118cc9cdc6da2e351aadfd9baa8cbdd3a76d429a695160d12c923ac9cc3baca289e193548608b82801",
+          "0x0606c4a02ea734cc32acd2b02bc28b99cb3e287e85a763af267492ab572e99ab3f370d275cec1da1aaa9075ff05f79be"
+        ]
+      ],
+      "g2_twist": "y²=x³+4(u+1), u²=-1 over Fp²",
+      "gt_field_degree": 12,
+      "gt_order": "52435875175126190479447740508185965837690552500527637822603658699938581184513",
+      "id": "WCP1:fp381:048e48638a4969db",
+      "model_a": 0,
+      "model_b": 4,
+      "name": "BLS12-381",
+      "order": "4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129030796414117214202539",
+      "p": "4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129015664037894272559787",
+      "r": "52435875175126190479447740508185965837690552500527637822603658699938581184513",
+      "signal": "pairing_friendly_catalog",
+      "slug": "wcp1-fp381-048e48638a4969db",
+      "source": "pairing_standards",
+      "source_note": "CFRG pairing-friendly curves draft, section 4.2.1",
+      "source_urls": [
+        "https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/",
+        "https://eips.ethereum.org/EIPS/eip-2537"
+      ],
+      "subgroup_advantage": "pairing-compatible groups; security depends on G1/G2/GT and protocol goals",
+      "trace": "-15132376222941642751"
     }
   ],
   "prime_examples": [
@@ -19041,6 +19137,23 @@
       "slug": "icv1-fp7-t0-8c4948d2",
       "subgroup_advantage": "pairing_map_and_destination_cost_open",
       "trace": 0
+    }
+  ],
+  "protocol_cases": [
+    {
+      "curve": "y²=x³+6x²+x",
+      "evidence": "published_key_recovery",
+      "field": "F_(p²), p=2^216·3^137−1",
+      "id": "WCPROTO1:SIKEp434:CD2022",
+      "mechanism": "Castryck–Decru Kani-reducibility attack",
+      "name": "SIKEp434 / SIDH auxiliary-torsion attack",
+      "prerequisites": "SIDH-style public images of the other party's torsion basis; specified starting-curve endomorphism information",
+      "result": "Published SIKEp434 key-recovery implementation, approximately ten minutes on one core in the paper's setting",
+      "security_goal": "SIDH/SIKE secret-isogeny key recovery",
+      "source_urls": [
+        "https://github.com/microsoft/PQCrypto-SIDH/blob/master/src/P434/P434.c",
+        "https://eprint.iacr.org/2022/975"
+      ]
     }
   ],
   "published_cases": [
@@ -19410,6 +19523,8 @@
     "case_database_sha256": "b74448a12c09ad6f1f733593d12e0795da83f494b59cad5ec91eca5402ae6f88",
     "curve_registry_sha256": "5520bc7e09da329603b75538182ab9c66f756f0347b2b6391cf5456b8daa4925",
     "model_database_sha256": "888589c5bf354be21749b3ab3afd4637f1c6af96adb7ee383d43dd7456f39a02",
+    "pairing_roster_sha256": "5b89a3837ed46a7066255e32feda172b5aaa887402b7047a2930a907487ea605",
+    "protocol_cases_sha256": "bd7fbf3cb4a6d3492247840c0e10a787d13ddd109880da12f9761a915a29c9b0",
     "transfer_registry_sha256": "aec6338011158c8c1aaddb829d4e90fb96eebc43cd4027d1067979bba3e6ca40"
   }
 }

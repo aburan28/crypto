@@ -1,5 +1,41 @@
 # Validation record
 
+## Snapshot 03: security goals, pairing groups, and SIDH, 12 October 2026
+
+- The source-pinned roster imports Ethereum's exact `alt_bn128`/`BN_SNARK1`
+  variant and BLS12-381. `python3 validate_pairing_roster.py` passed for both:
+  `ord_r(p)=12`, the published G1 cofactor relation, G1 and G2 curve
+  equations, and `[r]P=O` for both generators. This independently caught and
+  corrected one copied BLS12-381 G2 coordinate before export. The source
+  records link [EIP-196](https://eips.ethereum.org/EIPS/eip-196),
+  [EIP-197](https://eips.ethereum.org/EIPS/eip-197), and the
+  [CFRG parameter draft](https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/).
+- `cargo test --release --locked --offline`: four passed. The Rust exporter
+  `build` and `check` passed. The graph builder `--check` passed with 922 atlas
+  nodes, 1,092 total nodes, 676 isogeny classes, 73 multi-model classes,
+  and the same 232 certified map edges. Source/site JSON copies are byte
+  identical; all 23 criterion IDs are unique; the one SIKEp434 protocol case
+  is separate from graph nodes and WID1 findings. The finding count remains
+  29. `cargo fmt --all --check`, `cargo clippy --release --locked --offline
+  -- -D warnings`, and `node --check` for both site scripts passed; HTML IDs
+  and four atlas tabs are unique and present; `git diff --check` passed.
+- `lake build MinimalPairingField` and `lake env lean AxiomAudit.lean`
+  passed on the pinned Lean 4.34.1/Mathlib toolchain. The three new
+  declarations prove the order formula, divisibility into the pairing
+  extension, and minimality of the multiplicative order. Their axiom audit
+  reports only `propext`, `Classical.choice`, and `Quot.sound`; the
+  finite-field roots-of-unity identification remains an explicitly open
+  bridge in [PROOF_MAP.md](PROOF_MAP.md).
+- The Sites source helper pushed final commit
+  `e4ffc9e3eab84c56b1cb2b977c9d9598dfadb528`, packaged
+  `/Volumes/SSD990/llm/tmp/weakcurves-static-v13.tar.gz`, saved version 13
+  (`appgprj_6acd13c887f0819194ae65d7f61c7b33~appgver_4381e2a6df4c81918edc52e0ff2efc1a`),
+  and deployed publicly as `appgdep_6acd4c47cc38819185b09773d03fa731`.
+  Production returned HTTP 200 and its `snapshot.json` contains 105 named
+  curves and one protocol case at
+  <https://weakcurves.aburan28.chatgpt.site>. The public audience was
+  preserved. Browser pointer-interaction QA was unavailable in this run.
+
 ## Vulnerability filters and isogeny graph, 12 October 2026
 
 - `python3 research/weak_curve_leaderboard_20261012/build_isogeny_graph.py --check`

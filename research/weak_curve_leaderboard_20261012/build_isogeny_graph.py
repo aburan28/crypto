@@ -47,8 +47,24 @@ def atlas_checks(record):
     for finding in record.get("findings", []):
         add_check(checks, finding["criterion_id"], grades[finding["grade"]], finding["statement"])
     if record.get("embedding_degree") is not None:
+        p, r = int(record["p"]), int(record.get("r", record.get("generator_order")))
+        k = int(record["embedding_degree"])
+        assert pow(p, k, r) == 1 and all(pow(p, i, r) != 1 for i in range(1, k))
         for criterion in ("mov_weil_pairing", "frey_ruck_tate_pairing"):
             add_check(checks, criterion, "candidate", "Exact selected-order embedding degree; pairing transport and destination cost remain open.")
+        if record["degree"] == 1:
+            add_check(checks, "minimal_pairing_field", "condition",
+                      f"ord_r(p)={k}; the minimal r-th-root output field is F_(p^{k}). Pairing computation and DLP cost are separate checks.")
+        if record["signal"] == "low_embedding_degree_candidate":
+            add_check(checks, "ddh_pairing", "candidate",
+                      "The supersingular j=1728, p≡3 mod 4, r=13, k=2 setting admits a distortion-map route; an explicit pairing decision witness is pending.")
+        if record["signal"] == "pairing_friendly_catalog":
+            add_check(checks, "pairing_group_roles", "screen",
+                      "Standard-defined order-r G1, twist G2 and GT roles; see exact generator, cofactor and field records.")
+            add_check(checks, "pairing_subgroup_validation", "screen",
+                      "Named-group parameters are present; a vulnerability finding requires a particular parser or protocol accepting off-subgroup inputs.")
+            add_check(checks, "pairing_target_field_dlp", "screen",
+                      f"GT has order r in F_(p^{k})*; destination-field DLP work remains to be calibrated for this exact field.")
     if record.get("cubic_screen") == "necessary_condition_passed":
         add_check(checks, "cubic_norm_one", "screen", "Necessary conductor-depth condition passed; an exact cover is still required.")
     if record.get("cubic") == "yes" or record.get("quadratic") == "yes":

@@ -190,5 +190,89 @@
     "status": "published_criterion_no_exact_atlas_screen",
     "source": "Galbraith–Lin–Scott (2009)",
     "url": "https://eprint.iacr.org/2008/194"
+  },
+  {
+    "id": "ddh_pairing",
+    "name": "Pairing-assisted decisional Diffie–Hellman",
+    "method": "DDH decision through a nondegenerate pairing",
+    "domain": "A specified cyclic subgroup and DDH input law, often with a distortion map or cross-group input",
+    "recognition": "Check whether the protocol's DDH challenge can be mapped into both inputs of an efficiently computable nondegenerate pairing.",
+    "witness": "Exact challenge group, pairing, auxiliary map or G2 input, nondegeneracy on the chosen subgroup, and the decision equation.",
+    "construction": "Select a supersingular subgroup with a certified distortion map or define a cross-group pairing challenge; keep CDH and DLP as separate goals.",
+    "status": "structural_example_screen_only",
+    "source": "Galbraith–Rotger (2004)",
+    "url": "https://eprint.iacr.org/2004/070"
+  },
+  {
+    "id": "static_dh_oracle",
+    "name": "Static Diffie–Hellman with oracle access",
+    "method": "Repeated-secret oracle-assisted attack",
+    "domain": "A fixed secret key reused across chosen public inputs in a specified protocol",
+    "recognition": "Record the oracle query interface, key reuse, response form, target subgroup, and available auxiliary structure.",
+    "witness": "Concrete oracle transcript model, query bound, reduction or recovery algorithm, and independently checked secret or shared-key result.",
+    "construction": "Instantiate a protocol and fixed-key oracle on a named subgroup, then test a published static-DH algorithm under that oracle budget.",
+    "status": "published_problem_no_protocol_oracle_record",
+    "source": "Granger (2010)",
+    "url": "https://eprint.iacr.org/2010/177"
+  },
+  {
+    "id": "minimal_pairing_field",
+    "name": "Minimal pairing output field",
+    "method": "Embedding-field arithmetic",
+    "domain": "r coprime to p, base field q=p^m and k=ord_r(q)",
+    "recognition": "Compute d=ord_r(p) independently of k=ord_r(p^m); the smallest field containing the r-th roots of unity is F_(p^d), with d dividing mk.",
+    "witness": "Exact p, m, r, modular-order certificates for d and k, pairing computation field, and image field.",
+    "construction": "Choose p,m,r with r dividing #E(F_(p^m)); compute d and k, then compare output-field and pairing-computation costs.",
+    "status": "exact_prime_field_examples_present",
+    "source": "Hitt (2006)",
+    "url": "https://eprint.iacr.org/2006/415"
+  },
+  {
+    "id": "pairing_group_roles",
+    "name": "Pairing groups G1, G2 and GT",
+    "method": "Group-specific security contract",
+    "domain": "Pairing-friendly curve with a specified r, twist, and target field",
+    "recognition": "Record G1 on E(Fp), G2 on the twist over F_(p²), and GT inside F_(p^k)* as three distinct order-r groups.",
+    "witness": "Exact base and twist equations, generators, order/cofactor facts, embedding degree, and nondegenerate pairing specification.",
+    "construction": "Import a named pairing-friendly standard with exact variant parameters; verify each group's source-defined role.",
+    "status": "two_named_pairing_variants_imported",
+    "source": "CFRG Pairing-Friendly Curves draft; EIP-197",
+    "url": "https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/"
+  },
+  {
+    "id": "pairing_subgroup_validation",
+    "name": "Pairing subgroup and cofactor validation",
+    "method": "G1/G2 membership and GT result validation",
+    "domain": "A concrete protocol accepting G1/G2 points or GT values",
+    "recognition": "Check point-on-curve and [r]P=O for each accepted G1/G2 input when required; check GT order and final exponentiation for accepted target values.",
+    "witness": "Exact input parser, cofactor policy, membership tests, adversarial inputs, and observed protocol response.",
+    "construction": "Test the actual implementation with valid subgroup, off-subgroup, infinity, and malformed inputs under its published acceptance rules.",
+    "status": "named_curve_cofactors_present_implementation_open",
+    "source": "CFRG Pairing-Friendly Curves draft, subgroup membership",
+    "url": "https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/"
+  },
+  {
+    "id": "pairing_target_field_dlp",
+    "name": "GT finite-field discrete-log cost",
+    "method": "Destination-field security assessment",
+    "domain": "Order-r target group GT in F_(p^d)*",
+    "recognition": "Assess the multiplicative subgroup in the minimal output field and the particular finite-field DLP algorithms applicable to its representation.",
+    "witness": "Exact p, r, d, field tower, factorization assumptions, calibrated algorithm and resource estimate.",
+    "construction": "Specify a pairing-friendly parameter set and benchmark the best applicable destination-field DLP model independently of G1 and G2.",
+    "status": "field_parameters_present_cost_open",
+    "source": "CFRG Pairing-Friendly Curves draft, security estimates",
+    "url": "https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/"
+  },
+  {
+    "id": "sidh_auxiliary_torsion",
+    "name": "SIDH/SIKE auxiliary-torsion key recovery",
+    "method": "Kani-reducibility isogeny attack",
+    "domain": "SIDH-style protocol public keys containing images of auxiliary torsion points",
+    "recognition": "Match the public-key torsion images, starting-curve endomorphisms, and isogeny degree structure required by Castryck–Decru.",
+    "witness": "Exact protocol parameter set, public-key format and auxiliary images, attack implementation, and key-recovery transcript.",
+    "construction": "Instantiate SIKEp434 from its source parameters and reproduce the published key-recovery experiment.",
+    "status": "published_sikep434_protocol_case",
+    "source": "Castryck–Decru (2022/2023)",
+    "url": "https://eprint.iacr.org/2022/975"
   }
 ]

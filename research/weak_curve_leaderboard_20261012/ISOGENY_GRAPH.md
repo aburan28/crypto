@@ -1,8 +1,8 @@
 # WeakCurves criterion filters and isogeny graph
 
-The atlas now joins **1,090 exact curve nodes**, **674 finite-field isogeny
+The atlas now joins **1,092 exact curve nodes**, **676 finite-field isogeny
 classes**, and **232 independently verified directed isogeny edges**. The graph
-contains all 920 leaderboard models and 170 additional models appearing in
+contains all 922 leaderboard models and 170 additional models appearing in
 the P-192/P-224 walk evidence. Seventy-three indexed classes contain at least
 two models. The class and map relationships are deliberately different data.
 

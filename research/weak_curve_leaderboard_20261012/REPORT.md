@@ -4,11 +4,12 @@ The WeakCurves snapshot combines exact model identities, published
 covering cases, and selected-subgroup attack criteria in one queryable atlas.
 It provides a deterministic route from the two source-locked research
 databases and the repository's named-curve and transfer registries to a
-static catalog. The snapshot contains 814 prior exact models, 103 named
-curves (101 standards-provenance curves and two challenge curves), 36
+static catalog. The snapshot contains 814 prior exact models, 105 named
+curves (101 standards-provenance curves, two challenge curves, and two
+source-pinned pairing variants), 36
 published odd-characteristic parameter cases, three exact prime-field
-examples and sixteen criterion entries. Each evaluated finding has a
-[WID1 identifier](IDENTIFIERS.md) distinct from its curve's ICV1 identity.
+examples and twenty-three criterion entries. Each evaluated finding has a
+[WID1 identifier](IDENTIFIERS.md) distinct from its curve identity.
 
 ## What the leaderboard ranks
 
@@ -23,8 +24,9 @@ published parameter case is not an exact model and appears in its own view.
 | View | Rows | Meaning |
 | --- | ---: | --- |
 | Findings | 29 | 2 prime-field DLP conditions, 24 covering-model signals, 1 pairing candidate, 2 Oakley GHS invariant candidates |
-| Full exact corpus | 920 | 814 source-locked models, 103 named curves, 3 prime-field examples |
+| Full exact corpus | 922 | 814 source-locked models, 105 named curves, 3 prime-field examples |
 | Published cases | 36 | Iijima–Momose–Chao odd-characteristic `(2,…,2)` covering cases |
+| Protocol cases | 1 | SIKEp434 auxiliary-torsion key-recovery setting |
 | Large-field subset | 537 | 192–252-bit models; 384 unclassified in this index, 153 outside its domain |
 
 The large-field branch screen refines the 384 unclassified degree-six models:
@@ -36,8 +38,9 @@ each model's linked `curve_property.family_checks_json` and rechecked by the
 exporter’s count assertions; passing the cubic screen does not decide a
 covering or subgroup advantage.
 
-The 103 named curves are a tracked roster, not a census of all published
-curves. They have exact ICV1 model identities and standard or challenge aliases;
+The 105 named curves are a tracked roster, not a census of all published
+curves. The 103 inherited records have ICV1 identities; the two pairing
+variants use source-pinned WCP1 identities. All retain standard or challenge aliases;
 an unassessed row has no WID1 finding. WID1 is assigned only to a stated
 condition, with its own selected scope and evidence grade.
 
@@ -111,7 +114,7 @@ independent `ellgroup` result is `[10,10]`.
 ## Mechanism map
 
 The [machine-readable registry](criteria.json) specifies domain, recognition,
-required witness, construction and primary source for sixteen criteria. The
+required witness, construction and primary source for twenty-three criteria. The
 entries make four crucial separations.
 
 First, the [MOV reduction](https://doi.org/10.1145/103418.103434) uses a
@@ -157,7 +160,7 @@ measured advantage.
 Fifth, the graph and filters separate finite-field isogeny-class membership
 from an explicit route. Equal field size and trace put elliptic curves in the
 same isogeny class by Tate's theorem. The [graph export](ISOGENY_GRAPH.md)
-contains 1,090 indexed curves in 674 classes and 232 certified directed
+contains 1,092 indexed curves in 676 classes and 232 certified directed
 isogeny maps from the P-192/P-224 walk records. An atlas node receives an
 isogeny-transfer map tag only when it is an endpoint of a certified edge;
 the 319 atlas nodes in multi-model classes are not thereby assigned a map.
@@ -165,6 +168,19 @@ The GLV filter currently finds seven exact prime-field models with a rational
 `j=0` or `j=1728` automorphism screen. These are structural leads until the
 selected-subgroup endomorphism action and method cost are checked. GLS has a
 published recognition entry and no exact atlas-model match in this export.
+
+Sixth, [Ethereum's exact BN_SNARK1 variant](https://eips.ethereum.org/EIPS/eip-197)
+and [BLS12-381](https://datatracker.ietf.org/doc/draft-irtf-cfrg-pairing-friendly-curves/)
+have separately recorded order-`r` G1 and twist G2 generators and GT output
+fields. The [arithmetic replay](validate_pairing_roster.py) checks each
+generator's curve equation and `[r]P=O`, the G1 cofactor relation, and
+`ord_r(p)=12`. A pairing-friendly design supports its intended pairing
+protocols; DDH, static DH, subgroup-input exposure, and GT DLP each have
+their own witness and cost gate. [Hitt's minimal-field distinction](https://eprint.iacr.org/2006/415)
+is formalized at the group-order level in `lean/MinimalPairingField.lean`.
+The [SIKEp434 protocol row](protocol_cases.json) records the
+[Castryck–Decru](https://eprint.iacr.org/2022/975) key-recovery result under
+its auxiliary-torsion-image input, separate from the ordinary isogeny graph.
 
 ## Construction and search method
 

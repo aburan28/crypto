@@ -1,7 +1,7 @@
 # Lean proof map
 
 The proof artifacts are `lean/PrimeExamples.lean` and
-`lean/OakleyOrders.lean`. Their shared `lean-toolchain`,
+`lean/OakleyOrders.lean`, and `lean/MinimalPairingField.lean`. Their shared `lean-toolchain`,
 `lakefile.toml` and manifest pin Lean 4.34.1 and Mathlib commit
 `d13f23b723b8a846827a245b89c10fc7d3f11612`. The declaration
 `affineCount` is the finite sum of all
@@ -20,6 +20,8 @@ solutions to `y²=x³+ax+b (mod p)` for `0≤x,y<p`.
 | Oakley Groups 3 and 4 have RFC order decompositions `12r` and `4r` | `oakley3_full_order_factor`, `oakley4_full_order_factor` | Exact arithmetic on RFC-declared integers, checked; the RFC point counts themselves are hypotheses/source data |
 | Their field degrees factor as `5·31` and `5·37` | `oakley3_extension_factor`, `oakley4_extension_factor` | Exact arithmetic, checked |
 | Multiplying a point of order `c·r` by `c` yields order `r` | `selected_order_of_generator`; Oakley corollaries `oakley3_selected_order`, `oakley4_selected_order` | Generic additive-group theorem with the exact published point-order premise, checked |
+| For a finite-order element `x`, the order of `x^m` is `orderOf(x)/gcd(orderOf(x),m)` for `m≠0` | `embedding_degree_formula` | Generic group-order identity, checked; instantiate with `p` modulo `r` for the pairing field |
+| The minimal order of `x` divides `m·orderOf(x^m)`, and is the least positive exponent yielding one | `minimal_degree_divides_pairing_extension`, `minimal_degree_is_minimal` | Generic group-order implications, checked |
 
 The group-order formalization still needs the group construction with its
 unique point at infinity and a
@@ -28,6 +30,14 @@ algorithm, Pohlig–Hellman, and the MOV/Frey–Rück pairing reductions require
 their respective group or pairing formalizations. The present Lean proof is
 therefore an exact arithmetic component, not a formalization of the full
 cryptanalytic transfer.
+
+The minimal pairing-field declarations formalize the order calculation that
+separates `d=ord_r(p)` from `k=ord_r(p^m)`. Their remaining bridge is the
+finite-field theorem identifying `μ_r` inside `F_(p^d)` and the pairing image
+as an element of that field. The two imported pairing variants have `m=1`;
+their exact parameter and generator checks are replayed by
+`validate_pairing_roster.py`. This module does not formalize pairings, DDH,
+static-DH or the SIDH key-recovery algorithm.
 
 For the Oakley curves, the Lean subgroup theorem is conditional on the RFC
 generator-order premise. The independent checked Sage replay verifies that

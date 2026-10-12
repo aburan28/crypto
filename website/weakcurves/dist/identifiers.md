@@ -2,8 +2,10 @@
 
 The repository's [ICV1](../../docs/curves/ICV1.md) identifies an exact field
 representation and curve model. WID1 identifies **one mechanism claim on one
-ICV1 model or selected subgroup**. A curve may have several WID1 findings.
-A named standard is an alias pointing to ICV1, never a second curve identity.
+exact model or selected subgroup**. A curve may have several WID1 findings.
+A named standard is an alias pointing to one curve identity, never a second
+curve identity. The two source-pinned pairing variants use `WCP1` identities
+until their full ICV1 records and field-model encodings are imported.
 This is a catalog convention, not a security-bit estimate or a theorem that
 the associated attack is practical.
 
@@ -26,6 +28,16 @@ selector. A full curve order and a generator order are separate quantities.
 The identity excludes evidence grade, source links, costs, timestamps and
 free-form prose. Those can change as a finding is checked without renaming it.
 Changing the curve, selected order or route produces another WID1.
+
+`WCP1:fp<bits>:<16 lowercase SHA-256 hex digits>` is the snapshot's exact
+prime-field model identity for a pairing roster entry. Its digest hashes
+sorted-key compact JSON `{"a":a,"b":b,"field":"Fp","p":"<decimal p>"}`.
+The curve name, subgroup choice, trace, and source do not enter this model
+hash. This temporary identity is distinct from ICV1 because the source
+registry has no record for these two parameter variants yet. Protocol cases
+use a separate `WCPROTO1` namespace and are absent from the elliptic isogeny
+graph; the SIKEp434 case is keyed by its exact parameter name and attack
+family in this snapshot.
 
 | Code | Mechanism in this snapshot | Current claim scope |
 | --- | --- | --- |
@@ -57,7 +69,8 @@ RFC points and the exact orders of the derived `[4]P` and `[2]P` subgroup
 generators, using the RFC group-order claim as source data.
 
 This snapshot imports 103 named curves from the repository registry, including
-101 curves with standards provenance and two named challenge curves. It does
+101 curves with standards provenance and two named challenge curves, plus two
+source-pinned pairing variants. It does
 not enumerate every published elliptic curve or every possible mechanism.
 Rows without a finding carry no WID1 until a precise criterion is evaluated;
 absence of a WID1 is not a classification as secure.

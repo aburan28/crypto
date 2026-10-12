@@ -1,6 +1,6 @@
 name = "weak_curve_leaderboard"
 version = "0.1.0"
-defaultTargets = ["PrimeExamples", "OakleyOrders"]
+defaultTargets = ["PrimeExamples", "OakleyOrders", "MinimalPairingField"]
 
 [[require]]
 name = "mathlib"
@@ -12,3 +12,6 @@ name = "PrimeExamples"
 
 [[lean_lib]]
 name = "OakleyOrders"
+
+[[lean_lib]]
+name = "MinimalPairingField"

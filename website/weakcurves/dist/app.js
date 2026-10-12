@@ -22,6 +22,7 @@ const kind = {
   exact_covering_model: {label:'GHS cover model',grade:'Covering geometry',badge:'geometry',rank:1},
   low_embedding_degree_candidate: {label:'MOV / FR candidate',grade:'Candidate',badge:'candidate',rank:2},
   binary_ghs_invariant: {label:'Binary GHS',grade:'Exact invariant · route open',badge:'candidate',rank:2},
+  pairing_friendly_catalog: {label:'Pairing groups',grade:'Group-specific screen',badge:'open',rank:3},
   named_curve_unassessed: {label:'Named curve',grade:'Unassessed',badge:'open',rank:3},
   unclassified_covering_model: {label:'Covering open',grade:'Open',badge:'open',rank:3},
   outside_covering_index: {label:'Outside index',grade:'Open',badge:'open',rank:3},
@@ -71,6 +72,12 @@ function openRecord(record) {
   if (record.group_exponent) facts.push(['Group exponent',String(record.group_exponent)]);
   if (record.group_structure) facts.push(['Group structure',record.group_structure.join(' × ')]);
   if (record.embedding_degree) facts.push(['Embedding degree',String(record.embedding_degree)]);
+  if (record.g1_cofactor) facts.push(['G1 cofactor',String(record.g1_cofactor)]);
+  if (record.g1_generator) facts.push(['G1 generator',record.g1_generator.join(', ')]);
+  if (record.g2_twist) facts.push(['G2 twist',record.g2_twist]);
+  if (record.g2_generator) facts.push(['G2 generator',JSON.stringify(record.g2_generator)]);
+  if (record.g2_cofactor) facts.push(['G2 cofactor',String(record.g2_cofactor)]);
+  if (record.gt_field_degree) facts.push(['GT field',`F_(p^${record.gt_field_degree}), order r`]);
   if (record.field_modulus) facts.push(['Field polynomial',String(record.field_modulus)]);
   if (record.model_b) facts.push(['Model coefficient b',String(record.model_b)]);
   if (record.r) facts.push(['Largest prime factor r',String(record.r)]);
@@ -86,6 +93,7 @@ function openRecord(record) {
   facts.push(['Subgroup route',record.subgroup_advantage]);
   if (record.sha256) facts.push(['Model SHA-256',record.sha256]);
   if (record.proof) facts.push(['Evidence',record.proof]);
+  if (record.source_note) facts.push(['Source note',record.source_note]);
   if (record.source) facts.push(['Source',record.source]);
   if (record.findings?.length) facts.push(['Weakness IDs',record.findings.map(f=>f.id).join(' · ')]);
   const node = graphNodes.get(record.id);
@@ -103,6 +111,8 @@ function openRecord(record) {
     ? 'This exact model has a positive genus-three covering-model label. A selected subgroup map and comparative cost remain separate gates.'
     : record.signal === 'low_embedding_degree_candidate'
       ? 'The selected order and embedding degree are exact. The pairing image and destination-field cost remain to be certified.'
+      : record.signal === 'pairing_friendly_catalog'
+      ? 'This pairing-friendly variant deliberately has G1, G2 and GT groups. Inspect each group and the protocol input rules separately; pairing availability alone is not a finding of broken DLP or CDH.'
       : record.attack_ready
         ? 'The model and selected order satisfy a published discrete-log criterion. This snapshot reports no measured attack cost.'
         : 'This catalog record retains its exact identity and current classification status.';
@@ -208,11 +218,28 @@ function renderCases() {
   more.hidden=shown>=cases.length;
 }
 
+function renderProtocols() {
+  thead.replaceChildren();tbody.replaceChildren();
+  const head=document.createElement('tr');
+  ['Protocol case','Field and curve','Security goal','Mechanism','Evidence and prerequisites'].forEach(v=>{const th=document.createElement('th');th.textContent=v;head.append(th)});
+  thead.append(head);
+  const q=search.value.trim().toLowerCase();
+  const cases=(snapshot.protocol_cases||[]).filter(c=>!q||[c.name,c.id,c.security_goal,c.mechanism,c.prerequisites].some(v=>String(v).toLowerCase().includes(q)));
+  cases.slice(0,shown).forEach(c=>{
+    const row=document.createElement('tr');
+    const name=textCell(row,'');const link=document.createElement('a');link.href=c.source_urls[1];link.target='_blank';link.rel='noopener noreferrer';link.textContent=c.name+' ↗';name.append(link);
+    [c.field+' · '+c.curve,c.security_goal,c.mechanism,c.result+'; requires '+c.prerequisites].forEach(v=>textCell(row,v));
+    tbody.append(row);
+  });
+  $('#result-count').textContent=`Showing ${Math.min(shown,cases.length)} of ${cases.length} protocol cases`;
+  more.hidden=shown>=cases.length;
+}
+
 function render() {
   if (!snapshot) return;
-  $('#model-controls').style.display=tab==='families'?'none':'flex';
-  $('#criterion-controls').style.display=tab==='families'?'none':'flex';
-  if (tab==='families') renderCases();else renderCurves();
+  $('#model-controls').style.display=['families','protocols'].includes(tab)?'none':'flex';
+  $('#criterion-controls').style.display=['families','protocols'].includes(tab)?'none':'flex';
+  if (tab==='families') renderCases();else if(tab==='protocols') renderProtocols();else renderCurves();
 }
 
 function setTab(next) {
@@ -227,7 +254,9 @@ function renderCriteria(criteria) {
   criteriaById=new Map(criteria.map(c=>[c.id,c]));
   for (const c of criteria) {
     const option=document.createElement('option');option.value=c.id;
-    option.textContent=`${c.name} (${graphData.counts.atlas_checks[c.id]||0})`;
+    option.textContent=c.id==='sidh_auxiliary_torsion'
+      ? `${c.name} (${snapshot.counts.protocol_cases} protocol case)`
+      : `${c.name} (${graphData.counts.atlas_checks[c.id]||0})`;
     criterionFilter.append(option);
   }
   criteria.forEach((c,i)=>{
@@ -264,6 +293,7 @@ Promise.all([fetch('snapshot.json').then(r=>{if(!r.ok)throw Error('snapshot unav
     $('#signal-count').textContent=data.counts.findings;
     $('#corpus-count').textContent=data.counts.exact_models+data.counts.prime_field_examples+data.counts.named_curves;
     $('#case-count').textContent=data.counts.published_cases;
+    $('#protocol-count').textContent=data.counts.protocol_cases||0;
     render();
     window.dispatchEvent(new CustomEvent('weakcurves-ready',{detail:{graph,criteria,records:curveRecords(),openRecord}}));
   })
@@ -271,4 +301,5 @@ Promise.all([fetch('snapshot.json').then(r=>{if(!r.ok)throw Error('snapshot unav
 
 tabs.forEach(t=>t.addEventListener('click',()=>setTab(t.dataset.tab)));
 [search,fieldFilter,evidenceFilter,criterionFilter,checkFilter].forEach(el=>el.addEventListener('input',()=>{shown=50;render()}));
+criterionFilter.addEventListener('change',()=>{if(criterionFilter.value==='sidh_auxiliary_torsion')setTab('protocols')});
 more.addEventListener('click',()=>{shown+=50;render()});

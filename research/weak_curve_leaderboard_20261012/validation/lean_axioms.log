@@ -17,3 +17,8 @@
 'WeakCurveLeaderboard.selected_order_of_generator' depends on axioms: [propext, Classical.choice, Quot.sound]
 'WeakCurveLeaderboard.oakley3_selected_order' depends on axioms: [propext, Classical.choice, Quot.sound]
 'WeakCurveLeaderboard.oakley4_selected_order' depends on axioms: [propext, Classical.choice, Quot.sound]
+'WeakCurveLeaderboard.embedding_degree_formula' depends on axioms: [propext, Classical.choice, Quot.sound]
+'WeakCurveLeaderboard.minimal_degree_divides_pairing_extension' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'WeakCurveLeaderboard.minimal_degree_is_minimal' depends on axioms: [propext, Classical.choice, Quot.sound]

@@ -9,6 +9,8 @@ const DB: &str = "../weak_curve_database_20261012/weak_curves.sqlite";
 const CASES: &str = "../weak_curve_case_index_20261012/published_cases.sqlite";
 const CURVE_REGISTRY: &str = "../../docs/curves/registry.json";
 const TRANSFER_REGISTRY: &str = "../../docs/curves/jacobian-transfers.json";
+const PAIRING_ROSTER: &str = "pairing_curves.json";
+const PROTOCOL_CASES: &str = "protocol_cases.json";
 
 fn file_hash(path: &str) -> Result<String> {
     let bytes = fs::read(path)?;
@@ -313,6 +315,48 @@ fn named_curves() -> Result<Vec<Value>> {
     Ok(records)
 }
 
+fn pairing_curves() -> Result<Vec<Value>> {
+    let source: Vec<Value> = serde_json::from_slice(&fs::read(PAIRING_ROSTER)?)?;
+    if source.len() != 2 {
+        return Err("pairing roster count drifted".into());
+    }
+    source
+        .into_iter()
+        .map(|c| {
+            let p = c["p"].as_str().ok_or("pairing p missing")?;
+            let r = c["r"].as_str().ok_or("pairing r missing")?;
+            let name = c["name"].as_str().ok_or("pairing name missing")?;
+            let bits = if name.starts_with("Ethereum") { 254 } else { 381 };
+            let key = json!({"field":"Fp","p":p,"a":c["a"],"b":c["b"]});
+            let hash = format!("{:x}", Sha256::digest(serde_json::to_vec(&key)?));
+            let id = format!("WCP1:fp{bits}:{}", &hash[..16]);
+            let order = if name.starts_with("Ethereum") {
+                r.to_owned()
+            } else {
+                "4002409555221667393417789825735904156556882819939007885332058136124031650490837864442687629129030796414117214202539".to_owned()
+            };
+            let trace = if name.starts_with("Ethereum") {
+                "147946756881789318990833708069417712967"
+            } else {
+                "-15132376222941642751"
+            };
+            Ok(json!({"id":id,"slug":format!("wcp1-fp{bits}-{}", &hash[..16]),
+                "name":name,"aliases":c["aliases"],"p":p,"degree":1,"bits":bits,
+                "trace":trace,"order":order,"model_a":c["a"],"model_b":c["b"],
+                "r":r,"embedding_degree":c["embedding_degree"],
+                "g1_cofactor":c["g1_cofactor"],"g1_generator":c["g1_generator"],
+                "g2_twist":c["g2_twist"],"g2_generator":c["g2_generator"],
+                "g2_cofactor":c["g2_cofactor"],"gt_order":r,
+                "gt_field_degree":c["embedding_degree"],
+                "signal":"pairing_friendly_catalog","attack_ready":false,
+                "source":"pairing_standards","source_urls":c["source_urls"],
+                "source_note":c["source_note"],
+                "subgroup_advantage":"pairing-compatible groups; security depends on G1/G2/GT and protocol goals",
+                "findings":[]}))
+        })
+        .collect()
+}
+
 fn mul(a: u64, b: u64, p: u64) -> u64 {
     (a * b) % p
 }
@@ -492,7 +536,13 @@ fn snapshot() -> Result<Value> {
     let mut examples = prime_examples();
     attach_findings(&mut models);
     attach_findings(&mut examples);
-    let named = named_curves()?;
+    let mut named = named_curves()?;
+    named.extend(pairing_curves()?);
+    named.sort_by(|a, b| a["id"].as_str().cmp(&b["id"].as_str()));
+    let protocol_cases: Vec<Value> = serde_json::from_slice(&fs::read(PROTOCOL_CASES)?)?;
+    if protocol_cases.len() != 1 || protocol_cases[0]["id"] != "WCPROTO1:SIKEp434:CD2022" {
+        return Err("protocol case registry drifted".into());
+    }
     let mut curve_ids = std::collections::HashSet::new();
     let mut finding_ids = std::collections::HashSet::new();
     for record in models.iter().chain(&examples).chain(&named) {
@@ -513,7 +563,7 @@ fn snapshot() -> Result<Value> {
     if finding_ids.len() != 29 {
         return Err("finding count drifted".into());
     }
-    if curve_ids.len() != 920 {
+    if curve_ids.len() != 922 {
         return Err("curve identity count drifted".into());
     }
     let positive = models
@@ -557,15 +607,18 @@ fn snapshot() -> Result<Value> {
     Ok(json!({"schema":"weakcurves.snapshot.v2", "sources": {
         "model_database_sha256": file_hash(DB)?, "case_database_sha256": file_hash(CASES)?,
         "curve_registry_sha256":file_hash(CURVE_REGISTRY)?,
-        "transfer_registry_sha256":file_hash(TRANSFER_REGISTRY)?},
+        "transfer_registry_sha256":file_hash(TRANSFER_REGISTRY)?,
+        "pairing_roster_sha256":file_hash(PAIRING_ROSTER)?,
+        "protocol_cases_sha256":file_hash(PROTOCOL_CASES)?},
         "counts":{"exact_models":models.len(),"exact_covering_models":positive,
             "large_models":large,"large_cubic_screen_survivors":large_survivors,
             "large_cubic_depth_excluded":large_depth_excluded,"large_outside_domain":large_outside,
             "published_cases":cases.len(),"prime_field_examples":examples.len(),
-            "named_curves":named.len(),"oakley_ghs_candidates":2,
+            "named_curves":named.len(),"pairing_curves":2,"protocol_cases":protocol_cases.len(),
+            "oakley_ghs_candidates":2,
             "findings":finding_ids.len()},
         "models":models,"published_cases":cases,"prime_examples":examples,
-        "named_curves":named}))
+        "named_curves":named,"protocol_cases":protocol_cases}))
 }
 
 fn main() -> Result<()> {

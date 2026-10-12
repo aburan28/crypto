@@ -1,19 +1,29 @@
-# WeakCurves evidence snapshot 02
+# WeakCurves evidence snapshot 03
 
 This snapshot joins **814 exact elliptic models** from the source-locked
-weak-curve database, **103 named curves** from the repository's curve registry,
+weak-curve database, **105 named curves** from the repository's curve registry
+and the pinned pairing roster,
 and **36 published odd-characteristic covering cases**. The named roster
 includes Oakley Groups 3 and 4, with exact GHS invariant candidates and
 separate WID1 finding IDs. It adds three exhaustively checked prime-field
-examples and a sixteen-criterion
+examples and a twenty-three-criterion
 registry for anomalous, smooth-order, MOV, Frey–Rück, supersingular,
 binary-GHS, odd-characteristic GHS, cubic norm-one, quadratic-torus and
 proper-subfield mechanisms, plus direct extension-field decomposition,
 cover-and-decomposition, and cubic Jacobian-isogeny routes. The first [WeakCurves site](../../website/weakcurves/)
 uses this exact export.
 
+The new [pairing roster](pairing_curves.json) contains the exact Ethereum
+BN_SNARK1 variant and BLS12-381, with separate G1, G2, and GT parameters.
+The [arithmetic replay](validate_pairing_roster.py) checks both published
+generators and the minimal root-of-unity degree. A [SIKEp434 protocol
+case](protocol_cases.json) records the published auxiliary-torsion key-recovery
+setting outside the ordinary-curve isogeny graph. DDH and static-DH criteria
+state their challenge and oracle requirements; a curve-only record does not
+assert those protocol inputs.
+
 The [isogeny graph](ISOGENY_GRAPH.md) adds 170 verified-walk curve identities
-to the 920-model atlas, grouping 1,090 nodes into 674 finite-field isogeny
+to the 922-model atlas, grouping 1,092 nodes into 676 finite-field isogeny
 classes and displaying 232 certified directed maps. Its criterion checks
 power the site's vulnerability filters; check stages distinguish exact
 conditions, geometry, explicit maps, candidates and structural screens.
@@ -21,7 +31,7 @@ conditions, geometry, explicit maps, candidates and structural screens.
 The default leaderboard contains 29 finding rows: two prime-field models
 meeting a published DLP criterion, 24 exact small-field covering-model
 signals, one embedding-degree candidate, and two Oakley GHS invariant
-candidates. Its full-corpus view includes the 814 prior models, 103 named
+candidates. Its full-corpus view includes the 814 prior models, 105 named
 curves, and all three prime-field examples. The 537 prior
 models over 192–252-bit fields remain searchable with their actual cubic and
 quadratic screens: 247 pass the cubic necessary condition, 137 fail its
@@ -35,12 +45,13 @@ Run from this directory:
 cargo test --release --locked
 cargo run --release --locked -- build snapshot.json
 cargo run --release --locked -- check snapshot.json
+python3 validate_pairing_roster.py
 node --check ../../website/weakcurves/dist/app.js
 python3 build_isogeny_graph.py --check
 node --check ../../website/weakcurves/dist/graph.js
 ```
 
-The Rust exporter reopens both frozen SQLite inputs and both existing JSON
+The Rust exporter reopens both frozen SQLite inputs and the JSON
 registries, hashes their bytes, checks the exact import counts, enumerates
 the three prime-field models, and emits stable JSON with no time- or
 host-dependent fields. The graph builder binds the snapshot to verified
