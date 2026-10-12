@@ -344,6 +344,7 @@ static void test_oracle(uint64_t p, std::mt19937_64 &rng) {
     std::vector<rf_relation> tiny(1);
     rc = rf64_decompose(p, fbx.data(), fby.data(), N, tx.data(), ty.data(), (uint32_t)tx.size(), tiny.data(), 1, &opt, &res);
     CHECK(rc == RF_ERR_OVERFLOW && res.n_found == base.size() && res.n_written == 1, "overflow detection rc=%d found=%u", rc, res.n_found);
+    CHECK(res.chunk_used == RF_DEFAULT_CHUNK_64, "chunk 0 -> RF_DEFAULT_CHUNK_64 (got %u)", res.chunk_used);
     rc = rf64_decompose(p + 1, fbx.data(), fby.data(), N, tx.data(), ty.data(), 1, tiny.data(), 1, &opt, &res);
     CHECK(rc == RF_ERR_BAD_ARG, "even p rejected");
     std::vector<uint64_t> bad = tx; bad[0] = p;
@@ -416,9 +417,11 @@ static void test_oracle_p256(std::mt19937_64 &rng) {
     std::vector<rf_relation> out(256);
     rf_result res;
     for (int lookup : {RF_LOOKUP_SORTED, RF_LOOKUP_HASH}) {
-        rf_options opt{RF_BACKEND_EMULATE, lookup, 16};
+        /* chunk 0 must resolve to the P-256 default (16), not the 64-bit field's 32 */
+        rf_options opt{RF_BACKEND_EMULATE, lookup, 0};
         int rc = rf256_decompose(fbx.data(), fby.data(), 64, tx.data(), ty.data(), (uint32_t)ctls.size(), out.data(), 256, &opt, &res);
         CHECK(rc == RF_OK, "rf256_decompose rc=%d", rc);
+        CHECK(res.chunk_used == RF_DEFAULT_CHUNK_256, "p256 chunk 0 -> RF_DEFAULT_CHUNK_256 (got %u)", res.chunk_used);
         for (size_t k = 0; k < ctls.size(); k++) {
             bool found = false;
             for (uint32_t r = 0; r < res.n_written; r++)

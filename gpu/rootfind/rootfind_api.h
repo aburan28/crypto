@@ -1,8 +1,11 @@
 /* rootfind_api.h -- C ABI for the GPU root-finding 2-decomposition oracle.
  *
- * Linked from Rust through src/cryptanalysis/gpu_rootfind.rs (cargo
- * feature `gpu-rootfind`), from the CUDA driver bench.cu, and from the
- * CPU test harness.  Two backends implement the same contract:
+ * Consumers: the Rust FFI crate gpu/rootfind/rs (its build.rs compiles
+ * rootfind_api.cpp with the emulation backend, or links a prebuilt
+ * librootfind_cuda.a when GPU_ROOTFIND_CUDA_LIB_DIR is set; the root
+ * crate's src/cryptanalysis/gpu_rootfind.rs is pure Rust and does not
+ * link this library), the CUDA driver bench.cu, and the CPU test harness
+ * test_cpu.cpp.  Two backends implement the same contract:
  *
  *   emulate -- the kernel's per-thread function (rootfind.cuh) run on the
  *              host for every (target, slice) thread index.  Always
@@ -43,10 +46,20 @@ typedef struct rf_relation {
 enum rf_backend { RF_BACKEND_AUTO = 0, RF_BACKEND_EMULATE = 1, RF_BACKEND_CUDA = 2 };
 enum rf_lookup  { RF_LOOKUP_AUTO = 0, RF_LOOKUP_SORTED = 1, RF_LOOKUP_HASH = 2 };
 
+/* Library default for chunk == 0, per field.  The slice length sets the
+ * per-thread register footprint (2 * chunk field elements live during
+ * the batched inversion): 32 one-word elements fit comfortably, 32
+ * four-limb P-256 elements do not, hence the smaller P-256 default.
+ * Wrappers pass 0 through; the policy lives here only. */
+#define RF_DEFAULT_CHUNK_64  32u
+#define RF_DEFAULT_CHUNK_256 16u
+
 typedef struct rf_options {
     int backend;        /* enum rf_backend */
     int lookup;         /* enum rf_lookup */
-    uint32_t chunk;     /* factor-base slice per thread: 16, 32 or 64; 0 = 32 */
+    uint32_t chunk;     /* factor-base slice per thread: 16, 32 or 64;
+                           0 = RF_DEFAULT_CHUNK_64 (rf64_decompose) or
+                               RF_DEFAULT_CHUNK_256 (rf256_decompose) */
 } rf_options;
 
 typedef struct rf_result {

@@ -132,8 +132,11 @@ so that it can be dropped in (§5, future work).
 - `rootfind_api.h/.cpp` — C ABI: `rf64_decompose`, `rf256_decompose`,
   `rf_cuda_available`, `rf_backend_info`, `rf_strerror`. Canonical
   coordinates in, index relations out. Backend `AUTO|EMULATE|CUDA`,
-  lookup `AUTO|SORTED|HASH`, `chunk ∈ {16, 32, 64}`. Rejects even/out-of-
-  range `p`, non-canonical coordinates, bad chunk; reports overflow.
+  lookup `AUTO|SORTED|HASH`, `chunk ∈ {16, 32, 64}` (`chunk = 0` selects
+  the per-field library default, `RF_DEFAULT_CHUNK_64 = 32` /
+  `RF_DEFAULT_CHUNK_256 = 16`; wrappers pass `0` through). Rejects
+  even/out-of-range `p`, non-canonical coordinates, bad chunk; reports
+  overflow.
 - `rootfind_cuda.cu` — the three kernels (`k_decompose_sorted`,
   `k_decompose_shared_hash`, `k_decompose_global_hash`), device memory
   management, event timing. Compiled only with `RF_HAVE_CUDA=1`.

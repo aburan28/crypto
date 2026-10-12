@@ -172,7 +172,13 @@ pub fn targets_canonical(curve: &FastCurve, targets: &[Pt]) -> (Vec<u64>, Vec<u6
 /// `a = −3` prime-order curve at `bits` bits, a small-x factor base of
 /// `fb_size` points, and a target batch of up to 40 positive controls
 /// `±F_i ± F_j`, `n_random` random on-curve points, and the degenerate
-/// `R = F_3` last.  Returns `(curve, fb, targets, n_controls)`.
+/// `R = F_d` last, with `d = min(3, fb_size − 1)` (so `R = F_3` for every
+/// factor base of at least four points).  Returns
+/// `(curve, fb, targets, n_controls)`.
+///
+/// # Panics
+///
+/// If `fb_size == 0` or the curve yields fewer points than requested.
 pub fn synthetic_instance(
     bits: u32,
     fb_size: usize,
@@ -185,6 +191,11 @@ pub fn synthetic_instance(
 
     let (curve, _g) = find_a3_curve(bits, 3).expect("curve");
     let fb = FastFactorBase::build(&curve, fb_size);
+    assert!(
+        fb_size > 0 && fb.len() == fb_size,
+        "synthetic_instance: factor base of {fb_size} points requested, {} built",
+        fb.len()
+    );
     let mut rng = StdRng::seed_from_u64(seed);
     let mut targets = Vec::new();
     for _ in 0..40 {
@@ -211,7 +222,7 @@ pub fn synthetic_instance(
             targets.push(p);
         }
     }
-    targets.push(fb.pts[3]);
+    targets.push(fb.pts[3.min(fb.len() - 1)]);
     (curve, fb, targets, n_ctl)
 }
 

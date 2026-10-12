@@ -52,7 +52,11 @@ pub enum Lookup {
 pub struct Options {
     pub backend: Backend,
     pub lookup: Lookup,
-    /// Factor-base slice per thread: 16, 32 or 64 (0 = library default).
+    /// Factor-base slice per thread: 16, 32 or 64.  `0` is passed through
+    /// to the library, whose default is per field: 32 for the 64-bit field
+    /// (`RF_DEFAULT_CHUNK_64`) and 16 for P-256 (`RF_DEFAULT_CHUNK_256`,
+    /// register pressure of four-limb elements).  `Report::chunk_used`
+    /// reports what ran.
     pub chunk: u32,
 }
 
@@ -258,6 +262,8 @@ pub fn decompose64(
     if fb_x.len() != fb_y.len() || tx.len() != ty.len() || fb_x.is_empty() || tx.is_empty() {
         return Err(Error::BadArgument);
     }
+    let n_fb = u32::try_from(fb_x.len()).map_err(|_| Error::BadArgument)?;
+    let n_t = u32::try_from(tx.len()).map_err(|_| Error::BadArgument)?;
     let call = |cap: u32| -> (i32, ffi::RfResult, Vec<ffi::RfRelation>) {
         let mut out = vec![ffi::RfRelation::default(); cap as usize];
         let opt = ffi::RfOptions {
@@ -273,10 +279,10 @@ pub fn decompose64(
                 p,
                 fb_x.as_ptr(),
                 fb_y.as_ptr(),
-                fb_x.len() as u32,
+                n_fb,
                 tx.as_ptr(),
                 ty.as_ptr(),
-                tx.len() as u32,
+                n_t,
                 out.as_mut_ptr(),
                 cap,
                 &opt,
@@ -306,14 +312,15 @@ pub fn decompose_p256(
     {
         return Err(Error::BadArgument);
     }
-    let n_fb = (fb_x.len() / 4) as u32;
-    let n_t = (tx.len() / 4) as u32;
+    let n_fb = u32::try_from(fb_x.len() / 4).map_err(|_| Error::BadArgument)?;
+    let n_t = u32::try_from(tx.len() / 4).map_err(|_| Error::BadArgument)?;
     let call = |cap: u32| -> (i32, ffi::RfResult, Vec<ffi::RfRelation>) {
         let mut out = vec![ffi::RfRelation::default(); cap as usize];
         let opt = ffi::RfOptions {
             backend: backend_code(opts.backend),
             lookup: lookup_code(opts.lookup),
-            chunk: if opts.chunk == 0 { 16 } else { opts.chunk },
+            // 0 = library default (RF_DEFAULT_CHUNK_256 = 16 for this field).
+            chunk: opts.chunk,
         };
         let mut res = ffi::RfResult::default();
         // SAFETY: as in decompose64; limb counts were checked above.
@@ -342,10 +349,13 @@ where
 {
     // Expected hits are sparse; start with 4 per target plus slack and
     // retry once with the exact count if the kernel reports overflow.
-    let cap0 = (4 * n_targets + 1024) as u32;
+    // The counter is 32-bit on the C side, so saturate rather than wrap:
+    // a batch large enough to hit this would overflow the kernel's own
+    // counter anyway and come back as `Overflow`.
+    let cap0 = u32::try_from(4 * n_targets + 1024).unwrap_or(u32::MAX);
     let (mut rc, mut res, mut out) = call(cap0);
     if rc == ffi::RF_ERR_OVERFLOW {
-        let (rc2, res2, out2) = call(res.n_found + 64);
+        let (rc2, res2, out2) = call(res.n_found.saturating_add(64));
         rc = rc2;
         res = res2;
         out = out2;
@@ -558,21 +568,50 @@ mod tests {
             });
         }
         for lookup in [Lookup::Sorted, Lookup::Hash] {
-            let rep = decompose_p256(
-                &fbx,
-                &fby,
-                &tx,
-                &ty,
-                Options {
-                    backend: Backend::Emulate,
-                    lookup,
-                    chunk: 16,
-                },
-            )
-            .expect("p256 oracle");
-            for e in &expect {
-                assert!(rep.relations.contains(e), "{lookup:?}: missing {e:?}");
+            for chunk in [0u32, 16, 32] {
+                let rep = decompose_p256(
+                    &fbx,
+                    &fby,
+                    &tx,
+                    &ty,
+                    Options {
+                        backend: Backend::Emulate,
+                        lookup,
+                        chunk,
+                    },
+                )
+                .expect("p256 oracle");
+                // chunk 0 resolves to the library's per-field default
+                // (RF_DEFAULT_CHUNK_256 = 16), not to the 64-bit field's 32.
+                let want = if chunk == 0 { 16 } else { chunk };
+                assert_eq!(rep.chunk_used, want, "{lookup:?}: chunk_used");
+                for e in &expect {
+                    assert!(rep.relations.contains(e), "{lookup:?}: missing {e:?}");
+                }
             }
         }
+    }
+
+    #[test]
+    fn chunk_zero_resolves_per_field_default() {
+        let (curve, fb, targets, _) = synthetic_instance(40, 64, 8, 3);
+        let (fx, fy) = factor_base_canonical(&curve, &fb);
+        let (tx, ty) = targets_canonical(&curve, &targets);
+        let rep = decompose64(
+            curve.f.p,
+            &fx,
+            &fy,
+            &tx,
+            &ty,
+            Options {
+                backend: Backend::Emulate,
+                ..Options::default()
+            },
+        )
+        .expect("oracle");
+        assert_eq!(
+            rep.chunk_used, 32,
+            "64-bit field default is RF_DEFAULT_CHUNK_64"
+        );
     }
 }

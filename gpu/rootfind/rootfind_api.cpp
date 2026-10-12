@@ -73,12 +73,16 @@ int resolve_backend(int requested) {
     return requested;
 }
 
+/* `default_chunk` is the per-field library default substituted for
+ * chunk == 0 (RF_DEFAULT_CHUNK_64 / RF_DEFAULT_CHUNK_256); every wrapper
+ * passes 0 through so the policy lives in exactly one place. */
 int check_common(const void *fb_x, const void *fb_y, uint32_t n_fb, const void *tx, const void *ty,
-                 uint32_t n_targets, rf_relation *out, uint32_t cap, rf_options *opt, rf_result *res) {
+                 uint32_t n_targets, rf_relation *out, uint32_t cap, rf_options *opt, rf_result *res,
+                 uint32_t default_chunk) {
     if (!fb_x || !fb_y || !tx || !ty || !res || n_fb == 0 || n_targets == 0) return RF_ERR_BAD_ARG;
     if (cap > 0 && !out) return RF_ERR_BAD_ARG;
     std::memset(res, 0, sizeof(*res));
-    if (opt->chunk == 0) opt->chunk = 32;
+    if (opt->chunk == 0) opt->chunk = default_chunk;
     if (!rf::chunk_ok(opt->chunk)) return RF_ERR_BAD_CHUNK;
     if (opt->lookup != RF_LOOKUP_AUTO && opt->lookup != RF_LOOKUP_SORTED && opt->lookup != RF_LOOKUP_HASH) return RF_ERR_BAD_ARG;
     if (opt->backend != RF_BACKEND_AUTO && opt->backend != RF_BACKEND_EMULATE && opt->backend != RF_BACKEND_CUDA) return RF_ERR_BAD_ARG;
@@ -93,7 +97,7 @@ extern "C" int rf64_decompose(uint64_t p,
                               rf_relation *out, uint32_t cap,
                               const rf_options *opt_in, rf_result *res) {
     rf_options opt = opt_in ? *opt_in : rf_options{RF_BACKEND_AUTO, RF_LOOKUP_AUTO, 0};
-    int rc = check_common(fb_x, fb_y, n_fb, tx, ty, n_targets, out, cap, &opt, res);
+    int rc = check_common(fb_x, fb_y, n_fb, tx, ty, n_targets, out, cap, &opt, res, RF_DEFAULT_CHUNK_64);
     if (rc != RF_OK) return rc;
     if ((p & 1) == 0 || p <= 3 || p >= (1ull << 62)) return RF_ERR_BAD_ARG;
     for (uint32_t i = 0; i < n_fb; i++) if (fb_x[i] >= p || fb_y[i] >= p) return RF_ERR_BAD_ARG;
@@ -131,7 +135,7 @@ extern "C" int rf256_decompose(const uint64_t *fb_x, const uint64_t *fb_y, uint3
                                rf_relation *out, uint32_t cap,
                                const rf_options *opt_in, rf_result *res) {
     rf_options opt = opt_in ? *opt_in : rf_options{RF_BACKEND_AUTO, RF_LOOKUP_AUTO, 0};
-    int rc = check_common(fb_x, fb_y, n_fb, tx, ty, n_targets, out, cap, &opt, res);
+    int rc = check_common(fb_x, fb_y, n_fb, tx, ty, n_targets, out, cap, &opt, res, RF_DEFAULT_CHUNK_256);
     if (rc != RF_OK) return rc;
 
     Fp256Ctx f = fp256_ctx_p256();
