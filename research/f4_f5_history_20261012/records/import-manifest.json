@@ -1,0 +1,18 @@
+{
+  "schema": "groebner.history-import/v1",
+  "repository": "aburan28/crypto",
+  "source_branch": "perf-history",
+  "source_branch_head_observed": "d00aeb457e7902f5b10426dceb31670b93972add",
+  "captured_at_utc": "2026-10-12T00:09:06Z",
+  "method": "GitHub contents API; decoded bytes preserved; Git blob IDs checked against the original directory listing",
+  "historical_producer": "scripts/perf/perfhistory.py (legacy Python orchestration of native perfbench)",
+  "snapshots": [
+    {"file":"20261008T150820Z-93ff0c72333c.json","git_blob":"27e66dcfcc37e569739e8f5fb480c286b17e3415","bytes":24467},
+    {"file":"20261009T163719Z-6f81260f6ab5.json","git_blob":"ca829a5d1a05c334aae443d7609e00fb886cb7a7","bytes":24397},
+    {"file":"20261011T173144Z-8a41eca79320.json","git_blob":"b75af9f2a849904429e02198ca259753925243c6","bytes":24406},
+    {"file":"20261011T181908Z-0cfba41136ff.json","git_blob":"8209e6801b3a32043d1f835caff7441d50a1852e","bytes":24606},
+    {"file":"20261011T204041Z-f88e5909f6cd.json","git_blob":"1e6749aa02d05138a25c8fbc4ff4fad9ae024284","bytes":24558},
+    {"file":"20261011T220542Z-fb926c0206ab.json","git_blob":"335c12b2c59fc9a8b7c3930afaf1108bf00f555d","bytes":24368},
+    {"file":"20261011T222036Z-e478b952a890.json","git_blob":"0e24a17f3404db5de8e82972668716115d9e2d23","bytes":24573}
+  ]
+}

@@ -1,0 +1,22 @@
+
+running 17 tests
+test cryptanalysis::matrix_f5_f2::tests::avx512_unpack_matches_scalar_for_sparse_dense_and_partial_words ... ok
+test cryptanalysis::matrix_f5_f2::tests::certified_original_rows_preserve_independent_rows_and_exact_fallback ... ok
+test cryptanalysis::matrix_f5_f2::tests::criterion_cursor_reduces_across_prefix_and_temporary_pivot_words ... ok
+test cryptanalysis::matrix_f5_f2::tests::criterion_prunes_nothing_for_quadratics_at_degree_three ... ok
+test cryptanalysis::matrix_f5_f2::tests::direct_criterion_pack_preserves_cancelled_missing_columns ... ok
+test cryptanalysis::matrix_f5_f2::tests::direct_criterion_products_match_boolean_multiplication ... ok
+test cryptanalysis::matrix_f5_f2::tests::direct_packed_f5_build_matches_sorted_builder_and_falls_back_on_sparse_columns ... ok
+test cryptanalysis::matrix_f5_f2::tests::direct_scalar_unpack_matches_push_path ... ok
+test cryptanalysis::matrix_f5_f2::tests::echelon_option_preserves_the_f5_row_space ... ok
+test cryptanalysis::matrix_f5_f2::tests::f5_rows_span_the_f4_row_space_on_random_systems ... ok
+test cryptanalysis::matrix_f5_f2::tests::frobenius_criterion_prunes_the_leading_monomial_multiple ... ok
+test cryptanalysis::matrix_f5_f2::tests::fused_row_build_matches_two_pass_rows_and_full_count ... ok
+test cryptanalysis::matrix_f5_f2::tests::koszul_criterion_prunes_leading_monomials_of_earlier_generators ... ok
+test cryptanalysis::matrix_f5_f2::tests::naive_f2_criterion_is_unsound_in_the_boolean_ring ... ok
+test cryptanalysis::matrix_f5_f2::tests::sampled_column_certificate_is_exact_and_falls_back ... ok
+test cryptanalysis::matrix_f5_f2::tests::support_split_certificate_handles_projection_across_words ... ok
+test cryptanalysis::matrix_f5_f2::tests::support_split_certificate_is_exact_and_falls_back ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 3932 filtered out; finished in 0.12s
+
