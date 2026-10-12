@@ -1,10 +1,9 @@
 name: ECC2K-130 native candidate benchmark
 on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
-  push:
-    branches: [codex/ecc2k130-native-square]
-    paths:
-      - .github/workflows/ecc2k130-native-benchmark.yml
 permissions:
   contents: read
 concurrency:

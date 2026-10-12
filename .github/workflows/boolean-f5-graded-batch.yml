@@ -1,24 +1,9 @@
 name: Boolean F5 exact graded batch
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'tools/isolated_bench.py'
-      - 'research/boolean_f5_graded_batch_20261002/**'
-      - 'src/cryptanalysis/gf2_elim.rs'
-      - '.github/workflows/boolean-f5-graded-batch.yml'
-  pull_request:
-    paths:
-      - 'tools/isolated_bench.py'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - 'build.rs'
-      - '.cargo/**'
-      - 'rust-toolchain*'
-      - 'research/boolean_f5_graded_batch_20261002/**'
-      - 'src/cryptanalysis/gf2_elim.rs'
-      - '.github/workflows/boolean-f5-graded-batch.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
     inputs:
       phase:

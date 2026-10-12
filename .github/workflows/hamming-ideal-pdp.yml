@@ -6,10 +6,9 @@ name: Hamming-ideal PDP oracle (self-test and replay)
 # replays the n = 7 cell for two encodings and compares the recorded call
 # counts, and re-derives the summary table from the frozen raw results.
 on:
-  pull_request:
-    paths:
-      - 'research/hamming_ideal_pdp_20260930/**'
-      - '.github/workflows/hamming-ideal-pdp.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 permissions:
   contents: read

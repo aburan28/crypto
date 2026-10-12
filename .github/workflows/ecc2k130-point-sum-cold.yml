@@ -1,11 +1,9 @@
 name: ECC2K130 point-sum frozen-Q cold CPU panel
 
 on:
-  pull_request:
-    paths:
-      - 'tools/isolated_bench.py'
-      - .github/workflows/ecc2k130-point-sum-cold.yml
-      - research/notes/ecc2k130/point_sum_cold_20260930/**
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 
 permissions:

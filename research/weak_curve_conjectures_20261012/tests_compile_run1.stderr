@@ -1,0 +1,11 @@
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `hex`
+   --> ../../src/hash/sha256.rs:342:9
+    |
+342 |         hex::decode(hex_str).unwrap()
+    |         ^^^ use of unresolved module or unlinked crate `hex`
+    |
+    = help: you might be missing a crate named `hex`
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0433`.
