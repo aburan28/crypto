@@ -42,11 +42,11 @@ jobs:
       - name: Check frozen inputs, parser and materializer failure cases
         run: |
           python3 -m unittest discover -s research/notes/ecc2k130/compact_ir_ledger_20260930 -p 'test_panel.py' -v
-          python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p 'test_materialize.py' -v
+          cargo test --release --locked --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml
       - name: Materialize exact measured source
         run: |
           mkdir -p "${{ runner.temp }}/compact-ir"
-          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+          cargo run --release --locked --quiet --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml -- materialize \
             --freeze research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json \
             --dest "${{ runner.temp }}/compact-ir-frozen-src" \
             --receipt "${{ runner.temp }}/compact-ir/materialization.json"
@@ -117,7 +117,7 @@ jobs:
       - name: Materialize exact measured source and build
         run: |
           mkdir -p "${{ runner.temp }}/compact-ir"
-          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+          cargo run --release --locked --quiet --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml -- materialize \
             --freeze research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json \
             --dest "${{ runner.temp }}/compact-ir-frozen-src" \
             --receipt "${{ runner.temp }}/compact-ir/materialization.json"

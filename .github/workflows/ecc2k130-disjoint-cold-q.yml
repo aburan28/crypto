@@ -52,7 +52,7 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/disjoint-cold"
           python3 -m py_compile research/notes/ecc2k130/disjoint_cold_q_20260930/*.py
-          python3 -m unittest discover -s research/notes/ecc2k130/compact_frozen_source_replay_20260929 -p test_materialize.py -v
+          cargo test --release --locked --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml
           python3 research/notes/ecc2k130/disjoint_cold_q_20260930/verify_frozen.py > "$RUNNER_TEMP/disjoint-cold/input_replay.json"
           cmp "$RUNNER_TEMP/disjoint-cold/input_replay.json" research/notes/ecc2k130/disjoint_cold_q_20260930/INPUT_RECEIPT.json
       - name: Rehash and independently replay both archived local smoke blocks
@@ -89,7 +89,7 @@ jobs:
       - name: Materialize and build exact frozen source
         run: |
           set -euo pipefail
-          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+          cargo run --release --locked --quiet --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml -- materialize \
             --freeze research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json \
             --dest "$RUNNER_TEMP/disjoint-cold-frozen-src" \
             --receipt "$RUNNER_TEMP/disjoint-cold/materialization.json"
@@ -164,7 +164,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/disjoint-cold"
-          python3 research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py \
+          cargo run --release --locked --quiet --manifest-path research/notes/ecc2k130/compact_frozen_source_replay_20260929/frozen-materialize/Cargo.toml -- materialize \
             --freeze research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json \
             --dest "$RUNNER_TEMP/disjoint-cold-frozen-src" \
             --receipt "$RUNNER_TEMP/disjoint-cold/materialization.json"
