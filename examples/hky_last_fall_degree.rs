@@ -188,7 +188,10 @@ impl ArtinSchreier {
                 basis.sort_by(|a, b| b.0.cmp(&a.0));
             }
         }
-        ArtinSchreier { rows: basis, kernel }
+        ArtinSchreier {
+            rows: basis,
+            kernel,
+        }
     }
     fn solve(&self, mut c: u64) -> Vec<u64> {
         let mut t = 0u64;
@@ -380,7 +383,10 @@ pub fn ideal_side(nv: u32, sols: &[u64], cmax: u32) -> (Vec<usize>, u32) {
     }
     // Buchberger–Möller scan in ascending deglex: a monomial is standard iff
     // its evaluation vector on S is independent of the earlier standard ones.
-    assert!(s <= 128, "solution set too large for the u128 evaluation basis");
+    assert!(
+        s <= 128,
+        "solution set too large for the u128 evaluation basis"
+    );
     let mut basis: Vec<u128> = vec![];
     let mut standard: Vec<u64> = vec![];
     for &m in &monos {
@@ -410,7 +416,11 @@ pub fn ideal_side(nv: u32, sols: &[u64], cmax: u32) -> (Vec<usize>, u32) {
     let dg = monomials_deglex(nv, max_std + 1)
         .into_iter()
         .filter(|m| !std_set.contains(m))
-        .filter(|&m| (0..nv).filter(|i| m >> i & 1 == 1).all(|i| std_set.contains(&(m & !(1 << i)))))
+        .filter(|&m| {
+            (0..nv)
+                .filter(|i| m >> i & 1 == 1)
+                .all(|i| std_set.contains(&(m & !(1 << i))))
+        })
         .map(|m| m.count_ones())
         .max()
         .unwrap_or(0);
@@ -600,7 +610,10 @@ fn measure(d: &Draw, cmax: u32) -> Value {
     // cross-check: every solution satisfies every descended equation
     for &p in &sols {
         for e in &eqs {
-            assert!(!e.iter().fold(false, |acc, &m| acc ^ eval(m, p)), "solution check");
+            assert!(
+                !e.iter().fold(false, |acc, &m| acc ^ eval(m, p)),
+                "solution check"
+            );
         }
     }
     let (idim, dg) = ideal_side(nv, &sols, cmax);
@@ -681,7 +694,10 @@ fn plain_low(eqs: &[Vec<u64>], nv: u32, c: u32) -> usize {
             }
         }
     }
-    ech.pivots.keys().filter(|&&t| ring.degree_of_col(t) < c).count()
+    ech.pivots
+        .keys()
+        .filter(|&&t| ring.degree_of_col(t) < c)
+        .count()
 }
 
 // ------------------------------------------------------------------ draws
