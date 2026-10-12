@@ -50,10 +50,44 @@ sage factor_base_dor.sage --field 8 --dim 4 --targets 48 --out dor.json
 intermediate). Two findings there: symmetry breaking (`nb_break`) lifts the
 decomposable fraction toward `3! = 6` (5.4x at n=11, dim 3), but the chained
 `D*` is structure-independent (= 5 across subfield/standard/random), because
-the full-field intermediate dilutes the factor base. The special-subspace
-degree drop lives in the direct symmetric `S_4` encoding, which needs more
-variables than this dense instrument handles; the direct `m = 2` results
-already show it (subfield and standard below random).
+the full-field intermediate dilutes the factor base.
+
+`--symmetric-s4` is the direct `m = 3` encoding instead: `S_4` written in
+the elementary symmetric functions `e1, e2, e3` of the summands (the
+formula of `src/cryptanalysis/koblitz_sym_s4.rs`, checked here against the
+resultant), Boolean-quadratic after descent. Structures: `geometric`
+(`V = θ<1, g, …, g^{l-1}>`, the Galbraith–Gebregiyorgis "special subspace",
+`e_k` in a space of dimension `k(l-1)+1`), `standard` (`θ = 1, g = z`),
+`subfield` (closed under products, `e_k ∈ V`), `random` (`e_k` in
+`span(V^k)`). Satisfiability is labelled exactly with PolyBoRi, and the
+report counts *spurious* targets: Boolean-satisfiable with no point
+decomposition. Findings (`factor_base_dor_results.json`,
+`symmetric_s4_direct`): with `6l - 3 > n` the system is underdetermined and
+never unsatisfiable (n = 9, l = 3: 0/16 refutable on every structure), which
+is why GG add membership constraints; at the determined cells `D*` for the
+geometric window is 4 at n = 9, l = 2 and ≥ 5 at n = 15, l = 3 — no lower
+than the chained system — while the subfield base refutes at `D* = 3` with
+no spurious solutions (and no coverage at that size). The special subspace
+buys unknowns (15 against the chain's 24 at n = 15), not degree.
+
+```
+sage factor_base_dor.sage --field 9 --dim 2 --symmetric-s4 --selftest 12
+sage factor_base_dor.sage --field 15 --dim 3 --symmetric-s4 --dmax 4 --targets 16 --dstar-sample 6
+```
+
+`--delta-sweep D0,D1,...` is the Shantz–Teske delta method: the base
+dimension is set by `m·dim = n − δ` and the sweep reports, per `δ`, the
+decomposable fraction (beside the predicted `2^{-δ}` factor), the mean `D*`,
+the Macaulay shape at `D*`, and a work-per-relation proxy
+(`rows × cols / fraction`). At n = 8, 9 (m = 2) `δ = +1, +2` lower `D*` by
+about one degree and the proxy 10–13x; `δ = +3` at n = 9 leaves no
+decomposable target in 24, so the yield side wins once `2^{-δ}` reaches the
+base's coverage. The proxy ignores that a smaller base also needs fewer
+relations, so it understates the gain.
+
+```
+sage factor_base_dor.sage --field 9 --structures standard --delta-sweep=-1,1,3 --dmax 5 --targets 24
+```
 
 `--frobenius-windows` checks the GGMP §3.1 mechanism: the windows
 `V_i = <θ^(2^j)>` satisfy `π^dim(V_i) = V_{i+1}` and are disjoint, so a
@@ -109,8 +143,10 @@ What it does not cover:
   total degree 12 to degree 4. Over a vector-space factor base this does not
   by itself lower the solving degree (Galbraith–Gebregiyorgis 2014; HKY need
   a "special subspace" closed under products, which is the subfield case).
-  The engine measures the chained `m = 3` system, not the direct symmetric
-  `S_4`, so it does not yet capture the full lever.
+  `--symmetric-s4` measures exactly this and agrees: the geometric special
+  subspace does not lower `D*`, the multiplicatively closed base does. What
+  the engine still lacks is GG's membership constraints, so the symmetric
+  system is only well-posed when `6l − 3 ≤ n`.
 - **Prime fields.** There is no subfield to descend into, so the degree of
   regularity is a different object (Diem's degree-`k` extension, or the
   symmetric Semaev system over `F_p`). `--curve p256` prints this note.

@@ -238,10 +238,11 @@ def poly_degree(poly):
 
 # ── Macaulay refutation degree over GF(2) ──────────────────────────────
 
-def refutation_degree(equations, nvars, dmax):
+def refutation_degree(equations, nvars, dmax, shapes=None):
     """Smallest D in 2..dmax at which the constant 1 lies in the GF(2) row
     space of the degree-D Macaulay matrix (the solving degree D*), or None.
-    Returns (D*, rank_profile) with the row rank at each degree reached."""
+    Returns (D*, rank_profile) with the row rank at each degree reached.
+    If `shapes` is a dict it receives {D: (rows, cols)} for each degree."""
     monomials = [0]
     for k in range(1, nvars + 1):
         for comb in itertools.combinations(range(nvars), k):
@@ -271,6 +272,8 @@ def refutation_degree(equations, nvars, dmax):
                     rows.append(row)
         rank, const_in_span = gf2_rank(rows, index[0])
         profile[D] = rank
+        if shapes is not None:
+            shapes[D] = (len(rows), len(index))
         if const_in_span:
             return D, profile
     return None, profile
@@ -778,6 +781,279 @@ def measure_structure_m3(field, name, dim, dmax, targets_int, seed, dstar_sample
     return summary
 
 
+# ── direct symmetric S_4 (m = 3): Galbraith-Gebregiyorgis special subspaces ──
+#
+# The chained system above carries an n-bit intermediate U and is cubic.
+# Galbraith-Gebregiyorgis (ePrint 2014/806) instead write S_4(x1,x2,x3,x_R)
+# in the elementary symmetric functions e1, e2, e3 of the summands.  For
+# y^2 + xy = x^3 + b that is (src/cryptanalysis/koblitz_sym_s4.rs, checked
+# against the resultant):
+#
+#   S_4 = x^4 b^2 + e3 x^3 b + e3^2 (x^4 + b) + e3^3 x + e3^4 + e2^2 x^2 b
+#       + e2^2 e3 x^3 + e2^4 x^4 + e1^2 e3 x b + e1^2 e3^2 x^2 + e1^4 b^2
+#
+# which is Boolean-quadratic after descent.  The unknowns are the
+# coordinates of e_k in a space W_k that contains it.  For a generic V the
+# products fill span(V.V) (dim up to l(l+1)/2) and span(V.V.V); for the
+# "special subspace" V = theta<1, g, ..., g^(l-1)> they stay inside
+# theta^k <1, ..., g^(k(l-1))>, dimension k(l-1)+1.  Fewer unknowns at the
+# same base size is the lever; this measures what it does to D*.
+
+def product_span(field, basis_a, basis_b):
+    gens = []
+    for a in basis_a:
+        fa = field.from_int(a)
+        for b in basis_b:
+            gens.append(fa * field.from_int(b))
+    return subspace_from_generators(field, gens)
+
+
+def symmetric_spaces(field, name, dim, seed):
+    """Bases (W1, W2, W3) holding e1, e2, e3 for x_i in V = span(W1).
+
+    geometric: V = theta<1, g, ..., g^(dim-1)>, W_k = theta^k <1..g^(k(dim-1))>.
+    standard:  theta = 1, g = z (the polynomial-basis window).
+    subfield:  V = F_{2^dim}, closed under products, so W_k = V.
+    random:    V random, W2 = span(V.V), W3 = span(V.V.V)."""
+    K, z, n = field.K, field.z, field.n
+    rng = rng_for(seed)
+    if name in ("geometric", "standard"):
+        if name == "standard":
+            theta, g = K(1), z
+        else:
+            theta = field.from_int(rng.randrange(1, 2**n))
+            g = field.from_int(rng.randrange(2, 2**n))
+        spaces = []
+        for k in (1, 2, 3):
+            gens = [theta**k * g**j for j in range(k * (dim - 1) + 1)]
+            spaces.append(subspace_from_generators(field, gens))
+        if len(spaces[0]) != dim:
+            return None, "geometric generators dependent at dim %d" % dim
+        return tuple(spaces), None
+    if name == "subfield":
+        v, err = structure_basis(field, "subfield", dim, seed)
+        if v is None:
+            return None, err
+        return (v, v, v), None
+    if name == "random":
+        v, err = structure_basis(field, "random", dim, seed)
+        if v is None:
+            return None, err
+        w2 = product_span(field, v, v)
+        w3 = product_span(field, w2, v)
+        return (v, w2, w3), None
+    return None, "unknown symmetric structure %r" % name
+
+
+def descent_equations_sym_s4(field, w1, w2, w3, target_int, b_int):
+    """Weil descent of the symmetrised S_4 with e_k = sum of W_k coordinates
+    times fresh variables. Returns (equations, nvars)."""
+    d1, d2, d3 = len(w1), len(w2), len(w3)
+    E1 = fe_linear(field, w1, 0)
+    E2 = fe_linear(field, w2, d1)
+    E3 = fe_linear(field, w3, d1 + d2)
+    x = field.from_int(target_int)
+    b = field.from_int(b_int)
+
+    def c(v):
+        return fe_const(field, field.to_int(v))
+
+    def mul(u, v):
+        return fe_mul(field, u, v)
+
+    def sq(u):
+        return fe_square(field, u)
+
+    E1_2, E2_2, E3_2 = sq(E1), sq(E2), sq(E3)
+    terms = [
+        c(x**4 * b**2),
+        mul(E3, c(x**3 * b)),
+        mul(E3_2, c(x**4 + b)),
+        mul(mul(E3_2, E3), c(x)),
+        sq(E3_2),
+        mul(E2_2, c(x**2 * b)),
+        mul(mul(E2_2, E3), c(x**3)),
+        mul(sq(E2_2), c(x**4)),
+        mul(mul(E1_2, E3), c(x * b)),
+        mul(mul(E1_2, E3_2), c(x**2)),
+        mul(sq(E1_2), c(b**2)),
+    ]
+    acc = fe_zero(field.n)
+    for t in terms:
+        acc = fe_add(acc, t)
+    return [eq for eq in acc if eq], d1 + d2 + d3
+
+
+def boolean_unsat(equations, nvars):
+    """Exact satisfiability of a multilinear GF(2) system through PolyBoRi:
+    the reduced Groebner basis is [1] iff there is no Boolean solution."""
+    B = BooleanPolynomialRing(max(int(nvars), 1), "v")
+    gens = B.gens()
+    polys = []
+    for eq in equations:
+        p = B(0)
+        for m in eq:
+            term = B(1)
+            k, bits = 0, int(m)
+            while bits:
+                if bits & 1:
+                    term *= gens[k]
+                bits >>= 1
+                k += 1
+            p += term
+        polys.append(p)
+    gb = B.ideal(polys).groebner_basis()
+    return list(gb) == [B(1)]
+
+
+def selftest_sym_s4(field, dim, seed, samples):
+    """The symmetric system must be satisfiable whenever the target is a
+    true 3-sum over V (completeness); spurious Boolean solutions (e's not
+    coming from any x_i in V) are allowed and counted, not failures."""
+    b_int = field.one_int
+    rng = rng_for(seed)
+    failures = checked = 0
+    for name in ("standard", "geometric", "subfield", "random"):
+        spaces, err = symmetric_spaces(field, name, dim, seed)
+        if spaces is None:
+            continue
+        v = spaces[0]
+        targets = [rng.randrange(1, 2**field.n) for _ in range(samples)]
+        point_unsat = label_targets_m3(field, v, v, v, targets, b_int)
+        for t in targets:
+            eqs, nvars = descent_equations_sym_s4(field, *spaces, t, b_int)
+            unsat = boolean_unsat(eqs, nvars)
+            if unsat and not point_unsat[t]:
+                failures += 1
+                sys.stderr.write("SYM S4 INCOMPLETE %s target 0x%x: decomposable but refuted\n"
+                                 % (name, t))
+            checked += 1
+    sys.stderr.write("selftest_sym_s4: %d cases, %d failures\n" % (checked, failures))
+    return failures == 0
+
+
+def measure_symmetric_s4(field, name, dim, dmax, targets_int, seed, dstar_sample=None):
+    spaces, err = symmetric_spaces(field, name, dim, seed)
+    if spaces is None:
+        return {"structure": name, "skipped": err}
+    b_int = field.one_int
+    v = spaces[0]
+    point_unsat = label_targets_m3(field, v, v, v, targets_int, b_int)
+    results = []
+    bool_unsat_count = spurious = 0
+    nvars = None
+    for t_int in targets_int:
+        eqs, nvars = descent_equations_sym_s4(field, *spaces, t_int, b_int)
+        unsat = boolean_unsat(eqs, nvars)
+        if not unsat:
+            if point_unsat[t_int]:
+                spurious += 1
+            continue
+        bool_unsat_count += 1
+        if dstar_sample is not None and len(results) >= dstar_sample:
+            continue
+        shapes = {}
+        dstar, profile = refutation_degree(eqs, nvars, dmax, shapes)
+        results.append({"target": "0x%x" % t_int, "d_star": dstar,
+                        "rank_profile": {str(k): val for k, val in profile.items()},
+                        "macaulay_shape": {str(k): list(val) for k, val in shapes.items()}})
+    solved = [r["d_star"] for r in results if r["d_star"] is not None]
+    summary = {
+        "structure": name, "dim": dim, "summands": 3, "encoding": "symmetric_s4",
+        "space_dims": [len(w) for w in spaces], "nvars": nvars,
+        "chain_nvars_for_comparison": 3 * dim + field.n,
+        "equation_degree": max((poly_degree(eq) for eq in descent_equations_sym_s4(
+            field, *spaces, targets_int[0], b_int)[0]), default=0),
+        "point_decomposable_fraction": sum(1 for t in targets_int if not point_unsat[t]) / len(targets_int),
+        "decomposable_fraction": sum(1 for t in targets_int if not point_unsat[t]) / len(targets_int),
+        "boolean_unsat_fraction": bool_unsat_count / len(targets_int),
+        "spurious_satisfiable": spurious,
+        "unsat_targets": len(results),
+        "censored_above_dmax": sum(1 for r in results if r["d_star"] is None),
+    }
+    if solved:
+        summary["d_star_min"] = min(solved)
+        summary["d_star_max"] = max(solved)
+        summary["d_star_mean"] = sum(solved) / len(solved)
+    summary["targets"] = results
+    return summary
+
+
+# ── Shantz-Teske delta method: m*dim = n - delta ───────────────────────
+#
+# Shantz & Teske (2013) pick the base dimension so the descended system is
+# over-determined: m*l = n - delta with delta > 0 lowers the decomposition
+# probability by about 2^-delta but each system is smaller and (they
+# report) solves at a lower degree.  The sweep reports both sides and the
+# product that matters: Macaulay work at D* divided by the decomposable
+# fraction, i.e. a cost-per-relation proxy.
+
+def delta_sweep(field, name, summands, deltas, dmax, targets_int, seed, dstar_sample=None):
+    n = field.n
+    rows = []
+    for delta in deltas:
+        if (n - delta) % summands != 0:
+            rows.append({"delta": delta, "skipped": "m*dim = n - delta has no integer dim"})
+            continue
+        dim = (n - delta) // summands
+        if dim < 1:
+            rows.append({"delta": delta, "skipped": "dim < 1"})
+            continue
+        if summands == 2:
+            pair, err = structure_bases(field, name, dim, seed)
+            if pair is None:
+                rows.append({"delta": delta, "dim": dim, "skipped": err})
+                continue
+            basis1, basis2 = pair
+            nvars = len(basis1) + len(basis2)
+            labels = label_targets(field, basis1, basis2, targets_int, field.one_int)
+            build = lambda t: (descent_equations(field, basis1, basis2, t, field.one_int), nvars)
+        else:
+            triple, err = structure_bases3(field, name, dim, seed)
+            if triple is None:
+                rows.append({"delta": delta, "dim": dim, "skipped": err})
+                continue
+            labels = label_targets_m3(field, *triple, targets_int, field.one_int)
+            build = lambda t: descent_equations_m3(field, *triple, t, field.one_int)
+        decomposable = sum(1 for t in targets_int if not labels[t])
+        dstars, shapes_at_dstar = [], []
+        nv = None
+        censored = 0
+        for t in targets_int:
+            if not labels[t]:
+                continue
+            if dstar_sample is not None and len(dstars) + censored >= dstar_sample:
+                break
+            eqs, nv = build(t)
+            shapes = {}
+            dstar, _ = refutation_degree(eqs, nv, dmax, shapes)
+            if dstar is not None:
+                dstars.append(dstar)
+                shapes_at_dstar.append(shapes[dstar])
+            else:
+                censored += 1
+        row = {"delta": delta, "dim": dim, "nvars": nv,
+               "decomposable_fraction": decomposable / len(targets_int),
+               "unsat_measured": len(dstars), "censored_above_dmax": censored}
+        if dstars:
+            row["d_star_mean"] = sum(dstars) / len(dstars)
+            row["d_star_max"] = max(dstars)
+            mean_rows = sum(s[0] for s in shapes_at_dstar) / len(shapes_at_dstar)
+            mean_cols = sum(s[1] for s in shapes_at_dstar) / len(shapes_at_dstar)
+            row["macaulay_rows_mean"] = mean_rows
+            row["macaulay_cols_mean"] = mean_cols
+            row["work_proxy"] = mean_rows * mean_cols
+            if decomposable:
+                row["work_per_relation_proxy"] = row["work_proxy"] / (decomposable / len(targets_int))
+        rows.append(row)
+    base = next((r for r in rows if r.get("delta") == 0 and "decomposable_fraction" in r), None)
+    for r in rows:
+        if base and "decomposable_fraction" in r and base["decomposable_fraction"]:
+            r["fraction_ratio_to_delta0"] = r["decomposable_fraction"] / base["decomposable_fraction"]
+            r["predicted_ratio_2^-delta"] = 2.0 ** (-r["delta"])
+    return rows
+
+
 # ── driver ─────────────────────────────────────────────────────────────
 
 def measure_structure(field, name, dim, dmax, targets_int, seed):
@@ -848,11 +1124,22 @@ def main():
     parser.add_argument("--dstar-sample", type=int, default=None, metavar="K",
                         help="with --summands 3, compute D* on at most K non-decomposable targets; "
                              "the decomposable fraction still uses every target")
+    parser.add_argument("--symmetric-s4", action="store_true",
+                        help="m = 3 through the symmetrised S_4 in e1, e2, e3 (Galbraith-"
+                             "Gebregiyorgis special subspaces); structures geometric,standard,"
+                             "subfield,random")
+    parser.add_argument("--delta-sweep", metavar="D0,D1,...",
+                        help="Shantz-Teske: sweep dim = (n - delta)/m for the listed deltas on the "
+                             "first --structures entry, report D*, decomposable fraction and a "
+                             "work-per-relation proxy, then exit")
     args = parser.parse_args()
 
     if args.selftest:
-        check = selftest_m3 if args.summands == 3 else selftest
-        ok = check(BinaryField(args.field), args.dim, args.dmax, args.seed, args.selftest)
+        if args.symmetric_s4:
+            ok = selftest_sym_s4(BinaryField(args.field), args.dim, args.seed, args.selftest)
+        else:
+            check = selftest_m3 if args.summands == 3 else selftest
+            ok = check(BinaryField(args.field), args.dim, args.dmax, args.seed, args.selftest)
         sys.exit(int(0 if ok else 1))
 
     if args.frobenius_windows:
@@ -891,7 +1178,38 @@ def main():
         targets_int.append(t)
 
     structures = [s.strip() for s in args.structures.split(",") if s.strip()]
-    if args.summands == 3:
+
+    if args.delta_sweep:
+        deltas = [int(d) for d in args.delta_sweep.split(",")]
+        name = structures[0]
+        rows = delta_sweep(field, name, args.summands, deltas, args.dmax, targets_int,
+                           args.seed, args.dstar_sample)
+        report = {"schema": "factor-base-delta-sweep-v1", "field_degree": args.field,
+                  "structure": name, "summands": args.summands, "dmax": args.dmax,
+                  "targets": len(targets_int), "rows": rows}
+        text = json.dumps(report, indent=2, default=lambda o: int(o) if isinstance(o, Integer) else float(o))
+        if args.out:
+            with open(args.out, "w") as handle:
+                handle.write(text + "\n")
+        else:
+            sys.stdout.write(text + "\n")
+        for r in rows:
+            if "skipped" in r:
+                sys.stderr.write("  delta=%+d skipped: %s\n" % (r["delta"], r["skipped"]))
+                continue
+            sys.stderr.write("  delta=%+d dim=%d vars=%s D*=%s frac=%.3f (x%.2f vs 2^-d %.2f) work/rel=%s\n" % (
+                r["delta"], r["dim"], r["nvars"], r.get("d_star_mean"), r["decomposable_fraction"],
+                r.get("fraction_ratio_to_delta0", float("nan")), r.get("predicted_ratio_2^-delta", float("nan")),
+                ("%.3g" % r["work_per_relation_proxy"]) if "work_per_relation_proxy" in r else None))
+        return
+
+    if args.symmetric_s4:
+        if args.structures == parser.get_default("structures"):
+            structures = ["geometric", "standard", "subfield", "random"]
+
+        def measure(field, s, dim, dmax, targets_int, seed):
+            return measure_symmetric_s4(field, s, dim, dmax, targets_int, seed, args.dstar_sample)
+    elif args.summands == 3:
         def measure(field, s, dim, dmax, targets_int, seed):
             return measure_structure_m3(field, s, dim, dmax, targets_int, seed, args.dstar_sample)
     else:
@@ -901,7 +1219,8 @@ def main():
         "curve": "Koblitz y^2+xy=x^3+1 over F_2^%d" % args.field,
         "field_degree": args.field,
         "dim": args.dim,
-        "summands": args.summands,
+        "summands": 3 if args.symmetric_s4 else args.summands,
+        "encoding": "symmetric_s4" if args.symmetric_s4 else "chained_s3",
         "dmax": args.dmax,
         "targets": len(targets_int),
         "observable": "D* = solving/refutation degree on non-decomposable targets",
@@ -930,6 +1249,14 @@ def main():
         sys.stderr.write("  %-10s mean D*=%.3f  [%d..%d]  decomposable %.3f  over %d unsat targets\n" % (
             row["structure"], row["d_star_mean"], row["d_star_min"],
             row["d_star_max"], row["decomposable_fraction"], row["unsat_targets"]))
+    if args.symmetric_s4:
+        for r in report["results"]:
+            if "skipped" in r:
+                sys.stderr.write("  %-10s skipped: %s\n" % (r["structure"], r["skipped"]))
+            else:
+                sys.stderr.write("  %-10s W dims %s vars=%d (chain %d) point-decomp %.3f bool-unsat %.3f spurious %d\n" % (
+                    r["structure"], r["space_dims"], r["nvars"], r["chain_nvars_for_comparison"],
+                    r["point_decomposable_fraction"], r["boolean_unsat_fraction"], r["spurious_satisfiable"]))
 
 
 if __name__ == "__main__":
