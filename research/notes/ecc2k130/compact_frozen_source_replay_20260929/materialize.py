@@ -17,17 +17,12 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
-import subprocess
-import tarfile
-from io import BytesIO
 
 HERE = Path(__file__).resolve().parent
 SNAPSHOT_DIR = HERE / "historical_snapshots"
 # koblitz_index_calculus.rs, the largest snapshot, is 669,217 bytes; the cap
 # guards against a corrupted gzip stream, not a size any source approaches.
 MAX_SNAPSHOT_BYTES = 8 * 1024 * 1024
-FROZEN_BUILD_PATHS = (
-    "Cargo.toml", "src", "examples", "experiments", "benches", "docs")
 
 
 def sha(data: bytes) -> str:
@@ -55,69 +50,25 @@ def snapshot_bytes(path: str, digest: str, manifest: dict[str, dict],
     return raw
 
 
-def ensure_source_commit(root: Path, commit: str) -> None:
-    """Fetch the frozen source commit when a PR checkout is shallow."""
-    present = subprocess.run(
-        ["git", "cat-file", "-e", f"{commit}^{{commit}}"], cwd=root,
-        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False,
-    )
-    if present.returncode == 0:
-        return
-    subprocess.run(
-        ["git", "fetch", "--no-tags", "--depth=1", "origin", commit],
-        cwd=root, check=True,
-    )
-
-
-def overlay_frozen_build_tree(root: Path, dest: Path, commit: str) -> None:
-    """Replace live Rust inputs with the complete source tree at the frozen commit."""
-    ensure_source_commit(root, commit)
-    archive = subprocess.run(
-        ["git", "archive", "--format=tar", commit, *FROZEN_BUILD_PATHS],
-        cwd=root, check=True, stdout=subprocess.PIPE,
-    ).stdout
-    for path in FROZEN_BUILD_PATHS:
-        target = dest / path
-        if target.is_dir() and not target.is_symlink():
-            shutil.rmtree(target)
-        elif target.exists() or target.is_symlink():
-            target.unlink()
-    with tarfile.open(fileobj=BytesIO(archive), mode="r:") as bundle:
-        bundle.extractall(dest, filter="data")
-
-
 def materialize(root: Path, freezes: list[Path], dest: Path,
                 snapshot_dir: Path = SNAPSHOT_DIR) -> dict:
     assert not dest.exists(), "never overwrite a materialized tree"
     pins: dict[str, str] = {}
-    source_commits: set[str] = set()
     for freeze in freezes:
-        manifest_data = json.loads(freeze.read_text())
-        source_commit = (manifest_data.get("evaluation_source_commit") or
-                         manifest_data.get("source_base_main"))
-        if source_commit:
-            source_commits.add(source_commit)
-        for path, digest in manifest_data["source_sha256"].items():
+        for path, digest in json.loads(freeze.read_text())["source_sha256"].items():
             assert pins.setdefault(path, digest) == digest, f"{path}: conflicting pins"
-    assert len(source_commits) <= 1, "freezes use conflicting evaluation source commits"
     manifest = load_manifest(snapshot_dir)
     shutil.copytree(root, dest, symlinks=True,
                     ignore=shutil.ignore_patterns(".git", "target"))
-    if source_commits:
-        overlay_frozen_build_tree(root, dest, next(iter(source_commits)))
     replayed, live = {}, []
     for path, digest in sorted(pins.items()):
         target = dest / path
         if target.is_file() and sha(target.read_bytes()) == digest:
             live.append(path)
             continue
-        source = root / path
-        current = sha(source.read_bytes()) if source.is_file() else None
+        current = sha(target.read_bytes()) if target.is_file() else None
         target.parent.mkdir(parents=True, exist_ok=True)
-        if current == digest:
-            shutil.copyfile(source, target)
-        else:
-            target.write_bytes(snapshot_bytes(path, digest, manifest, snapshot_dir))
+        target.write_bytes(snapshot_bytes(path, digest, manifest, snapshot_dir))
         replayed[path] = {"frozen_sha256": digest, "live_sha256": current}
     for path, digest in pins.items():
         assert sha((dest / path).read_bytes()) == digest, path

@@ -17,34 +17,47 @@ UNKNOWN = object()
 EVENTS = ("pull_request", "merge_group")
 ROUTINE_PR_TYPES = {"opened", "synchronize", "reopened", "ready_for_review"}
 
-# This one existing PR workflow is a historical proof artifact: its exact bytes
-# are included in a checked Lean evidence seal. Keep the exception tied to the
-# exact seal and workflow content, rather than allowing a workflow name or a
-# proof-job label to exempt future work.
-FROZEN_LEAN_WORKFLOW = ".github/workflows/weak-curve-lean.yml"
-FROZEN_LEAN_JOB = "proofs"
-FROZEN_LEAN_TIMEOUT = 60
-FROZEN_LEAN_SEAL = "research/weak_curve_properties_lean_20261011/EVIDENCE_SHA256.tsv"
-FROZEN_LEAN_SEAL_SHA256 = "118adb8dc0f96521b54b947989c4f3f84ecb25491de45563d71aef51efb6feea"
-FROZEN_LEAN_PIN_PATH = "../../.github/workflows/weak-curve-lean.yml"
+# These existing PR jobs are historical proof artifacts: their exact workflow
+# bytes are included in checked Lean evidence seals. Keep each exception tied
+# to the exact seal and workflow content, rather than allowing a workflow name
+# or a proof-job label to exempt future work.
+FROZEN_BUDGET_EXCEPTIONS = {
+    ".github/workflows/weak-curve-lean.yml": {
+        "job": "proofs",
+        "timeout": 60,
+        "seal": "research/weak_curve_properties_lean_20261011/EVIDENCE_SHA256.tsv",
+        "seal_sha256": "118adb8dc0f96521b54b947989c4f3f84ecb25491de45563d71aef51efb6feea",
+        "pin_path": "../../.github/workflows/weak-curve-lean.yml",
+    },
+    ".github/workflows/weak-curve-conjectures.yml": {
+        "job": "evidence",
+        "timeout": 60,
+        "seal": "research/weak_curve_conjectures_20261012/EVIDENCE_SHA256SUMS",
+        "seal_sha256": "ea93a01006f38bbf9c6f08632324795c6607c4ed0c92ac393851cd18f398275d",
+        "pin_path": "../../.github/workflows/weak-curve-conjectures.yml",
+    },
+}
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
-def frozen_lean_budget_exception(label, job_name, budget, event, root=REPO_ROOT):
-    """Allow only the unchanged, evidence-sealed Lean proof job its 60m cap."""
-    if (Path(label).as_posix() != FROZEN_LEAN_WORKFLOW
-            or job_name != FROZEN_LEAN_JOB
-            or budget != FROZEN_LEAN_TIMEOUT
+def frozen_proof_budget_exception(label, job_name, budget, event, root=REPO_ROOT):
+    """Allow only unchanged, sealed Lean proof jobs their pinned 60m cap."""
+    path = Path(label).as_posix()
+    exception = FROZEN_BUDGET_EXCEPTIONS.get(path)
+    if (exception is None
+            or job_name != exception["job"]
+            or budget != exception["timeout"]
             or event != "pull_request"):
         return False
-    seal_path = root / FROZEN_LEAN_SEAL
-    workflow_path = root / FROZEN_LEAN_WORKFLOW
+    seal_path = root / exception["seal"]
+    workflow_path = root / path
     try:
         seal = seal_path.read_bytes()
-        if hashlib.sha256(seal).hexdigest() != FROZEN_LEAN_SEAL_SHA256:
+        if hashlib.sha256(seal).hexdigest() != exception["seal_sha256"]:
             return False
-        pins = [line.split("\t", 1) for line in seal.decode("utf-8").splitlines()]
-        pinned_hashes = [digest for digest, path in pins if path == FROZEN_LEAN_PIN_PATH]
+        pins = [line.split() for line in seal.decode("utf-8").splitlines()]
+        pin_path = exception["pin_path"]
+        pinned_hashes = [parts[0] for parts in pins if len(parts) == 2 and parts[1] == pin_path]
         if len(pinned_hashes) != 1:
             return False
         return hashlib.sha256(workflow_path.read_bytes()).hexdigest() == pinned_hashes[0]
@@ -170,7 +183,7 @@ def job_problems(jobs, event, action, label):
             continue
         budget = expression(job.get("timeout-minutes", UNKNOWN), event, action)
         if isinstance(budget, bool) or not isinstance(budget, (int, float)) or not 0 < budget <= 25:
-            if frozen_lean_budget_exception(label, name, budget, event):
+            if frozen_proof_budget_exception(label, name, budget, event):
                 continue
             found.append(f"{label}: {name} can run on {event}/{action} without a proven 1–25 minute timeout")
     return found

@@ -873,7 +873,7 @@ pub fn read_session(dir: &Path) -> Result<Session, String> {
 
 #[cfg(test)]
 mod exact_record_reader_tests {
-    use super::from_str_exact_floats;
+    use super::{from_str_exact_floats, Record};
     use serde::Deserialize;
 
     #[derive(Deserialize)]
@@ -890,7 +890,18 @@ mod exact_record_reader_tests {
             "0.37222665730402227".parse::<f64>().unwrap().to_bits()
         );
 
-        let duplicate = r#"{"rho_s":0.37222665730402227,"rho_s":0.5}"#;
-        assert!(from_str_exact_floats::<FloatFixture>(duplicate).is_err());
+        let record_line = include_str!(
+            "../../../research/ecbench_n41_n53_shared_rank_20261005/sessions/mac-l0/records.jsonl"
+        )
+        .lines()
+        .next()
+        .unwrap();
+        assert!(from_str_exact_floats::<Record>(record_line).is_ok());
+        let duplicate = record_line.replacen(
+            "{",
+            r#"{"schema":"ecbench.record/v1","#,
+            1,
+        );
+        assert!(from_str_exact_floats::<Record>(&duplicate).is_err());
     }
 }

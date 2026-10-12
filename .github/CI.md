@@ -61,7 +61,7 @@ embedded-data changes cannot disappear behind an incomplete trigger allowlist.
 ## Budgets and evidence coverage
 
 Every job eligible for an ordinary PR or merge group has an explicit execution
-budget of at most 25 minutes, except the exact frozen Lean proof workflow
+budget of at most 25 minutes, except the two exact frozen Lean proof workflows
 described below. Longer scientific budgets remain available on
 manual dispatch, scheduled work and main-branch recording, and explicitly
 requested one-shot label experiments retain their existing limits. Historical
@@ -79,15 +79,16 @@ manual measurements keep their existing cancellation policy.
 The event-aware [budget checker](scripts/check-pr-budgets.py) rejects missing,
 unknown or over-budget timeouts on PR/merge-group jobs, accounting for job
 conditions and dependencies. Its fixtures keep labeled/manual/disabled work
-separate from routine validation. The sole exception is the `proofs` job in
-`weak-curve-lean.yml`, whose 60-minute timeout is included in the Lean proof
-evidence seal. That frozen job performs a cold dependency build and fresh
-kernel replay; its hosted cold runtime has not been measured. The checker
-allows it only while the workflow bytes match the hash in the evidence seal
-and that seal retains its reviewed hash. Any change to those bytes or the job
-identity makes the exception fail closed. Updating the timeout requires new
-proof evidence and a separate review. This exception does not permit other
-long jobs or justify altering scientific workloads.
+The only exceptions are the `proofs` job in `weak-curve-lean.yml` and the
+`evidence` job in `weak-curve-conjectures.yml`, each with a 60-minute timeout
+included in its Lean proof evidence seal. These frozen jobs perform a cold
+dependency build and fresh kernel replay; their hosted cold runtimes have not
+been measured. The checker allows each only while its workflow bytes match the
+hash in its evidence seal and that seal retains its reviewed hash. Any change
+to those bytes or the job identity makes the exception fail closed. Updating
+either timeout requires new proof evidence and a separate review. These
+exceptions do not permit other long jobs or justify altering scientific
+workloads.
 
 | Lane | Execution budget |
 | --- | --- |
