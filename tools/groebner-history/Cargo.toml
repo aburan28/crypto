@@ -1,0 +1,18 @@
+[package]
+name = "groebner-history"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Validate recorded F4/F5 evidence and prepare separate historical plot groups"
+
+[workspace]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[dev-dependencies]
+hex = "0.4"
+
+[lints.clippy]
+chunks_exact_to_as_chunks = "allow"
