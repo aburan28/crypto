@@ -23,7 +23,7 @@
     {"id": "W9", "kind": "speedup", "title": "F_p F4 Las-Vegas probabilistic echelon; F5 criteria data structure (gated on profile share); tracer zero-reduction predictor",
      "papers": ["arXiv 2609.14433", "arXiv 2601.05026", "arXiv 2505.23696"], "status": "not started", "prs": []},
     {"id": "W10", "kind": "feasibility", "title": "Prime-field S5 small-root oracle: asymptotic Coppersmith bound (LP / optimal shifts) against delta = 1/5",
-     "papers": ["ePrint 2024/1577", "ePrint 2026/1027", "ePrint 2026/423"], "status": "not started", "prs": []},
+     "papers": ["ePrint 2024/1577", "ePrint 2026/1027", "ePrint 2026/423"], "status": "PR open", "prs": ["aburan28/crypto#1691"]},
     {"id": "W11", "kind": "speedup", "title": "Generic-method engineering: co-Z paired BSGS with windowed batch inversion; binary x-only isogeny evaluation; k=2 biextension pairing; DP hit-rate statistics; external challenge ladder",
      "papers": ["ePrint 2026/2102", "ePrint 2026/704", "ePrint 2025/1652", "ePrint 2026/1823", "arXiv 2508.14011"], "status": "not started", "prs": []},
     {"id": "W12", "kind": "audit", "title": "Flagged claims: reproduce the zero-minor ECDLP method at 20-30 bits against rho; record ePrint 2025/015 as unimplementable from its abstract",

@@ -1,0 +1,24 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W10",
+  "slug": "s4-finite-lattice-32bit",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1691",
+  "papers": ["ePrint 2024/1577"],
+  "kind": "negative",
+  "workload": {
+    "id": "fp-s4-jm-lattice-32bit-l1",
+    "description": "S4(x1,x2,x3, x(P1+P2+P3)) on a3-fast-32bit-p256class (p = 4294967291, a = -3, b = 31, prime order n = 4294959973, full group), planted x(P_i) <= p^delta, JM basic lattice l = 1 (dim 125), repo lll_reduce_hp, Lovasz 0.99",
+    "curve_ids": ["a3-fast-32bit-p256class"]
+  },
+  "metric": "trials with >= 3 reduced rows vanishing at the planted root over Z",
+  "unit": "count",
+  "isolation": "L0",
+  "samples": 36,
+  "arms": [],
+  "ratio_original_over_candidate": {"value": null, "interval": null, "interval_kind": "none"},
+  "ratio_previous_over_candidate": {"value": null, "interval": null, "interval_kind": "none"},
+  "outputs_identical": null,
+  "run_report": "research/lit2026_w10_s5_coppersmith_20261011/reports/run-20261011T2118Z/report.pdf",
+  "note": "0/36 recoveries at delta = 0.035..0.125 (B = 2..15, 6 trials each), consistent with the l = 1 reach delta_1 = 0.00133 (X < 1.03 at 32 bits); l = 2 (dim 729, reach X < 2^0.46 at 32 bits) not run, too slow for the repo BigInt LLL."
+}
