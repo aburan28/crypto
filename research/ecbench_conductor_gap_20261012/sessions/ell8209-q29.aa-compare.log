@@ -1,0 +1,25 @@
+saved research/ecbench_conductor_gap_20261012/sessions/ell8209-q29/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 16 pairs on 16 workloads, 2 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 1.0404, not a result: 16 of 16 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp29-t47-14392892 | 28.25 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+| icv1-fp29-t47-1f934956 | 28.25 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W02ae1bd475b0 | icv1-fp29-t47-1f934956 | 28.25 | 0.8112 | 0.8112 | 1.0000 |
+| W2e48fd31d527 | icv1-fp29-t47-1f934956 | 28.25 | 0.3586 | 0.3586 | 1.0000 |
+| W549daa7f1e9c | icv1-fp29-t47-14392892 | 28.25 | 0.3062 | 0.3062 | 1.0000 |
+| W62c80ae3988d | icv1-fp29-t47-14392892 | 28.25 | 0.4592 | 0.4592 | 1.0000 |
+| W65cba157e813 | icv1-fp29-t47-14392892 | 28.25 | 1.6692 | 1.6692 | 1.0000 |
+| W673ae02b7582 | icv1-fp29-t47-14392892 | 28.25 | 0.2944 | 0.2944 | 1.0000 |
+| W8bc9e1bf846b | icv1-fp29-t47-1f934956 | 28.25 | 1.4536 | 1.4536 | 1.0000 |
+| W90b7bea975f1 | icv1-fp29-t47-14392892 | 28.25 | 0.3660 | 0.3660 | 1.0000 |
+| W994787c95133 | icv1-fp29-t47-14392892 | 28.25 | 1.8929 | 1.8929 | 1.0000 |
+| Wa95e5dcf91c6 | icv1-fp29-t47-1f934956 | 28.25 | 0.8736 | 0.8736 | 1.0000 |
+| Wae604389a862 | icv1-fp29-t47-1f934956 | 28.25 | 0.6038 | 0.6038 | 1.0000 |
+| Wb710a9e566f6 | icv1-fp29-t47-1f934956 | 28.25 | 1.7019 | 1.7019 | 1.0000 |
+| We7e2f26656cd | icv1-fp29-t47-14392892 | 28.25 | 1.0805 | 1.0805 | 1.0000 |
+| Wecae5a064035 | icv1-fp29-t47-14392892 | 28.25 | 1.4024 | 1.4024 | 1.0000 |
+| Wf33c820d0eea | icv1-fp29-t47-1f934956 | 28.25 | 0.4554 | 0.4554 | 1.0000 |
+| Wfa8cf16b48cc | icv1-fp29-t47-1f934956 | 28.25 | 1.7981 | 1.7981 | 1.0000 |

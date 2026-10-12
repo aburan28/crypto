@@ -1,0 +1,45 @@
+{
+  "schema": "weak_curve.heuristic_registry/v1",
+  "heuristics": [
+    {
+      "id": "WCH1:gap-count-24p",
+      "statement": "For the two recorded hyperelliptic branches over F_(p^6), the number Z(p) of zero-support signed ordinary trace classes may stay below 24p.",
+      "scope": "The exact two-branch trace domain t congruent 2 mod 4; finite forecast, not an asymptotic theorem.",
+      "status": "fits_seven_exact_censuses_open",
+      "calibration": "p=7,11,13,17,19,29,37 give Z=46,138,182,270,290,494,654; each is <=24p.",
+      "falsifier": "One complete independently verified two-branch census at a prime p with Z(p)>24p refutes the finite forecast.",
+      "linked_conjecture": "WCQ1:gap-count",
+      "source_ids": ["iso1"]
+    },
+    {
+      "id": "WCH1:cm-mass-occupancy",
+      "statement": "After freezing the selected CM-order mass H_B(t) and sample count M_B, class zero frequencies may be approximated by exp(-M_B H_B(t)/sum H_B).",
+      "scope": "Class-uniform ordinary traces and separately specified branch, exceptional units and twist law; proposed statistical model.",
+      "status": "untested_in_this_database",
+      "calibration": "The parent hypothesis fixes mu bins [0,1), [1,2), [2,4), [4,8), [8,infinity) and a 1/5 absolute calibration forecast for bins with at least 30 rows.",
+      "falsifier": "A frozen independent validation split violating the preregistered calibration forecast in an eligible bin.",
+      "linked_conjecture": "WCQ1:cm-mass",
+      "source_ids": ["iso1"]
+    },
+    {
+      "id": "WCH1:class-number-only",
+      "statement": "Small maximal-order class number is a possible occupancy covariate, but class number alone does not determine whether the cubic branch has a representative.",
+      "scope": "The p41 cubic norm-one diagnostic only; not a complete predictor or exact theorem.",
+      "status": "exact_classifier_refuted_by_observed_pair",
+      "calibration": "At p=41, traces 137406 and 137410 have equal Frobenius 2-depth 3, equal 2-splitting flag 1 and h_K=414 in the saved class-number rows; representative counts are 0 and 12. The latter is positive under the randomized counter.",
+      "falsifier": "The displayed pair refutes any rule depending only on those three recorded covariates; statistical usefulness requires held-out calibration.",
+      "linked_conjecture": null,
+      "source_ids": ["iso1"]
+    },
+    {
+      "id": "WCH1:boundary-strip-64p",
+      "statement": "Every two-branch zero row lies within 64p of the Hasse boundary, i.e. 2p^3-|t|<=64p.",
+      "scope": "The seven complete two-branch ordinary trace censuses.",
+      "status": "refuted",
+      "calibration": "1,184 of 2,074 zero rows violate the strip. At p=7, t=+22 and t=-22 have gap 664>448.",
+      "falsifier": "The complete p7 oracle already contains the counterexamples.",
+      "linked_conjecture": "WCQ1:boundary-strip",
+      "source_ids": ["iso1"]
+    }
+  ]
+}

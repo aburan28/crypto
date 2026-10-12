@@ -1,0 +1,73 @@
+{
+  "contract_status": "PROPOSED_RENDERING_CONTRACT_NOT_EVIDENCE",
+  "purpose": "Select and format native recorded outputs for an optimization addendum; never estimate research results in Python.",
+  "schema_hint": "n83.optimized-rho.report-data/v1",
+  "campaign": {
+    "run_id": null,
+    "started_utc": null,
+    "completed_disposition": null,
+    "protocol_path_and_sha256": null,
+    "authoritative_executed_manifest_path": null,
+    "source_and_executable_pins": null
+  },
+  "fixture": {
+    "canonical_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+    "field_degree": 83,
+    "field_modulus_low_terms": [0, 2, 4, 7],
+    "subgroup_order": "8569786107849059",
+    "generator_and_public_target": "Must be bound by actual native command/input hashes, not inferred from the slug.",
+    "known_scalar_passed_to_solvers": null
+  },
+  "training": {
+    "grid_records_path": null,
+    "prospectively_declared_configurations": null,
+    "objective_and_tie_breaker": null,
+    "target_and_seed_units": null,
+    "rows": "All attempted native rows, including timeouts/failures/exhaustion; no zero imputation."
+  },
+  "selection": {
+    "selected_configuration_native": null,
+    "selection_receipt_path_and_sha256": null,
+    "frozen_before_holdout": null,
+    "backend_change_class": "rho_policy_only | rho_field_kernel | shared_field_kernel | explicit_combination",
+    "backend_applied_to_arms": null,
+    "ic_executable_changed": null
+  },
+  "heldout": {
+    "sampling_unit": "new_seeds_same_Q | independent_public_targets | both (must state actual native scope)",
+    "target_count_and_pair_count": null,
+    "rows_path": null,
+    "all_attempt_dispositions": null,
+    "independent_answer_replay_path_and_sha256": null
+  },
+  "native_statistics": {
+    "source_path_and_sha256": null,
+    "primary_estimator_and_ratio_direction": null,
+    "primary_ratio_and_native_interval": null,
+    "native_resampling_unit_seed_draws": null,
+    "aa_control_native": null,
+    "secondary_descriptive_values_and_native_scope": null,
+    "missing_interval_rule": "Keep null when native data lacks an interval; do not fabricate one."
+  },
+  "accounting": {
+    "rho_process_timeout_seconds": 60,
+    "ic_process_timeout_seconds": 1800,
+    "stop_envelopes_equal": false,
+    "ic_third_cli_argument_rank_seed": 29,
+    "ic_target_extraction": "Full single traversal of index.states; no 20-million-probe cap.",
+    "online_and_reusable_preparation_boundaries": null,
+    "conversion_and_validation_costs": null,
+    "native_phase_values_residuals_and_flags": null,
+    "cold_scope": "Fresh process from retained base; original representative selection/construction not newly timed; OS page cache not flushed.",
+    "runner_wall_observer_boundary": null,
+    "cpu_wall_rss_native": null,
+    "calibrated_common_S": null
+  },
+  "validation": {
+    "exact_field_and_backend_equivalence_checks": null,
+    "tests_and_replay_receipts": null,
+    "host_and_isolation_scope": null,
+    "remaining_admission_gaps": null,
+    "canonical_graph_or_ledger_disposition": null
+  }
+}

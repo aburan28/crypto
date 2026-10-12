@@ -86,13 +86,7 @@ fn decaps_never_panics_on_adversarial_ciphertexts() {
         cases.push(("S-equals-T".into(), enc(&[a_c, sp.x, sp.x, x0])));
     }
     // special and singular curves: A = 0 (j = 1728), A = +-2 (singular), A = 1, 3
-    for (name, a) in [
-        ("A=0", F::zero()),
-        ("A=2", F::from_i64(2)),
-        ("A=-2", F::from_i64(-2)),
-        ("A=1", F::one()),
-        ("A=3", F::from_i64(3)),
-    ] {
+    for (name, a) in [("A=0", F::zero()), ("A=2", F::from_i64(2)), ("A=-2", F::from_i64(-2)), ("A=1", F::one()), ("A=3", F::from_i64(3))] {
         if let Some(b) = on_curve_ct(a, &mut rng) {
             cases.push((format!("curve-{name}"), b));
         }
@@ -134,11 +128,7 @@ fn encaps_terminates_on_adversarial_public_keys() {
         ("all-zero".into(), vec![0; 4 * fl]),
         ("all-ff".into(), vec![0xff; 4 * fl]),
     ];
-    for (name, a) in [
-        ("A=0", F::zero()),
-        ("A=2", F::from_i64(2)),
-        ("A=-2", F::from_i64(-2)),
-    ] {
+    for (name, a) in [("A=0", F::zero()), ("A=2", F::from_i64(2)), ("A=-2", F::from_i64(-2))] {
         if let Some(b) = on_curve_ct(a, &mut rng) {
             keys.push((format!("curve-{name}"), b));
         }
@@ -158,8 +148,5 @@ fn encaps_terminates_on_adversarial_public_keys() {
         });
         assert!(r.is_ok(), "encaps panicked on public key {name}");
     }
-    eprintln!(
-        "robustness: {} adversarial public keys, encaps terminated",
-        keys.len()
-    );
+    eprintln!("robustness: {} adversarial public keys, encaps terminated", keys.len());
 }

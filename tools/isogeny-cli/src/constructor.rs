@@ -1,7 +1,5 @@
 //! Public-curve kernel construction on one selected Frobenius eigenline.
 #[path = "../../../research/p192_p224_large_degree_isogenies_20261009/extension.rs"]
-// This source is sealed scientific evidence; retain its original syntax.
-#[allow(clippy::manual_is_multiple_of)]
 mod extension;
 use extension::Extension;
 use isogeny_algos::{
@@ -207,7 +205,7 @@ pub fn run_model(name: &str, ell: u64, c: &PrimeCurve) -> Json {
         ),
         ("checks", checks),
     ]);
-    Json::obj(vec![
+    let doc = Json::obj(vec![
         ("status", Json::str("PASS")),
         ("operation", Json::str("kernel-first")),
         ("scope", Json::str("one_frobenius_eigenline")),
@@ -231,7 +229,8 @@ pub fn run_model(name: &str, ell: u64, c: &PrimeCurve) -> Json {
                 ("isogenies", Json::Arr(vec![iso])),
             ]),
         ),
-    ])
+    ]);
+    doc
 }
 
 #[cfg(test)]

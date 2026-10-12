@@ -28,8 +28,10 @@
 - Current ladder frontiers: `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`,
   `RESEARCH_ECC2K130_IC_FEASIBILITY.md`
 
-For small-prime elliptic-curve surface searches, quartic subgroup transfers, or
-abelian-surface Frobenius compatibility checks, use
+For small-prime or pinned GF(2^83) elliptic-curve surface searches, quartic
+subgroup transfers, genus-2+ Jacobian transfers, hyperelliptic covers, Mumford
+arithmetic, gluing or polarization candidates, or Frobenius compatibility
+checks, use
 [ecdlp-surfaces](.agents/skills/ecdlp-surfaces/SKILL.md) for tool selection,
 commands, and interpretation limits.
 

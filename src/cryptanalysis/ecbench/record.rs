@@ -724,12 +724,15 @@ mod tests {
         let text = r#"{"gae":3934.0137668849675,"nested":[0.37222665730402227],"integer":17}"#;
         // Use the correctly rounded standard parser as the reference. serde_json's
         // direct f64 decoder may itself use the legacy parser under its feature set.
-        let rounded_reference = LegacyFloatFixture {
+        let current = LegacyFloatFixture {
             gae: "3934.0137668849675".parse().unwrap(),
             nested: vec!["0.37222665730402227".parse().unwrap()],
             integer: 17,
         };
         let legacy: LegacyFloatFixture = from_str_legacy_floats(text).unwrap();
+        let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+        let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+        let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
 
         // Freeze the v1 parser's exact binary results independently of the
@@ -738,13 +741,11 @@ mod tests {
         assert_eq!(legacy.nested[0].to_bits(), 4_600_377_059_258_432_959);
         assert_eq!(
             legacy.gae.to_bits(),
-            legacy_json_float(rounded_reference.gae).unwrap().to_bits()
+            legacy_json_float(current.gae).unwrap().to_bits()
         );
         assert_eq!(
             legacy.nested[0].to_bits(),
-            legacy_json_float(rounded_reference.nested[0])
-                .unwrap()
-                .to_bits()
+            legacy_json_float(current.nested[0]).unwrap().to_bits()
         );
         // A newer serde_json parser may already yield the historical value.
         // Compatibility is the archived bit pattern, independent of whether

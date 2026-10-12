@@ -23,8 +23,7 @@ fn go<P: ParamSet<N>, const N: usize>(want: usize) {
     let s_d = sqrt_mod_2power(&((BigUint::one() << (e + 2)) - 7u32), e as u64 + 2);
     let s_dm = &s_d % &n2;
     let lo = BigUint::parse_bytes(P::F_LO_HEX.as_bytes(), 16).unwrap();
-    let (mut drawn, mut parity_gcd, mut two_f, mut sq, mut sched, mut acc) =
-        (0u64, 0u64, 0u64, 0u64, 0u64, 0usize);
+    let (mut drawn, mut parity_gcd, mut two_f, mut sq, mut sched, mut acc) = (0u64, 0u64, 0u64, 0u64, 0u64, 0usize);
     while acc < want {
         drawn += 1;
         let f = &lo + random_below(&mut rng, &lo);
@@ -43,11 +42,7 @@ fn go<P: ParamSet<N>, const N: usize>(want: usize) {
             sq += 1;
             continue;
         };
-        let (c0, cp0) = if (&x % 2u32).is_zero() {
-            (x, y)
-        } else {
-            (y, x)
-        };
+        let (c0, cp0) = if (&x % 2u32).is_zero() { (x, y) } else { (y, x) };
         let s0 = (&f * &s_dm) % &n2;
         let ds0 = BigInt::from((&d * &s0) % &n2);
         let mut ok = false;

@@ -5,7 +5,6 @@
 //!
 //! ```text
 //! cargo run --release --example gb_cas_export -- fp <outdir> [repeats]
-//! cargo run --release --example gb_cas_export -- fp-xl <outdir> [repeats] [case,case,…]
 //! cargo run --release --example gb_cas_export -- bool <node_dump.jsonl> <outdir>
 //! ```
 //!
@@ -103,14 +102,6 @@ const FP_CASES: &[(&str, usize, usize, u32, u64, u32)] = &[
     ("cubic_n5_p31", 5, 5, 3, 31, 16),
     ("overdet_n10_m15_p65521", 10, 15, 2, 65521, 10),
     ("overdet_n12_m24_p65521", 12, 24, 2, 65521, 10),
-];
-
-/// Larger cases, exported with `fp-xl`: where the linear algebra of a
-/// full-size F4 dominates (not in `f4_fp_bench`'s fixed suite).
-const FP_XL_CASES: &[(&str, usize, usize, u32, u64, u32)] = &[
-    ("quad_n10_p65521", 10, 10, 2, 65521, 16),
-    ("quad_n11_p65521", 11, 11, 2, 65521, 18),
-    ("cubic_n6_p31", 6, 6, 3, 31, 18),
 ];
 
 // ── writers ────────────────────────────────────────────────────────────
@@ -234,8 +225,8 @@ fn write_magma(path: &Path, n: usize, p: u64, input: &[String], ours: &[String])
     std::fs::write(path, s).expect("write Magma script");
 }
 
-fn run_fp(outdir: &Path, repeats: usize, cases: &[(&str, usize, usize, u32, u64, u32)]) {
-    for &(name, n, m, d, p, dmax) in cases {
+fn run_fp(outdir: &Path, repeats: usize) {
+    for &(name, n, m, d, p, dmax) in FP_CASES {
         let sys = system(
             n,
             m,
@@ -323,21 +314,11 @@ fn run_bool(dump: &Path, outdir: &Path) {
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     match args.get(1).map(String::as_str) {
-        Some(tier @ ("fp" | "fp-xl")) => {
+        Some("fp") => {
             let outdir = Path::new(args.get(2).expect("outdir"));
             std::fs::create_dir_all(outdir).expect("outdir");
             let repeats = args.get(3).map_or(3, |s| s.parse().expect("repeats"));
-            let all = if tier == "fp" { FP_CASES } else { FP_XL_CASES };
-            // optional comma-separated case names: run only those
-            let cases: Vec<_> = match args.get(4) {
-                Some(only) => all
-                    .iter()
-                    .copied()
-                    .filter(|c| only.split(',').any(|n| n == c.0))
-                    .collect(),
-                None => all.to_vec(),
-            };
-            run_fp(outdir, repeats, &cases);
+            run_fp(outdir, repeats);
         }
         Some("bool") => {
             let dump = Path::new(args.get(2).expect("node dump"));

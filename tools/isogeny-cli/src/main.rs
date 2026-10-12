@@ -1,23 +1,15 @@
 //! Installed isogeny construction, screening, and independent certificate replay.
 #![allow(dead_code)]
-// Each field width needs its own bindings for the shared verifier sources.
-#![allow(clippy::duplicate_mod)]
 mod catalog;
 mod constructor;
 #[path = "../../../src/cryptanalysis/isogeny_walk/curve.rs"]
 mod curve;
 #[path = "../../../src/cryptanalysis/isogeny_walk/field.rs"]
-// Limb indices follow the field formulas; conversions require this modulus.
-#[allow(clippy::needless_range_loop, clippy::wrong_self_convention)]
 mod field;
 #[cfg(test)]
 #[path = "../../../src/hash/sha256.rs"]
-// This sealed reference retains its explicit chunk conversion checks.
-#[allow(clippy::chunks_exact_to_as_chunks)]
 mod hash_sha256;
 #[path = "../../../research/p192_p224_large_degree_isogenies_20261009/verification_kernel.rs"]
-// Keep the sealed research source's arithmetic and indexed recurrences intact.
-#[allow(clippy::manual_is_multiple_of, clippy::needless_range_loop)]
 mod kernel;
 #[path = "../../../research/p192_p224_large_degree_isogenies_20261009/map_identity.rs"]
 mod map_identity;
@@ -28,11 +20,7 @@ mod modpoly;
 pub mod modular_polynomial;
 #[path = "../../../research/p192_p224_large_degree_isogenies_20261009/verification_poly.rs"]
 mod poly;
-// Field-context conversions and explicit limb indices mirror the reference.
-#[allow(clippy::needless_range_loop, clippy::wrong_self_convention)]
 mod verification_field;
-// Generated per-width modules include the unchanged sealed kernel verifier.
-#[allow(clippy::manual_is_multiple_of, clippy::needless_range_loop)]
 mod replay {
     include!(concat!(env!("OUT_DIR"), "/verification_engines.rs"));
 }
@@ -179,8 +167,8 @@ fn eigenvalues_from_trace(q: &Int, t: &Int, ell: u64) -> Option<[u64; 2]> {
         Zp::new(ell).sqrt(disc)?
     };
     Some([
-        (tm + sqrt) % ell * ell.div_ceil(2) % ell,
-        (tm + ell - sqrt) % ell * ell.div_ceil(2) % ell,
+        (tm + sqrt) % ell * ((ell + 1) / 2) % ell,
+        (tm + ell - sqrt) % ell * ((ell + 1) / 2) % ell,
     ])
 }
 fn multiplicative_order(a: u64, p: u64) -> u64 {
@@ -188,18 +176,18 @@ fn multiplicative_order(a: u64, p: u64) -> u64 {
     let mut residual = n;
     let mut d = 2;
     while d * d <= residual {
-        if residual.is_multiple_of(d) {
-            while n.is_multiple_of(d) && supervisor::pow(a, n / d, p) == 1 {
+        if residual % d == 0 {
+            while n % d == 0 && supervisor::pow(a, n / d, p) == 1 {
                 n /= d;
             }
-            while residual.is_multiple_of(d) {
+            while residual % d == 0 {
                 residual /= d;
             }
         }
         d += 1;
     }
     if residual > 1 {
-        while n.is_multiple_of(residual) && supervisor::pow(a, n / residual, p) == 1 {
+        while n % residual == 0 && supervisor::pow(a, n / residual, p) == 1 {
             n /= residual;
         }
     }

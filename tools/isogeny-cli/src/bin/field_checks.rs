@@ -1,14 +1,8 @@
 #[path = "../verification_field.rs"]
-// The test imports complete field APIs; limb indices and modulus conversions
-// intentionally match the independent reference rather than iterator styles.
-#[allow(dead_code, clippy::needless_range_loop, clippy::wrong_self_convention)]
 mod optimized;
 #[path = "../../../../src/cryptanalysis/isogeny_walk/field.rs"]
-#[allow(dead_code, clippy::needless_range_loop, clippy::wrong_self_convention)]
 mod original;
-#[cfg(test)]
 use num_bigint::BigUint;
-#[cfg(test)]
 use num_traits::{One, Zero};
 fn main() {}
 

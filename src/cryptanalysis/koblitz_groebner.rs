@@ -5364,291 +5364,6 @@ fn closure_rounds() -> u32 {
     })
 }
 
-/// Where the inherited engine's nodes are decided, by degree (lit2026 W4,
-/// arXiv 2603.24890: most decomposition attempts are inconsistent, so the
-/// degree at which `1` enters the ideal is what an attempt costs).
-///
-/// Collected on the calling thread while [`set_refutation_degree_trace`] is
-/// on; read and cleared with [`refutation_degree_trace_take`].  Every field
-/// counts nodes (attempts, for `root_first_refutation_degree`) and is
-/// exact.  The `*_first_degree` fields are a diagnostic the trace pays for:
-/// at every inherited-engine reduction the node's own system is also
-/// reduced from scratch, with the engine's multiplier policy, at degree 2
-/// and, unless that refutes, at the engine's top degree; the node is filed
-/// under the first degree whose row space holds `1` (refuted) or, failing
-/// that, a forced variable (forced), else as stalled.  The trace changes no
-/// decision of the solver.
-#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize)]
-pub struct RefutationDegreeTrace {
-    /// Inherited-engine reductions whose top basis was built from scratch
-    /// at this node (the root, or a node whose linear elimination dropped
-    /// its parent's bases), and those whose top basis was specialised from
-    /// the parent's.
-    pub reductions_fresh: u64,
-    pub reductions_inherited: u64,
-    /// The engine's own verdict at those reductions: `1` in the row space,
-    /// a forced variable and no `1`, or neither (the solver splits).
-    pub refuted_fresh: u64,
-    pub refuted_inherited: u64,
-    pub forced_fresh: u64,
-    pub forced_inherited: u64,
-    pub stalled_fresh: u64,
-    pub stalled_inherited: u64,
-    /// Diagnostic, indexed by degree (0 … 4): first degree of the node's
-    /// own from-scratch Macaulay space holding `1`, split by whether the
-    /// engine's basis at the node was fresh or inherited.
-    pub refuted_first_degree_fresh: [u64; 5],
-    pub refuted_first_degree_inherited: [u64; 5],
-    /// Diagnostic: the same for a forced variable, at nodes no degree up
-    /// to the top refutes; and the nodes neither decides.
-    pub forced_first_degree: [u64; 5],
-    pub stalled_from_scratch: u64,
-    /// Diagnostic: the from-scratch top-degree space refutes a node the
-    /// engine's basis did not, or the reverse (the inherited basis is a
-    /// documented subspace of it under the production policy).
-    pub scratch_refutes_engine_does_not: u64,
-    pub engine_refutes_scratch_does_not: u64,
-    /// Nodes refuted before any Macaulay matrix: the substituted system
-    /// holds `1` (degree 0), or linear elimination found a contradiction
-    /// (degree 1).
-    pub refuted_constant: u64,
-    pub refuted_linear: u64,
-    /// A forced value read off a reduction or an elimination contradicts
-    /// the assignment.
-    pub refuted_forced_conflict: u64,
-    /// Nodes the IC node oracle refuted.
-    pub refuted_oracle: u64,
-    /// Fully assigned points checked against the input, and how many were
-    /// solutions (each is certified by evaluation, degree 1).
-    pub leaves_checked: u64,
-    pub leaves_solutions: u64,
-    /// Early abort ([`early_abort_mode`]): degree-2 probes run, how many
-    /// refuted their node, and the probes' word operations (charged to the
-    /// stage unit like any reduction).
-    pub early_abort_probes: u64,
-    pub early_abort_refutations: u64,
-    pub early_abort_word_ops: u64,
-    /// Attempt-level diagnostic, once per inherited-engine solve: index `d`
-    /// in 2 … 4 counts root systems whose degree-`d` support-local Macaulay
-    /// space is the first to hold `1`; index 0 counts roots no degree ≤ 4
-    /// refutes; index 1 roots whose matrix exceeded the size caps before a
-    /// refutation.
-    pub root_first_refutation_degree: [u64; 5],
-    /// Where the stage unit goes: nodes that end refuted (any cause) and
-    /// nodes that end in a split, with the word operations each class spent
-    /// from node entry to its end (children excluded; with the trace on,
-    /// the trace's own from-scratch reductions are not charged).
-    pub nodes_refuted: u64,
-    pub word_ops_refuted_nodes: u64,
-    pub nodes_split: u64,
-    pub word_ops_split_nodes: u64,
-}
-
-thread_local! {
-    static REFUTATION_TRACE: std::cell::RefCell<Option<RefutationDegreeTrace>> =
-        const { std::cell::RefCell::new(None) };
-}
-
-/// Turn the refutation-degree trace on or off on this thread (off drops it).
-pub fn set_refutation_degree_trace(enabled: bool) {
-    REFUTATION_TRACE.with(|t| *t.borrow_mut() = enabled.then(RefutationDegreeTrace::default));
-}
-
-/// The trace collected on this thread since the last take, leaving it
-/// running and cleared; `None` when the trace is off.
-pub fn refutation_degree_trace_take() -> Option<RefutationDegreeTrace> {
-    REFUTATION_TRACE.with(|t| t.borrow_mut().as_mut().map(std::mem::take))
-}
-
-fn trace_on() -> bool {
-    REFUTATION_TRACE.with(|t| t.borrow().is_some())
-}
-
-/// Charge the stage-unit word operations a node spent since `w0` (its
-/// entry, children excluded) to the refuted or the split nodes.
-fn trace_cost(w0: Option<u64>, refuted: bool) {
-    let Some(w0) = w0 else { return };
-    let spent = f4_word_ops_thread().wrapping_sub(w0);
-    trace(|t| {
-        if refuted {
-            t.nodes_refuted += 1;
-            t.word_ops_refuted_nodes += spent;
-        } else {
-            t.nodes_split += 1;
-            t.word_ops_split_nodes += spent;
-        }
-    });
-}
-
-fn trace(f: impl FnOnce(&mut RefutationDegreeTrace)) {
-    REFUTATION_TRACE.with(|t| {
-        if let Some(trace) = t.borrow_mut().as_mut() {
-            f(trace);
-        }
-    });
-}
-
-/// Early abort at the refutation degree (lit2026 W4), `KIC_F4_EARLY_ABORT`,
-/// read once per process:
-///
-/// - `0` or unset: off, the engine as it was.
-/// - `1`: before a node builds its top-degree basis from scratch, and only
-///   when its ladder skips degree 2 (wide systems run the top degree
-///   alone), reduce the node's degree-2 Macaulay space with the same
-///   multiplier policy; if it holds `1`, the node is refuted without the
-///   top-degree build.  Exact and tree-preserving: the degree-2 rows are
-///   rows of the degree-`D` matrix under either policy, so the top build
-///   refutes the same node; a probe that does not refute is dropped and
-///   the build runs as before.
-/// - `2`: a child about to specialise its parent's bases, whose first act
-///   would be that reduction, first reduces its own degree-2 Macaulay
-///   space; `1` there refutes it without the specialisation, and the probe
-///   is counted as the node's reduction.  Exact (`1` in a sub-ideal is `1`
-///   in the ideal).  The tree is the same wherever the inherited top basis
-///   refutes every node the degree-2 space does; the inherited basis is a
-///   documented subspace of the from-scratch one, so where it does not, the
-///   tree only loses refuted subtrees
-///   (`RefutationDegreeTrace::scratch_refutes_engine_does_not`).
-/// - `3`: both.
-///
-/// [`set_early_abort_mode`] overrides the environment on the calling thread.
-pub fn early_abort_mode() -> u8 {
-    if let Some(mode) = EARLY_ABORT_OVERRIDE.with(|m| m.get()) {
-        return mode;
-    }
-    static MODE: std::sync::OnceLock<u8> = std::sync::OnceLock::new();
-    *MODE.get_or_init(|| {
-        std::env::var("KIC_F4_EARLY_ABORT")
-            .ok()
-            .and_then(|v| v.parse().ok())
-            .unwrap_or(0)
-    })
-}
-
-thread_local! {
-    static EARLY_ABORT_OVERRIDE: std::cell::Cell<Option<u8>> = const { std::cell::Cell::new(None) };
-}
-
-/// Set (`Some`) or clear (`None`) this thread's override of
-/// `KIC_F4_EARLY_ABORT`; a same-binary control for tests and harnesses.
-pub fn set_early_abort_mode(mode: Option<u8>) {
-    EARLY_ABORT_OVERRIDE.with(|m| m.set(mode));
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum ScratchOutcome {
-    Refuted,
-    Forced,
-    Stalled,
-}
-
-/// Reduce `system` from scratch at `degree` and say what its row space
-/// decides; `None` when the matrix exceeds the caps.  Returns the word
-/// operations it spent, which the caller charges or not.
-fn scratch_outcome(
-    system: &[F2BoolPoly],
-    n_vars: usize,
-    degree: u32,
-    support_local: bool,
-) -> (Option<ScratchOutcome>, u64) {
-    if system.iter().any(is_constant_one) {
-        return (Some(ScratchOutcome::Refuted), 0);
-    }
-    let Some((mut basis, mut cost)) =
-        ReducedBasis::from_system_with(system, n_vars, degree, support_local)
-    else {
-        return (None, 0);
-    };
-    let rows = basis.decisive_rows(&mut cost);
-    let outcome = if rows.iter().any(is_constant_one) {
-        ScratchOutcome::Refuted
-    } else if rows.iter().any(|p| forced_assignment(p).is_some()) {
-        ScratchOutcome::Forced
-    } else {
-        ScratchOutcome::Stalled
-    };
-    (Some(outcome), cost.word_ops())
-}
-
-/// The trace's per-node record (see [`RefutationDegreeTrace`]).
-fn trace_node(
-    system: &[F2BoolPoly],
-    n_vars: usize,
-    top: u32,
-    support_local: bool,
-    fresh: bool,
-    engine_rows: &[F2BoolPoly],
-) {
-    let engine_refuted = engine_rows.iter().any(is_constant_one);
-    let engine_forced =
-        !engine_refuted && engine_rows.iter().any(|p| forced_assignment(p).is_some());
-    let mut refuted_at: Option<u32> = None;
-    let mut forced_at: Option<u32> = None;
-    let mut degrees = vec![2u32];
-    if top > 2 {
-        degrees.push(top);
-    }
-    for d in degrees {
-        match scratch_outcome(system, n_vars, d, support_local).0 {
-            Some(ScratchOutcome::Refuted) => {
-                refuted_at = Some(d);
-                break;
-            }
-            Some(ScratchOutcome::Forced) => {
-                forced_at = forced_at.or(Some(d));
-            }
-            Some(ScratchOutcome::Stalled) | None => {}
-        }
-    }
-    trace(|t| {
-        if fresh {
-            t.reductions_fresh += 1;
-        } else {
-            t.reductions_inherited += 1;
-        }
-        match (engine_refuted, engine_forced, fresh) {
-            (true, _, true) => t.refuted_fresh += 1,
-            (true, _, false) => t.refuted_inherited += 1,
-            (false, true, true) => t.forced_fresh += 1,
-            (false, true, false) => t.forced_inherited += 1,
-            (false, false, true) => t.stalled_fresh += 1,
-            (false, false, false) => t.stalled_inherited += 1,
-        }
-        if refuted_at.is_some() && !engine_refuted {
-            t.scratch_refutes_engine_does_not += 1;
-        }
-        if engine_refuted && refuted_at.is_none() {
-            t.engine_refutes_scratch_does_not += 1;
-        }
-        match (refuted_at, forced_at) {
-            (Some(d), _) if fresh => t.refuted_first_degree_fresh[(d as usize).min(4)] += 1,
-            (Some(d), _) => t.refuted_first_degree_inherited[(d as usize).min(4)] += 1,
-            (None, Some(d)) => t.forced_first_degree[(d as usize).min(4)] += 1,
-            (None, None) => t.stalled_from_scratch += 1,
-        }
-    });
-}
-
-/// The trace's attempt-level record: the first degree in 2 … 4 at which
-/// the root system's Macaulay space holds `1`.
-fn trace_root(system: &[F2BoolPoly], n_vars: usize, support_local: bool) {
-    let mut slot = 0usize;
-    for d in 2..=4u32 {
-        match scratch_outcome(system, n_vars, d, support_local).0 {
-            Some(ScratchOutcome::Refuted) => {
-                slot = d as usize;
-                break;
-            }
-            None => {
-                slot = 1;
-                break;
-            }
-            _ => {}
-        }
-    }
-    trace(|t| t.root_first_refutation_degree[slot] += 1);
-}
-
 thread_local! {
     /// Root bases built ahead by [`prebuild_inherited_roots_lanes`], each
     /// with the system, degree and multiplier policy it was built for.
@@ -5888,36 +5603,6 @@ fn reduce_inherited(
     };
     let ladder = engine.degree_ladder(degree, n_vars)?;
     let top = *ladder.end();
-    let fresh = bases.position(top).is_none();
-    // Early abort (`KIC_F4_EARLY_ABORT=1`): a node about to build its
-    // top-degree basis from scratch, on a ladder that skips degree 2, first
-    // asks whether degree 2 already refutes it.
-    if matches!(early_abort_mode(), 1 | 3) && fresh && *ladder.start() > 2 && !system.is_empty() {
-        let started = std::time::Instant::now();
-        let (outcome, word_ops) = scratch_outcome(system, n_vars, 2, support_local);
-        charge_word_ops(word_ops);
-        f4_profile_add(|p| {
-            p.build_ns += started.elapsed().as_nanos();
-            p.word_ops += word_ops;
-        });
-        let refuted = outcome == Some(ScratchOutcome::Refuted);
-        trace(|t| {
-            t.early_abort_probes += 1;
-            t.early_abort_word_ops += word_ops;
-            t.early_abort_refutations += refuted as u64;
-        });
-        if refuted {
-            stats.max_degree_built = stats.max_degree_built.max(2);
-            let one = vec![F2BoolPoly::from_monos(
-                vec![F2BoolMono::from_mask(0)],
-                n_vars,
-            )];
-            if trace_on() {
-                trace_node(system, n_vars, top, support_local, fresh, &one);
-            }
-            return Some(one);
-        }
-    }
     let mut best: Option<Vec<F2BoolPoly>> = None;
     for d in ladder {
         if system.is_empty() {
@@ -6000,11 +5685,6 @@ fn reduce_inherited(
         best = Some(rows);
         if decisive {
             break;
-        }
-    }
-    if trace_on() {
-        if let Some(rows) = &best {
-            trace_node(system, n_vars, top, support_local, fresh, rows);
         }
     }
     best
@@ -6268,9 +5948,6 @@ fn solve_with_policy_and_oracle(
     // result of a substitution, which is canonical; so when the inputs
     // are, the order check can be done once here instead of per call.
     let canonical = equations.iter().all(F2BoolPoly::is_canonical);
-    if trace_on() && matches!(opts.engine, SolverEngine::InheritedF4 { .. }) {
-        trace_root(equations, n_vars, policy.support_local);
-    }
     solve_rec(
         equations.to_vec(),
         canonical,
@@ -6317,17 +5994,11 @@ fn solve_rec(
     if *stop || out.len() >= opts.max_solutions {
         return;
     }
-    let node_w0 = trace_on().then(f4_word_ops_thread);
     // A fully assigned branch needs no further Macaulay matrix. Verify the
     // complete point directly against the untouched equations.
     if assignment.iter().all(Option::is_some) {
         let point = point_with_definitions(&assignment, &defined);
-        let solution = original.iter().all(|equation| equation.eval(point) == 0);
-        trace(|t| {
-            t.leaves_checked += 1;
-            t.leaves_solutions += solution as u64;
-        });
-        if solution {
+        if original.iter().all(|equation| equation.eval(point) == 0) {
             out.push(point);
             if accept(point) {
                 *stop = true;
@@ -6355,8 +6026,6 @@ fn solve_rec(
             NodeOracleDecision::Continue => oracle_decided = true,
             NodeOracleDecision::Refute => {
                 stats.geometric_refutations += 1;
-                trace(|t| t.refuted_oracle += 1);
-                trace_cost(node_w0, true);
                 return;
             }
             NodeOracleDecision::Witness => {
@@ -6372,54 +6041,6 @@ fn solve_rec(
     // builds them at its first reduction.  A system that already contains
     // the constant `1` is refuted below without reducing, so nothing is
     // specialised for it either.
-    // Early abort, mode 2 (`KIC_F4_EARLY_ABORT=2`): a child about to
-    // specialise its parent's bases, whose first act would be that
-    // reduction (the oracle has answered, no linear generator will be
-    // eliminated), first reduces its own degree-2 Macaulay space; `1` there
-    // refutes it without the specialisation.  The probe is this node's
-    // reduction and is counted as one.
-    if matches!(early_abort_mode(), 2 | 3)
-        && oracle_decided
-        && matches!(opts.engine, SolverEngine::InheritedF4 { .. })
-        && parent.is_some_and(|(bases, _, _)| !bases.bases.is_empty())
-        && !system.iter().any(is_constant_one)
-        && !(policy.linear_elimination && system.iter().any(is_linear_generator))
-        && !policy.rebuild_on_drop
-    {
-        let started = std::time::Instant::now();
-        let (outcome, word_ops) = scratch_outcome(&system, n_vars, 2, policy.support_local);
-        charge_word_ops(word_ops);
-        f4_profile_add(|p| {
-            p.build_ns += started.elapsed().as_nanos();
-            p.word_ops += word_ops;
-        });
-        let refuted = outcome == Some(ScratchOutcome::Refuted);
-        trace(|t| {
-            t.early_abort_probes += 1;
-            t.early_abort_word_ops += word_ops;
-            t.early_abort_refutations += refuted as u64;
-        });
-        if refuted {
-            trace_cost(node_w0, true);
-            stats.reductions += 1;
-            stats.max_degree_built = stats.max_degree_built.max(2);
-            stats.infeasible_branches += 1;
-            if trace_on() {
-                let mut nonzero = system.clone();
-                nonzero.retain(|p| !p.is_zero());
-                let top = opts
-                    .engine
-                    .degree_ladder(system_degree(&nonzero), n_vars)
-                    .map_or(2, |l| *l.end());
-                let one = [F2BoolPoly::from_monos(
-                    vec![F2BoolMono::from_mask(0)],
-                    n_vars,
-                )];
-                trace_node(&nonzero, n_vars, top, policy.support_local, false, &one);
-            }
-            return;
-        }
-    }
     let (mut bases, mut system) = match parent {
         Some((bases, var, value))
             if matches!(opts.engine, SolverEngine::InheritedF4 { .. })
@@ -6443,8 +6064,6 @@ fn solve_rec(
                 NodeOracleDecision::Continue => {}
                 NodeOracleDecision::Refute => {
                     stats.geometric_refutations += 1;
-                    trace(|t| t.refuted_oracle += 1);
-                    trace_cost(node_w0, true);
                     return;
                 }
                 NodeOracleDecision::Witness => {
@@ -6457,8 +6076,6 @@ fn solve_rec(
         drop_zeros(&mut system);
         if system.iter().any(is_constant_one) {
             stats.infeasible_branches += 1;
-            trace(|t| t.refuted_constant += 1);
-            trace_cost(node_w0, true);
             return;
         }
         if policy.linear_elimination {
@@ -6472,8 +6089,6 @@ fn solve_rec(
                 LinearElimination::Nothing => {}
                 LinearElimination::Refuted => {
                     stats.infeasible_branches += 1;
-                    trace(|t| t.refuted_linear += 1);
-                    trace_cost(node_w0, true);
                     return;
                 }
                 LinearElimination::Substituted {
@@ -6485,8 +6100,6 @@ fn solve_rec(
                         match assignment[v as usize] {
                             Some(existing) if existing != val => {
                                 stats.infeasible_branches += 1;
-                                trace(|t| t.refuted_forced_conflict += 1);
-                                trace_cost(node_w0, true);
                                 return;
                             }
                             Some(_) => {}
@@ -6509,12 +6122,7 @@ fn solve_rec(
                     bases = InheritedBases::default();
                     if assignment.iter().all(Option::is_some) {
                         let point = point_with_definitions(&assignment, &defined);
-                        let solution = original.iter().all(|equation| equation.eval(point) == 0);
-                        trace(|t| {
-                            t.leaves_checked += 1;
-                            t.leaves_solutions += solution as u64;
-                        });
-                        if solution {
+                        if original.iter().all(|equation| equation.eval(point) == 0) {
                             out.push(point);
                             if accept(point) {
                                 *stop = true;
@@ -6546,7 +6154,6 @@ fn solve_rec(
         };
         if reduced.iter().any(is_constant_one) {
             stats.infeasible_branches += 1;
-            trace_cost(node_w0, true);
             return;
         }
         let forced: Vec<(u32, bool)> = reduced.iter().filter_map(forced_assignment).collect();
@@ -6561,8 +6168,6 @@ fn solve_rec(
                 match assignment[v as usize] {
                     Some(existing) if existing != val => {
                         stats.infeasible_branches += 1;
-                        trace(|t| t.refuted_forced_conflict += 1);
-                        trace_cost(node_w0, true);
                         return;
                     }
                     Some(_) => {}
@@ -6588,8 +6193,6 @@ fn solve_rec(
                         c.set((n + 1, s + fresh.len() as u64));
                     });
                     stats.geometric_refutations += 1;
-                    trace(|t| t.refuted_oracle += 1);
-                    trace_cost(node_w0, true);
                     return;
                 }
                 NodeOracleDecision::Witness => {
@@ -6612,8 +6215,6 @@ fn solve_rec(
             match assignment[v as usize] {
                 Some(existing) if existing != val => {
                     stats.infeasible_branches += 1;
-                    trace(|t| t.refuted_forced_conflict += 1);
-                    trace_cost(node_w0, true);
                     return;
                 }
                 Some(_) => {}
@@ -6645,12 +6246,7 @@ fn solve_rec(
         None => {
             let pt = point_with_definitions(&assignment, &defined);
             // Verify against the untouched system before accepting.
-            let solution = original.iter().all(|e| e.eval(pt) == 0);
-            trace(|t| {
-                t.leaves_checked += 1;
-                t.leaves_solutions += solution as u64;
-            });
-            if solution {
+            if original.iter().all(|e| e.eval(pt) == 0) {
                 out.push(pt);
                 if accept(pt) {
                     *stop = true;
@@ -6659,7 +6255,6 @@ fn solve_rec(
         }
         Some(free) => {
             stats.splits += 1;
-            trace_cost(node_w0, false);
             for value in [false, true] {
                 let mut branch = assignment.clone();
                 branch[free] = Some(value);
@@ -9382,212 +8977,170 @@ mod reference_equivalence_tests {
     }
 }
 
-/// lit2026 W4: the early abort at the refutation degree
-/// (`KIC_F4_EARLY_ABORT=1`) must find the same roots on the same tree.
-#[cfg(test)]
-mod early_abort_tests {
-    use super::*;
-
-    fn xorshift(seed: &mut u64) -> u64 {
-        *seed ^= *seed << 13;
-        *seed ^= *seed >> 7;
-        *seed ^= *seed << 17;
-        *seed
-    }
-
-    /// `equations` sparse quadratics in `n_vars` variables; with `planted`,
-    /// each constant is set so the point vanishes on every equation.
-    fn sparse_quadratic_system(
-        n_vars: usize,
-        equations: usize,
-        terms: usize,
-        planted: Option<u64>,
-        seed: &mut u64,
-    ) -> Vec<F2BoolPoly> {
-        (0..equations)
-            .map(|_| {
-                let mut monos: Vec<F2BoolMono> = (0..terms)
-                    .map(|_| {
-                        let a = xorshift(seed) % n_vars as u64;
-                        let b = xorshift(seed) % n_vars as u64;
-                        F2BoolMono::from_mask((1u64 << a) | (1u64 << b))
-                    })
-                    .collect();
-                let p = F2BoolPoly::from_monos(monos.clone(), n_vars);
-                let constant = match planted {
-                    Some(point) => p.eval(point) == 1,
-                    None => xorshift(seed) & 1 == 1,
-                };
-                if constant {
-                    monos.push(F2BoolMono::from_mask(0));
-                }
-                F2BoolPoly::from_monos(monos, n_vars)
-            })
-            .collect()
-    }
-
-    fn solve_with_mode(
-        system: &[F2BoolPoly],
-        n_vars: usize,
-        mode: u8,
-    ) -> (Vec<u64>, SolveStats, RefutationDegreeTrace) {
-        let opts = SolveOptions {
-            engine: SolverEngine::InheritedF4 { max_degree: 3 },
-            max_solutions: 64,
-            node_budget: 50_000,
-            split_rule: SplitRule::Auto,
-        };
-        set_early_abort_mode(Some(mode));
-        set_refutation_degree_trace(true);
-        let (mut roots, stats) = solve_boolean_system(system, n_vars, &opts);
-        let trace = refutation_degree_trace_take().expect("trace on");
-        set_refutation_degree_trace(false);
-        set_early_abort_mode(None);
-        roots.sort_unstable();
-        (roots, stats, trace)
-    }
-
-    #[test]
-    fn early_abort_keeps_roots_and_tree_on_wide_sparse_systems() {
-        // 24 variables: the ladder runs degree 3 alone, so fresh nodes are
-        // probed at degree 2.
-        let n_vars = 24;
-        let mut seed = 0x5eed_0fa4_u64;
-        let mut probe_refutations = [0u64; 4];
-        let mut planted_found = 0usize;
-        for case in 0..12 {
-            let planted = (case % 2 == 0).then(|| xorshift(&mut seed) & ((1u64 << n_vars) - 1));
-            let system = sparse_quadratic_system(n_vars, 26, 4, planted, &mut seed);
-            let (roots_off, stats_off, trace_off) = solve_with_mode(&system, n_vars, 0);
-            assert_eq!(trace_off.early_abort_probes, 0);
-            assert!(!stats_off.exhausted, "case {case}: budget");
-            if let Some(p) = planted {
-                assert!(roots_off.contains(&p), "case {case}: planted root lost");
-                planted_found += 1;
-            }
-            for mode in 1..=3u8 {
-                let (roots_on, stats_on, trace_on) = solve_with_mode(&system, n_vars, mode);
-                assert_eq!(roots_off, roots_on, "case {case} mode {mode}: roots differ");
-                assert!(!stats_on.exhausted, "case {case} mode {mode}: budget");
-                for root in &roots_on {
-                    assert!(system.iter().all(|e| e.eval(*root) == 0));
-                }
-                // The tree is unchanged unless a degree-2 space refutes a
-                // node the inherited basis does not (mode 2 only).
-                if mode == 1 || trace_off.scratch_refutes_engine_does_not == 0 {
-                    assert_eq!(
-                        stats_off.reductions, stats_on.reductions,
-                        "case {case} {mode}"
-                    );
-                    assert_eq!(stats_off.splits, stats_on.splits, "case {case} {mode}");
-                    assert_eq!(stats_off.propagations, stats_on.propagations);
-                    assert_eq!(stats_off.infeasible_branches, stats_on.infeasible_branches);
-                    assert_eq!(trace_off.refuted_fresh, trace_on.refuted_fresh);
-                    assert_eq!(trace_off.refuted_inherited, trace_on.refuted_inherited);
-                    assert_eq!(
-                        trace_off.refuted_first_degree_fresh,
-                        trace_on.refuted_first_degree_fresh
-                    );
-                }
-                if mode == 1 {
-                    // Every probe refutation is an engine refutation of a
-                    // fresh node.
-                    assert!(trace_on.early_abort_refutations <= trace_on.refuted_fresh);
-                }
-                probe_refutations[mode as usize] += trace_on.early_abort_refutations;
-            }
-        }
-        assert_eq!(planted_found, 6);
-        for mode in 1..=3 {
-            assert!(
-                probe_refutations[mode] > 0,
-                "mode {mode} never fired; the test checks nothing"
-            );
-        }
-    }
-
-    #[test]
-    fn refutation_trace_files_every_reduction() {
-        let n_vars = 24;
-        let mut seed = 0xdeca_fbad_u64;
-        let system = sparse_quadratic_system(n_vars, 28, 4, None, &mut seed);
-        let (_, stats, trace) = solve_with_mode(&system, n_vars, 0);
-        assert_eq!(
-            trace.reductions_fresh + trace.reductions_inherited,
-            stats.reductions as u64
-        );
-        let filed: u64 = trace.refuted_first_degree_fresh.iter().sum::<u64>()
-            + trace.refuted_first_degree_inherited.iter().sum::<u64>()
-            + trace.forced_first_degree.iter().sum::<u64>()
-            + trace.stalled_from_scratch;
-        assert_eq!(filed, stats.reductions as u64);
-        let refuted = trace.refuted_fresh
-            + trace.refuted_inherited
-            + trace.refuted_constant
-            + trace.refuted_linear
-            + trace.refuted_forced_conflict;
-        assert_eq!(refuted, stats.infeasible_branches as u64);
-        assert_eq!(trace.root_first_refutation_degree.iter().sum::<u64>(), 1);
-    }
-
-    #[test]
-    fn gate_first_refutations_are_included_in_refutation_trace() {
-        // Neither input is linear, but their sum forces x0 = 0. The
-        // oracle supplies the additional exact acceptance constraint
-        // x0 = 1, so it refutes after propagation in both solver orders.
-        let n_vars = 2;
-        let system = [
-            F2BoolPoly::from_monos(vec![F2BoolMono::from_mask(0b11)], n_vars),
-            F2BoolPoly::from_monos(
-                vec![F2BoolMono::from_mask(0b11), F2BoolMono::from_mask(0b01)],
-                n_vars,
-            ),
-        ];
-        let opts = SolveOptions {
-            engine: SolverEngine::InheritedF4 { max_degree: 3 },
-            max_solutions: 1,
-            node_budget: 100,
-            split_rule: SplitRule::HighestFree,
-        };
-        let mut control = None;
-        for enabled in [false, true] {
-            set_gate_first(Some(enabled));
-            set_early_abort_mode(Some(0));
-            set_refutation_degree_trace(true);
-            let skips_before = gate_first_skips_thread().0;
-            let (roots, stats) = solve_boolean_system_with_node_oracle(
-                &system,
-                n_vars,
-                &opts,
-                |_| true,
-                |assignment, _| {
-                    if assignment[0] == Some(false) {
-                        NodeOracleDecision::Refute
-                    } else {
-                        NodeOracleDecision::Continue
-                    }
-                },
-            );
-            let trace = refutation_degree_trace_take().expect("trace enabled");
-            set_refutation_degree_trace(false);
-            set_early_abort_mode(None);
-            set_gate_first(None);
-            assert!(roots.is_empty());
-            assert!(!stats.exhausted);
-            assert_eq!(stats.propagations, 1);
-            assert_eq!(stats.geometric_refutations, 1);
-            assert_eq!(trace.refuted_oracle, 1);
-            assert_eq!(trace.nodes_refuted, 1);
-            assert_eq!(
-                trace.reductions_fresh + trace.reductions_inherited,
-                stats.reductions as u64
-            );
-            assert_eq!(gate_first_skips_thread().0 - skips_before, enabled as u64);
-            if let Some(previous) = &control {
-                assert_eq!(previous, &stats);
-            } else {
-                control = Some(stats);
-            }
-        }
-    }
+/// Collected on the calling thread while [`set_refutation_degree_trace`] is
+/// on; read and cleared with [`refutation_degree_trace_take`].  Every field
+/// counts nodes (attempts, for `root_first_refutation_degree`) and is
+/// exact.  The `*_first_degree` fields are a diagnostic the trace pays for:
+/// at every inherited-engine reduction the node's own system is also
+/// reduced from scratch, with the engine's multiplier policy, at degree 2
+/// and, unless that refutes, at the engine's top degree; the node is filed
+/// under the first degree whose row space holds `1` (refuted) or, failing
+/// that, a forced variable (forced), else as stalled.  The trace changes no
+/// decision of the solver.
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize)]
+pub struct RefutationDegreeTrace {
+    /// Inherited-engine reductions whose top basis was built from scratch
+    /// at this node (the root, or a node whose linear elimination dropped
+    /// its parent's bases), and those whose top basis was specialised from
+    /// the parent's.
+    pub reductions_fresh: u64,
+    pub reductions_inherited: u64,
+    /// The engine's own verdict at those reductions: `1` in the row space,
+    /// a forced variable and no `1`, or neither (the solver splits).
+    pub refuted_fresh: u64,
+    pub refuted_inherited: u64,
+    pub forced_fresh: u64,
+    pub forced_inherited: u64,
+    pub stalled_fresh: u64,
+    pub stalled_inherited: u64,
+    /// Diagnostic, indexed by degree (0 … 4): first degree of the node's
+    /// own from-scratch Macaulay space holding `1`, split by whether the
+    /// engine's basis at the node was fresh or inherited.
+    pub refuted_first_degree_fresh: [u64; 5],
+    pub refuted_first_degree_inherited: [u64; 5],
+    /// Diagnostic: the same for a forced variable, at nodes no degree up
+    /// to the top refutes; and the nodes neither decides.
+    pub forced_first_degree: [u64; 5],
+    pub stalled_from_scratch: u64,
+    /// Diagnostic: the from-scratch top-degree space refutes a node the
+    /// engine's basis did not, or the reverse (the inherited basis is a
+    /// documented subspace of it under the production policy).
+    pub scratch_refutes_engine_does_not: u64,
+    pub engine_refutes_scratch_does_not: u64,
+    /// Nodes refuted before any Macaulay matrix: the substituted system
+    /// holds `1` (degree 0), or linear elimination found a contradiction
+    /// (degree 1).
+    pub refuted_constant: u64,
+    pub refuted_linear: u64,
+    /// A forced value read off a reduction or an elimination contradicts
+    /// the assignment.
+    pub refuted_forced_conflict: u64,
+    /// Nodes the IC node oracle refuted.
+    pub refuted_oracle: u64,
+    /// Fully assigned points checked against the input, and how many were
+    /// solutions (each is certified by evaluation, degree 1).
+    pub leaves_checked: u64,
+    pub leaves_solutions: u64,
+    /// Early abort ([`early_abort_mode`]): degree-2 probes run, how many
+    /// refuted their node, and the probes' word operations (charged to the
+    /// stage unit like any reduction).
+    pub early_abort_probes: u64,
+    pub early_abort_refutations: u64,
+    pub early_abort_word_ops: u64,
+    /// Attempt-level diagnostic, once per inherited-engine solve: index `d`
+    /// in 2 … 4 counts root systems whose degree-`d` support-local Macaulay
+    /// space is the first to hold `1`; index 0 counts roots no degree ≤ 4
+    /// refutes; index 1 roots whose matrix exceeded the size caps before a
+    /// refutation.
+    pub root_first_refutation_degree: [u64; 5],
+    /// Where the stage unit goes: nodes that end refuted (any cause) and
+    /// nodes that end in a split, with the word operations each class spent
+    /// from node entry to its end (children excluded; with the trace on,
+    /// the trace's own from-scratch reductions are not charged).
+    pub nodes_refuted: u64,
+    pub word_ops_refuted_nodes: u64,
+    pub nodes_split: u64,
+    pub word_ops_split_nodes: u64,
 }
+
+thread_local! {
+    static REFUTATION_TRACE: std::cell::RefCell<Option<RefutationDegreeTrace>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// Turn the refutation-degree trace on or off on this thread (off drops it).
+pub fn set_refutation_degree_trace(enabled: bool) {
+    REFUTATION_TRACE.with(|t| *t.borrow_mut() = enabled.then(RefutationDegreeTrace::default));
+}
+
+/// The trace collected on this thread since the last take, leaving it
+/// running and cleared; `None` when the trace is off.
+pub fn refutation_degree_trace_take() -> Option<RefutationDegreeTrace> {
+    REFUTATION_TRACE.with(|t| t.borrow_mut().as_mut().map(std::mem::take))
+}
+
+fn trace_on() -> bool {
+    REFUTATION_TRACE.with(|t| t.borrow().is_some())
+}
+
+/// Charge the stage-unit word operations a node spent since `w0` (its
+/// entry, children excluded) to the refuted or the split nodes.
+fn trace_cost(w0: Option<u64>, refuted: bool) {
+    let Some(w0) = w0 else { return };
+    let spent = f4_word_ops_thread().wrapping_sub(w0);
+    trace(|t| {
+        if refuted {
+            t.nodes_refuted += 1;
+            t.word_ops_refuted_nodes += spent;
+        } else {
+            t.nodes_split += 1;
+            t.word_ops_split_nodes += spent;
+        }
+    });
+}
+
+fn trace(f: impl FnOnce(&mut RefutationDegreeTrace)) {
+    REFUTATION_TRACE.with(|t| {
+        if let Some(trace) = t.borrow_mut().as_mut() {
+            f(trace);
+        }
+    });
+}
+
+/// Early abort at the refutation degree (lit2026 W4), `KIC_F4_EARLY_ABORT`,
+/// read once per process:
+///
+/// - `0` or unset: off, the engine as it was.
+/// - `1`: before a node builds its top-degree basis from scratch, and only
+///   when its ladder skips degree 2 (wide systems run the top degree
+///   alone), reduce the node's degree-2 Macaulay space with the same
+///   multiplier policy; if it holds `1`, the node is refuted without the
+///   top-degree build.  Exact and tree-preserving: the degree-2 rows are
+///   rows of the degree-`D` matrix under either policy, so the top build
+///   refutes the same node; a probe that does not refute is dropped and
+///   the build runs as before.
+/// - `2`: a child about to specialise its parent's bases, whose first act
+///   would be that reduction, first reduces its own degree-2 Macaulay
+///   space; `1` there refutes it without the specialisation, and the probe
+///   is counted as the node's reduction.  Exact (`1` in a sub-ideal is `1`
+///   in the ideal).  The tree is the same wherever the inherited top basis
+///   refutes every node the degree-2 space does; the inherited basis is a
+///   documented subspace of the from-scratch one, so where it does not, the
+///   tree only loses refuted subtrees
+///   (`RefutationDegreeTrace::scratch_refutes_engine_does_not`).
+/// - `3`: both.
+///
+/// [`set_early_abort_mode`] overrides the environment on the calling thread.
+pub fn early_abort_mode() -> u8 {
+    if let Some(mode) = EARLY_ABORT_OVERRIDE.with(|m| m.get()) {
+        return mode;
+    }
+    static MODE: std::sync::OnceLock<u8> = std::sync::OnceLock::new();
+    *MODE.get_or_init(|| {
+        std::env::var("KIC_F4_EARLY_ABORT")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(0)
+    })
+}
+
+thread_local! {
+    static EARLY_ABORT_OVERRIDE: std::cell::Cell<Option<u8>> = const { std::cell::Cell::new(None) };
+}
+
+/// Set (`Some`) or clear (`None`) this thread's override of
+/// `KIC_F4_EARLY_ABORT`; a same-binary control for tests and harnesses.
+pub fn set_early_abort_mode(mode: Option<u8>) {
+    EARLY_ABORT_OVERRIDE.with(|m| m.set(mode));
+}
+

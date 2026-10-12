@@ -7,13 +7,11 @@ explain the gap and what would let the work move past it.
 
 ## Index
 
-No problem records have been added yet; remove this sentence when adding the
-first record. This is a new tracking directory, not
-an assertion that the repository has no unresolved blockers. Add a row when
-creating a record; keep resolved and superseded records in the index.
+Keep resolved and superseded records in the index.
 
 | Problem | Status | What it blocks | What would unblock it |
 | --- | --- | --- | --- |
+| [N83 recorded-query sampler contract](n83-recorded-query-sampler-contract-mismatch.md) | open | green whole-library validation on the pinned baseline | traced and versioned query law, point checks and passing regression |
 
 ## Add or update a problem
 

@@ -1,0 +1,30 @@
+{
+  "schema": "n83.optimization-campaign/v1",
+  "protocol_id": "N83A1-fair-rho-training-holdout-20261012",
+  "cwd": "/workspace/repos/crypto",
+  "rho_binary": "/workspace/n83_optimization/frozen_binaries/rho_optimization",
+  "ic_binary": "/workspace/n83_evaluation/frozen_binaries/ic_baseline_a8194d61",
+  "base_file": "/workspace/repos/crypto/experiments/koblitz-single-target-n83-20261006/base_n83_K600.jsonl",
+  "expected_base_hash": "d4a4da26d6e7cb09367de922d9806631fe49989f70d378cae76f347f8d76a9f7",
+  "fixtures_dir": "/workspace/n83_optimization/fixtures",
+  "validation_sidecar": "/workspace/n83_optimization/fixtures/validation_sidecar.json",
+  "generator_receipt": "/workspace/n83_optimization/fixtures/generator_receipt.json",
+  "host_context_file": "/workspace/n83_optimization/host_context.json",
+  "human_protocol": "/workspace/repos/crypto/research/n83_evaluation_20261012/optimization/PROTOCOL.md",
+  "human_protocol_sha256": "012cbae4dabe692ceebd98b012e220f0bd77e6199a59fb120e15ae04cf02e3fa",
+  "delivery_branch": "codex/n83-rho-optimization-20261012",
+  "prior_report_pr": "https://github.com/aburan28/crypto/pull/1719",
+  "selection_primary": "arithmetic mean actual whole-process wall among all-nine-verified candidates; default preferred within2percent",
+  "training_seed_range": [202610128311,202610128319],
+  "holdout_seed_range": [202610128341,202610128355],
+  "bootstrap_seed": 202610128399,
+  "bootstrap_ic_seed": 202610128400,
+  "bootstrap_resamples": 20000,
+  "ic_rank_seed": 29,
+  "resource": {
+    "cpu": 3,
+    "memory_bytes": 12884901888,
+    "rho_timeout_s": 60,
+    "ic_timeout_s": 1800
+  }
+}

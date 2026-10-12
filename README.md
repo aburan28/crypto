@@ -132,6 +132,12 @@ The [report](docs/ecdlp-surfaces/REPORT.md) includes the diagram, PDF, fixtures,
 and native identity certificates. Run `tools/ecdlp-surfaces/check.sh` to validate
 the crate and replay its examples.
 
+For genus-2 and higher Jacobian transfers, use the
+[`ecdlp-surfaces` skill](.agents/skills/ecdlp-surfaces/SKILL.md) and its
+[higher-genus reference](.agents/skills/ecdlp-surfaces/references/higher-genus.md)
+for the existing cover/arithmetic tools, native pullback APIs, and construction
+and subgroup-validation requirements.
+
 ## Isogeny walks
 
 `isogeny_walk` walks a prime-field curve's isogeny class (P-256, P-224,
