@@ -1,0 +1,6 @@
+name = "isogeny_torsion_fibers"
+version = "0.1.0"
+defaultTargets = ["FiberCofactor"]
+
+[[lean_lib]]
+name = "FiberCofactor"

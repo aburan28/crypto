@@ -1,0 +1,4 @@
+# Preserve captured command output byte-for-byte; README summarizes it.
+*.stdout -diff
+*.stderr -diff
+*.log -diff

@@ -1,0 +1,8 @@
+
+running 4122 tests
+test asymmetric::ec_elgamal::tests::checked_encrypt_rejects_invalid_public_key_and_plaintext_collision ... ok
+test asymmetric::ec_elgamal::tests::decrypt_large_message_bounded ... ignored, slow: 1M-entry BSGS table; run with --ignored
+test asymmetric::ec_elgamal::tests::decrypt_out_of_range_fails ... ok
+test asymmetric::ec_elgamal::tests::decrypt_rejects_invalid_ciphertext_points ... ok
+test asymmetric::ec_elgamal::tests::decrypt_with_wrong_key_fails ... ok
+test asymmetric::ec_elgamal::tests::encrypt_decrypt_roundtrip_one ... 

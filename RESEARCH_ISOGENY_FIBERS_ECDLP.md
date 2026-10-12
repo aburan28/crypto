@@ -8,6 +8,13 @@ propositions, with a toy-field computational probe
 binary neighbours: identical Macaulay ranks, yield moves only with |F|),
 `RESEARCH_KOBLITZ_INDEX_CALCULUS.md`, `RESEARCH_PRIME_FIELD_BREAKTHROUGH_PROGRAM.md`.
 
+**Correction, 2026-10-12.** The original summary and proofs of Props. 2.7
+and 4.1 asserted `deg φ | h`. That implication is false when a rational
+isogeny's geometric kernel has non-rational points. The needed statement is
+`|ker φ ∩ E₁(F_q)| | h`, under `r ∤ deg φ`; the relation-projection conclusion
+is unchanged. The exact counterexample, proof map and bounded evidence are in
+[`research/isogeny_torsion_fibers_20261012/REPORT.md`](research/isogeny_torsion_fibers_20261012/REPORT.md).
+
 ---
 
 ## 0. Executive summary (read this if nothing else)
@@ -26,8 +33,8 @@ binary neighbours: identical Macaulay ranks, yield moves only with |F|),
    out-of-image 3-isogeny fiber is a single Frobenius orbit over F_{p³}.
 
 2. **Relation generation is isogeny-equivariant with zero lifting cost.**
-   A relation Σφ(P_i) = φ(R) on E₂ pulls back to ΣP_i − R ∈ M on E₁, and
-   multiplying by the cofactor h = N/r (always divisible by |M| when the
+   A relation Σφ(P_i) = φ(R) on E₂ pulls back to ΣP_i − R ∈ M^π on E₁, and
+   multiplying by the cofactor h = N/r (divisible by |M^π| when the
    prime-order target subgroup has r ∤ deg φ) kills the ambiguity (Prop. 4.1).
    Conversely the summation polynomial of E₂ pulls back along φ to the
    *product* of the kernel-twisted summation polynomials of E₁ (Thm. 4.2,
@@ -206,9 +213,13 @@ F₁ := φ⁻¹(F₂) ∩ E₁(F_q) and D₁(R) := lift(D₂(φ(R))), where lift
 ΣP_i − R ∈ M^π.
 
 **Proposition 2.7.** With h = N/r and r ∤ d, every accepted transported relation
-is a valid relation in G after cofactor projection: [h]ΣP_i = [h]R.
-*Proof.* ΣP_i − R = m ∈ M^π ⊂ E₁(F_q)[d], and d | h because r ∤ d and
-m ∈ E₁(F_q) has order dividing gcd(d, N) | h. ∎
+satisfies [h]ΣP_i = [h]R. When `r ∤ h`, this is a relation in the nonzero
+order-`r` cofactor projection G.
+*Corrected proof (2026-10-12).* Put `k = |M^π|`. By Lagrange, `k | N = hr`,
+and by the isogeny degree, `k | d`. As `r` is prime and `r ∤ d`, we have
+`gcd(k,r)=1`, so Euclid's lemma gives `k | h`. Thus `[h]m=O` for every
+`m ∈ M^π`, including `ΣP_i−R`. The earlier `d | h` step was false; see
+[`REPORT.md`](research/isogeny_torsion_fibers_20261012/REPORT.md). ∎
 
 **Proposition 2.8 (transport preserves the cost profile).** |F₁| = |M^π|·|F₂ ∩ φ(E₁(F_q))|
 ≤ |M^π|·|F₂|; after projection F₁ spans the same subgroup of G as F₂ (a
@@ -330,8 +341,9 @@ on E₂. Then ΣP_i − R ∈ M^π, and [h]ΣP_i = [h]R. If the P_i are only kno
 to the fiber (i.e. only Q_i = φ(P_i) ∈ F₂ are known), any choice of rational
 preimages P_i ∈ φ⁻¹(Q_i) ∩ F₁ gives a valid projected relation; no search over
 the fibers is required.
-*Proof.* Prop. 2.7 and: changing P_i within its rational fiber changes ΣP_i
-by an element of M^π, which [h] kills. ∎
+*Proof.* Prop. 2.7, using `|M^π| | h`, and: changing P_i within its rational
+fiber changes ΣP_i by an element of M^π, which [h] kills. The original
+assertion `d | h` is not required. ∎
 
 So "solving kernel ambiguities" costs nothing for the DLP in G. The ambiguity is
 real only if one insists on relations in the full group E₁(F_q), where it is
@@ -1135,8 +1147,9 @@ fiber becomes a well-defined function of the base point only after
 quotienting by M, and a *homomorphism* out of the fiber survives only when
 M is annihilated by a map the algorithm can apply.
 
-* Prop. 4.1: M = ker φ ⊂ E(F_q)[d]; the cofactor map [h] kills it because
-  d | h. Result: relations lift for free, but they lift into the part of
+* Prop. 4.1: the rational kernel M^π = ker φ ∩ E(F_q) lies in E(F_q)[d];
+  the cofactor map [h] kills it because |M^π| | h when r ∤ d. Result:
+  relations lift for free, but they lift into the part of
   the group where [h] is available, i.e. the DLP in G is untouched.
 * Smart's anomalous-curve attack (trace 1, N = p): the reduction map
   Ẽ(Q_p) → E(F_p) has fiber the formal group Ẽ₁(Q_p), a torsor under
