@@ -1,0 +1,104 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "pdp_split_slots_20261012 Part C, n=17 invariant base, m=2",
+  "description": "Preregistered (PROTOCOL.md Part C): pdp-split m=2 on the dimension-9 Frobenius-invariant base against the Frobenius-MITM incumbent, the native-XOR SAT arm and matched rho. Algebraic IC S is a counted lower bound.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 17
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 202610121301,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {
+          "lanes": "32",
+          "dp_bits": "4",
+          "step_cap_factor": "2000"
+        }
+      }
+    },
+    {
+      "name": "rho-frob",
+      "role": "baseline",
+      "method": {
+        "id": "rho.signed_frobenius"
+      }
+    },
+    {
+      "name": "ic-mitm-frob",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-orbit:divisor=0;1",
+          "linalg": "incremental-gauss",
+          "targets": "walk",
+          "max_trials": "20000",
+          "oracle": "mitm-frobenius:m=2"
+        }
+      }
+    },
+    {
+      "name": "ic-sat-xor",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-orbit:divisor=0;1",
+          "linalg": "incremental-gauss",
+          "targets": "walk",
+          "max_trials": "20000",
+          "oracle": "descent-algebraic:m=2",
+          "solver": "sat-cdcl:sat_conflict_budget=20000,sat_xor_encoding=native",
+          "solver_budget_seconds": "0"
+        }
+      }
+    },
+    {
+      "name": "pdp-m2-g0",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-orbit:divisor=0;1",
+          "linalg": "incremental-gauss",
+          "targets": "walk",
+          "max_trials": "20000",
+          "oracle": "pdp-split:m=2,plan=2,guess=0,slots=one,max_free=24"
+        }
+      }
+    },
+    {
+      "name": "pdp-m2-g4",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-orbit:divisor=0;1",
+          "linalg": "incremental-gauss",
+          "targets": "walk",
+          "max_trials": "20000",
+          "oracle": "pdp-split:m=2,plan=2,guess=4,slots=one,max_free=24"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610121302,
+    "isolation_required": "L0",
+    "timeout_seconds": 7200
+  }
+}
