@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="720" viewBox="0 0 1240 720" font-family="DejaVu Sans, Liberation Sans, Helvetica, Arial, sans-serif" font-size="10">
+  <title>Figure 1: the gate ladder for a dedicated PDP root-finder, with the two tracks' boundaries and reference arms</title>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#52514e"/></marker>
+  </defs>
+  <rect width="1240" height="720" fill="#fcfcfb"/>
+  <text x="620" y="26" text-anchor="middle" font-size="15" fill="#0b0b0b">Gate ladder for a dedicated PDP root-finder (README section 6)</text>
+  <text x="620" y="44" text-anchor="middle" font-size="10.5" fill="#52514e">one instance shape (K, E, V, m), targets x_R, every arm on the same frozen corpus, counted units, wall time as a note</text>
+
+  <!-- the solver's two phases -->
+  <rect x="420" y="60" width="180" height="40" rx="6" fill="#fcfcfb" stroke="#52514e" stroke-width="1.2"/>
+  <text x="510" y="77" text-anchor="middle" font-size="11.5" fill="#0b0b0b">prepare(shape)</text>
+  <text x="510" y="92" text-anchor="middle" font-size="9.5" fill="#52514e">once per (E, V, m): charged as T_prepare</text>
+  <rect x="640" y="60" width="180" height="40" rx="6" fill="#fcfcfb" stroke="#52514e" stroke-width="1.2"/>
+  <text x="730" y="77" text-anchor="middle" font-size="11.5" fill="#0b0b0b">decide(x_R)</text>
+  <text x="730" y="92" text-anchor="middle" font-size="9.5" fill="#52514e">per target, K in lock-step: T_target</text>
+  <line x1="600" y1="80" x2="640" y2="80" stroke="#52514e" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="620" y1="100" x2="620" y2="122" stroke="#52514e" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- the ladder -->
+  <g id="ladder">
+    <rect x="390" y="124" width="460" height="44" rx="6" fill="#fcfcfb" stroke="#0b0b0b" stroke-width="1.2"/>
+    <text x="400" y="141" font-size="11.5" fill="#0b0b0b" font-weight="bold">G0  exactness</text>
+    <text x="400" y="158" fill="#52514e">digests equal the exhaustive reference; every witness verified in the group</text>
+
+    <rect x="390" y="178" width="460" height="44" rx="6" fill="#fcfcfb" stroke="#0b0b0b" stroke-width="1.2"/>
+    <text x="400" y="195" font-size="11.5" fill="#0b0b0b" font-weight="bold">G1  vs the enumeration floor T_enum</text>
+    <text x="400" y="212" fill="#52514e">work / T_enum below 1 and falling (at most 0.6x per rung) over 4+ rungs</text>
+
+    <rect x="390" y="232" width="460" height="58" rx="6" fill="#fcfcfb" stroke="#0b0b0b" stroke-width="1.2"/>
+    <text x="400" y="249" font-size="11.5" fill="#0b0b0b" font-weight="bold">G2  vs F4 / F5 / general Groebner (the requested gate)</text>
+    <text x="400" y="266" fill="#52514e">(a) at most 0.1x the best Groebner arm at the largest cell both finish</text>
+    <text x="400" y="281" fill="#52514e">(b) lower growth beta, disjoint 95% intervals, 4+ sizes; (c) not slower than msolve</text>
+
+    <rect x="390" y="300" width="460" height="44" rx="6" fill="#fcfcfb" stroke="#2a78d6" stroke-width="2"/>
+    <text x="400" y="317" font-size="11.5" fill="#0b0b0b" font-weight="bold">G3  vs the generic line (the only exponent gate)</text>
+    <text x="400" y="334" fill="#52514e">beta below the pair table's floor(m/2)/m bits per variable at poly(N) memory</text>
+
+    <rect x="390" y="354" width="460" height="44" rx="6" fill="#fcfcfb" stroke="#0b0b0b" stroke-width="1.2"/>
+    <text x="400" y="371" font-size="11.5" fill="#0b0b0b" font-weight="bold">G4  vs SAT (binary only)</text>
+    <text x="400" y="388" fill="#52514e">fewer decisions than WDSat and the native CDCL+XOR; decides n = 59, l = 9</text>
+
+    <rect x="390" y="408" width="460" height="44" rx="6" fill="#fcfcfb" stroke="#0b0b0b" stroke-width="1.2"/>
+    <text x="400" y="425" font-size="11.5" fill="#0b0b0b" font-weight="bold">G5  amortised accounting</text>
+    <text x="400" y="442" fill="#52514e">(S, T_prepare, T_target, K) and log2(S T^2) - log2(r/|Aut|) per rung</text>
+
+    <rect x="390" y="462" width="460" height="58" rx="6" fill="#fcfcfb" stroke="#0b0b0b" stroke-width="1.2"/>
+    <text x="400" y="479" font-size="11.5" fill="#0b0b0b" font-weight="bold">G6  end-to-end admissibility (m at least 4)</text>
+    <text x="400" y="496" fill="#52514e">ECC2K-130: T_target below ~2^35 group ops at m = 4 (Macaulay degree 2)</text>
+    <text x="400" y="511" fill="#52514e">256-bit prime: T_dec below ~2^59 at m = 4 (degree 3); then ecbench verdict</text>
+
+    <rect x="390" y="530" width="460" height="44" rx="6" fill="#fcfcfb" stroke="#0b0b0b" stroke-width="1.2"/>
+    <text x="400" y="547" font-size="11.5" fill="#0b0b0b" font-weight="bold">G7  classification</text>
+    <text x="400" y="564" fill="#52514e">advance (G3 passed), engineering (G1, G2a), relabelling, accounting</text>
+  </g>
+
+  <!-- left column: binary track -->
+  <g id="binary">
+    <rect x="20" y="124" width="340" height="450" rx="8" fill="none" stroke="#2a78d6" stroke-width="1.2"/>
+    <text x="190" y="143" text-anchor="middle" font-size="11.5" fill="#0b0b0b" font-weight="bold">Binary track: F_(2^n), n prime</text>
+    <text x="190" y="158" text-anchor="middle" fill="#52514e">V an F2-subspace (dim l) or a Frobenius-stable set</text>
+    <text x="30" y="182" font-size="10.5" fill="#0b0b0b" font-weight="bold">Floors (derived)</text>
+    <text x="30" y="197" fill="#52514e">T_enum = 2^((m-1)l) / (m-1)!, O(l) field ops each</text>
+    <text x="30" y="211" fill="#52514e">pair table: 2^(floor(m/2) l) at 2^(ceil(m/2) l) memory</text>
+    <text x="30" y="225" fill="#52514e">product law: beat own enumeration by 2^-(63.2 + log2 m)</text>
+    <text x="30" y="249" font-size="10.5" fill="#0b0b0b" font-weight="bold">Reference arms (measured)</text>
+    <text x="30" y="264" fill="#52514e">R1 pairs-and-solve: 338 to 452 ns per pair, l = 8..12</text>
+    <text x="30" y="278" fill="#52514e">R2 mitm: n = 59, l = 9 in 3.86 core-s, 80/80 verdicts</text>
+    <text x="30" y="292" fill="#52514e">R3 inherited F4 / F6-IC, matrix-F4/F5, wide solver</text>
+    <text x="30" y="306" fill="#52514e">R4 WDSat, CryptoMiniSat, native CDCL+XOR</text>
+    <text x="30" y="320" fill="#52514e">R5 msolve, Singular, PolyBoRi (Magma scripts, not run)</text>
+    <text x="30" y="334" fill="#52514e">R8 F4 trace replay: to build; ceiling 4.3% of the rows</text>
+    <text x="30" y="358" font-size="10.5" fill="#0b0b0b" font-weight="bold">What F4 does today</text>
+    <text x="30" y="373" fill="#52514e">solving degree 7 at m = 3 (l = 4 and 5)</text>
+    <text x="30" y="387" fill="#52514e">2^8.6 to 2^9.3 per rung of l; enumeration 2^2, table 2^1</text>
+    <text x="30" y="401" fill="#52514e">SAT visits 2^(3l)/3! nodes: enumeration with overhead</text>
+    <text x="30" y="425" font-size="10.5" fill="#0b0b0b" font-weight="bold">Obstruction to beat</text>
+    <text x="30" y="440" fill="#52514e">no Frobenius-stable subspace at prime n;</text>
+    <text x="30" y="454" fill="#52514e">deciding degree about l/2 on the full descent</text>
+    <text x="30" y="478" font-size="10.5" fill="#0b0b0b" font-weight="bold">Budget at n = 131 (derived, README 6.4)</text>
+    <text x="30" y="493" fill="#52514e">m = 3: dead at the linear algebra (5 K^2 = 2^75)</text>
+    <text x="30" y="507" fill="#52514e">m = 4: l = 34, T_target below 2^35, T_enum = 2^99</text>
+    <text x="30" y="521" fill="#52514e">m = 5: l = 28, T_target below 2^41</text>
+    <text x="30" y="535" fill="#52514e">admissible Macaulay degree 2; measured 7</text>
+    <text x="30" y="549" fill="#52514e">unit: group-operation equivalents (ecbench gae)</text>
+  </g>
+
+  <!-- right column: prime track -->
+  <g id="prime">
+    <rect x="880" y="124" width="340" height="450" rx="8" fill="none" stroke="#eb6834" stroke-width="1.2"/>
+    <text x="1050" y="143" text-anchor="middle" font-size="11.5" fill="#0b0b0b" font-weight="bold">Prime track: F_p</text>
+    <text x="1050" y="158" text-anchor="middle" fill="#52514e">V = L^-1(c), L a tower: Kummer, Dickson, 2-isogeny</text>
+    <text x="890" y="182" font-size="10.5" fill="#0b0b0b" font-weight="bold">Floors (derived)</text>
+    <text x="890" y="197" fill="#52514e">T_enum = 2^((m-1)t) / (m-1)! (tower-exhaustive)</text>
+    <text x="890" y="211" fill="#52514e">pair table: 2^(floor(m/2) t); family law S = 0.75 r^(1/6)</text>
+    <text x="890" y="225" fill="#52514e">family floor r^(2/(m+1)): at or above rho for m = 2, 3</text>
+    <text x="890" y="249" font-size="10.5" fill="#0b0b0b" font-weight="bold">Reference arms (measured)</text>
+    <text x="890" y="264" fill="#52514e">R6 tower-exhaustive, mitm, subtract (prime-tower base)</text>
+    <text x="890" y="278" fill="#52514e">R7 f4_fp_tower (f4_fp at msolve parity; sig_fp_tower)</text>
+    <text x="890" y="292" fill="#52514e">R5 msolve, Singular on exported tower systems</text>
+    <text x="890" y="306" fill="#52514e">R8 F4 trace replay: to build; at most 58% zero rows</text>
+    <text x="890" y="330" font-size="10.5" fill="#0b0b0b" font-weight="bold">What F4 does today (Kummer towers, p1)</text>
+    <text x="890" y="345" fill="#52514e">D = 5 to 6 (m = 2); 6, 6, 7, 7 (m = 3); 6, 7, 7 (m = 4)</text>
+    <text x="890" y="359" fill="#52514e">1.6 / 2.1 / 2.4 bits of work per tower variable</text>
+    <text x="890" y="373" fill="#52514e">enumeration 0.50 to 0.75, pair table 0.33 to 0.50</text>
+    <text x="890" y="387" fill="#52514e">F5/GVW criteria: D_sig above D, 1.7 to 28x memory</text>
+    <text x="890" y="411" font-size="10.5" fill="#0b0b0b" font-weight="bold">Obstruction to beat</text>
+    <text x="890" y="426" fill="#52514e">one generator on a 2^N-point grid (no conjugates):</text>
+    <text x="890" y="440" fill="#52514e">XL degree at least d + delta_Z, delta_Z about N (Prop. 2)</text>
+    <text x="890" y="464" font-size="10.5" fill="#0b0b0b" font-weight="bold">Budget at 256 bits (derived, README 6.4)</text>
+    <text x="890" y="479" fill="#52514e">m = 3: never below rho (ties only at T_dec = O(1))</text>
+    <text x="890" y="493" fill="#52514e">m = 4: |F| = p^(1/4)/2, T_dec below p^(1/4)/32 = 2^59</text>
+    <text x="890" y="507" fill="#52514e">m = 5: |F| = 2^52, T_dec below 2^76</text>
+    <text x="890" y="521" fill="#52514e">admissible Macaulay degree 3 (m = 4); measured 7</text>
+    <text x="890" y="535" fill="#52514e">N = m t = 256 to 265 tower variables</text>
+    <text x="890" y="549" fill="#52514e">unit: F_p multiply-adds (ns_per_fp_muladd calibration)</text>
+  </g>
+
+  <!-- arrows from the columns into the gates they feed -->
+  <line x1="360" y1="200" x2="390" y2="200" stroke="#2a78d6" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="360" y1="261" x2="390" y2="261" stroke="#2a78d6" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="360" y1="376" x2="390" y2="376" stroke="#2a78d6" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="360" y1="491" x2="390" y2="491" stroke="#2a78d6" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="880" y1="200" x2="850" y2="200" stroke="#eb6834" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="880" y1="261" x2="850" y2="261" stroke="#eb6834" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="880" y1="491" x2="850" y2="491" stroke="#eb6834" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- bottom: the one table and the classes -->
+  <line x1="620" y1="574" x2="620" y2="594" stroke="#52514e" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <rect x="390" y="596" width="460" height="42" rx="6" fill="#fcfcfb" stroke="#52514e" stroke-width="1.2"/>
+  <text x="620" y="613" text-anchor="middle" font-size="11.5" fill="#0b0b0b">one table, one unit (README 6.3)</text>
+  <text x="620" y="629" text-anchor="middle" fill="#52514e">arm, cell, work/target, /T_enum, /pair table, /best Groebner, beta (95%), memory, verified, class</text>
+  <text x="620" y="668" text-anchor="middle" fill="#52514e">Only a G3 pass is an advance; G1 and G2 passes are engineering. Nothing in this figure is measured by this document.</text>
+  <text x="620" y="684" text-anchor="middle" fill="#52514e">Every number is quoted from a cited artefact or derived in the README.</text>
+  <text x="620" y="704" text-anchor="middle" font-size="9.5" fill="#52514e">research/pdp_root_finder_requirements_20261012, 2026-10-12</text>
+</svg>
