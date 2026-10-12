@@ -1,0 +1,36 @@
+{
+  "large_columns": 2048,
+  "large_compressed_blake3": "82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851",
+  "large_compressed_sha256": "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a",
+  "large_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851.jsonl.gz",
+  "nominal_unordered_multiset_counts_by_m_and_residual_count": {
+    "5": {
+      "0": "2423643343511761316264808",
+      "1": "8878309426598156108089140",
+      "2": "13009394065076279872900344"
+    },
+    "6": {
+      "0": "79260004322307878365588638556",
+      "1": "348413272489876759780963738848",
+      "2": "638159564119735563815285249490"
+    }
+  },
+  "point_row_prefix": true,
+  "rank_gain": null,
+  "relation_yield": null,
+  "representative_prefix": true,
+  "residual_columns": 866,
+  "residual_point_rows": 143756,
+  "residual_rows_sha256": "0d008d5a81da8ca34ecd9e8606d0ac3e58c6e325dc7329d69b3f568f224c4bf0",
+  "schema": "n83.v2-prefix-large-prime-pool/v1",
+  "shared_rows_sha256": "2e1d99d18881476f81900e5df61e643783a8515d1f2a53efafd7ea4568ea8442",
+  "small_columns": 1182,
+  "small_compressed_blake3": "76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92",
+  "small_compressed_sha256": "eb342b574e244e1e67e8e78c805f33ee88edcdb4f3a14d4114e6f413beede380",
+  "small_point_rows": 196212,
+  "small_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92.jsonl.gz",
+  "status": "PASS_exact_prefix_only",
+  "study": "koblitz_n83_factor_base_sweep_20261008",
+  "total_index_calculus_runtime_ms": null,
+  "uniform_nonidentity_group_denominator": "2417851639230796216685688"
+}

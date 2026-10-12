@@ -89,11 +89,9 @@
 //! - Faugère–Joux–Vitse–Perret-Renault et al., later work on
 //!   Semaev-polynomial Gröbner basis cost across curve families.
 
-use crate::cryptanalysis::ec_index_calculus::{
-    find_one_relation, gaussian_eliminate_mod_n_particular, semaev_s3,
-    semaev_s3_in_x3, sqrt_mod_p, FactorBaseEntry,
-};
-use crate::ecc::curve::CurveParams;
+use crate::cryptanalysis::ec_index_calculus::{find_one_relation, 
+    gaussian_eliminate_mod_n_particular, semaev_s3, semaev_s3_in_x3, sqrt_mod_p, 
+    FactorBaseEntry};use crate::ecc::curve::CurveParams;
 use crate::ecc::field::FieldElement;
 use crate::ecc::point::Point;
 use crate::utils::{mod_inverse, random::random_scalar};
