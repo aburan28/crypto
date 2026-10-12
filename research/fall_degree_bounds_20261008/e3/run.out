@@ -1,0 +1,136 @@
+warning: unused import: `super::koblitz_fast_arith::FastBinaryCurve`
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:77:5
+   |
+77 | use super::koblitz_fast_arith::FastBinaryCurve;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::cryptanalysis::binary_semaev::binary_semaev_s3`
+   --> src/cryptanalysis/semaev_sat.rs:105:5
+    |
+105 | use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:846:11
+    |
+831 |         FactorBaseSpec::StandardSubspace { dimension } => {
+    |         ---------------------------------------------- matches all the relevant values
+...
+846 |         | FactorBaseSpec::StandardSubspace { .. }
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+    |
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:847:11
+    |
+840 |         FactorBaseSpec::CofactorProjected { .. } | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |         ---------------------------------------- matches all the relevant values
+...
+847 |         | FactorBaseSpec::CofactorProjected { .. }
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:848:11
+    |
+840 |         FactorBaseSpec::CofactorProjected { .. } | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |                                                    ------------------------------------- matches all the relevant values
+...
+848 |         | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+
+warning: unused variable: `img_bits`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:2269:13
+     |
+2269 |         let img_bits = img
+     |             ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_img_bits`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `img_bits`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:2274:13
+     |
+2274 |         let img_bits = raw.first().copied().unwrap_or(0) as u128
+     |             ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_img_bits`
+
+warning: unused variable: `sums`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:3248:9
+     |
+3248 |     let sums = fast.batch_add(&pairs);
+     |         ^^^^ help: if this is intentional, prefix it with an underscore: `_sums`
+
+warning: unused variable: `projected`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:8807:10
+     |
+8807 |     let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
+     |          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_projected`
+
+warning: function `rref_f2_full` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:1714:4
+     |
+1714 | fn rref_f2_full(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+     |    ^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `rref_f2_suffix` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:1742:4
+     |
+1742 | fn rref_f2_suffix(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+     |    ^^^^^^^^^^^^^^
+
+warning: function `rref_f2_m4ri` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:1778:4
+     |
+1778 | fn rref_f2_m4ri(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+     |    ^^^^^^^^^^^^
+
+warning: enum `SplitHeuristic` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:2127:6
+     |
+2127 | enum SplitHeuristic {
+     |      ^^^^^^^^^^^^^^
+
+warning: function `choose_split_variable` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:2133:4
+     |
+2133 | fn choose_split_variable(
+     |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tail_zero_assignments` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:2175:4
+     |
+2175 | fn tail_zero_assignments(
+     |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `radix_sort_entries_by_key` is never used
+    --> src/cryptanalysis/koblitz_index_calculus.rs:4443:4
+     |
+4443 | fn radix_sort_entries_by_key(entries: &mut [(u64, u32, u32)]) {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `crypto` (lib) generated 16 warnings (run `cargo fix --lib -p crypto` to apply 6 suggestions)
+warning: variable does not need to be mutable
+   --> examples/hky_last_fall_degree.rs:295:9
+    |
+295 |     let mut toggle = |coeff: u64, mono: u64, eqs: &mut Vec<HashMap<u64, ()>>| {
+    |         ----^^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `nv` is never read
+   --> examples/hky_last_fall_degree.rs:466:5
+    |
+465 | struct Ring {
+    |        ---- field in this struct
+466 |     nv: u32,
+    |     ^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `crypto` (example "hky_last_fall_degree") generated 2 warnings (run `cargo fix --example "hky_last_fall_degree" -p crypto` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 0.09s
