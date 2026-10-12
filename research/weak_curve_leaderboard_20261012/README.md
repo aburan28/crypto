@@ -54,6 +54,8 @@ exact example certificates, mechanism recognition gates, and next research
 steps. The [WID1 specification](IDENTIFIERS.md) defines the weakness marker.
 The [coverage audit](COVERAGE_AUDIT.md) maps prime-degree extensions,
 hyperelliptic covers, and other Jacobian routes to their exact open witnesses.
+It also records missing twist/input, auxiliary-input, trace-zero, pairing-cost,
+endomorphism, prime-field decomposition, and implementation-context checks.
 The [proof map](PROOF_MAP.md)
 specifies the Lean boundary. [VALIDATION.md](VALIDATION.md) records the build,
 PARI replay, and site checks. This release does not infer a single security

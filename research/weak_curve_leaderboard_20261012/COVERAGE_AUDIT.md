@@ -1,6 +1,6 @@
 # Extension-field and Jacobian-transfer coverage audit
 
-The atlas now names thirteen mechanisms, including direct extension-field
+The atlas now names sixteen criteria, including direct extension-field
 index calculus, cover-and-decomposition, and cubic Weil-restriction Jacobian
 isogenies. Its 920 exact curve rows are **not** a census of every curve to
 which those methods apply. The `criteria.json` entries describe recognition
@@ -66,3 +66,40 @@ specifies the map and arithmetic checks. The [proof map](PROOF_MAP.md) lists
 the Lean status of the atlas's mathematical claims. This audit adds no new
 mathematical theorem; it records published route families and the exact
 unproved or unmeasured bridge for each.
+
+## Attack families and assessment layers still missing
+
+The sixteen-criterion registry is a method index, not a complete attack audit.
+In particular, its MOV and Frey–Rück entries share an embedding-degree screen,
+and several geometric entries have no constructed map on an atlas model. The
+following additions need separate records for an exact curve, selected subgroup,
+attack inputs, and measured or modeled cost. A structural candidate stays a
+candidate until its stated gate passes.
+
+| Proposed check | Exact recognition and evidence gate | Present gap and source |
+| --- | --- | --- |
+| Twist and invalid-input exposure | Count and factor the curve and its relevant twists; record input format, accepted point set, subgroup validation, cofactor handling, secret-scalar policy, and whether a multiplication result is observable. Test the implementation or protocol path against the actual small-order or invalid inputs. | `smooth_selected_order` covers only the selected subgroup on the listed model. Twist and invalid-curve attacks depend on input handling; [RFC 7748](https://www.rfc-editor.org/rfc/rfc7748) discusses low-order inputs and the all-zero check, and [Bernstein–Lange](https://eprint.iacr.org/2024/1265) analyze twist, small-subgroup, and invalid-curve exposure. |
+| Cheon auxiliary-input DLP | Factor `r−1` and `r+1` for the selected prime subgroup order `r`, then record the *actual* supplied powers of one secret, such as `G,[x]G,[x^d]G` with `d | r−1`; estimate the best attack for that input set. | The factors alone never establish the attack precondition. [Cheon](https://doi.org/10.1007/11761679_1) gives the auxiliary-input algorithm; [pairing-curve analysis](https://eprint.iacr.org/2020/351) applies it to structured-reference-string power sequences. |
+| Trace-zero subgroup index calculus | Specify `E/F_q`, the extension `F_(q^n)`, trace map, and selected point's membership in its kernel. Build the trace-zero factor base and record natural-query relations, rank, linear algebra, descent, and one-target cost. | `extension_index_calculus` analyzes decomposition on the whole elliptic group, while [Gorla–Massierer](https://eprint.iacr.org/2014/318) analyze a distinct algorithm on the trace-zero variety. The generator's trace-zero membership is a required gate. |
+| Pairing destination cost | After certifying a MOV or Frey–Rück transfer, record `k=ord_r(q)`, the field `F_(q^k)`, characteristic and polynomial shape, tower, finite-field DLP algorithm, and transfer plus individual-log cost. | The present `k` screen does not estimate target-field hardness. [Tower NFS](https://eprint.iacr.org/2015/505), [extended TNFS](https://eprint.iacr.org/2015/1027), and [pairing-curve cost estimates](https://eprint.iacr.org/2019/1371) show why `k` and field size alone are insufficient. |
+| Other efficient automorphisms and endomorphisms | Construct the endomorphism, verify its action and orbit size on the selected subgroup, and compare the resulting rho cost on matched inputs. Include binary Koblitz Frobenius and endomorphisms beyond the `j=0,1728` prime-field screens. | Current GLV and GLS entries are narrow structural screens. [Koblitz-curve analysis](https://eprint.iacr.org/2016/603) discusses Frobenius rho speedups; [SafeCurves' discriminant analysis](https://safecurves.cr.yp.to/disc.html) explains the small-CM-discriminant signal and its limits. |
+| Prime-field summation-polynomial index calculus | Fix a prime-field factor base and exact decomposition system, then measure ordinary-query relation yield, rank, final linear algebra, target descent, and matched one-target cost. | `extension_index_calculus` is scoped to `d>1`; [Amadori–Pintore–Sala](https://eprint.iacr.org/2017/609) study the prime-field branch. A proposed decomposition formula supplies a research route, while a weakness finding needs the complete pipeline. |
+| Restricted secrets, nonce leakage, and faults | Attach a separate application or implementation record: secret-key distribution, signature samples and nonce relation, observable side channel or fault model, and a reproducible key-recovery check. | These conditions concern use of a curve rather than its ECDLP subgroup. [Sun–Espitau–Tibouchi–Abe](https://eprint.iacr.org/2021/455) analyze partial ECDSA nonce leakage, and [Neves–Tibouchi](https://eprint.iacr.org/2015/1233) analyze fault-induced degenerate-curve behavior. |
+
+### Promotion order
+
+1. Add exact twist orders, selected subgroup orders, and input-validation
+   metadata for the named-curve roster. Publish separate **curve structure**
+   and **protocol exposure** badges, with a source and exact acceptance test.
+2. Add Cheon and trace-zero screens only when the auxiliary-input record or
+   trace-zero membership is known. Store `unassessed` for missing context.
+3. Replace pairing embedding-degree rankings with reproducible finite-field
+   cost estimates and an explicit pairing witness. Expand GLV/GLS screens to
+   exact subgroup actions and include binary Frobenius.
+4. Connect existing GHS, cover, Jacobian, and isogeny candidates to exact
+   maps and complete cost records using the procedure above. The current
+   graph's verified edges and the atlas's cover candidates are separate
+   evidence types.
+
+Future mathematical recognition results follow the [proof map](PROOF_MAP.md)
+and the repository's Lean requirement before promotion to theorem status.
