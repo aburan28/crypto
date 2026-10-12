@@ -184,3 +184,43 @@ from each record's stored `x_3` and `b`. It keeps the stored linear part,
 stored echelon basis of `span(F) ∩ R_{≤1}`, `deg_le1`. No draw was rerun
 and no seed changed. `score.py` reports both the as-run verdicts and the
 Amendment 1 verdicts, and `RESULTS.md` quotes both.
+
+## Amendment 2 (2026-10-12, before any E3 cell runs): E5 engine, its validation scope, E3 seeds
+
+**Engine.** E5 is `examples/hky_last_fall_degree.rs`, native Rust.
+
+- **Closure.** The mutant closure `V_{F,c}` uses the Boolean convention of §0 ("multiply
+  `g` by `m` only if `deg m + deg g ≤ c`"). It is computed by a work queue over a
+  leading-monomial echelon basis.
+- **Ideal side.** It does not use Sage's Gröbner basis. With the field equations the
+  Boolean ideal is radical, so `I = I(S)` for the exact solution set `S`. `S` is
+  enumerated by solving `S₃ = 0` as a quadratic in `X₂` for each `X₁ ∈ V`. So
+  `dim (I ∩ R_{≤c})` is a rank on `S`.
+- **`DG`.** It is the top degree of the minimal non-standard monomials of `S` in Sage's
+  deglex, found by a Buchberger–Möller scan.
+- **Early stop.** The engine stops at `e₀`, where Sage continued to `cmax`. `d_last`
+  depends only on degrees `≤ e₀`.
+
+**Validation scope (a deviation from E5's text, disclosed).**
+- The Sage records store `(n, x₃, b)`, but not the random subspace basis. So "reproduce
+  every Sage cell" is possible only for the `subfield` cells, where `V = F_{2^{n/2}}` is
+  fixed by `n`. Closure and ideal dimensions are invariant under a change of basis of `V`.
+- On those 32 records (`n = 8, 10, 12, 14`; rand and sat) the engine matches Sage exactly:
+  `DG`, `d_last`, `e₀`, and the closure, ideal and plain dimensions at every degree both
+  computed. The modulus is NTL's sparse irreducible, which is Sage's `minimal_weight`.
+  Output: `e5/replay_subfield.jsonl`.
+- The random-base Sage cells are compared by distribution only: the native E3 run
+  includes `n = 18, 20, 22`, overlapping `TABLE.md`.
+
+**E3 as run.** The cells are as registered: random base, 8 draws each, `rand` and `sat`,
+at `n ∈ {22, 24, 26, 28, 32}`. Overlap cells at `n ∈ {18, 20}` are added for the
+comparison above; they are not part of P3a or P3b.
+- Seeds: `hky_last_fall_degree cell --seed 20261012`, so draw `s` uses
+  `20261012·1000 + s`.
+- `cmax = 6`. A draw with no `e₀ ≤ 6` is reported censored.
+- Scoring follows §E3 unchanged: P3a, P3b, the LOG/LIN comparison, and the kill
+  condition. The LOG and LIN fits use the per-`n` median `d_F` on `n ≤ 22`, mixing the
+  Sage `TABLE.md` cells at `n ≤ 16` with native ones at `n = 18–22`. They are scored on
+  `n ∈ {24…32}`.
+- Nothing from any random-base E3 cell has been seen. Two timing draws with seed 1 at
+  `n = 22` and `26` were discarded unseen.
