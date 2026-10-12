@@ -1286,26 +1286,36 @@ impl TraitFile {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn unavailable_coordinate_models_keep_exact_fields_without_order_certificates() {
+    fn coordinate_models_keep_exact_fields_and_order_checks_without_certificates() {
         use super::*;
-        for (text, q) in [
+        for (text, q, order, expected_status) in [
             (
                 r#"{"field":"fp-101","form":"B*y^2=x^3+A*x^2+x","p":"101","A":"3","B":"1"}"#,
                 101u64,
+                96u64,
+                Status::Proved,
             ),
             (
                 r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","a":["1","0"],"b":["1","0"]}"#,
                 1369u64,
+                1369u64,
+                Status::NotEvaluated,
             ),
         ] {
             let (model, _) = parse_model(text).unwrap();
             assert_eq!(model.q(), BigUint::from(q));
             assert_eq!(
-                certify::check_order(&model, &BigUint::from(q), &[])
+                certify::check_order(&model, &BigUint::from(order), &[])
                     .unwrap()
                     .0,
-                Status::NotEvaluated
+                expected_status
             );
+            if expected_status == Status::Proved {
+                // Montgomery conversion is supported now: count its
+                // order without a generator certificate, and reject the
+                // old fixture's mistaken use of field size as order.
+                assert!(certify::check_order(&model, &BigUint::from(q), &[]).is_err());
+            }
         }
     }
     use super::*;
