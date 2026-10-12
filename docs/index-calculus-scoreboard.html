@@ -827,6 +827,8 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
 <tr><td>2026-10-07</td><td>Weak elliptic class: cover and decomposition on E(F_p^6)</td><td>Isogeny walk stage from a non-weak start eight moves from a weak curve, p = 1,009 (subgroup 2^57.9)</td><td class="n">0.0002&times;</td><td>stage</td><td><span class="chip">accounting</span></td><td><a href="#rho-parity-ledger">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/index-calculus/RESEARCH_COVER_DECOMPOSITION_LEDGER.md">source</a> (&sect;17)</td></tr>
 <tr><td>2026-10-12</td><td>Elliptic curve, cold counted-work diagnostics with unpriced native work</td><td>Large-prime conductor-gap IC, ell = 8209, fixed floor, eight one-target workloads</td><td class="n">19.7311&times; <small>bounded count diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ic37-20261012">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md">source</a></td></tr>
 <tr><td>2026-10-12</td><td>Elliptic curve, cold counted-work diagnostics with unpriced native work</td><td>Large-prime conductor-gap IC, ell = 131101, fixed floor, eight one-target workloads</td><td class="n">45.0827&times; <small>bounded count diagnostic</small></td><td>matched</td><td><span class="chip">accounting</span></td><td><a href="#conductor-gap-ic37-20261012">panel</a> · <a href="https://github.com/aburan28/crypto/blob/main/research/ecbench_conductor_gap_20261012/README.md">source</a></td></tr>
+<tr><td>2026-10-12</td><td>Elliptic curve, one-target cold example diagnostics on an unisolated host</td><td>n53 K220 fixed-base S3 root batch, nine single-target pairs</td><td class="n">52.586&times; <small>L0 cold in-process diagnostic; 95% block interval 33.179&ndash;64.668; was control 78.146&times; on these Q</small></td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#n53-s3-root-batch-20261012">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n53_s3_root_batch_20261012/RESULT.md">source</a></td></tr>
+<tr><td>2026-10-12</td><td>Elliptic curve, online phase only (reusable set-up excluded)</td><td>n53 K220 fixed-base S3 root batch, target phase, nine single-target pairs</td><td class="n">0.378&times; <small>L0 online diagnostic; 95% block interval 0.103&ndash;0.442; was control 0.490&times; on these Q</small></td><td>matched</td><td><span class="chip">engineering</span></td><td><a href="#n53-s3-root-batch-20261012">panel</a> &middot; <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n53_s3_root_batch_20261012/RESULT.md">source</a></td></tr>
 </tbody></table></div></details>
 <noscript><div class="dash-detail-body"><p>The chart needs JavaScript; the table above lists every plotted point.</p></div></noscript>
 <p class="dash-footnote">What would move the heavy series below the line for good: a cold, one-target, every-phase-priced <code>S</code> below a matched rho&rsquo;s at growing size (AGENTS.md &sect;2, &sect;8). The nearest measured approaches are 1.36&times; (round 0025) and 1.314&times; in CPU time (n41). The exponent story is in the <a href="#boundary-ledger">boundary ledger</a>: no fitted exponent on an elliptic curve sits below rho&rsquo;s one half; the cover route&rsquo;s ratio falls with size but on a weak class.</p>
@@ -1032,6 +1034,17 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           "class": "accounting",
           "anchor": "#n41-n53-base-size-cold-20261004",
           "source": "https://github.com/aburan28/crypto/blob/main/experiments/koblitz-base-size-cold-panel-20261004/RESULT.md"
+        },
+        {
+          "date": "2026-10-12",
+          "value": 52.58560062120812,
+          "reference": "matched",
+          "unit": "unisolated in-process cold wall diagnostic",
+          "label": "n53 K220 fixed-base S3 root batch, nine single-target pairs",
+          "detail": "Nine verified same-Q/rank-seed control/batch pairs and nine strong-rho cells; batch/rho cold median 52.586 [33.179–64.668], was control/rho 78.146 on these Q. Batch/control complete-cold median 0.738 [0.714–0.750]. All 27 cells completed and 18 IC replays verified; shared Apple M4 Pro L0 only, common-operation S unset.",
+          "class": "engineering",
+          "anchor": "#n53-s3-root-batch-20261012",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n53_s3_root_batch_20261012/RESULT.md"
         }
       ]
     },
@@ -1462,6 +1475,17 @@ body { background: var(--lab-bg); color: var(--lab-ink); padding: 0 24px 48px; }
           "class": "accounting",
           "anchor": "#ic-tool-programme-20261001",
           "source": "https://github.com/aburan28/crypto/blob/main/research/ic_tool_program/rule/v3/README.md"
+        },
+        {
+          "date": "2026-10-12",
+          "value": 0.37777093852601323,
+          "reference": "matched",
+          "unit": "unisolated online wall diagnostic",
+          "label": "n53 K220 fixed-base S3 root batch, target phase, nine single-target pairs",
+          "detail": "Nine verified same-Q/rank-seed pairs; batch/rho target-online median 0.378 [0.103–0.442], was control/rho 0.490 on these Q. Batch/control online median 0.612 [0.569–0.903]. Reusable K220 setup excluded here but charged in the cold-series point; shared Apple M4 Pro L0 diagnostic.",
+          "class": "engineering",
+          "anchor": "#n53-s3-root-batch-20261012",
+          "source": "https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n53_s3_root_batch_20261012/RESULT.md"
         }
       ]
     },
@@ -11844,6 +11868,21 @@ Prior negative degree-scheduling evidence remains preserved. No m=83 or ECC2K-13
 <p>Every W16/W64 versus scalar interval is below one, saving 16&ndash;26% complete CPU at fixed K. The best observed arms remain above matched rho: n=41 W64 K=255 is 1.535&times; rho (1.518&ndash;1.554), n=53 W64 K=440 is 1.582&times; (1.559&ndash;1.613). At n=53 the W64 rank and target phases still require 2.542 and 5.084 s, and 27.6 million root-table lookups lead to only 1,464 full-point lifts. The next preregistered direction is a no-false-negative root-key prefilter, with cold filter construction and all query work charged. There is no common calibrated S, n=83 result, GF(2<sup>131</sup>) transfer or descendant-native PDP conclusion. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/compact_s3_batch_20260929/RESULT.md">Decision and evidence</a>; <a href="https://github.com/aburan28/crypto/pull/957">PR #957</a>.</p>
 </section>
 <!-- END compact-s3-batch-20260929 -->
+<!-- BEGIN n53-s3-root-batch-20261012 -->
+<section class="panel" id="n53-s3-root-batch-20261012">
+<div class="panel-head"><h2>N53 fixed K220 S3 root batching: exact rank path, lower root cost <span class="chip">engineering</span></h2>
+  <p class="panel-summary">Nine one-target control/batch pairs on three new public Q pass independent replay and exact rank-trace matching. Batch/control median complete cold is 0.738 and target-online is 0.612 on a shared L0 host; batch/strong-rho cold is 52.586, with common-operation S unset.</p>
+<p>The frozen protocol uses the same constructed 23,320-point K220 base, 220 signed-Frobenius columns, three rank seeds per Q, and matched strong-rho rung 3. All 27 valid cells completed under 90 seconds and 16 GiB. Native replay verified all 18 IC results and nine rho results, every accepted rank relation and solved factor log, the target witness, and exclusive phase sums. The paired base dumps, selected rank traces, root tables, consumed root counts and 220 accepted rows match exactly. An earlier sandbox run returned incomplete statuses because <code>/usr/bin/time -l</code> could not read <code>kern.clockrate</code>; its eight statuses and interrupted ninth cell are retained separately and excluded.</p></div>
+<div class="table-scroll"><table>
+<caption>Median same-Q IC/rho ratios of in-process milliseconds across nine pairs; bracketed 95% target-block bootstrap interval is descriptive. Cold includes setup, rank, LA, target descent and checks; online excludes reusable setup. Shared Apple M4 Pro, L0; common S unset.</caption>
+<thead><tr><th>Arm</th><th>Cold IC / rho</th><th>Target-online IC / rho</th><th>Correctness</th><th>Class</th></tr></thead><tbody>
+<tr><td>strong rho, rung 3, 32 lanes, DP4</td><td>1.000 reference</td><td>1.000 reference</td><td>9/9 same-Q scalars verified</td><td>reference</td></tr>
+<tr><td>scalar-root control, K220</td><td>78.146 [44.220, 92.602]</td><td>0.490 [0.168, 0.763]</td><td>9/9 full-rank replays</td><td>baseline diagnostic</td></tr>
+<tr><td>batched-root candidate, K220</td><td>52.586 [33.179, 64.668]</td><td>0.378 [0.103, 0.442]</td><td>9/9 full-rank replays</td><td>engineering, L0 diagnostic</td></tr>
+</tbody></table></div>
+<p>Within each exact same-Q/rank-seed pair, batch/control median complete cold is <strong>0.738 [0.714, 0.750]</strong> and target-online is <strong>0.612 [0.569, 0.903]</strong>; both frozen descriptive progression thresholds (0.90 cold, 1.10 online) pass. Rank-root inversions total 80,790,012 control versus 763,167 batch (ratio 0.009446), while field multiplication calls total 1,211,850,180 versus 902,063,394 (0.744369), including batch preparation and prefetched roots. These are source-level operation counts, not a full S conversion or exponent change. Every candidate cold pair remains above rho (21.864&ndash;426.310). No isolated-host admission or second-host replay is claimed. The earlier 1,024-target K440/K550 batch panel above is a different workload and remains unchanged. The best-of rows remain unchanged because this L0 point is not a new qualified best. <a href="https://github.com/aburan28/crypto/blob/main/research/notes/ecc2k130/n53_s3_root_batch_20261012/RESULT.md">Protocol, source/input hashes, raw runs, independent replay, decision, graphs and PDFs</a>.</p>
+</section>
+<!-- END n53-s3-root-batch-20261012 -->
 <!-- BEGIN compact-s3-prefilter-20260930 -->
 <section class="panel" id="compact-s3-prefilter-20260930">
 <div class="panel-head"><h2>Blocked S3 root prefilter: complete-process gain, matched rho still ahead <span class="chip">engineering</span></h2>

@@ -1,0 +1,28 @@
+{
+  "arm": "control",
+  "binary_sha256": "5ea9f0faef6f8e146a95477dbe20ed6e156e05df1aeeef0d3424792cd341bacb",
+  "command": {
+    "args": [
+      "construct:53:0:220",
+      "/Volumes/SSD990-2/.codex/worktrees/7a7d/crypto/research/notes/ecc2k130/n53_s3_root_batch_20261012/inputs/point_0.jsonl",
+      "532101",
+      "/Volumes/SSD990-2/.codex/worktrees/7a7d/crypto/research/notes/ecc2k130/n53_s3_root_batch_20261012/runs/q0/s0/control/targets.jsonl"
+    ],
+    "binary": "target/release/examples/koblitz_s3_root_batch_experiment"
+  },
+  "environment": {
+    "KIC_PAIR_SYMMETRY": "0",
+    "KIC_RANK_PROBE_CAP": null,
+    "KIC_ROOT_BLOOM": "0",
+    "KIC_S3_ROOT_BATCH": "0"
+  },
+  "frozen_sha256": "359594b741a6ea263e6ed8a4d93994922a6a2b629038b8f0f1365fa4fc07fe7c",
+  "point_sha256": "56771b9748a98746aac8f543a79845fb9ac0084758a439e989147418245f86f3",
+  "rank_seed": 532101,
+  "rho_seed": 531201,
+  "rss_cap_bytes": 17179869184,
+  "schema": "n53-s3-root-batch-intent-v1",
+  "seed_index": 0,
+  "target_index": 0,
+  "wall_cap_seconds": 90
+}
