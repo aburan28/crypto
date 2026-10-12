@@ -19,7 +19,7 @@
     {"id": "W7", "kind": "speedup", "title": "Sparse linear algebra: Wiedemann final-phase pruning; check Galois k^2 saving in Koblitz linear algebra",
      "papers": ["ePrint 2026/1787", "ePrint 2026/560"], "status": "not started", "prs": []},
     {"id": "W8", "kind": "diagnostic", "title": "Summation-polynomial models: E/G check of torsion symmetrisation, characteristic-uniform model S3, Frobenius auxiliary variable, Lucas-identity splitting",
-     "papers": ["ePrint 2026/1299", "arXiv 2608.01675", "ePrint 2026/1927", "arXiv 2609.18866"], "status": "not started", "prs": []},
+     "papers": ["ePrint 2026/1299", "arXiv 2608.01675", "ePrint 2026/1927", "arXiv 2609.18866"], "status": "PR open", "prs": ["aburan28/crypto#1712"]},
     {"id": "W9", "kind": "speedup", "title": "F_p F4 Las-Vegas probabilistic echelon; F5 criteria data structure (gated on profile share); tracer zero-reduction predictor",
      "papers": ["arXiv 2609.14433", "arXiv 2601.05026", "arXiv 2505.23696"], "status": "not started", "prs": []},
     {"id": "W10", "kind": "feasibility", "title": "Prime-field S5 small-root oracle: asymptotic Coppersmith bound (LP / optimal shifts) against delta = 1/5",
