@@ -68,6 +68,8 @@ CONFLICTS = 5000
 MODELS = 32
 SMALL_SUMMANDS = 3
 RESIDUAL_SUMMANDS = 2
+SMALL_POINTS = 196212
+ENVELOPE_POINTS = 339968
 # Independently derived from the worker's published BLAKE3 trial schedule:
 # BLAKE3("n83.mixed-orbit-partial-trial/v1" || label || 0u64_le) mod r.
 FIRST_TRIAL_A = "1833078656608906180176350"
@@ -374,8 +376,8 @@ def replay_equation(a: str, b: str, small_points: list[tuple[int, int]],
     return lhs == rhs
 
 
-def replay_events(path: Path, small_object: Path, target: tuple[int, int],
-                  result: dict) -> str | None:
+def replay_events(path: Path, small_object: Path, envelope_object: Path,
+                  target: tuple[int, int], result: dict) -> str | None:
     try:
         events = [json.loads(line) for line in path.read_text().splitlines()]
     except (OSError, UnicodeError, json.JSONDecodeError):
@@ -426,7 +428,7 @@ def replay_events(path: Path, small_object: Path, target: tuple[int, int],
                     or candidate.get("b") != event.get("b")
                     or not isinstance(candidate.get("small_point_indices"), list)
                     or len(candidate["small_point_indices"]) != SMALL_SUMMANDS
-                    or any(type(i) is not int or not 0 <= i < 196212
+                    or any(type(i) is not int or not 0 <= i < SMALL_POINTS
                            for i in candidate["small_point_indices"])):
                 return "partial source or small indices mismatch"
             needed_indices.update(candidate["small_point_indices"])
@@ -456,20 +458,30 @@ def replay_events(path: Path, small_object: Path, target: tuple[int, int],
     try:
         with gzip.open(small_object, "rt", encoding="utf-8") as archive:
             header = json.loads(next(archive))
+            if not isinstance(header, dict):
+                return "small archive header malformed"
             representatives = [parse_point(value) for value in header["representatives"]]
-            if len(representatives) != 1182 or any(p is None for p in representatives):
+            if (header.get("point_count") != SMALL_POINTS
+                    or len(representatives) != 1182
+                    or any(p is None for p in representatives)):
                 return "small orbit representatives malformed"
+            count = 0
             for index, line in enumerate(archive):
+                count += 1
                 if index in needed_indices:
                     point = parse_point(json.loads(line)["point"])
                     if point is None:
                         return "small point is infinity"
                     points[index] = point
-    except (OSError, UnicodeError, ValueError, KeyError, StopIteration, json.JSONDecodeError):
+            if count != SMALL_POINTS:
+                return "small archive point count mismatch"
+    except (OSError, EOFError, UnicodeError, ValueError, TypeError, KeyError,
+            StopIteration, json.JSONDecodeError):
         return "small archive replay failed"
     if set(points) != needed_indices:
         return "small point rows missing"
-    sources: dict[int, tuple[int, int]] = {}
+    residual_by_trial: dict[int, list[tuple[int, int]]] = {}
+    needed_residuals: set[tuple[int, int]] = set()
     for event in events:
         candidate = event.get("candidate")
         if candidate is None:
@@ -478,10 +490,41 @@ def replay_events(path: Path, small_object: Path, target: tuple[int, int],
             residual = [parse_point(value) for value in candidate["residual_points"]]
         except (KeyError, TypeError, ValueError):
             return "residual point malformed"
-        if (len(residual) != RESIDUAL_SUMMANDS or any(p is None for p in residual)
-                or not replay_equation(candidate["a"], candidate["b"],
+        if len(residual) != RESIDUAL_SUMMANDS or any(point is None for point in residual):
+            return "residual point malformed"
+        residual_by_trial[event["trial"]] = residual
+        needed_residuals.update(residual)
+    found_residuals: set[tuple[int, int]] = set()
+    try:
+        with gzip.open(envelope_object, "rt", encoding="utf-8") as archive:
+            header = json.loads(next(archive))
+            if not isinstance(header, dict) or header.get("point_count") != ENVELOPE_POINTS:
+                return "envelope archive point count mismatch"
+            count = 0
+            for index, line in enumerate(archive):
+                count += 1
+                if index >= SMALL_POINTS:
+                    point = parse_point(json.loads(line)["point"])
+                    if point is None:
+                        return "envelope suffix point is infinity"
+                    if point in needed_residuals:
+                        found_residuals.add(point)
+            if count != ENVELOPE_POINTS:
+                return "envelope archive point count mismatch"
+    except (OSError, EOFError, UnicodeError, ValueError, TypeError, KeyError,
+            StopIteration, json.JSONDecodeError):
+        return "envelope archive replay failed"
+    if found_residuals != needed_residuals:
+        return "residual point outside pinned envelope suffix"
+    sources: dict[int, tuple[int, int]] = {}
+    for event in events:
+        candidate = event.get("candidate")
+        if candidate is None:
+            continue
+        residual = residual_by_trial[event["trial"]]
+        if not replay_equation(candidate["a"], candidate["b"],
                                        [points[i] for i in candidate["small_point_indices"]],
-                                       residual, target)):
+                                       residual, target):
             return "partial point equation failed independent replay"
         sources[candidate["source_id"]] = int(candidate["a"]), int(candidate["b"])
         graph = event["graph"]
@@ -680,7 +723,7 @@ def run(authorization: Path, build_dir: Path, output_dir: Path,
                 break
             try:
                 replay_error = replay_events(output_dir / "run" / "events.jsonl",
-                                             small_object, target, worker_result)
+                                             small_object, envelope_object, target, worker_result)
             except (OSError, ValueError, TypeError, KeyError, ArithmeticError) as error:
                 replay_error = f"independent replay raised {type(error).__name__}: {error}"
             status = "PRODUCER_FAILURE_event_replay" if replay_error else worker_result["status"]
