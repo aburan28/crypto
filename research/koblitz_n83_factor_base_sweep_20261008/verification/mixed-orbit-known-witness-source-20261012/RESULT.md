@@ -28,8 +28,33 @@ requires a 4 GiB zero-swap Linux cgroup. It writes separate control-only
 configuration and result receipts, including solver stats and a group replay
 of any returned candidate. It is prepared but **has not been executed**.
 
+[control_supervisor.py](control_supervisor.py) now makes the proposed next gate
+concrete. Its authorization schema is `n83.additional-local-budget/v3` with
+`prior_total_charged_seconds="15000"`,
+`purpose="one_mixed_orbit_known_witness_control"`, exact fresh build/run paths,
+and a new explicit user-approval reference. It rejects the expired v2 schema
+and any allowance other than 1,500 seconds. An offline, pinned-image Linux
+build has a 300-second conservative charge; the read-only import/control
+verification has 120 seconds; one 5,000-conflict/32-model SAT call has 900
+seconds; cleanup and audit reserve 180 seconds. Launched stages charge their
+whole caps even if they fail early. Docker stages use no network, the exact
+S3-object downloads, and verified container removal. The search runs at one
+CPU, 4 GiB, zero swap and a worker wall cap of 840 seconds.
+
+The supervisor freezes the clean source commit and SHA-256 values for code,
+fixture, manifests, objects, build receipt and binary. It validates the prior
+15,000-second audit hash before launch; rechecks the source and inputs after
+execution; retains raw stdout/stderr, container state, cleanup, an outer
+disposition and the conservative budget ledger; and independently replays any
+successful candidate against the archived point domains and group equation.
+Its [four source-only tests](test_control_supervisor.py) verify stale and
+underfunded grants are rejected before launch, a fake solver success cannot
+pass the receipt check, a cap cannot be called a success, and the worker wall
+cap needs a matching receipt. Preparing and testing this supervisor has not
+launched a container or SAT search.
+
 The next controlled experiment is exactly one `control-run` call under a
-separate authorized local budget and external container supervisor, with the
+separate authorized local budget and this external container supervisor, with the
 two archive hashes and fixture hash frozen before launch. A bounded failure
 would leave solver access unknown; a valid candidate would establish only
 known-answer solver access. A completed refutation would be a producer
