@@ -61,7 +61,10 @@ fn point_strings(point: &BinaryPoint) -> Result<[String; 2], String> {
 }
 
 fn make_strong(curve: &KoblitzCurve) -> Result<ExactStrong, String> {
-    let r = curve.subgroup_order.to_u64().ok_or("subgroup scalar does not fit u64")?;
+    let r = curve
+        .subgroup_order
+        .to_u64()
+        .ok_or("subgroup scalar does not fit u64")?;
     let lambda = curve.lambda.to_u64().ok_or("lambda does not fit u64")?;
     Ok(ExactStrong::from_parts(
         WideGf2::new(&curve.curve.irreducible),
@@ -78,8 +81,7 @@ fn assert_legacy_curve(curve: &KoblitzCurve) -> Result<(), String> {
         || curve.curve.irreducible.low_terms != [0, 2, 4, 7]
         || curve.subgroup_order.to_u64() != Some(LEGACY_R)
         || curve.cofactor.to_u64() != Some(1_128_547_018)
-        || point_strings(curve.generator())?
-            != [LEGACY_G[0].to_string(), LEGACY_G[1].to_string()]
+        || point_strings(curve.generator())? != [LEGACY_G[0].to_string(), LEGACY_G[1].to_string()]
     {
         return Err("constructor does not match the exact legacy K600 curve and generator".into());
     }
@@ -170,9 +172,8 @@ fn evaluate(input: &str, seed: u64) -> Result<(Value, bool), String> {
     let walk_ns = walk_started.elapsed().as_nanos();
     let validation_started = Instant::now();
     let recovered = outcome.as_ref().map(|value| value.scalar);
-    let replay_verified = recovered.is_some_and(|d| {
-        curve.mul(curve.generator(), &BigUint::from(d)) == q
-    });
+    let replay_verified =
+        recovered.is_some_and(|d| curve.mul(curve.generator(), &BigUint::from(d)) == q);
     let validation_ns = validation_started.elapsed().as_nanos();
     let online_ns = online_started.elapsed().as_nanos();
     let phase_sum_ns = query_ns + walk_ns + validation_ns;
@@ -297,7 +298,10 @@ fn main() {
         .and_then(|seed| evaluate(&args[1], seed));
     let (receipt, success) = match result {
         Ok(value) => value,
-        Err(message) => (json!({"schema":"n83-exact-public-strong-evaluation/v1", "status":"INPUT_OR_SETUP_FAILURE", "error":message}), false),
+        Err(message) => (
+            json!({"schema":"n83-exact-public-strong-evaluation/v1", "status":"INPUT_OR_SETUP_FAILURE", "error":message}),
+            false,
+        ),
     };
     let bytes = format!("{}\n", serde_json::to_string(&receipt).unwrap());
     if let Some(path) = args.get(3) {
@@ -359,20 +363,24 @@ mod tests {
                     dp_bits: 0,
                     ..StrongRhoParams::default()
                 };
-                let narrow_result = narrow.solve(
-                    q_narrow,
-                    &jumps_narrow,
-                    &mut StdRng::seed_from_u64(seed),
-                    &params,
-                    charges_narrow,
-                ).expect("narrow known-answer control");
-                let wide_result = wide.solve(
-                    q_wide,
-                    &jumps_wide,
-                    &mut StdRng::seed_from_u64(seed),
-                    &params,
-                    charges_wide,
-                ).expect("wide known-answer control");
+                let narrow_result = narrow
+                    .solve(
+                        q_narrow,
+                        &jumps_narrow,
+                        &mut StdRng::seed_from_u64(seed),
+                        &params,
+                        charges_narrow,
+                    )
+                    .expect("narrow known-answer control");
+                let wide_result = wide
+                    .solve(
+                        q_wide,
+                        &jumps_wide,
+                        &mut StdRng::seed_from_u64(seed),
+                        &params,
+                        charges_wide,
+                    )
+                    .expect("wide known-answer control");
                 assert_eq!(wide_result.scalar, scalar);
                 assert_eq!(narrow_result.scalar, wide_result.scalar);
                 assert_eq!(narrow_result.walk_steps, wide_result.walk_steps);
@@ -391,4 +399,3 @@ mod tests {
         }
     }
 }
-
