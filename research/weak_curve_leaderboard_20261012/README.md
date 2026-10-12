@@ -28,6 +28,15 @@ classes and displaying 232 certified directed maps. Its criterion checks
 power the site's vulnerability filters; check stages distinguish exact
 conditions, geometry, explicit maps, candidates and structural screens.
 
+The [WAM1 attack map](attack_map.json) adds 31 source-linked research checks
+to the 23 existing criteria, giving the website 54 searchable checks across
+curve structure, selected subgroups, auxiliary inputs, pairings, index calculus,
+endomorphisms, implementations and isogeny protocols. Each WAM1 row states an
+input prerequisite and a concrete evidence gate. These 31 rows are an
+unassessed research queue: they create no curve-level WID1 finding. The
+[validator](validate_attack_map.py) checks ID uniqueness, source fields,
+source/site byte parity and certified graph edge consistency.
+
 The default leaderboard contains 29 finding rows: two prime-field models
 meeting a published DLP criterion, 24 exact small-field covering-model
 signals, one embedding-degree candidate, and two Oakley GHS invariant
@@ -49,6 +58,8 @@ python3 validate_pairing_roster.py
 node --check ../../website/weakcurves/dist/app.js
 python3 build_isogeny_graph.py --check
 node --check ../../website/weakcurves/dist/graph.js
+node --check ../../website/weakcurves/dist/attack-map.js
+python3 validate_attack_map.py
 ```
 
 The Rust exporter reopens both frozen SQLite inputs and the JSON
@@ -56,7 +67,7 @@ registries, hashes their bytes, checks the exact import counts, enumerates
 the three prime-field models, and emits stable JSON with no time- or
 host-dependent fields. The graph builder binds the snapshot to verified
 P-192/P-224 walk records and their receipt. Copy `snapshot.json`,
-`criteria.json`, `isogeny_graph.json`, and
+`criteria.json`, `attack_map.json`, `isogeny_graph.json`, and
 `IDENTIFIERS.md` into `../../website/weakcurves/dist/` when they change.
 The site is static and reads the JSON files in the browser.
 

@@ -1,5 +1,37 @@
 # Validation record
 
+## WAM1 attack map and focused graph, 12 October 2026
+
+- `python3 validate_attack_map.py` passed: 23 distinct indexed criteria plus
+  31 source-linked research checks, 1,092 graph nodes and 232 certified
+  directed maps. Every edge has both endpoints in the same finite-field
+  isogeny class; the research and site copies of `attack_map.json` match
+  byte-for-byte. The WAM1 entries are an unassessed method queue and change
+  neither the 29 WID1 findings nor the 922-model atlas.
+- `node --check` passed for `app.js`, `graph.js` and `attack-map.js`.
+  An HTML parser found 48 unique IDs and all attack-map and graph controls.
+  The local static server returned HTTP 200 for `index.html`, the new JavaScript
+  and JSON assets, and the graph data. The graph builder `--check` passed with
+  676 classes and 232 map edges. Browser pointer-interaction QA was unavailable.
+- Primary sources were checked for the new input, auxiliary-information,
+  implementation and protocol families, including [RFC 7748](https://www.rfc-editor.org/rfc/rfc7748),
+  [RFC 9380](https://www.rfc-editor.org/rfc/rfc9380),
+  [Cheon](https://doi.org/10.1007/11761679_1),
+  [Gorla–Massierer](https://eprint.iacr.org/2014/318),
+  [Neves–Tibouchi](https://eprint.iacr.org/2015/1233), and
+  [Galbraith–Petit–Shani–Ti](https://eprint.iacr.org/2016/859).
+- The Sites source helper pushed commit `f8e9fd15cc364207222637fa770d01afae7157e1`,
+  packaged `/Volumes/SSD990/llm/tmp/weakcurves-static-v14.tar.gz`, saved
+  version 14 (`appgprj_6acd13c887f0819194ae65d7f61c7b33~appgver_97c5908652448191903dbda1eed35e75`),
+  and deployed publicly as `appgdep_6acd542272908191aec104e80d8a4726`.
+  The deployment returned `succeeded` at
+  <https://weakcurves.aburan28.chatgpt.site>; the existing public audience was
+  preserved. Live `attack_map.json` and `graph.js` match the packaged files
+  byte-for-byte; the live HTML contains the new controls and receives a
+  Cloudflare challenge script at the end of the response. This update contains
+  no new mathematical theorem, so the pinned
+  Lean proof map and checked declarations are unchanged.
+
 ## Snapshot 03: security goals, pairing groups, and SIDH, 12 October 2026
 
 - The source-pinned roster imports Ethereum's exact `alt_bn128`/`BN_SNARK1`

@@ -2,7 +2,7 @@
 
 This is the static source for the evidence-graded WeakCurves atlas.
 `dist/` contains the complete site and a deterministic JSON snapshot. The
-snapshot, criteria registry, and isogeny graph originate in
+snapshot, criteria registry, WAM1 attack map, and isogeny graph originate in
 [`research/weak_curve_leaderboard_20261012`](../../research/weak_curve_leaderboard_20261012/).
 The two copies of each JSON file and the WID1 specification must remain
 byte-identical.
@@ -16,8 +16,9 @@ must preserve the live policy read immediately before publication.
 To rebuild the data after a source change, run the Rust exporter from its
 research directory, build `isogeny_graph.json` with
 `python3 build_isogeny_graph.py`, copy `snapshot.json`, `criteria.json`,
-`isogeny_graph.json`, and `IDENTIFIERS.md` (as `dist/identifiers.md`) into
-`dist/`, then check both JavaScript files and all three data comparisons. The Sites
+`attack_map.json`, `isogeny_graph.json`, and `IDENTIFIERS.md` (as
+`dist/identifiers.md`) into `dist/`, then run `validate_attack_map.py`, check
+all three JavaScript files and all four JSON comparisons. The Sites
 source workflow pushes the exact site source and packages its `dist/` tree;
 the research [validation record](../../research/weak_curve_leaderboard_20261012/VALIDATION.md)
 names the current site commit and deployment.

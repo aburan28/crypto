@@ -69,6 +69,16 @@ unproved or unmeasured bridge for each.
 
 ## Attack families and assessment layers still missing
 
+The [WAM1 attack map](attack_map.json) now makes 31 of the research checks
+below searchable, with their input prerequisites, assessment test, and primary
+source. It contains method records, not positive findings for the 922 atlas
+models. Together with the 23 current criteria, the site exposes 54 checks;
+the next data step is to attach actual twist orders, accepted-input traces,
+auxiliary-point inventories, pairing witnesses and implementation receipts to
+specific model/protocol records. The [validator](validate_attack_map.py)
+enforces source/site parity and checks that every graph edge joins members of
+one finite-field class.
+
 The twenty-three-criterion registry is a method index, not a complete attack audit.
 In particular, its MOV and Frey–Rück entries share an embedding-degree screen,
 and several geometric entries have no constructed map on an atlas model. The

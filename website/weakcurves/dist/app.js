@@ -260,7 +260,7 @@ function renderCriteria(criteria) {
     criterionFilter.append(option);
   }
   criteria.forEach((c,i)=>{
-    const article=document.createElement('article');article.className='criterion';
+    const article=document.createElement('article');article.className='criterion';article.id=`criterion-${c.id}`;
     const top=document.createElement('div');top.className='criterion-top';
     const index=document.createElement('span');index.className='criterion-index';index.textContent=String(i+1).padStart(2,'0')+' / '+String(criteria.length).padStart(2,'0');
     const method=document.createElement('span');method.className='criterion-method';method.textContent=c.method;top.append(index,method);
