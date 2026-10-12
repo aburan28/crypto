@@ -517,7 +517,8 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                     env=dict(rho_env, KIC_RHO_EXPLICIT_SCALAR=str(scalar)), stdout_path=out,
                     stderr_path=run / f"logs/identity_{arm}.stderr.txt", cpu=arguments.cpu)
                 outputs[arm] = (measured, lab.read_jsonl(out), [])
-            ic_new = [untimed(x, ("relation_checks", "online_hw_counts", "online_hw_scope"))
+            ic_new = [untimed(x, ("relation_checks", "online_hw_counts", "online_hw_scope",
+                                   "root_calls", "skipped_symmetric_states"))
                       for x in outputs["ic"][1]]
             ic_old = [untimed(x) for x in outputs["frozen_ic"][1]]
             summary_keys = ("base_hash", "rank", "rank_attempts", "rank_relations", "rank_failures",
@@ -534,7 +535,8 @@ def launch_single(arguments: Any, lab: Any) -> dict[str, Any]:
                     ic_summaries[0].get(k) == ic_summaries[1].get(k) for k in summary_keys),
                 "rho_untimed_records_identical": bool(rho_new) and rho_new == rho_old,
                 "compared": "every record field except timers (*_ms, *_ns, *_event), the IC's new "
-                            "relation_checks counter, rho's producer_version and online hardware counters",
+                            "relation_checks/root_calls/skipped_symmetric_states counters, rho's "
+                            "producer_version and online hardware counters",
             }
             report["identical"] = all(code == 0 for code in report["exit_codes"].values()) and all(
                 report[k] for k in ("ic_untimed_records_identical", "ic_setup_summary_identical",

@@ -40,6 +40,7 @@ use std::time::{Duration, Instant};
 
 use num_traits::ToPrimitive;
 
+use super::large_prime::{LargePrimeCollector, LargePrimeConfig};
 use super::stages::{
     BooleanSystem, DecompositionOracle, FactorBaseBuilder, InstanceCtx, Params, SolverCost,
     SolverTotals, SolverVerdict, SystemShape, SystemSolver,
@@ -50,6 +51,7 @@ use crate::cryptanalysis::ic_boundary::{
     binary_subspace_factor_base, decompose_mitm, decompose_mitm_frobenius, koblitz_factor_base,
     prime_factor_base, BinaryGroup, BinaryInstance, ColumnFold, CountedGroup, FactorBase,
     FrobeniusPairTable, GroupOps, OracleCounters, PairTable, PrimeCurve, PrimeInstance, PrimePoint,
+    Relation,
 };
 use crate::cryptanalysis::koblitz_factor_base_search::subspace_is_trace_zero;
 use crate::cryptanalysis::koblitz_fast::FastPoint;
@@ -923,10 +925,18 @@ impl<G: CountedGroup> DecompositionOracle<G> for MitmOracle {
 
 /// Meet in the middle on a table folded by the signed Frobenius: the
 /// same probe over a table `2n` times smaller.
+///
+/// With `large_primes=1` or `2` (and `m=3`) the oracle runs the same
+/// probe loop through the large-prime collector
+/// ([`LargePrimeCollector`]), which keeps partial relations whose
+/// residual lies in a bounded domain `D` of `lp_domain_factor · |F|`
+/// signed points and returns the complete relations they merge into;
+/// see `ic_framework::large_prime`.
 pub struct FrobeniusMitmOracle<'i> {
     m: u32,
     instance: &'i BinaryInstance,
     table: Option<FrobeniusPairTable>,
+    large: Option<LargePrimeCollector<'i>>,
     count_setup: bool,
 }
 
@@ -936,6 +946,7 @@ impl<'i> FrobeniusMitmOracle<'i> {
             m,
             instance,
             table: None,
+            large: None,
             count_setup: false,
         }
     }
@@ -945,8 +956,19 @@ impl<'i> FrobeniusMitmOracle<'i> {
             m,
             instance,
             table: None,
+            large: None,
             count_setup: true,
         }
+    }
+
+    /// The large-prime collector of this run, when `large_primes` is set.
+    pub fn large_prime_collector(&self) -> Option<&LargePrimeCollector<'i>> {
+        self.large.as_ref()
+    }
+
+    /// The first error the collector's exact eliminator returned, if any.
+    pub fn large_prime_error(&self) -> Option<&str> {
+        self.large.as_ref().and_then(|lp| lp.last_error())
     }
 }
 
@@ -963,17 +985,57 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FrobeniusMitmOracle<'_> {
         self.m
     }
 
-    fn describe(&self, _params: &Params) -> String {
-        "a pair table folded by the signed Frobenius, one entry per orbit".into()
+    fn describe(&self, params: &Params) -> String {
+        match LargePrimeConfig::from_params(params) {
+            Ok(Some(config)) => format!(
+                "a pair table folded by the signed Frobenius, one entry per orbit, plus a large-prime collector with up to {} residuals in a domain of {} × |F| signed points",
+                config.large_primes, config.domain_factor
+            ),
+            _ => "a pair table folded by the signed Frobenius, one entry per orbit".into(),
+        }
+    }
+
+    fn parameters(&self) -> &[(&str, &str)] {
+        &[
+            ("m", "summands, 2 or 3"),
+            (
+                "large_primes",
+                "0 (default), 1 or 2 residual points outside the base a partial relation may carry; needs m=3",
+            ),
+            (
+                "lp_domain_factor",
+                "size of the large-prime domain D as a multiple of |F| in signed points (default 10); D is the next projected signed Frobenius orbits of the raw-x scan after the base's",
+            ),
+            (
+                "lp_raw_x_cap",
+                "inclusive raw-abscissa cap of the scan that materialises D (default 2^40)",
+            ),
+        ]
     }
 
     fn prepare(
         &mut self,
-        _ctx: &InstanceCtx<BinaryGroup<'a>>,
+        ctx: &InstanceCtx<BinaryGroup<'a>>,
         fb: &FactorBase<FastPoint>,
-        _params: &Params,
+        params: &Params,
         ops: &mut GroupOps,
     ) -> Result<(), String> {
+        if let Some(config) = LargePrimeConfig::from_params(params)? {
+            if self.m != 3 {
+                return Err("large_primes needs the three-summand probe loop (m=3)".into());
+            }
+            // The collector builds the classic table itself (its direct
+            // path is the plain probe) and the large table beside it.
+            self.large = Some(LargePrimeCollector::new(
+                self.instance,
+                ctx,
+                fb,
+                config,
+                ops,
+            )?);
+            self.table = None;
+            return Ok(());
+        }
         let table = FrobeniusPairTable::build(self.instance, fb)
             .ok_or("this instance has no Koblitz structure to fold by")?;
         ops.merge(table.build_ops);
@@ -983,6 +1045,9 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FrobeniusMitmOracle<'_> {
 
     fn setup_native(&self) -> BTreeMap<String, u64> {
         let mut counts = BTreeMap::new();
+        if let Some(lp) = &self.large {
+            counts.extend(lp.setup_counters());
+        }
         if self.count_setup {
             if let Some(table) = &self.table {
                 counts.insert("canonicalisations".into(), table.build_canonicalisations);
@@ -1005,6 +1070,32 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for FrobeniusMitmOracle<'_> {
     ) -> Option<Vec<usize>> {
         let table = self.table.as_ref()?;
         decompose_mitm_frobenius(ctx.group, fb, table, self.m, ops, counters, point)
+    }
+
+    fn decompose_relations(
+        &mut self,
+        ctx: &InstanceCtx<BinaryGroup<'a>>,
+        fb: &FactorBase<FastPoint>,
+        ops: &mut GroupOps,
+        counters: &mut OracleCounters,
+        point: FastPoint,
+        a: u64,
+        b: u64,
+    ) -> Vec<Relation> {
+        match self.large.as_mut() {
+            Some(lp) => lp.decompose(ctx, fb, ops, counters, point, a, b),
+            None => match self.decompose(ctx, fb, ops, counters, point) {
+                Some(summands) => vec![Relation::Summands(summands)],
+                None => Vec::new(),
+            },
+        }
+    }
+
+    fn relation_counters(&self) -> BTreeMap<String, u64> {
+        self.large
+            .as_ref()
+            .map(|lp| lp.relation_counters())
+            .unwrap_or_default()
     }
 }
 

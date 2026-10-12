@@ -431,6 +431,25 @@ class MeasurementSchemaTests(unittest.TestCase):
             self.assertEqual(result["status"], "FAIL", f"variant {index}: {result}")
             self.assertTrue(result["validation_errors"] or result["pairing_errors"])
 
+    def test_parse_paired_oracle_stdout_current_format(self) -> None:
+        sample = """=== Paired oracle benchmark: x-system vs symmetrised system ===
+targets = 8, seed = 24269, node budget = 50000, SAT conflict budget = 2000000, targets in <G> = true
+
+== K_0/F_2^31  m = 2  dim V = 16  |F_x| = 68327  |F_u| = 69441  targets = 8
+   arm            vars  eqs deg found refuted inconc via T     found ms   refuted ms    effort  built  ffd  gate
+   x-chained F4     32   31   2     5       3      0     0        20850        75871      7056      -    3    ok
+   sym F4           31   31   2     4       4      0     0         7011        38153      4095      -    4    ok
+   divisor indices [0, 1, 2, 3]  (612.0 s)
+"""
+        parsed = lab.parse_paired_oracle_stdout(sample)
+        self.assertEqual(parsed["header"]["n"], 31)
+        self.assertEqual(parsed["header"]["dim"], 16)
+        self.assertEqual(parsed["disagreements"], 0)
+        self.assertEqual(parsed["median_ms_per_target"], 75871.0)
+        self.assertEqual(parsed["arms"]["x_chained_f4"]["ffd"], 3)
+        self.assertEqual(parsed["arms"]["sym_f4"]["ffd"], 4)
+        self.assertEqual(parsed["wall_s"], 612.0)
+
     def test_decomposition_requires_ffd(self) -> None:
         report = {
             "n": 31,
@@ -452,6 +471,19 @@ class MeasurementSchemaTests(unittest.TestCase):
         result = lab.validate_claim(report, stage="decomposition", ledger=self.ledger)
         self.assertEqual(result["status"], "FAIL")
         self.assertIn("ffd_or_degree_of_regularity", result["missing_stage_fields"])
+
+    def test_parse_semaev_decomp_bench_stdout(self) -> None:
+        sample = """
+  ── deciding one target that does NOT decompose ──────────────────
+    l    n        triples  triples/gen  triples/1wd  pairs+solve   speedup
+    5   15           5984       0.025s       0.001s       0.001s      1.6x
+    8   24        2829056      14.299s       0.607s       0.068s      8.9x
+"""
+        parsed = lab.parse_semaev_decomp_bench_stdout(sample)
+        self.assertEqual(len(parsed["ladder"]), 2)
+        self.assertEqual(parsed["ladder"][-1]["l"], 8)
+        self.assertEqual(parsed["ladder"][-1]["pairs_s"], 0.068)
+        self.assertEqual(parsed["ladder"][-1]["speedup_vs_triples"], 8.9)
 
 
 class HelperTests(unittest.TestCase):
