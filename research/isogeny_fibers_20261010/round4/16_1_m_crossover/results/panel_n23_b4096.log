@@ -1,0 +1,15 @@
+# 2026-10-11T20:36:37Z r4_16_1_m_crossover --curves 23:0 --ms 2,3,4 --v-spec 23:3:div=0.1 --skip x-direct@3 --targets 24 --node-budget 4096 --cell-wall-s 300
+n=23 a=0 r=2095853 h=4  ns/XOR 0.525 ns/add 166.4  GAE/XOR 0.00315
+  n=23 m=2 ell=12 x-direct    |F|= 4055 cols=2024 vars=24 found 15 refuted  9 budget  0 unbuildable  0 truth 15 gate 0 | XOR/att 3.661e6 XOR/rel 5.857e6 S_rel 2.584e4 wall 0.6s
+  n=23 m=2 ell=12 sym         |F|= 4209 cols=1051 vars=23 found  3 refuted 21 budget  0 unbuildable  0 truth  3 gate 0 | XOR/att 4.946e6 XOR/rel 3.957e7 S_rel 9.070e4 wall 0.9s
+  n=23 m=3 ell=9 x-direct: skipped (--skip)
+  n=23 m=3 ell=9 x-chained   |F|=  467 cols= 232 vars=50 found  9 refuted  0 budget 15 unbuildable  0 truth 20 gate 0 | XOR/att 2.823e7 XOR/rel 7.528e7 S_rel 3.822e4 wall 5.6s
+  n=23 m=3 ell=9 sym         |F|=  497 cols= 124 vars=25 found  1 refuted  0 budget 23 unbuildable  0 truth 11 gate 0 | XOR/att 2.107e7 XOR/rel 5.058e8 S_rel 1.378e5 wall 9.8s
+  n=23 m=4 x-chained: 74 unknowns > 64: the engine's layout refuses it
+  n=23 m=4 ell=7 x-chained   |F|=  127 cols=  62 vars=74 found  0 refuted  0 budget  0 unbuildable 24 truth  0 gate 0 | XOR/att 0.000e0 XOR/rel inf S_rel inf wall 0.0s
+  n=23 m=4 sym-chained: 71 unknowns > 64: the engine's layout refuses it
+  n=23 m=4 ell=7 sym-chained |F|=  137 cols=  34 vars=71 found  0 refuted  0 budget  0 unbuildable 24 truth  0 gate 0 | XOR/att 0.000e0 XOR/rel inf S_rel inf wall 0.0s
+  n=23 m=3 ell=12 x-direct: skipped (--skip)
+  n=23 m=3 ell=12inv x-chained   |F|= 4235 cols=2116 vars=59 found 23 refuted  0 budget  1 unbuildable  0 truth 24 gate 0 | XOR/att 9.893e6 XOR/rel 1.032e7 S_rel 4.762e4 wall 1.3s
+  n=23 m=3 ell=12inv sym         |F|= 4049 cols=1012 vars=34 found  1 refuted  0 budget 23 unbuildable  0 truth 24 gate 0 | XOR/att 1.906e8 XOR/rel 4.575e9 S_rel 1.010e7 wall 23.0s
+# exit 0 at 2026-10-11T20:37:23Z

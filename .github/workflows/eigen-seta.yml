@@ -1,0 +1,49 @@
+name: Eigen-Seta research KEM
+
+on:
+  pull_request:
+    paths:
+      - 'eigen_seta/**'
+      - '.github/workflows/eigen-seta.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eigen_seta/**'
+      - '.github/workflows/eigen-seta.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  standalone:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /eigen_seta/
+      - uses: dtolnay/rust-toolchain@1.99
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: eigen_seta
+      - name: Format
+        run: cargo fmt --manifest-path eigen_seta/Cargo.toml --check
+      - name: Clippy
+        run: cargo clippy --manifest-path eigen_seta/Cargo.toml --all-targets -- -D warnings
+      - name: Release tests including Toy16
+        run: cargo test --manifest-path eigen_seta/Cargo.toml --release
+      - name: Ignored Toy32 round trip
+        run: cargo test --manifest-path eigen_seta/Cargo.toml --release -- --ignored
+      - name: L1 full-size round trip
+        run: cargo run --manifest-path eigen_seta/Cargo.toml --release --example run -- L1 1
+      - name: L1 authenticated PKE round trip
+        run: cargo run --manifest-path eigen_seta/Cargo.toml --release --example pke_run -- L1

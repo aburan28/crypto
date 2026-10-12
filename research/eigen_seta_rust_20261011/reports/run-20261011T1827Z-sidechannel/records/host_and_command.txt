@@ -1,0 +1,15 @@
+run id: run-20261011T1827Z-sidechannel
+start (UTC): 2026-10-11T18:27Z (script waited for the benchmark run to finish; probes began after it)
+sources: commit 19c641d121097e80f727bcc650a08632e204ba1d; uncommitted in eigen_seta/: README.md only (not compiled)
+rustc 1.97.0 (2d8144b78 2026-07-07)
+profile: release + debuginfo (CARGO_PROFILE_RELEASE_DEBUG=true), opt-level 3, lto thin, codegen-units 1
+valgrind-3.22.0
+ldd (Ubuntu GLIBC 2.39-0ubuntu8.9) 2.39
+model name	: Intel(R) Xeon(R) Processor @ 2.80GHz
+logical cores: 4
+Linux 6.18.44-fc-v114 x86_64
+probe command: valgrind --tool=callgrind --toggle-collect='*probe_core*' ./ct_probe <key_seed> <ct_seed> <valid|foreign>  (3 parallel streams of 4 probes)
+grid: key seeds 1-4 x {valid ct seed 1, valid ct seed 2, foreign ct seed 1}
+summary: ctsummary.sh (callgrind_annotate exclusive counts; alloc_mem = glibc malloc/arena/mem*/string_fortified/unresolved realloc helper; rest = total - alloc_mem)
+dudect command: ./dudect_decaps 1000  (one OsRng key; class 0 fixed ct; class 1 pool of 16 cts, 8 FO-rejected)
+isolation: shared cloud VM; dudect ran after the probes, alone

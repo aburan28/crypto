@@ -19,7 +19,12 @@ use num_traits::Zero;
 /// adds the Frobenius differences of `a` as generators without reducing `a`
 /// modulo `{α² + α}`, so it can exceed the GHS value; the screen records it
 /// beside [`ghs_magic`] and prices with the latter.
-pub fn ghs_rows(n_total: u32, irr: &IrreduciblePoly, a: &F2mElement, b: &F2mElement) -> Vec<DescentRow> {
+pub fn ghs_rows(
+    n_total: u32,
+    irr: &IrreduciblePoly,
+    a: &F2mElement,
+    b: &F2mElement,
+) -> Vec<DescentRow> {
     audit_curve(n_total, irr, a, b)
 }
 
@@ -65,7 +70,13 @@ fn f2_rank(mut rows: Vec<BigUint>) -> u32 {
 
 /// The GHS magic number of `E_(a,b)` over `F_(2^N)` for base degree `l`, computed
 /// as in `research/cover_route_prime_binary_20261008/ghs_magic.rs`.
-pub fn ghs_magic(n_total: u32, l: u32, irr: &IrreduciblePoly, a: &F2mElement, b: &F2mElement) -> GhsMagic {
+pub fn ghs_magic(
+    n_total: u32,
+    l: u32,
+    irr: &IrreduciblePoly,
+    a: &F2mElement,
+    b: &F2mElement,
+) -> GhsMagic {
     let n_rel = n_total / l;
     let gamma = b.square_k_times(n_total - 1, irr);
     let mut rows = Vec::with_capacity(n_rel as usize);
@@ -82,10 +93,10 @@ pub fn ghs_magic(n_total: u32, l: u32, irr: &IrreduciblePoly, a: &F2mElement, b:
         trace = trace.add(&acc);
     }
     let trace_a = u32::from(!trace.is_zero());
-    let a_may_add_one = trace_a == 1 && n_rel % 2 == 0;
+    let a_may_add_one = trace_a == 1 && n_rel.is_multiple_of(2);
     let mut orbit_length = n_rel;
     for d in 1..=n_rel {
-        if n_rel % d == 0 && gamma.square_k_times(d * l, irr) == gamma {
+        if n_rel.is_multiple_of(d) && gamma.square_k_times(d * l, irr) == gamma {
             orbit_length = d;
             break;
         }
@@ -105,7 +116,7 @@ pub fn ghs_magic(n_total: u32, l: u32, irr: &IrreduciblePoly, a: &F2mElement, b:
 pub fn cyclotomic_factor_degrees(n: u32) -> Vec<(u32, u32)> {
     let mut e = 0u32;
     let mut odd = n;
-    while odd % 2 == 0 {
+    while odd.is_multiple_of(2) {
         odd /= 2;
         e += 1;
     }
@@ -196,7 +207,7 @@ pub fn isogeny_extension_estimates(
     let log2_all_curves = f64::from(n_total) + 1.0;
     let step = model.log2_field_mult(f64::from(n_total)) + f64::from(n_total).log2();
     let mut out = Vec::new();
-    for d in 1..n_rel.min(direct_magic.saturating_sub(1)).max(0) + 1 {
+    for d in 1..n_rel.min(direct_magic.saturating_sub(1)) + 1 {
         let Some(log2_divisors) = counts.get(d as usize).copied().flatten() else {
             continue;
         };
@@ -238,14 +249,20 @@ mod tests {
     #[test]
     fn cyclotomic_degrees_match_known_factorisations() {
         // x^31 - 1 = (x + 1) * six quintics.
-        assert_eq!(cyclotomic_factor_degrees(31), vec![(1, 1), (5, 1), (5, 1), (5, 1), (5, 1), (5, 1), (5, 1)]);
+        assert_eq!(
+            cyclotomic_factor_degrees(31),
+            vec![(1, 1), (5, 1), (5, 1), (5, 1), (5, 1), (5, 1), (5, 1)]
+        );
         // x^7 - 1 = (x + 1)(x^3 + x + 1)(x^3 + x^2 + 1).
         assert_eq!(cyclotomic_factor_degrees(7), vec![(1, 1), (3, 1), (3, 1)]);
         // x^6 - 1 = (x^3 - 1)^2.
         assert_eq!(cyclotomic_factor_degrees(6), vec![(1, 2), (2, 2)]);
         // Prime n with 2 a primitive root: x + 1 times one factor of degree n - 1.
         assert_eq!(cyclotomic_factor_degrees(131), vec![(1, 1), (130, 1)]);
-        let total: u32 = cyclotomic_factor_degrees(155).iter().map(|(d, m)| d * m).sum();
+        let total: u32 = cyclotomic_factor_degrees(155)
+            .iter()
+            .map(|(d, m)| d * m)
+            .sum();
         assert_eq!(total, 155);
     }
 

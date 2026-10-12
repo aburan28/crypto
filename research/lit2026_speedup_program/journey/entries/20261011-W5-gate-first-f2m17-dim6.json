@@ -1,0 +1,28 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W5",
+  "slug": "gate-first",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1714",
+  "papers": ["arXiv 2607.06372", "arXiv 2603.16378"],
+  "kind": "speedup",
+  "workload": {
+    "id": "f6-ic-probe-k1-f2m17-dim6-f6p",
+    "description": "f6_ic_probe F6-IC + pair-index arm, Koblitz icv1-f2m17-tm101-00378d4e, prime-order subgroup of KoblitzCurve::new, standard subspace dim 6 (63 points), m = 3, targets [k]G k = 1..8 (1 relation), budget 20000, reps 3",
+    "curve_ids": ["icv1-f2m17-tm101-00378d4e"]
+  },
+  "metric": "stage-unit word XORs (word_xors), summed over the 8 targets",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 5,
+  "arms": [
+    {"role": "original", "label": "program baseline", "commit": "4b6e09b78", "value": 12635914},
+    {"role": "previous", "label": "KIC_F6_GATE_FIRST unset", "commit": "d22fb3b52", "value": 12635914},
+    {"role": "candidate", "label": "KIC_F6_GATE_FIRST=1 (gate asked before specialising by forced variables)", "commit": "d22fb3b52", "value": 8061140}
+  ],
+  "ratio_original_over_candidate": {"value": 1.5675095582014456, "interval": [1.5675095582014456, 1.5675095582014456], "interval_kind": "none (deterministic; identical in all 5 rounds)"},
+  "ratio_previous_over_candidate": {"value": 1.5675095582014456, "interval": [1.5675095582014456, 1.5675095582014456], "interval_kind": "none (deterministic; identical in all 5 rounds)"},
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w5_lane_batched_f4_20261011/reports/run-20261011T2225Z/report.pdf",
+  "note": "Process CPU previous/candidate 2.22 [2.11-2.28] over 5 rounds (L0, load 82-388). Verdicts, counters, oracle calls and the relation [21, 48, 57] identical; the inherited-F4 arm is unchanged by the switch."
+}
