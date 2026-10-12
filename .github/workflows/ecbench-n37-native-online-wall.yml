@@ -1,5 +1,9 @@
 name: ecbench n37 native online wall screen
 
+# PRs check the target/source freeze, sealed-record integrity and frozen
+# decision. The original 55-minute panel and all 320 solver replays remain
+# manual work; a PR integrity pass does not establish a new measurement.
+
 on:
   # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
   # push/pull_request triggers were fanning out across the account's shared runners. Run it
@@ -18,11 +22,15 @@ concurrency:
 jobs:
   native-screen:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && 25 || 90 }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ecbench
       - name: Check the preregistered source and target freeze
         run: |
           dir=research/ecbench_n37_native_online_wall_20261004
@@ -58,7 +66,7 @@ jobs:
               src/bin/ecbench.rs
           fi
       - name: Run the frozen native panel on a hosted Linux VM
-        if: ${{ hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') == '' }}
+        if: ${{ github.event_name != 'pull_request' && github.event_name != 'merge_group' && hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') == '' }}
         run: |
           out="$RUNNER_TEMP/ecbench-n37-native-wall"
           mkdir -p "$out"
@@ -99,16 +107,22 @@ jobs:
             find session -type f -print0 | sort -z | xargs -0 sha256sum
             sha256sum PROVENANCE.txt Cargo.lock HOST.txt LOCAL-AUDIT.json RUN.exit
           ) > "$out/SHA256SUMS"
-      - name: Re-audit committed native evidence
+      - name: Audit committed native evidence (solver replay on manual runs)
         if: ${{ hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') != '' }}
         run: |
+          replay_args=(--replay-all)
+          expected_replays=320
+          if [[ "$GITHUB_EVENT_NAME" == pull_request || "$GITHUB_EVENT_NAME" == merge_group ]]; then
+            replay_args=(--replay 0)
+            expected_replays=0
+          fi
           dir=research/ecbench_n37_native_online_wall_20261004
           (cd "$dir" && sha256sum --check SHA256SUMS)
           ./target/release/ecbench verify \
-            --dir "$dir/sessions/hosted_ubuntu_01" --replay-all --exit-code \
+            --dir "$dir/sessions/hosted_ubuntu_01" "${replay_args[@]}" --exit-code \
             --out "$RUNNER_TEMP/n37-native-wall-replay.json" > /dev/null
-          jq -e '.ok == true and .records == 384 and .verified_records == 384
-            and (.replays | length) == 320
+          jq -e --argjson expected_replays "$expected_replays" '.ok == true and .records == 384 and .verified_records == 384
+            and (.replays | length) == $expected_replays
             and all(.replays[]; .reproduced)' \
             "$RUNNER_TEMP/n37-native-wall-replay.json" > /dev/null
           cargo build --release --example ecbench_n37_native_online_wall_analyze
@@ -122,7 +136,7 @@ jobs:
             and .online_speedup == null and .all_measured_L2 == false' \
             "$dir/DECISION.json" > /dev/null
       - uses: actions/upload-artifact@v4
-        if: ${{ always() && hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') == '' }}
+        if: ${{ !cancelled() && github.event_name != 'pull_request' && github.event_name != 'merge_group' && hashFiles('research/ecbench_n37_native_online_wall_20261004/sessions/hosted_ubuntu_01/session.json') == '' }}
         with:
           name: ecbench-n37-native-wall
           path: ${{ runner.temp }}/ecbench-n37-native-wall

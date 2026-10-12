@@ -3,6 +3,7 @@ name: ECC2K130 orbit-disjoint v2 compact cold CPU panel
 on:
   pull_request:
     paths:
+      - 'tools/isolated_bench.py'
       - .github/workflows/ecc2k130-disjoint-cold-v2.yml
       - research/notes/ecc2k130/disjoint_cold_v2_20261001/**
       - research/notes/ecc2k130/compact_frozen_source_replay_20260929/**
@@ -18,7 +19,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 35 }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -50,6 +51,7 @@ jobs:
             research/notes/ecc2k130/point_sum_cold_20260930
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             tools/isolated_bench.py
+      - uses: Swatinem/rust-cache@v2
       - name: Replay every frozen public Q and check Python syntax
         run: |
           set -euo pipefail
@@ -141,6 +143,7 @@ jobs:
             research/notes/ecc2k130/point_sum_cold_20260930
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             tools/isolated_bench.py
+      - uses: Swatinem/rust-cache@v2
       - name: Materialize and build exact frozen source
         run: |
           set -euo pipefail

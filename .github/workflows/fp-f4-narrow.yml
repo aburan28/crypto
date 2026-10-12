@@ -11,12 +11,13 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+# PRs retain source, correctness and existing-evidence checks.
+# Fresh timing panels and their result gates run only after merge or by manual dispatch.
 jobs:
   exact-output-and-paired-f4:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
     env:
       RAYON_NUM_THREADS: '1'
       CARGO_BUILD_JOBS: '2'
@@ -33,19 +34,21 @@ jobs:
       - name: Build frozen F4 stage benchmark
         run: cargo build --release --example f4_fp_bench
       - name: Final one-thread paired confirmation
+        if: github.event_name != 'pull_request'
         run: |
           python3 research/fp_f4_narrow_20260926/paired_fp_f4.py \
             target/release/examples/f4_fp_bench \
             research/fp_f4_narrow_20260926/ci-result.json \
             --pairs 5 --candidate-mode 2 --threads 1
       - name: Final four-thread paired confirmation
+        if: github.event_name != 'pull_request'
         run: |
           python3 research/fp_f4_narrow_20260926/paired_fp_f4.py \
             target/release/examples/f4_fp_bench \
             research/fp_f4_narrow_20260926/ci-result-threads4.json \
             --pairs 5 --candidate-mode 2 --threads 4
       - name: Preserve raw runs and failures
-        if: always()
+        if: github.event_name != 'pull_request' && (always())
         uses: actions/upload-artifact@v4
         with:
           name: fp-f4-narrow-${{ github.sha }}

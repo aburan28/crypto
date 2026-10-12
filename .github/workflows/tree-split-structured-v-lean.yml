@@ -10,18 +10,32 @@ on:
       - '.github/workflows/tree-split-structured-v-lean.yml'
       - 'examples/tree_split_structured.rs'
       - 'research/ic_tree_split_structured_v_20261011/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - '.cargo/**'
   push:
     branches: [main]
     paths:
       - '.github/workflows/tree-split-structured-v-lean.yml'
       - 'examples/tree_split_structured.rs'
       - 'research/ic_tree_split_structured_v_20261011/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - '.cargo/**'
   workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   lean:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
     defaults:
       run:
         working-directory: research/ic_tree_split_structured_v_20261011
@@ -29,6 +43,33 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/scripts/
+            /Cargo.toml
+            /Cargo.lock
+            /build.rs
+            /.cargo/
+            /rust-toolchain*
+            /rustfmt.toml
+            /clippy.toml
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
+            /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
+            /research/ic_tree_split_structured_v_20261011/
+      - name: Materialize compile-time fixture inputs
+        working-directory: ${{ github.workspace }}
+        run: node .github/scripts/ci-scope.mjs --materialize
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Cache the pinned Lean toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan/toolchains
+          key: ${{ runner.os }}-lean-${{ hashFiles('research/ic_tree_split_structured_v_20261011/lean/lean-toolchain') }}
       - name: Install Lean (toolchain pinned by lean/lean-toolchain)
         run: |
           curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh

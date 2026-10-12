@@ -18,8 +18,7 @@ permissions:
 
 concurrency:
   group: boolean-f5-call-ceiling-${{ github.ref }}
-  cancel-in-progress: false
-
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 env:
   KIC_F5_DIRECT_PACK: '1'
   KIC_F5_UNPACK_DIRECT: '1'
@@ -31,9 +30,11 @@ env:
 jobs:
   correctness:
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 360 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Native mathematical and verifier tests
         run: |
           python3 tools/isolated_bench.py busy -- cargo test --locked --release --manifest-path research/boolean_f5_call_only_ceiling_20261002/Cargo.toml -- --test-threads=1

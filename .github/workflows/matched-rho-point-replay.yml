@@ -7,8 +7,10 @@ on:
 jobs:
   replay:
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 360 }}
     steps:
       - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
       - name: Build the point-input rho producer
         run: cargo build --release --example koblitz_rho_batch_ks
       - name: Check point-input behavior and frozen receipts

@@ -88,7 +88,7 @@ jobs:
   campaign:
     # Seed 2026092902 ran exactly once as Actions 36580669479. Its producer
     # timed out and its partial archive failed to upload. No redispatch.
-    if: ${{ false }}
+    if: ${{ false && github.event_name == 'workflow_dispatch' }}
     needs: [preflight, artifact-smoke]
     runs-on: ubuntu-24.04
     timeout-minutes: 360
