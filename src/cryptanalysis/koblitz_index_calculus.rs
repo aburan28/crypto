@@ -3680,7 +3680,20 @@ impl Default for KoblitzIcOptions {
             extra_relations: 4,
             max_trials: 20_000,
             seed: 0x4b_6f_62_6c_69_74_7a_00, // "Koblitz\0"
-            strategy: DecompositionStrategy::Groebner,
+            // The default decomposition oracle is the pair-table
+            // *root-finding* meet-in-the-middle, not a Gröbner basis:
+            // it answers "is `R = P_1 + … + P_m` over the factor base?"
+            // with one lookup (`m = 2`), `|F|` lookups (`m = 3`), or
+            // `|F|²` lookups (`m = 4`) into a precomputed `P_i + P_j`
+            // table, instead of row-reducing the Weil-restricted Semaev
+            // Boolean system (matrix-F4). Exact and complete like
+            // enumeration, every witness re-checked in the group, and
+            // vastly cheaper than F4/F5 at these field sizes (see
+            // `examples/semaev_root_vs_groebner_bench.rs`).
+            // `DecompositionStrategy::Groebner` stays selectable for the
+            // head-to-head comparison and for the infeasibility
+            // certificate it alone produces.
+            strategy: DecompositionStrategy::PairTable,
             engine: SolverEngine::default(),
             node_budget: 4096,
             max_models: 64,

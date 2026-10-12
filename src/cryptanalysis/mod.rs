@@ -174,6 +174,7 @@ pub mod pq_sparse_la;
 pub mod pq_wiedemann;
 pub mod pq_xl;
 pub mod preprocessing_rho;
+pub mod prime_fast;
 pub mod quantum_estimator;
 pub mod research_bench;
 pub mod residual_walk;
