@@ -1,21 +1,9 @@
 name: Chained PDP orbit holdout replay
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/pdp-chained-orbit-holdout.yml"
-      - "research/ecc2k130_pdp_chain_holdout_20260925/**"
-      - "research/ecc2k130_factor_base_pilot_20260924/run.py"
-      - "research/ecc2k130_relations/**"
-      - "research/ecc2k130_oriented_transport_20260924/**"
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/pdp-chained-orbit-holdout.yml"
-      - "research/ecc2k130_pdp_chain_holdout_20260925/**"
-      - "research/ecc2k130_factor_base_pilot_20260924/run.py"
-      - "research/ecc2k130_relations/**"
-      - "research/ecc2k130_oriented_transport_20260924/**"
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 
 jobs:

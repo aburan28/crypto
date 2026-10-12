@@ -1,0 +1,15 @@
+exhaustive n=5 modulus low terms [0, 2]: #E=44 (expected 44), |4E|=11, test-accepted=11, disagreements fp=0 fn=0 [0.0s] OK
+exhaustive n=7 modulus low terms [0, 1]: #E=116 (expected 116), |4E|=29, test-accepted=29, disagreements fp=0 fn=0 [0.0s] OK
+exhaustive n=9 modulus low terms [0, 1]: #E=508 (expected 508), |4E|=127, test-accepted=127, disagreements fp=0 fn=0 [0.0s] OK
+exhaustive n=11 modulus low terms [0, 2]: #E=2116 (expected 2116), |4E|=529, test-accepted=529, disagreements fp=0 fn=0 [0.0s] OK
+exhaustive n=13 modulus low terms [0, 1, 3, 4]: #E=8012 (expected 8012), |4E|=2003, test-accepted=2003, disagreements fp=0 fn=0 [0.3s] OK
+exhaustive n=15 modulus low terms [0, 1]: #E=33044 (expected 33044), |4E|=8261, test-accepted=8261, disagreements fp=0 fn=0 [0.2s] OK
+exhaustive n=17 modulus low terms [0, 3]: #E=130972 (expected 130972), |4E|=32743, test-accepted=32743, disagreements fp=0 fn=0 [3.1s] OK
+exhaustive n=19 modulus low terms [0, 1, 2, 5]: #E=523492 (expected 523492), |4E|=130873, test-accepted=130873, disagreements fp=0 fn=0 [18.5s] OK
+exhaustive n=21 modulus low terms [0, 2]: #E=2099948 (expected 2099948), |4E|=524987, test-accepted=524987, disagreements fp=0 fn=0 [35.7s] OK
+exhaustive n=23 modulus low terms [0, 5]: #E=8383412 (expected 8383412), |4E|=2095853, test-accepted=2095853, disagreements fp=0 fn=0 [233.9s] OK
+wrote exhaustive.json
+
+real	4m51.768s
+user	3m44.470s
+sys	0m0.268s

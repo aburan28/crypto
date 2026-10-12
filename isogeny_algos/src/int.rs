@@ -46,6 +46,14 @@ impl Int {
     pub fn mag(&self) -> &Big {
         &self.mag
     }
+    /// `self * 2^k`.
+    pub fn shl(&self, k: usize) -> Int {
+        Int::make(self.neg, self.mag.shl(k))
+    }
+    /// `self / 2^k`, truncated toward zero (sign-magnitude shift).
+    pub fn shr(&self, k: usize) -> Int {
+        Int::make(self.neg, self.mag.shr(k))
+    }
     pub fn is_zero(&self) -> bool {
         self.mag.is_zero()
     }

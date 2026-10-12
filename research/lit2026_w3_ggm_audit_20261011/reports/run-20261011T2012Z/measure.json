@@ -1,0 +1,1838 @@
+{
+  "batches_per_k": 24,
+  "fits": [
+    {
+      "all_verified": true,
+      "asymptotic_slope": 0.5,
+      "aut": 2.0,
+      "curve": "prime-floor q=68723001073 N=68723001023 (ell=120283, t=51)",
+      "curve_params": {
+        "a": 48478586416,
+        "b": 24234773000,
+        "cofactor": 1,
+        "generator": [
+          0,
+          26541473944
+        ],
+        "order": 68723001023,
+        "p": 68723001073
+      },
+      "ks": [
+        1,
+        2,
+        4,
+        8,
+        16
+      ],
+      "kuhn_struik_law_slope_same_ks": 0.5392727357577027,
+      "log2_r": 36.00007398689927,
+      "per_k": [
+        {
+          "batch_law": 1.0,
+          "batches": 24,
+          "k": 1,
+          "mean_total_gae": 255071.75,
+          "mean_total_over_sqrt_k_r_over_A": 1.3760249276990228,
+          "per_target_over_k1": 1.0
+        },
+        {
+          "batch_law": 0.75,
+          "batches": 24,
+          "k": 2,
+          "mean_total_gae": 383172.2083333333,
+          "mean_total_over_sqrt_k_r_over_A": 1.4616484954598106,
+          "per_target_over_k1": 0.7511067147446421
+        },
+        {
+          "batch_law": 0.546875,
+          "batches": 24,
+          "k": 4,
+          "mean_total_gae": 554336.5833333334,
+          "mean_total_over_sqrt_k_r_over_A": 1.4952282191229986,
+          "per_target_over_k1": 0.5433143648143448
+        },
+        {
+          "batch_law": 0.39276123046875,
+          "batches": 24,
+          "k": 8,
+          "mean_total_gae": 727278.875,
+          "mean_total_over_sqrt_k_r_over_A": 1.3871387985669026,
+          "per_target_over_k1": 0.35640896875094946
+        },
+        {
+          "batch_law": 0.27989986818283796,
+          "batches": 24,
+          "k": 16,
+          "mean_total_gae": 1146449.4166666667,
+          "mean_total_over_sqrt_k_r_over_A": 1.5461757090694452,
+          "per_target_over_k1": 0.2809134627479
+        }
+      ],
+      "r": 68723001023.0,
+      "runs": [
+        {
+          "all_verified": true,
+          "batch": 0,
+          "gae": 357079.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 1,
+          "gae": 115421.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 2,
+          "gae": 26218.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 3,
+          "gae": 51498.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 4,
+          "gae": 281853.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 5,
+          "gae": 65711.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 6,
+          "gae": 69940.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 7,
+          "gae": 554341.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 8,
+          "gae": 291031.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 9,
+          "gae": 358074.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 10,
+          "gae": 452912.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 11,
+          "gae": 120188.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 12,
+          "gae": 84854.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 13,
+          "gae": 430098.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 14,
+          "gae": 210577.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 15,
+          "gae": 300189.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 16,
+          "gae": 486693.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 17,
+          "gae": 58104.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 18,
+          "gae": 372357.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 19,
+          "gae": 326180.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 20,
+          "gae": 150307.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 21,
+          "gae": 120818.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 22,
+          "gae": 421268.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 23,
+          "gae": 416011.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 0,
+          "gae": 415336.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 1,
+          "gae": 326393.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 2,
+          "gae": 488247.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 3,
+          "gae": 206361.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 4,
+          "gae": 383610.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 5,
+          "gae": 477345.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 6,
+          "gae": 400099.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 7,
+          "gae": 262173.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 8,
+          "gae": 471462.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 9,
+          "gae": 731353.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 10,
+          "gae": 219403.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 11,
+          "gae": 437753.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 12,
+          "gae": 326183.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 13,
+          "gae": 308303.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 14,
+          "gae": 499403.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 15,
+          "gae": 195670.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 16,
+          "gae": 511795.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 17,
+          "gae": 238897.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 18,
+          "gae": 326559.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 19,
+          "gae": 364930.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 20,
+          "gae": 201683.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 21,
+          "gae": 494931.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 22,
+          "gae": 484357.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 23,
+          "gae": 423887.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 0,
+          "gae": 706288.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 1,
+          "gae": 616278.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 2,
+          "gae": 541612.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 3,
+          "gae": 605949.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 4,
+          "gae": 444255.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 5,
+          "gae": 394963.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 6,
+          "gae": 756007.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 7,
+          "gae": 658017.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 8,
+          "gae": 358826.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 9,
+          "gae": 540810.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 10,
+          "gae": 658009.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 11,
+          "gae": 674130.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 12,
+          "gae": 661611.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 13,
+          "gae": 368709.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 14,
+          "gae": 892586.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 15,
+          "gae": 612120.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 16,
+          "gae": 349609.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 17,
+          "gae": 485991.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 18,
+          "gae": 559137.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 19,
+          "gae": 492389.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 20,
+          "gae": 563473.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 21,
+          "gae": 468676.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 22,
+          "gae": 397701.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 23,
+          "gae": 496932.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 0,
+          "gae": 924641.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 1,
+          "gae": 654759.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 2,
+          "gae": 692901.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 3,
+          "gae": 777576.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 4,
+          "gae": 628666.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 5,
+          "gae": 876585.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 6,
+          "gae": 968643.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 7,
+          "gae": 775019.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 4
+        },
+        {
+          "all_verified": true,
+          "batch": 8,
+          "gae": 628571.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 9,
+          "gae": 652017.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 10,
+          "gae": 880717.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 5
+        },
+        {
+          "all_verified": true,
+          "batch": 11,
+          "gae": 738931.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 12,
+          "gae": 721908.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 13,
+          "gae": 717229.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 14,
+          "gae": 650855.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 4
+        },
+        {
+          "all_verified": true,
+          "batch": 15,
+          "gae": 699372.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 5
+        },
+        {
+          "all_verified": true,
+          "batch": 16,
+          "gae": 894381.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 17,
+          "gae": 689762.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 18,
+          "gae": 747257.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 19,
+          "gae": 664191.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 20,
+          "gae": 833277.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 21,
+          "gae": 388170.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 22,
+          "gae": 668239.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 23,
+          "gae": 581026.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 0,
+          "gae": 1014748.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 1,
+          "gae": 1090868.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 2,
+          "gae": 1136165.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 15
+        },
+        {
+          "all_verified": true,
+          "batch": 3,
+          "gae": 1175456.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 11
+        },
+        {
+          "all_verified": true,
+          "batch": 4,
+          "gae": 1180383.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 13
+        },
+        {
+          "all_verified": true,
+          "batch": 5,
+          "gae": 1385513.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 15
+        },
+        {
+          "all_verified": true,
+          "batch": 6,
+          "gae": 1283028.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 7,
+          "gae": 956340.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 15
+        },
+        {
+          "all_verified": true,
+          "batch": 8,
+          "gae": 1234037.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 9,
+          "gae": 1324729.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 12
+        },
+        {
+          "all_verified": true,
+          "batch": 10,
+          "gae": 1225650.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 11,
+          "gae": 1033053.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 12,
+          "gae": 1080091.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 13,
+          "gae": 1119483.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 13
+        },
+        {
+          "all_verified": true,
+          "batch": 14,
+          "gae": 1019204.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 15,
+          "gae": 1343965.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 10
+        },
+        {
+          "all_verified": true,
+          "batch": 16,
+          "gae": 1198942.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 17,
+          "gae": 985606.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 18,
+          "gae": 1133477.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 13
+        },
+        {
+          "all_verified": true,
+          "batch": 19,
+          "gae": 1116727.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 20,
+          "gae": 1340266.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 15
+        },
+        {
+          "all_verified": true,
+          "batch": 21,
+          "gae": 1075868.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 15
+        },
+        {
+          "all_verified": true,
+          "batch": 22,
+          "gae": 939805.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 23,
+          "gae": 1121382.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 13
+        }
+      ],
+      "slope": 0.5260911090465614,
+      "slope_ci95_bootstrap": [
+        0.45283750839270875,
+        0.6080771372045474
+      ],
+      "source": "fresh: rho_batch_with, NegationClasses, RhoWalk::negation"
+    },
+    {
+      "all_verified": true,
+      "asymptotic_slope": 0.5,
+      "aut": 82.0,
+      "curve": "icv1-f2m41-tm2308219-7f48b14a",
+      "ks": [
+        1,
+        2,
+        4,
+        8,
+        16
+      ],
+      "kuhn_struik_law_slope_same_ks": 0.5392727357577027,
+      "log2_r": 39.00000151433405,
+      "per_k": [
+        {
+          "batch_law": 1.0,
+          "batches": 24,
+          "k": 1,
+          "mean_total_gae": 96510.625,
+          "mean_total_over_sqrt_k_r_over_A": 1.1786827045050663,
+          "per_target_over_k1": 1.0
+        },
+        {
+          "batch_law": 0.75,
+          "batches": 24,
+          "k": 2,
+          "mean_total_gae": 173601.54166666666,
+          "mean_total_over_sqrt_k_r_over_A": 1.4992027238094836,
+          "per_target_over_k1": 0.8993908270030717
+        },
+        {
+          "batch_law": 0.546875,
+          "batches": 24,
+          "k": 4,
+          "mean_total_gae": 246785.33333333334,
+          "mean_total_over_sqrt_k_r_over_A": 1.5069926452425193,
+          "per_target_over_k1": 0.6392698558664741
+        },
+        {
+          "batch_law": 0.39276123046875,
+          "batches": 24,
+          "k": 8,
+          "mean_total_gae": 339394.4166666667,
+          "mean_total_over_sqrt_k_r_over_A": 1.4654853552204847,
+          "per_target_over_k1": 0.43958167386578767
+        },
+        {
+          "batch_law": 0.27989986818283796,
+          "batches": 24,
+          "k": 16,
+          "mean_total_gae": 481947.125,
+          "mean_total_over_sqrt_k_r_over_A": 1.4715031135780159,
+          "per_target_over_k1": 0.31210755616285774
+        }
+      ],
+      "r": 549756390943.0,
+      "runs": [
+        {
+          "all_verified": true,
+          "batch": 0,
+          "gae": 175175.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 1,
+          "gae": 47024.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 2,
+          "gae": 72906.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 3,
+          "gae": 25712.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 4,
+          "gae": 102839.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 5,
+          "gae": 120987.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 6,
+          "gae": 115521.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 7,
+          "gae": 9160.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 8,
+          "gae": 123661.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 9,
+          "gae": 64678.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 10,
+          "gae": 67729.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 11,
+          "gae": 193880.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 12,
+          "gae": 45768.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 13,
+          "gae": 189454.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 14,
+          "gae": 73549.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 15,
+          "gae": 158506.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 16,
+          "gae": 67167.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 17,
+          "gae": 96909.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 18,
+          "gae": 139958.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 19,
+          "gae": 58940.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 20,
+          "gae": 32240.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 21,
+          "gae": 59477.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 22,
+          "gae": 75520.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 23,
+          "gae": 199495.0,
+          "k": 1,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 0,
+          "gae": 134971.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 1,
+          "gae": 224468.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 2,
+          "gae": 258005.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 3,
+          "gae": 79873.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 4,
+          "gae": 287890.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 5,
+          "gae": 89871.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 6,
+          "gae": 191992.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 7,
+          "gae": 25108.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 8,
+          "gae": 213691.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 9,
+          "gae": 260701.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 10,
+          "gae": 154658.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 11,
+          "gae": 218220.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 12,
+          "gae": 101649.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 13,
+          "gae": 111061.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 14,
+          "gae": 176924.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 15,
+          "gae": 214205.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 16,
+          "gae": 180723.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 17,
+          "gae": 210598.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 18,
+          "gae": 184633.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 19,
+          "gae": 106438.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 20,
+          "gae": 197752.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 21,
+          "gae": 164896.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 22,
+          "gae": 248003.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 23,
+          "gae": 130107.0,
+          "k": 2,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 0,
+          "gae": 380840.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 1,
+          "gae": 216029.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 2,
+          "gae": 231327.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 3,
+          "gae": 265557.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 4,
+          "gae": 350385.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 5,
+          "gae": 154275.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 6,
+          "gae": 152533.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 7,
+          "gae": 226667.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 8,
+          "gae": 192564.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 9,
+          "gae": 253948.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 10,
+          "gae": 208460.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 11,
+          "gae": 241849.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 12,
+          "gae": 202922.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 13,
+          "gae": 266870.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 14,
+          "gae": 326574.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 15,
+          "gae": 224334.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 16,
+          "gae": 173424.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 17,
+          "gae": 182175.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 18,
+          "gae": 195703.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 19,
+          "gae": 268346.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 1
+        },
+        {
+          "all_verified": true,
+          "batch": 20,
+          "gae": 305290.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 0
+        },
+        {
+          "all_verified": true,
+          "batch": 21,
+          "gae": 364802.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 22,
+          "gae": 317665.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 2
+        },
+        {
+          "all_verified": true,
+          "batch": 23,
+          "gae": 220309.0,
+          "k": 4,
+          "solved_on_an_earlier_trail": 3
+        },
+        {
+          "all_verified": true,
+          "batch": 0,
+          "gae": 339573.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 1,
+          "gae": 419435.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 2,
+          "gae": 379334.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 3,
+          "gae": 375265.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 4,
+          "gae": 336915.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 5
+        },
+        {
+          "all_verified": true,
+          "batch": 5,
+          "gae": 382753.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 6,
+          "gae": 362891.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 7,
+          "gae": 452739.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 4
+        },
+        {
+          "all_verified": true,
+          "batch": 8,
+          "gae": 343266.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 9,
+          "gae": 256739.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 10,
+          "gae": 322874.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 11,
+          "gae": 335160.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 12,
+          "gae": 319810.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 13,
+          "gae": 386276.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 14,
+          "gae": 296872.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 15,
+          "gae": 310299.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 5
+        },
+        {
+          "all_verified": true,
+          "batch": 16,
+          "gae": 275267.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 17,
+          "gae": 299107.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 18,
+          "gae": 239632.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 5
+        },
+        {
+          "all_verified": true,
+          "batch": 19,
+          "gae": 303721.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 20,
+          "gae": 315119.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 21,
+          "gae": 301348.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 22,
+          "gae": 478500.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 7
+        },
+        {
+          "all_verified": true,
+          "batch": 23,
+          "gae": 312571.0,
+          "k": 8,
+          "solved_on_an_earlier_trail": 6
+        },
+        {
+          "all_verified": true,
+          "batch": 0,
+          "gae": 501167.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 15
+        },
+        {
+          "all_verified": true,
+          "batch": 1,
+          "gae": 526554.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 15
+        },
+        {
+          "all_verified": true,
+          "batch": 2,
+          "gae": 447738.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 3,
+          "gae": 451918.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 12
+        },
+        {
+          "all_verified": true,
+          "batch": 4,
+          "gae": 498584.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 5,
+          "gae": 576828.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 13
+        },
+        {
+          "all_verified": true,
+          "batch": 6,
+          "gae": 382028.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 13
+        },
+        {
+          "all_verified": true,
+          "batch": 7,
+          "gae": 561101.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 15
+        },
+        {
+          "all_verified": true,
+          "batch": 8,
+          "gae": 509868.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 15
+        },
+        {
+          "all_verified": true,
+          "batch": 9,
+          "gae": 456016.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 10,
+          "gae": 523366.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 12
+        },
+        {
+          "all_verified": true,
+          "batch": 11,
+          "gae": 422060.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 13
+        },
+        {
+          "all_verified": true,
+          "batch": 12,
+          "gae": 461537.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 13
+        },
+        {
+          "all_verified": true,
+          "batch": 13,
+          "gae": 514050.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 11
+        },
+        {
+          "all_verified": true,
+          "batch": 14,
+          "gae": 465070.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 12
+        },
+        {
+          "all_verified": true,
+          "batch": 15,
+          "gae": 451251.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 15
+        },
+        {
+          "all_verified": true,
+          "batch": 16,
+          "gae": 352683.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 14
+        },
+        {
+          "all_verified": true,
+          "batch": 17,
+          "gae": 500332.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 12
+        },
+        {
+          "all_verified": true,
+          "batch": 18,
+          "gae": 458831.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 15
+        },
+        {
+          "all_verified": true,
+          "batch": 19,
+          "gae": 561544.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 13
+        },
+        {
+          "all_verified": true,
+          "batch": 20,
+          "gae": 474916.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 15
+        },
+        {
+          "all_verified": true,
+          "batch": 21,
+          "gae": 482632.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 15
+        },
+        {
+          "all_verified": true,
+          "batch": 22,
+          "gae": 488063.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 12
+        },
+        {
+          "all_verified": true,
+          "batch": 23,
+          "gae": 498594.0,
+          "k": 16,
+          "solved_on_an_earlier_trail": 13
+        }
+      ],
+      "slope": 0.5607413453049059,
+      "slope_ci95_bootstrap": [
+        0.5001216442342125,
+        0.6369039849793977
+      ],
+      "source": "fresh: signed_frobenius_rho_batch"
+    }
+  ],
+  "ks": [
+    1,
+    2,
+    4,
+    8,
+    16
+  ],
+  "schema": "lit2026-w3-multitarget-measure/v1",
+  "seed": 112208511747,
+  "unit": "group-addition equivalents (gae) per batch: shared jump table, each target's setup, starts, walks, verification"
+}

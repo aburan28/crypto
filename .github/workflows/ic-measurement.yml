@@ -10,8 +10,14 @@ name: ic measurement standard
 # refuses wall time by design.  The smoke job checks the machinery, never the
 # numbers.
 on:
+  merge_group:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - "tools/icms/**"
       - "tools/isolated_bench.py"
       - "docs/ic/measurement/**"
@@ -63,7 +69,7 @@ jobs:
 
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: ${{ (github.event_name == 'pull_request' || github.event_name == 'merge_group') && 25 || 40 }}
     needs: standard
     steps:
       - uses: actions/checkout@v4
@@ -123,7 +129,7 @@ jobs:
       - name: The smoke session audits like a committed one
         run: python tools/icms audit-sessions /tmp/icms-smoke
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           name: icms-smoke-session
           path: /tmp/icms-smoke

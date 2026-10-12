@@ -1,0 +1,480 @@
+{
+  "argv": [
+    "/tmp/claude-0/-home-user/717e4727-b5a7-5b25-924a-7b31edb43331/scratchpad/r4target/release/examples/r4_16_3_vertical_margin",
+    "analyze",
+    "research/isogeny_fibers_20261010/round4/16_3_vertical_margin",
+    "research/isogeny_fibers_20261010/round4/16_3_vertical_margin/analysis.json",
+    "research/isogeny_fibers_20261010/round4/16_3_vertical_margin/analysis.json"
+  ],
+  "assumptions": {
+    "ell_max": "ell^2 | t^2 - 4p implies ell <= 2 sqrt(p)",
+    "g": "field mults per group op: 6 (affine add with batched inversion), 12 as sensitivity",
+    "logp_scale": "ladder-type phases scale with log2 p / 61, p ~ r; Velu/sqrt-elu counts taken as p-independent",
+    "rho_group_ops": "sqrt(pi r / 4)"
+  },
+  "crossover": [
+    {
+      "g_mults_per_group_op": 6.0,
+      "log2_ell_max": 33.0,
+      "log2_r": 64.0,
+      "log2_rho_mults": 34.410710565457315,
+      "logp_scale": 1.0491803278688525,
+      "rows": [
+        {
+          "log2_ell_star": 31.848756373567483,
+          "model": "rational kernel, Velu (fit ell>=2^10)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 35.879702762613654,
+          "model": "rational kernel, sqrt-elu (power-law fit ell>=2^16)",
+          "note": "beyond ell_max = 2 sqrt(p): no vertical gap that large exists"
+        },
+        {
+          "log2_ell_star": 40.68793814232139,
+          "model": "rational kernel, sqrt-elu (model sqrt(l) log^2 l, calibrated)",
+          "note": "beyond ell_max = 2 sqrt(p): no vertical gap that large exists"
+        },
+        {
+          "log2_ell_star": 9.583335095041006,
+          "model": "generic kernel k=(l-1)/2 (fit ell>=30, central)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 9.591812082811739,
+          "model": "generic kernel k=(l-1)/2 (fit, exponent at CI low end)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 9.824565811092992,
+          "model": "generic kernel k=(l-1)/2 (model l^2 log l, calibrated)",
+          "note": "crossover inside the possible range"
+        }
+      ]
+    },
+    {
+      "g_mults_per_group_op": 6.0,
+      "log2_ell_max": 65.0,
+      "log2_r": 128.0,
+      "log2_rho_mults": 66.41071056545732,
+      "logp_scale": 2.098360655737705,
+      "rows": [
+        {
+          "log2_ell_star": 63.91121520478695,
+          "model": "rational kernel, Velu (fit ell>=2^10)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 74.82256010075709,
+          "model": "rational kernel, sqrt-elu (power-law fit ell>=2^16)",
+          "note": "beyond ell_max = 2 sqrt(p): no vertical gap that large exists"
+        },
+        {
+          "log2_ell_star": 99.5260465129039,
+          "model": "rational kernel, sqrt-elu (model sqrt(l) log^2 l, calibrated)",
+          "note": "beyond ell_max = 2 sqrt(p): no vertical gap that large exists"
+        },
+        {
+          "log2_ell_star": 21.48557867904357,
+          "model": "generic kernel k=(l-1)/2 (fit ell>=30, central)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 21.616336265402936,
+          "model": "generic kernel k=(l-1)/2 (fit, exponent at CI low end)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 24.6606919781822,
+          "model": "generic kernel k=(l-1)/2 (model l^2 log l, calibrated)",
+          "note": "crossover inside the possible range"
+        }
+      ]
+    },
+    {
+      "g_mults_per_group_op": 6.0,
+      "log2_ell_max": 129.0,
+      "log2_r": 256.0,
+      "log2_rho_mults": 130.41071056545732,
+      "logp_scale": 4.19672131147541,
+      "rows": [
+        {
+          "log2_ell_star": 128.03613264635538,
+          "model": "rational kernel, Velu (fit ell>=2^10)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 152.70827450877604,
+          "model": "rational kernel, sqrt-elu (power-law fit ell>=2^16)",
+          "note": "beyond ell_max = 2 sqrt(p): no vertical gap that large exists"
+        },
+        {
+          "log2_ell_star": 222.87372451267913,
+          "model": "rational kernel, sqrt-elu (model sqrt(l) log^2 l, calibrated)",
+          "note": "beyond ell_max = 2 sqrt(p): no vertical gap that large exists"
+        },
+        {
+          "log2_ell_star": 45.67400914704018,
+          "model": "generic kernel k=(l-1)/2 (fit ell>=30, central)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 46.053272465378534,
+          "model": "generic kernel k=(l-1)/2 (fit, exponent at CI low end)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 55.574585971686055,
+          "model": "generic kernel k=(l-1)/2 (model l^2 log l, calibrated)",
+          "note": "crossover inside the possible range"
+        }
+      ]
+    },
+    {
+      "g_mults_per_group_op": 12.0,
+      "log2_ell_max": 33.0,
+      "log2_r": 64.0,
+      "log2_rho_mults": 35.410710565457315,
+      "logp_scale": 1.0491803278688525,
+      "rows": [
+        {
+          "log2_ell_star": 32.85070826380962,
+          "model": "rational kernel, Velu (fit ell>=2^10)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 37.096667117305934,
+          "model": "rational kernel, sqrt-elu (power-law fit ell>=2^16)",
+          "note": "beyond ell_max = 2 sqrt(p): no vertical gap that large exists"
+        },
+        {
+          "log2_ell_star": 42.44408842577869,
+          "model": "rational kernel, sqrt-elu (model sqrt(l) log^2 l, calibrated)",
+          "note": "beyond ell_max = 2 sqrt(p): no vertical gap that large exists"
+        },
+        {
+          "log2_ell_star": 9.967278443351272,
+          "model": "generic kernel k=(l-1)/2 (fit ell>=30, central)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 9.979699966633294,
+          "model": "generic kernel k=(l-1)/2 (fit, exponent at CI low end)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 10.291099999962778,
+          "model": "generic kernel k=(l-1)/2 (model l^2 log l, calibrated)",
+          "note": "crossover inside the possible range"
+        }
+      ]
+    },
+    {
+      "g_mults_per_group_op": 12.0,
+      "log2_ell_max": 65.0,
+      "log2_r": 128.0,
+      "log2_rho_mults": 67.41071056545732,
+      "logp_scale": 2.098360655737705,
+      "rows": [
+        {
+          "log2_ell_star": 64.91316703981147,
+          "model": "rational kernel, Velu (fit ell>=2^10)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 76.03952438838239,
+          "model": "rational kernel, sqrt-elu (power-law fit ell>=2^16)",
+          "note": "beyond ell_max = 2 sqrt(p): no vertical gap that large exists"
+        },
+        {
+          "log2_ell_star": 101.41740936876737,
+          "model": "rational kernel, sqrt-elu (model sqrt(l) log^2 l, calibrated)",
+          "note": "beyond ell_max = 2 sqrt(p): no vertical gap that large exists"
+        },
+        {
+          "log2_ell_star": 21.869522019805423,
+          "model": "generic kernel k=(l-1)/2 (fit ell>=30, central)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 22.004224141593035,
+          "model": "generic kernel k=(l-1)/2 (fit, exponent at CI low end)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 25.146616471556566,
+          "model": "generic kernel k=(l-1)/2 (model l^2 log l, calibrated)",
+          "note": "crossover inside the possible range"
+        }
+      ]
+    },
+    {
+      "g_mults_per_group_op": 12.0,
+      "log2_ell_max": 129.0,
+      "log2_r": 256.0,
+      "log2_rho_mults": 131.41071056545732,
+      "logp_scale": 4.19672131147541,
+      "rows": [
+        {
+          "log2_ell_star": 129.03808448137988,
+          "model": "rational kernel, Velu (fit ell>=2^10)",
+          "note": "beyond ell_max = 2 sqrt(p): no vertical gap that large exists"
+        },
+        {
+          "log2_ell_star": 153.92523879640135,
+          "model": "rational kernel, sqrt-elu (power-law fit ell>=2^16)",
+          "note": "beyond ell_max = 2 sqrt(p): no vertical gap that large exists"
+        },
+        {
+          "log2_ell_star": 224.8234603240296,
+          "model": "rational kernel, sqrt-elu (model sqrt(l) log^2 l, calibrated)",
+          "note": "beyond ell_max = 2 sqrt(p): no vertical gap that large exists"
+        },
+        {
+          "log2_ell_star": 46.057952487802034,
+          "model": "generic kernel k=(l-1)/2 (fit ell>=30, central)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 46.44116034156862,
+          "model": "generic kernel k=(l-1)/2 (fit, exponent at CI low end)",
+          "note": "crossover inside the possible range"
+        },
+        {
+          "log2_ell_star": 56.06820715002812,
+          "model": "generic kernel k=(l-1)/2 (model l^2 log l, calibrated)",
+          "note": "crossover inside the possible range"
+        }
+      ]
+    }
+  ],
+  "field_bits": 61,
+  "fits": [
+    {
+      "exponent": -0.025427634712730796,
+      "exponent_ci95": [
+        -0.03614900074272405,
+        -0.014706268682737545
+      ],
+      "log2_constant": 10.007157226136966,
+      "n": 42,
+      "r2": 0.3648384782059778,
+      "range": "all ell",
+      "series": "rational_find (cofactor ladder)"
+    },
+    {
+      "exponent": 0.9980519672141137,
+      "exponent_ci95": [
+        0.9972689247165805,
+        0.998835009711647
+      ],
+      "log2_constant": 2.623996503275123,
+      "n": 29,
+      "r2": 0.999996052294769,
+      "range": "ell >= 2^10",
+      "series": "velu_1pt (codomain + 1 image)"
+    },
+    {
+      "exponent": 0.9974923557942321,
+      "exponent_ci95": [
+        0.9964754220885953,
+        0.998509289499869
+      ],
+      "log2_constant": 1.0502221564351508,
+      "n": 29,
+      "r2": 0.9999933343069236,
+      "range": "ell >= 2^10",
+      "series": "velu_marginal_per_extra_point"
+    },
+    {
+      "exponent": 0.85630901955653,
+      "exponent_ci95": [
+        0.8450118170730113,
+        0.8676062220400488
+      ],
+      "log2_constant": 4.222174054680526,
+      "n": 29,
+      "r2": 0.9988849910533094,
+      "range": "ell >= 2^10",
+      "series": "sqrtvelu_1pt (codomain + 1 image)"
+    },
+    {
+      "exponent": 0.8217167998835315,
+      "exponent_ci95": [
+        0.8052118666964704,
+        0.8382217330705927
+      ],
+      "log2_constant": 4.927755920369993,
+      "n": 17,
+      "r2": 0.9986696698982848,
+      "range": "ell >= 2^16",
+      "series": "sqrtvelu_1pt (codomain + 1 image)"
+    },
+    {
+      "exponent": 0.8558736835336864,
+      "exponent_ci95": [
+        0.8439165990577965,
+        0.8678307680095764
+      ],
+      "log2_constant": 2.9548501163709187,
+      "n": 29,
+      "r2": 0.9987498272097479,
+      "range": "ell >= 2^10",
+      "series": "sqrtvelu_marginal_per_extra_point"
+    },
+    {
+      "exponent": 2.604833557620299,
+      "exponent_ci95": [
+        2.578339724580387,
+        2.631327390660211
+      ],
+      "log2_constant": 8.376551643634997,
+      "n": 74,
+      "r2": 0.9981291787448855,
+      "range": "ell >= 30",
+      "series": "generic_ladder_per_attempt (F_p^k, k=(ell-1)/2)"
+    },
+    {
+      "exponent": 2.4554162114821727,
+      "exponent_ci95": [
+        2.428713568405525,
+        2.4821188545588204
+      ],
+      "log2_constant": 1.311489557334415,
+      "n": 74,
+      "r2": 0.9978618184439111,
+      "range": "ell >= 30",
+      "series": "generic_minpoly"
+    },
+    {
+      "exponent": 2.6045509684208117,
+      "exponent_ci95": [
+        2.5780645938774835,
+        2.63103734296414
+      ],
+      "log2_constant": 9.381163147435707,
+      "n": 74,
+      "r2": 0.9981298249712143,
+      "range": "ell >= 30",
+      "series": "generic_find_expected (2 x ladder/attempt + minpoly)"
+    },
+    {
+      "exponent": 2.5524433698204043,
+      "exponent_ci95": [
+        2.4768972547104644,
+        2.6279894849303442
+      ],
+      "log2_constant": 9.810721377945224,
+      "n": 49,
+      "r2": 0.9899290559838232,
+      "range": "ell >= 150",
+      "series": "generic_find_expected (2 x ladder/attempt + minpoly)"
+    },
+    {
+      "exponent": 2.66476617424634,
+      "exponent_ci95": [
+        2.4759836416191283,
+        2.853548706873552
+      ],
+      "log2_constant": 8.70318988205705,
+      "n": 74,
+      "r2": 0.916646613249686,
+      "range": "ell >= 30",
+      "series": "generic_find_measured (realised attempts)"
+    },
+    {
+      "exponent": 2.831035649669307,
+      "exponent_ci95": [
+        2.546752151778931,
+        3.1153191475596835
+      ],
+      "log2_constant": 4.940943385132513,
+      "n": 74,
+      "r2": 0.8455259673342521,
+      "range": "ell >= 30",
+      "series": "generic_ext_setup (irreducible search, Ben-Or)"
+    },
+    {
+      "exponent": 0.9595160008017718,
+      "exponent_ci95": [
+        0.9562028277397159,
+        0.9628291738638277
+      ],
+      "log2_constant": 0.35439014397010915,
+      "n": 74,
+      "r2": 0.9997840237963765,
+      "range": "ell >= 30",
+      "series": "generic_eval_per_point_from_kernel_poly (M; +1 I)"
+    },
+    {
+      "exponent": 4.687806779682058,
+      "exponent_ci95": [
+        4.632725166081263,
+        4.742888393282852
+      ],
+      "log2_constant": -23.251753720469406,
+      "n": 18,
+      "r2": 0.9995086875495259,
+      "range": "ell >= 11",
+      "series": "library_Phi_ell_mod_p_wall_seconds_contended"
+    }
+  ],
+  "generic_calibration": {
+    "Meq": 4424929176.333333,
+    "ell": 433.0
+  },
+  "intermediate_k_r128_g6": [
+    {
+      "ext_mult_cost_M": 1.0,
+      "k": 1,
+      "log2_ell_star": 99.5260465129039,
+      "log2_find_M_scaled": 11.768835115724382
+    },
+    {
+      "ext_mult_cost_M": 5.0,
+      "k": 2,
+      "log2_ell_star": 95.14214845270459,
+      "log2_find_M_scaled": 16.498005878015192
+    },
+    {
+      "ext_mult_cost_M": 19.0,
+      "k": 4,
+      "log2_ell_star": 91.51448742760108,
+      "log2_find_M_scaled": 18.70665704220074
+    },
+    {
+      "ext_mult_cost_M": 71.0,
+      "k": 8,
+      "log2_ell_star": 87.94072322941635,
+      "log2_find_M_scaled": 21.096431111435475
+    },
+    {
+      "ext_mult_cost_M": 271.0,
+      "k": 16,
+      "log2_ell_star": 84.31863867590408,
+      "log2_find_M_scaled": 23.58880739854413
+    },
+    {
+      "ext_mult_cost_M": 799.0,
+      "k": 32,
+      "log2_ell_star": 81.40198385248424,
+      "log2_find_M_scaled": 26.135989729482407
+    },
+    {
+      "ext_mult_cost_M": 2367.0,
+      "k": 64,
+      "log2_ell_star": 78.47939909608098,
+      "log2_find_M_scaled": 28.711524547803847
+    }
+  ],
+  "mode": "analyze",
+  "rational_find_max_Meq": 1663.0,
+  "rational_find_mean_Meq": 821.4761904761906,
+  "sqrtvelu_calibration": {
+    "Meq": 24454729.0,
+    "ell": 16777259.0
+  },
+  "text": "Fits: log2(cost) = log2_constant + exponent * log2(ell), OLS, 95% t-interval\n  rational_find (cofactor ladder)                                all ell     exponent -0.025 [-0.036, -0.015]  log2 c 10.01  n=42 r2=0.3648\n  velu_1pt (codomain + 1 image)                                  ell >= 2^10 exponent 0.998 [0.997, 0.999]  log2 c 2.62  n=29 r2=1.0000\n  velu_marginal_per_extra_point                                  ell >= 2^10 exponent 0.997 [0.996, 0.999]  log2 c 1.05  n=29 r2=1.0000\n  sqrtvelu_1pt (codomain + 1 image)                              ell >= 2^10 exponent 0.856 [0.845, 0.868]  log2 c 4.22  n=29 r2=0.9989\n  sqrtvelu_1pt (codomain + 1 image)                              ell >= 2^16 exponent 0.822 [0.805, 0.838]  log2 c 4.93  n=17 r2=0.9987\n  sqrtvelu_marginal_per_extra_point                              ell >= 2^10 exponent 0.856 [0.844, 0.868]  log2 c 2.95  n=29 r2=0.9987\n  generic_ladder_per_attempt (F_p^k, k=(ell-1)/2)                ell >= 30   exponent 2.605 [2.578, 2.631]  log2 c 8.38  n=74 r2=0.9981\n  generic_minpoly                                                ell >= 30   exponent 2.455 [2.429, 2.482]  log2 c 1.31  n=74 r2=0.9979\n  generic_find_expected (2 x ladder/attempt + minpoly)           ell >= 30   exponent 2.605 [2.578, 2.631]  log2 c 9.38  n=74 r2=0.9981\n  generic_find_expected (2 x ladder/attempt + minpoly)           ell >= 150  exponent 2.552 [2.477, 2.628]  log2 c 9.81  n=49 r2=0.9899\n  generic_find_measured (realised attempts)                      ell >= 30   exponent 2.665 [2.476, 2.854]  log2 c 8.70  n=74 r2=0.9166\n  generic_ext_setup (irreducible search, Ben-Or)                 ell >= 30   exponent 2.831 [2.547, 3.115]  log2 c 4.94  n=74 r2=0.8455\n  generic_eval_per_point_from_kernel_poly (M; +1 I)              ell >= 30   exponent 0.960 [0.956, 0.963]  log2 c 0.35  n=74 r2=0.9998\n  library_Phi_ell_mod_p_wall_seconds_contended                   ell >= 11   exponent 4.688 [4.633, 4.743]  log2 c -23.25  n=18 r2=0.9995\n\nDerived (extrapolated) crossover: smallest ell with find+evaluate >= g * sqrt(pi r / 4) F_p mults\n  g=6 M/op, r=2^64: rho = 2^34.41 M, ell_max = 2^33\n    rational kernel, Velu (fit ell>=2^10)                              log2 ell* =    31.85  (crossover inside the possible range)\n    rational kernel, sqrt-elu (power-law fit ell>=2^16)                log2 ell* =    35.88  (beyond ell_max = 2 sqrt(p): no vertical gap that large exists)\n    rational kernel, sqrt-elu (model sqrt(l) log^2 l, calibrated)      log2 ell* =    40.69  (beyond ell_max = 2 sqrt(p): no vertical gap that large exists)\n    generic kernel k=(l-1)/2 (fit ell>=30, central)                    log2 ell* =     9.58  (crossover inside the possible range)\n    generic kernel k=(l-1)/2 (fit, exponent at CI low end)             log2 ell* =     9.59  (crossover inside the possible range)\n    generic kernel k=(l-1)/2 (model l^2 log l, calibrated)             log2 ell* =     9.82  (crossover inside the possible range)\n  g=6 M/op, r=2^128: rho = 2^66.41 M, ell_max = 2^65\n    rational kernel, Velu (fit ell>=2^10)                              log2 ell* =    63.91  (crossover inside the possible range)\n    rational kernel, sqrt-elu (power-law fit ell>=2^16)                log2 ell* =    74.82  (beyond ell_max = 2 sqrt(p): no vertical gap that large exists)\n    rational kernel, sqrt-elu (model sqrt(l) log^2 l, calibrated)      log2 ell* =    99.53  (beyond ell_max = 2 sqrt(p): no vertical gap that large exists)\n    generic kernel k=(l-1)/2 (fit ell>=30, central)                    log2 ell* =    21.49  (crossover inside the possible range)\n    generic kernel k=(l-1)/2 (fit, exponent at CI low end)             log2 ell* =    21.62  (crossover inside the possible range)\n    generic kernel k=(l-1)/2 (model l^2 log l, calibrated)             log2 ell* =    24.66  (crossover inside the possible range)\n  g=6 M/op, r=2^256: rho = 2^130.41 M, ell_max = 2^129\n    rational kernel, Velu (fit ell>=2^10)                              log2 ell* =   128.04  (crossover inside the possible range)\n    rational kernel, sqrt-elu (power-law fit ell>=2^16)                log2 ell* =   152.71  (beyond ell_max = 2 sqrt(p): no vertical gap that large exists)\n    rational kernel, sqrt-elu (model sqrt(l) log^2 l, calibrated)      log2 ell* =   222.87  (beyond ell_max = 2 sqrt(p): no vertical gap that large exists)\n    generic kernel k=(l-1)/2 (fit ell>=30, central)                    log2 ell* =    45.67  (crossover inside the possible range)\n    generic kernel k=(l-1)/2 (fit, exponent at CI low end)             log2 ell* =    46.05  (crossover inside the possible range)\n    generic kernel k=(l-1)/2 (model l^2 log l, calibrated)             log2 ell* =    55.57  (crossover inside the possible range)\n  g=12 M/op, r=2^64: rho = 2^35.41 M, ell_max = 2^33\n    rational kernel, Velu (fit ell>=2^10)                              log2 ell* =    32.85  (crossover inside the possible range)\n    rational kernel, sqrt-elu (power-law fit ell>=2^16)                log2 ell* =    37.10  (beyond ell_max = 2 sqrt(p): no vertical gap that large exists)\n    rational kernel, sqrt-elu (model sqrt(l) log^2 l, calibrated)      log2 ell* =    42.44  (beyond ell_max = 2 sqrt(p): no vertical gap that large exists)\n    generic kernel k=(l-1)/2 (fit ell>=30, central)                    log2 ell* =     9.97  (crossover inside the possible range)\n    generic kernel k=(l-1)/2 (fit, exponent at CI low end)             log2 ell* =     9.98  (crossover inside the possible range)\n    generic kernel k=(l-1)/2 (model l^2 log l, calibrated)             log2 ell* =    10.29  (crossover inside the possible range)\n  g=12 M/op, r=2^128: rho = 2^67.41 M, ell_max = 2^65\n    rational kernel, Velu (fit ell>=2^10)                              log2 ell* =    64.91  (crossover inside the possible range)\n    rational kernel, sqrt-elu (power-law fit ell>=2^16)                log2 ell* =    76.04  (beyond ell_max = 2 sqrt(p): no vertical gap that large exists)\n    rational kernel, sqrt-elu (model sqrt(l) log^2 l, calibrated)      log2 ell* =   101.42  (beyond ell_max = 2 sqrt(p): no vertical gap that large exists)\n    generic kernel k=(l-1)/2 (fit ell>=30, central)                    log2 ell* =    21.87  (crossover inside the possible range)\n    generic kernel k=(l-1)/2 (fit, exponent at CI low end)             log2 ell* =    22.00  (crossover inside the possible range)\n    generic kernel k=(l-1)/2 (model l^2 log l, calibrated)             log2 ell* =    25.15  (crossover inside the possible range)\n  g=12 M/op, r=2^256: rho = 2^131.41 M, ell_max = 2^129\n    rational kernel, Velu (fit ell>=2^10)                              log2 ell* =   129.04  (beyond ell_max = 2 sqrt(p): no vertical gap that large exists)\n    rational kernel, sqrt-elu (power-law fit ell>=2^16)                log2 ell* =   153.93  (beyond ell_max = 2 sqrt(p): no vertical gap that large exists)\n    rational kernel, sqrt-elu (model sqrt(l) log^2 l, calibrated)      log2 ell* =   224.82  (beyond ell_max = 2 sqrt(p): no vertical gap that large exists)\n    generic kernel k=(l-1)/2 (fit ell>=30, central)                    log2 ell* =    46.06  (crossover inside the possible range)\n    generic kernel k=(l-1)/2 (fit, exponent at CI low end)             log2 ell* =    46.44  (crossover inside the possible range)\n    generic kernel k=(l-1)/2 (model l^2 log l, calibrated)             log2 ell* =    56.07  (crossover inside the possible range)\n\nDerived: kernel over F_(p^k), r = 2^128, g = 6 (find(k) + sqrt-elu(ell) x m(k))\n  k=1   m(k)=1      find(k)=2^11.8 M  log2 ell* = 99.5\n  k=2   m(k)=5      find(k)=2^16.5 M  log2 ell* = 95.1\n  k=4   m(k)=19     find(k)=2^18.7 M  log2 ell* = 91.5\n  k=8   m(k)=71     find(k)=2^21.1 M  log2 ell* = 87.9\n  k=16  m(k)=271    find(k)=2^23.6 M  log2 ell* = 84.3\n  k=32  m(k)=799    find(k)=2^26.1 M  log2 ell* = 81.4\n  k=64  m(k)=2367   find(k)=2^28.7 M  log2 ell* = 78.5\n\nrational find: mean 821 Meq, max 1663 Meq per kernel point (61-bit p)\n",
+  "total_wall_s_contended": 0.007562906,
+  "unit": "M = F_p multiplications+squarings (incl. inside polynomial/extension arithmetic); I = F_p inversions; Meq = M + 91 I"
+}

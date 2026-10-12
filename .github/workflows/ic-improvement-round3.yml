@@ -21,12 +21,11 @@ concurrency:
   # Correctness controls are independent per PR. The push-triggered measured
   # round retains its original serialized group and its one-shot guard.
   group: ${{ github.event_name == 'pull_request' && format('ic-bounded-improvement-round3-pr-{0}', github.event.pull_request.number) || 'ic-bounded-improvement-round3' }}
-  cancel-in-progress: false
-
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   candidate-controls:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 35 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

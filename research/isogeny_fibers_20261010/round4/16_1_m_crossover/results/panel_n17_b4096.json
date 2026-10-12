@@ -1,0 +1,2108 @@
+{
+  "curves": [
+    {
+      "a": 1,
+      "cells": [
+        {
+          "S_relation_phase": 1373.0119933786546,
+          "arm": "x-direct",
+          "attempts": 24,
+          "base_points": 483,
+          "boolean_degree": 2,
+          "budget_exhausted": 0,
+          "built_degree": 3,
+          "columns": 241,
+          "completeness": 1.0,
+          "ell": 9,
+          "enumeration_reference": {
+            "gae_per_relation": 362.8235294117647,
+            "hits": 17,
+            "steps": 6168
+          },
+          "exact_hit_rate": 0.7083333333333334,
+          "feasible": true,
+          "found": 17,
+          "found_on_truth": 17,
+          "frame": "x (plain)",
+          "gae_per_relation": 1453.0074734473835,
+          "gate_failures": 0,
+          "hit_rate": 0.7083333333333334,
+          "m": 2,
+          "n_equations": 17,
+          "n_vars": 18,
+          "oversize_targets": 0,
+          "per_attempt": [
+            {
+              "target": 0,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 4.272952,
+              "word_xors": 348981
+            },
+            {
+              "target": 1,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 4.109379,
+              "word_xors": 397851
+            },
+            {
+              "target": 2,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 2.366316,
+              "word_xors": 231077
+            },
+            {
+              "target": 3,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1.62248,
+              "word_xors": 170249
+            },
+            {
+              "target": 4,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 4.365531,
+              "word_xors": 426923
+            },
+            {
+              "target": 5,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1.205416,
+              "word_xors": 132371
+            },
+            {
+              "target": 6,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 4.908216,
+              "word_xors": 350920
+            },
+            {
+              "target": 7,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 4.245306,
+              "word_xors": 427065
+            },
+            {
+              "target": 8,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 4.221901,
+              "word_xors": 415498
+            },
+            {
+              "target": 9,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 4.422039,
+              "word_xors": 439255
+            },
+            {
+              "target": 10,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1.047211,
+              "word_xors": 123339
+            },
+            {
+              "target": 11,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1.614915,
+              "word_xors": 151303
+            },
+            {
+              "target": 12,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1.836494,
+              "word_xors": 143323
+            },
+            {
+              "target": 13,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1.764018,
+              "word_xors": 178772
+            },
+            {
+              "target": 14,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 4.357495,
+              "word_xors": 422141
+            },
+            {
+              "target": 15,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 3.382182,
+              "word_xors": 329010
+            },
+            {
+              "target": 16,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1.366054,
+              "word_xors": 144712
+            },
+            {
+              "target": 17,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 4.524641,
+              "word_xors": 428172
+            },
+            {
+              "target": 18,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 4.222283,
+              "word_xors": 427112
+            },
+            {
+              "target": 19,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1.719243,
+              "word_xors": 175053
+            },
+            {
+              "target": 20,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1.63097,
+              "word_xors": 173398
+            },
+            {
+              "target": 21,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 4.48646,
+              "word_xors": 359484
+            },
+            {
+              "target": 22,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1.269187,
+              "word_xors": 134385
+            },
+            {
+              "target": 23,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 4.529855,
+              "word_xors": 431707
+            }
+          ],
+          "refuted": 7,
+          "relation_phase_gae": 351627.8085742668,
+          "solved_fraction": 1.0,
+          "splits": 868,
+          "truth_decomposable": 17,
+          "unbuildable": 0,
+          "v_invariant": false,
+          "via_t": 0,
+          "wall_s_contended": 0.073490544,
+          "wall_truncated": false,
+          "word_xors": 6962101,
+          "word_xors_on_found": 3959726,
+          "xor_per_attempt": 290087.5416666667,
+          "xor_per_relation": 409535.35294117645
+        },
+        {
+          "S_relation_phase": 1135.2507384590622,
+          "arm": "sym",
+          "attempts": 24,
+          "base_points": 497,
+          "boolean_degree": 2,
+          "budget_exhausted": 0,
+          "built_degree": 3,
+          "columns": 124,
+          "completeness": 1.0,
+          "ell": 9,
+          "enumeration_reference": {
+            "gae_per_relation": 943.7777777777778,
+            "hits": 9,
+            "steps": 8494
+          },
+          "exact_hit_rate": 0.375,
+          "feasible": true,
+          "found": 9,
+          "found_on_truth": 9,
+          "frame": "u (kernel-saturated, +T-closed)",
+          "gae_per_relation": 2325.8979893649866,
+          "gate_failures": 0,
+          "hit_rate": 0.375,
+          "m": 2,
+          "n_equations": 17,
+          "n_vars": 17,
+          "oversize_targets": 0,
+          "per_attempt": [
+            {
+              "target": 0,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1.896035,
+              "word_xors": 139200
+            },
+            {
+              "target": 1,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 2.784138,
+              "word_xors": 197828
+            },
+            {
+              "target": 2,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 2.501239,
+              "word_xors": 177894
+            },
+            {
+              "target": 3,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 3.747045,
+              "word_xors": 281305
+            },
+            {
+              "target": 4,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 2.809211,
+              "word_xors": 209924
+            },
+            {
+              "target": 5,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 5.669605,
+              "word_xors": 198376
+            },
+            {
+              "target": 6,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 3.52378,
+              "word_xors": 256969
+            },
+            {
+              "target": 7,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 7.43315,
+              "word_xors": 283165
+            },
+            {
+              "target": 8,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 8.703048,
+              "word_xors": 278006
+            },
+            {
+              "target": 9,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 7.879265,
+              "word_xors": 283050
+            },
+            {
+              "target": 10,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 3.525633,
+              "word_xors": 278402
+            },
+            {
+              "target": 11,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 3.655327,
+              "word_xors": 281407
+            },
+            {
+              "target": 12,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 2.712704,
+              "word_xors": 201553
+            },
+            {
+              "target": 13,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 3.556752,
+              "word_xors": 275911
+            },
+            {
+              "target": 14,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 3.585094,
+              "word_xors": 277326
+            },
+            {
+              "target": 15,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 4.208114,
+              "word_xors": 280320
+            },
+            {
+              "target": 16,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 3.737681,
+              "word_xors": 291279
+            },
+            {
+              "target": 17,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 8.005364,
+              "word_xors": 280261
+            },
+            {
+              "target": 18,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 5.325668,
+              "word_xors": 289363
+            },
+            {
+              "target": 19,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1.554192,
+              "word_xors": 102018
+            },
+            {
+              "target": 20,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 4.625167,
+              "word_xors": 278611
+            },
+            {
+              "target": 21,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 5.096346,
+              "word_xors": 280201
+            },
+            {
+              "target": 22,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 2.826852,
+              "word_xors": 197285
+            },
+            {
+              "target": 23,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 6.19321,
+              "word_xors": 280410
+            }
+          ],
+          "refuted": 15,
+          "relation_phase_gae": 290737.24867062335,
+          "solved_fraction": 1.0,
+          "splits": 1234,
+          "truth_decomposable": 9,
+          "unbuildable": 0,
+          "v_invariant": false,
+          "via_t": 0,
+          "wall_s_contended": 0.10555462,
+          "wall_truncated": false,
+          "word_xors": 5900064,
+          "word_xors_on_found": 1681047,
+          "xor_per_attempt": 245836.0,
+          "xor_per_relation": 655562.6666666666
+        },
+        {
+          "arm": "_base",
+          "cols_u": 124,
+          "cols_x": 241,
+          "ell": 9,
+          "enumeration_u": {
+            "gae_per_relation": 943.7777777777778,
+            "hits": 9,
+            "steps": 8494
+          },
+          "enumeration_x": {
+            "gae_per_relation": 362.8235294117647,
+            "hits": 17,
+            "steps": 6168
+          },
+          "exact_hits_u": 9,
+          "exact_hits_x": 17,
+          "fu_points": 497,
+          "fx_points": 483,
+          "m": 2,
+          "v_basis": [
+            1,
+            101662,
+            4770,
+            83522,
+            43590,
+            115091,
+            12094,
+            60565,
+            84765
+          ],
+          "v_invariant": false
+        },
+        {
+          "S_relation_phase": 486746.486764295,
+          "arm": "x-direct",
+          "attempts": 24,
+          "base_points": 129,
+          "boolean_degree": 6,
+          "budget_exhausted": 12,
+          "built_degree": 6,
+          "columns": 63,
+          "completeness": 0.5217391304347826,
+          "ell": 7,
+          "enumeration_reference": {
+            "gae_per_relation": 2258.782608695652,
+            "hits": 23,
+            "steps": 51952
+          },
+          "exact_hit_rate": 0.9583333333333334,
+          "feasible": true,
+          "found": 12,
+          "found_on_truth": 12,
+          "frame": "x (plain)",
+          "gae_per_relation": 1947743.3702502698,
+          "gate_failures": 0,
+          "hit_rate": 0.5,
+          "m": 3,
+          "n_equations": 17,
+          "n_vars": 21,
+          "oversize_targets": 0,
+          "per_attempt": [
+            {
+              "target": 0,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 1314.638001,
+              "word_xors": 379586001
+            },
+            {
+              "target": 1,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 56.295467,
+              "word_xors": 350941
+            },
+            {
+              "target": 2,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1291.533711,
+              "word_xors": 304383304
+            },
+            {
+              "target": 3,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1320.792828,
+              "word_xors": 306463735
+            },
+            {
+              "target": 4,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 729.416339,
+              "word_xors": 185491151
+            },
+            {
+              "target": 5,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 326.382868,
+              "word_xors": 67948723
+            },
+            {
+              "target": 6,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 1635.13385,
+              "word_xors": 380212536
+            },
+            {
+              "target": 7,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 1616.238021,
+              "word_xors": 380207223
+            },
+            {
+              "target": 8,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 864.02556,
+              "word_xors": 237370460
+            },
+            {
+              "target": 9,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 1493.167731,
+              "word_xors": 396660112
+            },
+            {
+              "target": 10,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 879.359169,
+              "word_xors": 232634377
+            },
+            {
+              "target": 11,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 677.256392,
+              "word_xors": 190812977
+            },
+            {
+              "target": 12,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 1012.409916,
+              "word_xors": 209815889
+            },
+            {
+              "target": 13,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 1438.965557,
+              "word_xors": 379706529
+            },
+            {
+              "target": 14,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 1374.016863,
+              "word_xors": 378481491
+            },
+            {
+              "target": 15,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 305.52434,
+              "word_xors": 70846099
+            },
+            {
+              "target": 16,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 795.437653,
+              "word_xors": 190256875
+            },
+            {
+              "target": 17,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 1566.624125,
+              "word_xors": 379975508
+            },
+            {
+              "target": 18,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 111.187312,
+              "word_xors": 339553
+            },
+            {
+              "target": 19,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 1474.527844,
+              "word_xors": 396410810
+            },
+            {
+              "target": 20,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 1337.862773,
+              "word_xors": 379650894
+            },
+            {
+              "target": 21,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 1612.702351,
+              "word_xors": 380601113
+            },
+            {
+              "target": 22,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 1669.23831,
+              "word_xors": 379635101
+            },
+            {
+              "target": 23,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 1551.929629,
+              "word_xors": 379899816
+            }
+          ],
+          "refuted": 0,
+          "relation_phase_gae": 124655575.69601727,
+          "solved_fraction": 0.5,
+          "splits": 35070,
+          "truth_decomposable": 23,
+          "unbuildable": 0,
+          "v_invariant": false,
+          "via_t": 0,
+          "wall_s_contended": 26.45466661,
+          "wall_truncated": false,
+          "word_xors": 6587741218,
+          "word_xors_on_found": 1996714084,
+          "xor_per_attempt": 274489217.4166667,
+          "xor_per_relation": 548978434.8333334
+        },
+        {
+          "S_relation_phase": 2148.9894334580076,
+          "arm": "x-chained",
+          "attempts": 24,
+          "base_points": 129,
+          "boolean_degree": 0,
+          "budget_exhausted": 0,
+          "built_degree": 3,
+          "columns": 63,
+          "completeness": 1.0,
+          "ell": 7,
+          "enumeration_reference": {
+            "gae_per_relation": 2258.782608695652,
+            "hits": 23,
+            "steps": 51952
+          },
+          "exact_hit_rate": 0.9583333333333334,
+          "feasible": true,
+          "found": 23,
+          "found_on_truth": 23,
+          "frame": "x (plain)",
+          "gae_per_relation": 8599.301762978344,
+          "gate_failures": 0,
+          "hit_rate": 0.9583333333333334,
+          "m": 3,
+          "n_equations": 34,
+          "n_vars": 38,
+          "oversize_targets": 0,
+          "per_attempt": [
+            {
+              "target": 0,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 34.136352,
+              "word_xors": 1798625
+            },
+            {
+              "target": 1,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 8.68958,
+              "word_xors": 577366
+            },
+            {
+              "target": 2,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 15.850006,
+              "word_xors": 1500154
+            },
+            {
+              "target": 3,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 15.970357,
+              "word_xors": 1511309
+            },
+            {
+              "target": 4,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 8.4114,
+              "word_xors": 932780
+            },
+            {
+              "target": 5,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 5.845486,
+              "word_xors": 703604
+            },
+            {
+              "target": 6,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 27.102372,
+              "word_xors": 2447207
+            },
+            {
+              "target": 7,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 30.316316,
+              "word_xors": 2616663
+            },
+            {
+              "target": 8,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 12.198273,
+              "word_xors": 1188415
+            },
+            {
+              "target": 9,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 26.674547,
+              "word_xors": 2359558
+            },
+            {
+              "target": 10,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 12.78253,
+              "word_xors": 1209893
+            },
+            {
+              "target": 11,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 9.098362,
+              "word_xors": 928860
+            },
+            {
+              "target": 12,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 9.482271,
+              "word_xors": 971756
+            },
+            {
+              "target": 13,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 71.675573,
+              "word_xors": 6087120
+            },
+            {
+              "target": 14,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 17.337809,
+              "word_xors": 1635399
+            },
+            {
+              "target": 15,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 6.827136,
+              "word_xors": 764969
+            },
+            {
+              "target": 16,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 8.336232,
+              "word_xors": 923057
+            },
+            {
+              "target": 17,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 39.397925,
+              "word_xors": 2802155
+            },
+            {
+              "target": 18,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 4.003601,
+              "word_xors": 555489
+            },
+            {
+              "target": 19,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 18.703929,
+              "word_xors": 1726491
+            },
+            {
+              "target": 20,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 26.667761,
+              "word_xors": 2353406
+            },
+            {
+              "target": 21,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 67.964352,
+              "word_xors": 5757151
+            },
+            {
+              "target": 22,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 42.708519,
+              "word_xors": 3483393
+            },
+            {
+              "target": 23,
+              "truth": false,
+              "verdict": "refuted",
+              "wall_ms_contended": 134.515237,
+              "word_xors": 10911291
+            }
+          ],
+          "refuted": 1,
+          "relation_phase_gae": 550355.312830614,
+          "solved_fraction": 1.0,
+          "splits": 4432,
+          "truth_decomposable": 23,
+          "unbuildable": 0,
+          "v_invariant": false,
+          "via_t": 0,
+          "wall_s_contended": 0.654695926,
+          "wall_truncated": false,
+          "word_xors": 55746111,
+          "word_xors_on_found": 44834820,
+          "xor_per_attempt": 2322754.625,
+          "xor_per_relation": 2423743.9565217393
+        },
+        {
+          "S_relation_phase": 3039.828162711405,
+          "arm": "sym",
+          "attempts": 24,
+          "base_points": 149,
+          "boolean_degree": 4,
+          "budget_exhausted": 12,
+          "built_degree": 4,
+          "columns": 37,
+          "completeness": 0.6666666666666666,
+          "ell": 7,
+          "enumeration_reference": {
+            "gae_per_relation": 5970.277777777777,
+            "hits": 18,
+            "steps": 107465
+          },
+          "exact_hit_rate": 0.75,
+          "feasible": true,
+          "found": 12,
+          "found_on_truth": 12,
+          "frame": "u (kernel-saturated, +T-closed)",
+          "gae_per_relation": 20486.809109255693,
+          "gate_failures": 0,
+          "hit_rate": 0.5,
+          "m": 3,
+          "n_equations": 17,
+          "n_vars": 19,
+          "oversize_targets": 0,
+          "per_attempt": [
+            {
+              "target": 0,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 266.519887,
+              "word_xors": 4254225
+            },
+            {
+              "target": 1,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 375.331722,
+              "word_xors": 4286787
+            },
+            {
+              "target": 2,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 216.113718,
+              "word_xors": 2639336
+            },
+            {
+              "target": 3,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 65.412744,
+              "word_xors": 1429099
+            },
+            {
+              "target": 4,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 210.71531,
+              "word_xors": 4266914
+            },
+            {
+              "target": 5,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 331.903832,
+              "word_xors": 4271583
+            },
+            {
+              "target": 6,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 15.708197,
+              "word_xors": 510970
+            },
+            {
+              "target": 7,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 17.164064,
+              "word_xors": 527522
+            },
+            {
+              "target": 8,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 109.896632,
+              "word_xors": 2338881
+            },
+            {
+              "target": 9,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 235.906359,
+              "word_xors": 4277827
+            },
+            {
+              "target": 10,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 107.434894,
+              "word_xors": 2359930
+            },
+            {
+              "target": 11,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 129.239833,
+              "word_xors": 2223850
+            },
+            {
+              "target": 12,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 203.037173,
+              "word_xors": 4290253
+            },
+            {
+              "target": 13,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 325.680259,
+              "word_xors": 4278915
+            },
+            {
+              "target": 14,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 99.852197,
+              "word_xors": 1419767
+            },
+            {
+              "target": 15,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 7.053349,
+              "word_xors": 668205
+            },
+            {
+              "target": 16,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 23.747,
+              "word_xors": 655710
+            },
+            {
+              "target": 17,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 209.824288,
+              "word_xors": 4261808
+            },
+            {
+              "target": 18,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 96.286445,
+              "word_xors": 1162071
+            },
+            {
+              "target": 19,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 356.893888,
+              "word_xors": 4300541
+            },
+            {
+              "target": 20,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 197.871012,
+              "word_xors": 4299023
+            },
+            {
+              "target": 21,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 292.518255,
+              "word_xors": 4251227
+            },
+            {
+              "target": 22,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 245.724752,
+              "word_xors": 4294585
+            },
+            {
+              "target": 23,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 147.058217,
+              "word_xors": 2022336
+            }
+          ],
+          "refuted": 0,
+          "relation_phase_gae": 778498.7461517163,
+          "solved_fraction": 0.5,
+          "splits": 26263,
+          "truth_decomposable": 18,
+          "unbuildable": 0,
+          "v_invariant": false,
+          "via_t": 0,
+          "wall_s_contended": 4.286894027,
+          "wall_truncated": false,
+          "word_xors": 69291365,
+          "word_xors_on_found": 17957677,
+          "xor_per_attempt": 2887140.2083333335,
+          "xor_per_relation": 5774280.416666667
+        },
+        {
+          "arm": "_base",
+          "cols_u": 37,
+          "cols_x": 63,
+          "ell": 7,
+          "enumeration_u": {
+            "gae_per_relation": 5970.277777777777,
+            "hits": 18,
+            "steps": 107465
+          },
+          "enumeration_x": {
+            "gae_per_relation": 2258.782608695652,
+            "hits": 23,
+            "steps": 51952
+          },
+          "exact_hits_u": 18,
+          "exact_hits_x": 23,
+          "fu_points": 149,
+          "fx_points": 129,
+          "m": 3,
+          "v_basis": [
+            1,
+            127402,
+            92945,
+            10428,
+            14168,
+            53546,
+            45398
+          ],
+          "v_invariant": false
+        },
+        {
+          "S_relation_phase": 8818.254639979563,
+          "arm": "x-chained",
+          "attempts": 24,
+          "base_points": 53,
+          "boolean_degree": 0,
+          "budget_exhausted": 2,
+          "built_degree": 3,
+          "columns": 26,
+          "completeness": 1.0,
+          "ell": 6,
+          "enumeration_reference": null,
+          "exact_hit_rate": 0.9166666666666666,
+          "feasible": true,
+          "found": 22,
+          "found_on_truth": 22,
+          "frame": "x (plain)",
+          "gae_per_relation": 83642.64436466307,
+          "gate_failures": 0,
+          "hit_rate": 0.9166666666666666,
+          "m": 4,
+          "n_equations": 51,
+          "n_vars": 58,
+          "oversize_targets": 0,
+          "per_attempt": [
+            {
+              "target": 0,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 631.166777,
+              "word_xors": 45251523
+            },
+            {
+              "target": 1,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 181.689795,
+              "word_xors": 14657389
+            },
+            {
+              "target": 2,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 632.30096,
+              "word_xors": 38335840
+            },
+            {
+              "target": 3,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 1125.293178,
+              "word_xors": 84449772
+            },
+            {
+              "target": 4,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 485.668819,
+              "word_xors": 23292861
+            },
+            {
+              "target": 5,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 31.415056,
+              "word_xors": 1288316
+            },
+            {
+              "target": 6,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 40.79487,
+              "word_xors": 1998763
+            },
+            {
+              "target": 7,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 524.024184,
+              "word_xors": 38525412
+            },
+            {
+              "target": 8,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 89.71103,
+              "word_xors": 8026976
+            },
+            {
+              "target": 9,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 1209.065776,
+              "word_xors": 84446648
+            },
+            {
+              "target": 10,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 236.052491,
+              "word_xors": 14592656
+            },
+            {
+              "target": 11,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 429.320013,
+              "word_xors": 26401023
+            },
+            {
+              "target": 12,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 149.378728,
+              "word_xors": 10741961
+            },
+            {
+              "target": 13,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 120.826594,
+              "word_xors": 8999269
+            },
+            {
+              "target": 14,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 21.625376,
+              "word_xors": 2180306
+            },
+            {
+              "target": 15,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 236.139833,
+              "word_xors": 14383340
+            },
+            {
+              "target": 16,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 31.366399,
+              "word_xors": 1465743
+            },
+            {
+              "target": 17,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 41.997361,
+              "word_xors": 1992150
+            },
+            {
+              "target": 18,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 605.906363,
+              "word_xors": 35589050
+            },
+            {
+              "target": 19,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 544.664189,
+              "word_xors": 35862557
+            },
+            {
+              "target": 20,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 114.001886,
+              "word_xors": 5084536
+            },
+            {
+              "target": 21,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 18.588866,
+              "word_xors": 1200968
+            },
+            {
+              "target": 22,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 283.780893,
+              "word_xors": 17930975
+            },
+            {
+              "target": 23,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 19.398201,
+              "word_xors": 1951492
+            }
+          ],
+          "refuted": 0,
+          "relation_phase_gae": 2258351.397845903,
+          "solved_fraction": 0.9166666666666666,
+          "splits": 10483,
+          "truth_decomposable": 22,
+          "unbuildable": 0,
+          "v_invariant": false,
+          "via_t": 0,
+          "wall_s_contended": 7.804177638,
+          "wall_truncated": false,
+          "word_xors": 518649526,
+          "word_xors_on_found": 349753106,
+          "xor_per_attempt": 21610396.916666668,
+          "xor_per_relation": 23574978.454545453
+        },
+        {
+          "S_relation_phase": 53342.89916078269,
+          "arm": "sym-chained",
+          "attempts": 24,
+          "base_points": 53,
+          "boolean_degree": 3,
+          "budget_exhausted": 23,
+          "built_degree": 3,
+          "columns": 13,
+          "completeness": 0.2,
+          "ell": 6,
+          "enumeration_reference": null,
+          "exact_hit_rate": 0.20833333333333334,
+          "feasible": false,
+          "found": 1,
+          "found_on_truth": 1,
+          "frame": "u (kernel-saturated, +T-closed)",
+          "gae_per_relation": 975792.4717627554,
+          "gate_failures": 0,
+          "hit_rate": 0.041666666666666664,
+          "m": 4,
+          "n_equations": 51,
+          "n_vars": 55,
+          "oversize_targets": 0,
+          "per_attempt": [
+            {
+              "target": 0,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 179.694354,
+              "word_xors": 11849397
+            },
+            {
+              "target": 1,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 155.934974,
+              "word_xors": 11547842
+            },
+            {
+              "target": 2,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 149.179661,
+              "word_xors": 11788536
+            },
+            {
+              "target": 3,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 252.110439,
+              "word_xors": 12117892
+            },
+            {
+              "target": 4,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 155.608253,
+              "word_xors": 11880045
+            },
+            {
+              "target": 5,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 235.23113,
+              "word_xors": 11831024
+            },
+            {
+              "target": 6,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 151.736598,
+              "word_xors": 11869894
+            },
+            {
+              "target": 7,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 146.803831,
+              "word_xors": 11563631
+            },
+            {
+              "target": 8,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 175.622085,
+              "word_xors": 11547695
+            },
+            {
+              "target": 9,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 150.952701,
+              "word_xors": 11986543
+            },
+            {
+              "target": 10,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 236.546904,
+              "word_xors": 12001678
+            },
+            {
+              "target": 11,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 322.917761,
+              "word_xors": 11703331
+            },
+            {
+              "target": 12,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 198.923228,
+              "word_xors": 12577995
+            },
+            {
+              "target": 13,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 145.634225,
+              "word_xors": 11763877
+            },
+            {
+              "target": 14,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 271.959008,
+              "word_xors": 11953729
+            },
+            {
+              "target": 15,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 265.517289,
+              "word_xors": 11842890
+            },
+            {
+              "target": 16,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 151.181855,
+              "word_xors": 11760502
+            },
+            {
+              "target": 17,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 150.547204,
+              "word_xors": 11878403
+            },
+            {
+              "target": 18,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 217.806962,
+              "word_xors": 11790712
+            },
+            {
+              "target": 19,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 276.421113,
+              "word_xors": 11688231
+            },
+            {
+              "target": 20,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 167.805678,
+              "word_xors": 11778513
+            },
+            {
+              "target": 21,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 161.833657,
+              "word_xors": 11905821
+            },
+            {
+              "target": 22,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 33.258431,
+              "word_xors": 2604782
+            },
+            {
+              "target": 23,
+              "truth": false,
+              "verdict": "budget",
+              "wall_ms_contended": 211.802588,
+              "word_xors": 11797635
+            }
+          ],
+          "refuted": 0,
+          "relation_phase_gae": 13661094.604678575,
+          "solved_fraction": 0.041666666666666664,
+          "splits": 47265,
+          "truth_decomposable": 5,
+          "unbuildable": 0,
+          "v_invariant": false,
+          "via_t": 0,
+          "wall_s_contended": 4.565029929,
+          "wall_truncated": false,
+          "word_xors": 275030598,
+          "word_xors_on_found": 2604782,
+          "xor_per_attempt": 11459608.25,
+          "xor_per_relation": 275030598.0
+        },
+        {
+          "arm": "_base",
+          "cols_u": 13,
+          "cols_x": 26,
+          "ell": 6,
+          "enumeration_u": null,
+          "enumeration_x": null,
+          "exact_hits_u": 5,
+          "exact_hits_x": 22,
+          "fu_points": 53,
+          "fx_points": 53,
+          "m": 4,
+          "v_basis": [
+            1,
+            60818,
+            62641,
+            71034,
+            118210,
+            71216
+          ],
+          "v_invariant": false
+        },
+        {
+          "S_relation_phase": null,
+          "arm": "x-direct",
+          "attempts": 1,
+          "base_points": 443,
+          "boolean_degree": 6,
+          "budget_exhausted": 1,
+          "built_degree": 6,
+          "columns": 221,
+          "completeness": 0.0,
+          "ell": 9,
+          "enumeration_reference": {
+            "gae_per_relation": 488.5833333333333,
+            "hits": 24,
+            "steps": 11726
+          },
+          "exact_hit_rate": 1.0,
+          "feasible": false,
+          "found": 0,
+          "found_on_truth": 0,
+          "frame": "x (plain)",
+          "gae_per_relation": null,
+          "gate_failures": 0,
+          "hit_rate": 0.0,
+          "m": 3,
+          "n_equations": 17,
+          "n_vars": 27,
+          "oversize_targets": 1,
+          "per_attempt": [
+            {
+              "target": 0,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 905610.831392,
+              "word_xors": 1254103046
+            }
+          ],
+          "refuted": 0,
+          "relation_phase_gae": null,
+          "solved_fraction": 0.0,
+          "splits": 2054,
+          "truth_decomposable": 1,
+          "unbuildable": 0,
+          "v_invariant": true,
+          "via_t": 0,
+          "wall_s_contended": 905.610831392,
+          "wall_truncated": true,
+          "word_xors": 1254103046,
+          "word_xors_on_found": 0,
+          "xor_per_attempt": 1254103046.0,
+          "xor_per_relation": null
+        },
+        {
+          "S_relation_phase": 4099.849268017034,
+          "arm": "x-chained",
+          "attempts": 24,
+          "base_points": 443,
+          "boolean_degree": 0,
+          "budget_exhausted": 0,
+          "built_degree": 3,
+          "columns": 221,
+          "completeness": 1.0,
+          "ell": 9,
+          "enumeration_reference": {
+            "gae_per_relation": 488.5833333333333,
+            "hits": 24,
+            "steps": 11726
+          },
+          "exact_hit_rate": 1.0,
+          "feasible": true,
+          "found": 24,
+          "found_on_truth": 24,
+          "frame": "x (plain)",
+          "gae_per_relation": 4729.593318088405,
+          "gate_failures": 0,
+          "hit_rate": 1.0,
+          "m": 3,
+          "n_equations": 34,
+          "n_vars": 44,
+          "oversize_targets": 0,
+          "per_attempt": [
+            {
+              "target": 0,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 17.739179,
+              "word_xors": 1811624
+            },
+            {
+              "target": 1,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 8.072639,
+              "word_xors": 1105243
+            },
+            {
+              "target": 2,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 7.064929,
+              "word_xors": 998528
+            },
+            {
+              "target": 3,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 6.895376,
+              "word_xors": 934250
+            },
+            {
+              "target": 4,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 15.427939,
+              "word_xors": 1673074
+            },
+            {
+              "target": 5,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 8.06977,
+              "word_xors": 1089693
+            },
+            {
+              "target": 6,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 11.87003,
+              "word_xors": 1436892
+            },
+            {
+              "target": 7,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 21.572916,
+              "word_xors": 2351574
+            },
+            {
+              "target": 8,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 20.690514,
+              "word_xors": 2374456
+            },
+            {
+              "target": 9,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 15.870761,
+              "word_xors": 1798230
+            },
+            {
+              "target": 10,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 11.610621,
+              "word_xors": 1413445
+            },
+            {
+              "target": 11,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 11.153598,
+              "word_xors": 1350114
+            },
+            {
+              "target": 12,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 6.851694,
+              "word_xors": 993188
+            },
+            {
+              "target": 13,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 5.75767,
+              "word_xors": 891366
+            },
+            {
+              "target": 14,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 6.378528,
+              "word_xors": 903017
+            },
+            {
+              "target": 15,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 7.010788,
+              "word_xors": 1003688
+            },
+            {
+              "target": 16,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 6.524806,
+              "word_xors": 948785
+            },
+            {
+              "target": 17,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 8.834516,
+              "word_xors": 958540
+            },
+            {
+              "target": 18,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 13.717967,
+              "word_xors": 1631596
+            },
+            {
+              "target": 19,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 8.130929,
+              "word_xors": 1081447
+            },
+            {
+              "target": 20,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 6.539529,
+              "word_xors": 973973
+            },
+            {
+              "target": 21,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 6.479904,
+              "word_xors": 952646
+            },
+            {
+              "target": 22,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 12.428767,
+              "word_xors": 1501039
+            },
+            {
+              "target": 23,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 15.04982,
+              "word_xors": 1816859
+            }
+          ],
+          "refuted": 0,
+          "relation_phase_gae": 1049969.716615626,
+          "solved_fraction": 1.0,
+          "splits": 1878,
+          "truth_decomposable": 24,
+          "unbuildable": 0,
+          "v_invariant": true,
+          "via_t": 0,
+          "wall_s_contended": 0.25974319,
+          "wall_truncated": false,
+          "word_xors": 31993267,
+          "word_xors_on_found": 31993267,
+          "xor_per_attempt": 1333052.7916666667,
+          "xor_per_relation": 1333052.7916666667
+        },
+        {
+          "S_relation_phase": 32252.680651673378,
+          "arm": "sym",
+          "attempts": 24,
+          "base_points": 409,
+          "boolean_degree": 4,
+          "budget_exhausted": 10,
+          "built_degree": 4,
+          "columns": 102,
+          "completeness": 0.5833333333333334,
+          "ell": 9,
+          "enumeration_reference": {
+            "gae_per_relation": 2041.7916666666667,
+            "hits": 24,
+            "steps": 49003
+          },
+          "exact_hit_rate": 1.0,
+          "feasible": true,
+          "found": 14,
+          "found_on_truth": 14,
+          "frame": "u (kernel-saturated, +T-closed)",
+          "gae_per_relation": 80193.18729524115,
+          "gate_failures": 0,
+          "hit_rate": 0.5833333333333334,
+          "m": 3,
+          "n_equations": 17,
+          "n_vars": 25,
+          "oversize_targets": 0,
+          "per_attempt": [
+            {
+              "target": 0,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 208.0373,
+              "word_xors": 14240244
+            },
+            {
+              "target": 1,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 21.71228,
+              "word_xors": 7124407
+            },
+            {
+              "target": 2,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 88.595764,
+              "word_xors": 8683652
+            },
+            {
+              "target": 3,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 358.844263,
+              "word_xors": 19359107
+            },
+            {
+              "target": 4,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 27.041393,
+              "word_xors": 6222123
+            },
+            {
+              "target": 5,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 28.757758,
+              "word_xors": 6290612
+            },
+            {
+              "target": 6,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 22.482919,
+              "word_xors": 6966425
+            },
+            {
+              "target": 7,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 373.005571,
+              "word_xors": 19604500
+            },
+            {
+              "target": 8,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 349.376232,
+              "word_xors": 19500034
+            },
+            {
+              "target": 9,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 22.567842,
+              "word_xors": 7087594
+            },
+            {
+              "target": 10,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 338.696246,
+              "word_xors": 19251100
+            },
+            {
+              "target": 11,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 65.512532,
+              "word_xors": 7828879
+            },
+            {
+              "target": 12,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 354.493286,
+              "word_xors": 19381422
+            },
+            {
+              "target": 13,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 89.039349,
+              "word_xors": 8728324
+            },
+            {
+              "target": 14,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 25.598466,
+              "word_xors": 6196811
+            },
+            {
+              "target": 15,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 496.40112,
+              "word_xors": 19423309
+            },
+            {
+              "target": 16,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 248.583043,
+              "word_xors": 13487278
+            },
+            {
+              "target": 17,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 537.833694,
+              "word_xors": 19575532
+            },
+            {
+              "target": 18,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 233.842939,
+              "word_xors": 13593315
+            },
+            {
+              "target": 19,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 89.585709,
+              "word_xors": 8555777
+            },
+            {
+              "target": 20,
+              "truth": true,
+              "verdict": "found",
+              "wall_ms_contended": 69.735952,
+              "word_xors": 6355064
+            },
+            {
+              "target": 21,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 396.537255,
+              "word_xors": 19576109
+            },
+            {
+              "target": 22,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 476.686301,
+              "word_xors": 19620892
+            },
+            {
+              "target": 23,
+              "truth": true,
+              "verdict": "budget",
+              "wall_ms_contended": 405.709758,
+              "word_xors": 19785803
+            }
+          ],
+          "refuted": 0,
+          "relation_phase_gae": 8259898.291409839,
+          "solved_fraction": 0.5833333333333334,
+          "splits": 26254,
+          "truth_decomposable": 24,
+          "unbuildable": 0,
+          "v_invariant": true,
+          "via_t": 0,
+          "wall_s_contended": 5.328676972,
+          "wall_truncated": false,
+          "word_xors": 316438313,
+          "word_xors_on_found": 121360505,
+          "xor_per_attempt": 13184929.708333334,
+          "xor_per_relation": 22602736.64285714
+        },
+        {
+          "arm": "_base",
+          "cols_u": 102,
+          "cols_x": 221,
+          "ell": 9,
+          "enumeration_u": {
+            "gae_per_relation": 2041.7916666666667,
+            "hits": 24,
+            "steps": 49003
+          },
+          "enumeration_x": {
+            "gae_per_relation": 488.5833333333333,
+            "hits": 24,
+            "steps": 11726
+          },
+          "exact_hits_u": 24,
+          "exact_hits_x": 24,
+          "fu_points": 409,
+          "fx_points": 443,
+          "m": 3,
+          "v_basis": [
+            1,
+            188,
+            1860,
+            2838,
+            4204,
+            8314,
+            16916,
+            33602,
+            65574
+          ],
+          "v_invariant": true
+        }
+      ],
+      "gae_per_word_xor": 0.0035479414976320395,
+      "h": 2,
+      "irreducible_low_terms": [
+        0,
+        3
+      ],
+      "n": 17,
+      "ns_per_add_contended": 140.231031,
+      "ns_per_word_xor_contended": 0.497531494140625,
+      "r": 65587,
+      "rho_gae_derived": 226.96235225858152,
+      "targets": 24
+    }
+  ],
+  "engine": "InheritedF4 { max_degree: 3 }, default split rule",
+  "experiment": "round4 lead 16.1: m crossover, plain x-frame vs kernel-saturated u-frame",
+  "feasible_rule": "found >= 1, (found + refuted) / attempts >= 0.5, zero gate failures",
+  "node_budget": 4096,
+  "seed": 370935120,
+  "targets": 24,
+  "unit": "word XORs counted by the engine (lower bound: Macaulay build and substitutions uncounted); GAE via measured ns/XOR over ns/add (contended host)"
+}

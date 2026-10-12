@@ -1,0 +1,11 @@
+[package]
+name = "n83-evaluation-runner"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+libc = "=0.2.190"
+serde_json = "=1.0.151"
+
+[profile.release]
+opt-level = 2

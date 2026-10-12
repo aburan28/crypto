@@ -23,6 +23,8 @@ Layout, and why each path is where it is:
     /status/walk-forest*.json, walk-forest.js  the same forests as an explorable graph
     /status/status.json   snapshot, next to the page that reads it
     /status/history.json  published history, likewise
+    /status/status34.json DP34 table-walk snapshot, kept separate from DP32
+    /status/history34.json DP34 table-walk history, likewise
     /status.json          same bytes at the root
     /history.json         same bytes at the root
 
@@ -128,6 +130,8 @@ PAGES = (
 DATA = (
     ("docs/ecc2k130-status/status.json", ("status/status.json", "status.json")),
     ("docs/ecc2k130-status/history.json", ("status/history.json", "history.json")),
+    ("docs/ecc2k130-status/status34.json", ("status/status34.json", "status34.json")),
+    ("docs/ecc2k130-status/history34.json", ("status/history34.json", "history34.json")),
     ("docs/ecc2k130-status/mac-control.json", ("status/mac-control.json",)),
 )
 

@@ -14,6 +14,10 @@ on:
       - 'examples/pkm_tower_pilot.rs'
       - 'examples/pkm_tower_check.rs'
       - '.github/workflows/pkm-tower-pilot.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - '.cargo/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,10 +30,37 @@ concurrency:
 jobs:
   cross-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 45 }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/scripts/
+            /Cargo.toml
+            /Cargo.lock
+            /build.rs
+            /.cargo/
+            /rust-toolchain*
+            /rustfmt.toml
+            /clippy.toml
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
+            /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
+            /research/pkm_tower_pilot_20260924/
+            /research/pkm_tower_round2_20260925/
+            /research/pkm_tower_round3_20260925/
+            /research/pkm_tower_round4_20260926/
+            /research/pkm_tower_round5_20260926/
+            /research/pkm_tower_round6_20260930/
+            /research/pkm_tower_round7_20261006/
+      - name: Materialize compile-time fixture inputs
+        run: node .github/scripts/ci-scope.mjs --materialize
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       # The checks are native since round 7 (note section 16.3): the legacy
       # Python verify.py, analyze.py and test_verify.py are kept as a record,
       # and the native checker must print what they printed.
@@ -69,10 +100,30 @@ jobs:
         run: python3 research/pkm_tower_round6_20260930/compare_exit.py
   engine-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 45 }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/scripts/
+            /Cargo.toml
+            /Cargo.lock
+            /build.rs
+            /.cargo/
+            /rust-toolchain*
+            /rustfmt.toml
+            /clippy.toml
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
+            /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
+      - name: Materialize compile-time fixture inputs
+        run: node .github/scripts/ci-scope.mjs --materialize
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: The tower engine's unit tests
         run: cargo test --release --lib f4_fp_tower
       - name: The signature engine's unit tests

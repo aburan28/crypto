@@ -25,8 +25,9 @@
 //! the 2-torsion). For a product one coordinate of D vanishes; the missing coordinate of an
 //! image is recovered from the image of x + T' (T' of order 4 above the kernel, f(T') a
 //! sign-type 2-torsion point), which permutes the dual coordinates.
-use crate::curve::{padd, pmul, Curve, Pt};
+use crate::curve::{jinv, padd, pmul, Curve, Pt};
 use crate::field::Field;
+use std::collections::{HashSet, VecDeque};
 
 /// Level-2 theta coordinates of a point of an abelian surface (index 2 c1 + c2).
 pub type Th<E> = [E; 4];
@@ -149,6 +150,48 @@ pub fn j_from_theta1<F: Field>(f: &F, n: &[F::E; 2]) -> F::E {
     let t3 = f.add(f.sq(a), f.sq(b));
     let t2 = f.mul(f.from_u64(2), f.mul(a, b));
     j_from_lambda(f, f.div(f.sq(t2), f.sq(t3)))
+}
+
+/// Montgomery parameter `A=-2(1+s^4)/(s^4-1)` for a theta null with `s=b/a`.
+fn montgomery_a_from_theta1<F: Field>(f: &F, n: &[F::E; 2]) -> Option<F::E> {
+    if f.char() <= 3 || f.is_zero(n[0]) {
+        return None;
+    }
+    let s = f.div(n[1], n[0]);
+    if f.is_zero(s) {
+        return None;
+    }
+    let s4 = f.sq(f.sq(s));
+    let den = f.sub(s4, f.one());
+    if f.is_zero(den) {
+        return None;
+    }
+    Some(f.neg(f.div(f.mul(f.from_u64(2), f.add(s4, f.one())), den)))
+}
+
+/// A short-Weierstrass model for a one-dimensional theta null `(a:b)`.
+/// The short model uses `x_short=x_m+A/3` and requires characteristic > 3.
+pub fn curve_from_theta1<F: Field>(f: &F, n: &[F::E; 2]) -> Option<Curve<F::E>> {
+    let a_m = montgomery_a_from_theta1(f, n)?;
+    let a3 = f.div(a_m, f.from_u64(3));
+    let aa = f.sub(f.one(), f.mul(a_m, a3));
+    let bb = f.sub(f.mul(f.from_u64(2), f.mul(f.sq(a3), a3)), a3);
+    Some(Curve::new(aa, bb))
+}
+
+/// x-coordinate on `curve_from_theta1(null)` of a factor theta point.
+/// `None` covers the identity and the exceptional 2-torsion chart point.
+pub fn x_on_theta1_curve<F: Field>(f: &F, null: &[F::E; 2], point: &[F::E; 2]) -> Option<F::E> {
+    let a_m = montgomery_a_from_theta1(f, null)?;
+    let s = f.div(null[1], null[0]);
+    let den = f.sub(f.mul(s, point[0]), point[1]);
+    if f.is_zero(den) {
+        return None;
+    }
+    Some(f.add(
+        f.div(f.add(f.mul(s, point[0]), point[1]), den),
+        f.div(a_m, f.from_u64(3)),
+    ))
 }
 
 pub fn j_from_lambda<F: Field>(f: &F, l: F::E) -> F::E {
@@ -432,6 +475,112 @@ pub fn split_j<F: Field>(f: &F, n: &Th<F::E>) -> Option<(F::E, F::E)> {
     ))
 }
 
+/// A bounded level-2 theta coordinate change that factors a split surface's
+/// null and supplied point images into two elliptic theta coordinates.  The
+/// generators are the two Fourier transforms, swap, controlled phase, and
+/// the two single-coordinate phases.  This does not determine y-signs or a
+/// component isomorphism to any caller-supplied elliptic curve.
+#[derive(Clone, Debug)]
+pub struct SplitChart<E> {
+    pub path: Vec<u8>,
+    pub factors: ([E; 2], [E; 2]),
+}
+
+pub(crate) fn split_chart_step<F: Field>(f: &F, imaginary: F::E, g: u8, v: &Th<F::E>) -> Th<F::E> {
+    let mut out = *v;
+    match g {
+        0 => {
+            for j in 0..2 {
+                out[j] = f.add(v[j], v[j + 2]);
+                out[j + 2] = f.sub(v[j], v[j + 2]);
+            }
+        }
+        1 => {
+            for j in [0, 2] {
+                out[j] = f.add(v[j], v[j + 1]);
+                out[j + 1] = f.sub(v[j], v[j + 1]);
+            }
+        }
+        2 => out[3] = f.neg(v[3]),
+        3 => out.swap(1, 2),
+        4 => {
+            for j in [2, 3] {
+                out[j] = f.mul(imaginary, v[j]);
+            }
+        }
+        5 => {
+            for j in [1, 3] {
+                out[j] = f.mul(imaginary, v[j]);
+            }
+        }
+        _ => unreachable!(),
+    }
+    out
+}
+
+impl<E: Copy> SplitChart<E> {
+    pub fn apply<F: Field<E = E>>(&self, f: &F, point: &Th<E>) -> Option<Th<E>> {
+        let imaginary = f.sqrt(f.neg(f.one()))?;
+        Some(
+            self.path
+                .iter()
+                .fold(*point, |v, &g| split_chart_step(f, imaginary, g, &v)),
+        )
+    }
+}
+
+/// Search at most `max_states` projective charts.  A candidate must factor
+/// the null and *all* supplied images and reproduce `split_j`'s two j-values.
+/// This is a toy/research helper, not a constant-time production algorithm.
+pub fn find_split_chart<F: Field>(
+    f: &F,
+    null: &Th<F::E>,
+    images: &[Th<F::E>],
+    max_states: usize,
+) -> Option<SplitChart<F::E>> {
+    let expected = split_j(f, null)?;
+    let imaginary = f.sqrt(f.neg(f.one()))?;
+    let mut seen = HashSet::new();
+    let mut todo = VecDeque::from([(*null, Vec::<u8>::new())]);
+    while let Some((v, path)) = todo.pop_front() {
+        let z = v.iter().position(|&x| !f.is_zero(x))?;
+        let inv = f.inv(v[z]);
+        let v = v.map(|x| f.mul(x, inv));
+        if !seen.insert(v) {
+            continue;
+        }
+        if f.mul(v[0], v[3]) == f.mul(v[1], v[2]) {
+            if let Some(factors) = factor_product(f, &v) {
+                if let (Some(ca), Some(cb)) = (
+                    curve_from_theta1(f, &factors.0),
+                    curve_from_theta1(f, &factors.1),
+                ) {
+                    let js = (jinv(f, &ca), jinv(f, &cb));
+                    if (js == expected || (js.1, js.0) == expected)
+                        && images.iter().all(|img| {
+                            let y = path
+                                .iter()
+                                .fold(*img, |x, &g| split_chart_step(f, imaginary, g, &x));
+                            f.mul(y[0], y[3]) == f.mul(y[1], y[2])
+                        })
+                    {
+                        return Some(SplitChart { path, factors });
+                    }
+                }
+            }
+        }
+        if seen.len() >= max_states {
+            return None;
+        }
+        for g in 0..6 {
+            let mut next_path = path.clone();
+            next_path.push(g);
+            todo.push_back((split_chart_step(f, imaginary, g, &v), next_path));
+        }
+    }
+    None
+}
+
 /// j from (theta_3^4, theta_4^4, theta_2^4) of one elliptic factor, in unknown order, up to a
 /// common factor and up to individual signs: Jacobi's theta_3^4 = theta_2^4 + theta_4^4 with
 /// some choice of signs identifies a Legendre lambda (any solution gives the same j).
@@ -462,6 +611,15 @@ pub struct ChainResult<E> {
     pub split: Option<(E, E)>,
     /// images of the extra points under the whole chain
     pub images: Vec<Th<E>>,
+}
+
+/// A prefix of a chain, stopped at its first product codomain.  This exposes
+/// an intermediate split rather than treating it as a failed Jacobian step.
+/// Continuing from this state requires explicit product coordinates and maps.
+#[derive(Clone, Debug)]
+pub struct ChainPrefix<E> {
+    pub result: ChainResult<E>,
+    pub remaining_steps: u32,
 }
 
 /// Projective inverse (v1 v2 v3, v0 v2 v3, v0 v1 v3, v0 v1 v2); None if a coordinate is zero.
@@ -534,6 +692,203 @@ pub fn chain_opts<F: Field>(
     extra: &[(Pt<F::E>, Pt<F::E>)],
     strategy: bool,
 ) -> Option<ChainResult<F::E>> {
+    Some(chain_impl(f, e1, e2, k, n, extra, strategy, false)?.result)
+}
+
+/// Evaluate until the first product codomain, even if the chain has more
+/// steps.  Uses the explicit-multiples strategy so all supplied point images
+/// are available at the split.  A non-split terminal quotient is returned
+/// with `remaining_steps = 0` and `result.split = None`.
+pub fn chain_until_first_split<F: Field>(
+    f: &F,
+    e1: &Curve<F::E>,
+    e2: &Curve<F::E>,
+    k: [(Pt<F::E>, Pt<F::E>); 2],
+    n: u32,
+    extra: &[(Pt<F::E>, Pt<F::E>)],
+) -> Option<ChainPrefix<F::E>> {
+    chain_impl(f, e1, e2, k, n, extra, false, true)
+}
+
+/// Evaluate a `(2^n, 2^n)` quotient starting from a nonsplit level-2 theta
+/// model. `k` contains lifts of its two kernel generators of order `4*2^n`;
+/// the actual kernel is generated by `[4]k`. Unlike [`chain`], this starts
+/// on a Jacobian and needs no product gluing. An intermediate product is not
+/// supported: callers must use explicit product coordinates to continue it.
+pub fn chain_from_theta<F: Field>(
+    f: &F,
+    null: &Th<F::E>,
+    k: [Th<F::E>; 2],
+    n: u32,
+    extra: &[Th<F::E>],
+) -> Option<ChainResult<F::E>> {
+    let prefix = chain_from_theta_until_first_split(f, null, k, n, extra)?;
+    (prefix.remaining_steps == 0).then_some(prefix.result)
+}
+
+/// A Jacobian-start quotient stopped at its first intermediate product.
+/// `kernel_images` are the two lifted generators in the returned theta chart.
+/// At a product, these Kummer coordinates do not determine relative y-signs;
+/// continuing requires additional translated-point data, not arbitrary lifts.
+#[derive(Clone, Debug)]
+pub struct ThetaChainPrefix<E> {
+    pub result: ChainResult<E>,
+    pub remaining_steps: u32,
+    pub kernel_images: [Th<E>; 2],
+}
+
+pub fn chain_from_theta_until_first_split<F: Field>(
+    f: &F,
+    null: &Th<F::E>,
+    mut k: [Th<F::E>; 2],
+    n: u32,
+    extra: &[Th<F::E>],
+) -> Option<ThetaChainPrefix<F::E>> {
+    if n == 0 || split_j(f, null).is_some() {
+        return None;
+    }
+    let mut cur = *null;
+    let mut images = extra.to_vec();
+    let mut nulls = Vec::with_capacity(n as usize);
+    for remaining in (1..=n).rev() {
+        let dbl = ThetaDoubler::new(f, &cur)?;
+        let mut t8 = k;
+        for _ in 1..remaining {
+            t8 = [dbl.double(f, &t8[0]), dbl.double(f, &t8[1])];
+        }
+        let (chart, iso) = find_isogeny_chart(f, &cur, &t8)?;
+        let imaginary = f.sqrt(f.neg(f.one()))?;
+        let transform = |v: Th<F::E>| {
+            chart
+                .iter()
+                .fold(v, |w, &g| split_chart_step(f, imaginary, g, &w))
+        };
+        k = k.map(transform);
+        for point in &mut images {
+            *point = transform(*point);
+        }
+        k = [iso.eval(f, &k[0]), iso.eval(f, &k[1])];
+        for point in &mut images {
+            *point = iso.eval(f, point);
+        }
+        cur = iso.codomain;
+        let split = split_j(f, &cur);
+        if remaining > 1 && split.is_some() {
+            nulls.push(cur);
+            return Some(ThetaChainPrefix {
+                result: ChainResult {
+                    nulls,
+                    split,
+                    images,
+                },
+                remaining_steps: remaining - 1,
+                kernel_images: k,
+            });
+        }
+        if remaining > 1 && ThetaDoubler::new(f, &cur).is_none() {
+            let regular = find_regular_chart(f, &cur)?;
+            let apply = |v: Th<F::E>| {
+                regular
+                    .iter()
+                    .fold(v, |w, &g| split_chart_step(f, imaginary, g, &w))
+            };
+            cur = apply(cur);
+            k = k.map(apply);
+            for point in &mut images {
+                *point = apply(*point);
+            }
+        }
+        nulls.push(cur);
+    }
+    Some(ThetaChainPrefix {
+        result: ChainResult {
+            nulls,
+            split: split_j(f, &cur),
+            images,
+        },
+        remaining_steps: 0,
+        kernel_images: k,
+    })
+}
+
+/// Find a level-2 theta chart in which the supplied 2-torsion kernel is the
+/// standard sign-type subgroup expected by `theta_isogeny`. This bounded
+/// chart search is a research helper, not a constant-time implementation.
+fn find_isogeny_chart<F: Field>(
+    f: &F,
+    null: &Th<F::E>,
+    t8: &[Th<F::E>; 2],
+) -> Option<(Vec<u8>, ThetaIso<F::E>)> {
+    let imaginary = f.sqrt(f.neg(f.one()))?;
+    let identity =
+        [0, 1, 2, 3].map(|j| [0, 1, 2, 3].map(|i| if i == j { f.one() } else { f.zero() }));
+    let mut seen = HashSet::new();
+    let mut todo = VecDeque::from([(identity, Vec::<u8>::new())]);
+    while let Some((matrix, path)) = todo.pop_front() {
+        let z = matrix.iter().flatten().copied().find(|&x| !f.is_zero(x))?;
+        let inv = f.inv(z);
+        let matrix = matrix.map(|col| col.map(|x| f.mul(x, inv)));
+        if !seen.insert(matrix) {
+            continue;
+        }
+        let apply = |v: &Th<F::E>| {
+            path.iter()
+                .fold(*v, |w, &g| split_chart_step(f, imaginary, g, &w))
+        };
+        let transformed = t8.map(|v| apply(&v));
+        if let Some(iso) = theta_isogeny(f, &apply(null), &transformed[0], &transformed[1]) {
+            if iso.zero.is_none() {
+                return Some((path, iso));
+            }
+        }
+        if seen.len() >= 50_000 {
+            return None;
+        }
+        for g in 0..6 {
+            let mut next = path.clone();
+            next.push(g);
+            todo.push_back((matrix.map(|v| split_chart_step(f, imaginary, g, &v)), next));
+        }
+    }
+    None
+}
+
+fn find_regular_chart<F: Field>(f: &F, null: &Th<F::E>) -> Option<Vec<u8>> {
+    let imaginary = f.sqrt(f.neg(f.one()))?;
+    let mut seen = HashSet::new();
+    let mut todo = VecDeque::from([(*null, Vec::<u8>::new())]);
+    while let Some((v, path)) = todo.pop_front() {
+        let z = v.iter().position(|&x| !f.is_zero(x))?;
+        let inv = f.inv(v[z]);
+        let key = v.map(|x| f.mul(x, inv));
+        if !seen.insert(key) {
+            continue;
+        }
+        if ThetaDoubler::new(f, &v).is_some() {
+            return Some(path);
+        }
+        if seen.len() >= 50_000 {
+            return None;
+        }
+        for g in 0..6 {
+            let mut next = path.clone();
+            next.push(g);
+            todo.push_back((split_chart_step(f, imaginary, g, &v), next));
+        }
+    }
+    None
+}
+
+fn chain_impl<F: Field>(
+    f: &F,
+    e1: &Curve<F::E>,
+    e2: &Curve<F::E>,
+    k: [(Pt<F::E>, Pt<F::E>); 2],
+    n: u32,
+    extra: &[(Pt<F::E>, Pt<F::E>)],
+    strategy: bool,
+    stop_at_split: bool,
+) -> Option<ChainPrefix<F::E>> {
     assert!(n >= 1);
     let dbl1 = |p: &(Pt<F::E>, Pt<F::E>)| (padd(f, e1, &p.0, &p.0), padd(f, e2, &p.1, &p.1));
     let add = |p: &(Pt<F::E>, Pt<F::E>), q: &(Pt<F::E>, Pt<F::E>)| {
@@ -582,11 +937,26 @@ pub fn chain_opts<F: Field>(
     let mut nulls = vec![glue.codomain];
     if n == 1 {
         let split = split_j(f, &glue.codomain);
-        return Some(ChainResult {
-            nulls,
-            split,
-            images,
+        return Some(ChainPrefix {
+            result: ChainResult {
+                nulls,
+                split,
+                images,
+            },
+            remaining_steps: 0,
         });
+    }
+    if stop_at_split {
+        if let Some(split) = split_j(f, &glue.codomain) {
+            return Some(ChainPrefix {
+                result: ChainResult {
+                    nulls,
+                    split: Some(split),
+                    images,
+                },
+                remaining_steps: n - 1,
+            });
+        }
     }
     let mut cur = glue.codomain;
     if strategy {
@@ -657,12 +1027,27 @@ pub fn chain_opts<F: Field>(
             }
             cur = iso.codomain;
             nulls.push(cur);
+            if stop_at_split && step < n {
+                if let Some(split) = split_j(f, &cur) {
+                    return Some(ChainPrefix {
+                        result: ChainResult {
+                            nulls,
+                            split: Some(split),
+                            images,
+                        },
+                        remaining_steps: n - step,
+                    });
+                }
+            }
         }
     }
     let split = split_j(f, &cur);
-    Some(ChainResult {
-        nulls,
-        split,
-        images,
+    Some(ChainPrefix {
+        result: ChainResult {
+            nulls,
+            split,
+            images,
+        },
+        remaining_steps: 0,
     })
 }

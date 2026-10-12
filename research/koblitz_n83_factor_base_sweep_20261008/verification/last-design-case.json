@@ -1,0 +1,21 @@
+{
+  "backend": "fes_monica",
+  "base": {
+    "a": 1,
+    "closure": "signed_frobenius",
+    "family": "frobenius_divisor",
+    "parameter": 83,
+    "parameter_unit": "binary_dimension",
+    "seed": 0
+  },
+  "disposition": "resource_gate_dimension_above_20",
+  "enumeration": "gray",
+  "executed": false,
+  "linear_algebra": "modular_biguint",
+  "max_large_primes": 2,
+  "ordinal": 45359999,
+  "split_bits": 12,
+  "summands": 6,
+  "symmetry": "four_torsion",
+  "threads": 12
+}

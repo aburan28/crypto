@@ -1,0 +1,603 @@
+{
+  "bits": [
+    10,
+    12
+  ],
+  "experiment": "stream",
+  "family": "torsion",
+  "lead": "16.4",
+  "rows": [
+    {
+      "ab_stream": {
+        "a": {
+          "columns": 456,
+          "deficiency_total": 300,
+          "first_pin_relations": 26,
+          "first_pin_trials": 73,
+          "points": 912,
+          "rank_final": 147,
+          "recovered": 500,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "b": {
+          "columns": 152,
+          "deficiency_total": 100,
+          "first_pin_relations": 17,
+          "first_pin_trials": 55,
+          "points": 912,
+          "rank_final": 53,
+          "recovered": 500,
+          "square_relations": 215,
+          "square_trials": 989,
+          "verified": true
+        },
+        "column_ratio": 3.0,
+        "field_invs_total": 176814,
+        "field_muls_total": 7542823,
+        "hit_rate": 0.05330700888450148,
+        "relations": 324,
+        "square_ratio_a_over_b": null,
+        "trials": 6078
+      },
+      "bits": 10,
+      "c_arm_valid": true,
+      "c_stream": {
+        "c_neg": {
+          "columns": 162,
+          "deficiency_total": 108,
+          "first_pin_relations": 20,
+          "first_pin_trials": 193,
+          "points": 324,
+          "rank_final": 52,
+          "recovered": 500,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "c_zeta": {
+          "columns": 54,
+          "deficiency_total": 36,
+          "first_pin_relations": 9,
+          "first_pin_trials": 84,
+          "points": 324,
+          "rank_final": 18,
+          "recovered": 500,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "column_ratio": 3.0,
+        "field_invs_total": 158649,
+        "field_muls_total": 7051270,
+        "hit_rate": 0.018756169792694965,
+        "relations": 114,
+        "square_ratio_neg_over_zeta": null,
+        "trials": 6078
+      },
+      "experiment": "stream",
+      "instance": {
+        "b": [
+          688,
+          74
+        ],
+        "cofactor": 921,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 846399,
+        "lambda_zeta": 866,
+        "lambda_zeta_prime": 866,
+        "log2_r": 9.843921051289035,
+        "nu": 3,
+        "omega": 52,
+        "order_is_base_change_product_N1_N2": [
+          919,
+          921
+        ],
+        "p": 919,
+        "r": 919,
+        "rational_3_torsion": true,
+        "trace_fp2": -1837
+      },
+      "law_square_trials_c_over_b": 1.0,
+      "planted": 500,
+      "seed": 1,
+      "square_trials_c_over_b": null,
+      "wall_s_contended": 0.195044493
+    },
+    {
+      "ab_stream": {
+        "a": {
+          "columns": 477,
+          "deficiency_total": 303,
+          "first_pin_relations": 19,
+          "first_pin_trials": 36,
+          "points": 954,
+          "rank_final": 148,
+          "recovered": 563,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "b": {
+          "columns": 159,
+          "deficiency_total": 101,
+          "first_pin_relations": 15,
+          "first_pin_trials": 31,
+          "points": 954,
+          "rank_final": 55,
+          "recovered": 563,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "column_ratio": 3.0,
+        "field_invs_total": 197107,
+        "field_muls_total": 8170507,
+        "hit_rate": 0.050647649541551445,
+        "relations": 348,
+        "square_ratio_a_over_b": null,
+        "trials": 6871
+      },
+      "bits": 10,
+      "c_arm_valid": true,
+      "c_stream": {
+        "c_neg": {
+          "columns": 141,
+          "deficiency_total": 105,
+          "first_pin_relations": 10,
+          "first_pin_trials": 164,
+          "points": 282,
+          "rank_final": 37,
+          "recovered": 563,
+          "square_relations": 55,
+          "square_trials": 991,
+          "verified": true
+        },
+        "c_zeta": {
+          "columns": 47,
+          "deficiency_total": 35,
+          "first_pin_relations": 6,
+          "first_pin_trials": 105,
+          "points": 282,
+          "rank_final": 13,
+          "recovered": 563,
+          "square_relations": 27,
+          "square_trials": 312,
+          "verified": true
+        },
+        "column_ratio": 3.0,
+        "field_invs_total": 32669,
+        "field_muls_total": 2806628,
+        "hit_rate": 0.055499495459132187,
+        "relations": 55,
+        "square_ratio_neg_over_zeta": 2.037037037037037,
+        "trials": 991
+      },
+      "experiment": "stream",
+      "instance": {
+        "b": [
+          729,
+          158
+        ],
+        "cofactor": 921,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 846399,
+        "lambda_zeta": 866,
+        "lambda_zeta_prime": 866,
+        "log2_r": 9.843921051289035,
+        "nu": 3,
+        "omega": 52,
+        "order_is_base_change_product_N1_N2": [
+          919,
+          921
+        ],
+        "p": 919,
+        "r": 919,
+        "rational_3_torsion": true,
+        "trace_fp2": -1837
+      },
+      "law_square_trials_c_over_b": 1.0,
+      "planted": 563,
+      "seed": 2,
+      "square_trials_c_over_b": null,
+      "wall_s_contended": 0.219015068
+    },
+    {
+      "ab_stream": {
+        "a": {
+          "columns": 354,
+          "deficiency_total": 225,
+          "first_pin_relations": 15,
+          "first_pin_trials": 44,
+          "points": 708,
+          "rank_final": 115,
+          "recovered": 596,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "b": {
+          "columns": 118,
+          "deficiency_total": 75,
+          "first_pin_relations": 15,
+          "first_pin_trials": 44,
+          "points": 708,
+          "rank_final": 39,
+          "recovered": 596,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "column_ratio": 3.0,
+        "field_invs_total": 122568,
+        "field_muls_total": 5674422,
+        "hit_rate": 0.0670235047707703,
+        "relations": 288,
+        "square_ratio_a_over_b": null,
+        "trials": 4297
+      },
+      "bits": 10,
+      "c_arm_valid": true,
+      "c_stream": {
+        "c_neg": {
+          "columns": 105,
+          "deficiency_total": 60,
+          "first_pin_relations": 21,
+          "first_pin_trials": 134,
+          "points": 210,
+          "rank_final": 46,
+          "recovered": 596,
+          "square_relations": 95,
+          "square_trials": 976,
+          "verified": true
+        },
+        "c_zeta": {
+          "columns": 35,
+          "deficiency_total": 20,
+          "first_pin_relations": 5,
+          "first_pin_trials": 35,
+          "points": 210,
+          "rank_final": 16,
+          "recovered": 596,
+          "square_relations": 33,
+          "square_trials": 200,
+          "verified": true
+        },
+        "column_ratio": 3.0,
+        "field_invs_total": 29262,
+        "field_muls_total": 2552168,
+        "hit_rate": 0.09733606557377049,
+        "relations": 95,
+        "square_ratio_neg_over_zeta": 2.878787878787879,
+        "trials": 976
+      },
+      "experiment": "stream",
+      "instance": {
+        "b": [
+          517,
+          513
+        ],
+        "cofactor": 741,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 538707,
+        "lambda_zeta": 445,
+        "lambda_zeta_prime": 445,
+        "log2_r": 9.505811553919594,
+        "nu": 2,
+        "omega": 425,
+        "order_is_base_change_product_N1_N2": [
+          727,
+          741
+        ],
+        "p": 733,
+        "r": 727,
+        "rational_3_torsion": true,
+        "trace_fp2": -1417
+      },
+      "law_square_trials_c_over_b": 1.0,
+      "planted": 596,
+      "seed": 3,
+      "square_trials_c_over_b": null,
+      "wall_s_contended": 0.121941759
+    },
+    {
+      "ab_stream": {
+        "a": {
+          "columns": 1335,
+          "deficiency_total": 832,
+          "first_pin_relations": 35,
+          "first_pin_trials": 103,
+          "points": 2670,
+          "rank_final": 409,
+          "recovered": 1479,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "b": {
+          "columns": 445,
+          "deficiency_total": 277,
+          "first_pin_relations": 24,
+          "first_pin_trials": 71,
+          "points": 2670,
+          "rank_final": 159,
+          "recovered": 1479,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "column_ratio": 3.0,
+        "field_invs_total": 801405,
+        "field_muls_total": 31222740,
+        "hit_rate": 0.04242298945627455,
+        "relations": 1026,
+        "square_ratio_a_over_b": null,
+        "trials": 24185
+      },
+      "bits": 12,
+      "c_arm_valid": true,
+      "c_stream": {
+        "c_neg": {
+          "columns": 465,
+          "deficiency_total": 276,
+          "first_pin_relations": 9,
+          "first_pin_trials": 64,
+          "points": 930,
+          "rank_final": 181,
+          "recovered": 1479,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "c_zeta": {
+          "columns": 155,
+          "deficiency_total": 92,
+          "first_pin_relations": 9,
+          "first_pin_trials": 64,
+          "points": 930,
+          "rank_final": 63,
+          "recovered": 1479,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "column_ratio": 3.0,
+        "field_invs_total": 737415,
+        "field_muls_total": 29552125,
+        "hit_rate": 0.02009510026876163,
+        "relations": 486,
+        "square_ratio_neg_over_zeta": null,
+        "trials": 24185
+      },
+      "experiment": "stream",
+      "instance": {
+        "b": [
+          1859,
+          2175
+        ],
+        "cofactor": 2577,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 7006863,
+        "lambda_zeta": 1453,
+        "lambda_zeta_prime": 1453,
+        "log2_r": 11.40886043602476,
+        "nu": 3,
+        "omega": 2461,
+        "order_is_base_change_product_N1_N2": [
+          2719,
+          2577
+        ],
+        "p": 2647,
+        "r": 2719,
+        "rational_3_torsion": true,
+        "trace_fp2": -253
+      },
+      "law_square_trials_c_over_b": 1.0,
+      "planted": 1479,
+      "seed": 1,
+      "square_trials_c_over_b": null,
+      "wall_s_contended": 0.922693248
+    },
+    {
+      "ab_stream": {
+        "a": {
+          "columns": 1275,
+          "deficiency_total": 810,
+          "first_pin_relations": 49,
+          "first_pin_trials": 157,
+          "points": 2550,
+          "rank_final": 392,
+          "recovered": 422,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "b": {
+          "columns": 425,
+          "deficiency_total": 270,
+          "first_pin_relations": 19,
+          "first_pin_trials": 87,
+          "points": 2550,
+          "rank_final": 148,
+          "recovered": 422,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "column_ratio": 3.0,
+        "field_invs_total": 560457,
+        "field_muls_total": 24968384,
+        "hit_rate": 0.0593915102933139,
+        "relations": 978,
+        "square_ratio_a_over_b": null,
+        "trials": 16467
+      },
+      "bits": 12,
+      "c_arm_valid": true,
+      "c_stream": {
+        "c_neg": {
+          "columns": 435,
+          "deficiency_total": 273,
+          "first_pin_relations": 24,
+          "first_pin_trials": 176,
+          "points": 870,
+          "rank_final": 155,
+          "recovered": 422,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "c_zeta": {
+          "columns": 145,
+          "deficiency_total": 91,
+          "first_pin_relations": 23,
+          "first_pin_trials": 155,
+          "points": 870,
+          "rank_final": 55,
+          "recovered": 422,
+          "square_relations": 334,
+          "square_trials": 3906,
+          "verified": true
+        },
+        "column_ratio": 3.0,
+        "field_invs_total": 501912,
+        "field_muls_total": 23404249,
+        "hit_rate": 0.024776826380032792,
+        "relations": 408,
+        "square_ratio_neg_over_zeta": null,
+        "trials": 16467
+      },
+      "experiment": "stream",
+      "instance": {
+        "b": [
+          1104,
+          871
+        ],
+        "cofactor": 2613,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 6540339,
+        "lambda_zeta": 1226,
+        "lambda_zeta_prime": 1226,
+        "log2_r": 11.289442575688332,
+        "nu": 2,
+        "omega": 835,
+        "order_is_base_change_product_N1_N2": [
+          2613,
+          2503
+        ],
+        "p": 2557,
+        "r": 2503,
+        "rational_3_torsion": true,
+        "trace_fp2": -2089
+      },
+      "law_square_trials_c_over_b": 1.0,
+      "planted": 422,
+      "seed": 2,
+      "square_trials_c_over_b": null,
+      "wall_s_contended": 0.844242423
+    },
+    {
+      "ab_stream": {
+        "a": {
+          "columns": 1608,
+          "deficiency_total": 960,
+          "first_pin_relations": 12,
+          "first_pin_trials": 30,
+          "points": 3216,
+          "rank_final": 537,
+          "recovered": 2626,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "b": {
+          "columns": 536,
+          "deficiency_total": 320,
+          "first_pin_relations": 12,
+          "first_pin_trials": 30,
+          "points": 3216,
+          "rank_final": 206,
+          "recovered": 2626,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "column_ratio": 3.0,
+        "field_invs_total": 915306,
+        "field_muls_total": 35741911,
+        "hit_rate": 0.049207217058501916,
+        "relations": 1350,
+        "square_ratio_a_over_b": null,
+        "trials": 27435
+      },
+      "bits": 12,
+      "c_arm_valid": true,
+      "c_stream": {
+        "c_neg": {
+          "columns": 534,
+          "deficiency_total": 306,
+          "first_pin_relations": 37,
+          "first_pin_trials": 178,
+          "points": 1068,
+          "rank_final": 202,
+          "recovered": 2626,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "c_zeta": {
+          "columns": 178,
+          "deficiency_total": 102,
+          "first_pin_relations": 13,
+          "first_pin_trials": 67,
+          "points": 1068,
+          "rank_final": 75,
+          "recovered": 2626,
+          "square_relations": null,
+          "square_trials": null,
+          "verified": true
+        },
+        "column_ratio": 3.0,
+        "field_invs_total": 848931,
+        "field_muls_total": 33876345,
+        "hit_rate": 0.02099507927829415,
+        "relations": 576,
+        "square_ratio_neg_over_zeta": null,
+        "trials": 27435
+      },
+      "experiment": "stream",
+      "instance": {
+        "b": [
+          753,
+          322
+        ],
+        "cofactor": 3171,
+        "family": "y^2 = x^3 + b over F_{p^2}, b not in F_p, b a square (T = (0, sqrt b) rational), 9 does not divide #E",
+        "group_order": 10048899,
+        "lambda_zeta": 3071,
+        "lambda_zeta_prime": 3071,
+        "log2_r": 11.629811944382233,
+        "nu": 7,
+        "omega": 97,
+        "order_is_base_change_product_N1_N2": [
+          3169,
+          3171
+        ],
+        "p": 3169,
+        "r": 3169,
+        "rational_3_torsion": true,
+        "trace_fp2": -6337
+      },
+      "law_square_trials_c_over_b": 1.0,
+      "planted": 2626,
+      "seed": 3,
+      "square_trials_c_over_b": null,
+      "wall_s_contended": 1.129560137
+    }
+  ],
+  "seeds": 3,
+  "targets": 300,
+  "unit": "F_p multiplications (ext_curve thread-local counter + LineOracle solver count); inversions reported, not priced; wall times are contended",
+  "wall_s_contended": 3.438627463
+}
