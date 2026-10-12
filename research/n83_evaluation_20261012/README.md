@@ -150,4 +150,3 @@ A narrow search used the retained a=1/K600 run prefix, subgroup order, 8.181 rat
 - The canonical boundary ledger already labels the old observation exploratory, with controlled speedup unknown and historical verdict retained as provenance.
 
 The canonical ledger already stores the correct legacy modulus and G/Q, without either erroneous curve slug; no identity join repair is needed there. Its controlled speedup, crossover and isolation fields remain null, and the historical label is explicitly qualified. No canonical graph or ledger is edited or promoted by this diagnostic. This scoped check does not exhaust historical branches or figures.
-
