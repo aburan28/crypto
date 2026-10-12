@@ -1604,6 +1604,119 @@ def parse_semaev_decomp_bench_stdout(stdout: str) -> dict[str, Any]:
     return {"ladder": ladder}
 
 
+def parse_j0_known_answer_stdout(stdout: str) -> dict[str, Any]:
+    """Parse examples/j0_known_answer_bits JSON result object from stdout."""
+    rows = parse_json_objects(stdout)
+    row = next(
+        (
+            item
+            for item in reversed(rows)
+            if isinstance(item.get("bits"), int)
+            and "ic_ok" in item
+            and "rho_ok" in item
+        ),
+        None,
+    )
+    require(row is not None, "j0_known_answer_bits stdout missing known-answer JSON row")
+    return row
+
+
+def draft_j0_end_to_end_dlp_claim(
+    *,
+    beat: dict[str, Any],
+    beat_id: str,
+    run: Path,
+    direct_obs: dict[str, Any],
+    binaries: dict[str, str],
+) -> dict[str, Any]:
+    parsed = parse_j0_known_answer_stdout(direct_obs.get("stdout") or "")
+    bits = int(beat.get("bits") or parsed["bits"])
+    require(int(parsed["bits"]) == bits, f"producer bits {parsed['bits']} != beat bits {bits}")
+    producers_ok = (
+        direct_obs["exit_code"] == 0
+        and parsed.get("ic_ok") is True
+        and parsed.get("rho_ok") is True
+        and parsed.get("ic_agrees_rho") is True
+    )
+    peak_rss = direct_obs.get("children_peak_rss_bytes")
+    cap = beat.get("resource_cap_bytes")
+    under_cap = (
+        peak_rss is not None and cap is not None and int(peak_rss) <= int(cap)
+        if cap is not None
+        else None
+    )
+    ic_ms = float(parsed["ic_ms"])
+    rho_ms = float(parsed["rho_ms"])
+    source = REPO / "examples" / f"{beat['producer']['example']}.rs"
+    binary_path = binaries.get("custom") or binaries.get("direct")
+    claim = {
+        "schema_version": 2,
+        "task_id": TASK_ID,
+        "beat_id": beat_id,
+        "regime": beat["regime"],
+        "stage": "end_to_end_dlp",
+        "n": bits,
+        "n_or_bits": bits,
+        "curve": parsed.get("curve"),
+        "recovered_d_verified": bool(parsed.get("ic_ok")),
+        "ic_ok": parsed.get("ic_ok"),
+        "rho_ok": parsed.get("rho_ok"),
+        "ic_matches_truth": parsed.get("ic_matches_truth"),
+        "ic_agrees_rho": parsed.get("ic_agrees_rho"),
+        "ic_ms": ic_ms,
+        "rho_ms": rho_ms,
+        "stage_timers": {
+            "ic_ms": ic_ms,
+            "rho_ms": rho_ms,
+            "note": (
+                "producer does not yet split FB/relations/LA; "
+                "wall is full j0_index_calculus_dlp vs pollard_rho"
+            ),
+        },
+        "target_orbits": parsed.get("target_orbits"),
+        "max_trials": parsed.get("max_trials"),
+        "rho_steps": parsed.get("rho_steps"),
+        "wall_s": float(direct_obs.get("whole_process_wall_ms") or 0.0) / 1000.0,
+        "peak_rss_bytes": peak_rss,
+        "verdict": (
+            "J0_16BIT_KA_IC_AGREES_RHO_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok
+            else "PRODUCER_FAILURE"
+        ),
+        "claim_boundary": (
+            "Public synthetic known-answer j=0 IC vs rho only. "
+            "Not key recovery, not asymptotic sub-rho, not ledger promotion."
+        ),
+        "claim_boundary_non_claims": [
+            "not key recovery on deployed curves",
+            "not asymptotic sub-rho",
+            "not ledger promotion until independent validation",
+            "IC slower than rho on this instance (expected; not a vs_rho crossover)",
+        ],
+        "independent_replay_pointer": independent_replay_pointer(run),
+        "fixture_hash": sha256(source),
+        "executable_or_source_hash": {
+            "executable": sha256(binary_path) if binary_path else None,
+            "source": sha256(source),
+        },
+        "host_id": host_record(),
+        "resource_caps": {
+            "common_cap_bytes": cap,
+            "observed_peak_rss_bytes": peak_rss,
+            "under_cap": under_cap,
+        },
+        "seeds": {"random_scalar": "runtime"},
+        "evidence_paths": [
+            str((run / "logs/direct.stdout.jsonl").resolve()),
+            str((run / "receipts/direct.resource.json").resolve()),
+        ],
+        "created_at": now(),
+        "autolab_run_id": run.name,
+        "producer_exit_codes": {"direct": direct_obs["exit_code"]},
+    }
+    return claim
+
+
 def draft_binary_pairs_decomposition_claim(
     *,
     beat: dict[str, Any],
@@ -2051,13 +2164,19 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
             return state
 
         stage = str(beat.get("stage") or "vs_rho")
-        if stage == "decomposition":
+        if stage in ("decomposition", "end_to_end_dlp") and isinstance(
+            beat.get("producer"), dict
+        ) and beat["producer"].get("example"):
             require(
-                isinstance(beat.get("producer"), dict) and beat["producer"].get("example"),
-                f"beat {beat_id} stage decomposition requires producer.example",
+                beat["producer"].get("example"),
+                f"beat {beat_id} stage {stage} requires producer.example",
             )
             custom = build_example(str(beat["producer"]["example"]))
             binaries = {"custom": custom, "direct": custom}
+        elif stage == "decomposition":
+            raise AutolabError(
+                f"beat {beat_id} stage decomposition requires producer.example"
+            )
         else:
             binaries = build_producers()
         write_json(
@@ -2226,6 +2345,40 @@ def launch(arguments: argparse.Namespace) -> dict[str, Any]:
                 direct_exit_code=direct_obs["exit_code"],
                 claim_check=validation["status"],
             )
+        elif stage == "end_to_end_dlp":
+            producer = beat.get("producer") or {}
+            require(
+                str(producer.get("example") or "") == "j0_known_answer_bits",
+                f"beat {beat_id} end_to_end_dlp launch supports j0_known_answer_bits only",
+            )
+            claim = draft_j0_end_to_end_dlp_claim(
+                beat=beat,
+                beat_id=beat_id,
+                run=run,
+                direct_obs=direct_obs,
+                binaries=binaries,
+            )
+            write_json(run / "artifacts/claim_draft.json", claim)
+            validation = validate_claim(claim, stage="end_to_end_dlp", ledger=ledger)
+            write_json(run / "artifacts/claim_check.json", validation)
+            producers_ok = (
+                direct_obs["exit_code"] == 0
+                and claim.get("ic_ok") is True
+                and claim.get("rho_ok") is True
+                and claim.get("ic_agrees_rho") is True
+            )
+            status = (
+                "PENDING_INDEPENDENT_VALIDATION" if producers_ok else "PRODUCER_FAILURE"
+            )
+            if producers_ok and validation["status"] != "PASS":
+                status = "SCHEMA_INCOMPLETE"
+            state.update(
+                status=status,
+                phase="analysis",
+                updated_at=now(),
+                direct_exit_code=direct_obs["exit_code"],
+                claim_check=validation["status"],
+            )
         else:
             raise AutolabError(f"unsupported launch stage: {stage}")
 
@@ -2279,6 +2432,7 @@ def producer_commands(
             n=beat.get("n"),
             m=beat.get("m"),
             l=beat.get("l"),
+            bits=beat.get("bits"),
             fixtures=fixtures,
         )
         direct_argv = [direct_bin, *shlex.split(rendered)]

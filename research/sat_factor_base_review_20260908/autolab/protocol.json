@@ -369,9 +369,10 @@
       "stage": "end_to_end_dlp",
       "priority": 5,
       "bits": 16,
+      "fixtures_default": 1,
       "producer": {
         "example": "j0_known_answer_bits",
-        "args": "16"
+        "args_template": "{bits}"
       },
       "acceptance_gates": [
         "ic recovers d with [d]G=Q",
@@ -379,7 +380,7 @@
         "wall times logged",
         "not ledger promotion until independent validation"
       ],
-      "note": "Manual draft under runs_manual/prime_j0_e2e_16bit_20260911"
+      "note": "Control-plane launch via examples/j0_known_answer_bits {bits}. Protocol-registered rung is 16 bits (agent_priorities text may mention >=20; do not invent unregistered beats). Manual drafts under runs_manual/prime_j0_e2e_16bit_20260911."
     },
     "koblitz.compact_orbit.n61_panel": {
       "label": "Multi-target batch diagnostic only: a=0 n=61 compact-orbit shared-log DLP vs frozen KS v2 batched rho at L>=1024",
