@@ -339,7 +339,7 @@
         "not a ledger promotion until independent validation"
       ],
       "ledger_next_target": "regimes.koblitz.stages.decomposition.next_target",
-      "note": "Manual/driver via examples/symmetrised_oracle_bench (paired_bench picks target_dim=ceil((n+1)/m)=16). Control-plane launch for decomposition not yet wired; claim drafts under runs_manual/n31_decomp_m2_dim16_*."
+      "note": "Driver via examples/symmetrised_oracle_bench (paired_bench picks target_dim=ceil((n+1)/m)=16). Control-plane launch supported; archive as PENDING_INDEPENDENT_VALIDATION. Older claim drafts under runs_manual/n31_decomp_m2_dim16_*."
     },
     "binary.decomposition.l8_pairs_baseline": {
       "label": "Priority #4 probe: pairs-and-solve baseline at l=8 (not a sub-2^(2l) win)",
@@ -354,8 +354,8 @@
       },
       "acceptance_gates": [
         "pairs wall at l=8 logged",
-        "FFD required for ledger beat — currently unmeasured",
-        "sub-2^(2l) requires oracle faster than pairs — not this baseline",
+        "FFD required for ledger beat \u2014 currently unmeasured",
+        "sub-2^(2l) requires oracle faster than pairs \u2014 not this baseline",
         "not a ledger promotion"
       ],
       "ledger_next_target": "regimes.binary.stages.decomposition.next_target",
@@ -612,7 +612,7 @@
       "rank": 1,
       "regime": "koblitz",
       "stage": "vs_rho",
-      "beat": "Extend the verified single-target online ladder to n=73, a=0 (prime degree; r=86020738150056119 ~ 2^56.3, cofactor 109796) on the same frozen public point contract with the compact-orbit u128 domain (no explicit pair table, peak RSS under the common cap). The n=71 compact-orbit u128 record (median 2864.1x online across three paired runs, deterministic 14554-probe relation, three Python-replayed runs) is the rung to beat. No new field code is needed — the landed u128 producers already admit n=73."
+      "beat": "Extend the verified single-target online ladder to n=73, a=0 (prime degree; r=86020738150056119 ~ 2^56.3, cofactor 109796) on the same frozen public point contract with the compact-orbit u128 domain (no explicit pair table, peak RSS under the common cap). The n=71 compact-orbit u128 record (median 2864.1x online across three paired runs, deterministic 14554-probe relation, three Python-replayed runs) is the rung to beat. No new field code is needed \u2014 the landed u128 producers already admit n=73."
     },
     {
       "rank": 2,
