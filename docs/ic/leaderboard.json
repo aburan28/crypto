@@ -94,9 +94,13 @@
    "path": "research/ecbench_n41_n53_shared_rank_20261005/DECISION.json",
    "sha256": "fe55908f837840eeee173cfeae463368bb272e3c65ef03fa2b66efeead769331"
   },
+  "conductor_gap_counts": {
+   "path": "research/ecbench_conductor_gap_20261012/analysis.json",
+   "sha256": "0ff9b20fd773ea67fa8fc2c434635e77f97422b2904d687b61eac75a02c04279"
+  },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "0bdcfb2c7a497a3508522890c28a7994d2754148aae8dcdf9e254e63bc10753c"
+   "sha256": "89b580c52ecf14765c61312a80fb233d5ba2758e9db6c147e959bd3d4b18d3a0"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -35068,6 +35072,20 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp42k6-tm2491251533173327737941972795111971366-526ba8ed",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['2207745007428', '632092940411', '3664686186933', '758045781929', '3458687394009', '1600776342139'], b = ['3059791393877', '4152591947783', '491277949489', '3320907546820', '2797462175524', '60260767491']",
+   "order_bits": 252,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp19-t241-08557336",
    "family": "prime",
    "field": "GF(p), p = 343073",
@@ -35118,6 +35136,20 @@
    "standard": [],
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp42k6-tm29792387245275262226064940024003903270-5788c993",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['2338115754146', '2494073351486', '1520571513808', '91944634782', '2224880827890', '2305393862062'], b = ['556686241633', '408293391830', '639747042009', '3676267222692', '2933463754751', '1428913110381']",
+   "order_bits": 252,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
    "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
@@ -35180,6 +35212,20 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp42k6-tm42685072077033061909020167905304827814-ed81cabb",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['4327484881957', '2488248483101', '175698049609', '3035357766960', '2679181023626', '432633600817'], b = ['1897963669695', '3451622759517', '918277301031', '53544278132', '2444990015027', '1626964312772']",
+   "order_bits": 252,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp19-t241-c8307dcf",
    "family": "prime",
    "field": "GF(p), p = 343073",
@@ -35230,6 +35276,20 @@
    "standard": [],
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp42k6-tm47625218402626040157351434367347524950-abe16089",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['1291743088313', '2715451159407', '801883508151', '3687921364150', '1298230218257', '2100348320186'], b = ['452902829636', '3192361391945', '567620390801', '635518609027', '1564898537531', '2131607742206']",
+   "order_bits": 252,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
    "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
@@ -35292,6 +35352,20 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp42k6-tm64034012845409394729220743976057956986-66ee9158",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['1090677424314', '1199326624940', '1164435828636', '372070234725', '4127012178254', '930479649397'], b = ['350070958324', '474962076318', '2949529221428', '1657401313763', '1143690658363', '3384631441572']",
+   "order_bits": 252,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp19-t241-fba4a099",
    "family": "prime",
    "field": "GF(p), p = 343073",
@@ -35342,6 +35416,20 @@
    "standard": [],
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp42k6-tm81933216907660852315187676140185091926-37a1e378",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['41037185332', '4007114749997', '1188976312053', '4303656364014', '1244844859431', '2497625593944'], b = ['3293150744342', '945758243968', '1405298664025', '1155811245328', '746232238582', '3369164897663']",
+   "order_bits": 252,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
    "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
@@ -35404,6 +35492,20 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp42k6-tm94337795294083411234614731411795056966-f6a5b1ff",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['2956967472090', '4082054593042', '2341831686590', '2393357325021', '3271295195391', '1088560909723'], b = ['4369226164638', '509411495165', '3310826290753', '3113720285408', '2151655699401', '3462217206775']",
+   "order_bits": 252,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp29-t47-1f934956",
    "family": "prime",
    "field": "GF(p), p = 320092037",
@@ -35412,6 +35514,20 @@
    "standard": [],
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp42k6-tm94425043260925418064943765136461443902-2954d8b9",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['4096140621829', '886201109017', '1549291792960', '1196281731421', '2616503775085', '4005315452476'], b = ['3181812663457', '2958847219495', '2047063647518', '2477223584346', '4059891407201', '1956469942575']",
+   "order_bits": 252,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
    "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
@@ -35432,6 +35548,20 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp42k6-tm96457303662662337409351348340650293994-e4919e97",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['408128396945', '16866706706', '1033418358786', '352962236744', '1558239709229', '3678454259458'], b = ['1201295596694', '61217616726', '3832562754249', '473302058466', '2420099791154', '3542065626319']",
+   "order_bits": 252,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp29-t47-522e6830",
    "family": "prime",
    "field": "GF(p), p = 320092037",
@@ -35446,6 +35576,20 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp43k6-t80369948951667839190628429049567884210-1a345239",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['183582467398', '3336323858559', '48071243890', '3963142660416', '2387156660413', '2147542323730'], b = ['3411537234841', '4183015757449', '1080744694606', '1175731587779', '2102907526761', '3596705973911']",
+   "order_bits": 253,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp37-t277-090dc414",
    "family": "prime",
    "field": "GF(p), p = 81640512137",
@@ -35454,6 +35598,20 @@
    "standard": [],
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp43k6-t80369948951667839190628429049567884210-8a669356",
+   "family": "extension",
+   "field": "GF(2^None)",
+   "coefficients": "a = ['2253803012394', '3630391213102', '3374266364292', '1282446936815', '996618294589', '2194249978977'], b = ['2889000543283', '880590613020', '1658349615202', '633515690453', '3340196979196', '3373097675899']",
+   "order_bits": 253,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": null,
    "legacy": [],
    "on_board": false,
    "curves_yaml_key": null,
@@ -35655,6 +35813,826 @@
   ],
   "online_speedup": null,
   "fully_priced_cold_speedup": null
+ },
+ "conductor_gap_count_diagnostic": {
+  "protocol": "research/ecbench_conductor_gap_20261012/PROTOCOL.md",
+  "resamples": 20000,
+  "schema": "conductor-gap-analysis/v1",
+  "seed": 20261012,
+  "sessions": [
+   {
+    "aa": {
+     "mismatches": [],
+     "pairs": 16
+    },
+    "arms": {
+     "ic-mitm": {
+      "cross_curve": {
+       "ci95": [
+        0.683853700087,
+        1.32426566979
+       ],
+       "ci99": [
+        0.60346297355,
+        1.4509336259
+       ],
+       "cross_curve_targets_transported": false,
+       "method": "independent workload bootstrap on each fixed curve; label permutation",
+       "permutation_p_two_sided": 0.893955302235,
+       "ratio_floor_over_crater": 0.975241620441,
+       "resamples": 20000,
+       "seed": 20261012
+      },
+      "curves": [
+       {
+        "factor_base": {
+         "abscissae": 256,
+         "columns": 256,
+         "description": "smallest 256 abscissae",
+         "dimension": null,
+         "family": "prime-abscissa",
+         "fb_id": "FB1h7f4deff25c73",
+         "fb_sha256": "7f4deff25c7324e8790452494a2d97ca2e70b5005651e50e9e9a41f4d2a25014",
+         "params": {
+          "size": "256"
+         },
+         "points_sha256": "afb61b3215d1c5d9186d8c392e505f7ae4929f6ae0549530153ad6b3140f75fa",
+         "signed_points": 512
+        },
+        "floor_s": 0.886226925453,
+        "isolation_levels": {
+         "L0": 8
+        },
+        "lower_bound": true,
+        "max_s": 30.3637869521,
+        "mean_s": 20.3742473744,
+        "measured": 8,
+        "min_s": 11.4504323281,
+        "phase_mean_gae": {
+         "factor_base": 0.0,
+         "linear_algebra": 0.0,
+         "oracle_setup": 65792.0,
+         "relations": 298687.75,
+         "verify": 38.25
+        },
+        "role": "crater",
+        "run_ids": [
+         "ECM1h0a90b9dbc108W62c80ae3988dR2",
+         "ECM1h0a90b9dbc108We7e2f26656cdR2",
+         "ECM1h0a90b9dbc108W65cba157e813R2",
+         "ECM1h0a90b9dbc108W549daa7f1e9cR2",
+         "ECM1h0a90b9dbc108W673ae02b7582R2",
+         "ECM1h0a90b9dbc108W90b7bea975f1R2",
+         "ECM1h0a90b9dbc108W994787c95133R2",
+         "ECM1h0a90b9dbc108Wecae5a064035R2"
+        ],
+        "slug": "icv1-fp29-t47-14392892",
+        "statuses": {
+         "verified": 8
+        },
+        "unpriced": [
+         "legendre_symbols_uncharged",
+         "lookups_uncharged",
+         "row_ops_uncharged",
+         "sqrt_solves_uncharged",
+         "target_guard_probes_uncharged"
+        ],
+        "valid": true,
+        "workloads": 8
+       },
+       {
+        "factor_base": {
+         "abscissae": 256,
+         "columns": 256,
+         "description": "smallest 256 abscissae",
+         "dimension": null,
+         "family": "prime-abscissa",
+         "fb_id": "FB1hf1a829b51277",
+         "fb_sha256": "f1a829b51277cd0f80ef1383378ae30505c6d85634b190dff2a6e3c7173127f8",
+         "params": {
+          "size": "256"
+         },
+         "points_sha256": "5cecc40151a6c90bd60848d2781499accda01a2fa1b1b8dcc6a33f09984fa3eb",
+         "signed_points": 512
+        },
+        "floor_s": 0.886226925453,
+        "isolation_levels": {
+         "L0": 8
+        },
+        "lower_bound": true,
+        "max_s": 27.0554408564,
+        "mean_s": 19.8698140247,
+        "measured": 8,
+        "min_s": 7.92438040305,
+        "phase_mean_gae": {
+         "factor_base": 0.0,
+         "linear_algebra": 0.0,
+         "oracle_setup": 65792.0,
+         "relations": 289660.875,
+         "verify": 40.25
+        },
+        "role": "floor",
+        "run_ids": [
+         "ECM1h0a90b9dbc108Wfa8cf16b48ccR2",
+         "ECM1h0a90b9dbc108W02ae1bd475b0R2",
+         "ECM1h0a90b9dbc108W2e48fd31d527R2",
+         "ECM1h0a90b9dbc108W8bc9e1bf846bR2",
+         "ECM1h0a90b9dbc108Wf33c820d0eeaR2",
+         "ECM1h0a90b9dbc108Wa95e5dcf91c6R2",
+         "ECM1h0a90b9dbc108Wae604389a862R2",
+         "ECM1h0a90b9dbc108Wb710a9e566f6R2"
+        ],
+        "slug": "icv1-fp29-t47-1f934956",
+        "statuses": {
+         "verified": 8
+        },
+        "unpriced": [
+         "legendre_symbols_uncharged",
+         "lookups_uncharged",
+         "row_ops_uncharged",
+         "sqrt_solves_uncharged",
+         "target_guard_probes_uncharged"
+        ],
+        "valid": true,
+        "workloads": 8
+       }
+      ]
+     },
+     "rho-neg": {
+      "cross_curve": {
+       "ci95": [
+        0.60092243202,
+        2.08981733046
+       ],
+       "ci99": [
+        0.495005116351,
+        2.69486647124
+       ],
+       "cross_curve_targets_transported": false,
+       "method": "independent workload bootstrap on each fixed curve; label permutation",
+       "permutation_p_two_sided": 0.808809559522,
+       "ratio_floor_over_crater": 1.07835435651,
+       "resamples": 20000,
+       "seed": 20261012
+      },
+      "curves": [
+       {
+        "factor_base": null,
+        "floor_s": 0.886226925453,
+        "isolation_levels": {
+         "L0": 8
+        },
+        "lower_bound": true,
+        "max_s": 1.89289489568,
+        "mean_s": 0.933857399553,
+        "measured": 8,
+        "min_s": 0.294447832943,
+        "phase_mean_gae": {
+         "internal_verification": 38.25,
+         "search": 16322.625,
+         "setup": 346.875
+        },
+        "role": "crater",
+        "run_ids": [
+         "ECM1hefea4e0ebe79W62c80ae3988dR4",
+         "ECM1hefea4e0ebe79We7e2f26656cdR4",
+         "ECM1hefea4e0ebe79W65cba157e813R4",
+         "ECM1hefea4e0ebe79W549daa7f1e9cR4",
+         "ECM1hefea4e0ebe79W673ae02b7582R4",
+         "ECM1hefea4e0ebe79W90b7bea975f1R4",
+         "ECM1hefea4e0ebe79W994787c95133R4",
+         "ECM1hefea4e0ebe79Wecae5a064035R4"
+        ],
+        "slug": "icv1-fp29-t47-14392892",
+        "statuses": {
+         "verified": 8
+        },
+        "unpriced": [
+         "canonicalisations_uncharged"
+        ],
+        "valid": true,
+        "workloads": 8
+       },
+       {
+        "factor_base": null,
+        "floor_s": 0.886226925453,
+        "isolation_levels": {
+         "L0": 8
+        },
+        "lower_bound": true,
+        "max_s": 1.798099238,
+        "mean_s": 1.00702919517,
+        "measured": 8,
+        "min_s": 0.358557867944,
+        "phase_mean_gae": {
+         "internal_verification": 40.25,
+         "search": 17632.875,
+         "setup": 343.75
+        },
+        "role": "floor",
+        "run_ids": [
+         "ECM1hefea4e0ebe79Wfa8cf16b48ccR4",
+         "ECM1hefea4e0ebe79W02ae1bd475b0R4",
+         "ECM1hefea4e0ebe79W2e48fd31d527R4",
+         "ECM1hefea4e0ebe79W8bc9e1bf846bR4",
+         "ECM1hefea4e0ebe79Wf33c820d0eeaR4",
+         "ECM1hefea4e0ebe79Wa95e5dcf91c6R4",
+         "ECM1hefea4e0ebe79Wae604389a862R4",
+         "ECM1hefea4e0ebe79Wb710a9e566f6R4"
+        ],
+        "slug": "icv1-fp29-t47-1f934956",
+        "statuses": {
+         "verified": 8
+        },
+        "unpriced": [
+         "canonicalisations_uncharged"
+        ],
+        "valid": true,
+        "workloads": 8
+       }
+      ]
+     },
+     "rho-neg-aa": {
+      "cross_curve": {
+       "ci95": [
+        0.60092243202,
+        2.08981733046
+       ],
+       "ci99": [
+        0.495005116351,
+        2.69486647124
+       ],
+       "cross_curve_targets_transported": false,
+       "method": "independent workload bootstrap on each fixed curve; label permutation",
+       "permutation_p_two_sided": 0.808809559522,
+       "ratio_floor_over_crater": 1.07835435651,
+       "resamples": 20000,
+       "seed": 20261012
+      },
+      "curves": [
+       {
+        "factor_base": null,
+        "floor_s": 0.886226925453,
+        "isolation_levels": {
+         "L0": 8
+        },
+        "lower_bound": true,
+        "max_s": 1.89289489568,
+        "mean_s": 0.933857399553,
+        "measured": 8,
+        "min_s": 0.294447832943,
+        "phase_mean_gae": {
+         "internal_verification": 38.25,
+         "search": 16322.625,
+         "setup": 346.875
+        },
+        "role": "crater",
+        "run_ids": [
+         "ECM1hefea4e0ebe79W62c80ae3988dR3",
+         "ECM1hefea4e0ebe79We7e2f26656cdR3",
+         "ECM1hefea4e0ebe79W65cba157e813R3",
+         "ECM1hefea4e0ebe79W549daa7f1e9cR3",
+         "ECM1hefea4e0ebe79W673ae02b7582R3",
+         "ECM1hefea4e0ebe79W90b7bea975f1R3",
+         "ECM1hefea4e0ebe79W994787c95133R3",
+         "ECM1hefea4e0ebe79Wecae5a064035R3"
+        ],
+        "slug": "icv1-fp29-t47-14392892",
+        "statuses": {
+         "verified": 8
+        },
+        "unpriced": [
+         "canonicalisations_uncharged"
+        ],
+        "valid": true,
+        "workloads": 8
+       },
+       {
+        "factor_base": null,
+        "floor_s": 0.886226925453,
+        "isolation_levels": {
+         "L0": 8
+        },
+        "lower_bound": true,
+        "max_s": 1.798099238,
+        "mean_s": 1.00702919517,
+        "measured": 8,
+        "min_s": 0.358557867944,
+        "phase_mean_gae": {
+         "internal_verification": 40.25,
+         "search": 17632.875,
+         "setup": 343.75
+        },
+        "role": "floor",
+        "run_ids": [
+         "ECM1hefea4e0ebe79Wfa8cf16b48ccR3",
+         "ECM1hefea4e0ebe79W02ae1bd475b0R3",
+         "ECM1hefea4e0ebe79W2e48fd31d527R3",
+         "ECM1hefea4e0ebe79W8bc9e1bf846bR3",
+         "ECM1hefea4e0ebe79Wf33c820d0eeaR3",
+         "ECM1hefea4e0ebe79Wa95e5dcf91c6R3",
+         "ECM1hefea4e0ebe79Wae604389a862R3",
+         "ECM1hefea4e0ebe79Wb710a9e566f6R3"
+        ],
+        "slug": "icv1-fp29-t47-1f934956",
+        "statuses": {
+         "verified": 8
+        },
+        "unpriced": [
+         "canonicalisations_uncharged"
+        ],
+        "valid": true,
+        "workloads": 8
+       }
+      ]
+     }
+    },
+    "curve_manifests": [
+     {
+      "curve": {
+       "coefficients": {
+        "a": "0xf2c85f8",
+        "b": "0x1079c127"
+       },
+       "cofactor": "1",
+       "generator": [
+        "0x1",
+        "0x16c5e08"
+       ],
+       "group_order": "320091991",
+       "model": "short-weierstrass",
+       "subgroup_order": "320091991",
+       "target_group": "prime-order cyclic subgroup generated by the recorded generator"
+      },
+      "curve_id": "EC1P29Ccmcraterhae811e480428",
+      "curve_sha256": "ae811e480428595a3ede9019006aaea4d8049d984502ad3bb8fb262803400fd0",
+      "curve_uid": "urn:ec-record:1:sha256:ae811e480428595a3ede9019006aaea4d8049d984502ad3bb8fb262803400fd0",
+      "field": {
+       "characteristic": 320092037,
+       "degree": 1,
+       "element_encoding": "lowercase hex with 0x prefix",
+       "representation": "prime-residue"
+      },
+      "field_sha256": "dac1fc848602cd2735542aadb261120492f9e9c5240fdc154091db29ea28737c",
+      "role": "crater",
+      "status": "metadata identity of the exact frozen representation; not an additional mathematical certificate"
+     },
+     {
+      "curve": {
+       "coefficients": {
+        "a": "0x607fcdd",
+        "b": "0x36ed8bd"
+       },
+       "cofactor": "1",
+       "generator": [
+        "0x0",
+        "0x6b053da"
+       ],
+       "group_order": "320091991",
+       "model": "short-weierstrass",
+       "subgroup_order": "320091991",
+       "target_group": "prime-order cyclic subgroup generated by the recorded generator"
+      },
+      "curve_id": "EC1P29Ccmfloorh12dba562e91a",
+      "curve_sha256": "12dba562e91af4e2ddbe56f3ccea704568d87f5df115e104e2edc1b863923b1b",
+      "curve_uid": "urn:ec-record:1:sha256:12dba562e91af4e2ddbe56f3ccea704568d87f5df115e104e2edc1b863923b1b",
+      "field": {
+       "characteristic": 320092037,
+       "degree": 1,
+       "element_encoding": "lowercase hex with 0x prefix",
+       "representation": "prime-residue"
+      },
+      "field_sha256": "dac1fc848602cd2735542aadb261120492f9e9c5240fdc154091db29ea28737c",
+      "role": "floor",
+      "status": "metadata identity of the exact frozen representation; not an additional mathematical certificate"
+     }
+    ],
+    "ell": 8209,
+    "failed": [],
+    "ic_vs_rho": {
+     "crater": {
+      "ic_over_rho_count_diagnostic": 21.8173003546,
+      "ratio_of_lower_bounds": true
+     },
+     "floor": {
+      "ic_over_rho_count_diagnostic": 19.7311201304,
+      "ratio_of_lower_bounds": true
+     }
+    },
+    "measured": 48,
+    "records": 96,
+    "records_sha256": "cb0e0fb9474108d8e12b4d659c919132af9701a7bfdb0b8b3629f2159daaed98",
+    "session": "research/ecbench_conductor_gap_20261012/sessions/ell8209-q29",
+    "session_id": "ECBS1h2686905ba61d",
+    "status": "observations on two fixed curves; no population hardness or speedup claim"
+   },
+   {
+    "aa": {
+     "mismatches": [],
+     "pairs": 16
+    },
+    "arms": {
+     "ic-mitm": {
+      "cross_curve": {
+       "ci95": [
+        0.970800881581,
+        1.29083772565
+       ],
+       "ci99": [
+        0.922471315615,
+        1.34169431101
+       ],
+       "cross_curve_targets_transported": false,
+       "method": "independent workload bootstrap on each fixed curve; label permutation",
+       "permutation_p_two_sided": 0.144942752862,
+       "ratio_floor_over_crater": 1.12713418199,
+       "resamples": 20000,
+       "seed": 20261012
+      },
+      "curves": [
+       {
+        "factor_base": {
+         "abscissae": 2048,
+         "columns": 2048,
+         "description": "smallest 2048 abscissae",
+         "dimension": null,
+         "family": "prime-abscissa",
+         "fb_id": "FB1ha0548e6b38c6",
+         "fb_sha256": "a0548e6b38c60f31e53d90bdf9e607561c9768ea3e7635ea68d2ae30c5250997",
+         "params": {
+          "size": "2048"
+         },
+         "points_sha256": "79991361a0c28ee608b92d5505003ece772fc27951a01e284ce1f153a1f60c3f",
+         "signed_points": 4096
+        },
+        "floor_s": 0.886226925453,
+        "isolation_levels": {
+         "L0": 8
+        },
+        "lower_bound": true,
+        "max_s": 52.1463349888,
+        "mean_s": 44.1240552582,
+        "measured": 8,
+        "min_s": 34.9101441355,
+        "phase_mean_gae": {
+         "factor_base": 0.0,
+         "linear_algebra": 0.0,
+         "oracle_setup": 4196352.0,
+         "relations": 8411075.375,
+         "verify": 52.375
+        },
+        "role": "crater",
+        "run_ids": [
+         "ECM1hf001d28db50bW603d04f825bfR2",
+         "ECM1hf001d28db50bW0415e5bd2d6eR2",
+         "ECM1hf001d28db50bWf54d2cda2916R2",
+         "ECM1hf001d28db50bW858cdab46c91R2",
+         "ECM1hf001d28db50bW864a96f42f90R2",
+         "ECM1hf001d28db50bWfe7b7ba27047R2",
+         "ECM1hf001d28db50bWe9f6a73081e3R2",
+         "ECM1hf001d28db50bWeece426f3bcdR2"
+        ],
+        "slug": "icv1-fp37-t277-91fd6e29",
+        "statuses": {
+         "verified": 8
+        },
+        "unpriced": [
+         "legendre_symbols_uncharged",
+         "lookups_uncharged",
+         "row_ops_uncharged",
+         "sqrt_solves_uncharged",
+         "target_guard_probes_uncharged"
+        ],
+        "valid": true,
+        "workloads": 8
+       },
+       {
+        "factor_base": {
+         "abscissae": 2048,
+         "columns": 2048,
+         "description": "smallest 2048 abscissae",
+         "dimension": null,
+         "family": "prime-abscissa",
+         "fb_id": "FB1h07c983c12398",
+         "fb_sha256": "07c983c123983d76559e2a274ca8e67f1207e5391330a3a0779bde66b3ef6f67",
+         "params": {
+          "size": "2048"
+         },
+         "points_sha256": "163c73671ac3129e02daa17c8d43ffc6ecfa296caf7f7583dd23f3f7db1e3cb0",
+         "signed_points": 4096
+        },
+        "floor_s": 0.886226925453,
+        "isolation_levels": {
+         "L0": 8
+        },
+        "lower_bound": true,
+        "max_s": 55.6938412332,
+        "mean_s": 49.7337309296,
+        "measured": 8,
+        "min_s": 32.4050697147,
+        "phase_mean_gae": {
+         "factor_base": 0.0,
+         "linear_algebra": 0.0,
+         "oracle_setup": 4196352.0,
+         "relations": 10013917.375,
+         "verify": 52.0
+        },
+        "role": "floor",
+        "run_ids": [
+         "ECM1hf001d28db50bWafd981f8ee50R2",
+         "ECM1hf001d28db50bW30fbca1376d1R2",
+         "ECM1hf001d28db50bW131b677b4f41R2",
+         "ECM1hf001d28db50bW57ef05ee88f3R2",
+         "ECM1hf001d28db50bW3272f900dba4R2",
+         "ECM1hf001d28db50bWb4ceee6a1766R2",
+         "ECM1hf001d28db50bW66be038fe1c0R2",
+         "ECM1hf001d28db50bW482a690133dfR2"
+        ],
+        "slug": "icv1-fp37-t277-090dc414",
+        "statuses": {
+         "verified": 8
+        },
+        "unpriced": [
+         "legendre_symbols_uncharged",
+         "lookups_uncharged",
+         "row_ops_uncharged",
+         "sqrt_solves_uncharged",
+         "target_guard_probes_uncharged"
+        ],
+        "valid": true,
+        "workloads": 8
+       }
+      ]
+     },
+     "rho-neg": {
+      "cross_curve": {
+       "ci95": [
+        0.617955880413,
+        1.99334369905
+       ],
+       "ci99": [
+        0.47279760467,
+        2.34283934805
+       ],
+       "cross_curve_targets_transported": false,
+       "method": "independent workload bootstrap on each fixed curve; label permutation",
+       "permutation_p_two_sided": 0.607319634018,
+       "ratio_floor_over_crater": 1.17974306779,
+       "resamples": 20000,
+       "seed": 20261012
+      },
+      "curves": [
+       {
+        "factor_base": null,
+        "floor_s": 0.886226925453,
+        "isolation_levels": {
+         "L0": 8
+        },
+        "lower_bound": true,
+        "max_s": 1.6284646155,
+        "mean_s": 0.935089802897,
+        "measured": 8,
+        "min_s": 0.316783751934,
+        "phase_mean_gae": {
+         "internal_verification": 52.375,
+         "search": 266774.5,
+         "setup": 354.5
+        },
+        "role": "crater",
+        "run_ids": [
+         "ECM1hefea4e0ebe79W603d04f825bfR4",
+         "ECM1hefea4e0ebe79W0415e5bd2d6eR4",
+         "ECM1hefea4e0ebe79Wf54d2cda2916R4",
+         "ECM1hefea4e0ebe79W858cdab46c91R4",
+         "ECM1hefea4e0ebe79W864a96f42f90R4",
+         "ECM1hefea4e0ebe79Wfe7b7ba27047R4",
+         "ECM1hefea4e0ebe79We9f6a73081e3R4",
+         "ECM1hefea4e0ebe79Weece426f3bcdR4"
+        ],
+        "slug": "icv1-fp37-t277-91fd6e29",
+        "statuses": {
+         "verified": 8
+        },
+        "unpriced": [
+         "canonicalisations_uncharged"
+        ],
+        "valid": true,
+        "workloads": 8
+       },
+       {
+        "factor_base": null,
+        "floor_s": 0.886226925453,
+        "isolation_levels": {
+         "L0": 8
+        },
+        "lower_bound": true,
+        "max_s": 2.3937097812,
+        "mean_s": 1.10316571273,
+        "measured": 8,
+        "min_s": 0.180920291584,
+        "phase_mean_gae": {
+         "internal_verification": 52.0,
+         "search": 314793.25,
+         "setup": 360.125
+        },
+        "role": "floor",
+        "run_ids": [
+         "ECM1hefea4e0ebe79Wafd981f8ee50R4",
+         "ECM1hefea4e0ebe79W30fbca1376d1R4",
+         "ECM1hefea4e0ebe79W131b677b4f41R4",
+         "ECM1hefea4e0ebe79W57ef05ee88f3R4",
+         "ECM1hefea4e0ebe79W3272f900dba4R4",
+         "ECM1hefea4e0ebe79Wb4ceee6a1766R4",
+         "ECM1hefea4e0ebe79W66be038fe1c0R4",
+         "ECM1hefea4e0ebe79W482a690133dfR4"
+        ],
+        "slug": "icv1-fp37-t277-090dc414",
+        "statuses": {
+         "verified": 8
+        },
+        "unpriced": [
+         "canonicalisations_uncharged"
+        ],
+        "valid": true,
+        "workloads": 8
+       }
+      ]
+     },
+     "rho-neg-aa": {
+      "cross_curve": {
+       "ci95": [
+        0.617955880413,
+        1.99334369905
+       ],
+       "ci99": [
+        0.47279760467,
+        2.34283934805
+       ],
+       "cross_curve_targets_transported": false,
+       "method": "independent workload bootstrap on each fixed curve; label permutation",
+       "permutation_p_two_sided": 0.607319634018,
+       "ratio_floor_over_crater": 1.17974306779,
+       "resamples": 20000,
+       "seed": 20261012
+      },
+      "curves": [
+       {
+        "factor_base": null,
+        "floor_s": 0.886226925453,
+        "isolation_levels": {
+         "L0": 8
+        },
+        "lower_bound": true,
+        "max_s": 1.6284646155,
+        "mean_s": 0.935089802897,
+        "measured": 8,
+        "min_s": 0.316783751934,
+        "phase_mean_gae": {
+         "internal_verification": 52.375,
+         "search": 266774.5,
+         "setup": 354.5
+        },
+        "role": "crater",
+        "run_ids": [
+         "ECM1hefea4e0ebe79W603d04f825bfR3",
+         "ECM1hefea4e0ebe79W0415e5bd2d6eR3",
+         "ECM1hefea4e0ebe79Wf54d2cda2916R3",
+         "ECM1hefea4e0ebe79W858cdab46c91R3",
+         "ECM1hefea4e0ebe79W864a96f42f90R3",
+         "ECM1hefea4e0ebe79Wfe7b7ba27047R3",
+         "ECM1hefea4e0ebe79We9f6a73081e3R3",
+         "ECM1hefea4e0ebe79Weece426f3bcdR3"
+        ],
+        "slug": "icv1-fp37-t277-91fd6e29",
+        "statuses": {
+         "verified": 8
+        },
+        "unpriced": [
+         "canonicalisations_uncharged"
+        ],
+        "valid": true,
+        "workloads": 8
+       },
+       {
+        "factor_base": null,
+        "floor_s": 0.886226925453,
+        "isolation_levels": {
+         "L0": 8
+        },
+        "lower_bound": true,
+        "max_s": 2.3937097812,
+        "mean_s": 1.10316571273,
+        "measured": 8,
+        "min_s": 0.180920291584,
+        "phase_mean_gae": {
+         "internal_verification": 52.0,
+         "search": 314793.25,
+         "setup": 360.125
+        },
+        "role": "floor",
+        "run_ids": [
+         "ECM1hefea4e0ebe79Wafd981f8ee50R3",
+         "ECM1hefea4e0ebe79W30fbca1376d1R3",
+         "ECM1hefea4e0ebe79W131b677b4f41R3",
+         "ECM1hefea4e0ebe79W57ef05ee88f3R3",
+         "ECM1hefea4e0ebe79W3272f900dba4R3",
+         "ECM1hefea4e0ebe79Wb4ceee6a1766R3",
+         "ECM1hefea4e0ebe79W66be038fe1c0R3",
+         "ECM1hefea4e0ebe79W482a690133dfR3"
+        ],
+        "slug": "icv1-fp37-t277-090dc414",
+        "statuses": {
+         "verified": 8
+        },
+        "unpriced": [
+         "canonicalisations_uncharged"
+        ],
+        "valid": true,
+        "workloads": 8
+       }
+      ]
+     }
+    },
+    "curve_manifests": [
+     {
+      "curve": {
+       "coefficients": {
+        "a": "0x171f106df",
+        "b": "0x74cadcd6d"
+       },
+       "cofactor": "1",
+       "generator": [
+        "0x3",
+        "0x408fe9564"
+       ],
+       "group_order": "81640511861",
+       "model": "short-weierstrass",
+       "subgroup_order": "81640511861",
+       "target_group": "prime-order cyclic subgroup generated by the recorded generator"
+      },
+      "curve_id": "EC1P37Ccmcraterh28d36d6728fd",
+      "curve_sha256": "28d36d6728fd54cba045cf9814801b0aa24cd146a585e1ac95227c99aa4b7729",
+      "curve_uid": "urn:ec-record:1:sha256:28d36d6728fd54cba045cf9814801b0aa24cd146a585e1ac95227c99aa4b7729",
+      "field": {
+       "characteristic": 81640512137,
+       "degree": 1,
+       "element_encoding": "lowercase hex with 0x prefix",
+       "representation": "prime-residue"
+      },
+      "field_sha256": "5f5b3ef82674f849ab7d22f6ecae4107892423b3c8c0650c7a6b27dda153ee2a",
+      "role": "crater",
+      "status": "metadata identity of the exact frozen representation; not an additional mathematical certificate"
+     },
+     {
+      "curve": {
+       "coefficients": {
+        "a": "0x16979b318",
+        "b": "0xffd932cf6"
+       },
+       "cofactor": "1",
+       "generator": [
+        "0x2",
+        "0x5fef6707f"
+       ],
+       "group_order": "81640511861",
+       "model": "short-weierstrass",
+       "subgroup_order": "81640511861",
+       "target_group": "prime-order cyclic subgroup generated by the recorded generator"
+      },
+      "curve_id": "EC1P37Ccmfloorh892cd9d9b053",
+      "curve_sha256": "892cd9d9b0539e2071254e19931cc6b9249c0bbbaa70ddfc9ba22d55a0bfd7e2",
+      "curve_uid": "urn:ec-record:1:sha256:892cd9d9b0539e2071254e19931cc6b9249c0bbbaa70ddfc9ba22d55a0bfd7e2",
+      "field": {
+       "characteristic": 81640512137,
+       "degree": 1,
+       "element_encoding": "lowercase hex with 0x prefix",
+       "representation": "prime-residue"
+      },
+      "field_sha256": "5f5b3ef82674f849ab7d22f6ecae4107892423b3c8c0650c7a6b27dda153ee2a",
+      "role": "floor",
+      "status": "metadata identity of the exact frozen representation; not an additional mathematical certificate"
+     }
+    ],
+    "ell": 131101,
+    "failed": [],
+    "ic_vs_rho": {
+     "crater": {
+      "ic_over_rho_count_diagnostic": 47.1869708358,
+      "ratio_of_lower_bounds": true
+     },
+     "floor": {
+      "ic_over_rho_count_diagnostic": 45.0827381196,
+      "ratio_of_lower_bounds": true
+     }
+    },
+    "measured": 48,
+    "records": 96,
+    "records_sha256": "c46193b81034cc3252b353544b0729efb0f860a790c481d7dd161e70c3a83cc1",
+    "session": "research/ecbench_conductor_gap_20261012/sessions/ell131101-q37",
+    "session_id": "ECBS1h8dc7fcf4f74b",
+    "status": "observations on two fixed curves; no population hardness or speedup claim"
+   }
+  ]
  },
  "phases": [
   {

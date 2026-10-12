@@ -1143,7 +1143,8 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = curve.generator() else {
             panic!("generator is affine");
         };
-        let base = build_explicit_frobenius_orbit_factor_base(&curve, &[x.clone()]).unwrap();
+        let base =
+            build_explicit_frobenius_orbit_factor_base(&curve, std::slice::from_ref(x)).unwrap();
         let target = curve.mul(curve.generator(), &BigUint::from(17u32));
         let mut graph =
             WideLargePrimeEliminator::new(&curve, &base, target, LargePrimeLimits::default())
@@ -1204,7 +1205,7 @@ mod tests {
         );
         assert_eq!(base.unknowns(), 1);
         assert!(graph
-            .solve_completed_full_rank(&[full.clone()])
+            .solve_completed_full_rank(std::slice::from_ref(&full))
             .unwrap()
             .is_none());
         let FeedOutcome::Full(direct) = graph

@@ -1,0 +1,313 @@
+   Compiling libc v0.2.190
+   Compiling cfg-if v1.0.5
+   Compiling proc-macro2 v1.0.107
+   Compiling zerocopy v0.8.62
+   Compiling autocfg v1.5.1
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling num-traits v0.2.19
+   Compiling find-msvc-tools v0.1.14
+   Compiling serde_core v1.0.229
+   Compiling getrandom v0.2.17
+   Compiling shlex v2.0.1
+   Compiling rand_core v0.6.4
+   Compiling cc v1.6.0
+   Compiling zmij v1.0.23
+   Compiling syn v3.0.6
+   Compiling ppv-lite86 v0.2.21
+   Compiling blake3 v1.8.7
+   Compiling rand_chacha v0.3.1
+   Compiling serde_json v1.0.151
+   Compiling serde v1.0.229
+   Compiling serde_derive v1.0.229
+   Compiling num-integer v0.1.47
+   Compiling rand v0.8.8
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling constant_time_eq v0.4.2
+   Compiling arrayvec v0.7.8
+   Compiling isogeny-cli v0.1.0 (/sources/baseline/tools/isogeny-cli)
+   Compiling num-bigint v0.4.8
+   Compiling subtle v2.6.1
+   Compiling hex v0.4.3
+   Compiling isogeny_algos v0.1.0 (/sources/baseline/isogeny_algos)
+warning: field `hw` is never read
+  --> /sources/baseline/isogeny_algos/src/gf2n.rs:17:5
+   |
+12 | pub struct GF2n {
+   |            ---- field in this struct
+...
+17 |     hw: bool,
+   |     ^^
+   |
+   = note: `GF2n` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `isogeny_algos` (lib) generated 1 warning
+warning: unused import: `num_bigint::BigUint`
+ --> src/bin/field_checks.rs:5:5
+  |
+5 | use num_bigint::BigUint;
+  |     ^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused imports: `One` and `Zero`
+ --> src/bin/field_checks.rs:6:18
+  |
+6 | use num_traits::{One, Zero};
+  |                  ^^^  ^^^^
+
+warning: struct `Element` is never constructed
+ --> src/bin/../verification_field.rs:8:12
+  |
+8 | pub struct Element<const N: usize>(pub [u64; N]);
+  |            ^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: struct `PrimeField` is never constructed
+  --> src/bin/../verification_field.rs:12:12
+   |
+12 | pub struct PrimeField<const N: usize> {
+   |            ^^^^^^^^^^
+
+warning: function `to_limbs` is never used
+  --> src/bin/../verification_field.rs:31:4
+   |
+31 | fn to_limbs<const N: usize>(v: &BigUint) -> [u64; N] {
+   |    ^^^^^^^^
+
+warning: function `from_limbs` is never used
+  --> src/bin/../verification_field.rs:39:4
+   |
+39 | fn from_limbs<const N: usize>(v: &[u64; N]) -> BigUint {
+   |    ^^^^^^^^^^
+
+warning: function `geq` is never used
+  --> src/bin/../verification_field.rs:47:4
+   |
+47 | fn geq<const N: usize>(a: &[u64; N], b: &[u64; N]) -> bool {
+   |    ^^^
+
+warning: function `sub_limbs` is never used
+  --> src/bin/../verification_field.rs:56:4
+   |
+56 | fn sub_limbs<const N: usize>(a: &[u64; N], b: &[u64; N]) -> ([u64; N], bool) {
+   |    ^^^^^^^^^
+
+warning: function `add_limbs` is never used
+  --> src/bin/../verification_field.rs:68:4
+   |
+68 | fn add_limbs<const N: usize>(a: &[u64; N], b: &[u64; N]) -> ([u64; N], bool) {
+   |    ^^^^^^^^^
+
+warning: function `shr1` is never used
+  --> src/bin/../verification_field.rs:80:4
+   |
+80 | fn shr1<const N: usize>(a: &mut [u64; N], carry: bool) {
+   |    ^^^^
+
+warning: multiple associated items are never used
+   --> src/bin/../verification_field.rs:93:12
+    |
+ 89 | impl<const N: usize> PrimeField<N> {
+    | ---------------------------------- associated items in this implementation
+...
+ 93 |     pub fn new(p: &BigUint) -> Option<Self> {
+    |            ^^^
+...
+135 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+140 |     pub fn least_nonresidue(&self) -> u64 {
+    |            ^^^^^^^^^^^^^^^^
+...
+145 |     pub fn zero(&self) -> Element<N> {
+    |            ^^^^
+...
+150 |     pub fn one(&self) -> Element<N> {
+    |            ^^^
+...
+155 |     pub fn is_zero(&self, a: &Element<N>) -> bool {
+    |            ^^^^^^^
+...
+160 |     pub fn mul(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+198 |     pub fn sqr(&self, a: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+203 |     pub fn add(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+213 |     pub fn sub(&self, a: &Element<N>, b: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+222 |     pub fn neg(&self, a: &Element<N>) -> Element<N> {
+    |            ^^^
+...
+226 |     pub fn from_u64(&self, v: u64) -> Element<N> {
+    |            ^^^^^^^^
+...
+236 |     pub fn from_i64(&self, v: i64) -> Element<N> {
+    |            ^^^^^^^^
+...
+245 |     pub fn from_u128(&self, v: u128) -> Element<N> {
+    |            ^^^^^^^^^
+...
+249 |     pub fn from_big(&self, v: &BigUint) -> Element<N> {
+    |            ^^^^^^^^
+...
+254 |     pub fn to_big(&self, a: &Element<N>) -> BigUint {
+    |            ^^^^^^
+...
+262 |     pub fn pow(&self, a: &Element<N>, e: &BigUint) -> Element<N> {
+    |            ^^^
+...
+274 |     pub fn inv(&self, a: &Element<N>) -> Option<Element<N>> {
+    |            ^^^
+...
+310 |     fn half_coefficient(&self, mut a: Element<N>) -> Element<N> {
+    |        ^^^^^^^^^^^^^^^^
+...
+321 |     pub fn div(&self, a: &Element<N>, b: &Element<N>) -> Option<Element<N>> {
+    |            ^^^
+...
+326 |     pub fn legendre(&self, a: &Element<N>) -> i32 {
+    |            ^^^^^^^^
+...
+338 |     pub fn sqrt(&self, a: &Element<N>) -> Option<Element<N>> {
+    |            ^^^^
+...
+368 |     pub fn hex(&self, a: &Element<N>) -> String {
+    |            ^^^
+
+warning: function `is_probable_prime` is never used
+   --> src/bin/../verification_field.rs:375:8
+    |
+375 | pub fn is_probable_prime(n: &BigUint) -> bool {
+    |        ^^^^^^^^^^^^^^^^^
+
+warning: struct `Fe` is never constructed
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:13:12
+   |
+13 | pub struct Fe(pub [u64; 4]);
+   |            ^^
+
+warning: struct `Field` is never constructed
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:17:12
+   |
+17 | pub struct Field {
+   |            ^^^^^
+
+warning: function `to_limbs` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:36:4
+   |
+36 | fn to_limbs(v: &BigUint) -> [u64; 4] {
+   |    ^^^^^^^^
+
+warning: function `from_limbs` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:44:4
+   |
+44 | fn from_limbs(v: &[u64; 4]) -> BigUint {
+   |    ^^^^^^^^^^
+
+warning: function `geq` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:52:4
+   |
+52 | fn geq(a: &[u64; 4], b: &[u64; 4]) -> bool {
+   |    ^^^
+
+warning: function `sub_limbs` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:61:4
+   |
+61 | fn sub_limbs(a: &[u64; 4], b: &[u64; 4]) -> ([u64; 4], bool) {
+   |    ^^^^^^^^^
+
+warning: function `add_limbs` is never used
+  --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:73:4
+   |
+73 | fn add_limbs(a: &[u64; 4], b: &[u64; 4]) -> ([u64; 4], bool) {
+   |    ^^^^^^^^^
+
+warning: multiple associated items are never used
+   --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:89:12
+    |
+ 85 | impl Field {
+    | ---------- associated items in this implementation
+...
+ 89 |     pub fn new(p: &BigUint) -> Option<Self> {
+    |            ^^^
+...
+125 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+130 |     pub fn least_nonresidue(&self) -> u64 {
+    |            ^^^^^^^^^^^^^^^^
+...
+134 |     pub fn zero(&self) -> Fe {
+    |            ^^^^
+...
+138 |     pub fn one(&self) -> Fe {
+    |            ^^^
+...
+142 |     pub fn is_zero(&self, a: &Fe) -> bool {
+    |            ^^^^^^^
+...
+146 |     pub fn mul(&self, a: &Fe, b: &Fe) -> Fe {
+    |            ^^^
+...
+182 |     pub fn sqr(&self, a: &Fe) -> Fe {
+    |            ^^^
+...
+186 |     pub fn add(&self, a: &Fe, b: &Fe) -> Fe {
+    |            ^^^
+...
+195 |     pub fn sub(&self, a: &Fe, b: &Fe) -> Fe {
+    |            ^^^
+...
+204 |     pub fn neg(&self, a: &Fe) -> Fe {
+    |            ^^^
+...
+208 |     pub fn from_u64(&self, v: u64) -> Fe {
+    |            ^^^^^^^^
+...
+212 |     pub fn from_i64(&self, v: i64) -> Fe {
+    |            ^^^^^^^^
+...
+221 |     pub fn from_u128(&self, v: u128) -> Fe {
+    |            ^^^^^^^^^
+...
+225 |     pub fn from_big(&self, v: &BigUint) -> Fe {
+    |            ^^^^^^^^
+...
+230 |     pub fn to_big(&self, a: &Fe) -> BigUint {
+    |            ^^^^^^
+...
+234 |     pub fn pow(&self, a: &Fe, e: &BigUint) -> Fe {
+    |            ^^^
+...
+246 |     pub fn inv(&self, a: &Fe) -> Option<Fe> {
+    |            ^^^
+...
+253 |     pub fn div(&self, a: &Fe, b: &Fe) -> Option<Fe> {
+    |            ^^^
+...
+258 |     pub fn legendre(&self, a: &Fe) -> i32 {
+    |            ^^^^^^^^
+...
+270 |     pub fn sqrt(&self, a: &Fe) -> Option<Fe> {
+    |            ^^^^
+...
+300 |     pub fn hex(&self, a: &Fe) -> String {
+    |            ^^^
+
+warning: function `is_probable_prime` is never used
+   --> src/bin/../../../../src/cryptanalysis/isogeny_walk/field.rs:307:8
+    |
+307 | pub fn is_probable_prime(n: &BigUint) -> bool {
+    |        ^^^^^^^^^^^^^^^^^
+
+warning: `isogeny-cli` (bin "field_checks") generated 21 warnings (run `cargo fix --bin "field_checks" -p isogeny-cli` to apply 2 suggestions)
+    Finished `release` profile [optimized] target(s) in 1m 30s

@@ -1,0 +1,61 @@
+{
+  "current_main_port": {
+    "main_base_commit": "c62555b7a1746490dba707589d791669a20bb0d0",
+    "receipt_audit": "PASS_bounded_receipts_only",
+    "release_library": {
+      "command": "CARGO_TARGET_DIR=/Volumes/SSD990/crypto/worktrees/codex-n83-ordered-first-pair-20261011/target TMPDIR=/Volumes/SSD990/crypto/target/n83-matched-test-tmp RUST_TEST_THREADS=4 cargo test --release --lib",
+      "failed": 0,
+      "ignored": 112,
+      "log": "current-main-release-lib.log",
+      "passed": 3986,
+      "status": "PASS"
+    },
+    "snapshot_only_audit": {
+      "log": "snapshot-only-audit.log",
+      "method": "empty local Git database; archived worker source only",
+      "status": "PASS_bounded_receipts_only"
+    },
+    "study_python": {
+      "command": "python3 -m unittest discover -s research/koblitz_n83_factor_base_sweep_20261008 -p test_*.py -q",
+      "log": "current-main-study-python.log",
+      "status": "PASS",
+      "tests": 39
+    }
+  },
+  "logs_sha256": {
+    "current-main-release-lib.log": "5cb03c0c8f4a26cc7ae5fcad02272c26f1bba53b267d000c32823b01f9a0e3c7",
+    "current-main-study-python.log": "1dab655b9c9be33467d84a2142ea6c55ff04682b42d13afa18454d0983912e24",
+    "release-lib-loopback.log": "794898655df51d9ae33e2633acff5bc80aeff7b26908357fe0eb503d9190385d",
+    "release-lib-sandbox.log": "0508a0b348f15178bc24445dc9939b8ef0da4d6ad0374898e7aa90bbfb5900a0",
+    "snapshot-only-audit.log": "f77c82651ef23a5bf5e2f1845ab33b48e2e1e50510408f29a966a01805ba1f93",
+    "study-python.log": "66ec36c12bb19436c23c106f1c704d52c11b3b27f68fc2ad7625a45961c657e3"
+  },
+  "receipt_audit": {
+    "command": "python3 research/koblitz_n83_factor_base_sweep_20261008/verification/matched-k1182-k2048-900s-20261011/audit.py",
+    "docker_socket_access": "read_only_local",
+    "status": "PASS_bounded_receipts_only"
+  },
+  "release_library_initial": {
+    "command": "TMPDIR=/Volumes/SSD990/crypto/target/n83-matched-test-tmp RUST_TEST_THREADS=4 cargo test --release --lib",
+    "failed": 9,
+    "ignored": 110,
+    "log": "release-lib-sandbox.log",
+    "passed": 3889,
+    "status": "SANDBOX_LOOPBACK_DENIED"
+  },
+  "release_library_recheck": {
+    "command": "TMPDIR=/Volumes/SSD990/crypto/target/n83-matched-test-tmp RUST_TEST_THREADS=4 cargo test --release --lib",
+    "failed": 0,
+    "ignored": 110,
+    "log": "release-lib-loopback.log",
+    "passed": 3898,
+    "status": "PASS"
+  },
+  "schema": "n83.matched-retained-size-validation/v1",
+  "study_python": {
+    "command": "python3 -m unittest discover -s research/koblitz_n83_factor_base_sweep_20261008 -p test_*.py -q",
+    "log": "study-python.log",
+    "status": "PASS",
+    "tests": 39
+  }
+}

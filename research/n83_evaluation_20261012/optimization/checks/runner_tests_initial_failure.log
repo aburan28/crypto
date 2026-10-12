@@ -1,0 +1,22 @@
+     Locking 12 packages to highest compatible versions
+   Compiling zmij v1.0.23
+   Compiling serde_core v1.0.229
+   Compiling libc v0.2.190
+   Compiling serde_json v1.0.151
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling n83-optimization-runner v0.1.0 (/workspace/repos/crypto/research/n83_evaluation_20261012/optimization/native_runner)
+error[E0308]: `?` operator has incompatible types
+   --> src/main.rs:185:38
+    |
+185 |     result["analysis_source_sha256"]=hash_bytes(include_bytes!("statistics.rs"))?;new_json(out,&result)?;println!("{}",result);Ok(0)
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Value`, found `String`
+    |
+    = note: `?` operator cannot convert from `std::string::String` to `serde_json::Value`
+help: try wrapping the expression in `serde_json::Value::String`
+    |
+185 |     result["analysis_source_sha256"]=serde_json::Value::String(hash_bytes(include_bytes!("statistics.rs"))?);new_json(out,&result)?;println!("{}",result);Ok(0)
+    |                                      ++++++++++++++++++++++++++                                            +
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `n83-optimization-runner` (bin "n83-optimization-runner" test) due to 1 previous error

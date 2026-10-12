@@ -14,6 +14,7 @@ pub struct GF2n {
     /// f(x) - x^n (bits below n)
     pub red: u64,
     mask: u64,
+    #[cfg(target_arch = "x86_64")]
     hw: bool,
     /// trace(x^i) as bit i: Tr(a) = parity(a & tmask)
     tmask: u64,
@@ -179,12 +180,11 @@ impl GF2n {
         assert!((2..=63).contains(&n) && tail < (1u64 << n) && tail & 1 == 1);
         #[cfg(target_arch = "x86_64")]
         let hw = std::arch::is_x86_feature_detected!("pclmulqdq");
-        #[cfg(not(target_arch = "x86_64"))]
-        let hw = false;
         let mut f = GF2n {
             n,
             red: tail,
             mask: (1u64 << n) - 1,
+            #[cfg(target_arch = "x86_64")]
             hw,
             tmask: 0,
             qsolve: vec![],

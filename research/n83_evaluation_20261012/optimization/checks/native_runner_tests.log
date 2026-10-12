@@ -1,0 +1,28 @@
+   Compiling n83-optimization-runner v0.1.0 (/workspace/repos/crypto/research/n83_evaluation_20261012/optimization/native_runner)
+    Finished `release` profile [optimized] target(s) in 2.47s
+     Running unittests src/main.rs (n83_optimization/runner/build/release/deps/n83_optimization_runner-e068c83083565fc6)
+
+running 20 tests
+test monitor::tests::exit_zero_with_failed_target_is_rejected ... ok
+test monitor::tests::exactly_one_complete_summary_is_required ... ok
+test monitor::tests::base_digest_mismatch_is_rejected ... ok
+test monitor::tests::mismatched_public_point_is_rejected ... ok
+test monitor::tests::missing_rank_is_rejected ... ok
+test monitor::tests::truncated_json_is_rejected ... ok
+test monitor::tests::zero_replicate_and_one_replicate_ci_are_not_fabricated ... ok
+test statistics::tests::bad_failure_charge_and_duplicate_seed_fail_closed ... ok
+test statistics::tests::missing_seed_draw_is_never_zero_imputed ... ok
+test statistics::tests::failure_is_charged_only_in_secondary_and_disqualifies_full_workload_ratios ... ok
+test statistics::tests::paired_arm_seed_sets_must_match_and_text_numbers_are_normalized ... ok
+test statistics::tests::bootstrap_is_reproducible_and_uses_geometric_paired_target_ratios ... ok
+test statistics::tests::wrong_answer_rejects_entire_holdout_including_capped_secondary ... ok
+test tests::default_wins_declared_two_percent_tie ... ok
+test tests::incomplete_candidate_never_beats_complete_candidate ... ok
+test tests::incomplete_kernel_trajectory_blocks_fold ... ok
+test tests::wrong_answer_rejects_otherwise_complete_candidate ... ok
+test statistics::tests::paired_cluster_resampling_preserves_exact_proportionality ... ok
+test statistics::tests::prepared_ic_requires_exactly_one_verified_draw_per_matching_target ... ok
+test statistics::tests::actual_verified_wall_is_preserved_while_secondary_charge_is_capped ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
