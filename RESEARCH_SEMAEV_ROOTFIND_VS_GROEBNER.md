@@ -143,11 +143,75 @@ principal square root so it reproduces the committed rungs exactly).
   the prime-rho note's set-up caveat describes. The per-decomposition tables
   isolate the oracle cost, which is the quantity the Gröbner solve dominated.
 
-## 5. Reproduce
+## 5. Scaling to larger fields
+
+Measured by `examples/semaev_rootfind_scaling_bench.rs`
+(`research/semaev_rootfind_scaling_20261012/`). Two walls are made
+explicit, because "bigger curve" means different things on each axis.
+
+**Prime, native `u64` (`Fp64`), direct-subtraction 2-decomposition,
+`|F| = 120`.** Per-target cost stays flat to the `2^62` ceiling; every one
+of 200 constructed `R = F_i + F_j` targets decomposes and verifies in the
+group at each size.
+
+| bits | per-target root-find | constructed verified |
+|---:|---:|---:|
+| 40 | 2.95 µs | 200/200 |
+| 48 | 3.87 µs | 200/200 |
+| 56 | 3.35 µs | 200/200 |
+| 61 | 8.82 µs | 200/200 |
+
+**Prime, arbitrary precision (`BigUint`), `p = 2^83 − 55` (largest prime
+`< 2^83`), `|F| = 80`.** The *same* algorithm — no summation-polynomial
+root solve, no Gröbner basis, just `x(R ∓ F_i)` by subtraction — runs at
+83 bits:
+
+| bits | per-target root-find | constructed verified |
+|---:|---:|---:|
+| 83 | 5.99 ms | 100/100 |
+
+The ≈1000× jump from the `u64` rows is the arbitrary-precision field (one
+`BigUint` modular inverse per factor-base element, un-batched), not the
+method. A `u128` Montgomery field would recover most of it; the point here
+is that the decomposition algorithm, not the word size, is what extends.
+
+**Binary `F_{2^53}`, pairs-and-solve (root-finding) over a bounded
+subspace.** Correctness anchor at `ℓ = 6`: `decompose` agrees with an
+exhaustive `S₄` triple search on 200/200 targets. Rejection cost (the
+dominant per-target work) scales with the subspace as expected:
+
+| ℓ | \|V\| | per-target decompose |
+|---:|---:|---:|
+| 8 | 256 | 38 ms |
+| 10 | 1024 | 585 ms |
+| 11 | 2048 | 2.48 s |
+
+**The two walls.**
+
+1. *Native `u64` width (engineering).* `Fp64` needs `p < 2^62`; the binary
+   `PairSumTable` / `Gf2` pack an x-coordinate into a `u64` (`n ≤ 63`). An
+   `83`-bit prime runs only via `BigUint` (above); `F_{2^83}` exceeds the
+   single-word binary field (`Gf2` asserts `n ≤ 63`) and the pair-table
+   packing (`n ≤ 62`). A `u128` field (the crate already has `Gf2_128`)
+   is the fix, and does not change the algorithm.
+2. *Exponential factor base (fundamental).* The Koblitz Frobenius-invariant
+   factor base has dimension `ℓ = ord_2(n)`: **52 at `n = 53`, 82 at
+   `n = 83`**, so `|V| = 2^52` / `2^82` cannot be materialised by *any*
+   decomposition engine — F4 and root finding alike. The small-`n`
+   head-to-head of §1 lives where `ord_2(n)` is small; raising `n` makes
+   the factor base exponentially larger, not the decomposition harder.
+   This is why the scaling study measures the oracle on a *bounded*
+   subspace / factor base, isolating the decomposition cost from the
+   regime's own barrier.
+
+## 6. Reproduce
 
 ```bash
 cargo run --release --example semaev_root_vs_groebner_bench
+cargo run --release --example semaev_rootfind_scaling_bench
 # raw evidence:
 BENCH_OUT=research/semaev_root_vs_groebner_20261012 \
   cargo run --release --example semaev_root_vs_groebner_bench
+BENCH_OUT=research/semaev_rootfind_scaling_20261012 \
+  cargo run --release --example semaev_rootfind_scaling_bench
 ```
