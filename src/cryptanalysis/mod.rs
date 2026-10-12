@@ -264,6 +264,7 @@ pub mod p256_isogeny_walk;
 pub mod p256_structural;
 pub mod pc_degree_avg;
 pub mod pc_degree_harness;
+pub mod pdp_split;
 pub mod petit_quisquater;
 pub mod pkm_criterion;
 pub mod pohlig_hellman;
