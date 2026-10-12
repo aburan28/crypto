@@ -348,18 +348,20 @@
       "priority": 4,
       "l": 8,
       "n": 24,
+      "m": 3,
+      "fixtures_default": 1,
       "producer": {
         "example": "semaev_decomp_bench",
-        "args": "8"
+        "args_template": "{l}"
       },
       "acceptance_gates": [
         "pairs wall at l=8 logged",
-        "FFD required for ledger beat \u2014 currently unmeasured",
+        "FFD required for ledger beat \u2014 currently unmeasured on this pairs arm (related full-field S3 FFD logged separately)",
         "sub-2^(2l) requires oracle faster than pairs \u2014 not this baseline",
         "not a ledger promotion"
       ],
       "ledger_next_target": "regimes.binary.stages.decomposition.next_target",
-      "note": "Manual PASS-or-FAIL drafts under runs_manual/binary_decomp_l8_20260911. Research note: SAT historically slower than pairs at l=8."
+      "note": "Control-plane launch via examples/semaev_decomp_bench {l}. Pairs-and-solve is Theta(2^(2l)); this measures the baseline, not a sub-2^(2l) win. Manual drafts under runs_manual/binary_decomp_l8_20260911."
     },
     "prime.end_to_end_dlp.j0_16bit": {
       "label": "Priority #5: j=0 known-answer IC at 16 bits agreeing with rho",

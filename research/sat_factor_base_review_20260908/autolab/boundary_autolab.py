@@ -1577,6 +1577,150 @@ def parse_paired_oracle_stdout(stdout: str) -> dict[str, Any]:
     }
 
 
+def parse_semaev_decomp_bench_stdout(stdout: str) -> dict[str, Any]:
+    """Parse examples/semaev_decomp_bench text ladder into structured fields."""
+    import re
+
+    ladder: list[dict[str, Any]] = []
+    for line in stdout.splitlines():
+        m = re.match(
+            r"^\s*(\d+)\s+(\d+)\s+(\d+)\s+([0-9.]+)s\s+([0-9.]+)s\s+([0-9.]+)s\s+([0-9.]+)x\s*$",
+            line,
+        )
+        if not m:
+            continue
+        ladder.append(
+            {
+                "l": int(m.group(1)),
+                "n": int(m.group(2)),
+                "triples": int(m.group(3)),
+                "triples_gen_s": float(m.group(4)),
+                "triples_1wd_s": float(m.group(5)),
+                "pairs_s": float(m.group(6)),
+                "speedup_vs_triples": float(m.group(7)),
+            }
+        )
+    require(ladder, "semaev_decomp_bench stdout missing pairs ladder rows")
+    return {"ladder": ladder}
+
+
+def draft_binary_pairs_decomposition_claim(
+    *,
+    beat: dict[str, Any],
+    beat_id: str,
+    run: Path,
+    direct_obs: dict[str, Any],
+    binaries: dict[str, str],
+) -> dict[str, Any]:
+    parsed = parse_semaev_decomp_bench_stdout(direct_obs.get("stdout") or "")
+    ladder = parsed["ladder"]
+    l_goal = int(beat.get("l") or 8)
+    row = next((item for item in ladder if item["l"] == l_goal), None)
+    require(row is not None, f"semaev_decomp_bench stdout missing l={l_goal} ladder row")
+    producers_ok = direct_obs["exit_code"] == 0
+    peak_rss = direct_obs.get("children_peak_rss_bytes")
+    cap = beat.get("resource_cap_bytes")
+    under_cap = (
+        peak_rss is not None and cap is not None and int(peak_rss) <= int(cap)
+        if cap is not None
+        else None
+    )
+    pairs_s = float(row["pairs_s"])
+    median_ms = pairs_s * 1000.0
+    source = REPO / "examples" / f"{beat['producer']['example']}.rs"
+    binary_path = binaries.get("custom") or binaries.get("direct")
+    claim = {
+        "schema_version": 2,
+        "task_id": TASK_ID,
+        "beat_id": beat_id,
+        "regime": beat["regime"],
+        "stage": "decomposition",
+        "n": beat.get("n", row["n"]),
+        "n_or_bits": beat.get("n", row["n"]),
+        "m_summands": beat.get("m", 3),
+        "dimension_l_or_dim": l_goal,
+        "unknowns": "2*l_bit_pair_space",
+        "system_degree": "quartic_s4_symmetrised",
+        "eq_var_ratio": "inapplicable_pairs_and_solve_no_boolean_system",
+        "ffd_or_degree_of_regularity": {
+            "status": "inapplicable",
+            "reason": (
+                "oracle_class=pairs_and_solve enumerates pair space; "
+                "no Boolean Macaulay/GB system in this arm"
+            ),
+            "note": (
+                "Ledger sub-2^(2l) beat still wants subspace/oracle FFD at l=8; "
+                "see runs_manual/binary_s4_ffd_l8_20260920 for related S4 subspace FFD."
+            ),
+        },
+        "oracle_class": "pairs_and_solve",
+        "median_ms_per_target": median_ms,
+        "largest_solvable": {
+            "budget": "pairs_baseline",
+            "l": l_goal,
+            "n": row["n"],
+            "pairs_solve_s": pairs_s,
+        },
+        "ladder": [
+            {
+                "l": item["l"],
+                "pairs_s": item["pairs_s"],
+                "speedup_vs_triples": item["speedup_vs_triples"],
+                "triples_gen_s": item["triples_gen_s"],
+            }
+            for item in ladder
+        ],
+        "ledger_gate_assessment": {
+            "ffd_logged": False,
+            "median_le_half_pairs": "n/a_until_faster_oracle_measured",
+            "note": (
+                "pairs-and-solve IS Theta(2^(2l)); this measures the baseline, "
+                "not a sub-2^(2l) win"
+            ),
+            "sub_2_to_2l_oracle": False,
+            "targets_le_64": True,
+        },
+        "wall_s": float(direct_obs.get("whole_process_wall_ms") or 0.0) / 1000.0,
+        "peak_rss_bytes": peak_rss,
+        "verdict": (
+            "L8_PAIRS_BASELINE_MEASURED_NO_SUB_2_2L_PENDING_INDEPENDENT_VALIDATION"
+            if producers_ok
+            else "PRODUCER_FAILURE"
+        ),
+        "claim_boundary": (
+            "Public synthetic binary Semaev pairs-and-solve baseline only. "
+            "Not key recovery, not a sub-2^(2l) oracle claim, not ledger promotion."
+        ),
+        "claim_boundary_non_claims": [
+            "not key recovery",
+            "not sub-2^(2l) oracle claim",
+            "not ledger promotion",
+            "FFD unmeasured on pairs arm",
+        ],
+        "independent_replay_pointer": independent_replay_pointer(run),
+        "fixture_hash": sha256(source),
+        "executable_or_source_hash": {
+            "executable": sha256(binary_path) if binary_path else None,
+            "source": sha256(source),
+        },
+        "host_id": host_record(),
+        "resource_caps": {
+            "common_cap_bytes": cap,
+            "observed_peak_rss_bytes": peak_rss,
+            "under_cap": under_cap,
+        },
+        "seeds": {"decomp_bench_internal": "0x9E3779B9"},
+        "evidence_paths": [
+            str((run / "logs/direct.stdout.jsonl").resolve()),
+            str((run / "receipts/direct.resource.json").resolve()),
+        ],
+        "created_at": now(),
+        "autolab_run_id": run.name,
+        "producer_exit_codes": {"direct": direct_obs["exit_code"]},
+    }
+    return claim
+
+
 def draft_decomposition_claim(
     *,
     beat: dict[str, Any],
@@ -1586,6 +1730,15 @@ def draft_decomposition_claim(
     binaries: dict[str, str],
     fixtures: int,
 ) -> dict[str, Any]:
+    producer = beat.get("producer") or {}
+    if str(producer.get("example") or "") == "semaev_decomp_bench":
+        return draft_binary_pairs_decomposition_claim(
+            beat=beat,
+            beat_id=beat_id,
+            run=run,
+            direct_obs=direct_obs,
+            binaries=binaries,
+        )
     parsed = parse_paired_oracle_stdout(direct_obs.get("stdout") or "")
     header = parsed["header"]
     arms = parsed["arms"]
@@ -2125,6 +2278,7 @@ def producer_commands(
             a=beat.get("a", 0),
             n=beat.get("n"),
             m=beat.get("m"),
+            l=beat.get("l"),
             fixtures=fixtures,
         )
         direct_argv = [direct_bin, *shlex.split(rendered)]
