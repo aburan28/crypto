@@ -20,6 +20,13 @@ the entire historical research corpus. Failures and timeouts remain failures.
   run, including 320 column-sweep solves. It also performs dedicated historical
   replays before replaying those sessions again in the corpus loop.
 
+The refreshed default branch has 350 workflows. Its newer decision to retire
+99 completed-study gates from automatic events is preserved: those studies
+remain available through manual dispatch. The new weak-curve conjecture gate
+retains its census replay, tests, Lean proof and axiom checks, with a 25-minute
+PR budget and its original 60-minute manual budget. Its sparse checkout includes
+the fixed census inputs and SHA-256 source that its standalone reviewer uses.
+
 ## Scope contract
 
 [ci-scope.mjs](scripts/ci-scope.mjs) compares local git trees, with NUL-delimited
@@ -75,6 +82,18 @@ manual measurement commands and archived results. PR validation does not
 create evidence commits or rewrite frozen sessions. Obsolete PR jobs cancel;
 manual measurements keep their existing cancellation policy.
 
+Historical replay manifests that bind workflow metadata retain their original
+bytes and hashes. Their historical custody checks use an isolated view with the
+exact frozen workflow revision. All other source and evidence comes from the
+current checkout, and native source tests still run there. Existing scientific
+source drift and a historical verifier syntax
+error were observed in hosted checks and remain visible failures. Local CI
+metadata validation does not establish that every hosted scientific job passes.
+The rotated-admission custody command passes its historical replay, original
+negative controls and current-interface check. The n53 custody check now passes
+the workflow freeze, then retains the original preflight rejection of historical
+Cargo-lock digest drift.
+
 The event-aware [budget checker](scripts/check-pr-budgets.py) rejects missing,
 unknown or over-budget timeouts on PR/merge-group jobs, accounting for job
 conditions and dependencies. Its fixtures keep labeled/manual/disabled work
@@ -115,6 +134,7 @@ repository settings.
 
 ```sh
 node --test .github/scripts/test-ci-scope.mjs
+node --test .github/scripts/test-frozen-workflow-check.mjs
 python3 -B scripts/test_workflows_parse.py -v
 python3 -B .github/scripts/test-pr-budgets.py -v
 python3 -B .github/scripts/check-pr-budgets.py
@@ -126,6 +146,9 @@ and job semantics with SHA-256 verified actionlint 1.7.12. Its YAML structure
 check keeps its existing job name. `workflows-parse` owns YAML regression
 fixtures, the historical-stage manual-only rule, classifier fixtures and the
 PR budget contract. Both jobs use sparse checkouts of the metadata they read.
+Frozen-workflow custody fixtures check the pinned manifest and workflow, current
+source retention, altered or deleted evidence, failure propagation and temporary
+view cleanup.
 The status dashboard schedule runs every ten minutes, respecting GitHub's
 five-minute minimum, and disabled historical campaigns use explicit conditions
 that remain false while passing the semantic linter.
