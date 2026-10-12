@@ -50,6 +50,25 @@ noise and a trend or an area index is the signal.  The wall column is one
 reading on the recording host and is informational.  Recording a snapshot
 takes about fifteen minutes of callgrind on four cores.
 
+### Separate F4/F5 groups
+
+The [separate algorithm reports](https://github.com/aburan28/crypto/blob/perf-history/docs/perf/groebner/REPORT.md)
+retain F4 and F5 as separate series for the shared Boolean matrix-step and
+solver workloads, with instruction and diagnostic-runtime graphs. Complete-call
+allocation and F5 criterion allocation have separate groups. Every group has a
+PDF, and a combined PDF, SVGs, editable sources and native plot data are saved
+together. The history workflow regenerates them when it records a revision.
+
+The [frozen initial rendering](../../research/f4_f5_history_20261012/REPORT.md)
+retains seven imported historical snapshots and the native allocation audit.
+The [group registry](groebner-groups.json) and
+[allocation history index](f4-f5-allocation-history.json) define the inputs;
+[the native tool](../../tools/groebner-history/README.md) validates the raw
+records before rendering. Historical CI timings are diagnostic, and the
+recorded profiler scope has incomplete worker coverage. Lines break when the
+fingerprint, host, compiler, harness or profiler changes. These displays make
+no new runtime-speedup or complete-DLP claim.
+
 ## What it measures, and what it does not
 
 `examples/perfbench` is a registry of **kernels**: each runs a fixed,

@@ -2450,7 +2450,6 @@ fn visit_macaulay_rows_counted<const COUNT_PRUNED: bool>(
     let mut full_count = 0usize;
     let mut schedules: Vec<Option<std::rc::Rc<[u64]>>> = vec![None; degree as usize + 1];
     let mut all: Vec<u64> = Vec::new();
-    let mut row: Vec<u64> = Vec::new();
     for (i, p) in polys.iter().enumerate() {
         let pdeg = p
             .terms
@@ -2480,22 +2479,25 @@ fn visit_macaulay_rows_counted<const COUNT_PRUNED: bool>(
             all.clear();
             all.extend(p.terms.iter().map(|t| t.mask | mult));
             all.sort_unstable();
-            row.clear();
             let mut i = 0;
+            let mut kept = 0;
             while i < all.len() {
                 let mut j = i;
                 while j < all.len() && all[j] == all[i] {
                     j += 1;
                 }
                 if (j - i) % 2 == 1 {
-                    row.push(all[i]);
+                    // The write cursor never passes the unread suffix.
+                    all[kept] = all[i];
+                    kept += 1;
                 }
                 i = j;
             }
-            if !row.is_empty() {
+            all.truncate(kept);
+            if !all.is_empty() {
                 full_count += 1;
                 if !pruned {
-                    visit(&row);
+                    visit(&all);
                     selected_count += 1;
                 }
             }
@@ -2516,10 +2518,27 @@ fn visit_macaulay_rows_counted<const COUNT_PRUNED: bool>(
 /// what makes "leading column index ≥ the degree-≤1 boundary" equivalent
 /// to "this row is a linear consequence".
 pub(crate) fn macaulay_columns(rows_monos: &[Vec<u64>]) -> Option<Vec<u64>> {
-    let mut cols: Vec<u64> = rows_monos.iter().flatten().copied().collect();
-    cols.sort_unstable();
-    cols.dedup();
-    if cols.len() > max_f4_cols() {
+    let cap = max_f4_cols();
+    let mut cols: Vec<u64> = if rows_monos.len() <= 1 {
+        // A single row has no repeated support across rows to eliminate.
+        let mut cols: Vec<u64> = rows_monos.iter().flatten().copied().collect();
+        cols.sort_unstable();
+        cols.dedup();
+        cols
+    } else {
+        // Retain each column once rather than sorting the entire matrix's
+        // nonzeros. The mask hasher also handles support in high variables.
+        let mut seen: crate::cryptanalysis::fx_hash::MaskMap<()> = Default::default();
+        for row in rows_monos {
+            for &mask in row {
+                if seen.insert(mask, ()).is_none() && seen.len() > cap {
+                    return None;
+                }
+            }
+        }
+        seen.into_keys().collect()
+    };
+    if cols.len() > cap {
         return None;
     }
     // `mono_key` orders exactly as `cmp_mono`; the masks are distinct
@@ -6294,6 +6313,50 @@ mod tests {
     use crate::binary_ecc::BinaryCurve;
     use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
     use crate::cryptanalysis::koblitz_index_calculus::{find_irreducible, KoblitzCurve};
+
+    #[test]
+    fn macaulay_products_preserve_boolean_cancellation_and_row_order() {
+        let n_vars = 5;
+        let degree = 4;
+        let mask = all_variable_mask(n_vars);
+        let polys = [
+            F2BoolPoly::zero(n_vars),
+            F2BoolPoly::one(n_vars),
+            F2BoolPoly::from_monos(
+                [0, 1, 2, 3, 4, 5, 7, 16]
+                    .into_iter()
+                    .map(F2BoolMono::from_mask)
+                    .collect(),
+                n_vars,
+            ),
+        ];
+        let mut expected = Vec::new();
+        for p in &polys {
+            let pdeg = p.terms.iter().map(|t| t.degree()).max().unwrap_or(0);
+            for multiplier in monomials_up_to_mask(mask, degree - pdeg) {
+                let product = p.mul_mono(F2BoolMono::from_mask(multiplier));
+                if !product.is_zero() {
+                    let mut row: Vec<u64> = product.terms.iter().map(|t| t.mask).collect();
+                    row.sort_unstable();
+                    expected.push(row);
+                }
+            }
+        }
+        assert_eq!(
+            macaulay_rows_monos_with_mask(&polys, n_vars, degree, mask, None).unwrap(),
+            expected
+        );
+    }
+
+    #[test]
+    fn macaulay_columns_deduplicate_high_bit_support_in_monomial_order() {
+        let a = 1u64 << 61;
+        let b = 1u64 << 63;
+        let rows = vec![vec![b, a | b, 0], vec![a, b, a | b], vec![b, 0]];
+        assert_eq!(macaulay_columns(&rows), Some(vec![a | b, a, b, 0]));
+        assert_eq!(macaulay_columns(&[vec![b, b, 0]]), Some(vec![b, 0]));
+        assert_eq!(macaulay_columns(&[]), Some(Vec::new()));
+    }
 
     #[test]
     fn fused_f5_count_applies_the_full_f4_row_cap() {

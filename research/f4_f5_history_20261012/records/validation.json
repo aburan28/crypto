@@ -1,0 +1,32 @@
+{
+  "schema": "groebner.history-validation/v1",
+  "library_source_revision": "8f1e6d5deefe3812da4e4d0d0379aaf837d51eaa",
+  "native_tests_passed": 19,
+  "native_clippy": "passed, all targets, warnings denied",
+  "native_release_build": "passed",
+  "snapshot_imports_verified": 7,
+  "groups": 4,
+  "svg_graphs": 8,
+  "group_pdfs": 4,
+  "combined_pdf_pages": 4,
+  "pdf_inspection": "All eight pages across five PDFs rasterized and opened; labels, values, captions, tables and source pointers checked",
+  "render_reproduction": "Every SVG, PDF, Typst, Markdown and JSON file reproduced byte for byte in a second output directory",
+  "workflow_validation": "YAML parses; record and PR report-generation steps present; live GitHub execution not monitored or claimed",
+  "library": {
+    "expected_tests": 4015,
+    "distinct_passed": 3904,
+    "ignored": 110,
+    "unfinished": 1,
+    "budget_seconds": 1200,
+    "exit_code": 124,
+    "initial_failures": 11,
+    "network_rerun_passed": 37,
+    "cover_serial_rerun_passed": 14,
+    "cover_serial_rerun_ignored": 1,
+    "unresolved_failed_tests": 0,
+    "unfinished_test": "cryptanalysis::jv_isogeny_walk::tests::end_to_end_from_a_non_weak_curve_recovers_and_verifies",
+    "full_suite_passed": false
+  },
+  "new_performance_measurement": false,
+  "runtime_speedup_claim": false
+}

@@ -26,6 +26,11 @@ on:
       - 'scripts/perf/perfindex.py'
       - 'docs/perf/ecbench-children.json'
       - 'docs/perf/weights.json'
+      - 'docs/perf/groebner-groups.json'
+      - 'docs/perf/f4-f5-allocation-history.json'
+      - 'tools/groebner-history/**'
+      - 'scripts/perf/render_groebner_history.py'
+      - 'scripts/perf/groebner-render-requirements.txt'
       - '.github/workflows/perf-history.yml'
   pull_request:
     paths:
@@ -37,6 +42,11 @@ on:
       - 'scripts/perf/perfindex.py'
       - 'docs/perf/ecbench-children.json'
       - 'docs/perf/weights.json'
+      - 'docs/perf/groebner-groups.json'
+      - 'docs/perf/f4-f5-allocation-history.json'
+      - 'tools/groebner-history/**'
+      - 'scripts/perf/render_groebner_history.py'
+      - 'scripts/perf/groebner-render-requirements.txt'
       - '.github/workflows/perf-history.yml'
   workflow_dispatch:
     inputs:
@@ -111,12 +121,54 @@ jobs:
             sed -n '/^## Areas/,/^## Snapshots/p' perf-history/docs/perf/HISTORY.md | head -40
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Check out current report tools for historical backfills
+        if: github.event_name == 'workflow_dispatch' && inputs.ref != ''
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: report-tools
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /tools/groebner-history/
+            /src/hash/sha256.rs
+            /docs/perf/groebner-groups.json
+            /docs/perf/f4-f5-allocation-history.json
+            /scripts/perf/render_groebner_history.py
+            /scripts/perf/groebner-render-requirements.txt
+            /research/f4_f5_row_build_20261011/records/comparison.json
+            /research/f4_f5_row_build_20261011/records/baseline.jsonl
+            /research/f4_f5_row_build_20261011/records/candidate.jsonl
+      - name: Prepare separate F4/F5 plot groups natively
+        env:
+          REPORT_ROOT: ${{ github.event_name == 'workflow_dispatch' && inputs.ref != '' && 'report-tools' || '.' }}
+        run: |
+          cargo build --locked --release --manifest-path "$REPORT_ROOT/tools/groebner-history/Cargo.toml" \
+            --target-dir "$RUNNER_TEMP/groebner-history-target"
+          "$RUNNER_TEMP/groebner-history-target/release/groebner-history" prepare \
+            --history perf-history/docs/perf/history \
+            --groups "$REPORT_ROOT/docs/perf/groebner-groups.json" \
+            --allocation-index "$REPORT_ROOT/docs/perf/f4-f5-allocation-history.json" \
+            --root "$REPORT_ROOT" --out perf-history/docs/perf/groebner/plot-data.json
+      - name: Render F4/F5 graphs and PDFs from recorded values
+        env:
+          REPORT_ROOT: ${{ github.event_name == 'workflow_dispatch' && inputs.ref != '' && 'report-tools' || '.' }}
+        run: |
+          python3 -m venv "$RUNNER_TEMP/groebner-render"
+          "$RUNNER_TEMP/groebner-render/bin/pip" install -r "$REPORT_ROOT/scripts/perf/groebner-render-requirements.txt"
+          "$RUNNER_TEMP/groebner-render/bin/python" "$REPORT_ROOT/scripts/perf/render_groebner_history.py" \
+            --data perf-history/docs/perf/groebner/plot-data.json --out perf-history/docs/perf/groebner
+          cat >> perf-history/docs/perf/HISTORY.md <<'EOF'
+
+          ## Separate F4/F5 history
+
+          [Matrix-step and solver history, allocation groups, graphs and PDFs](groebner/REPORT.md).
+          EOF
       - name: Commit and push the snapshot
         working-directory: perf-history
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add docs/perf/history docs/perf/HISTORY.md docs/perf/history.svg docs/perf/history.json
+          git add docs/perf/history docs/perf/HISTORY.md docs/perf/history.svg docs/perf/history.json docs/perf/groebner
           if git diff --cached --quiet; then echo "nothing new"; exit 0; fi
           git commit -m "perf history: ${{ inputs.ref || github.sha }}"
           # Another run may have pushed meanwhile: rebase onto it and retry.
@@ -135,6 +187,7 @@ jobs:
             perf-history/docs/perf/HISTORY.md
             perf-history/docs/perf/history.svg
             perf-history/docs/perf/history.json
+            perf-history/docs/perf/groebner/
             ${{ runner.temp }}/record.log
           if-no-files-found: warn
 
@@ -159,6 +212,21 @@ jobs:
           test "$(valgrind --version)" = valgrind-3.22.0
       - name: Build perfbench and ecbench
         run: cargo build --release --example perfbench --bin ecbench
+      - name: Validate native F4/F5 plot data and render reports
+        run: |
+          cargo test --locked --manifest-path tools/groebner-history/Cargo.toml \
+            --target-dir "$RUNNER_TEMP/groebner-history-target"
+          cargo build --locked --release --manifest-path tools/groebner-history/Cargo.toml \
+            --target-dir "$RUNNER_TEMP/groebner-history-target"
+          "$RUNNER_TEMP/groebner-history-target/release/groebner-history" prepare \
+            --history perf-history/docs/perf/history \
+            --groups docs/perf/groebner-groups.json \
+            --allocation-index docs/perf/f4-f5-allocation-history.json \
+            --root . --out "$RUNNER_TEMP/groebner-reports/plot-data.json"
+          python3 -m venv "$RUNNER_TEMP/groebner-render"
+          "$RUNNER_TEMP/groebner-render/bin/pip" install -r scripts/perf/groebner-render-requirements.txt
+          "$RUNNER_TEMP/groebner-render/bin/python" scripts/perf/render_groebner_history.py \
+            --data "$RUNNER_TEMP/groebner-reports/plot-data.json" --out "$RUNNER_TEMP/groebner-reports"
       - name: Compare against the latest snapshot
         env:
           FAIL: ${{ vars.PERF_HISTORY_FAIL_ON_REGRESSION }}
@@ -176,5 +244,7 @@ jobs:
         if: always()
         with:
           name: perf-history-check-${{ github.run_id }}
-          path: ${{ runner.temp }}/check.md
+          path: |
+            ${{ runner.temp }}/check.md
+            ${{ runner.temp }}/groebner-reports/
           if-no-files-found: warn
