@@ -3508,7 +3508,7 @@ impl F4ColumnLayout {
                     .enumerate()
                     .map(|(column, &monomial)| (monomial, column)),
             );
-            F4ColumnIndex::Fast(index)
+            F4ColumnIndex::Fast(F4FastColumnIndex::Hashed(index))
         };
         Self { columns, index }
     }
@@ -3516,7 +3516,13 @@ impl F4ColumnLayout {
 
 enum F4ColumnIndex {
     Standard(std::collections::HashMap<u64, usize>),
-    Fast(FastColumnMap),
+    Fast(F4FastColumnIndex),
+}
+
+// Nest the fast representations so the outer enum retains the original
+// hash-only metadata size, including on high-bit fallback layouts.
+enum F4FastColumnIndex {
+    Hashed(FastColumnMap),
     Dense(Vec<u16>),
 }
 
@@ -3542,14 +3548,14 @@ impl F4ColumnIndex {
         for (column, &monomial) in columns.iter().enumerate() {
             index[monomial as usize] = column as u16;
         }
-        Some(Self::Dense(index))
+        Some(Self::Fast(F4FastColumnIndex::Dense(index)))
     }
 
     fn get(&self, monomial: &u64) -> Option<usize> {
         match self {
             Self::Standard(index) => index.get(monomial).copied(),
-            Self::Fast(index) => index.get(monomial).copied(),
-            Self::Dense(index) => index
+            Self::Fast(F4FastColumnIndex::Hashed(index)) => index.get(monomial).copied(),
+            Self::Fast(F4FastColumnIndex::Dense(index)) => index
                 .get(usize::try_from(*monomial).ok()?)
                 .copied()
                 .filter(|&column| column != u16::MAX)
@@ -6680,6 +6686,15 @@ mod tests {
 
     #[test]
     fn dense_column_lookup_matches_a_map_and_preserves_missing_masks() {
+        #[allow(dead_code)]
+        enum OriginalHashIndex {
+            Standard(std::collections::HashMap<u64, usize>),
+            Fast(FastColumnMap),
+        }
+        assert!(
+            std::mem::size_of::<F4ColumnIndex>() <= std::mem::size_of::<OriginalHashIndex>(),
+            "index metadata must not enlarge heap-resident fallback layouts"
+        );
         let columns = [9, 0, 1, 7, 3, 5, 8];
         let reference: std::collections::HashMap<_, _> = columns
             .iter()
