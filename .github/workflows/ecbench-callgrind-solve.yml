@@ -4,20 +4,9 @@ name: ecbench Callgrind solve census
 # The original 32 fresh Callgrind solves run only by manual dispatch.
 
 on:
-  merge_group:
-  pull_request:
-    paths:
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - 'build.rs'
-      - '.cargo/**'
-      - 'rust-toolchain*'
-      - 'src/bin/ecbench.rs'
-      - 'src/cryptanalysis/ecbench/**'
-      - 'src/cryptanalysis/ic_measurement.rs'
-      - 'examples/ecbench_callgrind_analyze.rs'
-      - 'research/ecbench_callgrind_solve_20261004/**'
-      - '.github/workflows/ecbench-callgrind-solve.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 
 permissions:

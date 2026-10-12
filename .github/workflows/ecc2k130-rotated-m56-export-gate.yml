@@ -1,19 +1,10 @@
 name: ECC2K130 rotated m5/m6 exporter semantic gate
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/ecc2k130-rotated-m56-export-gate.yml'
-      - 'research/notes/ecc2k130/rotated_m56_export_gate_20260925/**'
-      - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/**'
-      - 'research/notes/ecc2k130/rotated_subspace_support_20260925/verify.py'
-  pull_request:
-    paths:
-      - '.github/workflows/ecc2k130-rotated-m56-export-gate.yml'
-      - 'research/notes/ecc2k130/rotated_m56_export_gate_20260925/**'
-      - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/**'
-      - 'research/notes/ecc2k130/rotated_subspace_support_20260925/verify.py'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
 
 jobs:
   frozen-semantic-replay:

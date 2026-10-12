@@ -1,19 +1,10 @@
 name: ECC2K130 n131 beta3 F0 exact census
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/ecc2k130-n131-f0-census.yml'
-      - 'research/notes/ecc2k130/n131_beta3_f0_census_20260925/**'
-      - 'research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py'
-      - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/verify.py'
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/ecc2k130-n131-f0-census.yml'
-      - 'research/notes/ecc2k130/n131_beta3_f0_census_20260925/**'
-      - 'research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py'
-      - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/verify.py'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
 
 jobs:
   frozen-controls-and-archive:

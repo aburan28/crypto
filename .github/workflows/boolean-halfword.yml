@@ -1,11 +1,8 @@
 name: Standalone Boolean half-word study
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, labeled]
-    paths:
-      - 'tools/isolated_bench.py'
-      - 'research/boolean_halfword_20260923/**'
-      - '.github/workflows/boolean-halfword.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
     inputs:
       phase:

@@ -1,17 +1,10 @@
 name: Boolean F5 affine signature
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'tools/isolated_bench.py'
-      - 'research/boolean_f5_affine_signature_20261002/**'
-      - '.github/workflows/boolean-f5-affine-signature.yml'
-  pull_request:
-    paths:
-      - 'tools/isolated_bench.py'
-      - 'research/boolean_f5_affine_signature_20261002/**'
-      - '.github/workflows/boolean-f5-affine-signature.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
 
 permissions:
   contents: read

@@ -1,0 +1,28 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W5",
+  "slug": "lane-batched-roots",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1714",
+  "papers": ["arXiv 2607.06372"],
+  "kind": "negative",
+  "workload": {
+    "id": "f6-ic-probe-k0-f2m23-dim8-f6p",
+    "description": "f6_ic_probe F6-IC + pair-index arm, Koblitz icv1-f2m23-t5197-69e76b73, prime-order subgroup of KoblitzCurve::new, standard subspace dim 8 (275 points), m = 3, targets [k]G k = 1..4 (no relation), budget 20000, reps 3",
+    "curve_ids": ["icv1-f2m23-t5197-69e76b73"]
+  },
+  "metric": "word_xors incl. lane-root shares, 4 targets",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 5,
+  "arms": [
+    {"role": "original", "label": "program baseline", "commit": "4b6e09b78", "value": 124949801},
+    {"role": "previous", "label": "KIC_F4_INHERIT_ROOT=rref (sequential RREF roots, the control the lanes reproduce row for row)", "commit": "d22fb3b52", "value": 89627327},
+    {"role": "candidate", "label": "KIC_F4_LANES=4 + KIC_F4_INHERIT_ROOT=rref (4 roots bit-sliced together)", "commit": "d22fb3b52", "value": 235173139}
+  ],
+  "ratio_original_over_candidate": {"value": 0.5313098321147978, "interval": [0.5313098321147978, 0.5313098321147978], "interval_kind": "none (deterministic; identical in all 5 rounds)"},
+  "ratio_previous_over_candidate": {"value": 0.3811120920574182, "interval": [0.3811120920574182, 0.3811120920574182], "interval_kind": "none (deterministic; identical in all 5 rounds)"},
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w5_lane_batched_f4_20261011/reports/run-20261011T2225Z/report.pdf",
+  "note": "Exact (tree identical to the RREF control), but the bit-sliced root costs 2.6x the control's stage unit; process CPU control/lanes 0.93 [0.92-0.98]. Lanes share their pivot in 35 of 761 columns."
+}

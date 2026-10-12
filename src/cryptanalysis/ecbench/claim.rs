@@ -1018,6 +1018,7 @@ fn build_from_session(
     put("target_count", json!(1));
     put("ic_target_hash", json!(target_hash));
     put("rho_target_hash", json!(target_hash));
+    put("timing_class", json!("single_target_online"));
     put("timing_class", json!("single_target_online_wall"));
     put("ic_cost", json!(ic_ms));
     put("rho_cost", json!(rho_ms));
@@ -1477,7 +1478,7 @@ pub fn check_vs_rho(report: &Value) -> Result<Value, String> {
         .is_some_and(|e| e.contains(&Value::String("single_target_online_wall".into())))
         || get("timing_class").and_then(Value::as_str) != Some("single_target_online_wall")
     {
-        err("timing_class must be single_target_online_wall".into());
+        err("timing_class must be single_target_online".into());
     }
     for key in [
         "same_resource_envelope",
