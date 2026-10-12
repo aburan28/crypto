@@ -3,7 +3,7 @@
   "workstream": "W5",
   "slug": "lane-batched-roots",
   "date": "2026-10-11",
-  "pr": "aburan28/crypto#PRNUM",
+  "pr": "aburan28/crypto#1714",
   "papers": ["arXiv 2607.06372"],
   "kind": "negative",
   "workload": {
@@ -11,7 +11,7 @@
     "description": "f6_ic_probe F6-IC + pair-index arm, Koblitz icv1-f2m23-tm5197-1f85e9e1, prime-order subgroup of KoblitzCurve::new, standard subspace dim 7 (107 points), m = 3, targets [k]G k = 1..4 (no relation), budget 20000, reps 3",
     "curve_ids": ["icv1-f2m23-tm5197-1f85e9e1"]
   },
-  "metric": "stage-unit word XORs (word_xors), summed over the 4 targets; lane roots charged their share of the bit-sliced elimination in 64-bit word equivalents",
+  "metric": "word_xors incl. lane-root shares, 4 targets",
   "unit": "counted ops",
   "isolation": "L0",
   "samples": 5,
