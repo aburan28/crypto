@@ -1296,7 +1296,7 @@ mod tests {
                 Status::Proved,
             ),
             (
-                r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","a":["1","0"],"b":["1","0"]}"#,
+                r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","modulus":["2","0"],"a":["1","0"],"b":["1","0"]}"#,
                 1369u64,
                 1369u64,
                 Status::NotEvaluated,
@@ -1315,6 +1315,10 @@ mod tests {
                 // order without a generator certificate, and reject the
                 // old fixture's mistaken use of field size as order.
                 assert!(certify::check_order(&model, &BigUint::from(q), &[]).is_err());
+            } else {
+                let mut incomplete: Value = serde_json::from_str(text).unwrap();
+                incomplete.as_object_mut().unwrap().remove("modulus");
+                assert!(parse_model(&incomplete.to_string()).is_err());
             }
         }
     }

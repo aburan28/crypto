@@ -40,3 +40,14 @@ copied release-test binary, normal Rayon defaults and its own 20-minute budget.
 The copied binary precedes this independent fixture-only repair; its isogeny
 test/source are unchanged. Retain its exact command, hash, timestamps and
 result separately. A standard-suite ignore is not a pass of that test.
+
+The first fixture-repair rerun passed seven coordinate tests and failed the
+renamed test on its previously unreached extension input: `missing coefficient
+array modulus`. That failed log remains under `records/verification-final/`.
+Complete the synthetic extension fixture with the required canonical
+`modulus:["2","0"]` (implicit monic leading coefficient); keep its exact
+field-size/NotEvaluated assertions and explicitly reject a record with the
+modulus removed. No parser rule is relaxed. Fresh final verification records
+use `records/verification-final-2/`. This corrects the earlier statement that
+the extension fixture was already valid: its intended unavailable-order
+status was unchanged, but its serialization was incomplete.
