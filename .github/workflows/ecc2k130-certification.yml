@@ -2,6 +2,11 @@ name: ECC2K local certification gates
 on:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'ecc2k130/**'
       - 'src/cryptanalysis/ecc2k130_guard.rs'
       - 'src/bin/ecc2k_guard.rs'
@@ -74,7 +79,7 @@ jobs:
   # it, then test_merge_parity.py holds the two side by side on real corpora.
   merge-parity:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

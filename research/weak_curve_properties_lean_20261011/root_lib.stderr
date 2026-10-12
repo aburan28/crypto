@@ -1,0 +1,209 @@
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009)
+warning: unused import: `super::koblitz_fast_arith::FastBinaryCurve`
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:77:5
+   |
+77 | use super::koblitz_fast_arith::FastBinaryCurve;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::cryptanalysis::binary_semaev::binary_semaev_s3`
+   --> src/cryptanalysis/semaev_sat.rs:105:5
+    |
+105 | use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2301:13
+     |
+2301 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:846:11
+    |
+831 |         FactorBaseSpec::StandardSubspace { dimension } => {
+    |         ---------------------------------------------- matches all the relevant values
+...
+846 |         | FactorBaseSpec::StandardSubspace { .. }
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+    |
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:847:11
+    |
+840 |         FactorBaseSpec::CofactorProjected { .. } | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |         ---------------------------------------- matches all the relevant values
+...
+847 |         | FactorBaseSpec::CofactorProjected { .. }
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:848:11
+    |
+840 |         FactorBaseSpec::CofactorProjected { .. } | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |                                                    ------------------------------------- matches all the relevant values
+...
+848 |         | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+
+warning: unused variable: `x`
+    --> src/cryptanalysis/koblitz_fast_arith.rs:1431:17
+     |
+1431 |             let x = (state & fast.gf.mask) as u128;
+     |                 ^ help: if this is intentional, prefix it with an underscore: `_x`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `img_bits`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:2269:13
+     |
+2269 |         let img_bits = img
+     |             ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_img_bits`
+
+warning: unused variable: `img_bits`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:2274:13
+     |
+2274 |         let img_bits = raw.first().copied().unwrap_or(0) as u128
+     |             ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_img_bits`
+
+warning: unused variable: `sums`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:3248:9
+     |
+3248 |     let sums = fast.batch_add(&pairs);
+     |         ^^^^ help: if this is intentional, prefix it with an underscore: `_sums`
+
+warning: unused variable: `projected`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:8807:10
+     |
+8807 |     let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
+     |          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_projected`
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+
+warning: variable does not need to be mutable
+   --> src/pqc/fast/keccak4.rs:500:13
+    |
+500 |         let mut v = vec![Backend::Portable];
+    |             ----^
+    |             |
+    |             help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/pqc/fast/ml_kem.rs:420:13
+    |
+420 |         let mut buf = buf;
+    |             ----^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1063:5
+     |
+1061 | enum Lanes {
+     |      ----- variants in this enum
+1062 |     Scalar,
+1063 |     Avx2,
+     |     ^^^^
+1064 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `plans` is never read
+   --> src/cryptanalysis/inherited_f4.rs:164:5
+    |
+156 | struct LayoutStep {
+    |        ---------- field in this struct
+...
+164 |     plans: RefCell<HashMap<u32, Rc<RewritePlan>>>,
+    |     ^^^^^
+    |
+    = note: `LayoutStep` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: function `zeroed_words` is never used
+   --> src/cryptanalysis/inherited_f4.rs:670:4
+    |
+670 | fn zeroed_words(n: usize) -> Rc<[u64]> {
+    |    ^^^^^^^^^^^^
+
+warning: method `rewrite_plan` is never used
+    --> src/cryptanalysis/inherited_f4.rs:1298:8
+     |
+ 981 | impl ReducedBasis {
+     | ----------------- method in this implementation
+...
+1298 |     fn rewrite_plan(&self, from: u32) -> Rc<RewritePlan> {
+     |        ^^^^^^^^^^^^
+
+warning: fields `qx` and `qy` are never read
+    --> src/cryptanalysis/koblitz_fast.rs:1111:5
+     |
+1107 | pub struct BatchScratch {
+     |            ------------ fields in this struct
+...
+1111 |     qx: Vec<u64>,
+     |     ^^
+1112 |     qy: Vec<u64>,
+     |     ^^
+     |
+     = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `rref_f2_full` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:1714:4
+     |
+1714 | fn rref_f2_full(matrix: &mut [Vec<u64>], n_cols: usize) -> usize {
+     |    ^^^^^^^^^^^^
+
+warning: enum `SplitHeuristic` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:2127:6
+     |
+2127 | enum SplitHeuristic {
+     |      ^^^^^^^^^^^^^^
+
+warning: function `choose_split_variable` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:2133:4
+     |
+2133 | fn choose_split_variable(
+     |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tail_zero_assignments` is never used
+    --> src/cryptanalysis/koblitz_groebner.rs:2175:4
+     |
+2175 | fn tail_zero_assignments(
+     |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `RC` is never used
+  --> src/pqc/fast/keccak4.rs:27:7
+   |
+27 | const RC: [u64; 24] = [
+   |       ^^
+
+warning: function `use_avx2` is never used
+   --> src/pqc/fast/ml_kem.rs:343:4
+    |
+343 | fn use_avx2() -> bool {
+    |    ^^^^^^^^
+
+warning: `crypto` (lib test) generated 26 warnings (run `cargo fix --lib -p crypto --tests` to apply 12 suggestions)
+    Finished `release` profile [optimized] target(s) in 54m 19s
+     Running unittests src/lib.rs (target/release/deps/crypto_lib-e89b2f0dbc9b5389)
+error: test failed, to rerun pass `--lib`

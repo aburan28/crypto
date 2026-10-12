@@ -39,18 +39,47 @@ on:
       # build's tables with the second.
       - 'examples/dump_fold_plan.rs'
       - 'examples/load_fold_table.rs'
+      - 'src/binary_ecc/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - '.cargo/**'
       - '.github/workflows/gpu-ecc2k-host-verification.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   host-tests:
     runs-on: ubuntu-latest
     # Most of this is one `cargo build --release` to generate the
     # vectors; the C++ itself is seconds.
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/scripts/
+            /Cargo.toml
+            /Cargo.lock
+            /build.rs
+            /.cargo/
+            /rust-toolchain*
+            /rustfmt.toml
+            /clippy.toml
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
+            /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
+            /gpu/ecc2k/
+      - name: Materialize compile-time fixture inputs
+        run: node .github/scripts/ci-scope.mjs --materialize
       - uses: dtolnay/rust-toolchain@1.90.0
+      - uses: Swatinem/rust-cache@v2
       # `make test` builds nine binaries and runs them, three per curve:
       # the field and curve harness, the pair table's building blocks,
       # and the pair-table kernels themselves run on the host.  The two
@@ -81,6 +110,10 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /gpu/ecc2k/
       # nvcc and the runtime headers from NVIDIA's apt repository, nothing
       # else.  12.9 is the ptxas the occupancy tables in the README quote,
       # and the first 12.x with all of sm_90, sm_100 and sm_120.

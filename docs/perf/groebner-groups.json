@@ -1,0 +1,23 @@
+{
+  "schema": "groebner.groups/v1",
+  "groups": [
+    {
+      "id": "boolean-matrix",
+      "title": "Boolean matrix step: F4 and F5",
+      "workload": "One shared K_1 / 2^23 m=2 system, 22 Boolean variables, maximum degree 4. Matrix construction, reduction and readback; F5 includes its criterion.",
+      "series": [
+        {"id": "bool_gb/matrix_f4_deg4_m2_n23", "label": "F4", "color": "#326eab"},
+        {"id": "bool_gb/matrix_f5_deg4_m2_n23", "label": "F5", "color": "#d17b35"}
+      ]
+    },
+    {
+      "id": "boolean-solver",
+      "title": "Boolean solver calls: F4 and F5",
+      "workload": "Shared K_1 / 2^17 m=2 workload, 16 Boolean variables, four planted and four random targets, maximum degree 3. The solve_boolean_system entry point, including root readback.",
+      "series": [
+        {"id": "bool_gb/solve_matrixf4_m2_n17", "label": "F4", "color": "#326eab"},
+        {"id": "bool_gb/solve_matrixf5_m2_n17", "label": "F5", "color": "#d17b35"}
+      ]
+    }
+  ]
+}

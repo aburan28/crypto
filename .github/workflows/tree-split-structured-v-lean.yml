@@ -1,0 +1,91 @@
+name: Tree-split structured-V Lean checks
+# Re-derives the study's verdict and replay in Lean on every change to it:
+# Data.lean must be what the harness generates from the committed records,
+# Verdict.lean must close by kernel `decide`, and Replay.lean's independent
+# recomputation must match the records. See
+# research/ic_tree_split_structured_v_20261011/PREREGISTRATION.md §7.
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/tree-split-structured-v-lean.yml'
+      - 'examples/tree_split_structured.rs'
+      - 'research/ic_tree_split_structured_v_20261011/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - '.cargo/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/tree-split-structured-v-lean.yml'
+      - 'examples/tree_split_structured.rs'
+      - 'research/ic_tree_split_structured_v_20261011/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - '.cargo/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lean:
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
+    defaults:
+      run:
+        working-directory: research/ic_tree_split_structured_v_20261011
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/scripts/
+            /Cargo.toml
+            /Cargo.lock
+            /build.rs
+            /.cargo/
+            /rust-toolchain*
+            /rustfmt.toml
+            /clippy.toml
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
+            /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
+            /research/ic_tree_split_structured_v_20261011/
+      - name: Materialize compile-time fixture inputs
+        working-directory: ${{ github.workspace }}
+        run: node .github/scripts/ci-scope.mjs --materialize
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Cache the pinned Lean toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.elan/toolchains
+          key: ${{ runner.os }}-lean-${{ hashFiles('research/ic_tree_split_structured_v_20261011/lean/lean-toolchain') }}
+      - name: Install Lean (toolchain pinned by lean/lean-toolchain)
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Harness self-test, and Data.lean regenerated from the records
+        run: |
+          cargo build --release --example tree_split_structured
+          bin=../../target/release/examples/tree_split_structured
+          $bin selftest
+          $bin lean runs/registered/cells.jsonl /tmp/Data.lean
+          diff -u lean/TreeSplit/Data.lean /tmp/Data.lean
+          $bin readout runs/registered/cells.jsonl | diff -u runs/registered/readout.txt -
+      - name: Rule hash is the registered one
+        run: |
+          echo "714601c110d88e23202206b741c92f9d198554410b1b087841f3b2e36cd0760d  lean/TreeSplit/Rule.lean" | sha256sum -c -
+      - name: lake build (Rule, Verdict by decide, Replay by native_decide)
+        working-directory: research/ic_tree_split_structured_v_20261011/lean
+        run: lake build

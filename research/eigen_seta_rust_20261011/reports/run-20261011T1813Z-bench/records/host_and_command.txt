@@ -1,0 +1,15 @@
+run id: run-20261011T1813Z-bench
+start (UTC): 2026-10-11T18:13:51Z
+sources: eigen_seta/ as committed in 19c641d121097e80f727bcc650a08632e204ba1d (binary built from that tree before the commit; a cargo rebuild after the commit was a no-op)
+base commit at run start: 8745814b6
+rustc 1.97.0 (2d8144b78 2026-07-07)
+cargo 1.97.0 (c980f4866 2026-06-30)
+profile: release (opt-level 3, lto thin, codegen-units 1), default target-cpu
+model name	: Intel(R) Xeon(R) Processor @ 2.80GHz
+logical cores: 4
+cpu flags (subset): adx avx2 avx512f bmi2 popcnt 
+memory: 15 GiB
+Linux 6.18.44-fc-v114 x86_64
+isolation: shared cloud VM (Claude Code remote container); no CPU pinning, no frequency control; nothing else heavy running during the run
+command: ./target/release/examples/bench_field; for a in 'Toy16 5' 'Toy32 3' 'L1 3' 'L3 2' 'L5 2'; do ./target/release/examples/run $a; done
+RNG: OsRng (keys and ciphertexts are fresh per run; outputs are pinned by the decapsulation-correctness check 'ok true')

@@ -1,0 +1,14 @@
+Commands run concurrently in eigen_seta/:
+cargo run --release --example run -- L3 1
+cargo run --release --example run -- L5 1
+Both exited 0.
+
+L3 stdout:
+L3 keygen_s 112.612 pk_bytes 1992 ct_bytes 1992 f_bits 409
+L3 trial 0 encaps_s 1.3059 decaps_s 47.275 ok true
+L3 RESULT 1/1 decapsulations correct
+
+L5 stdout:
+L5 keygen_s 259.034 pk_bytes 2632 ct_bytes 2632 f_bits 536
+L5 trial 0 encaps_s 1.9862 decaps_s 107.221 ok true
+L5 RESULT 1/1 decapsulations correct

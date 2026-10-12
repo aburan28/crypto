@@ -1,0 +1,61 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W8",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1712",
+  "slug": "eg-quotient-s3-k1-n17",
+  "papers": [
+    "ePrint 2026/1299"
+  ],
+  "kind": "speedup",
+  "workload": {
+    "id": "koblitz-fghr-sym-s3-m2-k1-n17",
+    "description": "descended FGHR-symmetrised S3 (m = 2) decomposition solve, all roots, MatrixF4 cap 4, 8 targets in the prime subgroup (r = 65587) of icv1-f2m17-tm101-00378d4e",
+    "curve_ids": [
+      "icv1-f2m17-tm101-00378d4e"
+    ]
+  },
+  "metric": "F4 word XORs per round (sum over 8 target solves)",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 5,
+  "arms": [
+    {
+      "role": "original",
+      "label": "repo symmetrised system (sym), harness on the 4b6e09b78 library",
+      "commit": "4b6e09b78",
+      "value": 169687396
+    },
+    {
+      "role": "previous",
+      "label": "sym in the candidate binary",
+      "commit": "lit2026/w8-summation-models",
+      "value": 169687396
+    },
+    {
+      "role": "candidate",
+      "label": "S3 of E/<T> in w = 1/X (eg): sym with the parity bit eliminated",
+      "commit": "lit2026/w8-summation-models",
+      "value": 117819615
+    }
+  ],
+  "ratio_original_over_candidate": {
+    "value": 1.4402,
+    "interval": [
+      1.4402,
+      1.4402
+    ],
+    "interval_kind": "none (deterministic counter, identical in all 5 rounds)"
+  },
+  "ratio_previous_over_candidate": {
+    "value": 1.4402,
+    "interval": [
+      1.4402,
+      1.4402
+    ],
+    "interval_kind": "none (deterministic counter, identical in all 5 rounds)"
+  },
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w8_summation_models_20261011/reports/run-20261011T2131Z/report.pdf",
+  "note": "Wall time (L0, load 100-341, ratio of per-round totals): original/candidate median 3.11 [2.06-4.28], previous/candidate 2.27 [1.46-2.86]. Toy decomposition stage only; lifting an eg root tries both parities; no IC-vs-rho claim."
+}

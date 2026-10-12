@@ -58,6 +58,9 @@ use std::collections::{BTreeMap, HashMap};
 use std::time::Instant;
 
 use num_bigint::BigUint;
+use num_traits::One;
+
+use crypto_lib::binary_ecc::{BinaryCurve, F2mElement};
 
 use crypto_lib::cryptanalysis::ecbench::methods::BinaryPlugins;
 use crypto_lib::cryptanalysis::ic_boundary::{
@@ -74,7 +77,7 @@ use crypto_lib::cryptanalysis::koblitz_groebner::{
 };
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
     build_standard_subspace_factor_base, groebner_decompose, groebner_decompose_f6_ic, point_key,
-    FrobeniusFactorBase,
+    FrobeniusFactorBase, KoblitzCurve,
 };
 
 /// The unit string of the solver's count.  It matches the symmetrised and
@@ -86,6 +89,97 @@ pub const WORD_XOR_UNIT: &str =
 /// Environment prefixes the Groebner code reads for tuning overrides.
 const TUNING_PREFIXES: [&str; 3] = ["KIC_", "F4_", "SOLVER_"];
 
+/// A generic binary curve `y² + xy = x³ + ax² + b` (`a ∈ {0, 1}`, `b`
+/// anywhere in `F_{2^n}`) seen through the [`KoblitzCurve`] type the
+/// decomposers take, with the 2-power Frobenius switched off: the same
+/// shape [`KoblitzCurve::isogenous_model`] gives a floor curve
+/// (`frobenius_is_endomorphism = false`, `λ = 1`, `k = 1`), but with the
+/// curve's own counted order, subgroup and generator rather than a Koblitz
+/// class's.  Nothing the decomposition reads depends on Frobenius: the
+/// Semaev system takes only `b`, the base is folded by negation alone, and
+/// F6-IC's gate needs the subspace, base membership and group addition.
+fn generic_view(inst: &BinaryInstance) -> Result<KoblitzCurve, String> {
+    if inst.a > 1 {
+        return Err(format!(
+            "the generic view takes a ∈ {{0, 1}}, this curve has a = {:#x}",
+            inst.a
+        ));
+    }
+    let n = inst.n;
+    let curve = BinaryCurve {
+        m: n,
+        irreducible: inst.irreducible.clone(),
+        a: inst.gf.to_element(inst.a),
+        b: inst.gf.to_element(inst.b),
+        generator: inst.fast.lower(inst.generator),
+        order: BigUint::from(inst.r),
+        cofactor: BigUint::from(inst.cofactor),
+    };
+    let trace = (1i128 << n) + 1 - i128::from(inst.group_order);
+    Ok(KoblitzCurve {
+        a: inst.a as u8,
+        n,
+        curve,
+        trace: trace as i64,
+        group_order: BigUint::from(inst.group_order),
+        subgroup_order: BigUint::from(inst.r),
+        cofactor: BigUint::from(inst.cofactor),
+        lambda: BigUint::one(),
+        frobenius_is_endomorphism: false,
+        k: 1,
+        q: 2,
+        a_index: inst.a,
+        b_index: 0,
+        subfield_basis: vec![F2mElement::one(n)],
+    })
+}
+
+/// The instance the decomposers read: the run's own when it is a Koblitz
+/// curve, otherwise a copy that carries [`generic_view`].  The copy differs
+/// from the run's instance only in that field; the run's group, points and
+/// identity are untouched.
+enum View<'i> {
+    Koblitz(&'i BinaryInstance),
+    Generic(Box<BinaryInstance>),
+}
+
+impl<'i> View<'i> {
+    fn of(inst: &'i BinaryInstance) -> Result<Self, String> {
+        if inst.koblitz.is_some() {
+            return Ok(Self::Koblitz(inst));
+        }
+        Ok(Self::Generic(Box::new(BinaryInstance {
+            name: inst.name.clone(),
+            n: inst.n,
+            irreducible: inst.irreducible.clone(),
+            fast: inst.fast.clone(),
+            gf: inst.gf.clone(),
+            artin_schreier: inst.artin_schreier.clone(),
+            a: inst.a,
+            b: inst.b,
+            group_order: inst.group_order,
+            r: inst.r,
+            cofactor: inst.cofactor,
+            generator: inst.generator,
+            koblitz: Some(generic_view(inst)?),
+        })))
+    }
+
+    fn instance(&self) -> &BinaryInstance {
+        match self {
+            Self::Koblitz(i) => i,
+            Self::Generic(i) => i,
+        }
+    }
+
+    fn curve(&self) -> &KoblitzCurve {
+        self.instance()
+            .koblitz
+            .as_ref()
+            .expect("a view always carries a curve")
+    }
+}
+
 fn standard_subspace(
     inst: &BinaryInstance,
     params: &Params,
@@ -93,7 +187,7 @@ fn standard_subspace(
     let kc = inst
         .koblitz
         .as_ref()
-        .ok_or("this instance is not a Koblitz curve")?;
+        .ok_or("this instance has no curve view")?;
     let d = params
         .get("dimension")
         .ok_or("missing parameter `dimension`; #1333 used 4 at n9 and 6 at n17")?;
@@ -103,14 +197,27 @@ fn standard_subspace(
     build_standard_subspace_factor_base(kc, d)
 }
 
-/// `koblitz-standard-subspace:dimension=d`.
+/// `binary-standard-subspace:dimension=d`, also registered under its first
+/// name, `koblitz-standard-subspace`.  On a Koblitz curve the two are the
+/// same base; on any other binary curve it is built through
+/// [`generic_view`].
 pub struct KoblitzStandardSubspaceBase<'i> {
-    pub instance: &'i BinaryInstance,
+    name: &'static str,
+    view: Result<View<'i>, String>,
+}
+
+impl<'i> KoblitzStandardSubspaceBase<'i> {
+    pub fn new(name: &'static str, instance: &'i BinaryInstance) -> Self {
+        Self {
+            name,
+            view: View::of(instance),
+        }
+    }
 }
 
 impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzStandardSubspaceBase<'_> {
     fn name(&self) -> &str {
-        "koblitz-standard-subspace"
+        self.name
     }
 
     fn describe(&self, params: &Params) -> String {
@@ -134,9 +241,10 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzStandardSubspaceBase<'_> 
         params: &Params,
         _ops: &mut GroupOps,
     ) -> Result<FactorBase<FastPoint>, String> {
-        let frob = standard_subspace(self.instance, params)?;
+        let view = self.view.as_ref().map_err(Clone::clone)?;
+        let frob = standard_subspace(view.instance(), params)?;
         let mut fb = koblitz_factor_base(
-            self.instance,
+            view.instance(),
             &frob,
             ColumnFold::SignedFrobeniusOrbit,
             format!(
@@ -152,13 +260,24 @@ impl<'a> FactorBaseBuilder<BinaryGroup<'a>> for KoblitzStandardSubspaceBase<'_> 
     }
 }
 
-/// Which of #1333's two decomposers the oracle calls.
+/// Which decomposer, and which reduction engine, the oracle calls.
+///
+/// Each engine runs under its own default splitting rule
+/// (`SplitRule::Auto`): the inherited engines split on the highest free
+/// variable, the matrix engines on the lowest.  So an engine arm is the
+/// whole solver choice, as in #1333's three-way comparison, not one
+/// reduction kernel on a shared tree.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Pdp3Engine {
     /// `groebner_decompose` with inherited F4: the control.
     InheritedF4,
     /// `groebner_decompose_f6_ic`: inherited F4 with the geometric gate.
     F6Ic,
+    /// `groebner_decompose` with Boolean matrix-F4, every node from scratch.
+    MatrixF4,
+    /// `groebner_decompose` with Boolean matrix-F5: matrix-F4's matrices
+    /// less the rows the F5 criterion predicts reduce to zero.
+    MatrixF5,
 }
 
 impl Pdp3Engine {
@@ -166,8 +285,10 @@ impl Pdp3Engine {
         match s {
             "inherited-f4" => Ok(Self::InheritedF4),
             "f6-ic" => Ok(Self::F6Ic),
+            "matrix-f4" => Ok(Self::MatrixF4),
+            "matrix-f5" => Ok(Self::MatrixF5),
             other => Err(format!(
-                "unknown engine `{other}`; try inherited-f4 or f6-ic"
+                "unknown engine `{other}`; try inherited-f4, f6-ic, matrix-f4 or matrix-f5"
             )),
         }
     }
@@ -176,6 +297,17 @@ impl Pdp3Engine {
         match self {
             Self::InheritedF4 => "inherited-f4",
             Self::F6Ic => "f6-ic",
+            Self::MatrixF4 => "matrix-f4",
+            Self::MatrixF5 => "matrix-f5",
+        }
+    }
+
+    /// The reduction engine at each node of the splitting tree.
+    fn solver(self, max_degree: u32) -> SolverEngine {
+        match self {
+            Self::InheritedF4 | Self::F6Ic => SolverEngine::InheritedF4 { max_degree },
+            Self::MatrixF4 => SolverEngine::MatrixF4 { max_degree },
+            Self::MatrixF5 => SolverEngine::MatrixF5 { max_degree },
         }
     }
 }
@@ -212,8 +344,9 @@ fn stats_extra(s: &SolveStats) -> BTreeMap<String, u64> {
 
 /// `pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N`.
 pub struct Pdp3KoblitzOracle<'i> {
+    name: &'static str,
     summands: u32,
-    instance: &'i BinaryInstance,
+    view: Result<View<'i>, String>,
     engine: Pdp3Engine,
     solver: SolverEngine,
     node_budget: usize,
@@ -228,10 +361,11 @@ pub struct Pdp3KoblitzOracle<'i> {
 }
 
 impl<'i> Pdp3KoblitzOracle<'i> {
-    pub fn new(summands: u32, instance: &'i BinaryInstance) -> Self {
+    pub fn new(name: &'static str, summands: u32, instance: &'i BinaryInstance) -> Self {
         Self {
+            name,
             summands,
-            instance,
+            view: View::of(instance),
             engine: Pdp3Engine::InheritedF4,
             solver: SolverEngine::InheritedF4 { max_degree: 3 },
             node_budget: 0,
@@ -247,7 +381,7 @@ impl<'i> Pdp3KoblitzOracle<'i> {
 
 impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
     fn name(&self) -> &str {
-        "pdp3-koblitz"
+        self.name
     }
 
     fn summands(&self) -> u32 {
@@ -268,7 +402,10 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
     fn parameters(&self) -> &[(&str, &str)] {
         &[
             ("m", "summands; #1333 ran 3 (Semaev S4)"),
-            ("engine", "inherited-f4 (the control) or f6-ic"),
+            (
+                "engine",
+                "inherited-f4 (the control), f6-ic, matrix-f4 or matrix-f5",
+            ),
             ("degree", "highest Macaulay degree built before splitting"),
             (
                 "node_budget",
@@ -302,15 +439,12 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
                 self.summands
             ));
         }
-        let kc = self
-            .instance
-            .koblitz
-            .as_ref()
-            .ok_or("pdp3-koblitz needs a Koblitz instance")?;
+        let view = self.view.as_ref().map_err(Clone::clone)?;
+        let kc = view.curve();
         // Parameters that change the search have no default.
         let engine = params
             .get("engine")
-            .ok_or("missing parameter `engine`; try inherited-f4 or f6-ic")?;
+            .ok_or("missing parameter `engine`; try inherited-f4, f6-ic, matrix-f4 or matrix-f5")?;
         self.engine = Pdp3Engine::parse(engine)?;
         let degree = params
             .get("degree")
@@ -321,7 +455,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         if !(2..=4).contains(&max_degree) {
             return Err(format!("degree must be 2..=4, got {max_degree}"));
         }
-        self.solver = SolverEngine::InheritedF4 { max_degree };
+        self.solver = self.engine.solver(max_degree);
         let budget = params
             .get("node_budget")
             .ok_or("missing parameter `node_budget`; #1333 ran 8192 cold")?;
@@ -335,7 +469,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         if base_params.get("dimension").is_none() {
             base_params.set("dimension", dimension.to_string());
         }
-        let frob = standard_subspace(self.instance, &base_params)?;
+        let frob = standard_subspace(view.instance(), &base_params)?;
         // The base the runner built must be this one, point for point and
         // in the same order: the decomposer returns indices into `frob`,
         // and the relation is written against the runner's base.
@@ -348,7 +482,7 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
             ));
         }
         for (i, p) in frob.points.iter().enumerate() {
-            if fb.index_of_key(self.instance.fast.lift(p).pack()) != Some(i) {
+            if fb.index_of_key(view.instance().fast.lift(p).pack()) != Some(i) {
                 return Err(
                     "pdp3-koblitz needs koblitz-standard-subspace with the same dimension: \
                      the bases differ"
@@ -402,11 +536,12 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
         let (Some(frob), Some(st), Some(shape)) = (&self.frob, &self.st, &self.shape) else {
             return None;
         };
-        let kc = self.instance.koblitz.as_ref()?;
-        let target = self.instance.fast.lower(point);
+        let view = self.view.as_ref().ok()?;
+        let kc = view.curve();
+        let target = view.instance().fast.lower(point);
         let decompose = match self.engine {
-            Pdp3Engine::InheritedF4 => groebner_decompose,
             Pdp3Engine::F6Ic => groebner_decompose_f6_ic,
+            _ => groebner_decompose,
         };
         let before = f4_word_ops_thread();
         let started = Instant::now();
@@ -456,20 +591,25 @@ impl<'a> DecompositionOracle<BinaryGroup<'a>> for Pdp3KoblitzOracle<'_> {
     }
 }
 
+/// The base's names: the first one it had, and the one that says it takes
+/// any binary curve.  Both build the same base.
+const BASE_NAMES: [&str; 2] = ["koblitz-standard-subspace", "binary-standard-subspace"];
+
+/// The oracle's names, likewise.
+const ORACLE_NAMES: [&str; 2] = ["pdp3-koblitz", "pdp3-binary"];
+
 /// This module's plug-ins, for `methods::register_binary_plugins`.
 pub fn plugins() -> BinaryPlugins {
     BinaryPlugins {
         base: |name, instance| {
-            (name == "koblitz-standard-subspace").then(|| {
-                Box::new(KoblitzStandardSubspaceBase { instance })
-                    as Box<dyn FactorBaseBuilder<BinaryGroup<'_>> + '_>
-            })
+            let name = BASE_NAMES.iter().find(|n| **n == name)?;
+            Some(Box::new(KoblitzStandardSubspaceBase::new(name, instance))
+                as Box<dyn FactorBaseBuilder<BinaryGroup<'_>> + '_>)
         },
         oracle: |name, summands, instance| {
-            (name == "pdp3-koblitz").then(|| {
-                Box::new(Pdp3KoblitzOracle::new(summands, instance))
-                    as Box<dyn DecompositionOracle<BinaryGroup<'_>> + '_>
-            })
+            let name = ORACLE_NAMES.iter().find(|n| **n == name)?;
+            Some(Box::new(Pdp3KoblitzOracle::new(name, summands, instance))
+                as Box<dyn DecompositionOracle<BinaryGroup<'_>> + '_>)
         },
     }
 }
