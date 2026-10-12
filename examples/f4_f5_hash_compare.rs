@@ -630,6 +630,12 @@ fn analyze(root: &Path) -> Result<Value> {
         && case_verdicts
             .iter()
             .all(|case| case["verdict"] != "more_instructions");
+    let complete_call_accepted = accepted
+        && f4["verdict"] == "fewer_instructions"
+        && case_verdicts
+            .iter()
+            .filter(|case| case["arm"] == "f4" || case["arm"] == "f5")
+            .all(|case| case["verdict"] != "more_instructions");
     let mut sources = Vec::new();
     for run in [&a, &b, &aa] {
         sources.extend_from_slice(&run.sources);
@@ -645,6 +651,7 @@ fn analyze(root: &Path) -> Result<Value> {
         "measurement":"Callgrind Ir, instrumented complete calls, merged worker coverage",
         "runtime_speedup":null,"rss":null,"acceptance_met":accepted,"memory_regressions":memory_regressions,
         "two_arm_acceptance_met":two_arm_accepted,
+        "complete_call_acceptance_met":complete_call_accepted,
         "arms":arms,"case_verdicts":case_verdicts,"primary_cases":per_case,"memory_cases":memory_cases,"sources":sources}),
     )
 }
