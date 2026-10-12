@@ -1,0 +1,25 @@
+saved research/ecbench_conductor_gap_20261012/sessions/ell131101-q37/comparisons/rho-neg__rho-neg-aa.json
+ops (ok): rho-neg-aa / rho-neg = 1.0000 [1.000, 1.000] (cluster) over 16 pairs on 16 workloads, 2 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 0.9853, not a result: 16 of 16 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | rho-neg-aa / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp37-t277-090dc414 | 36.25 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+| icv1-fp37-t277-91fd6e29 | 36.25 | 8 | 1.0000 | [1.0000, 1.0000] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | rho-neg-aa mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0415e5bd2d6e | icv1-fp37-t277-91fd6e29 | 36.25 | 0.8711 | 0.8711 | 1.0000 |
+| W131b677b4f41 | icv1-fp37-t277-090dc414 | 36.25 | 0.6094 | 0.6094 | 1.0000 |
+| W30fbca1376d1 | icv1-fp37-t277-090dc414 | 36.25 | 1.1287 | 1.1287 | 1.0000 |
+| W3272f900dba4 | icv1-fp37-t277-090dc414 | 36.25 | 1.3970 | 1.3970 | 1.0000 |
+| W482a690133df | icv1-fp37-t277-090dc414 | 36.25 | 2.3937 | 2.3937 | 1.0000 |
+| W57ef05ee88f3 | icv1-fp37-t277-090dc414 | 36.25 | 0.2459 | 0.2459 | 1.0000 |
+| W603d04f825bf | icv1-fp37-t277-91fd6e29 | 36.25 | 0.3168 | 0.3168 | 1.0000 |
+| W66be038fe1c0 | icv1-fp37-t277-090dc414 | 36.25 | 0.1809 | 0.1809 | 1.0000 |
+| W858cdab46c91 | icv1-fp37-t277-91fd6e29 | 36.25 | 1.3770 | 1.3770 | 1.0000 |
+| W864a96f42f90 | icv1-fp37-t277-91fd6e29 | 36.25 | 1.6285 | 1.6285 | 1.0000 |
+| Wafd981f8ee50 | icv1-fp37-t277-090dc414 | 36.25 | 0.9420 | 0.9420 | 1.0000 |
+| Wb4ceee6a1766 | icv1-fp37-t277-090dc414 | 36.25 | 1.9278 | 1.9278 | 1.0000 |
+| We9f6a73081e3 | icv1-fp37-t277-91fd6e29 | 36.25 | 0.5469 | 0.5469 | 1.0000 |
+| Weece426f3bcd | icv1-fp37-t277-91fd6e29 | 36.25 | 0.9369 | 0.9369 | 1.0000 |
+| Wf54d2cda2916 | icv1-fp37-t277-91fd6e29 | 36.25 | 0.6222 | 0.6222 | 1.0000 |
+| Wfe7b7ba27047 | icv1-fp37-t277-91fd6e29 | 36.25 | 1.1815 | 1.1815 | 1.0000 |

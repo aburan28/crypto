@@ -8,7 +8,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import typst
 
-root = Path('/workspace/crypto/research/ecbench_conductor_gap_20261012')
+root = Path(__file__).resolve().parent.parent
 analysis = json.loads((root / 'analysis.json').read_text())
 plt.rcParams.update({'font.size': 10, 'svg.fonttype': 'none'})
 fig, ax = plt.subplots(figsize=(9, 3.4))

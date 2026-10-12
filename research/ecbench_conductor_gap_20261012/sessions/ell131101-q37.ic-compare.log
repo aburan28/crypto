@@ -1,0 +1,25 @@
+saved research/ecbench_conductor_gap_20261012/sessions/ell131101-q37/comparisons/rho-neg__ic-mitm.json
+ops (ok): ic-mitm / rho-neg = 46.0481 [35.941, 64.292] (cluster) over 16 pairs on 16 workloads, 2 curve(s), diagnostic only (unpriced work; ratio does not bound full cost); wall: descriptive (median 130.2825, not a result: 16 of 16 pairs did not reach L2; 0 admitted pairs; at least 5 are needed)
+| curve | log2 r | workloads | ic-mitm / rho-neg | 95% interval | interval |
+|---|---:|---:|---:|---|---|
+| icv1-fp37-t277-090dc414 | 36.25 | 8 | 45.0827 | [31.0313, 77.6283] | cluster |
+| icv1-fp37-t277-91fd6e29 | 36.25 | 8 | 47.1870 | [36.6325, 67.2442] | cluster |
+
+| workload | curve | log2 r | rho-neg mean S | ic-mitm mean S | ratio |
+|---|---|---:|---:|---:|---:|
+| W0415e5bd2d6e | icv1-fp37-t277-91fd6e29 | 36.25 | 0.8711 | 38.5318 | 44.2340 |
+| W131b677b4f41 | icv1-fp37-t277-090dc414 | 36.25 | 0.6094 | 53.8650 | 88.3972 |
+| W30fbca1376d1 | icv1-fp37-t277-090dc414 | 36.25 | 1.1287 | 55.5442 | 49.2097 |
+| W3272f900dba4 | icv1-fp37-t277-090dc414 | 36.25 | 1.3970 | 55.6938 | 39.8674 |
+| W482a690133df | icv1-fp37-t277-090dc414 | 36.25 | 2.3937 | 53.7308 | 22.4467 |
+| W57ef05ee88f3 | icv1-fp37-t277-090dc414 | 36.25 | 0.2459 | 48.6515 | 197.8721 |
+| W603d04f825bf | icv1-fp37-t277-91fd6e29 | 36.25 | 0.3168 | 50.6996 | 160.0449 |
+| W66be038fe1c0 | icv1-fp37-t277-090dc414 | 36.25 | 0.1809 | 48.2951 | 266.9415 |
+| W858cdab46c91 | icv1-fp37-t277-91fd6e29 | 36.25 | 1.3770 | 47.1429 | 34.2371 |
+| W864a96f42f90 | icv1-fp37-t277-91fd6e29 | 36.25 | 1.6285 | 50.6274 | 31.0890 |
+| Wafd981f8ee50 | icv1-fp37-t277-090dc414 | 36.25 | 0.9420 | 32.4051 | 34.3999 |
+| Wb4ceee6a1766 | icv1-fp37-t277-090dc414 | 36.25 | 1.9278 | 49.6843 | 25.7731 |
+| We9f6a73081e3 | icv1-fp37-t277-91fd6e29 | 36.25 | 0.5469 | 34.9101 | 63.8375 |
+| Weece426f3bcd | icv1-fp37-t277-91fd6e29 | 36.25 | 0.9369 | 52.1463 | 55.6595 |
+| Wf54d2cda2916 | icv1-fp37-t277-91fd6e29 | 36.25 | 0.6222 | 41.3452 | 66.4522 |
+| Wfe7b7ba27047 | icv1-fp37-t277-91fd6e29 | 36.25 | 1.1815 | 37.5890 | 31.8144 |
