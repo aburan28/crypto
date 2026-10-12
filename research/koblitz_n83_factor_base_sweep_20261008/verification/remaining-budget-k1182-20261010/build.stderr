@@ -1,0 +1,350 @@
+warning: unused import: `crate::cryptanalysis::binary_semaev::binary_semaev_s3`
+   --> src/cryptanalysis/semaev_sat.rs:105:5
+    |
+105 | use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: use of deprecated type alias `libc::time_t`: This type is changed to 64-bit in musl 1.2.0, we'll follow that change in the future release. See #1848 for more info.
+   --> src/cryptanalysis/ecc2k130_merge.rs:928:46
+    |
+928 |         .map_or(0, |d| d.as_secs()) as libc::time_t;
+    |                                              ^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/ec_index_calculus.rs:397:9
+    |
+397 |     let mut g = poly_gcd(&monic, &shifted, p);
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/ec_index_calculus.rs:406:20
+    |
+406 |     while let Some(mut h) = queue.pop() {
+    |                    ----^
+    |                    |
+    |                    help: remove this `mut`
+
+warning: unused variable: `deg`
+   --> src/cryptanalysis/ec_index_calculus.rs:386:9
+    |
+386 |     let deg = monic.len() - 1;
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_deg`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/ec_index_calculus.rs:576:9
+    |
+576 |     let mut b = poly_rem(base, f, p);
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+
+warning: function `stored_point` is never used
+  --> src/cryptanalysis/f6_wide_geometry.rs:46:4
+   |
+46 | fn stored_point(point: &BinaryPoint) -> Option<Option<(u128, u128)>> {
+   |    ^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `restore_point` is never used
+  --> src/cryptanalysis/f6_wide_geometry.rs:53:4
+   |
+53 | fn restore_point(point: Option<(u128, u128)>, m: u32) -> BinaryPoint {
+   |    ^^^^^^^^^^^^^
+
+warning: function `batch_x_keys_stored` is never used
+   --> src/cryptanalysis/f6_wide_geometry.rs:496:26
+    |
+496 |     pub(super) unsafe fn batch_x_keys_stored(
+    |                          ^^^^^^^^^^^^^^^^^^^
+
+warning: function `batch_add_fixed` is never used
+   --> src/cryptanalysis/f6_wide_geometry.rs:561:26
+    |
+561 |     pub(super) unsafe fn batch_add_fixed(
+    |                          ^^^^^^^^^^^^^^^
+
+warning: constant `CACHE_VERSION` is never used
+  --> src/cryptanalysis/groebner_cache.rs:14:7
+   |
+14 | const CACHE_VERSION: u8 = 1;
+   |       ^^^^^^^^^^^^^
+
+warning: constant `DEFAULT_TTL_SECS` is never used
+  --> src/cryptanalysis/groebner_cache.rs:15:7
+   |
+15 | const DEFAULT_TTL_SECS: u64 = 7 * 24 * 60 * 60;
+   |       ^^^^^^^^^^^^^^^^
+
+warning: constant `DEFAULT_MAX_BYTES` is never used
+  --> src/cryptanalysis/groebner_cache.rs:16:7
+   |
+16 | const DEFAULT_MAX_BYTES: usize = 16 * 1024 * 1024;
+   |       ^^^^^^^^^^^^^^^^^
+
+warning: struct `CachedRows` is never constructed
+  --> src/cryptanalysis/groebner_cache.rs:19:8
+   |
+19 | struct CachedRows {
+   |        ^^^^^^^^^^
+
+warning: struct `GroebnerCache` is never constructed
+  --> src/cryptanalysis/groebner_cache.rs:27:19
+   |
+27 | pub(crate) struct GroebnerCache {
+   |                   ^^^^^^^^^^^^^
+
+warning: static `CACHE` is never used
+  --> src/cryptanalysis/groebner_cache.rs:34:8
+   |
+34 | static CACHE: OnceLock<Option<GroebnerCache>> = OnceLock::new();
+   |        ^^^^^
+
+warning: static `CONFIG_WARNING_EMITTED` is never used
+  --> src/cryptanalysis/groebner_cache.rs:35:8
+   |
+35 | static CONFIG_WARNING_EMITTED: OnceLock<()> = OnceLock::new();
+   |        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: associated items `from_env`, `key`, `get`, and `put` are never used
+   --> src/cryptanalysis/groebner_cache.rs:38:8
+    |
+ 37 | impl GroebnerCache {
+    | ------------------ associated items in this implementation
+ 38 |     fn from_env() -> Option<Self> {
+    |        ^^^^^^^^
+...
+ 65 |     fn key(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32) -> String {
+    |        ^^^
+...
+ 88 |     fn get(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32) -> Option<Vec<F2BoolPoly>> {
+    |        ^^^
+...
+134 |     fn put(&self, equations: &[F2BoolPoly], n_vars: usize, degree: u32, rows: &[F2BoolPoly]) {
+    |        ^^^
+
+warning: function `get_or_compute` is never used
+   --> src/cryptanalysis/groebner_cache.rs:162:15
+    |
+162 | pub(crate) fn get_or_compute(
+    |               ^^^^^^^^^^^^^^
+
+warning: function `parse_env_u64` is never used
+   --> src/cryptanalysis/groebner_cache.rs:180:4
+    |
+180 | fn parse_env_u64(name: &str, default: u64) -> u64 {
+    |    ^^^^^^^^^^^^^
+
+warning: function `parse_env_usize` is never used
+   --> src/cryptanalysis/groebner_cache.rs:187:4
+    |
+187 | fn parse_env_usize(name: &str, default: usize) -> usize {
+    |    ^^^^^^^^^^^^^^^
+
+warning: function `warn_once` is never used
+   --> src/cryptanalysis/groebner_cache.rs:194:4
+    |
+194 | fn warn_once(message: String) {
+    |    ^^^^^^^^^
+
+warning: function `factorise_u64` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:715:4
+    |
+715 | fn factorise_u64(mut v: u64) -> Vec<(u64, u32)> {
+    |    ^^^^^^^^^^^^^
+
+warning: function `factorise_big` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:785:4
+    |
+785 | fn factorise_big(mut v: BigUint) -> Vec<(BigUint, u32)> {
+    |    ^^^^^^^^^^^^^
+
+warning: `crypto` (lib) generated 24 warnings (run `cargo fix --lib -p crypto` to apply 5 suggestions)
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-n83-upstream-integration-20261010)
+warning: unused imports: `Echelon`, `mulmod`, and `peak_rss_bytes`
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:711:9
+    |
+711 |         mulmod, pack, peak_rss_bytes, unpack, BinaryPoint, Echelon, F2mElement, PUBLIC_SEED, STUDY,
+    |         ^^^^^^        ^^^^^^^^^^^^^^                       ^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: struct `Linear` is never constructed
+  --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:99:8
+   |
+99 | struct Linear {
+   |        ^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: associated items `from_images` and `apply` are never used
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:104:8
+    |
+103 | impl Linear {
+    | ----------- associated items in this implementation
+104 |     fn from_images(images: &[u64]) -> Self {
+    |        ^^^^^^^^^^^
+...
+119 |     fn apply(&self, v: u64) -> u64 {
+    |        ^^^^^
+
+warning: struct `NormalBasis` is never constructed
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:128:8
+    |
+128 | struct NormalBasis {
+    |        ^^^^^^^^^^^
+
+warning: associated items `new`, `rotate`, and `canonical` are never used
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:136:8
+    |
+135 | impl NormalBasis {
+    | ---------------- associated items in this implementation
+136 |     fn new(gf: &Gf2) -> Self {
+    |        ^^^
+...
+161 |     fn rotate(&self, v: u64, k: u32) -> u64 {
+    |        ^^^^^^
+...
+170 |     fn canonical(&self, v: u64) -> (u64, u32) {
+    |        ^^^^^^^^^
+
+warning: function `invert_columns` is never used
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:187:4
+    |
+187 | fn invert_columns(columns: &[u64], n: usize) -> Option<Vec<u64>> {
+    |    ^^^^^^^^^^^^^^
+
+warning: struct `S3Solver` is never constructed
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:223:8
+    |
+223 | struct S3Solver {
+    |        ^^^^^^^^
+
+warning: associated items `new` and `roots` are never used
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:231:8
+    |
+230 | impl S3Solver {
+    | ------------- associated items in this implementation
+231 |     fn new(gf: &Gf2, b: u64) -> Self {
+    |        ^^^
+...
+269 |     fn roots(&self, gf: &Gf2, basis: &NormalBasis, left: u64, right: u64) -> Option<[u64; 2]> {
+    |        ^^^^^
+
+warning: function `invert` is never used
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:291:4
+    |
+291 | fn invert(gf: &Gf2, basis: &NormalBasis, a: u64) -> u64 {
+    |    ^^^^^^
+
+warning: struct `RootTable` is never constructed
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:312:8
+    |
+312 | struct RootTable {
+    |        ^^^^^^^^^
+
+warning: associated items `with_capacity`, `slot`, `insert_if_absent`, and `get` are never used
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:319:8
+    |
+318 | impl RootTable {
+    | -------------- associated items in this implementation
+319 |     fn with_capacity(entries: usize) -> Self {
+    |        ^^^^^^^^^^^^^
+...
+329 |     fn slot(&self, key: u64) -> usize {
+    |        ^^^^
+...
+333 |     fn insert_if_absent(&mut self, key: u64, value: u64) {
+    |        ^^^^^^^^^^^^^^^^
+...
+350 |     fn get(&self, key: u64) -> Option<u64> {
+    |        ^^^
+
+warning: struct `State` is never constructed
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:366:8
+    |
+366 | struct State {
+    |        ^^^^^
+
+warning: struct `Index` is never constructed
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:373:8
+    |
+373 | struct Index {
+    |        ^^^^^
+
+warning: function `build_index` is never used
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:392:4
+    |
+392 | fn build_index(gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, reps: &[u64]) -> Index {
+    |    ^^^^^^^^^^^
+
+warning: struct `Relation` is never constructed
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:443:8
+    |
+443 | struct Relation {
+    |        ^^^^^^^^
+
+warning: enum `TargetInput` is never used
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:451:6
+    |
+451 | enum TargetInput {
+    |      ^^^^^^^^^^^
+
+warning: struct `Base` is never constructed
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:456:8
+    |
+456 | struct Base {
+    |        ^^^^
+
+warning: function `lift` is never used
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:463:4
+    |
+463 | fn lift(
+    |    ^^^^
+
+warning: function `extract` is never used
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:489:4
+    |
+489 | fn extract(
+    |    ^^^^^^^
+
+warning: function `construct_base` is never used
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:551:4
+    |
+551 | fn construct_base(
+    |    ^^^^^^^^^^^^^^
+
+warning: function `relation_row` is never used
+   --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:680:4
+    |
+680 | fn relation_row(base: &Base, relation: &Relation, rhs: u64, r: u64) -> Vec<u64> {
+    |    ^^^^^^^^^^^^
+
+warning: function `legacy_fixture_entrypoint` is never used
+    --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:2263:4
+     |
+2263 | fn legacy_fixture_entrypoint() {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `main` is never used
+    --> examples/../research/koblitz_n83_factor_base_sweep_20261008/compact_cold.rs:2794:4
+     |
+2794 | fn main() {
+     |    ^^^^
+
+warning: linker stderr: ignoring deprecated linker optimization setting '1'
+  |
+  = note: `#[warn(linker_messages)]` on by default
+
+warning: `crypto` (example "koblitz_n83_factor_base_export") generated 24 warnings (run `cargo fix --example "koblitz_n83_factor_base_export" -p crypto` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 1m 02s

@@ -1,0 +1,24 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W3",
+  "slug": "ggm-delta-table",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1683",
+  "papers": ["ePrint 2026/384"],
+  "kind": "diagnostic",
+  "workload": {
+    "id": "ic-configurations-committed-records",
+    "description": "208 committed IC configurations: docs/ic/leaderboard.json Tables A-C (prime fp10-fp24, random binary f2m15-f2m27, Koblitz f2m19-f2m61), boundary_targets round-5 Koblitz rows (n <= 41), compact-orbit ladder n37-n83 (icv1-f2m37-tm534059-32aad96b ... icv1-f2m83-t6151469093347-cdcc5432); prime-order subgroups as registered",
+    "curve_ids": ["icv1-f2m37-tm534059-32aad96b", "icv1-f2m41-tm2308219-7f48b14a", "icv1-f2m53-tm56619371-dac20a85", "icv1-f2m61-t158598901-ab42b6c5", "icv1-f2m71-t48653080717-2cafaea3", "icv1-f2m73-tm184271214331-9d25cc67", "icv1-f2m83-t6151469093347-cdcc5432"]
+  },
+  "metric": "min over configurations of measured whole-process cost / min(sqrt(r/A), 1/delta)",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 208,
+  "arms": [],
+  "ratio_original_over_candidate": null,
+  "ratio_previous_over_candidate": null,
+  "outputs_identical": null,
+  "run_report": "research/lit2026_w3_ggm_audit_20261011/reports/run-20261011T2012Z/report.pdf",
+  "note": "No configuration is below its structured generic-group bound; the closest is 38.9x above (fp14 balanced m=2). 122 of 208 rows have delta_upper = 1 (all compact-orbit rungs, most Koblitz m=3), where the bound is vacuous. Record problems: n61 log2 r 47.54 vs 47.21; excluded precompute omits the rank stage at n61/n71."
+}

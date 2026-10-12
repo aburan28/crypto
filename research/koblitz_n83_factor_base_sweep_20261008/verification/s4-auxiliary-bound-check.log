@@ -1,0 +1,7 @@
+source src/cryptanalysis/binary_semaev_s4.rs sha256=d4c94dd8b612a6872e2fb9736630e5f7cef8873b12d2ef2e4e8266dd9fab4776
+source src/cryptanalysis/semaev_sat.rs sha256=18ac7704b399c06f6036d80fefa05dae7f8265f22654bf65f0eeaea7f81bc4b7
+small_block_enumeration l=1..5 PASS
+n83 core=910 x_quadratic_aux=20667 x_cubic_aux=571787
+n83 sat_variables_lower_bound=593364
+n83 and_definition_clauses_lower_bound=2349149
+status PASS source-derived bound only; no solver memory or runtime claim

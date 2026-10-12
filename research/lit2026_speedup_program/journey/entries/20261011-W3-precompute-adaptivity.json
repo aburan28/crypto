@@ -1,0 +1,24 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W3",
+  "slug": "precompute-adaptivity",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1683",
+  "papers": ["arXiv 2505.00894"],
+  "kind": "diagnostic",
+  "workload": {
+    "id": "precompute-arms-committed-records",
+    "description": "Multiplier closure cells C23/C37/C37b (research/transfer_aware_ic_20261010, 27 arms) and the compact-orbit target scan n37-n83 (S = K^2 n index entries), Koblitz curves K_a/GF(2^n), prime-order subgroups as registered",
+    "curve_ids": ["icv1-f2m37-tm534059-32aad96b", "icv1-f2m41-tm2308219-7f48b14a", "icv1-f2m53-tm56619371-dac20a85", "icv1-f2m61-t158598901-ab42b6c5", "icv1-f2m71-t48653080717-2cafaea3", "icv1-f2m73-tm184271214331-9d25cc67", "icv1-f2m83-t6151469093347-cdcc5432"]
+  },
+  "metric": "S*T/(r/A): advice entries times online probes over the automorphism-reduced order",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 34,
+  "arms": [],
+  "ratio_original_over_candidate": null,
+  "ratio_previous_over_candidate": null,
+  "outputs_identical": null,
+  "run_report": "research/lit2026_w3_ggm_audit_20261011/reports/run-20261011T2012Z/report.pdf",
+  "note": "Both arms are non-adaptive in the Dinur-Keller-Marmor sense and sit on their S*T ~ N line: multiplier closure 0.739-1.432 (27 arms), compact-orbit scan at the rank-stage mean 1.053-2.734 (7 rungs). The S3 root Bloom filter (#1659) changes no query. Preprocessing rho is adaptive (S*T^2 ~ N); no ops-counted record exists for it."
+}

@@ -1,13 +1,9 @@
 name: Paired n37 n41 full-rank controls
 
 on:
-  pull_request:
-    paths:
-      - 'research/notes/ecc2k130/paired_fullrank_20260925/**'
-      - 'research/notes/ecc2k130/PAIRED_N37_N41_FULLRANK_PROTOCOL_20260925.md'
-      - 'research/notes/ecc2k130/paired_fullrank_clean_evidence_20260925/**'
-      - 'research/notes/ecc2k130/compact_frozen_source_replay_20260929/materialize.py'
-      - '.github/workflows/paired-n37-n41-fullrank.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 
 permissions:

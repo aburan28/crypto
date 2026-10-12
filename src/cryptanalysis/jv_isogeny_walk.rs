@@ -2719,6 +2719,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "long end-to-end sieve; run in jv-isogeny-walk CI"]
     fn end_to_end_from_a_non_weak_curve_recovers_and_verifies() {
         // A whole-method run (§18.1) at a tiny size: the challenge curve is
         // not weak, the walk reaches a weak curve, the route solves, and the
