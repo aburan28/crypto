@@ -224,3 +224,38 @@ comparison above; they are not part of P3a or P3b.
   `n ∈ {24…32}`.
 - Nothing from any random-base E3 cell has been seen. Two timing draws with seed 1 at
   `n = 22` and `26` were discarded unseen.
+
+## Amendment 3 (2026-10-12, before any E4 draw is measured): E4 as run, and an exploratory extension
+
+**E4 as registered.** E4 is the four `m = 3` cells, using their committed unsatisfiable
+draws (`solutions = 0`), rebuilt exactly from the recorded `v_basis` and `x_r` with
+`koblitz_groebner::build_decomposition_system` (`b = 1`, `find_irreducible_sparse(n)`):
+
+| cell | records |
+|:--|:--|
+| (5, 2), (7, 2), (7, 3) | `research/dreg_fixed_surplus_20260923/runs/cell-*-7.jsonl` |
+| (5, 3) | `research/dreg_ell_grid_20260925/runs/cell-5-3-7.jsonl` |
+
+- **What is measured.** These systems have no solutions, so `I = (1)` and `d_F` is the
+  first `c` with `1 ∈ V_{F,c}`, the polynomial-calculus refutation degree (ledger §1).
+- **Engine.** The E5 engine computes it with the same closure, stopping once `1` enters.
+- **Scoring.** P4a and P4b are scored exactly as registered. P4c (the direct-`S₄`
+  first-fall bound) is not run here and is reported not tested.
+
+**Exploratory extension (not registered for scoring; reported separately and labelled).**
+The same measurement is taken on the committed unsatisfiable draws of:
+
+| `m` | cells | `cmax` | records |
+|:--|:--|:--|:--|
+| 3 | (9, 3), (11, 4) | 6 | `dreg_fixed_surplus_20260923` |
+| 3 | (13, 4) | 5 | `dreg_fixed_surplus_20260923` |
+| 4 | (5, 2), (7, 2) | 6 | `research/dreg_m4_chain_20261006` |
+| 4 | (9, 3) | 5 | `research/dreg_m4_chain_20261006` |
+
+- **The question.** Does `d_F` stay below `D*` as `ℓ` grows (`D*` = 5, 6, 6 at `m = 3`;
+  6 and `≥ 7` at `m = 4`)?
+- **Reading rule.** Fixed now: "`d_F` flat while `D*` rises" needs `d_F ≤ D* − 2` at the
+  largest `ℓ` measured, for both `m`. Otherwise the reading is "`d_F` tracks `D*`".
+- **Censoring.** A draw not refuted by `cmax` is censored (`d_F > cmax`).
+
+Nothing from any E4 or extension draw has been computed.
