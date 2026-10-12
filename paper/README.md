@@ -1,4 +1,21 @@
-# LaTeX paper draft
+# LaTeX paper drafts
+
+## `rootfinding_decomposition.tex`
+
+*Point Decomposition by Root Finding: Replacing Gröbner-Basis Solvers in
+Elliptic-Curve Index Calculus, with Measurements on Prime and Binary
+Curves up to NIST P-521.* Paper-quality write-up of
+[`RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md`](../RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md):
+the $S_3$-roots-are-$x(R \mp F_i)$ observation, the pair-sum table for
+binary curves, the fail-closed verification protocol, and head-to-head
+measurements against the codebase's own matrix-F4 / Buchberger solvers
+on Koblitz curves, small prime curves, 40–83-bit prime fields, and the
+five NIST P-curves. §7 states the boundary: a constant-factor subroutine
+improvement, asymptotics unchanged, no security claim. Anonymous author
+block. Build with `tectonic -X compile rootfinding_decomposition.tex`
+(≈10 pages; the PDF is a build artefact and is not committed).
+
+## `structural_completeness.tex`
 
 `structural_completeness.tex` is a paper-quality LaTeX version of
 [`PAPER_STRUCTURAL_COMPLETENESS.md`](../PAPER_STRUCTURAL_COMPLETENESS.md).
