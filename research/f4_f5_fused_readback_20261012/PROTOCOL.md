@@ -44,6 +44,12 @@ seeds or workloads adaptively. Callgrind's `summary` can wrap after zero-stats;
 use positive `totals` and independently sum self-cost records, excluding
 inclusive call edges. Keep wrapped fields unchanged.
 
+Additional compatibility control, declared before candidate measurement:
+one fresh candidate process with `KIC_F5_FUSED_BUILD=0` and one repetition
+of all eleven systems/three arms. The native checker compares its outputs
+and accounting to the primary baseline. These 33 extra calls are outside
+the fixed 792-call, five-pair acceptance campaign.
+
 Correctness: identical input/output and criterion-membership digests, reports,
 rank, complete and criterion word-XOR accounting; identical reduced F4/F5
 outputs on each input. Independently test sorted readback over multiple packed

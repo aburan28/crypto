@@ -38,6 +38,12 @@ if [ "${1:-}" = "baseline" ]; then
     exit
 fi
 
+if [ "${1:-}" = "legacy" ]; then
+    export KIC_F5_FUSED_BUILD=0
+    profile legacy-b b 1
+    exit
+fi
+
 # primary-a was captured before any production edits; aa-a repeats that binary.
 profile primary-b b 3
 for task_round in 0 1 2 3 4; do

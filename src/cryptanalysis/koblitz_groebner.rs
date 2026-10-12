@@ -1215,7 +1215,7 @@ pub fn matrix_f4_f2_blocked(
     for row in matrix.iter().take(rank) {
         let monos = row_monos(row, &cols);
         if !monos.is_empty() {
-            out.push(F2BoolPoly::from_monos(monos, n_vars_out));
+            out.push(poly_from_column_order(monos, n_vars_out));
         }
     }
     Some((out, word_ops))
@@ -1242,6 +1242,16 @@ fn row_monos(row: &[u64], cols: &[u64]) -> Vec<F2BoolMono> {
         }
     }
     monos
+}
+
+/// Adopt terms read from unique, descending Macaulay columns. Set-bit
+/// readback preserves that order, so sorting and cancelling again would
+/// only copy the terms into another allocation.
+fn poly_from_column_order(terms: Vec<F2BoolMono>, n_vars: usize) -> F2BoolPoly {
+    debug_assert!(terms
+        .windows(2)
+        .all(|pair| cmp_mono(pair[0], pair[1]).is_gt()));
+    F2BoolPoly { terms, n_vars }
 }
 
 // ── Matrix-F4 over the Boolean ring ────────────────────────────────
@@ -1577,7 +1587,7 @@ fn matrix_f4_f2_counted_impl(
                     monos.push(F2BoolMono::from_mask(cols[column]));
                 }
             }
-            let poly = F2BoolPoly::from_monos(monos, n_vars_out);
+            let poly = poly_from_column_order(monos, n_vars_out);
             if is_constant_one(&poly) || forced_assignment(&poly).is_some() {
                 out.push(poly);
             }
@@ -1602,7 +1612,7 @@ fn matrix_f4_f2_counted_impl(
                     }
                 }
                 if monos.len() <= 2 {
-                    let poly = F2BoolPoly::from_monos(monos, n_vars_out);
+                    let poly = poly_from_column_order(monos, n_vars_out);
                     if is_constant_one(&poly) || forced_assignment(&poly).is_some() {
                         out.push(poly);
                     }
@@ -1610,7 +1620,7 @@ fn matrix_f4_f2_counted_impl(
             } else {
                 let monos = row_monos(row, &cols);
                 if !monos.is_empty() {
-                    out.push(F2BoolPoly::from_monos(monos, n_vars_out));
+                    out.push(poly_from_column_order(monos, n_vars_out));
                 }
             }
         }
@@ -6630,6 +6640,115 @@ mod tests {
         assert_eq!(macaulay_columns(&rows), Some(vec![a | b, a, b, 0]));
         assert_eq!(macaulay_columns(&[vec![b, b, 0]]), Some(vec![b, 0]));
         assert_eq!(macaulay_columns(&[]), Some(Vec::new()));
+    }
+
+    #[test]
+    fn packed_readback_preserves_canonical_order_across_words_and_padding() {
+        let support = [0, 2, 7, 18, 52, 60, 63];
+        let mut cols: Vec<u64> = (0..128u64)
+            .map(|subset| {
+                support.iter().enumerate().fold(0, |mask, (i, bit)| {
+                    mask | if subset & (1 << i) != 0 { 1 << bit } else { 0 }
+                })
+            })
+            .collect();
+        cols.sort_unstable_by(|&a, &b| {
+            cmp_mono(F2BoolMono::from_mask(b), F2BoolMono::from_mask(a))
+        });
+        cols.truncate(117);
+        // Include boundary columns 63/64/116, padding from column 117,
+        // an extra padding word, empty rows and every valid column.
+        for row in [
+            [0, 0, 0],
+            [0, 0, u64::MAX],
+            [1 << 63, (1 << 52) | (1 << 53) | 1, u64::MAX],
+            [u64::MAX, u64::MAX, u64::MAX],
+            [0xaaaa_5555_aaaa_5555, 0x5555_aaaa_5555_aaaa, 0],
+        ] {
+            let expected = F2BoolPoly::from_monos(
+                cols.iter()
+                    .enumerate()
+                    .filter(|(i, _)| row[i / 64] & (1 << (i % 64)) != 0)
+                    .map(|(_, &mask)| F2BoolMono::from_mask(mask))
+                    .collect(),
+                64,
+            );
+            let actual = poly_from_column_order(row_monos(&row, &cols), 64);
+            assert_eq!(actual, expected);
+            assert!(actual
+                .terms
+                .windows(2)
+                .all(|pair| cmp_mono(pair[0], pair[1]).is_gt()));
+        }
+    }
+
+    #[test]
+    fn fused_f5_count_matches_polynomial_products_at_every_cap_boundary() {
+        let n_vars = 6;
+        let mask = all_variable_mask(n_vars);
+        let from_masks = |masks: &[u64]| {
+            F2BoolPoly::from_monos(
+                masks.iter().copied().map(F2BoolMono::from_mask).collect(),
+                64,
+            )
+        };
+        let polys = [
+            F2BoolPoly::zero(64),
+            from_masks(&[1, 3]), // Multiplication by x_1 cancels this row.
+            from_masks(&[3, 4, 0]),
+            from_masks(&[(1 << 63) | 4, 1 << 52, 0]),
+            F2BoolPoly::one(64),
+        ];
+        for degree in 0..=4 {
+            let criterion = F5Criterion::new(&polys, n_vars, degree, mask);
+            let mut full = 0;
+            let mut expected = Vec::new();
+            for (i, polynomial) in polys.iter().enumerate() {
+                let polynomial_degree = polynomial
+                    .terms
+                    .iter()
+                    .map(|term| term.degree())
+                    .max()
+                    .unwrap_or(0);
+                // Enumerate the whole small Boolean multiplier universe
+                // independently of the builder's cached row schedules.
+                for multiplier in 0..=mask {
+                    if polynomial_degree + multiplier.count_ones() > degree {
+                        continue;
+                    }
+                    let product = polynomial.mul_mono(F2BoolMono::from_mask(multiplier));
+                    if product.is_zero() {
+                        continue;
+                    }
+                    full += 1;
+                    if !criterion.prunes(i, multiplier) {
+                        let mut row: Vec<_> = product.terms.iter().map(|term| term.mask).collect();
+                        row.sort_unstable();
+                        expected.push(row);
+                    }
+                }
+            }
+            expected.sort_unstable();
+            for cap in 0..=full + 1 {
+                let mut rows = Vec::new();
+                let result = visit_macaulay_rows_counted::<true>(
+                    &polys,
+                    n_vars,
+                    degree,
+                    mask,
+                    Some(&criterion),
+                    cap,
+                    |row| rows.push(row.to_vec()),
+                );
+                if cap < full {
+                    assert!(result.is_none(), "degree {degree}, cap {cap}, full {full}");
+                } else {
+                    assert_eq!(result, Some((expected.len(), full)));
+                    rows.sort_unstable();
+                    assert_eq!(rows, expected, "degree {degree}, cap {cap}");
+                }
+            }
+        }
     }
 
     #[test]

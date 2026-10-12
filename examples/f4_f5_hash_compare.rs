@@ -1,4 +1,4 @@
-//! Native validation and statistical comparison of the frozen hash study.
+//! Native validation and comparison of frozen eleven-system F4/F5 profiles.
 //! `cargo run --release --example f4_f5_hash_compare -- RECORDS_DIRECTORY`
 use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
@@ -588,6 +588,20 @@ fn analyze(root: &Path) -> Result<Value> {
         result["aa_primary_ir"] = json!(total(&aa, arm));
         result["calls_per_round"] = json!(11);
         result["primary_calls"] = json!(33);
+        for field in ["allocations", "allocated_bytes"] {
+            let sum = |run: &Run| -> Result<u64> {
+                run.rows
+                    .values()
+                    .filter(|row| row["arm"] == arm)
+                    .try_fold(0u64, |sum, row| Ok(sum + number(row, field)?))
+            };
+            let baseline: u64 = sum(&a)?;
+            let candidate: u64 = sum(&b)?;
+            result[format!("primary_baseline_{field}")] = json!(baseline);
+            result[format!("primary_candidate_{field}")] = json!(candidate);
+            result[format!("primary_{field}_reduction_percent")] =
+                json!(100.0 * (1.0 - candidate as f64 / baseline as f64));
+        }
         arms.push(result);
     }
     for (label, row) in rounds[0].0.rows.iter() {
@@ -611,6 +625,11 @@ fn analyze(root: &Path) -> Result<Value> {
     let accepted = f5["verdict"] == "fewer_instructions"
         && f4["verdict"] != "more_instructions"
         && memory_regressions.is_empty();
+    let two_arm_accepted = accepted
+        && f4["verdict"] == "fewer_instructions"
+        && case_verdicts
+            .iter()
+            .all(|case| case["verdict"] != "more_instructions");
     let mut sources = Vec::new();
     for run in [&a, &b, &aa] {
         sources.extend_from_slice(&run.sources);
@@ -625,6 +644,7 @@ fn analyze(root: &Path) -> Result<Value> {
         "bootstrap_resamples":2000,"bootstrap_seed":"0x243f6a8885a308d3","exact_outputs_and_counts":true,
         "measurement":"Callgrind Ir, instrumented complete calls, merged worker coverage",
         "runtime_speedup":null,"rss":null,"acceptance_met":accepted,"memory_regressions":memory_regressions,
+        "two_arm_acceptance_met":two_arm_accepted,
         "arms":arms,"case_verdicts":case_verdicts,"primary_cases":per_case,"memory_cases":memory_cases,"sources":sources}),
     )
 }
@@ -642,6 +662,21 @@ fn main() {
             args[4].parse().unwrap(),
             args.get(5).map_or("criterion", String::as_str),
         )
+    } else if args.get(1).is_some_and(|s| s == "check") {
+        assert_eq!(
+            args.len(),
+            7,
+            "check RECORDS_DIRECTORY REFERENCE_RUN REPEATS CANDIDATE_RUN REPEATS"
+        );
+        let root = Path::new(&args[2]);
+        (|| {
+            let reference = read_run(root, &args[3], args[4].parse().unwrap())?;
+            let candidate = read_run(root, &args[5], args[6].parse().unwrap())?;
+            check_against(&reference, &candidate)?;
+            Ok(json!({"reference":args[3],"candidate":args[5],
+                "exact_outputs_and_counts":true,"candidate_calls":candidate.rows.len(),
+                "reference_sources":reference.sources,"candidate_sources":candidate.sources}))
+        })()
     } else {
         assert_eq!(args.len(), 2, "RECORDS_DIRECTORY");
         analyze(Path::new(&args[1]))
