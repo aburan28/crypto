@@ -107,7 +107,9 @@ large-prime graph. A cap before the first SAT pattern stops the run rather
 than repeating an identical failed preflight. Results separate invalid
 models, preflight caps, search caps, graph caps and completed bounded search.
 The external supervisor must retain its launch, timeout, source and cgroup
-receipts and charge all import, failed-search and artifact time. This worker
-has only source tests at present: no retained N83 `verify` or `run` invocation
-is part of its validation. Graph rows and stage counts cannot select a
+receipts and charge all import, failed-search and artifact time. The separate
+[Linux import gate](verification/mixed-orbit-import-900s-20261012/RESULT.md)
+compiled this worker and completed its retained-N83 `verify` invocation for
+both exact S3-backed objects. It did not invoke `run` or search for a relation.
+Graph rows and stage counts cannot select a
 minimum-runtime base without the remaining full-pipeline measurements.
