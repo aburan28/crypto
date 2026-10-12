@@ -3225,16 +3225,9 @@ pub fn saturate_factor_base_two_torsion(
     }
     let sums = fast.batch_add(&pairs);
     let mut xs = std::collections::BTreeMap::new();
-    for (p, s) in fb.points.iter().zip(sums.iter()) {
-        let q = match s {
-            None => BinaryPoint::Infinity,
-            Some((x, y)) => BinaryPoint::Affine {
-                x: fast.element(*x),
-                y: fast.element(*y),
-            },
-        };
-        for r in [p.clone(), q] {
-            if let BinaryPoint::Affine { x, .. } = r {
+    for p in &fb.points {
+        for q in [p.clone(), kc.add(p, &t)] {
+            if let BinaryPoint::Affine { x, .. } = q {
                 xs.entry(x.to_biguint()).or_insert(x);
             }
         }
