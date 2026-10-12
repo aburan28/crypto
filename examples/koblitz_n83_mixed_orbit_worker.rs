@@ -1,7 +1,7 @@
 //! Replay two pinned N83 bases and collect bounded one/two-residual relations.
 //!
-//! `verify` imports both S3 objects and checks their exact orbit-labelled
-//! prefix. `run` additionally requires a 4 GiB, zero-swap Linux cgroup and
+//! `verify` and `verify-alt` import pinned S3 objects and check their exact
+//! orbit-labelled prefix. `run` and `run-alt` additionally require a 4 GiB, zero-swap Linux cgroup and
 //! an external budget supervisor. Neither mode downloads an object.
 //! `verify-control` and `control-run` use a pinned known-answer witness only;
 //! their outcomes are not natural-target relation-yield measurements.
@@ -30,9 +30,14 @@ type Result<T> = std::result::Result<T, Box<dyn Error>>;
 const STUDY: &str = "koblitz_n83_factor_base_sweep_20261008";
 const CURVE: &str = "icv1-f2m83-tm6151469093347-debefd74";
 const PREFIX: &str = "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/";
+const PILOT_PREFIX: &str =
+    "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/a0/";
 const SMALL_MANIFEST: &[u8] = include_bytes!("../research/koblitz_n83_factor_base_sweep_20261008/verification/matched-k1182-k2048-900s-20261011/evidence-01/panel-k1182/manifest.json");
+const SMALL_600_MANIFEST: &[u8] =
+    include_bytes!("../research/koblitz_n83_factor_base_sweep_20261008/pilot-01/manifest.json");
 const ENVELOPE_MANIFEST: &[u8] = include_bytes!("../research/koblitz_n83_factor_base_sweep_20261008/verification/remaining-budget-k2048-20261010/manifest.json");
 const SMALL_HASH: &str = "76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92";
+const SMALL_600_HASH: &str = "b4dda45e6c3edfca673db6f3f82c16cce8c860f5e62c092155258df399a0363e";
 const ENVELOPE_HASH: &str = "82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851";
 const PUBLIC_CORPUS_HASH: &str = "831eaa7be2387634fd610f6706103b2af9b4e274f0db59923c0280af3cbed74b";
 const CONTROL_FIXTURE: &[u8] = include_bytes!("../research/koblitz_n83_factor_base_sweep_20261008/verification/mixed-orbit-known-witness-source-20261012/fixture.json");
@@ -41,17 +46,38 @@ struct PinnedBase {
     manifest: &'static [u8],
     object_hash: &'static str,
     columns: usize,
+    panel_schema: &'static str,
+    panel_status: &'static str,
+    panel_count: usize,
+    s3_prefix: &'static str,
 }
 
 const SMALL: PinnedBase = PinnedBase {
     manifest: SMALL_MANIFEST,
     object_hash: SMALL_HASH,
     columns: 1182,
+    panel_schema: "n83.factor-base-panel/v2-size-frontier",
+    panel_status: "completed_factor_base_object",
+    panel_count: 1,
+    s3_prefix: PREFIX,
+};
+const SMALL_600: PinnedBase = PinnedBase {
+    manifest: SMALL_600_MANIFEST,
+    object_hash: SMALL_600_HASH,
+    columns: 600,
+    panel_schema: "n83.factor-base-panel/v1",
+    panel_status: "completed_factor_base_panel",
+    panel_count: 54,
+    s3_prefix: PILOT_PREFIX,
 };
 const ENVELOPE: PinnedBase = PinnedBase {
     manifest: ENVELOPE_MANIFEST,
     object_hash: ENVELOPE_HASH,
     columns: 2048,
+    panel_schema: "n83.factor-base-panel/v2-size-frontier",
+    panel_status: "completed_factor_base_object",
+    panel_count: 1,
+    s3_prefix: PREFIX,
 };
 
 fn decimal(value: &Value) -> Result<BigUint> {
@@ -122,21 +148,32 @@ fn bound_archive(
     }
     let header: Value = serde_json::from_slice(manifest)?;
     let rows = header["bases"].as_array().ok_or("manifest bases")?;
-    let row = rows.first().ok_or("missing base")?;
     let object = format!("objects/{}.jsonl.gz", spec.object_hash);
-    if header["schema"] != "n83.factor-base-panel/v2-size-frontier"
-        || header["status"] != "completed_factor_base_object"
+    if header["schema"] != spec.panel_schema
+        || header["status"] != spec.panel_status
         || header["study"] != STUDY
-        || header["completed_base_count"] != 1
-        || rows.len() != 1
-        || row["a"] != 0
+        || header["completed_base_count"] != spec.panel_count
+        || rows.len() != spec.panel_count
+        || (spec.panel_count > 1 && header["expected_base_count"] != spec.panel_count)
+    {
+        return Err("manifest panel binding".into());
+    }
+    let selected: Vec<_> = rows
+        .iter()
+        .filter(|row| row["compressed_blake3"] == spec.object_hash)
+        .collect();
+    if selected.len() != 1 {
+        return Err("manifest selected row binding".into());
+    }
+    let row = selected[0];
+    if row["a"] != 0
         || row["policy"] != "public_x_hash"
         || row["seed"] != 2026100801u64
         || row["columns"] != spec.columns
         || row["points"] != spec.columns * 166
         || row["object"] != object
         || row["compressed_blake3"] != spec.object_hash
-        || row["s3_uri"] != format!("{PREFIX}{object}")
+        || row["s3_uri"] != format!("{}{object}", spec.s3_prefix)
         || row["bytes"].as_u64() != Some(compressed.len() as u64)
     {
         return Err("manifest row binding".into());
@@ -273,15 +310,19 @@ fn import(
 
 fn import_pair(
     args: &[String],
+    small_spec: &PinnedBase,
 ) -> Result<(KoblitzCurve, FrobeniusFactorBase, FrobeniusFactorBase)> {
     let curve = KoblitzCurve::known_n83_k0().ok_or("pinned Koblitz curve")?;
     if curve.label() != CURVE || curve.cofactor != BigUint::from(4u8) {
         return Err("curve identity mismatch".into());
     }
-    let small = import(&SMALL, Path::new(&args[1]), Path::new(&args[2]), &curve)?;
+    let small = import(small_spec, Path::new(&args[1]), Path::new(&args[2]), &curve)?;
     let envelope = import(&ENVELOPE, Path::new(&args[3]), Path::new(&args[4]), &curve)?;
     let residual = build_exact_residual_suffix_factor_base(&curve, &small, &envelope)?;
-    if residual.signed_orbits.len() != 866 || residual.points.len() != 143_756 {
+    let expected_residual_orbits = ENVELOPE.columns - small_spec.columns;
+    if residual.signed_orbits.len() != expected_residual_orbits
+        || residual.points.len() != expected_residual_orbits * 166
+    {
         return Err("residual suffix size mismatch".into());
     }
     Ok((curve, small, residual))
@@ -469,7 +510,7 @@ fn control_run(args: &[String]) -> Result<()> {
         );
         std::process::exit(124);
     });
-    let (curve, small, residual) = import_pair(args)?;
+    let (curve, small, residual) = import_pair(args, &SMALL)?;
     let target = control_target(Path::new(&args[5]), &curve, &small, &residual)?;
     let import_ms = start.elapsed().as_secs_f64() * 1000.0;
     let domains = MixedOrbitDomains::new(&curve, &small, &residual)?;
@@ -539,7 +580,7 @@ fn control_run(args: &[String]) -> Result<()> {
     Ok(())
 }
 
-fn run(args: &[String]) -> Result<()> {
+fn run(args: &[String], small_spec: &PinnedBase) -> Result<()> {
     if args.len() != 13 {
         return Err("usage: run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT CORPUS BUDGET_SECONDS MAX_TRIALS CONFLICT_BUDGET MAX_MODELS SMALL_SUMMANDS RESIDUAL_SUMMANDS OUTPUT_DIR".into());
     }
@@ -567,8 +608,8 @@ fn run(args: &[String]) -> Result<()> {
         &output.join("config.json"),
         &json!({
             "schema":"n83.mixed-orbit-partial-config/v1", "study":STUDY,
-            "small_object_blake3":SMALL_HASH, "envelope_object_blake3":ENVELOPE_HASH,
-            "small_manifest_blake3":blake3::hash(SMALL_MANIFEST).to_hex().to_string(),
+            "small_object_blake3":small_spec.object_hash, "envelope_object_blake3":ENVELOPE_HASH,
+            "small_manifest_blake3":blake3::hash(small_spec.manifest).to_hex().to_string(),
             "envelope_manifest_blake3":blake3::hash(ENVELOPE_MANIFEST).to_hex().to_string(),
             "source_blake3":blake3::hash(include_bytes!("koblitz_n83_mixed_orbit_worker.rs")).to_hex().to_string(),
             "public_corpus_path":args[5], "public_corpus_canonical_json_blake3":PUBLIC_CORPUS_HASH,
@@ -595,7 +636,7 @@ fn run(args: &[String]) -> Result<()> {
         );
         std::process::exit(124);
     });
-    let (curve, small, residual) = import_pair(args)?;
+    let (curve, small, residual) = import_pair(args, small_spec)?;
     let import_ms = start.elapsed().as_secs_f64() * 1000.0;
     let (target, corpus_hash) = public_target(Path::new(&args[5]), &curve)?;
     let domains = MixedOrbitDomains::new(&curve, &small, &residual)?;
@@ -705,7 +746,7 @@ fn run(args: &[String]) -> Result<()> {
         &output.join("result.json"),
         &json!({
             "schema":"n83.mixed-orbit-partial-result/v1", "study":STUDY,
-            "status":status, "small_object_blake3":SMALL_HASH,
+            "status":status, "small_object_blake3":small_spec.object_hash,
             "envelope_object_blake3":ENVELOPE_HASH,
             "public_corpus_canonical_json_blake3":corpus_hash,
             "small_signed_orbits":small.signed_orbits.len(),
@@ -733,11 +774,12 @@ fn run(args: &[String]) -> Result<()> {
 fn main() -> Result<()> {
     let args: Vec<_> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
-        Some("verify") if args.len() == 5 => {
-            let (curve, small, residual) = import_pair(&args)?;
+        Some("verify" | "verify-alt") if args.len() == 5 => {
+            let small_spec = if args[0] == "verify-alt" { &SMALL_600 } else { &SMALL };
+            let (curve, small, residual) = import_pair(&args, small_spec)?;
             println!("{}", json!({
                 "schema":"n83.mixed-orbit-import/v1", "status":"PASS",
-                "curve_slug":curve.label(), "small_object_blake3":SMALL_HASH,
+                "curve_slug":curve.label(), "small_object_blake3":small_spec.object_hash,
                 "envelope_object_blake3":ENVELOPE_HASH,
                 "small_points":small.points.len(), "small_signed_orbits":small.signed_orbits.len(),
                 "residual_points":residual.points.len(), "residual_signed_orbits":residual.signed_orbits.len(),
@@ -745,9 +787,10 @@ fn main() -> Result<()> {
             }));
             Ok(())
         }
-        Some("run") => run(&args),
+        Some("run") => run(&args, &SMALL),
+        Some("run-alt") => run(&args, &SMALL_600),
         Some("verify-control") if args.len() == 6 => {
-            let (curve, small, residual) = import_pair(&args)?;
+            let (curve, small, residual) = import_pair(&args, &SMALL)?;
             let target = control_target(Path::new(&args[5]), &curve, &small, &residual)?;
             println!("{}", json!({"schema":"n83.mixed-orbit-known-witness-verify/v1",
                 "status":"PASS", "scope":"known_answer_control_only",
@@ -755,7 +798,7 @@ fn main() -> Result<()> {
             Ok(())
         }
         Some("control-run") => control_run(&args),
-        _ => Err("usage: verify SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT | verify-control SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE | run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT CORPUS BUDGET_SECONDS MAX_TRIALS CONFLICT_BUDGET MAX_MODELS SMALL_SUMMANDS RESIDUAL_SUMMANDS OUTPUT_DIR | control-run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE BUDGET_SECONDS CONFLICT_BUDGET MAX_MODELS OUTPUT_DIR".into()),
+        _ => Err("usage: verify|verify-alt SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT | verify-control SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE | run|run-alt SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT CORPUS BUDGET_SECONDS MAX_TRIALS CONFLICT_BUDGET MAX_MODELS SMALL_SUMMANDS RESIDUAL_SUMMANDS OUTPUT_DIR | control-run SMALL_MANIFEST SMALL_OBJECT ENVELOPE_MANIFEST ENVELOPE_OBJECT FIXTURE BUDGET_SECONDS CONFLICT_BUDGET MAX_MODELS OUTPUT_DIR".into()),
     }
 }
 
@@ -776,6 +819,8 @@ mod tests {
     fn pinned_manifests_reject_wrong_bytes_or_archive() {
         assert!(bound_archive(&SMALL, ENVELOPE_MANIFEST, b"").is_err());
         assert!(bound_archive(&SMALL, SMALL_MANIFEST, b"changed archive").is_err());
+        assert!(bound_archive(&SMALL_600, SMALL_MANIFEST, b"").is_err());
+        assert!(bound_archive(&SMALL_600, SMALL_600_MANIFEST, b"changed archive").is_err());
         assert!(bound_archive(&ENVELOPE, ENVELOPE_MANIFEST, b"changed archive").is_err());
     }
 
