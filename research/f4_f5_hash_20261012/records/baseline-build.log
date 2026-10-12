@@ -1,0 +1,19 @@
+   Compiling crypto v0.1.0 (/workspace/crypto)
+warning: unused import: `crate::cryptanalysis::binary_semaev::binary_semaev_s3`
+   --> src/cryptanalysis/semaev_sat.rs:105:5
+    |
+105 | use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `projected`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:8804:10
+     |
+8804 |     let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
+     |          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_projected`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `crypto` (lib) generated 2 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
+    Finished `release` profile [optimized] target(s) in 3m 41s

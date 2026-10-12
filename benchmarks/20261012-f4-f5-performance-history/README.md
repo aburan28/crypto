@@ -23,3 +23,9 @@ History rendering quotes existing records; runtime has no stored spread or isola
 - [criterion-allocations-requests.svg](visuals/research/f4_f5_history_20261012/reports/run-20261012T0009Z/criterion-allocations-requests.svg) — `research/f4_f5_history_20261012/reports/run-20261012T0009Z/criterion-allocations-requests.svg`
 - [criterion-allocations.pdf](visuals/research/f4_f5_history_20261012/reports/run-20261012T0009Z/criterion-allocations.pdf) — `research/f4_f5_history_20261012/reports/run-20261012T0009Z/criterion-allocations.pdf`
 - [report.pdf](visuals/research/f4_f5_history_20261012/reports/run-20261012T0009Z/report.pdf) — `research/f4_f5_history_20261012/reports/run-20261012T0009Z/report.pdf`
+
+## Captured planning source
+
+The roadmap references in the verbatim source report describe the original planning snapshot captured at PR #1677 head [baa624218809b821400cfe33155c6bacb542e9a8](https://github.com/aburan28/crypto/tree/baa624218809b821400cfe33155c6bacb542e9a8/research/f4_f5_history_20261012). Its five original planning files are preserved in the [captured planning archive](../../research/f4_f5_history_20261012/archives/pr-1677-baa6242188/), with source hashes and provenance. The original planning PDF has SHA-256 `c09a1753fdf9d9af9caebcef48c87e3ba15434007a7f3eb94966b4fdf1a2c3e1`.
+
+The [current roadmap](../../research/f4_f5_history_20261012/NEXT_STEPS.md) records the later native hashing execution separately; its refreshed planning PDF has SHA-256 `2ce7eb49b71ef823a25481f47af4503d7903407e051b1eae3a952c6e33093eb3`. The historical measured plots and browsing PDF/SVG copies in this entry retain their original bytes and measurement scope. The [native hashing entry](../20261012-f4-f5-native-hashing/) carries that follow-up's instruction and live-allocation reports.

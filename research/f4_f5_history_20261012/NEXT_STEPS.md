@@ -1,6 +1,8 @@
 # F4/F5 follow-up roadmap
 
-2026-10-12 — **Planned; no new benchmark or profiling run has been launched.**
+2026-10-12 — **Original planning snapshot; current follow-up execution status is below.**
+
+Execution update: the [native hashing study](../f4_f5_hash_20261012/REPORT.md) completed worker-inclusive instruction profiling, tracked live-allocation measurements and a measured F5 optimization, including three fresh-seed holdouts. Complete F5 calls use 3.71% fewer instructions and criterion construction 45.14% fewer under its native controls. Full release-library verification passed with 3,906 tests and 110 ignored; the previously unfinished test passed unmodified. Controlled runtime/RSS and the larger scaling matrix remain pending. The diagram and PDF retain the original route as a labeled planning snapshot.
 
 The next question is whether the verified allocation reductions improve complete-call runtime and peak memory. The [native allocation study](../f4_f5_row_build_20261011/REPORT.md) measures cumulative allocation traffic, while the [history report](REPORT.md) retains diagnostic CI timings without isolation eligibility or stored spread. Neither establishes a runtime or peak-memory improvement.
 
@@ -41,14 +43,14 @@ No quantitative graph changes in this planning update: the four current study gr
 
 ## Independent validation work
 
-Investigate the unfinished `cryptanalysis::jv_isogeny_walk::tests::end_to_end_from_a_non_weak_curve_recovers_and_verifies` with a bounded reproducer, diagnose its stalled work and deliver a verified fix in a separate PR. Do not skip it or weaken its assertions to claim completion. The [current validation record](records/validation.json) remains partial: 3,904 distinct library tests passed, 110 were ignored and this test timed out. Run library validation separately from timed benchmarks.
+Original proposal: investigate `cryptanalysis::jv_isogeny_walk::tests::end_to_end_from_a_non_weak_curve_recovers_and_verifies` with a bounded reproducer and diagnose its stalled work. The [prior validation record](records/validation.json) was partial: 3,904 distinct library tests passed, 110 were ignored and this test timed out. In the later hashing study, all library tests completed and this test passed unmodified. The earlier timeout has not been diagnosed; investigate it independently if it recurs rather than skipping the test or weakening assertions. Run library validation separately from timed benchmarks.
 
 | Deliverable | Status |
 | --- | --- |
 | Source-linked roadmap, explanatory SVG and inspected PDF | Complete planning deliverable |
-| Controlled native runtime and peak-memory campaign | Not attempted; proposed follow-on |
-| Worker-inclusive profiling and next optimization | Not attempted; depends on measurements |
-| Held-out scaling, crossover and optional selector | Not attempted; depends on profiling and validation |
-| Fix unfinished isogeny test and complete library verification | Pending independent work; existing gap retained |
+| Controlled native runtime and peak-memory campaign | Tracked live allocations measured in hashing study; controlled runtime and fresh-process RSS pending |
+| Worker-inclusive profiling and next optimization | Completed for criterion hashing in the linked native study; other hotspots remain follow-ons |
+| Held-out scaling, crossover and optional selector | Three native holdouts measured; larger scaling matrix, crossover and selector remain pending |
+| Complete library verification and investigate prior timeout | Full verification passed in hashing study; test unmodified, prior timeout diagnosis remains open |
 
-Conductor is unavailable; the attempted reservation for this study directory is preserved in [the planning scope record](records/next-steps-conductor.log). This update changes documentation and its rendered diagram/PDF only; it does not rerun or replace the existing library validation record.
+Conductor was unavailable; the original planning reservation is preserved in [the planning scope record](records/next-steps-conductor.log). The original update changed documentation and its diagram/PDF only. Later execution and validation are recorded in the linked hashing study; the prior library-validation record remains historical evidence.

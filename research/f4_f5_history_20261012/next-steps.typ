@@ -4,9 +4,9 @@
 #set par(leading: 0.55em, spacing: 0.75em)
 #set heading(numbering: none)
 = F4/F5 follow-up roadmap
-#text(fill: rgb("#79542b"), weight: "bold")[2026-10-12 — Planned. No new benchmark or profiling run launched.]
+#text(size: 8pt, fill: rgb("#79542b"), weight: "bold")[2026-10-12 — Original planning snapshot. Current execution status: NEXT_STEPS.md.]
 
-Allocation traffic reductions are verified for the frozen Boolean workloads. Controlled runtime and peak memory remain unmeasured. Existing CI timing plots are diagnostic and have no stored spread or isolation eligibility.
+At planning time, allocation traffic reductions were verified for the frozen Boolean workloads, while controlled runtime and peak memory were unmeasured. Existing CI timing plots were diagnostic, with no stored spread or isolation eligibility. The later hashing study and current status are linked from NEXT_STEPS.md.
 
 #image("next-steps.svg", width: 100%)
 
@@ -18,8 +18,8 @@ Measure peak live heap separately over the complete-call interval, recording its
 
 *Publish each completed follow-on in a PR.* Retain native records, source/input hashes, controls and failures. Add eligible native history series separately from legacy CI diagnostics. Regenerate graph data, SVGs and PDFs together after measurements; this planning update adds no quantitative points.
 
-*Independent validation.* A bounded reproducer and verified fix are still needed for the unfinished isogeny-walk end-to-end test. Current coverage remains partial: 3,904 distinct library tests passed, 110 ignored and one unfinished. Run this work outside timing reservations; do not skip the test or weaken its assertions.
+*Independent validation.* A bounded reproducer and verified fix were needed for the unfinished isogeny-walk end-to-end test. At planning time, coverage was partial: 3,904 distinct library tests passed, 110 ignored and one unfinished. Run this work outside timing reservations; do not skip the test or weaken its assertions.
 
 #text(size: 8pt)[
-Sources and full acceptance gates: #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-row-build/research/f4_f5_history_20261012/NEXT_STEPS.md")[NEXT_STEPS.md]. Evidence: #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-row-build/research/f4_f5_row_build_20261011/REPORT.md")[allocation study], #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-row-build/research/f4_f5_history_20261012/REPORT.md")[history report] and #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-row-build/research/f4_f5_history_20261012/records/validation.json")[validation record]. All measurement, profiling, scaling and validation follow-ons are pending.
+Sources and full acceptance gates: #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-row-build/research/f4_f5_history_20261012/NEXT_STEPS.md")[NEXT_STEPS.md]. Evidence: #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-row-build/research/f4_f5_row_build_20261011/REPORT.md")[allocation study], #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-row-build/research/f4_f5_history_20261012/REPORT.md")[history report] and #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-row-build/research/f4_f5_history_20261012/records/validation.json")[validation record]. These follow-ons were pending when the proposal was written. Current execution status is linked from NEXT_STEPS.md.
 ]

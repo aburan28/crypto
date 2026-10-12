@@ -100,11 +100,11 @@
 //! - C. Eder, J.-C. Faugère, *A survey on signature-based algorithms for
 //!   computing Gröbner bases*, J. Symbolic Comput. 80 (2017).
 
+use crate::cryptanalysis::fx_hash::{FxMap, MaskMap, MaskSet};
 use crate::cryptanalysis::koblitz_groebner::{
     all_variable_mask, macaulay_columns, monomials_up_to_mask, occurring_vars,
 };
 use crate::cryptanalysis::pq_groebner_f2::{F2BoolMono, F2BoolPoly};
-use std::collections::{HashMap, HashSet};
 
 /// Degree of a Boolean polynomial (`0` for a constant or zero).
 fn poly_degree(p: &F2BoolPoly) -> u32 {
@@ -147,7 +147,8 @@ fn product_monos(p: &F2BoolPoly, s: u64) -> Vec<u64> {
 /// leading-monomial set can be read off one structure.
 struct PrefixEchelon {
     columns: Vec<u64>,
-    index: HashMap<u64, usize>,
+    // Monomial masks need high-bit mixing, as in the F4 column layouts.
+    index: MaskMap<usize>,
     words: usize,
     /// `pivot[c]` is the index into `rows` of the row leading at column `c`.
     pivot: Vec<Option<usize>>,
@@ -273,7 +274,8 @@ impl PrefixEchelon {
 /// Frobenius span, then discarded.
 #[derive(Default)]
 struct TempEchelon {
-    pivot: HashMap<usize, usize>,
+    // Dense column indices do not have the sparse-mask low-bit problem.
+    pivot: FxMap<usize, usize>,
     rows: Vec<Vec<u64>>,
 }
 
@@ -283,7 +285,7 @@ struct TempEchelon {
 pub struct F5Criterion {
     /// `pruned[i]` is the set of multiplier monomials `t` with
     /// `t ∈ LM(W_i(d))`; `t·f_i` is redundant at this degree.
-    pruned: Vec<HashSet<u64>>,
+    pruned: Vec<MaskSet>,
     /// Word XORs spent echelonising the lower-degree matrices.
     word_ops: u64,
     /// Rows inserted into the lower-degree echelons.
@@ -306,7 +308,7 @@ impl F5Criterion {
     pub fn new(polys: &[F2BoolPoly], n_vars: usize, degree: u32, multiplier_mask: u64) -> Self {
         let m = polys.len();
         let mut out = Self {
-            pruned: vec![HashSet::new(); m],
+            pruned: vec![MaskSet::default(); m],
             word_ops: 0,
             lower_rows: 0,
             lower_zero_reductions: 0,
@@ -345,7 +347,7 @@ impl F5Criterion {
                 // The criterion for f_i at this level is read before f_i's
                 // own rows enter: W_i(d) = V_{i−1}(e) + Frobenius span of f_i.
                 if di <= degree && degree - di == e {
-                    let mut pruned: HashSet<u64> = echelon.leading_monomials(i).collect();
+                    let mut pruned: MaskSet = echelon.leading_monomials(i).collect();
                     out.koszul_pruned += pruned.len() as u64;
                     if degree >= 2 * di {
                         let gap = degree - 2 * di;
@@ -1050,6 +1052,7 @@ mod tests {
     use crate::cryptanalysis::koblitz_groebner::{
         f5_rows_monos_with_f4_count, f5_rows_packed_full_columns, matrix_f4_f2, pack_rows,
     };
+    use std::collections::HashSet;
 
     #[test]
     fn direct_criterion_products_match_boolean_multiplication() {
@@ -1131,6 +1134,78 @@ mod tests {
         assert_eq!(echelon.reduce_leading(&mut row, Some(&temp)), None);
         assert_eq!(row, vec![0; 5]);
         assert_eq!(echelon.word_ops, 18);
+    }
+
+    #[test]
+    fn criterion_pruning_and_row_spaces_survive_high_bit_embedding() {
+        let positions = [52, 54, 57, 60, 63];
+        let embed = |mask: u64| {
+            positions
+                .iter()
+                .enumerate()
+                .fold(0, |out, (bit, &position)| {
+                    out | if mask & (1 << bit) != 0 {
+                        1 << position
+                    } else {
+                        0
+                    }
+                })
+        };
+        let low_mask = (1u64 << positions.len()) - 1;
+        let high_mask = embed(low_mask);
+        let mut seed = 0xd1b5_4a32_d192_ed03;
+        for _ in 0..12 {
+            let low: Vec<_> = (0..5)
+                .map(|_| random_poly(5, 2, 8, &mut seed))
+                .filter(|p| poly_degree(p) > 0)
+                .collect();
+            let high: Vec<_> = low
+                .iter()
+                .map(|p| {
+                    F2BoolPoly::from_monos(
+                        p.terms
+                            .iter()
+                            .map(|term| F2BoolMono::from_mask(embed(term.mask)))
+                            .collect(),
+                        64,
+                    )
+                })
+                .collect();
+            for degree in 2..=5 {
+                let a = F5Criterion::new(&low, 5, degree, low_mask);
+                let b = F5Criterion::new(&high, 64, degree, high_mask);
+                assert_eq!(a.lower_level_rows(), b.lower_level_rows());
+                assert_eq!(a.pruned_by_part(), b.pruned_by_part());
+                assert_eq!(a.word_ops(), b.word_ops());
+                for i in 0..low.len() {
+                    for multiplier in monomials_up_to_mask(low_mask, degree) {
+                        assert_eq!(a.prunes(i, multiplier), b.prunes(i, embed(multiplier)));
+                    }
+                }
+                let full = crate::cryptanalysis::koblitz_groebner::macaulay_rows_monos_with_mask(
+                    &high, 64, degree, high_mask, None,
+                )
+                .unwrap();
+                let pruned = crate::cryptanalysis::koblitz_groebner::f5_rows_monos_with_mask(
+                    &high, 64, degree, high_mask, &b,
+                )
+                .unwrap();
+                let as_polys = |rows: Vec<Vec<u64>>| {
+                    rows.into_iter()
+                        .map(|row| {
+                            F2BoolPoly::from_monos(
+                                row.into_iter().map(F2BoolMono::from_mask).collect(),
+                                64,
+                            )
+                        })
+                        .collect::<Vec<_>>()
+                };
+                assert_eq!(
+                    row_space_canonical(&as_polys(full), 64),
+                    row_space_canonical(&as_polys(pruned), 64)
+                );
+            }
+        }
     }
 
     #[test]

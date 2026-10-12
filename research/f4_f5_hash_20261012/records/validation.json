@@ -1,0 +1,32 @@
+{
+  "schema": "f4-f5.hash-validation/v1",
+  "candidate_production_revision": "0505fb45ae98b0fe4cb3f86fb17305b67f01d676",
+  "native_performance_acceptance": true,
+  "frozen_systems": 11,
+  "primary_repeats": 3,
+  "paired_rounds": 5,
+  "exact_outputs_and_counts": true,
+  "memory_regressions": 0,
+  "instruction_regressions_above_gate": 0,
+  "focused_f5_tests_passed": 18,
+  "native_comparison_tests_passed": 5,
+  "example_clippy": "Both direct checks passed; comparison warnings denied",
+  "render_reproduction": "All three SVGs, four PDFs and editable Typst sources reproduced byte for byte",
+  "pdf_inspection": "Three group pages, all three combined pages and the refreshed one-page planning snapshot opened and inspected",
+  "library": {
+    "expected_tests": 4016,
+    "passed": 3906,
+    "failed": 0,
+    "ignored": 110,
+    "unfinished": 0,
+    "duration_seconds": 847.81,
+    "budget_seconds": 1200,
+    "exit_code": 0,
+    "test_threads": 3,
+    "network_enabled": true,
+    "full_suite_passed": true,
+    "prior_unfinished_test_now_passed": "cryptanalysis::jv_isogeny_walk::tests::end_to_end_from_a_non_weak_curve_recovers_and_verifies"
+  },
+  "controlled_runtime_measured": false,
+  "process_rss_measured": false
+}
