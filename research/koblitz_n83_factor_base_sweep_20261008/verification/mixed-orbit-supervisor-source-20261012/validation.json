@@ -1,0 +1,64 @@
+{
+  "checks": {
+    "release_library_concurrent_failed": {
+      "compressed_sha256": "aece78140cef5920c0c1e39b6cf03181fe9a51a21682793226c6fe30e163238b",
+      "log": "release_library_concurrent_failed.log.gz",
+      "plain_bytes": 344999,
+      "plain_sha256": "b28500b7d0872c8cd6b1bf5179802473c9cbe642ade8f77c70355a651a07108f"
+    },
+    "release_library_serial": {
+      "compressed_sha256": "ed1412b516ea6de1c3bb1877dac7978c385aded2a164efd0a0bbc07dddc7c612",
+      "log": "release_library_serial.log.gz",
+      "plain_bytes": 343779,
+      "plain_sha256": "469bd06770c742a5eeb0cec9573c4bc367d22951b89e6f926c2a39fa20df99f4"
+    },
+    "study_python": {
+      "compressed_sha256": "eaf49be826ff4c980f6a3d60f730f8877137fa5cbc66a293dc8e797de7770d7f",
+      "log": "study_python.log.gz",
+      "plain_bytes": 98,
+      "plain_sha256": "9d79762f3e220183a5bd50cd47ba0fc4b9038a1815eafaab2a86eba56cdbc0b7"
+    },
+    "wdsat_isolated": {
+      "compressed_sha256": "91d6ae53477d556bd52f2794154cef1c093375fea9c733a81462af686d834764",
+      "log": "wdsat_isolated.log.gz",
+      "plain_bytes": 4143,
+      "plain_sha256": "6cdc1239bce51372d7ecfd52f2ae2f95347f4f4a541d5e2fde99a0aaa7a1f5ef"
+    }
+  },
+  "complete_runtime": null,
+  "relation_yield": null,
+  "results": {
+    "diff_check": "PASS",
+    "release_library_concurrent": {
+      "failed": 1,
+      "failure": "cryptanalysis::wdsat_oracle::tests::mock_child_exit_and_empty_output_are_not_refutations: WDSat timed out after 2000 ms",
+      "ignored": 113,
+      "passed": 3999
+    },
+    "release_library_serial": {
+      "failed": 0,
+      "ignored": 113,
+      "passed": 4000
+    },
+    "study_python": {
+      "failed": 0,
+      "passed": 43
+    },
+    "wdsat_isolated": {
+      "failed": 0,
+      "passed": 1
+    }
+  },
+  "retained_n83_import_executed": false,
+  "retained_n83_search_executed": false,
+  "schema": "n83.mixed-orbit-supervisor-source-validation/v1",
+  "source_sha256": {
+    "research/koblitz_n83_factor_base_sweep_20261008/chain_search_supervisor.py": "fa0443e453e5fb7011019a08b61a219834e1594acc99e007f405f27e44b97a66",
+    "research/koblitz_n83_factor_base_sweep_20261008/compact_probe_supervisor.py": "4a9c363d8164f000ac3a6b654e37d001375d64744173bd90d7ad3dd2be692d37",
+    "research/koblitz_n83_factor_base_sweep_20261008/mixed_orbit_supervisor.py": "3a88270da320c9836051ad5f2fdf0256080d0d38f765c06f4c912cdd62c0fb4c",
+    "research/koblitz_n83_factor_base_sweep_20261008/structured_orbit_search_supervisor.py": "045d2eed66f2ae49ec3be7564dee3a2f563e89151d2f682cf7587d321b2145f7",
+    "research/koblitz_n83_factor_base_sweep_20261008/test_mixed_orbit_supervisor.py": "4e918d8a5299a568e9aa2fa17fb2619c078698d8fe233a416478c31843de8254",
+    "research/koblitz_n83_factor_base_sweep_20261008/verification/mixed-orbit-supervisor-source-20261012/PROTOCOL.md": "afb8afd1a08b06c1790db0cfabdd13a07641702d0456afb5c7bf8c2cbf8c40c9"
+  },
+  "status": "PASS_source_only_with_retained_concurrent_timing_failure"
+}
