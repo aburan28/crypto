@@ -147,6 +147,11 @@ impl Cell {
 
 fn main() {
     let mode = std::env::args().nth(1).unwrap_or_default();
+    if mode == "summarize" {
+        let dir = std::env::args().nth(2).expect("summarize <run dir>");
+        summarize(std::path::Path::new(&dir));
+        return;
+    }
     let a: u8 = flag("--a").and_then(|v| v.parse().ok()).unwrap_or(0);
     let n: u32 = flag("--n").and_then(|v| v.parse().ok()).unwrap_or(17);
     let dim: u32 = flag("--dim").and_then(|v| v.parse().ok()).unwrap_or(6);
@@ -402,7 +407,7 @@ fn main() {
                     {
                         let mut v: Vec<(u32, usize)> = by_degree.iter().map(|(a, b)| (*a, *b)).collect();
                         v.sort_unstable();
-                        v
+                        v.iter().map(|(d, c)| [*d as usize, *c]).collect::<Vec<_>>()
                     },
                     shape(&system, true),
                     shape(&system, false),
@@ -411,6 +416,261 @@ fn main() {
                 );
             }
         }
-        other => panic!("unknown mode {other:?}; use profile, lanes, lockstep or costmodel"),
+        other => {
+            panic!("unknown mode {other:?}; use profile, lanes, lockstep, costmodel or summarize")
+        }
     }
+}
+
+/// Median, minimum and maximum of recorded values.
+fn spread(values: &[f64]) -> serde_json::Value {
+    let mut v = values.to_vec();
+    v.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    if v.is_empty() {
+        return serde_json::Value::Null;
+    }
+    let median = if v.len() % 2 == 1 {
+        v[v.len() / 2]
+    } else {
+        (v[v.len() / 2 - 1] + v[v.len() / 2]) / 2.0
+    };
+    serde_json::json!({"median": median, "min": v[0], "max": v[v.len() - 1], "n": v.len(), "values": values})
+}
+
+/// Tabulate a `run_arms.sh` run directory (`raw/r<round>-<cell>-<arm>.jsonl`)
+/// into one JSON summary on stdout: per cell, engine and arm the stage unit
+/// (and whether it was the same in every round), the counters, the wall and
+/// CPU times per round with median and min–max, the per-round ratios of
+/// `orig` and `prev` to every arm, and the identity checks — per-target
+/// verdicts and solver counters equal across all arms and rounds, relations
+/// equal across the candidate binary's arms, and the lane arm's tree (stage
+/// unit less root eliminations) equal to the `rref` arm's.
+fn summarize(dir: &std::path::Path) {
+    use serde_json::{json, Value};
+    use std::collections::BTreeMap;
+    let raw = dir.join("raw");
+    // (cell, engine, arm) -> round -> (total line, target lines)
+    type Runs = BTreeMap<(String, String, String), BTreeMap<u32, (Value, Vec<Value>)>>;
+    let mut runs: Runs = BTreeMap::new();
+    let mut loads: Vec<f64> = Vec::new();
+    let mut files: Vec<_> = std::fs::read_dir(&raw)
+        .expect("raw dir")
+        .filter_map(|e| e.ok().map(|e| e.path()))
+        .filter(|p| {
+            p.extension().is_some_and(|x| x == "jsonl")
+                && p.file_name().unwrap().to_string_lossy().starts_with('r')
+        })
+        .collect();
+    files.sort();
+    for path in files {
+        let name = path.file_stem().unwrap().to_string_lossy().to_string();
+        // r<round>-<cell>-<arm>, cell like K1_17
+        let mut parts = name.splitn(3, '-');
+        let round: u32 = parts.next().unwrap()[1..].parse().expect("round");
+        let cell = parts.next().unwrap().to_string();
+        let arm = parts.next().unwrap().to_string();
+        let text = std::fs::read_to_string(&path).unwrap();
+        for line in text.lines() {
+            let Ok(v) = serde_json::from_str::<Value>(line) else {
+                continue;
+            };
+            if let Some(up) = v.get("uptime").and_then(Value::as_str) {
+                if let Some(first) = up.split_whitespace().next() {
+                    if let Ok(x) = first.trim_end_matches(',').parse::<f64>() {
+                        loads.push(x);
+                    }
+                }
+                continue;
+            }
+            let Some(engine) = v.get("arm").and_then(Value::as_str).map(str::to_string) else {
+                continue;
+            };
+            let entry = runs
+                .entry((cell.clone(), engine, arm.clone()))
+                .or_default()
+                .entry(round)
+                .or_insert((Value::Null, Vec::new()));
+            if v.get("total_ms").is_some() {
+                entry.0 = v;
+            } else if v.get("target").is_some() {
+                entry.1.push(v);
+            }
+        }
+    }
+    let num = |v: &Value, k: &str| v.get(k).and_then(Value::as_f64);
+    let signature = |t: &Value| -> Value {
+        let keys = [
+            "target",
+            "hit",
+            "exhausted",
+            "reductions",
+            "splits",
+            "propagations",
+            "infeasible",
+            "geo_refute",
+            "geo_witness",
+            "partial_refute",
+            "geo_adds",
+            "pair_builds",
+            "pair_lookups",
+        ];
+        Value::Object(
+            keys.iter()
+                .map(|k| (k.to_string(), t[*k].clone()))
+                .collect(),
+        )
+    };
+    let mut cells_out = Vec::new();
+    let mut pairs: Vec<(String, String)> = runs
+        .keys()
+        .map(|(c, e, _)| (c.clone(), e.clone()))
+        .collect();
+    pairs.dedup();
+    for (cell, engine) in pairs {
+        let arms: Vec<String> = runs
+            .keys()
+            .filter(|(c, e, _)| *c == cell && *e == engine)
+            .map(|(_, _, a)| a.clone())
+            .collect();
+        let mut arms_out = serde_json::Map::new();
+        let mut sigs: Vec<(String, u32, Vec<Value>)> = Vec::new();
+        let mut relations: BTreeMap<String, Vec<Value>> = BTreeMap::new();
+        let mut walls: BTreeMap<String, BTreeMap<u32, f64>> = BTreeMap::new();
+        let mut cpus: BTreeMap<String, BTreeMap<u32, f64>> = BTreeMap::new();
+        let mut xors: BTreeMap<String, f64> = BTreeMap::new();
+        let mut tree: BTreeMap<String, f64> = BTreeMap::new();
+        for arm in &arms {
+            let rounds = &runs[&(cell.clone(), engine.clone(), arm.clone())];
+            let mut word: Vec<f64> = Vec::new();
+            let mut fields = serde_json::Map::new();
+            for (&round, (total, targets)) in rounds {
+                if let Some(ms) = num(total, "total_ms") {
+                    walls.entry(arm.clone()).or_default().insert(round, ms);
+                }
+                if let Some(ms) = num(total, "cpu_ms") {
+                    cpus.entry(arm.clone()).or_default().insert(round, ms);
+                }
+                if let Some(x) = num(total, "word_xors") {
+                    word.push(x);
+                }
+                for key in [
+                    "root_elim_xors",
+                    "rows_generated",
+                    "row_words_generated",
+                    "gate_first_nodes",
+                    "gate_first_specialisations",
+                    "lane_built",
+                    "reps",
+                    "lanes",
+                    "hits",
+                    "reductions",
+                    "splits",
+                    "geo_refute",
+                ] {
+                    if let Some(x) = total.get(key) {
+                        fields.insert(key.to_string(), x.clone());
+                    }
+                }
+                let mut sorted = targets.clone();
+                sorted.sort_by_key(|t| t["target"].as_u64());
+                sigs.push((arm.clone(), round, sorted.iter().map(signature).collect()));
+                if arm != "orig" {
+                    let rel: Vec<Value> = sorted
+                        .iter()
+                        .map(|t| json!([t["target"], t.get("indices").cloned()]))
+                        .collect();
+                    relations.entry(format!("{arm}/r{round}")).or_insert(rel);
+                }
+            }
+            let deterministic = word.windows(2).all(|w| w[0] == w[1]);
+            if let Some(&x) = word.first() {
+                xors.insert(arm.clone(), x);
+                // The per-target stage unit is the last repetition's; the
+                // root-elimination counter spans every repetition.
+                let reps = fields.get("reps").and_then(Value::as_f64).unwrap_or(1.0);
+                if let Some(root) = fields.get("root_elim_xors").and_then(Value::as_f64) {
+                    fields.insert("root_elim_xors_per_rep".into(), json!(root / reps));
+                    tree.insert(arm.clone(), x - root / reps);
+                }
+            }
+            fields.insert("rounds".into(), json!(rounds.len()));
+            fields.insert("word_xors".into(), json!(word.first()));
+            fields.insert("word_xors_deterministic".into(), json!(deterministic));
+            fields.insert(
+                "wall_ms".into(),
+                spread(
+                    &walls
+                        .get(arm)
+                        .map(|m| m.values().copied().collect::<Vec<_>>())
+                        .unwrap_or_default(),
+                ),
+            );
+            fields.insert(
+                "cpu_ms".into(),
+                spread(
+                    &cpus
+                        .get(arm)
+                        .map(|m| m.values().copied().collect::<Vec<_>>())
+                        .unwrap_or_default(),
+                ),
+            );
+            arms_out.insert(arm.clone(), Value::Object(fields));
+        }
+        let identical = sigs.windows(2).all(|w| w[0].2 == w[1].2);
+        let rel_values: Vec<&Vec<Value>> = relations.values().collect();
+        let relations_identical = rel_values.windows(2).all(|w| w[0] == w[1]);
+        let mut ratios = serde_json::Map::new();
+        for base in ["orig", "prev", "rref"] {
+            if !arms.contains(&base.to_string()) {
+                continue;
+            }
+            for arm in &arms {
+                if arm == base {
+                    continue;
+                }
+                let per_round = |m: &BTreeMap<String, BTreeMap<u32, f64>>| -> Vec<f64> {
+                    let (Some(b), Some(a)) = (m.get(base), m.get(arm)) else {
+                        return Vec::new();
+                    };
+                    b.iter()
+                        .filter_map(|(r, bv)| a.get(r).map(|av| bv / av))
+                        .collect()
+                };
+                ratios.insert(
+                    format!("{base}/{arm}"),
+                    json!({
+                        "word_xors": match (xors.get(base), xors.get(arm)) {
+                            (Some(b), Some(a)) => json!(b / a),
+                            _ => Value::Null,
+                        },
+                        "wall_round_ratios": spread(&per_round(&walls)),
+                        "cpu_round_ratios": spread(&per_round(&cpus)),
+                    }),
+                );
+            }
+        }
+        cells_out.push(json!({
+            "cell": cell,
+            "engine": engine,
+            "arms": arms_out,
+            "ratios": ratios,
+            "verdicts_and_counters_identical": identical,
+            "relations_identical_across_candidate_arms": relations_identical,
+            "relations": rel_values.first(),
+            "lanes_tree_equals_rref_tree": match (tree.get("lanes"), tree.get("rref")) {
+                (Some(a), Some(b)) => json!(a == b),
+                _ => Value::Null,
+            },
+        }));
+    }
+    let load = spread(&loads);
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&json!({
+            "run": dir.file_name().map(|n| n.to_string_lossy().to_string()),
+            "load1": {"min": load["min"], "max": load["max"], "median": load["median"], "samples": load["n"]},
+            "cells": cells_out,
+        }))
+        .unwrap()
+    );
 }

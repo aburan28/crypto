@@ -3,9 +3,10 @@
 #   OUT     output directory (raw/ is created under it)
 #   ROUNDS  rounds (default 5); the arm order rotates every round
 # Arms: orig (4b6e09b78 binary), prev (candidate binary, switches off),
-# gate (KIC_F6_GATE_FIRST=1), lanes (KIC_F4_LANES=<targets of the cell>),
-# rref (KIC_F4_INHERIT_ROOT=rref, the sequential control the lane roots
-# reproduce row for row).
+# gate (KIC_F6_GATE_FIRST=1), lanes (KIC_F4_LANES=<targets of the cell>
+# with KIC_F4_INHERIT_ROOT=rref), rref (KIC_F4_INHERIT_ROOT=rref, the
+# sequential control the lane roots reproduce row for row), and gaterref
+# (both switches).  ARMS selects and orders them.
 BIN=/Volumes/SSD990-2/crypto/targets/lit2026-w5/bin
 OUT=${OUT:?set OUT}
 ROUNDS=${ROUNDS:-5}
@@ -40,11 +41,12 @@ run_arm() {
     gate)  KIC_F6_GATE_FIRST=1 $BIN/f6_ic_probe.cand $flags --engines f4,f6p --reps 3 >> "$file" 2>/dev/null ;;
     lanes) KIC_F4_INHERIT_ROOT=rref KIC_F4_LANES=$(cell_lanes "$cell") $BIN/f6_ic_probe.cand $flags --engines f4,f6p --reps 3 >> "$file" 2>/dev/null ;;
     rref)  KIC_F4_INHERIT_ROOT=rref $BIN/f6_ic_probe.cand $flags --engines f4,f6p --reps 3 >> "$file" 2>/dev/null ;;
+    gaterref) KIC_F6_GATE_FIRST=1 KIC_F4_INHERIT_ROOT=rref $BIN/f6_ic_probe.cand $flags --engines f4,f6p --reps 3 >> "$file" 2>/dev/null ;;
   esac
   echo "exit=$?" >> "$OUT/raw/r${round}-${cell}-${arm}.status"
 }
 
-ARMS="orig prev gate lanes rref"
+ARMS=${ARMS:-"orig prev gate lanes rref"}
 round=1
 while [ "$round" -le "$ROUNDS" ]; do
   for cell in K1_17 K1_23 K0_23 K0_31; do

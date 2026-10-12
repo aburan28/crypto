@@ -1,0 +1,22 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W5",
+  "slug": "lockstep-diagnostic",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#PRNUM",
+  "papers": ["arXiv 2607.06372"],
+  "kind": "diagnostic",
+  "workload": {
+    "id": "inherited-f4-tree-lockstep-4-cells",
+    "description": "f4_lane_probe lockstep: splitting-tree node assignments shared across the targets of icv1-f2m17-tm101-00378d4e dim 6 (8 targets), icv1-f2m23-tm5197-1f85e9e1 dim 7 (4), icv1-f2m23-t5197-69e76b73 dim 8 (4), icv1-f2m31-tm90707-c95f16f5 dim 9 (4, budget 2000), inherited F4 and F6-IC + pair index, m = 3",
+    "curve_ids": ["icv1-f2m17-tm101-00378d4e", "icv1-f2m23-tm5197-1f85e9e1", "icv1-f2m23-t5197-69e76b73", "icv1-f2m31-tm90707-c95f16f5"]
+  },
+  "metric": "share of stage unit spent at nodes reached by two or more targets",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 1,
+  "arms": [],
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w5_lane_batched_f4_20261011/reports/run-20261011T2225Z/report.pdf",
+  "note": "66-83 % (f4) and 94-97 % (f6p) of the stage unit is at nodes several targets reach, but their bases share the pivot pattern in only 3-14 % of root columns and bit-slicing over F2 cannot beat packed rows below 64 lanes, so no tree lane engine was built. Gate-first leaves the inherited-F4 arm's stage unit unchanged on all four cells (no node oracle there)."
+}

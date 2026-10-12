@@ -17952,6 +17952,11 @@ mod tests {
                 (k, f4_word_ops_thread() - x0)
             };
             set_gate_first(Some(false));
+            // Warm the per-thread caches (the pair-sum index is built on a
+            // first visit and reused), so every pass below starts alike.
+            for t in &targets {
+                let _ = run(t);
+            }
             let base: Vec<(Key, u64)> = targets.iter().map(measured).collect();
             set_gate_first(Some(true));
             let skips0 = gate_first_skips_thread();
