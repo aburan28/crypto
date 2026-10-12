@@ -2966,7 +2966,7 @@ fn pack_rows_with_layout(
     for monos in rows_monos {
         let mut row = vec![0u64; words];
         for monomial in monos {
-            let &column = layout.index.get(monomial)?;
+            let column = layout.index.get(monomial)?;
             row[column / 64] |= 1 << (column % 64);
             if let Some(seen) = &mut seen {
                 seen[column] = true;
@@ -3001,7 +3001,7 @@ fn pack_rows_flat_with_layout(
     for (row_index, monos) in rows_monos.iter().enumerate() {
         let row = &mut data[row_index * words..(row_index + 1) * words];
         for monomial in monos {
-            let &column = layout.index.get(monomial)?;
+            let column = layout.index.get(monomial)?;
             row[column / 64] |= 1 << (column % 64);
             if let Some(seen) = &mut seen {
                 seen[column] = true;
@@ -3091,7 +3091,7 @@ fn pack_polynomials_flat_fused(
             data.resize(start + words, 0);
             let row = &mut data[start..start + words];
             for monomial in &product[..write] {
-                let &column = layout.index.get(monomial)?;
+                let column = layout.index.get(monomial)?;
                 row[column / 64] |= 1 << (column % 64);
                 seen[column] = true;
             }
@@ -3156,7 +3156,7 @@ fn pack_polynomials_nested_fused<const DIRECT: bool>(
                 let mut row = vec![0u64; words];
                 for term in &polynomial.terms {
                     let monomial = term.mask | multiplier;
-                    let &column = layout.index.get(&monomial)?;
+                    let column = layout.index.get(&monomial)?;
                     row[column / 64] ^= 1 << (column % 64);
                 }
                 if row.iter().all(|&word| word == 0) {
@@ -3199,7 +3199,7 @@ fn pack_polynomials_nested_fused<const DIRECT: bool>(
             }
             let mut row = vec![0u64; words];
             for monomial in &product[..write] {
-                let &column = layout.index.get(monomial)?;
+                let column = layout.index.get(monomial)?;
                 row[column / 64] |= 1 << (column % 64);
                 seen[column] = true;
             }
@@ -3491,6 +3491,12 @@ impl F4ColumnLayout {
                     .map(|(column, &monomial)| (monomial, column))
                     .collect(),
             )
+        } else if let Some(dense) = (std::env::var("KIC_F4_HASH_COLUMN_INDEX").as_deref()
+            != Ok("1"))
+        .then(|| F4ColumnIndex::dense(&columns))
+        .flatten()
+        {
+            dense
         } else {
             let mut index = FastColumnMap::with_capacity_and_hasher(
                 columns.len(),
@@ -3511,13 +3517,43 @@ impl F4ColumnLayout {
 enum F4ColumnIndex {
     Standard(std::collections::HashMap<u64, usize>),
     Fast(FastColumnMap),
+    Dense(Vec<u16>),
 }
 
 impl F4ColumnIndex {
-    fn get(&self, monomial: &u64) -> Option<&usize> {
+    /// Direct lookup only when it uses at most the entry bytes the hash
+    /// map must store, excluding its spare buckets and control bytes.
+    /// High-bit or sparse ranges fall back before allocating a table.
+    fn dense(columns: &[u64]) -> Option<Self> {
+        if columns.len() > u16::MAX as usize {
+            return None;
+        }
+        let slots = usize::try_from(columns.iter().copied().max()?)
+            .ok()?
+            .checked_add(1)?;
+        let bytes = slots.checked_mul(std::mem::size_of::<u16>())?;
+        let hash_entry_bytes = columns
+            .len()
+            .checked_mul(std::mem::size_of::<(u64, usize)>())?;
+        if bytes > hash_entry_bytes {
+            return None;
+        }
+        let mut index = vec![u16::MAX; slots];
+        for (column, &monomial) in columns.iter().enumerate() {
+            index[monomial as usize] = column as u16;
+        }
+        Some(Self::Dense(index))
+    }
+
+    fn get(&self, monomial: &u64) -> Option<usize> {
         match self {
-            Self::Standard(index) => index.get(monomial),
-            Self::Fast(index) => index.get(monomial),
+            Self::Standard(index) => index.get(monomial).copied(),
+            Self::Fast(index) => index.get(monomial).copied(),
+            Self::Dense(index) => index
+                .get(usize::try_from(*monomial).ok()?)
+                .copied()
+                .filter(|&column| column != u16::MAX)
+                .map(usize::from),
         }
     }
 }
@@ -6640,6 +6676,32 @@ mod tests {
         assert_eq!(macaulay_columns(&rows), Some(vec![a | b, a, b, 0]));
         assert_eq!(macaulay_columns(&[vec![b, b, 0]]), Some(vec![b, 0]));
         assert_eq!(macaulay_columns(&[]), Some(Vec::new()));
+    }
+
+    #[test]
+    fn dense_column_lookup_matches_a_map_and_preserves_missing_masks() {
+        let columns = [9, 0, 1, 7, 3, 5, 8];
+        let reference: std::collections::HashMap<_, _> = columns
+            .iter()
+            .enumerate()
+            .map(|(column, &mask)| (mask, column))
+            .collect();
+        let dense = F4ColumnIndex::dense(&columns).unwrap();
+        for mask in (0..32).chain([1 << 63, u64::MAX]) {
+            assert_eq!(dense.get(&mask), reference.get(&mask).copied());
+        }
+        assert!(F4ColumnIndex::dense(&[]).is_none());
+        assert!(F4ColumnIndex::dense(&[0, 1 << 20]).is_none());
+        assert!(F4ColumnIndex::dense(&[0, 1 << 63]).is_none());
+        assert!(F4ColumnIndex::dense(&[u64::MAX]).is_none());
+
+        // The largest encodable index is one below the missing sentinel.
+        let columns: Vec<_> = (0..u16::MAX as u64).collect();
+        let dense = F4ColumnIndex::dense(&columns).unwrap();
+        assert_eq!(dense.get(&(u16::MAX as u64 - 1)), Some(65534));
+        assert_eq!(dense.get(&(u16::MAX as u64)), None);
+        let too_many: Vec<_> = (0..=u16::MAX as u64).collect();
+        assert!(F4ColumnIndex::dense(&too_many).is_none());
     }
 
     #[test]
