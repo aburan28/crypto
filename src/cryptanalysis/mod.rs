@@ -162,6 +162,7 @@ pub mod fght_snfs;
 pub(crate) mod fx_hash;
 pub mod gaudry_cubic;
 pub mod gaudry_quartic;
+pub mod genus2_fp;
 pub mod gf2_elim;
 pub mod gf3m;
 pub mod ghs_descent;
