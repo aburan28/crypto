@@ -7510,6 +7510,81 @@ pub fn groebner_decompose_f6_ic_pair_index(
     )
 }
 
+/// The equations, and their variable count, that [`groebner_decompose`]
+/// and the F6-IC decomposers hand the Boolean solver for `target`: the
+/// decomposition system in the solve's (possibly interleaved) variable
+/// order.  For [`prebuild_decomposition_roots`]; `None` where the
+/// decomposers would report the target unsupported.
+pub fn decomposition_solver_equations(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    engine: SolverEngine,
+) -> Option<(Vec<F2BoolPoly>, usize)> {
+    let x_r = match target {
+        BinaryPoint::Affine { x, .. } => x.clone(),
+        BinaryPoint::Infinity => return None,
+    };
+    let sys = crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+        &fb.subspace_basis,
+        &x_r,
+        &kc.curve.b,
+        m,
+        st,
+    )?;
+    let opts = SolveOptions {
+        engine,
+        max_solutions: usize::MAX,
+        node_budget: 0,
+        split_rule: split_rule_default(),
+    };
+    let equations = if m >= 3 && chain_order_interleaved(opts.resolve().split_rule) {
+        let perm = sys.interleaved_order(kc.n);
+        sys.equations
+            .iter()
+            .map(|e| permute_poly(e, &perm))
+            .collect()
+    } else {
+        sys.equations.clone()
+    };
+    Some((equations, sys.n_vars))
+}
+
+/// **Lane-batched roots for a batch of targets** (`KIC_F4_LANES`, lit2026
+/// W5): build the inherited-F4 root bases of every target's decomposition
+/// together ([`crate::cryptanalysis::koblitz_groebner::prebuild_inherited_roots_lanes`]),
+/// so that the decompositions that follow on this thread, in any order,
+/// take them instead of building their own.  The decompositions decide
+/// exactly as without it.  Returns the batch statistics and how many
+/// targets got a basis.
+pub fn prebuild_decomposition_roots(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    st: &FieldStructure,
+    targets: &[BinaryPoint],
+    m: usize,
+    engine: SolverEngine,
+) -> (crate::cryptanalysis::inherited_f4::LaneStats, usize) {
+    let mut systems = Vec::with_capacity(targets.len());
+    let mut n_vars = 0usize;
+    for target in targets {
+        if let Some((equations, n)) = decomposition_solver_equations(kc, fb, st, target, m, engine)
+        {
+            if n_vars != 0 && n != n_vars {
+                continue;
+            }
+            n_vars = n;
+            systems.push(equations);
+        }
+    }
+    if systems.is_empty() {
+        return (Default::default(), 0);
+    }
+    crate::cryptanalysis::koblitz_groebner::prebuild_inherited_roots_lanes(&systems, n_vars, engine)
+}
+
 #[allow(clippy::too_many_arguments)]
 fn groebner_decompose_with_geometry(
     kc: &KoblitzCurve,
@@ -19264,6 +19339,99 @@ mod tests {
             missed += usize::from(expected.is_none());
         }
         assert!(missed > 0);
+    }
+
+    /// lit2026 W5: the gate-first order (`KIC_F6_GATE_FIRST`) and the
+    /// lane-batched roots (`KIC_F4_LANES`) leave every decomposition as it
+    /// was — relation, exhaustion, reductions, splits, propagations,
+    /// refutations, oracle calls and group additions — on inherited F4 and
+    /// on F6-IC with the pair index, at a 35-variable cell where the root
+    /// is a single degree-3 rung.  Gate-first never costs stage units.
+    #[test]
+    fn w5_gate_first_and_lane_roots_keep_every_decomposition() {
+        use crate::cryptanalysis::koblitz_groebner::{
+            clear_lane_roots, f4_word_ops_thread, gate_first_skips_thread, lane_roots_pending,
+            set_gate_first,
+        };
+        let kc = KoblitzCurve::new(1, 17).unwrap();
+        let fb = build_standard_subspace_factor_base(&kc, 6).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let engine = SolverEngine::InheritedF4 { max_degree: 3 };
+        let targets: Vec<BinaryPoint> = (1..=4u32)
+            .map(|k| kc.mul(kc.generator(), &BigUint::from(k)))
+            .collect();
+        type Key = (
+            Option<Vec<usize>>,
+            bool,
+            usize,
+            usize,
+            usize,
+            usize,
+            u64,
+            u64,
+            u64,
+            u64,
+        );
+        let key = |r: (Option<Vec<usize>>, SolveStats)| -> Key {
+            let s = r.1;
+            (
+                r.0,
+                s.exhausted,
+                s.reductions,
+                s.splits,
+                s.propagations,
+                s.infeasible_branches,
+                s.geometric_refutations as u64,
+                s.geometric_witnesses as u64,
+                s.geometric_oracle_calls,
+                s.geometric_group_additions,
+            )
+        };
+        for f6 in [false, true] {
+            let run = |t: &BinaryPoint| {
+                if f6 {
+                    groebner_decompose_f6_ic_pair_index(
+                        &kc, &fb, &index_of, &st, t, 3, engine, 20_000,
+                    )
+                } else {
+                    groebner_decompose(&kc, &fb, &index_of, &st, t, 3, engine, 20_000)
+                }
+            };
+            let measured = |t: &BinaryPoint| {
+                let x0 = f4_word_ops_thread();
+                let k = key(run(t));
+                (k, f4_word_ops_thread() - x0)
+            };
+            set_gate_first(Some(false));
+            // Warm the per-thread caches (the pair-sum index is built on a
+            // first visit and reused), so every pass below starts alike.
+            for t in &targets {
+                let _ = run(t);
+            }
+            let base: Vec<(Key, u64)> = targets.iter().map(measured).collect();
+            set_gate_first(Some(true));
+            let skips0 = gate_first_skips_thread();
+            let first: Vec<(Key, u64)> = targets.iter().map(measured).collect();
+            let skips = gate_first_skips_thread().0 - skips0.0;
+            set_gate_first(Some(false));
+            for (i, (a, b)) in base.iter().zip(&first).enumerate() {
+                assert_eq!(a.0, b.0, "gate-first, f6={f6}, target {i}");
+                assert!(b.1 <= a.1, "gate-first costs more, f6={f6}, target {i}");
+            }
+            if !f6 {
+                assert_eq!(skips, 0, "no gate, nothing to skip");
+            }
+            clear_lane_roots();
+            let (stats, placed) = prebuild_decomposition_roots(&kc, &fb, &st, &targets, 3, engine);
+            assert_eq!(placed, targets.len(), "every root lane-built: {stats:?}");
+            let lanes: Vec<Key> = targets.iter().map(|t| key(run(t))).collect();
+            assert_eq!(lane_roots_pending(), 0, "every lane-built root consumed");
+            for (i, (a, b)) in base.iter().zip(&lanes).enumerate() {
+                assert_eq!(&a.0, b, "lanes, f6={f6}, target {i}");
+            }
+        }
+        set_gate_first(None);
     }
 
     #[test]
