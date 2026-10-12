@@ -29,5 +29,7 @@ container states, elapsed walls, final receipt, budget receipt, and any
 failure. `PASS_import_only` means the wide factor-base adapter accepted the
 two retained objects. No SAT trial, partial relation, graph row, matrix rank,
 individual logarithm, or complete cold runtime is measured in this gate.
-The existing 2,400-second search protocol remains separate and requires its
-own run-specific grant.
+The existing 2,400-second search protocol remains separate. Its authorization
+record was frozen against the earlier 11,700-second baseline; update that
+accounting to 12,600 seconds and obtain a new run-specific grant before any
+later search launch.
