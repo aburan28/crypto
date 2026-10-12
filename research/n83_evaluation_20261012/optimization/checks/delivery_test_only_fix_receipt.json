@@ -1,0 +1,155 @@
+{
+  "schema": "n83.delivery-test-only-fix/v1",
+  "scope": "Only the test block in src/cryptanalysis/curve_traits/mod.rs; no production code or measured frozen artifact modified.",
+  "cwd": "/workspace/repos/crypto",
+  "conductor_check": {
+    "argv": [
+      "conductor",
+      "check",
+      "--summary",
+      "Correct stale Montgomery test expectation after exact small-field order support",
+      "--scope",
+      "path:src/cryptanalysis/curve_traits/mod.rs"
+    ],
+    "status": "command_not_found"
+  },
+  "environment": {
+    "RUSTUP_HOME": "/workspace/n83_evaluation/toolchain/rustup",
+    "CARGO_HOME": "/workspace/n83_evaluation/toolchain/cargo",
+    "CARGO_TARGET_DIR": "/workspace/n83_evaluation/build",
+    "PATH": "/workspace/n83_evaluation/toolchain/cargo/bin:/usr/bin:/bin"
+  },
+  "test_name_before": "cryptanalysis::curve_traits::tests::unavailable_coordinate_models_keep_exact_fields_without_order_certificates",
+  "test_name_after": "cryptanalysis::curve_traits::tests::coordinate_models_keep_exact_fields_and_available_order_certificates",
+  "correction": {
+    "montgomery_field_size": 101,
+    "montgomery_A": 3,
+    "montgomery_B": 1,
+    "proved_curve_order": 96,
+    "proof_method": "exhaustive point count",
+    "wrong_order_101_rejected": true,
+    "extension_field_size": 1369,
+    "extension_modulus_lower_coefficients": [
+      2,
+      0
+    ],
+    "extension_order_status": "NotEvaluated",
+    "extension_modulus_note": "Implicit monic x^2+2; separate native enumeration finds no root among all37 residues."
+  },
+  "source_before_sha256": "2164289525629df40c6d33008884441dd6108f72ff0ccb8e9f3a45af7e718edf",
+  "source_after_sha256": "23d749c51d1045c0ac6e6c56208b654b5450e6b0d07fb90c59ceacd57a1adeba",
+  "executions": [
+    {
+      "stage": "original_delivery_full_lib",
+      "log": "delivery_full_library_tests.log",
+      "status": "FAILED",
+      "passed": 3991,
+      "failed": 1,
+      "ignored": 112,
+      "test_seconds": 291.4,
+      "reason": "stale Montgomery unavailable-model expectation instead received exact count96 vs incorrect declared101",
+      "log_preserved_unchanged": true
+    },
+    {
+      "stage": "targeted_attempt1",
+      "argv": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--lib",
+        "cryptanalysis::curve_traits::tests::coordinate_models_keep_exact_fields_and_available_order_certificates"
+      ],
+      "log": "delivery_montgomery_targeted_postfix.log",
+      "exit_code": 101,
+      "passed": 0,
+      "failed": 1,
+      "compile_seconds": 204,
+      "reason": "Second stale fixture detail: current extension parser requires coefficient-array modulus. Montgomery assertions passed before extension parse failed."
+    },
+    {
+      "stage": "targeted_attempt2",
+      "argv": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--lib",
+        "cryptanalysis::curve_traits::tests::coordinate_models_keep_exact_fields_and_available_order_certificates"
+      ],
+      "log": "delivery_montgomery_targeted_postfix_attempt2.log",
+      "exit_code": 0,
+      "passed": 1,
+      "failed": 0,
+      "compile_seconds": 209,
+      "test_seconds": 0
+    },
+    {
+      "stage": "full_lib_postfix",
+      "argv": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--lib"
+      ],
+      "log": "delivery_full_library_tests_postfix.log",
+      "exit_code": 0,
+      "passed": 3992,
+      "failed": 0,
+      "ignored": 112,
+      "compile_seconds": 0.05,
+      "test_seconds": 402.32,
+      "sandbox_network_permission": true
+    },
+    {
+      "stage": "rho_example_postfix",
+      "argv": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--example",
+        "n83_rho_optimization_eval",
+        "--",
+        "--test-threads=1"
+      ],
+      "log": "delivery_rho_example_tests_postfix.log",
+      "exit_code": 0,
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "compile_seconds": 268,
+      "test_seconds": 12.19
+    }
+  ],
+  "concurrency_note": "Root requested example compilation/test overlap with the already compiled full-library test execution. Shared Cargo target lock managed build access. These are validation timings, not benchmark measurements.",
+  "independent_native_certificate": {
+    "directory": "montgomery_native_count",
+    "count_source": "count.cpp",
+    "affine_pairs_tested": 10201,
+    "affine_solutions": 95,
+    "infinity_points": 1,
+    "total_points": 96,
+    "count_exit_code": 0,
+    "receipt_sha256": "7d70d65829ce9b2f353c15b7efe43ef98ac00680a18bec702f62001b94f80c4b",
+    "final_source_pin_sha256": "e45757eb849003a5babad0659e1cbbb7595a984bc46678a0f65c7747cbacbf21",
+    "extension_residues_tested": 37,
+    "extension_polynomial_roots": 0,
+    "original_native_count_artifacts_preserved": true
+  },
+  "hashes": {
+    "/workspace/n83_optimization/checks/delivery_full_library_tests.log": "5ae4c352ee13032672a1f82977bd773d323227ee4c9cd05f2090b424b2d6b300",
+    "/workspace/n83_optimization/checks/delivery_full_library_tests_postfix.log": "8de11158a6e6f1678956b372b05c82acb043a388fa4c639c9ba7374f3065f4d5",
+    "/workspace/n83_optimization/checks/delivery_montgomery_targeted_postfix.log": "6ee824bf6fe22170293d03a0801906d3e8ed5e5101da0a7c4cad19f301425332",
+    "/workspace/n83_optimization/checks/delivery_montgomery_targeted_postfix_attempt2.log": "9da682c48b95624a0f55bec2edc1c02664e337adaa49ecd787c447ca3a3540a8",
+    "/workspace/n83_optimization/checks/delivery_rho_example_tests_postfix.log": "1f53ee1575af05f1dccb3a234bc46962aa7fca5ee965af5880bddeadda11c7b0",
+    "/workspace/n83_optimization/checks/montgomery_native_count/receipt.json": "7d70d65829ce9b2f353c15b7efe43ef98ac00680a18bec702f62001b94f80c4b",
+    "/workspace/n83_optimization/checks/montgomery_native_count/final_source_pin.json": "e45757eb849003a5babad0659e1cbbb7595a984bc46678a0f65c7747cbacbf21",
+    "src/cryptanalysis/curve_traits/mod.rs": "23d749c51d1045c0ac6e6c56208b654b5450e6b0d07fb90c59ceacd57a1adeba",
+    "examples/n83_rho_optimization_eval.rs": "fb14072f4fa5d08e18d8b79130b6d58a220adae0f76369cc9be949691c83eaa0"
+  },
+  "no_benchmark_rerun": true,
+  "benchmark_source_and_executable_pins_remain_immutable": true,
+  "root_owns_commit_and_repository_delivery": true
+}

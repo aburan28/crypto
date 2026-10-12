@@ -1,5 +1,18 @@
 # Degree-83 a=1/K600 evaluation against strong rho
 
+**Update: [fair rho optimization and fresh-target evaluation](optimization/README.md)
+is complete.** A prospectively selected Fold/64-lane/DP6 control improved
+held-out rho process cost by1.756671 (95% target-block interval
+[1.540157,2.033353]). All156 new rho answers and five IC answers were
+independently verified. Prepared IC was faster on four of five new targets,
+but its geometric and arithmetic cost ratios point in opposite directions;
+the online interval includes parity. There is no uniform online winner.
+
+The five-pair values below remain frozen historical measurements against
+**default** strong rho on the original single target. They are not ratios
+against the newly tuned control. The new IC batch's one shared setup is
+reported separately and does not replace those five cold repeats.
+
 **Status: all five matched pairs completed; all 22 fresh answers independently verified.**
 This directory records a new native evaluation of the retained one-point degree-83 IC observation. No performance row is promoted by this diagnostic study. The result applies to five repeats of one fixed public target on one virtualized host.
 

@@ -1,0 +1,22 @@
+{
+  "schema": "n83.optimization-host-context/v1",
+  "recorded_date_utc": "2026-10-12",
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "architecture": "x86_64",
+  "guest_logical_cpus": 5,
+  "guest_hypervisor": "KVM",
+  "cgroup_cpu_max": "400000 100000",
+  "cgroup_memory_max_bytes": 17179869184,
+  "reserved_cpu": 3,
+  "worker_threads": 1,
+  "address_space_limit_bytes": 12884901888,
+  "rho_release_profile": "Cargo default release, no task-specific RUSTFLAGS",
+  "ic_binary": "immutable a8194d61 original evaluation binary",
+  "compiler": "rustc 1.99.0 (b940084d7)",
+  "physical_host_exclusivity": null,
+  "independent_host_replication": false,
+  "hardware_kernel": "runtime pclmulqdq for both field backends and IC",
+  "common_operation_equivalent_S": null,
+  "lscpu_artifact": "/workspace/n83_optimization/host_lscpu.json",
+  "pre_measurement_library_test": "3947 passed; 0 failed; 112 ignored; 184.48 seconds"
+}

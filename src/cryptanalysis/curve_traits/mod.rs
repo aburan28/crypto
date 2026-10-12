@@ -1286,27 +1286,32 @@ impl TraitFile {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn unavailable_coordinate_models_keep_exact_fields_without_order_certificates() {
+    fn coordinate_models_keep_exact_fields_and_available_order_certificates() {
         use super::*;
-        for (text, q) in [
-            (
-                r#"{"field":"fp-101","form":"B*y^2=x^3+A*x^2+x","p":"101","A":"3","B":"1"}"#,
-                101u64,
-            ),
-            (
-                r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","a":["1","0"],"b":["1","0"]}"#,
-                1369u64,
-            ),
-        ] {
-            let (model, _) = parse_model(text).unwrap();
-            assert_eq!(model.q(), BigUint::from(q));
-            assert_eq!(
-                certify::check_order(&model, &BigUint::from(q), &[])
-                    .unwrap()
-                    .0,
-                Status::NotEvaluated
-            );
-        }
+        let (montgomery, _) = parse_model(
+            r#"{"field":"fp-101","form":"B*y^2=x^3+A*x^2+x","p":"101","A":"3","B":"1"}"#,
+        )
+        .unwrap();
+        assert_eq!(montgomery.q(), BigUint::from(101u64));
+        // The prime-field Montgomery adapter now supports exact counting;
+        // field size and curve order are distinct quantities.
+        assert_eq!(
+            certify::check_order(&montgomery, &BigUint::from(96u64), &[]).unwrap(),
+            (Status::Proved, "exhaustive point count")
+        );
+        assert!(certify::check_order(&montgomery, &BigUint::from(101u64), &[]).is_err());
+
+        let (extension, _) = parse_model(
+            r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","modulus":["2","0"],"a":["1","0"],"b":["1","0"]}"#,
+        )
+        .unwrap();
+        assert_eq!(extension.q(), BigUint::from(1369u64));
+        assert_eq!(
+            certify::check_order(&extension, &BigUint::from(1369u64), &[])
+                .unwrap()
+                .0,
+            Status::NotEvaluated
+        );
     }
     use super::*;
 

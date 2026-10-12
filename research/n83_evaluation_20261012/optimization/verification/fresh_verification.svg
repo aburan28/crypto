@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="405" viewBox="0 0 1000 405">
+<style>text{font-family:Arial,sans-serif;fill:#15344b}.title{font-size:23px;font-weight:bold}.body{font-size:18px}.small{font-size:16px}rect{fill:#edf5f8;stroke:#315c73;stroke-width:2}.edge{fill:none;stroke:#315c73;stroke-width:3}</style>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#315c73"/></marker></defs>
+<text x="30" y="32" class="title">Completed optimization outputs: native replay PASS for 161 answers</text>
+<rect x="30" y="70" width="300" height="120" rx="12"/><text x="50" y="101" class="body">Exact frozen instance</text><text x="50" y="130" class="small">3 training + 5 held-out points</text><text x="50" y="158" class="small">600 reps; 99,600 signed base points</text>
+<path d="M330 130H380" class="edge" marker-end="url(#arrow)"/>
+<rect x="390" y="70" width="270" height="120" rx="12"/><text x="410" y="101" class="body">Independent native arithmetic</text><text x="410" y="130" class="small">Every recorded scalar: [d]G = Q</text><text x="410" y="158" class="small">IC witnesses: four base points = Q</text>
+<path d="M660 130H710" class="edge" marker-end="url(#arrow)"/>
+<rect x="720" y="70" width="250" height="120" rx="12"/><text x="740" y="101" class="body">Recorded checks PASS</text><text x="740" y="130" class="small">156 rho + 5 IC scalar answers</text><text x="740" y="158" class="small">5 IC witnesses; zero invalid rows</text>
+<rect x="125" y="245" width="750" height="105" rx="12"/><text x="147" y="276" class="body">157 process receipts; 656 file hashes audited</text><text x="147" y="307" class="small">Source, binary, input/config and output provenance retained. No retiming.</text><text x="147" y="334" class="small">Still unverified: full rank/log transcript, timing replay and second-host gates.</text>
+<text x="30" y="391" class="small">Verified outputs, not a universal field identity or performance claim. Correct model suffix: 9eba6cd5.</text>
+</svg>
