@@ -3,6 +3,11 @@ name: n37 complete-table floor replay
 on:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - '.github/workflows/n37-complete-table-floor.yml'
       - 'examples/n37_complete_table_floor.rs'
       - 'examples/n37_complete_table_floor_analyze.rs'
@@ -31,7 +36,7 @@ concurrency:
 jobs:
   replay:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,6 +57,7 @@ jobs:
             research/notes/ecc2k130/n37_four_policy_support_20261003/SOURCE42.jsonl
             research/notes/ecc2k130/n37_four_policy_support_20261003/RESULT.json.gz
             research/notes/ecc2k130/n37_complete_table_floor_20261003
+      - uses: Swatinem/rust-cache@v2
       - name: Use frozen lockfile and check Rust formatting
         run: |
           cp research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock Cargo.lock
@@ -70,10 +76,18 @@ jobs:
             "$RUNNER_TEMP/decision-linux.json"
           cmp "$RUNNER_TEMP/decision-linux.json" "$note/DECISION.json"
       - name: Re-audit the sealed rho session on Linux with every measured run replayed
+        if: github.event_name != 'pull_request'
         run: |
           note=research/notes/ecc2k130/n37_complete_table_floor_20261003
           target/release/ecbench verify --dir "$note/sessions/strong-rho-e1" \
             --replay-all --exit-code --out "$RUNNER_TEMP/rho-linux-audit.json" > /dev/null
+      - name: Audit every sealed rho record without rerunning historical solvers
+        if: github.event_name == 'pull_request'
+        run: |
+          note=research/notes/ecc2k130/n37_complete_table_floor_20261003
+          target/release/ecbench verify --dir "$note/sessions/strong-rho-e1" \
+            --replay 0 --exit-code --out "$RUNNER_TEMP/rho-linux-integrity.json" > /dev/null
+          echo 'PR receipt checks every record, seal, hash, plan and recorded answer; full solver replay remains in manual validation.' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -82,5 +96,6 @@ jobs:
             ${{ runner.temp }}/count-linux.json
             ${{ runner.temp }}/decision-linux.json
             ${{ runner.temp }}/rho-linux-audit.json
+            ${{ runner.temp }}/rho-linux-integrity.json
           if-no-files-found: ignore
           retention-days: 30

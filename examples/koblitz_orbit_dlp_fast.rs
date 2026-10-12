@@ -2,6 +2,7 @@
 //!
 //! Public synthetic Koblitz fixtures only. Reads a retained
 //! `point_defined_factor_base` header, builds the Frobenius-quotiented S3
+//! regular-root index once (no pair table, no edge selectors), then:
 //! regular-root index once (no pair table, no edge selectors), then
 //!   1. rank stage: decomposes random `[a]G` until the K orbit logs are fixed,
 //!   2. target stage: decomposes each published target and recovers its log.
@@ -594,6 +595,11 @@ fn build_index(gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, reps: &[u64]) -
     let mut table = RootTable::with_capacity(states.len() * 2);
     for state in &states {
         for &root in &state.normal_roots {
+            let (canonical, shift) = basis.canonical(root);
+            table.insert_if_absent(
+                canonical,
+                pack(state.left, state.right, state.relative, shift),
+            );
             let (canonical, shift) = basis.canonical_selected(root);
             table.insert_if_absent(
                 canonical,

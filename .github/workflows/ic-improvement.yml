@@ -32,11 +32,11 @@ concurrency:
   # PR controls need their own pending slot. Keep measured dispatches in the
   # original serialized group; unrelated PRs must not cancel queued controls.
   group: ${{ github.event_name == 'pull_request' && format('ic-bounded-improvement-pr-{0}', github.event.pull_request.number) || 'ic-bounded-improvement' }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   candidate-controls:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 35 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -101,7 +101,7 @@ jobs:
           if-no-files-found: warn
   round2-candidate-controls:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 35 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

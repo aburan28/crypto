@@ -1,0 +1,14 @@
+   Compiling crypto v0.1.0 (/workspace/crypto)
+error: mismatched closing delimiter: `}`
+    --> src/cryptanalysis/prime_fast.rs:1622:23
+     |
+1616 |         for bits in [16u32, 20, 24] {
+     |                                     - closing delimiter possibly meant for this
+...
+1622 |             assert_eq!(
+     |                       ^ unclosed delimiter
+...
+1644 |         }
+     |         ^ mismatched closing delimiter
+
+error: could not compile `crypto` (lib) due to 1 previous error

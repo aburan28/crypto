@@ -134,6 +134,29 @@ conductor_gap.rs`, `CurveSpec::ConductorGap`), which rebuilds the pair from
 plan` and is not run here because the explicit-form sessions above already
 measure the same curves.
 
+### Relation to the ECC2K-130 conductor-gap study on main
+
+`research/isogeny_conductor_gap_20261007/` and
+`docs/ic/EXPERIMENTS_ISOGENY_CONDUCTOR_GAP_20261007.md` study the same
+question inside the binary Koblitz class of ECC2K-130 (`D = −7`, gaps at
+primes such as 263 and 967 reached by Vélu descent from the crater). Its E1
+panel ran the production index-calculus pipeline on the crater and on floor
+curves at the toy rung `n = 23` and found the per-call statistics
+level-blind (trials per relation 2.41–2.52 on the crater, 2.50–2.78 on the
+floor). Its only level-dependent effect is orbit folding: the crater's
+Frobenius endomorphism `τ` is defined over `F_2`, so its factor base folds
+by about `n`, and floor curves lose that.
+
+This directory is the prime-field complement. Here `D = −19` gives a crater
+whose extra endomorphisms have norm at least 5 and are not used by any
+method in ecbench, so there is no folding to lose. Every method then
+measures as level-blind. Together the two say the same thing from both
+characteristics: in the implemented methods, the conductor matters only
+through an endomorphism the method actually exploits, never through the
+ring's index as such. That is the Lean pair of §4 in practice: generic
+methods are blind by theorem, and a structural method is no better than the
+endomorphisms it uses.
+
 ## 6. Falsifiers
 
 - A generic arm with `log₂ S` excluding 0: harness fault (check the

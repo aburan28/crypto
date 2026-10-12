@@ -290,7 +290,10 @@ impl FactorBaseDocument {
         curve_label(self.degree, self.curve_a, self.subfield, self.curve_b)
     }
 }
+/// `path` may be a store reference (`store:NAME`, `sha256:DIGEST`), fetched into the
+/// local cache and verified on first use; a plain path is read as is.
 pub fn load_factor_base(path: &Path) -> Result<FactorBaseDocument, String> {
+    let path = &crypto_lib::store::resolve_path(path)?;
     let mut data = Vec::new();
     File::open(path)
         .map_err(|e| format!("{}: {e}", path.display()))?

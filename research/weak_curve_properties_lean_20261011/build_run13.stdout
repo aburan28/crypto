@@ -1,0 +1,37 @@
+⚠ [1630/1637] Replayed WeakCurveProperties.FiniteFields
+warning: WeakCurveProperties/FiniteFields.lean:21:0: automatically included section variable(s) unused in theorem `WeakCurveProperties.card_subfield_units`:
+  [Finite F]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Finite F] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+✖ [1635/1637] Building WeakCurveProperties.WeierstrassTwists (57s)
+trace: .> LEAN_PATH=/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/Cli/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/batteries/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/Qq/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/aesop/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/proofwidgets/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/importGraph/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/plausible/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/mathlib/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/lib/lean /Users/adamburan/.elan/toolchains/leanprover--lean4---v4.34.1/bin/lean /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/WeakCurveProperties/WeierstrassTwists.lean -o /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/lib/lean/WeakCurveProperties/WeierstrassTwists.olean -i /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/lib/lean/WeakCurveProperties/WeierstrassTwists.ilean -c /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/ir/WeakCurveProperties/WeierstrassTwists.c --setup /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/ir/WeakCurveProperties/WeierstrassTwists.setup.json --json
+info: WeakCurveProperties/WeierstrassTwists.lean:128:8: Try this:
+  [apply] ring_nf
+  
+  The `ring` tactic failed to close the goal. Use `ring_nf` to obtain a normal form.
+    
+  Note that `ring` works primarily in *commutative* rings. If you have a noncommutative ring, abelian group or module, consider using `noncomm_ring`, `abel` or `module` instead.
+error: WeakCurveProperties/WeierstrassTwists.lean:124:63: unsolved goals
+F : Type u_1
+inst✝² : Field F
+inst✝¹ : NeZero 2
+inst✝ : NeZero 3
+a b : F
+ha : a ≠ 0
+hb : b ≠ 0
+hdisc : 4 * a ^ 3 + 27 * b ^ 2 ≠ 0
+h2 : 2 ≠ 0
+h3 : 3 ≠ 0
+hdisc' : a ^ 3 * 4 + b ^ 2 * 27 ≠ 0
+h6912 : 6912 ≠ 0
+h46656 : 46656 ≠ 0
+hj : shortJ a b ≠ 0
+⊢ a ^ 3 * 6912 - a ^ 3 * b ^ 2 * (a ^ 3 * 4 + b ^ 2 * 27)⁻¹ * 186624 - a ^ 6 * (a ^ 3 * 4 + b ^ 2 * 27)⁻¹ * 27648 +
+      b ^ 2 * 46656 =
+    b ^ 2 * 46656
+error: WeakCurveProperties/WeierstrassTwists.lean:141:8: `field_simp` made no progress on the goal
+error: WeakCurveProperties/WeierstrassTwists.lean:146:8: `field_simp` made no progress on the goal
+Some required targets logged failures:
+- WeakCurveProperties.WeierstrassTwists

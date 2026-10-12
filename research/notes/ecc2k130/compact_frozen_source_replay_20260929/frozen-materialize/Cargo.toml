@@ -1,0 +1,15 @@
+[package]
+name = "frozen-materialize"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Materialize the frozen source tree of a compact-orbit evaluation (native replacement for materialize.py)"
+
+# Standalone: not a member of the repository's root package.
+[workspace]
+
+[dependencies]
+flate2 = "1.0"
+serde_json = "1.0"
+sha2 = "0.10"
+tar = "0.4"
