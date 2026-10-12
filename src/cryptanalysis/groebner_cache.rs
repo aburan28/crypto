@@ -5,7 +5,6 @@
 //! solver's answer.  Set `IC_GROEBNER_CACHE_URL` to enable it.  For an
 //! ElastiCache replication group with in-transit encryption, use a `rediss://`
 //! URL and provide the auth token in the URL through the deployment secret.
-
 // Fail-open cache infra, currently unwired: kept for upcoming use.
 // `dead_code` is allowed so `-D warnings` stays green until it is wired in.
 #![allow(dead_code)]

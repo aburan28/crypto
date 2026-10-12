@@ -1,12 +1,9 @@
 name: ecbench n37 K8 K16 frozen profile
 
 on:
-  pull_request:
-    paths:
-      - 'research/ecbench_n37_k8_k16_20261004/**'
-      - '.github/workflows/ecbench-n37-k8-k16.yml'
-      - 'src/bin/ecbench.rs'
-      - 'src/cryptanalysis/ecbench/**'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 
 permissions:

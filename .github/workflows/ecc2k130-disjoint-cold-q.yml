@@ -1,11 +1,9 @@
 name: ECC2K130 disjoint-Q compact cold CPU panel
 
 on:
-  pull_request:
-    paths:
-      - .github/workflows/ecc2k130-disjoint-cold-q.yml
-      - research/notes/ecc2k130/disjoint_cold_q_20260930/**
-      - research/notes/ecc2k130/compact_frozen_source_replay_20260929/**
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 
 permissions:
@@ -23,6 +21,9 @@ jobs:
           sparse-checkout: |
             Cargo.toml
             docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            docs/ecbench/schema.sql
+            docs/curves/registry.json
             src
             examples/koblitz_orbit_dlp_s3_batch.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs
@@ -132,6 +133,9 @@ jobs:
           sparse-checkout: |
             Cargo.toml
             docs/ic/calibration.json
+            docs/ic/boundary_targets.json
+            docs/ecbench/schema.sql
+            docs/curves/registry.json
             src
             examples/koblitz_orbit_dlp_s3_batch.rs
             examples/koblitz_rho_batch_ks_v2_n61.rs

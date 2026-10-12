@@ -1,12 +1,8 @@
 name: Degree-7 paired factor-base pilot
 on:
-  pull_request:
-    paths:
-      - 'research/ecc2k130_factor_base_pilot_20260924/**'
-      - 'research/ecc2k130_oriented_transport_20260924/oriented_velu.py'
-      - 'research/ecc2k130_relations/fastfield.py'
-      - 'research/ecc2k130_relations/relations.py'
-      - '.github/workflows/degree7-factor-base-pilot.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 permissions:
   contents: read

@@ -961,6 +961,20 @@ workloads, under the same isolation, into the same sealed records.
 
 Historical autolab, tournament and ICMS evidence keeps its own protocols.
 
+### 13. Large files go through the store
+
+A factor base, relation table or raw evidence file too big for Git is pushed
+with `crypto store push` (or `ecbench store push`) and referred to by name,
+not by a local path or a one-off bucket URL: `store:<name>`, accepted
+wherever a path is (`ic --factor-base`, and any code that calls
+`crypto_lib::store::resolve_path`). The tracked `store/index.json` is the
+manifest the evidence rules ask for: content hash, byte count, location,
+and the command that produced the file (`--provenance`). Commit the index
+entry in the PR that lands the result. Objects are immutable and keyed by
+SHA-256; a name is not repointed without `--replace`, which keeps the old
+digest as superseded. Never delete remote objects from an agent session.
+See [docs/store/README.md](docs/store/README.md).
+
 ## Worked example
 
 `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md` is the reference implementation of this
