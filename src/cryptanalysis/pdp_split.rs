@@ -92,12 +92,30 @@ pub fn build_split_system(
     b: &F2mElement,
     st: &FieldStructure,
 ) -> Result<SplitSystem, String> {
+    let m: usize = plan.iter().sum();
+    let bases = vec![basis.to_vec(); m];
+    build_split_system_bases(plan, &bases, x_r, b, st)
+}
+
+/// [`build_split_system`] with summand `i` ranging over the span of
+/// `bases[i]` — the τ-slot form: over a Frobenius closure, summand `i`
+/// lives in the rotation `σ^{jᵢ}(V)`.  Every basis has the same length `ℓ`.
+pub fn build_split_system_bases(
+    plan: &[usize],
+    bases: &[Vec<F2mElement>],
+    x_r: &F2mElement,
+    b: &F2mElement,
+    st: &FieldStructure,
+) -> Result<SplitSystem, String> {
     let n = st.n;
-    let ell = basis.len();
     let m: usize = plan.iter().sum();
     if plan.is_empty() || plan.contains(&0) {
         return Err("plan needs nonzero block sizes".into());
     }
+    if bases.len() != m || bases.iter().any(|b| b.len() != bases[0].len()) {
+        return Err(format!("need {m} bases of one dimension"));
+    }
+    let ell = bases[0].len();
     let k = plan.len();
     let n_vars = m * ell + (k - 1) * n as usize;
     if n_vars > MAX_VARS {
@@ -107,7 +125,7 @@ pub fn build_split_system(
     }
     let b_is_one = *b == F2mElement::one(n);
     let summands: Vec<SymElement> = (0..m)
-        .map(|i| SymElement::from_subspace_vars(basis, i * ell, n, n_vars))
+        .map(|i| SymElement::from_subspace_vars(&bases[i], i * ell, n, n_vars))
         .collect();
     let aux: Vec<SymElement> = (0..k - 1)
         .map(|j| SymElement::from_free_vars(m * ell + j * n as usize, n, n_vars))
@@ -366,10 +384,15 @@ pub fn verify_decomposition(inst: &BinaryInstance, xs: &[u64], x_r: u64) -> Opti
 /// The summands' abscissae of a Boolean assignment, in the field's word
 /// representation (the standard basis puts bit `t` of block `i` at `z^t`).
 pub fn summands_of(sys: &SplitSystem, basis_words: &[u64], assignment: u64) -> Vec<u64> {
+    summands_of_bases(sys, &vec![basis_words.to_vec(); sys.m], assignment)
+}
+
+/// [`summands_of`] with summand `i` over the span of `bases_words[i]`.
+pub fn summands_of_bases(sys: &SplitSystem, bases_words: &[Vec<u64>], assignment: u64) -> Vec<u64> {
     (0..sys.m)
         .map(|i| {
             let mut x = 0u64;
-            for (t, w) in basis_words.iter().enumerate() {
+            for (t, w) in bases_words[i].iter().enumerate() {
                 if (assignment >> (i * sys.ell + t)) & 1 == 1 {
                     x ^= w;
                 }
@@ -377,6 +400,134 @@ pub fn summands_of(sys: &SplitSystem, basis_words: &[u64], assignment: u64) -> V
             x
         })
         .collect()
+}
+
+/// Every element of the `F₂`-span of `basis_words`.
+pub fn span_words(basis_words: &[u64]) -> Vec<u64> {
+    (0..1u64 << basis_words.len())
+        .map(|c| {
+            basis_words
+                .iter()
+                .enumerate()
+                .filter(|(t, _)| (c >> t) & 1 == 1)
+                .fold(0u64, |a, (_, w)| a ^ w)
+        })
+        .collect()
+}
+
+/// The basis of the rotation `σ^j(V)`: each basis word raised to `2^j`.
+pub fn rotate_words(inst: &BinaryInstance, basis_words: &[u64], j: u32) -> Vec<u64> {
+    basis_words.iter().map(|&w| inst.gf.sqr_k(w, j)).collect()
+}
+
+/// The slot tuples of one target over a Frobenius closure: summand `i`
+/// over `σ^{jᵢ}(V)`, with `j₁ = 0` and `j₂ ≤ … ≤ j_m` (the systems are
+/// symmetric in their summands, so a multiset of rotations is one system).
+/// `[0, 0, …, 0]` is the plain `V^m` system.
+pub fn slot_tuples(n: u32, m: usize) -> Vec<Vec<u32>> {
+    let mut out = Vec::new();
+    let mut cur = vec![0u32; m];
+    fn rec(n: u32, m: usize, pos: usize, cur: &mut Vec<u32>, out: &mut Vec<Vec<u32>>) {
+        if pos == m {
+            out.push(cur.clone());
+            return;
+        }
+        let lo = if pos <= 1 { 0 } else { cur[pos - 1] };
+        for j in lo..n {
+            cur[pos] = j;
+            rec(n, m, pos + 1, cur, out);
+        }
+    }
+    if m == 1 {
+        return vec![vec![0]];
+    }
+    rec(n, m, 1, &mut cur, &mut out);
+    out
+}
+
+/// The Frobenius closure `∪_j σ^j(V)` as a factor base: how many liftable
+/// abscissae it holds, and how many columns it needs once each signed
+/// Frobenius orbit `{±τ^k P}` is folded to one (an abscissa orbit under
+/// squaring is exactly such a point orbit).
+#[derive(Clone, Copy, Debug, serde::Serialize)]
+pub struct ClosureCensus {
+    pub abscissae: usize,
+    pub columns: usize,
+}
+
+pub fn closure_census(inst: &BinaryInstance, basis_words: &[u64]) -> ClosureCensus {
+    let mut xs = BTreeSet::new();
+    for j in 0..inst.n {
+        for x in span_words(&rotate_words(inst, basis_words, j)) {
+            if lift_x(inst, x).is_some() {
+                xs.insert(x);
+            }
+        }
+    }
+    let mut seen = BTreeSet::new();
+    let mut columns = 0usize;
+    for &x in &xs {
+        if seen.contains(&x) {
+            continue;
+        }
+        columns += 1;
+        let mut y = x;
+        for _ in 0..inst.n {
+            seen.insert(y);
+            y = inst.gf.sqr(y);
+        }
+    }
+    ClosureCensus {
+        abscissae: xs.len(),
+        columns,
+    }
+}
+
+/// [`exhaustive_decompositions`] with summand `i` over the span of
+/// `bases_words[i]`: every tuple of liftable abscissae, one from each
+/// space, whose points sum to `±R` with some signs, as sorted multisets.
+pub fn exhaustive_decompositions_bases(
+    inst: &BinaryInstance,
+    bases_words: &[Vec<u64>],
+    x_r: u64,
+) -> BTreeSet<Decomposition> {
+    let lists: Vec<Vec<u64>> = bases_words
+        .iter()
+        .map(|b| {
+            span_words(b)
+                .into_iter()
+                .filter(|&x| lift_x(inst, x).is_some())
+                .collect()
+        })
+        .collect();
+    let mut out = BTreeSet::new();
+    if lists.iter().any(|l| l.is_empty()) {
+        return out;
+    }
+    let m = lists.len();
+    let mut idx = vec![0usize; m];
+    loop {
+        let xs: Vec<u64> = idx.iter().zip(&lists).map(|(&i, l)| l[i]).collect();
+        if verify_decomposition(inst, &xs, x_r) == Some(true) {
+            let mut d = xs;
+            d.sort_unstable();
+            out.insert(d);
+        }
+        let mut p = m;
+        loop {
+            if p == 0 {
+                return out;
+            }
+            p -= 1;
+            if idx[p] + 1 < lists[p].len() {
+                idx[p] += 1;
+                for q in idx.iter_mut().skip(p + 1) {
+                    *q = 0;
+                }
+                break;
+            }
+        }
+    }
 }
 
 /// Every decomposition of `R` over `V` with `m` summands, by exhaustive
@@ -487,6 +638,23 @@ pub fn run_hybrid(
     truth: &BTreeSet<Decomposition>,
     build_ns: u64,
 ) -> HybridRun {
+    let bases = vec![basis_words.to_vec(); sys.m];
+    run_hybrid_bases(inst, sys, &bases, x_r, g, budget, max_free, truth, build_ns)
+}
+
+/// [`run_hybrid`] with summand `i` over the span of `bases_words[i]`.
+#[allow(clippy::too_many_arguments)]
+pub fn run_hybrid_bases(
+    inst: &BinaryInstance,
+    sys: &SplitSystem,
+    bases_words: &[Vec<u64>],
+    x_r: u64,
+    g: usize,
+    budget: Option<Duration>,
+    max_free: usize,
+    truth: &BTreeSet<Decomposition>,
+    build_ns: u64,
+) -> HybridRun {
     let mut per_branch = Vec::with_capacity(1 << g);
     let mut verified = BTreeSet::new();
     let (mut algebraic, mut unliftable, mut false_sols) = (0usize, 0usize, 0usize);
@@ -495,7 +663,7 @@ pub fn run_hybrid(
         if let Some(sols) = &bo.solutions {
             for &a in sols {
                 algebraic += 1;
-                let xs = summands_of(sys, basis_words, a);
+                let xs = summands_of_bases(sys, bases_words, a);
                 match verify_decomposition(inst, &xs, x_r) {
                     None => unliftable += 1,
                     Some(false) => false_sols += 1,
@@ -578,6 +746,31 @@ pub fn build_for_instance(
     Ok((sys, t0.elapsed().as_nanos() as u64))
 }
 
+/// Build `plan`'s system for `x_r` with summand `i` over `σ^{slots[i]}(V)`,
+/// `V` the standard subspace of dimension `ell`; returns the system, the
+/// per-summand basis words, and the construction time.
+pub fn build_for_instance_slots(
+    inst: &BinaryInstance,
+    plan: &[usize],
+    ell: usize,
+    slots: &[u32],
+    x_r: u64,
+) -> Result<(SplitSystem, Vec<Vec<u64>>, u64), String> {
+    let n = inst.n;
+    let st = FieldStructure::new(n, &inst.irreducible);
+    let v: Vec<u64> = (0..ell).map(|t| 1u64 << t).collect();
+    let words: Vec<Vec<u64>> = slots.iter().map(|&j| rotate_words(inst, &v, j)).collect();
+    let bases: Vec<Vec<F2mElement>> = words
+        .iter()
+        .map(|w| w.iter().map(|&x| inst.gf.to_element(x)).collect())
+        .collect();
+    let b = inst.gf.to_element(inst.b);
+    let xr = inst.gf.to_element(x_r);
+    let t0 = Instant::now();
+    let sys = build_split_system_bases(plan, &bases, &xr, &b, &st)?;
+    Ok((sys, words, t0.elapsed().as_nanos() as u64))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -646,6 +839,57 @@ mod tests {
         let run = run_hybrid(&inst, &sys, &words, x_r, 0, None, 24, &truth, ns);
         assert_eq!(run.complete_and_exact, Some(true));
         assert_eq!(run.verified, vec![vec![5, 21, 22]]);
+    }
+
+    /// Over rotated per-summand bases, unsplit and split systems (with and
+    /// without guessing) find exactly the exhaustive decompositions, and
+    /// the all-zero slot reproduces the plain system.
+    #[test]
+    fn slot_systems_agree_with_exhaustive() {
+        let inst = koblitz_instance(1, 11).expect("K_1 / GF(2^11)");
+        let ell = 4;
+        let v: Vec<u64> = (0..ell).map(|t| 1u64 << t).collect();
+        assert_eq!(slot_tuples(11, 3).len(), 66);
+        let mut hits = 0;
+        for (k, slots) in [[0u32, 0, 0], [0, 1, 5], [0, 3, 3], [0, 2, 9]]
+            .iter()
+            .enumerate()
+        {
+            let r = inst
+                .fast
+                .mul_u64(inst.generator, 4099 * (k as u64 + 1) + 17);
+            let words: Vec<Vec<u64>> = slots.iter().map(|&j| rotate_words(&inst, &v, j)).collect();
+            let truth = exhaustive_decompositions_bases(&inst, &words, r.x);
+            if *slots == [0, 0, 0] {
+                assert_eq!(truth, exhaustive_decompositions(&inst, &v, 3, r.x));
+            }
+            hits += truth.len();
+            for plan in [vec![3], vec![2, 1]] {
+                for g in [0usize, 2] {
+                    let (sys, w, ns) =
+                        build_for_instance_slots(&inst, &plan, ell, slots, r.x).unwrap();
+                    let run = run_hybrid_bases(&inst, &sys, &w, r.x, g, None, 24, &truth, ns);
+                    assert_eq!(run.false_solutions, 0);
+                    assert_eq!(
+                        run.complete_and_exact,
+                        Some(true),
+                        "{plan:?} {slots:?} g={g}"
+                    );
+                }
+            }
+        }
+        let _ = hits;
+    }
+
+    #[test]
+    fn closure_folds_by_frobenius() {
+        let inst = koblitz_instance(1, 11).unwrap();
+        let v: Vec<u64> = (0..4).map(|t| 1u64 << t).collect();
+        let c = closure_census(&inst, &v);
+        // Every column is a whole squaring orbit of liftable abscissae.
+        assert!(c.columns <= c.abscissae);
+        assert!(c.abscissae <= 11 * 16);
+        assert!(c.columns >= factor_base_size(&inst, &v) / 11);
     }
 
     #[test]
