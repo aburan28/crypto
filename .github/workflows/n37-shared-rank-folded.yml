@@ -1,26 +1,26 @@
 name: n37 target-blind folded rank replay
 
 on:
-  pull_request:
-    paths:
-      - 'src/cryptanalysis/ic_framework/**'
-      - 'examples/n37_shared_rank_folded.rs'
-      - 'examples/n37_shared_rank_replay.rs'
-      - 'research/notes/ecc2k130/shared_rank_folded_table_20261003/**'
-      - 'research/notes/ecc2k130/n37_four_policy_support_20261003/SOURCE42.jsonl'
-      - '.github/workflows/n37-shared-rank-folded.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   replay:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Build against the archived dependency lock
         run: |
           cp research/notes/ecc2k130/n37_native_m6_mitm_20261002/Cargo.lock Cargo.lock

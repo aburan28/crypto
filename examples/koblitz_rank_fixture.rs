@@ -1,5 +1,12 @@
 #![recursion_limit = "512"]
 //! Public fixture interface for the independently complete rank and shared-log implementations.
+//! Point-defined factor base, exact-support relation collection, and rank trace.
+//!
+//! This is the fully charged V2 control for the Koblitz crossover task.  The
+//! base is selected only from public point coordinates. Known-answer controls
+//! retain a validation scalar; `hash:SEED` derives a subgroup point without
+//! constructing its scalar and accepts recovery only after `[d]G = Q`.
+
 #[path = "koblitz_rank_fixture/rank.rs"]
 mod rank;
 #[path = "koblitz_rank_fixture/shared.rs"]

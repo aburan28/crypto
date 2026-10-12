@@ -724,6 +724,9 @@ mod tests {
         let text = r#"{"gae":3934.0137668849675,"nested":[0.37222665730402227],"integer":17}"#;
         let legacy: LegacyFloatFixture = from_str_legacy_floats(text).unwrap();
         let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+        let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+        let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
+        let current: LegacyFloatFixture = serde_json::from_str(text).unwrap();
 
         // Freeze the v1 parser's exact binary results independently of the
         // serde_json feature set used by the current build.

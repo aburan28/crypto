@@ -1,9 +1,5 @@
 //! Native-XOR balanced-S5 SAT control over point-defined Koblitz bases.
 //!
-//! Four factor-base points are constrained to sum to one published synthetic
-//! target through three balanced S3 links.  All SAT models are lifted through
-//! the original curve group; no unknown, external, or production point is used.
-
 #![recursion_limit = "1024"]
 //! Four factor-base points are constrained through three balanced S3 links.
 //! SAT controls use published synthetic targets; the optional compact batch
@@ -6611,7 +6607,6 @@ fn main() {
             result => break result,
         }
     };
-    phase_restart_shots_used += 1;
     if !compact_batch_only {
         phase_restart_shots_used += 1;
     }

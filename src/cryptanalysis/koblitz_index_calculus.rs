@@ -133,7 +133,7 @@ use std::sync::{Arc, OnceLock};
 use num_bigint::{BigUint, RandBigInt};
 use num_traits::{One, ToPrimitive, Zero};
 use rand::rngs::StdRng;
-use rand::{Rng, SeedableRng};
+use rand::{Rng, RngCore, SeedableRng};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -727,6 +727,12 @@ fn factorise(v: BigUint) -> Vec<(BigUint, u32)> {
             .map(|(p, e)| (BigUint::from(p), e))
             .collect();
     }
+    if let Some(v) = biguint_to_u128(&v) {
+        return factorise_u128(v)
+            .into_iter()
+            .map(|(p, e)| (BigUint::from(p), e))
+            .collect();
+    }
     factorise_big(v)
 }
 
@@ -790,6 +796,37 @@ fn factorise_big(mut v: BigUint) -> Vec<(BigUint, u32)> {
         d += BigUint::one();
     }
     if v > BigUint::one() {
+        out.push((v, 1));
+    }
+    out
+}
+
+/// `Some(v)` as a native word when the [`BigUint`] fits in 128 bits.
+fn biguint_to_u128(v: &BigUint) -> Option<u128> {
+    let limbs = v.to_u64_digits();
+    if limbs.len() > 2 {
+        return None;
+    }
+    Some(limbs[0] as u128 | ((limbs.get(1).copied().unwrap_or(0) as u128) << 64))
+}
+
+/// Native-word trial division: same factor list as [`factorise`], no
+/// allocations.  `d * d` cannot overflow: `d ≤ √v < 2^64`.
+fn factorise_u128(mut v: u128) -> Vec<(u128, u32)> {
+    let mut out: Vec<(u128, u32)> = Vec::new();
+    let mut d = 2u128;
+    while d * d <= v {
+        let mut e = 0;
+        while v.is_multiple_of(d) {
+            v /= d;
+            e += 1;
+        }
+        if e > 0 {
+            out.push((d, e));
+        }
+        d += 1;
+    }
+    if v > 1 {
         out.push((v, 1));
     }
     out
@@ -2361,17 +2398,7 @@ fn poly_mul_full(a: u64, b: u64) -> Option<u64> {
 /// [`factor_x_n_minus_1`] returns only the non-trivial factors; a
 /// divisor may use `x + 1` too, so the divisor-based constructions take
 /// their indices into this list.
-///
-/// Memoised (pure in `n`); the uncached scan follows.
 pub fn all_factors_of_x_n_minus_1(n: u32) -> Vec<u64> {
-    if let Some(hit) = memo_get(&ALL_FACTORS_MEMO, n) {
-        return hit;
-    }
-    memo_put(&ALL_FACTORS_MEMO, n, all_factors_of_x_n_minus_1_uncached(n))
-}
-
-/// Uncached scan behind [`all_factors_of_x_n_minus_1`].
-fn all_factors_of_x_n_minus_1_uncached(n: u32) -> Vec<u64> {
     let mut out = vec![0b11u64]; // x + 1
                                  // The degrees that occur are exactly the cyclotomic coset sizes;
                                  // the size-1 coset is {0}, already covered by x + 1 above.
@@ -3198,16 +3225,9 @@ pub fn saturate_factor_base_two_torsion(
     }
     let sums = fast.batch_add(&pairs);
     let mut xs = std::collections::BTreeMap::new();
-    for (p, s) in fb.points.iter().zip(sums.iter()) {
-        let q = match s {
-            None => BinaryPoint::Infinity,
-            Some((x, y)) => BinaryPoint::Affine {
-                x: fast.element(*x),
-                y: fast.element(*y),
-            },
-        };
-        for r in [p.clone(), q] {
-            if let BinaryPoint::Affine { x, .. } = r {
+    for p in &fb.points {
+        for q in [p.clone(), kc.add(p, &t)] {
+            if let BinaryPoint::Affine { x, .. } = q {
                 xs.entry(x.to_biguint()).or_insert(x);
             }
         }
@@ -3717,6 +3737,9 @@ pub enum DecompositionStrategy {
     /// large explicit-coordinate trie, but still requires the same complete
     /// curve-group witness and relation checks.
     ChainedS3FrobeniusOrbit,
+    /// The Frobenius-orbit chained solver with `x_0 <= x_1` on the first
+    /// S3 node. This preserves solutions under swapping its first pair.
+    ChainedS3FrobeniusOrbitOrdered,
     /// **Meet in the middle** over a precomputed table of all pair sums
     /// `P_i + P_j` ([`PairSumTable`]).  `m = 2` is one lookup, `m = 3`
     /// is `|F|` lookups, `m = 4` is `|F|²` lookups — against
@@ -7490,6 +7513,81 @@ pub fn groebner_decompose_f6_ic_pair_index(
     )
 }
 
+/// The equations, and their variable count, that [`groebner_decompose`]
+/// and the F6-IC decomposers hand the Boolean solver for `target`: the
+/// decomposition system in the solve's (possibly interleaved) variable
+/// order.  For [`prebuild_decomposition_roots`]; `None` where the
+/// decomposers would report the target unsupported.
+pub fn decomposition_solver_equations(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    st: &FieldStructure,
+    target: &BinaryPoint,
+    m: usize,
+    engine: SolverEngine,
+) -> Option<(Vec<F2BoolPoly>, usize)> {
+    let x_r = match target {
+        BinaryPoint::Affine { x, .. } => x.clone(),
+        BinaryPoint::Infinity => return None,
+    };
+    let sys = crate::cryptanalysis::polynomial_reuse::build_decomposition_system_reusing(
+        &fb.subspace_basis,
+        &x_r,
+        &kc.curve.b,
+        m,
+        st,
+    )?;
+    let opts = SolveOptions {
+        engine,
+        max_solutions: usize::MAX,
+        node_budget: 0,
+        split_rule: split_rule_default(),
+    };
+    let equations = if m >= 3 && chain_order_interleaved(opts.resolve().split_rule) {
+        let perm = sys.interleaved_order(kc.n);
+        sys.equations
+            .iter()
+            .map(|e| permute_poly(e, &perm))
+            .collect()
+    } else {
+        sys.equations.clone()
+    };
+    Some((equations, sys.n_vars))
+}
+
+/// **Lane-batched roots for a batch of targets** (`KIC_F4_LANES`, lit2026
+/// W5): build the inherited-F4 root bases of every target's decomposition
+/// together ([`crate::cryptanalysis::koblitz_groebner::prebuild_inherited_roots_lanes`]),
+/// so that the decompositions that follow on this thread, in any order,
+/// take them instead of building their own.  The decompositions decide
+/// exactly as without it.  Returns the batch statistics and how many
+/// targets got a basis.
+pub fn prebuild_decomposition_roots(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    st: &FieldStructure,
+    targets: &[BinaryPoint],
+    m: usize,
+    engine: SolverEngine,
+) -> (crate::cryptanalysis::inherited_f4::LaneStats, usize) {
+    let mut systems = Vec::with_capacity(targets.len());
+    let mut n_vars = 0usize;
+    for target in targets {
+        if let Some((equations, n)) = decomposition_solver_equations(kc, fb, st, target, m, engine)
+        {
+            if n_vars != 0 && n != n_vars {
+                continue;
+            }
+            n_vars = n;
+            systems.push(equations);
+        }
+    }
+    if systems.is_empty() {
+        return (Default::default(), 0);
+    }
+    crate::cryptanalysis::koblitz_groebner::prebuild_inherited_roots_lanes(&systems, n_vars, engine)
+}
+
 #[allow(clippy::too_many_arguments)]
 fn groebner_decompose_with_geometry(
     kc: &KoblitzCurve,
@@ -8341,7 +8439,7 @@ pub fn sat_decompose_chained_s3(
     m: usize,
     limits: ChainS3Limits,
 ) -> (Option<Vec<usize>>, ChainS3Stats) {
-    sat_decompose_chained_s3_with_domain(kc, fb, target, m, limits, false)
+    sat_decompose_chained_s3_with_domain(kc, fb, target, m, limits, false, false)
 }
 
 /// Use one signed-Frobenius representative per column to constrain the same
@@ -8355,7 +8453,20 @@ pub fn sat_decompose_chained_s3_frobenius_orbit(
     m: usize,
     limits: ChainS3Limits,
 ) -> (Option<Vec<usize>>, ChainS3Stats) {
-    sat_decompose_chained_s3_with_domain(kc, fb, target, m, limits, true)
+    sat_decompose_chained_s3_with_domain(kc, fb, target, m, limits, true, false)
+}
+
+/// An opt-in symmetry arm for the same exact signed-Frobenius domain.
+/// Swapping the first two summands preserves their S3 equation and every
+/// later chain node; group lifting still checks every sign choice.
+pub fn sat_decompose_chained_s3_frobenius_orbit_ordered(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    target: &BinaryPoint,
+    m: usize,
+    limits: ChainS3Limits,
+) -> (Option<Vec<usize>>, ChainS3Stats) {
+    sat_decompose_chained_s3_with_domain(kc, fb, target, m, limits, true, true)
 }
 
 fn sat_decompose_chained_s3_with_domain(
@@ -8365,6 +8476,7 @@ fn sat_decompose_chained_s3_with_domain(
     m: usize,
     limits: ChainS3Limits,
     frobenius_orbits: bool,
+    order_first_pair: bool,
 ) -> (Option<Vec<usize>>, ChainS3Stats) {
     use crate::cryptanalysis::binary_semaev_chain_sat::{
         finite_domain_clause_count, frobenius_orbit_domain_size, ChainBuildError, ChainedS3Encoding,
@@ -8485,6 +8597,10 @@ fn sat_decompose_chained_s3_with_domain(
             enc.constrain_summands(&codes, limits.max_domain_clauses)
         };
         if installed != Ok(domain_clauses) {
+            stats.exhausted = true;
+            return (None, stats);
+        }
+        if order_first_pair && enc.order_first_pair(limits.max_variables).is_err() {
             stats.exhausted = true;
             return (None, stats);
         }
@@ -8772,6 +8888,7 @@ fn build_projected_signed_orbit_map(
     if let Some(map) = projected_signed_orbit_map_fast(kc, fb) {
         return map;
     }
+    let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
     projected_signed_orbit_map_slow(kc, fb)
 }
 
@@ -8846,8 +8963,6 @@ fn projected_signed_orbit_map_slow(
 /// Project one representative per signed orbit, deriving its labelled
 /// members from [h]pi^k(P) = pi^k([h]P) and [h](-P) = -[h]P. A stale or
 /// malformed orbit label falls back to the original pointwise operation.
-/// Test-only since the projected-map builder stopped calling it.
-#[cfg(test)]
 fn project_by_frobenius_orbits_generic(
     kc: &KoblitzCurve,
     fb: &FrobeniusFactorBase,
@@ -9520,6 +9635,35 @@ pub fn koblitz_index_calculus_dlp_with_factor_base_and_progress(
     koblitz_index_calculus_dlp_observed(kc, q, fb, opts, progress)
 }
 
+/// Draw a nonzero relation coefficient from the entire prime subgroup.
+///
+/// Keep the old `gen_range` path for a one-word order so frozen small-curve
+/// relation streams remain bit-for-bit unchanged.  A wider order is sampled
+/// by masked rejection; taking its low limb would silently restrict the
+/// relation workload to a different coefficient distribution.
+fn sample_relation_scalar(r: &BigUint, rng: &mut StdRng) -> BigUint {
+    if r.bits() <= 64 {
+        let word = r.to_u64_digits().first().copied().unwrap_or(1).max(2);
+        return BigUint::from(rng.gen_range(1..word));
+    }
+    let bits = r.bits();
+    let mut bytes = vec![0u8; bits.div_ceil(8) as usize];
+    let high_bits = bits % 8;
+    let high_mask = if high_bits == 0 {
+        u8::MAX
+    } else {
+        (1u8 << high_bits) - 1
+    };
+    loop {
+        rng.fill_bytes(&mut bytes);
+        *bytes.last_mut().expect("nonzero subgroup order") &= high_mask;
+        let candidate = BigUint::from_bytes_le(&bytes);
+        if !candidate.is_zero() && &candidate < r {
+            return candidate;
+        }
+    }
+}
+
 fn koblitz_index_calculus_dlp_observed(
     kc: &KoblitzCurve,
     q: &BinaryPoint,
@@ -9607,7 +9751,9 @@ fn koblitz_index_calculus_dlp_observed(
     };
     if matches!(
         opts.strategy,
-        DecompositionStrategy::ChainedS3 | DecompositionStrategy::ChainedS3FrobeniusOrbit
+        DecompositionStrategy::ChainedS3
+            | DecompositionStrategy::ChainedS3FrobeniusOrbit
+            | DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered
     ) && (!(5..=6).contains(&opts.m)
         || !fb.uses_ambient_basis()
         || opts.chain_s3_limits.max_variables == 0
@@ -9897,6 +10043,12 @@ fn koblitz_index_calculus_dlp_observed(
                         target,
                         opts.m,
                         opts.chain_s3_limits,
+                    );
+                    RelationAttemptOutcome::ChainedS3(idxs, stats)
+                }
+                DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered => {
+                    let (idxs, stats) = sat_decompose_chained_s3_frobenius_orbit_ordered(
+                        kc, fb, target, opts.m, opts.chain_s3_limits,
                     );
                     RelationAttemptOutcome::ChainedS3(idxs, stats)
                 }
@@ -11658,6 +11810,12 @@ fn decompose_once(
                 target,
                 opts.m,
                 opts.chain_s3_limits,
+            );
+            PdpAttempt::chained(points, stats)
+        }
+        DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered => {
+            let (points, stats) = sat_decompose_chained_s3_frobenius_orbit_ordered(
+                kc, fb, target, opts.m, opts.chain_s3_limits,
             );
             PdpAttempt::chained(points, stats)
         }
@@ -13747,6 +13905,39 @@ mod tests {
     use crate::cryptanalysis::koblitz_groebner::build_decomposition_system;
 
     #[test]
+    fn relation_scalar_sampler_preserves_one_word_stream() {
+        for (seed, order) in [(0, 65537u64), (1, 1_000_003), (5, u64::MAX - 58)] {
+            let mut sampler = StdRng::seed_from_u64(seed);
+            let mut reference = StdRng::seed_from_u64(seed);
+            let r = BigUint::from(order);
+            for _ in 0..128 {
+                assert_eq!(
+                    sample_relation_scalar(&r, &mut sampler),
+                    BigUint::from(reference.gen_range(1..order))
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn relation_scalar_sampler_covers_full_m83_order_reproducibly() {
+        let r = BigUint::parse_bytes(b"2417851639230796216685689", 10).unwrap();
+        assert!(r.bits() > 64);
+        let mut saw_high_limb = false;
+        for seed in [0, 1, 5, 0x83] {
+            let mut first = StdRng::seed_from_u64(seed);
+            let mut replay = StdRng::seed_from_u64(seed);
+            for _ in 0..128 {
+                let value = sample_relation_scalar(&r, &mut first);
+                assert!(value > BigUint::zero() && value < r);
+                saw_high_limb |= value.bits() > 64;
+                assert_eq!(value, sample_relation_scalar(&r, &mut replay));
+            }
+        }
+        assert!(saw_high_limb, "the m=83 stream never reached a high limb");
+    }
+
+    #[test]
     fn rho_preparation_preserves_walk_and_charges() {
         for a in [0, 1] {
             let curve = KoblitzCurve::new(a, 9).unwrap();
@@ -15311,7 +15502,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("N83 generator must be affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x))
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()])
             .expect("complete signed orbit");
         let expected: Vec<_> = fb
             .points
@@ -15336,7 +15527,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("N83 generator must be affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x))
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()])
             .expect("complete signed orbit");
         let target = kc.mul(kc.generator(), &BigUint::from(7u32));
         let opts = KoblitzIcOptions {
@@ -15376,7 +15567,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("generator must be affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x)).unwrap();
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
         let index = fb.index_map();
         let field = FieldStructure::new(kc.n, &kc.curve.irreducible);
         let target = kc.mul(&fb.points[0], &BigUint::from(3u32));
@@ -15458,7 +15649,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("generator is affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x)).unwrap();
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
         for m in [5usize, 6] {
             let target = kc.mul(&fb.points[0], &BigUint::from(m as u32));
             let (found, stats) = sat_decompose_chained_s3(
@@ -15562,18 +15753,23 @@ mod tests {
         };
         for m in [5usize, 6] {
             let target = kc.mul(&fb.points[0], &BigUint::from(m as u32));
-            let (found, stats) =
-                sat_decompose_chained_s3_frobenius_orbit(&kc, &fb, &target, m, limits);
-            let indices = found.unwrap_or_else(|| panic!("m={m}: {stats:?}"));
-            assert_eq!(indices.len(), m);
-            assert_eq!(
-                indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
-                    kc.add(&acc, &fb.points[index])
-                }),
-                target
-            );
-            assert!(!stats.exhausted);
-            assert_eq!(stats.invalid_models, 0);
+            for ordered in [false, true] {
+                let (found, stats) = if ordered {
+                    sat_decompose_chained_s3_frobenius_orbit_ordered(&kc, &fb, &target, m, limits)
+                } else {
+                    sat_decompose_chained_s3_frobenius_orbit(&kc, &fb, &target, m, limits)
+                };
+                let indices = found.unwrap_or_else(|| panic!("m={m}, ordered={ordered}: {stats:?}"));
+                assert_eq!(indices.len(), m);
+                assert_eq!(
+                    indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
+                        kc.add(&acc, &fb.points[index])
+                    }),
+                    target
+                );
+                assert!(!stats.exhausted);
+                assert_eq!(stats.invalid_models, 0);
+            }
         }
         let mut incomplete = fb.clone();
         incomplete.signed_orbits[0].clear();
@@ -15606,7 +15802,7 @@ mod tests {
         let BinaryPoint::Affine { x, .. } = kc.generator() else {
             panic!("generator is affine");
         };
-        let fb = build_explicit_frobenius_orbit_factor_base(&kc, std::slice::from_ref(x)).unwrap();
+        let fb = build_explicit_frobenius_orbit_factor_base(&kc, &[x.clone()]).unwrap();
         let known = BigUint::from(3u32) % &kc.subgroup_order;
         let target = kc.mul(kc.generator(), &known);
         let opts = KoblitzIcOptions {
@@ -19181,6 +19377,99 @@ mod tests {
             missed += usize::from(expected.is_none());
         }
         assert!(missed > 0);
+    }
+
+    /// lit2026 W5: the gate-first order (`KIC_F6_GATE_FIRST`) and the
+    /// lane-batched roots (`KIC_F4_LANES`) leave every decomposition as it
+    /// was — relation, exhaustion, reductions, splits, propagations,
+    /// refutations, oracle calls and group additions — on inherited F4 and
+    /// on F6-IC with the pair index, at a 35-variable cell where the root
+    /// is a single degree-3 rung.  Gate-first never costs stage units.
+    #[test]
+    fn w5_gate_first_and_lane_roots_keep_every_decomposition() {
+        use crate::cryptanalysis::koblitz_groebner::{
+            clear_lane_roots, f4_word_ops_thread, gate_first_skips_thread, lane_roots_pending,
+            set_gate_first,
+        };
+        let kc = KoblitzCurve::new(1, 17).unwrap();
+        let fb = build_standard_subspace_factor_base(&kc, 6).unwrap();
+        let index_of = fb.index_map();
+        let st = FieldStructure::new(kc.n, &kc.curve.irreducible);
+        let engine = SolverEngine::InheritedF4 { max_degree: 3 };
+        let targets: Vec<BinaryPoint> = (1..=4u32)
+            .map(|k| kc.mul(kc.generator(), &BigUint::from(k)))
+            .collect();
+        type Key = (
+            Option<Vec<usize>>,
+            bool,
+            usize,
+            usize,
+            usize,
+            usize,
+            u64,
+            u64,
+            u64,
+            u64,
+        );
+        let key = |r: (Option<Vec<usize>>, SolveStats)| -> Key {
+            let s = r.1;
+            (
+                r.0,
+                s.exhausted,
+                s.reductions,
+                s.splits,
+                s.propagations,
+                s.infeasible_branches,
+                s.geometric_refutations as u64,
+                s.geometric_witnesses as u64,
+                s.geometric_oracle_calls,
+                s.geometric_group_additions,
+            )
+        };
+        for f6 in [false, true] {
+            let run = |t: &BinaryPoint| {
+                if f6 {
+                    groebner_decompose_f6_ic_pair_index(
+                        &kc, &fb, &index_of, &st, t, 3, engine, 20_000,
+                    )
+                } else {
+                    groebner_decompose(&kc, &fb, &index_of, &st, t, 3, engine, 20_000)
+                }
+            };
+            let measured = |t: &BinaryPoint| {
+                let x0 = f4_word_ops_thread();
+                let k = key(run(t));
+                (k, f4_word_ops_thread() - x0)
+            };
+            set_gate_first(Some(false));
+            // Warm the per-thread caches (the pair-sum index is built on a
+            // first visit and reused), so every pass below starts alike.
+            for t in &targets {
+                let _ = run(t);
+            }
+            let base: Vec<(Key, u64)> = targets.iter().map(measured).collect();
+            set_gate_first(Some(true));
+            let skips0 = gate_first_skips_thread();
+            let first: Vec<(Key, u64)> = targets.iter().map(measured).collect();
+            let skips = gate_first_skips_thread().0 - skips0.0;
+            set_gate_first(Some(false));
+            for (i, (a, b)) in base.iter().zip(&first).enumerate() {
+                assert_eq!(a.0, b.0, "gate-first, f6={f6}, target {i}");
+                assert!(b.1 <= a.1, "gate-first costs more, f6={f6}, target {i}");
+            }
+            if !f6 {
+                assert_eq!(skips, 0, "no gate, nothing to skip");
+            }
+            clear_lane_roots();
+            let (stats, placed) = prebuild_decomposition_roots(&kc, &fb, &st, &targets, 3, engine);
+            assert_eq!(placed, targets.len(), "every root lane-built: {stats:?}");
+            let lanes: Vec<Key> = targets.iter().map(|t| key(run(t))).collect();
+            assert_eq!(lane_roots_pending(), 0, "every lane-built root consumed");
+            for (i, (a, b)) in base.iter().zip(&lanes).enumerate() {
+                assert_eq!(&a.0, b, "lanes, f6={f6}, target {i}");
+            }
+        }
+        set_gate_first(None);
     }
 
     #[test]

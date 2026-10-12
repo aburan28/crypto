@@ -383,7 +383,6 @@ pub fn find_roots_fp_fast(coeffs: &[FieldElement], p: &BigUint) -> Vec<FieldElem
     // Monic copy for the polynomial arithmetic.
     let lead_inv = f[deg].inv().expect("nonzero lead is invertible mod p");
     let monic: Vec<FieldElement> = f.iter().map(|c| c.mul(&lead_inv)).collect();
-    let _deg = monic.len() - 1;
 
     // X^p mod f(X) by repeated squaring.
     let x_pow_p = poly_pow_x_mod(&monic, p);

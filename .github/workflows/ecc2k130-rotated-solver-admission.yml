@@ -2,8 +2,10 @@ name: ECC2K130 rotated solver admission replay
 
 on:
   push:
+    branches: [main]
     paths:
       - '.github/workflows/ecc2k130-rotated-solver-admission.yml'
+      - '.github/scripts/*frozen-workflow-check*'
       - 'research/notes/ecc2k130/rotated_solver_admission_replay_20260925/**'
       - 'research/notes/ecc2k130/rotated_solver_admission_20260925/**'
       - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/raw.tar.gz'
@@ -15,7 +17,13 @@ on:
       - 'src/cryptanalysis/koblitz_index_calculus.rs'
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - '.github/workflows/ecc2k130-rotated-solver-admission.yml'
+      - '.github/scripts/*frozen-workflow-check*'
       - 'research/notes/ecc2k130/rotated_solver_admission_replay_20260925/**'
       - 'research/notes/ecc2k130/rotated_solver_admission_20260925/**'
       - 'research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/raw.tar.gz'
@@ -29,23 +37,42 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   historical-and-current-interface:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify old and new preregistration bytes
-        run: python3 research/notes/ecc2k130/rotated_solver_admission_replay_20260925/replay.py --mode freeze
-      - name: Replay original admission receipt from pinned historical bytes
-        run: python3 research/notes/ecc2k130/rotated_solver_admission_replay_20260925/replay.py --mode historical
-      - name: Check fail-closed historical/current separation
-        run: python3 -m unittest discover -s research/notes/ecc2k130/rotated_solver_admission_replay_20260925 -p 'test_replay.py' -v
-      - name: Check current generic and reused solver-interface contract
-        run: python3 research/notes/ecc2k130/rotated_solver_admission_replay_20260925/replay.py --mode current
+      - name: Preserve frozen metadata and verify historical and current-source controls
+        run: |
+          node .github/scripts/frozen-workflow-check.mjs \
+            --workflow .github/workflows/ecc2k130-rotated-solver-admission.yml \
+            --revision aa0cee7bd1769222e5706e61b64478d5aad6d573 \
+            --manifest research/notes/ecc2k130/rotated_solver_admission_replay_20260925/FROZEN.json \
+            --root research/notes/ecc2k130/rotated_solver_admission_replay_20260925 \
+            --root research/notes/ecc2k130/rotated_solver_admission_20260925 \
+            --root src/cryptanalysis/koblitz_groebner.rs \
+            --root src/cryptanalysis/polynomial_reuse.rs \
+            --root src/cryptanalysis/koblitz_index_calculus.rs \
+            --root research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/raw.tar.gz \
+            --root research/notes/ecc2k130/rotated_m56_export_gate_20260925/RESULT.md \
+            --root research/notes/ecc2k130/rotated_s3_fibre_theorem_20260925/RESULT.md \
+            --root research/notes/ecc2k130/rotated_s3_candidate_20260925/evidence/n13-m5/producer/result.json \
+            --root research/notes/ecc2k130/rotated_s3_candidate_20260925/evidence/n19-m6/producer/result.json \
+            -- bash -e -c '
+              python3 research/notes/ecc2k130/rotated_solver_admission_replay_20260925/replay.py --mode freeze
+              python3 research/notes/ecc2k130/rotated_solver_admission_replay_20260925/replay.py --mode historical
+              python3 -m unittest discover -s research/notes/ecc2k130/rotated_solver_admission_replay_20260925 -p "test_replay.py" -v
+              python3 research/notes/ecc2k130/rotated_solver_admission_replay_20260925/replay.py --mode current
+            '
       - name: Regress n19-m6 width rejection and inconclusive status
         run: cargo test --lib pdp_admission_n19_m6_d2_layout_is_unsupported_not_refuted -- --nocapture
       - name: Regress unsupported-input status across solver frontends
