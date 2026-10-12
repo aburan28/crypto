@@ -78,15 +78,39 @@
 #define RF_BOUNDS __launch_bounds__(RF_BLOCK)
 #endif
 
+/* `rc` and the `cleanup` label live in run_device.  Every failure jumps
+ * there so device buffers and events allocated earlier are released. */
 #define CU(call)                                                                   \
     do {                                                                           \
         cudaError_t e_ = (call);                                                   \
         if (e_ != cudaSuccess) {                                                   \
             std::fprintf(stderr, "CUDA error %s at %s:%d: %s\n", #call, __FILE__,  \
                          __LINE__, cudaGetErrorString(e_));                        \
-            return RF_ERR_CUDA;                                                    \
+            rc = RF_ERR_CUDA;                                                      \
+            goto cleanup;                                                          \
         }                                                                          \
     } while (0)
+
+/* Publish the pointer only after a successful alloc, so cleanup never
+ * frees a handle a failed call may have written. */
+template <class T>
+static cudaError_t rf_cu_alloc(T **dst, size_t bytes) {
+    void *p = nullptr;
+    cudaError_t e = cudaMalloc(&p, bytes);
+    if (e == cudaSuccess) *dst = static_cast<T *>(p);
+    return e;
+}
+
+static cudaError_t rf_cu_event(cudaEvent_t *dst) {
+    cudaEvent_t ev = nullptr;
+    cudaError_t e = cudaEventCreate(&ev);
+    if (e == cudaSuccess) *dst = ev;
+    return e;
+}
+
+__device__ __forceinline__ uint64_t rf_global_tid() {
+    return (uint64_t)blockIdx.x * (uint64_t)blockDim.x + threadIdx.x;
+}
 
 /* ------------------------------------------------------------------ *
  * Kernels
@@ -95,8 +119,7 @@
 /* Global sorted table: every thread probes global memory. */
 template <class F, int CHUNK>
 __global__ void RF_BOUNDS k_decompose_sorted(DecompArgs<F> a, SortedTable table) {
-    uint32_t tid = blockIdx.x * blockDim.x + threadIdx.x;
-    rf_decompose_thread<F, SortedTable, CHUNK>(a, table, tid);
+    rf_decompose_thread<F, SortedTable, CHUNK>(a, table, rf_global_tid());
 }
 
 /* Shared-memory hash table: the block copies the table (keys + values)
@@ -116,16 +139,14 @@ __global__ void RF_BOUNDS k_decompose_shared_hash(DecompArgs<F> a, HashTable gta
     table.keys = s_keys;
     table.vals = s_vals;
     table.mask = gtable.mask;
-    uint32_t tid = blockIdx.x * blockDim.x + threadIdx.x;
-    rf_decompose_thread<F, HashTable, CHUNK>(a, table, tid);
+    rf_decompose_thread<F, HashTable, CHUNK>(a, table, rf_global_tid());
 }
 
 /* Global hash table (no staging) for factor bases too large for shared
  * memory but where the caller explicitly asked for hashing. */
 template <class F, int CHUNK>
 __global__ void RF_BOUNDS k_decompose_global_hash(DecompArgs<F> a, HashTable table) {
-    uint32_t tid = blockIdx.x * blockDim.x + threadIdx.x;
-    rf_decompose_thread<F, HashTable, CHUNK>(a, table, tid);
+    rf_decompose_thread<F, HashTable, CHUNK>(a, table, rf_global_tid());
 }
 
 /* ------------------------------------------------------------------ *
@@ -141,6 +162,14 @@ static int run_device(const typename F::ctx &f,
     typedef typename F::elt elt;
     if (!rf::chunk_ok(chunk)) return RF_ERR_BAD_CHUNK;
 
+    /* gridDim.x maximum is 2^31-1.  The (target, slice) product is 2^32
+     * at the batch cited in the note, and a uint32 count wraps to an
+     * empty grid that still returns RF_OK. */
+    const uint64_t total = rf_thread_count(n_targets, n_fb, (int)chunk);
+    const uint64_t grid64 = (total + (uint64_t)RF_BLOCK - 1) / (uint64_t)RF_BLOCK;
+    if (grid64 == 0 || grid64 > 2147483647ull) return RF_ERR_BAD_ARG;
+    const unsigned int grid = (unsigned int)grid64;
+
     /* Table (built on the host; the view below points into device
      * copies of its arrays). */
     rf::SortedTableHost sorted;
@@ -148,17 +177,24 @@ static int run_device(const typename F::ctx &f,
     if (lookup == RF_LOOKUP_SORTED) sorted = rf::build_sorted<F>(f, fb_x, n_fb);
     else hash = rf::build_hash<F>(f, fb_x, n_fb);
 
+    int rc = RF_OK;
     elt *d_fbx = nullptr, *d_fby = nullptr, *d_tx = nullptr, *d_ty = nullptr;
     uint64_t *d_keys = nullptr;
     uint32_t *d_idx = nullptr, *d_cnt = nullptr;
     rf_relation *d_out = nullptr;
+    cudaEvent_t e0 = nullptr, e1 = nullptr;
+    SortedTable sview{};
+    HashTable hview{};
+    DecompArgs<F> a{};
+    float ms = 0;
+    uint32_t found = 0, nw = 0, hcap = 0;
 
-    CU(cudaMalloc(&d_fbx, n_fb * sizeof(elt)));
-    CU(cudaMalloc(&d_fby, n_fb * sizeof(elt)));
-    CU(cudaMalloc(&d_tx, n_targets * sizeof(elt)));
-    CU(cudaMalloc(&d_ty, n_targets * sizeof(elt)));
-    CU(cudaMalloc(&d_cnt, sizeof(uint32_t)));
-    CU(cudaMalloc(&d_out, (cap ? cap : 1) * sizeof(rf_relation)));
+    CU(rf_cu_alloc(&d_fbx, n_fb * sizeof(elt)));
+    CU(rf_cu_alloc(&d_fby, n_fb * sizeof(elt)));
+    CU(rf_cu_alloc(&d_tx, n_targets * sizeof(elt)));
+    CU(rf_cu_alloc(&d_ty, n_targets * sizeof(elt)));
+    CU(rf_cu_alloc(&d_cnt, sizeof(uint32_t)));
+    CU(rf_cu_alloc(&d_out, (cap ? cap : 1) * sizeof(rf_relation)));
     CU(cudaMemcpy(d_fbx, fb_x, n_fb * sizeof(elt), cudaMemcpyHostToDevice));
     CU(cudaMemcpy(d_fby, fb_y, n_fb * sizeof(elt), cudaMemcpyHostToDevice));
     CU(cudaMemcpy(d_tx, tx, n_targets * sizeof(elt), cudaMemcpyHostToDevice));
@@ -167,35 +203,28 @@ static int run_device(const typename F::ctx &f,
 
     /* Device views: the same POD structs the kernels take, pointing at
      * device copies of the host-built arrays. */
-    SortedTable sview{};
-    HashTable hview{};
     if (lookup == RF_LOOKUP_SORTED) {
-        CU(cudaMalloc(&d_keys, n_fb * sizeof(uint64_t)));
-        CU(cudaMalloc(&d_idx, n_fb * sizeof(uint32_t)));
+        CU(rf_cu_alloc(&d_keys, n_fb * sizeof(uint64_t)));
+        CU(rf_cu_alloc(&d_idx, n_fb * sizeof(uint32_t)));
         CU(cudaMemcpy(d_keys, sorted.keys.data(), n_fb * sizeof(uint64_t), cudaMemcpyHostToDevice));
         CU(cudaMemcpy(d_idx, sorted.idx.data(), n_fb * sizeof(uint32_t), cudaMemcpyHostToDevice));
         sview.keys = d_keys; sview.idx = d_idx; sview.n = n_fb;
     } else {
-        uint32_t hcap = hash.capacity();
-        CU(cudaMalloc(&d_keys, hcap * sizeof(uint64_t)));
-        CU(cudaMalloc(&d_idx, hcap * sizeof(uint32_t)));
+        hcap = hash.capacity();
+        CU(rf_cu_alloc(&d_keys, hcap * sizeof(uint64_t)));
+        CU(rf_cu_alloc(&d_idx, hcap * sizeof(uint32_t)));
         CU(cudaMemcpy(d_keys, hash.keys.data(), hcap * sizeof(uint64_t), cudaMemcpyHostToDevice));
         CU(cudaMemcpy(d_idx, hash.vals.data(), hcap * sizeof(uint32_t), cudaMemcpyHostToDevice));
         hview.keys = d_keys; hview.vals = d_idx; hview.mask = hash.mask;
     }
 
-    DecompArgs<F> a;
     a.f = f;
     a.fb_x = d_fbx; a.fb_y = d_fby; a.n_fb = n_fb;
     a.t_x = d_tx; a.t_y = d_ty; a.n_targets = n_targets;
     a.out = d_out; a.out_count = d_cnt; a.out_cap = cap;
 
-    uint32_t total = rf_thread_count(a, (int)chunk);
-    uint32_t grid = (total + RF_BLOCK - 1) / RF_BLOCK;
-
-    cudaEvent_t e0, e1;
-    CU(cudaEventCreate(&e0));
-    CU(cudaEventCreate(&e1));
+    CU(rf_cu_event(&e0));
+    CU(rf_cu_event(&e1));
     CU(cudaEventRecord(e0));
 
     /* Dispatch on (lookup, chunk).  Device views are passed by value. */
@@ -211,26 +240,29 @@ static int run_device(const typename F::ctx &f,
         case 16: RF_LAUNCH(16) break;
         case 32: RF_LAUNCH(32) break;
         case 64: RF_LAUNCH(64) break;
-        default: return RF_ERR_BAD_CHUNK;
+        default: rc = RF_ERR_BAD_CHUNK; goto cleanup;
     }
 #undef RF_LAUNCH
     CU(cudaGetLastError());
     CU(cudaEventRecord(e1));
     CU(cudaEventSynchronize(e1));
-    float ms = 0;
     CU(cudaEventElapsedTime(&ms, e0, e1));
     *seconds = ms / 1000.0;
 
-    uint32_t found = 0;
     CU(cudaMemcpy(&found, d_cnt, sizeof(uint32_t), cudaMemcpyDeviceToHost));
     *n_found = found;
-    uint32_t nw = found < cap ? found : cap;
+    nw = found < cap ? found : cap;
     if (nw) CU(cudaMemcpy(out, d_out, nw * sizeof(rf_relation), cudaMemcpyDeviceToHost));
 
+cleanup:
+    /* A failed launch or memcpy leaves a sticky runtime error.  Later
+     * calls then return that error and do not free, so clear it first. */
+    cudaGetLastError();
     cudaFree(d_fbx); cudaFree(d_fby); cudaFree(d_tx); cudaFree(d_ty);
     cudaFree(d_keys); cudaFree(d_idx); cudaFree(d_cnt); cudaFree(d_out);
-    cudaEventDestroy(e0); cudaEventDestroy(e1);
-    return RF_OK;
+    if (e0) cudaEventDestroy(e0);
+    if (e1) cudaEventDestroy(e1);
+    return rc;
 }
 
 extern "C" int rf_cuda_decompose64(const Fp64Ctx *f,

@@ -208,17 +208,27 @@ RF_HD void rf_emit(rf_relation *out, uint32_t *ctr, uint32_t cap,
     }
 }
 
+/* 64-bit: n_targets and ceil(n_fb / chunk) are independent uint32
+ * counts, and their product is exactly 2^32 at ~2^20 targets,
+ * |F| = 2^16, chunk = 16.  A uint32 multiply wraps to 0 there. */
+RF_HD uint64_t rf_n_chunks(uint32_t n_fb, int chunk) {
+    return ((uint64_t)n_fb + (uint64_t)chunk - 1) / (uint64_t)chunk;
+}
+
+RF_HD uint64_t rf_thread_count(uint32_t n_targets, uint32_t n_fb, int chunk) {
+    return (uint64_t)n_targets * rf_n_chunks(n_fb, chunk);
+}
+
 /* ------------------------------------------------------------------ *
  * The per-thread oracle.  CHUNK must be a multiple of 8 and <= 64.
  * ------------------------------------------------------------------ */
 template <class F, class T, int CHUNK>
-RF_HD void rf_decompose_thread(const DecompArgs<F> &a, const T &table, uint32_t tid) {
+RF_HD void rf_decompose_thread(const DecompArgs<F> &a, const T &table, uint64_t tid) {
     typedef typename F::elt elt;
     const typename F::ctx &f = a.f;
-    const uint32_t n_chunks = (a.n_fb + CHUNK - 1) / CHUNK;
-    if (tid >= a.n_targets * n_chunks) return;
-    const uint32_t k = tid % a.n_targets;
-    const uint32_t i0 = (tid / a.n_targets) * CHUNK;
+    if (tid >= rf_thread_count(a.n_targets, a.n_fb, CHUNK)) return;
+    const uint32_t k = (uint32_t)(tid % (uint64_t)a.n_targets);
+    const uint32_t i0 = (uint32_t)(tid / (uint64_t)a.n_targets) * (uint32_t)CHUNK;
     const uint32_t cnt = (a.n_fb - i0 < (uint32_t)CHUNK) ? (a.n_fb - i0) : (uint32_t)CHUNK;
 
     const elt xr = a.t_x[k];
@@ -289,11 +299,6 @@ RF_HD void rf_decompose_thread(const DecompArgs<F> &a, const T &table, uint32_t 
             }
         }
     }
-}
-
-template <class F>
-RF_HD uint32_t rf_thread_count(const DecompArgs<F> &a, int chunk) {
-    return a.n_targets * ((a.n_fb + chunk - 1) / chunk);
 }
 
 #endif /* GPU_ROOTFIND_ROOTFIND_CUH */

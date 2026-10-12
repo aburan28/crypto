@@ -97,25 +97,25 @@ inline std::vector<U256x64> to_mont256(const Fp256Ctx &f, const uint64_t *limbs,
  * order is irrelevant (the Rust harness compares sets). */
 template <class F, class T, int CHUNK>
 void emulate(const DecompArgs<F> &a, const T &table, unsigned hw_threads = 0) {
-    const uint32_t total = rf_thread_count(a, CHUNK);
+    const uint64_t total = rf_thread_count(a.n_targets, a.n_fb, CHUNK);
     if (hw_threads == 0) hw_threads = std::max(1u, std::thread::hardware_concurrency());
     if (hw_threads > 1 && total >= 4096) {
         std::vector<std::thread> pool;
-        std::atomic<uint32_t> next{0};
-        const uint32_t grain = 1024;
+        std::atomic<uint64_t> next{0};
+        const uint64_t grain = 1024;
         for (unsigned h = 0; h < hw_threads; h++) {
             pool.emplace_back([&]() {
                 for (;;) {
-                    uint32_t start = next.fetch_add(grain);
+                    uint64_t start = next.fetch_add(grain);
                     if (start >= total) break;
-                    uint32_t end = std::min(total, start + grain);
-                    for (uint32_t tid = start; tid < end; tid++) rf_decompose_thread<F, T, CHUNK>(a, table, tid);
+                    uint64_t end = std::min(total, start + grain);
+                    for (uint64_t tid = start; tid < end; tid++) rf_decompose_thread<F, T, CHUNK>(a, table, tid);
                 }
             });
         }
         for (auto &th : pool) th.join();
     } else {
-        for (uint32_t tid = 0; tid < total; tid++) rf_decompose_thread<F, T, CHUNK>(a, table, tid);
+        for (uint64_t tid = 0; tid < total; tid++) rf_decompose_thread<F, T, CHUNK>(a, table, tid);
     }
 }
 
