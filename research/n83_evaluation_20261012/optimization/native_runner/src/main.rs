@@ -770,7 +770,7 @@ fn ic_batch(p: &Protocol, root: &Path) -> Result<i32> {
         let recovered = r.get("recovered_scalar").and_then(scalar);
         let correct = recovered.as_deref() == Some(f.expected_scalar.as_str());
         rows.push(json!({"target_id":f.id,"target":f.point,"target_ms":r["target_ms"],"group_verified":r["group_verified"],"recovered_scalar":recovered,"parent_known_answer_scalar_match":correct,
-            "status":if r.is_null(){"TARGET_NOT_COMPLETED"}else if !correct{"WRONG_ANSWER"}else if r["group_verified"]==true{"COMPLETED_VERIFIED"}else{"SEMANTIC_VALIDATION_FAILED"},"raw_target_record":r}));
+            "status":if r.is_null(){"TARGET_NOT_COMPLETED"}else if recovered.is_none(){"SEMANTIC_VALIDATION_FAILED"}else if !correct{"WRONG_ANSWER"}else if r["group_verified"]==true{"COMPLETED_VERIFIED"}else{"SEMANTIC_VALIDATION_FAILED"},"raw_target_record":r}));
     }
     let complete = receipt["status"] == "COMPLETED_VERIFIED"
         && receipt["semantic"]["valid"] == true
