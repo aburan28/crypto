@@ -25,7 +25,9 @@
   extension, and minimality of the multiplicative order. Their axiom audit
   reports only `propext`, `Classical.choice`, and `Quot.sound`; the
   finite-field roots-of-unity identification remains an explicitly open
-  bridge in [PROOF_MAP.md](PROOF_MAP.md).
+  bridge in [PROOF_MAP.md](PROOF_MAP.md). `lake env leanchecker --fresh
+  --verbose MinimalPairingField` also exited successfully with output
+  `replaying MinimalPairingField with --fresh`.
 - The Sites source helper pushed final commit
   `e4ffc9e3eab84c56b1cb2b977c9d9598dfadb528`, packaged
   `/Volumes/SSD990/llm/tmp/weakcurves-static-v13.tar.gz`, saved version 13
