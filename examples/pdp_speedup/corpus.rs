@@ -39,11 +39,11 @@ pub struct Record {
     pub rational: Vec<bool>,
 }
 
-pub fn make_targets(rung: &Rung) -> Vec<Target> {
+pub fn make_targets(rung: &Rung, n_uniform: usize, n_planted: usize) -> Vec<Target> {
     let mut rng = SplitMix64(SEED_BASE + rung.l as u64);
     let mut out = Vec::new();
     // Uniform: a uniformly random abscissa among those that lift to a rational point.
-    while out.len() < N_UNIFORM {
+    while out.len() < n_uniform {
         let x = rng.next() & rung.mask();
         if x == 0 {
             continue;
@@ -63,7 +63,7 @@ pub fn make_targets(rung: &Rung) -> Vec<Target> {
     }
     // Planted: R = P₁ + P₂ + P₃ with every abscissa in V.
     let mut planted = 0u32;
-    while (planted as usize) < N_PLANTED {
+    while (planted as usize) < n_planted {
         let mut pts = Vec::new();
         let mut xs = [0u64; 3];
         let mut ok = true;
@@ -296,8 +296,13 @@ pub fn brute_roots(rung: &Rung, xr: u64, threads: usize) -> Vec<[u64; 3]> {
     all
 }
 
-pub fn build_records(rung: &Rung, threads: usize) -> Vec<Record> {
-    make_targets(rung)
+pub fn build_records(
+    rung: &Rung,
+    threads: usize,
+    n_uniform: usize,
+    n_planted: usize,
+) -> Vec<Record> {
+    make_targets(rung, n_uniform, n_planted)
         .into_iter()
         .map(|t| {
             let roots = all_roots(rung, t.xr, threads);

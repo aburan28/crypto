@@ -202,7 +202,8 @@ days (before PS-7).
 | Scope every task with a frozen protocol | **verified complete** by this PR (§3 and `protocols/`) |
 | Baseline recorded | **verified complete** by PS-0 ([`baseline_v1/`](baseline_v1/README.md)): corpus, digests, A/A, counts; supersedes §2 |
 | PS-1 | **partial**: bit-degree, exactness theorem, group-law formulation and gate counts done; identity certificates blocked (schema is `F_p`-only), two candidate formulations not attempted ([`ps1_algebra/`](ps1_algebra/README.md)) |
-| PS-2 to PS-7, PS-3b | **not attempted** (each updates this row when it lands) |
+| PS-2 | **partial**: scalar group-law kernel with identical digests, A/A-qualified timing (0.067–0.12 of the baseline per pair, 0.016–0.031 per target), gate count and hashed program; the library module and the incremental-update arm are **not** built ([`ps2_scalar/`](ps2_scalar/README.md)) |
+| PS-3 to PS-7, PS-3b | **not attempted** (each updates this row when it lands) |
 | Any speedup claim | **none made** |
 
 ## 9. Graphs and canonical artifacts checked
