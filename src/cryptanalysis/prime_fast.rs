@@ -1626,7 +1626,7 @@ mod tests {
             assert!(
                 found.1 == frozen.1 || found.1 == (fc.f.p - frozen.1) % fc.f.p,
                 "generated point must match the frozen generator up to sign"
-            );
+            );;;;
             let (x, y) = gen.canonical(gg);
             let (expected_x, expected_y) = fc.canonical(g);
             assert_eq!(

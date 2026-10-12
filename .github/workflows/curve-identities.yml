@@ -24,6 +24,7 @@ concurrency:
 jobs:
   metadata:
     runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 360 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

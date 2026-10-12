@@ -1,0 +1,56 @@
+{
+  "additional_charged_seconds": 900,
+  "arms": [
+    {
+      "arm": "ordered",
+      "base_import_ms_L0": 4376.335836,
+      "cgroup_peak_bytes": 518672384,
+      "conflicts": 1000,
+      "container_cleanup_verified": true,
+      "domain_encoding": "frobenius_orbit_phase_ordered_first_pair",
+      "models": 0,
+      "outer_wall_ms_L0": 80703.90591700198,
+      "rank": 0,
+      "relations": 0,
+      "selected_object_sha256": "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a",
+      "status": "UNKNOWN_solver_cap",
+      "worker_solver_ms_L0": 74972.00924300001
+    },
+    {
+      "arm": "unrestricted",
+      "base_import_ms_L0": 4703.770543,
+      "cgroup_peak_bytes": 506798080,
+      "conflicts": 1000,
+      "container_cleanup_verified": true,
+      "domain_encoding": "frobenius_orbit_phase",
+      "models": 0,
+      "outer_wall_ms_L0": 53393.67887499975,
+      "rank": 0,
+      "relations": 0,
+      "selected_object_sha256": "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a",
+      "status": "UNKNOWN_solver_cap",
+      "worker_solver_ms_L0": 47403.458438
+    }
+  ],
+  "binary_sha256": "b84cc4a6036ea8041362bf29fcf2388a9c0f9c73d8c4f92e376968d97d893b3b",
+  "build_wall_ms_L0": 147139.2426249986,
+  "cleanup_and_receipt_reserve_charged_seconds": 60,
+  "conservative_stage_charges_seconds": [
+    280,
+    280,
+    280
+  ],
+  "cumulative_charged_seconds": 10800,
+  "prior_charged_seconds": 9900,
+  "schema": "n83.ordered-first-pair-audit/v1",
+  "selected_best_total_runtime": null,
+  "selected_object_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851.jsonl.gz",
+  "solver_search_executed": true,
+  "source_commit": "b7f55cf1528f13419ba079711d3c817d764a7dae",
+  "status": "PASS_bounded_receipts_only",
+  "target": [
+    "6261116474805304534310590",
+    "4505575220639647215230954"
+  ],
+  "total_index_calculus_runtime_ms": null
+}
