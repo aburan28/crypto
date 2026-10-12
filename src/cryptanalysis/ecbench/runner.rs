@@ -833,9 +833,19 @@ pub fn read_record_lines(dir: &Path) -> Result<Vec<(String, Record)>, String> {
 /// semantics. This is for explicit evidence migrations; v1 protocol replay
 /// continues to use [`read_record_lines`].
 pub fn read_record_lines_exact(dir: &Path) -> Result<Vec<(String, Record)>, String> {
-    read_record_lines_with(dir, |line| {
-        serde_json::from_str(line).map_err(|error| error.to_string())
-    })
+    read_record_lines_with(dir, from_str_exact_floats)
+}
+
+fn from_str_exact_floats<T: serde::de::DeserializeOwned>(line: &str) -> Result<T, String> {
+    // Validate the complete typed shape first. In particular, serde's derived
+    // record visitors reject duplicate fields; Value alone would keep only the
+    // last occurrence. Discard the legacy f64 values from this pass.
+    let _: T = serde_json::from_str(line).map_err(|error| error.to_string())?;
+    // `arbitrary_precision` preserves the decimal token in Value until f64
+    // conversion. Direct `deserialize_f64` uses the legacy significand path.
+    let value: serde_json::Value =
+        serde_json::from_str(line).map_err(|error| error.to_string())?;
+    serde_json::from_value(value).map_err(|error| error.to_string())
 }
 
 fn read_record_lines_with(
@@ -859,4 +869,28 @@ pub fn read_session(dir: &Path) -> Result<Session, String> {
     let text = std::fs::read_to_string(dir.join("session.json"))
         .map_err(|e| format!("{}: {e}", dir.join("session.json").display()))?;
     serde_json::from_str(&text).map_err(|e| format!("session.json: {e}"))
+}
+
+#[cfg(test)]
+mod exact_record_reader_tests {
+    use super::from_str_exact_floats;
+    use serde::Deserialize;
+
+    #[derive(Deserialize)]
+    struct FloatFixture {
+        rho_s: f64,
+    }
+
+    #[test]
+    fn exact_reader_preserves_recorded_float_and_rejects_duplicate_fields() {
+        let line = r#"{"rho_s":0.37222665730402227}"#;
+        let parsed: FloatFixture = from_str_exact_floats(line).unwrap();
+        assert_eq!(
+            parsed.rho_s.to_bits(),
+            "0.37222665730402227".parse::<f64>().unwrap().to_bits()
+        );
+
+        let duplicate = r#"{"rho_s":0.37222665730402227,"rho_s":0.5}"#;
+        assert!(from_str_exact_floats::<FloatFixture>(duplicate).is_err());
+    }
 }

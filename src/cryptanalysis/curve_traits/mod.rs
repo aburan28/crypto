@@ -47,7 +47,7 @@ use std::collections::BTreeMap;
 
 use num_bigint::{BigInt, BigUint};
 use num_integer::Integer;
-use num_traits::{One, Signed, ToPrimitive, Zero};
+use num_traits::{One, Signed, Zero};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 

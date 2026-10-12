@@ -3213,27 +3213,13 @@ pub fn saturate_factor_base_two_torsion(
     if kc.mul(&t, &kc.cofactor) != BinaryPoint::Infinity {
         return None;
     }
-    // Translate every base point by T in one Montgomery batch (a single
-    // inversion for the whole base instead of one slow inversion per
-    // point).  Results are bit-identical to the per-point adds, so the
-    // collected abscissa set — and everything built from it — is
-    // unchanged.  The at-most-one doubling case (P = T itself) takes the
-    // exact slow path inside the batch.
-    let fast = kc.fast_binary_curve()?;
-    let (tx, ty) = match &t {
-        BinaryPoint::Affine { x, y } => (fast.word(x), fast.word(y)),
-        BinaryPoint::Infinity => return None,
-    };
-    let mut pairs = Vec::with_capacity(fb.points.len());
-    for p in &fb.points {
-        match p {
-            BinaryPoint::Infinity => pairs.push((0, 0, tx, ty, true, false)),
-            BinaryPoint::Affine { x, y } => {
-                pairs.push((fast.word(x), fast.word(y), tx, ty, false, false))
-            }
-        }
+    // Retain the single-word admission gate, and translate through the
+    // curve's actual field representation rather than computing an unused
+    // packed batch alongside the authoritative general-field additions.
+    kc.fast_binary_curve()?;
+    if t == BinaryPoint::Infinity {
+        return None;
     }
-    let sums = fast.batch_add(&pairs);
     let mut xs = std::collections::BTreeMap::new();
     for p in &fb.points {
         for q in [p.clone(), kc.add(p, &t)] {

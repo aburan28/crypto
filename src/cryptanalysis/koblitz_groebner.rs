@@ -9520,4 +9520,65 @@ mod early_abort_tests {
         assert_eq!(refuted, stats.infeasible_branches as u64);
         assert_eq!(trace.root_first_refutation_degree.iter().sum::<u64>(), 1);
     }
+
+    #[test]
+    fn gate_first_refutations_are_included_in_refutation_trace() {
+        // Neither input is linear, but their sum forces x0 = 0. The
+        // oracle supplies the additional exact acceptance constraint
+        // x0 = 1, so it refutes after propagation in both solver orders.
+        let n_vars = 2;
+        let system = [
+            F2BoolPoly::from_monos(vec![F2BoolMono::from_mask(0b11)], n_vars),
+            F2BoolPoly::from_monos(
+                vec![F2BoolMono::from_mask(0b11), F2BoolMono::from_mask(0b01)],
+                n_vars,
+            ),
+        ];
+        let opts = SolveOptions {
+            engine: SolverEngine::InheritedF4 { max_degree: 3 },
+            max_solutions: 1,
+            node_budget: 100,
+            split_rule: SplitRule::HighestFree,
+        };
+        let mut control = None;
+        for enabled in [false, true] {
+            set_gate_first(Some(enabled));
+            set_early_abort_mode(Some(0));
+            set_refutation_degree_trace(true);
+            let skips_before = gate_first_skips_thread().0;
+            let (roots, stats) = solve_boolean_system_with_node_oracle(
+                &system,
+                n_vars,
+                &opts,
+                |_| true,
+                |assignment, _| {
+                    if assignment[0] == Some(false) {
+                        NodeOracleDecision::Refute
+                    } else {
+                        NodeOracleDecision::Continue
+                    }
+                },
+            );
+            let trace = refutation_degree_trace_take().expect("trace enabled");
+            set_refutation_degree_trace(false);
+            set_early_abort_mode(None);
+            set_gate_first(None);
+            assert!(roots.is_empty());
+            assert!(!stats.exhausted);
+            assert_eq!(stats.propagations, 1);
+            assert_eq!(stats.geometric_refutations, 1);
+            assert_eq!(trace.refuted_oracle, 1);
+            assert_eq!(trace.nodes_refuted, 1);
+            assert_eq!(
+                trace.reductions_fresh + trace.reductions_inherited,
+                stats.reductions as u64
+            );
+            assert_eq!(gate_first_skips_thread().0 - skips_before, enabled as u64);
+            if let Some(previous) = &control {
+                assert_eq!(previous, &stats);
+            } else {
+                control = Some(stats);
+            }
+        }
+    }
 }
