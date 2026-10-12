@@ -1,0 +1,245 @@
+{
+  "accounting": "Whole-process wall/CPU include launch, load, preparation, online, replay. Producer online interval is separate.",
+  "argv": [
+    "/workspace/n83_optimization/frozen_binaries/rho_optimization",
+    "/workspace/n83_optimization/fixtures/holdout_1.jsonl",
+    "202610128341",
+    "/workspace/n83_optimization/panel/holdout/configs/wide-L32-DP4-E0.json",
+    "/workspace/n83_optimization/panel/holdout/runs/H01-default/producer.json"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_optimization/fixtures/holdout_1.jsonl": "1935fdf8c2430068a326865d83ddac3cbf92562a54dcbff63d8936e45fec9159",
+    "/workspace/n83_optimization/panel/holdout/configs/wide-L32-DP4-E0.json": "2cb897f7af77e20a0fe30215025223cb4edadf79afd003df3cd8d077805f4d54"
+  },
+  "arm": "rho",
+  "binary_sha256": "21827dcc645fd4591b39dd913619f047d267a98d541854bd7c83ee7143d8bbcb",
+  "cpu_system_s": 0.056905,
+  "cpu_total_s": 5.925871000000001,
+  "cpu_user_s": 5.868966,
+  "cwd": "/workspace/repos/crypto",
+  "elapsed_process_wall_s": 5.927393899,
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "exit_observation_delay_note": "Nominal 0-5 ms plus scheduling and poll-body delays; no strict bound under arbitrary scheduling",
+  "exit_observation_poll_ms": 5,
+  "finished_epoch_ms": 1791783373463,
+  "interrupted_signal": 0,
+  "known_answer_environment_present": false,
+  "memory_limit_hit": null,
+  "memory_limit_note": "RLIMIT_AS allocation refusal may appear as nonzero/abort; no inference from exit code alone",
+  "peak_rss_bytes": 106536960,
+  "peak_rss_native_kib": 104040,
+  "peak_rss_source": "Linux wait4(2) ru_maxrss KiB multiplied by 1024; exact child process",
+  "pid": 32861,
+  "raw_wait_status": 0,
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 60.0
+  },
+  "return_code": 0,
+  "schema": "n83.process-receipt/v1",
+  "semantic": {
+    "exit_code_field_ok": true,
+    "group_verified": true,
+    "independent_replay_required": true,
+    "online_boundary_qualified": true,
+    "producer_online_ms": 5724.517468,
+    "producer_phase_gap_ms": 0.00017099999968195334,
+    "producer_phase_sum_ms": 5724.517297,
+    "producer_phases_ms": {
+      "generic_scalar_replay": 0.285491,
+      "target_query_and_validation": 0.234864,
+      "walk_and_collision": 5723.996942
+    },
+    "producer_preparation_ms": 198.127009,
+    "public_target_match": true,
+    "recovered_scalar": "7476391028129651",
+    "scalar_is_verified_by_producer_group_replay_only": true,
+    "scalar_present": true,
+    "selected_row": {
+      "a": 1,
+      "arithmetic_kernel": {
+        "backend": "wide",
+        "carryless_multiply": "pclmulqdq",
+        "reduction": "sparse_xor_fold_loop",
+        "squaring": "multiply_self"
+      },
+      "b": 1,
+      "base_snapshot": "a8194d616ed8c04489ec46177d369f1b1670360a",
+      "canonical_candidate_id": null,
+      "canonical_workload_id": null,
+      "claim_boundary": "public synthetic exact legacy n83 a1 target; answer correctness and exploratory local timing only; no admitted speedup",
+      "cofactor": "1128547018",
+      "compiled_source_revision": null,
+      "compiled_source_sha256": {
+        "examples/n83_rho_optimization_eval.rs": "fb14072f4fa5d08e18d8b79130b6d58a220adae0f76369cc9be949691c83eaa0",
+        "src/cryptanalysis/koblitz_strong_rho.rs": "3e45be340df4fe5b73998b8f907ad0a1a77d58c06609c73f77f17f2babd90108",
+        "src/cryptanalysis/semaev_decomp.rs": "be551d55d574b89bab1e9cd6fe1b1ad298966dd4fcf48a7cd1262d3e5ef4925a",
+        "src/cryptanalysis/wide_gf2m.rs": "086c786cdb2410c852c4242abc543255776a5ec3fff873ab972d08978907c701"
+      },
+      "config_input_blake3": "5589c96e1d0e762d73543af2dd2c81a2f92ceb59c6306ed541d4d15afaf6c99f",
+      "config_input_sha256": "2cb897f7af77e20a0fe30215025223cb4edadf79afd003df3cd8d077805f4d54",
+      "controlled_speedup": null,
+      "curve_id": "ICV1:f2m-83-a5fd0d39:6151469093347:9671406556910881928556062:0x1:-7:unk:r:9eba6cd5d359",
+      "curve_slug": "icv1-f2m83-t6151469093347-9eba6cd5",
+      "executable_blake3": "cbe7cb12e78695df206e439829a350ecbe11fa9abd976eef3fb2fcc547015627",
+      "failure_counter_note": null,
+      "field_encoding": "polynomial words as canonical decimal strings",
+      "field_modulus_low_terms": [
+        0,
+        2,
+        4,
+        7
+      ],
+      "generator": [
+        "6614244651398184860292015",
+        "8868260410029249391539529"
+      ],
+      "generic_scalar_replay_verified": true,
+      "group_verified": true,
+      "host_isolation_receipt": null,
+      "jump_seed": 1666631349314596140,
+      "known_answer_input": false,
+      "lambda": "2998004823950457",
+      "n": 83,
+      "online_interval": {
+        "excluded_stages": [
+          "input_and_config_loading",
+          "curve_normal_basis_G_only_jumps",
+          "receipt_hashing",
+          "receipt_serialization",
+          "receipt_io"
+        ],
+        "included_stages": [
+          "target_validation",
+          "walk_starts",
+          "walk_and_collision",
+          "generic_scalar_replay"
+        ],
+        "start_event": "before_public_target_membership_and_subgroup_validation",
+        "stop_event": "after_generic_scalar_replay"
+      },
+      "online_interval_ns": 5724517468,
+      "online_ms": 5724.517468,
+      "online_phase_ns": {
+        "generic_scalar_replay": 285491,
+        "target_query_and_validation": 234864,
+        "walk_and_collision": 5723996942
+      },
+      "online_phase_sum_ns": 5724517297,
+      "online_timer_boundary_residual_ns": 171,
+      "online_total_ms": 5724.517468,
+      "optimization_backend": "wide",
+      "optimization_config": {
+        "backend": "wide",
+        "dp_bits": 4,
+        "escape_fruitless": false,
+        "lanes": 32,
+        "step_cap_factor": 2000
+      },
+      "outcome": {
+        "automorphism_size": 166,
+        "capped_walks": 202,
+        "charges_setup_and_solve": {
+          "canonicalizations": 13417722,
+          "failed_collisions": 0,
+          "group_additions": 13417723,
+          "partition_hashes": 12576311,
+          "scalar_multiplications": 35,
+          "table_inserts": 838985,
+          "table_queries": 838986
+        },
+        "fruitless_cycles": 2192,
+        "fruitless_escapes": 0,
+        "ideal_steps": 9005148.640969077,
+        "table_entries": 838985,
+        "table_payload_lower_bound_bytes": 41110265,
+        "walk_steps": 12576311,
+        "walks": 841411,
+        "wasted_merges": 0
+      },
+      "peak_rss_bytes": 106536960,
+      "peak_rss_source": "getrusage RUSAGE_SELF ru_maxrss; platform-scaled bytes",
+      "preparation_charges": {
+        "canonicalizations": 0,
+        "failed_collisions": 0,
+        "group_additions": 0,
+        "partition_hashes": 0,
+        "scalar_multiplications": 32,
+        "table_inserts": 0,
+        "table_queries": 0
+      },
+      "preparation_ns_excluded": 198127009,
+      "process_ns_before_receipt_io": 5924942266,
+      "public_input_blake3": "6a12a595869cd03b20ca8ade5192535b07ae77a5cc6153ef0381f4e86f3d717c",
+      "public_input_sha256": "1935fdf8c2430068a326865d83ddac3cbf92562a54dcbff63d8936e45fec9159",
+      "public_target_q": [
+        "4566057969910634118716199",
+        "3243784791760122731624216"
+      ],
+      "published_q": [
+        "4566057969910634118716199",
+        "3243784791760122731624216"
+      ],
+      "record_class": "verified_answer_exploratory_wall",
+      "recovered_scalar": "7476391028129651",
+      "reference_grade": "strong_configured_field_u64_scalar",
+      "reference_group_validation": true,
+      "rho_policy": {
+        "G_only_jumps_target_independent": true,
+        "distinguished_bits": 4,
+        "escape_fruitless": false,
+        "jump_count": 32,
+        "lanes": 32,
+        "quotient": "signed_frobenius",
+        "step_cap": 18010298000,
+        "step_cap_factor": 2000
+      },
+      "run_id": "N83A1RhoOptwideL32DP4E0W202610128341Q6a12a595869c",
+      "schema": "n83-rho-optimization-evaluation/v1",
+      "started_unix_ms": 1791783367536,
+      "status": "PASS_VERIFIED_PUBLIC_TARGET",
+      "subgroup_order": "8569786107849059",
+      "target_count": 1,
+      "target_in_subgroup": true,
+      "target_ms": 5724.517468,
+      "target_on_curve": true,
+      "validation_sidecar_opened": false,
+      "walk_seed": 202610128341,
+      "worker_count": 1,
+      "worker_source_blake3": "4175b0c043148a86b459b176ec7730d0131373f31e644bd25be44d3636e2fd1c",
+      "worker_source_sha256": "fb14072f4fa5d08e18d8b79130b6d58a220adae0f76369cc9be949691c83eaa0"
+    },
+    "valid": true,
+    "verified_flag_ok": true
+  },
+  "semantic_path": "/workspace/n83_optimization/panel/holdout/runs/H01-default/stdout.jsonl",
+  "semantic_sha256": "c991021d13c2c4547528f3a4aaaf1fff7d40599f136151c00a919cdd206dea5e",
+  "started_epoch_ms": 1791783367534,
+  "status": "COMPLETED_VERIFIED",
+  "stderr_path": "/workspace/n83_optimization/panel/holdout/runs/H01-default/stderr.txt",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_path": "/workspace/n83_optimization/panel/holdout/runs/H01-default/stdout.jsonl",
+  "stdout_sha256": "c991021d13c2c4547528f3a4aaaf1fff7d40599f136151c00a919cdd206dea5e",
+  "target_sha256": "1935fdf8c2430068a326865d83ddac3cbf92562a54dcbff63d8936e45fec9159",
+  "termination_signal": null,
+  "timeout": false
+}
