@@ -6747,8 +6747,10 @@ mod tests {
             assert_eq!(pack_rows(&rows, &columns), reference(&rows, &columns));
         }
 
-        let columns: Vec<u64> = (0..137).map(|i| (i * 13) % 256).collect();
-        let template = vec![columns[0], columns[63], columns[64], columns[136]];
+        // Wide rows cross the Rayon threshold without hundreds of thousands
+        // of small row allocations in this correctness test.
+        let columns: Vec<u64> = (0..u16::MAX as u64).collect();
+        let template = vec![columns[0], columns[63], columns[64], columns[65534]];
         let words = columns.len().div_ceil(64);
         let rows = vec![template.clone(); M4RI_PARALLEL_WORDS / words + 1];
         let expected = reference(&[template], &columns).pop().unwrap();
