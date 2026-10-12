@@ -23,6 +23,19 @@ applies to the exchangeable first two small domains. The caller must still
 charge unsuccessful searches and feed every accepted candidate to the
 independent graph replay.
 
+`build_exact_residual_suffix_factor_base` connects two already replayed,
+prefix-related stored bases to this producer. It requires the smaller point
+record and both orbit-label maps to be exact prefixes, independently rebuilds
+the larger base's point suffix as a closed signed-Frobenius base, checks every
+suffix orbit index and phase against the envelope, and rejects overlapping
+x-domains through `MixedOrbitDomains::new`. For the retained K=1,182 and
+K=2,048 objects, this defines the 866-orbit residual pool whose compressed
+point rows were checked in the prefix receipt. The constructor itself makes
+no statement about N83 partial yield or graph completion. The
+[source-only validation](verification/residual-suffix-20261012/RESULT.md)
+retains the focused and full-library tests separately from the N83 pilot
+ledger.
+
 An input partial carries a unique source ID and the point equation
 [a]G + [b]Q = sum(small points) + sum(residual points). The adapter checks
 the equation using curve arithmetic. It currently requires the public target,
@@ -65,7 +78,8 @@ source provenance and cap classifications. A Koblitz F2^7 regression builds
 disjoint two-orbit domains and obtains one SAT-discovered one-residual point
 equation, then independently feeds it to the graph. It also checks an exact
 two-residual sign lift and graph feed, overlap rejection and fail-closed
-preflight caps. The two-residual SAT search has no positive regression or
+preflight caps. It now checks exact suffix extraction and rejects changed
+prefix points or suffix orbit labels. The two-residual SAT search has no positive regression or
 retained N83 yield measurement. These checks establish algebra and one
 small-curve producer
 path. They do not measure retained N83 partial-relation yield, rank gain,
