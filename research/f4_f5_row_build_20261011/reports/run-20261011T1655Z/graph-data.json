@@ -1,0 +1,40 @@
+{
+  "scope": "Boolean matrix-F4/F5 allocation diagnostic",
+  "systems": 8,
+  "repeats": 3,
+  "exact_outputs_and_counts": true,
+  "arms": [
+    {
+      "allocated_byte_reduction_percent": 0.0,
+      "allocation_reduction_percent": 0.0,
+      "arm": "criterion",
+      "baseline_allocated_bytes": 1329024,
+      "baseline_allocations": 8748,
+      "calls": 24,
+      "candidate_allocated_bytes": 1329024,
+      "candidate_allocations": 8748
+    },
+    {
+      "allocated_byte_reduction_percent": 0.0,
+      "allocation_reduction_percent": 0.0,
+      "arm": "f4",
+      "baseline_allocated_bytes": 11667696,
+      "baseline_allocations": 48414,
+      "calls": 24,
+      "candidate_allocated_bytes": 11667696,
+      "candidate_allocations": 48414
+    },
+    {
+      "allocated_byte_reduction_percent": 0.0,
+      "allocation_reduction_percent": 0.0,
+      "arm": "f5",
+      "baseline_allocated_bytes": 12400920,
+      "baseline_allocations": 42801,
+      "calls": 24,
+      "candidate_allocated_bytes": 12400920,
+      "candidate_allocations": 42801
+    }
+  ],
+  "graph_mode": "baseline",
+  "caption": "run-20261011T1655Z | 8 fixed systems, 3 repeats, 24 calls per arm"
+}

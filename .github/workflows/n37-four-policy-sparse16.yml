@@ -3,6 +3,11 @@ name: n37 sparse four-policy PDP replay
 on:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - '.github/workflows/n37-four-policy-sparse16.yml'
       - 'examples/n37_four_policy_sparse16_*.rs'
       - 'examples/support/n37_policy_common.rs'
@@ -24,7 +29,7 @@ concurrency:
 jobs:
   replay:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,6 +53,7 @@ jobs:
             research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b03.points.jsonl
             research/notes/ecc2k130/disjoint_cold_v2_20261001/fixtures/n37_L1024_b04.points.jsonl
             research/notes/ecc2k130/n37_four_policy_sparse16_20261004
+      - uses: Swatinem/rust-cache@v2
       - name: Restore the measured Cargo manifest and lockfile
         run: |
           note=research/notes/ecc2k130/n37_four_policy_sparse16_20261004

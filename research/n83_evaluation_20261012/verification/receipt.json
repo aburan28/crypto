@@ -1,0 +1,25 @@
+{
+  "kind":"native_independent_archive_correctness_check",
+  "status":"PASS",
+  "curve_model_slug":"icv1-f2m83-t6151469093347-cdcc5432",
+  "scope":"Standalone C++ GF(2^83) arithmetic and archive witness/metadata replay; no retiming or solver re-execution",
+  "field_rabin_irreducibility":true,
+  "subgroup_deterministic_miller_rabin_64bit_prime":true,
+  "frobenius_recurrence_curve_order":"9671406556910881928556062",
+  "subgroup_order":"8569786107849059",
+  "cofactor":"1128547018",
+  "generator_target_on_curve_and_in_subgroup":true,
+  "validation_sidecar_scalar_replay":true,
+  "tau_eigenvalue":"2998004823950457",
+  "tau_eigenvalue_exact_order":83,
+  "signed_frobenius_orbit_size":166,
+  "factor_base_representatives_subgroup_verified":600,
+  "factor_base_distinct_signed_orbit_points_verified":99600,
+  "factor_base_labels_verified":99600,
+  "runs":[
+    {"run_id":"N83A1K600W12We202610061R21R1","four_point_witness_native_replay":true,"scalar_native_replay_both_arms":true,"ic_target_ms":7939.1377079999993,"ic_five_phase_sum_ms":7939.1372499999998,"ic_unassigned_elapsed_ms":0.00045799999952578219,"rho_recorded_total_ms":64952.483041999993,"rho_setup_ms_unresolved_target_dependence":7.556,"rho_internal_total_over_ic_target":8.1813019789982455,"rho_walk_steps":6608900,"ic_probes":8845441},
+    {"run_id":"N83A1K600W12We202610062R22R2","four_point_witness_native_replay":true,"scalar_native_replay_both_arms":true,"ic_target_ms":7746.0142500000002,"ic_five_phase_sum_ms":7746.0141659999999,"ic_unassigned_elapsed_ms":8.4000000242667738e-05,"rho_recorded_total_ms":42987.579540999999,"rho_setup_ms_unresolved_target_dependence":7.8160829999999999,"rho_internal_total_over_ic_target":5.5496385823199326,"rho_walk_steps":5958775,"ic_probes":8845441},
+    {"run_id":"N83A1K600W12We202610063R23R3","four_point_witness_native_replay":true,"scalar_native_replay_both_arms":true,"ic_target_ms":5623.2751250000001,"ic_five_phase_sum_ms":5623.2745839999989,"ic_unassigned_elapsed_ms":0.00054100000124890357,"rho_recorded_total_ms":71253.689916000018,"rho_setup_ms_unresolved_target_dependence":7.5162500000000003,"rho_internal_total_over_ic_target":12.671208207334514,"rho_walk_steps":12179440,"ic_probes":8845441}
+  ],
+  "not_verified":["600 independent rank equations and recovered factor logs: witnesses/log database not retained in these summary receipts","Timing isolation and matched enforced memory/resource limits","Target dependence of rho setup","A new unknown-scalar recovery or performance comparison","Exact canonical candidate/workload identity manifests and five-exclusive-phase timing contract"]
+}

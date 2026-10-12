@@ -1,0 +1,120 @@
+{
+  "completed_arm_count": 22,
+  "dispositions": [
+    {
+      "excluded_warmup": true,
+      "id": "warmup_rho",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": true,
+      "id": "warmup_ic",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "aa_1_a",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "aa_1_b",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "aa_2_a",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "aa_2_b",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "aa_3_a",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "aa_3_b",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "aa_4_a",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "aa_4_b",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "aa_5_a",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "aa_5_b",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "matched_1_rho",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "matched_1_ic",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "matched_2_ic",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "matched_2_rho",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "matched_3_rho",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "matched_3_ic",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "matched_4_ic",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "matched_4_rho",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "matched_5_rho",
+      "return_code": 0
+    },
+    {
+      "excluded_warmup": false,
+      "id": "matched_5_ic",
+      "return_code": 0
+    }
+  ],
+  "failed_arms": 0,
+  "finished_epoch_ms": 1791778427958,
+  "interrupted_signal": 0,
+  "planned_arm_count": 22,
+  "schema": "n83.panel-completion/v1"
+}

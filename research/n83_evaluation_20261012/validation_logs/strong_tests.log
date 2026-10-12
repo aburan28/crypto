@@ -1,0 +1,108 @@
+warning: unused import: `super::koblitz_fast_arith::FastBinaryCurve`
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:77:5
+   |
+77 | use super::koblitz_fast_arith::FastBinaryCurve;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::cryptanalysis::binary_semaev::binary_semaev_s3`
+   --> src/cryptanalysis/semaev_sat.rs:105:5
+    |
+105 | use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:857:11
+    |
+842 |         FactorBaseSpec::StandardSubspace { dimension } => {
+    |         ---------------------------------------------- matches all the relevant values
+...
+857 |         | FactorBaseSpec::StandardSubspace { .. }
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+    |
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:858:11
+    |
+851 |         FactorBaseSpec::CofactorProjected { .. } | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |         ---------------------------------------- matches all the relevant values
+...
+858 |         | FactorBaseSpec::CofactorProjected { .. }
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:859:11
+    |
+851 |         FactorBaseSpec::CofactorProjected { .. } | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |                                                    ------------------------------------- matches all the relevant values
+...
+859 |         | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+
+warning: unused variable: `sums`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:3226:9
+     |
+3226 |     let sums = fast.batch_add(&pairs);
+     |         ^^^^ help: if this is intentional, prefix it with an underscore: `_sums`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `projected`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:8795:10
+     |
+8795 |     let (projected, _) = project_by_frobenius_orbits_generic(kc, fb);
+     |          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_projected`
+
+warning: unused variable: `a`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:9803:21
+     |
+9803 |                 let a = sample_relation_scalar(r, &mut rng);
+     |                     ^ help: if this is intentional, prefix it with an underscore: `_a`
+
+warning: unused variable: `b`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:9804:21
+     |
+9804 |                 let b = sample_relation_scalar(r, &mut rng);
+     |                     ^ help: if this is intentional, prefix it with an underscore: `_b`
+
+warning: static `ALL_FACTORS_MEMO` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:527:8
+    |
+527 | static ALL_FACTORS_MEMO: std::sync::OnceLock<std::sync::Mutex<HashMap<u32, Vec<u64>>>> =
+    |        ^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `memo_get` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:530:4
+    |
+530 | fn memo_get(
+    |    ^^^^^^^^
+
+warning: function `memo_put` is never used
+   --> src/cryptanalysis/koblitz_index_calculus.rs:541:4
+    |
+541 | fn memo_put(
+    |    ^^^^^^^^
+
+warning: `crypto` (lib) generated 12 warnings (run `cargo fix --lib -p crypto` to apply 6 suggestions)
+   Compiling crypto v0.1.0 (/workspace/repos/crypto)
+error: recursion limit reached while expanding `$crate::json_internal!`
+   --> examples/n83_strong_point_eval.rs:203:19
+    |
+203 |       let receipt = json!({
+    |  ___________________^
+204 | |         "schema": "n83-exact-public-strong-evaluation/v1",
+205 | |         "status": status,
+206 | |         "run_id": format!("N83A1StrongW{seed}Q{}", &input_blake3[..12]),
+...   |
+281 | |         "claim_boundary": "public synthetic exact legacy n83 a1 target; answer correctness and exploratory local timing only; no ...
+282 | |     });
+    | |______^
+    |
+    = help: consider increasing the recursion limit by adding a `#![recursion_limit = "256"]` attribute to your crate (`n83_strong_point_eval`)
+    = note: this error originates in the macro `$crate::json_internal` which comes from the expansion of the macro `json` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: could not compile `crypto` (example "n83_strong_point_eval" test) due to 1 previous error

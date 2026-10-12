@@ -3737,6 +3737,9 @@ pub enum DecompositionStrategy {
     /// large explicit-coordinate trie, but still requires the same complete
     /// curve-group witness and relation checks.
     ChainedS3FrobeniusOrbit,
+    /// The Frobenius-orbit chained solver with `x_0 <= x_1` on the first
+    /// S3 node. This preserves solutions under swapping its first pair.
+    ChainedS3FrobeniusOrbitOrdered,
     /// **Meet in the middle** over a precomputed table of all pair sums
     /// `P_i + P_j` ([`PairSumTable`]).  `m = 2` is one lookup, `m = 3`
     /// is `|F|` lookups, `m = 4` is `|F|²` lookups — against
@@ -8436,7 +8439,7 @@ pub fn sat_decompose_chained_s3(
     m: usize,
     limits: ChainS3Limits,
 ) -> (Option<Vec<usize>>, ChainS3Stats) {
-    sat_decompose_chained_s3_with_domain(kc, fb, target, m, limits, false)
+    sat_decompose_chained_s3_with_domain(kc, fb, target, m, limits, false, false)
 }
 
 /// Use one signed-Frobenius representative per column to constrain the same
@@ -8450,7 +8453,20 @@ pub fn sat_decompose_chained_s3_frobenius_orbit(
     m: usize,
     limits: ChainS3Limits,
 ) -> (Option<Vec<usize>>, ChainS3Stats) {
-    sat_decompose_chained_s3_with_domain(kc, fb, target, m, limits, true)
+    sat_decompose_chained_s3_with_domain(kc, fb, target, m, limits, true, false)
+}
+
+/// An opt-in symmetry arm for the same exact signed-Frobenius domain.
+/// Swapping the first two summands preserves their S3 equation and every
+/// later chain node; group lifting still checks every sign choice.
+pub fn sat_decompose_chained_s3_frobenius_orbit_ordered(
+    kc: &KoblitzCurve,
+    fb: &FrobeniusFactorBase,
+    target: &BinaryPoint,
+    m: usize,
+    limits: ChainS3Limits,
+) -> (Option<Vec<usize>>, ChainS3Stats) {
+    sat_decompose_chained_s3_with_domain(kc, fb, target, m, limits, true, true)
 }
 
 fn sat_decompose_chained_s3_with_domain(
@@ -8460,6 +8476,7 @@ fn sat_decompose_chained_s3_with_domain(
     m: usize,
     limits: ChainS3Limits,
     frobenius_orbits: bool,
+    order_first_pair: bool,
 ) -> (Option<Vec<usize>>, ChainS3Stats) {
     use crate::cryptanalysis::binary_semaev_chain_sat::{
         finite_domain_clause_count, frobenius_orbit_domain_size, ChainBuildError, ChainedS3Encoding,
@@ -8580,6 +8597,10 @@ fn sat_decompose_chained_s3_with_domain(
             enc.constrain_summands(&codes, limits.max_domain_clauses)
         };
         if installed != Ok(domain_clauses) {
+            stats.exhausted = true;
+            return (None, stats);
+        }
+        if order_first_pair && enc.order_first_pair(limits.max_variables).is_err() {
             stats.exhausted = true;
             return (None, stats);
         }
@@ -9730,7 +9751,9 @@ fn koblitz_index_calculus_dlp_observed(
     };
     if matches!(
         opts.strategy,
-        DecompositionStrategy::ChainedS3 | DecompositionStrategy::ChainedS3FrobeniusOrbit
+        DecompositionStrategy::ChainedS3
+            | DecompositionStrategy::ChainedS3FrobeniusOrbit
+            | DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered
     ) && (!(5..=6).contains(&opts.m)
         || !fb.uses_ambient_basis()
         || opts.chain_s3_limits.max_variables == 0
@@ -9875,8 +9898,6 @@ fn koblitz_index_calculus_dlp_observed(
         let batch_size = opts.relation_batch_size.max(1).min(remaining_trials);
         let attempts: Vec<_> = (0..batch_size)
             .map(|_| {
-                let a = sample_relation_scalar(r, &mut rng);
-                let b = sample_relation_scalar(r, &mut rng);
                 // A zero-inclusive additive draw gives full subgroup support;
                 // under uniform RNG bits the query is uniform for fixed b, Q.
                 let (a, b) = if let Some(order) = wide_order {
@@ -10022,6 +10043,12 @@ fn koblitz_index_calculus_dlp_observed(
                         target,
                         opts.m,
                         opts.chain_s3_limits,
+                    );
+                    RelationAttemptOutcome::ChainedS3(idxs, stats)
+                }
+                DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered => {
+                    let (idxs, stats) = sat_decompose_chained_s3_frobenius_orbit_ordered(
+                        kc, fb, target, opts.m, opts.chain_s3_limits,
                     );
                     RelationAttemptOutcome::ChainedS3(idxs, stats)
                 }
@@ -11783,6 +11810,12 @@ fn decompose_once(
                 target,
                 opts.m,
                 opts.chain_s3_limits,
+            );
+            PdpAttempt::chained(points, stats)
+        }
+        DecompositionStrategy::ChainedS3FrobeniusOrbitOrdered => {
+            let (points, stats) = sat_decompose_chained_s3_frobenius_orbit_ordered(
+                kc, fb, target, opts.m, opts.chain_s3_limits,
             );
             PdpAttempt::chained(points, stats)
         }
@@ -15720,18 +15753,23 @@ mod tests {
         };
         for m in [5usize, 6] {
             let target = kc.mul(&fb.points[0], &BigUint::from(m as u32));
-            let (found, stats) =
-                sat_decompose_chained_s3_frobenius_orbit(&kc, &fb, &target, m, limits);
-            let indices = found.unwrap_or_else(|| panic!("m={m}: {stats:?}"));
-            assert_eq!(indices.len(), m);
-            assert_eq!(
-                indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
-                    kc.add(&acc, &fb.points[index])
-                }),
-                target
-            );
-            assert!(!stats.exhausted);
-            assert_eq!(stats.invalid_models, 0);
+            for ordered in [false, true] {
+                let (found, stats) = if ordered {
+                    sat_decompose_chained_s3_frobenius_orbit_ordered(&kc, &fb, &target, m, limits)
+                } else {
+                    sat_decompose_chained_s3_frobenius_orbit(&kc, &fb, &target, m, limits)
+                };
+                let indices = found.unwrap_or_else(|| panic!("m={m}, ordered={ordered}: {stats:?}"));
+                assert_eq!(indices.len(), m);
+                assert_eq!(
+                    indices.iter().fold(BinaryPoint::Infinity, |acc, &index| {
+                        kc.add(&acc, &fb.points[index])
+                    }),
+                    target
+                );
+                assert!(!stats.exhausted);
+                assert_eq!(stats.invalid_models, 0);
+            }
         }
         let mut incomplete = fb.clone();
         incomplete.signed_orbits[0].clear();

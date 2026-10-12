@@ -6,9 +6,14 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   cpu-reference:
     runs-on: ubuntu-24.04
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 360 }}
     steps:
       - uses: actions/checkout@v4
       - name: Build and check CPU reference
@@ -18,6 +23,7 @@ jobs:
   cuda-compile:
     runs-on: ubuntu-24.04
     container: nvidia/cuda:12.6.3-devel-ubuntu24.04
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 360 }}
     steps:
       - uses: actions/checkout@v4
       - name: Compile CUDA reference (GPU execution remains pending)

@@ -2,6 +2,11 @@ name: Compact-orbit cold point-only panel
 on:
   pull_request:
     paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - '.github/workflows/compact-orbit-point-panel.yml'
       - 'examples/koblitz_rho_batch_ks_v2_n61.rs'
       - 'examples/koblitz_orbit_dlp_fast.rs'
@@ -17,6 +22,12 @@ on:
       - 'research/notes/ecc2k130/compact_orbit_point_panel_20260929/**'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# PRs retain source, correctness and existing-evidence checks.
+# Fresh timing panels and their result gates run only after merge or by manual dispatch.
 jobs:
   point-contract:
     runs-on: ubuntu-24.04
@@ -35,6 +46,7 @@ jobs:
             examples/koblitz_rho_batch_ks_v2_n61.rs
             research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
             research/notes/ecc2k130/compact_orbit_point_panel_20260929/test_point_mode.py
+      - uses: Swatinem/rust-cache@v2
       - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
       - run: cargo build --release --locked --example koblitz_rho_batch_ks_v2_n61
       - run: cargo test --release --locked --example koblitz_rho_batch_ks_v2_n61
@@ -42,7 +54,7 @@ jobs:
 
   paired-panel:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 90 }}
     strategy:
       fail-fast: false
       matrix:
@@ -66,9 +78,11 @@ jobs:
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             research/notes/ecc2k130/compact_orbit_point_panel_20260929
             .github/workflows/compact-orbit-point-panel.yml
+      - uses: Swatinem/rust-cache@v2
       - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
       - run: cargo build --release --locked --example koblitz_rho_batch_ks_v2_n61 --example koblitz_orbit_dlp_fast
       - name: Run five alternating cold pairs and disjoint L1 tuning
+        if: github.event_name != 'pull_request'
         id: run
         run: |
           python3 research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py \
@@ -77,14 +91,14 @@ jobs:
             --ic target/release/examples/koblitz_orbit_dlp_fast \
             --out "${{ runner.temp }}/point-panel/n${{ matrix.n }}_L${{ matrix.L }}"
       - name: Independently replay every completed relation and scalar
-        if: always() && steps.run.outcome != 'skipped'
+        if: github.event_name != 'pull_request' && (always() && steps.run.outcome != 'skipped')
         run: |
           python3 research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py \
             --n ${{ matrix.n }} --L ${{ matrix.L }} \
             --run-dir "${{ runner.temp }}/point-panel/n${{ matrix.n }}_L${{ matrix.L }}" \
             --out "${{ runner.temp }}/point-panel/n${{ matrix.n }}_L${{ matrix.L }}/receipt.json"
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: github.event_name != 'pull_request' && (always())
         with:
           name: compact-point-n${{ matrix.n }}-L${{ matrix.L }}
           path: ${{ runner.temp }}/point-panel/n${{ matrix.n }}_L${{ matrix.L }}
@@ -93,7 +107,7 @@ jobs:
 
   rho-backend-ab:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 45 }}
     strategy:
       fail-fast: false
       matrix:
@@ -118,10 +132,12 @@ jobs:
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             research/notes/ecc2k130/compact_orbit_point_panel_20260929
             .github/workflows/compact-orbit-point-panel.yml
+      - uses: Swatinem/rust-cache@v2
       - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
       - run: cp research/notes/ecc2k130/compact_orbit_point_panel_20260929/rho_baseline_0839.rs examples/koblitz_rho_backend_baseline.rs
       - run: cargo build --release --locked --example koblitz_rho_backend_baseline --example koblitz_rho_batch_ks_v2_n61
       - name: Pair frozen baseline and corrected rho backend
+        if: github.event_name != 'pull_request'
         id: run
         run: |
           python3 research/notes/ecc2k130/compact_orbit_point_panel_20260929/backend_ab.py \
@@ -130,14 +146,14 @@ jobs:
             --candidate target/release/examples/koblitz_rho_batch_ks_v2_n61 \
             --out "${{ runner.temp }}/point-panel-backend/n${{ matrix.n }}_L${{ matrix.L }}_backend_ab"
       - name: Check identical Q, scalars, walks and charges
-        if: always() && steps.run.outcome != 'skipped'
+        if: github.event_name != 'pull_request' && (always() && steps.run.outcome != 'skipped')
         run: |
           python3 research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_backend_ab.py \
             --n ${{ matrix.n }} --L ${{ matrix.L }} \
             --run-dir "${{ runner.temp }}/point-panel-backend/n${{ matrix.n }}_L${{ matrix.L }}_backend_ab" \
             --out "${{ runner.temp }}/point-panel-backend/n${{ matrix.n }}_L${{ matrix.L }}_backend_ab/receipt.json"
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: github.event_name != 'pull_request' && (always())
         with:
           name: compact-point-backend-n${{ matrix.n }}-L${{ matrix.L }}
           path: ${{ runner.temp }}/point-panel-backend/n${{ matrix.n }}_L${{ matrix.L }}_backend_ab

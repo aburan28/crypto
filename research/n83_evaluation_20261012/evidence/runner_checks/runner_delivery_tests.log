@@ -1,0 +1,21 @@
+   Compiling serde_core v1.0.229
+   Compiling zmij v1.0.23
+   Compiling serde_json v1.0.151
+   Compiling libc v0.2.190
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling n83-evaluation-runner v0.1.0 (/workspace/repos/crypto/research/n83_evaluation_20261012/runner)
+    Finished `release` profile [optimized] target(s) in 6.20s
+     Running unittests src/main.rs (n83_evaluation/runner_delivery_test_build/release/deps/n83_evaluation_runner-102c6f1891989166)
+
+running 7 tests
+test tests::base_digest_mismatch_is_rejected ... ok
+test tests::exactly_one_complete_summary_is_required ... ok
+test tests::exit_zero_with_failed_target_is_rejected ... ok
+test tests::mismatched_public_point_is_rejected ... ok
+test tests::missing_rank_is_rejected ... ok
+test tests::zero_replicate_and_one_replicate_ci_are_not_fabricated ... ok
+test tests::truncated_json_is_rejected ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
