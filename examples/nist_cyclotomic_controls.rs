@@ -522,6 +522,18 @@ fn pairing_on_rational(e: &CurveQ, pg: &Pt, pr: &Pt) -> [f64; 4] {
     [c5, r5, c4, r4]
 }
 
+/// Amendment 2 instrument check: `ĥ(P+Q) + ĥ(P−Q) − 2ĥ(P) − 2ĥ(Q)` from
+/// rational-model heights at k = 5 (zero for an exact canonical height).
+fn parallelogram_defect(e: &CurveQ, pg: &Pt, pr: &Pt) -> f64 {
+    let h = |q: &Pt| *e.height_sequence_on(q, 5, true).last().unwrap();
+    let neg: Pt = pr.as_ref().map(|(x, y)| (x.clone(), Rat::small(0).sub(y)));
+    let ((ha, hr), (hs, hd)) = rayon::join(
+        || rayon::join(|| h(pg), || h(pr)),
+        || rayon::join(|| h(&e.add(pg, pr)), || h(&e.add(pg, &neg))),
+    );
+    hs + hd - 2.0 * ha - 2.0 * hr
+}
+
 fn two_point_curve(p1: &(BigInt, BigInt), p2: &(BigInt, BigInt)) -> (CurveQ, Pt, Pt) {
     let (x1, y1, x2, y2) = (
         Rat::int(&p1.0),
@@ -708,6 +720,7 @@ fn run_amendment2(out: &std::path::Path, mode: &str) {
     writeln!(md, "## E4r — two-point-lift pairing from rational-model heights (k = 5; k = 4 for the accuracy check)\n\nNull: the same N = {n_e4} random pairs per curve as v2 (same seeds). Bonferroni α = 0.05/6 = {alpha4:.4}. Power check: min attainable p = {pmin4:.4}, {}. Accuracy gate (pre-registered): on the dependent pairs, abs(|cos| − 1) ≤ 1e-4 and abs(det/(ĥĥ)) ≤ 1e-4 at k = 5 on every curve, else no orthogonality verdict.\n", if pmin4 < alpha4 { "passes" } else { "**FAILS**" }).unwrap();
     writeln!(md, "| curve | metric | target | random pairs median [2.5%, 97.5%] (N) | rank | p | verdict | dependent pairs ([2]G̃; [3]G̃) | median abs(k5 − k4) over controls |\n|:--|:--|--:|:--|--:|--:|:--|:--|--:|").unwrap();
     let mut gate = true;
+    let mut par_ok = true;
     for (ci, c) in CURVES.iter().enumerate() {
         let p = big(c.p);
         let b = bighex(c.b_hex);
@@ -727,6 +740,25 @@ fn run_amendment2(out: &std::path::Path, mode: &str) {
                 pairing_on_rational(&e, &a, &r)
             })
             .collect();
+        let n_par = n_e4.min(50);
+        let par: Vec<f64> = pairs[..n_par]
+            .par_iter()
+            .map(|(p1, p2)| {
+                let (e, a, r) = two_point_curve(p1, p2);
+                parallelogram_defect(&e, &a, &r)
+            })
+            .collect();
+        let par_max = par.iter().fold(0.0f64, |m, &d| m.max(d.abs()));
+        par_ok &= par_max <= 1e-2;
+        for (i, d) in par.iter().enumerate() {
+            writeln!(
+                rows,
+                "{}",
+                json!({"exp":"E4r","arm":"parallelogram","curve":c.name,"i":i,"defect":d})
+            )
+            .unwrap();
+        }
+        writeln!(md, "*{}: parallelogram defect over the first {n_par} control pairs: max abs = {par_max:.2e} nats.*\n", c.name).unwrap();
         eprintln!(
             "E4r {} random pairs done ({:.0}s)",
             c.name,
@@ -784,15 +816,13 @@ fn run_amendment2(out: &std::path::Path, mode: &str) {
     }
     writeln!(
         md,
-        "\nAccuracy gate: **{}**.\n",
-        if gate {
-            "passed"
-        } else {
-            "FAILED — no orthogonality verdict is licensed"
-        }
+        "\nAccuracy gate (dependent pairs): **{}**. Parallelogram gate (max abs defect ≤ 1e-2 nats on the first 50 control pairs per curve): **{}**.\n",
+        if gate { "passed" } else { "FAILED — no orthogonality verdict is licensed" },
+        if par_ok { "passed" } else { "FAILED — no orthogonality verdict is licensed" }
     )
     .unwrap();
-    summary.push(json!({"exp":"E4r","accuracy_gate_passed":gate}));
+    summary
+        .push(json!({"exp":"E4r","accuracy_gate_passed":gate,"parallelogram_gate_passed":par_ok}));
     writeln!(
         md,
         "\n---\nRun time {:.0} s. Raw per-sample rows: `rows_{mode}.jsonl`.",
