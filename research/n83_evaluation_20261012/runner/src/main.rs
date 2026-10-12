@@ -846,7 +846,7 @@ fn main() {
 mod tests {
     use super::*;
     fn fixture(name: &str, text: &str) -> PathBuf {
-        let root = PathBuf::from("/workspace/n83_evaluation/runner/smoke");
+        let root = std::env::temp_dir().join("crypto-n83-evaluation-runner-fixtures");
         fs::create_dir_all(&root).unwrap();
         let nonce = SystemTime::now()
             .duration_since(UNIX_EPOCH)
