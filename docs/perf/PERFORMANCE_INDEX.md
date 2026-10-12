@@ -88,6 +88,16 @@ and every case verdict. Historical and current matched pairs are disconnected
 across intervening unrelated merges; no runtime, RSS or solver-speed claim is
 made.
 
+The [native F5 packing enhancement](../../research/f4_f5_dense_packing_20261012/REPORT.md)
+measures 3.95% fewer complete-F5 instructions and 2.03% fewer requested
+allocation bytes against the preceding candidate. F4 is neutral, exact outputs
+and accounting match, and no primary or paired memory metric regresses.
+Its gate was fixed for this F5-specific change before measurement. One standalone
+criterion case uses 15.45% more instructions and is retained as a diagnostic.
+The report adds a third matched history segment, per-case instruction intervals,
+requested-byte plots, group PDFs and benchmark-index copies. These instruction
+results do not establish elapsed-time, RSS or full-solver gains.
+
 ## What it measures, and what it does not
 
 `examples/perfbench` is a registry of **kernels**: each runs a fixed,
