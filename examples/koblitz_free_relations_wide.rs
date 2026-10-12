@@ -639,9 +639,12 @@ fn main() {
             j += 1;
         }
         let run = &entries[i..j];
-        let row_cap = 4 * base.columns as u64;
-        if run.len() > 1 && verified_relations < row_cap {
-            'pairs: for x in 0..run.len() {
+        if run.len() > 1 {
+            // Pair every distinct pair-state in the run, and keep walking
+            // later key-runs. Stopping at 4 * columns leaves collision
+            // counts and homogeneous rank as lower bounds while new rows
+            // still increase rank.
+            for x in 0..run.len() {
                 for y in (x + 1)..run.len() {
                     let first = &run[x];
                     let second = &run[y];
@@ -672,9 +675,6 @@ fn main() {
                                 rank_gain_rows += 1;
                             }
                             verified_relations += 1;
-                            if verified_relations >= row_cap {
-                                break 'pairs;
-                            }
                         }
                         Verified::TrivialOnly => trivial_only_pairs += 1,
                         Verified::NoSum => no_sum_pairs += 1,

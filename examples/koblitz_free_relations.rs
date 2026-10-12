@@ -544,11 +544,12 @@ fn main() {
             j += 1;
         }
         let run = &entries[i..j];
-        let row_cap = 4 * base.columns as u64;
-        if run.len() > 1 && verified_relations < row_cap {
+        if run.len() > 1 {
             // Pair up every two entries in the run whose pair-states differ
-            // beyond the trivial transpose.
-            'pairs: for x in 0..run.len() {
+            // beyond the trivial transpose. Every later key-run is walked
+            // too: a fixed multiple of the column count is not a finished
+            // census while new rows still raise the homogeneous rank.
+            for x in 0..run.len() {
                 for y in (x + 1)..run.len() {
                     let first = &run[x];
                     let second = &run[y];
@@ -582,11 +583,6 @@ fn main() {
                                 verified_rows.push(row);
                             }
                             verified_relations += 1;
-                            if verified_relations >= row_cap {
-                                // Enough verified rows for a rank census; the
-                                // surplus would only repeat the measurement.
-                                break 'pairs;
-                            }
                         }
                         Verified::TrivialOnly => trivial_only_pairs += 1,
                         Verified::NoSum => no_sum_pairs += 1,
