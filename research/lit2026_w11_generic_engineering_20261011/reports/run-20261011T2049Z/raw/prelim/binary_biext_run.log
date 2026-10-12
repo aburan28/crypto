@@ -1,0 +1,11 @@
+13:50  up 13:29, 10 users, load averages: 89.65 93.25 98.20
+ sect163 8 200 5 > binary_sect163.jsonl  1.91s user 0.04s system 35% cpu 5.575 total
+13:50  up 13:29, 10 users, load averages: 86.87 92.61 97.95
+ torsion19 3 5 > binary_torsion19.jsonl  5.24s user 0.10s system 45% cpu 11.699 total
+13:51  up 13:30, 10 users, load averages: 84.62 91.86 97.58
+
+thread 'main' (5161595) panicked at examples/lit2026_w11_biext_k2.rs:71:13:
+no p below 2^62
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+ 4 200 5 > biext_k2.jsonl  4.95s user 0.10s system 23% cpu 21.626 total
+13:51  up 13:30, 10 users, load averages: 81.69 90.65 97.01
