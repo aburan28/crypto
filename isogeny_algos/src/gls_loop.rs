@@ -151,13 +151,24 @@ pub fn cheapest_loops_upto(d: i64, nmax: u64) -> (Vec<LoopElement>, u64) {
             if fac.iter().any(|&(l, _)| kronecker(d, l) == -1) {
                 continue;
             }
-            let cost = if n == 1 { 1.0 } else { fac.iter().map(|&(l, e)| 7.5 * l as f64 * e as f64).sum() };
+            let cost = if n == 1 {
+                1.0
+            } else {
+                fac.iter().map(|&(l, e)| 7.5 * l as f64 * e as f64).sum()
+            };
             if cost < best_cost - 1e-9 {
                 best_cost = cost;
                 best.clear();
             }
             if (cost - best_cost).abs() < 1e-9 {
-                best.push(LoopElement { d, a, b, norm: n, steps: fac, cost });
+                best.push(LoopElement {
+                    d,
+                    a,
+                    b,
+                    norm: n,
+                    steps: fac,
+                    cost,
+                });
             }
         }
         b += 1;
@@ -182,11 +193,20 @@ pub fn cheapest_loop(d: i64) -> (LoopElement, usize, u64, u64) {
     let dm = d_min(d).max(1);
     let (first, _) = cheapest_loops_upto(d, dm * 64);
     let ub = first.first().map(|l| l.cost).unwrap_or(f64::INFINITY);
-    let nmax = if ub.is_finite() { (2f64.powf(ub / kappa_projective())).floor() as u64 } else { dm * 4096 };
+    let nmax = if ub.is_finite() {
+        (2f64.powf(ub / kappa_projective())).floor() as u64
+    } else {
+        dm * 4096
+    };
     let nmax = nmax.max(dm * 64);
     let (best, enumerated) = cheapest_loops_upto(d, nmax);
     let ties = best.len();
-    (best.into_iter().next().expect("a loop exists"), ties, enumerated, nmax)
+    (
+        best.into_iter().next().expect("a loop exists"),
+        ties,
+        enumerated,
+        nmax,
+    )
 }
 
 /// A GLS instance for discriminant `d`.
@@ -214,7 +234,14 @@ fn random_below_bits(rng: &mut Rng, bits: usize) -> Int {
 /// Search `t, v` with `p = (t^2 + |d| v^2)/4` a prime of exactly `pbits` bits, `p = 3 mod 4`,
 /// `gcd(v, l) = 1` for every `l` in `avoid` (so that only the horizontal `l`-isogenies are
 /// rational), and `(p-1)^2 + t^2 = h r` with `r` prime and `h <= hmax`.
-pub fn find_instance(d: i64, pbits: usize, avoid: &[u64], hmax: u64, seed: u64, max_tries: u64) -> Option<Instance> {
+pub fn find_instance(
+    d: i64,
+    pbits: usize,
+    avoid: &[u64],
+    hmax: u64,
+    seed: u64,
+    max_tries: u64,
+) -> Option<Instance> {
     let mut rng = Rng::new(seed);
     let ad = Int::from(-d);
     let four = Int::from(4i64);
@@ -250,7 +277,15 @@ pub fn find_instance(d: i64, pbits: usize, avoid: &[u64], hmax: u64, seed: u64, 
             }
             let r = nt.div_floor(&Int::from(h));
             if r.is_probable_prime() {
-                return Some(Instance { d, p, t, v, h, r, tries });
+                return Some(Instance {
+                    d,
+                    p,
+                    t,
+                    v,
+                    h,
+                    r,
+                    tries,
+                });
             }
         }
     }
@@ -276,7 +311,10 @@ impl api::FieldTask for RootsTask<'_> {
     fn run<F: PrimeFieldInt>(self, f: &F) -> Vec<Int> {
         let pp: poly::Poly<F> = self.coeffs.iter().map(|c| f.elem(c)).collect();
         let mut rng = Rng::new(self.seed);
-        poly::roots(f, &pp, &mut rng).into_iter().map(|e| f.int(e)).collect()
+        poly::roots(f, &pp, &mut rng)
+            .into_iter()
+            .map(|e| f.int(e))
+            .collect()
     }
 }
 
@@ -304,13 +342,25 @@ pub fn order_kills(curve: &PrimeCurve, order: &Int, seed: u64) -> bool {
 
 pub fn build_curve(inst: &Instance, seed: u64) -> Result<CmCurve, String> {
     let hp = hilbert_class_poly(inst.d)?;
-    let roots = api::with_field(&inst.p, RootsTask { coeffs: &hp.coeffs, seed });
+    let roots = api::with_field(
+        &inst.p,
+        RootsTask {
+            coeffs: &hp.coeffs,
+            seed,
+        },
+    );
     let degree = hp.coeffs.len() - 1;
     if roots.len() != degree {
-        return Err(format!("H_D mod p has {} roots in F_p, expected {degree}", roots.len()));
+        return Err(format!(
+            "H_D mod p has {} roots in F_p, expected {degree}",
+            roots.len()
+        ));
     }
     let p = &inst.p;
-    let j0 = roots.iter().find(|j| !j.is_zero() && **j != Int::from(1728i64)).ok_or("only j = 0, 1728")?;
+    let j0 = roots
+        .iter()
+        .find(|j| !j.is_zero() && **j != Int::from(1728i64))
+        .ok_or("only j = 0, 1728")?;
     // y^2 = x^3 + 3 j (1728 - j) x + 2 j (1728 - j)^2
     let k = (&Int::from(1728i64) - j0).modulo(p);
     let a = (&(&Int::from(3i64) * j0) * &k).modulo(p);
@@ -343,7 +393,12 @@ pub struct Chain {
 
 /// Every non-backtracking walk of horizontal isogenies with the given degree sequence that
 /// returns to `start`'s j-invariant, with the isomorphism closing it.
-pub fn closing_loops(start: &PrimeCurve, crater: &HashSet<Int>, degrees: &[u64], seed: u64) -> Result<Vec<Chain>, String> {
+pub fn closing_loops(
+    start: &PrimeCurve,
+    crater: &HashSet<Int>,
+    degrees: &[u64],
+    seed: u64,
+) -> Result<Vec<Chain>, String> {
     let p = &start.p;
     let j0 = start.j();
     let mut out = vec![];
@@ -408,12 +463,21 @@ impl Chain {
         let maps = self
             .steps
             .iter()
-            .map(|r| (r.map_num.iter().map(embed).collect(), r.map_den.iter().map(embed).collect()))
+            .map(|r| {
+                (
+                    r.map_num.iter().map(embed).collect(),
+                    r.map_den.iter().map(embed).collect(),
+                )
+            })
             .collect();
         let w = embed(&self.w);
         let w2 = g.mul(w, w);
         let w3 = g.mul(w2, w);
-        FieldChain { maps, w2_inv: g.inv(w2), w3_inv: g.inv(w3) }
+        FieldChain {
+            maps,
+            w2_inv: g.inv(w2),
+            w3_inv: g.inv(w3),
+        }
     }
 }
 
@@ -441,6 +505,268 @@ impl<G: Field> FieldChain<G> {
     }
 }
 
+// ---------------------------------------------------------------- binary GLS number theory
+
+pub fn squarefree(mut n: i64) -> bool {
+    let mut q = 2i64;
+    while q * q <= n {
+        if n % (q * q) == 0 {
+            return false;
+        }
+        if n % q == 0 {
+            n /= q;
+        }
+        q += 1;
+    }
+    true
+}
+
+pub fn prime_form(d: i64, l: i64) -> Option<crate::path::relation::Form> {
+    // (l, b, c) with b^2 = d mod 4l, b = d mod 2
+    let d = d as i128;
+    let l = l as i128;
+    for b in 0..2 * l {
+        if (b - d).rem_euclid(2) == 0 && (b * b - d).rem_euclid(4 * l) == 0 {
+            return Some(
+                crate::path::relation::Form {
+                    a: l,
+                    b,
+                    c: (b * b - d) / (4 * l),
+                }
+                .reduce(),
+            );
+        }
+    }
+    None
+}
+
+pub fn is_prime_u64(n: u64) -> bool {
+    if n < 2 {
+        return false;
+    }
+    let mut q = 2u64;
+    while q * q <= n {
+        if n.is_multiple_of(q) {
+            return false;
+        }
+        q += 1;
+    }
+    true
+}
+
+/// Square roots of d modulo 2^k (k >= 3, d = 1 mod 8): the four lifts.
+pub fn sqrt_mod_2k(d: &Int, k: usize) -> Vec<Int> {
+    let m = Int::one().shl(k);
+    let dm = d.modulo(&m);
+    let mut x = Int::one();
+    for j in 3..k {
+        // x^2 = d mod 2^j; lift to mod 2^(j+1)
+        let mj1 = Int::one().shl(j + 1);
+        if !(&(&x * &x) - &dm).modulo(&mj1).is_zero() {
+            x = &x + &Int::one().shl(j - 1);
+        }
+    }
+    let half = Int::one().shl(k - 1);
+    let mut out = vec![
+        x.modulo(&m),
+        (-&x).modulo(&m),
+        (&x + &half).modulo(&m),
+        (&(-&x) + &half).modulo(&m),
+    ];
+    out.retain(|r| (&(r * r) - &dm).modulo(&m).is_zero());
+    out.sort();
+    out.dedup();
+    out
+}
+
+/// All (A, B), B > 0, with A^2 + |d| B^2 = 4n, n = l 2^k (l = 1 or an odd prime with (d/l) = 1),
+/// found by Cornacchia's reduction from every square root of d mod 4n; each result is verified.
+pub fn cornacchia(d: i64, l: u64, k: usize) -> Vec<(Int, Int)> {
+    let ad = Int::from(-d);
+    let n = &Int::from(l) * &Int::one().shl(k);
+    let four_n = &n * &Int::from(4i64);
+    let di = Int::from(d);
+    let r2 = sqrt_mod_2k(&di, k + 2);
+    let rl: Vec<Int> = if l == 1 {
+        vec![Int::zero()]
+    } else {
+        (0..l)
+            .filter(|&x| (x as i128 * x as i128 - d as i128).rem_euclid(l as i128) == 0)
+            .map(Int::from)
+            .collect()
+    };
+    let m2 = Int::one().shl(k + 2);
+    let ml = Int::from(l);
+    let bound = (&n * &Int::from(4i64)).isqrt();
+    let mut out: Vec<(Int, Int)> = vec![];
+    for a2 in &r2 {
+        for al in &rl {
+            // CRT: x = a2 mod 2^(k+2), x = al mod l
+            let x0 = if l == 1 {
+                a2.clone()
+            } else {
+                let t = (&(al - a2) * &m2.inv_mod(&ml).unwrap()).modulo(&ml);
+                (a2 + &(&t * &m2)).modulo(&four_n)
+            };
+            for start in [x0.clone(), (-&x0).modulo(&four_n)] {
+                let (mut a, mut b) = (
+                    &n * &Int::from(2i64),
+                    start.modulo(&(&n * &Int::from(2i64))),
+                );
+                let mut tried = 0;
+                while tried < 4096 {
+                    tried += 1;
+                    if b <= bound {
+                        let rest = &four_n - &(&b * &b);
+                        if !rest.is_neg() && rest.modulo(&ad).is_zero() {
+                            let c = rest.div_floor(&ad);
+                            if c.is_square() && !c.is_zero() {
+                                let bb = c.isqrt();
+                                if &(&b * &b) + &(&ad * &(&bb * &bb)) == four_n {
+                                    out.push((b.clone(), bb.clone()));
+                                    out.push((-&b, bb));
+                                }
+                            }
+                        }
+                    }
+                    if b.is_zero() {
+                        break;
+                    }
+                    let r = a.modulo(&b);
+                    a = b;
+                    b = r;
+                }
+            }
+        }
+    }
+    out.sort();
+    out.dedup();
+    out
+}
+
+pub fn v2(x: &Int) -> usize {
+    if x.is_zero() {
+        return usize::MAX;
+    }
+    let mut v = 0;
+    let mut y = x.abs();
+    while y.is_even() {
+        y = y.shr(1);
+        v += 1;
+    }
+    v
+}
+
+// ---------------------------------------------------------------- decomposition
+
+/// Babai rounding with precomputed constants: c_j = round(k g_j / 2^m), g_j = round(C_j0 2^m / det).
+pub struct Babai {
+    pub basis: Vec<Vec<Int>>,
+    g: Vec<Int>,
+    m: usize,
+}
+
+fn det3(m: &[[Int; 3]; 3]) -> Int {
+    let t = |a: &Int, b: &Int, c: &Int, d: &Int| &(a * b) - &(c * d);
+    &(&(&m[0][0] * &t(&m[1][1], &m[2][2], &m[1][2], &m[2][1]))
+        - &(&m[0][1] * &t(&m[1][0], &m[2][2], &m[1][2], &m[2][0])))
+        + &(&m[0][2] * &t(&m[1][0], &m[2][1], &m[1][1], &m[2][0]))
+}
+
+impl Babai {
+    pub fn new(basis: Vec<Vec<Int>>, rbits: usize) -> Babai {
+        let n = basis.len();
+        let (cof, det): (Vec<Int>, Int) = if n == 2 {
+            let cof = vec![basis[1][1].clone(), -&basis[0][1]];
+            let det = &(&basis[0][0] * &basis[1][1]) - &(&basis[0][1] * &basis[1][0]);
+            (cof, det)
+        } else {
+            let mut cof = vec![];
+            for j in 0..4 {
+                let rows: Vec<usize> = (0..4).filter(|&i| i != j).collect();
+                let mut mm: [[Int; 3]; 3] =
+                    std::array::from_fn(|_| std::array::from_fn(|_| Int::zero()));
+                for (ri, &i) in rows.iter().enumerate() {
+                    for c in 1..4 {
+                        mm[ri][c - 1] = basis[i][c].clone();
+                    }
+                }
+                let d3 = det3(&mm);
+                cof.push(if j % 2 == 0 { d3 } else { -&d3 });
+            }
+            let det = (0..4).fold(Int::zero(), |acc, j| &acc + &(&basis[j][0] * &cof[j]));
+            (cof, det)
+        };
+        let m = 2 * rbits + 16;
+        let g = cof.iter().map(|c| c.shl(m).div_round(&det)).collect();
+        Babai { basis, g, m }
+    }
+    pub fn decompose(&self, k: &Int) -> Vec<Int> {
+        let n = self.basis.len();
+        let mut out = vec![Int::zero(); n];
+        out[0] = k.clone();
+        let half = Int::one().shl(self.m - 1);
+        for j in 0..n {
+            let t = &(k * &self.g[j]) + &half;
+            let c = t.div_floor(&Int::one().shl(self.m));
+            if c.is_zero() {
+                continue;
+            }
+            for i in 0..n {
+                out[i] = &out[i] - &(&c * &self.basis[j][i]);
+            }
+        }
+        out
+    }
+}
+
+/// Lagrange–Gauss-reduced basis of {(k0, k1) : k0 + k1 mu = 0 mod r}.
+pub fn gauss2(r: &Int, mu: &Int) -> Vec<Vec<Int>> {
+    // Lagrange-Gauss reduction of (r, 0), (-mu, 1)
+    let mut a = (r.clone(), Int::zero());
+    let mut b = ((-mu).modulo(r), Int::one());
+    let n2 = |v: &(Int, Int)| &(&v.0 * &v.0) + &(&v.1 * &v.1);
+    loop {
+        if n2(&a) < n2(&b) {
+            std::mem::swap(&mut a, &mut b);
+        }
+        let dot = &(&a.0 * &b.0) + &(&a.1 * &b.1);
+        let q = dot.div_round(&n2(&b));
+        if q.is_zero() {
+            break;
+        }
+        a = (&a.0 - &(&q * &b.0), &a.1 - &(&q * &b.1));
+    }
+    vec![vec![a.0, a.1], vec![b.0, b.1]]
+}
+
+/// Exact-LLL-reduced basis of {k : k0 + k1 mu + k2 lam + k3 lam mu = 0 mod r}.
+pub fn lll4(r: &Int, mu: &Int, lam: &Int) -> Vec<Vec<Int>> {
+    let lm = (lam * mu).modulo(r);
+    let z = Int::zero;
+    let o = Int::one;
+    let rows: Vec<Vec<Int>> = vec![
+        vec![r.clone(), z(), z(), z()],
+        vec![(-mu).modulo(r), o(), z(), z()],
+        vec![(-lam).modulo(r), z(), o(), z()],
+        vec![(-&lm).modulo(r), z(), z(), o()],
+    ];
+    let mut gram: [[Int; 4]; 4] = std::array::from_fn(|_| std::array::from_fn(|_| Int::zero()));
+    for i in 0..4 {
+        for j in 0..4 {
+            gram[i][j] = (0..4).fold(Int::zero(), |acc, c| &acc + &(&rows[i][c] * &rows[j][c]));
+        }
+    }
+    let h = crate::quat::lll_gram(&gram);
+    (0..4)
+        .map(|i| {
+            (0..4)
+                .map(|c| (0..4).fold(Int::zero(), |acc, k| &acc + &(&h[i][k] * &rows[k][c])))
+                .collect()
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -448,7 +774,12 @@ mod tests {
     #[test]
     fn cheapest_loops_reproduce_known_values() {
         // values certified natively in research/isogeny_loop_glv_20261011 and in the paper
-        for (d, cost, norm) in [(-23i64, 37.5, 6u64), (-71, 60.0, 18), (-619, 127.5, 175), (-3019, 210.0, 1625)] {
+        for (d, cost, norm) in [
+            (-23i64, 37.5, 6u64),
+            (-71, 60.0, 18),
+            (-619, 127.5, 175),
+            (-3019, 210.0, 1625),
+        ] {
             let (l, _, _, _) = cheapest_loop(d);
             assert_eq!(l.cost, cost, "D = {d}");
             assert_eq!(l.norm, norm, "D = {d}");

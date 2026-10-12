@@ -30,10 +30,11 @@ use isogeny_algos::curve::{pmul, pmul_big, random_point_f, Curve, Pt};
 use isogeny_algos::field::{Field, Rng};
 use isogeny_algos::fp2::Fp2;
 use isogeny_algos::fpm::FpM;
-use isogeny_algos::gls_loop::{build_curve, cheapest_loop, closing_loops, find_instance, FieldChain};
+use isogeny_algos::gls_loop::{
+    build_curve, cheapest_loop, closing_loops, find_instance, gauss2, lll4, Babai, FieldChain,
+};
 use isogeny_algos::int::Int;
 use isogeny_algos::json::Json;
-use isogeny_algos::quat::lll_gram;
 use std::time::Instant;
 
 type B = FpM<2>;
@@ -54,7 +55,11 @@ struct Ar<'a> {
 
 impl Ar<'_> {
     fn inf(&self) -> Jac {
-        Jac { x: self.g.one(), y: self.g.one(), z: self.g.zero() }
+        Jac {
+            x: self.g.one(),
+            y: self.g.one(),
+            z: self.g.zero(),
+        }
     }
     fn is_inf(&self, p: &Jac) -> bool {
         self.g.is_zero(p.z)
@@ -79,13 +84,21 @@ impl Ar<'_> {
         };
         let y3 = g.sub(g.mul(m, g.sub(s, x3)), y8);
         let z3 = g.sub(g.sub(g.sq(g.add(p.y, p.z)), yy), zz);
-        Jac { x: x3, y: y3, z: z3 }
+        Jac {
+            x: x3,
+            y: y3,
+            z: z3,
+        }
     }
     /// p + (x2, y2) with (x2, y2) affine.
     fn madd(&self, p: &Jac, x2: E, y2: E) -> Jac {
         let g = self.g;
         if self.is_inf(p) {
-            return Jac { x: x2, y: y2, z: g.one() };
+            return Jac {
+                x: x2,
+                y: y2,
+                z: g.one(),
+            };
         }
         let z1z1 = g.sq(p.z);
         let u2 = g.mul(x2, z1z1);
@@ -96,7 +109,11 @@ impl Ar<'_> {
             g.add(t, t)
         };
         if g.is_zero(h) {
-            return if g.is_zero(rr) { self.dbl(p) } else { self.inf() };
+            return if g.is_zero(rr) {
+                self.dbl(p)
+            } else {
+                self.inf()
+            };
         }
         let hh = g.sq(h);
         let i = {
@@ -109,7 +126,11 @@ impl Ar<'_> {
         let yj = g.mul(p.y, j);
         let y3 = g.sub(g.mul(rr, g.sub(v, x3)), g.add(yj, yj));
         let z3 = g.sub(g.sub(g.sq(g.add(p.z, h)), z1z1), hh);
-        Jac { x: x3, y: y3, z: z3 }
+        Jac {
+            x: x3,
+            y: y3,
+            z: z3,
+        }
     }
     /// Full Jacobian addition (add-2007-bl), used for the tables.
     fn add(&self, p: &Jac, q: &Jac) -> Jac {
@@ -132,7 +153,11 @@ impl Ar<'_> {
             g.add(t, t)
         };
         if g.is_zero(h) {
-            return if g.is_zero(rr) { self.dbl(p) } else { self.inf() };
+            return if g.is_zero(rr) {
+                self.dbl(p)
+            } else {
+                self.inf()
+            };
         }
         let i = g.sq(g.add(h, h));
         let j = g.mul(h, i);
@@ -141,13 +166,20 @@ impl Ar<'_> {
         let sj = g.mul(s1, j);
         let y3 = g.sub(g.mul(rr, g.sub(v, x3)), g.add(sj, sj));
         let z3 = g.mul(g.sub(g.sub(g.sq(g.add(p.z, q.z)), z1z1), z2z2), h);
-        Jac { x: x3, y: y3, z: z3 }
+        Jac {
+            x: x3,
+            y: y3,
+            z: z3,
+        }
     }
     /// Odd multiples P, 3P, ..., (2^(w-1) - 1) P of several affine base points, all normalized
     /// to affine with one batched inversion.
     fn tables(&self, bases: &[(E, E)], w: u32) -> Vec<Vec<(E, E)>> {
         let g = self.g;
-        let jb: Vec<Jac> = bases.iter().map(|&(x, y)| Jac { x, y, z: g.one() }).collect();
+        let jb: Vec<Jac> = bases
+            .iter()
+            .map(|&(x, y)| Jac { x, y, z: g.one() })
+            .collect();
         self.tables_jac(&jb, w)
     }
     /// The same with Jacobian bases (the base itself is normalized in the same batch).
@@ -190,12 +222,17 @@ impl Ar<'_> {
         }
         let z1z1 = g.sq(p.z);
         let z2z2 = g.sq(q.z);
-        g.mul(p.x, z2z2) == g.mul(q.x, z1z1) && g.mul(p.y, g.mul(q.z, z2z2)) == g.mul(q.y, g.mul(p.z, z1z1))
+        g.mul(p.x, z2z2) == g.mul(q.x, z1z1)
+            && g.mul(p.y, g.mul(q.z, z2z2)) == g.mul(q.y, g.mul(p.z, z1z1))
     }
-    fn from_aff(&self, p: &Pt<E>) -> Jac {
+    fn lift_aff(&self, p: &Pt<E>) -> Jac {
         match *p {
             Pt::Inf => self.inf(),
-            Pt::Aff(x, y) => Jac { x, y, z: self.g.one() },
+            Pt::Aff(x, y) => Jac {
+                x,
+                y,
+                z: self.g.one(),
+            },
         }
     }
 }
@@ -222,17 +259,27 @@ fn homog(g: &G, c: &[E], x: E, vpow: &[E]) -> E {
 impl ProjChain {
     fn new(g: &G, fc: &FieldChain<G>) -> ProjChain {
         let deriv = |c: &Vec<E>| -> Vec<E> {
-            (1..c.len()).map(|i| g.mul(g.from_u64(i as u64), c[i])).collect()
+            (1..c.len())
+                .map(|i| g.mul(g.from_u64(i as u64), c[i]))
+                .collect()
         };
         let steps = fc
             .maps
             .iter()
             .map(|(n, d)| {
-                assert_eq!(n.len(), d.len() + 1, "x-map degrees: num = den + 1 expected");
+                assert_eq!(
+                    n.len(),
+                    d.len() + 1,
+                    "x-map degrees: num = den + 1 expected"
+                );
                 [n.clone(), d.clone(), deriv(n), deriv(d)]
             })
             .collect();
-        ProjChain { steps, w2_inv: fc.w2_inv, w3_inv: fc.w3_inv }
+        ProjChain {
+            steps,
+            w2_inv: fc.w2_inv,
+            w3_inv: fc.w3_inv,
+        }
     }
     fn eval(&self, g: &G, u: E, x: E, y: E) -> Jac {
         let (mut xx, mut zz, mut yy, mut ww) = (x, g.one(), y, g.one());
@@ -257,7 +304,11 @@ impl ProjChain {
         // x = X/Z, y = Y/W  ->  Jacobian with Z_J = Z W
         let zw = g.mul(zz, ww);
         let w2 = g.sq(ww);
-        Jac { x: g.mul(g.mul(xx, zz), w2), y: g.mul(g.mul(yy, g.mul(g.sq(zz), zz)), w2), z: zw }
+        Jac {
+            x: g.mul(g.mul(xx, zz), w2),
+            y: g.mul(g.mul(yy, g.mul(g.sq(zz), zz)), w2),
+            z: zw,
+        }
     }
 }
 
@@ -323,106 +374,6 @@ fn interleaved(ar: &Ar, digits: &[Vec<i32>], tabs: &[&Vec<(E, E)>], neg: &[bool]
     r
 }
 
-/// Babai rounding with precomputed constants: c_j = round(k g_j / 2^m), g_j = round(C_j0 2^m / det).
-struct Babai {
-    basis: Vec<Vec<Int>>,
-    g: Vec<Int>,
-    m: usize,
-}
-
-fn det3(m: &[[Int; 3]; 3]) -> Int {
-    let t = |a: &Int, b: &Int, c: &Int, d: &Int| &(a * b) - &(c * d);
-    &(&(&m[0][0] * &t(&m[1][1], &m[2][2], &m[1][2], &m[2][1])) - &(&m[0][1] * &t(&m[1][0], &m[2][2], &m[1][2], &m[2][0])))
-        + &(&m[0][2] * &t(&m[1][0], &m[2][1], &m[1][1], &m[2][0]))
-}
-
-impl Babai {
-    fn new(basis: Vec<Vec<Int>>, rbits: usize) -> Babai {
-        let n = basis.len();
-        let (cof, det): (Vec<Int>, Int) = if n == 2 {
-            let cof = vec![basis[1][1].clone(), -&basis[0][1]];
-            let det = &(&basis[0][0] * &basis[1][1]) - &(&basis[0][1] * &basis[1][0]);
-            (cof, det)
-        } else {
-            let mut cof = vec![];
-            for j in 0..4 {
-                let rows: Vec<usize> = (0..4).filter(|&i| i != j).collect();
-                let mut mm: [[Int; 3]; 3] = std::array::from_fn(|_| std::array::from_fn(|_| Int::zero()));
-                for (ri, &i) in rows.iter().enumerate() {
-                    for c in 1..4 {
-                        mm[ri][c - 1] = basis[i][c].clone();
-                    }
-                }
-                let d3 = det3(&mm);
-                cof.push(if j % 2 == 0 { d3 } else { -&d3 });
-            }
-            let det = (0..4).fold(Int::zero(), |acc, j| &acc + &(&basis[j][0] * &cof[j]));
-            (cof, det)
-        };
-        let m = 2 * rbits + 16;
-        let g = cof.iter().map(|c| c.shl(m).div_round(&det)).collect();
-        Babai { basis, g, m }
-    }
-    fn decompose(&self, k: &Int) -> Vec<Int> {
-        let n = self.basis.len();
-        let mut out = vec![Int::zero(); n];
-        out[0] = k.clone();
-        let half = Int::one().shl(self.m - 1);
-        for j in 0..n {
-            let t = &(k * &self.g[j]) + &half;
-            let c = t.div_floor(&Int::one().shl(self.m));
-            if c.is_zero() {
-                continue;
-            }
-            for i in 0..n {
-                out[i] = &out[i] - &(&c * &self.basis[j][i]);
-            }
-        }
-        out
-    }
-}
-
-fn gauss2(r: &Int, mu: &Int) -> Vec<Vec<Int>> {
-    // Lagrange-Gauss reduction of (r, 0), (-mu, 1)
-    let mut a = (r.clone(), Int::zero());
-    let mut b = ((-mu).modulo(r), Int::one());
-    let n2 = |v: &(Int, Int)| &(&v.0 * &v.0) + &(&v.1 * &v.1);
-    loop {
-        if n2(&a) < n2(&b) {
-            std::mem::swap(&mut a, &mut b);
-        }
-        let dot = &(&a.0 * &b.0) + &(&a.1 * &b.1);
-        let q = dot.div_round(&n2(&b));
-        if q.is_zero() {
-            break;
-        }
-        a = (&a.0 - &(&q * &b.0), &a.1 - &(&q * &b.1));
-    }
-    vec![vec![a.0, a.1], vec![b.0, b.1]]
-}
-
-fn lll4(r: &Int, mu: &Int, lam: &Int) -> Vec<Vec<Int>> {
-    let lm = (lam * mu).modulo(r);
-    let z = Int::zero;
-    let o = Int::one;
-    let rows: Vec<Vec<Int>> = vec![
-        vec![r.clone(), z(), z(), z()],
-        vec![(-mu).modulo(r), o(), z(), z()],
-        vec![(-lam).modulo(r), z(), o(), z()],
-        vec![(-&lm).modulo(r), z(), z(), o()],
-    ];
-    let mut gram: [[Int; 4]; 4] = std::array::from_fn(|_| std::array::from_fn(|_| Int::zero()));
-    for i in 0..4 {
-        for j in 0..4 {
-            gram[i][j] = (0..4).fold(Int::zero(), |acc, c| &acc + &(&rows[i][c] * &rows[j][c]));
-        }
-    }
-    let h = lll_gram(&gram);
-    (0..4)
-        .map(|i| (0..4).map(|c| (0..4).fold(Int::zero(), |acc, k| &acc + &(&h[i][k] * &rows[k][c]))).collect())
-        .collect()
-}
-
 fn pow_big(g: &G, a: E, e: &Big) -> E {
     let mut r = g.one();
     for i in (0..e.bits()).rev() {
@@ -435,7 +386,11 @@ fn pow_big(g: &G, a: E, e: &Big) -> E {
 }
 
 fn arg<T: std::str::FromStr>(args: &[String], name: &str, default: T) -> T {
-    args.iter().position(|a| a == name).and_then(|i| args.get(i + 1)).and_then(|v| v.parse().ok()).unwrap_or(default)
+    args.iter()
+        .position(|a| a == name)
+        .and_then(|i| args.get(i + 1))
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(default)
 }
 
 fn median(v: &mut [f64]) -> f64 {
@@ -456,14 +411,30 @@ fn main() {
     let pairs: usize = arg(&args, "--pairs", 256);
     let rounds: usize = arg(&args, "--rounds", 20);
     let w: u32 = arg(&args, "--w", 5);
-    let json_out: Option<String> = args.iter().position(|a| a == "--json").and_then(|i| args.get(i + 1)).cloned();
+    let json_out: Option<String> = args
+        .iter()
+        .position(|a| a == "--json")
+        .and_then(|i| args.get(i + 1))
+        .cloned();
 
     // ---------------- setup (untimed)
     let (lp, _, _, _) = cheapest_loop(d);
-    let avoid: Vec<u64> = lp.steps.iter().map(|&(l, _)| l).filter(|&l| l > 2).collect();
-    let inst = find_instance(d, pbits, &avoid, 64, seed ^ (1u64 << 32), 20_000_000).expect("instance");
+    let avoid: Vec<u64> = lp
+        .steps
+        .iter()
+        .map(|&(l, _)| l)
+        .filter(|&l| l > 2)
+        .collect();
+    let inst =
+        find_instance(d, pbits, &avoid, 64, seed ^ (1u64 << 32), 20_000_000).expect("instance");
     let cm = build_curve(&inst, seed ^ (1u64 << 32)).expect("curve");
-    let chains = closing_loops(&cm.curve, &cm.crater, &lp.degree_sequence(), seed ^ (1u64 << 32)).expect("walk");
+    let chains = closing_loops(
+        &cm.curve,
+        &cm.crater,
+        &lp.degree_sequence(),
+        seed ^ (1u64 << 32),
+    )
+    .expect("walk");
     assert!(!chains.is_empty());
     let p = &inst.p;
     let r = &inst.r;
@@ -492,7 +463,8 @@ fn main() {
     // sample points of order r and determine mu, lambda (sign included) on the first one
     let pts: Vec<(E, E)> = (0..pairs)
         .map(|_| loop {
-            if let Pt::Aff(x, y) = pmul(&g, &ct, &random_point_f(&g, &ct, &mut rng), inst.h as u128) {
+            if let Pt::Aff(x, y) = pmul(&g, &ct, &random_point_f(&g, &ct, &mut rng), inst.h as u128)
+            {
                 break (x, y);
             }
         })
@@ -545,7 +517,12 @@ fn main() {
         let tpsi: Vec<(E, E)> = t[0].iter().map(|&q| psi_aff(q)).collect();
         let d0 = c[0].to_i128().unwrap();
         let d1 = c[1].to_i128().unwrap();
-        interleaved(&ar, &[wnaf_i128(d0.abs(), w), wnaf_i128(d1.abs(), w)], &[&t[0], &tpsi], &[d0 < 0, d1 < 0])
+        interleaved(
+            &ar,
+            &[wnaf_i128(d0.abs(), w), wnaf_i128(d1.abs(), w)],
+            &[&t[0], &tpsi],
+            &[d0 < 0, d1 < 0],
+        )
     };
     let arm_glvgls4 = |k: &Int, pt: (E, E)| -> Jac {
         let c = b4.decompose(k);
@@ -556,7 +533,12 @@ fn main() {
         let ds: Vec<i128> = c.iter().map(|x| x.to_i128().unwrap()).collect();
         interleaved(
             &ar,
-            &[wnaf_i128(ds[0].abs(), w), wnaf_i128(ds[1].abs(), w), wnaf_i128(ds[2].abs(), w), wnaf_i128(ds[3].abs(), w)],
+            &[
+                wnaf_i128(ds[0].abs(), w),
+                wnaf_i128(ds[1].abs(), w),
+                wnaf_i128(ds[2].abs(), w),
+                wnaf_i128(ds[3].abs(), w),
+            ],
             &[&t[0], &tpsi, &t[1], &tapsi],
             &[ds[0] < 0, ds[1] < 0, ds[2] < 0, ds[3] < 0],
         )
@@ -566,13 +548,28 @@ fn main() {
     let arm_glvgls4p = |k: &Int, pt: (E, E)| -> Jac {
         let c = b4.decompose(k);
         let ap = pchain.eval(&g, u, pt.0, pt.1);
-        let t = ar.tables_jac(&[Jac { x: pt.0, y: pt.1, z: g.one() }, ap], w);
+        let t = ar.tables_jac(
+            &[
+                Jac {
+                    x: pt.0,
+                    y: pt.1,
+                    z: g.one(),
+                },
+                ap,
+            ],
+            w,
+        );
         let tpsi: Vec<(E, E)> = t[0].iter().map(|&q| psi_aff(q)).collect();
         let tapsi: Vec<(E, E)> = t[1].iter().map(|&q| psi_aff(q)).collect();
         let ds: Vec<i128> = c.iter().map(|x| x.to_i128().unwrap()).collect();
         interleaved(
             &ar,
-            &[wnaf_i128(ds[0].abs(), w), wnaf_i128(ds[1].abs(), w), wnaf_i128(ds[2].abs(), w), wnaf_i128(ds[3].abs(), w)],
+            &[
+                wnaf_i128(ds[0].abs(), w),
+                wnaf_i128(ds[1].abs(), w),
+                wnaf_i128(ds[2].abs(), w),
+                wnaf_i128(ds[3].abs(), w),
+            ],
             &[&t[0], &tpsi, &t[1], &tapsi],
             &[ds[0] < 0, ds[1] < 0, ds[2] < 0, ds[3] < 0],
         )
@@ -587,7 +584,10 @@ fn main() {
         ok &= ar.eq(&base, &arm_gls2(k, pt));
         ok &= ar.eq(&base, &arm_glvgls4(k, pt));
         ok &= ar.eq(&base, &arm_glvgls4p(k, pt));
-        ok &= ar.eq(&pchain.eval(&g, u, pt.0, pt.1), &ar.from_aff(&pmul_big(&g, &ct, &Pt::Aff(pt.0, pt.1), lam.mag())));
+        ok &= ar.eq(
+            &pchain.eval(&g, u, pt.0, pt.1),
+            &ar.lift_aff(&pmul_big(&g, &ct, &Pt::Aff(pt.0, pt.1), lam.mag())),
+        );
         let c2v = b2.decompose(k);
         let c4v = b4.decompose(k);
         ok &= (&(&c2v[0] + &(&c2v[1] * &mu)) - k).modulo(r).is_zero();
@@ -601,11 +601,14 @@ fn main() {
         let ap = alpha(pt).unwrap();
         ok &= pmul_big(&g, &ct, &pp, lam.mag()) == Pt::Aff(ap.0, ap.1);
         if i < 8 {
-            ok &= ar.eq(&base, &ar.from_aff(&pmul_big(&g, &ct, &pp, k.mag())));
+            ok &= ar.eq(&base, &ar.lift_aff(&pmul_big(&g, &ct, &pp, k.mag())));
             ok &= pmul_big(&g, &ct, &pp, &rbig) == Pt::Inf;
         }
     }
-    eprintln!("correctness on {pairs} pairs: {}", if ok { "all pass" } else { "FAIL" });
+    eprintln!(
+        "correctness on {pairs} pairs: {}",
+        if ok { "all pass" } else { "FAIL" }
+    );
     if !ok {
         std::process::exit(1);
     }
@@ -625,7 +628,11 @@ fn main() {
     let mut times: Vec<Vec<f64>> = vec![vec![]; names.len()];
     let mut sink = 0u64;
     for round in 0..rounds {
-        let order: Vec<usize> = if round % 2 == 0 { (0..names.len()).collect() } else { (0..names.len()).rev().collect() };
+        let order: Vec<usize> = if round % 2 == 0 {
+            (0..names.len()).collect()
+        } else {
+            (0..names.len()).rev().collect()
+        };
         for &arm in &order {
             let t0 = Instant::now();
             for (k, &pt) in scalars.iter().zip(&pts) {
@@ -644,7 +651,10 @@ fn main() {
         }
     }
     let med: Vec<f64> = times.iter().map(|v| median(&mut v.clone())).collect();
-    let min: Vec<f64> = times.iter().map(|v| v.iter().cloned().fold(f64::INFINITY, f64::min)).collect();
+    let min: Vec<f64> = times
+        .iter()
+        .map(|v| v.iter().cloned().fold(f64::INFINITY, f64::min))
+        .collect();
 
     println!("# GLV-GLS with an isogeny-loop endomorphism: timing on E'(F_(p^2))\n");
     println!(
@@ -661,9 +671,21 @@ fn main() {
             names[i],
             med[i],
             min[i],
-            if stage { "—".into() } else { format!("{:.3}", med[0] / med[i]) },
-            if stage { "—".into() } else { format!("{:.3}", min[0] / min[i]) },
-            if stage { "—".into() } else { format!("{:.3}", med[1] / med[i]) },
+            if stage {
+                "—".into()
+            } else {
+                format!("{:.3}", med[0] / med[i])
+            },
+            if stage {
+                "—".into()
+            } else {
+                format!("{:.3}", min[0] / min[i])
+            },
+            if stage {
+                "—".into()
+            } else {
+                format!("{:.3}", med[1] / med[i])
+            },
         );
     }
     println!("\nall correctness checks passed: yes (sink {sink:x})");
@@ -672,7 +694,15 @@ fn main() {
             ("schema", Json::str("gls_loop_bench/v1")),
             ("command", Json::str(args.join(" "))),
             ("d", Json::Num(d)),
-            ("loop", Json::obj(vec![("A", Json::Num(lp.a)), ("B", Json::Num(lp.b)), ("norm", Json::str(lp.norm)), ("cost_M", Json::Float(lp.cost))])),
+            (
+                "loop",
+                Json::obj(vec![
+                    ("A", Json::Num(lp.a)),
+                    ("B", Json::Num(lp.b)),
+                    ("norm", Json::str(lp.norm)),
+                    ("cost_M", Json::Float(lp.cost)),
+                ]),
+            ),
             ("p", Json::str(p)),
             ("t", Json::str(&inst.t)),
             ("v", Json::str(&inst.v)),
@@ -686,16 +716,24 @@ fn main() {
             ("seed", Json::str(seed)),
             ("max_bits_gls2", Json::Num(max_bits2 as i64)),
             ("max_bits_glvgls4", Json::Num(max_bits4 as i64)),
-            ("arms", Json::Arr(
-                (0..names.len())
-                    .map(|i| Json::obj(vec![
-                        ("name", Json::str(names[i])),
-                        ("median_ns", Json::Float(med[i])),
-                        ("min_ns", Json::Float(min[i])),
-                        ("rounds_ns", Json::Arr(times[i].iter().map(|&x| Json::Float(x)).collect())),
-                    ]))
-                    .collect(),
-            )),
+            (
+                "arms",
+                Json::Arr(
+                    (0..names.len())
+                        .map(|i| {
+                            Json::obj(vec![
+                                ("name", Json::str(names[i])),
+                                ("median_ns", Json::Float(med[i])),
+                                ("min_ns", Json::Float(min[i])),
+                                (
+                                    "rounds_ns",
+                                    Json::Arr(times[i].iter().map(|&x| Json::Float(x)).collect()),
+                                ),
+                            ])
+                        })
+                        .collect(),
+                ),
+            ),
             ("correctness_all_pass", Json::Bool(ok)),
         ]);
         std::fs::write(&path, doc.dump()).expect("write");

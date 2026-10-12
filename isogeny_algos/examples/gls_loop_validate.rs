@@ -62,7 +62,11 @@ fn candidates(a: i64, b: i64, s: &Int, r: &Int) -> Vec<(String, Int)> {
 }
 
 fn arg<T: std::str::FromStr>(args: &[String], name: &str, default: T) -> T {
-    args.iter().position(|a| a == name).and_then(|i| args.get(i + 1)).and_then(|v| v.parse().ok()).unwrap_or(default)
+    args.iter()
+        .position(|a| a == name)
+        .and_then(|i| args.get(i + 1))
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(default)
 }
 
 fn main() {
@@ -74,8 +78,15 @@ fn main() {
         .split(',')
         .map(|s| s.trim().parse().unwrap())
         .collect();
-    let json_out: Option<String> = args.iter().position(|a| a == "--json").and_then(|i| args.get(i + 1)).cloned();
-    assert!(pbits <= 127, "this example uses FpM<2>; pbits must be <= 127");
+    let json_out: Option<String> = args
+        .iter()
+        .position(|a| a == "--json")
+        .and_then(|i| args.get(i + 1))
+        .cloned();
+    assert!(
+        pbits <= 127,
+        "this example uses FpM<2>; pbits must be <= 127"
+    );
 
     let mut all_pass = true;
     let mut rows = vec![];
@@ -87,7 +98,12 @@ fn main() {
         let s_d = seed ^ ((di as u64 + 1) << 32);
         let (lp, _, _, _) = cheapest_loop(d);
         let degs = lp.degree_sequence();
-        let avoid: Vec<u64> = lp.steps.iter().map(|&(l, _)| l).filter(|&l| l > 2).collect();
+        let avoid: Vec<u64> = lp
+            .steps
+            .iter()
+            .map(|&(l, _)| l)
+            .filter(|&l| l > 2)
+            .collect();
         let inst = find_instance(d, pbits, &avoid, 64, s_d, 20_000_000).expect("no instance");
         let cm = build_curve(&inst, s_d).expect("curve");
         let chains = closing_loops(&cm.curve, &cm.crater, &degs, s_d).expect("walk");
@@ -119,7 +135,10 @@ fn main() {
                 let Pt::Aff(x, y) = pt else { continue };
                 for (ci, ch) in chains.iter().enumerate() {
                     let fc = ch.to_field(&f, &|v: &Int| f.elem(v));
-                    let img = fc.eval_twisted(&f, f.one(), x, y).map(|(a, b)| Pt::Aff(a, b)).unwrap_or(Pt::Inf);
+                    let img = fc
+                        .eval_twisted(&f, f.one(), x, y)
+                        .map(|(a, b)| Pt::Aff(a, b))
+                        .unwrap_or(Pt::Inf);
                     let hit: Vec<String> = cands
                         .iter()
                         .filter(|(_, l)| pmul_big(&f, &c, &pt, l.mag()) == img)
@@ -174,13 +193,19 @@ fn main() {
             }
         };
         let mu = (&(p - &Int::one()) * &inst.t.inv_mod(r).unwrap()).modulo(r);
-        assert!((&(&mu * &mu) + &Int::one()).modulo(r).is_zero(), "mu^2 != -1");
+        assert!(
+            (&(&mu * &mu) + &Int::one()).modulo(r).is_zero(),
+            "mu^2 != -1"
+        );
         let s = (&(&(&Int::from(2i64) * &mu) - &inst.t) * &inst.v.inv_mod(r).unwrap()).modulo(r);
         assert!((&(&s * &s) - &Int::from(d)).modulo(r).is_zero(), "s^2 != D");
         let cands = candidates(lp.a, lp.b, &s, r);
         let mut psi_seen = vec![];
         let mut seen: Vec<Vec<String>> = vec![vec![]; chains.len()];
-        let fcs: Vec<_> = chains.iter().map(|ch| ch.to_field(&g, &|v: &Int| g.embed(f.elem(v)))).collect();
+        let fcs: Vec<_> = chains
+            .iter()
+            .map(|ch| ch.to_field(&g, &|v: &Int| g.embed(f.elem(v))))
+            .collect();
         let mut killed = true;
         for _ in 0..npts {
             let q = pmul(&g, &ct, &random_point_f(&g, &ct, &mut rng), inst.h as u128);
@@ -196,7 +221,10 @@ fn main() {
             };
             psi_seen.push(ps.to_string());
             for (ci, fc) in fcs.iter().enumerate() {
-                let img = fc.eval_twisted(&g, u, x, y).map(|(a, b)| Pt::Aff(a, b)).unwrap_or(Pt::Inf);
+                let img = fc
+                    .eval_twisted(&g, u, x, y)
+                    .map(|(a, b)| Pt::Aff(a, b))
+                    .unwrap_or(Pt::Inf);
                 let hit: Vec<String> = cands
                     .iter()
                     .filter(|(_, l)| pmul_big(&g, &ct, &q, l.mag()) == img)
@@ -221,7 +249,10 @@ fn main() {
             })
             .collect();
         // the closing loops must sit on conjugate embeddings
-        let embeds: Vec<&str> = tw.iter().map(|x| if x.contains("(-s)") { "-s" } else { "s" }).collect();
+        let embeds: Vec<&str> = tw
+            .iter()
+            .map(|x| if x.contains("(-s)") { "-s" } else { "s" })
+            .collect();
         let conj_ok = embeds.len() == 2 && embeds[0] != embeds[1];
         let pass = killed && psi_ok && tw_ok && fp_ok && conj_ok;
         all_pass &= pass;
@@ -248,40 +279,78 @@ fn main() {
         );
         rows.push(Json::obj(vec![
             ("D", Json::Num(d)),
-            ("loop", Json::obj(vec![
-                ("A", Json::Num(lp.a)),
-                ("B", Json::Num(lp.b)),
-                ("norm", Json::str(lp.norm)),
-                ("cost_M", Json::Float(lp.cost)),
-                ("degrees", Json::Arr(degs.iter().map(|&l| Json::Num(l as i64)).collect())),
-            ])),
-            ("instance", Json::obj(vec![
-                ("p", Json::str(p)),
-                ("t", Json::str(&inst.t)),
-                ("v", Json::str(&inst.v)),
-                ("h", Json::Num(inst.h as i64)),
-                ("r", Json::str(r)),
-                ("tries", Json::Num(inst.tries as i64)),
-            ])),
-            ("curve", Json::obj(vec![("a", Json::str(&cm.curve.a)), ("b", Json::str(&cm.curve.b)), ("j", Json::str(cm.curve.j()))])),
-            ("hilbert", Json::obj(vec![
-                ("degree", Json::Num(cm.hilbert_degree as i64)),
-                ("precision_bits", Json::Num(cm.hilbert_precision as i64)),
-                ("worst_rounding_log2", Json::Float(cm.hilbert_error_log2)),
-                ("roots_in_Fp", Json::Num(cm.crater.len() as i64)),
-            ])),
-            ("closing_loops", Json::Arr(chains.iter().map(|ch| Json::Arr(ch.js.iter().map(Json::str).collect())).collect())),
+            (
+                "loop",
+                Json::obj(vec![
+                    ("A", Json::Num(lp.a)),
+                    ("B", Json::Num(lp.b)),
+                    ("norm", Json::str(lp.norm)),
+                    ("cost_M", Json::Float(lp.cost)),
+                    (
+                        "degrees",
+                        Json::Arr(degs.iter().map(|&l| Json::Num(l as i64)).collect()),
+                    ),
+                ]),
+            ),
+            (
+                "instance",
+                Json::obj(vec![
+                    ("p", Json::str(p)),
+                    ("t", Json::str(&inst.t)),
+                    ("v", Json::str(&inst.v)),
+                    ("h", Json::Num(inst.h as i64)),
+                    ("r", Json::str(r)),
+                    ("tries", Json::Num(inst.tries as i64)),
+                ]),
+            ),
+            (
+                "curve",
+                Json::obj(vec![
+                    ("a", Json::str(&cm.curve.a)),
+                    ("b", Json::str(&cm.curve.b)),
+                    ("j", Json::str(cm.curve.j())),
+                ]),
+            ),
+            (
+                "hilbert",
+                Json::obj(vec![
+                    ("degree", Json::Num(cm.hilbert_degree as i64)),
+                    ("precision_bits", Json::Num(cm.hilbert_precision as i64)),
+                    ("worst_rounding_log2", Json::Float(cm.hilbert_error_log2)),
+                    ("roots_in_Fp", Json::Num(cm.crater.len() as i64)),
+                ]),
+            ),
+            (
+                "closing_loops",
+                Json::Arr(
+                    chains
+                        .iter()
+                        .map(|ch| Json::Arr(ch.js.iter().map(Json::str).collect()))
+                        .collect(),
+                ),
+            ),
             ("fp_check", Json::str(&fp_note)),
             ("mu", Json::str(&mu)),
             ("psi", Json::Arr(psi_seen.iter().map(Json::str).collect())),
-            ("twisted_loops", Json::Arr(seen.iter().map(|v| Json::Arr(v.iter().map(Json::str).collect())).collect())),
+            (
+                "twisted_loops",
+                Json::Arr(
+                    seen.iter()
+                        .map(|v| Json::Arr(v.iter().map(Json::str).collect()))
+                        .collect(),
+                ),
+            ),
             ("order_r_killed_all_points", Json::Bool(killed)),
             ("pass", Json::Bool(pass)),
         ]));
     }
     println!(
         "\nverdict: {}",
-        if all_pass { "ALL PASS" } else { "FAIL (see rows)" }
+        if all_pass {
+            "ALL PASS"
+        } else {
+            "FAIL (see rows)"
+        }
     );
     if let Some(path) = json_out {
         let doc = Json::obj(vec![

@@ -20,7 +20,10 @@ use crate::int::Int;
 /// Primitive reduced positive-definite forms `(a, b, c)` with `b^2 - 4ac = d`:
 /// `|b| <= a <= c`, `b >= 0` when `|b| = a` or `a = c`.  Their number is `h(d)`.
 pub fn reduced_forms(d: i64) -> Vec<(i64, i64, i64)> {
-    assert!(d < 0 && (d.rem_euclid(4) == 0 || d.rem_euclid(4) == 1), "not a discriminant");
+    assert!(
+        d < 0 && (d.rem_euclid(4) == 0 || d.rem_euclid(4) == 1),
+        "not a discriminant"
+    );
     let ad = -d;
     let mut out = vec![];
     let mut a = 1i64;
@@ -93,8 +96,17 @@ impl Fx {
     fn cdiv(&self, x: &C, y: &C) -> C {
         // x / y = x * conj(y) / |y|^2
         let n = &self.mul(&y.re, &y.re) + &self.mul(&y.im, &y.im);
-        let t = self.cmul(x, &C { re: y.re.clone(), im: -&y.im });
-        C { re: self.div(&t.re, &n), im: self.div(&t.im, &n) }
+        let t = self.cmul(
+            x,
+            &C {
+                re: y.re.clone(),
+                im: -&y.im,
+            },
+        );
+        C {
+            re: self.div(&t.re, &n),
+            im: self.div(&t.im, &n),
+        }
     }
     /// pi by Machin's formula: 16 atan(1/5) - 4 atan(1/239).
     fn pi(&self) -> Int {
@@ -181,7 +193,7 @@ fn sigma3(n: u64) -> i64 {
     let mut s = 0i64;
     let mut d = 1u64;
     while d * d <= n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             s += (d * d * d) as i64;
             let e = n / d;
             if e != d {
@@ -202,10 +214,19 @@ fn j_of_form(fx: &Fx, pi: &Int, sqrt_ad: &Int, a: i64, b: i64) -> C {
     let ey = fx.exp(&y);
     let eny = fx.div(&fx.one(), &ey);
     // q = e^{-y} (cos theta - i sin theta), 1/q = e^{y} (cos theta + i sin theta)
-    let q = C { re: fx.mul(&eny, &ct), im: -fx.mul(&eny, &st) };
-    let inv_q = C { re: fx.mul(&ey, &ct), im: fx.mul(&ey, &st) };
+    let q = C {
+        re: fx.mul(&eny, &ct),
+        im: -fx.mul(&eny, &st),
+    };
+    let inv_q = C {
+        re: fx.mul(&ey, &ct),
+        im: fx.mul(&ey, &st),
+    };
     // E4 = 1 + 240 sum sigma3(n) q^n ; eta-product prod(1 - q^n) by the pentagonal series
-    let mut e4 = C { re: fx.one(), im: Int::zero() };
+    let mut e4 = C {
+        re: fx.one(),
+        im: Int::zero(),
+    };
     let mut qn = q.clone();
     let mut n = 1u64;
     while !(qn.re.is_zero() && qn.im.is_zero()) {
@@ -217,7 +238,10 @@ fn j_of_form(fx: &Fx, pi: &Int, sqrt_ad: &Int, a: i64, b: i64) -> C {
         n += 1;
     }
     // prod (1 - q^n) = sum_{k in Z} (-1)^k q^{k(3k-1)/2}
-    let mut eta = C { re: fx.one(), im: Int::zero() };
+    let mut eta = C {
+        re: fx.one(),
+        im: Int::zero(),
+    };
     let mut k = 1i64;
     loop {
         let mut any = false;
@@ -250,7 +274,10 @@ fn j_of_form(fx: &Fx, pi: &Int, sqrt_ad: &Int, a: i64, b: i64) -> C {
 }
 
 fn cpow(fx: &Fx, x: &C, mut e: u64) -> C {
-    let mut r = C { re: fx.one(), im: Int::zero() };
+    let mut r = C {
+        re: fx.one(),
+        im: Int::zero(),
+    };
     let mut b = x.clone();
     while e > 0 {
         if e & 1 == 1 {
@@ -286,18 +313,28 @@ pub fn hilbert_class_poly(d: i64) -> Result<HilbertPoly, String> {
     // elementary symmetric functions of the roots
     let mut bits = 0f64;
     for &(a, _, _) in &forms {
-        bits += (std::f64::consts::PI * ad.sqrt() / (a as f64) / std::f64::consts::LN_2).max(10.0) + 2.0;
+        bits += (std::f64::consts::PI * ad.sqrt() / (a as f64) / std::f64::consts::LN_2).max(10.0)
+            + 2.0;
     }
     let h = forms.len();
     let p = bits.ceil() as usize + 2 * (64 - (h as u64).leading_zeros() as usize) + 96;
     let fx = Fx { p };
     let pi = fx.pi();
     let sqrt_ad = fx.sqrt_u64((-d) as u64);
-    let mut poly: Vec<C> = vec![C { re: fx.one(), im: Int::zero() }];
+    let mut poly: Vec<C> = vec![C {
+        re: fx.one(),
+        im: Int::zero(),
+    }];
     for &(a, b, _) in &forms {
         let j = j_of_form(&fx, &pi, &sqrt_ad, a, b);
         // poly *= (X - j)
-        let mut next = vec![C { re: Int::zero(), im: Int::zero() }; poly.len() + 1];
+        let mut next = vec![
+            C {
+                re: Int::zero(),
+                im: Int::zero()
+            };
+            poly.len() + 1
+        ];
         for (k, c) in poly.iter().enumerate() {
             next[k + 1].re = &next[k + 1].re + &c.re;
             next[k + 1].im = &next[k + 1].im + &c.im;
@@ -318,7 +355,11 @@ pub fn hilbert_class_poly(d: i64) -> Result<HilbertPoly, String> {
         let err_re = (&c.re - &n.shl(p)).abs();
         let err_im = c.im.abs();
         let e = err_re.max(err_im);
-        let el = if e.is_zero() { -(p as f64) } else { e.bits() as f64 - p as f64 };
+        let el = if e.is_zero() {
+            -(p as f64)
+        } else {
+            e.bits() as f64 - p as f64
+        };
         worst = worst.max(el);
         if el > -16.0 {
             return Err(format!(
@@ -327,7 +368,13 @@ pub fn hilbert_class_poly(d: i64) -> Result<HilbertPoly, String> {
         }
         coeffs.push(n);
     }
-    Ok(HilbertPoly { d, coeffs, forms, precision: p, worst_error_log2: worst })
+    Ok(HilbertPoly {
+        d,
+        coeffs,
+        forms,
+        precision: p,
+        worst_error_log2: worst,
+    })
 }
 
 #[cfg(test)]
@@ -337,7 +384,16 @@ mod tests {
     #[test]
     fn class_numbers_from_forms() {
         // h(D) for a few fundamental discriminants
-        for (d, h) in [(-3, 1), (-4, 1), (-7, 1), (-23, 3), (-47, 5), (-71, 7), (-619, 5), (-3019, 7)] {
+        for (d, h) in [
+            (-3, 1),
+            (-4, 1),
+            (-7, 1),
+            (-23, 3),
+            (-47, 5),
+            (-71, 7),
+            (-619, 5),
+            (-3019, 7),
+        ] {
             assert_eq!(reduced_forms(d).len(), h, "h({d})");
         }
     }
@@ -345,7 +401,14 @@ mod tests {
     #[test]
     fn small_hilbert_polys_match_known_values() {
         // H_{-3} = X, H_{-4} = X - 1728, H_{-7} = X + 3375, H_{-8} = X - 8000
-        for (d, c0) in [(-3i64, 0i64), (-4, -1728), (-7, 3375), (-8, -8000), (-11, 32768), (-163, 262537412640768000)] {
+        for (d, c0) in [
+            (-3i64, 0i64),
+            (-4, -1728),
+            (-7, 3375),
+            (-8, -8000),
+            (-11, 32768),
+            (-163, 262537412640768000),
+        ] {
             let hp = hilbert_class_poly(d).unwrap();
             assert_eq!(hp.coeffs.len(), 2);
             assert_eq!(hp.coeffs[1], Int::one());
