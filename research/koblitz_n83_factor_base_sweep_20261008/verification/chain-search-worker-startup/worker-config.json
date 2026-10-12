@@ -1,0 +1,27 @@
+{
+  "allow_direct_relation": false,
+  "budget_seconds": 60,
+  "chain_s3_limits": {
+    "conflict_budget": 10000,
+    "max_domain_clauses": 1000000,
+    "max_models": 1,
+    "max_variables": 100000
+  },
+  "curve_a": 0,
+  "fixture": 0,
+  "fixture_dir": "/fixtures",
+  "max_trials": 0,
+  "memory_cgroup_limit_bytes": 268435456,
+  "memory_cgroup_swap_limit_bytes": 0,
+  "orbit_columns": 64,
+  "panel_dir": "/panel",
+  "policy": "public_x_hash",
+  "schema": "n83.primary-cold-config/v1",
+  "seed": 2026100801,
+  "source_adapter_blake3": "80e7cee81716185ed005b7e49c9a3436e62d7c28337559087b4d1ce97b42b179",
+  "source_attestation_mode": "supervised_snapshot",
+  "source_commit": "7eba91dd46661a2e035c6fe1f5eb15a2e09ba7fa",
+  "strategy": "chain-s3",
+  "study": "koblitz_n83_factor_base_sweep_20261008",
+  "summands": 5
+}

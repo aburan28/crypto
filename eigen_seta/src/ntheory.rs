@@ -14,9 +14,9 @@ pub fn random_below<R: RngCore>(rng: &mut R, n: &BigUint) -> BigUint {
 }
 
 const SMALL_PRIMES: [u32; 54] = [
-    2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109,
-    113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239,
-    241, 251,
+    2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
+    101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193,
+    197, 199, 211, 223, 227, 229, 233, 239, 241, 251,
 ];
 
 /// Miller–Rabin with deterministic small bases plus `extra` random bases.
@@ -37,7 +37,10 @@ pub fn is_probable_prime<R: RngCore>(n: &BigUint, rng: &mut R, extra: usize) -> 
     let nm1 = n - 1u32;
     let s = nm1.trailing_zeros().unwrap_or(0);
     let d = &nm1 >> s;
-    let mut bases: Vec<BigUint> = [2u32, 3, 5, 7, 11, 13, 17].iter().map(|&b| BigUint::from(b)).collect();
+    let mut bases: Vec<BigUint> = [2u32, 3, 5, 7, 11, 13, 17]
+        .iter()
+        .map(|&b| BigUint::from(b))
+        .collect();
     for _ in 0..extra {
         bases.push(random_below(rng, &(n - 3u32)) + 2u32);
     }
@@ -132,11 +135,17 @@ pub fn cornacchia<R: RngCore>(d: u64, m: &BigUint, rng: &mut R) -> Option<(BigUi
 /// Write m = x^2 + y^2 with m = (product of small primes) * (prime q = 1 mod 4).
 /// Returns None if m has a prime factor 3 mod 4 to an odd power among the
 /// small primes, or the cofactor is not a prime 1 mod 4.
-pub fn two_squares<R: RngCore>(m: &BigUint, rng: &mut R, trial_bound: u32) -> Option<(BigUint, BigUint)> {
+pub fn two_squares<R: RngCore>(
+    m: &BigUint,
+    rng: &mut R,
+    trial_bound: u32,
+) -> Option<(BigUint, BigUint)> {
     let mut rest = m.clone();
     // Gaussian integer accumulator (a + b i)
     let mut acc = (BigInt::one(), BigInt::zero());
-    let gmul = |x: &(BigInt, BigInt), y: &(BigInt, BigInt)| (&x.0 * &y.0 - &x.1 * &y.1, &x.0 * &y.1 + &x.1 * &y.0);
+    let gmul = |x: &(BigInt, BigInt), y: &(BigInt, BigInt)| {
+        (&x.0 * &y.0 - &x.1 * &y.1, &x.0 * &y.1 + &x.1 * &y.0)
+    };
     let mut q = 2u32;
     while q <= trial_bound {
         let qb = BigUint::from(q);
@@ -158,7 +167,10 @@ pub fn two_squares<R: RngCore>(m: &BigUint, rng: &mut R, trial_bound: u32) -> Op
                 acc = (&acc.0 * &s, &acc.1 * &s);
             } else {
                 let (x, y) = cornacchia(1, &qb, rng)?;
-                let g = (BigInt::from_biguint(Sign::Plus, x), BigInt::from_biguint(Sign::Plus, y));
+                let g = (
+                    BigInt::from_biguint(Sign::Plus, x),
+                    BigInt::from_biguint(Sign::Plus, y),
+                );
                 for _ in 0..e {
                     acc = gmul(&acc, &g);
                 }
@@ -171,9 +183,18 @@ pub fn two_squares<R: RngCore>(m: &BigUint, rng: &mut R, trial_bound: u32) -> Op
             return None;
         }
         let (x, y) = cornacchia(1, &rest, rng)?;
-        acc = gmul(&acc, &(BigInt::from_biguint(Sign::Plus, x), BigInt::from_biguint(Sign::Plus, y)));
+        acc = gmul(
+            &acc,
+            &(
+                BigInt::from_biguint(Sign::Plus, x),
+                BigInt::from_biguint(Sign::Plus, y),
+            ),
+        );
     }
-    Some((acc.0.abs().to_biguint().unwrap(), acc.1.abs().to_biguint().unwrap()))
+    Some((
+        acc.0.abs().to_biguint().unwrap(),
+        acc.1.abs().to_biguint().unwrap(),
+    ))
 }
 
 /// s with s^2 = a mod 2^k for a = 1 mod 8.

@@ -14,7 +14,10 @@ fn weil_bilinear_and_dlog() {
     let n = BigUint::from(3u32).pow(k as u32);
     let (p, q) = torsion_basis(&ed, 3, k, &mut rng);
     let e = weil_sq(&ed, &p, &q, &n);
-    assert!(bool::from(full_order_3k(&e, k)), "pairing of a basis not of full order");
+    assert!(
+        bool::from(full_order_3k(&e, k)),
+        "pairing of a basis not of full order"
+    );
     assert_eq!(cube_n(&e, k), F::one(), "pairing not in mu_n");
     for _ in 0..5 {
         let a = BigUint::from(rng.next_u64()) % &n;

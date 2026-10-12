@@ -6,27 +6,28 @@
 
 #align(center)[
   #text(size: 15pt, weight: "bold")[Eigen-Séta v2 in Rust] \
-  #text(size: 11pt)[Constant-time decapsulation at NIST level 1, 3 and 5 parameter sizes: results report (two rounds)] \
-  #text(size: 8.5pt)[2026-10-11 · runs: run-20261011T1813Z-bench (19c641d12), run-20261011T1827Z-sidechannel (19c641d12), run-20261011T1955Z-verify (d504af28e) · paper: papers/eigen-seta/]
+  #text(size: 11pt)[KEM and authenticated PKE at L1, L3 and L5 parameter sizes: results report] \
+  #text(size: 8.5pt)[2026-10-11 · code: eigen_seta/ · original benchmark and side-channel probes: commit 19c641d12]
 ]
 
 = Claims and status
 
-#table(columns: (auto, 2.2fr, 1.8fr, 0.9fr),
+#table(columns: (auto, 2.2fr, 1.6fr, 0.9fr),
   [*\#*], [*Claim*], [*Status*], [*Evidence*],
-  [1], [Correct decapsulation at Toy16, Toy32, L1, L3, L5.], [measured: 3,635 decapsulations, no failure], [verify + bench],
-  [2], [pk = ct = 1344 / 1992 / 2632 B; decaps 13–15 / 52–54 / 120–124 s at L1 / L3 / L5.], [measured, one host], [bench],
-  [3], [The decaps secret phase executes the same instructions for every key and ciphertext, apart from glibc's allocator.], [measured at Toy16 (12 runs) and L1 (4 runs). Evidence, not proof.], [verify, sidechannel],
-  [4], [No timing difference between a fixed ct and fresh ones (FO-rejected included), one key.], [measured: \|t\| ≤ 2.36 and ≤ 0.84 in two runs; threshold 4.5], [verify, sidechannel],
-  [5], [Robust to adversarial inputs.], [tested: 48 ciphertexts, 14 public keys; no panic or hang], [tests],
-  [6], [NIST categories 1 / 3 / 5.], [*conjectured*: binding attack ≈ 2#super[λ] classical, 2#super[λ/2] Grover (shape of AES key search)], [paper §6],
-  [7], [The toy `walk` variant is insecure.], [derived from the merged code (key from public degree)], [paper §6.2],
-  [8], [The recovered kernel is always cyclic.], [proved (Proposition 3)], [paper §4],
+  [1], [The Rust KEM decapsulates correctly at Toy16, Toy32, L1, L3 and L5.], [measured, 15/15 trials], [bench run],
+  [2], [pk = ct = 1344 / 1992 / 2632 B at L1 / L3 / L5. Decaps takes 13–15 / 52–54 / 120–124 s on one core of the recorded host.], [measured, n = 3 / 2 / 2, one host], [bench run],
+  [3], [The original decaps secret phase ran a key- and ciphertext-independent instruction stream, apart from glibc's allocator.], [measured at Toy16, 4 keys × 3 cts on commit 19c641d12. Not rerun on final build.], [side-channel run],
+  [4], [No timing difference between a fixed ct and fresh ones, FO-rejected included, for one key.], [measured, Welch \|t\| ≤ 0.84, n = 1,000 per class], [side-channel run],
+  [5], [The parameters target λ = 128 / 192 / 256 classical bits.], [*conjectured*, heuristic. Quantum security ≈ λ/2, as for FESTA.], [eigen_seta/README.md §3],
+  [6], [The toy `walk` variant in the merged prototype is insecure.], [measured: an outsider decrypted 5/5 ciphertexts], [correction notices],
+  [7], [The KEM–DEM PKE encrypts and decrypts a 39-byte plaintext with associated data at L1, L3 and L5.], [measured: 1/1 per size on the later build; functionality, not a security proof], [PKE run reports],
 )
 
-Defects found and fixed: an LLVM-introduced conditional in safegcd (found by the callgrind probe); a key-generation hang (Tonelli–Shanks accepted z = 0); degenerate secret scalars ≡ −1 (now rejected at keygen); an uncapped basis search on public curves (now capped). The first version of this report gave quantum security as "about λ/2, as for FESTA" without relating it to NIST's definitions, which are themselves AES key search (claim 6).
+The original implementation fixed an LLVM-introduced conditional in safegcd and a Tonelli–Shanks key-generation hang. This follow-up fixes the degenerate scalar-recovery case `[k+1]P = O` and bounds the public torsion-basis search. The compiled-code side-channel probe has not been repeated after these edits.
 
 = Correctness, sizes and speed
+
+Run run-20261011T1813Z-bench, Intel Xeon at 2.80 GHz (shared VM), rustc 1.97.0. Every trial's decapsulated key matched.
 
 #table(columns: 7,
   [*Set*], [*p bits*], [*pk = ct (B)*], [*keygen (s), n=1*], [*encaps (s)*], [*decaps (s)*], [*correct*],
@@ -36,33 +37,43 @@ Defects found and fixed: an LLVM-introduced conditional in safegcd (found by the
   [L3], [1991], [1992], [118.6], [1.03], [51.8–53.9], [2/2],
   [L5], [2630], [2632], [271.8], [2.17–2.20], [120.2–124.0], [2/2],
 )
-The verification run added 3,000/3,000 (Toy16), 600/600 (Toy32) and 20/20 (L1) correct decapsulations with fresh keys. Zero failures in 3,000 trials bounds the failure rate only by about 10#super[−3]. Negligibility rests on the heuristic O(E/p) argument in the paper.
 
-#figure(image("figures/kem_times.svg", width: 78%), caption: [Wall time per operation, all trials, log scale. Measured; run-20261011T1813Z-bench.])
+#figure(image("figures/kem_times.svg", width: 82%), caption: [Wall time per operation, all trials, log scale. Measured; run-20261011T1813Z-bench/records/bench_output.txt.])
 
-Safegcd inversion is 3.9× to 140× faster than Fermat inversion in the same binary. No KEM-level speedup is claimed, because no baseline binary was kept (AGENTS.md §10).
+In the same binary and run, safegcd inversion is 3.9× to 140× faster than Fermat inversion, from Toy16 to L5. No pre-change baseline binary was kept for the KEM-level timings, so this report makes *no KEM-level speedup claim*; AGENTS.md §10 requires a recorded baseline. Decapsulation time is dominated by the Richelot steps in Mumford coordinates, according to a callgrind profile at Toy16. A theta-coordinate chain is the main open performance item, and its gain is unmeasured.
 
-#figure(image("figures/field_ops.svg", width: 78%), caption: [F_p multiplication and inversions against limb count. Measured; run-20261011T1813Z-bench.])
+#figure(image("figures/field_ops.svg", width: 82%), caption: [F_p multiplication and the two inversions against limb count. Measured; same record.])
+
+= Follow-up: authenticated plaintext encryption
+
+`pke::EigenSetaPke` combines a fresh KEM encapsulation with ChaCha20-Poly1305. The complete ciphertext contains the KEM ciphertext, a 12-byte nonce, encrypted message and 16-byte tag. Toy16 integration tests check empty and nonempty messages, mismatched associated data, tampering, truncation and invalid public keys. The command-line example completed one 39-byte authenticated plaintext round trip per full-size set.
+
+#table(columns: (auto, auto, auto, auto, auto, auto),
+  [*Set*], [*KeyGen (s)*], [*Encrypt (s)*], [*Decrypt (s)*], [*PKE ct (B)*], [*Correct*],
+  [L1], [25.044], [0.3897], [11.208], [1411], [1/1],
+  [L3], [186.427], [1.1051], [47.138], [2059], [1/1],
+  [L5], [298.906], [2.2990], [104.223], [2699], [1/1],
+)
+
+These are measured single samples (n=1 per operation/set), on a shared AMD EPYC 7763 cloud VM with rustc 1.99.0. No spread or interval was recorded. L3 and L5 ran concurrently, with other local validation active; no isolated comparison or KEM-level speedup claim is made. Source records: run-20261011T1956Z-pke-l1 and run-20261011T1958Z-pke-l3-l5, each under `reports/`. The graph's source values are in `figures/pke_roundtrips.csv`.
+
+#figure(image("figures/pke_roundtrips.svg", width: 88%), caption: [Descriptive wall time, n=1 per operation/set, log seconds. Run IDs run-20261011T1956Z-pke-l1 and run-20261011T1958Z-pke-l3-l5.])
+
+The current build also completed new KEM round trips at L1, L3 and L5; see the follow-up KEM run reports. This is the secret-degree single-chain v2 variant, *not* the original random-curve two-halves design. Security remains conjectural.
 
 = Constant-time evidence
 
-#table(columns: 4,
-  [*Set*], [*Keys*], [*Runs*], [*Non-allocator instructions*],
-  [Toy16], [4], [12], [1,116,209,216 in every run],
-  [L1], [2], [4], [120,996,429,610 in every run],
-)
-Allocator work, including heap growth through sbrk and brk, varies with the heap state left by earlier variable-time phases. It is equal for the two valid ciphertexts of each key.
+Run run-20261011T1827Z-sidechannel counts the instructions executed by `decaps_core` on commit 19c641d12, under callgrind at Toy16. Each of 4 key seeds has 2 valid ciphertexts and 1 FO-rejected one. The non-allocator count was 1,116,186,003 in all 12 runs. The glibc allocator count varies with the heap state left by the earlier variable-time phases, and it is equal for the two valid ciphertexts of each key.
 
-#figure(image("figures/ct_probe_verify.svg", width: 88%), caption: [Instruction counts of decaps_core per run. Measured; run-20261011T1955Z-verify.])
+#figure(image("figures/ct_probe.svg", width: 82%), caption: [Instruction counts per run. Measured; run-20261011T1827Z-sidechannel/records/ctprobe_summary.txt.])
 
-Limits: instruction counts only, not memory addresses (there are no secret-indexed tables, which is an argument). L3 and L5 were not probed. One compiler and one target. Key generation is variable time by design.
-
-= Key-recovery search space
-
-Key generation's public filters accept 2#super[−8.13], 2#super[−8.64] and 2#super[−9.02] of the odd f candidates at L1, L3 and L5. That leaves about 2#super[268], 2#super[399] and 2#super[525] admissible degrees for an exhaustive search.
-
-#figure(image("figures/f_filter.svg", width: 62%), caption: [log2 of the filter acceptance rate. Measured; run-20261011T1955Z-verify.])
+Limits:
+- Instruction counts do not cover memory-address leakage. The code has no secret-indexed tables, which is an argument, not a measurement.
+- The check ran at Toy16 only. The code is generic over the limb count, but L1–L5 were not measured.
+- The result covers this compiler and target only.
+- It does not cover the later scalar-recovery fix or PKE layer. No compiled-code constant-time claim is made for this PR's final build.
+- Key generation is variable time by design (SIDE_CHANNELS.md, R1).
 
 = Graphs checked and left unchanged
 
-docs/index-calculus-scoreboard.html, docs/ic/progress-timeline.json, docs/performance-gains/, docs/curves/ and figures/ were checked. None covers isogeny KEMs. docs/curves/ mentions isogenies only as curve-transfer links in the discrete-log registry, and this work adds no registry curve. This report's graphs are new and are drawn from run records by figures/plot.py and figures/plot_verify.py, which only plot recorded values.
+These canonical graphs were checked: docs/index-calculus-scoreboard.html, docs/ic/progress-timeline.json, docs/performance-gains/, docs/curves/ and figures/. None covers isogeny KEMs. docs/curves/ mentions isogenies only as curve-transfer links in the discrete-log registry, and this work adds no registry curve. Historical plots came from the run records via figures/plot.py; the follow-up PKE SVG is drawn from figures/pke_roundtrips.csv, copied from its two run records.

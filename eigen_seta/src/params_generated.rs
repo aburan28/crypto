@@ -24,7 +24,6 @@ impl ParamSet<4> for Toy16 {
     const ED_A4_HEX: &'static str = "c0675d853cfffffffffffffffffffffffffffffffffffffceb9c5c";
     const ED_A6_HEX: &'static str = "28ecf4141e";
 }
-
 // Toy32: lambda = 32, p has 369 bits (6 limbs), e = 297, f3 = 41 (d ~ 2^65.0), c = 55, kappa = 8
 #[derive(Clone, Copy, Debug)]
 pub struct Toy32Fp;
@@ -46,7 +45,6 @@ impl ParamSet<6> for Toy32 {
     const ED_A4_HEX: &'static str = "1b2fc30e3d206427513fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffceb9c5c";
     const ED_A6_HEX: &'static str = "28ecf4141e";
 }
-
 // L1: lambda = 128, p has 1341 bits (21 limbs), e = 1076, f3 = 162 (d ~ 2^256.8), c = 144, kappa = 12
 #[derive(Clone, Copy, Debug)]
 pub struct L1Fp;
@@ -112,4 +110,3 @@ impl ParamSet<42> for L5 {
     const ED_A4_HEX: &'static str = "223e047a381431b6bd283938b1136820f011153efd3d97b1741eb046d717d8f9ab92388d45960d699e8a5bc8d98a394926f07f3ec962f520fbe604caa2bbe4afa1dffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffceb9c5c";
     const ED_A6_HEX: &'static str = "28ecf4141e";
 }
-

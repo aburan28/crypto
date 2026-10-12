@@ -32,13 +32,25 @@ impl<F: Field> ConditionallySelectable for WPoint<F> {
 
 impl<F: Field> WPoint<F> {
     pub fn new(x: F, y: F) -> Self {
-        WPoint { x, y, inf: Choice::from(0) }
+        WPoint {
+            x,
+            y,
+            inf: Choice::from(0),
+        }
     }
     pub fn infinity() -> Self {
-        WPoint { x: F::zero(), y: F::one(), inf: Choice::from(1) }
+        WPoint {
+            x: F::zero(),
+            y: F::one(),
+            inf: Choice::from(1),
+        }
     }
     pub fn neg(&self) -> Self {
-        WPoint { x: self.x, y: -self.y, inf: self.inf }
+        WPoint {
+            x: self.x,
+            y: -self.y,
+            inf: self.inf,
+        }
     }
     /// Constant-time equality (both infinity, or equal affine coordinates).
     pub fn ct_eq(&self, o: &Self) -> Choice {
@@ -54,7 +66,11 @@ impl<F: Field> WCurve<F> {
     }
     /// Montgomery y^2 = x^3 + A x^2 + x.
     pub fn from_montgomery(a: F) -> Self {
-        WCurve { a2: a, a4: F::one(), a6: F::zero() }
+        WCurve {
+            a2: a,
+            a4: F::one(),
+            a6: F::zero(),
+        }
     }
     pub fn rhs(&self, x: &F) -> F {
         ((*x + self.a2) * *x + self.a4) * *x + self.a6
@@ -103,7 +119,11 @@ impl<F: Field> WCurve<F> {
 
     /// [2^n]P via Jacobian coordinates (no inversion until the end).
     pub fn dbl_iter(&self, p: &WPoint<F>, n: usize) -> WPoint<F> {
-        let (mut x, mut y, mut z) = (p.x, p.y, F::conditional_select(&F::one(), &F::zero(), p.inf));
+        let (mut x, mut y, mut z) = (
+            p.x,
+            p.y,
+            F::conditional_select(&F::one(), &F::zero(), p.inf),
+        );
         for _ in 0..n {
             let z2 = z.square();
             let y2 = y.square();
@@ -118,7 +138,11 @@ impl<F: Field> WCurve<F> {
         let zi = z.invert();
         let zi2 = zi.square();
         let inf = z.is_zero();
-        let r = WPoint { x: x * zi2, y: y * zi2 * zi, inf: Choice::from(0) };
+        let r = WPoint {
+            x: x * zi2,
+            y: y * zi2 * zi,
+            inf: Choice::from(0),
+        };
         WPoint::conditional_select(&r, &WPoint::infinity(), inf)
     }
 
@@ -151,7 +175,11 @@ impl<F: Field> Isog2<F> {
         let t = (x0.mul_small(3) + e.a2.double()) * *x0 + e.a4;
         let a4 = e.a4 - t.mul_small(5);
         let a6 = e.a6 - (e.a2.mul_small(4) * t) - (*x0 * t).mul_small(7);
-        Isog2 { x0: *x0, t, codomain: WCurve { a2: e.a2, a4, a6 } }
+        Isog2 {
+            x0: *x0,
+            t,
+            codomain: WCurve { a2: e.a2, a4, a6 },
+        }
     }
     pub fn eval(&self, p: &WPoint<F>) -> WPoint<F> {
         let dx = p.x - self.x0;
@@ -186,12 +214,26 @@ impl<F: Field> WIso<F> {
         let u2 = (b2 * a1) * (b1 * a2).invert();
         let (u, _) = u2.sqrt();
         let inv3 = F::from_i64(3).invert();
-        WIso { u2, u3: u2 * u, s1: e1.a2 * inv3, s2: e2.a2 * inv3 }
+        WIso {
+            u2,
+            u3: u2 * u,
+            s1: e1.a2 * inv3,
+            s2: e2.a2 * inv3,
+        }
     }
     pub fn eval(&self, p: &WPoint<F>) -> WPoint<F> {
-        WPoint { x: self.u2 * (p.x + self.s1) - self.s2, y: self.u3 * p.y, inf: p.inf }
+        WPoint {
+            x: self.u2 * (p.x + self.s1) - self.s2,
+            y: self.u3 * p.y,
+            inf: p.inf,
+        }
     }
     pub fn negate(&self) -> Self {
-        WIso { u2: self.u2, u3: -self.u3, s1: self.s1, s2: self.s2 }
+        WIso {
+            u2: self.u2,
+            u3: -self.u3,
+            s1: self.s1,
+            s2: self.s2,
+        }
     }
 }

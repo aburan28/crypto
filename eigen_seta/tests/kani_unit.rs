@@ -71,10 +71,26 @@ fn sqrt_mod_prime_small_q_terminates() {
     use num_bigint::BigUint;
     struct Ctr(u64);
     impl rand_core::RngCore for Ctr {
-        fn next_u32(&mut self) -> u32 { self.next_u64() as u32 }
-        fn next_u64(&mut self) -> u64 { self.0 = self.0.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407); self.0 >> 11 }
-        fn fill_bytes(&mut self, d: &mut [u8]) { for c in d.chunks_mut(8) { let v = self.next_u64().to_le_bytes(); c.copy_from_slice(&v[..c.len()]); } }
-        fn try_fill_bytes(&mut self, d: &mut [u8]) -> Result<(), rand_core::Error> { self.fill_bytes(d); Ok(()) }
+        fn next_u32(&mut self) -> u32 {
+            self.next_u64() as u32
+        }
+        fn next_u64(&mut self) -> u64 {
+            self.0 = self
+                .0
+                .wrapping_mul(6364136223846793005)
+                .wrapping_add(1442695040888963407);
+            self.0 >> 11
+        }
+        fn fill_bytes(&mut self, d: &mut [u8]) {
+            for c in d.chunks_mut(8) {
+                let v = self.next_u64().to_le_bytes();
+                c.copy_from_slice(&v[..c.len()]);
+            }
+        }
+        fn try_fill_bytes(&mut self, d: &mut [u8]) -> Result<(), rand_core::Error> {
+            self.fill_bytes(d);
+            Ok(())
+        }
     }
     for q in [17u32, 41, 73, 89, 97, 113, 137, 193, 233, 241, 257] {
         let qb = BigUint::from(q);

@@ -7,18 +7,25 @@
 //!   loop counts, branch-free formulas, constant-time selections.  Branches
 //!   in these functions depend only on public data (parameters, the public
 //!   key, the ciphertext's validity as curve points).
-//! * IND-CCA: Fujisaki–Okamoto with implicit rejection on the deterministic
-//!   trapdoor function s -> (E_C, [a]phi(P), [b]phi(Q)), (a, b) = G(s, pk).
+//! * Fujisaki–Okamoto-style re-encryption with implicit rejection on the
+//!   deterministic trapdoor function s -> (E_C, [a]phi(P), [b]phi(Q)),
+//!   (a, b) = G(s, pk). IND-CCA security has not been established.
 
 use crate::chain::{decaps_chain, first_step_glues, keygen_chain, Pair};
-use crate::cm::{add_vartime, eigenvector_2k, mul_vartime, point_from_x, point_of_order, torsion_basis, Omega};
+use crate::cm::{
+    add_vartime, eigenvector_2k, mul_vartime, point_from_x, point_of_order, torsion_basis, Omega,
+};
 use crate::ct::{Choice, ConditionallySelectable, ConstantTimeEq};
 use crate::field::Field;
 use crate::fp::Fp;
 use crate::fp2::Fp2;
 use crate::isog3::chain3;
-use crate::mont::{ladder, ladder3pt, recover_y, xadd, xtpl_iter, MontCurve, ProjCurve, XPoint};
-use crate::ntheory::{cornacchia, is_probable_prime, modpos, random_below, sqrt_mod_2power, two_squares, v2};
+use crate::mont::{
+    ladder, ladder3pt, recover_y, xadd, xdbl, xdbl_iter, xtpl_iter, MontCurve, ProjCurve, XPoint,
+};
+use crate::ntheory::{
+    cornacchia, is_probable_prime, modpos, random_below, sqrt_mod_2power, two_squares, v2,
+};
 use crate::pairing::{dlog_3k, full_order_3k, weil_sq};
 use crate::params::ParamSet;
 use crate::scalar::{OddModulus, Scalar};
@@ -29,7 +36,7 @@ use num_traits::{One, Zero};
 use rand_core::{CryptoRng, RngCore};
 use sha3::digest::{ExtendableOutput, Update, XofReader};
 use sha3::Shake256;
-use zeroize::{Zeroize, ZeroizeOnDrop, Zeroizing};
+use zeroize::{Zeroize, ZeroizeOnDrop};
 
 pub const SS_BYTES: usize = 32;
 
@@ -71,7 +78,9 @@ impl SecretKey {
 /// Redacting Debug: never print secret scalars.
 impl core::fmt::Debug for SecretKey {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("SecretKey").field("pkh", &self.pkh).finish_non_exhaustive()
+        f.debug_struct("SecretKey")
+            .field("pkh", &self.pkh)
+            .finish_non_exhaustive()
     }
 }
 
@@ -109,6 +118,7 @@ pub struct DecapsPrep<Fl: Field> {
 }
 
 type F<P, const N: usize> = Fp2<<P as ParamSet<N>>::Cfg, N>;
+type WPair<P, const N: usize> = (WPoint<F<P, N>>, WPoint<F<P, N>>);
 
 /// Public parameters derived at run time.
 struct Ctx<P: ParamSet<N>, const N: usize> {
@@ -125,7 +135,14 @@ impl<P: ParamSet<N>, const N: usize> Ctx<P, N> {
         let d = BigUint::from(3u32).pow(P::F3 as u32);
         let d_bits = d.bits() as usize;
         let modd = OddModulus::new(&d);
-        Ctx { d, d_bits, e: P::E, e_limbs: P::E.div_ceil(64) + 1, modd, _p: PhantomData }
+        Ctx {
+            d,
+            d_bits,
+            e: P::E,
+            e_limbs: P::E.div_ceil(64) + 1,
+            modd,
+            _p: PhantomData,
+        }
     }
 }
 
@@ -139,25 +156,33 @@ fn fp_from_hex<P: ParamSet<N>, const N: usize>(h: &str) -> Fp<P::Cfg, N> {
 }
 
 /// Deterministic basis (P, Q) of E[3^F3] on the Montgomery curve y^2 = x^3 +
-/// A x^2 + x, computed from public data only (variable time).  The search is
-/// capped: for an honest curve it succeeds within a handful of counters
-/// (failure after the cap has probability below 2^-1000), and on any input
-/// it returns None instead of spinning, so a crafted public key or
-/// ciphertext cannot make encapsulation or decapsulation loop.
-const BASIS_SEARCH_CAP: u64 = 4096;
-fn canonical_basis_3<P: ParamSet<N>, const N: usize>(a: &F<P, N>) -> Option<(WPoint<F<P, N>>, WPoint<F<P, N>>)> {
+/// A x^2 + x, computed from public data only (variable time).
+fn canonical_basis_3<P: ParamSet<N>, const N: usize>(a: &F<P, N>) -> Option<WPair<P, N>> {
+    // A = ±2 makes the Montgomery model singular. Reject it before any
+    // point arithmetic, including the public, variable-time basis search.
+    if bool::from((a.square() - F::<P, N>::from_i64(4)).is_zero()) {
+        return None;
+    }
     let w = WCurve::from_montgomery(*a);
+    let pc = ProjCurve::from_affine(*a);
     let d = BigUint::from(3u32).pow(P::F3 as u32);
     let cof = crate::cm::p_plus_1::<F<P, N>>() / &d;
     let d1 = &d / 3u32;
     let mut found: Vec<WPoint<F<P, N>>> = vec![];
-    for k in 1..=BASIS_SEARCH_CAP {
+    // An arbitrary encoded curve need not have the expected 3^F3 torsion.
+    // Never let a caller-supplied public key or ciphertext loop forever.
+    for k in 1..=256u64 {
         let x = <F<P, N> as Field>::from_counter(k);
-        let Some(r) = point_from_x(&w, x) else { continue };
+        let Some(r) = point_from_x(&w, x) else {
+            continue;
+        };
         let r = mul_vartime(&w, &r, &cof);
         let r3 = mul_vartime(&w, &r, &d1);
         if bool::from(r3.inf) {
             continue;
+        }
+        if !bool::from(xtpl_iter(&XPoint::from_affine(r.x), P::F3, &pc).is_infinity()) {
+            continue; // not in E[3^F3] on a malformed public curve
         }
         if let Some(p0) = found.first() {
             let p3 = mul_vartime(&w, p0, &d1);
@@ -178,8 +203,16 @@ fn smul_ct<Fl: Field>(a: &Fl, p: &WPoint<Fl>, k: &Scalar, nbits: usize) -> WPoin
     let (r0, r1) = ladder(&XPoint::from_affine(p.x), k, nbits, &pc);
     let (x, y, z) = recover_y(a, &p.x, &p.y, &r0, &r1);
     let zi = z.invert();
-    let r = WPoint { x: x * zi, y: y * zi, inf: Choice::from(0) };
-    WPoint::conditional_select(&r, &WPoint::infinity(), z.is_zero())
+    let r = WPoint {
+        x: x * zi,
+        y: y * zi,
+        inf: Choice::from(0),
+    };
+    let r = WPoint::conditional_select(&r, &WPoint::infinity(), z.is_zero());
+    // Okeya–Sakurai y-recovery has Z = 0 when [k+1]P = O. In that
+    // case [k]P = -P, independently of the order of P. Select it without
+    // branching on the secret scalar.
+    WPoint::conditional_select(&r, &p.neg(), r1.is_infinity())
 }
 
 fn fbytes<Fl: Field>(xs: &[Fl]) -> Vec<u8> {
@@ -228,7 +261,7 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
     /// Masks (a, b), odd, mod 2^E, from the kernel scalar s.
     fn masks(ctx: &Ctx<P, N>, s_bytes: &[u8], pkh: &[u8]) -> (Scalar, Scalar) {
         let nb = ctx.e.div_ceil(8);
-        let h = Zeroizing::new(shake(&[b"EigenSeta-G", s_bytes, pkh], 2 * nb));
+        let h = shake(&[b"EigenSeta-G", s_bytes, pkh], 2 * nb);
         let mut a = Scalar::from_le_bytes(&h[..nb], ctx.e_limbs).mod_2k(ctx.e);
         let mut b = Scalar::from_le_bytes(&h[nb..], ctx.e_limbs).mod_2k(ctx.e);
         a.l[0] |= 1;
@@ -248,12 +281,53 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         Some(PkBasis { pd, qd, pqd })
     }
 
+    /// Check the public 2^E-basis and its differential point before an
+    /// untrusted public key can enter deterministic encapsulation.
+    fn pk_points_valid(pk: &[F<P, N>; 4]) -> bool {
+        let [a, xp, xq, xpq] = *pk;
+        if bool::from((a.square() - F::<P, N>::from_i64(4)).is_zero()) {
+            return false;
+        }
+        let curve = WCurve::from_montgomery(a);
+        let Some(p) = point_from_x(&curve, xp) else {
+            return false;
+        };
+        let Some(q) = point_from_x(&curve, xq) else {
+            return false;
+        };
+        let diff = curve.sub(&p, &q);
+        let sum = curve.add(&p, &q);
+        if !bool::from(diff.x.ct_eq(&xpq)) && !bool::from(sum.x.ct_eq(&xpq)) {
+            return false;
+        }
+        let pc = ProjCurve::from_affine(a);
+        let hp = xdbl_iter(&XPoint::from_affine(xp), P::E - 1, &pc);
+        let hq = xdbl_iter(&XPoint::from_affine(xq), P::E - 1, &pc);
+        !bool::from(hp.is_infinity())
+            && !bool::from(hq.is_infinity())
+            && bool::from(xdbl(&hp, &pc).is_infinity())
+            && bool::from(xdbl(&hq, &pc).is_infinity())
+            && !bool::from(hp.affine().ct_eq(&hq.affine()))
+    }
+
     fn enc_det(ctx: &Ctx<P, N>, pk: &[F<P, N>; 4], s: &Scalar, pkh: &[u8]) -> Option<Vec<u8>> {
-        Some(Self::enc_det_core(ctx, pk, &Self::pk_basis(&pk[0])?, s, pkh))
+        Some(Self::enc_det_core(
+            ctx,
+            pk,
+            &Self::pk_basis(&pk[0])?,
+            s,
+            pkh,
+        ))
     }
 
     /// Deterministic encryption given the public basis: constant time in `s`.
-    fn enc_det_core(ctx: &Ctx<P, N>, pk: &[F<P, N>; 4], basis: &PkBasis<F<P, N>>, s: &Scalar, pkh: &[u8]) -> Vec<u8> {
+    fn enc_det_core(
+        ctx: &Ctx<P, N>,
+        pk: &[F<P, N>; 4],
+        basis: &PkBasis<F<P, N>>,
+        s: &Scalar,
+        pkh: &[u8],
+    ) -> Vec<u8> {
         let a_a = pk[0];
         let pc = ProjCurve::from_affine(a_a);
         let PkBasis { pd, qd, pqd } = *basis;
@@ -265,13 +339,17 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
             ctx.d_bits,
             &pc,
         );
-        let mut pts = [XPoint::from_affine(pk[1]), XPoint::from_affine(pk[2]), XPoint::from_affine(pk[3])];
+        let mut pts = [
+            XPoint::from_affine(pk[1]),
+            XPoint::from_affine(pk[2]),
+            XPoint::from_affine(pk[3]),
+        ];
         let cod = chain3(&pc, &xk, P::F3, &mut pts);
         let a_c = cod.affine_a();
         let cc = ProjCurve::from_affine(a_c);
         let (xp, xq, xpq) = (pts[0], pts[1], pts[2]);
         let xppq = xadd(&xp, &xq, &xpq); // x(phiP + phiQ)
-        let (a, b) = Self::masks(ctx, &Zeroizing::new(Self::s_to_bytes(ctx, s)), pkh);
+        let (a, b) = Self::masks(ctx, &Self::s_to_bytes(ctx, s), pkh);
         let (xs, _) = ladder(&xp, &a, ctx.e, &cc);
         let (xt, _) = ladder(&xq, &b, ctx.e, &cc);
         let m = b.mul_mod_2k(&a.inv_mod_2k(ctx.e), ctx.e);
@@ -280,17 +358,28 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         fbytes(&[a_c, xs.affine(), xt.affine(), xst.affine()])
     }
 
-    pub fn encaps<R: RngCore + CryptoRng>(pk: &PublicKey, rng: &mut R) -> Option<(Ciphertext, [u8; SS_BYTES])> {
+    pub fn encaps<R: RngCore + CryptoRng>(
+        pk: &PublicKey,
+        rng: &mut R,
+    ) -> Option<(Ciphertext, [u8; SS_BYTES])> {
         let ctx = Ctx::<P, N>::new();
         let pkf = parse4::<F<P, N>>(&pk.bytes)?;
+        if !Self::pk_points_valid(&pkf) {
+            return None;
+        }
         let pkh = shake(&[b"EigenSeta-P", &pk.bytes], 32);
         let mut buf = vec![0u8; ctx.d_bits.div_ceil(8) + 16];
         rng.fill_bytes(&mut buf);
         let s_raw = Scalar::from_le_bytes(&buf, buf.len().div_ceil(8));
-        let s = ctx.modd.to_scalar_width(&ctx.modd.reduce(&s_raw), ctx.modd.limbs());
+        let s = ctx
+            .modd
+            .to_scalar_width(&ctx.modd.reduce(&s_raw), ctx.modd.limbs());
         buf.zeroize();
         let ct = Self::enc_det(&ctx, &pkf, &s, &pkh)?;
-        let k = Zeroizing::new(shake(&[b"EigenSeta-K", &Zeroizing::new(Self::s_to_bytes(&ctx, &s)), &ct], SS_BYTES));
+        let k = shake(
+            &[b"EigenSeta-K", &Self::s_to_bytes(&ctx, &s), &ct],
+            SS_BYTES,
+        );
         let mut out = [0u8; SS_BYTES];
         out.copy_from_slice(&k);
         Some((Ciphertext { bytes: ct }, out))
@@ -313,6 +402,9 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
     /// and compute the canonical 3-torsion bases of E_C and E_A.
     pub fn decaps_prepare(sk: &SecretKey, ct: &Ciphertext) -> Option<DecapsPrep<F<P, N>>> {
         let [a_c, xs, xt, xst] = parse4::<F<P, N>>(&ct.bytes)?;
+        if bool::from((a_c.square() - F::<P, N>::from_i64(4)).is_zero()) {
+            return None;
+        }
         let pkf = parse4::<F<P, N>>(&sk.pk)?;
         let wc = WCurve::from_montgomery(a_c);
         let s_pt = point_from_x(&wc, xs)?;
@@ -324,7 +416,15 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
             }
         }
         let (x1, x2) = canonical_basis_3::<P, N>(&a_c)?;
-        Some(DecapsPrep { pkf, a_c, s_pt, t_pt, x1, x2, pk_basis: Self::pk_basis(&pkf[0])? })
+        Some(DecapsPrep {
+            pkf,
+            a_c,
+            s_pt,
+            t_pt,
+            x1,
+            x2,
+            pk_basis: Self::pk_basis(&pkf[0])?,
+        })
     }
 
     /// Secret phase of decapsulation: trapdoor inversion, deterministic
@@ -333,16 +433,22 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
     /// instruction-count tools can measure it on its own (see
     /// examples/ct_probe.rs and SIDE_CHANNELS.md).
     #[inline(never)]
-    pub fn decaps_core(sk: &SecretKey, prep: &DecapsPrep<F<P, N>>, ct: &Ciphertext) -> [u8; SS_BYTES] {
-        let reject = Zeroizing::new(shake(&[b"EigenSeta-R", &sk.z, &ct.bytes], SS_BYTES));
+    pub fn decaps_core(
+        sk: &SecretKey,
+        prep: &DecapsPrep<F<P, N>>,
+        ct: &Ciphertext,
+    ) -> [u8; SS_BYTES] {
+        let reject = shake(&[b"EigenSeta-R", &sk.z, &ct.bytes], SS_BYTES);
         let mut out = [0u8; SS_BYTES];
         out.copy_from_slice(&reject);
         let ctx = Ctx::<P, N>::new();
-        let s = Self::recover_s_core(sk, prep); // Scalar: wiped on drop
+        let s = Self::recover_s_core(sk, prep);
         let ct2 = Self::enc_det_core(&ctx, &prep.pkf, &prep.pk_basis, &s, &sk.pkh);
         let same = crate::ct::bytes_eq(&ct2, &ct.bytes);
-        let s_bytes = Zeroizing::new(Self::s_to_bytes(&ctx, &s));
-        let k = Zeroizing::new(shake(&[b"EigenSeta-K", &s_bytes, &ct.bytes], SS_BYTES));
+        let k = shake(
+            &[b"EigenSeta-K", &Self::s_to_bytes(&ctx, &s), &ct.bytes],
+            SS_BYTES,
+        );
         for i in 0..SS_BYTES {
             out[i] = u8::conditional_select(&out[i], &k[i], same);
         }
@@ -357,13 +463,27 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
 
     fn recover_s_core(sk: &SecretKey, prep: &DecapsPrep<F<P, N>>) -> Scalar {
         let ctx = Ctx::<P, N>::new();
-        let DecapsPrep { pkf, a_c, s_pt, t_pt, x1, x2, ref pk_basis } = *prep;
+        let DecapsPrep {
+            pkf,
+            a_c,
+            s_pt,
+            t_pt,
+            x1,
+            x2,
+            ref pk_basis,
+        } = *prep;
         let a_a = pkf[0];
         let wc = WCurve::from_montgomery(a_c);
         // secret: Kani kernel generators (c'S, -lamS S), (c'T, -lamT T)
         let e = ctx.e;
-        let k1 = (smul_ct(&a_c, &s_pt, &sk.cp2, e), smul_ct(&a_c, &s_pt, &sk.lam_s, e).neg());
-        let k2 = (smul_ct(&a_c, &t_pt, &sk.cp2, e), smul_ct(&a_c, &t_pt, &sk.lam_t, e).neg());
+        let k1 = (
+            smul_ct(&a_c, &s_pt, &sk.cp2, e),
+            smul_ct(&a_c, &s_pt, &sk.lam_s, e).neg(),
+        );
+        let k2 = (
+            smul_ct(&a_c, &t_pt, &sk.cp2, e),
+            smul_ct(&a_c, &t_pt, &sk.lam_t, e).neg(),
+        );
         let o = WPoint::infinity();
         let (fc, imgs) = decaps_chain(&wc, &k1, &k2, e, &[(x1, o), (o, x1), (x2, o)]);
         // identify the codomain factors with E_C: Phi(X,0) = (alpha X, -c'X), Phi(0,X) = (c'X, ...)
@@ -375,12 +495,15 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         for swap in [false, true] {
             let pick = |pr: &Pair<F<P, N>>, first: bool| if first ^ swap { pr.0 } else { pr.1 };
             for sc in [sig, sig.negate()] {
-                let ok_c = sc.eval(&pick(&imgs[0], false)).ct_eq(&cpx1.neg()) & sc.eval(&pick(&imgs[2], false)).ct_eq(&cpx2.neg());
+                let ok_c = sc.eval(&pick(&imgs[0], false)).ct_eq(&cpx1.neg())
+                    & sc.eval(&pick(&imgs[2], false)).ct_eq(&cpx2.neg());
                 for sa in [sig, sig.negate()] {
                     let ok_a = sa.eval(&pick(&imgs[1], true)).ct_eq(&cpx1);
                     let ok = ok_c & ok_a;
-                    alpha1 = WPoint::conditional_select(&alpha1, &sa.eval(&pick(&imgs[0], true)), ok);
-                    alpha2 = WPoint::conditional_select(&alpha2, &sa.eval(&pick(&imgs[2], true)), ok);
+                    alpha1 =
+                        WPoint::conditional_select(&alpha1, &sa.eval(&pick(&imgs[0], true)), ok);
+                    alpha2 =
+                        WPoint::conditional_select(&alpha2, &sa.eval(&pick(&imgs[2], true)), ok);
                 }
             }
         }
@@ -392,7 +515,8 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         let k3 = P::F3;
         let d = &ctx.d;
         let pcc = ProjCurve::from_affine(a_c);
-        let g1_full = !xtpl_iter(&XPoint::from_affine(psi1.x), k3 - 1, &pcc).is_infinity() & !psi1.inf;
+        let g1_full =
+            !xtpl_iter(&XPoint::from_affine(psi1.x), k3 - 1, &pcc).is_infinity() & !psi1.inf;
         let g = WPoint::conditional_select(&psi2, &psi1, g1_full);
         let h = WPoint::conditional_select(&psi1, &psi2, g1_full);
         let xg = WPoint::conditional_select(&x2, &x1, g1_full);
@@ -404,7 +528,9 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         let base = F::<P, N>::conditional_select(&e_g2, &e_g1, r1_full);
         let tgt = weil_sq(&wc, &h, &r, d);
         let kk = dlog_3k(&base, &tgt, k3);
-        let kk = ctx.modd.to_scalar_width(&ctx.modd.reduce(&kk), ctx.modd.limbs());
+        let kk = ctx
+            .modd
+            .to_scalar_width(&ctx.modd.reduce(&kk), ctx.modd.limbs());
         // kernel of psi' (= ker phi_dual): X_h - k X_g
         let khat = wc.sub(&xh, &smul_ct(&a_c, &xg, &kk, ctx.d_bits));
         // phi_dual and the images of X1, X2 in E_A
@@ -428,7 +554,8 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         let z1 = weil_sq(&wa, &kg, &qd, d);
         let z2 = weil_sq(&wa, &pd, &kg, d);
         let s = dlog_3k(&z1, &z2, k3);
-        ctx.modd.to_scalar_width(&ctx.modd.reduce(&s), ctx.modd.limbs())
+        ctx.modd
+            .to_scalar_width(&ctx.modd.reduce(&s), ctx.modd.limbs())
     }
 
     /// Key generation (variable time).
@@ -448,7 +575,10 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         let ed = Self::ed_curve();
         let om = Omega::find(&ed, rng);
         let t = om.trace;
-        let s_d = BigInt::from(sqrt_mod_2power(&((BigUint::one() << (e + 2)) - 7u32), e as u64 + 2));
+        let s_d = BigInt::from(sqrt_mod_2power(
+            &((BigUint::one() << (e + 2)) - 7u32),
+            e as u64 + 2,
+        ));
         let mu = modpos(&((BigInt::from(t) + &s_d) / 2), &n2);
         let nu = modpos(&((BigInt::from(t) - &s_d) / 2), &n2);
         let w = |x: &WPoint<F<P, N>>| om.eval(x);
@@ -469,8 +599,14 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
                 continue;
             }
             let m = &n2 - &d * &d * &f * &f * 7u32;
-            let Some((x, y)) = two_squares(&m, rng, 1 << 14) else { continue };
-            let (c0, cp0) = if (&x % 2u32).is_zero() { (x, y) } else { (y, x) };
+            let Some((x, y)) = two_squares(&m, rng, 1 << 14) else {
+                continue;
+            };
+            let (c0, cp0) = if (&x % 2u32).is_zero() {
+                (x, y)
+            } else {
+                (y, x)
+            };
             let s0 = (&f * &s_dm) % &n2;
             let ds0 = BigInt::from((&d * &s0) % &n2);
             let mut choice = None;
@@ -491,7 +627,9 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         let g = &n2 - &f;
         let fg = &f * &g;
         // 2. alpha = x0 + x1 omega + (y0 + y1 omega) pi with n(alpha) = f g
-        let nform = |u0: &BigInt, u1: &BigInt| -> BigInt { u0 * u0 + BigInt::from(t) * u0 * u1 + u1 * u1 * 2 };
+        let nform = |u0: &BigInt, u1: &BigInt| -> BigInt {
+            u0 * u0 + BigInt::from(t) * u0 * u1 + u1 * u1 * 2
+        };
         let ymax = (&fg / &pchar).sqrt() + 1u32;
         let ymax_i = BigInt::from(ymax.clone());
         let mut alpha_c = None;
@@ -518,7 +656,11 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
             }
         }
         let (x0, x1, y0, y1) = alpha_c?;
-        let frob = |p: &WPoint<F<P, N>>| WPoint { x: p.x.frob(), y: p.y.frob(), inf: p.inf };
+        let frob = |p: &WPoint<F<P, N>>| WPoint {
+            x: p.x.frob(),
+            y: p.y.frob(),
+            inf: p.inf,
+        };
         let mulz = |p: &WPoint<F<P, N>>, k: &BigInt| {
             let r = mul_vartime(&ed, p, &k.magnitude().clone());
             if k.sign() == num_bigint::Sign::Minus {
@@ -558,9 +700,17 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         let e1 = weil_sq(&ea, &imgs[3].0, &imgs[4].0, &d);
         let e2 = weil_sq(&eb, &imgs[3].1, &imgs[4].1, &d);
         let (curve, eps_p, eps_q) = if e1 == want {
-            (ea, ea.sub(&imgs[0].0, &imgs[2].0), ea.sub(&imgs[1].0, &imgs[2].0))
+            (
+                ea,
+                ea.sub(&imgs[0].0, &imgs[2].0),
+                ea.sub(&imgs[1].0, &imgs[2].0),
+            )
         } else if e2 == want {
-            (eb, eb.sub(&imgs[0].1, &imgs[2].1), eb.sub(&imgs[1].1, &imgs[2].1))
+            (
+                eb,
+                eb.sub(&imgs[0].1, &imgs[2].1),
+                eb.sub(&imgs[1].1, &imgs[2].1),
+            )
         } else {
             return None;
         };
@@ -602,15 +752,6 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         let ds0 = BigInt::from((&d * &s0) % &n2);
         let lam_s = modpos(&(&ds0 + &c), &n2);
         let lam_t = modpos(&(&c - &ds0), &n2);
-        // Exclude scalars k = -1 mod the point order: x-only y-recovery returns
-        // O for [k]P when [k+1]P = O (SIDE_CHANNELS.md R3).  Probability about
-        // 2^-E and 3^-F3 per key; checked so the case cannot occur at all.
-        let n2m1 = &n2 - 1u32;
-        let dm1 = &d - 1u32;
-        let cp2v = modpos(&cp, &n2);
-        if lam_s == n2m1 || lam_t == n2m1 || cp2v == n2m1 || modpos(&c, &d) == dm1 || modpos(&cp, &d) == dm1 {
-            return None;
-        }
         let mut z = [0u8; 32];
         rng.fill_bytes(&mut z);
         let pkh = shake(&[b"EigenSeta-P", &pk_bytes], 32);
@@ -621,7 +762,7 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
         let sk = SecretKey {
             lam_s: Scalar::from_biguint(&lam_s, el),
             lam_t: Scalar::from_biguint(&lam_t, el),
-            cp2: Scalar::from_biguint(&cp2v, el),
+            cp2: Scalar::from_biguint(&modpos(&cp, &n2), el),
             c3: Scalar::from_biguint(&modpos(&c, &d), dl),
             cp3: Scalar::from_biguint(&modpos(&cp, &d), dl),
             z,
@@ -640,3 +781,48 @@ impl<P: ParamSet<N>, const N: usize> EigenSeta<P, N> {
 }
 
 pub(crate) fn _unused(_: MontCurve<Fp2<crate::params::Toy16Fp, 4>>) {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::params::Toy16;
+    use rand_core::OsRng;
+
+    #[test]
+    fn scalar_recovery_handles_minus_one_and_zero() {
+        let a = F::<Toy16, 4>::zero();
+        let e = WCurve::from_montgomery(a);
+        let mut rng = OsRng;
+        for (l, exponent) in [(2u32, Toy16::E), (3u32, Toy16::F3)] {
+            let p = point_of_order(&e, l, exponent, &mut rng);
+            let order = BigUint::from(l).pow(exponent as u32);
+            let bits = order.bits() as usize;
+            let width = bits.div_ceil(64) + 1;
+            let minus_one = Scalar::from_biguint(&(&order - 1u32), width);
+            let got = smul_ct(&a, &p, &minus_one, bits);
+            assert!(bool::from(got.ct_eq(&p.neg())), "order {l}^{exponent}");
+            let zero = smul_ct(&a, &p, &Scalar::zero(width), bits);
+            assert!(bool::from(zero.inf));
+            let one = smul_ct(&a, &p, &Scalar::from_u64(1, width), bits);
+            assert!(bool::from(one.ct_eq(&p)));
+        }
+    }
+
+    #[test]
+    fn rejects_invalid_public_curves_and_basis() {
+        let mut rng = OsRng;
+        let zero = PublicKey {
+            bytes: vec![0; EigenSeta::<Toy16, 4>::pk_bytes()],
+        };
+        assert!(EigenSeta::<Toy16, 4>::encaps(&zero, &mut rng).is_none());
+        let singular = PublicKey {
+            bytes: fbytes(&[
+                F::<Toy16, 4>::from_i64(2),
+                F::<Toy16, 4>::zero(),
+                F::<Toy16, 4>::zero(),
+                F::<Toy16, 4>::zero(),
+            ]),
+        };
+        assert!(EigenSeta::<Toy16, 4>::encaps(&singular, &mut rng).is_none());
+    }
+}

@@ -155,7 +155,7 @@ pub trait FpConfig<const N: usize>: 'static + Copy + Clone + Send + Sync + fmt::
     const BITS: usize = bit_length(&Self::MODULUS);
     /// R^3 mod p (to return safegcd output to Montgomery form).
     const R3: [u64; N] = r_pow_mod_p(&Self::MODULUS, 3);
-    const BYTES: usize = (bit_length(&Self::MODULUS) + 7) / 8;
+    const BYTES: usize = bit_length(&Self::MODULUS).div_ceil(8);
     /// Number of low 64-bit limbs of p + 1 that are zero ("Montgomery-friendly"
     /// primes c*2^a*3^b - 1).  When positive, p = -1 mod 2^64 and the
     /// reduction skips those limbs.

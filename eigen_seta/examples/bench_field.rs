@@ -11,15 +11,21 @@ fn bench<C: FpConfig<N>, const N: usize>() {
     let mut mul = f64::MAX;
     for _ in 0..15 {
         let t = Instant::now();
-        for _ in 0..it { x = black_box(x * x + F::<C, N>::one()); }
+        for _ in 0..it {
+            x = black_box(x * x + F::<C, N>::one());
+        }
         mul = mul.min(t.elapsed().as_nanos() as f64 / it as f64);
     }
     let it = 200;
     let t = Instant::now();
-    for _ in 0..it { x = black_box(x.invert_fermat() + F::<C, N>::one()); }
+    for _ in 0..it {
+        x = black_box(x.invert_fermat() + F::<C, N>::one());
+    }
     let fer = t.elapsed().as_nanos() as f64 / it as f64;
     let t = Instant::now();
-    for _ in 0..it { x = black_box(x.invert() + F::<C, N>::one()); }
+    for _ in 0..it {
+        x = black_box(x.invert() + F::<C, N>::one());
+    }
     let sg = t.elapsed().as_nanos() as f64 / it as f64;
     println!("{:6} limbs {:2}  mul {:8.0} ns  fermat {:10.0} ns  safegcd {:9.0} ns  ratio {:5.1}  safegcd/mul {:5.0}",
         C::NAME, N, mul, fer, sg, fer / sg, sg / mul);

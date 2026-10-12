@@ -15,7 +15,10 @@ pub struct XPoint<F: Field> {
 
 impl<F: Field> ConditionallySelectable for XPoint<F> {
     fn conditional_select(a: &Self, b: &Self, c: Choice) -> Self {
-        XPoint { x: F::conditional_select(&a.x, &b.x, c), z: F::conditional_select(&a.z, &b.z, c) }
+        XPoint {
+            x: F::conditional_select(&a.x, &b.x, c),
+            z: F::conditional_select(&a.z, &b.z, c),
+        }
     }
 }
 
@@ -24,7 +27,10 @@ impl<F: Field> XPoint<F> {
         XPoint { x, z: F::one() }
     }
     pub fn infinity() -> Self {
-        XPoint { x: F::one(), z: F::zero() }
+        XPoint {
+            x: F::one(),
+            z: F::zero(),
+        }
     }
     pub fn is_infinity(&self) -> Choice {
         self.z.is_zero()
@@ -59,7 +65,10 @@ pub struct ProjCurve<F: Field> {
 impl<F: Field> ProjCurve<F> {
     pub fn from_affine(a: F) -> Self {
         let two = F::from_i64(2);
-        ProjCurve { a24p: a + two, a24m: a - two }
+        ProjCurve {
+            a24p: a + two,
+            a24m: a - two,
+        }
     }
     /// C24 = A24p - A24m (= 4C).
     pub fn c24(&self) -> F {
@@ -112,17 +121,30 @@ pub fn xadd<F: Field>(p: &XPoint<F>, q: &XPoint<F>, d: &XPoint<F>) -> XPoint<F> 
     let dd = q.x - q.z;
     let da = dd * a;
     let cb = cc * b;
-    XPoint { x: d.z * (da + cb).square(), z: d.x * (da - cb).square() }
+    XPoint {
+        x: d.z * (da + cb).square(),
+        z: d.x * (da - cb).square(),
+    }
 }
 
 /// ([2]P, P + Q) given x(P - Q).
 #[inline]
-pub fn xdbladd<F: Field>(p: &XPoint<F>, q: &XPoint<F>, d: &XPoint<F>, c: &ProjCurve<F>) -> (XPoint<F>, XPoint<F>) {
+pub fn xdbladd<F: Field>(
+    p: &XPoint<F>,
+    q: &XPoint<F>,
+    d: &XPoint<F>,
+    c: &ProjCurve<F>,
+) -> (XPoint<F>, XPoint<F>) {
     (xdbl(p, c), xadd(p, q, d))
 }
 
 /// ([k]P, [k+1]P) for a scalar of `nbits` public bits.  Constant time.
-pub fn ladder<F: Field>(p: &XPoint<F>, k: &Scalar, nbits: usize, c: &ProjCurve<F>) -> (XPoint<F>, XPoint<F>) {
+pub fn ladder<F: Field>(
+    p: &XPoint<F>,
+    k: &Scalar,
+    nbits: usize,
+    c: &ProjCurve<F>,
+) -> (XPoint<F>, XPoint<F>) {
     let mut r0 = XPoint::infinity();
     let mut r1 = *p;
     let mut prev = 0u64;
@@ -226,7 +248,10 @@ pub fn eval_3_isog<F: Field>(q: &XPoint<F>, k: &[F; 2]) -> XPoint<F> {
     let t1 = k[1] * (q.x - q.z);
     let t2 = (t0 + t1).square();
     let t0 = (t1 - t0).square();
-    XPoint { x: q.x * t2, z: q.z * t0 }
+    XPoint {
+        x: q.x * t2,
+        z: q.z * t0,
+    }
 }
 
 /// Okeya–Sakurai y-recovery on y^2 = x^3 + A x^2 + x: given P = (xp, yp)

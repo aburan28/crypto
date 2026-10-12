@@ -7,15 +7,14 @@ torsion; ciphertext = codomain of a 3^f-isogeny plus torsion images masked by a
 sender-random diagonal matrix; decryption = lollipop endomorphism (masks cancel
 on the eigenbasis) decoded with a (2^e, 2^e)-isogeny chain in dimension 2.
 
-> **Correction (2026-10-11).** The `walk` variant below is **insecure**: its
-> decryption key is computed from Δ' = 7·25^k alone (`eigen_seta_toy.py`
-> lines 133–155) and k is public, so anyone can decrypt (an exploratory run,
-> not archived, decrypted 5/5 ciphertexts this way). The "non-cyclic ψ'"
-> corner case reported below was never explained; it cannot occur in the
-> secret-degree v2 scheme (`papers/eigen-seta/`, Proposition 3). The PDF
-> `eigen_seta_design_note.pdf` predates these corrections. The maintained
-> implementation is the Rust crate `eigen_seta/` (v2, secret degree,
-> constant-time decapsulation, NIST-level parameter sets).
+> **Correction (2026-10-11).** The `walk` variant below is insecure: its
+> decryption key depends only on Δ' = 7·25^k, with public k. A toy attack
+> decrypted 5/5 ciphertexts from the public key and k. The "non-cyclic ψ'"
+> frequency below is unverified in the later implementation. The design-note
+> PDF predates these corrections. The maintained, end-to-end Rust implementation
+> is the distinct secret-degree v2 variant in `eigen_seta/`; it does not
+> implement the note's random-curve, two-halves design, and its security is
+> conjectural.
 
 **Status.** Correctness only. Toy parameters (32–66-bit primes), no security,
 no timing claims. Two *special-key* variants are implemented (see below); the

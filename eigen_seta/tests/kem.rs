@@ -7,8 +7,14 @@ fn roundtrip<P: eigen_seta::params::ParamSet<N>, const N: usize>(trials: usize) 
     let mut rng = OsRng;
     let t0 = Instant::now();
     let (pk, sk) = EigenSeta::<P, N>::keygen(&mut rng);
-    eprintln!("[{}] keygen {:?}; pk {} B, ct {} B; secret degree has {} bits",
-        P::NAME, t0.elapsed(), pk.bytes.len(), EigenSeta::<P, N>::ct_bytes(), sk.secret_degree_bits());
+    eprintln!(
+        "[{}] keygen {:?}; pk {} B, ct {} B; secret degree has {} bits",
+        P::NAME,
+        t0.elapsed(),
+        pk.bytes.len(),
+        EigenSeta::<P, N>::ct_bytes(),
+        sk.secret_degree_bits()
+    );
     for i in 0..trials {
         let t1 = Instant::now();
         let (ct, k1) = EigenSeta::<P, N>::encaps(&pk, &mut rng).unwrap();

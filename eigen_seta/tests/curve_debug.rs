@@ -20,13 +20,24 @@ fn debug_curves() {
     assert!(bool::from(z.inf), "[p+1]P != O");
     let half = &n >> 1;
     let t = mul_vartime(&ed, &p, &half);
-    eprintln!("2-torsion inf? {}  y zero? {}", bool::from(t.inf), bool::from(t.y.is_zero()));
+    eprintln!(
+        "2-torsion inf? {}  y zero? {}",
+        bool::from(t.inf),
+        bool::from(t.y.is_zero())
+    );
     if !bool::from(t.inf) {
         let phi = Isog2::new(&ed, &t.x);
         let im = phi.eval(&q);
-        eprintln!("image on codomain: {}", bool::from(phi.codomain.on_curve(&im)));
+        eprintln!(
+            "image on codomain: {}",
+            bool::from(phi.codomain.on_curve(&im))
+        );
         let iso = WIso::find(&phi.codomain, &phi.codomain);
         eprintln!("self-iso u2 = {:?}", iso.u2);
-        eprintln!("j(ed) = {:?}\nj(cod) = {:?}", ed.j_invariant(), phi.codomain.j_invariant());
+        eprintln!(
+            "j(ed) = {:?}\nj(cod) = {:?}",
+            ed.j_invariant(),
+            phi.codomain.j_invariant()
+        );
     }
 }

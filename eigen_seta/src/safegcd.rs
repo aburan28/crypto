@@ -23,7 +23,11 @@ fn to_s62(a: &[u64], l: usize) -> S62 {
         let w = bit / 64;
         let o = bit % 64;
         let lo = if w < a.len() { a[w] >> o } else { 0 };
-        let hi = if o > 2 && w + 1 < a.len() { a[w + 1] << (64 - o) } else { 0 };
+        let hi = if o > 2 && w + 1 < a.len() {
+            a[w + 1] << (64 - o)
+        } else {
+            0
+        };
         v[i] = ((lo | hi) & M62) as i64;
     }
     S62 { v }

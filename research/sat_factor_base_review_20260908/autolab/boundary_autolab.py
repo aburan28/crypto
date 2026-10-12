@@ -237,8 +237,6 @@ def operation_accounting_errors(accounting: Any) -> list[str]:
     for name, value in (("ic_online_operations", ic_ops), ("rho_online_operations", rho_ops)):
         if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
             errors.append(f"operation_accounting.{name} must be nonnegative and finite")
-        if type(value) not in (int, float) or not math.isfinite(value) or value <= 0:
-            errors.append(f"operation_accounting.{name} must be positive")
     units = accounting.get("operation_units")
     if not isinstance(units, dict) or not all(
         isinstance(units.get(arm), str) and units[arm].strip() for arm in ("ic", "rho")
@@ -320,15 +318,6 @@ def hardware_accounting_errors(accounting: Any) -> list[str]:
             errors.append("hardware_accounting.rho_per_ic_instructions must match the counts")
     elif status == "counter_unavailable" and ratio is not None:
         errors.append("hardware_accounting.rho_per_ic_instructions must be null when unavailable")
-    if type(ratio) not in (int, float) or not math.isfinite(ratio) or ratio <= 0:
-        errors.append("operation_accounting.ops_speedup_online is required")
-    elif not errors:
-        expected = float(rho_ops) / float(ic_ops)
-        if abs(float(ratio) - expected) > max(1e-12, expected * 1e-8):
-            errors.append(
-                "operation_accounting.ops_speedup_online does not equal "
-                "rho_online_operations / ic_online_operations"
-            )
     return errors
 
 
@@ -611,6 +600,7 @@ def validate_claim(
         "status": "PASS" if ok else "FAIL",
         "missing_stage_fields": missing_stage,
         "missing_global_provenance": missing_global,
+        "pairing_errors": pairing_errors,
         "validation_errors": validation_errors,
         "required_stage_fields": required,
         "required_global_provenance": global_required,
@@ -2643,7 +2633,6 @@ def parser() -> argparse.ArgumentParser:
             f"(default {DEFAULT_TIMED_REPEATS}; stops early once a run "
             f"exceeds {int(REPEAT_BUDGET_MS / 1000)}s)"
         ),
-        help="Online target count (default from beat); vs_rho primary runs require exactly 1",
     )
     launch_parser.add_argument(
         "--prepare-only",

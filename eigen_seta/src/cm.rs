@@ -22,7 +22,11 @@ fn jac_dbl<F: Field>(e: &WCurve<F>, p: &Jac<F>) -> Jac<F> {
     let z3 = (p.y * p.z).double();
     let x3 = m.square() - e.a2 * z3.square() - (p.x * y2).mul_small(8);
     let y3 = m * ((p.x * y2).mul_small(4) - x3) - y2.square().mul_small(8);
-    Jac { x: x3, y: y3, z: z3 }
+    Jac {
+        x: x3,
+        y: y3,
+        z: z3,
+    }
 }
 
 fn jac_add<F: Field>(e: &WCurve<F>, p: &Jac<F>, q: &Jac<F>) -> Jac<F> {
@@ -44,20 +48,36 @@ fn jac_add<F: Field>(e: &WCurve<F>, p: &Jac<F>, q: &Jac<F>) -> Jac<F> {
         if bool::from(r.is_zero()) {
             return jac_dbl(e, p);
         }
-        return Jac { x: F::one(), y: F::one(), z: F::zero() };
+        return Jac {
+            x: F::one(),
+            y: F::one(),
+            z: F::zero(),
+        };
     }
     let z3 = h * p.z * q.z;
     let h2 = h.square();
     let x3 = r.square() - e.a2 * z3.square() - (u1 + u2) * h2;
     let y3 = r * (u1 * h2 - x3) - s1 * h2 * h;
-    Jac { x: x3, y: y3, z: z3 }
+    Jac {
+        x: x3,
+        y: y3,
+        z: z3,
+    }
 }
 
 fn to_jac<F: Field>(p: &WPoint<F>) -> Jac<F> {
     if bool::from(p.inf) {
-        Jac { x: F::one(), y: F::one(), z: F::zero() }
+        Jac {
+            x: F::one(),
+            y: F::one(),
+            z: F::zero(),
+        }
     } else {
-        Jac { x: p.x, y: p.y, z: F::one() }
+        Jac {
+            x: p.x,
+            y: p.y,
+            z: F::one(),
+        }
     }
 }
 
@@ -73,7 +93,11 @@ fn from_jac<F: Field>(p: &Jac<F>) -> WPoint<F> {
 /// [k]P for a public scalar.  Variable time.
 pub fn mul_vartime<F: Field>(e: &WCurve<F>, p: &WPoint<F>, k: &BigUint) -> WPoint<F> {
     let pj = to_jac(p);
-    let mut r = Jac { x: F::one(), y: F::one(), z: F::zero() };
+    let mut r = Jac {
+        x: F::one(),
+        y: F::one(),
+        z: F::zero(),
+    };
     for i in (0..k.bits()).rev() {
         r = jac_dbl(e, &r);
         if k.bit(i) {
@@ -115,7 +139,12 @@ pub fn p_plus_1<F: Field>() -> BigUint {
 }
 
 /// Point of exact order l^k (l prime, l^k | p + 1) from random sampling.
-pub fn point_of_order<F: Field, R: RngCore>(e: &WCurve<F>, l: u32, k: usize, rng: &mut R) -> WPoint<F> {
+pub fn point_of_order<F: Field, R: RngCore>(
+    e: &WCurve<F>,
+    l: u32,
+    k: usize,
+    rng: &mut R,
+) -> WPoint<F> {
     let lk = BigUint::from(l).pow(k as u32);
     let cof = p_plus_1::<F>() / &lk;
     let lk1 = BigUint::from(l).pow(k as u32 - 1);
@@ -128,7 +157,12 @@ pub fn point_of_order<F: Field, R: RngCore>(e: &WCurve<F>, l: u32, k: usize, rng
 }
 
 /// Basis (P, Q) of E[l^k].
-pub fn torsion_basis<F: Field, R: RngCore>(e: &WCurve<F>, l: u32, k: usize, rng: &mut R) -> (WPoint<F>, WPoint<F>) {
+pub fn torsion_basis<F: Field, R: RngCore>(
+    e: &WCurve<F>,
+    l: u32,
+    k: usize,
+    rng: &mut R,
+) -> (WPoint<F>, WPoint<F>) {
     let lk1 = BigUint::from(l).pow(k as u32 - 1);
     let p = point_of_order(e, l, k, rng);
     let pl = mul_vartime(e, &p, &lk1);
@@ -168,7 +202,7 @@ impl<F: Field> Omega<F> {
         let mut xs: Vec<F> = vec![];
         while xs.len() < 3 {
             let t = mul_vartime(ed, &random_point(ed, rng), &half);
-            if !bool::from(t.inf) && !xs.iter().any(|x| *x == t.x) {
+            if !bool::from(t.inf) && !xs.contains(&t.x) {
                 xs.push(t.x);
             }
         }
@@ -247,7 +281,12 @@ impl<F: Field> Isog3W<F> {
         let w = uq + q.x * vq;
         let a4 = e.a4 - vq.mul_small(5);
         let a6 = e.a6 - e.a2.mul_small(4) * vq - w.mul_small(7);
-        Isog3W { xq: q.x, vq, uq, codomain: WCurve::new(e.a2, a4, a6) }
+        Isog3W {
+            xq: q.x,
+            vq,
+            uq,
+            codomain: WCurve::new(e.a2, a4, a6),
+        }
     }
     pub fn eval(&self, p: &WPoint<F>) -> WPoint<F> {
         if bool::from(p.inf) {
@@ -266,7 +305,12 @@ impl<F: Field> Isog3W<F> {
 }
 
 /// Chain of 3-isogenies with kernel <K> (K of order 3^k), pushing `pts`.
-pub fn chain3_vartime<F: Field>(e: &WCurve<F>, k: &WPoint<F>, n: usize, pts: &mut [WPoint<F>]) -> WCurve<F> {
+pub fn chain3_vartime<F: Field>(
+    e: &WCurve<F>,
+    k: &WPoint<F>,
+    n: usize,
+    pts: &mut [WPoint<F>],
+) -> WCurve<F> {
     let mut cur = *e;
     let mut ker = *k;
     for i in 0..n {

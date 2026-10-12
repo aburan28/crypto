@@ -7,7 +7,12 @@ use crate::strategy::{optimal, traverse};
 
 /// Codomain of the 3^n-isogeny with kernel <K> (K of order 3^n), and the
 /// images of `pts`.
-pub fn chain3<F: Field>(curve: &ProjCurve<F>, k: &XPoint<F>, n: usize, pts: &mut [XPoint<F>]) -> ProjCurve<F> {
+pub fn chain3<F: Field>(
+    curve: &ProjCurve<F>,
+    k: &XPoint<F>,
+    n: usize,
+    pts: &mut [XPoint<F>],
+) -> ProjCurve<F> {
     let strategy = optimal(n, 1.6, 1.0); // tripling ~ 1.6 evaluations
     let mut cur = *curve;
     let curs = core::cell::RefCell::new(Vec::<ProjCurve<F>>::new());

@@ -1,0 +1,17 @@
+n=233: {"library_cofactor":"4","log2_norm_rho":233,"norm_tau_n_minus_1_equals_order":true,"order_formula":"13803492693581127574869511724554051042283763955449008505312348098965372","order_mod_8":"4","r":"3450873173395281893717377931138512760570940988862252126328087024741343","r_bits":232,"r_equals_library_sect233k1_order":true,"r_popcount":72,"r_probable_prime":true,"tnaf_length":235,"tnaf_nonzero":79}
+n=233: 1000009 points sampled
+n=233: confusion [coset][test_in] = [[0, 250584], [249533, 0], [249993, 0], [249899, 0]]; errors = 0; tnaf disagreements = 0 [401.9s]
+n=233: library is_valid_public_point agreement 2000/2000
+n=233 bench[uniform]: {"contended_wall_ns_per_check_max":5795.9814453125,"contended_wall_ns_per_check_median":5727.513671875,"contended_wall_ns_per_check_min":5716.2890625,"method":"closed_form_chain","points":2048,"reps":5}
+n=233 bench[uniform]: {"contended_wall_ns_per_check_max":100.166015625,"contended_wall_ns_per_check_median":80.86767578125,"contended_wall_ns_per_check_min":75.0390625,"method":"closed_form_table","points":2048,"reps":5}
+n=233 bench[uniform]: {"contended_wall_ns_per_check_max":184160.99560546875,"contended_wall_ns_per_check_median":167427.77978515625,"contended_wall_ns_per_check_min":162044.5087890625,"method":"binary_ld_rP","points":2048,"reps":5}
+n=233 bench[uniform]: {"contended_wall_ns_per_check_max":121150.943359375,"contended_wall_ns_per_check_median":102088.6923828125,"contended_wall_ns_per_check_min":98515.26416015625,"method":"tnaf_ld_rP","points":2048,"reps":5}
+n=233 bench[members_of_G]: {"contended_wall_ns_per_check_max":12621.66650390625,"contended_wall_ns_per_check_median":11778.193359375,"contended_wall_ns_per_check_min":11685.322265625,"method":"closed_form_chain","points":2048,"reps":5}
+n=233 bench[members_of_G]: {"contended_wall_ns_per_check_max":181.45263671875,"contended_wall_ns_per_check_median":122.19775390625,"contended_wall_ns_per_check_min":121.91064453125,"method":"closed_form_table","points":2048,"reps":5}
+n=233 bench[members_of_G]: {"contended_wall_ns_per_check_max":168807.66845703125,"contended_wall_ns_per_check_median":165402.3916015625,"contended_wall_ns_per_check_min":163662.57177734375,"method":"binary_ld_rP","points":2048,"reps":5}
+n=233 bench[members_of_G]: {"contended_wall_ns_per_check_max":103430.771484375,"contended_wall_ns_per_check_median":98230.69140625,"contended_wall_ns_per_check_min":97921.77978515625,"method":"tnaf_ld_rP","points":2048,"reps":5}
+wrote sample_n233.json
+
+real	7m43.860s
+user	5m26.910s
+sys	0m0.281s

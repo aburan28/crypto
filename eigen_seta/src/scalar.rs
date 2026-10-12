@@ -14,7 +14,9 @@ pub struct Scalar {
 
 impl Scalar {
     pub fn zero(limbs: usize) -> Self {
-        Scalar { l: vec![0u64; limbs] }
+        Scalar {
+            l: vec![0u64; limbs],
+        }
     }
     pub fn from_u64(v: u64, limbs: usize) -> Self {
         let mut s = Self::zero(limbs);
@@ -59,7 +61,9 @@ impl Scalar {
         s
     }
     pub fn to_le_bytes(&self, nbytes: usize) -> Vec<u8> {
-        (0..nbytes).map(|k| (self.l[k / 8] >> (8 * (k % 8))) as u8).collect()
+        (0..nbytes)
+            .map(|k| (self.l[k / 8] >> (8 * (k % 8))) as u8)
+            .collect()
     }
 
     /// Reduce modulo 2^k (k public).
@@ -162,7 +166,13 @@ impl Scalar {
     pub fn select(a: &Self, b: &Self, c: Choice) -> Self {
         assert_eq!(a.l.len(), b.l.len());
         let m = core::hint::black_box(mask(c));
-        Scalar { l: a.l.iter().zip(&b.l).map(|(x, y)| (x & !m) | (y & m)).collect() }
+        Scalar {
+            l: a.l
+                .iter()
+                .zip(&b.l)
+                .map(|(x, y)| (x & !m) | (y & m))
+                .collect(),
+        }
     }
 }
 
@@ -188,7 +198,12 @@ impl OddModulus {
         for (i, d) in r2b.to_u64_digits().iter().enumerate() {
             r2[i] = *d;
         }
-        OddModulus { m: ml, minv, r2, bits: m.bits() as usize }
+        OddModulus {
+            m: ml,
+            minv,
+            r2,
+            bits: m.bits() as usize,
+        }
     }
     pub fn limbs(&self) -> usize {
         self.m.len()
@@ -287,7 +302,9 @@ impl OddModulus {
     /// a * b mod m for reduced a, b.
     pub fn mul(&self, a: &Scalar, b: &Scalar) -> Scalar {
         let ar = self.mont_mul(&a.l, &self.r2);
-        Scalar { l: self.mont_mul(&ar, &b.l) }
+        Scalar {
+            l: self.mont_mul(&ar, &b.l),
+        }
     }
 
     /// a^e mod m, e public.
@@ -303,7 +320,9 @@ impl OddModulus {
                 r = self.mont_mul(&r, &am);
             }
         }
-        Scalar { l: self.mont_mul(&r, &one) }
+        Scalar {
+            l: self.mont_mul(&r, &one),
+        }
     }
 
     pub fn to_scalar_width(&self, x: &Scalar, limbs: usize) -> Scalar {

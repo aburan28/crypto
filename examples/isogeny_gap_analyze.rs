@@ -442,13 +442,27 @@ fn main() {
                     (Some(x), Some(y)) => ratio(x, y),
                     _ => "–".into(),
                 };
+                let verified_cell = format!(
+                    "{}{}{}",
+                    a.verified,
+                    if a.exhausted > 0 {
+                        format!(" ({} exhausted)", a.exhausted)
+                    } else {
+                        String::new()
+                    },
+                    if a.pinned_by_repeated_row > 0 {
+                        format!(" ({} collision-pinned)", a.pinned_by_repeated_row)
+                    } else {
+                        String::new()
+                    }
+                );
                 if is_fiber {
                     writeln!(
                         md,
                         "| `{}` | {} | {} | {} | {} | {}/{} | {}{:.3} | {} | {:.4} | {} | {:.1} | {} | {:.0} | {} | {} | {} | {} | {} | {:.2} | {} |",
                         a.slug, a.family, a.cofactor,
                         a.fiber_size.map(|v| v.to_string()).unwrap_or("–".into()),
-                        arm, format!("{}{}{}", a.verified, if a.exhausted > 0 { format!(" ({} exhausted)", a.exhausted) } else { String::new() }, if a.pinned_by_repeated_row > 0 { format!(" ({} collision-pinned)", a.pinned_by_repeated_row) } else { String::new() }), a.runs, s_mark, a.s_mean(), s_ratio, a.yield_(), y_ratio,
+                        arm, verified_cell, a.runs, s_mark, a.s_mean(), s_ratio, a.yield_(), y_ratio,
                         a.rel_gae_per_relation(), rr_ratio,
                         if a.verified == 0 { 0.0 } else { a.setup_gae / a.verified as f64 },
                         fmt_opt(a.solver_ops_per_relation(), 0), ops_ratio,
@@ -467,7 +481,7 @@ fn main() {
                         role.map(|r| r.conductor.to_string()).unwrap_or("–".into()),
                         role.and_then(|r| r.j).map(|j| j.to_string()).unwrap_or("–".into()),
                         role.and_then(|r| r.aut).map(|j| j.to_string()).unwrap_or("–".into()),
-                        a.slug, arm, format!("{}{}{}", a.verified, if a.exhausted > 0 { format!(" ({} exhausted)", a.exhausted) } else { String::new() }, if a.pinned_by_repeated_row > 0 { format!(" ({} collision-pinned)", a.pinned_by_repeated_row) } else { String::new() }), a.runs, s_mark, a.s_mean(), a.s_min, a.s_max, a.yield_(),
+                        a.slug, arm, verified_cell, a.runs, s_mark, a.s_mean(), a.s_min, a.s_max, a.yield_(),
                         a.rel_gae_per_relation(), fmt_opt(a.degree_mean(), 3),
                         if a.degree_max > 0 { a.degree_max.to_string() } else { "–".into() },
                         a.online_ms(), a.level_string()

@@ -1,0 +1,7 @@
+{"uptime":"135.75 157.81 179.14","utc":"2026-10-11T23:18:38Z","arm":"orig","cell":"K0_31","round":3}
+{"arm":"f4","target":1,"ms":14871.631,"hit":false,"exhausted":false,"reductions":1410,"splits":602,"propagations":4190,"infeasible":603,"geo_refute":0,"geo_witness":0,"partial_refute":0,"geo_adds":0,"oracle_ms":0.000,"pair_builds":0,"pair_lookups":0,"word_xors":281583026}
+{"arm":"f4","total_ms":14871.631,"hits":0,"reductions":1410,"splits":602,"geo_refute":0,"geo_witness":0,"geo_adds":0,"oracle_ms":0.000,"word_xors":281583026}
+{"arm":"f4","profile":{"calls":4230,"build_ms":47602.669,"reduce_ms":384.119,"readback_ms":0.000,"rows":1679616,"cols":8314491,"word_ops":844749078,"specialise_word_ops":138967095}}
+{"arm":"f6p","target":1,"ms":11101.177,"hit":false,"exhausted":false,"reductions":528,"splits":323,"propagations":2460,"infeasible":0,"geo_refute":324,"geo_witness":0,"partial_refute":47,"geo_adds":553,"oracle_ms":2.884,"pair_builds":0,"pair_lookups":553,"word_xors":278237634}
+{"arm":"f6p","total_ms":11101.177,"hits":0,"reductions":528,"splits":323,"geo_refute":324,"geo_witness":0,"geo_adds":553,"oracle_ms":2.884,"word_xors":278237634}
+{"arm":"f6p","profile":{"calls":1584,"build_ms":35204.094,"reduce_ms":33.774,"readback_ms":0.000,"rows":1642383,"cols":7279416,"word_ops":834712902,"specialise_word_ops":138649491}}

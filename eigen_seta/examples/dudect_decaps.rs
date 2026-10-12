@@ -8,7 +8,7 @@
 //! |t| > 4.5 is the usual "leak detected" threshold.
 //!
 //!   cargo run --release --example dudect_decaps -- [samples_per_class]
-use eigen_seta::kem::{EigenSeta, SecretKey, DecapsPrep, Ciphertext};
+use eigen_seta::kem::{Ciphertext, DecapsPrep, EigenSeta, SecretKey};
 use eigen_seta::params::{Toy16, Toy16Fp};
 use rand_core::{OsRng, RngCore};
 use std::time::Instant;
@@ -19,20 +19,29 @@ type Prep = DecapsPrep<eigen_seta::fp2::Fp2<Toy16Fp, 4>>;
 #[inline(never)]
 fn timed(sk: &SecretKey, prep: &Prep, ct: &Ciphertext) -> u64 {
     let t = Instant::now();
-    let k = K::decaps_core(std::hint::black_box(sk), std::hint::black_box(prep), std::hint::black_box(ct));
+    let k = K::decaps_core(
+        std::hint::black_box(sk),
+        std::hint::black_box(prep),
+        std::hint::black_box(ct),
+    );
     std::hint::black_box(k);
     t.elapsed().as_nanos() as u64
 }
 
 fn welch(a: &[f64], b: &[f64]) -> f64 {
     let m = |x: &[f64]| x.iter().sum::<f64>() / x.len() as f64;
-    let v = |x: &[f64], mu: f64| x.iter().map(|y| (y - mu) * (y - mu)).sum::<f64>() / (x.len() as f64 - 1.0);
+    let v = |x: &[f64], mu: f64| {
+        x.iter().map(|y| (y - mu) * (y - mu)).sum::<f64>() / (x.len() as f64 - 1.0)
+    };
     let (ma, mb) = (m(a), m(b));
     (ma - mb) / (v(a, ma) / a.len() as f64 + v(b, mb) / b.len() as f64).sqrt()
 }
 
 fn main() {
-    let n: usize = std::env::args().nth(1).and_then(|s| s.parse().ok()).unwrap_or(300);
+    let n: usize = std::env::args()
+        .nth(1)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(300);
     let mut rng = OsRng;
     let (pk, sk) = K::keygen(&mut rng);
     let (pk2, _) = K::keygen(&mut rng);
@@ -41,7 +50,13 @@ fn main() {
     let fixed_prep = K::decaps_prepare(&sk, &fixed).unwrap();
     let pool: Vec<(Ciphertext, Prep)> = (0..pool_n)
         .map(|i| {
-            let ct = if i % 2 == 0 { K::encaps(&pk, &mut rng) } else { K::encaps(&pk2, &mut rng) }.unwrap().0;
+            let ct = if i % 2 == 0 {
+                K::encaps(&pk, &mut rng)
+            } else {
+                K::encaps(&pk2, &mut rng)
+            }
+            .unwrap()
+            .0;
             let prep = K::decaps_prepare(&sk, &ct).unwrap();
             (ct, prep)
         })
@@ -63,8 +78,16 @@ fn main() {
             s1.push(timed(&sk, prep, ct) as f64);
         }
     }
-    let med = |x: &[f64]| { let mut y = x.to_vec(); y.sort_by(|a, b| a.partial_cmp(b).unwrap()); y[y.len() / 2] };
-    println!("samples/class {n}; median ns: fixed {:.0}, random {:.0}", med(&s0), med(&s1));
+    let med = |x: &[f64]| {
+        let mut y = x.to_vec();
+        y.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        y[y.len() / 2]
+    };
+    println!(
+        "samples/class {n}; median ns: fixed {:.0}, random {:.0}",
+        med(&s0),
+        med(&s1)
+    );
     println!("t(raw) = {:+.2}", welch(&s0, &s1));
     let mut all: Vec<f64> = s0.iter().chain(s1.iter()).copied().collect();
     all.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -72,6 +95,12 @@ fn main() {
         let thr = all[((all.len() as f64) * pct) as usize];
         let a: Vec<f64> = s0.iter().copied().filter(|x| *x <= thr).collect();
         let b: Vec<f64> = s1.iter().copied().filter(|x| *x <= thr).collect();
-        println!("t(crop <= p{:.0}) = {:+.2}  (n = {}, {})", pct * 100.0, welch(&a, &b), a.len(), b.len());
+        println!(
+            "t(crop <= p{:.0}) = {:+.2}  (n = {}, {})",
+            pct * 100.0,
+            welch(&a, &b),
+            a.len(),
+            b.len()
+        );
     }
 }

@@ -80,7 +80,10 @@ macro_rules! field_test {
                 let c = rand_big(&mut rng);
                 let d = rand_big(&mut rng);
                 let x = F2::new(fa, fb);
-                let y = F2::new(F::from_canonical_limbs(from_big(&c)), F::from_canonical_limbs(from_big(&d)));
+                let y = F2::new(
+                    F::from_canonical_limbs(from_big(&c)),
+                    F::from_canonical_limbs(from_big(&d)),
+                );
                 let xy = x * y;
                 let re = (&a * &c + &p * &p - (&b * &d) % &p) % &p;
                 let im = (&a * &d + &b * &c) % &p;

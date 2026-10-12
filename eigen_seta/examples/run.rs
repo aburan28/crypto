@@ -8,7 +8,14 @@ fn go<P: ParamSet<N>, const N: usize>(trials: usize) {
     let mut rng = OsRng;
     let t0 = Instant::now();
     let (pk, sk) = EigenSeta::<P, N>::keygen(&mut rng);
-    println!("{} keygen_s {:.3} pk_bytes {} ct_bytes {} f_bits {}", P::NAME, t0.elapsed().as_secs_f64(), pk.bytes.len(), EigenSeta::<P, N>::ct_bytes(), sk.secret_degree_bits());
+    println!(
+        "{} keygen_s {:.3} pk_bytes {} ct_bytes {} f_bits {}",
+        P::NAME,
+        t0.elapsed().as_secs_f64(),
+        pk.bytes.len(),
+        EigenSeta::<P, N>::ct_bytes(),
+        sk.secret_degree_bits()
+    );
     let mut ok = 0;
     for i in 0..trials {
         let t1 = Instant::now();
@@ -18,9 +25,21 @@ fn go<P: ParamSet<N>, const N: usize>(trials: usize) {
         let k2 = EigenSeta::<P, N>::decaps(&sk, &ct);
         let td = t2.elapsed().as_secs_f64();
         ok += (k1 == k2) as usize;
-        println!("{} trial {} encaps_s {:.4} decaps_s {:.3} ok {}", P::NAME, i, te, td, k1 == k2);
+        println!(
+            "{} trial {} encaps_s {:.4} decaps_s {:.3} ok {}",
+            P::NAME,
+            i,
+            te,
+            td,
+            k1 == k2
+        );
     }
-    println!("{} RESULT {}/{} decapsulations correct", P::NAME, ok, trials);
+    println!(
+        "{} RESULT {}/{} decapsulations correct",
+        P::NAME,
+        ok,
+        trials
+    );
 }
 
 fn main() {

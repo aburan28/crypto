@@ -104,7 +104,13 @@ pub fn jacobian_phase<F: Field>(
 /// The decapsulation (2^e, 2^e)-chain on E x E with kernel <K1, K2> and the
 /// fixed schedule.  Returns the codomain curve (both factors are the same
 /// curve after the final graph step) and the images of `payload`.
-pub fn decaps_chain<F: Field>(ec: &WCurve<F>, k1: &Pair<F>, k2: &Pair<F>, e: usize, payload: &[Pair<F>]) -> (WCurve<F>, Vec<Pair<F>>) {
+pub fn decaps_chain<F: Field>(
+    ec: &WCurve<F>,
+    k1: &Pair<F>,
+    k2: &Pair<F>,
+    e: usize,
+    payload: &[Pair<F>],
+) -> (WCurve<F>, Vec<Pair<F>>) {
     assert!(e >= 8);
     // step 1: graph of the identity  (x, y) -> (x + y, x - y)
     let mut k1 = graph_identity(ec, k1);
@@ -128,7 +134,11 @@ pub fn decaps_chain<F: Field>(ec: &WCurve<F>, k1: &Pair<F>, k2: &Pair<F>, e: usi
     let r = e - 6;
     let h = jacobian_phase(g.h, &mut gens, e - 3, r, &mut extra);
     // step e-2: splitting (kernel of order 2^3 now; its 2-torsion is 4*gens)
-    let s = Split::new(&h, &div_dbl_iter(&h, &gens[0], 2), &div_dbl_iter(&h, &gens[1], 2));
+    let s = Split::new(
+        &h,
+        &div_dbl_iter(&h, &gens[0], 2),
+        &div_dbl_iter(&h, &gens[1], 2),
+    );
     let mut k1 = s.map(&gens[0]);
     let mut k2 = s.map(&gens[1]);
     let mut pay: Vec<Pair<F>> = extra.iter().map(|d| s.map(d)).collect();
@@ -156,7 +166,13 @@ pub fn decaps_chain<F: Field>(ec: &WCurve<F>, k1: &Pair<F>, k2: &Pair<F>, e: usi
 /// Key-generation chain (variable time is acceptable here): schedule
 /// glue, rich x (e-2), split, starting from E x E with kernel <K1, K2> of
 /// order 2^e.  Returns the two codomain curves and the payload images.
-pub fn keygen_chain<F: Field>(e0: &WCurve<F>, k1: &Pair<F>, k2: &Pair<F>, e: usize, payload: &[Pair<F>]) -> (WCurve<F>, WCurve<F>, Vec<Pair<F>>) {
+pub fn keygen_chain<F: Field>(
+    e0: &WCurve<F>,
+    k1: &Pair<F>,
+    k2: &Pair<F>,
+    e: usize,
+    payload: &[Pair<F>],
+) -> (WCurve<F>, WCurve<F>, Vec<Pair<F>>) {
     let a1 = e0.dbl_iter(&k1.0, e - 1);
     let a2 = e0.dbl_iter(&k2.0, e - 1);
     let b1 = e0.dbl_iter(&k1.1, e - 1);
@@ -179,7 +195,11 @@ pub fn first_step_glues<F: Field>(e0: &WCurve<F>, k1: &Pair<F>, k2: &Pair<F>, e:
     let b2 = e0.dbl_iter(&k2.1, e - 1);
     let fin = |p: &WPoint<F>| !bool::from(p.inf);
     // graph of the identity on E[2] (alpha = 1 on E[2]) gives a product step
-    fin(&a1) && fin(&a2) && fin(&b1) && fin(&b2) && !(bool::from(a1.x.ct_eq(&b1.x)) && bool::from(a2.x.ct_eq(&b2.x)))
+    fin(&a1)
+        && fin(&a2)
+        && fin(&b1)
+        && fin(&b2)
+        && !(bool::from(a1.x.ct_eq(&b1.x)) && bool::from(a2.x.ct_eq(&b2.x)))
 }
 
 pub(crate) fn _c(_: Choice) {}

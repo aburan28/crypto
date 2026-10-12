@@ -1,0 +1,5 @@
+/bin/bash: line 1:  5125 Killed                  ./target/release/examples/binary_gls_validate --m 31 --count 3 --hmax 320 --lmax 61 --points 24 --seed 20261012 --json $R/binary_validate.json > $R/binary_validate.md
+
+real	11m50.341s
+user	10m26.643s
+sys	1m11.443s

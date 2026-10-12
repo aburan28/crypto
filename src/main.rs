@@ -130,6 +130,9 @@ enum Cmd {
         #[command(subcommand)]
         op: cli_mlwe::MlweOp,
     },
+    /// Large files (factor bases, relation tables): push to, pull from, and index
+    /// the object store. See docs/store/README.md.
+    Store(crypto_lib::store::cli::StoreArgs),
 }
 
 #[derive(Subcommand)]
@@ -522,6 +525,12 @@ fn main() {
         Cmd::Cryptopals { challenge } => cmd_cryptopals(&challenge),
         Cmd::PqcFast { op } => cli_pqc_fast::run(op),
         Cmd::Mlwe { op } => cli_mlwe::run(op),
+        Cmd::Store(args) => {
+            if let Err(e) = crypto_lib::store::cli::run(&args) {
+                eprintln!("store: {e}");
+                std::process::exit(1);
+            }
+        }
     }
 }
 

@@ -33,8 +33,14 @@ impl<C: FpConfig<N>, const N: usize> fmt::Debug for Fp2<C, N> {
 }
 
 impl<C: FpConfig<N>, const N: usize> Fp2<C, N> {
-    pub const ZERO: Self = Fp2 { c0: Fp::ZERO, c1: Fp::ZERO };
-    pub const ONE: Self = Fp2 { c0: Fp::ONE, c1: Fp::ZERO };
+    pub const ZERO: Self = Fp2 {
+        c0: Fp::ZERO,
+        c1: Fp::ZERO,
+    };
+    pub const ONE: Self = Fp2 {
+        c0: Fp::ONE,
+        c1: Fp::ZERO,
+    };
 
     #[inline(always)]
     pub fn new(c0: Fp<C, N>, c1: Fp<C, N>) -> Self {
@@ -49,10 +55,16 @@ impl<C: FpConfig<N>, const N: usize> Fp2<C, N> {
         Self::ONE
     }
     pub fn i() -> Self {
-        Fp2 { c0: Fp::ZERO, c1: Fp::ONE }
+        Fp2 {
+            c0: Fp::ZERO,
+            c1: Fp::ONE,
+        }
     }
     pub fn from_fp(a: Fp<C, N>) -> Self {
-        Fp2 { c0: a, c1: Fp::ZERO }
+        Fp2 {
+            c0: a,
+            c1: Fp::ZERO,
+        }
     }
     pub fn from_i64(v: i64) -> Self {
         Self::from_fp(Fp::from_i64(v))
@@ -63,15 +75,24 @@ impl<C: FpConfig<N>, const N: usize> Fp2<C, N> {
 
     #[inline]
     pub fn add(self, o: &Self) -> Self {
-        Fp2 { c0: self.c0.add(&o.c0), c1: self.c1.add(&o.c1) }
+        Fp2 {
+            c0: self.c0.add(&o.c0),
+            c1: self.c1.add(&o.c1),
+        }
     }
     #[inline]
     pub fn sub(self, o: &Self) -> Self {
-        Fp2 { c0: self.c0.sub(&o.c0), c1: self.c1.sub(&o.c1) }
+        Fp2 {
+            c0: self.c0.sub(&o.c0),
+            c1: self.c1.sub(&o.c1),
+        }
     }
     #[inline]
     pub fn neg(self) -> Self {
-        Fp2 { c0: self.c0.neg(), c1: self.c1.neg() }
+        Fp2 {
+            c0: self.c0.neg(),
+            c1: self.c1.neg(),
+        }
     }
     #[inline]
     pub fn double(&self) -> Self {
@@ -83,23 +104,35 @@ impl<C: FpConfig<N>, const N: usize> Fp2<C, N> {
         let v0 = self.c0.mul(&o.c0);
         let v1 = self.c1.mul(&o.c1);
         let s = self.c0.add(&self.c1).mul(&o.c0.add(&o.c1));
-        Fp2 { c0: v0.sub(&v1), c1: s.sub(&v0).sub(&v1) }
+        Fp2 {
+            c0: v0.sub(&v1),
+            c1: s.sub(&v0).sub(&v1),
+        }
     }
     /// (a+bi)^2 = (a+b)(a-b) + 2ab i: 2 base multiplications.
     #[inline]
     pub fn square(&self) -> Self {
         let t = self.c0.add(&self.c1).mul(&self.c0.sub(&self.c1));
         let u = self.c0.mul(&self.c1);
-        Fp2 { c0: t, c1: u.double() }
+        Fp2 {
+            c0: t,
+            c1: u.double(),
+        }
     }
     pub fn mul_fp(&self, s: &Fp<C, N>) -> Self {
-        Fp2 { c0: self.c0.mul(s), c1: self.c1.mul(s) }
+        Fp2 {
+            c0: self.c0.mul(s),
+            c1: self.c1.mul(s),
+        }
     }
     pub fn mul_small(&self, k: i64) -> Self {
         self.mul_fp(&Fp::from_i64(k))
     }
     pub fn conj(&self) -> Self {
-        Fp2 { c0: self.c0, c1: self.c1.neg() }
+        Fp2 {
+            c0: self.c0,
+            c1: self.c1.neg(),
+        }
     }
     /// Frobenius x -> x^p (= conjugation since p ≡ 3 mod 4).
     pub fn frob(&self) -> Self {
@@ -111,7 +144,10 @@ impl<C: FpConfig<N>, const N: usize> Fp2<C, N> {
     /// 1/x; maps 0 to 0.  Constant time (one F_p Fermat inversion).
     pub fn invert(&self) -> Self {
         let n = self.norm().invert();
-        Fp2 { c0: self.c0.mul(&n), c1: self.c1.neg().mul(&n) }
+        Fp2 {
+            c0: self.c0.mul(&n),
+            c1: self.c1.neg().mul(&n),
+        }
     }
     pub fn is_zero(&self) -> Choice {
         self.c0.is_zero() & self.c1.is_zero()

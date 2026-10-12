@@ -129,7 +129,11 @@ fn det4<F: Field>(m: &[[F; 4]; 4]) -> F {
     let mut d = F::zero();
     for c in 0..4 {
         let minor = minor3(m, 0, c);
-        let s = if c % 2 == 0 { m[0][c] * minor } else { -(m[0][c] * minor) };
+        let s = if c % 2 == 0 {
+            m[0][c] * minor
+        } else {
+            -(m[0][c] * minor)
+        };
         d += s;
     }
     d
@@ -139,7 +143,8 @@ fn minor3<F: Field>(m: &[[F; 4]; 4], r: usize, c: usize) -> F {
     let rows: Vec<usize> = (0..4).filter(|&i| i != r).collect();
     let cols: Vec<usize> = (0..4).filter(|&j| j != c).collect();
     let a = |i: usize, j: usize| m[rows[i]][cols[j]];
-    a(0, 0) * (a(1, 1) * a(2, 2) - a(1, 2) * a(2, 1)) - a(0, 1) * (a(1, 0) * a(2, 2) - a(1, 2) * a(2, 0))
+    a(0, 0) * (a(1, 1) * a(2, 2) - a(1, 2) * a(2, 1))
+        - a(0, 1) * (a(1, 0) * a(2, 2) - a(1, 2) * a(2, 0))
         + a(0, 2) * (a(1, 0) * a(2, 1) - a(1, 1) * a(2, 0))
 }
 
@@ -204,7 +209,12 @@ fn reduce_from<F: Field>(h: &[F; 7], v3: &[F], uu: &[F]) -> Div<F> {
     let u1 = q[1] * li;
     let u0 = q[0] * li;
     let (r1, r0) = rem_quad(v3, u1, u0);
-    Div { u1, u0, v1: -r1, v0: -r0 }
+    Div {
+        u1,
+        u0,
+        v1: -r1,
+        v0: -r0,
+    }
 }
 
 /// Generic doubling.
@@ -250,13 +260,17 @@ impl<F: Field> Glue<F> {
     /// `a` = x-coordinates of the kernel's 2-torsion on E1: x(P1), x(Q1),
     /// x(P1+Q1); `b` the same on E2.
     pub fn new(a: [F; 3], b: [F; 3]) -> Self {
-        let m = [[a[0] * b[0], a[0], b[0]], [a[1] * b[1], a[1], b[1]], [a[2] * b[2], a[2], b[2]]];
+        let m = [
+            [a[0] * b[0], a[0], b[0]],
+            [a[1] * b[1], a[1], b[1]],
+            [a[2] * b[2], a[2], b[2]],
+        ];
         // adjugate and determinant of the 3x3 matrix
         let cof = |i: usize, j: usize| {
             let r: Vec<usize> = (0..3).filter(|&x| x != i).collect();
             let c: Vec<usize> = (0..3).filter(|&x| x != j).collect();
             let v = m[r[0]][c[0]] * m[r[1]][c[1]] - m[r[0]][c[1]] * m[r[1]][c[0]];
-            if (i + j) % 2 == 0 {
+            if (i + j).is_multiple_of(2) {
                 v
             } else {
                 -v
@@ -287,17 +301,34 @@ impl<F: Field> Glue<F> {
         let hh = pscale(&pmul(&pmul(&q0, &q1), &q2), s1);
         let mut h = [F::zero(); 7];
         h.copy_from_slice(&hh[..7]);
-        Glue { h, s1, s2, t1, t2, s1i }
+        Glue {
+            h,
+            s1,
+            s2,
+            t1,
+            t2,
+            s1i,
+        }
     }
 
     fn map_e1(&self, p: &WPoint<F>) -> Div<F> {
         // u = x^2 + (s2 - xP)/s1, v = yP/s1
-        Div { u1: F::zero(), u0: (self.s2 - p.x) * self.s1i, v1: F::zero(), v0: p.y * self.s1i }
+        Div {
+            u1: F::zero(),
+            u0: (self.s2 - p.x) * self.s1i,
+            v1: F::zero(),
+            v0: p.y * self.s1i,
+        }
     }
     fn map_e2(&self, p: &WPoint<F>) -> Div<F> {
         // u = x^2 - t1/(xP - t2), v = yP/(xP - t2) * x
         let di = (p.x - self.t2).invert();
-        Div { u1: F::zero(), u0: -(self.t1 * di), v1: p.y * di, v0: F::zero() }
+        Div {
+            u1: F::zero(),
+            u0: -(self.t1 * di),
+            v1: p.y * di,
+            v0: F::zero(),
+        }
     }
     /// Image of (P1, P2); either component may be infinity (selected in
     /// constant time).
@@ -330,7 +361,7 @@ fn inv3x3<F: Field>(m: &[[F; 3]; 3]) -> [[F; 3]; 3] {
         let r: Vec<usize> = (0..3).filter(|&x| x != i).collect();
         let k: Vec<usize> = (0..3).filter(|&x| x != j).collect();
         let v = m[r[0]][k[0]] * m[r[1]][k[1]] - m[r[0]][k[1]] * m[r[1]][k[0]];
-        if (i + j) % 2 == 0 {
+        if (i + j).is_multiple_of(2) {
             v
         } else {
             -v
@@ -372,7 +403,15 @@ impl<F: Field> Richelot<F> {
         let h11 = pmul(&h1, &h1);
         let h12 = pmul(&h1, &h2);
         let h22 = pmul(&h2, &h2);
-        Richelot { g1, g2, h1, h11, h12, h22, hnew }
+        Richelot {
+            g1,
+            g2,
+            h1,
+            h11,
+            h12,
+            h22,
+            hnew,
+        }
     }
 
     pub fn map(&self, d: &Div<F>) -> Div<F> {
@@ -385,16 +424,28 @@ impl<F: Field> Richelot<F> {
         let c11 = g11.square() * p + g11 * g10 * s + g10.square();
         let c12 = two * g11 * g21 * p + (g11 * g20 + g21 * g10) * s + two * g10 * g20;
         let c22 = g21.square() * p + g21 * g20 * s + g20.square();
-        let px = padd(&padd(&pscale(&self.h11, c11), &pscale(&self.h12, c12)), &pscale(&self.h22, c22));
+        let px = padd(
+            &padd(&pscale(&self.h11, c11), &pscale(&self.h12, c12)),
+            &pscale(&self.h22, c22),
+        );
         let py2 = v1.square() * p + v1 * v0 * s + v0.square();
         let a = two * v1 * g11 * p + v1 * g10 * s + v0 * g11 * s + two * v0 * g10;
-        let b = v1 * g11 * s * p + two * v1 * g10 * p + v0 * g11 * (s.square() - two * p) + v0 * g10 * s;
+        let b = v1 * g11 * s * p
+            + two * v1 * g10 * p
+            + v0 * g11 * (s.square() - two * p)
+            + v0 * g10 * s;
         let py1 = pmul(&[-b, a], &self.h1); // degree 3
         let u = [d.u0, d.u1, F::one()];
         let py0 = pscale(&pmul(&self.h11, &u), c11); // degree 6
-        // make Px monic
+                                                     // make Px monic
         let lc_i = px[4].invert();
-        let pxm = [px[0] * lc_i, px[1] * lc_i, px[2] * lc_i, px[3] * lc_i, F::one()];
+        let pxm = [
+            px[0] * lc_i,
+            px[1] * lc_i,
+            px[2] * lc_i,
+            px[3] * lc_i,
+            F::one(),
+        ];
         let py1r = rem_monic4(&py1, &pxm);
         let inv = inv_mod_quartic(&py1r, &pxm);
         let rhs = padd(&pscale(&self.hnew, py2), &py0);
@@ -410,7 +461,12 @@ impl<F: Field> Richelot<F> {
         let u1 = q[1] * li;
         let u0 = q[0] * li;
         let (r1, r0) = rem_quad(&py, u1, u0);
-        Div { u1, u0, v1: -r1, v0: -r0 }
+        Div {
+            u1,
+            u0,
+            v1: -r1,
+            v0: -r0,
+        }
     }
 }
 
@@ -450,15 +506,39 @@ impl<F: Field> Split<F> {
         let b = (v - sq) * half;
         let a = ad * d.invert();
         let ev = |g: &[F; 3], x0: F, x1: F, x2: F| g[0] * x0 + g[1] * x1 + g[2] * x2;
-        let (h11, h21, h31) = (ev(&g1, F::one(), a, a.square()), ev(&g2, F::one(), a, a.square()), ev(&g3, F::one(), a, a.square()));
-        let (h10, h20, h30) = (ev(&g1, d.square(), b * d, b.square()), ev(&g2, d.square(), b * d, b.square()), ev(&g3, d.square(), b * d, b.square()));
+        let (h11, h21, h31) = (
+            ev(&g1, F::one(), a, a.square()),
+            ev(&g2, F::one(), a, a.square()),
+            ev(&g3, F::one(), a, a.square()),
+        );
+        let (h10, h20, h30) = (
+            ev(&g1, d.square(), b * d, b.square()),
+            ev(&g2, d.square(), b * d, b.square()),
+            ev(&g3, d.square(), b * d, b.square()),
+        );
         let p1 = pmul(&pmul(&[h10, h11], &[h20, h21]), &[h30, h31]);
         let p2 = pmul(&pmul(&[h11, h10], &[h21, h20]), &[h31, h30]);
-        let p1n = pmul(&pmul(&[h10 * h21 * h31, F::one()], &[h20 * h11 * h31, F::one()]), &[h30 * h11 * h21, F::one()]);
-        let p2n = pmul(&pmul(&[h11 * h20 * h30, F::one()], &[h21 * h10 * h30, F::one()]), &[h31 * h10 * h20, F::one()]);
+        let p1n = pmul(
+            &pmul(&[h10 * h21 * h31, F::one()], &[h20 * h11 * h31, F::one()]),
+            &[h30 * h11 * h21, F::one()],
+        );
+        let p2n = pmul(
+            &pmul(&[h11 * h20 * h30, F::one()], &[h21 * h10 * h30, F::one()]),
+            &[h31 * h10 * h20, F::one()],
+        );
         let e1 = WCurve::new(p1n[2], p1n[1], p1n[0]);
         let e2 = WCurve::new(p2n[2], p2n[1], p2n[0]);
-        Split { a, b, d, p1, p2, k1: h11 * h21 * h31, k2: h10 * h20 * h30, e1, e2 }
+        Split {
+            a,
+            b,
+            d,
+            p1,
+            p2,
+            k1: h11 * h21 * h31,
+            k2: h10 * h20 * h30,
+            e1,
+            e2,
+        }
     }
 
     pub fn map(&self, dv: &Div<F>) -> (WPoint<F>, WPoint<F>) {
@@ -466,8 +546,14 @@ impl<F: Field> Split<F> {
         let xd = [d, F::one()]; // x + d
         let axb = [b, a]; // a x + b
         let xd2 = pmul(&xd, &xd);
-        let u_ = padd(&padd(&pscale(&xd2, dv.u0), &pscale(&pmul(&axb, &xd), dv.u1)), &pmul(&axb, &axb));
-        let vv = padd(&pscale(&pmul(&xd2, &xd), dv.v0), &pscale(&pmul(&axb, &xd2), dv.v1));
+        let u_ = padd(
+            &padd(&pscale(&xd2, dv.u0), &pscale(&pmul(&axb, &xd), dv.u1)),
+            &pmul(&axb, &axb),
+        );
+        let vv = padd(
+            &pscale(&pmul(&xd2, &xd), dv.v0),
+            &pscale(&pmul(&axb, &xd2), dv.v1),
+        );
         // reduce vv mod u_ (u_ has leading coefficient u_[2])
         let lci = u_[2].invert();
         let m1 = u_[1] * lci;
@@ -502,7 +588,10 @@ impl<F: Field> Split<F> {
         let red2 = quo_monic(&padd(&self.p2, &pneg(&zsq)), &[u2p0, u2p1, F::one()]);
         let xp2 = -red2[0] * red2[1].invert();
         let yp2 = z1 * xp2 + z0;
-        (WPoint::new(self.k1 * xp1, self.k1 * yp1), WPoint::new(self.k2 * xp2, self.k2 * yp2))
+        (
+            WPoint::new(self.k1 * xp1, self.k1 * yp1),
+            WPoint::new(self.k2 * xp2, self.k2 * yp2),
+        )
     }
 }
 
@@ -585,7 +674,12 @@ pub fn div_dbl_batch<F: Field>(h: &[F; 7], ds: &[Div<F>]) -> Vec<Div<F>> {
             let u1 = q[1] * li[k];
             let u0 = q[0] * li[k];
             let (r1, r0) = rem_quad(v3, u1, u0);
-            Div { u1, u0, v1: -r1, v0: -r0 }
+            Div {
+                u1,
+                u0,
+                v1: -r1,
+                v0: -r0,
+            }
         })
         .collect()
 }
@@ -619,10 +713,16 @@ impl<F: Field> Richelot<F> {
             let c11 = g11.square() * p + g11 * g10 * s + g10.square();
             let c12 = two * g11 * g21 * p + (g11 * g20 + g21 * g10) * s + two * g10 * g20;
             let c22 = g21.square() * p + g21 * g20 * s + g20.square();
-            let px = padd(&padd(&pscale(&self.h11, c11), &pscale(&self.h12, c12)), &pscale(&self.h22, c22));
+            let px = padd(
+                &padd(&pscale(&self.h11, c11), &pscale(&self.h12, c12)),
+                &pscale(&self.h22, c22),
+            );
             let py2 = v1.square() * p + v1 * v0 * s + v0.square();
             let a = two * v1 * g11 * p + v1 * g10 * s + v0 * g11 * s + two * v0 * g10;
-            let b = v1 * g11 * s * p + two * v1 * g10 * p + v0 * g11 * (s.square() - two * p) + v0 * g10 * s;
+            let b = v1 * g11 * s * p
+                + two * v1 * g10 * p
+                + v0 * g11 * (s.square() - two * p)
+                + v0 * g10 * s;
             let py1 = pmul(&[-b, a], &self.h1);
             let u = [d.u0, d.u1, F::one()];
             let py0 = pscale(&pmul(&self.h11, &u), c11);
@@ -635,7 +735,13 @@ impl<F: Field> Richelot<F> {
         let mut dets = Vec::with_capacity(ds.len());
         for (k, x) in s1.iter().enumerate() {
             let li = lci[k];
-            let pxm = [x.px[0] * li, x.px[1] * li, x.px[2] * li, x.px[3] * li, F::one()];
+            let pxm = [
+                x.px[0] * li,
+                x.px[1] * li,
+                x.px[2] * li,
+                x.px[3] * li,
+                F::one(),
+            ];
             let py1r = rem_monic4(&x.py1, &pxm);
             let mut cols = [[F::zero(); 4]; 4];
             let mut cur: Vec<F> = py1r.to_vec();
@@ -683,7 +789,12 @@ impl<F: Field> Richelot<F> {
                 let u1 = q[1] * q2i[k];
                 let u0 = q[0] * q2i[k];
                 let (r1, r0) = rem_quad(py, u1, u0);
-                Div { u1, u0, v1: -r1, v0: -r0 }
+                Div {
+                    u1,
+                    u0,
+                    v1: -r1,
+                    v0: -r0,
+                }
             })
             .collect()
     }

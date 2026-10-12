@@ -17,7 +17,9 @@ use rand_core::{CryptoRng, RngCore};
 /// Deterministic bases for the extra Miller-Rabin rounds (public data only).
 struct SplitMix(u64);
 impl RngCore for SplitMix {
-    fn next_u32(&mut self) -> u32 { self.next_u64() as u32 }
+    fn next_u32(&mut self) -> u32 {
+        self.next_u64() as u32
+    }
     fn next_u64(&mut self) -> u64 {
         self.0 = self.0.wrapping_add(0x9E3779B97F4A7C15);
         let mut z = self.0;
@@ -25,12 +27,26 @@ impl RngCore for SplitMix {
         z = (z ^ (z >> 27)).wrapping_mul(0x94D049BB133111EB);
         z ^ (z >> 31)
     }
-    fn fill_bytes(&mut self, d: &mut [u8]) { for c in d.chunks_mut(8) { let v = self.next_u64().to_le_bytes(); c.copy_from_slice(&v[..c.len()]); } }
-    fn try_fill_bytes(&mut self, d: &mut [u8]) -> Result<(), rand_core::Error> { self.fill_bytes(d); Ok(()) }
+    fn fill_bytes(&mut self, d: &mut [u8]) {
+        for c in d.chunks_mut(8) {
+            let v = self.next_u64().to_le_bytes();
+            c.copy_from_slice(&v[..c.len()]);
+        }
+    }
+    fn try_fill_bytes(&mut self, d: &mut [u8]) -> Result<(), rand_core::Error> {
+        self.fill_bytes(d);
+        Ok(())
+    }
 }
 impl CryptoRng for SplitMix {}
 
-const SETS: [(&str, usize, usize); 5] = [("Toy16", 16, 8), ("Toy32", 32, 8), ("L1", 128, 12), ("L3", 192, 12), ("L5", 256, 12)];
+const SETS: [(&str, usize, usize); 5] = [
+    ("Toy16", 16, 8),
+    ("Toy32", 32, 8),
+    ("L1", 128, 12),
+    ("L3", 192, 12),
+    ("L5", 256, 12),
+];
 
 fn find_prime(e: usize, f3: usize, rng: &mut SplitMix) -> (BigUint, u64) {
     let base = (BigUint::from(1u32) << (e + 1)) * BigUint::from(3u32).pow(f3 as u32);
@@ -45,7 +61,15 @@ fn find_prime(e: usize, f3: usize, rng: &mut SplitMix) -> (BigUint, u64) {
     }
 }
 
-struct Set { lam: usize, kappa: usize, f3: usize, e: usize, p: BigUint, c: u64, lo: BigUint }
+struct Set {
+    lam: usize,
+    kappa: usize,
+    f3: usize,
+    e: usize,
+    p: BigUint,
+    c: u64,
+    lo: BigUint,
+}
 
 fn pick(lam: usize, kappa: usize, rng: &mut SplitMix) -> Set {
     let f3 = (2.0 * lam as f64 / 3f64.log2()).ceil() as usize;
@@ -53,7 +77,10 @@ fn pick(lam: usize, kappa: usize, rng: &mut SplitMix) -> Set {
     let bound = |e: usize, p: &BigUint| {
         let lo = (p >> e) * (BigUint::from(1u32) << kappa) + 1u32;
         let fmax = &lo * 2u32;
-        (BigUint::from(1u32) << e > BigUint::from(28u32) * &d * &d * &fmax * &fmax, lo)
+        (
+            BigUint::from(1u32) << e > BigUint::from(28u32) * &d * &d * &fmax * &fmax,
+            lo,
+        )
     };
     let mut e = 8usize.max((4.0 * f3 as f64 * 1.58) as usize - 10);
     loop {
@@ -63,14 +90,24 @@ fn pick(lam: usize, kappa: usize, rng: &mut SplitMix) -> Set {
             let (p, c) = find_prime(e, f3, rng);
             let (ok, lo) = bound(e, &p);
             if ok {
-                return Set { lam, kappa, f3, e, p, c, lo };
+                return Set {
+                    lam,
+                    kappa,
+                    f3,
+                    e,
+                    p,
+                    c,
+                    lo,
+                };
             }
         }
         e += 1;
     }
 }
 
-fn hex(x: &BigUint) -> String { format!("{:x}", x) }
+fn hex(x: &BigUint) -> String {
+    format!("{:x}", x)
+}
 
 fn main() {
     let want: Vec<String> = std::env::args().skip(1).collect();
@@ -98,7 +135,9 @@ fn main() {
         let a6 = red(BigInt::from(-2) * &j * &k * &k);
         let dbits = s.f3 as f64 * 3f64.log2();
         out.push(format!("// {name}: lambda = {}, p has {bits} bits ({n} limbs), e = {}, f3 = {} (d ~ 2^{:.1}), c = {}, kappa = {}", s.lam, s.e, s.f3, dbits, s.c, s.kappa));
-        out.push(format!("#[derive(Clone, Copy, Debug)]\npub struct {name}Fp;"));
+        out.push(format!(
+            "#[derive(Clone, Copy, Debug)]\npub struct {name}Fp;"
+        ));
         out.push(format!("impl FpConfig<{n}> for {name}Fp {{\n    const MODULUS: [u64; {n}] = crate::hexlimbs!(\"{}\", {n});\n    const NAME: &'static str = \"{name}\";\n}}", hex(p)));
         out.push(format!("#[derive(Clone, Copy, Debug)]\npub struct {name};"));
         out.push(format!("impl ParamSet<{n}> for {name} {{\n    const NAME: &'static str = \"{name}\";\n    const LAMBDA: usize = {lam};\n    type Cfg = {name}Fp;\n    const E: usize = {};\n    const F3: usize = {};\n    const KAPPA: usize = {kappa};\n    const COFACTOR: u64 = {};\n    const F_LO_HEX: &'static str = \"{}\";\n    const ED_A4_HEX: &'static str = \"{}\";\n    const ED_A6_HEX: &'static str = \"{}\";\n}}\n", s.e, s.f3, s.c, hex(&s.lo), hex(&a4), hex(&a6)));

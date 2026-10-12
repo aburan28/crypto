@@ -1,0 +1,21 @@
+test_claim_check_cli_roundtrip (test_boundary_autolab.HelperTests.test_claim_check_cli_roundtrip) ... ok
+test_draft_factor_base_claim_from_stdout (test_boundary_autolab.HelperTests.test_draft_factor_base_claim_from_stdout) ... ok
+test_factor_base_producer_commands_omit_rho (test_boundary_autolab.HelperTests.test_factor_base_producer_commands_omit_rho) ... ok
+test_independent_replay_pointer_targets_validation_receipt (test_boundary_autolab.HelperTests.test_independent_replay_pointer_targets_validation_receipt) ... ok
+test_seed_is_deterministic (test_boundary_autolab.HelperTests.test_seed_is_deterministic) ... ok
+test_single_target_claim_points_to_separate_validation_receipt (test_boundary_autolab.HelperTests.test_single_target_claim_points_to_separate_validation_receipt) ... ok
+test_single_target_command_separates_precompute_from_online_target (test_boundary_autolab.HelperTests.test_single_target_command_separates_precompute_from_online_target) ... ok
+test_vs_rho_batch_launch_is_rejected_before_runner_lock (test_boundary_autolab.HelperTests.test_vs_rho_batch_launch_is_rejected_before_runner_lock) ... ok
+test_plan_lists_priority_beats (test_boundary_autolab.LedgerContractTests.test_plan_lists_priority_beats) ... ok
+test_protocol_and_ledger_load (test_boundary_autolab.LedgerContractTests.test_protocol_and_ledger_load) ... ok
+test_status_overlays_rejected_paired_target_audit (test_boundary_autolab.LedgerContractTests.test_status_overlays_rejected_paired_target_audit) ... ok
+test_decomposition_requires_ffd (test_boundary_autolab.MeasurementSchemaTests.test_decomposition_requires_ffd) ... ok
+test_factor_base_complete_passes (test_boundary_autolab.MeasurementSchemaTests.test_factor_base_complete_passes) ... ok
+test_vs_rho_complete_passes (test_boundary_autolab.MeasurementSchemaTests.test_vs_rho_complete_passes) ... ok
+test_vs_rho_different_public_points_fail (test_boundary_autolab.MeasurementSchemaTests.test_vs_rho_different_public_points_fail) ... ok
+test_vs_rho_incomplete_fails_closed (test_boundary_autolab.MeasurementSchemaTests.test_vs_rho_incomplete_fails_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.192s
+
+OK

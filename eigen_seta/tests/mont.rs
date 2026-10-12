@@ -40,11 +40,22 @@ fn montgomery_against_weierstrass() {
         assert_eq!(x * zi, kp.x);
         assert_eq!(y * zi, kp.y, "y recovery");
         let pq = w.sub(&p, &q);
-        let m3 = ladder3pt(&XPoint::from_affine(p.x), &XPoint::from_affine(q.x), &XPoint::from_affine(pq.x), &k, 200, &pc);
+        let m3 = ladder3pt(
+            &XPoint::from_affine(p.x),
+            &XPoint::from_affine(q.x),
+            &XPoint::from_affine(pq.x),
+            &k,
+            200,
+            &pc,
+        );
         let expect = w.add(&p, &mul_vartime(&w, &q, &kb));
         assert_eq!(m3.affine(), expect.x, "ladder3pt");
         let t = xtpl(&XPoint::from_affine(p.x), &pc);
-        assert_eq!(t.affine(), mul_vartime(&w, &p, &BigUint::from(3u32)).x, "xtpl");
+        assert_eq!(
+            t.affine(),
+            mul_vartime(&w, &p, &BigUint::from(3u32)).x,
+            "xtpl"
+        );
     }
     // 3-isogeny chain: x-only vs full-point Velu, compared through an isomorphism
     let n = 12;
