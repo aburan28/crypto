@@ -1,0 +1,2678 @@
+{
+  "cells": [
+    {
+      "a": 0,
+      "calibration_key": "koblitz/K_0 / GF(2^13)",
+      "curve_slug": "icv1-f2m13-t181-515ee569",
+      "ell": 4,
+      "factor_base": 10.0,
+      "file": "3-0-13-4.jsonl",
+      "lambda": 0.15625,
+      "lambda_targets": 256,
+      "m": 3,
+      "n": 13,
+      "pinned_ns_per_word_xor": 0.002304,
+      "r": 2003.0,
+      "rho_signed_frobenius": {
+        "mean_online_wall_ns": 116245.325,
+        "mean_s": 2.094743260166024,
+        "runs": 40
+      },
+      "rho_strong": {
+        "mean_online_wall_ns": 40443.1,
+        "mean_s": 16.649962391486252,
+        "runs": 40
+      },
+      "surplus": 1,
+      "variants": [
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            23.068832008,
+            1.071745057,
+            0.952734795,
+            1.342428959
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 6.608935204750001,
+          "mean_word_xors": 394718201.5,
+          "n_vars": 25,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 64023923.832422405,
+            "over_signed_frobenius_rho_s": 682921.8542125057,
+            "over_strong_rho_s": 85918.86982659025,
+            "pdp_calls": 70.4,
+            "relation_phase_wall_s_descriptive": 465.2690384144001,
+            "s_relations": 1430545.9513317305,
+            "word_xors": 27788161385.600002
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            660222881.0,
+            308911824.0,
+            295003753.0,
+            314734348.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            14.996455754000001,
+            1.899924353,
+            1.8153694500000002,
+            1.8573418350000002
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 5.142272848,
+          "mean_word_xors": 945282062.75,
+          "n_vars": 25,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 153326263.02935043,
+            "over_signed_frobenius_rho_s": 1635480.138979738,
+            "over_strong_rho_s": 205760.885082539,
+            "pdp_calls": 70.4,
+            "relation_phase_wall_s_descriptive": 362.01600849920004,
+            "s_relations": 3425910.998263199,
+            "word_xors": 66547857217.600006
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            1036605291.0,
+            939339707.0,
+            875218221.0,
+            929965032.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.39129562300000004,
+            0.19164676500000002,
+            0.17211905500000002,
+            0.182295059
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 0.23433912550000002,
+          "mean_word_xors": 24851105.0,
+          "n_vars": 25,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 4030888.992768001,
+            "over_signed_frobenius_rho_s": 42996.14925619202,
+            "over_strong_rho_s": 5409.375213577341,
+            "pdp_calls": 70.4,
+            "relation_phase_wall_s_descriptive": 16.497474435200004,
+            "s_relations": 90065.89386750064,
+            "word_xors": 1749517792.0000002
+          },
+          "solving_degree_per_target": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            30402664.0,
+            23138571.0,
+            22859727.0,
+            23003458.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.257462537,
+            0.074662886,
+            0.087398261,
+            0.07675644200000001
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.12407003149999998,
+          "mean_word_xors": 49433249.5,
+          "n_vars": 12,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 8018152.1620992,
+            "over_signed_frobenius_rho_s": 85526.95639572482,
+            "over_strong_rho_s": 10760.205414281756,
+            "pdp_calls": 70.4,
+            "relation_phase_wall_s_descriptive": 8.7345302176,
+            "s_relations": 179157.01547245798,
+            "word_xors": 3480100764.8
+          },
+          "solving_degree_per_target": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            81179151.0,
+            39028016.0,
+            38729915.0,
+            38795916.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.100351937,
+            0.055583469,
+            0.041323772,
+            0.043689703
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.06023722025,
+          "mean_word_xors": 5278732.0,
+          "n_vars": 12,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 856218.7763712001,
+            "over_signed_frobenius_rho_s": 9133.000281292801,
+            "over_strong_rho_s": 1149.0290689254075,
+            "pdp_calls": 70.4,
+            "relation_phase_wall_s_descriptive": 4.240700305600001,
+            "s_relations": 19131.290784332497,
+            "word_xors": 371622732.8
+          },
+          "solving_degree_per_target": [
+            6,
+            6,
+            6,
+            6
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            8153290.0,
+            3823253.0,
+            4554280.0,
+            4584105.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.014375207000000001,
+            0.013806622000000001,
+            0.012769922000000001,
+            0.013621344
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.01364327375,
+          "mean_word_xors": 630805.75,
+          "n_vars": 12,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 102317.70193920001,
+            "over_signed_frobenius_rho_s": 1091.3888206848,
+            "over_strong_rho_s": 137.3083807996491,
+            "pdp_calls": 70.4,
+            "relation_phase_wall_s_descriptive": 0.9604864720000001,
+            "s_relations": 2286.1793763500305,
+            "word_xors": 44408724.800000004
+          },
+          "solving_degree_per_target": [
+            5,
+            5,
+            5,
+            5
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            1,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            660546.0,
+            601576.0,
+            647224.0,
+            613877.0
+          ]
+        }
+      ]
+    },
+    {
+      "a": 0,
+      "calibration_key": "koblitz/K_0 / GF(2^13)",
+      "curve_slug": "icv1-f2m13-t181-515ee569",
+      "ell": 5,
+      "factor_base": 17.0,
+      "file": "3-0-13-5.jsonl",
+      "lambda": 0.76953125,
+      "lambda_targets": 256,
+      "m": 3,
+      "n": 13,
+      "pinned_ns_per_word_xor": 0.002304,
+      "r": 2003.0,
+      "rho_signed_frobenius": {
+        "mean_online_wall_ns": 116245.325,
+        "mean_s": 2.094743260166024,
+        "runs": 40
+      },
+      "rho_strong": {
+        "mean_online_wall_ns": 40443.1,
+        "mean_s": 16.649962391486252,
+        "runs": 40
+      },
+      "surplus": -2,
+      "variants": [
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            7.721007644,
+            7.122736648,
+            4.255670648000001,
+            6.648912378
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 6.4370818295,
+          "mean_word_xors": 928301920.25,
+          "n_vars": 28,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 50028556.00290176,
+            "over_signed_frobenius_rho_s": 533637.9306976189,
+            "over_strong_rho_s": 67137.35637441269,
+            "pdp_calls": 23.390862944162436,
+            "relation_phase_wall_s_descriptive": 150.5688988341929,
+            "s_relations": 1117834.458697781,
+            "word_xors": 21713782987.370556
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            1,
+            3,
+            0,
+            1
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            1,
+            3,
+            0,
+            1
+          ],
+          "word_xors_per_target": [
+            1054935107.0,
+            1072863581.0,
+            644174379.0,
+            941234614.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            89.213765142,
+            164.847996074,
+            8.703170201,
+            88.40022892600001
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 87.79129008575,
+          "mean_word_xors": 3660000849.5,
+          "n_vars": 28,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 197246772.27918166,
+            "over_signed_frobenius_rho_s": 2103965.570977938,
+            "over_strong_rho_s": 264701.36062775715,
+            "pdp_calls": 23.390862944162436,
+            "relation_phase_wall_s_descriptive": 2053.514034086985,
+            "s_relations": 4407267.699427396,
+            "word_xors": 85610578246.17259
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            1,
+            3,
+            0,
+            1
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            1,
+            3,
+            0,
+            1
+          ],
+          "word_xors_per_target": [
+            3702155728.0,
+            5259768876.0,
+            1944057366.0,
+            3734021428.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            13.347253961000002,
+            22.706740894000003,
+            5.1929724010000005,
+            14.431007498000001
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 13.919493688500001,
+          "mean_word_xors": 1657757239.0,
+          "n_vars": 28,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 89340761.94541547,
+            "over_signed_frobenius_rho_s": 952968.127417765,
+            "over_strong_rho_s": 119893.57784268293,
+            "pdp_calls": 23.390862944162436,
+            "relation_phase_wall_s_descriptive": 325.5889691198376,
+            "s_relations": 1996223.5620614002,
+            "word_xors": 38776372372.14213
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            1,
+            3,
+            0,
+            1
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            1,
+            3,
+            0,
+            1
+          ],
+          "word_xors_per_target": [
+            1686578515.0,
+            1784672149.0,
+            1502016689.0,
+            1657761603.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            16.387625908,
+            16.503152645,
+            6.166490062,
+            15.821395553
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 13.719666042000002,
+          "mean_word_xors": 19312633521.0,
+          "n_vars": 15,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 1040807033.3503832,
+            "over_signed_frobenius_rho_s": 11101941.689070756,
+            "over_strong_rho_s": 1396742.9463881964,
+            "pdp_calls": 23.390862944162436,
+            "relation_phase_wall_s_descriptive": 320.91482802810157,
+            "s_relations": 23255717.52793717,
+            "word_xors": 451739163780.5482
+          },
+          "solving_degree_per_target": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            1,
+            3,
+            0,
+            1
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            1,
+            3,
+            0,
+            1
+          ],
+          "word_xors_per_target": [
+            20102406940.0,
+            22782743701.0,
+            15611205315.0,
+            18754178128.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            2.248576765,
+            3.364632868,
+            1.13074632,
+            2.1145830930000002
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 2.2146347615,
+          "mean_word_xors": 1446447948.5,
+          "n_vars": 15,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 77952765.8171023,
+            "over_signed_frobenius_rho_s": 831496.1687157579,
+            "over_strong_rho_s": 104611.10687924664,
+            "pdp_calls": 23.390862944162436,
+            "relation_phase_wall_s_descriptive": 51.80221817762437,
+            "s_relations": 1741770.9952712052,
+            "word_xors": 33833665719.228424
+          },
+          "solving_degree_per_target": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            1,
+            3,
+            0,
+            1
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            1,
+            3,
+            0,
+            1
+          ],
+          "word_xors_per_target": [
+            1393252727.0,
+            1830457683.0,
+            1178719072.0,
+            1383362312.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.328815136,
+            0.436412693,
+            0.270090979,
+            0.34982840400000004
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.34628680300000003,
+          "mean_word_xors": 64828813.25,
+          "n_vars": 15,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 3493789.944338193,
+            "over_signed_frobenius_rho_s": 37267.0927396074,
+            "over_strong_rho_s": 4688.598659069183,
+            "pdp_calls": 23.390862944162436,
+            "relation_phase_wall_s_descriptive": 8.099947148345178,
+            "s_relations": 78064.99134227476,
+            "word_xors": 1516401885.5634518
+          },
+          "solving_degree_per_target": [
+            6,
+            6,
+            6,
+            6
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            1,
+            3,
+            0,
+            1
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            1,
+            3,
+            0,
+            1
+          ],
+          "word_xors_per_target": [
+            63792773.0,
+            72232798.0,
+            59586942.0,
+            63702740.0
+          ]
+        }
+      ]
+    },
+    {
+      "a": 1,
+      "calibration_key": "koblitz/K_1 / GF(2^11)",
+      "curve_slug": "icv1-f2m11-t67-05f5aa36",
+      "ell": 4,
+      "factor_base": 6.0,
+      "file": "3-1-11-4.jsonl",
+      "lambda": 0.2578125,
+      "lambda_targets": 256,
+      "m": 3,
+      "n": 11,
+      "pinned_ns_per_word_xor": 0.00274,
+      "r": 991.0,
+      "rho_signed_frobenius": {
+        "mean_online_wall_ns": 114606.225,
+        "mean_s": 2.4475739136056895,
+        "runs": 40
+      },
+      "rho_strong": {
+        "mean_online_wall_ns": 114982.025,
+        "mean_s": 42.023904313273796,
+        "runs": 40
+      },
+      "surplus": -1,
+      "variants": [
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.238045366,
+            0.24932293300000002,
+            0.249349442,
+            5.710219881
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 1.6117344055,
+          "mean_word_xors": 119154356.0,
+          "n_vars": 23,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 8864506.368310302,
+            "over_signed_frobenius_rho_s": 115048.75234666189,
+            "over_strong_rho_s": 6700.717832817524,
+            "pdp_calls": 27.151515151515152,
+            "relation_phase_wall_s_descriptive": 43.76103113115152,
+            "s_relations": 281590.325036571,
+            "word_xors": 3235221302.3030305
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "word_xors_per_target": [
+            79515376.0,
+            72832238.0,
+            77976771.0,
+            246293039.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.513157404,
+            0.551268854,
+            0.510758703,
+            4.072582764
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 1.41194193125,
+          "mean_word_xors": 222873856.25,
+          "n_vars": 23,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 16580734.304484848,
+            "over_signed_frobenius_rho_s": 215194.47507443017,
+            "over_strong_rho_s": 12533.447145173483,
+            "pdp_calls": 27.151515151515152,
+            "relation_phase_wall_s_descriptive": 38.33636273939394,
+            "s_relations": 526704.383544245,
+            "word_xors": 6051362884.848485
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "word_xors_per_target": [
+            204376190.0,
+            207379961.0,
+            218497529.0,
+            261241745.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.156156169,
+            0.120747034,
+            0.138666819,
+            0.24665924600000003
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 0.165557317,
+          "mean_word_xors": 13388127.75,
+          "n_vars": 23,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 996011.7924654544,
+            "over_signed_frobenius_rho_s": 12926.824042380975,
+            "over_strong_rho_s": 752.889523925287,
+            "pdp_calls": 27.151515151515152,
+            "relation_phase_wall_s_descriptive": 4.495132000969697,
+            "s_relations": 31639.357311902524,
+            "word_xors": 363507953.45454544
+          },
+          "solving_degree_per_target": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "word_xors_per_target": [
+            16340916.0,
+            9202305.0,
+            11589077.0,
+            16420213.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.067671617,
+            0.061372742,
+            0.053119057000000004,
+            0.225499371
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.10191569675,
+          "mean_word_xors": 30813651.25,
+          "n_vars": 12,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 2292386.253478788,
+            "over_signed_frobenius_rho_s": 29751.930609718194,
+            "over_strong_rho_s": 1732.8244585963355,
+            "pdp_calls": 27.151515151515152,
+            "relation_phase_wall_s_descriptive": 2.767165584484849,
+            "s_relations": 72820.04923975287,
+            "word_xors": 836637318.7878788
+          },
+          "solving_degree_per_target": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "word_xors_per_target": [
+            18734807.0,
+            18516045.0,
+            18694637.0,
+            67309116.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.045977331,
+            0.047075508,
+            0.042938540000000004,
+            0.107178221
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.060792399999999996,
+          "mean_word_xors": 6735974.25,
+          "n_vars": 12,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 501123.82493090903,
+            "over_signed_frobenius_rho_s": 6503.878324865786,
+            "over_strong_rho_s": 378.80161744464175,
+            "pdp_calls": 27.151515151515152,
+            "relation_phase_wall_s_descriptive": 1.6506057696969696,
+            "s_relations": 15918.72292520697,
+            "word_xors": 182891906.9090909
+          },
+          "solving_degree_per_target": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "word_xors_per_target": [
+            5954865.0,
+            5820621.0,
+            5819197.0,
+            9349214.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.009088485,
+            0.008961784,
+            0.008825640000000001,
+            0.010833183000000001
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.009427273000000002,
+          "mean_word_xors": 404564.25,
+          "n_vars": 12,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 30097.618676363632,
+            "over_signed_frobenius_rho_s": 390.62451234735397,
+            "over_strong_rho_s": 22.75091717583071,
+            "pdp_calls": 27.151515151515152,
+            "relation_phase_wall_s_descriptive": 0.25596474569696975,
+            "s_relations": 956.0823664363271,
+            "word_xors": 10984532.363636363
+          },
+          "solving_degree_per_target": [
+            5,
+            5,
+            5,
+            5
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "word_xors_per_target": [
+            395801.0,
+            391266.0,
+            392393.0,
+            438797.0
+          ]
+        }
+      ]
+    },
+    {
+      "a": 1,
+      "calibration_key": "koblitz/K_1 / GF(2^17)",
+      "curve_slug": "icv1-f2m17-tm101-00378d4e",
+      "ell": 4,
+      "factor_base": 6.0,
+      "file": "3-1-17-4.jsonl",
+      "lambda": 0.0,
+      "lambda_targets": 256,
+      "m": 3,
+      "n": 17,
+      "pinned_ns_per_word_xor": 0.001954,
+      "r": 65587.0,
+      "rho_signed_frobenius": {
+        "mean_online_wall_ns": 198085.025,
+        "mean_s": 1.0932270527886825,
+        "runs": 40
+      },
+      "rho_strong": {
+        "mean_online_wall_ns": 51000.325,
+        "mean_s": 4.0541217537960765,
+        "runs": 40
+      },
+      "surplus": 5,
+      "variants": [
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            3.760857462,
+            3.8715440350000003,
+            3.8887573110000004,
+            3.770499001
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 3.82291445225,
+          "mean_word_xors": 1115097326.5,
+          "n_vars": 29,
+          "plan": "split-2+1",
+          "projection": null,
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            1142301176.0,
+            1073490007.0,
+            1079554405.0,
+            1165043718.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            9.503251756000001,
+            9.978911250000001,
+            9.324580285000001,
+            8.939196184
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 9.43648486875,
+          "mean_word_xors": 2895207687.5,
+          "n_vars": 29,
+          "plan": "split-2+1",
+          "projection": null,
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            2841264186.0,
+            2980192910.0,
+            2831371078.0,
+            2928002576.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.355102741,
+            0.35880570300000003,
+            0.372229719,
+            0.361044805
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 0.3617957420000001,
+          "mean_word_xors": 71123496.75,
+          "n_vars": 29,
+          "plan": "split-2+1",
+          "projection": null,
+          "solving_degree_per_target": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            70899772.0,
+            70853573.0,
+            71514565.0,
+            71226077.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.08314278900000001,
+            0.064348191,
+            0.062594728,
+            0.062020692
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.06802659999999999,
+          "mean_word_xors": 39452568.5,
+          "n_vars": 12,
+          "plan": "unsplit",
+          "projection": null,
+          "solving_degree_per_target": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            39326859.0,
+            39793688.0,
+            39436450.0,
+            39253277.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.061683980000000006,
+            0.049074041000000006,
+            0.054501899000000006,
+            0.037650973000000004
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.05072772325,
+          "mean_word_xors": 4658562.0,
+          "n_vars": 12,
+          "plan": "unsplit",
+          "projection": null,
+          "solving_degree_per_target": [
+            6,
+            6,
+            6,
+            6
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            4354831.0,
+            4850296.0,
+            5898659.0,
+            3530462.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.007374741000000001,
+            0.005779017,
+            0.007934567,
+            0.005792301000000001
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.0067201565,
+          "mean_word_xors": 164041.0,
+          "n_vars": 12,
+          "plan": "unsplit",
+          "projection": null,
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            173447.0,
+            155322.0,
+            163910.0,
+            163485.0
+          ]
+        }
+      ]
+    },
+    {
+      "a": 1,
+      "calibration_key": "koblitz/K_1 / GF(2^17)",
+      "curve_slug": "icv1-f2m17-tm101-00378d4e",
+      "ell": 5,
+      "factor_base": 15.0,
+      "file": "3-1-17-5.jsonl",
+      "lambda": 0.03515625,
+      "lambda_targets": 256,
+      "m": 3,
+      "n": 17,
+      "pinned_ns_per_word_xor": 0.001954,
+      "r": 65587.0,
+      "rho_signed_frobenius": {
+        "mean_online_wall_ns": 198085.025,
+        "mean_s": 1.0932270527886825,
+        "runs": 40
+      },
+      "rho_strong": {
+        "mean_online_wall_ns": 51000.325,
+        "mean_s": 4.0541217537960765,
+        "runs": 40
+      },
+      "surplus": 2,
+      "variants": [
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            17.363080046,
+            19.492402839,
+            15.880067654000001,
+            17.346374177
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 17.520481179,
+          "mean_word_xors": 3683710207.5,
+          "n_vars": 32,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 3275876008.5981865,
+            "over_signed_frobenius_rho_s": 11700601.870160503,
+            "over_strong_rho_s": 3155162.887348431,
+            "pdp_calls": 455.1111111111111,
+            "relation_phase_wall_s_descriptive": 7973.765656576,
+            "s_relations": 12791414.498369314,
+            "word_xors": 1676497445546.6665
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            3683469799.0,
+            3679789265.0,
+            3679781758.0,
+            3691800008.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            36.813947787000004,
+            41.555869151,
+            36.246155783,
+            38.492543010000006
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 38.27712893275,
+          "mean_word_xors": 12526458245.25,
+          "n_vars": 32,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 11139617865.37233,
+            "over_signed_frobenius_rho_s": 39787902.01043783,
+            "over_strong_rho_s": 10729132.841357622,
+            "pdp_calls": 455.1111111111111,
+            "relation_phase_wall_s_descriptive": 17420.34667872711,
+            "s_relations": 43497210.851515844,
+            "word_xors": 5700930330282.666
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            12518799882.0,
+            12490982988.0,
+            12578732982.0,
+            12517317129.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            20.796931449000002,
+            20.491957741,
+            21.624114588,
+            21.423390671
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 21.084098612250003,
+          "mean_word_xors": 7649525389.0,
+          "n_vars": 32,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 6802624334.554908,
+            "over_signed_frobenius_rho_s": 24297256.30700923,
+            "over_strong_rho_s": 6551953.669988133,
+            "pdp_calls": 455.1111111111111,
+            "relation_phase_wall_s_descriptive": 9595.607546197334,
+            "s_relations": 26562417.90336293,
+            "word_xors": 3481383999260.4443
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            7599415383.0,
+            7621274046.0,
+            7650694307.0,
+            7726717820.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            9.338300399000001,
+            9.001627745,
+            9.010504201,
+            9.706718479000001
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 9.264287706000001,
+          "mean_word_xors": 24256951840.25,
+          "n_vars": 15,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 21571394626.377274,
+            "over_signed_frobenius_rho_s": 77047574.34191367,
+            "over_strong_rho_s": 20776507.89433198,
+            "pdp_calls": 455.1111111111111,
+            "relation_phase_wall_s_descriptive": 4216.280271530667,
+            "s_relations": 84230492.6223272,
+            "word_xors": 11039608304184.889
+          },
+          "solving_degree_per_target": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            24296072166.0,
+            24266882864.0,
+            24242614221.0,
+            24222238110.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.578796013,
+            0.619500881,
+            0.6343031010000001,
+            0.598525117
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.607781278,
+          "mean_word_xors": 350974383.75,
+          "n_vars": 15,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 312116995.79904,
+            "over_signed_frobenius_rho_s": 1114803.0924155375,
+            "over_strong_rho_s": 300615.7617294021,
+            "pdp_calls": 455.1111111111111,
+            "relation_phase_wall_s_descriptive": 276.6080127431111,
+            "s_relations": 1218732.8991611472,
+            "word_xors": 159732341760.0
+          },
+          "solving_degree_per_target": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            354887272.0,
+            355035496.0,
+            346436080.0,
+            347538687.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.391618271,
+            0.392618892,
+            0.391441152,
+            0.42055705000000004
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.39905884125,
+          "mean_word_xors": 102909977.75,
+          "n_vars": 15,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 91516516.81780621,
+            "over_signed_frobenius_rho_s": 326873.8880893159,
+            "over_strong_rho_s": 88144.21445899061,
+            "pdp_calls": 455.1111111111111,
+            "relation_phase_wall_s_descriptive": 181.61611264,
+            "s_relations": 357347.3773094605,
+            "word_xors": 46835474318.22222
+          },
+          "solving_degree_per_target": [
+            6,
+            6,
+            6,
+            6
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            107269974.0,
+            101247447.0,
+            101575230.0,
+            101547260.0
+          ]
+        }
+      ]
+    },
+    {
+      "a": 1,
+      "calibration_key": "koblitz/K_1 / GF(2^19)",
+      "curve_slug": "icv1-f2m19-tm797-9c54981b",
+      "ell": 4,
+      "factor_base": 8.0,
+      "file": "3-1-19-4.jsonl",
+      "lambda": 0.00390625,
+      "lambda_targets": 256,
+      "m": 3,
+      "n": 19,
+      "pinned_ns_per_word_xor": 0.00158,
+      "r": 262543.0,
+      "rho_signed_frobenius": {
+        "mean_online_wall_ns": 209672.175,
+        "mean_s": 0.5766609187677589,
+        "runs": 40
+      },
+      "rho_strong": {
+        "mean_online_wall_ns": 63273.825,
+        "mean_s": 2.3776642477896273,
+        "runs": 40
+      },
+      "surplus": 7,
+      "variants": [
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            7.711505837000001,
+            7.916284038000001,
+            8.686006247,
+            7.6283268060000005
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 7.985530732,
+          "mean_word_xors": 3437612839.75,
+          "n_vars": 31,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 12514010772.79872,
+            "over_signed_frobenius_rho_s": 42352181.31076646,
+            "over_strong_rho_s": 10271781.56427669,
+            "pdp_calls": 2304.0,
+            "relation_phase_wall_s_descriptive": 18398.662806528,
+            "s_relations": 24422847.786485296,
+            "word_xors": 7920259982784.0
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            3425702418.0,
+            3434663295.0,
+            3485104862.0,
+            3404980784.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            22.651796184000002,
+            22.879272326000002,
+            22.562153793,
+            22.8104368
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 22.725914775750002,
+          "mean_word_xors": 9186991390.0,
+          "n_vars": 31,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 33443588496.8448,
+            "over_signed_frobenius_rho_s": 113185848.1998301,
+            "over_strong_rho_s": 27451249.80328893,
+            "pdp_calls": 2304.0,
+            "relation_phase_wall_s_descriptive": 52360.507643328005,
+            "s_relations": 65269855.21442212,
+            "word_xors": 21166828162560.0
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            9228396788.0,
+            9005203234.0,
+            9327587671.0,
+            9186777867.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.6720551090000001,
+            0.696166955,
+            0.657288701,
+            0.7157295610000001
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 0.6853100815000002,
+          "mean_word_xors": 162370912.5,
+          "n_vars": 31,
+          "plan": "split-2+1",
+          "projection": {
+            "gae": 591082080.192,
+            "over_signed_frobenius_rho_s": 2000447.0097030208,
+            "over_strong_rho_s": 485173.46872417926,
+            "pdp_calls": 2304.0,
+            "relation_phase_wall_s_descriptive": 1578.9544277760003,
+            "s_relations": 1153579.61056156,
+            "word_xors": 374102582400.0
+          },
+          "solving_degree_per_target": [
+            3,
+            3,
+            3,
+            3
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            163035343.0,
+            161907828.0,
+            162102491.0,
+            162437988.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.085046798,
+            0.085382052,
+            0.076313879,
+            0.07667892400000001
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.08085541325000001,
+          "mean_word_xors": 49932509.5,
+          "n_vars": 12,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 181770312.98304,
+            "over_signed_frobenius_rho_s": 615180.0084035536,
+            "over_strong_rho_s": 149201.16209988063,
+            "pdp_calls": 2304.0,
+            "relation_phase_wall_s_descriptive": 186.29087212800002,
+            "s_relations": 354750.2688535509,
+            "word_xors": 115044501888.0
+          },
+          "solving_degree_per_target": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            50049692.0,
+            49889790.0,
+            49912137.0,
+            49878419.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.02560822,
+            0.030379907,
+            0.028190915,
+            0.026665717000000002
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.02771118975,
+          "mean_word_xors": 2538033.25,
+          "n_vars": 12,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 9239253.20064,
+            "over_signed_frobenius_rho_s": 31269.153737676625,
+            "over_strong_rho_s": 7583.786878328974,
+            "pdp_calls": 2304.0,
+            "relation_phase_wall_s_descriptive": 63.846581184,
+            "s_relations": 18031.698923458905,
+            "word_xors": 5847628608.0
+          },
+          "solving_degree_per_target": [
+            6,
+            6,
+            6,
+            6
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            2696685.0,
+            2488351.0,
+            2447243.0,
+            2519854.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            0.009808471000000001,
+            0.008465034,
+            0.006836133,
+            0.007214772
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 0.008081102500000001,
+          "mean_word_xors": 178141.0,
+          "n_vars": 12,
+          "plan": "unsplit",
+          "projection": {
+            "gae": 648490.24512,
+            "over_signed_frobenius_rho_s": 2194.738116998054,
+            "over_strong_rho_s": 532.2953819822501,
+            "pdp_calls": 2304.0,
+            "relation_phase_wall_s_descriptive": 18.618860160000004,
+            "s_relations": 1265.619699002719,
+            "word_xors": 410436864.0
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            259920.0,
+            178589.0,
+            144240.0,
+            129815.0
+          ]
+        }
+      ]
+    },
+    {
+      "a": 0,
+      "calibration_key": "koblitz/K_0 / GF(2^13)",
+      "curve_slug": "icv1-f2m13-t181-515ee569",
+      "ell": 3,
+      "factor_base": 6.0,
+      "file": "4-0-13-3.jsonl",
+      "lambda": 0.08203125,
+      "lambda_targets": 256,
+      "m": 4,
+      "n": 13,
+      "pinned_ns_per_word_xor": 0.002304,
+      "r": 2003.0,
+      "rho_signed_frobenius": {
+        "mean_online_wall_ns": 116245.325,
+        "mean_s": 2.094743260166024,
+        "runs": 40
+      },
+      "rho_strong": {
+        "mean_online_wall_ns": 40443.1,
+        "mean_s": 16.649962391486252,
+        "runs": 40
+      },
+      "surplus": 1,
+      "variants": [
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            193.155417578,
+            199.67619319300002,
+            192.10265308400002,
+            206.576145411
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 197.8776023165,
+          "mean_word_xors": 38173715942.25,
+          "n_vars": 38,
+          "plan": "split-2+1+1",
+          "projection": {
+            "gae": 7505257943.973888,
+            "over_signed_frobenius_rho_s": 80056084.73572148,
+            "over_strong_rho_s": 10071911.274777558,
+            "pdp_calls": 85.33333333333333,
+            "relation_phase_wall_s_descriptive": 16885.555397674667,
+            "s_relations": 167696943.9354327,
+            "word_xors": 3257490427072.0
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            37026299684.0,
+            37611852494.0,
+            38596401916.0,
+            39460309675.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            162.647226305,
+            145.005272171,
+            131.598088979,
+            150.85961833300001
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 147.527551447,
+          "mean_word_xors": 10034077331.5,
+          "n_vars": 38,
+          "plan": "split-2+1+1",
+          "projection": {
+            "gae": 1972779875.9915519,
+            "over_signed_frobenius_rho_s": 21042985.34390989,
+            "over_strong_rho_s": 2647432.5098456223,
+            "pdp_calls": 85.33333333333333,
+            "relation_phase_wall_s_descriptive": 12589.017723477333,
+            "s_relations": 44079651.72292767,
+            "word_xors": 856241265621.3333
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            9249812788.0,
+            12098879276.0,
+            9982075761.0,
+            8805541501.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            10.994536983000001,
+            9.858582555,
+            10.815872017,
+            12.998972529000001
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 11.166991021000001,
+          "mean_word_xors": 478656367.5,
+          "n_vars": 38,
+          "plan": "split-2+1+1",
+          "projection": {
+            "gae": 94107671.10144,
+            "over_signed_frobenius_rho_s": 1003815.1584153601,
+            "over_strong_rho_s": 126290.67790677247,
+            "pdp_calls": 85.33333333333333,
+            "relation_phase_wall_s_descriptive": 952.9165671253334,
+            "s_relations": 2102735.0375430654,
+            "word_xors": 40845343360.0
+          },
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            408509134.0,
+            425058853.0,
+            415094503.0,
+            665962980.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            71.016213449,
+            77.174271355,
+            71.44953592200001,
+            72.45146808300001
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 73.02287220225,
+          "mean_word_xors": 29485572312.75,
+          "n_vars": 25,
+          "plan": "split-2+2",
+          "projection": {
+            "gae": 5797099401.265152,
+            "over_signed_frobenius_rho_s": 61835726.94682829,
+            "over_strong_rho_s": 7779595.485787324,
+            "pdp_calls": 85.33333333333333,
+            "relation_phase_wall_s_descriptive": 6231.285094592,
+            "s_relations": 129529972.25933516,
+            "word_xors": 2516102170688.0
+          },
+          "solving_degree_per_target": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            29477063995.0,
+            29485523853.0,
+            29489038191.0,
+            29490663212.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            219.732548516,
+            205.27100263900002,
+            144.752326837,
+            177.020275204
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 186.694038299,
+          "mean_word_xors": 19314222966.5,
+          "n_vars": 25,
+          "plan": "split-2+2",
+          "projection": {
+            "gae": 3797330748.9976315,
+            "over_signed_frobenius_rho_s": 40504861.3226414,
+            "over_strong_rho_s": 5095944.559187001,
+            "pdp_calls": 85.33333333333333,
+            "relation_phase_wall_s_descriptive": 15931.224601514667,
+            "s_relations": 84847285.25956255,
+            "word_xors": 1648147026474.6665
+          },
+          "solving_degree_per_target": [
+            6,
+            6,
+            6,
+            6
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            28253040826.0,
+            19700349671.0,
+            13176976758.0,
+            16126524611.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            3.7610826380000004,
+            2.441472946,
+            2.801551036,
+            2.53075274
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 2.8837148400000006,
+          "mean_word_xors": 112614304.5,
+          "n_vars": 25,
+          "plan": "split-2+2",
+          "projection": {
+            "gae": 22140873.179136,
+            "over_signed_frobenius_rho_s": 236169.31391078403,
+            "over_strong_rho_s": 29712.624385603096,
+            "pdp_calls": 85.33333333333333,
+            "relation_phase_wall_s_descriptive": 246.07699968000003,
+            "s_relations": 494714.07857264887,
+            "word_xors": 9609753984.0
+          },
+          "solving_degree_per_target": [
+            6,
+            6,
+            6,
+            6
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            114011161.0,
+            111611937.0,
+            114721557.0,
+            110112563.0
+          ]
+        }
+      ]
+    },
+    {
+      "a": 1,
+      "calibration_key": "koblitz/K_1 / GF(2^11)",
+      "curve_slug": "icv1-f2m11-t67-05f5aa36",
+      "ell": 3,
+      "factor_base": 2.0,
+      "file": "4-1-11-3.jsonl",
+      "lambda": 0.0,
+      "lambda_targets": 256,
+      "m": 4,
+      "n": 11,
+      "pinned_ns_per_word_xor": 0.00274,
+      "r": 991.0,
+      "rho_signed_frobenius": {
+        "mean_online_wall_ns": 114606.225,
+        "mean_s": 2.4475739136056895,
+        "runs": 40
+      },
+      "rho_strong": {
+        "mean_online_wall_ns": 114982.025,
+        "mean_s": 42.023904313273796,
+        "runs": 40
+      },
+      "surplus": -1,
+      "variants": [
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            5.2958454,
+            6.31175418,
+            8.196039231,
+            9.239990282
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 7.26090727325,
+          "mean_word_xors": 248835940.0,
+          "n_vars": 34,
+          "plan": "split-2+1+1",
+          "projection": null,
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            208072874.0,
+            210306945.0,
+            258594114.0,
+            318369827.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            5.553837017,
+            4.884088998,
+            5.836578350000001,
+            4.993025876
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 5.316882560250001,
+          "mean_word_xors": 2179931539.0,
+          "n_vars": 34,
+          "plan": "split-2+1+1",
+          "projection": null,
+          "solving_degree_per_target": [
+            4,
+            4,
+            4,
+            4
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            1898119787.0,
+            1983828594.0,
+            2352643325.0,
+            2485134450.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            1.22360584,
+            1.288378948,
+            1.34138533,
+            1.364462883
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 3,
+          "mean_f4_wall_s_descriptive": 1.3044582502500002,
+          "mean_word_xors": 33196660.25,
+          "n_vars": 34,
+          "plan": "split-2+1+1",
+          "projection": null,
+          "solving_degree_per_target": [
+            3,
+            4,
+            3,
+            3
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            31917829.0,
+            34797921.0,
+            35316615.0,
+            30754276.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            41.816203825,
+            138.355854529,
+            39.466204255,
+            41.212611353
+          ],
+          "false_solutions": 0,
+          "g": 0,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 65.21271849050001,
+          "mean_word_xors": 28012297707.75,
+          "n_vars": 23,
+          "plan": "split-2+2",
+          "projection": null,
+          "solving_degree_per_target": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            4405240888.0,
+            98751067622.0,
+            4396373179.0,
+            4496509142.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            28.441674856000002,
+            29.063330580000002,
+            29.069546225000003,
+            27.87768854
+          ],
+          "false_solutions": 0,
+          "g": 2,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 28.613060050250006,
+          "mean_word_xors": 9650332534.5,
+          "n_vars": 23,
+          "plan": "split-2+2",
+          "projection": null,
+          "solving_degree_per_target": [
+            7,
+            7,
+            7,
+            7
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            9082273420.0,
+            10045802384.0,
+            9993395662.0,
+            9479858672.0
+          ]
+        },
+        {
+          "branches_timed_out": 0,
+          "complete": 4,
+          "exact_failures": 0,
+          "f4_wall_s_per_target_descriptive": [
+            2.304278864,
+            2.514451219,
+            2.228918918,
+            2.2349596430000003
+          ],
+          "false_solutions": 0,
+          "g": 4,
+          "input_degree": 6,
+          "mean_f4_wall_s_descriptive": 2.320652161,
+          "mean_word_xors": 164592774.75,
+          "n_vars": 23,
+          "plan": "split-2+2",
+          "projection": null,
+          "solving_degree_per_target": [
+            6,
+            6,
+            6,
+            6
+          ],
+          "targets": 4,
+          "truth_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "unliftable_solutions": 0,
+          "verified_per_target": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "word_xors_per_target": [
+            168925388.0,
+            161468090.0,
+            191547565.0,
+            136430056.0
+          ]
+        }
+      ]
+    }
+  ],
+  "inputs": {
+    "calibration": "docs/ic/calibration.json",
+    "replica": "research/pdp_split_dreg_20261011/runs",
+    "rho_session": "research/pdp_split_dreg_20261011/sessions/rho-01",
+    "runs": "research/pdp_split_dreg_20261011/runs-v2"
+  },
+  "projection_rule": "S_relations = (F+1)/lambda * mean_word_xors * ns_per_word_xor / sqrt(r); relation phase only; pinned ratio from another host",
+  "replica_runs_compared": 192,
+  "replica_runs_mismatched": 3,
+  "schema": "pdp_split_dreg.analysis/v1"
+}

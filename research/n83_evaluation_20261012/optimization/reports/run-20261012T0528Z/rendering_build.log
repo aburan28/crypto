@@ -1,0 +1,83 @@
+
+** (process:45238): WARNING **: 06:38:54.514: Unable to create profile directory (Read-only file system) (30)
+
+** (inkscape:45238): WARNING **: 06:38:54.519: Failed to wrap object of type 'PangoFT2FontMap'. Hint: this error is commonly caused by failing to call a library init() function.
+Fontconfig error: No writable cache directories
+** Message: 06:38:54.525: Cannot create profile directory /home/agent/.config/inkscape.
+** Message: 06:38:54.525: Inkscape will run with default settings, and new settings will not be saved. 
+
+** (inkscape:45238): WARNING **: 06:38:54.574: Could not create directory '/home/agent/.config/inkscape'
+
+** (inkscape:45238): WARNING **: 06:38:54.574: Could not create extension error log file '/home/agent/.config/inkscape/extension-errors.log'
+
+** (inkscape:45238): WARNING **: 06:38:54.596: Failed to wrap object of type 'GtkRecentManager'. Hint: this error is commonly caused by failing to call a library init() function.
+
+** (process:45244): WARNING **: 06:38:54.793: Unable to create profile directory (Read-only file system) (30)
+
+** (inkscape:45244): WARNING **: 06:38:54.798: Failed to wrap object of type 'PangoFT2FontMap'. Hint: this error is commonly caused by failing to call a library init() function.
+Fontconfig error: No writable cache directories
+** Message: 06:38:54.805: Cannot create profile directory /home/agent/.config/inkscape.
+** Message: 06:38:54.805: Inkscape will run with default settings, and new settings will not be saved. 
+
+** (inkscape:45244): WARNING **: 06:38:54.857: Could not create directory '/home/agent/.config/inkscape'
+
+** (inkscape:45244): WARNING **: 06:38:54.857: Could not create extension error log file '/home/agent/.config/inkscape/extension-errors.log'
+
+** (inkscape:45244): WARNING **: 06:38:54.878: Failed to wrap object of type 'GtkRecentManager'. Hint: this error is commonly caused by failing to call a library init() function.
+
+** (process:45250): WARNING **: 06:38:55.105: Unable to create profile directory (Read-only file system) (30)
+
+** (inkscape:45250): WARNING **: 06:38:55.110: Failed to wrap object of type 'PangoFT2FontMap'. Hint: this error is commonly caused by failing to call a library init() function.
+Fontconfig error: No writable cache directories
+** Message: 06:38:55.117: Cannot create profile directory /home/agent/.config/inkscape.
+** Message: 06:38:55.117: Inkscape will run with default settings, and new settings will not be saved. 
+
+** (inkscape:45250): WARNING **: 06:38:55.173: Could not create directory '/home/agent/.config/inkscape'
+
+** (inkscape:45250): WARNING **: 06:38:55.173: Could not create extension error log file '/home/agent/.config/inkscape/extension-errors.log'
+
+** (inkscape:45250): WARNING **: 06:38:55.203: Failed to wrap object of type 'GtkRecentManager'. Hint: this error is commonly caused by failing to call a library init() function.
+
+** (process:45256): WARNING **: 06:38:55.385: Unable to create profile directory (Read-only file system) (30)
+
+** (inkscape:45256): WARNING **: 06:38:55.389: Failed to wrap object of type 'PangoFT2FontMap'. Hint: this error is commonly caused by failing to call a library init() function.
+Fontconfig error: No writable cache directories
+** Message: 06:38:55.395: Cannot create profile directory /home/agent/.config/inkscape.
+** Message: 06:38:55.395: Inkscape will run with default settings, and new settings will not be saved. 
+
+** (inkscape:45256): WARNING **: 06:38:55.442: Could not create directory '/home/agent/.config/inkscape'
+
+** (inkscape:45256): WARNING **: 06:38:55.442: Could not create extension error log file '/home/agent/.config/inkscape/extension-errors.log'
+
+** (inkscape:45256): WARNING **: 06:38:55.464: Failed to wrap object of type 'GtkRecentManager'. Hint: this error is commonly caused by failing to call a library init() function.
+{
+  "addendum_layout": {
+    "pdf": "/workspace/repos/crypto/research/n83_evaluation_20261012/optimization/reports/run-20261012T0528Z/n83_optimized_rho_evaluation.pdf",
+    "pages": 12,
+    "clickable_links": 64,
+    "page_bounds_violations": [],
+    "replacement_glyphs": [],
+    "missing_font_glyphs": [],
+    "contact_sheet": "/workspace/repos/crypto/research/n83_evaluation_20261012/optimization/reports/run-20261012T0528Z/preview/contact_sheet.jpg"
+  },
+  "merge": {
+    "kind": "pdf_layout_merge",
+    "addendum": "/workspace/repos/crypto/research/n83_evaluation_20261012/optimization/reports/run-20261012T0528Z/n83_optimized_rho_evaluation.pdf",
+    "historical_source_read_only": "/workspace/report_output/unified_curve_basis_report_updated_n83.pdf",
+    "output": "/workspace/report_output/unified_curve_basis_report_optimized_rho.pdf",
+    "addendum_pages": 12,
+    "historical_pages": 48,
+    "combined_pages": 60,
+    "historical_page_text_preserved": true,
+    "research_results_recomputed": false
+  },
+  "combined_layout": {
+    "pdf": "/workspace/report_output/unified_curve_basis_report_optimized_rho.pdf",
+    "pages": 60,
+    "clickable_links": 226,
+    "page_bounds_violations": [],
+    "replacement_glyphs": [],
+    "missing_font_glyphs": [],
+    "contact_sheet": "/workspace/repos/crypto/research/n83_evaluation_20261012/optimization/reports/run-20261012T0528Z/combined_preview/contact_sheet.jpg"
+  }
+}

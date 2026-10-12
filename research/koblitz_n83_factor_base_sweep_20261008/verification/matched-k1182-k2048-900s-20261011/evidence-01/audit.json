@@ -1,0 +1,66 @@
+{
+  "additional_charged_seconds": 900,
+  "arms": [
+    {
+      "base_import_ms_L0": 2264.370793,
+      "cgroup_peak_bytes": 397496320,
+      "columns": 1182,
+      "conflicts": 5000,
+      "container_cleanup_verified": true,
+      "models": 0,
+      "outer_wall_ms_L0": 188820.78820800234,
+      "rank": 0,
+      "relations": 0,
+      "selected_object_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/76e1cbe4ea5a9d26e5b24a2d27f9401271dc471846529190a0416d8e09837a92.jsonl.gz",
+      "selected_object_sha256": "eb342b574e244e1e67e8e78c805f33ee88edcdb4f3a14d4114e6f413beede380",
+      "solver_ms_L0": 185709.045625,
+      "status": "UNKNOWN_solver_cap"
+    },
+    {
+      "base_import_ms_L0": 4309.509336,
+      "cgroup_peak_bytes": 556707840,
+      "columns": 2048,
+      "conflicts": 5000,
+      "container_cleanup_verified": true,
+      "models": 0,
+      "outer_wall_ms_L0": 168456.37870799692,
+      "rank": 0,
+      "relations": 0,
+      "selected_object_s3_uri": "s3://crypto-autoresearcher/factor-bases/icv1/etc/koblitz_n83_factor_base_sweep_20261008/v2-size-frontier/a0/objects/82990cda5d57b1c4c4b635673a881ad233c24f707e7ac644a11478aeddddf851.jsonl.gz",
+      "selected_object_sha256": "aacb62784dee0c9f5e06328dbb85a4b6a1c7243e778328da82900e7284f3a74a",
+      "solver_ms_L0": 163542.025741,
+      "status": "UNKNOWN_solver_cap"
+    }
+  ],
+  "binary_sha256": "a195936edd6ed15fa96201dd69b54f62c67e99871e3ba7d02c2f12713c753c7d",
+  "build_wall_ms_L0": 136033.97012499772,
+  "cleanup_and_receipt_reserve_charged_seconds": 60,
+  "conservative_stage_charges_seconds": [
+    280,
+    280,
+    280
+  ],
+  "cumulative_charged_seconds": 11700,
+  "prefix_geometry": {
+    "large_columns": 2048,
+    "point_row_prefix": true,
+    "representative_prefix": true,
+    "residual_columns": 866,
+    "residual_point_rows": 143756,
+    "residual_rows_sha256": "0d008d5a81da8ca34ecd9e8606d0ac3e58c6e325dc7329d69b3f568f224c4bf0",
+    "shared_rows_sha256": "2e1d99d18881476f81900e5df61e643783a8515d1f2a53efafd7ea4568ea8442",
+    "small_columns": 1182,
+    "small_point_rows": 196212
+  },
+  "prior_charged_seconds": 10800,
+  "schema": "n83.matched-retained-size-audit/v1",
+  "selected_best_total_runtime": null,
+  "source_commit": "831cedf9eea92ab21751965b9769687855bb898a",
+  "source_git_object_and_snapshot_checked": true,
+  "status": "PASS_bounded_receipts_only",
+  "target": [
+    "6261116474805304534310590",
+    "4505575220639647215230954"
+  ],
+  "total_index_calculus_runtime_ms": null
+}

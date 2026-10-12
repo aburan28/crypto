@@ -1,0 +1,30 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W12",
+  "slug": "hu-eprint-2025-015",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1713",
+  "papers": [
+    "ePrint 2025/015",
+    "ePrint 2024/1923"
+  ],
+  "kind": "negative",
+  "workload": {
+    "id": "hu-iica-not-implementable",
+    "description": "no workload: the full text of ePrint 2025/015 was not obtainable (Cloudflare challenge, not bypassed); the abstract leaves IICA undefined and concerns DLP in F_p^*, not the ECDLP",
+    "curve_ids": []
+  },
+  "metric": "none",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 0,
+  "arms": [],
+  "ratio_original_over_candidate": {
+    "value": null,
+    "interval": null,
+    "interval_kind": "none"
+  },
+  "outputs_identical": null,
+  "run_report": "research/lit2026_w12_flagged_claims_20261011/REPORT.pdf",
+  "note": "Blocked by access, not by mathematics: the algorithm is unspecified in every reachable source. The companion ePrint 2024/1923 (abstract) states no subexponential prime-field ECDLP method is known."
+}

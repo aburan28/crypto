@@ -1,0 +1,9 @@
+rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)
+cargo 1.93.1 (Homebrew)
+Darwin arm64
+6fdf294c78abd1d4d858a0f024d1b6715f54e5d1
+7819ee8c096b9c99617a8ff14ff001d9f4efd4e9
+Search build: --release --config profile.release.opt-level=1 --config profile.release.codegen-units=256 --target-dir isogeny_algos/target-o1
+Per-child virtual-memory cap: 8 GiB
+Actual search build: corrected default release profile, optimization level 3. The alternate O1 build was not used for the search.
+Actual per-child memory control: native supervised RSS, 8 GiB, sampled every 25 ms; macOS virtual-memory ulimit is unsupported.

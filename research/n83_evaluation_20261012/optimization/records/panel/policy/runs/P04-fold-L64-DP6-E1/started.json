@@ -1,0 +1,44 @@
+{
+  "argv": [
+    "/workspace/n83_optimization/frozen_binaries/rho_optimization",
+    "/workspace/n83_optimization/fixtures/training_2.jsonl",
+    "202610128314",
+    "/workspace/n83_optimization/panel/policy/configs/fold-L64-DP6-E1.json",
+    "/workspace/n83_optimization/panel/policy/runs/P04-fold-L64-DP6-E1/producer.json"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_optimization/fixtures/training_2.jsonl": "7058f2b201b3abf24639a0b71ae5efd25be8ad7e640b915778a61d26dd571236",
+    "/workspace/n83_optimization/panel/policy/configs/fold-L64-DP6-E1.json": "55de830c096043889d135fb98b382c3caf5ee605ec34e3d10e7507173e473f96"
+  },
+  "arm": "rho",
+  "binary_sha256": "21827dcc645fd4591b39dd913619f047d267a98d541854bd7c83ee7143d8bbcb",
+  "cwd": "/workspace/repos/crypto",
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 60.0
+  },
+  "schema": "n83.process-start/v1",
+  "started_epoch_ms": 1791783114727,
+  "target_file": "/workspace/n83_optimization/fixtures/training_2.jsonl",
+  "target_sha256": "7058f2b201b3abf24639a0b71ae5efd25be8ad7e640b915778a61d26dd571236"
+}

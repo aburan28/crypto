@@ -1,0 +1,57 @@
+{
+  "schema": "standalone-native-montgomery-count-v1",
+  "status": "verified_complete",
+  "scope": "Independent direct native C++ enumeration of all affine pairs for the exact p=101, A=3, B=1 Montgomery fixture, plus its unique point at infinity.",
+  "equation": "B*y^2 = x^3 + A*x^2 + x (mod p)",
+  "p": 101,
+  "A": 3,
+  "B": 1,
+  "affine_pairs_tested": 10201,
+  "affine_points": 95,
+  "zero_y_points": 3,
+  "points_at_infinity": 1,
+  "total_points": 96,
+  "expected_total_points": 96,
+  "count_method": "Two nested loops over x=0..100 and y=0..100; compare direct integer residues of the declared equation; add one infinity point.",
+  "independence": "No repository code or elliptic-curve library is imported or linked. Only C++ standard integer and stream facilities are used. No Python, Rust command, network access, or repository edit was used.",
+  "infinity_justification": "Homogenization gives B*Y^2*Z = X^3 + A*X^2*Z + X*Z^2. At Z=0 it forces X=0, leaving the unique projective point [0:1:0]. B=1 and A^2-4=5 modulo 101 are nonzero, so the declared Montgomery cubic is nonsingular.",
+  "source_verification": {
+    "path": "/workspace/repos/crypto/src/cryptanalysis/curve_traits/mod.rs",
+    "test_name": "coordinate_models_keep_exact_fields_and_available_order_certificates",
+    "test_line": 1289,
+    "fixture_lines": [1292, 1294],
+    "order_proof_lines": [1298, 1303],
+    "parser_branch_line": 389,
+    "equation_comment_line": 245,
+    "git_head": "010e4f69a1d2afece70ebec915cccfc09681176f",
+    "source_sha256_at_observation": "f2b5b438396d23825c3a832af27cb6e7736372fbf7d827636bbdf8ffa560a7b8",
+    "pre_fix_source_sha256_reported_by_parent": "2164289525629df40c6d33008884441dd6108f72ff0ccb8e9f3a45af7e718edf",
+    "post_test_only_source_sha256_independently_observed": "f2b5b438396d23825c3a832af27cb6e7736372fbf7d827636bbdf8ffa560a7b8",
+    "preserved_excerpt": "/workspace/n83_optimization/checks/montgomery_native_count/source_excerpt.txt",
+    "excerpt_sha256": "97955c5b1036fdc7ce093b851c90e35ae203dd68b2e4314992e5184906ed4472"
+  },
+  "build": {
+    "command": "g++ -std=c++17 -O2 -Wall -Wextra -Werror -pedantic count.cpp -o count 2> compile.log",
+    "compiler": "g++ (Debian 14.2.0-19) 14.2.0",
+    "exit_status": 0,
+    "log": "/workspace/n83_optimization/checks/montgomery_native_count/compile.log",
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "run": {
+    "command": "./count > run.log",
+    "exit_status": 0,
+    "started_utc": "2026-10-12T06:21:00Z",
+    "finished_utc": "2026-10-12T06:21:01Z",
+    "platform": "Linux 6.18.44 x86_64",
+    "log": "/workspace/n83_optimization/checks/montgomery_native_count/run.log",
+    "log_sha256": "0107b68e49991f029d686ac26622b71c930a104ea3e477c5a175db3048838af9"
+  },
+  "artifacts": {
+    "source": "/workspace/n83_optimization/checks/montgomery_native_count/count.cpp",
+    "source_sha256": "7dd04ea79a0ebe05c8f5fc4df4cc6991a470463213f48c74518b9d2bd8e98b3c",
+    "executable": "/workspace/n83_optimization/checks/montgomery_native_count/count",
+    "executable_sha256": "1aac0300a9fca5fda4a3d8152b014969cd1803a814a01bd476eb9d5ab7421cb0",
+    "replay_script": "/workspace/n83_optimization/checks/montgomery_native_count/replay.sh",
+    "checksum_manifest": "/workspace/n83_optimization/checks/montgomery_native_count/SHA256SUMS"
+  }
+}
