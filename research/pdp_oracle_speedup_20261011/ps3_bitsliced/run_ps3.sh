@@ -16,9 +16,10 @@ declare -A TARGETS=( [8]=16 [9]=16 [10]=16 [11]=16 [12]=6 [13]=3 )
 declare -A PASSES=(  [8]=40 [9]=10 [10]=3  [11]=1  [12]=1  [13]=1 )   # the baseline's frozen passes (PS-0); l = 13 one
 ARMS="baseline baseline2 group-scalar bs64 bs256 bs512"            # baseline2 = the baseline again: the A/A of every round
 S="$SCR/pdp_speedup"
+BUSY="python3 tools/isolated_bench.py busy --wait --"   # untimed heavy work takes the benchmark lock, so it never overlaps a timed run
 
 if [ "$STAGES" = all ] || [ "$STAGES" = correctness ]; then
-  python3 tools/isolated_bench.py busy -- cargo build --release --example pdp_speedup
+  python3 tools/isolated_bench.py busy --wait -- cargo build --release --example pdp_speedup
   cp target/release/examples/pdp_speedup "$S"
   sha256sum "$S" > "$OUT/binary_hashes.txt"
   git rev-parse HEAD > "$OUT/revision.txt"; git status --short >> "$OUT/revision.txt"
@@ -27,24 +28,24 @@ if [ "$STAGES" = all ] || [ "$STAGES" = correctness ]; then
   : > "$OUT/verify_arms.jsonl"
   for l in 8 9 10 11 12; do
     for arm in bs64 bs256 bs512 bs64-t4 bs256-t4 bs512-t4; do
-      "$S" verify-arm --arm "$arm" --l "$l" --corpus "$C/corpus_l$l.txt" | tee -a "$OUT/verify_arms.jsonl"
+      $BUSY "$S" verify-arm --arm "$arm" --l "$l" --corpus "$C/corpus_l$l.txt" | tee -a "$OUT/verify_arms.jsonl"
     done
   done
 
   # 2. the l = 13 sample (timing only): verdicts decided against the baseline arm on the same targets
   if [ ! -s "$OUT/corpus_l13.txt" ]; then
-    python3 tools/isolated_bench.py busy -- "$S" corpus --l 13 --out "$OUT/corpus_l13.txt" --uniform 3 --planted 0 --threads 3 \
+    $BUSY "$S" corpus --l 13 --out "$OUT/corpus_l13.txt" --uniform 3 --planted 0 --threads 3 \
       | tee "$OUT/corpus_l13.log"
   fi
   : > "$OUT/verify_l13.jsonl"
   for arm in baseline group-scalar bs64 bs256 bs512 bs512-t4; do
-    "$S" verify-arm --arm "$arm" --l 13 --corpus "$OUT/corpus_l13.txt" | tee -a "$OUT/verify_l13.jsonl"
+    $BUSY "$S" verify-arm --arm "$arm" --l 13 --corpus "$OUT/corpus_l13.txt" | tee -a "$OUT/verify_l13.jsonl"
   done
 
   # 3. the recorded program is still PS-2's (same hash on every rung); the vector lanes run the same function
   : > "$OUT/programs.jsonl"
-  for l in 8 9 10 11 12; do "$S" export-program --l "$l" --tasks 8 | tee -a "$OUT/programs.jsonl"; done
-  "$S" export-program --l 11 --tasks 64 | tee -a "$OUT/programs.jsonl"
+  for l in 8 9 10 11 12; do $BUSY "$S" export-program --l "$l" --tasks 8 | tee -a "$OUT/programs.jsonl"; done
+  $BUSY "$S" export-program --l 11 --tasks 64 | tee -a "$OUT/programs.jsonl"
   grep -o '"sha256":"[0-9a-f]*"' "$R/ps2_scalar/raw/programs.jsonl" > "$OUT/programs_ps2.sha"
   grep -o '"sha256":"[0-9a-f]*"' "$OUT/programs.jsonl" > "$OUT/programs_ps3.sha"
   if diff -q "$OUT/programs_ps2.sha" "$OUT/programs_ps3.sha" >/dev/null; then echo "program hashes equal PS-2: true" | tee "$OUT/programs_equal_ps2.txt"
@@ -52,11 +53,11 @@ if [ "$STAGES" = all ] || [ "$STAGES" = correctness ]; then
 
   # 4. slots, valid pairs and lane utilisation per width
   : > "$OUT/utilisation.jsonl"
-  for l in 8 9 10 11 12 13; do "$S" bs-util --l "$l" | tee -a "$OUT/utilisation.jsonl"; done
+  for l in 8 9 10 11 12 13; do $BUSY "$S" bs-util --l "$l" | tee -a "$OUT/utilisation.jsonl"; done
 
   # 5. the product on its own and the batch pipeline, per width (diagnostic, not the headline)
   : > "$OUT/micro.jsonl"
-  for l in 9 11; do "$S" bs-micro --l "$l" --iters 3000 | tee -a "$OUT/micro.jsonl"; done
+  for l in 9 11; do $BUSY "$S" bs-micro --l "$l" --iters 3000 | tee -a "$OUT/micro.jsonl"; done
 fi
 
 [ "$STAGES" = correctness ] && exit 0
