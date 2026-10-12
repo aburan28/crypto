@@ -46,3 +46,7 @@ Initial tool attempts are retained too: the shared hash tests needed their `hex`
 Canonical graphs checked: the new group outputs and the performance-index documentation change. `docs/index-calculus-scoreboard.html`, `docs/ic/progress-timeline.json`, curve diagrams and the aggregate index remain unchanged: this rendering adds no IC/rho ratio, curve fact, exponent, newly priced phase or aggregate-index value.
 
 Conductor is unavailable; [initial scope attempt](records/conductor.log) and the rendering dependency scope expansion are retained. The requested requirements are frozen in [REQUIREMENTS.md](REQUIREMENTS.md).
+
+## Planned follow-up
+
+The [next-steps roadmap](NEXT_STEPS.md), [editable workflow diagram](next-steps.svg) and [one-page PDF](next-steps.pdf) propose controlled native runtime and peak-memory measurements, worker-inclusive profiling and held-out scaling before choosing another optimization. The unfinished isogeny test remains an independent validation task. These are planned follow-ons; this documentation update launches no new experiment and changes no quantitative graph values. [Planning validation](records/next-steps-validation.md) retains PDF inspection and byte-reproduction checks; the existing library-validation gap remains unchanged.
