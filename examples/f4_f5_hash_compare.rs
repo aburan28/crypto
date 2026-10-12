@@ -636,6 +636,11 @@ fn analyze(root: &Path) -> Result<Value> {
             .iter()
             .filter(|case| case["arm"] == "f4" || case["arm"] == "f5")
             .all(|case| case["verdict"] != "more_instructions");
+    let f5_guarded_accepted = accepted
+        && case_verdicts
+            .iter()
+            .filter(|case| case["arm"] == "f4" || case["arm"] == "f5")
+            .all(|case| case["verdict"] != "more_instructions");
     let mut sources = Vec::new();
     for run in [&a, &b, &aa] {
         sources.extend_from_slice(&run.sources);
@@ -652,6 +657,7 @@ fn analyze(root: &Path) -> Result<Value> {
         "runtime_speedup":null,"rss":null,"acceptance_met":accepted,"memory_regressions":memory_regressions,
         "two_arm_acceptance_met":two_arm_accepted,
         "complete_call_acceptance_met":complete_call_accepted,
+        "f5_with_complete_call_guards_met":f5_guarded_accepted,
         "arms":arms,"case_verdicts":case_verdicts,"primary_cases":per_case,"memory_cases":memory_cases,"sources":sources}),
     )
 }

@@ -2118,13 +2118,33 @@ pub(crate) fn f5_rows_monos_with_mask(
 
 /// Pack monomial rows as bit-rows over `cols` (descending monomial order).
 pub(crate) fn pack_rows(rows_monos: &[Vec<u64>], cols: &[u64]) -> Vec<Vec<u64>> {
+    let words = cols.len().div_ceil(64).max(1);
+    if std::env::var("KIC_F4_HASH_COLUMN_INDEX").as_deref() != Ok("1") {
+        if let Some(index) = F4ColumnIndex::dense_table(cols) {
+            return pack_rows_with_lookup(rows_monos, words, |monomial| {
+                let mask = usize::try_from(*monomial).expect("monomial exceeds dense column range");
+                let column = index[mask];
+                assert_ne!(column, u16::MAX, "monomial missing from column layout");
+                usize::from(column)
+            });
+        }
+    }
     let index: crate::cryptanalysis::fx_hash::MaskMap<usize> =
         cols.iter().enumerate().map(|(i, m)| (*m, i)).collect();
-    let words = cols.len().div_ceil(64).max(1);
+    pack_rows_with_lookup(rows_monos, words, |monomial| index[monomial])
+}
+
+// Choose the representation before packing. Separate monomorphisations avoid
+// an enum branch for every term on the sparse/high-bit hash fallback.
+fn pack_rows_with_lookup(
+    rows_monos: &[Vec<u64>],
+    words: usize,
+    lookup: impl Fn(&u64) -> usize + Sync,
+) -> Vec<Vec<u64>> {
     let pack = |monos: &Vec<u64>| {
         let mut row = vec![0u64; words];
         for m in monos {
-            let c = index[m];
+            let c = lookup(m);
             row[c / 64] |= 1u64 << (c % 64);
         }
         row
@@ -3531,6 +3551,10 @@ impl F4ColumnIndex {
     /// map must store, excluding its spare buckets and control bytes.
     /// High-bit or sparse ranges fall back before allocating a table.
     fn dense(columns: &[u64]) -> Option<Self> {
+        Self::dense_table(columns).map(|index| Self::Fast(F4FastColumnIndex::Dense(index)))
+    }
+
+    fn dense_table(columns: &[u64]) -> Option<Vec<u16>> {
         if columns.len() > u16::MAX as usize {
             return None;
         }
@@ -3548,7 +3572,7 @@ impl F4ColumnIndex {
         for (column, &monomial) in columns.iter().enumerate() {
             index[monomial as usize] = column as u16;
         }
-        Some(Self::Fast(F4FastColumnIndex::Dense(index)))
+        Some(index)
     }
 
     fn get(&self, monomial: &u64) -> Option<usize> {
@@ -6682,6 +6706,63 @@ mod tests {
         assert_eq!(macaulay_columns(&rows), Some(vec![a | b, a, b, 0]));
         assert_eq!(macaulay_columns(&[vec![b, b, 0]]), Some(vec![b, 0]));
         assert_eq!(macaulay_columns(&[]), Some(Vec::new()));
+    }
+
+    #[test]
+    fn packed_rows_match_column_positions_for_dense_sparse_and_parallel_inputs() {
+        // Reconstruct each bit from its column position, without lookup tables.
+        let reference = |rows: &[Vec<u64>], columns: &[u64]| -> Vec<Vec<u64>> {
+            rows.iter()
+                .map(|row| {
+                    let mut packed = vec![0; columns.len().div_ceil(64).max(1)];
+                    for (column, mask) in columns.iter().enumerate() {
+                        if row.contains(mask) {
+                            packed[column / 64] |= 1 << (column % 64);
+                        }
+                    }
+                    packed
+                })
+                .collect()
+        };
+        for columns in [
+            Vec::new(),
+            vec![0],
+            (0..137).map(|i| (i * 13) % 256).collect(),
+            vec![1 << 63, 0, 1 << 52, (1 << 63) | (1 << 52)],
+            vec![0, 1 << 20],
+            (0..u16::MAX as u64).collect(),
+            (0..=u16::MAX as u64).collect(),
+        ] {
+            let rows = vec![
+                Vec::new(),
+                columns.iter().copied().step_by(31).collect(),
+                columns
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, _)| matches!(i % 128, 0 | 63 | 64 | 127))
+                    .flat_map(|(_, &mask)| [mask, mask])
+                    .collect(),
+                columns.iter().copied().rev().take(3).collect(),
+            ];
+            assert_eq!(pack_rows(&rows, &columns), reference(&rows, &columns));
+        }
+
+        let columns: Vec<u64> = (0..137).map(|i| (i * 13) % 256).collect();
+        let template = vec![columns[0], columns[63], columns[64], columns[136]];
+        let words = columns.len().div_ceil(64);
+        let rows = vec![template.clone(); M4RI_PARALLEL_WORDS / words + 1];
+        let expected = reference(&[template], &columns).pop().unwrap();
+        assert!(pack_rows(&rows, &columns)
+            .iter()
+            .all(|row| *row == expected));
+        let index: crate::cryptanalysis::fx_hash::MaskMap<usize> = columns
+            .iter()
+            .enumerate()
+            .map(|(column, &mask)| (mask, column))
+            .collect();
+        assert!(pack_rows_with_lookup(&rows, words, |mask| index[mask])
+            .iter()
+            .all(|row| *row == expected));
     }
 
     #[test]
