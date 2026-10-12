@@ -96,7 +96,7 @@
   },
   "registry": {
    "path": "docs/curves/registry.json",
-   "sha256": "023322e9aae2fc8e370eb055a2c7c71491e2ce32c7229c282edff8c81afa621a"
+   "sha256": "8d470000a97afc40cd3525e45daef6c07006fb21a56ba23e61f618c56c3eefdd"
   },
   "curves_schema": {
    "path": "docs/curves/ic/curves.schema.json",
@@ -6412,6 +6412,34 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-f2m24-tm5983-28fa8b30",
+   "family": "koblitz",
+   "field": "GF(2^24)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 25,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": ["pdp-oracle-speedup-l8"],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-f2m27-t7555-cb6a4c9d",
+   "family": "koblitz",
+   "field": "GF(2^27)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 27,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": ["pdp-oracle-speedup-l9"],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-f2m29-tm40309-30c52b96",
    "family": "koblitz",
    "field": "GF(2^29)",
@@ -6446,6 +6474,20 @@
    "legacy": [
     "ecbench-koblitz-n29-l8"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-f2m30-t10089-8ab21610",
+   "family": "koblitz",
+   "field": "GF(2^30)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 30,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": ["pdp-oracle-speedup-l10"],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
@@ -6504,6 +6546,34 @@
     "K_1/2^31",
     "K_1/F_2^31"
    ],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-f2m33-tm110885-f5e5693b",
+   "family": "koblitz",
+   "field": "GF(2^33)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 34,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": ["pdp-oracle-speedup-l11"],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-f2m36-t473713-f90ff4d7",
+   "family": "koblitz",
+   "field": "GF(2^36)",
+   "coefficients": "a = 1, b = 1",
+   "order_bits": 36,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": ["pdp-oracle-speedup-l12"],
    "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
@@ -9442,6 +9512,34 @@
     "bench-20bit"
    ],
    "on_board": true,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp21-tm700-56b6783a",
+   "family": "prime",
+   "field": "GF(p), p = 1048583",
+   "coefficients": "a = 2, b = 2",
+   "order_bits": 21,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp21-tm700-7ee99c50",
+   "family": "prime",
+   "field": "GF(p), p = 1048583",
+   "coefficients": "a = 1048579, b = 1048579",
+   "order_bits": 21,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
    "curves_yaml_key": null,
    "factor_base_link_status": "no_curves_yaml_record"
   },
@@ -14386,6 +14484,34 @@
    "factor_base_link_status": "no_curves_yaml_record"
   },
   {
+   "slug": "icv1-fp32-t6738-7a2b626e",
+   "family": "prime",
+   "field": "GF(p), p = 2790788831",
+   "coefficients": "a = 666561205, b = 2453577277",
+   "order_bits": 32,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp36-tm47184-1daf0972",
+   "family": "prime",
+   "field": "GF(p), p = 68190058247",
+   "coefficients": "a = 65137035636, b = 33544543934",
+   "order_bits": 36,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
    "slug": "icv1-fp37-t51-ff3fd2db",
    "family": "prime",
    "field": "GF(p), 37-bit p",
@@ -14419,6 +14545,20 @@
    "field": "GF(p), p = 81640512137",
    "coefficients": "a = 6206588639, b = 31351229805",
    "order_bits": 37,
+   "standard": [],
+   "ec1": [],
+   "ec1_unresolved": "no tracked record carries this model's subgroup and generator",
+   "legacy": [],
+   "on_board": false,
+   "curves_yaml_key": null,
+   "factor_base_link_status": "no_curves_yaml_record"
+  },
+  {
+   "slug": "icv1-fp40-tm88926-7cb4feb5",
+   "family": "prime",
+   "field": "GF(p), p = 931154352071",
+   "coefficients": "a = 194304939514, b = 873553658046",
+   "order_bits": 40,
    "standard": [],
    "ec1": [],
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator",

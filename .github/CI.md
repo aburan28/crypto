@@ -61,7 +61,8 @@ embedded-data changes cannot disappear behind an incomplete trigger allowlist.
 ## Budgets and evidence coverage
 
 Every job eligible for an ordinary PR or merge group has an explicit execution
-budget of at most 25 minutes. Longer scientific budgets remain available on
+budget of at most 25 minutes, except the exact frozen Lean proof workflow
+described below. Longer scientific budgets remain available on
 manual dispatch, scheduled work and main-branch recording, and explicitly
 requested one-shot label experiments retain their existing limits. Historical
 campaigns disabled by their owners remain disabled.
@@ -78,8 +79,15 @@ manual measurements keep their existing cancellation policy.
 The event-aware [budget checker](scripts/check-pr-budgets.py) rejects missing,
 unknown or over-budget timeouts on PR/merge-group jobs, accounting for job
 conditions and dependencies. Its fixtures keep labeled/manual/disabled work
-separate from routine validation. This is a runtime contract, not a reason to
-silence errors or alter scientific workloads.
+separate from routine validation. The sole exception is the `proofs` job in
+`weak-curve-lean.yml`, whose 60-minute timeout is included in the Lean proof
+evidence seal. That frozen job performs a cold dependency build and fresh
+kernel replay; its hosted cold runtime has not been measured. The checker
+allows it only while the workflow bytes match the hash in the evidence seal
+and that seal retains its reviewed hash. Any change to those bytes or the job
+identity makes the exception fail closed. Updating the timeout requires new
+proof evidence and a separate review. This exception does not permit other
+long jobs or justify altering scientific workloads.
 
 | Lane | Execution budget |
 | --- | --- |
