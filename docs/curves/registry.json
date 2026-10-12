@@ -11703,18 +11703,18 @@
    ]
   },
   {
-   "slug": "icv1-fp21-tm700-56b6783a",
-   "icv1": "ICV1:fp-1048583:-700:1049284:60314:unk:unk:r:56b6783a1485",
+   "slug": "icv1-fp21-tm700-d62ba3a6",
+   "icv1": "ICV1:fp-1048583:-700:1049284:128:unk:unk:r:d62ba3a6bad8",
    "family": "prime",
    "params": {
-    "p": "1048583",
-    "a": "2",
-    "b": "2"
+    "a": "699056",
+    "b": "737891",
+    "p": "1048583"
    },
-   "model_json": "{\"a\":\"2\",\"b\":\"2\",\"field\":\"fp-1048583\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1048583\",\"v\":\"1\"}",
+   "model_json": "{\"a\":\"699056\",\"b\":\"737891\",\"field\":\"fp-1048583\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1048583\",\"v\":\"1\"}",
    "trace": -700,
    "order": "1049284",
-   "j": "60314",
+   "j": "128",
    "end": "unk",
    "aliases": [],
    "standard_names": [],
@@ -11725,18 +11725,18 @@
    "ec1_unresolved": "no tracked record carries this model's subgroup and generator"
   },
   {
-   "slug": "icv1-fp21-tm700-7ee99c50",
-   "icv1": "ICV1:fp-1048583:-700:1049284:188138:unk:unk:r:7ee99c50b352",
+   "slug": "icv1-fp21-tm700-07d957b2",
+   "icv1": "ICV1:fp-1048583:-700:1049284:10976:unk:unk:r:07d957b2581c",
    "family": "prime",
    "params": {
-    "p": "1048583",
-    "a": "1048579",
-    "b": "1048579"
+    "a": "699046",
+    "b": "388354",
+    "p": "1048583"
    },
-   "model_json": "{\"a\":\"1048579\",\"b\":\"1048579\",\"field\":\"fp-1048583\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1048583\",\"v\":\"1\"}",
+   "model_json": "{\"a\":\"699046\",\"b\":\"388354\",\"field\":\"fp-1048583\",\"form\":\"y^2=x^3+a*x+b\",\"p\":\"1048583\",\"v\":\"1\"}",
    "trace": -700,
    "order": "1049284",
-   "j": "188138",
+   "j": "10976",
    "end": "unk",
    "aliases": [],
    "standard_names": [],
@@ -115998,5 +115998,6 @@
    "standard_names": [],
    "trace": "80369948951667839190628429049567884210"
   }
- ]
+ ],
+ "standards_source": "docs/curves/standards/registry.json"
 }

@@ -6411,7 +6411,10 @@ fn solve_rec(
                     .engine
                     .degree_ladder(system_degree(&nonzero), n_vars)
                     .map_or(2, |l| *l.end());
-                let one = [F2BoolPoly::from_monos(vec![F2BoolMono::from_mask(0)], n_vars)];
+                let one = [F2BoolPoly::from_monos(
+                    vec![F2BoolMono::from_mask(0)],
+                    n_vars,
+                )];
                 trace_node(&nonzero, n_vars, top, policy.support_local, false, &one);
             }
             return;
@@ -9472,7 +9475,10 @@ mod early_abort_tests {
                 // The tree is unchanged unless a degree-2 space refutes a
                 // node the inherited basis does not (mode 2 only).
                 if mode == 1 || trace_off.scratch_refutes_engine_does_not == 0 {
-                    assert_eq!(stats_off.reductions, stats_on.reductions, "case {case} {mode}");
+                    assert_eq!(
+                        stats_off.reductions, stats_on.reductions,
+                        "case {case} {mode}"
+                    );
                     assert_eq!(stats_off.splits, stats_on.splits, "case {case} {mode}");
                     assert_eq!(stats_off.propagations, stats_on.propagations);
                     assert_eq!(stats_off.infeasible_branches, stats_on.infeasible_branches);
@@ -9493,7 +9499,10 @@ mod early_abort_tests {
         }
         assert_eq!(planted_found, 6);
         for mode in 1..=3 {
-            assert!(probe_refutations[mode] > 0, "mode {mode} never fired; the test checks nothing");
+            assert!(
+                probe_refutations[mode] > 0,
+                "mode {mode} never fired; the test checks nothing"
+            );
         }
     }
 

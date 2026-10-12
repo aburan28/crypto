@@ -55,7 +55,8 @@ fn main() {
     println!("cargo:rustc-env=ISOGENY_REGISTRY_SHA256={checksum}");
     let mut engines = String::new();
     for limbs in 1..=10 {
-        engines.push_str(&format!("mod n{limbs} {{\nmod field {{ pub type Field=crate::verification_field::PrimeField<{limbs}>; pub type Fe=crate::verification_field::Element<{limbs}>; pub const FIELD_BITS:usize={limbs}*64; }}\n"));
+        let field_bits = limbs * 64;
+        engines.push_str(&format!("mod n{limbs} {{\nmod field {{ pub type Field=crate::verification_field::PrimeField<{limbs}>; pub type Fe=crate::verification_field::Element<{limbs}>; pub const FIELD_BITS:usize={field_bits}; }}\n"));
         for (name, path) in [
             ("curve", "src/cryptanalysis/isogeny_walk/curve.rs"),
             ("modpoly", "tools/isogeny-cli/src/verification_modpoly.rs"),
@@ -76,19 +77,19 @@ fn main() {
         }
         engines.push_str("pub fn verify(out:&std::path::Path,write:bool)->serde_json::Value { replay::verify(out,write) }\npub fn verify_with_registry(out:&std::path::Path,write:bool,registry:&serde_json::Value)->serde_json::Value { replay::verify_with_registry(out,write,registry) }\npub fn verify_detail(out:&std::path::Path,write:bool,registry:&serde_json::Value)->(serde_json::Value,serde_json::Value) { replay::verify_detail(out,write,registry) }\n}\n");
     }
-    engines.push_str("pub fn verify(out:&std::path::Path,write:bool)->serde_json::Value {\nlet summary:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(\"search.json\")).unwrap()).unwrap();\nlet item=&summary[\"attempts\"][0];\nlet data:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(item[\"curve\"].as_str().unwrap()).join(item[\"receipt\"][\"stdout\"].as_str().unwrap())).unwrap()).unwrap();\nlet p=crate::catalog::integer(&data[\"curve\"][\"p\"]);\nmatch (p.bits()+63)/64 {\n");
+    engines.push_str("pub fn verify(out:&std::path::Path,write:bool)->serde_json::Value {\nlet summary:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(\"search.json\")).unwrap()).unwrap();\nlet item=&summary[\"attempts\"][0];\nlet data:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(item[\"curve\"].as_str().unwrap()).join(item[\"receipt\"][\"stdout\"].as_str().unwrap())).unwrap()).unwrap();\nlet p=crate::catalog::integer(&data[\"curve\"][\"p\"]);\nmatch p.bits().div_ceil(64) {\n");
     for limbs in 1..=10 {
         engines.push_str(&format!("{limbs} => n{limbs}::verify(out,write),\n"));
     }
     engines.push_str("_ => panic!(\"unsupported verification field width\") } }\n");
-    engines.push_str("pub fn verify_detail(out:&std::path::Path,write:bool,registry:&serde_json::Value)->(serde_json::Value,serde_json::Value) {\nlet summary:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(\"search.json\")).unwrap()).unwrap();\nlet item=&summary[\"attempts\"][0];\nlet data:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(item[\"curve\"].as_str().unwrap()).join(item[\"receipt\"][\"stdout\"].as_str().unwrap())).unwrap()).unwrap();\nlet p=crate::catalog::integer(&data[\"curve\"][\"p\"]);\nmatch (p.bits()+63)/64 {\n");
+    engines.push_str("pub fn verify_detail(out:&std::path::Path,write:bool,registry:&serde_json::Value)->(serde_json::Value,serde_json::Value) {\nlet summary:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(\"search.json\")).unwrap()).unwrap();\nlet item=&summary[\"attempts\"][0];\nlet data:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(item[\"curve\"].as_str().unwrap()).join(item[\"receipt\"][\"stdout\"].as_str().unwrap())).unwrap()).unwrap();\nlet p=crate::catalog::integer(&data[\"curve\"][\"p\"]);\nmatch p.bits().div_ceil(64) {\n");
     for limbs in 1..=10 {
         engines.push_str(&format!(
             "{limbs} => n{limbs}::verify_detail(out,write,registry),\n"
         ));
     }
     engines.push_str("_ => panic!(\"unsupported verification field width\") } }\n");
-    engines.push_str("pub fn verify_with_registry(out:&std::path::Path,write:bool,registry:&serde_json::Value)->serde_json::Value {\nlet summary:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(\"search.json\")).unwrap()).unwrap();\nlet item=&summary[\"attempts\"][0];\nlet data:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(item[\"curve\"].as_str().unwrap()).join(item[\"receipt\"][\"stdout\"].as_str().unwrap())).unwrap()).unwrap();\nlet p=crate::catalog::integer(&data[\"curve\"][\"p\"]);\nmatch (p.bits()+63)/64 {\n");
+    engines.push_str("pub fn verify_with_registry(out:&std::path::Path,write:bool,registry:&serde_json::Value)->serde_json::Value {\nlet summary:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(\"search.json\")).unwrap()).unwrap();\nlet item=&summary[\"attempts\"][0];\nlet data:serde_json::Value=serde_json::from_slice(&std::fs::read(out.join(item[\"curve\"].as_str().unwrap()).join(item[\"receipt\"][\"stdout\"].as_str().unwrap())).unwrap()).unwrap();\nlet p=crate::catalog::integer(&data[\"curve\"][\"p\"]);\nmatch p.bits().div_ceil(64) {\n");
     for limbs in 1..=10 {
         engines.push_str(&format!(
             "{limbs} => n{limbs}::verify_with_registry(out,write,registry),\n"

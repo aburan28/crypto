@@ -843,8 +843,7 @@ fn from_str_exact_floats<T: serde::de::DeserializeOwned>(line: &str) -> Result<T
     let _: T = serde_json::from_str(line).map_err(|error| error.to_string())?;
     // `arbitrary_precision` preserves the decimal token in Value until f64
     // conversion. Direct `deserialize_f64` uses the legacy significand path.
-    let value: serde_json::Value =
-        serde_json::from_str(line).map_err(|error| error.to_string())?;
+    let value: serde_json::Value = serde_json::from_str(line).map_err(|error| error.to_string())?;
     serde_json::from_value(value).map_err(|error| error.to_string())
 }
 
@@ -897,11 +896,7 @@ mod exact_record_reader_tests {
         .next()
         .unwrap();
         assert!(from_str_exact_floats::<Record>(record_line).is_ok());
-        let duplicate = record_line.replacen(
-            "{",
-            r#"{"schema":"ecbench.record/v1","#,
-            1,
-        );
+        let duplicate = record_line.replacen("{", r#"{"schema":"ecbench.record/v1","#, 1);
         assert!(from_str_exact_floats::<Record>(&duplicate).is_err());
     }
 }
