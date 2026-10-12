@@ -1,0 +1,70 @@
+{
+  "schema": "ecc2k130-fused-b16-geometry-independent-audit-v1",
+  "auditedArchiveSha256": "0bc85581ac549932472d584d218f8900e3a50acdf0eda5001f47ecd3037d9487",
+  "auditedResultSha256": "785af54f06be2453566fb41c576a86ee11f5b32681055f08cb9adb82058829c6",
+  "verdict": "PASS_RETAIN_T256",
+  "goal26bMet": false,
+  "t512Selected": false,
+  "checks": {
+    "archiveExtracts": true,
+    "archiveOnlyRegularFilesAndDirectories": true,
+    "measuredSourceManifestPasses": true,
+    "binaryManifestPasses": true,
+    "all24SampleLogHashesPass": true,
+    "nativeResummarizationByteIdentical": true,
+    "correctedAuditCompilesWithGccAndClang": true,
+    "correctedAuditValid": true,
+    "packedWalkZeroStackAndSpillsBothArms": true,
+    "t256Resources": {
+      "registersPerThread": 126,
+      "localBytesPerThread": 0,
+      "staticSharedBytesPerBlock": 1792,
+      "residentBlocksPerSm": 2,
+      "threadsPerBlock": 256
+    },
+    "t512Resources": {
+      "registersPerThread": 126,
+      "localBytesPerThread": 0,
+      "staticSharedBytesPerBlock": 1792,
+      "residentBlocksPerSm": 1,
+      "threadsPerBlock": 512
+    },
+    "referenceReplayPerArm": 300,
+    "droppedPerArm": 0,
+    "sortedCorpusIdentity": true,
+    "recordCountPerArm": 1711916,
+    "checkpointWholeIdentity": true,
+    "checkpointT256ToT512Identity": true,
+    "checkpointT512ToT256Identity": true,
+    "warmupRows": 4,
+    "aaRows": 10,
+    "abRows": 10,
+    "updatesPerTimingRow": 403726925824,
+    "equalWorkEveryRow": true,
+    "zeroDropsEveryRow": true
+  },
+  "measurement": {
+    "aaRatios": [
+      0.99988507873166221,
+      1.0004203852825335,
+      0.99916705237377235,
+      0.9996631173906817,
+      0.99983136389073535
+    ],
+    "aaMaxAbsoluteDrift": 0.00083294762622765361,
+    "t512OverT256Ratios": [
+      1.005953969845129,
+      1.0057812287675474,
+      1.0070886858486801,
+      1.0070231209919789,
+      1.0060301615919236
+    ],
+    "medianRatio": 1.0060301615919236,
+    "minimumRatio": 1.0057812287675474,
+    "t256MedianMps": 15578.687,
+    "t512MedianMps": 15672.629000000001,
+    "t512ChangePercent": 0.6030161591923595,
+    "selectionThresholdRatio": 1.01
+  },
+  "interpretation": "T512 is consistently 0.603 percent faster in this allocation, but it misses the frozen 1 percent selection threshold. Retain the current-main T256 fused preset. Separate-allocation rates are excluded."
+}

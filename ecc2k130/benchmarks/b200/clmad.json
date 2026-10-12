@@ -1,0 +1,83 @@
+{
+  "kind": "b200 complete-scalar-iteration throughput",
+  "family": "b200",
+  "gpu": "NVIDIA B200",
+  "cc": "100",
+  "valid": true,
+  "packedClmad": true,
+  "arm": "clmad",
+  "batch": 16,
+  "blockThreads": 256,
+  "minBlocks": 2,
+  "workers": "automatic",
+  "requestedWorkers": 0,
+  "automaticThreads": 75776,
+  "steps": 1024,
+  "launches": 32,
+  "repeats": 3,
+  "sms": 148,
+  "registers": 102,
+  "sourceSha256": "64714ac545c12f7956d819fddd88ccc7606b66c5597a007840549494995c5161",
+  "binarySha256": "faa4c636ec1327e556fe36541e2b7aab3bce6f4d16061c6ad6c24826eb751445",
+  "activeBackend": "packed-poly131",
+  "cudaImageVersion": "13.3.1",
+  "gpuState": "name, uuid, driver_version, pstate, clocks.current.sm [MHz], clocks.current.memory [MHz], power.limit [W], temperature.gpu NVIDIA B200, GPU-eff75013-aab9-ce18-ca91-ca9185ab96a5, 580.95.05, P0, 120 MHz, 3996 MHz, 1000.00 W, 32",
+  "compiler": "nvcc",
+  "modalApp": "ap-siOazkY39t3EJCxHKwT6tF",
+  "ratesM": [
+    8821.857,
+    8823.243,
+    8810.542
+  ],
+  "minRateM": 8810.542,
+  "maxRateM": 8823.243,
+  "medianM": 8821.857,
+  "medianB": 8.821857,
+  "prior": {
+    "kind": "sm-count-scale",
+    "sms": 148,
+    "B": 11.899666042553191
+  },
+  "ratioToPrior": 0.7413533260894087,
+  "ratioTo6000": 0.5836185758576196,
+  "perSmM": 59.60714189189189,
+  "parsedFrom": "modal-log",
+  "samples": [
+    {
+      "valid": true,
+      "rateM": 8821.857,
+      "packedClmad": true,
+      "expectedPackedClmad": true,
+      "registers": 102,
+      "localBytes": 0,
+      "deviceLine": "NVIDIA B200, 148 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 75776,
+      "sms": 148,
+      "error": null
+    },
+    {
+      "valid": true,
+      "rateM": 8823.243,
+      "packedClmad": true,
+      "expectedPackedClmad": true,
+      "registers": 102,
+      "localBytes": 0,
+      "deviceLine": "NVIDIA B200, 148 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 75776,
+      "sms": 148,
+      "error": null
+    },
+    {
+      "valid": true,
+      "rateM": 8810.542,
+      "packedClmad": true,
+      "expectedPackedClmad": true,
+      "registers": 102,
+      "localBytes": 0,
+      "deviceLine": "NVIDIA B200, 148 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 75776,
+      "sms": 148,
+      "error": null
+    }
+  ]
+}

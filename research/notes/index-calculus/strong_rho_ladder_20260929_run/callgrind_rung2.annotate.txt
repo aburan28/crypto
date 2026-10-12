@@ -1,0 +1,37 @@
+--------------------------------------------------------------------------------
+Profile data file 'callgrind_rung2.out' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 7721499387
+Trigger: Program termination
+Profiled target:  /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong 53 0 signed_frobenius 1024 531310 (PID 2133, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                      
+--------------------------------------------------------------------------------
+68,926,289,783 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                       file:function
+--------------------------------------------------------------------------------
+28,246,979,866 (40.98%)  ???:koblitz_rho_batch_ks_strong::Field::inv [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+23,444,686,877 (34.01%)  ???:koblitz_rho_batch_ks_strong::FastCanon::apply [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+ 5,419,479,195 ( 7.86%)  ???:crypto_lib::cryptanalysis::semaev_decomp::Gf2::sqr [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+ 3,506,443,640 ( 5.09%)  ???:koblitz_rho_batch_ks_strong::point_add [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+ 3,481,622,453 ( 5.05%)  ???:koblitz_rho_batch_ks_strong::run [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+ 1,894,063,864 ( 2.75%)  ???:crypto_lib::cryptanalysis::semaev_decomp::clmul_u64 [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   902,859,565 ( 1.31%)  ???:<std::hash::random::DefaultHasher as core::hash::Hasher>::write [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   458,036,072 ( 0.66%)  ???:core::hash::BuildHasher::hash_one [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   362,410,118 ( 0.53%)  ???:crypto_lib::cryptanalysis::koblitz_index_calculus::factorise [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   289,010,547 ( 0.42%)  ???:num_bigint::biguint::addition::<impl core::ops::arith::AddAssign for num_bigint::biguint::BigUint>::add_assign [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   261,486,174 ( 0.38%)  ???:num_bigint::biguint::multiplication::<impl core::ops::arith::Mul for &num_bigint::biguint::BigUint>::mul [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+

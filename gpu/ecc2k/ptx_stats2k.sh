@@ -39,10 +39,29 @@ template<int N> __global__ void ksqr(f2e *o, const f2e *i) {
     for (int k = 0; k < N; k++) a = F2::sqr(a);
     o[threadIdx.x] = a;
 }
+template<int N> __global__ void kweight(uint32_t *o, const f2e *i, const uint32_t *tb) {
+    f2e a = i[0];
+    uint32_t acc = 0;
+#pragma unroll
+    for (int k = 0; k < N; k++) { acc += ClassWeight::of(a, tb); a.v[0] ^= acc; }
+    o[threadIdx.x] = acc;
+}
+#if F2M_FROB_COUNT > 0
+template<int N> __global__ void ktau(f2e *o, const f2e *i, const uint32_t *tb) {
+    f2e a = i[0];
+#pragma unroll
+    for (int k = 0; k < N; k++) a = FrobPow::apply(a, tb, k % F2M_FROB_COUNT);
+    o[threadIdx.x] = a;
+}
+template __global__ void ktau<1>(f2e*, const f2e*, const uint32_t*);
+template __global__ void ktau<11>(f2e*, const f2e*, const uint32_t*);
+#endif
 template __global__ void kmul<1>(f2e*, const f2e*);
 template __global__ void kmul<11>(f2e*, const f2e*);
 template __global__ void ksqr<1>(f2e*, const f2e*);
 template __global__ void ksqr<11>(f2e*, const f2e*);
+template __global__ void kweight<1>(uint32_t*, const f2e*, const uint32_t*);
+template __global__ void kweight<11>(uint32_t*, const f2e*, const uint32_t*);
 EOF
 
 echo "=== PTX instructions per field operation (sm_90, clang) ==="
@@ -64,13 +83,21 @@ for m in re.finditer(r'\.visible \.entry (\S+?)\(', txt):
     funcs[m.group(1)] = ops
 def pick(tag):
     ks = sorted([n for n in funcs if tag in n], key=lambda n: len(funcs[n]))
+    if len(ks) < 2: return None, []
     return (len(funcs[ks[1]]) - len(funcs[ks[0]])) / 10.0, funcs[ks[1]]
 mu, ops = pick('kmul')
 sq, _ = pick('ksqr')
-print("  multiply  %6.1f" % mu)
-print("  squaring  %6.1f   (%.2f of a multiply)" % (sq, sq / mu))
+wg, _ = pick('kweight')
+tau, tops = pick('ktau')
+print("  multiply      %6.1f" % mu)
+print("  squaring      %6.1f   (%.2f of a multiply)" % (sq, sq / mu))
+print("  class weight  %6.1f   (once per walk step)" % wg)
+if tau is not None:
+    ld = sum(1 for o in tops if o.startswith('ld.')) / 11.0
+    print("  tau^k table   %6.1f   (%.0f of them loads; beats k = %.1f squarings)"
+          % (tau, ld, tau / sq))
 w = sum(1 for o in ops if o.startswith('mul.wide'))
-print("  %d widening multiplies per field multiply (9 carry-less 32x32 products)"
+print("  %d widening multiplies per field multiply (16 per carry-less 32x32 product)"
       % (w / 11))
 PY
 

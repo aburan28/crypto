@@ -1,0 +1,94 @@
+[
+  {
+    "config": {
+      "batch_trials": 64,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Frozen matched implementation baseline.",
+    "id": "incumbent"
+  },
+  {
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2,
+          8
+        ]
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Larger orbit union may provide enough independent log columns; charge construction and solve.",
+    "id": "union_1",
+    "parent": "incumbent"
+  },
+  {
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2,
+          16
+        ]
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Larger orbit union may provide enough independent log columns; charge construction and solve.",
+    "id": "union_2",
+    "parent": "incumbent"
+  },
+  {
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          3,
+          32
+        ]
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Larger orbit union may provide enough independent log columns; charge construction and solve.",
+    "id": "union_3",
+    "parent": "incumbent"
+  },
+  {
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2,
+          4,
+          8
+        ]
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Larger orbit union may provide enough independent log columns; charge construction and solve.",
+    "id": "union_4",
+    "parent": "incumbent"
+  }
+]

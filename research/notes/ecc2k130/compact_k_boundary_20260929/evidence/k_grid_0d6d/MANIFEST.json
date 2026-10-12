@@ -1,0 +1,153 @@
+{
+  "cases": {
+    "n41_L1024": {
+      "host_path": "hosts/n41_L1024.json",
+      "host_sha256": "4f23af7903ebc486f0afb4b18e97b720ce544a5f832f5b72427b8f47d315bb9e",
+      "k_grid": [
+        128,
+        192,
+        255,
+        320
+      ],
+      "paired_to_normal_rho": {
+        "ic_k128": {
+          "cpu_ratio_95pct_log_t_interval": [
+            3.461453027992522,
+            3.509296892736172
+          ],
+          "cpu_ratio_median": 3.4913222470543426,
+          "wall_ratio_95pct_log_t_interval": [
+            3.458009535483035,
+            3.509591268642892
+          ],
+          "wall_ratio_median": 3.4868710222487067
+        },
+        "ic_k192": {
+          "cpu_ratio_95pct_log_t_interval": [
+            2.4222856146423277,
+            2.4778849139914305
+          ],
+          "cpu_ratio_median": 2.4426391791577,
+          "wall_ratio_95pct_log_t_interval": [
+            2.418165758360413,
+            2.476189743037611
+          ],
+          "wall_ratio_median": 2.439185654975415
+        },
+        "ic_k255": {
+          "cpu_ratio_95pct_log_t_interval": [
+            2.46194364693406,
+            2.530441649139419
+          ],
+          "cpu_ratio_median": 2.493493527659974,
+          "wall_ratio_95pct_log_t_interval": [
+            2.4588155612264737,
+            2.5296250713531947
+          ],
+          "wall_ratio_median": 2.4908210066747185
+        },
+        "ic_k320": {
+          "cpu_ratio_95pct_log_t_interval": [
+            3.0091807559967183,
+            3.0488747752231062
+          ],
+          "cpu_ratio_median": 3.0290073293671687,
+          "wall_ratio_95pct_log_t_interval": [
+            3.003548763077346,
+            3.047689525071043
+          ],
+          "wall_ratio_median": 3.025739666325751
+        }
+      },
+      "raw_bytes": 8772680,
+      "raw_path": "raw/n41_L1024.tar.gz",
+      "raw_sha256": "6627bf16fe9e45e64c8aca520d10d308e2dc463c760104f8e59e825f7cbf677f",
+      "receipt_path": "receipts/n41_L1024.json",
+      "receipt_sha256": "3ae85c9ae89483d282bab42c41ad1b917cb0026dfd43f6a3550f072ecbbd596a",
+      "second_host_replay_path": "second_host_replay/n41_L1024.json",
+      "second_host_replay_sha256": "3ae85c9ae89483d282bab42c41ad1b917cb0026dfd43f6a3550f072ecbbd596a",
+      "status": "PASS",
+      "targets_verified_per_arm": 5120
+    },
+    "n53_L1024": {
+      "host_path": "hosts/n53_L1024.json",
+      "host_sha256": "fc55f35bd5e0b8db40e1945b7e47fbb69359b35cd8c64f2df6a0ca37dfd09ce6",
+      "k_grid": [
+        220,
+        330,
+        440,
+        550
+      ],
+      "paired_to_normal_rho": {
+        "ic_k220": {
+          "cpu_ratio_95pct_log_t_interval": [
+            5.527300974225798,
+            5.5737674651033045
+          ],
+          "cpu_ratio_median": 5.55295536653459,
+          "wall_ratio_95pct_log_t_interval": [
+            5.525635782668908,
+            5.57208145764909
+          ],
+          "wall_ratio_median": 5.549951279130937
+        },
+        "ic_k330": {
+          "cpu_ratio_95pct_log_t_interval": [
+            3.077226551590976,
+            3.101931103760111
+          ],
+          "cpu_ratio_median": 3.086750741461696,
+          "wall_ratio_95pct_log_t_interval": [
+            3.0766569650879516,
+            3.1002259989344725
+          ],
+          "wall_ratio_median": 3.085355675779759
+        },
+        "ic_k440": {
+          "cpu_ratio_95pct_log_t_interval": [
+            2.564916028327283,
+            2.726750082192328
+          ],
+          "cpu_ratio_median": 2.616457684423502,
+          "wall_ratio_95pct_log_t_interval": [
+            2.564068162041611,
+            2.7262948241081517
+          ],
+          "wall_ratio_median": 2.615024264823566
+        },
+        "ic_k550": {
+          "cpu_ratio_95pct_log_t_interval": [
+            2.7489259565630637,
+            2.7864448992175093
+          ],
+          "cpu_ratio_median": 2.7656513065544064,
+          "wall_ratio_95pct_log_t_interval": [
+            2.748562886791734,
+            2.785223781732273
+          ],
+          "wall_ratio_median": 2.7653843767585147
+        }
+      },
+      "raw_bytes": 18604374,
+      "raw_path": "raw/n53_L1024.tar.gz",
+      "raw_sha256": "6173058de008efd650a38e250b38a0fad5e2d11900f2b6593b2e6825c3c3c8e3",
+      "receipt_path": "receipts/n53_L1024.json",
+      "receipt_sha256": "1cf7c7c92c6e02e0ff1dd9db0a924782e446b5a27bba294731f65f5bea8c4882",
+      "second_host_replay_path": "second_host_replay/n53_L1024.json",
+      "second_host_replay_sha256": "945276038db56c253a44eeebdb325166a2a206408cfc6f7ef48dc230a5b6dc34",
+      "status": "PASS",
+      "targets_verified_per_arm": 5120
+    }
+  },
+  "checkout_main_parent": "0adc50ecd67b868eced5e0de713d70bfd317b9fc",
+  "checkout_merge_commit": "32063e0f673876ca86d421c62ba3afaebb19972e",
+  "extraction": "tar -xzf raw/n41_L1024.tar.gz -C DEST; repeat for n53",
+  "frozen_sha256": "094689c08b48e9c9e957c5f6fe792dfaa0e3d2cb334e6334928e7c7771bf84a3",
+  "github_run_url": "https://github.com/aburan28/crypto/actions/runs/36570106399",
+  "independent_replay": "python3 verify_panel.py --n 41 --run-dir DEST/n41_L1024 --out NEW_RECEIPT.json",
+  "schema": "compact-k-boundary-hosted-archive-v1",
+  "second_host_replay_host_path": "second_host_replay/HOST.json",
+  "second_host_replay_host_sha256": "23363fcb9daf9b6862f3dd6896a1e819a862ef256843e03fa749936ef24d5cd2",
+  "source_head": "0d6db9d48b2ba8353ddeaaa3100417463a37cdda",
+  "source_head_kind": "PR head; Actions compiled the recorded PR merge checkout"
+}

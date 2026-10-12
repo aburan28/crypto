@@ -1,0 +1,31 @@
+{
+ "schema_version": 2,
+ "name": "C045: an anomalous curve, #E = p, near 2^20",
+ "field": {
+  "kind": "prime",
+  "p": "1074607"
+ },
+ "curve": {
+  "form": "short_weierstrass",
+  "a": "0",
+  "b": "5"
+ },
+ "subgroup": {
+  "order": "1074607",
+  "cofactor": "1",
+  "generator": {
+   "x": "666153",
+   "y": "108426"
+  }
+ },
+ "target": {
+  "known_log": "276186"
+ },
+ "method": {
+  "solve": "rho",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 7
+  }
+ }
+}

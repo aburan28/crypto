@@ -1,0 +1,48 @@
+{
+  "schema": "ecbench.session/v1",
+  "session_id": "ECBS1h73210d525d59",
+  "label": "calibration: generic methods on six registered Koblitz curves",
+  "spec_id": "ECS1h9429f9e49b6c",
+  "spec_sha256": "9429f9e49b6c9a310653ced75f68cca93c7db3a3a238a8bb913ecd3052e179d9",
+  "env_class_id": "ECBENV1h9391b7a712c6",
+  "host_sha256": "1c81873aa4b4c5913692387ba59f7cacbc6b4a85b781d2a0ff3ca8b5ff3640a8",
+  "plan_sha256": "e8065ede1c38d5963c113e2d9fa0cab3fccc23d2f5b2404572c13c2a4bf3c932",
+  "binary_sha256": "32390c09f730971ad83eeff8ff97262be1150dc5e4c90657784f798827ef32af",
+  "git_commit": "78a2b631f7273fbd222a6ed838a500f018fb83a7",
+  "git_dirty": false,
+  "options": {
+    "cpus": "none",
+    "lock_path": "/tmp/crypto-bench.lock",
+    "wait_for_lock": true,
+    "allow_busy": false,
+    "thresholds": {
+      "settle_seconds": 2.0,
+      "max_other_cpu": 0.1,
+      "max_psi": 5.0,
+      "max_preemptions_per_second": 50.0
+    },
+    "exe": "/Volumes/SSD990/crypto/.claude/worktrees/eloquent-ellis-53d3cb/target/release/ecbench"
+  },
+  "cpu_plan": null,
+  "preflight": null,
+  "eviction": null,
+  "child_env_sha256": "c4cccd61201fbd7a759a1a0437de712fad3e8fea29c9d9dbdc8aef130311fe69",
+  "child_env": {
+    "HOME": "/Users/adamburan",
+    "LC_ALL": "C",
+    "OMP_NUM_THREADS": "1",
+    "PATH": "/Users/adamburan/.local/bin:/Users/adamburan/.bun/bin:/Users/adamburan/.bun/bin:/Users/adamburan/.bun/bin:/Users/adamburan/bin:/Users/adamburan/.opencode/bin:/Users/adamburan/.bun/bin:/Users/adamburan/.atuin/bin:/Users/adamburan/.pyenv/shims:/Users/adamburan/.pyenv/bin:/Users/adamburan/.local/bin:/Users/adamburan/.local/share/solana/install/active_release/bin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/pkg/env/global/bin:/Library/Apple/usr/bin:/Applications/Wireshark.app/Contents/MacOS:/usr/local/go/bin:/Users/adamburan/.cargo/bin:/Users/adamburan/.docker/bin:/Users/adamburan/go/bin:/Users/adamburan/istio-1.24.0/bin:/Users/adamburan/.local/bin:/Users/adamburan/.lmstudio/bin",
+    "RAYON_NUM_THREADS": "1",
+    "RUST_BACKTRACE": "0",
+    "RUST_MIN_STACK": "8388608"
+  },
+  "started_unix_ms": 1790983674699,
+  "finished_unix_ms": 1790983766039,
+  "status": "complete",
+  "executions_planned": 864,
+  "records_written": 864,
+  "records_sha256": "1f7a9ebe3cd1991a67be49bffb8e271c209dd3e4d2598ba3592e5705b7892bf8",
+  "status_counts": {
+    "verified": 864
+  }
+}

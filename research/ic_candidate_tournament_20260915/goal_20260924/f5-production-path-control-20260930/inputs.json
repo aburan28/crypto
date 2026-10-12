@@ -1,0 +1,210 @@
+{
+  "basis": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "controls": [
+    {
+      "indices": [
+        62,
+        9,
+        43
+      ],
+      "models": [
+        {
+          "assignment": "7100887935",
+          "order": [
+            0,
+            1,
+            2
+          ],
+          "renamed_assignment": "25343882111"
+        },
+        {
+          "assignment": "26655644671",
+          "order": [
+            0,
+            2,
+            1
+          ],
+          "renamed_assignment": "7395818495"
+        },
+        {
+          "assignment": "7100891085",
+          "order": [
+            1,
+            0,
+            2
+          ],
+          "renamed_assignment": "25343885261"
+        },
+        {
+          "assignment": "26119502797",
+          "order": [
+            1,
+            2,
+            0
+          ],
+          "renamed_assignment": "34230983629"
+        },
+        {
+          "assignment": "26655645679",
+          "order": [
+            2,
+            0,
+            1
+          ],
+          "renamed_assignment": "7395819503"
+        },
+        {
+          "assignment": "26119500655",
+          "order": [
+            2,
+            1,
+            0
+          ],
+          "renamed_assignment": "34230981487"
+        }
+      ],
+      "points": [
+        [
+          63,
+          4366
+        ],
+        [
+          13,
+          39239
+        ],
+        [
+          47,
+          4676
+        ]
+      ],
+      "scalar": 8015,
+      "target": [
+        75203,
+        52604
+      ],
+      "trial": 164
+    },
+    {
+      "indices": [
+        2,
+        44,
+        51
+      ],
+      "models": [
+        {
+          "assignment": "33573804995",
+          "order": [
+            0,
+            1,
+            2
+          ],
+          "renamed_assignment": "31126232003"
+        },
+        {
+          "assignment": "21275016771",
+          "order": [
+            0,
+            2,
+            1
+          ],
+          "renamed_assignment": "25565355587"
+        },
+        {
+          "assignment": "33573802223",
+          "order": [
+            1,
+            0,
+            2
+          ],
+          "renamed_assignment": "31126229231"
+        },
+        {
+          "assignment": "2768518767",
+          "order": [
+            1,
+            2,
+            0
+          ],
+          "renamed_assignment": "1653874287"
+        },
+        {
+          "assignment": "21275013369",
+          "order": [
+            2,
+            0,
+            1
+          ],
+          "renamed_assignment": "25565352185"
+        },
+        {
+          "assignment": "2768518137",
+          "order": [
+            2,
+            1,
+            0
+          ],
+          "renamed_assignment": "1653873657"
+        }
+      ],
+      "points": [
+        [
+          3,
+          95627
+        ],
+        [
+          47,
+          4715
+        ],
+        [
+          57,
+          96968
+        ]
+      ],
+      "scalar": 26268,
+      "target": [
+        29365,
+        106256
+      ],
+      "trial": 173
+    }
+  ],
+  "fixture": {
+    "cofactor": "2",
+    "curve_a": 1,
+    "degree": 17,
+    "generator": [
+      "43693",
+      "23339"
+    ],
+    "group_order": "131174",
+    "irreducible": {
+      "degree": 17,
+      "low_terms": [
+        0,
+        3
+      ]
+    },
+    "lambda": "17184",
+    "subgroup_order": "65587",
+    "target_scalar_constructed": false,
+    "target_seeds": [
+      2026092948
+    ],
+    "targets": [
+      [
+        "52411",
+        "72106"
+      ]
+    ]
+  },
+  "matrix_degree": 3,
+  "schema_version": 1,
+  "summands": 3
+}

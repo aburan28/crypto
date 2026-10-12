@@ -1,0 +1,1267 @@
+{
+  "schema": "p256.dickson_quadratic_s3/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "prime": 1151,
+  "a": 1148,
+  "b": 241,
+  "max_degree": 12,
+  "budget_seconds": 30,
+  "cells": [
+    {
+      "depth": 4,
+      "terminal": 0,
+      "liftable_roots": 8,
+      "common_targets_available": 124,
+      "selected_targets": [
+        [
+          9,
+          533
+        ],
+        [
+          9,
+          618
+        ],
+        [
+          10,
+          254
+        ]
+      ],
+      "quartic_s3": [
+        {
+          "target": [
+            9,
+            533
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "correct": true,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 309,
+          "field_ops": 1183930,
+          "milliseconds": 12.833179999999999
+        },
+        {
+          "target": [
+            9,
+            618
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "correct": true,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 309,
+          "field_ops": 1183930,
+          "milliseconds": 12.446850000000001
+        },
+        {
+          "target": [
+            10,
+            254
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "correct": true,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 309,
+          "field_ops": 1182561,
+          "milliseconds": 11.665818
+        }
+      ],
+      "quadratic_s3": [
+        {
+          "layout": "grouped",
+          "runs": [
+            {
+              "target": [
+                9,
+                533
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 360,
+              "field_ops": 1150381,
+              "milliseconds": 13.544409
+            },
+            {
+              "target": [
+                9,
+                618
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 360,
+              "field_ops": 1150381,
+              "milliseconds": 13.181514
+            },
+            {
+              "target": [
+                10,
+                254
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 360,
+              "field_ops": 1150519,
+              "milliseconds": 13.0497
+            }
+          ]
+        },
+        {
+          "layout": "aux-first",
+          "runs": [
+            {
+              "target": [
+                9,
+                533
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 357,
+              "field_ops": 1095382,
+              "milliseconds": 12.950283
+            },
+            {
+              "target": [
+                9,
+                618
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 357,
+              "field_ops": 1095382,
+              "milliseconds": 12.103353
+            },
+            {
+              "target": [
+                10,
+                254
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 357,
+              "field_ops": 1093606,
+              "milliseconds": 11.658367
+            }
+          ]
+        },
+        {
+          "layout": "level-interleaved",
+          "runs": [
+            {
+              "target": [
+                9,
+                533
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 367,
+              "field_ops": 1083807,
+              "milliseconds": 13.21986
+            },
+            {
+              "target": [
+                9,
+                618
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 367,
+              "field_ops": 1083807,
+              "milliseconds": 13.18153
+            },
+            {
+              "target": [
+                10,
+                254
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 367,
+              "field_ops": 1083930,
+              "milliseconds": 12.440131000000001
+            }
+          ]
+        },
+        {
+          "layout": "reverse-blocks",
+          "runs": [
+            {
+              "target": [
+                9,
+                533
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 390,
+              "field_ops": 900802,
+              "milliseconds": 11.180833
+            },
+            {
+              "target": [
+                9,
+                618
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 390,
+              "field_ops": 900802,
+              "milliseconds": 11.039575
+            },
+            {
+              "target": [
+                10,
+                254
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 390,
+              "field_ops": 901474,
+              "milliseconds": 11.250454999999999
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "depth": 4,
+      "terminal": 782,
+      "liftable_roots": 11,
+      "common_targets_available": 24,
+      "selected_targets": [
+        [
+          56,
+          461
+        ],
+        [
+          56,
+          690
+        ],
+        [
+          93,
+          237
+        ]
+      ],
+      "quartic_s3": [
+        {
+          "target": [
+            56,
+            461
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "correct": true,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 309,
+          "field_ops": 1105052,
+          "milliseconds": 11.249884999999999
+        },
+        {
+          "target": [
+            56,
+            690
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "correct": true,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 309,
+          "field_ops": 1105052,
+          "milliseconds": 11.026415
+        },
+        {
+          "target": [
+            93,
+            237
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "correct": true,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 309,
+          "field_ops": 1202101,
+          "milliseconds": 11.900965
+        }
+      ],
+      "quadratic_s3": [
+        {
+          "layout": "grouped",
+          "runs": [
+            {
+              "target": [
+                56,
+                461
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 360,
+              "field_ops": 1052502,
+              "milliseconds": 12.147238
+            },
+            {
+              "target": [
+                56,
+                690
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 360,
+              "field_ops": 1052502,
+              "milliseconds": 12.355455
+            },
+            {
+              "target": [
+                93,
+                237
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 360,
+              "field_ops": 1125157,
+              "milliseconds": 12.952526
+            }
+          ]
+        },
+        {
+          "layout": "aux-first",
+          "runs": [
+            {
+              "target": [
+                56,
+                461
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 357,
+              "field_ops": 1048909,
+              "milliseconds": 11.138491
+            },
+            {
+              "target": [
+                56,
+                690
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 357,
+              "field_ops": 1048909,
+              "milliseconds": 11.952562
+            },
+            {
+              "target": [
+                93,
+                237
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 357,
+              "field_ops": 1095486,
+              "milliseconds": 12.484876
+            }
+          ]
+        },
+        {
+          "layout": "level-interleaved",
+          "runs": [
+            {
+              "target": [
+                56,
+                461
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 367,
+              "field_ops": 985811,
+              "milliseconds": 12.956462
+            },
+            {
+              "target": [
+                56,
+                690
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 367,
+              "field_ops": 985811,
+              "milliseconds": 16.070976
+            },
+            {
+              "target": [
+                93,
+                237
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 367,
+              "field_ops": 1064486,
+              "milliseconds": 12.978695
+            }
+          ]
+        },
+        {
+          "layout": "reverse-blocks",
+          "runs": [
+            {
+              "target": [
+                56,
+                461
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 390,
+              "field_ops": 836223,
+              "milliseconds": 12.210587
+            },
+            {
+              "target": [
+                56,
+                690
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 390,
+              "field_ops": 836223,
+              "milliseconds": 11.161735
+            },
+            {
+              "target": [
+                93,
+                237
+              ],
+              "variables": 13,
+              "equations": 14,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 390,
+              "field_ops": 880688,
+              "milliseconds": 11.510217999999998
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "depth": 5,
+      "terminal": 0,
+      "liftable_roots": 13,
+      "common_targets_available": 304,
+      "selected_targets": [
+        [
+          3,
+          542
+        ],
+        [
+          3,
+          609
+        ],
+        [
+          6,
+          187
+        ]
+      ],
+      "quartic_s3": [
+        {
+          "target": [
+            3,
+            542
+          ],
+          "variables": 12,
+          "equations": 13,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "correct": true,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 647,
+          "field_ops": 36725681,
+          "milliseconds": 97.955971
+        },
+        {
+          "target": [
+            3,
+            609
+          ],
+          "variables": 12,
+          "equations": 13,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "correct": true,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 647,
+          "field_ops": 36725681,
+          "milliseconds": 93.787276
+        },
+        {
+          "target": [
+            6,
+            187
+          ],
+          "variables": 12,
+          "equations": 13,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "correct": true,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 647,
+          "field_ops": 36179518,
+          "milliseconds": 96.754749
+        }
+      ],
+      "quadratic_s3": [
+        {
+          "layout": "grouped",
+          "runs": [
+            {
+              "target": [
+                3,
+                542
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 714,
+              "field_ops": 18309849,
+              "milliseconds": 92.654764
+            },
+            {
+              "target": [
+                3,
+                609
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 714,
+              "field_ops": 18309849,
+              "milliseconds": 89.487894
+            },
+            {
+              "target": [
+                6,
+                187
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 714,
+              "field_ops": 18878550,
+              "milliseconds": 95.753366
+            }
+          ]
+        },
+        {
+          "layout": "aux-first",
+          "runs": [
+            {
+              "target": [
+                3,
+                542
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 737,
+              "field_ops": 28698701,
+              "milliseconds": 87.51938
+            },
+            {
+              "target": [
+                3,
+                609
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 737,
+              "field_ops": 28698701,
+              "milliseconds": 91.07235
+            },
+            {
+              "target": [
+                6,
+                187
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 737,
+              "field_ops": 29401792,
+              "milliseconds": 92.04312300000001
+            }
+          ]
+        },
+        {
+          "layout": "level-interleaved",
+          "runs": [
+            {
+              "target": [
+                3,
+                542
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 722,
+              "field_ops": 16792103,
+              "milliseconds": 95.681429
+            },
+            {
+              "target": [
+                3,
+                609
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 722,
+              "field_ops": 16792103,
+              "milliseconds": 86.466361
+            },
+            {
+              "target": [
+                6,
+                187
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 722,
+              "field_ops": 17239122,
+              "milliseconds": 86.700911
+            }
+          ]
+        },
+        {
+          "layout": "reverse-blocks",
+          "runs": [
+            {
+              "target": [
+                3,
+                542
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 804,
+              "field_ops": 14237319,
+              "milliseconds": 76.033365
+            },
+            {
+              "target": [
+                3,
+                609
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 804,
+              "field_ops": 14237319,
+              "milliseconds": 83.18247500000001
+            },
+            {
+              "target": [
+                6,
+                187
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 804,
+              "field_ops": 14677219,
+              "milliseconds": 86.021576
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "depth": 5,
+      "terminal": 369,
+      "liftable_roots": 16,
+      "common_targets_available": 138,
+      "selected_targets": [
+        [
+          48,
+          543
+        ],
+        [
+          48,
+          608
+        ],
+        [
+          134,
+          137
+        ]
+      ],
+      "quartic_s3": [
+        {
+          "target": [
+            48,
+            543
+          ],
+          "variables": 12,
+          "equations": 13,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "correct": true,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 642,
+          "field_ops": 31566344,
+          "milliseconds": 91.861355
+        },
+        {
+          "target": [
+            48,
+            608
+          ],
+          "variables": 12,
+          "equations": 13,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "correct": true,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 642,
+          "field_ops": 31566344,
+          "milliseconds": 87.637993
+        },
+        {
+          "target": [
+            134,
+            137
+          ],
+          "variables": 12,
+          "equations": 13,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "correct": true,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 647,
+          "field_ops": 36167368,
+          "milliseconds": 94.20379
+        }
+      ],
+      "quadratic_s3": [
+        {
+          "layout": "grouped",
+          "runs": [
+            {
+              "target": [
+                48,
+                543
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 706,
+              "field_ops": 16778687,
+              "milliseconds": 84.552926
+            },
+            {
+              "target": [
+                48,
+                608
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 706,
+              "field_ops": 16778687,
+              "milliseconds": 83.293554
+            },
+            {
+              "target": [
+                134,
+                137
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 714,
+              "field_ops": 18883779,
+              "milliseconds": 89.702479
+            }
+          ]
+        },
+        {
+          "layout": "aux-first",
+          "runs": [
+            {
+              "target": [
+                48,
+                543
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 720,
+              "field_ops": 25099432,
+              "milliseconds": 83.397667
+            },
+            {
+              "target": [
+                48,
+                608
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 720,
+              "field_ops": 25099432,
+              "milliseconds": 80.220715
+            },
+            {
+              "target": [
+                134,
+                137
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 737,
+              "field_ops": 29375747,
+              "milliseconds": 87.88810099999999
+            }
+          ]
+        },
+        {
+          "layout": "level-interleaved",
+          "runs": [
+            {
+              "target": [
+                48,
+                543
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 719,
+              "field_ops": 15412143,
+              "milliseconds": 83.244862
+            },
+            {
+              "target": [
+                48,
+                608
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 719,
+              "field_ops": 15412143,
+              "milliseconds": 85.020293
+            },
+            {
+              "target": [
+                134,
+                137
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 722,
+              "field_ops": 17224317,
+              "milliseconds": 86.959535
+            }
+          ]
+        },
+        {
+          "layout": "reverse-blocks",
+          "runs": [
+            {
+              "target": [
+                48,
+                543
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 802,
+              "field_ops": 13397495,
+              "milliseconds": 74.936243
+            },
+            {
+              "target": [
+                48,
+                608
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 802,
+              "field_ops": 13397495,
+              "milliseconds": 76.17934
+            },
+            {
+              "target": [
+                134,
+                137
+              ],
+              "variables": 15,
+              "equations": 16,
+              "input_max_degree": 2,
+              "inconsistent": false,
+              "complete": true,
+              "correct": true,
+              "timed_out": false,
+              "pairs_above_bound": 0,
+              "solving_degree_max": 4,
+              "max_cols_to_solution": 804,
+              "field_ops": 14671834,
+              "milliseconds": 93.562246
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

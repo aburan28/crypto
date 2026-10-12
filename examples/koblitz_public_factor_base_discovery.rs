@@ -9,8 +9,8 @@
 //! target subgroup nor constructs a target or any discrete-log label.
 
 use crypto_lib::cryptanalysis::koblitz_index_calculus::{
-    all_factors_of_x_n_minus_1, build_frobenius_factor_base_from_divisor, point_key,
-    projected_signed_orbit_count, KoblitzCurve,
+    all_factors_of_x_n_minus_1, build_frobenius_factor_base_from_divisor, cyclotomic_cosets,
+    point_key, projected_signed_orbit_count, KoblitzCurve,
 };
 use serde_json::json;
 use std::collections::HashSet;
@@ -39,6 +39,17 @@ fn main() {
         .iter()
         .map(|factor| 63 - factor.leading_zeros())
         .collect();
+    let mut complete_factor_degrees: Vec<usize> =
+        cyclotomic_cosets(n).iter().map(Vec::len).collect();
+    complete_factor_degrees.sort_unstable();
+    let mut achievable_dimensions = vec![false; n as usize + 1];
+    achievable_dimensions[0] = true;
+    for &degree in &complete_factor_degrees {
+        for dimension in (degree..achievable_dimensions.len()).rev() {
+            achievable_dimensions[dimension] |= achievable_dimensions[dimension - degree];
+        }
+    }
+    let requested_divisor_exists = achievable_dimensions[wanted_dimension];
 
     let mut candidates = Vec::new();
     for mask in 1usize..(1usize << factors.len()) {
@@ -87,10 +98,42 @@ fn main() {
             }
         }));
     }
-    assert!(
-        !candidates.is_empty(),
-        "no divisor has the requested dimension"
-    );
+    if candidates.is_empty() {
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&json!({
+                "schema":"koblitz_public_factor_base_discovery.v1",
+                "status":if requested_divisor_exists {
+                    "unavailable_factor_enumeration_degree_cap"
+                } else {
+                    "unavailable_no_divisor_of_requested_dimension"
+                },
+                "n":n,"a":a,"m":m,
+                "group_order":curve.group_order.to_string(),
+                "subgroup_order":curve.subgroup_order.to_string(),
+                "cofactor":curve.cofactor.to_string(),
+                "requested_dimension":wanted_dimension,
+                "sizing_gate":{"m_times_dimension":m*wanted_dimension,"n":n,"passes":m*wanted_dimension >= n as usize},
+                "factor_degrees":factor_degrees,
+                "complete_factor_degrees":complete_factor_degrees,
+                "factor_enumeration_degree_cap":24,
+                "requested_divisor_exists":requested_divisor_exists,
+                "candidates":candidates,
+                "selected":null,
+                "selection_rule":"cofactor admissible; maximize rational points; minimize projected signed-Frobenius columns; lexicographically lower divisor indices",
+                "forbidden_inputs":{
+                    "target_constructed":false,
+                    "target_subgroup_enumerated":false,
+                    "discrete_log_labels_constructed":false,
+                    "relation_yield_used":false,
+                    "solver_timing_used":false
+                },
+                "timing_ns":{"curve_and_subgroup_construction":curve_ns,"end_to_end":total_start.elapsed().as_nanos()}
+            }))
+            .expect("JSON")
+        );
+        return;
+    }
 
     // Frozen public rule: among cofactor-admissible candidates, maximize the
     // number of rational factor-base points; then minimize the number of
@@ -123,6 +166,7 @@ fn main() {
         "{}",
         serde_json::to_string_pretty(&json!({
             "schema":"koblitz_public_factor_base_discovery.v1",
+            "status":"selected",
             "n":n,"a":a,"m":m,
             "group_order":curve.group_order.to_string(),
             "subgroup_order":curve.subgroup_order.to_string(),
@@ -130,6 +174,9 @@ fn main() {
             "requested_dimension":wanted_dimension,
             "sizing_gate":{"m_times_dimension":m*wanted_dimension,"n":n,"passes":m*wanted_dimension >= n as usize},
             "factor_degrees":factor_degrees,
+            "complete_factor_degrees":complete_factor_degrees,
+            "factor_enumeration_degree_cap":24,
+            "requested_divisor_exists":requested_divisor_exists,
             "candidates":candidates,
             "selected":selected,
             "selection_rule":"cofactor admissible; maximize rational points; minimize projected signed-Frobenius columns; lexicographically lower divisor indices",

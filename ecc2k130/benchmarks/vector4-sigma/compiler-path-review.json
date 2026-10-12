@@ -1,0 +1,398 @@
+{
+  "valid": true,
+  "status": "Two pinnedCPU wrapper compiles passed; nativevectorloads and completehelper reduction established, runtimegain unmeasured",
+  "ownerTerminal": {
+    "session": 92774,
+    "app": "ap-cK4ZTcpzN4JDhwbDcYz9XD",
+    "exitCode": 0
+  },
+  "rawSha256": "7a8b014039f649ccb16639be7c02fb4a537570f346f4b30449462ec38c60a71a",
+  "rawBytes": 10455016,
+  "remoteArtifact": "/data/vector4-sigma-cpu/1789215736513672051/result.json",
+  "image": "nvidia/cuda@sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+  "toolchain": "13.3.73",
+  "architecture": "sm_120",
+  "sourceFiles": 160,
+  "uploadedFiles": 32,
+  "sourceManifestSha256": "bf1ab4c8d9f8862ad53a2a5b321a4848210a4959d107e253bdd691f29edb816d",
+  "sourceCanonicalSha256": "921cd46593759256fe532fedaff9a4b1e24fe3cada4b514e88b1cac15ff51a17",
+  "driverFreezeSha256": "bf7657b3a7b91a8b8dedb5cdba1db09530490b0bbf9c23f23033c4f2c15fd924",
+  "hostReceiptSha256": "d870cbdf019d14e329bd8bc61d1beead5529caf561cb326afe96d06eafdcb512",
+  "hostCustodyAddendumSha256": "32e13cd7627e6fe8f6a02ef685c1f569f95c7dcee3cb05b7021c6fe64fed8421",
+  "sourceChanges": [
+    "Makefile",
+    "codegen/gensigma.py",
+    "include/packed131.h",
+    "include/packedengine.cuh",
+    "include/packedsigma131.h"
+  ],
+  "controlWholeCubinExactlyMatchesMeasuredShared1": true,
+  "scalarGlobalInverseSourceUnchanged": true,
+  "initInstructionTextUnchanged": true,
+  "allWarnings": false,
+  "allStackLocalSpillBytesZero": true,
+  "rows": {
+    "vector0": {
+      "cubinSha256": "908ee02ee31a9e46061a6d796c594081e67c1b9cc5285bbd13ced20b47c07e83",
+      "ptxSha256": "2744fa2b3d1903743e157881fb498afea89c8737db9d01a95ca2c057cf5136a1",
+      "resources": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "registers": 104,
+          "stackBytes": 0,
+          "sharedBytes": 2816,
+          "localBytes": 0
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "registers": 98,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "localBytes": 0
+        }
+      },
+      "fullWalkNonNop": 4449,
+      "fullCallerNonNop": 1721,
+      "pairedHelperNonNop": 502,
+      "pairedHelperOpcodes": {
+        "S2UR": 1,
+        "UMOV": 1,
+        "SHF.R.U32.HI": 98,
+        "ULEA": 1,
+        "LEA": 1,
+        "LDS": 56,
+        "LOP3.LUT": 244,
+        "IMAD.SHL.U32": 80,
+        "IMAD.U32": 18,
+        "MOV": 1,
+        "RET.REL.NODEC": 1
+      },
+      "selectedPath": {
+        "callerInstructionEncounters": 10305,
+        "helperCalls": {
+          "29sigmaWalkNetworkPairShared131ENS0_4P131ES1_i": 16,
+          "20mulPolynomialPair131ENS0_4P131ES1_S1_": 30,
+          "6mul131ENS0_4P131ES1_": 8,
+          "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": 1,
+          "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": 1,
+          "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": 1,
+          "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": 1,
+          "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": 1,
+          "16mulPolynomial131ENS0_4P131ES1_": 17
+        },
+        "traceSha256": "9e31497a81be6066463a541621219e9a16650a8fe3d7b667a3f9497982ad34e8",
+        "selectedPerWorkerStep": 35036,
+        "selectedPerScalar": 2189.75,
+        "memory": {
+          "LDG": {
+            "instructionEncounters": 320,
+            "logicalBytes": 2144
+          },
+          "STG": {
+            "instructionEncounters": 128,
+            "logicalBytes": 1088
+          },
+          "LDS": {
+            "instructionEncounters": 896,
+            "logicalBytes": 3584
+          },
+          "STS": {
+            "instructionEncounters": 0,
+            "logicalBytes": 0
+          }
+        },
+        "fieldProducts": 85,
+        "nativeCLMAD": 510,
+        "callAndReturnEncounters": 152
+      },
+      "entryCopy": {
+        "blockThreads": 256,
+        "copyWordCount": 448,
+        "sourceDerivedCopyIterations": "Threads0..191 copytwo words;192..255 copyone. Controluses its scalar remainder loop and skips the four-way loop at this block size.",
+        "branchChoiceLimit": "Fixed256-thread source-bound path choices, not an emulator for MUFU/division or a GPUtrace. Instruction encounters include predicated-off instructions; memory bytes count active stores only.",
+        "profiles": {
+          "copies2-component0": {
+            "perThread": {
+              "instructionEncounters": 100,
+              "activeCopyLoads": 2,
+              "activeCopyStores": 2
+            },
+            "threads": 48
+          },
+          "copies2-component1": {
+            "perThread": {
+              "instructionEncounters": 100,
+              "activeCopyLoads": 2,
+              "activeCopyStores": 2
+            },
+            "threads": 48
+          },
+          "copies2-component2": {
+            "perThread": {
+              "instructionEncounters": 100,
+              "activeCopyLoads": 2,
+              "activeCopyStores": 2
+            },
+            "threads": 48
+          },
+          "copies2-component3": {
+            "perThread": {
+              "instructionEncounters": 100,
+              "activeCopyLoads": 2,
+              "activeCopyStores": 2
+            },
+            "threads": 48
+          },
+          "copies1-component0": {
+            "perThread": {
+              "instructionEncounters": 86,
+              "activeCopyLoads": 1,
+              "activeCopyStores": 1
+            },
+            "threads": 16
+          },
+          "copies1-component1": {
+            "perThread": {
+              "instructionEncounters": 86,
+              "activeCopyLoads": 1,
+              "activeCopyStores": 1
+            },
+            "threads": 16
+          },
+          "copies1-component2": {
+            "perThread": {
+              "instructionEncounters": 86,
+              "activeCopyLoads": 1,
+              "activeCopyStores": 1
+            },
+            "threads": 16
+          },
+          "copies1-component3": {
+            "perThread": {
+              "instructionEncounters": 86,
+              "activeCopyLoads": 1,
+              "activeCopyStores": 1
+            },
+            "threads": 16
+          }
+        },
+        "aggregateInstructionEncounters": 24704,
+        "averagePerThread": 96.5,
+        "activeLoadBytes": 1792,
+        "activeStoreBytes": 1792,
+        "barrierParticipantEncounters": 256,
+        "staticPrologueNonNop": 136,
+        "barrierAddress": "0x730",
+        "firstPartialExitAddress": "0x750"
+      }
+    },
+    "vector1": {
+      "cubinSha256": "5319a7a717a0302bada9d942c4e78cccec69e751be3afffe2a4e1719cea7ada0",
+      "ptxSha256": "8ad07d50bf68f7633381bbbd0a5e03081f1f32ed08ce09daba8dbafbf04424f3",
+      "resources": {
+        "_ZN12eccPacked1314walkE10WalkParamsIjEPj": {
+          "registers": 104,
+          "stackBytes": 0,
+          "sharedBytes": 2816,
+          "localBytes": 0
+        },
+        "_ZN12eccPacked1314initE10WalkParamsIjEb": {
+          "registers": 98,
+          "stackBytes": 0,
+          "sharedBytes": 0,
+          "localBytes": 0
+        }
+      },
+      "fullWalkNonNop": 4334,
+      "fullCallerNonNop": 1648,
+      "pairedHelperNonNop": 460,
+      "pairedHelperOpcodes": {
+        "S2UR": 1,
+        "UMOV": 1,
+        "SHF.R.U32.HI": 98,
+        "ULEA": 1,
+        "LEA": 1,
+        "LDS.128": 14,
+        "LOP3.LUT": 244,
+        "IMAD.SHL.U32": 80,
+        "IMAD.U32": 18,
+        "MOV": 1,
+        "RET.REL.NODEC": 1
+      },
+      "selectedPath": {
+        "callerInstructionEncounters": 10305,
+        "helperCalls": {
+          "29sigmaWalkNetworkPairShared131ENS0_4P131ES1_i": 16,
+          "20mulPolynomialPair131ENS0_4P131ES1_S1_": 30,
+          "6mul131ENS0_4P131ES1_": 8,
+          "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2": 1,
+          "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1": 1,
+          "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5": 1,
+          "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4": 1,
+          "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3": 1,
+          "16mulPolynomial131ENS0_4P131ES1_": 17
+        },
+        "traceSha256": "db78ce9b5aa0887fdf04402d4e528e96e420707749ea94ed3635026401cefafa",
+        "selectedPerWorkerStep": 34364,
+        "selectedPerScalar": 2147.75,
+        "memory": {
+          "LDG": {
+            "instructionEncounters": 320,
+            "logicalBytes": 2144
+          },
+          "STG": {
+            "instructionEncounters": 128,
+            "logicalBytes": 1088
+          },
+          "LDS": {
+            "instructionEncounters": 224,
+            "logicalBytes": 3584
+          },
+          "STS": {
+            "instructionEncounters": 0,
+            "logicalBytes": 0
+          }
+        },
+        "fieldProducts": 85,
+        "nativeCLMAD": 510,
+        "callAndReturnEncounters": 152
+      },
+      "entryCopy": {
+        "blockThreads": 256,
+        "copyWordCount": 448,
+        "sourceDerivedCopyIterations": "Threads0..191 copytwo words;192..255 copyone. Controluses its scalar remainder loop and skips the four-way loop at this block size.",
+        "branchChoiceLimit": "Fixed256-thread source-bound path choices, not an emulator for MUFU/division or a GPUtrace. Instruction encounters include predicated-off instructions; memory bytes count active stores only.",
+        "profiles": {
+          "copies2-component0": {
+            "perThread": {
+              "instructionEncounters": 84,
+              "activeCopyLoads": 2,
+              "activeCopyStores": 2
+            },
+            "threads": 48
+          },
+          "copies2-component1": {
+            "perThread": {
+              "instructionEncounters": 84,
+              "activeCopyLoads": 2,
+              "activeCopyStores": 2
+            },
+            "threads": 48
+          },
+          "copies2-component2": {
+            "perThread": {
+              "instructionEncounters": 82,
+              "activeCopyLoads": 2,
+              "activeCopyStores": 2
+            },
+            "threads": 48
+          },
+          "copies2-component3": {
+            "perThread": {
+              "instructionEncounters": 82,
+              "activeCopyLoads": 2,
+              "activeCopyStores": 2
+            },
+            "threads": 48
+          },
+          "copies1-component0": {
+            "perThread": {
+              "instructionEncounters": 61,
+              "activeCopyLoads": 1,
+              "activeCopyStores": 1
+            },
+            "threads": 16
+          },
+          "copies1-component1": {
+            "perThread": {
+              "instructionEncounters": 61,
+              "activeCopyLoads": 1,
+              "activeCopyStores": 1
+            },
+            "threads": 16
+          },
+          "copies1-component2": {
+            "perThread": {
+              "instructionEncounters": 60,
+              "activeCopyLoads": 1,
+              "activeCopyStores": 1
+            },
+            "threads": 16
+          },
+          "copies1-component3": {
+            "perThread": {
+              "instructionEncounters": 60,
+              "activeCopyLoads": 1,
+              "activeCopyStores": 1
+            },
+            "threads": 16
+          }
+        },
+        "aggregateInstructionEncounters": 19808,
+        "averagePerThread": 77.375,
+        "activeLoadBytes": 1792,
+        "activeStoreBytes": 1792,
+        "barrierParticipantEncounters": 256,
+        "staticPrologueNonNop": 64,
+        "barrierAddress": "0x2b0",
+        "firstPartialExitAddress": "0x2d0"
+      }
+    }
+  },
+  "selectedPathReductionPerScalar": 42,
+  "selectedPathReductionPercent": 1.918027172051604,
+  "perWorkerCalls": {
+    "ordinaryPolynomial": 17,
+    "pairedPolynomial": 30,
+    "normalInverseProducts": 8,
+    "pairedSigma": 16,
+    "inversePermutationHelpers": 5,
+    "totalCalls": 76,
+    "callReturnEncounters": 152,
+    "fieldProducts": 85,
+    "nativeCLMAD": 510
+  },
+  "resourceInterpretation": "Physical compiler registers104/98 andcompiledshared2816/0 are identical acrossmodes. This establishes no static resource loss; runtimefunctionsharedbytes andAPI residency remain unqueried inthisphase.",
+  "copyInterpretation": "Typedmember copy emits scalar predicatedSTS stores, not a partial-vector RMW. Candidatecomponentdispatch diverges withinwarps. Per-thread entryencounters24704\u219219808perCTA are a source-bound static ledger, not GPUissuedinstructions orlatency.",
+  "paths": {
+    "path_cost.py": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-cpu-20260912/path_cost.py",
+      "sha256": "c67507d5cce8c2ac7befa7f812abc0e2db643d8f28fafe7285059713ce97ebeb"
+    },
+    "path-cost.json": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-cpu-20260912/path-cost.json",
+      "sha256": "e0c59351c8f2261f35e7b8a886c8d08969687c5adbb1c851b11cba213ae1a13d"
+    },
+    "path-cost-interpretation.json": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-cpu-20260912/path-cost-interpretation.json",
+      "sha256": "6f4891031cb5985251bdbcc4daff5b07046a2e905f5c7ec63569812d5725353b"
+    },
+    "source-checks.json": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-cpu-20260912/source-checks.json",
+      "sha256": "b3a394855a1db6595602220eb63a33d5185c6fbb8445c99f0354325a818f5550"
+    },
+    "guard-checks.json": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-cpu-20260912/guard-checks.json",
+      "sha256": "68551cc6b67097eee0f7e96f5ac78a68607f63dee8493480a26feb4951b677c9"
+    },
+    "host-custody-addendum.json": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-cpu-20260912/host-custody-addendum.json",
+      "sha256": "32e13cd7627e6fe8f6a02ef685c1f569f95c7dcee3cb05b7021c6fe64fed8421"
+    },
+    "review.py": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-cpu-20260912/review.py",
+      "sha256": "6dd5f01026f5d28a0c1b872181d2d4b60f9de1d2e6ae9bfb3e97f1680cbcae85"
+    }
+  },
+  "pendingRuntimeWork": "The existing dedicated GPU sigma probe still names the scalar shared array and requires a vector-layout adaptation before a later GPU phase. It is notcompiledorexecutedin thisCPUwrapperassessment.",
+  "compilerBuilds": 2,
+  "gpuJobs": 0,
+  "deviceExecutableRuns": 0,
+  "performanceGainEstablished": false,
+  "independentReviewRequiredBeforeGpu": true,
+  "limits": [
+    "NoGPUcorrectness/timing wasperformed; hostNVCC/devicebranchchecksareCPUemulation.",
+    "The selectedlive/no-report/no-guard pathincludesallreachedhelper/ABIinstructions butexcludescoldbranches,termination,reseed andhostoverhead.",
+    "Wholeentryandcopycodeisinventoriedseparately; fixed256-thread sourcebranchchoices arenot aGPUtrace orMUFU/divisionemulator.",
+    "Logicalglobal/sharedbytes areunchanged withintheselectedpath andarenot measuredtransactions/bankconflicts.",
+    "Runtimeprobe/layout/markeradaptation andfullclient/source/checkpointgatesremainbeforeanytiming."
+  ]
+}

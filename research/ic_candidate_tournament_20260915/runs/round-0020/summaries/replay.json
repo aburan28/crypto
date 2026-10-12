@@ -1,0 +1,85 @@
+{
+  "comparisons": [
+    {
+      "candidate": "both",
+      "candidate_over_baseline": 0.9638463816070778,
+      "ci95": [
+        0.9440154011190073,
+        0.9821778449652059
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 8,
+      "native_wall_candidate_over_baseline": 0.971339473534602,
+      "native_wall_ci95": [
+        0.9441779120963821,
+        0.9941809027682009
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9693668865153088,
+        "n17a1": 0.9810158799218848,
+        "n19a0": 0.9744359860462917,
+        "n19a1": 0.9942736226510227,
+        "n23a0": 1.0165968988406133,
+        "n23a1": 0.9919812552870911,
+        "n29a1": 0.9444493241562546,
+        "n31a0": 0.903054473313709
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 124,
+      "per_cell": {
+        "n13a0": 0.9747543011822195,
+        "n17a1": 0.9930333161006453,
+        "n19a0": 0.9893252386059377,
+        "n19a1": 0.9765150168823458,
+        "n23a0": 0.9571893258576132,
+        "n23a1": 0.9785458288823248,
+        "n29a1": 0.9238323503282001,
+        "n31a0": 0.9204779579341629
+      },
+      "speedup": 1.0375097308895231
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 237.175470660266,
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 1.4540529400489166,
+    "ci95": [
+      1.2903830220843315,
+      1.6329382267865422
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 8,
+    "native_wall_candidate_over_baseline": 1.1049139225707938,
+    "native_wall_ci95": [
+      1.0703513132223739,
+      1.1373271631779451
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 1.1116858197667334,
+      "n17a1": 1.14867702135074,
+      "n19a0": 1.1629954659934425,
+      "n19a1": 1.144017656811316,
+      "n23a0": 1.0894577458043053,
+      "n23a1": 1.076760289004373,
+      "n29a1": 1.0278299409396465,
+      "n31a0": 1.0843915718362684
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 124,
+    "per_cell": {
+      "n13a0": 1.396530727270357,
+      "n17a1": 1.6120724774011754,
+      "n19a0": 1.8045394364161886,
+      "n19a1": 1.6980143160285481,
+      "n23a0": 1.1765082653701402,
+      "n23a1": 1.2311506265635768,
+      "n29a1": 1.2236615753519957,
+      "n31a0": 1.6342988341857887
+    },
+    "speedup": 0.6877328689052811
+  },
+  "runs": 1116,
+  "stage": "replay",
+  "verified_runs": 1116
+}

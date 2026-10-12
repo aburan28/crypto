@@ -1,0 +1,31 @@
+{
+ "schema_version": 2,
+ "name": "C044: a curve over p near 2^34 whose subgroup is below 4 sqrt(p)",
+ "field": {
+  "kind": "prime",
+  "p": "17179869209"
+ },
+ "curve": {
+  "form": "short_weierstrass",
+  "a": "10754506939",
+  "b": "15080532235"
+ },
+ "subgroup": {
+  "order": "3121",
+  "cofactor": "5504656",
+  "generator": {
+   "x": "8002985948",
+   "y": "16801326999"
+  }
+ },
+ "target": {
+  "known_log": "2176"
+ },
+ "method": {
+  "solve": "rho",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 7
+  }
+ }
+}

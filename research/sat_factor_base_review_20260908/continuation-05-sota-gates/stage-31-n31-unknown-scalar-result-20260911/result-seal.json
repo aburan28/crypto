@@ -1,0 +1,95 @@
+{
+  "inventory": [
+    {
+      "bytes": 912,
+      "path": "artifacts.json",
+      "sha256": "49fb5c91a07053ea467701c1706f8a01073d009c8b7eaedb9dc964c2ed0a7508"
+    },
+    {
+      "bytes": 783,
+      "path": "stage31-build/build.time",
+      "sha256": "454a2dbe57b66565115311cd4c430d4292cdb2bd513cb78aff6b90e8d341f209"
+    },
+    {
+      "bytes": 1105,
+      "path": "stage31-run/params.json",
+      "sha256": "14837bb90b97705ea3b4aae4633666283ce1cad4a9ed9cc37933a18f1cca9eb4"
+    },
+    {
+      "bytes": 14413,
+      "path": "stage31-run/result.json",
+      "sha256": "a8895d705c4cdddd58e4217df961660956f6eabad1de429c4a90948897a4e3f1"
+    },
+    {
+      "bytes": 642,
+      "path": "stage31-run/workflow.metrics.json",
+      "sha256": "bd417adc89d370f71eb4e622c774a91c0ca2879bea3dde06454c0347211e87cd"
+    },
+    {
+      "bytes": 0,
+      "path": "stage31-run/workflow.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 11694,
+      "path": "stage31-run/workflow.stdout",
+      "sha256": "a4e251feaa463f43f5ccd712474daecd5b133ea4b5f97aeb2eeb117f06cf2f3e"
+    },
+    {
+      "bytes": 3601,
+      "path": "stage31-run/workflow/baseline.json",
+      "sha256": "bc8c7f575426b8436ca91a5bf864d884f35182bb9553188b773eda8ac8a38c4a"
+    },
+    {
+      "bytes": 218,
+      "path": "stage31-run/workflow/factor_base.json",
+      "sha256": "8dadeecb4c23c5fb523b63b49705a0e33ee91a767947cdbe2f4421cf227a990d"
+    },
+    {
+      "bytes": 3018,
+      "path": "stage31-run/workflow/logs.json",
+      "sha256": "86e8e7edcbd29c9dff2aad66c2c2e4520be2e91d840024d87b67b1bc3d8a1c66"
+    },
+    {
+      "bytes": 331791,
+      "path": "stage31-run/workflow/relations/unit-00000.json",
+      "sha256": "91016392c26099e92bc243c60657153ce168b8651a2cf06431687ed90caabdef"
+    },
+    {
+      "bytes": 336695,
+      "path": "stage31-run/workflow/relations/unit-00001.json",
+      "sha256": "9db88abc904a0707f463b39f79536e4a1ee50e8d8e50b8dea73ad9266b060444"
+    },
+    {
+      "bytes": 339043,
+      "path": "stage31-run/workflow/relations/unit-00002.json",
+      "sha256": "7d6610064cd4db7c934c88fb04724b3711d6990987db18fc9b537d3dfccba049"
+    },
+    {
+      "bytes": 340770,
+      "path": "stage31-run/workflow/relations/unit-00003.json",
+      "sha256": "8d926be0bf6134d10863d312faeabd97a33017ae6e2ddb6035f567eeca650b0f"
+    },
+    {
+      "bytes": 2298,
+      "path": "stage31-run/workflow/solutions.json",
+      "sha256": "87426ae1ef232bd3abf6409038cacb63aafddc47ff70bdec4e4a5399ebfa9a3d"
+    },
+    {
+      "bytes": 731,
+      "path": "stage31-run/workflow/state.json",
+      "sha256": "171786482152813227e7393cc84e8461784f9bdc83574ed0f2b1da4feefaf941"
+    },
+    {
+      "bytes": 4651,
+      "path": "workflow.json",
+      "sha256": "546d7a6123815745f39e6509af3bf1d7241158e1102297cd760022d240e6f67e"
+    }
+  ],
+  "inventory_sha256": "852a1d949ddec70516c81db0bc875aabfc02e255f67da9131d29723eb57dc594",
+  "schema": "koblitz_stage31_result_seal.v1",
+  "seal_payload_sha256": "165a87c75da0b15c5b667f983e5a3d2280449f306a08244878416d323160b5c9",
+  "status": "result_frozen",
+  "workflow_commit": "bfebb2c743885371ebd5d9364936ccaea61ff075",
+  "workflow_run_id": 34642615206
+}

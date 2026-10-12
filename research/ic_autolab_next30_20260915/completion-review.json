@@ -1,0 +1,63 @@
+{
+  "audit": {
+    "source_files": 450,
+    "status": "VERIFIED",
+    "trial_receipts": 1356
+  },
+  "campaign_container_removed": true,
+  "canonical_scoreboard_sha256": "383c0822d1bb7f7ba0f5bcc51e672a25f260a80a90725c7cbec69359f3df982f",
+  "confirmation_phase_receipts_bound_to_audit": 540,
+  "confirmation_reduction_percent": 47.716864060027696,
+  "cost_assessment_sha256": "f337669a800132a0e6cd0dc3c3b5e602bbef33d205d40e4e9086a726344da6fc",
+  "cost_report_sha256": "0124f79559da76626383b7988b9d92f0ec463e7b2ef12007ea366d4cd5802006",
+  "decision_sha256": "a2d3a39fea5ce1de230eaa886cc6eafdd24cc5f7647820476b0ec4fe44bc50d4",
+  "fresh_confirmation_targets": 60,
+  "matched_base_profiles": 912,
+  "new_baseline_is_previous_verified_winner": true,
+  "new_development_and_confirmation_panels_match_frozen_data": true,
+  "previous_scoreboard_panels_preserved": true,
+  "prior_targets_excluded": 289,
+  "receipt_and_decision_hashes_rechecked": 1357,
+  "replay_reduction_percent": 47.71704730599032,
+  "report_links_resolve": true,
+  "report_sha256": "f00ad85d59da8da45027ac4b10f344774a622169e418a73256f119f4014fb45d",
+  "required_stages": {
+    "aa": {
+      "failures": 0,
+      "verified_pairs": 24
+    },
+    "confirmation": {
+      "failures": 0,
+      "verified_pairs": 540
+    },
+    "development": {
+      "failures": 0,
+      "verified_pairs": 108
+    },
+    "replay": {
+      "failures": 0,
+      "verified_pairs": 540
+    },
+    "selection": {
+      "failures": 0,
+      "verified_pairs": 108
+    },
+    "smoke": {
+      "failures": 0,
+      "verified_pairs": 36
+    }
+  },
+  "scope": "Bounded cold Koblitz implementation instruction cost; native runtime remains diagnostic.",
+  "service_completion": {
+    "active": false,
+    "error": null,
+    "finished_unix": 1789513816.055187,
+    "host_child_cpu_seconds": 64.823309,
+    "status": "promoted",
+    "wall_seconds": 1410.29252743721
+  },
+  "service_state": "Result=success\nActiveState=inactive\nSubState=dead",
+  "source_patch_matches_tested_and_measured_candidate": true,
+  "source_test_count": 6,
+  "status": "VERIFIED"
+}

@@ -1,0 +1,666 @@
+{
+  "schema": "ecc2k130_batch_hints_fast2_independent_audit.v1",
+  "generatedAtUtc": "2026-10-01T22:55:16Z",
+  "auditRole": "independent post-run artifact, source, correctness, and timing audit",
+  "constraints": {
+    "gpuLaunches": 0,
+    "sourceEdits": 0,
+    "hostOnlyCompilations": 4,
+    "summarizerExecutions": 1
+  },
+  "verdict": {
+    "status": "PASS_WITH_SCOPE_LIMITATIONS",
+    "artifactIntegrity": "pass",
+    "sourceIdentity": "pass",
+    "referenceReplay": "pass",
+    "corpusIdentity": "pass",
+    "resourceParity": "pass",
+    "exactWorkParity": "pass",
+    "frozenAdmissionProtocol": "confirmation_complete",
+    "semanticExactness": "pass",
+    "claimClass": "bounded same-walk kernel engineering stage diagnostic",
+    "candidateQualified": true,
+    "fullEcdlpSpeedupEstablished": false,
+    "securityBreakthroughEstablished": false,
+    "summary": "The retained evidence supports an exact same-walk fast2 optimization on the measured RTX PRO 6000 configuration. The candidate reproduces the control's complete 1,480,278-record v3 multiset and passes 300 reference replays per arm with zero drops. It clears the frozen screen and all three confirmation pairs, with a median paired candidate/control throughput ratio of 1.4666039188283515. This is kernel-stage engineering evidence only."
+  },
+  "inputs": {
+    "archive": {
+      "path": "/private/tmp/ecc2k-batch-hints-fast2-gpu-20261001/results.tgz",
+      "bytes": 61389365,
+      "sha256": "6662cd707f4a0add15ba47fa240c1dde83c3f8ace7db40637cf7fef51eaf2755",
+      "regularFileMembers": 29
+    },
+    "launchMetadata": {
+      "path": "/private/tmp/ecc2k-batch-hints-fast2-gpu-20261001/launch.json",
+      "bytes": 642,
+      "sha256": "713b6e4994a8e5ce31a986b5974c4c2bc077fc83e780a403d7f48c4b839436ad",
+      "provider": "modal",
+      "job": "benchmarks/batch-hints-fast2/gpujob.sh",
+      "gpuClass": "RTX-PRO-6000",
+      "startedAt": "2026-10-01T22:28:04Z",
+      "fetchedAt": "2026-10-01T22:46:20Z",
+      "providerSeconds": 712.9083263874054,
+      "exitCode": 0,
+      "gitDirty": false,
+      "gitRevision": "40a59c809f4492758866e9c6ed5a37bf50f484e8"
+    },
+    "frozenSource": {
+      "path": "/private/tmp/ecc2k130-batched-hints-fast2-20261001",
+      "commit": "40a59c809f4492758866e9c6ed5a37bf50f484e8",
+      "tree": "4301f492588a9c42dc44cecfb02c827e86c8635b",
+      "parent": "602de5b9ce472783e3234493aca27b27dc2b29b7",
+      "detachedHead": true,
+      "trackedWorktreeCleanAfterAudit": true
+    }
+  },
+  "archiveIntegrity": {
+    "all29ArchiveMembersMatchExtractedBytes": true,
+    "missingExtractedMembers": [],
+    "mismatchedExtractedMembers": [],
+    "nonArchiveFilesPresentInExtractionAndExcluded": [
+      "result-revalidated.json"
+    ],
+    "recordedJobExitCode": 0,
+    "archiveMemberSha256": {
+      "binary-sha256.txt": "3c007e4d25deeb5685a03374419b9cba2a68541ae635f8b806fe77bbfa30cef2",
+      "build-candidate.log": "3da607359b4b4700ad5631b2fd1f2577eb19753294025051b8d7d2ce79f75a44",
+      "build-control.log": "345ebc9b4dbc5f9b0c4738bf528c48a2e27e953636898fc1c39744e5805abe2d",
+      "confirm-1-1-control.log": "ef4d97d4490cf27eecc3910b6771ba3ae81a54892426883b3207f4f7ab9a67d6",
+      "confirm-1-2-candidate.log": "8d38d2a69ad93bcd8875af0a3a215423122176be3cc4d98945d2cb8e1f29b212",
+      "confirm-2-1-candidate.log": "da99be6a0e4eeb3f7af69c873537559e7ddd31124397ec650b0e8d5a052ac657",
+      "confirm-2-2-control.log": "ec954834b090dfa6deb3bdb27eed249714ebef096c8aab5a080e4b74a6e584b7",
+      "confirm-3-1-control.log": "cea408bb9b2c2708ca000422113bb32e8fdb3e012ed152c5a9f2d53028127673",
+      "confirm-3-2-candidate.log": "550727880f4a9aad1fabb3094d0a2f967bacd0cb9fcea394bde5acc04dcd618c",
+      "dp-candidate.bin": "666ee44128d346f200821e8bab5868ef97994e86c6cc1de064f40848b75cecb7",
+      "dp-control.bin": "dddf29d3b1c59faddb196e17aff590ff69b905bfd1d6bdf7d91200a91546fab2",
+      "dp-identity.txt": "00fad9a4da79636184916aeabbbefcb2535c16c773b85e46f81857c141010ff4",
+      "exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "host.txt": "a812145080c3b9fa08de707f23c12b45c0900037d30e163cdecc9a86c46ab94e",
+      "job.log": "418ec806ac8fa840435f709777b0e7fd2f9488575c33f29d64e30f695189f8e4",
+      "preflight.json": "9a686e9251ad7eb7c4085cb57e74c3a025198c5a21b710158832c9eecab6aabe",
+      "result.json": "30ec5a725ec6d1d0c950498cb4dbba3185407d6b38100ab45e7bfd5ba3271974",
+      "samples.tsv": "cbea09f712be6d1eac403c5d7e5a3818d8fb2222b37345c23f4317249c2bc378",
+      "screen-0-1-control.log": "9765f806abcad98a78c032d20ad461ec3488bf1cc31c86be79b5f6fe6712d33e",
+      "screen-0-2-candidate.log": "da5c1f3b228373a1d0f7d1fa578ec036b3c8f6d3d7ebae6c5307582b3f1c9dd8",
+      "screen-0-3-control.log": "4c9490d6084e0a8b3ef120aa8b16048406ebcff14dbe0ce6da8294ff9b669e71",
+      "screen.json": "def4d40257cb16185a528d830d46e67b965f536e698106aed749bca04a651bc1",
+      "source-files.sha256": "3a43bd6ca43401c9333ef7b3b96ec81b24ea4d05e5a52e9d2b8e14d12d862eac",
+      "verify-candidate.log": "a4fe1d8c405ae9816d43b84383bee5e4940fb2e72e0b8ffd7c5ead5b3fa3c3c1",
+      "verify-candidate.txt": "aeed046538495c64f3c5bf6bdc64c287dce259b29a5ad133082cdb7aa2540bbc",
+      "verify-control.log": "80f4b1d77cd3698ecaf4cda8983eaff577a15045be247ccc8fb47ab03e23d6a5",
+      "verify-control.txt": "f260b2aadc2eb2fcbe534ae8e1cf7d39a9ff62dc34b55f7ce60cda6dd2e69d39",
+      "warmup-0-1-control.log": "6e3c880e0fd335045612ba180f22ffaffcfaddf9f119cfbd2c5bb139e756298c",
+      "warmup-0-2-candidate.log": "345776a82275011398a63efdc683df7b4d4ab1ccc7f9dc016409135c27a59d00"
+    }
+  },
+  "retention": {
+    "controlExecutableRetained": false,
+    "candidateExecutableRetained": false,
+    "corpusBinaryFilesRetained": true,
+    "buildLogsRetained": true,
+    "timingLogsRetained": true,
+    "verificationLogsRetained": true,
+    "recordedExecutableHashes": {
+      "ecc2k130-control": "eac377af6028cb1a2b90e3b6aba2aa6319b2083683b18eb101a076ef158bcfae",
+      "ecc2k130-candidate": "f9ce318be1c8c44aeea043338537c5064de41be1d874cd891a6a634d2aab4975"
+    },
+    "recordedExecutableHashesRecomputedFromExecutables": false,
+    "reasonExecutableHashesNotRecomputed": "The archive retained binary-sha256.txt but omitted the two executable files."
+  },
+  "sourceIdentity": {
+    "artifactManifestSha256": "3a43bd6ca43401c9333ef7b3b96ec81b24ea4d05e5a52e9d2b8e14d12d862eac",
+    "allEightRecordedSourceHashesMatchFrozenCommitCheckout": true,
+    "recordedFiles": [
+      {
+        "path": "Makefile",
+        "bytes": 51986,
+        "sha256": "12964495c3d745fe01c09198900699280a34e60c079d0e710c6264e6c3f7f133",
+        "matches": true
+      },
+      {
+        "path": "include/packedkernels.cuh",
+        "bytes": 50349,
+        "sha256": "029484690610dc535906e66014e23a36a3c4372751a6b5d38c94b7ea2a083f23",
+        "matches": true
+      },
+      {
+        "path": "include/packedengine.cuh",
+        "bytes": 19718,
+        "sha256": "82dffc41409b5aa5c585d8b665abc075a261450bad2253e0ee2840d5705502b0",
+        "matches": true
+      },
+      {
+        "path": "include/packedtablewalk.cuh",
+        "bytes": 22618,
+        "sha256": "2f0e4ea24577fbd5c17e73b02d00e10d77f995769168bb1247e0515e917c614a",
+        "matches": true
+      },
+      {
+        "path": "include/tablewalk.h",
+        "bytes": 9348,
+        "sha256": "bc96fd999d9da0a42d6564a86015f156021efca6c28f6534a9d5f452b154aaf5",
+        "matches": true
+      },
+      {
+        "path": "include/cycleanchor_body.h",
+        "bytes": 3205,
+        "sha256": "a08cc05183185482f57a140e1ac861168d566e6aac0bf2cc9818440b474cc38c",
+        "matches": true
+      },
+      {
+        "path": "include/ref.h",
+        "bytes": 21544,
+        "sha256": "5543e898c7711a14bf0f7fffd1289e08c34357a0958d71f78eb3ef095614f34e",
+        "matches": true
+      },
+      {
+        "path": "src/main.cu",
+        "bytes": 94407,
+        "sha256": "3f0e857eceb915285b4e419d1632abc3ff49c24fb5fc2614705ab260de8d2147",
+        "matches": true
+      }
+    ],
+    "harnessFilesAtFrozenCommit": {
+      "benchmarks/batch-hints-fast2/README.md": "8fa1d6b0045a89e1dc7dd9a2f485f0772f0e9145ad7247b4a3372a8fb7ae4c3f",
+      "benchmarks/batch-hints-fast2/gpujob.sh": "8048307b7a86bdacd8d427cd4afbed5989f5b3af433accdda3b705132fcbb782",
+      "benchmarks/batch-hints-fast2/summarize.py": "066a397276b4dd943d25d8e3b2f123e4ebc9ade1def53b32e4b71270ddac579b",
+      "benchmarks/batch-hints-fast2/test_summarize.py": "e33b7c1d6ffd54f8355e27831c4e3b62ee5b1cbb858d5e43733ff9c7c93d1a8d"
+    },
+    "manifestScope": "The retained source manifest names eight directly selected build/source files. The clean frozen Git revision binds the broader tracked tree, but the result archive does not contain a complete source snapshot or a full transitive include manifest."
+  },
+  "hostAndResources": {
+    "gpu": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-79f2dc7e-f96c-4d41-e362-167acf50fbc1",
+      "driverVersion": "580.95.05",
+      "maxSmClockMHz": 2430,
+      "powerLimitW": 600.0,
+      "memoryMiB": 97887,
+      "computeCapability": "12.0"
+    },
+    "cuda": {
+      "release": "13.3",
+      "nvccVersion": "13.3.73",
+      "build": "cuda_13.3.r13.3/compiler.38244171_0",
+      "target": "sm_120"
+    },
+    "geometry": {
+      "runtimeThreads": 96256,
+      "batch": 16,
+      "liveWalks": 1540096,
+      "blockThreads": 512,
+      "blocks": 188,
+      "minBlocks": 1,
+      "splitForward": 1,
+      "batchHints": 1
+    },
+    "controlWalkKernel": {
+      "registersPerThread": 128,
+      "stackFrameBytes": 400,
+      "spillStoreBytes": 0,
+      "spillLoadBytes": 0,
+      "barriers": 1,
+      "staticSharedBytesPerBlock": 0,
+      "dynamicTableSharedBytesPerBlock": 48732,
+      "driverReservedSharedBytesPerBlock": 1024
+    },
+    "candidateWalkKernel": {
+      "registersPerThread": 128,
+      "stackFrameBytes": 400,
+      "spillStoreBytes": 0,
+      "spillLoadBytes": 0,
+      "barriers": 1,
+      "staticSharedBytesPerBlock": 0,
+      "dynamicTableSharedBytesPerBlock": 48732,
+      "driverReservedSharedBytesPerBlock": 1024
+    },
+    "resourceParity": true
+  },
+  "referenceReplay": {
+    "common": {
+      "runtimeThreads": 96256,
+      "batch": 16,
+      "liveWalks": 1540096,
+      "dpWeight": 48,
+      "stepsPerLaunch": 96,
+      "launches": 6,
+      "exactIterations": 887095296,
+      "splitForward": 1,
+      "batchHints": 1
+    },
+    "control": {
+      "fast2": 0,
+      "logSha256": "80f4b1d77cd3698ecaf4cda8983eaff577a15045be247ccc8fb47ab03e23d6a5",
+      "rateMps": 5.639,
+      "distinguishedPoints": 1480278,
+      "stored": 1480278,
+      "verifiedAgainstReference": 300,
+      "dropped": 0,
+      "mismatchMarkers": 0,
+      "overflowMarkers": 0,
+      "valid": true
+    },
+    "candidate": {
+      "fast2": 1,
+      "logSha256": "a4fe1d8c405ae9816d43b84383bee5e4940fb2e72e0b8ffd7c5ead5b3fa3c3c1",
+      "rateMps": 5.6,
+      "distinguishedPoints": 1480278,
+      "stored": 1480278,
+      "verifiedAgainstReference": 300,
+      "dropped": 0,
+      "mismatchMarkers": 0,
+      "overflowMarkers": 0,
+      "valid": true
+    },
+    "aggregateStatement": "300/300 reports were replayed for each arm, 600 reports total, with zero reported mismatches, overflows, or drops.",
+    "perReportReplayTranscriptRetained": false
+  },
+  "v3CorpusIdentity": {
+    "method": "Independent strict little-endian <8sII> header parse followed by an exact comparison of the two sorted record byte strings; SHA-256 is also reported.",
+    "control": {
+      "fileBytes": 47368912,
+      "magicAscii": "ECC2KDT3",
+      "magicHex": "454343324b445433",
+      "version": 3,
+      "recordBytes": 32,
+      "payloadBytes": 47368896,
+      "records": 1480278,
+      "uniqueRecords": 1480278,
+      "duplicateInstances": 0,
+      "wholeFileSha256": "dddf29d3b1c59faddb196e17aff590ff69b905bfd1d6bdf7d91200a91546fab2",
+      "rawPayloadSha256": "a613e71843d67d2d7227f3d9909d60315244f780cac24a187fae12e227a22093",
+      "sortedPayloadSha256": "2fc6f84d4b1969240418cf6f8e779df9538b1d8f01eb6ff4c6a00be7324fae01"
+    },
+    "candidate": {
+      "fileBytes": 47368912,
+      "magicAscii": "ECC2KDT3",
+      "magicHex": "454343324b445433",
+      "version": 3,
+      "recordBytes": 32,
+      "payloadBytes": 47368896,
+      "records": 1480278,
+      "uniqueRecords": 1480278,
+      "duplicateInstances": 0,
+      "wholeFileSha256": "666ee44128d346f200821e8bab5868ef97994e86c6cc1de064f40848b75cecb7",
+      "rawPayloadSha256": "fbb0be2b7fcf0b6bbe08f6009c2c8a5cb62baa528538ed7136f6c70aacfa3296",
+      "sortedPayloadSha256": "2fc6f84d4b1969240418cf6f8e779df9538b1d8f01eb6ff4c6a00be7324fae01"
+    },
+    "rawFileBytesEqual": false,
+    "exactSortedRecordBytesEqual": true,
+    "interpretation": "The emission order differs, but the complete record multisets, including multiplicity, are byte-for-byte identical after sorting."
+  },
+  "exactWork": {
+    "iterationsPerLaunch": 1577058304,
+    "formula": "96256 runtime threads * 16 slots * 1024 steps",
+    "warmup": {
+      "launchesPerSample": 16,
+      "iterationsPerSample": 25232932864,
+      "allSamplesMatch": true,
+      "excludedFromDecision": true
+    },
+    "screen": {
+      "launchesPerSample": 32,
+      "iterationsPerSample": 50465865728,
+      "allSamplesMatch": true
+    },
+    "confirmation": {
+      "launchesPerSample": 64,
+      "iterationsPerSample": 100931731456,
+      "allSamplesMatch": true
+    }
+  },
+  "timingSamples": [
+    {
+      "phase": "warmup",
+      "pair": 0,
+      "order": 1,
+      "variant": "control",
+      "fast2": 0,
+      "rateMps": 3438.664,
+      "exactIterations": 25232932864,
+      "logSha256": "6e3c880e0fd335045612ba180f22ffaffcfaddf9f119cfbd2c5bb139e756298c",
+      "logHashMatchesTsv": true,
+      "rateMatchesLog": true,
+      "gpuStateAfterSample": {
+        "clockMHz": 2400,
+        "powerW": 239.26,
+        "temperatureC": 43
+      }
+    },
+    {
+      "phase": "warmup",
+      "pair": 0,
+      "order": 2,
+      "variant": "candidate",
+      "fast2": 1,
+      "rateMps": 4872.338,
+      "exactIterations": 25232932864,
+      "logSha256": "345776a82275011398a63efdc683df7b4d4ab1ccc7f9dc016409135c27a59d00",
+      "logHashMatchesTsv": true,
+      "rateMatchesLog": true,
+      "gpuStateAfterSample": {
+        "clockMHz": 2422,
+        "powerW": 288.2,
+        "temperatureC": 45
+      }
+    },
+    {
+      "phase": "screen",
+      "pair": 0,
+      "order": 1,
+      "variant": "control",
+      "fast2": 0,
+      "rateMps": 2931.95,
+      "exactIterations": 50465865728,
+      "logSha256": "9765f806abcad98a78c032d20ad461ec3488bf1cc31c86be79b5f6fe6712d33e",
+      "logHashMatchesTsv": true,
+      "rateMatchesLog": true,
+      "gpuStateAfterSample": {
+        "clockMHz": 2422,
+        "powerW": 216.53,
+        "temperatureC": 48
+      }
+    },
+    {
+      "phase": "screen",
+      "pair": 0,
+      "order": 2,
+      "variant": "candidate",
+      "fast2": 1,
+      "rateMps": 4190.032,
+      "exactIterations": 50465865728,
+      "logSha256": "da5c1f3b228373a1d0f7d1fa578ec036b3c8f6d3d7ebae6c5307582b3f1c9dd8",
+      "logHashMatchesTsv": true,
+      "rateMatchesLog": true,
+      "gpuStateAfterSample": {
+        "clockMHz": 2422,
+        "powerW": 286.01,
+        "temperatureC": 51
+      }
+    },
+    {
+      "phase": "screen",
+      "pair": 0,
+      "order": 3,
+      "variant": "control",
+      "fast2": 0,
+      "rateMps": 2931.331,
+      "exactIterations": 50465865728,
+      "logSha256": "4c9490d6084e0a8b3ef120aa8b16048406ebcff14dbe0ce6da8294ff9b669e71",
+      "logHashMatchesTsv": true,
+      "rateMatchesLog": true,
+      "gpuStateAfterSample": {
+        "clockMHz": 2422,
+        "powerW": 226.59,
+        "temperatureC": 52
+      }
+    },
+    {
+      "phase": "confirm",
+      "pair": 1,
+      "order": 1,
+      "variant": "control",
+      "fast2": 0,
+      "rateMps": 2450.018,
+      "exactIterations": 100931731456,
+      "logSha256": "ef4d97d4490cf27eecc3910b6771ba3ae81a54892426883b3207f4f7ab9a67d6",
+      "logHashMatchesTsv": true,
+      "rateMatchesLog": true,
+      "gpuStateAfterSample": {
+        "clockMHz": 2422,
+        "powerW": 247.54,
+        "temperatureC": 54
+      }
+    },
+    {
+      "phase": "confirm",
+      "pair": 1,
+      "order": 2,
+      "variant": "candidate",
+      "fast2": 1,
+      "rateMps": 3593.206,
+      "exactIterations": 100931731456,
+      "logSha256": "8d38d2a69ad93bcd8875af0a3a215423122176be3cc4d98945d2cb8e1f29b212",
+      "logHashMatchesTsv": true,
+      "rateMatchesLog": true,
+      "gpuStateAfterSample": {
+        "clockMHz": 2422,
+        "powerW": 289.52,
+        "temperatureC": 58
+      }
+    },
+    {
+      "phase": "confirm",
+      "pair": 2,
+      "order": 1,
+      "variant": "candidate",
+      "fast2": 1,
+      "rateMps": 3592.601,
+      "exactIterations": 100931731456,
+      "logSha256": "da99be6a0e4eeb3f7af69c873537559e7ddd31124397ec650b0e8d5a052ac657",
+      "logHashMatchesTsv": true,
+      "rateMatchesLog": true,
+      "gpuStateAfterSample": {
+        "clockMHz": 2422,
+        "powerW": 293.96,
+        "temperatureC": 59
+      }
+    },
+    {
+      "phase": "confirm",
+      "pair": 2,
+      "order": 2,
+      "variant": "control",
+      "fast2": 0,
+      "rateMps": 2450.247,
+      "exactIterations": 100931731456,
+      "logSha256": "ec954834b090dfa6deb3bdb27eed249714ebef096c8aab5a080e4b74a6e584b7",
+      "logHashMatchesTsv": true,
+      "rateMatchesLog": true,
+      "gpuStateAfterSample": {
+        "clockMHz": 2422,
+        "powerW": 252.05,
+        "temperatureC": 58
+      }
+    },
+    {
+      "phase": "confirm",
+      "pair": 3,
+      "order": 1,
+      "variant": "control",
+      "fast2": 0,
+      "rateMps": 2449.482,
+      "exactIterations": 100931731456,
+      "logSha256": "cea408bb9b2c2708ca000422113bb32e8fdb3e012ed152c5a9f2d53028127673",
+      "logHashMatchesTsv": true,
+      "rateMatchesLog": true,
+      "gpuStateAfterSample": {
+        "clockMHz": 2422,
+        "powerW": 248.73,
+        "temperatureC": 57
+      }
+    },
+    {
+      "phase": "confirm",
+      "pair": 3,
+      "order": 2,
+      "variant": "candidate",
+      "fast2": 1,
+      "rateMps": 3592.794,
+      "exactIterations": 100931731456,
+      "logSha256": "550727880f4a9aad1fabb3094d0a2f967bacd0cb9fcea394bde5acc04dcd618c",
+      "logHashMatchesTsv": true,
+      "rateMatchesLog": true,
+      "gpuStateAfterSample": {
+        "clockMHz": 2422,
+        "powerW": 290.59,
+        "temperatureC": 60
+      }
+    }
+  ],
+  "screenDecision": {
+    "order": [
+      "control",
+      "candidate",
+      "control"
+    ],
+    "controlRatesMps": [
+      2931.95,
+      2931.331
+    ],
+    "controlMedianMps": 2931.6405,
+    "fasterControlMps": 2931.95,
+    "candidateMps": 4190.032,
+    "qualificationMultiplier": 1.005,
+    "qualificationThresholdMps": 2946.6097499999996,
+    "candidateToFasterControlRatio": 1.4290939477139788,
+    "candidateToControlMedianRatio": 1.4292448204341563,
+    "marginAboveThresholdMps": 1243.4222500000005,
+    "qualified": true
+  },
+  "confirmationDecision": {
+    "pairOrders": [
+      [
+        "control",
+        "candidate"
+      ],
+      [
+        "candidate",
+        "control"
+      ],
+      [
+        "control",
+        "candidate"
+      ]
+    ],
+    "pairs": [
+      {
+        "pair": 1,
+        "controlMps": 2450.018,
+        "candidateMps": 3593.206,
+        "candidateToControlRatio": 1.4666039188283515
+      },
+      {
+        "pair": 2,
+        "controlMps": 2450.247,
+        "candidateMps": 3592.601,
+        "candidateToControlRatio": 1.466219936194188
+      },
+      {
+        "pair": 3,
+        "controlMps": 2449.482,
+        "candidateMps": 3592.794,
+        "candidateToControlRatio": 1.466756644874304
+      }
+    ],
+    "controlRatesMps": [
+      2450.018,
+      2450.247,
+      2449.482
+    ],
+    "candidateRatesMps": [
+      3593.206,
+      3592.601,
+      3592.794
+    ],
+    "controlMedianMps": 2450.018,
+    "candidateMedianMps": 3592.794,
+    "ratioOfArmMedians": 1.4664357567985213,
+    "pairedRatioMedian": 1.4666039188283515,
+    "pairedRatioMean": 1.4665268332989478,
+    "pairedRatioGeometricMean": 1.4665268159167464,
+    "pairedRatioMinimum": 1.466219936194188,
+    "pairedRatioMaximum": 1.466756644874304,
+    "pairedRatioSampleStdev": 0.00027653333607462216,
+    "pairedRatioRange": 0.0005367086801160159,
+    "pairedRatioRelativeRangePercent": 0.036595339288659795,
+    "candidateGainFromPairedMedianPercent": 46.66039188283515,
+    "candidateGainFromRatioOfArmMediansPercent": 46.643575679852134,
+    "decision": "confirmation_complete"
+  },
+  "summarizerValidation": {
+    "frozenSummarizerSha256": "066a397276b4dd943d25d8e3b2f123e4ebc9ade1def53b32e4b71270ddac579b",
+    "recomputedResultByteIdenticalToArchivedResult": true,
+    "recomputedResultSha256": "30ec5a725ec6d1d0c950498cb4dbba3185407d6b38100ab45e7bfd5ba3271974",
+    "unitTests": {
+      "passed": 4,
+      "failed": 0,
+      "tests": [
+        "test_bounded_screen_gate_is_inherited",
+        "test_fast2_identity_and_geometry_fail_closed",
+        "test_preflight_requires_exact_reference_replayed_corpora",
+        "test_v3_corpus_identity_ignores_record_order"
+      ]
+    },
+    "independentlyRecomputed": [
+      "strict v3 headers and exact sorted record equality",
+      "reference replay markers and exact verification work",
+      "source hashes",
+      "ptxas walk resources",
+      "timing-log SHA-256 values",
+      "timing-log feature and geometry markers",
+      "exact iterations per timing sample",
+      "screen threshold and ratio",
+      "all paired ratios and medians"
+    ],
+    "validationGaps": [
+      "The summarizer trusts samples.tsv rates, logSha256 values, gpuState values, and screen pair/order fields; it does not reopen or rehash timing logs.",
+      "The summarizer ignores rows whose phase is not warmup, screen, or confirm.",
+      "The summarizer embeds source-files.sha256 and binary-sha256.txt without validating their entries against source or executable bytes.",
+      "In-memory adversarial checks showed that a corrupt timing hash plus blank GPU state, corrupt screen pair/order values, and an extra unknown-phase row each still returned valid=true and confirmation_complete."
+    ],
+    "gapDisposition": "These gaps do not change this audit's decision because the independent audit rehashed and reparsed every retained timing log, checked exact work and markers, validated the source manifest, and excluded non-archive files. Executable hash recomputation remains impossible because the executables were not retained."
+  },
+  "semanticExactnessAudit": {
+    "conclusion": "The fast2 branch is semantically equivalent to the general v3 cycle probe for the raw two-cycle case it shortcuts, and every other case resumes the general probe with the already computed second raw tag.",
+    "sourceChecks": [
+      "eccTagNegates accepts only tags with identical h and k and the opposite eps bit, so the selected table points are exact group inverses.",
+      "The first affine step computes after = start + A. The packed oppositeCloses check requires the second affine denominator x(after) + x(-A) to be nonzero. Under that guard, group associativity proves after + (-A) = start.",
+      "The shortcut checks whether the intermediate point is distinguished before closing, matching the general probe's stop-before-report behavior.",
+      "The shortcut builds the same cyclic four-tag histories as the general length-two probe: raw,opposite,raw,opposite at start and opposite,raw,opposite,raw at the other vertex.",
+      "It applies the same eccTagFruitless eligibility test at both vertices and the same strict less(other,start) anchor comparison, including tie behavior.",
+      "Its exit preserves k and eps and advances h exactly once, matching the general probe.",
+      "If the inverse-tag, denominator, eligibility, or anchor condition fails, the loop continues with tags[1] cached and executes the unchanged general probe path."
+    ],
+    "hostOnlyRegression": {
+      "fast2OffDefaultLayout": "PASS: graph entry phases; F131 exits 6; packed/reference comparisons 15; pivot bytes 0; hybrid 0",
+      "fast2OnDefaultLayout": "PASS: graph entry phases; F131 exits 6; packed/reference comparisons 15; pivot bytes 0; hybrid 0",
+      "fast2OffHybridLayout": "PASS: graph entry phases; F131 exits 6; packed/reference comparisons 15; pivot bytes 1; hybrid 1",
+      "fast2OnHybridLayout": "PASS: graph entry phases; F131 exits 6; packed/reference comparisons 15; pivot bytes 1; hybrid 1",
+      "candidateOneAffineStepAssertionPassed": true
+    },
+    "deviceEvidence": "No new GPU test was launched. The retained candidate device run has the same complete sorted v3 corpus as control and reports 300 successful reference replays with zero drops."
+  },
+  "limitations": [
+    "The control and candidate executables were omitted from the archive, so the two recorded executable SHA-256 values cannot be independently recomputed from retained binary bytes.",
+    "Only aggregate 300-reference-replay completion is retained for each arm; individual replay transcripts are absent.",
+    "The source-files manifest covers eight selected files rather than the full transitive compilation input set. The launch metadata and clean Git revision identify the broader tree.",
+    "GPU state is a single post-sample clock, power, and temperature snapshot, not continuous telemetry.",
+    "The experiment has three alternating confirmation pairs and no A/A noise-floor panel. It therefore passes its frozen bounded admission protocol but does not satisfy the repository-wide convention of an A/A run, at least five interleaved rounds, and a 95 percent paired confidence interval for a general runtime claim.",
+    "The result is throughput for complete table-walk kernel updates on one RTX PRO 6000 configuration. It does not establish the 26 B/s objective, an end-to-end ECDLP improvement, or a cryptanalytic breakthrough."
+  ],
+  "finalChecks": {
+    "archiveHashVerified": true,
+    "archiveExtractionVerified": true,
+    "launchMetadataHashVerified": true,
+    "frozenCommitVerified": true,
+    "frozenTreeClean": true,
+    "sourceManifestVerified": true,
+    "resourceBlocksVerified": true,
+    "referenceReplayVerified": true,
+    "v3CorpusIdentityVerified": true,
+    "allTimingLogHashesVerified": true,
+    "allTimingRatesVerified": true,
+    "allFeatureMarkersVerified": true,
+    "allGeometryMarkersVerified": true,
+    "allExactWorkCountsVerified": true,
+    "screenRecomputed": true,
+    "confirmationRatiosRecomputed": true,
+    "mediansRecomputed": true,
+    "summarizerReproduced": true,
+    "hostSemanticTestsPassed": true,
+    "gpuLaunchedDuringAudit": false,
+    "sourceModifiedDuringAudit": false
+  }
+}

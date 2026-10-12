@@ -1,0 +1,17 @@
+{
+  "pair": {
+    "seedA": "0002000001c30000",
+    "seedB": "0001000002740000",
+    "key": "0000000000000000000000000000000000000000ea052254"
+  },
+  "returncode": 0,
+  "k": "369250562913",
+  "verified": true,
+  "matchesPublished": null,
+  "tail": [
+    "backend reference-table-walk: 1 threads x 2 slots x 1 lanes = 2 walks, dp weight 13, 1 steps per launch",
+    "collision found while reloading /tmp/tmpszboksh8/pair-0002000001c30000-0001000002740000.bin: seeds 0001000002740000 and 0002000001c30000",
+    "  k = 369250562913",
+    "  verified [k]P == Q"
+  ]
+}

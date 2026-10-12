@@ -51,7 +51,10 @@ pub fn run() -> Report {
     let leaked = edit(&ct, &key, 0xCAFEBABE, 0, &zero);
     // leaked = new_pt XOR ks = ks.  Recover original pt by XORing ct with ks.
     let recovered: Vec<u8> = ct.iter().zip(&leaked).map(|(c, k)| c ^ k).collect();
-    r.line(format!("Recovered head: {:?}", &String::from_utf8_lossy(&recovered)[..40]));
+    r.line(format!(
+        "Recovered head: {:?}",
+        &String::from_utf8_lossy(&recovered)[..40]
+    ));
     assert_eq!(recovered, pt);
     r.succeed()
 }

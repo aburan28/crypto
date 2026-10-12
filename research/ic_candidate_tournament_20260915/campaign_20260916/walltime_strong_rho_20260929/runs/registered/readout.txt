@@ -1,0 +1,21 @@
+timed 3000, contended 90 (excluded), answer failures 0
+
+## inproc: absolute geometric means (ms) and ratios, 95% bootstrap over cases
+  n13a0: incumbent 0.281 lean_rho 0.380 strong32 0.376 strong1 0.378 | strongest rho: strong32 | IC/strongest 0.748 [0.731,0.764] | A/A 0.983 [0.955,1.009]
+  n17a1: incumbent 0.309 lean_rho 0.415 strong32 0.442 strong1 0.443 | strongest rho: lean_rho | IC/strongest 0.744 [0.705,0.785] | A/A 0.987 [0.960,1.018]
+  n19a0: incumbent 0.343 lean_rho 0.432 strong32 0.631 strong1 0.625 | strongest rho: lean_rho | IC/strongest 0.793 [0.766,0.824] | A/A 0.979 [0.955,1.003]
+  n19a1: incumbent 0.380 lean_rho 0.451 strong32 0.616 strong1 0.630 | strongest rho: lean_rho | IC/strongest 0.842 [0.807,0.883] | A/A 0.997 [0.980,1.016]
+  n23a0: incumbent 0.507 lean_rho 0.492 strong32 0.759 strong1 0.809 | strongest rho: lean_rho | IC/strongest 1.031 [0.964,1.107] | A/A 0.999 [0.982,1.016]
+
+## wall: absolute geometric means (ms) and ratios, 95% bootstrap over cases
+  n13a0: incumbent 0.851 lean_rho 0.972 strong32 3.597 strong1 3.664 | strongest rho: lean_rho | IC/strongest 0.875 [0.851,0.900] | A/A 0.989 [0.975,1.004]
+  n17a1: incumbent 0.868 lean_rho 0.983 strong32 3.539 strong1 3.571 | strongest rho: lean_rho | IC/strongest 0.883 [0.858,0.911] | A/A 1.000 [0.990,1.010]
+  n19a0: incumbent 0.901 lean_rho 1.001 strong32 3.762 strong1 3.745 | strongest rho: lean_rho | IC/strongest 0.900 [0.877,0.925] | A/A 0.996 [0.979,1.016]
+  n19a1: incumbent 0.957 lean_rho 1.051 strong32 3.755 strong1 3.776 | strongest rho: lean_rho | IC/strongest 0.911 [0.886,0.937] | A/A 1.002 [0.994,1.012]
+  n23a0: incumbent 1.091 lean_rho 1.086 strong32 3.929 strong1 3.968 | strongest rho: lean_rho | IC/strongest 1.004 [0.974,1.038] | A/A 0.997 [0.975,1.017]
+
+REGISTERED READOUT
+  P1 (reported) strongest rho in-process per cell: {'n13a0': 'strong32', 'n17a1': 'lean_rho', 'n19a0': 'lean_rho', 'n19a1': 'lean_rho', 'n23a0': 'lean_rho'}
+  P2 IC / strongest rho in-process upper limit below 1 at all four small cells: True
+  P3 strong32 A/A in-process interval inside [0.9, 1.1] at every cell: True
+  P4 at most 5% of timed runs contended: True

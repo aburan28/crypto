@@ -22,7 +22,7 @@ pub fn run() -> Report {
                 dups += 1;
             }
         }
-        if dups > 0 && best.as_ref().map_or(true, |(_, _, d)| dups > *d) {
+        if dups > 0 && best.as_ref().is_none_or(|(_, _, d)| dups > *d) {
             best = Some((i, line.trim().to_string(), dups));
         }
     }

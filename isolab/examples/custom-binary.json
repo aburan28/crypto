@@ -1,0 +1,16 @@
+{
+  "schema": "isolab.job/v1",
+  "name": "custom-binary-four-cores",
+  "runtime": {"image": "localhost/isolab-base:latest", "oci_runtime": "crun", "network": "none"},
+  "inputs": [
+    {"path": "bin/solver", "local_file": "./target/release/solver"},
+    {"path": "params.json", "content": "{\"seed\": 7}"}
+  ],
+  "command": {"argv": ["./bin/solver", "--params", "params.json"], "env": {"RAYON_NUM_THREADS": "4"}},
+  "measure": {"warmups": 1, "repeats": 5, "cooldown_s": 2},
+  "resources": {"cpus": 4, "memory_mb": 16384, "numa_node": "single", "smt": "isolate"},
+  "fidelity": {"policy": "strict"},
+  "placement": {"cpu_flags": ["avx2"]},
+  "limits": {"timeout_s": 1800},
+  "labels": {"experiment": "EXP-0042"}
+}

@@ -1,0 +1,50 @@
+{
+  "input_sha256": "d83873d46f810c75045131ab57b3110e313f1185ba75831c1fa3739862f48e0c",
+  "lines": [
+    {
+      "arms": 4,
+      "hits": {
+        "descendant_native": 0,
+        "original": 0,
+        "pullback": 0,
+        "transported": 0
+      },
+      "line": [
+        1,
+        0
+      ],
+      "ranks": {
+        "descendant_native": 0,
+        "original": 0,
+        "pullback": 0,
+        "transported": 0
+      },
+      "targets": 32
+    },
+    {
+      "arms": 4,
+      "hits": {
+        "descendant_native": 0,
+        "original": 0,
+        "pullback": 0,
+        "transported": 0
+      },
+      "line": [
+        1,
+        4
+      ],
+      "ranks": {
+        "descendant_native": 0,
+        "original": 0,
+        "pullback": 0,
+        "transported": 0
+      },
+      "targets": 32
+    }
+  ],
+  "schema": "ecc2k130-degree263-bounded-smoke-independent-replay-v1",
+  "status": "PASS",
+  "total_exact_target_replays": 64,
+  "total_pair_case_replays": 256,
+  "verifier_sha256": "c460b0fbf218121479b7f171f518a34145307c635a4b04bd71e4a75b8b72bbfd"
+}

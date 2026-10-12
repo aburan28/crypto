@@ -1,0 +1,56 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "hypothesis": "The round-0012 incumbent on a baseline whose scalar multiplications, the general one of the final check and the single-word one of the curve construction and of rho's own setup, run in Lopez-Dahab projective coordinates with one field inversion per product instead of one per step; every result is the same affine point, checked against the affine double-and-add kept as the reference. Both arms share the change. Expected: the IC job cheaper by 15-20% of its instructions, rho's job by 40-55% (its setup was scalar multiplications), so the winner/rho ratios move toward one and the strict native win on n23a0 is expected to be lost by the incumbent.",
+    "id": "incumbent",
+    "parent": "tiny2 + certificate, musl static executable with the arena allocator (round-0012)",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0012",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "533855aa94edf4008c13d78c931a2ad86262a215ad7eee7ba6a4d0544ae43cf3"
+  },
+  {
+    "binary_relative": "source_candidates/ld_canon/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "falsification": "Any bad, missing or unmatched certificate; any report byte different from the incumbent's beyond elapsed_seconds; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "IC-only: the orbit name of an abscissa (the least rotation of its normal-basis coordinate word) found from the longest circular run of zeros, comparing one or two rotations instead of all n-1, tested equal to the rotation loop it replaces; expected 4-6% of the incumbent's instructions on the larger cells.",
+    "id": "ld_canon",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/ld_canon/source",
+    "source_manifest_relative": "source_candidates/ld_canon/source-manifest.json",
+    "source_manifest_sha256": "b3f96b7905d1c0721f73f8c21afbf53c56c587c7d659468c6b509de7b7ca613b"
+  },
+  {
+    "binary_relative": "source_candidates/ld_ic/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "falsification": "Any bad, missing or unmatched certificate; any report byte different from the incumbent's beyond elapsed_seconds; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "IC-only: ld_canon plus the report's decimal numbers written two digits at a time from a table and appended without a UTF-8 validation pass (rounds 0011 and 0012 measured that change alone at 0.965 and 0.954 of the incumbent's instructions but could not resolve it on the native clock); expected 8-10% of the incumbent's instructions together, and the arm most likely to keep the strict win on every cell.",
+    "id": "ld_ic",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/ld_ic/source",
+    "source_manifest_relative": "source_candidates/ld_ic/source-manifest.json",
+    "source_manifest_sha256": "f6efc55cd4fcd96e16c6bcb16186b157b41a473849d436c4968bf84f14f433bf"
+  }
+]

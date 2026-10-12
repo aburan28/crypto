@@ -1,0 +1,88 @@
+{
+  "decision": "TARGET_BLIND_RANK42_ADMITTED_N37_SOURCE",
+  "class": "stage_diagnostic",
+  "curve": "icv1-f2m37-tm534059-32aad96b",
+  "preregistered_commit": "5d13c68ea7d9ac89df91d44e2f418a32ccdcc7f7",
+  "timer_and_replay_correction_commit": "14aef9e7de84e353f9a59153498c8dca712ecd31",
+  "dependency_lock_sha256": "b28d3c2d81146a40d00df85f45c6460d9e2bc5c26875307a06cfd15efff99365",
+  "source42_sha256": "0a32de24a5680ff46baf9543e8bf8e32447323491e2a2adedce2548c14a25f75",
+  "ordered_base_sha256": "8460ac4c28515db701c3897a03b4ce0f28abf7cd56fd759ad095f98436a76dcf",
+  "final_producer_binary_sha256": "fe63bd5a0aa8195876aa6bad951fd6ae981d12c85f43c10c49bddb9f13369206",
+  "final_replay_binary_sha256": "b673fc1fbc2c828010a1be315f08eadf64a8e3efc43b30a4f4e1688e5be6fd6a",
+  "host": {
+    "os_kernel_arch": "Darwin 25.6.0 arm64",
+    "rustc": "1.93.1 (01f6ddf75 2026-02-11)",
+    "cargo": "1.93.1",
+    "isolation": "L0; wall values descriptive only"
+  },
+  "final_runs": [
+    {
+      "raw": "RAW.json",
+      "raw_sha256": "293d273c071c280326825c5a4f6d12bce00e46349735e5475b16bcd40264dd3b",
+      "replay": "REPLAY.json",
+      "replay_sha256": "31b878ffd2a47a572663689e30a27d0b06a7f18e4509bade4a0aaed306c50342",
+      "base_wall_ns": 7575625,
+      "table_wall_ns": 85358083,
+      "replay_status": "PASS"
+    },
+    {
+      "raw": "RAW_B.json",
+      "raw_sha256": "c615bdf8df8fb006a8c5ce7cd769d2fc8e950c3b84d50b60945208aa841a5018",
+      "replay": "REPLAY_B.json",
+      "replay_sha256": "e059e1255f407e99c409ad8f9c26213c48560cf5683b373d9fc5f73ec148377d",
+      "base_wall_ns": 4664333,
+      "table_wall_ns": 61283500,
+      "replay_status": "PASS"
+    }
+  ],
+  "retained_pre_timer_runs": [
+    {
+      "raw": "RAW_INITIAL.json",
+      "raw_sha256": "fe58f08ed6f48760a3007377ea834b1edcbac8",
+      "replay": "REPLAY_INITIAL.json",
+      "replay_sha256": "9356eff46d954fafa02b14c5c7dd9bfa36a0e7d570f7ec043d1daed63af2377c",
+      "base_wall_ns": 0
+    },
+    {
+      "raw": "RAW_INITIAL_B.json",
+      "raw_sha256": "aa6432e464f962a9ebcb0905e1d9e8a36742313a662c14e1cec8ffec793bdbad",
+      "replay": "REPLAY_INITIAL_B.json",
+      "replay_sha256": "83e4da4143de3708fa3850ba900261509231097c59f6111f4e25a053f48bd8a7",
+      "base_wall_ns": 0
+    }
+  ],
+  "nontiming_jq_sorted_sha256_all_four_runs": "aa650e78c32a66e0496dc8fd1c0fbda31bf8d5ce8b96e139a78d1d520475f321",
+  "counts": {
+    "signed_points": 3108,
+    "columns": 42,
+    "trials": 55,
+    "oracle_hits": 55,
+    "independent_rows": 42,
+    "dependent_rows": 13,
+    "rank": 42,
+    "column_logs_verified": 42,
+    "folded_table_additions": 66822,
+    "folded_table_entries": 64467
+  },
+  "gae_lower_bound": {
+    "base": 4260,
+    "table": 178710,
+    "rank_search": 8498,
+    "linear_algebra": 1110,
+    "verification": 2248,
+    "total": 194826
+  },
+  "mutations_rejected": [
+    {
+      "edit": "relations[0].witness[0] = 298",
+      "reason": "witness or matrix row differs at trial 0"
+    },
+    {
+      "edit": "table.group_ops.adds += 1",
+      "reason": "frozen folded-table ledger differs"
+    }
+  ],
+  "target_descent": null,
+  "rho_ratio": null,
+  "complete_ic_cost": null
+}

@@ -13,7 +13,11 @@ const PREFIX: &[u8] = b"comment1=cooking%20MCs;userdata=";
 const SUFFIX: &[u8] = b";comment2=%20like%20a%20pound%20of%20bacon";
 
 fn oracle_encrypt(user: &[u8], key: &AesKey, nonce: u64) -> Vec<u8> {
-    let mut sanitised: Vec<u8> = user.iter().filter(|b| **b != b';' && **b != b'=').copied().collect();
+    let mut sanitised: Vec<u8> = user
+        .iter()
+        .filter(|b| **b != b';' && **b != b'=')
+        .copied()
+        .collect();
     let mut full = PREFIX.to_vec();
     full.append(&mut sanitised);
     full.extend_from_slice(SUFFIX);

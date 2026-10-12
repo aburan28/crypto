@@ -1,0 +1,14 @@
+running 12 tests
+test cryptanalysis::koblitz_tiny_ic::policy_tests::policy_is_one_batch_across_the_whole_panel_and_grows_beyond_it ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::collectors_name_their_summand_counts ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::counted_sizing_matches_its_preregistered_model ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::arithmetic_matches_fast_curve ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::euclid_inverse_matches_fermat ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::seeded_chacha_matches_std_rng ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::normal_basis_rotation_locates_frobenius_images ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::the_orbit_name_from_zero_runs_equals_the_rotation_loop ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::unsupported_recipes_are_declined ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::complete_solve_verifies_in_general_arithmetic ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::triple_collector_solves_and_verifies_in_general_arithmetic ... ok
+test cryptanalysis::koblitz_tiny_ic::tests::base_matches_general_construction ... ok
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 2522 filtered out; finished in 0.90s

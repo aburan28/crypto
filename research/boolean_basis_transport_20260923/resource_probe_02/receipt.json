@@ -1,0 +1,72 @@
+{
+  "scope": "Discovery-only successor probe. Original-equation branching with quadratic echelon transport and affine-tail RREF. Thirteen matched arms, one repetition; no holdouts or promotion claims.",
+  "started_utc": "2026-09-23T15:03:36.229070+00:00",
+  "source_hashes": {
+    "worker.rs": "5ea04f513282797b2a2c441fb32fdb0c12fb7bf3ab4b556234dbd3e868388292",
+    "kernel.rs": "c48f50d7312e8018499ccdd94482708311cb2da0aced60e18e15de28e7ce3f0a",
+    "quadratic.rs": "44f107b98de0b211ee1fea58a8d4acd35c17f01df3e682a4ffe104e1b18507f4",
+    "packed.rs": "240e363ee53a79952225f8eacc9dd9d0a4ace0ce5d09b3b59a69de0edcd5d464",
+    "basis.rs": "716b439439daf82512904bf20b4afd7d0c54379be2043f7a8dfc37dfc879eabc",
+    "basis_tests.rs": "58331a341cfe02a2bfac5622727f3e9f58e5e293ce5270bfe0c8f85b02507046"
+  },
+  "worker_sha256": "cd53944a074b49c02586d420f90d10821a2e51e2ee169de1e7a309e3f7e459ac",
+  "compiler_command": [
+    "rustc",
+    "--edition",
+    "2021",
+    "-O",
+    "research/boolean_basis_transport_20260923/worker.rs",
+    "-o",
+    "/tmp/boolean-tail-probe"
+  ],
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "receipts": [
+    {
+      "command": [
+        "/tmp/boolean-tail-probe",
+        "24",
+        "17",
+        "planted",
+        "1",
+        "200000",
+        "with-tail"
+      ],
+      "exit_code": 0,
+      "process_ns": 3478100917,
+      "stdout_sha256": "e9925caef7a086cbbfdadfedff993afa3eb6b8905828e7dac093d5d95fcfeb74",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/tmp/boolean-tail-probe",
+        "24",
+        "17",
+        "cross_planted",
+        "1",
+        "200000",
+        "with-tail"
+      ],
+      "exit_code": 0,
+      "process_ns": 1676248708,
+      "stdout_sha256": "26d5551b65d85ac11806325408d82c0829fc2d2c7ef0f54f269dee1de7d9b3b3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "/tmp/boolean-tail-probe",
+        "24",
+        "17",
+        "unplanted",
+        "1",
+        "200000",
+        "with-tail"
+      ],
+      "exit_code": 0,
+      "process_ns": 3000940000,
+      "stdout_sha256": "8a973cd0d59decd903ed198a5981ec58385dec5ddc54db2b969629923e983c43",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "complete": true,
+  "ended_utc": "2026-09-23T15:03:44.413000+00:00"
+}

@@ -1,0 +1,37 @@
+{
+  "R": 8,
+  "base_file": "research/notes/ecc2k130/four_sum_membership_20260925/base_n41_R8.json",
+  "base_file_sha256": "3ab7ca43c7e262d7980f2bb25d737d993913253911b2882358adc35c7b51f3ba",
+  "budget_amendment_commit": "4d1b48634d559e38369e85936f5c7a2190e24323",
+  "checkout_commit": "5fc7a64375a5c4b7f300a830e5e6144f02d1876b",
+  "command": [
+    "/private/tmp/four-sum-oracle-20260925/target/release/examples/koblitz_four_sum_membership",
+    "/private/tmp/four-sum-oracle-20260925/research/notes/ecc2k130/four_sum_membership_20260925/base_n41_R8.json",
+    "/private/tmp/four-sum-oracle-20260925/research/notes/ecc2k130/four_sum_membership_20260925/target_points_n41.jsonl",
+    "512"
+  ],
+  "count": 512,
+  "environment": {
+    "RAYON_NUM_THREADS": "1"
+  },
+  "executable_sha256": "4120ef964a128e9c12537e3f2361dcd0ee0b0375bc5fd04c4b5c0a63cb92d4e4",
+  "host": "Adams-MacBook-Pro.local",
+  "input_manifest_sha256": "de605d359df5ee0b35df422e93f2bd65d064878a24d03c1e7e165e4554f95285",
+  "mode": "oracle",
+  "n": 41,
+  "platform": "macOS-26.6-arm64-arm-64bit",
+  "point_set_sha256": "cbdd871504ebac2f36e16ce652bc6dfe9623d3fd62723b05f7112d3d94614520",
+  "protocol_sha256": "9d6f222efca7dd149aa556212e3fef1cfa48d2b87ef87f6973cbb753b5ddec79",
+  "psutil_version": "7.2.2",
+  "rss_poll_interval_ms": 50,
+  "runner_sha256": "3d90a2d5656db2ac44681a44d517a74e62eb8feb1e31c9cb7a59ceb914c27335",
+  "sampled_rss_stop_bytes": 2147483648,
+  "schema_version": "1.0",
+  "source_input_freeze_commit": "12d2e489de77dc633f02df47de2debf865a3f301",
+  "source_path": "examples/koblitz_four_sum_membership.rs",
+  "source_pr747_commit": "fc27150df3238b6863ed5618c721e7fd8b6ce403",
+  "source_sha256": "6185018d17e9541245456ffbfec2df36630fe5a4d7e47e8f638ff59f072bdd8a",
+  "targets_file": "research/notes/ecc2k130/four_sum_membership_20260925/target_points_n41.jsonl",
+  "targets_sha256": "e04f2892b85817d34d8be54134ae6cb38ec3c6393dc5131355d290cba4c46a44",
+  "timeout_seconds": 900
+}

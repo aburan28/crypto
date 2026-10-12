@@ -1,0 +1,107 @@
+name: jacobian-transfers
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/jacobian_transfer/**'
+      - 'src/bin/jacobian_transfers.rs'
+      - 'src/cryptanalysis/ec_trapdoor.rs'
+      - 'src/cryptanalysis/curve_traits/arith.rs'
+      - 'src/cryptanalysis/curve_id.rs'
+      - 'src/binary_ecc/**'
+      - 'docs/curves/registry.json'
+      - 'docs/curves/jacobian-transfers.json'
+      - 'docs/curves/JACOBIAN_TRANSFERS.md'
+      - '.github/workflows/jacobian-transfers.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - '.cargo/**'
+  push:
+    branches: [main]
+    paths:
+      - 'src/cryptanalysis/jacobian_transfer/**'
+      - 'src/bin/jacobian_transfers.rs'
+      - 'src/cryptanalysis/ec_trapdoor.rs'
+      - 'src/cryptanalysis/curve_traits/arith.rs'
+      - 'src/cryptanalysis/curve_id.rs'
+      - 'src/binary_ecc/**'
+      - 'docs/curves/registry.json'
+      - 'docs/curves/jacobian-transfers.json'
+      - 'docs/curves/JACOBIAN_TRANSFERS.md'
+      - '.github/workflows/jacobian-transfers.yml'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - '.cargo/**'
+  # The registry grows in PRs that do not touch this file; a weekly rebuild
+  # catches a curve that landed unscreened.
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  transfers:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 45 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/scripts/
+            /Cargo.toml
+            /Cargo.lock
+            /build.rs
+            /.cargo/
+            /rust-toolchain*
+            /rustfmt.toml
+            /clippy.toml
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
+            /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
+            /docs/curves/registry.json
+            /docs/curves/jacobian-transfers.json
+            /docs/curves/JACOBIAN_TRANSFERS.md
+      - name: Materialize compile-time fixture inputs
+        run: node .github/scripts/ci-scope.mjs --materialize
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: Module tests
+        run: cargo test --release --lib jacobian_transfer
+      - run: cargo build --release --bin jacobian_transfers
+      - name: jacobian-transfers.json is current with registry.json
+        run: ./target/release/jacobian_transfers check
+      - name: The summary table in JACOBIAN_TRANSFERS.md is current
+        run: |
+          ./target/release/jacobian_transfers table > /tmp/table.md
+          sed -n '/<!-- jacobian_transfers table -->/,$p' docs/curves/JACOBIAN_TRANSFERS.md | tail -n +2 > /tmp/committed.md
+          if ! diff /tmp/committed.md /tmp/table.md; then
+            echo 'docs/curves/JACOBIAN_TRANSFERS.md table is stale: run `jacobian_transfers table --write-doc docs/curves/JACOBIAN_TRANSFERS.md`'
+            exit 1
+          fi
+      - name: Queries run on the committed file
+        run: |
+          ./target/release/jacobian_transfers show "Oakley Group 3"
+          ./target/release/jacobian_transfers show ECC2K-130
+          ./target/release/jacobian_transfers rank --top 10
+          ./target/release/jacobian_transfers rank --class formula_advantage
+          ./target/release/jacobian_transfers chart --svg /tmp/chart.svg --tikz /tmp/chart.tex
+      - name: Reject an altered file
+        run: |
+          cp docs/curves/jacobian-transfers.json /tmp/altered.json
+          sed -i '0,/"magic_number": 5,/s//"magic_number": 6,/' /tmp/altered.json
+          if cmp -s docs/curves/jacobian-transfers.json /tmp/altered.json; then
+            echo 'the edit did not apply'; exit 1
+          fi
+          if ./target/release/jacobian_transfers check --report /tmp/altered.json; then
+            exit 1
+          fi

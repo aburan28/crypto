@@ -1,0 +1,12 @@
+
+=== Gröbner stage: frozen decomposition ladder (A2) ===
+
+| instance | m | ℓ | targets | decomposed | word XORs | F4 calls | build ms | reduce ms | read ms | wall s |
+|:---------|--:|--:|--------:|-----------:|----------:|---------:|---------:|----------:|--------:|-------:|
+| `K_0/2^15` | 3 | 4 | 8 | 3 | 1631233 | 395 | 1465.3 | 27.9 | 0.0 | 2.48 |
+
+Unit: 64-bit word XORs in the Macaulay eliminations; wall time is the whole
+stage including building and reading back every matrix.  Per AGENTS.md §8 this
+is a solver-stage diagnostic, not an end-to-end ECDLP measurement.
+
+Wrote /home/user/crypto/research/groebner_instructions_20260925/stage/r2-holdout/A2/rung10/stage/stage.json

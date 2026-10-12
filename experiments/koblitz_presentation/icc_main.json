@@ -1,0 +1,146 @@
+{
+  "n=16 a2=0 l=8": {
+    "curves": 165,
+    "subspaces": 4,
+    "yield_per_F2": {
+      "icc_curve": 0.0,
+      "ci95": [
+        0.0,
+        0.02096873124272879
+      ],
+      "var_curve": 0.0,
+      "var_subspace": 0.0,
+      "var_residual": 2.8293158011963858e-12,
+      "share_subspace": 0.0
+    },
+    "log_us_per_call": {
+      "icc_curve": 0.0007355767560401107,
+      "ci95": [
+        0.0,
+        0.060638558236832056
+      ],
+      "var_curve": 1.2842235396209466e-06,
+      "var_subspace": 0.0,
+      "var_residual": 0.001744588697369966,
+      "share_subspace": 0.0
+    },
+    "reductions_per_call": {
+      "icc_curve": 0.0,
+      "ci95": [
+        0.0,
+        0.052087064760167646
+      ],
+      "var_curve": 0.0,
+      "var_subspace": 0.0,
+      "var_residual": 0.0306476647956079,
+      "share_subspace": 0.0
+    },
+    "log_projected_solve": {
+      "icc_curve": 0.0,
+      "ci95": [
+        0.0,
+        0.06132525422809796
+      ],
+      "var_curve": 0.0,
+      "var_subspace": 5.530398363071079e-07,
+      "var_residual": 0.007853959599729872,
+      "share_subspace": 7.041045850779273e-05
+    }
+  },
+  "n=17 a2=1 l=8": {
+    "curves": 273,
+    "subspaces": 4,
+    "yield_per_F2": {
+      "icc_curve": 0.008999106903730174,
+      "ci95": [
+        0.0,
+        0.05888082423547489
+      ],
+      "var_curve": 1.5883167494056992e-14,
+      "var_subspace": 0.0,
+      "var_residual": 1.7490883640112907e-12,
+      "share_subspace": 0.0
+    },
+    "log_us_per_call": {
+      "icc_curve": 0.029998829997246762,
+      "ci95": [
+        0.0,
+        0.10064826064729969
+      ],
+      "var_curve": 3.469018350388671e-05,
+      "var_subspace": 0.0,
+      "var_residual": 0.001121694365729217,
+      "share_subspace": 0.0
+    },
+    "reductions_per_call": {
+      "icc_curve": 0.01350397168558621,
+      "ci95": [
+        0.0,
+        0.06206919664983329
+      ],
+      "var_curve": 0.00020140352014202988,
+      "var_subspace": 0.0,
+      "var_residual": 0.014712987951590897,
+      "share_subspace": 0.0
+    },
+    "log_projected_solve": {
+      "icc_curve": 0.0,
+      "ci95": [
+        0.0,
+        0.04092121074960613
+      ],
+      "var_curve": 0.0,
+      "var_subspace": 0.0,
+      "var_residual": 0.009001214918453532,
+      "share_subspace": 0.0
+    }
+  },
+  "n=23 a2=1 l=11": {
+    "curves": 32,
+    "subspaces": 4,
+    "yield_per_F2": {
+      "icc_curve": 0.08584043638085756,
+      "ci95": [
+        0.0,
+        0.2602663632077643
+      ],
+      "var_curve": 4.0360117091810563e-17,
+      "var_subspace": 2.475045978212847e-18,
+      "var_residual": 4.2734088441347797e-16,
+      "share_subspace": 0.005264083509697922
+    },
+    "log_us_per_call": {
+      "icc_curve": 0.0,
+      "ci95": [
+        0.0,
+        0.07460476701452733
+      ],
+      "var_curve": 0.0,
+      "var_subspace": 0.0,
+      "var_residual": 0.010003185197388697,
+      "share_subspace": 0.0
+    },
+    "reductions_per_call": {
+      "icc_curve": 0.03139355705486896,
+      "ci95": [
+        0.0,
+        0.1846353495894635
+      ],
+      "var_curve": 0.0009557585685483882,
+      "var_subspace": 0.0,
+      "var_residual": 0.0294886592741935,
+      "share_subspace": 0.0
+    },
+    "log_projected_solve": {
+      "icc_curve": 0.030184033345755222,
+      "ci95": [
+        0.0,
+        0.18572251018265015
+      ],
+      "var_curve": 0.000721916835461538,
+      "var_subspace": 6.6774455137801276e-06,
+      "var_residual": 0.02318858163756577,
+      "share_subspace": 0.0002791903833681147
+    }
+  }
+}

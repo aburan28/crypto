@@ -1,0 +1,51 @@
+{
+  "a": 0,
+  "cofactor_bits": 3,
+  "constructors": {
+    "column_coverage": {
+      "first_units": 152890.25149472166,
+      "median_units": 155482.7694947431,
+      "per_point": 23.701641691271814
+    },
+    "curve": {
+      "first_units": 489075.98786830064,
+      "median_units": 478918.5909053564,
+      "per_point": 73.00588275996286
+    },
+    "field_structure": {
+      "first_units": 3022.548719317086,
+      "median_units": 3023.2835649454532,
+      "per_point": 0.4608663970953435
+    },
+    "index_map": {
+      "first_units": 37187.02748524873,
+      "median_units": 46126.043806100555,
+      "per_point": 7.031409116783621
+    },
+    "log_solver": {
+      "first_units": 150448.51031967133,
+      "median_units": 154100.75420251602,
+      "per_point": 23.49096862843232
+    },
+    "m_can_decompose": {
+      "first_units": 69962.71635097322,
+      "median_units": 71267.1269300158,
+      "per_point": 10.863891300307287
+    },
+    "orbit_map": {
+      "first_units": 172733.72123397226,
+      "median_units": 156557.83723477848,
+      "per_point": 23.865523968716232
+    },
+    "relation_collector": {
+      "first_units": 127661.43563571206,
+      "median_units": 125940.76162205978,
+      "per_point": 19.198286832631066
+    }
+  },
+  "n": 41,
+  "params": "/home/user/crypto/research/ic_exponent_20260926/runs/k0n41/measure/M1.params.json",
+  "points": 6560,
+  "rounds": 5,
+  "signed_orbits": 80
+}

@@ -1,0 +1,29 @@
+{
+  "what": "Batching the field inversion in the m = 4 enumeration arm, and what it is worth on the arm itself.",
+  "class": "engineering, by AGENTS.md section 3: S falls where the code runs, and the ratio to the floor does not move. In fact no measured S moves at all, because no parameter set or recorded run reaches m = 4.",
+  "stage_diagnostic": "Every figure here prices the inner step of one enumeration arm, so by AGENTS.md section 2 none of them is a speedup and none may be quoted as one. No scoreboard row follows.",
+  "the_change": "witnesses_fast_inner's m = 4 arm computed rest = target - (P_k + P_l) through FastCurve::add, which calls Gf2::inv - a Fermat inversion, n-1 squarings and as many multiplications - once per (k, l). The row's pair sums were already one add_many slice; the rests are now a second, so the row costs two batched inversions instead of one plus |row| single ones. The row is then keyed with keys_of and prefetched ahead of the probe, which is the shape the m = 3 arm already had.",
+  "harness": "examples/m4_inversion_cost.rs, witnesses_fast(target, 4, sink-that-never-stops)",
+  "arm_ns_per_k_l": {
+    "before": 1155.5,
+    "after": {
+      "median": 123.0,
+      "runs": [
+        114.8,
+        121.1,
+        125.1,
+        128.6
+      ]
+    },
+    "ratio": 9.4,
+    "setup": "n = 61, |F| = 976, compact tier, 4 targets, 1907104 (k, l) walked, 0 witnesses",
+    "cross_check": "The 1030 ns that went matches the Fermat inversion the same binary measures alone at 1019 ns, so the gain is the thing it was meant to be rather than a measurement artefact."
+  },
+  "why_n_61_and_not_a_small_degree": "At n = 19 on the same base a target decomposes tens of thousands of ways, and the |F|-long compact recovery each hit pays swamps the walk: before and after measured 2452.5 and 2429.5 ns, 1% apart, and the fix looked like nothing. At n = 61 the group is far larger than |F|^4, a target has no witnesses, and what is left is the walk - which is where the inversion sits. What a (k, l) costs and what a HIT costs are different questions.",
+  "correctness": "src/cryptanalysis/koblitz_index_calculus.rs gains the_m4_scan_finds_exactly_the_quadruples_that_sum_to_the_target, which checks the scan against a meet-in-the-middle oracle that shares no code with it - no table, no key, no tier - on all three tiers (full, compact, folded) and asserts every returned witness really sums to the target. It passes on the code before the change as well as after, which is what makes it an oracle rather than a description of the new behaviour. Written first, for that reason.",
+  "not_claimed": [
+    "That this speeds up anything that runs today. Nothing reaches m = 4.",
+    "That the arm is now optimal. An early exit still throws away a whole row, as it always did, because the row is the slice add_many batches over.",
+    "That these absolute nanoseconds combine with any other run's. Same host throughout this record."
+  ]
+}

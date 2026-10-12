@@ -1,0 +1,113 @@
+# ECC2K-130 status page
+
+Static dashboard for the `ecc2k-130` distinguished-point campaign,
+published at <https://aburan28.github.io/crypto/status/>. The Action
+overwrites `status.json` and `history.json`; this HTML only renders those
+files, and `scripts/site/build.py` lays them out for publishing.
+
+The operations panel above the counts is the walk total the walkers
+checkpointed, as `2^n`, taken from the snapshot's `work.iterations`. Under
+it is the **collision-odds panel**: rho has no intermediate progress, so
+the page draws the one thing that accumulates, the probability that a
+collision has already happened. After `W` iterations that is the birthday
+bound `1 - exp(-pi W^2 / 4 E^2)` with its mean set to the expected cost
+`E = 2^60.9`, so the curve's mean is the same expectation the ETA counts
+to; the page says it is conditional on the walk behaving as a random map.
+The curve runs from now to the date the odds reach 99% at the measured
+rate, with the fleet doubled drawn dashed, and four tiles give the odds
+over the next 30 days (conditional on no collision so far), the dates the
+odds pass one half and nine tenths, and the share of the expected work
+walked, as a number rather than a bar: that share was `2^-21` when the
+page was first published, and a bar filled from it is empty while one
+filled from the exponents lies. With no measured rate the curve is drawn
+against work instead of dates and the date tiles say why they are missing.
+
+Beneath the bars are the two numbers that depend on time. **Iterations per
+second** is measured, not projected: that same total's increase between two
+published snapshots, divided by the time between them, with the span it
+used printed beside it. The **ETA** is the work still expected at exactly
+that rate. A snapshot carrying no iteration total falls back to the point
+count at one point per `2^25.27` iterations at `HW(x) <= 34`, which reads
+about 8.8 times low against this campaign's measured weight-32 interval
+of `2^28.41` and is labelled on the page as the
+fallback; a campaign with one total so far says the rate arrives with the
+next snapshot rather than showing a number it cannot measure yet. See
+`scripts/rho_status/README.md` for where the total comes from and why the
+derivation is only a fallback.
+
+**What the walk builds**, between the cumulative chart and the worker
+table, is `walk-forest.svg`: real ECC2K-130 walks from a separate client run
+on the challenge curve at weight 34, replayed with the client's own kernel,
+sampled along their length and drawn, generated from the hashed trails in
+`walk-forest/` by `scripts/site/walk_forest.py`. Only walks short enough to
+draw are shown. The caption states the counts, and the orbits are named by hash
+because a distinguished point's orbit is its key and the page publishes
+counts only. This run's endpoints were not uploaded to the live weight-32
+campaign or included in the counts above the figure. `walk-forest/README.md`
+has the exact commands, including how to point the same pipeline at the
+fleet's corpus, and
+`scripts/site/test_build.py` fails if the SVG, the trails, their recorded
+endpoints, the scalar reference's replay and the caption disagree.
+`scripts/site/build.py` copies the SVG next to the page so the relative
+`src` resolves both in the working tree and once published.
+
+The worker table is empty on the live ingest feed: `dp_ingest.py` does
+not publish `per_worker` (`worker_id` is an upload-object name). The
+dashboard names that, instead of "No workers have reported points."
+
+The **Contribute compute** section under the worker table is static: it
+carries the [cairn](https://github.com/aburan28/cairn) download link
+(`releases/latest`, plus the one-line installer the cairn README
+documents) for the paid piecework path, and the `ecc2k130/` client
+commands for the unpaid one. cairn now posts this search as
+`objective-ecc2k130-orbit-batch`, paying per novel orbit, so the section
+says where the remaining gap actually is: a point on this curve cannot
+carry `(a, b)` at this walk's step cost, so a claim needs the eight
+branch counters that make a trail verifiable in ~227 group operations,
+and the kernel does not emit them yet. The section says it should: the
+campaign's packed backend has the branch index as a scalar already, so a
+counter is two instructions, and replay is for the points already
+collected without them. It also keeps cairn's own two limits visible, the
+posted tranche and the audit that a witness still needs. When the kernel
+learns to carry those counters, this section is what has to change with
+it.
+
+A worker that is also on cairn appears on that node's own dashboard
+(`/ui/task?id=<objective>`), which shows the paid orbits beside the
+heartbeats `ecc2k130/aws/worker.py` posts when `ECC_CAIRN_NODE` and
+`ECC_CAIRN_OBJECTIVE` are set. The two pages count different things -- this
+one the campaign corpus, that one what cairn's log settled -- and neither
+is derived from the other.
+
+Open `index.html` from the working tree next to the two JSON files and it
+renders exactly as published; only the site navigation links resolve solely
+on the published site.
+
+`how.html` is the readable walk: the same iteration as the GPU client, on
+`GF(2^23)`, with `rho-toy.js` recovering a planted `k` in the browser. The
+Python original is `ecc2k130/examples/rho_toy.py`.
+
+The dashboard fetches the live S3 `status.json` and the Pages copy together
+and fills missing fields (walk rate, walking slots, per-worker rows) from
+whichever document has them, then measures the rate from `history.json`
+when neither snapshot carries one. `published_at` is kept from whichever
+source wrote more recently: a healthy Pages job on a frozen ingest feed
+must not inherit the feed's old stamp, or the banner blames the publisher
+for a dead feed. Past the stale threshold, `walking_slots`,
+`off_weight_walking_slots` and `walk_rate` are cleared so a frozen document
+cannot read as "walking now".
+
+Two fields answer whether the points being added can take part in a
+collision at all, both from the ingest host: `work.off_weight_slots` /
+`off_weight_walking_slots` (slots whose iterations per point put them at a
+distinguished-point cutoff other than the campaign's; drawn as a warning on
+the GPU card and a row in the campaign table) and
+`ingest.duplicate_records_last_day` (records dropped because the store
+already held the point under the same seed, i.e. a walk re-walking seeds
+already walked; a row in the campaign table). Neither is folded into the
+headline counts.
+
+See [`scripts/rho_status/README.md`](../../scripts/rho_status/README.md)
+for secrets, the walker hop, and what is (not) published, and
+[`scripts/site/README.md`](../../scripts/site/README.md) for the published
+URL layout.

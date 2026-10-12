@@ -1,0 +1,52 @@
+{
+  "schema": "ecc2k130-sparse-alu-synthesis-audit-v2",
+  "auditStatus": "PASS",
+  "scope": "Separate native rebuild, sanitizer replay, manifest verification and arithmetic recomputation. No CUDA or GPU was used.",
+  "sourceParent": "b3d0095f6fb74c180c71780ead8ab692b4831cc1",
+  "compiler": "Apple clang 17.0.0",
+  "integrity": {
+    "protocolSha256": "77916b2f68f924c865c73aad285e4f09fa4daa35d36a4e2312b3874108a1faab",
+    "resultsSha256": "11b0b90f38a6eef584267375f368fa1e17316e657cfe79d11c7e290237aac3ce",
+    "checkerSha256": "3733390ffd862f9ec2332950ff2a8edd5b6a638dc8010181e878d1207b49304d",
+    "resultSha256": "6db9b5a73f1962936a3a00b12d1e3ed0952f4bb123f67fac640ad4bb15a183c0",
+    "manifestEntriesVerified": 7,
+    "freshOptimizedBuildByteIdentical": true,
+    "secondDriverBuildByteIdentical": true,
+    "undefinedBehaviorSanitizerByteIdentical": true
+  },
+  "exactChecksReopened": {
+    "basisVectors": 131,
+    "denseVectors": 4096,
+    "denseLjComparisons": 32768,
+    "compositionIdentities": 59,
+    "conversionRanks": [131, 131, 131],
+    "ljRanks": [130, 130, 130, 130, 130, 130, 130, 130]
+  },
+  "recomputedFrozenModelScreen": {
+    "sparseToNormalFreeShiftTerms": 754,
+    "twoOracleL3FreeShiftTerms": 978,
+    "amortizedBasisConversions": 94.125,
+    "oracleMapTotal": 1826.125,
+    "target26SourceOpAllowance": 1124.529230769231,
+    "oracleMapOverTargetBudget": 1.623905285827,
+    "modelAdmissionPass": false
+  },
+  "recomputedComparableSubledger": {
+    "reference": 2276.25,
+    "oracleCandidateMaps": 1826.125,
+    "sparseReducers": 476.625,
+    "aluSquareSpread": 75.0,
+    "oracleCandidateTotal": 2377.75,
+    "candidateOverReference": 1.044590884130,
+    "comparisonPass": false
+  },
+  "limitations": [
+    "Source word operations are not Blackwell SASS or measured throughput; the one-operation-per-lane-cycle conversion is a conditional model, not a hardware lower bound.",
+    "The same model predicts 12.844705 B/s from the 2276.25-operation reference subledger while the fused kernel measured 15.436677 B/s, so compiler lowering and overlap do not transfer exactly.",
+    "The one-word-shift diagonal count is exact only inside that abstraction; a 131-bit cross-word shift can cost more.",
+    "The greedy XOR construction is a deterministic candidate circuit, not a universal XOR lower bound.",
+    "The dynamic selector distribution is a uniform-field model; the decision uses the stronger free-selection oracle and does not depend on it.",
+    "The conclusion covers the enumerated diagonal, all-output, fixed-branch, greedy-CSE and Frobenius-composition families, not every possible GF(2) circuit."
+  ],
+  "conclusion": "No enumerated construction passes the frozen conditional source-operation screen. The free-shift/free-selection oracle exceeds the 26 B/s model allowance, and its complete comparable source subledger is worse than the fused beta reference; this is not a universal circuit or hardware lower bound."
+}

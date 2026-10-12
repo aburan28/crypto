@@ -79,10 +79,8 @@ mod tests {
     #[test]
     fn kmac128_sample_1() {
         let data = h("00010203");
-        let expected = h(
-            "e5780b0d3ea6f7d3a429c5706aa43a00\
-             fadbd7d49628839e3187243f456ee14e",
-        );
+        let expected = h("e5780b0d3ea6f7d3a429c5706aa43a00\
+             fadbd7d49628839e3187243f456ee14e");
         assert_eq!(kmac128(&key_sp800_185(), &data, b"", 32), expected);
     }
 
@@ -91,10 +89,8 @@ mod tests {
     fn kmac128_sample_2() {
         let data = h("00010203");
         let s = b"My Tagged Application";
-        let expected = h(
-            "3b1fba963cd8b0b59e8c1a6d71888b71\
-             43651af8ba0a7070c0979e2811324aa5",
-        );
+        let expected = h("3b1fba963cd8b0b59e8c1a6d71888b71\
+             43651af8ba0a7070c0979e2811324aa5");
         assert_eq!(kmac128(&key_sp800_185(), &data, s, 32), expected);
     }
 
@@ -103,10 +99,8 @@ mod tests {
     fn kmac128_sample_3() {
         let data: Vec<u8> = (0u8..=199).collect();
         let s = b"My Tagged Application";
-        let expected = h(
-            "1f5b4e6cca02209e0dcb5ca635b89a15\
-             e271ecc760071dfd805faa38f9729230",
-        );
+        let expected = h("1f5b4e6cca02209e0dcb5ca635b89a15\
+             e271ecc760071dfd805faa38f9729230");
         assert_eq!(kmac128(&key_sp800_185(), &data, s, 32), expected);
     }
 
@@ -117,12 +111,10 @@ mod tests {
     fn kmac256_sample_4() {
         let data = h("00010203");
         let s = b"My Tagged Application";
-        let expected = h(
-            "20c570c31346f703c9ac36c61c03cb64\
+        let expected = h("20c570c31346f703c9ac36c61c03cb64\
              c3970d0cfc787e9b79599d273a68d2f7\
              f69d4cc3de9d104a351689f27cf6f595\
-             1f0103f33f4f24871024d9c27773a8dd",
-        );
+             1f0103f33f4f24871024d9c27773a8dd");
         assert_eq!(kmac256(&key_sp800_185(), &data, s, 64), expected);
     }
 
@@ -130,12 +122,10 @@ mod tests {
     #[test]
     fn kmac256_sample_5() {
         let data: Vec<u8> = (0u8..=199).collect();
-        let expected = h(
-            "75358cf39e41494e949707927cee0af2\
+        let expected = h("75358cf39e41494e949707927cee0af2\
              0a3ff553904c86b08f21cc414bcfd691\
              589d27cf5e15369cbbff8b9a4c2eb178\
-             00855d0235ff635da82533ec6b759b69",
-        );
+             00855d0235ff635da82533ec6b759b69");
         assert_eq!(kmac256(&key_sp800_185(), &data, b"", 64), expected);
     }
 
@@ -144,12 +134,10 @@ mod tests {
     fn kmac256_sample_6() {
         let data: Vec<u8> = (0u8..=199).collect();
         let s = b"My Tagged Application";
-        let expected = h(
-            "b58618f71f92e1d56c1b8c55ddd7cd18\
+        let expected = h("b58618f71f92e1d56c1b8c55ddd7cd18\
              8b97b4ca4d99831eb2699a837da2e4d9\
              70fbacfde50033aea585f1a2708510c3\
-             2d07880801bd182898fe476876fc8965",
-        );
+             2d07880801bd182898fe476876fc8965");
         assert_eq!(kmac256(&key_sp800_185(), &data, s, 64), expected);
     }
 
@@ -159,9 +147,7 @@ mod tests {
     #[test]
     fn kmacxof128_sample_4() {
         let data = h("00010203");
-        let expected = h(
-            "cd83740bbd92ccc8cf032b1481a0f4460e7ca9dd12b08a0c4031178bacd6ec35",
-        );
+        let expected = h("cd83740bbd92ccc8cf032b1481a0f4460e7ca9dd12b08a0c4031178bacd6ec35");
         assert_eq!(kmacxof128(&key_sp800_185(), &data, b"", 32), expected);
     }
 
@@ -170,12 +156,10 @@ mod tests {
     fn kmacxof256_sample_6() {
         let data: Vec<u8> = (0u8..=199).collect();
         let s = b"My Tagged Application";
-        let expected = h(
-            "d5be731c954ed7732846bb59dbe3a8e3\
+        let expected = h("d5be731c954ed7732846bb59dbe3a8e3\
              0f83e77a4bff4459f2f1c2b4ecebb8ce\
              67ba01c62e8ab8578d2d499bd1bb2767\
-             68781190020a306a97de281dcc30305d",
-        );
+             68781190020a306a97de281dcc30305d");
         assert_eq!(kmacxof256(&key_sp800_185(), &data, s, 64), expected);
     }
 }

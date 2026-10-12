@@ -1,0 +1,69 @@
+name: Matrix-F5 AVX2 gather short reservations
+
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/matrix_f5_f2.rs'
+      - 'examples/f4_f2_bench.rs'
+      - 'research/f5_avx2_gather_unpack_20260929/PROTOCOL.md'
+      - 'research/f5_avx2_gather_unpack_20260929/confirm_segment.py'
+      - 'research/f5_avx2_gather_unpack_20260929/run_segments.py'
+      - '.github/workflows/f5-avx2-gather-segments.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  paired-f5:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        threads: [1, 2]
+    env:
+      CARGO_BUILD_JOBS: '2'
+      KIC_GF2_FORCE_AVX2: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: Check fail-closed block qualification
+        run: python3 research/f5_avx2_gather_unpack_20260929/test_run_segments.py
+      - name: Check exact shared-kernel and F5 output
+        run: |
+          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-avx2-gather-bench.lock" -- cargo test --release --lib cryptanalysis::gf2_elim::tests -- --test-threads=1
+          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-avx2-gather-bench.lock" -- cargo test --release --lib cryptanalysis::matrix_f5_f2::tests -- --test-threads=1
+      - name: Build F5 stage benchmark
+        run: python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-avx2-gather-bench.lock" -- cargo build --release --example f4_f2_bench
+      - name: Choose reservable CPUs
+        id: cpus
+        run: |
+          python3 research/f5_avx2_gather_unpack_20260929/choose_isolated_cpus.py \
+            ${{ matrix.threads }} \
+            research/f5_avx2_gather_unpack_20260929/segment-cpu-choice-t${{ matrix.threads }}.json \
+            >> "$GITHUB_OUTPUT"
+      - name: Replay four seed blocks with first-clean selection
+        run: |
+          python3 research/f5_avx2_gather_unpack_20260929/run_segments.py \
+            target/release/examples/f4_f2_bench \
+            research/f5_avx2_gather_unpack_20260929/segments-t${{ matrix.threads }} \
+            --threads ${{ matrix.threads }} \
+            --reserve '${{ steps.cpus.outputs.reserve }}' \
+            --pin '${{ steps.cpus.outputs.pin }}'
+      - name: Preserve every qualified and failed attempt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f5-avx2-gather-segments-t${{ matrix.threads }}-${{ github.sha }}
+          path: |
+            research/f5_avx2_gather_unpack_20260929/segment-cpu-choice-t${{ matrix.threads }}.json
+            research/f5_avx2_gather_unpack_20260929/segments-t${{ matrix.threads }}/
+          if-no-files-found: warn

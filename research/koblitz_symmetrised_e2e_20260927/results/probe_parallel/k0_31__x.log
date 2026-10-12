@@ -1,0 +1,950 @@
+# 2026-09-27T03:11:42Z ic bench --koblitz-degree 31 --koblitz-a 0 --factor-base koblitz-orbit:divisor=0;1;2 --oracle descent-algebraic:m=2 --solver inherited-f4 --repeats 3 --rho-runs 8 --seed 123212651130
+{
+  "all_verified": true,
+  "calibration": {
+    "ns_per_add": 392.018625,
+    "ns_per_as_solve": 30.51394573275,
+    "ns_per_canon": 28.923526171124998,
+    "ns_per_double": 388.421462097,
+    "ns_per_frobenius": 12.200795665875,
+    "ns_per_inversion": null,
+    "ns_per_legendre": null,
+    "ns_per_lookup": 2.946804004125,
+    "ns_per_row_op": 2.666902705875,
+    "ns_per_s4_pair": 1155.115808127,
+    "ns_per_sqrt": null,
+    "ns_per_word_xor": 0.382218159375,
+    "pinned_units": [
+      "ns_per_double",
+      "ns_per_lookup",
+      "ns_per_row_op",
+      "ns_per_as_solve",
+      "ns_per_s4_pair",
+      "ns_per_word_xor",
+      "ns_per_frobenius",
+      "ns_per_canon"
+    ]
+  },
+  "calibration_pins": {
+    "measured": [],
+    "pinned": [
+      "ns_per_double",
+      "ns_per_lookup",
+      "ns_per_row_op",
+      "ns_per_as_solve",
+      "ns_per_s4_pair",
+      "ns_per_word_xor",
+      "ns_per_frobenius",
+      "ns_per_canon"
+    ]
+  },
+  "configurations_run": 3,
+  "configurations_skipped": [],
+  "elapsed_seconds": 25.341924579,
+  "instance": "K_0 / GF(2^31)",
+  "markdown": "| instance | configuration | base | cols | pts/col | hit rate | trials | rows | rank | D_solve | D_sr | S | vs rho | correct |\n|:--|:--|--:|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|:--|\n| K_0 / GF(2^31) | koblitz-orbit[divisor=0;1;2] + descent-algebraic[m=2] + inherited-f4 + walk | 2049 | 35 | 58.5 | 0.003 | 713 | 2 | 2 | — | 5 | 12707.119 | 12048.07× | yes |\n| K_0 / GF(2^31) | koblitz-orbit[divisor=0;1;2] + descent-algebraic[m=2] + inherited-f4 + walk | 2049 | 35 | 58.5 | 0.001 | 1726 | 2 | 2 | — | 5 | 29876.589 | 28327.06× | yes |\n| K_0 / GF(2^31) | koblitz-orbit[divisor=0;1;2] + descent-algebraic[m=2] + inherited-f4 + walk | 2049 | 35 | 58.5 | 0.003 | 582 | 2 | 2 | — | 5 | 10035.594 | 9515.10× | yes |\n",
+  "operation": "bench",
+  "regime": "koblitz",
+  "rho_reference": {
+    "all_verified": true,
+    "automorphisms": 2,
+    "max_s": 1.8820633794744337,
+    "mean_s": 1.0547014830834638,
+    "mean_s_walk": 0.882477680699095,
+    "method": "negation-map r-adding walk: look-ahead, short-cycle escape by doubling, distinguished points, stride starts",
+    "min_s": 0.36340993509780917,
+    "per_run": [
+      {
+        "planted": 695931,
+        "s": 0.555117010952158,
+        "s_walk": 0.39758380514141045,
+        "seed": 124055164282,
+        "steps": 450,
+        "steps_over_expected": 0.44862528289612935,
+        "verified": true
+      },
+      {
+        "planted": 736434,
+        "s": 1.0818947150388905,
+        "s_walk": 0.9143594009226987,
+        "seed": 124055164283,
+        "steps": 1015,
+        "steps_over_expected": 1.0317440992391067,
+        "verified": true
+      },
+      {
+        "planted": 776937,
+        "s": 0.36340993509780917,
+        "s_walk": 0.20921076538887637,
+        "seed": 124055164280,
+        "steps": 233,
+        "steps_over_expected": 0.23606906919691503,
+        "verified": true
+      },
+      {
+        "planted": 695931,
+        "s": 1.5686639859038458,
+        "s_walk": 1.3719558558967748,
+        "seed": 124055164281,
+        "steps": 1541,
+        "steps_over_expected": 1.5480864059686141,
+        "verified": true
+      },
+      {
+        "planted": 736434,
+        "s": 1.1377398197442878,
+        "s_walk": 0.959368888297198,
+        "seed": 124055164286,
+        "steps": 1077,
+        "steps_over_expected": 1.0825318671141402,
+        "verified": true
+      },
+      {
+        "planted": 776937,
+        "s": 1.1960854515260462,
+        "s_walk": 1.0135469749516879,
+        "seed": 124055164287,
+        "steps": 1114,
+        "steps_over_expected": 1.143665291408162,
+        "verified": true
+      },
+      {
+        "planted": 695931,
+        "s": 0.6526375669302398,
+        "s_walk": 0.5017724333231218,
+        "seed": 124055164284,
+        "steps": 559,
+        "steps_over_expected": 0.5661895603846329,
+        "verified": true
+      },
+      {
+        "planted": 736434,
+        "s": 1.8820633794744337,
+        "s_walk": 1.6920233216709921,
+        "seed": 124055164285,
+        "steps": 1889,
+        "steps_over_expected": 1.9092438664132967,
+        "verified": true
+      }
+    ],
+    "runs": 8
+  },
+  "rho_reference_candidates": [
+    {
+      "all_verified": true,
+      "automorphisms": 62,
+      "max_s": 1.3039124432738354,
+      "mean_s": 1.15138029161581,
+      "mean_s_walk": 0.19087356682889517,
+      "method": "signed-Frobenius r-adding walk, distinguished points (koblitz_signed_frobenius_rho_reference)",
+      "min_s": 1.04302411830683,
+      "per_run": [
+        {
+          "planted": 695931,
+          "s": 1.2080589053466608,
+          "s_walk": 0.24755218055974615,
+          "seed": 124055164282,
+          "steps": 297,
+          "steps_over_expected": 1.5552587822326227,
+          "verified": true
+        },
+        {
+          "planted": 736434,
+          "s": 1.1563813457685321,
+          "s_walk": 0.19670813000707102,
+          "seed": 124055164283,
+          "steps": 236,
+          "steps_over_expected": 1.235828527295956,
+          "verified": true
+        },
+        {
+          "planted": 776937,
+          "s": 1.04302411830683,
+          "s_walk": 0.08335090254536907,
+          "seed": 124055164280,
+          "steps": 100,
+          "steps_over_expected": 0.5236561556338797,
+          "verified": true
+        },
+        {
+          "planted": 695931,
+          "s": 1.059694298815904,
+          "s_walk": 0.10002108305444289,
+          "seed": 124055164281,
+          "steps": 120,
+          "steps_over_expected": 0.6283873867606556,
+          "verified": true
+        },
+        {
+          "planted": 736434,
+          "s": 1.3039124432738354,
+          "s_walk": 0.3417387004360132,
+          "seed": 124055164286,
+          "steps": 410,
+          "steps_over_expected": 2.1469902380989065,
+          "verified": true
+        },
+        {
+          "planted": 776937,
+          "s": 1.1655499450485227,
+          "s_walk": 0.20337620221070055,
+          "seed": 124055164287,
+          "steps": 244,
+          "steps_over_expected": 1.2777210197466664,
+          "verified": true
+        },
+        {
+          "planted": 695931,
+          "s": 1.116372912546755,
+          "s_walk": 0.15669969678529386,
+          "seed": 124055164284,
+          "steps": 188,
+          "steps_over_expected": 0.9844735725916938,
+          "verified": true
+        },
+        {
+          "planted": 736434,
+          "s": 1.1580483638194394,
+          "s_walk": 0.1975416390325247,
+          "seed": 124055164285,
+          "steps": 237,
+          "steps_over_expected": 1.241065088852295,
+          "verified": true
+        }
+      ],
+      "runs": 8
+    }
+  ],
+  "rho_reference_plain": {
+    "all_verified": true,
+    "automorphisms": 1,
+    "max_s": 6.001264983266573,
+    "mean_s": 3.748915219234337,
+    "mean_s_walk": 2.4833359527110894,
+    "method": "r-adding walk, distinguished points, 16 jumps",
+    "min_s": 1.7745407151909076,
+    "per_run": [
+      {
+        "planted": 695931,
+        "s": 3.088150939305924,
+        "s_walk": 1.8470560004053787,
+        "seed": 124055164282,
+        "steps": 2216,
+        "steps_over_expected": 1.4737374656617428,
+        "verified": true
+      },
+      {
+        "planted": 736434,
+        "s": 5.259441950612788,
+        "s_walk": 4.151708455784833,
+        "seed": 124055164283,
+        "steps": 4981,
+        "steps_over_expected": 3.3125840778254245,
+        "verified": true
+      },
+      {
+        "planted": 776937,
+        "s": 2.406340556484805,
+        "s_walk": 1.250263538180536,
+        "seed": 124055164280,
+        "steps": 1500,
+        "steps_over_expected": 0.9975659740490136,
+        "verified": true
+      },
+      {
+        "planted": 695931,
+        "s": 1.7745407151909076,
+        "s_walk": 0.8343425344791444,
+        "seed": 124055164281,
+        "steps": 1001,
+        "steps_over_expected": 0.6657090266820417,
+        "verified": true
+      },
+      {
+        "planted": 736434,
+        "s": 4.859357618395017,
+        "s_walk": 3.535745285974556,
+        "seed": 124055164286,
+        "steps": 4242,
+        "steps_over_expected": 2.82111657461061,
+        "verified": true
+      },
+      {
+        "planted": 776937,
+        "s": 4.796010932460536,
+        "s_walk": 2.79142172624441,
+        "seed": 124055164287,
+        "steps": 3349,
+        "steps_over_expected": 2.227232298060098,
+        "verified": true
+      },
+      {
+        "planted": 695931,
+        "s": 6.001264983266573,
+        "s_walk": 4.37675589265733,
+        "seed": 124055164284,
+        "steps": 5251,
+        "steps_over_expected": 3.492145953154247,
+        "verified": true
+      },
+      {
+        "planted": 736434,
+        "s": 1.8062140581581478,
+        "s_walk": 1.0793941879625295,
+        "seed": 124055164285,
+        "steps": 1295,
+        "steps_over_expected": 0.8612319575956484,
+        "verified": true
+      }
+    ],
+    "runs": 8
+  },
+  "rho_reference_rule": "Koblitz curve: the signed-Frobenius walk (A = 2n) and the negation walk (A = 2) on the same seeds; the lower mean S prices the column, the other is kept in rho_reference_candidates",
+  "rows": [
+    {
+      "decomposition": {
+        "cost": {
+          "gae": 15245074.054441942,
+          "group_ops": {
+            "adds": 1063,
+            "doubles": 643,
+            "scalar_mults": 34
+          },
+          "native": {
+            "canonicalisations": 0,
+            "direct_relations_skipped": 0,
+            "frobfold_mismatches": 0,
+            "inversions": 0,
+            "lift_failures": 0,
+            "lookups": 0,
+            "relations": 2,
+            "repeated_targets_skipped": 0,
+            "s4_hits": 0,
+            "s4_pairs": 0,
+            "solver_budget_exceeded": 0,
+            "solver_calls": 713,
+            "solver_ops": 505979122,
+            "sqrt_solves": 0,
+            "target_guard_probes": 713,
+            "trials": 713,
+            "unliftable_systems": 0,
+            "walk_jumps": 16,
+            "walk_pool_offsets": 0,
+            "walk_pool_ops": 0,
+            "walk_pool_restarts": 0,
+            "walk_restarts": 1,
+            "walk_steps": 712
+          },
+          "wall_ns": 6089981914
+        },
+        "description": "Weil-descend S_3 over the base's abscissa subspace and solve with inherited-f4",
+        "hit_rate": 0.002805049088359046,
+        "name": "descent-algebraic",
+        "relations_found": 2,
+        "setup": {
+          "gae": 0.0,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {},
+          "wall_ns": 143055
+        },
+        "solver": {
+          "budget_exceeded": 0,
+          "calls": 713,
+          "degree_over_bound": null,
+          "extra": {
+            "eliminated": 0,
+            "engine_overridden_by_environment": 0,
+            "infeasible_branches": 22612,
+            "max_degree": 2139,
+            "oversize": 0,
+            "propagations": 2195,
+            "reduction_cache_on": 0,
+            "reductions": 46455,
+            "splits": 21903,
+            "verification_tests": 8804
+          },
+          "gae": 15243362.694820942,
+          "name": "inherited-f4",
+          "ns_per_op": 11.810135683819777,
+          "op_unit": "word XORs (elimination, specialisation and linear elimination only)",
+          "ops": 505979122,
+          "peak_bytes": 0,
+          "priced_by": "measured",
+          "semi_regular_degree": 5,
+          "solving_degree_max": 0,
+          "solving_degree_mean": null,
+          "wall_ns": 5975682084
+        },
+        "summands": 2,
+        "system": {
+          "degrees": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "n_equations": 31,
+          "n_vars": 22,
+          "semi_regular_degree": 5
+        },
+        "targets_tried": 713
+      },
+      "exhausted": false,
+      "factor_base": {
+        "abscissae": 1025,
+        "columns": 35,
+        "cost": {
+          "gae": 223.183251,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "abscissae_scanned": 2048,
+            "as_solves": 2048,
+            "derived_counts": 1,
+            "frobenius_maps": 2049
+          },
+          "wall_ns": 2212242
+        },
+        "description": "the Frobenius-invariant subspace spanned by divisor factors 0;1;2, each signed Frobenius orbit folded onto one column",
+        "name": "koblitz-orbit",
+        "points_per_column": 58.542857142857144,
+        "signed_points": 2049
+      },
+      "group_order": 2147574356,
+      "instance": "K_0 / GF(2^31)",
+      "label": "koblitz-orbit[divisor=0;1;2] + descent-algebraic[m=2] + inherited-f4 + walk",
+      "linear_algebra": {
+        "cost": {
+          "gae": 0.06803000000000001,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "columns": 36,
+            "pinned_by_repeated_row": 0,
+            "rank": 2,
+            "repeated_column_rows": 0,
+            "row_ops": 10,
+            "rows": 2,
+            "single_column_rows": 2,
+            "two_column_rows": 0
+          },
+          "wall_ns": 28606
+        },
+        "dependent": 0,
+        "name": "incremental-gauss",
+        "rank": 2,
+        "rows": 2,
+        "work": 10,
+        "work_unit": "row_ops"
+      },
+      "log2_r": 20.457029116748018,
+      "r": 1439393,
+      "recovered": 695931,
+      "rho_s": 1.0547014830834638,
+      "s": 12707.118738824694,
+      "s_over_rho": 12048.071366767119,
+      "spec": {
+        "factor_base": "koblitz-orbit",
+        "factor_base_params": {
+          "divisor": "0;1;2"
+        },
+        "linalg": "incremental-gauss",
+        "max_trials": 2000000,
+        "oracle": "descent-algebraic",
+        "oracle_params": {
+          "m": "2"
+        },
+        "seed": 123212651130,
+        "solver": "inherited-f4",
+        "solver_budget_seconds": 120,
+        "solver_params": {},
+        "targets": "Walk"
+      },
+      "total_gae": 15245328.30572294,
+      "verified": true,
+      "verify": {
+        "gae": 31.0,
+        "group_ops": {
+          "adds": 12,
+          "doubles": 19,
+          "scalar_mults": 1
+        },
+        "native": {},
+        "wall_ns": 12538
+      },
+      "wall_seconds": 6.092432013
+    },
+    {
+      "decomposition": {
+        "cost": {
+          "gae": 35844097.5136732,
+          "group_ops": {
+            "adds": 2080,
+            "doubles": 631,
+            "scalar_mults": 34
+          },
+          "native": {
+            "canonicalisations": 0,
+            "direct_relations_skipped": 0,
+            "frobfold_mismatches": 0,
+            "inversions": 0,
+            "lift_failures": 0,
+            "lookups": 0,
+            "relations": 2,
+            "repeated_targets_skipped": 0,
+            "s4_hits": 0,
+            "s4_pairs": 0,
+            "solver_budget_exceeded": 0,
+            "solver_calls": 1726,
+            "solver_ops": 1224538397,
+            "sqrt_solves": 0,
+            "target_guard_probes": 1726,
+            "trials": 1726,
+            "unliftable_systems": 0,
+            "walk_jumps": 16,
+            "walk_pool_offsets": 0,
+            "walk_pool_ops": 0,
+            "walk_pool_restarts": 0,
+            "walk_restarts": 1,
+            "walk_steps": 1725
+          },
+          "wall_ns": 14307646713
+        },
+        "description": "Weil-descend S_3 over the base's abscissa subspace and solve with inherited-f4",
+        "hit_rate": 0.0011587485515643105,
+        "name": "descent-algebraic",
+        "relations_found": 2,
+        "setup": {
+          "gae": 0.0,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {},
+          "wall_ns": 196104
+        },
+        "solver": {
+          "budget_exceeded": 0,
+          "calls": 1726,
+          "degree_over_bound": null,
+          "extra": {
+            "eliminated": 0,
+            "engine_overridden_by_environment": 0,
+            "infeasible_branches": 54835,
+            "max_degree": 5178,
+            "oversize": 0,
+            "propagations": 4822,
+            "reduction_cache_on": 0,
+            "reductions": 112277,
+            "splits": 53113,
+            "verification_tests": 9254
+          },
+          "gae": 35841373.5393312,
+          "name": "inherited-f4",
+          "ns_per_op": 11.47410812712964,
+          "op_unit": "word XORs (elimination, specialisation and linear elimination only)",
+          "ops": 1224538397,
+          "peak_bytes": 0,
+          "priced_by": "measured",
+          "semi_regular_degree": 5,
+          "solving_degree_max": 0,
+          "solving_degree_mean": null,
+          "wall_ns": 14050485973
+        },
+        "summands": 2,
+        "system": {
+          "degrees": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "n_equations": 31,
+          "n_vars": 22,
+          "semi_regular_degree": 5
+        },
+        "targets_tried": 1726
+      },
+      "exhausted": false,
+      "factor_base": {
+        "abscissae": 1025,
+        "columns": 35,
+        "cost": {
+          "gae": 223.183251,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "abscissae_scanned": 2048,
+            "as_solves": 2048,
+            "derived_counts": 1,
+            "frobenius_maps": 2049
+          },
+          "wall_ns": 3129555
+        },
+        "description": "the Frobenius-invariant subspace spanned by divisor factors 0;1;2, each signed Frobenius orbit folded onto one column",
+        "name": "koblitz-orbit",
+        "points_per_column": 58.542857142857144,
+        "signed_points": 2049
+      },
+      "group_order": 2147574356,
+      "instance": "K_0 / GF(2^31)",
+      "label": "koblitz-orbit[divisor=0;1;2] + descent-algebraic[m=2] + inherited-f4 + walk",
+      "linear_algebra": {
+        "cost": {
+          "gae": 0.06803000000000001,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "columns": 36,
+            "pinned_by_repeated_row": 0,
+            "rank": 2,
+            "repeated_column_rows": 0,
+            "row_ops": 10,
+            "rows": 2,
+            "single_column_rows": 2,
+            "two_column_rows": 0
+          },
+          "wall_ns": 13909
+        },
+        "dependent": 0,
+        "name": "incremental-gauss",
+        "rank": 2,
+        "rows": 2,
+        "work": 10,
+        "work_unit": "row_ops"
+      },
+      "log2_r": 20.457029116748018,
+      "r": 1439393,
+      "recovered": 736434,
+      "rho_s": 1.0547014830834638,
+      "s": 29876.589040608204,
+      "s_over_rho": 28327.05701073137,
+      "spec": {
+        "factor_base": "koblitz-orbit",
+        "factor_base_params": {
+          "divisor": "0;1;2"
+        },
+        "linalg": "incremental-gauss",
+        "max_trials": 2000000,
+        "oracle": "descent-algebraic",
+        "oracle_params": {
+          "m": "2"
+        },
+        "seed": 123212691633,
+        "solver": "inherited-f4",
+        "solver_budget_seconds": 120,
+        "solver_params": {},
+        "targets": "Walk"
+      },
+      "total_gae": 35844349.7649542,
+      "verified": true,
+      "verify": {
+        "gae": 29.0,
+        "group_ops": {
+          "adds": 10,
+          "doubles": 19,
+          "scalar_mults": 1
+        },
+        "native": {},
+        "wall_ns": 11561
+      },
+      "wall_seconds": 14.311041416
+    },
+    {
+      "decomposition": {
+        "cost": {
+          "gae": 12039919.711416915,
+          "group_ops": {
+            "adds": 953,
+            "doubles": 676,
+            "scalar_mults": 36
+          },
+          "native": {
+            "canonicalisations": 0,
+            "direct_relations_skipped": 0,
+            "frobfold_mismatches": 0,
+            "inversions": 0,
+            "lift_failures": 0,
+            "lookups": 0,
+            "relations": 2,
+            "repeated_targets_skipped": 1,
+            "s4_hits": 0,
+            "s4_pairs": 0,
+            "solver_budget_exceeded": 0,
+            "solver_calls": 581,
+            "solver_ops": 411707260,
+            "sqrt_solves": 0,
+            "target_guard_probes": 582,
+            "trials": 582,
+            "unliftable_systems": 0,
+            "walk_jumps": 17,
+            "walk_pool_offsets": 1,
+            "walk_pool_ops": 57,
+            "walk_pool_restarts": 1,
+            "walk_restarts": 2,
+            "walk_steps": 580
+          },
+          "wall_ns": 4808529047
+        },
+        "description": "Weil-descend S_3 over the base's abscissa subspace and solve with inherited-f4",
+        "hit_rate": 0.003436426116838488,
+        "name": "descent-algebraic",
+        "relations_found": 2,
+        "setup": {
+          "gae": 0.0,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {},
+          "wall_ns": 134415
+        },
+        "solver": {
+          "budget_exceeded": 0,
+          "calls": 581,
+          "degree_over_bound": null,
+          "extra": {
+            "eliminated": 5,
+            "engine_overridden_by_environment": 0,
+            "infeasible_branches": 18438,
+            "max_degree": 1743,
+            "oversize": 0,
+            "propagations": 1722,
+            "reduction_cache_on": 0,
+            "reductions": 37837,
+            "splits": 17863,
+            "verification_tests": 13882
+          },
+          "gae": 12038286.336522914,
+          "name": "inherited-f4",
+          "ns_per_op": 11.462592272480208,
+          "op_unit": "word XORs (elimination, specialisation and linear elimination only)",
+          "ops": 411707260,
+          "peak_bytes": 0,
+          "priced_by": "measured",
+          "semi_regular_degree": 5,
+          "solving_degree_max": 0,
+          "solving_degree_mean": null,
+          "wall_ns": 4719232457
+        },
+        "summands": 2,
+        "system": {
+          "degrees": [
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "n_equations": 31,
+          "n_vars": 22,
+          "semi_regular_degree": 5
+        },
+        "targets_tried": 582
+      },
+      "exhausted": false,
+      "factor_base": {
+        "abscissae": 1025,
+        "columns": 35,
+        "cost": {
+          "gae": 223.183251,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "abscissae_scanned": 2048,
+            "as_solves": 2048,
+            "derived_counts": 1,
+            "frobenius_maps": 2049
+          },
+          "wall_ns": 2199949
+        },
+        "description": "the Frobenius-invariant subspace spanned by divisor factors 0;1;2, each signed Frobenius orbit folded onto one column",
+        "name": "koblitz-orbit",
+        "points_per_column": 58.542857142857144,
+        "signed_points": 2049
+      },
+      "group_order": 2147574356,
+      "instance": "K_0 / GF(2^31)",
+      "label": "koblitz-orbit[divisor=0;1;2] + descent-algebraic[m=2] + inherited-f4 + walk",
+      "linear_algebra": {
+        "cost": {
+          "gae": 0.06803000000000001,
+          "group_ops": {
+            "adds": 0,
+            "doubles": 0,
+            "scalar_mults": 0
+          },
+          "native": {
+            "columns": 36,
+            "pinned_by_repeated_row": 0,
+            "rank": 2,
+            "repeated_column_rows": 0,
+            "row_ops": 10,
+            "rows": 2,
+            "single_column_rows": 2,
+            "two_column_rows": 0
+          },
+          "wall_ns": 7208
+        },
+        "dependent": 0,
+        "name": "incremental-gauss",
+        "rank": 2,
+        "rows": 2,
+        "work": 10,
+        "work_unit": "row_ops"
+      },
+      "log2_r": 20.457029116748018,
+      "r": 1439393,
+      "recovered": 776937,
+      "rho_s": 1.0547014830834638,
+      "s": 10035.59366594124,
+      "s_over_rho": 9515.103398358522,
+      "spec": {
+        "factor_base": "koblitz-orbit",
+        "factor_base_params": {
+          "divisor": "0;1;2"
+        },
+        "linalg": "incremental-gauss",
+        "max_trials": 2000000,
+        "oracle": "descent-algebraic",
+        "oracle_params": {
+          "m": "2"
+        },
+        "seed": 123212732136,
+        "solver": "inherited-f4",
+        "solver_budget_seconds": 120,
+        "solver_params": {},
+        "targets": "Walk"
+      },
+      "total_gae": 12040173.962697914,
+      "verified": true,
+      "verify": {
+        "gae": 31.0,
+        "group_ops": {
+          "adds": 12,
+          "doubles": 19,
+          "scalar_mults": 1
+        },
+        "native": {},
+        "wall_ns": 11855
+      },
+      "wall_seconds": 4.810929984
+    }
+  ],
+  "schema_version": 1,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "893b39cf11f4ad387d168c940028fe2a89e5493b111938fe52a6e745016ada78",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "status": "complete",
+  "what_this_is": "Index-calculus configurations -- each a choice of factor base, target source, decomposition oracle, polynomial solver and relation matrix -- run end to end against a planted logarithm, with every stage's cost in group-addition equivalents and the total divided by sqrt(r).",
+  "what_this_is_not": [
+    "not a speed claim: a configuration on a toy instance is a measurement, and a comparison needs the matched reference rows AGENTS.md section 1 asks for",
+    "not a wall-clock benchmark: operation counts are the metric, wall time rides along",
+    "not a claim about any deployed curve"
+  ]
+}
+# exit 0 at 2026-09-27T03:12:08Z

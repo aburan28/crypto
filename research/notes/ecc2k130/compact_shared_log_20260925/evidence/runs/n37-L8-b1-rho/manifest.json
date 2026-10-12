@@ -1,0 +1,35 @@
+{
+  "F": 592,
+  "R": 8,
+  "block": 1,
+  "command": [
+    "/private/tmp/kic-sparse-shared-log-20260925/target/release/examples/koblitz_rho_batch_ks",
+    "37",
+    "0",
+    "signed_frobenius",
+    "8",
+    "202609253701"
+  ],
+  "environment": {
+    "KIC_RHO_BATCH_CORPUS": "sparse-shared-n37-b1-L8",
+    "KIC_RHO_DP_BITS": "4",
+    "KIC_RHO_PRECOMPUTE_WALKS": "0",
+    "KIC_RHO_TARGET_POINTS_JSONL": "/private/tmp/kic-shared-log-n37-20260925/L8-b1-rho/target_points.jsonl",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "executable_sha256": "b2890cbf2ff9c5a80062bd811a3e9a1ef3ee02dda0c6abbd5631cdba8d4e30a3",
+  "host": "Adams-MacBook-Pro.local",
+  "input_file": "target_points.jsonl",
+  "input_sha256": "2a5948232d41d34e31568240c0dcdd74535336a5452acc1c2ed7aac1e968a65e",
+  "input_spec_sha256": "ef2e8df8f90a6dcedbbd3d6595bfa71454d49041775980fd2ca51d0d4a67b783",
+  "length": 8,
+  "mode": "rho",
+  "n": 37,
+  "platform": "macOS-26.6-arm64-arm-64bit",
+  "rss_cap_bytes": 2147483648,
+  "schema_version": "1.0",
+  "source_commit": "8c9eff1c4b876d7d6d69a6c46f6ac7a16248cafa",
+  "source_path": "examples/koblitz_rho_batch_ks.rs",
+  "source_sha256": "fedacb54e441979c8c32860e7b5639e43799234741d49677010164564536d2c8",
+  "timeout_seconds": 180
+}

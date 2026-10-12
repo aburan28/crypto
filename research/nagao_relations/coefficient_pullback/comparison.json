@@ -1,0 +1,430 @@
+{
+  "stage_trial_count": 96,
+  "complete_stage_pairs": [
+    {
+      "key": [
+        11,
+        5,
+        [
+          1596,
+          964
+        ],
+        "first"
+      ],
+      "baseline": {
+        "additions": 28266,
+        "multiplications": 17080,
+        "squarings": 14332,
+        "inversionCalls": 29,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 59678
+      },
+      "candidate": {
+        "additions": 19183,
+        "multiplications": 17985,
+        "squarings": 2342,
+        "inversionCalls": 30,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 39510
+      },
+      "field_api_sum_ratio": 1.5104530498607946
+    },
+    {
+      "key": [
+        11,
+        5,
+        [
+          1596,
+          964
+        ],
+        "enumerate"
+      ],
+      "baseline": {
+        "additions": 35566,
+        "multiplications": 21438,
+        "squarings": 18095,
+        "inversionCalls": 35,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 75099
+      },
+      "candidate": {
+        "additions": 24277,
+        "multiplications": 22655,
+        "squarings": 2881,
+        "inversionCalls": 36,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 49813
+      },
+      "field_api_sum_ratio": 1.507618493164435
+    },
+    {
+      "key": [
+        11,
+        5,
+        [
+          1011,
+          1319
+        ],
+        "first"
+      ],
+      "baseline": {
+        "additions": 21758,
+        "multiplications": 13180,
+        "squarings": 10988,
+        "inversionCalls": 23,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 45926
+      },
+      "candidate": {
+        "additions": 15035,
+        "multiplications": 13845,
+        "squarings": 1862,
+        "inversionCalls": 24,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 30742
+      },
+      "field_api_sum_ratio": 1.4939171166482337
+    },
+    {
+      "key": [
+        11,
+        5,
+        [
+          1011,
+          1319
+        ],
+        "enumerate"
+      ],
+      "baseline": {
+        "additions": 35678,
+        "multiplications": 21438,
+        "squarings": 18095,
+        "inversionCalls": 35,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 75211
+      },
+      "candidate": {
+        "additions": 24543,
+        "multiplications": 22655,
+        "squarings": 2881,
+        "inversionCalls": 36,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 50079
+      },
+      "field_api_sum_ratio": 1.5018470816110545
+    },
+    {
+      "key": [
+        11,
+        5,
+        [
+          595,
+          1524
+        ],
+        "first"
+      ],
+      "baseline": {
+        "additions": 7620,
+        "multiplications": 4741,
+        "squarings": 3806,
+        "inversionCalls": 10,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 16167
+      },
+      "candidate": {
+        "additions": 5257,
+        "multiplications": 4919,
+        "squarings": 853,
+        "inversionCalls": 11,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 11029
+      },
+      "field_api_sum_ratio": 1.4658627255417536
+    },
+    {
+      "key": [
+        11,
+        5,
+        [
+          595,
+          1524
+        ],
+        "enumerate"
+      ],
+      "baseline": {
+        "additions": 35892,
+        "multiplications": 21600,
+        "squarings": 18140,
+        "inversionCalls": 37,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 75632
+      },
+      "candidate": {
+        "additions": 24467,
+        "multiplications": 22715,
+        "squarings": 2888,
+        "inversionCalls": 38,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 50070
+      },
+      "field_api_sum_ratio": 1.5105252646295186
+    },
+    {
+      "key": [
+        11,
+        5,
+        [
+          355,
+          1935
+        ],
+        "first"
+      ],
+      "baseline": {
+        "additions": 2977,
+        "multiplications": 1968,
+        "squarings": 1440,
+        "inversionCalls": 6,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 6385
+      },
+      "candidate": {
+        "additions": 2219,
+        "multiplications": 2049,
+        "squarings": 512,
+        "inversionCalls": 7,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 4780
+      },
+      "field_api_sum_ratio": 1.3357740585774058
+    },
+    {
+      "key": [
+        11,
+        5,
+        [
+          355,
+          1935
+        ],
+        "enumerate"
+      ],
+      "baseline": {
+        "additions": 35824,
+        "multiplications": 21610,
+        "squarings": 18131,
+        "inversionCalls": 39,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 75565
+      },
+      "candidate": {
+        "additions": 24517,
+        "multiplications": 22797,
+        "squarings": 2895,
+        "inversionCalls": 40,
+        "curveAdditionCalls": 0,
+        "curveDoublingCalls": 0,
+        "fieldOperations": 50209
+      },
+      "field_api_sum_ratio": 1.505009062120337
+    }
+  ],
+  "e2e_attempt_oracle_checks": 126,
+  "e2e_distinct_attempt_targets": 61,
+  "e2e_matched_attempt_paths": true,
+  "e2e_groups": [
+    {
+      "n": 5,
+      "variant": "quadratic-image",
+      "verified": 3,
+      "field_api_counts": {
+        "additions": 27206,
+        "multiplications": 27606,
+        "squarings": 9539,
+        "fieldOperations": 64351
+      },
+      "scalar_modular_counts": {
+        "additions": 162,
+        "multiplications": 168,
+        "inversions": 15
+      },
+      "phase_seconds": {
+        "setup": 0.006085854001867119,
+        "factor_base": 0.0016911530001380015,
+        "relation_collection": 0.05068593400210375,
+        "matrix": 0.00010620000466587953,
+        "individual": 0.009267289995477768,
+        "rho_walk": 0.0,
+        "final_verification": 0.00018582999837235548
+      },
+      "cold_wall_seconds": 0.06809973400231684,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "cost_over_floor": null
+    },
+    {
+      "n": 5,
+      "variant": "coefficient-pullback",
+      "verified": 3,
+      "field_api_counts": {
+        "additions": 16066,
+        "multiplications": 22476,
+        "squarings": 4595,
+        "fieldOperations": 43137
+      },
+      "scalar_modular_counts": {
+        "additions": 162,
+        "multiplications": 168,
+        "inversions": 15
+      },
+      "phase_seconds": {
+        "setup": 0.006134736999229062,
+        "factor_base": 0.0016440429972135462,
+        "relation_collection": 0.037329440005123615,
+        "matrix": 0.0001244630075234454,
+        "individual": 0.006801682004152099,
+        "rho_walk": 0.0,
+        "final_verification": 0.00018296499547432177
+      },
+      "cold_wall_seconds": 0.052300508996268036,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "cost_over_floor": null
+    },
+    {
+      "n": 5,
+      "variant": "rho",
+      "verified": 3,
+      "field_api_counts": {
+        "additions": 2037,
+        "multiplications": 3996,
+        "squarings": 717,
+        "fieldOperations": 6750
+      },
+      "scalar_modular_counts": {
+        "additions": 78,
+        "multiplications": 3,
+        "inversions": 3
+      },
+      "phase_seconds": {
+        "setup": 0.006453429003158817,
+        "factor_base": 0.0,
+        "relation_collection": 0.0,
+        "matrix": 0.0,
+        "individual": 0.0,
+        "rho_walk": 0.002148562005459098,
+        "final_verification": 0.0001813630005926825
+      },
+      "cold_wall_seconds": 0.008803583004919346,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "cost_over_floor": null
+    },
+    {
+      "n": 9,
+      "variant": "quadratic-image",
+      "verified": 3,
+      "field_api_counts": {
+        "additions": 226874,
+        "multiplications": 199396,
+        "squarings": 105191,
+        "fieldOperations": 531461
+      },
+      "scalar_modular_counts": {
+        "additions": 762,
+        "multiplications": 993,
+        "inversions": 33
+      },
+      "phase_seconds": {
+        "setup": 0.15014493800481432,
+        "factor_base": 0.007972643001266988,
+        "relation_collection": 0.552656299987575,
+        "matrix": 0.00042397200741106644,
+        "individual": 0.05327868000313174,
+        "rho_walk": 0.0,
+        "final_verification": 0.0009374999972351361
+      },
+      "cold_wall_seconds": 0.765547796003375,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "cost_over_floor": null
+    },
+    {
+      "n": 9,
+      "variant": "coefficient-pullback",
+      "verified": 3,
+      "field_api_counts": {
+        "additions": 115830,
+        "multiplications": 153397,
+        "squarings": 39495,
+        "fieldOperations": 308722
+      },
+      "scalar_modular_counts": {
+        "additions": 762,
+        "multiplications": 993,
+        "inversions": 33
+      },
+      "phase_seconds": {
+        "setup": 0.14893722100168816,
+        "factor_base": 0.008025921997614205,
+        "relation_collection": 0.31653848699716036,
+        "matrix": 0.0005866130049980711,
+        "individual": 0.03184303799935151,
+        "rho_walk": 0.0,
+        "final_verification": 0.000942576996749267
+      },
+      "cold_wall_seconds": 0.5069995560006646,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "cost_over_floor": null
+    },
+    {
+      "n": 9,
+      "variant": "rho",
+      "verified": 3,
+      "field_api_counts": {
+        "additions": 25866,
+        "multiplications": 45389,
+        "squarings": 19869,
+        "fieldOperations": 91124
+      },
+      "scalar_modular_counts": {
+        "additions": 141,
+        "multiplications": 27,
+        "inversions": 3
+      },
+      "phase_seconds": {
+        "setup": 0.1461128720002307,
+        "factor_base": 0.0,
+        "relation_collection": 0.0,
+        "matrix": 0.0,
+        "individual": 0.0,
+        "rho_walk": 0.012124146000132896,
+        "final_verification": 0.0009197340004902799
+      },
+      "cold_wall_seconds": 0.1591899819977698,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "cost_over_floor": null
+    }
+  ],
+  "interpretation": "Field API vectors and wall times are diagnostics; no calibrated common-operation speedup or normalized S is established.",
+  "input_sha256": {
+    "research/nagao_relations/coefficient_pullback/results/raw.jsonl": "cf33904eeb273f35ad857f011f570e4b7c122b38e52669f55714fff7e03af948",
+    "research/nagao_relations/coefficient_pullback/e2e_results/raw.jsonl": "dde6d8702c6d4ff420046320ff3060cfdd06516fca398b700fb51058b2774e06",
+    "/workspace/scratch/5ef6d6b590d6/crypto-experiments/research/nagao_relations/coefficient_pullback/compare.py": "033c3a145e9cd608ade4ea19086c04ce4e55553fe6eed7ce1123a52d201b1b86"
+  }
+}

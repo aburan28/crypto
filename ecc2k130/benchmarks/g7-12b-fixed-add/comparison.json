@@ -1,0 +1,62 @@
+{
+  "status": "complete-negative",
+  "hardware_key": "1f924b694c2e82c4fb97249871bafb50f5ab75057f69c87cc45661d87529a2e7",
+  "gpu": "NVIDIA RTX PRO 4500 Blackwell Server Edition",
+  "instance_type": "g7.2xlarge",
+  "power_limit_watts": 165.0,
+  "selected_binary_sha256": "8c4ed76a152cc135280a68fd3559c3bf71bef726ab73eae0e04014c2e27c6d02",
+  "fixed_add_binary_sha256": "1defe5b3f82172fdab5e3d0d83fd062c958dba80fd7639adab000da2eef32638",
+  "rows": [
+    {
+      "repetition": 0,
+      "run_id": "62173",
+      "scalar_updates": 34359738368,
+      "selected_million_updates_per_second": 6381.188,
+      "fixed_add_million_updates_per_second": 7619.793,
+      "fixed_add_over_selected": 1.1941025714960913
+    },
+    {
+      "repetition": 1,
+      "run_id": "62173",
+      "scalar_updates": 34359738368,
+      "selected_million_updates_per_second": 6321.422,
+      "fixed_add_million_updates_per_second": 7601.382,
+      "fixed_add_over_selected": 1.2024797585100315
+    },
+    {
+      "repetition": 2,
+      "run_id": "62173",
+      "scalar_updates": 34359738368,
+      "selected_million_updates_per_second": 6300.687,
+      "fixed_add_million_updates_per_second": 7543.261,
+      "fixed_add_over_selected": 1.1972124627044638
+    }
+  ],
+  "selected_median_million_updates_per_second": 6321.422,
+  "fixed_add_median_million_updates_per_second": 7601.382,
+  "raw_paired_ratio": {
+    "geometric_mean_ratio": 1.197926610696169,
+    "ci95_low": 1.1874577876311194,
+    "ci95_high": 1.2084877286263571,
+    "method": "paired Student-t interval on log ratios, df=2"
+  },
+  "collision_study": {
+    "field_degree": 23,
+    "planted_solves_per_mode": 2000,
+    "bad_recoveries_per_mode": 0,
+    "selected_mean_complete_iterations": 172.331,
+    "fixed_add_mean_complete_iterations": 241.105,
+    "fixed_add_over_selected_work_ratio": 1.3990808386187048,
+    "evidence": "collision-study.txt"
+  },
+  "collision_adjusted_median_million_iterations_per_second": 5433.125656630928,
+  "collision_adjusted_paired_ratio": {
+    "geometric_mean_ratio": 0.8562240133878662,
+    "ci95_low": 0.848741369943628,
+    "ci95_high": 0.8637726250468001,
+    "method": "raw paired log-ratio interval divided by measured fixed/selected mean collision-work ratio"
+  },
+  "candidate_raw_fraction_of_12b_goal": 0.6334485,
+  "candidate_adjusted_fraction_of_12b_goal": 0.45276047138591063,
+  "decision": "reject fixed-add; retain selected self-Frobenius walk"
+}

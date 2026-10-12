@@ -1,0 +1,85 @@
+{
+  "schema": "koblitz_stage198_final.v1",
+  "candidate_commit": "6519bd72b8fc5154d7ae71ed462177a69f7cb6f6",
+  "finalizer_commit": "6519bd72b8fc5154d7ae71ed462177a69f7cb6f6",
+  "decision_status": "CONFIRMED_FOR_DEFAULT_CHANGE",
+  "candidate_selected": false,
+  "runtime_default": "selected build-serial inner phases, unconditional Rayon BlockTables construction with fresh per-run word buffers, parallel row reduction, and the twelve-worker fixed-X1 outer batch",
+  "claim_boundary": "One opened n=59 decomposition target and a shape-selective elimination confirmation. A separate default-change commit and unset replay remain required; direct MITM and full automorphism-aware rho boundaries are unchanged, with no relation-yield, full-DLP, external-reproduction, novelty, or SOTA claim.",
+  "conflicts": null,
+  "confirmation": {
+    "all_correct": true,
+    "pair_ratios": [
+      {
+        "repeat": 1,
+        "hybrid_over_current": {
+          "wall": 0.7544888170981928,
+          "core": 0.8848933846167051,
+          "rss": 0.6009939260077305
+        }
+      },
+      {
+        "repeat": 2,
+        "hybrid_over_current": {
+          "wall": 0.9563057197209256,
+          "core": 0.8597753462763303,
+          "rss": 0.6300619342544068
+        }
+      },
+      {
+        "repeat": 3,
+        "hybrid_over_current": {
+          "wall": 0.9084329512326684,
+          "core": 0.879278587937195,
+          "rss": 0.7701637211663547
+        }
+      }
+    ],
+    "median_paired_ratios": {
+      "wall": 0.9084329512326684,
+      "core": 0.879278587937195,
+      "rss": 0.6300619342544068
+    },
+    "passed_performance_gate": true,
+    "status": "CONFIRMED_FOR_DEFAULT_CHANGE"
+  },
+  "inherited_stage197_result_sha256": "84b92c9d0e2b028095b48553ce33d7f07077d1590259dfd831422acc9e8de241",
+  "measured_stage_charge": {
+    "components": 11,
+    "wall_seconds_sum": 249.700592833,
+    "total_core_seconds_sum": 1362.3354470000002,
+    "peak_rss_bytes_max": 5192499200,
+    "single_core_seconds": null
+  },
+  "cumulative_measured_lower_bound": {
+    "components": 681,
+    "wall_seconds_sum": 25322.227678872,
+    "total_core_seconds_sum": 67684.179439,
+    "peak_rss_bytes_max": 6310576128,
+    "single_core_seconds": null
+  },
+  "complete_campaign_cost": null,
+  "unmetered_components": [
+    "development compilation and tests before the exact native build",
+    "final result write and final verification after a charged composition control"
+  ],
+  "artifacts": {
+    "confirmation_result": {
+      "path": "development/confirmation/result.json",
+      "bytes": 76723,
+      "sha256": "a311dd1d1ca5dff2ecacad4c454777efde57d90b49a464f77df978b7909de00b"
+    },
+    "confirmation_verification": {
+      "path": "development/confirmation/verification.json",
+      "bytes": 192,
+      "sha256": "21fd8b29f7291049c566abd3ed21188fe42528404af93a1be905436cb99eafe5"
+    },
+    "protocol": {
+      "path": "PROTOCOL.md",
+      "bytes": 3893,
+      "sha256": "b8abad90f3581a9d2b12f727c2a23e53be5ac78ac653f66c29e763180df18f18"
+    }
+  },
+  "all_seven_gates_passed": false,
+  "koblitz_index_calculus_sota": false
+}

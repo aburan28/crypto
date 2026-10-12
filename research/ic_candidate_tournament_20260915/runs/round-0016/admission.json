@@ -1,0 +1,39 @@
+{
+  "rule": "A candidate needs every smoke trial VERIFIED before development; incomplete arms have null costs.",
+  "stage": "smoke",
+  "tables": [
+    {
+      "S_Ir": 3374.420941449481,
+      "candidate_over_floor": 213595.8223910621,
+      "candidate_over_incumbent": 1,
+      "candidate_over_rho": 0.8129546190535271,
+      "class": "reference",
+      "scheduled_runs": 18,
+      "stage": "smoke",
+      "variant": "incumbent",
+      "verified_runs": 18
+    },
+    {
+      "S_Ir": 2997.113682465781,
+      "candidate_over_floor": 189712.8345614157,
+      "candidate_over_incumbent": 0.8881860723571645,
+      "candidate_over_rho": 0.7220549701017671,
+      "class": "engineering experiment",
+      "scheduled_runs": 18,
+      "stage": "smoke",
+      "variant": "scan_io",
+      "verified_runs": 18
+    },
+    {
+      "S_Ir": 4150.810958400253,
+      "candidate_over_floor": null,
+      "candidate_over_incumbent": 1.2300809621627322,
+      "candidate_over_rho": 1.0,
+      "class": "reference",
+      "scheduled_runs": 18,
+      "stage": "smoke",
+      "variant": "rho",
+      "verified_runs": 18
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/Volumes/SSD990/crypto-koblitz-stage28-replay-20260911/target/release/examples/koblitz_stage21_independent_replay",
+    "/Volumes/SSD990/koblitz-stage21-relation-yield-production-20260910-01/tasks/03-yield/result.json"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 900.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 8.442784582963213,
+    "user_seconds": 7.932629,
+    "system_seconds": 0.066592,
+    "total_core_seconds": 7.999221,
+    "single_core_seconds": 7.999221,
+    "peak_rss_bytes": 146636800,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

@@ -306,7 +306,7 @@ pub fn bleichenbacher_fft(
     snr_threshold: f64,
 ) -> Option<BleichenbacherPeak> {
     let m = samples.len();
-    if m < 2 || fft_log2_size < 1 || fft_log2_size > 28 {
+    if m < 2 || !(1..=28).contains(&fft_log2_size) {
         return None;
     }
     let n_size = 1usize << fft_log2_size;
@@ -420,7 +420,7 @@ mod tests {
 
     fn biased_nonce<R: RngCore>(rng: &mut R, k_bits: u32) -> BigUint {
         loop {
-            let bytes = ((k_bits + 7) / 8) as usize;
+            let bytes = k_bits.div_ceil(8) as usize;
             let mut buf = vec![0u8; bytes];
             rng.fill_bytes(&mut buf);
             let extra = (bytes as u32) * 8 - k_bits;

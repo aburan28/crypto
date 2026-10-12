@@ -1,0 +1,57 @@
+{
+  "schema": "n37-four-policy-sparse16-evidence-v1",
+  "status": "PASS_LOCAL_REPLAY",
+  "linux_ci_gate": "required before PR merge; GitHub check is authoritative",
+  "candidate_id": null,
+  "claim_scope": "exact four-policy PDP and rank stage diagnostic only; no IC/rho speed claim",
+  "protocol_commit": "469126b2",
+  "input_freeze_commit": "746166b0",
+  "producer_source_commit": "7039ab0b",
+  "measured_cargo_lockfile_archive": "Cargo.lock",
+  "source_lock_sha256": "82851447484b8bc3f59671b4b1e08fb0027b2e4d375d56d000ebeb518079339c",
+  "source_sha256": {
+    "examples/n37_four_policy_sparse16_prepare.rs": "63442c46bd030964bd996ddbd048c7c349090a29a2379739cba1477dc6ce12cd",
+    "examples/n37_four_policy_sparse16_inputs_replay.rs": "ce6036192d12dd82325f69fc468a55b4691b19db4ce8e887e3670a4159d5ccb9",
+    "examples/n37_four_policy_sparse16_pdp.rs": "0635dfdf1e79c26ddd91f5b43bf282dc623ba6fea4442b9b252422b3c44a61b0",
+    "examples/n37_four_policy_sparse16_pdp_replay.rs": "c9b5f21ac9071c5ff2d33f6e77e010e565b8b855432d5661294ef8154f4f5c6b",
+    "examples/support/n37_policy_common.rs": "ffe89798e42c70e28075094db9541ca8bc79f92d73d9780aec4112cfe8adb99b",
+    "Cargo.lock": "b58ae26e7c52a01152cf09535f2ca8741fc0fbb29c09156d0c32ce11b2f53bda"
+  },
+  "input_sha256": {
+    "inputs/FROZEN.json": "0e6dc1c988d1183413f76f24a375c4daa6147e45d8ae243b2b7bda1a0ee86a90",
+    "inputs/points-b0.jsonl": "642e5812234ca3d439ea191238d47bdb3561f266b823095607cfc1fa2b968004",
+    "inputs/points-b1.jsonl": "05d5c82c0a885edb568a1a8276810b289edd46d1857415b5f60dc9b009e9b3eb",
+    "inputs/labels-b0.jsonl": "ab3bc90d3b789702ccd388906297fab0806bb4575f0e421836685a0c7e89aace",
+    "inputs/labels-b1.jsonl": "7de577bca854402cbc978358e9344edd487c830591ffcb2954dee11ea7e115b8",
+    "INPUT_REPLAY.json": "1ef722a059a7b0badf0b821aeffd40e4090a01c56f9a116c82ea58d05a7d4347"
+  },
+  "binary_sha256": {
+    "pdp": "247afcc8746d3a7163899a37ec373d2f6f2be011d74c87641547b4c1783cc49c",
+    "pdp_replay": "c32262d6f67b4429bd4fe9b6d64e0e2d0c2060f512cc8957e28064367bb12390"
+  },
+  "result": {
+    "compressed_path": "RESULT.json.gz",
+    "compressed_bytes": 180373,
+    "compressed_sha256": "dbafb183d4edf27813dd15bc22aed6e1fe9809887aa3cd54bedf589120d43357",
+    "expanded_bytes": 4669993,
+    "expanded_sha256": "a17e6b2cad2f33e6f9df950bed272eb6dcc85bd13594625527250e61e7c0e1f7",
+    "replay_path": "REPLAY_INITIAL.json",
+    "replay_sha256": "8b4b4c184cee5541f233a706d432c3f733c30b5562a9feae6e821f691142a05e"
+  },
+  "mutation_receipt_sha256": {
+    "decision": "65ff780c1bea471487306955a7801c7cd7d7f221f3928ccb9324424de14983ae",
+    "hit_flag": "d0f81a48987f21ca9aaa7e8bf2602ff1cbf4e7b33b063f64cccd5dd333adad59",
+    "rank_row": "1fd5c972707a70f0cde9590772ceecb9120d254ea015f5de86d7ae41f8a320be",
+    "target_stderr": "867d71395a8fad339eb3796be132cb2d7659de8dc3e606e637afde6897158b5f",
+    "witness": "1ba6916d0887427c0cc0e9b706078ebe851e1b0ff238460f91d34c56a78923c9"
+  },
+  "host": {
+    "os": "Darwin 25.6.0",
+    "architecture": "arm64",
+    "cpu": "Apple M4 Pro, 10 performance plus 4 efficiency cores",
+    "memory_gb": 48,
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+    "cargo": "cargo 1.93.1 (Homebrew)",
+    "isolation": "L0; wall times descriptive only"
+  }
+}

@@ -1,0 +1,72 @@
+kernel 4walk: 3632 SASS instructions, regs 102, spills ('0', '0')
+
+subroutines (own SASS, then with nested calls):
+range               n    alu   imad  quart  clmad    mem   called from
+51f0  -5d10       179    160      1      0      6      0   0x4410 0x5100
+5d20  -6cc0       251    242      8      0      0      0   0x3980
+6cd0  -7d70       267    257      9      0      0      0   0x35f0
+7d80  -8e70       272    262      9      0      0      0   0x3540
+8e80  -a100       297    230      9      0      0     57   0x3480
+a110  -b390       297    230      9      0      0     57   0x33c0
+b3a0  -ca10       360    307      2      0     12      0   0x2650 0x4350
+ca20  -e0d0       364    340      0      5      6      0   0x2e50 0x33a0 0x3460 0x3520 0x35d0 0x3690 0x3960 0x3a20
+e0e0  -e200        19     18      0      0      0      0   0xc0
+
+loops in the kernel body (own SASS):
+start      end             n    alu   imad  quart  clmad    mem
+170        1f0             9      4      2      0      0      2
+270        3c0            22      6      7      0      0      8
+570        51d0         1223    915     26     35     20    119
+600        27e0          543    370     16     14      0    105
+22a0       2320            9      8      0      0      0      0
+41c0       51c0          257    227     10      0      0     14
+
+step loop 570-51d0; slot loops: ['600-27e0', '41c0-51c0']
+
+per scalar update, batch 16 (callees attributed to their call sites):
+                                          n      alu     imad  quarter    clmad      mem
+slot loop 0                             903      677       18       14       12      105
+slot loop 1                             975      854       14        0       24       14
+inversion + step overhead, /B         294.9    266.2      2.8      3.8     4.25      7.1
+TOTAL per update                     2172.9   1797.2     34.8     17.8    40.25    126.1
+ALU slots/update (alu + 2.01 imad + 3.97 quarter-rate) = 1937.8 ; clmad/update = 40.25 ; instr/update = 2172.9
+
+opcode histogram, slot loops + their callees (static):
+  LOP3           647
+  SHF            354
+  IMAD           144
+  NOP             92
+  LDS             71
+  MOV             67
+  PRMT            50
+  IADD            37
+  VIMNMX          32
+  CLMAD           30
+  LDG             23
+  STG             21
+  ISETP           17
+  BRA             15
+  LDCU            13
+  POPC            11
+  IADD3           10
+  LEA              8
+  S2R              6
+  BSSY             5
+  BSYNC            5
+  HFMA2            5
+  SEL              5
+  VOTEU            4
+  CALL             4
+  LDC              3
+  UFLO             3
+  REDG             3
+  RET              3
+  BREV             2
+  UMOV             2
+  FLO              1
+  ATOMG            1
+  SHFL             1
+  UIMAD            1
+  UIADD3           1
+  S2UR             1
+  ULEA             1

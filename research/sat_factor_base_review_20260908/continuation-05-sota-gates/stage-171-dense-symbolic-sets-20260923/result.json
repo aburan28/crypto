@@ -1,0 +1,3537 @@
+{
+  "campaign_accounting": {
+    "complete_campaign_cost": null,
+    "measured_lower_bound": {
+      "peak_rss_bytes": 6310576128,
+      "resource_components": 313,
+      "summed_wall_seconds": 9669.289576290957,
+      "total_core_seconds": 19529.306858000004
+    },
+    "reason_complete_is_null": "exploratory compiles and tests were not all outer-metered, and one early profiler receipt was overwritten before archival; the retained sum is a measured lower bound",
+    "stage170_measured_lower_bound": {
+      "peak_rss_bytes": 6310576128,
+      "resource_components": 264,
+      "summed_wall_seconds": 8808.374611916948,
+      "total_core_seconds": 12423.234481000003
+    },
+    "stage171_incremental_measured": {
+      "peak_rss_bytes": 3561144320,
+      "resource_components": 49,
+      "summed_wall_seconds": 860.9149643740093,
+      "total_core_seconds": 7106.0723769999995
+    },
+    "unmetered_scope": [
+      "some exploratory compilation and focused tests",
+      "one overwritten early profiler receipt",
+      "score composition, documentation and Git operations"
+    ]
+  },
+  "claim_boundary": "Same-target engineering after the Stage-169 truth was opened. It improves the repository-native F4 symbolic-preprocessing path and permits one complete fixed-X1 batch. It is not a fresh-target distribution, complete index calculus, rho crossover, independent reproduction, novelty review, or SOTA.",
+  "clean_build": {
+    "artifacts": {
+      "metrics": {
+        "bytes": 487,
+        "path": "development/clean-build/metrics.json",
+        "sha256": "1bed2f6f61cdc97316df9e4564a74ea134128b59a1679a28441e32989aa4fbf6"
+      },
+      "script": {
+        "bytes": 1389,
+        "path": "development/clean-build-6de26d8c.sh",
+        "sha256": "15ed5e64cc592a8f5cf9ca54906135ab08fd463417cd9a03f372b47d9856a725"
+      },
+      "stderr": {
+        "bytes": 34121,
+        "path": "development/clean-build/stderr",
+        "sha256": "f05896e39e907869f2d01b2a2d1d1aafd7842203407e86cecb041d33f016c9be"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "development/clean-build/stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "failed_attempts": [
+      {
+        "metrics": {
+          "bytes": 481,
+          "path": "development/clean-build/failed-default-cache.metrics.json",
+          "sha256": "efdb937f3edf749f905218b8d81a41dac9046ed62721aa0c599fe61fba650e15"
+        },
+        "reason": "offline Cargo home lacked the registry index; no binary produced",
+        "stderr": {
+          "bytes": 364,
+          "path": "development/clean-build/failed-default-cache.stderr",
+          "sha256": "519bd4fc0653d589b259ab639b18f088b6aacd66f20082bed9ffddeaf8bd3883"
+        }
+      },
+      {
+        "metrics": {
+          "bytes": 527,
+          "path": "development/clean-build/failed-vendor-wrong-cwd.metrics.json",
+          "sha256": "785d89a67b1411684deca18f33dc6ffea2e2ff6c931a079d4b3578232f016973"
+        },
+        "reason": "Cargo ran outside the extracted source and did not discover vendor config",
+        "stderr": {
+          "bytes": 364,
+          "path": "development/clean-build/failed-vendor-wrong-cwd.stderr",
+          "sha256": "519bd4fc0653d589b259ab639b18f088b6aacd66f20082bed9ffddeaf8bd3883"
+        }
+      }
+    ],
+    "process": {
+      "command": [
+        "/Volumes/SSD990/kic-f4-stage171-dev/clean-build-6de26d8c.sh"
+      ],
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 1714372608,
+        "single_core_seconds": 166.665865,
+        "system_seconds": 4.280912,
+        "total_core_seconds": 166.665865,
+        "user_seconds": 162.384953,
+        "wall_seconds": 170.14715320800315
+      },
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    }
+  },
+  "clean_paired_repeats": {
+    "candidates": [
+      {
+        "artifacts": {
+          "metrics": {
+            "bytes": 550,
+            "path": "development/clean-pairs/candidate-r1/metrics.json",
+            "sha256": "c483e480591941f0e5c13359c9365516cd90b57eb4a9def9ecdc1da646342616"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "development/clean-pairs/candidate-r1/stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 6565,
+            "path": "development/clean-pairs/candidate-r1/stdout.json",
+            "sha256": "39547f90220efa17784656a4003315f67103909a2b38d483699a4c7bca76eed6"
+          }
+        },
+        "name": "candidate-r1",
+        "process": {
+          "command": [
+            "/Volumes/SSD990/koblitz-native-f4-build21-6de26d8c/bin/koblitz_pdp_backend",
+            "native-f4",
+            "manifest.json",
+            "300"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 2932424704,
+            "single_core_seconds": null,
+            "system_seconds": 1.583104,
+            "total_core_seconds": 159.504427,
+            "user_seconds": 157.921323,
+            "wall_seconds": 14.992138957997668
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 360.0
+        },
+        "report": {
+          "algebraic_roots": 0,
+          "backend": "native-f4",
+          "budget_seconds": 300,
+          "conflicts": null,
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 49808299475,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 376832,
+              "dense_symbolic_set_steps": 1204,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 94980987815,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 811072,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 11460318567,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 166074203545
+          },
+          "exhaustive": true,
+          "factor_base_contract": {
+            "discrete_log_labels_used": false,
+            "target_subgroup_enumerated": false
+          },
+          "fixed_x1_masks_visited": 512,
+          "fixed_x1_nonrational_skipped": 270,
+          "fixed_x1_systems_completed": 242,
+          "fixed_x1_systems_constructed": 242,
+          "fixed_x1_values": 512,
+          "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+          "regenerated_source_exact": true,
+          "same_instance_fields": [
+            "n",
+            "ell",
+            "m",
+            "curve",
+            "algebraic_factor_base",
+            "affine_target"
+          ],
+          "schema": "koblitz_pdp_isolated_backend.v1",
+          "single_thread_requested": false,
+          "solver": "f4-f2",
+          "solver_column_index": "dense_monomial_domain_to_20_variables_else_splitmix64_hash",
+          "solver_constructor": "fixed_x1_constant_linear_specialisation",
+          "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, dense duplicate-cancelling monomial products, bit-packed symbolic monomial sets on bounded Boolean domains, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis",
+          "solver_echelon_policy": "shape_selected_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming",
+          "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "solver_equations_total": 14278,
+          "solver_internal_mask_hasher": "splitmix64_for_trusted_u64_masks_with_exact_key_equality",
+          "solver_max_degree": 4,
+          "solver_monomial_multiply": "epoch_dense_parity_cancel_then_encoded_u32_order_sort",
+          "solver_monomial_multiply_control": "PQ_F4_DISABLE_DENSE_MUL=1",
+          "solver_pair_installer": "order_preserving_batch_update_env_PQ_F4_DISABLE_BATCH_INSERT",
+          "solver_pair_selector": "epoch_dense_lcm_groups_to_20_variables_else_sorted_lcm_exact_submask_equivalent_to_quadratic_update",
+          "solver_parallel_construction": true,
+          "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+          "solver_rayon_threads_requested": 12,
+          "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+          "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+          "solver_symbolic_monomial_set_control": "PQ_F4_DISABLE_DENSE_SYMBOLIC_SET=1",
+          "solver_symbolic_monomial_sets": "reused_bit_packed_complete_boolean_domain_to_20_variables_else_splitmix64_hash_sets",
+          "solver_symbolic_reducer_selector": "exact_submask_index_when_cheaper_else_linear_scan_with_shortest_reducer_and_index_tie_break",
+          "solver_terms_max_per_system": 62087,
+          "solver_terms_total": 14515915,
+          "solver_variables": 18,
+          "solver_x1_batch_cap": 512,
+          "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+          "solver_x1_batch_size": 512,
+          "solver_x1_batches_completed": 1,
+          "solver_x1_order": "hamming_weight_then_mask",
+          "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+          "solver_x1_order_target_independent": true,
+          "solver_x1_speculative_systems_completed": 0,
+          "source_artifacts": {
+            "cryptominisat_xor_dimacs": {
+              "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+              "bytes": 208168,
+              "path": "instance.xor.cnf",
+              "valid": true
+            },
+            "magma_boolean_f4": {
+              "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+              "bytes": 373254,
+              "path": "instance.magma",
+              "valid": true
+            },
+            "wdsat_anf": {
+              "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+              "bytes": 236183,
+              "path": "instance.anf",
+              "valid": true
+            }
+          },
+          "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+          "source_instance_verified": true,
+          "source_model_valid": null,
+          "source_representation": "symmetrised_s4",
+          "source_variables": 78,
+          "source_witness_valid": null,
+          "status": "unsat",
+          "timing_ns": {
+            "factor_base_x1_membership": 33203165,
+            "fixed_x1_s4_construction": 535227625,
+            "native_f4_whole": 14921102875,
+            "source_verification": 33625125
+          },
+          "witness_points": null
+        }
+      },
+      {
+        "artifacts": {
+          "metrics": {
+            "bytes": 549,
+            "path": "development/clean-pairs/candidate-r2/metrics.json",
+            "sha256": "a90bf3f7698b5f8b5688a74f05c2cd0b8a04b06902a6644531d593e8be0497c1"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "development/clean-pairs/candidate-r2/stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 6565,
+            "path": "development/clean-pairs/candidate-r2/stdout.json",
+            "sha256": "432f60f10448fe91f5e688511424fabcea83d50b9649d351024b5a4b3551c480"
+          }
+        },
+        "name": "candidate-r2",
+        "process": {
+          "command": [
+            "/Volumes/SSD990/koblitz-native-f4-build21-6de26d8c/bin/koblitz_pdp_backend",
+            "native-f4",
+            "manifest.json",
+            "300"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 2866102272,
+            "single_core_seconds": null,
+            "system_seconds": 1.679981,
+            "total_core_seconds": 159.370714,
+            "user_seconds": 157.690733,
+            "wall_seconds": 15.01399154200044
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 360.0
+        },
+        "report": {
+          "algebraic_roots": 0,
+          "backend": "native-f4",
+          "budget_seconds": 300,
+          "conflicts": null,
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 49514262101,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 376832,
+              "dense_symbolic_set_steps": 1204,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 95224616579,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 407680,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 11290454916,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 166002762083
+          },
+          "exhaustive": true,
+          "factor_base_contract": {
+            "discrete_log_labels_used": false,
+            "target_subgroup_enumerated": false
+          },
+          "fixed_x1_masks_visited": 512,
+          "fixed_x1_nonrational_skipped": 270,
+          "fixed_x1_systems_completed": 242,
+          "fixed_x1_systems_constructed": 242,
+          "fixed_x1_values": 512,
+          "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+          "regenerated_source_exact": true,
+          "same_instance_fields": [
+            "n",
+            "ell",
+            "m",
+            "curve",
+            "algebraic_factor_base",
+            "affine_target"
+          ],
+          "schema": "koblitz_pdp_isolated_backend.v1",
+          "single_thread_requested": false,
+          "solver": "f4-f2",
+          "solver_column_index": "dense_monomial_domain_to_20_variables_else_splitmix64_hash",
+          "solver_constructor": "fixed_x1_constant_linear_specialisation",
+          "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, dense duplicate-cancelling monomial products, bit-packed symbolic monomial sets on bounded Boolean domains, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis",
+          "solver_echelon_policy": "shape_selected_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming",
+          "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "solver_equations_total": 14278,
+          "solver_internal_mask_hasher": "splitmix64_for_trusted_u64_masks_with_exact_key_equality",
+          "solver_max_degree": 4,
+          "solver_monomial_multiply": "epoch_dense_parity_cancel_then_encoded_u32_order_sort",
+          "solver_monomial_multiply_control": "PQ_F4_DISABLE_DENSE_MUL=1",
+          "solver_pair_installer": "order_preserving_batch_update_env_PQ_F4_DISABLE_BATCH_INSERT",
+          "solver_pair_selector": "epoch_dense_lcm_groups_to_20_variables_else_sorted_lcm_exact_submask_equivalent_to_quadratic_update",
+          "solver_parallel_construction": true,
+          "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+          "solver_rayon_threads_requested": 12,
+          "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+          "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+          "solver_symbolic_monomial_set_control": "PQ_F4_DISABLE_DENSE_SYMBOLIC_SET=1",
+          "solver_symbolic_monomial_sets": "reused_bit_packed_complete_boolean_domain_to_20_variables_else_splitmix64_hash_sets",
+          "solver_symbolic_reducer_selector": "exact_submask_index_when_cheaper_else_linear_scan_with_shortest_reducer_and_index_tie_break",
+          "solver_terms_max_per_system": 62087,
+          "solver_terms_total": 14515915,
+          "solver_variables": 18,
+          "solver_x1_batch_cap": 512,
+          "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+          "solver_x1_batch_size": 512,
+          "solver_x1_batches_completed": 1,
+          "solver_x1_order": "hamming_weight_then_mask",
+          "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+          "solver_x1_order_target_independent": true,
+          "solver_x1_speculative_systems_completed": 0,
+          "source_artifacts": {
+            "cryptominisat_xor_dimacs": {
+              "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+              "bytes": 208168,
+              "path": "instance.xor.cnf",
+              "valid": true
+            },
+            "magma_boolean_f4": {
+              "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+              "bytes": 373254,
+              "path": "instance.magma",
+              "valid": true
+            },
+            "wdsat_anf": {
+              "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+              "bytes": 236183,
+              "path": "instance.anf",
+              "valid": true
+            }
+          },
+          "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+          "source_instance_verified": true,
+          "source_model_valid": null,
+          "source_representation": "symmetrised_s4",
+          "source_variables": 78,
+          "source_witness_valid": null,
+          "status": "unsat",
+          "timing_ns": {
+            "factor_base_x1_membership": 32584744,
+            "fixed_x1_s4_construction": 519459250,
+            "native_f4_whole": 14945902083,
+            "source_verification": 32994875
+          },
+          "witness_points": null
+        }
+      },
+      {
+        "artifacts": {
+          "metrics": {
+            "bytes": 549,
+            "path": "development/clean-pairs/candidate-r3/metrics.json",
+            "sha256": "83681a2690549fb510f6efeb6ffda45b685ee29cdfbce6a6b5279f07d41abfd1"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "development/clean-pairs/candidate-r3/stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 6565,
+            "path": "development/clean-pairs/candidate-r3/stdout.json",
+            "sha256": "295b38ef3d7c220b44bf006246a643811d83af85873f55aa5a1834bb3fc2656a"
+          }
+        },
+        "name": "candidate-r3",
+        "process": {
+          "command": [
+            "/Volumes/SSD990/koblitz-native-f4-build21-6de26d8c/bin/koblitz_pdp_backend",
+            "native-f4",
+            "manifest.json",
+            "300"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 2982952960,
+            "single_core_seconds": null,
+            "system_seconds": 1.611499,
+            "total_core_seconds": 152.021139,
+            "user_seconds": 150.40964,
+            "wall_seconds": 14.518537500000093
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 360.0
+        },
+        "report": {
+          "algebraic_roots": 0,
+          "backend": "native-f4",
+          "budget_seconds": 300,
+          "conflicts": null,
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 47537148126,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 376832,
+              "dense_symbolic_set_steps": 1204,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 90402366943,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 407680,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 10729173961,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 157948885712
+          },
+          "exhaustive": true,
+          "factor_base_contract": {
+            "discrete_log_labels_used": false,
+            "target_subgroup_enumerated": false
+          },
+          "fixed_x1_masks_visited": 512,
+          "fixed_x1_nonrational_skipped": 270,
+          "fixed_x1_systems_completed": 242,
+          "fixed_x1_systems_constructed": 242,
+          "fixed_x1_values": 512,
+          "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+          "regenerated_source_exact": true,
+          "same_instance_fields": [
+            "n",
+            "ell",
+            "m",
+            "curve",
+            "algebraic_factor_base",
+            "affine_target"
+          ],
+          "schema": "koblitz_pdp_isolated_backend.v1",
+          "single_thread_requested": false,
+          "solver": "f4-f2",
+          "solver_column_index": "dense_monomial_domain_to_20_variables_else_splitmix64_hash",
+          "solver_constructor": "fixed_x1_constant_linear_specialisation",
+          "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, dense duplicate-cancelling monomial products, bit-packed symbolic monomial sets on bounded Boolean domains, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis",
+          "solver_echelon_policy": "shape_selected_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming",
+          "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "solver_equations_total": 14278,
+          "solver_internal_mask_hasher": "splitmix64_for_trusted_u64_masks_with_exact_key_equality",
+          "solver_max_degree": 4,
+          "solver_monomial_multiply": "epoch_dense_parity_cancel_then_encoded_u32_order_sort",
+          "solver_monomial_multiply_control": "PQ_F4_DISABLE_DENSE_MUL=1",
+          "solver_pair_installer": "order_preserving_batch_update_env_PQ_F4_DISABLE_BATCH_INSERT",
+          "solver_pair_selector": "epoch_dense_lcm_groups_to_20_variables_else_sorted_lcm_exact_submask_equivalent_to_quadratic_update",
+          "solver_parallel_construction": true,
+          "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+          "solver_rayon_threads_requested": 12,
+          "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+          "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+          "solver_symbolic_monomial_set_control": "PQ_F4_DISABLE_DENSE_SYMBOLIC_SET=1",
+          "solver_symbolic_monomial_sets": "reused_bit_packed_complete_boolean_domain_to_20_variables_else_splitmix64_hash_sets",
+          "solver_symbolic_reducer_selector": "exact_submask_index_when_cheaper_else_linear_scan_with_shortest_reducer_and_index_tie_break",
+          "solver_terms_max_per_system": 62087,
+          "solver_terms_total": 14515915,
+          "solver_variables": 18,
+          "solver_x1_batch_cap": 512,
+          "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+          "solver_x1_batch_size": 512,
+          "solver_x1_batches_completed": 1,
+          "solver_x1_order": "hamming_weight_then_mask",
+          "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+          "solver_x1_order_target_independent": true,
+          "solver_x1_speculative_systems_completed": 0,
+          "source_artifacts": {
+            "cryptominisat_xor_dimacs": {
+              "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+              "bytes": 208168,
+              "path": "instance.xor.cnf",
+              "valid": true
+            },
+            "magma_boolean_f4": {
+              "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+              "bytes": 373254,
+              "path": "instance.magma",
+              "valid": true
+            },
+            "wdsat_anf": {
+              "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+              "bytes": 236183,
+              "path": "instance.anf",
+              "valid": true
+            }
+          },
+          "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+          "source_instance_verified": true,
+          "source_model_valid": null,
+          "source_representation": "symmetrised_s4",
+          "source_variables": 78,
+          "source_witness_valid": null,
+          "status": "unsat",
+          "timing_ns": {
+            "factor_base_x1_membership": 32782322,
+            "fixed_x1_s4_construction": 493879125,
+            "native_f4_whole": 14449557875,
+            "source_verification": 33280917
+          },
+          "witness_points": null
+        }
+      }
+    ],
+    "controls": [
+      {
+        "artifacts": {
+          "metrics": {
+            "bytes": 549,
+            "path": "development/clean-pairs/control-r1/metrics.json",
+            "sha256": "f150a4bf46b0552028df9bbf0547e2561a8c7e86af3a96724486f9322e187e43"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "development/clean-pairs/control-r1/stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 6468,
+            "path": "development/clean-pairs/control-r1/stdout.json",
+            "sha256": "75f6c43e3082aa7ae455a9addc124a13c4361220d0bcbb40884cac8c50d05fe0"
+          }
+        },
+        "name": "control-r1",
+        "process": {
+          "command": [
+            "/Volumes/SSD990/koblitz-native-f4-build21-6de26d8c/bin/koblitz_pdp_backend",
+            "native-f4",
+            "manifest.json",
+            "300"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 3206152192,
+            "single_core_seconds": null,
+            "system_seconds": 1.518966,
+            "total_core_seconds": 155.915346,
+            "user_seconds": 154.39638,
+            "wall_seconds": 15.190197000003536
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 360.0
+        },
+        "report": {
+          "algebraic_roots": 0,
+          "backend": "native-f4",
+          "budget_seconds": 300,
+          "conflicts": null,
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 57311735957,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 0,
+              "dense_symbolic_set_steps": 0,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 90357739011,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 811072,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 11511006822,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 168919746368
+          },
+          "exhaustive": true,
+          "factor_base_contract": {
+            "discrete_log_labels_used": false,
+            "target_subgroup_enumerated": false
+          },
+          "fixed_x1_masks_visited": 512,
+          "fixed_x1_nonrational_skipped": 270,
+          "fixed_x1_systems_completed": 242,
+          "fixed_x1_systems_constructed": 242,
+          "fixed_x1_values": 512,
+          "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+          "regenerated_source_exact": true,
+          "same_instance_fields": [
+            "n",
+            "ell",
+            "m",
+            "curve",
+            "algebraic_factor_base",
+            "affine_target"
+          ],
+          "schema": "koblitz_pdp_isolated_backend.v1",
+          "single_thread_requested": false,
+          "solver": "f4-f2",
+          "solver_column_index": "dense_monomial_domain_to_20_variables_else_splitmix64_hash",
+          "solver_constructor": "fixed_x1_constant_linear_specialisation",
+          "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, dense duplicate-cancelling monomial products, hash-backed symbolic monomial sets, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis",
+          "solver_echelon_policy": "shape_selected_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming",
+          "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "solver_equations_total": 14278,
+          "solver_internal_mask_hasher": "splitmix64_for_trusted_u64_masks_with_exact_key_equality",
+          "solver_max_degree": 4,
+          "solver_monomial_multiply": "epoch_dense_parity_cancel_then_encoded_u32_order_sort",
+          "solver_monomial_multiply_control": "PQ_F4_DISABLE_DENSE_MUL=1",
+          "solver_pair_installer": "order_preserving_batch_update_env_PQ_F4_DISABLE_BATCH_INSERT",
+          "solver_pair_selector": "epoch_dense_lcm_groups_to_20_variables_else_sorted_lcm_exact_submask_equivalent_to_quadratic_update",
+          "solver_parallel_construction": true,
+          "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+          "solver_rayon_threads_requested": 12,
+          "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+          "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+          "solver_symbolic_monomial_set_control": "PQ_F4_DISABLE_DENSE_SYMBOLIC_SET=1",
+          "solver_symbolic_monomial_sets": "splitmix64_hash_sets",
+          "solver_symbolic_reducer_selector": "exact_submask_index_when_cheaper_else_linear_scan_with_shortest_reducer_and_index_tie_break",
+          "solver_terms_max_per_system": 62087,
+          "solver_terms_total": 14515915,
+          "solver_variables": 18,
+          "solver_x1_batch_cap": 512,
+          "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+          "solver_x1_batch_size": 512,
+          "solver_x1_batches_completed": 1,
+          "solver_x1_order": "hamming_weight_then_mask",
+          "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+          "solver_x1_order_target_independent": true,
+          "solver_x1_speculative_systems_completed": 0,
+          "source_artifacts": {
+            "cryptominisat_xor_dimacs": {
+              "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+              "bytes": 208168,
+              "path": "instance.xor.cnf",
+              "valid": true
+            },
+            "magma_boolean_f4": {
+              "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+              "bytes": 373254,
+              "path": "instance.magma",
+              "valid": true
+            },
+            "wdsat_anf": {
+              "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+              "bytes": 236183,
+              "path": "instance.anf",
+              "valid": true
+            }
+          },
+          "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+          "source_instance_verified": true,
+          "source_model_valid": null,
+          "source_representation": "symmetrised_s4",
+          "source_variables": 78,
+          "source_witness_valid": null,
+          "status": "unsat",
+          "timing_ns": {
+            "factor_base_x1_membership": 33967362,
+            "fixed_x1_s4_construction": 504928208,
+            "native_f4_whole": 15119273000,
+            "source_verification": 33429125
+          },
+          "witness_points": null
+        }
+      },
+      {
+        "artifacts": {
+          "metrics": {
+            "bytes": 566,
+            "path": "development/clean-pairs/control-r2/metrics.json",
+            "sha256": "2ebf8e8a00ba6921e9bf6323335b771dd30cc8758f22024a4e1772f464ee49c9"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "development/clean-pairs/control-r2/stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 6468,
+            "path": "development/clean-pairs/control-r2/stdout.json",
+            "sha256": "b3c335b604dcb7214e3cb372801e2250a0f54fb11ab0be64adcf6b2964cf15f2"
+          }
+        },
+        "name": "control-r2",
+        "process": {
+          "command": [
+            "/Volumes/SSD990/koblitz-native-f4-build21-6de26d8c/bin/koblitz_pdp_backend",
+            "native-f4",
+            "manifest.json",
+            "300"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 3479863296,
+            "single_core_seconds": null,
+            "system_seconds": 1.686761,
+            "total_core_seconds": 162.53768499999998,
+            "user_seconds": 160.850924,
+            "wall_seconds": 15.235668249995797
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 360.0
+        },
+        "report": {
+          "algebraic_roots": 0,
+          "backend": "native-f4",
+          "budget_seconds": 300,
+          "conflicts": null,
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 56377928837,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 0,
+              "dense_symbolic_set_steps": 0,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 91460157437,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 407680,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 10837830798,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 168564938993
+          },
+          "exhaustive": true,
+          "factor_base_contract": {
+            "discrete_log_labels_used": false,
+            "target_subgroup_enumerated": false
+          },
+          "fixed_x1_masks_visited": 512,
+          "fixed_x1_nonrational_skipped": 270,
+          "fixed_x1_systems_completed": 242,
+          "fixed_x1_systems_constructed": 242,
+          "fixed_x1_values": 512,
+          "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+          "regenerated_source_exact": true,
+          "same_instance_fields": [
+            "n",
+            "ell",
+            "m",
+            "curve",
+            "algebraic_factor_base",
+            "affine_target"
+          ],
+          "schema": "koblitz_pdp_isolated_backend.v1",
+          "single_thread_requested": false,
+          "solver": "f4-f2",
+          "solver_column_index": "dense_monomial_domain_to_20_variables_else_splitmix64_hash",
+          "solver_constructor": "fixed_x1_constant_linear_specialisation",
+          "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, dense duplicate-cancelling monomial products, hash-backed symbolic monomial sets, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis",
+          "solver_echelon_policy": "shape_selected_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming",
+          "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "solver_equations_total": 14278,
+          "solver_internal_mask_hasher": "splitmix64_for_trusted_u64_masks_with_exact_key_equality",
+          "solver_max_degree": 4,
+          "solver_monomial_multiply": "epoch_dense_parity_cancel_then_encoded_u32_order_sort",
+          "solver_monomial_multiply_control": "PQ_F4_DISABLE_DENSE_MUL=1",
+          "solver_pair_installer": "order_preserving_batch_update_env_PQ_F4_DISABLE_BATCH_INSERT",
+          "solver_pair_selector": "epoch_dense_lcm_groups_to_20_variables_else_sorted_lcm_exact_submask_equivalent_to_quadratic_update",
+          "solver_parallel_construction": true,
+          "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+          "solver_rayon_threads_requested": 12,
+          "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+          "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+          "solver_symbolic_monomial_set_control": "PQ_F4_DISABLE_DENSE_SYMBOLIC_SET=1",
+          "solver_symbolic_monomial_sets": "splitmix64_hash_sets",
+          "solver_symbolic_reducer_selector": "exact_submask_index_when_cheaper_else_linear_scan_with_shortest_reducer_and_index_tie_break",
+          "solver_terms_max_per_system": 62087,
+          "solver_terms_total": 14515915,
+          "solver_variables": 18,
+          "solver_x1_batch_cap": 512,
+          "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+          "solver_x1_batch_size": 512,
+          "solver_x1_batches_completed": 1,
+          "solver_x1_order": "hamming_weight_then_mask",
+          "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+          "solver_x1_order_target_independent": true,
+          "solver_x1_speculative_systems_completed": 0,
+          "source_artifacts": {
+            "cryptominisat_xor_dimacs": {
+              "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+              "bytes": 208168,
+              "path": "instance.xor.cnf",
+              "valid": true
+            },
+            "magma_boolean_f4": {
+              "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+              "bytes": 373254,
+              "path": "instance.magma",
+              "valid": true
+            },
+            "wdsat_anf": {
+              "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+              "bytes": 236183,
+              "path": "instance.anf",
+              "valid": true
+            }
+          },
+          "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+          "source_instance_verified": true,
+          "source_model_valid": null,
+          "source_representation": "symmetrised_s4",
+          "source_variables": 78,
+          "source_witness_valid": null,
+          "status": "unsat",
+          "timing_ns": {
+            "factor_base_x1_membership": 33479374,
+            "fixed_x1_s4_construction": 512369500,
+            "native_f4_whole": 15159519625,
+            "source_verification": 34032125
+          },
+          "witness_points": null
+        }
+      },
+      {
+        "artifacts": {
+          "metrics": {
+            "bytes": 566,
+            "path": "development/clean-pairs/control-r3/metrics.json",
+            "sha256": "55b5209a48834ba8c4775e631b54ba7930bcaa1b7e06f3106816232d4d978218"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "development/clean-pairs/control-r3/stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 6468,
+            "path": "development/clean-pairs/control-r3/stdout.json",
+            "sha256": "64bc570c6248ae654749652367cee9b8de20796be94af409a9b2e05f86cb0e64"
+          }
+        },
+        "name": "control-r3",
+        "process": {
+          "command": [
+            "/Volumes/SSD990/koblitz-native-f4-build21-6de26d8c/bin/koblitz_pdp_backend",
+            "native-f4",
+            "manifest.json",
+            "300"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 3177005056,
+            "single_core_seconds": null,
+            "system_seconds": 1.688992,
+            "total_core_seconds": 153.99752700000002,
+            "user_seconds": 152.308535,
+            "wall_seconds": 14.666323624987854
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 360.0
+        },
+        "report": {
+          "algebraic_roots": 0,
+          "backend": "native-f4",
+          "budget_seconds": 300,
+          "conflicts": null,
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 55949414720,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 0,
+              "dense_symbolic_set_steps": 0,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 85990862449,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 407680,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 10867159169,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 162064687626
+          },
+          "exhaustive": true,
+          "factor_base_contract": {
+            "discrete_log_labels_used": false,
+            "target_subgroup_enumerated": false
+          },
+          "fixed_x1_masks_visited": 512,
+          "fixed_x1_nonrational_skipped": 270,
+          "fixed_x1_systems_completed": 242,
+          "fixed_x1_systems_constructed": 242,
+          "fixed_x1_values": 512,
+          "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+          "regenerated_source_exact": true,
+          "same_instance_fields": [
+            "n",
+            "ell",
+            "m",
+            "curve",
+            "algebraic_factor_base",
+            "affine_target"
+          ],
+          "schema": "koblitz_pdp_isolated_backend.v1",
+          "single_thread_requested": false,
+          "solver": "f4-f2",
+          "solver_column_index": "dense_monomial_domain_to_20_variables_else_splitmix64_hash",
+          "solver_constructor": "fixed_x1_constant_linear_specialisation",
+          "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, dense duplicate-cancelling monomial products, hash-backed symbolic monomial sets, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis",
+          "solver_echelon_policy": "shape_selected_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming",
+          "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "solver_equations_total": 14278,
+          "solver_internal_mask_hasher": "splitmix64_for_trusted_u64_masks_with_exact_key_equality",
+          "solver_max_degree": 4,
+          "solver_monomial_multiply": "epoch_dense_parity_cancel_then_encoded_u32_order_sort",
+          "solver_monomial_multiply_control": "PQ_F4_DISABLE_DENSE_MUL=1",
+          "solver_pair_installer": "order_preserving_batch_update_env_PQ_F4_DISABLE_BATCH_INSERT",
+          "solver_pair_selector": "epoch_dense_lcm_groups_to_20_variables_else_sorted_lcm_exact_submask_equivalent_to_quadratic_update",
+          "solver_parallel_construction": true,
+          "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+          "solver_rayon_threads_requested": 12,
+          "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+          "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+          "solver_symbolic_monomial_set_control": "PQ_F4_DISABLE_DENSE_SYMBOLIC_SET=1",
+          "solver_symbolic_monomial_sets": "splitmix64_hash_sets",
+          "solver_symbolic_reducer_selector": "exact_submask_index_when_cheaper_else_linear_scan_with_shortest_reducer_and_index_tie_break",
+          "solver_terms_max_per_system": 62087,
+          "solver_terms_total": 14515915,
+          "solver_variables": 18,
+          "solver_x1_batch_cap": 512,
+          "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+          "solver_x1_batch_size": 512,
+          "solver_x1_batches_completed": 1,
+          "solver_x1_order": "hamming_weight_then_mask",
+          "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+          "solver_x1_order_target_independent": true,
+          "solver_x1_speculative_systems_completed": 0,
+          "source_artifacts": {
+            "cryptominisat_xor_dimacs": {
+              "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+              "bytes": 208168,
+              "path": "instance.xor.cnf",
+              "valid": true
+            },
+            "magma_boolean_f4": {
+              "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+              "bytes": 373254,
+              "path": "instance.magma",
+              "valid": true
+            },
+            "wdsat_anf": {
+              "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+              "bytes": 236183,
+              "path": "instance.anf",
+              "valid": true
+            }
+          },
+          "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+          "source_instance_verified": true,
+          "source_model_valid": null,
+          "source_representation": "symmetrised_s4",
+          "source_variables": 78,
+          "source_witness_valid": null,
+          "status": "unsat",
+          "timing_ns": {
+            "factor_base_x1_membership": 32725722,
+            "fixed_x1_s4_construction": 540755334,
+            "native_f4_whole": 14588564208,
+            "source_verification": 34623042
+          },
+          "witness_points": null
+        }
+      }
+    ],
+    "median_pair_ratios": {
+      "candidate_over_control_build_ns": 0.8690767893049044,
+      "candidate_over_control_core": 0.9871661055959683,
+      "candidate_over_control_eliminate_ns": 1.0511660523448598,
+      "candidate_over_control_rss": 0.9146242999059728,
+      "candidate_over_control_wall": 0.9869614566548529
+    },
+    "pair_ratios": [
+      {
+        "candidate_over_control_build_ns": 0.8690767893049044,
+        "candidate_over_control_core": 1.0230194210645565,
+        "candidate_over_control_eliminate_ns": 1.0511660523448598,
+        "candidate_over_control_rss": 0.9146242999059728,
+        "candidate_over_control_wall": 0.9869614566548529,
+        "pair": 1
+      },
+      {
+        "candidate_over_control_build_ns": 0.878256138925496,
+        "candidate_over_control_core": 0.9805154663055525,
+        "candidate_over_control_eliminate_ns": 1.0411595523940909,
+        "candidate_over_control_rss": 0.8236249611570948,
+        "candidate_over_control_wall": 0.985450148667065,
+        "pair": 2
+      },
+      {
+        "candidate_over_control_build_ns": 0.8496451368419248,
+        "candidate_over_control_core": 0.9871661055959683,
+        "candidate_over_control_eliminate_ns": 1.0513020147532117,
+        "candidate_over_control_rss": 0.9389198025878118,
+        "candidate_over_control_wall": 0.989923437613502,
+        "pair": 3
+      }
+    ]
+  },
+  "comparisons": {
+    "cold_build_plus_selected": {
+      "peak_rss_bytes": 2932424704,
+      "total_core_seconds": 326.170292,
+      "wall_seconds": 185.1392921660008
+    },
+    "paired_medians_candidate_over_control": {
+      "candidate_over_control_build_ns": 0.8690767893049044,
+      "candidate_over_control_core": 0.9871661055959683,
+      "candidate_over_control_eliminate_ns": 1.0511660523448598,
+      "candidate_over_control_rss": 0.9146242999059728,
+      "candidate_over_control_wall": 0.9869614566548529
+    },
+    "selected_over_direct_mitm": {
+      "core_ratio": 54.10082247926842,
+      "rss_ratio": 65.13136826783115,
+      "wall_ratio": 5.076696120150551
+    },
+    "selected_over_same_binary_hash_control": {
+      "build_ns_ratio": 0.8690767893049044,
+      "core_ratio": 1.0230194210645565,
+      "rss_ratio": 0.9146242999059728,
+      "same_scientific_report": true,
+      "wall_ratio": 0.9869614566548529
+    },
+    "selected_over_stage170_posthoc_ceiling": {
+      "core_ratio": 0.9217839590233037,
+      "interpretation": "the clean selected median-scale result does not beat the earlier one-off posthoc wall sample",
+      "rss_ratio": 0.8293721588671149,
+      "wall_ratio": 1.022518216646663
+    },
+    "selected_over_stage170_selected": {
+      "core_ratio": 0.905392061771114,
+      "rss_ratio": 1.0096177711590966,
+      "wall_speedup": 1.142701782914066
+    }
+  },
+  "date": "2026-09-23",
+  "development_accounting": {
+    "complete_total": null,
+    "maximum_peak_rss_bytes": 3561144320,
+    "metered_components": 49,
+    "reason_complete_total_is_null": "exploratory compiles and tests were not all outer-metered, and one early profiler receipt was overwritten before archival; the retained sum is a measured lower bound",
+    "summed_wall_seconds": 860.9149643740093,
+    "total_core_seconds": 7106.0723769999995
+  },
+  "factor_base": {
+    "definition": "span(1,z,...,z^8), with exact rational-lift membership checks",
+    "discrete_log_labels_used": false,
+    "factor_base_logs_known_by_construction": false,
+    "target_subgroup_enumerated": false
+  },
+  "fresh_target_holdout_complete": true,
+  "full_cost_gate_passed": false,
+  "gates": {
+    "1_all_stage_resource_charging": "partial_measured_lower_bound_complete_total_null",
+    "2_same_instance_solver_matrix": "partial_two_native_f4_n59_targets_one_preregistered_holdout_licensed_magma_and_full_panel_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_native_f4_complete_conflicts_null_magma_missing",
+    "4_n31_n41_larger_pdp": "inherited_satisfied_finite_coverage",
+    "5_unknown_scalar_without_known_base_logs": "inherited_satisfied_finite_controls",
+    "6_full_cost_vs_automorphism_rho": "unchanged_not_tested_by_pdp_stage_and_current_full_cost_gate_false",
+    "7_independent_external_reproduction": "requested_but_missing",
+    "all_seven_gates_passed": false
+  },
+  "independent_external_reproduction_satisfied": false,
+  "instance": {
+    "blind_instance_id": "b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4",
+    "cell_id": "n59-l9-m3-standard-a1-f0",
+    "ell": 9,
+    "m": 3,
+    "n": 59,
+    "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+    "source_system_id": "x-af85283c5728becd64890c6eaa654ccb164cb499fcc4cde7b5cfd1484b4e0efa",
+    "target_class_opened_after_run_seal": "nondecomposable"
+  },
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "mechanism": {
+    "batch_cap_changed_from": 64,
+    "batch_cap_changed_to": "2^ell",
+    "definition": "For at most twenty Boolean variables, retain one bit per complete-domain monomial plus an insertion-order vector for the F4 lcm, examined, and no-divisor sets; clear and reuse them across F4 steps. Larger systems retain the exact SplitMix64 hash-set path.",
+    "name": "reused_bit_packed_symbolic_monomial_sets",
+    "same_binary_control": "PQ_F4_DISABLE_DENSE_SYMBOLIC_SET=1",
+    "selected_batches": 1,
+    "selected_rational_systems": 242,
+    "selected_rayon_threads": 12,
+    "selected_x1_batch_size": 512,
+    "uses_discrete_log_labels": false,
+    "uses_truth_or_witness": false
+  },
+  "predecessor": {
+    "path": "stage-170-parallel-fixed-x1-construction-20260923/result.json",
+    "sha256": "d72db3a24b97f4240c6184c74b90786283d19c13047489aae3eb121a918e2c07",
+    "status": "complete_parallel_construction_true_negative"
+  },
+  "rejected_development": {
+    "dense_reducer_index": {
+      "candidate": {
+        "artifacts": {
+          "metrics": {
+            "bytes": 574,
+            "path": "development/dense-reducer-candidate-r1/metrics.json",
+            "sha256": "4f6b9759a1cea2320cca9b7ee7c393e6d637973c9ddd228bab75b7d9c2f49eb8"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "development/dense-reducer-candidate-r1/stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 6440,
+            "path": "development/dense-reducer-candidate-r1/stdout.json",
+            "sha256": "dd8f0eb9b21985c793aed8cb68ec9519dde9d3f435feedf58ba4dd9d56a77017"
+          }
+        },
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "active_candidate_visits": 1137001812,
+            "active_deactivation_tests": 1137001812,
+            "basis_len": 1,
+            "batch_insert_elements": 1011275,
+            "batch_insert_groups": 1204,
+            "build_ns": 46289625949,
+            "dense_column_bytes_max": 1048576,
+            "dense_column_matrices": 1446,
+            "dense_mul_calls": 4764716,
+            "dense_mul_cancelled_terms": 569706460,
+            "dense_mul_input_terms": 3750901091,
+            "dense_mul_output_terms": 3181194631,
+            "dense_mul_scratch_bytes_max": 1061696,
+            "dense_reducer_index_bytes_max": 2097152,
+            "dense_reducer_index_steps": 1204,
+            "dense_symbolic_set_bytes_max": 376832,
+            "dense_symbolic_set_steps": 1204,
+            "divisor_linear_tests": 0,
+            "divisor_submask_lookups": 103531834,
+            "divisor_tests": 103531834,
+            "eliminate_ns": 91875688628,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "field_pairs_reduced": 633185,
+            "m4ri_block_width_max": 8,
+            "m4ri_blocks": 438925,
+            "m4ri_consecutive_blocks": 409354,
+            "m4ri_matrices": 723,
+            "m4ri_scratch_bytes_max": 407680,
+            "m4ri_table_word_xors": 9180637307,
+            "m4ri_trimmed_word_xors_avoided": 137506694,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764716,
+            "new_elements": 997056,
+            "oversize": 0,
+            "packed_seen_row_bytes_max": 114688,
+            "packed_seen_row_steps": 1204,
+            "pair_cover_lookups": 698657372,
+            "pair_dense_scratch_bytes_max": 4472832,
+            "pair_dense_select_calls": 1011034,
+            "pair_lcm_groups": 594604504,
+            "pair_prune_linear_tests": 2691661,
+            "pair_prune_passes": 1204,
+            "pair_prune_submask_lookups": 80060551,
+            "pair_prune_tests": 82752212,
+            "pair_sorted_select_calls": 0,
+            "pair_update_ns": 11113285328,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "reducer_rows": 1732889,
+            "steps": 1204,
+            "symbolic_bytes_estimate_max": 171258672,
+            "symbolic_cap_hit": 0
+          },
+          "op_unit": "word XORs (elimination, including M4RI tables)",
+          "ops": 99199976264,
+          "peak_bytes": 18528000,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 158723273368
+        },
+        "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "name": "dense-reducer-candidate-r1",
+        "process": {
+          "command": [
+            "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_pdp_backend",
+            "native-f4",
+            "manifest.json",
+            "300"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 2960097280,
+            "single_core_seconds": null,
+            "system_seconds": 1.519547,
+            "total_core_seconds": 159.36181299999998,
+            "user_seconds": 157.842266,
+            "wall_seconds": 14.297690124993096
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 360.0
+        },
+        "status": "unsat"
+      },
+      "control": {
+        "artifacts": {
+          "metrics": {
+            "bytes": 558,
+            "path": "development/dense-reducer-control-r1/metrics.json",
+            "sha256": "eab758fd1a8ab314e5e611081dc3565c8d7ad8e21b129669f6037a66d210c52b"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "development/dense-reducer-control-r1/stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 6431,
+            "path": "development/dense-reducer-control-r1/stdout.json",
+            "sha256": "061cc99b60718327a728f89642943e07cb09055cbc8a95257fad7547af21e3d0"
+          }
+        },
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "active_candidate_visits": 1137001812,
+            "active_deactivation_tests": 1137001812,
+            "basis_len": 1,
+            "batch_insert_elements": 1011275,
+            "batch_insert_groups": 1204,
+            "build_ns": 45962889913,
+            "dense_column_bytes_max": 1048576,
+            "dense_column_matrices": 1446,
+            "dense_mul_calls": 4764716,
+            "dense_mul_cancelled_terms": 569706460,
+            "dense_mul_input_terms": 3750901091,
+            "dense_mul_output_terms": 3181194631,
+            "dense_mul_scratch_bytes_max": 1061696,
+            "dense_reducer_index_bytes_max": 0,
+            "dense_reducer_index_steps": 0,
+            "dense_symbolic_set_bytes_max": 376832,
+            "dense_symbolic_set_steps": 1204,
+            "divisor_linear_tests": 0,
+            "divisor_submask_lookups": 103531834,
+            "divisor_tests": 103531834,
+            "eliminate_ns": 88090405831,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "field_pairs_reduced": 633185,
+            "m4ri_block_width_max": 8,
+            "m4ri_blocks": 438925,
+            "m4ri_consecutive_blocks": 409354,
+            "m4ri_matrices": 723,
+            "m4ri_scratch_bytes_max": 407680,
+            "m4ri_table_word_xors": 9180637307,
+            "m4ri_trimmed_word_xors_avoided": 137506694,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764716,
+            "new_elements": 997056,
+            "oversize": 0,
+            "packed_seen_row_bytes_max": 114688,
+            "packed_seen_row_steps": 1204,
+            "pair_cover_lookups": 698657372,
+            "pair_dense_scratch_bytes_max": 4472832,
+            "pair_dense_select_calls": 1011034,
+            "pair_lcm_groups": 594604504,
+            "pair_prune_linear_tests": 2691661,
+            "pair_prune_passes": 1204,
+            "pair_prune_submask_lookups": 80060551,
+            "pair_prune_tests": 82752212,
+            "pair_sorted_select_calls": 0,
+            "pair_update_ns": 10654958330,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "reducer_rows": 1732889,
+            "steps": 1204,
+            "symbolic_bytes_estimate_max": 171258672,
+            "symbolic_cap_hit": 0
+          },
+          "op_unit": "word XORs (elimination, including M4RI tables)",
+          "ops": 99199976264,
+          "peak_bytes": 18528000,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 153842240512
+        },
+        "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "name": "dense-reducer-control-r1",
+        "process": {
+          "command": [
+            "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_pdp_backend",
+            "native-f4",
+            "manifest.json",
+            "300"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 3066200064,
+            "single_core_seconds": null,
+            "system_seconds": 1.417495,
+            "total_core_seconds": 153.285958,
+            "user_seconds": 151.868463,
+            "wall_seconds": 14.347969458001899
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 360.0
+        },
+        "status": "unsat"
+      },
+      "reason": "two MiB per concurrent solve and higher core cost"
+    },
+    "encoded_column_sort": {
+      "candidate": {
+        "artifacts": {
+          "metrics": {
+            "bytes": 557,
+            "path": "development/encoded-columns-candidate-r1/metrics.json",
+            "sha256": "b93b59e30d43dcfd33562bfbe2f621490f6376938c4a84ce688d193c429600e9"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "development/encoded-columns-candidate-r1/stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 6395,
+            "path": "development/encoded-columns-candidate-r1/stdout.json",
+            "sha256": "b801c61e2333a933971b4f7f465b611442bd5027f6c51839ec313acbc65ddb34"
+          }
+        },
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "active_candidate_visits": 1137001812,
+            "active_deactivation_tests": 1137001812,
+            "basis_len": 1,
+            "batch_insert_elements": 1011275,
+            "batch_insert_groups": 1204,
+            "build_ns": 51261703553,
+            "dense_column_bytes_max": 1048576,
+            "dense_column_matrices": 1446,
+            "dense_mul_calls": 4764716,
+            "dense_mul_cancelled_terms": 569706460,
+            "dense_mul_input_terms": 3750901091,
+            "dense_mul_output_terms": 3181194631,
+            "dense_mul_scratch_bytes_max": 1061696,
+            "dense_symbolic_set_bytes_max": 376832,
+            "dense_symbolic_set_steps": 1204,
+            "divisor_linear_tests": 0,
+            "divisor_submask_lookups": 103531834,
+            "divisor_tests": 103531834,
+            "eliminate_ns": 91152033074,
+            "encoded_column_sort_matrices": 1446,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "field_pairs_reduced": 633185,
+            "m4ri_block_width_max": 8,
+            "m4ri_blocks": 438925,
+            "m4ri_consecutive_blocks": 409354,
+            "m4ri_matrices": 723,
+            "m4ri_scratch_bytes_max": 407680,
+            "m4ri_table_word_xors": 9180637307,
+            "m4ri_trimmed_word_xors_avoided": 137506694,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764716,
+            "new_elements": 997056,
+            "oversize": 0,
+            "packed_seen_row_bytes_max": 114688,
+            "packed_seen_row_steps": 1204,
+            "pair_cover_lookups": 698657372,
+            "pair_dense_scratch_bytes_max": 4472832,
+            "pair_dense_select_calls": 1011034,
+            "pair_lcm_groups": 594604504,
+            "pair_prune_linear_tests": 2691661,
+            "pair_prune_passes": 1204,
+            "pair_prune_submask_lookups": 80060551,
+            "pair_prune_tests": 82752212,
+            "pair_sorted_select_calls": 0,
+            "pair_update_ns": 11309563251,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "reducer_rows": 1732889,
+            "steps": 1204,
+            "symbolic_bytes_estimate_max": 171258672,
+            "symbolic_cap_hit": 0
+          },
+          "op_unit": "word XORs (elimination, including M4RI tables)",
+          "ops": 99199976264,
+          "peak_bytes": 18528000,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 163373413213
+        },
+        "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "name": "encoded-columns-candidate-r1",
+        "process": {
+          "command": [
+            "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_pdp_backend",
+            "native-f4",
+            "manifest.json",
+            "300"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 2977792000,
+            "single_core_seconds": null,
+            "system_seconds": 1.67461,
+            "total_core_seconds": 156.003519,
+            "user_seconds": 154.328909,
+            "wall_seconds": 14.714112208006554
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 360.0
+        },
+        "status": "unsat"
+      },
+      "control": {
+        "artifacts": {
+          "metrics": {
+            "bytes": 558,
+            "path": "development/encoded-columns-control-r1/metrics.json",
+            "sha256": "c7f028c28f883b823448b9f32bb338d4fa4ab2a4f88a1e5f8605086f95ac5334"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "development/encoded-columns-control-r1/stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 6392,
+            "path": "development/encoded-columns-control-r1/stdout.json",
+            "sha256": "68cca4fcc99613b52757beb9181fd81cbd29d2f376b79840111b821dea2ea216"
+          }
+        },
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "active_candidate_visits": 1137001812,
+            "active_deactivation_tests": 1137001812,
+            "basis_len": 1,
+            "batch_insert_elements": 1011275,
+            "batch_insert_groups": 1204,
+            "build_ns": 49616341183,
+            "dense_column_bytes_max": 1048576,
+            "dense_column_matrices": 1446,
+            "dense_mul_calls": 4764716,
+            "dense_mul_cancelled_terms": 569706460,
+            "dense_mul_input_terms": 3750901091,
+            "dense_mul_output_terms": 3181194631,
+            "dense_mul_scratch_bytes_max": 1061696,
+            "dense_symbolic_set_bytes_max": 376832,
+            "dense_symbolic_set_steps": 1204,
+            "divisor_linear_tests": 0,
+            "divisor_submask_lookups": 103531834,
+            "divisor_tests": 103531834,
+            "eliminate_ns": 91334016789,
+            "encoded_column_sort_matrices": 0,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "field_pairs_reduced": 633185,
+            "m4ri_block_width_max": 8,
+            "m4ri_blocks": 438925,
+            "m4ri_consecutive_blocks": 409354,
+            "m4ri_matrices": 723,
+            "m4ri_scratch_bytes_max": 407680,
+            "m4ri_table_word_xors": 9180637307,
+            "m4ri_trimmed_word_xors_avoided": 137506694,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764716,
+            "new_elements": 997056,
+            "oversize": 0,
+            "packed_seen_row_bytes_max": 114688,
+            "packed_seen_row_steps": 1204,
+            "pair_cover_lookups": 698657372,
+            "pair_dense_scratch_bytes_max": 4472832,
+            "pair_dense_select_calls": 1011034,
+            "pair_lcm_groups": 594604504,
+            "pair_prune_linear_tests": 2691661,
+            "pair_prune_passes": 1204,
+            "pair_prune_submask_lookups": 80060551,
+            "pair_prune_tests": 82752212,
+            "pair_sorted_select_calls": 0,
+            "pair_update_ns": 10444231061,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "reducer_rows": 1732889,
+            "steps": 1204,
+            "symbolic_bytes_estimate_max": 171258672,
+            "symbolic_cap_hit": 0
+          },
+          "op_unit": "word XORs (elimination, including M4RI tables)",
+          "ops": 99199976264,
+          "peak_bytes": 18528000,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 160654056666
+        },
+        "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "name": "encoded-columns-control-r1",
+        "process": {
+          "command": [
+            "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_pdp_backend",
+            "native-f4",
+            "manifest.json",
+            "300"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 2999713792,
+            "single_core_seconds": null,
+            "system_seconds": 1.595157,
+            "total_core_seconds": 153.547908,
+            "user_seconds": 151.952751,
+            "wall_seconds": 14.981304834000184
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 360.0
+        },
+        "status": "unsat"
+      },
+      "reason": "saved no CPU after key-buffer construction"
+    },
+    "fourteen_thread_batch64": {
+      "candidate_runs": [
+        {
+          "artifacts": {
+            "metrics": {
+              "bytes": 548,
+              "path": "development/clean-t14-b64/candidate-r1/metrics.json",
+              "sha256": "b9eaec18992a2a724a89d2eff9f56ba9f4da3a8145de4233bbe22b2610ccc7a4"
+            },
+            "stderr": {
+              "bytes": 0,
+              "path": "development/clean-t14-b64/candidate-r1/stderr.txt",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 6564,
+              "path": "development/clean-t14-b64/candidate-r1/stdout.json",
+              "sha256": "a8b4f99880f0b4aafa7a0fba62ee9d66c596b1dd86d3cf34567bd96a307a2d0c"
+            }
+          },
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 81674728239,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 376832,
+              "dense_symbolic_set_steps": 1204,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 169367575225,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 407680,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 18448696305,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 285743796750
+          },
+          "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "name": "candidate-r1",
+          "process": {
+            "command": [
+              "/Volumes/SSD990/koblitz-native-f4-build21-6de26d8c/bin/koblitz_pdp_backend",
+              "native-f4",
+              "manifest.json",
+              "300"
+            ],
+            "metrics": {
+              "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+              "peak_rss_bytes": 3290890240,
+              "single_core_seconds": null,
+              "system_seconds": 3.79466,
+              "total_core_seconds": 164.168502,
+              "user_seconds": 160.373842,
+              "wall_seconds": 22.75949799999944
+            },
+            "orphan_group_terminated": false,
+            "returncode": 0,
+            "timed_out": false,
+            "watchdog_seconds": 360.0
+          },
+          "status": "unsat"
+        },
+        {
+          "artifacts": {
+            "metrics": {
+              "bytes": 550,
+              "path": "development/clean-t14-b64/candidate-r2/metrics.json",
+              "sha256": "ac1ae9bfbeb35e3e60ea59058efa6b894bf468a39ba71ae90e05a4c96d9144e7"
+            },
+            "stderr": {
+              "bytes": 0,
+              "path": "development/clean-t14-b64/candidate-r2/stderr.txt",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 6564,
+              "path": "development/clean-t14-b64/candidate-r2/stdout.json",
+              "sha256": "789ad74ea892a7ca8da8ff244f62ec2b885b99da81fb5ccfc0e3ba26871347de"
+            }
+          },
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 73142760575,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 376832,
+              "dense_symbolic_set_steps": 1204,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 154859959054,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 407680,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 16436169506,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 259124635254
+          },
+          "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "name": "candidate-r2",
+          "process": {
+            "command": [
+              "/Volumes/SSD990/koblitz-native-f4-build21-6de26d8c/bin/koblitz_pdp_backend",
+              "native-f4",
+              "manifest.json",
+              "300"
+            ],
+            "metrics": {
+              "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+              "peak_rss_bytes": 3413491712,
+              "single_core_seconds": null,
+              "system_seconds": 4.183572,
+              "total_core_seconds": 170.899225,
+              "user_seconds": 166.715653,
+              "wall_seconds": 20.774014041002374
+            },
+            "orphan_group_terminated": false,
+            "returncode": 0,
+            "timed_out": false,
+            "watchdog_seconds": 360.0
+          },
+          "status": "unsat"
+        }
+      ],
+      "control": {
+        "artifacts": {
+          "metrics": {
+            "bytes": 566,
+            "path": "development/clean-t14-b64/control-r1/metrics.json",
+            "sha256": "25654131024d651f23b78c2ea6e8e95c2133a911975db186c1a939030284e8a6"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "development/clean-t14-b64/control-r1/stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 6467,
+            "path": "development/clean-t14-b64/control-r1/stdout.json",
+            "sha256": "c401789f015fab4aa83ddfa241fdac815f2d03dae6e7593a8440b9e13bb174c8"
+          }
+        },
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "active_candidate_visits": 1137001812,
+            "active_deactivation_tests": 1137001812,
+            "basis_len": 1,
+            "batch_insert_elements": 1011275,
+            "batch_insert_groups": 1204,
+            "build_ns": 61235493790,
+            "dense_column_bytes_max": 1048576,
+            "dense_column_matrices": 1446,
+            "dense_mul_calls": 4764716,
+            "dense_mul_cancelled_terms": 569706460,
+            "dense_mul_input_terms": 3750901091,
+            "dense_mul_output_terms": 3181194631,
+            "dense_mul_scratch_bytes_max": 1061696,
+            "dense_symbolic_set_bytes_max": 0,
+            "dense_symbolic_set_steps": 0,
+            "divisor_linear_tests": 0,
+            "divisor_submask_lookups": 103531834,
+            "divisor_tests": 103531834,
+            "eliminate_ns": 112170732505,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "field_pairs_reduced": 633185,
+            "m4ri_block_width_max": 8,
+            "m4ri_blocks": 438925,
+            "m4ri_consecutive_blocks": 409354,
+            "m4ri_matrices": 723,
+            "m4ri_scratch_bytes_max": 407680,
+            "m4ri_table_word_xors": 9180637307,
+            "m4ri_trimmed_word_xors_avoided": 137506694,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764716,
+            "new_elements": 997056,
+            "oversize": 0,
+            "pair_cover_lookups": 698657372,
+            "pair_dense_scratch_bytes_max": 4472832,
+            "pair_dense_select_calls": 1011034,
+            "pair_lcm_groups": 594604504,
+            "pair_prune_linear_tests": 2691661,
+            "pair_prune_passes": 1204,
+            "pair_prune_submask_lookups": 80060551,
+            "pair_prune_tests": 82752212,
+            "pair_sorted_select_calls": 0,
+            "pair_update_ns": 11618802326,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "reducer_rows": 1732889,
+            "steps": 1204,
+            "symbolic_bytes_estimate_max": 171258672,
+            "symbolic_cap_hit": 0
+          },
+          "op_unit": "word XORs (elimination, including M4RI tables)",
+          "ops": 99199976264,
+          "peak_bytes": 18528000,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 196112083587
+        },
+        "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "name": "control-r1",
+        "process": {
+          "command": [
+            "/Volumes/SSD990/koblitz-native-f4-build21-6de26d8c/bin/koblitz_pdp_backend",
+            "native-f4",
+            "manifest.json",
+            "300"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 3389669376,
+            "single_core_seconds": null,
+            "system_seconds": 1.829141,
+            "total_core_seconds": 167.03599599999998,
+            "user_seconds": 165.206855,
+            "wall_seconds": 16.036498125002254
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 360.0
+        },
+        "status": "unsat"
+      },
+      "reason": "repeatable wall stalls despite comparable process CPU"
+    },
+    "packed_seen_rows": {
+      "candidate_runs": [
+        {
+          "artifacts": {
+            "metrics": {
+              "bytes": 558,
+              "path": "development/packed-seen-candidate-r1/metrics.json",
+              "sha256": "7decc3438985ea812d3c64e962d6e9b116e73fff0485c1b7aeaae572303bd986"
+            },
+            "stderr": {
+              "bytes": 0,
+              "path": "development/packed-seen-candidate-r1/stderr.txt",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 6351,
+              "path": "development/packed-seen-candidate-r1/stdout.json",
+              "sha256": "d08620180d967f8fb9a0531c428809fa57686324e28b431e8316f9a680ec8940"
+            }
+          },
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 46215412215,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 376832,
+              "dense_symbolic_set_steps": 1204,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 88615068927,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 407680,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "packed_seen_row_bytes_max": 114688,
+              "packed_seen_row_steps": 1204,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 10567892697,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 154529841249
+          },
+          "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "name": "packed-seen-candidate-r1",
+          "process": {
+            "command": [
+              "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_pdp_backend",
+              "native-f4",
+              "manifest.json",
+              "300"
+            ],
+            "metrics": {
+              "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+              "peak_rss_bytes": 2940895232,
+              "single_core_seconds": null,
+              "system_seconds": 1.563541,
+              "total_core_seconds": 154.891393,
+              "user_seconds": 153.327852,
+              "wall_seconds": 13.983861124987016
+            },
+            "orphan_group_terminated": false,
+            "returncode": 0,
+            "timed_out": false,
+            "watchdog_seconds": 360.0
+          },
+          "status": "unsat"
+        },
+        {
+          "artifacts": {
+            "metrics": {
+              "bytes": 558,
+              "path": "development/packed-seen-candidate-r2/metrics.json",
+              "sha256": "28c4dc0b22e2b11169bef87de668624c4645539861c983f8f1f294b311dd8878"
+            },
+            "stderr": {
+              "bytes": 0,
+              "path": "development/packed-seen-candidate-r2/stderr.txt",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 6351,
+              "path": "development/packed-seen-candidate-r2/stdout.json",
+              "sha256": "1cfa781aa7a63dc976c2c3842f008e294f2f85c39d24c7f4490a858eaad2f540"
+            }
+          },
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 46249480884,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 376832,
+              "dense_symbolic_set_steps": 1204,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 87386990039,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 811072,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "packed_seen_row_bytes_max": 114688,
+              "packed_seen_row_steps": 1204,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 10516413868,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 153092899085
+          },
+          "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "name": "packed-seen-candidate-r2",
+          "process": {
+            "command": [
+              "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_pdp_backend",
+              "native-f4",
+              "manifest.json",
+              "300"
+            ],
+            "metrics": {
+              "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+              "peak_rss_bytes": 3384950784,
+              "single_core_seconds": null,
+              "system_seconds": 1.570467,
+              "total_core_seconds": 148.789794,
+              "user_seconds": 147.219327,
+              "wall_seconds": 13.862168917010422
+            },
+            "orphan_group_terminated": false,
+            "returncode": 0,
+            "timed_out": false,
+            "watchdog_seconds": 360.0
+          },
+          "status": "unsat"
+        },
+        {
+          "artifacts": {
+            "metrics": {
+              "bytes": 556,
+              "path": "development/packed-seen-candidate-r3/metrics.json",
+              "sha256": "46b5834e197aabafd18f84a5b6a8f5e8f583785090c64d4c580e0738fa0bcb85"
+            },
+            "stderr": {
+              "bytes": 0,
+              "path": "development/packed-seen-candidate-r3/stderr.txt",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 6351,
+              "path": "development/packed-seen-candidate-r3/stdout.json",
+              "sha256": "0e8b565c0a0d211903a9e9a620082fead87417deecad7851b25657f2384c7eb1"
+            }
+          },
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 50225162589,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 376832,
+              "dense_symbolic_set_steps": 1204,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 93498691560,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 407680,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "packed_seen_row_bytes_max": 114688,
+              "packed_seen_row_steps": 1204,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 11126174967,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 164746289674
+          },
+          "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "name": "packed-seen-candidate-r3",
+          "process": {
+            "command": [
+              "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_pdp_backend",
+              "native-f4",
+              "manifest.json",
+              "300"
+            ],
+            "metrics": {
+              "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+              "peak_rss_bytes": 3000991744,
+              "single_core_seconds": null,
+              "system_seconds": 1.564638,
+              "total_core_seconds": 151.81213,
+              "user_seconds": 150.247492,
+              "wall_seconds": 14.863009167005657
+            },
+            "orphan_group_terminated": false,
+            "returncode": 0,
+            "timed_out": false,
+            "watchdog_seconds": 360.0
+          },
+          "status": "unsat"
+        }
+      ],
+      "control_runs": [
+        {
+          "artifacts": {
+            "metrics": {
+              "bytes": 574,
+              "path": "development/packed-seen-control-r1/metrics.json",
+              "sha256": "47145ca66a672dc74fe8be2e912062dcf3399490aa01c971bbdc9cf9fb53ef76"
+            },
+            "stderr": {
+              "bytes": 0,
+              "path": "development/packed-seen-control-r1/stderr.txt",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 6343,
+              "path": "development/packed-seen-control-r1/stdout.json",
+              "sha256": "cab38f14f44f5b09b4f9cb10911439a1f0f995780e4ce27ea1a3e324aa46fe1c"
+            }
+          },
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 45665909150,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 376832,
+              "dense_symbolic_set_steps": 1204,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 88222007298,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 407680,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "packed_seen_row_bytes_max": 0,
+              "packed_seen_row_steps": 0,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 10190347740,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 152966092252
+          },
+          "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "name": "packed-seen-control-r1",
+          "process": {
+            "command": [
+              "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_pdp_backend",
+              "native-f4",
+              "manifest.json",
+              "300"
+            ],
+            "metrics": {
+              "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+              "peak_rss_bytes": 3009265664,
+              "single_core_seconds": null,
+              "system_seconds": 1.515384,
+              "total_core_seconds": 153.33844100000002,
+              "user_seconds": 151.823057,
+              "wall_seconds": 14.316540708008688
+            },
+            "orphan_group_terminated": false,
+            "returncode": 0,
+            "timed_out": false,
+            "watchdog_seconds": 360.0
+          },
+          "status": "unsat"
+        },
+        {
+          "artifacts": {
+            "metrics": {
+              "bytes": 568,
+              "path": "development/packed-seen-control-r2/metrics.json",
+              "sha256": "4e23bccf968e49e4ba8dccc3a735f276d1fd182d15111facc9e1276de5785b2f"
+            },
+            "stderr": {
+              "bytes": 0,
+              "path": "development/packed-seen-control-r2/stderr.txt",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 6343,
+              "path": "development/packed-seen-control-r2/stdout.json",
+              "sha256": "be280ab5fa84c0ddde58a27a92d24012131713a4a527f2f49faff098111bda04"
+            }
+          },
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 46978791153,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 376832,
+              "dense_symbolic_set_steps": 1204,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 87763301485,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 407680,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "packed_seen_row_bytes_max": 0,
+              "packed_seen_row_steps": 0,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 10358674298,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 154298340920
+          },
+          "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "name": "packed-seen-control-r2",
+          "process": {
+            "command": [
+              "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_pdp_backend",
+              "native-f4",
+              "manifest.json",
+              "300"
+            ],
+            "metrics": {
+              "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+              "peak_rss_bytes": 2821947392,
+              "single_core_seconds": null,
+              "system_seconds": 1.4957449999999999,
+              "total_core_seconds": 152.749572,
+              "user_seconds": 151.253827,
+              "wall_seconds": 13.987184124998748
+            },
+            "orphan_group_terminated": false,
+            "returncode": 0,
+            "timed_out": false,
+            "watchdog_seconds": 360.0
+          },
+          "status": "unsat"
+        },
+        {
+          "artifacts": {
+            "metrics": {
+              "bytes": 558,
+              "path": "development/packed-seen-control-r3/metrics.json",
+              "sha256": "ce33028961c363056f07ac515586735a51bbf7d07ed79cc653e659f9de55aeb4"
+            },
+            "stderr": {
+              "bytes": 0,
+              "path": "development/packed-seen-control-r3/stderr.txt",
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "stdout": {
+              "bytes": 6343,
+              "path": "development/packed-seen-control-r3/stdout.json",
+              "sha256": "cab26e02c32957d854e476a8c4ce4bb338e220ec718cafa0606a036e85b5a88c"
+            }
+          },
+          "cost": {
+            "degree_reached": 5,
+            "extra": {
+              "active_candidate_visits": 1137001812,
+              "active_deactivation_tests": 1137001812,
+              "basis_len": 1,
+              "batch_insert_elements": 1011275,
+              "batch_insert_groups": 1204,
+              "build_ns": 49852883754,
+              "dense_column_bytes_max": 1048576,
+              "dense_column_matrices": 1446,
+              "dense_mul_calls": 4764716,
+              "dense_mul_cancelled_terms": 569706460,
+              "dense_mul_input_terms": 3750901091,
+              "dense_mul_output_terms": 3181194631,
+              "dense_mul_scratch_bytes_max": 1061696,
+              "dense_symbolic_set_bytes_max": 376832,
+              "dense_symbolic_set_steps": 1204,
+              "divisor_linear_tests": 0,
+              "divisor_submask_lookups": 103531834,
+              "divisor_tests": 103531834,
+              "eliminate_ns": 91944104685,
+              "extraction_tests": 0,
+              "f4_calls": 242,
+              "field_pairs_reduced": 633185,
+              "m4ri_block_width_max": 8,
+              "m4ri_blocks": 438925,
+              "m4ri_consecutive_blocks": 409354,
+              "m4ri_matrices": 723,
+              "m4ri_scratch_bytes_max": 407680,
+              "m4ri_table_word_xors": 9180637307,
+              "m4ri_trimmed_word_xors_avoided": 137506694,
+              "matrix_cols_max": 12348,
+              "matrix_rows_max": 12000,
+              "matrix_rows_sum": 4764716,
+              "new_elements": 997056,
+              "oversize": 0,
+              "packed_seen_row_bytes_max": 0,
+              "packed_seen_row_steps": 0,
+              "pair_cover_lookups": 698657372,
+              "pair_dense_scratch_bytes_max": 4472832,
+              "pair_dense_select_calls": 1011034,
+              "pair_lcm_groups": 594604504,
+              "pair_prune_linear_tests": 2691661,
+              "pair_prune_passes": 1204,
+              "pair_prune_submask_lookups": 80060551,
+              "pair_prune_tests": 82752212,
+              "pair_sorted_select_calls": 0,
+              "pair_update_ns": 10951487902,
+              "pairs_chain_skipped": 865909122,
+              "pairs_left": 0,
+              "pairs_product_skipped": 267427242,
+              "pairs_reduced": 1543629,
+              "reducer_rows": 1732889,
+              "steps": 1204,
+              "symbolic_bytes_estimate_max": 171258672,
+              "symbolic_cap_hit": 0
+            },
+            "op_unit": "word XORs (elimination, including M4RI tables)",
+            "ops": 99199976264,
+            "peak_bytes": 18528000,
+            "solving_degree": 5,
+            "timed_out": false,
+            "wall_ns": 162701283549
+          },
+          "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+          "name": "packed-seen-control-r3",
+          "process": {
+            "command": [
+              "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_pdp_backend",
+              "native-f4",
+              "manifest.json",
+              "300"
+            ],
+            "metrics": {
+              "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+              "peak_rss_bytes": 2962014208,
+              "single_core_seconds": null,
+              "system_seconds": 1.606752,
+              "total_core_seconds": 153.237175,
+              "user_seconds": 151.630423,
+              "wall_seconds": 14.679566250008065
+            },
+            "orphan_group_terminated": false,
+            "returncode": 0,
+            "timed_out": false,
+            "watchdog_seconds": 360.0
+          },
+          "status": "unsat"
+        }
+      ],
+      "reason": "sub-percent paired CPU effect and no clear whole-run gain; reverted for simplicity"
+    },
+    "radix_product_sort": {
+      "candidate": {
+        "artifacts": {
+          "metrics": {
+            "bytes": 558,
+            "path": "development/radix-candidate-r1/metrics.json",
+            "sha256": "33d31e5adf18945aa112576147917ab4449ab632b8a336f1ea514cb57b48f35e"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "development/radix-candidate-r1/stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 6313,
+            "path": "development/radix-candidate-r1/stdout.json",
+            "sha256": "5234db46c1630c36bd67848b65891e6d4da3a317acf8124a5f60db0106caacda"
+          }
+        },
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "active_candidate_visits": 1137001812,
+            "active_deactivation_tests": 1137001812,
+            "basis_len": 1,
+            "batch_insert_elements": 1011275,
+            "batch_insert_groups": 1204,
+            "build_ns": 73242067759,
+            "dense_column_bytes_max": 1048576,
+            "dense_column_matrices": 1446,
+            "dense_mul_calls": 4764716,
+            "dense_mul_cancelled_terms": 569706460,
+            "dense_mul_comparison_sort_calls": 14,
+            "dense_mul_input_terms": 3750901091,
+            "dense_mul_output_terms": 3181194631,
+            "dense_mul_radix_calls": 4764702,
+            "dense_mul_scratch_bytes_max": 1073408,
+            "divisor_linear_tests": 0,
+            "divisor_submask_lookups": 103531834,
+            "divisor_tests": 103531834,
+            "eliminate_ns": 97084164694,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "field_pairs_reduced": 633185,
+            "m4ri_block_width_max": 8,
+            "m4ri_blocks": 438925,
+            "m4ri_consecutive_blocks": 409354,
+            "m4ri_matrices": 723,
+            "m4ri_scratch_bytes_max": 407680,
+            "m4ri_table_word_xors": 9180637307,
+            "m4ri_trimmed_word_xors_avoided": 137506694,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764716,
+            "new_elements": 997056,
+            "oversize": 0,
+            "pair_cover_lookups": 698657372,
+            "pair_dense_scratch_bytes_max": 4472832,
+            "pair_dense_select_calls": 1011034,
+            "pair_lcm_groups": 594604504,
+            "pair_prune_linear_tests": 2691661,
+            "pair_prune_passes": 1204,
+            "pair_prune_submask_lookups": 80060551,
+            "pair_prune_tests": 82752212,
+            "pair_sorted_select_calls": 0,
+            "pair_update_ns": 11996875287,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "reducer_rows": 1732889,
+            "steps": 1204,
+            "symbolic_bytes_estimate_max": 171258672,
+            "symbolic_cap_hit": 0
+          },
+          "op_unit": "word XORs (elimination, including M4RI tables)",
+          "ops": 99199976264,
+          "peak_bytes": 18528000,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 192657797883
+        },
+        "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "name": "radix-candidate-r1",
+        "process": {
+          "command": [
+            "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_pdp_backend",
+            "native-f4",
+            "manifest.json",
+            "300"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 3149627392,
+            "single_core_seconds": null,
+            "system_seconds": 1.606361,
+            "total_core_seconds": 162.376016,
+            "user_seconds": 160.769655,
+            "wall_seconds": 17.222769750005682
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 360.0
+        },
+        "status": "unsat"
+      },
+      "control": {
+        "artifacts": {
+          "metrics": {
+            "bytes": 556,
+            "path": "development/radix-control-r1/metrics.json",
+            "sha256": "a92cf3d9836d2f2a3828eefe8a47feba97cd177f3b344849c80fa4be07c42ed8"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "development/radix-control-r1/stderr.txt",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 6301,
+            "path": "development/radix-control-r1/stdout.json",
+            "sha256": "7242447bc92343bd6e81b4eb1d6425d21c4c8c9d7a8501bac44dab8e890b09f8"
+          }
+        },
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "active_candidate_visits": 1137001812,
+            "active_deactivation_tests": 1137001812,
+            "basis_len": 1,
+            "batch_insert_elements": 1011275,
+            "batch_insert_groups": 1204,
+            "build_ns": 53648563009,
+            "dense_column_bytes_max": 1048576,
+            "dense_column_matrices": 1446,
+            "dense_mul_calls": 4764716,
+            "dense_mul_cancelled_terms": 569706460,
+            "dense_mul_comparison_sort_calls": 4764716,
+            "dense_mul_input_terms": 3750901091,
+            "dense_mul_output_terms": 3181194631,
+            "dense_mul_radix_calls": 0,
+            "dense_mul_scratch_bytes_max": 1061696,
+            "divisor_linear_tests": 0,
+            "divisor_submask_lookups": 103531834,
+            "divisor_tests": 103531834,
+            "eliminate_ns": 89190692612,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "field_pairs_reduced": 633185,
+            "m4ri_block_width_max": 8,
+            "m4ri_blocks": 438925,
+            "m4ri_consecutive_blocks": 409354,
+            "m4ri_matrices": 723,
+            "m4ri_scratch_bytes_max": 407680,
+            "m4ri_table_word_xors": 9180637307,
+            "m4ri_trimmed_word_xors_avoided": 137506694,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764716,
+            "new_elements": 997056,
+            "oversize": 0,
+            "pair_cover_lookups": 698657372,
+            "pair_dense_scratch_bytes_max": 4472832,
+            "pair_dense_select_calls": 1011034,
+            "pair_lcm_groups": 594604504,
+            "pair_prune_linear_tests": 2691661,
+            "pair_prune_passes": 1204,
+            "pair_prune_submask_lookups": 80060551,
+            "pair_prune_tests": 82752212,
+            "pair_sorted_select_calls": 0,
+            "pair_update_ns": 10811416353,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "reducer_rows": 1732889,
+            "steps": 1204,
+            "symbolic_bytes_estimate_max": 171258672,
+            "symbolic_cap_hit": 0
+          },
+          "op_unit": "word XORs (elimination, including M4RI tables)",
+          "ops": 99199976264,
+          "peak_bytes": 18528000,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 162791024879
+        },
+        "equation_fingerprint": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "name": "radix-control-r1",
+        "process": {
+          "command": [
+            "/Volumes/SSD990/kic-f4-stage171-frozen-target/release/examples/koblitz_pdp_backend",
+            "native-f4",
+            "manifest.json",
+            "300"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 2952232960,
+            "single_core_seconds": null,
+            "system_seconds": 1.588218,
+            "total_core_seconds": 154.87957,
+            "user_seconds": 153.291352,
+            "wall_seconds": 15.133610457996838
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 360.0
+        },
+        "status": "unsat"
+      },
+      "reason": "higher wall and core cost"
+    }
+  },
+  "same_binary_hash_control": {
+    "artifacts": {
+      "metrics": {
+        "bytes": 549,
+        "path": "development/clean-pairs/control-r1/metrics.json",
+        "sha256": "f150a4bf46b0552028df9bbf0547e2561a8c7e86af3a96724486f9322e187e43"
+      },
+      "stderr": {
+        "bytes": 0,
+        "path": "development/clean-pairs/control-r1/stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 6468,
+        "path": "development/clean-pairs/control-r1/stdout.json",
+        "sha256": "75f6c43e3082aa7ae455a9addc124a13c4361220d0bcbb40884cac8c50d05fe0"
+      }
+    },
+    "conflicts": null,
+    "decision": "first_clean_control_same_binary_and_schedule",
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 3206152192,
+      "single_core_seconds": null,
+      "system_seconds": 1.518966,
+      "total_core_seconds": 155.915346,
+      "user_seconds": 154.39638,
+      "wall_seconds": 15.190197000003536
+    },
+    "process": {
+      "command": [
+        "/Volumes/SSD990/koblitz-native-f4-build21-6de26d8c/bin/koblitz_pdp_backend",
+        "native-f4",
+        "manifest.json",
+        "300"
+      ],
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 3206152192,
+        "single_core_seconds": null,
+        "system_seconds": 1.518966,
+        "total_core_seconds": 155.915346,
+        "user_seconds": 154.39638,
+        "wall_seconds": 15.190197000003536
+      },
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 360.0
+    },
+    "report": {
+      "algebraic_roots": 0,
+      "backend": "native-f4",
+      "budget_seconds": 300,
+      "conflicts": null,
+      "cost": {
+        "degree_reached": 5,
+        "extra": {
+          "active_candidate_visits": 1137001812,
+          "active_deactivation_tests": 1137001812,
+          "basis_len": 1,
+          "batch_insert_elements": 1011275,
+          "batch_insert_groups": 1204,
+          "build_ns": 57311735957,
+          "dense_column_bytes_max": 1048576,
+          "dense_column_matrices": 1446,
+          "dense_mul_calls": 4764716,
+          "dense_mul_cancelled_terms": 569706460,
+          "dense_mul_input_terms": 3750901091,
+          "dense_mul_output_terms": 3181194631,
+          "dense_mul_scratch_bytes_max": 1061696,
+          "dense_symbolic_set_bytes_max": 0,
+          "dense_symbolic_set_steps": 0,
+          "divisor_linear_tests": 0,
+          "divisor_submask_lookups": 103531834,
+          "divisor_tests": 103531834,
+          "eliminate_ns": 90357739011,
+          "extraction_tests": 0,
+          "f4_calls": 242,
+          "field_pairs_reduced": 633185,
+          "m4ri_block_width_max": 8,
+          "m4ri_blocks": 438925,
+          "m4ri_consecutive_blocks": 409354,
+          "m4ri_matrices": 723,
+          "m4ri_scratch_bytes_max": 811072,
+          "m4ri_table_word_xors": 9180637307,
+          "m4ri_trimmed_word_xors_avoided": 137506694,
+          "matrix_cols_max": 12348,
+          "matrix_rows_max": 12000,
+          "matrix_rows_sum": 4764716,
+          "new_elements": 997056,
+          "oversize": 0,
+          "pair_cover_lookups": 698657372,
+          "pair_dense_scratch_bytes_max": 4472832,
+          "pair_dense_select_calls": 1011034,
+          "pair_lcm_groups": 594604504,
+          "pair_prune_linear_tests": 2691661,
+          "pair_prune_passes": 1204,
+          "pair_prune_submask_lookups": 80060551,
+          "pair_prune_tests": 82752212,
+          "pair_sorted_select_calls": 0,
+          "pair_update_ns": 11511006822,
+          "pairs_chain_skipped": 865909122,
+          "pairs_left": 0,
+          "pairs_product_skipped": 267427242,
+          "pairs_reduced": 1543629,
+          "reducer_rows": 1732889,
+          "steps": 1204,
+          "symbolic_bytes_estimate_max": 171258672,
+          "symbolic_cap_hit": 0
+        },
+        "op_unit": "word XORs (elimination, including M4RI tables)",
+        "ops": 99199976264,
+        "peak_bytes": 18528000,
+        "solving_degree": 5,
+        "timed_out": false,
+        "wall_ns": 168919746368
+      },
+      "exhaustive": true,
+      "factor_base_contract": {
+        "discrete_log_labels_used": false,
+        "target_subgroup_enumerated": false
+      },
+      "fixed_x1_masks_visited": 512,
+      "fixed_x1_nonrational_skipped": 270,
+      "fixed_x1_systems_completed": 242,
+      "fixed_x1_systems_constructed": 242,
+      "fixed_x1_values": 512,
+      "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+      "regenerated_source_exact": true,
+      "same_instance_fields": [
+        "n",
+        "ell",
+        "m",
+        "curve",
+        "algebraic_factor_base",
+        "affine_target"
+      ],
+      "schema": "koblitz_pdp_isolated_backend.v1",
+      "single_thread_requested": false,
+      "solver": "f4-f2",
+      "solver_column_index": "dense_monomial_domain_to_20_variables_else_splitmix64_hash",
+      "solver_constructor": "fixed_x1_constant_linear_specialisation",
+      "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, dense duplicate-cancelling monomial products, hash-backed symbolic monomial sets, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis",
+      "solver_echelon_policy": "shape_selected_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming",
+      "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+      "solver_equations_total": 14278,
+      "solver_internal_mask_hasher": "splitmix64_for_trusted_u64_masks_with_exact_key_equality",
+      "solver_max_degree": 4,
+      "solver_monomial_multiply": "epoch_dense_parity_cancel_then_encoded_u32_order_sort",
+      "solver_monomial_multiply_control": "PQ_F4_DISABLE_DENSE_MUL=1",
+      "solver_pair_installer": "order_preserving_batch_update_env_PQ_F4_DISABLE_BATCH_INSERT",
+      "solver_pair_selector": "epoch_dense_lcm_groups_to_20_variables_else_sorted_lcm_exact_submask_equivalent_to_quadratic_update",
+      "solver_parallel_construction": true,
+      "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+      "solver_rayon_threads_requested": 12,
+      "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+      "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+      "solver_symbolic_monomial_set_control": "PQ_F4_DISABLE_DENSE_SYMBOLIC_SET=1",
+      "solver_symbolic_monomial_sets": "splitmix64_hash_sets",
+      "solver_symbolic_reducer_selector": "exact_submask_index_when_cheaper_else_linear_scan_with_shortest_reducer_and_index_tie_break",
+      "solver_terms_max_per_system": 62087,
+      "solver_terms_total": 14515915,
+      "solver_variables": 18,
+      "solver_x1_batch_cap": 512,
+      "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+      "solver_x1_batch_size": 512,
+      "solver_x1_batches_completed": 1,
+      "solver_x1_order": "hamming_weight_then_mask",
+      "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+      "solver_x1_order_target_independent": true,
+      "solver_x1_speculative_systems_completed": 0,
+      "source_artifacts": {
+        "cryptominisat_xor_dimacs": {
+          "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+          "bytes": 208168,
+          "path": "instance.xor.cnf",
+          "valid": true
+        },
+        "magma_boolean_f4": {
+          "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+          "bytes": 373254,
+          "path": "instance.magma",
+          "valid": true
+        },
+        "wdsat_anf": {
+          "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+          "bytes": 236183,
+          "path": "instance.anf",
+          "valid": true
+        }
+      },
+      "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+      "source_instance_verified": true,
+      "source_model_valid": null,
+      "source_representation": "symmetrised_s4",
+      "source_variables": 78,
+      "source_witness_valid": null,
+      "status": "unsat",
+      "timing_ns": {
+        "factor_base_x1_membership": 33967362,
+        "fixed_x1_s4_construction": 504928208,
+        "native_f4_whole": 15119273000,
+        "source_verification": 33429125
+      },
+      "witness_points": null
+    },
+    "valid_single_core_seconds": null
+  },
+  "schema": "koblitz_stage171_dense_symbolic_sets.v1",
+  "selected_native_f4": {
+    "artifacts": {
+      "metrics": {
+        "bytes": 550,
+        "path": "development/clean-pairs/candidate-r1/metrics.json",
+        "sha256": "c483e480591941f0e5c13359c9365516cd90b57eb4a9def9ecdc1da646342616"
+      },
+      "stderr": {
+        "bytes": 0,
+        "path": "development/clean-pairs/candidate-r1/stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 6565,
+        "path": "development/clean-pairs/candidate-r1/stdout.json",
+        "sha256": "39547f90220efa17784656a4003315f67103909a2b38d483699a4c7bca76eed6"
+      }
+    },
+    "classification": "true_negative",
+    "conflicts": null,
+    "decision": "first_clean_candidate_at_preselected_12_threads_one_complete_batch",
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 2932424704,
+      "single_core_seconds": null,
+      "system_seconds": 1.583104,
+      "total_core_seconds": 159.504427,
+      "user_seconds": 157.921323,
+      "wall_seconds": 14.992138957997668
+    },
+    "process": {
+      "command": [
+        "/Volumes/SSD990/koblitz-native-f4-build21-6de26d8c/bin/koblitz_pdp_backend",
+        "native-f4",
+        "manifest.json",
+        "300"
+      ],
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 2932424704,
+        "single_core_seconds": null,
+        "system_seconds": 1.583104,
+        "total_core_seconds": 159.504427,
+        "user_seconds": 157.921323,
+        "wall_seconds": 14.992138957997668
+      },
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 360.0
+    },
+    "report": {
+      "algebraic_roots": 0,
+      "backend": "native-f4",
+      "budget_seconds": 300,
+      "conflicts": null,
+      "cost": {
+        "degree_reached": 5,
+        "extra": {
+          "active_candidate_visits": 1137001812,
+          "active_deactivation_tests": 1137001812,
+          "basis_len": 1,
+          "batch_insert_elements": 1011275,
+          "batch_insert_groups": 1204,
+          "build_ns": 49808299475,
+          "dense_column_bytes_max": 1048576,
+          "dense_column_matrices": 1446,
+          "dense_mul_calls": 4764716,
+          "dense_mul_cancelled_terms": 569706460,
+          "dense_mul_input_terms": 3750901091,
+          "dense_mul_output_terms": 3181194631,
+          "dense_mul_scratch_bytes_max": 1061696,
+          "dense_symbolic_set_bytes_max": 376832,
+          "dense_symbolic_set_steps": 1204,
+          "divisor_linear_tests": 0,
+          "divisor_submask_lookups": 103531834,
+          "divisor_tests": 103531834,
+          "eliminate_ns": 94980987815,
+          "extraction_tests": 0,
+          "f4_calls": 242,
+          "field_pairs_reduced": 633185,
+          "m4ri_block_width_max": 8,
+          "m4ri_blocks": 438925,
+          "m4ri_consecutive_blocks": 409354,
+          "m4ri_matrices": 723,
+          "m4ri_scratch_bytes_max": 811072,
+          "m4ri_table_word_xors": 9180637307,
+          "m4ri_trimmed_word_xors_avoided": 137506694,
+          "matrix_cols_max": 12348,
+          "matrix_rows_max": 12000,
+          "matrix_rows_sum": 4764716,
+          "new_elements": 997056,
+          "oversize": 0,
+          "pair_cover_lookups": 698657372,
+          "pair_dense_scratch_bytes_max": 4472832,
+          "pair_dense_select_calls": 1011034,
+          "pair_lcm_groups": 594604504,
+          "pair_prune_linear_tests": 2691661,
+          "pair_prune_passes": 1204,
+          "pair_prune_submask_lookups": 80060551,
+          "pair_prune_tests": 82752212,
+          "pair_sorted_select_calls": 0,
+          "pair_update_ns": 11460318567,
+          "pairs_chain_skipped": 865909122,
+          "pairs_left": 0,
+          "pairs_product_skipped": 267427242,
+          "pairs_reduced": 1543629,
+          "reducer_rows": 1732889,
+          "steps": 1204,
+          "symbolic_bytes_estimate_max": 171258672,
+          "symbolic_cap_hit": 0
+        },
+        "op_unit": "word XORs (elimination, including M4RI tables)",
+        "ops": 99199976264,
+        "peak_bytes": 18528000,
+        "solving_degree": 5,
+        "timed_out": false,
+        "wall_ns": 166074203545
+      },
+      "exhaustive": true,
+      "factor_base_contract": {
+        "discrete_log_labels_used": false,
+        "target_subgroup_enumerated": false
+      },
+      "fixed_x1_masks_visited": 512,
+      "fixed_x1_nonrational_skipped": 270,
+      "fixed_x1_systems_completed": 242,
+      "fixed_x1_systems_constructed": 242,
+      "fixed_x1_values": 512,
+      "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+      "regenerated_source_exact": true,
+      "same_instance_fields": [
+        "n",
+        "ell",
+        "m",
+        "curve",
+        "algebraic_factor_base",
+        "affine_target"
+      ],
+      "schema": "koblitz_pdp_isolated_backend.v1",
+      "single_thread_requested": false,
+      "solver": "f4-f2",
+      "solver_column_index": "dense_monomial_domain_to_20_variables_else_splitmix64_hash",
+      "solver_constructor": "fixed_x1_constant_linear_specialisation",
+      "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, dense duplicate-cancelling monomial products, bit-packed symbolic monomial sets on bounded Boolean domains, indexed exact-submask reducers, field pairs, shape-selected block-8 M4RI/streaming bit-packed elimination, reduced basis",
+      "solver_echelon_policy": "shape_selected_m4ri_default_block8_env_PQ_F4_M4RI_BLOCK_2_to_10_else_streaming",
+      "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+      "solver_equations_total": 14278,
+      "solver_internal_mask_hasher": "splitmix64_for_trusted_u64_masks_with_exact_key_equality",
+      "solver_max_degree": 4,
+      "solver_monomial_multiply": "epoch_dense_parity_cancel_then_encoded_u32_order_sort",
+      "solver_monomial_multiply_control": "PQ_F4_DISABLE_DENSE_MUL=1",
+      "solver_pair_installer": "order_preserving_batch_update_env_PQ_F4_DISABLE_BATCH_INSERT",
+      "solver_pair_selector": "epoch_dense_lcm_groups_to_20_variables_else_sorted_lcm_exact_submask_equivalent_to_quadratic_update",
+      "solver_parallel_construction": true,
+      "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+      "solver_rayon_threads_requested": 12,
+      "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+      "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+      "solver_symbolic_monomial_set_control": "PQ_F4_DISABLE_DENSE_SYMBOLIC_SET=1",
+      "solver_symbolic_monomial_sets": "reused_bit_packed_complete_boolean_domain_to_20_variables_else_splitmix64_hash_sets",
+      "solver_symbolic_reducer_selector": "exact_submask_index_when_cheaper_else_linear_scan_with_shortest_reducer_and_index_tie_break",
+      "solver_terms_max_per_system": 62087,
+      "solver_terms_total": 14515915,
+      "solver_variables": 18,
+      "solver_x1_batch_cap": 512,
+      "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+      "solver_x1_batch_size": 512,
+      "solver_x1_batches_completed": 1,
+      "solver_x1_order": "hamming_weight_then_mask",
+      "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+      "solver_x1_order_target_independent": true,
+      "solver_x1_speculative_systems_completed": 0,
+      "source_artifacts": {
+        "cryptominisat_xor_dimacs": {
+          "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+          "bytes": 208168,
+          "path": "instance.xor.cnf",
+          "valid": true
+        },
+        "magma_boolean_f4": {
+          "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+          "bytes": 373254,
+          "path": "instance.magma",
+          "valid": true
+        },
+        "wdsat_anf": {
+          "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+          "bytes": 236183,
+          "path": "instance.anf",
+          "valid": true
+        }
+      },
+      "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+      "source_instance_verified": true,
+      "source_model_valid": null,
+      "source_representation": "symmetrised_s4",
+      "source_variables": 78,
+      "source_witness_valid": null,
+      "status": "unsat",
+      "timing_ns": {
+        "factor_base_x1_membership": 33203165,
+        "fixed_x1_s4_construction": 535227625,
+        "native_f4_whole": 14921102875,
+        "source_verification": 33625125
+      },
+      "witness_points": null
+    },
+    "valid_single_core_seconds": null
+  },
+  "source_revision": {
+    "archive_sha256": "45a9c8e42311eebac690520983946f2a91a66b1b1371db72fce9747c9e9e9a68",
+    "backend_sha256": "1c955e78d1885c400d731d2a69e669e096dc5fef4c06bcff9d0540273584dd15",
+    "commit": "6de26d8c7c1791e916f7a595440319f0a1a2c030",
+    "dirty": false,
+    "exporter_sha256": "fed446b4c4483b79f34e2d79d1b42e57afe797dd270c94a2ecca0becfc4b4e8b",
+    "frozen_cargo_lock_sha256": "10461fc25d189a7e1b533c0a59e1c66d7376ca04d3af5c5868a6f155efc8e5cf",
+    "tree": "9e5b4a5e2ca11e1b055a69a71e1d8656736e37f4"
+  },
+  "status": "complete_dense_symbolic_sets_true_negative",
+  "validation": {
+    "all_clean_pair_terminals_exact": true,
+    "boolean_f4_tests": {
+      "artifacts": {
+        "metrics": {
+          "bytes": 620,
+          "path": "development/final-tests/f4.metrics.json",
+          "sha256": "6f733cb7d2f381dbd2074ddcdb1b2ea1840fef9e1273d6a69acfa8655338cb9f"
+        },
+        "stderr": {
+          "bytes": 30298,
+          "path": "development/final-tests/f4.stderr",
+          "sha256": "1c20c5ec6682517176d325f63e96bef9c44e31217ac9e944f7b3e0ba688aee7c"
+        },
+        "stdout": {
+          "bytes": 1253,
+          "path": "development/final-tests/f4.stdout",
+          "sha256": "91e58e98b4b1162aa8fac897736ff364094a9d157c3179ad6ae94997240a4086"
+        }
+      },
+      "failed": 0,
+      "passed": 13
+    },
+    "fixed_x1_backend_tests": {
+      "artifacts": {
+        "metrics": {
+          "bytes": 578,
+          "path": "development/final-tests/backend.metrics.json",
+          "sha256": "1dab6e5a6ef689984d7573a870b92e20a4659438066444a84a41f2e724f588bd"
+        },
+        "stderr": {
+          "bytes": 32407,
+          "path": "development/final-tests/backend.stderr",
+          "sha256": "8eebcfb6f1c7b65b6d0fd2acb8ab8c0c7be0461a71c3c7c166e7ce05c4db465b"
+        },
+        "stdout": {
+          "bytes": 353,
+          "path": "development/final-tests/backend.stdout",
+          "sha256": "841d0a0a17025863c20d7b60f02acc229d57699974db9728522a57a58869db3f"
+        }
+      },
+      "failed": 0,
+      "passed": 3
+    },
+    "same_scientific_report_outside_declared_mode_allocation_and_timing": true
+  }
+}

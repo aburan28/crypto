@@ -1,0 +1,49 @@
+{
+  "acceptance": {
+    "32_of_32_extracted": true,
+    "full_rank_accumulation": false,
+    "independent_arithmetic_replay": true,
+    "matched_published_scalars": true,
+    "measured_shared_setup_and_queries": true,
+    "shared_factor_base_hash": true,
+    "verified_discrete_log": false,
+    "vs_rho": false
+  },
+  "beat_id": "koblitz.vs_rho.n53_probe",
+  "claim_boundary": "Public synthetic n=53 compact-orbit relation extraction on one matched 32-target block only; no full-rank accumulation, no discrete-log recovery, no vs_rho claim, no key recovery, no external points, no asymptotic sub-rho claim.",
+  "cumulative_factor_base_log_rank": 96,
+  "edge_selectors": 0,
+  "factor_base_header_source": "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/runs/n53/block_00/direct/stdout.txt",
+  "factor_base_point_set_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+  "failed_target_scalars": [],
+  "fixture_source": "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/runs/n53/block_02/rho/stdout.txt",
+  "group_lifted_by_producer": true,
+  "host": {
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O"
+  },
+  "independent_arithmetic_replay": "PASS",
+  "pair_table_entries": 0,
+  "producer_executable_sha256": "e42ff8988b066f7114bda87a45925f2d035b4264caf5e535d2c56c58b3daccb4",
+  "producer_json_sha256": "45ab9b53c889e5b5250186e73756182f58c210f3d10d4ccec3ab945afe271f89",
+  "producer_source_sha256": "71615c63f32eba46336aefe849e96f9356321b29eb35d0ec24c695332ef193df",
+  "regular_states": 2565200,
+  "relations_extracted": 32,
+  "root_index_entries": 5081560,
+  "round": 3,
+  "schema_version": "1.0",
+  "stage": "relation_yield",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "target_count": 32,
+  "target_scalars_match_published_fixture": true,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "timing_ms": {
+    "base_setup": 342.900958,
+    "charged_ms_per_target": 247.23202865624995,
+    "charged_total": 7911.4249169999985,
+    "queries_total": 6786.695125999999,
+    "regular_state_scan_shared": 638.211375,
+    "root_index_build_shared": 143.617458
+  }
+}

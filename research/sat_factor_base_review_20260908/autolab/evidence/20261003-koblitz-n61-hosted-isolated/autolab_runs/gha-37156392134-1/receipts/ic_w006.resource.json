@@ -1,0 +1,35 @@
+{
+  "command": [
+    "/home/runner/work/crypto/crypto/target/release/examples/koblitz_orbit_dlp_fast_online",
+    "construct:61:0:500",
+    "/home/runner/work/crypto/crypto/research/sat_factor_base_review_20260908/autolab/runs/gha-37156392134-1/inputs/eval_w006.target",
+    "7",
+    "/home/runner/work/crypto/crypto/research/sat_factor_base_review_20260908/autolab/runs/gha-37156392134-1/logs/ic_w006.jsonl"
+  ],
+  "conditions_after": {
+    "at": "2026-10-03T22:01:25.106615+00:00",
+    "available_memory_bytes": 15761227776,
+    "loadavg": [
+      1.078125,
+      1.3291015625,
+      0.7470703125
+    ]
+  },
+  "conditions_before": {
+    "at": "2026-10-03T22:01:03.222991+00:00",
+    "available_memory_bytes": 15756140544,
+    "loadavg": [
+      1.1103515625,
+      1.35302734375,
+      0.7412109375
+    ]
+  },
+  "exit_code": 0,
+  "involuntary_context_switches": 192,
+  "max_rss_bytes": 1453367296,
+  "pinned_cpu": 3,
+  "sys_s": 0.108967,
+  "user_s": 21.77193,
+  "voluntary_context_switches": 7,
+  "wall_s": 21.88343942399996
+}

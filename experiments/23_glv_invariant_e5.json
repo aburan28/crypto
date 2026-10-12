@@ -1,0 +1,2796 @@
+{
+  "command": "glv_invariant_experiments --exp e5 --bits 7,8,9,10,11 --seeds 4 --json experiments/23_glv_invariant_e5.json",
+  "host": {
+    "arch": "x86_64",
+    "os": "linux",
+    "threads": 4
+  },
+  "rows": [
+    {
+      "base_order": 68,
+      "cofactor": 68,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 14,
+          "points": 84,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 42,
+          "points": 84,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 300764,
+      "instance": "subfield-p7bit-p67",
+      "log2_r": 12.110809526898654,
+      "p_bits": 7,
+      "r": 4423,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 2672,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 3372830,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 42,
+            "deficiency_at_square": 13,
+            "deficiency_total": 13,
+            "dependent_final": 28,
+            "first_pin_relations": 10,
+            "first_pin_trials": 528,
+            "label": "control",
+            "points": 84,
+            "points_per_column": 2.0,
+            "rank_at_columns": 27,
+            "rank_final": 30,
+            "rank_fraction_at_columns": 0.9,
+            "recovered": 3956,
+            "relations_total": 58,
+            "row_ops": 371,
+            "single_column_rows": 0,
+            "square_over_columns": 1.380952380952381,
+            "square_relations": 58,
+            "square_trials": 4138,
+            "touched_at_square": 42,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 1.6666666666666667,
+          "folded": {
+            "columns": 14,
+            "deficiency_at_square": 0,
+            "deficiency_total": 0,
+            "dependent_final": 43,
+            "first_pin_relations": 6,
+            "first_pin_trials": 333,
+            "label": "folded",
+            "points": 84,
+            "points_per_column": 6.0,
+            "rank_at_columns": 10,
+            "rank_final": 15,
+            "rank_fraction_at_columns": 0.6666666666666666,
+            "recovered": 3956,
+            "relations_total": 58,
+            "row_ops": 260,
+            "single_column_rows": 49,
+            "square_over_columns": 2.7142857142857144,
+            "square_relations": 38,
+            "square_trials": 2392,
+            "touched_at_square": 14,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 45293,
+            "doubles": 84077,
+            "scalar_mults": 8276
+          },
+          "hit_rate": 0.01401643305944901,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 58,
+          "square_ratio": 1.5263157894736843,
+          "trials": 4138
+        }
+      },
+      "seed": 1,
+      "wall_seconds": 0.1445792,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 73,
+      "cofactor": 292,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 11,
+          "points": 66,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 33,
+          "points": 66,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 494356,
+      "instance": "subfield-p7bit-p79",
+      "log2_r": 10.725366257895642,
+      "p_bits": 7,
+      "r": 1693,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 511,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 738287,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 33,
+            "deficiency_at_square": 23,
+            "deficiency_total": 23,
+            "dependent_final": 1,
+            "first_pin_relations": 7,
+            "first_pin_trials": 354,
+            "label": "control",
+            "points": 66,
+            "points_per_column": 2.0,
+            "rank_at_columns": null,
+            "rank_final": 11,
+            "rank_fraction_at_columns": null,
+            "recovered": 179,
+            "relations_total": 12,
+            "row_ops": 77,
+            "single_column_rows": 0,
+            "square_over_columns": 0.36363636363636365,
+            "square_relations": 12,
+            "square_trials": 604,
+            "touched_at_square": 15,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 2.3333333333333335,
+          "folded": {
+            "columns": 11,
+            "deficiency_at_square": 6,
+            "deficiency_total": 6,
+            "dependent_final": 6,
+            "first_pin_relations": 3,
+            "first_pin_trials": 153,
+            "label": "folded",
+            "points": 66,
+            "points_per_column": 6.0,
+            "rank_at_columns": 6,
+            "rank_final": 6,
+            "rank_fraction_at_columns": 1.0,
+            "recovered": 179,
+            "relations_total": 12,
+            "row_ops": 51,
+            "single_column_rows": 12,
+            "square_over_columns": 0.7272727272727273,
+            "square_relations": 8,
+            "square_trials": 464,
+            "touched_at_square": 5,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 5780,
+            "doubles": 10636,
+            "scalar_mults": 1212
+          },
+          "hit_rate": 0.019867549668874173,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 12,
+          "square_ratio": 1.5,
+          "trials": 604
+        }
+      },
+      "seed": 2,
+      "wall_seconds": 0.02671769,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 137,
+      "cofactor": 548,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 19,
+          "points": 114,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 57,
+          "points": 114,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 2045684,
+      "instance": "subfield-p7bit-p127",
+      "log2_r": 11.86611979330307,
+      "p_bits": 7,
+      "r": 3733,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 3147,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 6519427,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 57,
+            "deficiency_at_square": 43,
+            "deficiency_total": 43,
+            "dependent_final": 16,
+            "first_pin_relations": 8,
+            "first_pin_trials": 877,
+            "label": "control",
+            "points": 114,
+            "points_per_column": 2.0,
+            "rank_at_columns": null,
+            "rank_final": 15,
+            "rank_fraction_at_columns": null,
+            "recovered": 3144,
+            "relations_total": 31,
+            "row_ops": 182,
+            "single_column_rows": 0,
+            "square_over_columns": 0.543859649122807,
+            "square_relations": 31,
+            "square_trials": 6787,
+            "touched_at_square": 24,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 2.6666666666666665,
+          "folded": {
+            "columns": 19,
+            "deficiency_at_square": 13,
+            "deficiency_total": 13,
+            "dependent_final": 24,
+            "first_pin_relations": 3,
+            "first_pin_trials": 197,
+            "label": "folded",
+            "points": 114,
+            "points_per_column": 6.0,
+            "rank_at_columns": 6,
+            "rank_final": 7,
+            "rank_fraction_at_columns": 0.8571428571428571,
+            "recovered": 3144,
+            "relations_total": 31,
+            "row_ops": 137,
+            "single_column_rows": 21,
+            "square_over_columns": 1.368421052631579,
+            "square_relations": 26,
+            "square_trials": 4207,
+            "touched_at_square": 8,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 72242,
+            "doubles": 134620,
+            "scalar_mults": 13574
+          },
+          "hit_rate": 0.004567555621040224,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 31,
+          "square_ratio": 1.1923076923076923,
+          "trials": 6787
+        }
+      },
+      "seed": 3,
+      "wall_seconds": 0.265374325,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 116,
+      "cofactor": 116,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 18,
+          "points": 108,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 54,
+          "points": 108,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 1293284,
+      "instance": "subfield-p7bit-p109",
+      "log2_r": 13.444626694202688,
+      "p_bits": 7,
+      "r": 11149,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 5535,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 10367780,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 54,
+            "deficiency_at_square": 17,
+            "deficiency_total": 17,
+            "dependent_final": 25,
+            "first_pin_relations": 10,
+            "first_pin_trials": 1141,
+            "label": "control",
+            "points": 108,
+            "points_per_column": 2.0,
+            "rank_at_columns": 35,
+            "rank_final": 38,
+            "rank_fraction_at_columns": 0.9210526315789473,
+            "recovered": 4257,
+            "relations_total": 63,
+            "row_ops": 392,
+            "single_column_rows": 0,
+            "square_over_columns": 1.1666666666666667,
+            "square_relations": 63,
+            "square_trials": 7658,
+            "touched_at_square": 54,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 2.0,
+          "folded": {
+            "columns": 18,
+            "deficiency_at_square": 0,
+            "deficiency_total": 0,
+            "dependent_final": 44,
+            "first_pin_relations": 5,
+            "first_pin_trials": 754,
+            "label": "folded",
+            "points": 108,
+            "points_per_column": 6.0,
+            "rank_at_columns": 13,
+            "rank_final": 19,
+            "rank_fraction_at_columns": 0.6842105263157895,
+            "recovered": 4257,
+            "relations_total": 63,
+            "row_ops": 267,
+            "single_column_rows": 58,
+            "square_over_columns": 2.8333333333333335,
+            "square_relations": 51,
+            "square_trials": 5931,
+            "touched_at_square": 18,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 92538,
+            "doubles": 176733,
+            "scalar_mults": 15316
+          },
+          "hit_rate": 0.008226691042047532,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 63,
+          "square_ratio": 1.2352941176470589,
+          "trials": 7658
+        }
+      },
+      "seed": 4,
+      "wall_seconds": 0.34483479,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 140,
+      "cofactor": 980,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 26,
+          "points": 156,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 78,
+          "points": 156,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 3446660,
+      "instance": "subfield-p8bit-p151",
+      "log2_r": 11.780129619625306,
+      "p_bits": 8,
+      "r": 3517,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 1935,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 2951804,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 78,
+            "deficiency_at_square": 68,
+            "deficiency_total": 68,
+            "dependent_final": 2,
+            "first_pin_relations": 3,
+            "first_pin_trials": 517,
+            "label": "control",
+            "points": 156,
+            "points_per_column": 2.0,
+            "rank_at_columns": null,
+            "rank_final": 11,
+            "rank_fraction_at_columns": null,
+            "recovered": 2558,
+            "relations_total": 13,
+            "row_ops": 74,
+            "single_column_rows": 0,
+            "square_over_columns": 0.16666666666666666,
+            "square_relations": 13,
+            "square_trials": 2720,
+            "touched_at_square": 15,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 1.5,
+          "folded": {
+            "columns": 26,
+            "deficiency_at_square": 22,
+            "deficiency_total": 22,
+            "dependent_final": 8,
+            "first_pin_relations": 2,
+            "first_pin_trials": 393,
+            "label": "folded",
+            "points": 156,
+            "points_per_column": 6.0,
+            "rank_at_columns": null,
+            "rank_final": 5,
+            "rank_fraction_at_columns": null,
+            "recovered": 2558,
+            "relations_total": 13,
+            "row_ops": 66,
+            "single_column_rows": 4,
+            "square_over_columns": 0.38461538461538464,
+            "square_relations": 10,
+            "square_trials": 2010,
+            "touched_at_square": 5,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 28504,
+            "doubles": 53703,
+            "scalar_mults": 5442
+          },
+          "hit_rate": 0.004779411764705883,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 13,
+          "square_ratio": 1.3,
+          "trials": 2720
+        }
+      },
+      "seed": 1,
+      "wall_seconds": 0.119313356,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 238,
+      "cofactor": 238,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 44,
+          "points": 264,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 132,
+          "points": 264,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 11082946,
+      "instance": "subfield-p8bit-p223",
+      "log2_r": 15.507020321520136,
+      "p_bits": 8,
+      "r": 46567,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 33313,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 76265059,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 132,
+            "deficiency_at_square": 38,
+            "deficiency_total": 38,
+            "dependent_final": 197,
+            "first_pin_relations": 31,
+            "first_pin_trials": 3880,
+            "label": "control",
+            "points": 264,
+            "points_per_column": 2.0,
+            "rank_at_columns": 76,
+            "rank_final": 95,
+            "rank_fraction_at_columns": 0.8,
+            "recovered": 38879,
+            "relations_total": 292,
+            "row_ops": 1923,
+            "single_column_rows": 0,
+            "square_over_columns": 2.212121212121212,
+            "square_relations": 292,
+            "square_trials": 58207,
+            "touched_at_square": 132,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 3.875,
+          "folded": {
+            "columns": 44,
+            "deficiency_at_square": 0,
+            "deficiency_total": 0,
+            "dependent_final": 247,
+            "first_pin_relations": 8,
+            "first_pin_trials": 1320,
+            "label": "folded",
+            "points": 264,
+            "points_per_column": 6.0,
+            "rank_at_columns": 28,
+            "rank_final": 45,
+            "rank_fraction_at_columns": 0.6222222222222222,
+            "recovered": 38879,
+            "relations_total": 292,
+            "row_ops": 1362,
+            "single_column_rows": 204,
+            "square_over_columns": 4.818181818181818,
+            "square_relations": 212,
+            "square_trials": 33230,
+            "touched_at_square": 44,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 824041,
+            "doubles": 1582492,
+            "scalar_mults": 116414
+          },
+          "hit_rate": 0.0050165787620045695,
+          "oracle_lift_failures": 8,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 4,
+          "orbit_duplicates": 0,
+          "relations": 292,
+          "square_ratio": 1.3773584905660377,
+          "trials": 58207
+        }
+      },
+      "seed": 2,
+      "wall_seconds": 2.698372291,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 190,
+      "cofactor": 1330,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 33,
+          "points": 198,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 99,
+          "points": 198,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 7191310,
+      "instance": "subfield-p8bit-p193",
+      "log2_r": 12.400612641081999,
+      "p_bits": 8,
+      "r": 5407,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 2372,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 3225714,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 99,
+            "deficiency_at_square": 92,
+            "deficiency_total": 92,
+            "dependent_final": 2,
+            "first_pin_relations": 7,
+            "first_pin_trials": 1816,
+            "label": "control",
+            "points": 198,
+            "points_per_column": 2.0,
+            "rank_at_columns": null,
+            "rank_final": 8,
+            "rank_fraction_at_columns": null,
+            "recovered": 402,
+            "relations_total": 10,
+            "row_ops": 64,
+            "single_column_rows": 0,
+            "square_over_columns": 0.10101010101010101,
+            "square_relations": 10,
+            "square_trials": 3209,
+            "touched_at_square": 12,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 3.5,
+          "folded": {
+            "columns": 33,
+            "deficiency_at_square": 30,
+            "deficiency_total": 30,
+            "dependent_final": 6,
+            "first_pin_relations": 2,
+            "first_pin_trials": 453,
+            "label": "folded",
+            "points": 198,
+            "points_per_column": 6.0,
+            "rank_at_columns": null,
+            "rank_final": 4,
+            "rank_fraction_at_columns": null,
+            "recovered": 402,
+            "relations_total": 10,
+            "row_ops": 45,
+            "single_column_rows": 7,
+            "square_over_columns": 0.12121212121212122,
+            "square_relations": 4,
+            "square_trials": 799,
+            "touched_at_square": 4,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 35267,
+            "doubles": 67532,
+            "scalar_mults": 6418
+          },
+          "hit_rate": 0.0031162355874104083,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 10,
+          "square_ratio": 2.5,
+          "trials": 3209
+        }
+      },
+      "seed": 3,
+      "wall_seconds": 0.13709873,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 254,
+      "cofactor": 254,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 48,
+          "points": 288,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 144,
+          "points": 288,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 12006326,
+      "instance": "subfield-p8bit-p229",
+      "log2_r": 15.528606723613448,
+      "p_bits": 8,
+      "r": 47269,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 40790,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 84519123,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 144,
+            "deficiency_at_square": 37,
+            "deficiency_total": 37,
+            "dependent_final": 357,
+            "first_pin_relations": 17,
+            "first_pin_trials": 1482,
+            "label": "control",
+            "points": 288,
+            "points_per_column": 2.0,
+            "rank_at_columns": 79,
+            "rank_final": 108,
+            "rank_fraction_at_columns": 0.7314814814814815,
+            "recovered": 15981,
+            "relations_total": 465,
+            "row_ops": 3161,
+            "single_column_rows": 6,
+            "square_over_columns": 3.2291666666666665,
+            "square_relations": 465,
+            "square_trials": 93496,
+            "touched_at_square": 144,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 1.0,
+          "folded": {
+            "columns": 48,
+            "deficiency_at_square": 0,
+            "deficiency_total": 0,
+            "dependent_final": 416,
+            "first_pin_relations": 17,
+            "first_pin_trials": 1482,
+            "label": "folded",
+            "points": 288,
+            "points_per_column": 6.0,
+            "rank_at_columns": 30,
+            "rank_final": 49,
+            "rank_fraction_at_columns": 0.6122448979591837,
+            "recovered": 15981,
+            "relations_total": 465,
+            "row_ops": 2311,
+            "single_column_rows": 260,
+            "square_over_columns": 5.125,
+            "square_relations": 246,
+            "square_trials": 28209,
+            "touched_at_square": 48,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 1327669,
+            "doubles": 2544980,
+            "scalar_mults": 187000
+          },
+          "hit_rate": 0.004973474801061008,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 465,
+          "square_ratio": 1.8902439024390243,
+          "trials": 93496
+        }
+      },
+      "seed": 4,
+      "wall_seconds": 3.70598879,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 346,
+      "cofactor": 346,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 58,
+          "points": 348,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 174,
+          "points": 348,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 49444438,
+      "instance": "subfield-p9bit-p367",
+      "log2_r": 17.12467667806223,
+      "p_bits": 9,
+      "r": 142903,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 98295,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 189436763,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 174,
+            "deficiency_at_square": 52,
+            "deficiency_total": 52,
+            "dependent_final": 176,
+            "first_pin_relations": 29,
+            "first_pin_trials": 9774,
+            "label": "control",
+            "points": 348,
+            "points_per_column": 2.0,
+            "rank_at_columns": 105,
+            "rank_final": 123,
+            "rank_fraction_at_columns": 0.8536585365853658,
+            "recovered": 106640,
+            "relations_total": 299,
+            "row_ops": 1918,
+            "single_column_rows": 0,
+            "square_over_columns": 1.7183908045977012,
+            "square_relations": 299,
+            "square_trials": 167102,
+            "touched_at_square": 174,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 5.8,
+          "folded": {
+            "columns": 58,
+            "deficiency_at_square": 0,
+            "deficiency_total": 0,
+            "dependent_final": 240,
+            "first_pin_relations": 5,
+            "first_pin_trials": 1031,
+            "label": "folded",
+            "points": 348,
+            "points_per_column": 6.0,
+            "rank_at_columns": 36,
+            "rank_final": 59,
+            "rank_fraction_at_columns": 0.6101694915254238,
+            "recovered": 106640,
+            "relations_total": 299,
+            "row_ops": 1352,
+            "single_column_rows": 227,
+            "square_over_columns": 3.189655172413793,
+            "square_relations": 185,
+            "square_trials": 86863,
+            "touched_at_square": 58,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 2648735,
+            "doubles": 5068843,
+            "scalar_mults": 334206
+          },
+          "hit_rate": 0.001789326279757274,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 299,
+          "square_ratio": 1.6162162162162161,
+          "trials": 167102
+        }
+      },
+      "seed": 1,
+      "wall_seconds": 8.340493283,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 359,
+      "cofactor": 1436,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 62,
+          "points": 372,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 186,
+          "points": 372,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 49440044,
+      "instance": "subfield-p9bit-p367",
+      "log2_r": 15.071336657582098,
+      "p_bits": 9,
+      "r": 34429,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 29238,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 71406866,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 186,
+            "deficiency_at_square": 127,
+            "deficiency_total": 127,
+            "dependent_final": 120,
+            "first_pin_relations": 17,
+            "first_pin_trials": 2542,
+            "label": "control",
+            "points": 372,
+            "points_per_column": 2.0,
+            "rank_at_columns": null,
+            "rank_final": 60,
+            "rank_fraction_at_columns": null,
+            "recovered": 18491,
+            "relations_total": 180,
+            "row_ops": 1155,
+            "single_column_rows": 0,
+            "square_over_columns": 0.967741935483871,
+            "square_relations": 180,
+            "square_trials": 65635,
+            "touched_at_square": 93,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 2.125,
+          "folded": {
+            "columns": 62,
+            "deficiency_at_square": 36,
+            "deficiency_total": 36,
+            "dependent_final": 153,
+            "first_pin_relations": 8,
+            "first_pin_trials": 1420,
+            "label": "folded",
+            "points": 372,
+            "points_per_column": 6.0,
+            "rank_at_columns": 24,
+            "rank_final": 27,
+            "rank_fraction_at_columns": 0.8888888888888888,
+            "recovered": 18491,
+            "relations_total": 180,
+            "row_ops": 852,
+            "single_column_rows": 110,
+            "square_over_columns": 2.338709677419355,
+            "square_relations": 145,
+            "square_trials": 40887,
+            "touched_at_square": 31,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 911273,
+            "doubles": 1719179,
+            "scalar_mults": 131276
+          },
+          "hit_rate": 0.0027424392473527842,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 180,
+          "square_ratio": 1.2413793103448276,
+          "trials": 65635
+        }
+      },
+      "seed": 2,
+      "wall_seconds": 2.881100349,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 409,
+      "cofactor": 1636,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 81,
+          "points": 486,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 243,
+          "points": 486,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 84615556,
+      "instance": "subfield-p9bit-p439",
+      "log2_r": 15.658462548763625,
+      "p_bits": 9,
+      "r": 51721,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 47204,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 90772035,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 243,
+            "deficiency_at_square": 182,
+            "deficiency_total": 182,
+            "dependent_final": 107,
+            "first_pin_relations": 22,
+            "first_pin_trials": 7936,
+            "label": "control",
+            "points": 486,
+            "points_per_column": 2.0,
+            "rank_at_columns": null,
+            "rank_final": 62,
+            "rank_fraction_at_columns": null,
+            "recovered": 720,
+            "relations_total": 169,
+            "row_ops": 1040,
+            "single_column_rows": 0,
+            "square_over_columns": 0.6954732510288066,
+            "square_relations": 169,
+            "square_trials": 126464,
+            "touched_at_square": 96,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 7.333333333333333,
+          "folded": {
+            "columns": 81,
+            "deficiency_at_square": 55,
+            "deficiency_total": 55,
+            "dependent_final": 142,
+            "first_pin_relations": 3,
+            "first_pin_trials": 2075,
+            "label": "folded",
+            "points": 486,
+            "points_per_column": 6.0,
+            "rank_at_columns": 27,
+            "rank_final": 27,
+            "rank_fraction_at_columns": 1.0,
+            "recovered": 720,
+            "relations_total": 169,
+            "row_ops": 801,
+            "single_column_rows": 99,
+            "square_over_columns": 0.6296296296296297,
+            "square_relations": 51,
+            "square_trials": 19367,
+            "touched_at_square": 32,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 1812342,
+            "doubles": 3472442,
+            "scalar_mults": 252936
+          },
+          "hit_rate": 0.0013363486842105264,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 169,
+          "square_ratio": 3.3137254901960786,
+          "trials": 126464
+        }
+      },
+      "seed": 3,
+      "wall_seconds": 5.231010578,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 464,
+      "cofactor": 3248,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 87,
+          "points": 522,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 261,
+          "points": 522,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 95435984,
+      "instance": "subfield-p9bit-p457",
+      "log2_r": 14.842694081916301,
+      "p_bits": 9,
+      "r": 29383,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 15734,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 36608167,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 261,
+            "deficiency_at_square": 233,
+            "deficiency_total": 233,
+            "dependent_final": 20,
+            "first_pin_relations": 6,
+            "first_pin_trials": 2425,
+            "label": "control",
+            "points": 522,
+            "points_per_column": 2.0,
+            "rank_at_columns": null,
+            "rank_final": 29,
+            "rank_fraction_at_columns": null,
+            "recovered": 21897,
+            "relations_total": 49,
+            "row_ops": 275,
+            "single_column_rows": 0,
+            "square_over_columns": 0.18773946360153257,
+            "square_relations": 49,
+            "square_trials": 22638,
+            "touched_at_square": 48,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 2.0,
+          "folded": {
+            "columns": 87,
+            "deficiency_at_square": 75,
+            "deficiency_total": 75,
+            "dependent_final": 36,
+            "first_pin_relations": 3,
+            "first_pin_trials": 308,
+            "label": "folded",
+            "points": 522,
+            "points_per_column": 6.0,
+            "rank_at_columns": null,
+            "rank_final": 13,
+            "rank_fraction_at_columns": null,
+            "recovered": 21897,
+            "relations_total": 49,
+            "row_ops": 217,
+            "single_column_rows": 31,
+            "square_over_columns": 0.42528735632183906,
+            "square_relations": 37,
+            "square_trials": 14838,
+            "touched_at_square": 16,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 307997,
+            "doubles": 583485,
+            "scalar_mults": 45276
+          },
+          "hit_rate": 0.0021645021645021645,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 49,
+          "square_ratio": 1.3243243243243243,
+          "trials": 22638
+        }
+      },
+      "seed": 4,
+      "wall_seconds": 1.236645358,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 812,
+      "cofactor": 812,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 141,
+          "points": 846,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 423,
+          "points": 846,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 487400564,
+      "instance": "subfield-p10bit-p787",
+      "log2_r": 19.195196762403643,
+      "p_bits": 10,
+      "r": 600247,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 537053,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 983049409,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 423,
+            "deficiency_at_square": 117,
+            "deficiency_total": 117,
+            "dependent_final": 966,
+            "first_pin_relations": 57,
+            "first_pin_trials": 21077,
+            "label": "control",
+            "points": 846,
+            "points_per_column": 2.0,
+            "rank_at_columns": 243,
+            "rank_final": 307,
+            "rank_fraction_at_columns": 0.7915309446254072,
+            "recovered": 10466,
+            "relations_total": 1273,
+            "row_ops": 8632,
+            "single_column_rows": 0,
+            "square_over_columns": 3.0094562647754137,
+            "square_relations": 1273,
+            "square_trials": 1353416,
+            "touched_at_square": 423,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 3.8,
+          "folded": {
+            "columns": 141,
+            "deficiency_at_square": 0,
+            "deficiency_total": 0,
+            "dependent_final": 1131,
+            "first_pin_relations": 15,
+            "first_pin_trials": 4887,
+            "label": "folded",
+            "points": 846,
+            "points_per_column": 6.0,
+            "rank_at_columns": 81,
+            "rank_final": 142,
+            "rank_fraction_at_columns": 0.5704225352112676,
+            "recovered": 10466,
+            "relations_total": 1273,
+            "row_ops": 6190,
+            "single_column_rows": 753,
+            "square_over_columns": 7.028368794326241,
+            "square_relations": 991,
+            "square_trials": 718593,
+            "touched_at_square": 141,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 24173194,
+            "doubles": 46700871,
+            "scalar_mults": 2706838
+          },
+          "hit_rate": 0.000940582939761315,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 1273,
+          "square_ratio": 1.284561049445005,
+          "trials": 1353416
+        }
+      },
+      "seed": 1,
+      "wall_seconds": 62.198764867,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 757,
+      "cofactor": 3028,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 133,
+          "points": 798,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 399,
+          "points": 798,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 454784404,
+      "instance": "subfield-p10bit-p769",
+      "log2_r": 17.19645804960178,
+      "p_bits": 10,
+      "r": 150193,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 140737,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 230676444,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 399,
+            "deficiency_at_square": 313,
+            "deficiency_total": 313,
+            "dependent_final": 135,
+            "first_pin_relations": 21,
+            "first_pin_trials": 11799,
+            "label": "control",
+            "points": 798,
+            "points_per_column": 2.0,
+            "rank_at_columns": null,
+            "rank_final": 87,
+            "rank_fraction_at_columns": null,
+            "recovered": 42875,
+            "relations_total": 222,
+            "row_ops": 1322,
+            "single_column_rows": 0,
+            "square_over_columns": 0.556390977443609,
+            "square_relations": 222,
+            "square_trials": 414667,
+            "touched_at_square": 141,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 2.3333333333333335,
+          "folded": {
+            "columns": 133,
+            "deficiency_at_square": 96,
+            "deficiency_total": 96,
+            "dependent_final": 184,
+            "first_pin_relations": 9,
+            "first_pin_trials": 3720,
+            "label": "folded",
+            "points": 798,
+            "points_per_column": 6.0,
+            "rank_at_columns": 37,
+            "rank_final": 38,
+            "rank_fraction_at_columns": 0.9736842105263158,
+            "recovered": 42875,
+            "relations_total": 222,
+            "row_ops": 1030,
+            "single_column_rows": 140,
+            "square_over_columns": 1.0676691729323309,
+            "square_relations": 142,
+            "square_trials": 126379,
+            "touched_at_square": 47,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 6575960,
+            "doubles": 12652330,
+            "scalar_mults": 829342
+          },
+          "hit_rate": 0.0005353693445584047,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 222,
+          "square_ratio": 1.5633802816901408,
+          "trials": 414667
+        }
+      },
+      "seed": 2,
+      "wall_seconds": 16.240470487,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 529,
+      "cofactor": 2116,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 84,
+          "points": 504,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 252,
+          "points": 504,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 163691644,
+      "instance": "subfield-p10bit-p547",
+      "log2_r": 16.239281525135073,
+      "p_bits": 10,
+      "r": 77359,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 53307,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 117583744,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 252,
+            "deficiency_at_square": 195,
+            "deficiency_total": 195,
+            "dependent_final": 53,
+            "first_pin_relations": 13,
+            "first_pin_trials": 6980,
+            "label": "control",
+            "points": 504,
+            "points_per_column": 2.0,
+            "rank_at_columns": null,
+            "rank_final": 58,
+            "rank_fraction_at_columns": null,
+            "recovered": 53946,
+            "relations_total": 111,
+            "row_ops": 646,
+            "single_column_rows": 0,
+            "square_over_columns": 0.44047619047619047,
+            "square_relations": 111,
+            "square_trials": 90597,
+            "touched_at_square": 90,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 2.1666666666666665,
+          "folded": {
+            "columns": 84,
+            "deficiency_at_square": 59,
+            "deficiency_total": 59,
+            "dependent_final": 85,
+            "first_pin_relations": 6,
+            "first_pin_trials": 950,
+            "label": "folded",
+            "points": 504,
+            "points_per_column": 6.0,
+            "rank_at_columns": 26,
+            "rank_final": 26,
+            "rank_fraction_at_columns": 1.0,
+            "recovered": 53946,
+            "relations_total": 111,
+            "row_ops": 514,
+            "single_column_rows": 71,
+            "square_over_columns": 0.6904761904761905,
+            "square_relations": 58,
+            "square_trials": 29989,
+            "touched_at_square": 30,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 1349610,
+            "doubles": 2591126,
+            "scalar_mults": 181196
+          },
+          "hit_rate": 0.001225206132653399,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 111,
+          "square_ratio": 1.9137931034482758,
+          "trials": 90597
+        }
+      },
+      "seed": 3,
+      "wall_seconds": 4.547347047,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 595,
+      "cofactor": 2380,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 104,
+          "points": 624,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 312,
+          "points": 624,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 223670020,
+      "instance": "subfield-p10bit-p607",
+      "log2_r": 16.520050796121033,
+      "p_bits": 10,
+      "r": 93979,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 81350,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 166728608,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 312,
+            "deficiency_at_square": 245,
+            "deficiency_total": 245,
+            "dependent_final": 94,
+            "first_pin_relations": 22,
+            "first_pin_trials": 10436,
+            "label": "control",
+            "points": 624,
+            "points_per_column": 2.0,
+            "rank_at_columns": null,
+            "rank_final": 68,
+            "rank_fraction_at_columns": null,
+            "recovered": 39507,
+            "relations_total": 162,
+            "row_ops": 974,
+            "single_column_rows": 0,
+            "square_over_columns": 0.5192307692307693,
+            "square_relations": 162,
+            "square_trials": 187515,
+            "touched_at_square": 111,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 1.8333333333333333,
+          "folded": {
+            "columns": 104,
+            "deficiency_at_square": 76,
+            "deficiency_total": 76,
+            "dependent_final": 133,
+            "first_pin_relations": 12,
+            "first_pin_trials": 5015,
+            "label": "folded",
+            "points": 624,
+            "points_per_column": 6.0,
+            "rank_at_columns": 28,
+            "rank_final": 29,
+            "rank_fraction_at_columns": 0.9655172413793104,
+            "recovered": 39507,
+            "relations_total": 162,
+            "row_ops": 764,
+            "single_column_rows": 90,
+            "square_over_columns": 1.0192307692307692,
+            "square_relations": 106,
+            "square_trials": 73032,
+            "touched_at_square": 37,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 2842163,
+            "doubles": 5476241,
+            "scalar_mults": 375036
+          },
+          "hit_rate": 0.0008639308855291577,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 162,
+          "square_ratio": 1.528301886792453,
+          "trials": 187515
+        }
+      },
+      "seed": 4,
+      "wall_seconds": 8.075017997,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 1684,
+      "cofactor": 1684,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 264,
+          "points": 1584,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 792,
+          "points": 1584,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 4259342884,
+      "instance": "subfield-p11bit-p1621",
+      "log2_r": 21.270307304770245,
+      "p_bits": 11,
+      "r": 2529301,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 2106931,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 5789300805,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 792,
+            "deficiency_at_square": 232,
+            "deficiency_total": 232,
+            "dependent_final": 1379,
+            "first_pin_relations": 67,
+            "first_pin_trials": 66974,
+            "label": "control",
+            "points": 1584,
+            "points_per_column": 2.0,
+            "rank_at_columns": 474,
+            "rank_final": 561,
+            "rank_fraction_at_columns": 0.8449197860962567,
+            "recovered": 2109986,
+            "relations_total": 1940,
+            "row_ops": 12723,
+            "single_column_rows": 0,
+            "square_over_columns": 2.4494949494949494,
+            "square_relations": 1940,
+            "square_trials": 4524630,
+            "touched_at_square": 792,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 1.425531914893617,
+          "folded": {
+            "columns": 264,
+            "deficiency_at_square": 0,
+            "deficiency_total": 0,
+            "dependent_final": 1675,
+            "first_pin_relations": 47,
+            "first_pin_trials": 49130,
+            "label": "folded",
+            "points": 1584,
+            "points_per_column": 6.0,
+            "rank_at_columns": 158,
+            "rank_final": 265,
+            "rank_fraction_at_columns": 0.5962264150943396,
+            "recovered": 2109986,
+            "relations_total": 1940,
+            "row_ops": 9085,
+            "single_column_rows": 1338,
+            "square_over_columns": 5.071969696969697,
+            "square_relations": 1339,
+            "square_trials": 2196980,
+            "touched_at_square": 264,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 90018076,
+            "doubles": 175023050,
+            "scalar_mults": 9049260
+          },
+          "hit_rate": 0.00042876434095163584,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 1940,
+          "square_ratio": 1.4488424197162062,
+          "trials": 4524630
+        }
+      },
+      "seed": 1,
+      "wall_seconds": 257.225695062,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 1732,
+      "cofactor": 1732,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 307,
+          "points": 1842,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 921,
+          "points": 1842,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 5841760612,
+      "instance": "subfield-p11bit-p1801",
+      "log2_r": 21.685532878810292,
+      "p_bits": 11,
+      "r": 3372841,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 2822127,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 7519165810,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 921,
+            "deficiency_at_square": 255,
+            "deficiency_total": 255,
+            "dependent_final": 1840,
+            "first_pin_relations": 114,
+            "first_pin_trials": 122566,
+            "label": "control",
+            "points": 1842,
+            "points_per_column": 2.0,
+            "rank_at_columns": 538,
+            "rank_final": 667,
+            "rank_fraction_at_columns": 0.8065967016491754,
+            "recovered": 1896875,
+            "relations_total": 2507,
+            "row_ops": 16774,
+            "single_column_rows": 11,
+            "square_over_columns": 2.7220412595005428,
+            "square_relations": 2507,
+            "square_trials": 6114482,
+            "touched_at_square": 921,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 2.923076923076923,
+          "folded": {
+            "columns": 307,
+            "deficiency_at_square": 0,
+            "deficiency_total": 0,
+            "dependent_final": 2199,
+            "first_pin_relations": 39,
+            "first_pin_trials": 49720,
+            "label": "folded",
+            "points": 1842,
+            "points_per_column": 6.0,
+            "rank_at_columns": 197,
+            "rank_final": 308,
+            "rank_fraction_at_columns": 0.6396103896103896,
+            "recovered": 1896875,
+            "relations_total": 2507,
+            "row_ops": 12043,
+            "single_column_rows": 1557,
+            "square_over_columns": 6.605863192182411,
+            "square_relations": 2028,
+            "square_trials": 3772315,
+            "touched_at_square": 307,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 124413517,
+            "doubles": 241606048,
+            "scalar_mults": 12228974
+          },
+          "hit_rate": 0.0004100102020089355,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 2507,
+          "square_ratio": 1.2361932938856015,
+          "trials": 6114482
+        }
+      },
+      "seed": 2,
+      "wall_seconds": 347.751304518,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 1318,
+      "cofactor": 9226,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 222,
+          "points": 1332,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 666,
+          "points": 1332,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 2181755254,
+      "instance": "subfield-p11bit-p1297",
+      "log2_r": 17.85135254831425,
+      "p_bits": 11,
+      "r": 236479,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 219341,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 414878212,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 666,
+            "deficiency_at_square": 555,
+            "deficiency_total": 555,
+            "dependent_final": 180,
+            "first_pin_relations": 28,
+            "first_pin_trials": 18597,
+            "label": "control",
+            "points": 1332,
+            "points_per_column": 2.0,
+            "rank_at_columns": null,
+            "rank_final": 112,
+            "rank_fraction_at_columns": null,
+            "recovered": 154476,
+            "relations_total": 292,
+            "row_ops": 1759,
+            "single_column_rows": 0,
+            "square_over_columns": 0.43843843843843844,
+            "square_relations": 292,
+            "square_trials": 620616,
+            "touched_at_square": 180,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 7.0,
+          "folded": {
+            "columns": 222,
+            "deficiency_at_square": 175,
+            "deficiency_total": 175,
+            "dependent_final": 244,
+            "first_pin_relations": 4,
+            "first_pin_trials": 2474,
+            "label": "folded",
+            "points": 1332,
+            "points_per_column": 6.0,
+            "rank_at_columns": 48,
+            "rank_final": 48,
+            "rank_fraction_at_columns": 1.0,
+            "recovered": 154476,
+            "relations_total": 292,
+            "row_ops": 1354,
+            "single_column_rows": 172,
+            "square_over_columns": 0.7387387387387387,
+            "square_relations": 164,
+            "square_trials": 171378,
+            "touched_at_square": 60,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 10303125,
+            "doubles": 19724502,
+            "scalar_mults": 1241242
+          },
+          "hit_rate": 0.0004705002771439989,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 292,
+          "square_ratio": 1.7804878048780488,
+          "trials": 620616
+        }
+      },
+      "seed": 3,
+      "wall_seconds": 26.832999381,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 1525,
+      "cofactor": 6100,
+      "experiment": "e5",
+      "family": "subfield",
+      "folds": {
+        "frobenius": {
+          "columns": 264,
+          "points": 1584,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 792,
+          "points": 1584,
+          "points_per_column": 2.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 3182925100,
+      "instance": "subfield-p11bit-p1471",
+      "log2_r": 18.99311253479121,
+      "p_bits": 11,
+      "r": 521791,
+      "relation_stream": {
+        "oracle": "line-resultant",
+        "oracle_calls": 447227,
+        "oracle_degenerate": 0,
+        "oracle_fp_muls": 1067204023,
+        "stream": {
+          "column_ratio": 3.0,
+          "control": {
+            "columns": 792,
+            "deficiency_at_square": 573,
+            "deficiency_total": 573,
+            "dependent_final": 368,
+            "first_pin_relations": 5,
+            "first_pin_trials": 3463,
+            "label": "control",
+            "points": 1584,
+            "points_per_column": 2.0,
+            "rank_at_columns": null,
+            "rank_final": 220,
+            "rank_fraction_at_columns": null,
+            "recovered": 2709,
+            "relations_total": 588,
+            "row_ops": 3611,
+            "single_column_rows": 0,
+            "square_over_columns": 0.7424242424242424,
+            "square_relations": 588,
+            "square_trials": 1012919,
+            "touched_at_square": 345,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "exhausted": false,
+          "first_pin_ratio": 1.0,
+          "folded": {
+            "columns": 264,
+            "deficiency_at_square": 167,
+            "deficiency_total": 167,
+            "dependent_final": 490,
+            "first_pin_relations": 5,
+            "first_pin_trials": 3463,
+            "label": "folded",
+            "points": 1584,
+            "points_per_column": 6.0,
+            "rank_at_columns": 92,
+            "rank_final": 98,
+            "rank_fraction_at_columns": 0.9387755102040817,
+            "recovered": 2709,
+            "relations_total": 588,
+            "row_ops": 2689,
+            "single_column_rows": 386,
+            "square_over_columns": 1.481060606060606,
+            "square_relations": 391,
+            "square_trials": 426925,
+            "touched_at_square": 115,
+            "verified": true,
+            "zero_support_rows": 0
+          },
+          "group_ops": {
+            "adds": 18200337,
+            "doubles": 34430409,
+            "scalar_mults": 2025838
+          },
+          "hit_rate": 0.0005805005138614243,
+          "oracle_lift_failures": 0,
+          "oracle_lookups": 0,
+          "oracle_unliftable_systems": 0,
+          "orbit_duplicates": 0,
+          "relations": 588,
+          "square_ratio": 1.5038363171355498,
+          "trials": 1012919
+        }
+      },
+      "seed": 4,
+      "wall_seconds": 51.256274684,
+      "zeta_eigenvalue_order": null,
+      "zeta_is_frobenius_power": null
+    },
+    {
+      "base_order": 91,
+      "cofactor": 10192,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 21,
+          "points": 126,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 21,
+          "points": 126,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 63,
+          "points": 126,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 21,
+          "points": 126,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 1294384,
+      "instance": "subfield-j0-p7bit-p109",
+      "log2_r": 6.9886846867721655,
+      "p_bits": 7,
+      "r": 127,
+      "relation_stream": null,
+      "seed": 1,
+      "wall_seconds": 0.007595464,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 52,
+      "cofactor": 3796,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 13,
+          "points": 78,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 13,
+          "points": 78,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 39,
+          "points": 78,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 13,
+          "points": 78,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 299884,
+      "instance": "subfield-j0-p7bit-p67",
+      "log2_r": 6.303780748177103,
+      "p_bits": 7,
+      "r": 79,
+      "relation_stream": null,
+      "seed": 2,
+      "wall_seconds": 0.003545786,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 148,
+      "cofactor": 16132,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 21,
+          "points": 126,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 21,
+          "points": 126,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 63,
+          "points": 126,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 21,
+          "points": 126,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 2048764,
+      "instance": "subfield-j0-p7bit-p127",
+      "log2_r": 6.9886846867721655,
+      "p_bits": 7,
+      "r": 127,
+      "relation_stream": null,
+      "seed": 3,
+      "wall_seconds": 0.009069981,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 79,
+      "cofactor": 8848,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 17,
+          "points": 102,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 17,
+          "points": 102,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 51,
+          "points": 102,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 17,
+          "points": 102,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 911344,
+      "instance": "subfield-j0-p7bit-p97",
+      "log2_r": 6.6865005271832185,
+      "p_bits": 7,
+      "r": 103,
+      "relation_stream": null,
+      "seed": 4,
+      "wall_seconds": 0.005471192,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 252,
+      "cofactor": 151956,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 39,
+          "points": 234,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 39,
+          "points": 234,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 117,
+          "points": 234,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 39,
+          "points": 234,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 12004524,
+      "instance": "subfield-j0-p8bit-p229",
+      "log2_r": 6.303780748177103,
+      "p_bits": 8,
+      "r": 79,
+      "relation_stream": null,
+      "seed": 1,
+      "wall_seconds": 0.01709747,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 201,
+      "cofactor": 151956,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 36,
+          "points": 216,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 36,
+          "points": 216,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 108,
+          "points": 216,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 36,
+          "points": 216,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 11092788,
+      "instance": "subfield-j0-p8bit-p223",
+      "log2_r": 6.189824558880018,
+      "p_bits": 8,
+      "r": 73,
+      "relation_stream": null,
+      "seed": 2,
+      "wall_seconds": 0.014917599,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 139,
+      "cofactor": 23908,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 30,
+          "points": 180,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 30,
+          "points": 180,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 90,
+          "points": 180,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 30,
+          "points": 180,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 4327348,
+      "instance": "subfield-j0-p8bit-p163",
+      "log2_r": 7.499845887083206,
+      "p_bits": 8,
+      "r": 181,
+      "relation_stream": null,
+      "seed": 3,
+      "wall_seconds": 0.012176643,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 133,
+      "cofactor": 16492,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 27,
+          "points": 162,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 27,
+          "points": 162,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 81,
+          "points": 162,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 27,
+          "points": 162,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 2688196,
+      "instance": "subfield-j0-p8bit-p139",
+      "log2_r": 7.348728154231077,
+      "p_bits": 8,
+      "r": 163,
+      "relation_stream": null,
+      "seed": 4,
+      "wall_seconds": 0.008869028,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 436,
+      "cofactor": 204484,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 66,
+          "points": 396,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 66,
+          "points": 396,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 198,
+          "points": 396,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 66,
+          "points": 396,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 81180148,
+      "instance": "subfield-j0-p9bit-p433",
+      "log2_r": 8.632995197142957,
+      "p_bits": 9,
+      "r": 397,
+      "relation_stream": null,
+      "seed": 1,
+      "wall_seconds": 0.030408287,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 448,
+      "cofactor": 191296,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 83,
+          "points": 498,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 83,
+          "points": 498,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 249,
+          "points": 498,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 83,
+          "points": 498,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 95456704,
+      "instance": "subfield-j0-p9bit-p457",
+      "log2_r": 8.96289600533726,
+      "p_bits": 9,
+      "r": 499,
+      "relation_stream": null,
+      "seed": 2,
+      "wall_seconds": 0.036357328,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 316,
+      "cofactor": 81844,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 46,
+          "points": 276,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 46,
+          "points": 276,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 138,
+          "points": 276,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 46,
+          "points": 276,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 22670788,
+      "instance": "subfield-j0-p9bit-p283",
+      "log2_r": 8.113742166049189,
+      "p_bits": 9,
+      "r": 277,
+      "relation_stream": null,
+      "seed": 3,
+      "wall_seconds": 0.022755815,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 309,
+      "cofactor": 233604,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 48,
+          "points": 288,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 48,
+          "points": 288,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 144,
+          "points": 288,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 48,
+          "points": 288,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 22659588,
+      "instance": "subfield-j0-p9bit-p283",
+      "log2_r": 6.599912842187128,
+      "p_bits": 9,
+      "r": 97,
+      "relation_stream": null,
+      "seed": 4,
+      "wall_seconds": 0.021466728,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 613,
+      "cofactor": 429100,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 112,
+          "points": 672,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 112,
+          "points": 672,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 336,
+          "points": 672,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 112,
+          "points": 672,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 288784300,
+      "instance": "subfield-j0-p10bit-p661",
+      "log2_r": 9.394462694610317,
+      "p_bits": 10,
+      "r": 673,
+      "relation_stream": null,
+      "seed": 1,
+      "wall_seconds": 0.055793567,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 588,
+      "cofactor": 1063692,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 111,
+          "points": 666,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 111,
+          "points": 666,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 333,
+          "points": 666,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 111,
+          "points": 666,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 237203316,
+      "instance": "subfield-j0-p10bit-p619",
+      "log2_r": 7.800899899920305,
+      "p_bits": 10,
+      "r": 223,
+      "relation_stream": null,
+      "seed": 2,
+      "wall_seconds": 0.058284906,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 679,
+      "cofactor": 524188,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 122,
+          "points": 732,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 122,
+          "points": 732,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 366,
+          "points": 732,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 122,
+          "points": 732,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 384229804,
+      "instance": "subfield-j0-p10bit-p727",
+      "log2_r": 9.517669388133811,
+      "p_bits": 10,
+      "r": 733,
+      "relation_stream": null,
+      "seed": 3,
+      "wall_seconds": 0.072712813,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 657,
+      "cofactor": 1158948,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 96,
+          "points": 576,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 96,
+          "points": 576,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 288,
+          "points": 576,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 96,
+          "points": 576,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 223676964,
+      "instance": "subfield-j0-p10bit-p607",
+      "log2_r": 7.592457037268081,
+      "p_bits": 10,
+      "r": 193,
+      "relation_stream": null,
+      "seed": 4,
+      "wall_seconds": 0.050723185,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 1713,
+      "cofactor": 9065196,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 309,
+          "points": 1854,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 309,
+          "points": 1854,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 927,
+          "points": 1854,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 309,
+          "points": 1854,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 5611356324,
+      "instance": "subfield-j0-p11bit-p1777",
+      "log2_r": 9.273795599214264,
+      "p_bits": 11,
+      "r": 619,
+      "relation_stream": null,
+      "seed": 1,
+      "wall_seconds": 0.19340044,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 1876,
+      "cofactor": 3243604,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 300,
+          "points": 1800,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 300,
+          "points": 1800,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 900,
+          "points": 1800,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 300,
+          "points": 1800,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 5841730804,
+      "instance": "subfield-j0-p11bit-p1801",
+      "log2_r": 10.814582465906277,
+      "p_bits": 11,
+      "r": 1801,
+      "relation_stream": null,
+      "seed": 2,
+      "wall_seconds": 0.185817052,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 1677,
+      "cofactor": 27348516,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 297,
+          "points": 1782,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 297,
+          "points": 1782,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 891,
+          "points": 1782,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 297,
+          "points": 1782,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 5442354684,
+      "instance": "subfield-j0-p11bit-p1759",
+      "log2_r": 7.636624620543649,
+      "p_bits": 11,
+      "r": 199,
+      "relation_stream": null,
+      "seed": 3,
+      "wall_seconds": 0.186513497,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    },
+    {
+      "base_order": 1767,
+      "cofactor": 9923472,
+      "experiment": "e5",
+      "family": "subfield-j0",
+      "folds": {
+        "frobenius": {
+          "columns": 288,
+          "points": 1728,
+          "points_per_column": 6.0
+        },
+        "frobenius+zeta": {
+          "columns": 288,
+          "points": 1728,
+          "points_per_column": 6.0
+        },
+        "negation": {
+          "columns": 864,
+          "points": 1728,
+          "points_per_column": 2.0
+        },
+        "zeta": {
+          "columns": 288,
+          "points": 1728,
+          "points_per_column": 6.0
+        }
+      },
+      "frobenius_eigenvalue_order": 3,
+      "group_order": 5725843344,
+      "instance": "subfield-j0-p11bit-p1789",
+      "log2_r": 9.172427508645482,
+      "p_bits": 11,
+      "r": 577,
+      "relation_stream": null,
+      "seed": 4,
+      "wall_seconds": 0.189064043,
+      "zeta_eigenvalue_order": 3,
+      "zeta_is_frobenius_power": true
+    }
+  ],
+  "wall_seconds": 800.562321875,
+  "what_this_is": "Experiment e5 of research/notes/index-calculus/RESEARCH_GLV_INVARIANT_FACTOR_BASES.md: rows as measured, every logarithm checked against the planted one.",
+  "what_this_is_not": [
+    "not a speed claim: relation counts and S are reported against their floors and a counted rho; the fold is an engineering lever unless a ratio to the floor falls",
+    "not a claim about any deployed curve: toy instances with certified orders"
+  ]
+}

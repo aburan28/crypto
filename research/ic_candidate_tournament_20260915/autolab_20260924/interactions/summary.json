@@ -1,0 +1,211 @@
+{
+  "all_jobs_verified": true,
+  "global_optimum_claim": false,
+  "next_action": "Retain distinct mechanisms; run actual combinations on fresh development cases. Freeze one challenger before confirmation.",
+  "promotion_eligible": false,
+  "reason": "No instruction accounting, held-out confirmation, or baseline quality certification.",
+  "retained_candidates": [
+    "incumbent",
+    "combination_01",
+    "combination_02",
+    "union_4",
+    "implementation_01",
+    "implementation_10"
+  ],
+  "status": "DEVELOPMENT_DIAGNOSTIC",
+  "table": [
+    {
+      "S": null,
+      "arm": "incumbent",
+      "base_sizes": [
+        182,
+        272
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.0,
+      "failures": [],
+      "median_cold_wall_seconds": 0.036232688013114966,
+      "mode": "ic",
+      "rank_range": [
+        7,
+        8
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "combination_01",
+      "base_sizes": [
+        137,
+        185
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.6551686421149039,
+      "failures": [],
+      "median_cold_wall_seconds": 0.023738521005725488,
+      "mode": "ic",
+      "rank_range": [
+        4,
+        7
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "combination_02",
+      "base_sizes": [
+        137,
+        185
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.7377644184693406,
+      "failures": [],
+      "median_cold_wall_seconds": 0.02673118800157681,
+      "mode": "ic",
+      "rank_range": [
+        4,
+        7
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "union_4",
+      "base_sizes": [
+        137,
+        185
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 1.067746698366893,
+      "failures": [],
+      "median_cold_wall_seconds": 0.03868733299896121,
+      "mode": "ic",
+      "rank_range": [
+        4,
+        7
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "implementation_01",
+      "base_sizes": [
+        182,
+        272
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.778799518875876,
+      "failures": [],
+      "median_cold_wall_seconds": 0.028217999992193654,
+      "mode": "ic",
+      "rank_range": [
+        7,
+        8
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "implementation_10",
+      "base_sizes": [
+        182,
+        272
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.9864786044373925,
+      "failures": [],
+      "median_cold_wall_seconds": 0.035742771506193094,
+      "mode": "ic",
+      "rank_range": [
+        7,
+        8
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "aa_control",
+      "base_sizes": [
+        182,
+        272
+      ],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.7563428085648111,
+      "failures": [],
+      "median_cold_wall_seconds": 0.02740433301369194,
+      "mode": "ic",
+      "rank_range": [
+        7,
+        8
+      ],
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "rho_w1",
+      "base_sizes": [],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.2809801608046946,
+      "failures": [],
+      "median_cold_wall_seconds": 0.010180666504311375,
+      "mode": "rho",
+      "rank_range": null,
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "rho_w8",
+      "base_sizes": [],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.26052441892062134,
+      "failures": [],
+      "median_cold_wall_seconds": 0.009439499990548939,
+      "mode": "rho",
+      "rank_range": null,
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    },
+    {
+      "S": null,
+      "arm": "rho_w32",
+      "base_sizes": [],
+      "complete": true,
+      "diagnostic_time_over_incumbent": 0.22429388878063583,
+      "failures": [],
+      "median_cold_wall_seconds": 0.008126770495437086,
+      "mode": "rho",
+      "rank_range": null,
+      "ratio_to_floor": null,
+      "scheduled": 12,
+      "total_operations": null,
+      "verified": 12
+    }
+  ],
+  "unit": "complete cold child wall seconds"
+}

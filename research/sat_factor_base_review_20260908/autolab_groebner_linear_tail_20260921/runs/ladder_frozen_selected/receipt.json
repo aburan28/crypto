@@ -1,0 +1,24 @@
+{
+  "child_system_ms": 3.9589999999999996,
+  "child_user_ms": 5143.836,
+  "command": [
+    "target/release/examples/groebner_stage_bench",
+    "--out",
+    "research/sat_factor_base_review_20260908/autolab_groebner_linear_tail_20260921/runs/ladder_frozen_selected/artifact",
+    "--label",
+    "ladder_frozen_selected"
+  ],
+  "ended_unix_ns": 1790040226293531000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/groebner_stage_bench",
+  "executable_sha256": "da435bbff4eb46701a6a594e5dc5400029647b8d61e1f510ae5fb5ff6bce7312",
+  "exit_code": 0,
+  "peak_rss_bytes": 14909440,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790040221143258000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 1121,
+  "stdout_sha256": "a956be3c6d178ededdefa695ce4ab389fdf4629562fc492644e79cb7a4a150d1",
+  "task_id": "TASK-KIC-GROEBNER-LINEAR-TAIL-LADDER-FROZEN-SELECTED-20260921",
+  "wall_ms": 5150.281458
+}

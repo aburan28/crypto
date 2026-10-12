@@ -18,7 +18,7 @@
 //! arithmetic operations (which are *not* constant-time at the
 //! limb level).  For production use, the existing P-256 /
 //! secp256k1 backends in this library use a constant-time U256;
-//! a similar treatment for Curve25519 is in [`DEFERRED.md`] item
+//! a similar treatment for Curve25519 is in [`docs/DEFERRED.md`] item
 //! "constant-time Curve25519 backend".
 
 use num_bigint::BigUint;

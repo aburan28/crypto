@@ -1,0 +1,590 @@
+{
+  "schema": "koblitz_stage193_sat_comparators.v1",
+  "source_commit": "1521a6958d018fd762a229d838b1521aaa29a22e",
+  "finalizer_commit": "8f6be9c0fdc89e8c3fa316e83756256cb90b9c7e",
+  "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+  "factor_base_contract": {
+    "definition": "span_F2(1,z,...,z^8)",
+    "discrete_log_labels_used": false,
+    "target_subgroup_enumerated": false
+  },
+  "meter_binary": {
+    "path": "/Volumes/SSD990/kic-stage192-target-e575d53f1/release/examples/koblitz_f4_stage188",
+    "bytes": 1006080,
+    "sha256": "971ddd3b0a77b86aa1388632a201747cec42d570e4d9ba9536c7c61e8361c524"
+  },
+  "manifest": {
+    "path": "input/manifest.json",
+    "bytes": 4348,
+    "sha256": "188dfdcb7e9398b0ab03193265f7b3035776d4a8a52de7dd4a51475dfc1a572c"
+  },
+  "wdsat_anf": {
+    "path": "input/instance.anf",
+    "bytes": 236183,
+    "sha256": "34c516d2568e327a3c5b403d6871845c80d523f0b7f012bd183be0bbc1469508"
+  },
+  "cryptominisat_xor_dimacs": {
+    "path": "input/instance.xor.cnf",
+    "bytes": 208168,
+    "sha256": "a529c4d8bb1e1a4b5904134b1e5d099adfb80806215f1ff128088d7d518d4bb8"
+  },
+  "wdsat_config": {
+    "path": "input/wdsat-config.h",
+    "bytes": 237,
+    "sha256": "4a73c3b5a14ded98f749d282b597594ae3ac05355a39cadcb9345a90bf735352"
+  },
+  "wdsat_provenance": {
+    "source_commit": "55d55b2620d768d9f7c78dcd8990a0689533c1d0",
+    "worktree": {
+      "schema": "koblitz_native_meter_receipt.v1",
+      "process": {
+        "schema": "koblitz_native_process_meter.v1",
+        "meter": "fresh child process wait4/getrusage; all child threads included",
+        "command": [
+          "/usr/bin/git",
+          "-C",
+          "/Volumes/SSD990/WDSat",
+          "worktree",
+          "add",
+          "--detach",
+          "/Volumes/SSD990/wdsat-stage193-55d55b2",
+          "55d55b2620d768d9f7c78dcd8990a0689533c1d0"
+        ],
+        "environment": {},
+        "pid": 83358,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 60,
+        "wall_seconds": 1.24454025,
+        "user_seconds": 0.186168,
+        "system_seconds": 0.529966,
+        "total_core_seconds": 0.716134,
+        "single_core_seconds": null,
+        "peak_rss_bytes": 33996800
+      },
+      "stdout": {
+        "path": "stdout.txt",
+        "bytes": 86,
+        "sha256": "4a6c0b649462fd4c5bab7d8d7b193971737ea6d462ea01ba02a0fd1d6057206e"
+      },
+      "stderr": {
+        "path": "stderr.txt",
+        "bytes": 182,
+        "sha256": "0762916e74b822bbf6e5a6b90d8f4e99fd043c9c7a320c0d02d6a1565a1eda71"
+      },
+      "metrics": {
+        "path": "metrics.json",
+        "bytes": 630,
+        "sha256": "ddd44365a5785bca3edfe7b859713dad338ae489a4e1946cd646f93a34777beb"
+      }
+    },
+    "source_check": {
+      "schema": "koblitz_native_meter_receipt.v1",
+      "process": {
+        "schema": "koblitz_native_process_meter.v1",
+        "meter": "fresh child process wait4/getrusage; all child threads included",
+        "command": [
+          "/usr/bin/git",
+          "-C",
+          "/Volumes/SSD990/wdsat-stage193-55d55b2",
+          "rev-parse",
+          "HEAD"
+        ],
+        "environment": {},
+        "pid": 83393,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 30,
+        "wall_seconds": 0.022271459,
+        "user_seconds": 0.005155,
+        "system_seconds": 0.004428,
+        "total_core_seconds": 0.009583,
+        "single_core_seconds": null,
+        "peak_rss_bytes": 4325376
+      },
+      "stdout": {
+        "path": "stdout.txt",
+        "bytes": 41,
+        "sha256": "68ea328a322fa386ddfd6010af86908929d03a6db72664ac66670e4bcc52229c"
+      },
+      "stderr": {
+        "path": "stderr.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "metrics": {
+        "path": "metrics.json",
+        "bytes": 539,
+        "sha256": "3df871cdbabbf5bf55270dabeca1cbaef58f893139a208d3e428f7b0b9ea6093"
+      }
+    },
+    "config_install": {
+      "schema": "koblitz_native_meter_receipt.v1",
+      "process": {
+        "schema": "koblitz_native_process_meter.v1",
+        "meter": "fresh child process wait4/getrusage; all child threads included",
+        "command": [
+          "/bin/cp",
+          "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-193-native-sat-comparators-20261002/input/wdsat-config.h",
+          "/Volumes/SSD990/wdsat-stage193-55d55b2/src/config.h"
+        ],
+        "environment": {},
+        "pid": 83424,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 30,
+        "wall_seconds": 0.021759125,
+        "user_seconds": 0.000504,
+        "system_seconds": 0.000977,
+        "total_core_seconds": 0.001481,
+        "single_core_seconds": null,
+        "peak_rss_bytes": 1261568
+      },
+      "stdout": {
+        "path": "stdout.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "stderr.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "metrics": {
+        "path": "metrics.json",
+        "bytes": 706,
+        "sha256": "05e85c9e58ed2352de809d502256a274b30b4ae524d1c16c890c767c92131aa6"
+      }
+    },
+    "clean": {
+      "schema": "koblitz_native_meter_receipt.v1",
+      "process": {
+        "schema": "koblitz_native_process_meter.v1",
+        "meter": "fresh child process wait4/getrusage; all child threads included",
+        "command": [
+          "/usr/bin/env",
+          "RAYON_NUM_THREADS=1",
+          "VECLIB_MAXIMUM_THREADS=1",
+          "OPENBLAS_NUM_THREADS=1",
+          "OMP_NUM_THREADS=1",
+          "MKL_NUM_THREADS=1",
+          "BLIS_NUM_THREADS=1",
+          "NUMEXPR_NUM_THREADS=1",
+          "/usr/bin/make",
+          "-C",
+          "/Volumes/SSD990/wdsat-stage193-55d55b2/src",
+          "clean"
+        ],
+        "environment": {},
+        "pid": 83455,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 60,
+        "wall_seconds": 0.020718875,
+        "user_seconds": 0.0044,
+        "system_seconds": 0.005804,
+        "total_core_seconds": 0.010204,
+        "single_core_seconds": null,
+        "peak_rss_bytes": 1785856
+      },
+      "stdout": {
+        "path": "stdout.txt",
+        "bytes": 17,
+        "sha256": "a3515c316ebd9e7c90a2a42b194022151e5a247df963425832fe5923d04eedbd"
+      },
+      "stderr": {
+        "path": "stderr.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "metrics": {
+        "path": "metrics.json",
+        "bytes": 752,
+        "sha256": "3e9982d66c543e6d0a6cbd263bd7e65799695da8c6a1ba55da15fce85a545449"
+      }
+    },
+    "build": {
+      "schema": "koblitz_native_meter_receipt.v1",
+      "process": {
+        "schema": "koblitz_native_process_meter.v1",
+        "meter": "fresh child process wait4/getrusage; all child threads included",
+        "command": [
+          "/usr/bin/env",
+          "RAYON_NUM_THREADS=1",
+          "VECLIB_MAXIMUM_THREADS=1",
+          "OPENBLAS_NUM_THREADS=1",
+          "OMP_NUM_THREADS=1",
+          "MKL_NUM_THREADS=1",
+          "BLIS_NUM_THREADS=1",
+          "NUMEXPR_NUM_THREADS=1",
+          "/usr/bin/make",
+          "-C",
+          "/Volumes/SSD990/wdsat-stage193-55d55b2/src",
+          "all"
+        ],
+        "environment": {},
+        "pid": 83487,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 120,
+        "wall_seconds": 0.666478459,
+        "user_seconds": 0.407628,
+        "system_seconds": 0.195485,
+        "total_core_seconds": 0.603113,
+        "single_core_seconds": null,
+        "peak_rss_bytes": 57655296
+      },
+      "stdout": {
+        "path": "stdout.txt",
+        "bytes": 474,
+        "sha256": "1f2b527e8bb4e6c4f8392e8d879dd788105f528c27e967e2af8f59235b05e838"
+      },
+      "stderr": {
+        "path": "stderr.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "metrics": {
+        "path": "metrics.json",
+        "bytes": 742,
+        "sha256": "050fd4cb21bee366082b7f2e1c94fd5384793a31047af1ff766320f9cd0ae43b"
+      }
+    },
+    "installed_config": {
+      "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/config.h",
+      "bytes": 237,
+      "sha256": "4a73c3b5a14ded98f749d282b597594ae3ac05355a39cadcb9345a90bf735352"
+    },
+    "source_inventory": [
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/cnf.c",
+        "bytes": 16778,
+        "sha256": "ec86f8f08d9272579b20d6dfb9513ca69bdfca3c490e4b11e75878f13745a9ee"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/cnf.h",
+        "bytes": 1866,
+        "sha256": "f1c5479b60c4a49192c84569a74a9838b855c44411e35c066817076c90879a62"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/dimacs.c",
+        "bytes": 38752,
+        "sha256": "d165dea3b5c2919c8d29a05a037e0b98ed7aac4ff9f7c8c073a7a9c2151d9ffb"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/dimacs.h",
+        "bytes": 2213,
+        "sha256": "f40ede80353b747851463b0fd376c3b9f7e394367b21df115ab8f5f797b30cfd"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/fp.c",
+        "bytes": 8112,
+        "sha256": "c51eca3b78beb801810ab82a9ae5d97af688338d567ec4c645873ec4adf1fd06"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/fp.h",
+        "bytes": 1096,
+        "sha256": "cff83916044c1370c0c07f271fa8eea6446ff1e29032618821cdda3c75b68e97"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/main.c",
+        "bytes": 4248,
+        "sha256": "0ab5b48557aa3a5a6229124bda3dea36a1a771d2a8f92721e6d44a4291b0973d"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/makefile",
+        "bytes": 602,
+        "sha256": "3cbeb6537587d54d28c37937e17d841b551d774f7a9946aeee91264e9413b48d"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/wdsat.c",
+        "bytes": 13723,
+        "sha256": "1f17ba03459bbdda89539e542bbda75d8860037082a25d7c073dc0d90095a732"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/wdsat.h",
+        "bytes": 746,
+        "sha256": "476b9ae9fcf66b140625e6b8f44179a121bcc08cb425f63dd7b6caf02c1d6e8a"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/wdsat_utils.c",
+        "bytes": 1205,
+        "sha256": "430b2d23de167854782cfd46dd0e08987abcd1d69cfde69d82482dd81899740e"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/wdsat_utils.h",
+        "bytes": 6860,
+        "sha256": "15cd7a3921902d157e7c83bc333c516ec8ba685e91170c897e06c5fe3654479b"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/xorgauss.c",
+        "bytes": 30129,
+        "sha256": "e9c62dda272a3801999b03da2ada8282539796caf98befd6768ce79027e526ec"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/xorgauss.h",
+        "bytes": 4841,
+        "sha256": "02014f27602a0e02553467acde33d14c69c7aa0f8a5fc01f16deece57b438445"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/xorset.c",
+        "bytes": 11794,
+        "sha256": "584ef01e43561df607a7e65d340dcd30736121834c4b66f81f9f208b6d924c0d"
+      },
+      {
+        "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/src/xorset.h",
+        "bytes": 3039,
+        "sha256": "0cb90df166194472d21bcb7740d5ab2c1887db89eea9e2522a4d06e977099db9"
+      }
+    ]
+  },
+  "cryptominisat_provenance": {
+    "version": "5.14.7",
+    "version_check": {
+      "schema": "koblitz_native_meter_receipt.v1",
+      "process": {
+        "schema": "koblitz_native_process_meter.v1",
+        "meter": "fresh child process wait4/getrusage; all child threads included",
+        "command": [
+          "/usr/bin/env",
+          "RAYON_NUM_THREADS=1",
+          "VECLIB_MAXIMUM_THREADS=1",
+          "OPENBLAS_NUM_THREADS=1",
+          "OMP_NUM_THREADS=1",
+          "MKL_NUM_THREADS=1",
+          "BLIS_NUM_THREADS=1",
+          "NUMEXPR_NUM_THREADS=1",
+          "/opt/homebrew/bin/cryptominisat5",
+          "--version"
+        ],
+        "environment": {},
+        "pid": 83599,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 30,
+        "wall_seconds": 0.027214958,
+        "user_seconds": 0.002026,
+        "system_seconds": 0.003244,
+        "total_core_seconds": 0.00527,
+        "single_core_seconds": null,
+        "peak_rss_bytes": 2162688
+      },
+      "stdout": {
+        "path": "stdout.txt",
+        "bytes": 1201,
+        "sha256": "ffa1cee9f1211a37fa832b1b3f47159508335897ea294a1d8598e5c77c746ec7"
+      },
+      "stderr": {
+        "path": "stderr.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "metrics": {
+        "path": "metrics.json",
+        "bytes": 704,
+        "sha256": "f0a61e60a07680eb3744e398137549d6047cc5a9915ac44157e763648e601050"
+      }
+    }
+  },
+  "wdsat": {
+    "solver": "wdsat",
+    "status": "timeout_inconclusive",
+    "terminal": null,
+    "conflicts": null,
+    "wall_seconds": 120.27429925,
+    "total_core_seconds": 118.710537,
+    "single_core_seconds": 118.710537,
+    "peak_rss_bytes": 13910016,
+    "timed_out": true,
+    "returncode": -15,
+    "receipt": {
+      "schema": "koblitz_native_meter_receipt.v1",
+      "process": {
+        "schema": "koblitz_native_process_meter.v1",
+        "meter": "fresh child process wait4/getrusage; all child threads included",
+        "command": [
+          "/usr/bin/env",
+          "RAYON_NUM_THREADS=1",
+          "VECLIB_MAXIMUM_THREADS=1",
+          "OPENBLAS_NUM_THREADS=1",
+          "OMP_NUM_THREADS=1",
+          "MKL_NUM_THREADS=1",
+          "BLIS_NUM_THREADS=1",
+          "NUMEXPR_NUM_THREADS=1",
+          "/Volumes/SSD990/wdsat-stage193-55d55b2/wdsat_solver",
+          "-i",
+          "/tmp/kic193/instance.anf",
+          "-g",
+          "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27"
+        ],
+        "environment": {},
+        "pid": 83804,
+        "returncode": -15,
+        "timed_out": true,
+        "watchdog_seconds": 120,
+        "wall_seconds": 120.27429925,
+        "user_seconds": 118.361979,
+        "system_seconds": 0.348558,
+        "total_core_seconds": 118.710537,
+        "single_core_seconds": null,
+        "peak_rss_bytes": 13910016
+      },
+      "stdout": {
+        "path": "stdout.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "stderr.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "metrics": {
+        "path": "metrics.json",
+        "bytes": 846,
+        "sha256": "2ed5b571927deb9e14b7f023809ad4a8dfb26194c5172657cbd9b9dfd4914385"
+      }
+    },
+    "stdout": {
+      "path": "development/wdsat-run/stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "development/wdsat-run/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "binary": {
+      "path": "/Volumes/SSD990/wdsat-stage193-55d55b2/wdsat_solver",
+      "bytes": 114608,
+      "sha256": "1de1e3328af3f00963cd5339c07cc4ab18efd55d1749c953ecaafcefc54fd185"
+    },
+    "input": {
+      "path": "input/instance.anf",
+      "bytes": 236183,
+      "sha256": "34c516d2568e327a3c5b403d6871845c80d523f0b7f012bd183be0bbc1469508"
+    },
+    "executed_input": {
+      "path": "/tmp/kic193/instance.anf",
+      "bytes": 236183,
+      "sha256": "34c516d2568e327a3c5b403d6871845c80d523f0b7f012bd183be0bbc1469508"
+    }
+  },
+  "cryptominisat": {
+    "solver": "cryptominisat",
+    "status": "timeout_inconclusive",
+    "terminal": "INDETERMINATE",
+    "conflicts": 3473638,
+    "wall_seconds": 121.436959208,
+    "total_core_seconds": 121.201177,
+    "single_core_seconds": 121.201177,
+    "peak_rss_bytes": 280756224,
+    "timed_out": false,
+    "returncode": 0,
+    "receipt": {
+      "schema": "koblitz_native_meter_receipt.v1",
+      "process": {
+        "schema": "koblitz_native_process_meter.v1",
+        "meter": "fresh child process wait4/getrusage; all child threads included",
+        "command": [
+          "/usr/bin/env",
+          "RAYON_NUM_THREADS=1",
+          "VECLIB_MAXIMUM_THREADS=1",
+          "OPENBLAS_NUM_THREADS=1",
+          "OMP_NUM_THREADS=1",
+          "MKL_NUM_THREADS=1",
+          "BLIS_NUM_THREADS=1",
+          "NUMEXPR_NUM_THREADS=1",
+          "/opt/homebrew/bin/cryptominisat5",
+          "--threads",
+          "1",
+          "--verb",
+          "1",
+          "--verbstat",
+          "1",
+          "--printsol",
+          "0",
+          "--zero-exit-status",
+          "--maxtime",
+          "120",
+          "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-193-native-sat-comparators-20261002/input/instance.xor.cnf"
+        ],
+        "environment": {},
+        "pid": 84248,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 135,
+        "wall_seconds": 121.436959208,
+        "user_seconds": 120.003401,
+        "system_seconds": 1.197776,
+        "total_core_seconds": 121.201177,
+        "single_core_seconds": null,
+        "peak_rss_bytes": 280756224
+      },
+      "stdout": {
+        "path": "stdout.txt",
+        "bytes": 480158,
+        "sha256": "ddde2a439a48dae6ce00766fe0d7c0f7141037bcff957c1431e433b2090870cf"
+      },
+      "stderr": {
+        "path": "stderr.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "metrics": {
+        "path": "metrics.json",
+        "bytes": 1041,
+        "sha256": "daaea1802fbcf8c740c696dc53c529ce26a07ace5b0f54e0709ca83fd60d964b"
+      }
+    },
+    "stdout": {
+      "path": "development/cryptominisat-run/stdout.txt",
+      "bytes": 480158,
+      "sha256": "ddde2a439a48dae6ce00766fe0d7c0f7141037bcff957c1431e433b2090870cf"
+    },
+    "stderr": {
+      "path": "development/cryptominisat-run/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "binary": {
+      "path": "/opt/homebrew/Cellar/cryptominisat/5.14.7/bin/cryptominisat5",
+      "bytes": 626672,
+      "sha256": "a3f85c3709b5e2a040bf82a4a604d1c7b9f10219bbf180a9e0f72319a2e892ac"
+    },
+    "input": {
+      "path": "input/instance.xor.cnf",
+      "bytes": 208168,
+      "sha256": "a529c4d8bb1e1a4b5904134b1e5d099adfb80806215f1ff128088d7d518d4bb8"
+    },
+    "executed_input": {
+      "path": "input/instance.xor.cnf",
+      "bytes": 208168,
+      "sha256": "a529c4d8bb1e1a4b5904134b1e5d099adfb80806215f1ff128088d7d518d4bb8"
+    }
+  },
+  "inherited_stage192_result": {
+    "path": "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-192-selected-parallel-boundary-20261002/result.json",
+    "bytes": 17428,
+    "sha256": "e1849a1b2ae97bdc3633025eaadcb18438ff2a49448820a936a890db24904a48"
+  },
+  "inherited_stage192_result_sha256": "e1849a1b2ae97bdc3633025eaadcb18438ff2a49448820a936a890db24904a48",
+  "measured_stage_charge": {
+    "components": 25,
+    "wall_seconds_sum": 248.21968225100002,
+    "total_core_seconds_sum": 247.702005,
+    "peak_rss_bytes_max": 280756224
+  },
+  "cumulative_measured_lower_bound": {
+    "components": 607,
+    "wall_seconds_sum": 24158.966302790002,
+    "total_core_seconds_sum": 61807.398531,
+    "peak_rss_bytes_max": 6310576128
+  },
+  "complete_campaign_cost": null,
+  "licensed_magma_available": false,
+  "all_seven_gates_passed": false,
+  "koblitz_index_calculus_sota": false,
+  "claim_boundary": "Same opened n=59 decomposition instance. WDSat and CryptoMiniSat terminal/resource controls only; UNKNOWN and watchdog timeout are censored. Licensed Magma, full index calculus, rho crossover, external reproduction, novelty and SOTA remain open."
+}

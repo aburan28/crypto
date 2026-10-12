@@ -1,0 +1,14 @@
+name n19l6-2-S
+curve y^2 + x*y = x^3 + 1*x^2 + 1 over GF(2^19)
+modulus z^19 + z^5 + z^2 + z^1 + 1
+factor_base subspace <1, z, ..., z^5> (dimension 6)
+x_R 0x6317c
+satisfiable true
+label_certified_by planted sum of three factor-base points, S4 checked
+witness X1 0x33 X2 0x34 X3 0xe
+witness_true_sat_variables 1 2 5 6 9 11 12 14 15 16
+variables x_(i,j) = bit j of X_(i+1) -> DIMACS 1 + i*l + j ; e-variables from 19 ; CNF auxiliaries after 51
+dimacs_xor variables 767 clauses 2364 xor_rows 52
+dimacs_cnf variables 3022 clauses 26461
+anf equations 52 monomials 4642
+generator crypto_lib::cryptanalysis::ic_corpus seed 1

@@ -1,0 +1,31 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "RAYON_NUM_THREADS=12",
+    "PQ_F4_X1_BATCH=512",
+    "VECLIB_MAXIMUM_THREADS=1",
+    "OPENBLAS_NUM_THREADS=1",
+    "OMP_NUM_THREADS=1",
+    "MKL_NUM_THREADS=1",
+    "BLIS_NUM_THREADS=1",
+    "NUMEXPR_NUM_THREADS=1",
+    "F4_F2_FULL_M4RI=1",
+    "/Volumes/SSD990/kic-stage181-full-m4ri-target-850182efb/release/examples/koblitz_pdp_backend",
+    "native-f4",
+    "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+    "300"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 360.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 60.8727667080002,
+    "user_seconds": 230.086735,
+    "system_seconds": 12.406742,
+    "total_core_seconds": 242.493477,
+    "single_core_seconds": 242.493477,
+    "peak_rss_bytes": 2787868672,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

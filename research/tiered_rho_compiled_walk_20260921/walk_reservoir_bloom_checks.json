@@ -1,0 +1,1362 @@
+{
+  "evidence_type": "finite_walk_reservoir_bloom_equivalence_audit",
+  "field_prime": 65537,
+  "budget": 427,
+  "configs": [
+    {
+      "choices": 4,
+      "reservoir_size": 32
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64
+    }
+  ],
+  "public_seeds": [
+    20261400,
+    20261401,
+    20261402,
+    20261403,
+    20261404,
+    20261405,
+    20261406,
+    20261407,
+    20261408,
+    20261409,
+    20261410,
+    20261411,
+    20261412,
+    20261413,
+    20261414,
+    20261415,
+    20261416,
+    20261417,
+    20261418,
+    20261419,
+    20261420,
+    20261421,
+    20261422,
+    20261423,
+    20261424,
+    20261425,
+    20261426,
+    20261427,
+    20261428,
+    20261429,
+    20261430,
+    20261431
+  ],
+  "summaries": [
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "trials": 32,
+      "matching_event_transcripts": 32,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "changed_choices": 0,
+      "mean_endpoint_difference_bloom_minus_exact": 0.0,
+      "mean_censored_addition_difference_bloom_minus_exact": 0.0
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "trials": 32,
+      "matching_event_transcripts": 32,
+      "false_positives": 4,
+      "false_negatives": 0,
+      "changed_choices": 0,
+      "mean_endpoint_difference_bloom_minus_exact": 0.0,
+      "mean_censored_addition_difference_bloom_minus_exact": 0.0
+    }
+  ],
+  "rows": [
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261400,
+      "events_match": true,
+      "bloom_endpoint": 49345,
+      "exact_endpoint": 49345,
+      "bloom_prefix_numerator": 19057958,
+      "exact_prefix_numerator": 19057958,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52783,
+        "hash_probes": 185311,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82913
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261401,
+      "events_match": true,
+      "bloom_endpoint": 49338,
+      "exact_endpoint": 49338,
+      "bloom_prefix_numerator": 19066891,
+      "exact_prefix_numerator": 19066891,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52756,
+        "hash_probes": 185058,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82946
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261402,
+      "events_match": true,
+      "bloom_endpoint": 49465,
+      "exact_endpoint": 49465,
+      "bloom_prefix_numerator": 19042321,
+      "exact_prefix_numerator": 19042321,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52782,
+        "hash_probes": 184482,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 83185
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261403,
+      "events_match": true,
+      "bloom_endpoint": 49282,
+      "exact_endpoint": 49282,
+      "bloom_prefix_numerator": 19056988,
+      "exact_prefix_numerator": 19056988,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52769,
+        "hash_probes": 185282,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82884
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261404,
+      "events_match": true,
+      "bloom_endpoint": 49275,
+      "exact_endpoint": 49275,
+      "bloom_prefix_numerator": 19067084,
+      "exact_prefix_numerator": 19067084,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52723,
+        "hash_probes": 184461,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82919
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261405,
+      "events_match": true,
+      "bloom_endpoint": 49397,
+      "exact_endpoint": 49397,
+      "bloom_prefix_numerator": 19048334,
+      "exact_prefix_numerator": 19048334,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52760,
+        "hash_probes": 185956,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82556
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261406,
+      "events_match": true,
+      "bloom_endpoint": 49289,
+      "exact_endpoint": 49289,
+      "bloom_prefix_numerator": 19054054,
+      "exact_prefix_numerator": 19054054,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52779,
+        "hash_probes": 183921,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 83139
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261407,
+      "events_match": true,
+      "bloom_endpoint": 49246,
+      "exact_endpoint": 49246,
+      "bloom_prefix_numerator": 19034095,
+      "exact_prefix_numerator": 19034095,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52761,
+        "hash_probes": 184569,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82833
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261408,
+      "events_match": true,
+      "bloom_endpoint": 49266,
+      "exact_endpoint": 49266,
+      "bloom_prefix_numerator": 19068005,
+      "exact_prefix_numerator": 19068005,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52682,
+        "hash_probes": 184642,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82712
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261409,
+      "events_match": true,
+      "bloom_endpoint": 49169,
+      "exact_endpoint": 49169,
+      "bloom_prefix_numerator": 19084164,
+      "exact_prefix_numerator": 19084164,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52768,
+        "hash_probes": 184619,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82959
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261410,
+      "events_match": true,
+      "bloom_endpoint": 49233,
+      "exact_endpoint": 49233,
+      "bloom_prefix_numerator": 19085242,
+      "exact_prefix_numerator": 19085242,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52782,
+        "hash_probes": 184403,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82963
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261411,
+      "events_match": true,
+      "bloom_endpoint": 49371,
+      "exact_endpoint": 49371,
+      "bloom_prefix_numerator": 19055657,
+      "exact_prefix_numerator": 19055657,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52782,
+        "hash_probes": 185263,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 83019
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261412,
+      "events_match": true,
+      "bloom_endpoint": 49272,
+      "exact_endpoint": 49272,
+      "bloom_prefix_numerator": 19058717,
+      "exact_prefix_numerator": 19058717,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52764,
+        "hash_probes": 184678,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82996
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261413,
+      "events_match": true,
+      "bloom_endpoint": 49295,
+      "exact_endpoint": 49295,
+      "bloom_prefix_numerator": 19070086,
+      "exact_prefix_numerator": 19070086,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52718,
+        "hash_probes": 184342,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 83026
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261414,
+      "events_match": true,
+      "bloom_endpoint": 49379,
+      "exact_endpoint": 49379,
+      "bloom_prefix_numerator": 19047586,
+      "exact_prefix_numerator": 19047586,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52771,
+        "hash_probes": 184020,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 83023
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261415,
+      "events_match": true,
+      "bloom_endpoint": 49377,
+      "exact_endpoint": 49377,
+      "bloom_prefix_numerator": 19018352,
+      "exact_prefix_numerator": 19018352,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52761,
+        "hash_probes": 184027,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 83161
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261416,
+      "events_match": true,
+      "bloom_endpoint": 49235,
+      "exact_endpoint": 49235,
+      "bloom_prefix_numerator": 19056680,
+      "exact_prefix_numerator": 19056680,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52775,
+        "hash_probes": 186247,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82391
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261417,
+      "events_match": true,
+      "bloom_endpoint": 49140,
+      "exact_endpoint": 49140,
+      "bloom_prefix_numerator": 19059955,
+      "exact_prefix_numerator": 19059955,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52810,
+        "hash_probes": 184334,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 83066
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261418,
+      "events_match": true,
+      "bloom_endpoint": 49241,
+      "exact_endpoint": 49241,
+      "bloom_prefix_numerator": 19055164,
+      "exact_prefix_numerator": 19055164,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52798,
+        "hash_probes": 184924,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82998
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261419,
+      "events_match": true,
+      "bloom_endpoint": 49221,
+      "exact_endpoint": 49221,
+      "bloom_prefix_numerator": 19069991,
+      "exact_prefix_numerator": 19069991,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52774,
+        "hash_probes": 184713,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 83131
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261420,
+      "events_match": true,
+      "bloom_endpoint": 49252,
+      "exact_endpoint": 49252,
+      "bloom_prefix_numerator": 19060899,
+      "exact_prefix_numerator": 19060899,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52781,
+        "hash_probes": 185794,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82843
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261421,
+      "events_match": true,
+      "bloom_endpoint": 49320,
+      "exact_endpoint": 49320,
+      "bloom_prefix_numerator": 19047523,
+      "exact_prefix_numerator": 19047523,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52780,
+        "hash_probes": 184060,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 83084
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261422,
+      "events_match": true,
+      "bloom_endpoint": 49331,
+      "exact_endpoint": 49331,
+      "bloom_prefix_numerator": 19054239,
+      "exact_prefix_numerator": 19054239,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52764,
+        "hash_probes": 185274,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82973
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261423,
+      "events_match": true,
+      "bloom_endpoint": 49399,
+      "exact_endpoint": 49399,
+      "bloom_prefix_numerator": 19052111,
+      "exact_prefix_numerator": 19052111,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52766,
+        "hash_probes": 184954,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82947
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261424,
+      "events_match": true,
+      "bloom_endpoint": 49357,
+      "exact_endpoint": 49357,
+      "bloom_prefix_numerator": 19054875,
+      "exact_prefix_numerator": 19054875,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52742,
+        "hash_probes": 184930,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 83053
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261425,
+      "events_match": true,
+      "bloom_endpoint": 49323,
+      "exact_endpoint": 49323,
+      "bloom_prefix_numerator": 19064660,
+      "exact_prefix_numerator": 19064660,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52767,
+        "hash_probes": 185840,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82647
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261426,
+      "events_match": true,
+      "bloom_endpoint": 49260,
+      "exact_endpoint": 49260,
+      "bloom_prefix_numerator": 19056311,
+      "exact_prefix_numerator": 19056311,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52773,
+        "hash_probes": 186489,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82497
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261427,
+      "events_match": true,
+      "bloom_endpoint": 49338,
+      "exact_endpoint": 49338,
+      "bloom_prefix_numerator": 19059054,
+      "exact_prefix_numerator": 19059054,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52736,
+        "hash_probes": 185788,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82810
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261428,
+      "events_match": true,
+      "bloom_endpoint": 49252,
+      "exact_endpoint": 49252,
+      "bloom_prefix_numerator": 19066342,
+      "exact_prefix_numerator": 19066342,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52762,
+        "hash_probes": 185888,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82809
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261429,
+      "events_match": true,
+      "bloom_endpoint": 49193,
+      "exact_endpoint": 49193,
+      "bloom_prefix_numerator": 19059967,
+      "exact_prefix_numerator": 19059967,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52768,
+        "hash_probes": 187844,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82541
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261430,
+      "events_match": true,
+      "bloom_endpoint": 49267,
+      "exact_endpoint": 49267,
+      "bloom_prefix_numerator": 19061672,
+      "exact_prefix_numerator": 19061672,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52787,
+        "hash_probes": 185216,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82865
+      }
+    },
+    {
+      "choices": 4,
+      "reservoir_size": 32,
+      "seed": 20261431,
+      "events_match": true,
+      "bloom_endpoint": 49245,
+      "exact_endpoint": 49245,
+      "bloom_prefix_numerator": 19062397,
+      "exact_prefix_numerator": 19062397,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 52773,
+        "hash_probes": 186659,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 82488
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261400,
+      "events_match": true,
+      "bloom_endpoint": 49695,
+      "exact_endpoint": 49695,
+      "bloom_prefix_numerator": 18937816,
+      "exact_prefix_numerator": 18937816,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405787,
+        "hash_probes": 1088679,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145784
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261401,
+      "events_match": true,
+      "bloom_endpoint": 49657,
+      "exact_endpoint": 49657,
+      "bloom_prefix_numerator": 18934974,
+      "exact_prefix_numerator": 18934974,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405764,
+        "hash_probes": 1087368,
+        "false_positives": 2,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 146118
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261402,
+      "events_match": true,
+      "bloom_endpoint": 49601,
+      "exact_endpoint": 49601,
+      "bloom_prefix_numerator": 18954315,
+      "exact_prefix_numerator": 18954315,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405778,
+        "hash_probes": 1083802,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145690
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261403,
+      "events_match": true,
+      "bloom_endpoint": 49692,
+      "exact_endpoint": 49692,
+      "bloom_prefix_numerator": 18922115,
+      "exact_prefix_numerator": 18922115,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405756,
+        "hash_probes": 1086493,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145843
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261404,
+      "events_match": true,
+      "bloom_endpoint": 49744,
+      "exact_endpoint": 49744,
+      "bloom_prefix_numerator": 18941961,
+      "exact_prefix_numerator": 18941961,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405749,
+        "hash_probes": 1088228,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145852
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261405,
+      "events_match": true,
+      "bloom_endpoint": 49666,
+      "exact_endpoint": 49666,
+      "bloom_prefix_numerator": 18938396,
+      "exact_prefix_numerator": 18938396,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405780,
+        "hash_probes": 1095517,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145144
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261406,
+      "events_match": true,
+      "bloom_endpoint": 49701,
+      "exact_endpoint": 49701,
+      "bloom_prefix_numerator": 18950500,
+      "exact_prefix_numerator": 18950500,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405813,
+        "hash_probes": 1085357,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145463
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261407,
+      "events_match": true,
+      "bloom_endpoint": 49920,
+      "exact_endpoint": 49920,
+      "bloom_prefix_numerator": 18915686,
+      "exact_prefix_numerator": 18915686,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405769,
+        "hash_probes": 1088094,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145637
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261408,
+      "events_match": true,
+      "bloom_endpoint": 49562,
+      "exact_endpoint": 49562,
+      "bloom_prefix_numerator": 18954018,
+      "exact_prefix_numerator": 18954018,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405792,
+        "hash_probes": 1089093,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145345
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261409,
+      "events_match": true,
+      "bloom_endpoint": 49721,
+      "exact_endpoint": 49721,
+      "bloom_prefix_numerator": 18929092,
+      "exact_prefix_numerator": 18929092,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405755,
+        "hash_probes": 1085181,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145855
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261410,
+      "events_match": true,
+      "bloom_endpoint": 49734,
+      "exact_endpoint": 49734,
+      "bloom_prefix_numerator": 18930360,
+      "exact_prefix_numerator": 18930360,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405756,
+        "hash_probes": 1088859,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145924
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261411,
+      "events_match": true,
+      "bloom_endpoint": 49627,
+      "exact_endpoint": 49627,
+      "bloom_prefix_numerator": 18936989,
+      "exact_prefix_numerator": 18936989,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405811,
+        "hash_probes": 1088710,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145594
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261412,
+      "events_match": true,
+      "bloom_endpoint": 49695,
+      "exact_endpoint": 49695,
+      "bloom_prefix_numerator": 18947953,
+      "exact_prefix_numerator": 18947953,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405755,
+        "hash_probes": 1087481,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145299
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261413,
+      "events_match": true,
+      "bloom_endpoint": 49589,
+      "exact_endpoint": 49589,
+      "bloom_prefix_numerator": 18951417,
+      "exact_prefix_numerator": 18951417,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405814,
+        "hash_probes": 1084659,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145857
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261414,
+      "events_match": true,
+      "bloom_endpoint": 49807,
+      "exact_endpoint": 49807,
+      "bloom_prefix_numerator": 18939343,
+      "exact_prefix_numerator": 18939343,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405815,
+        "hash_probes": 1089271,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145531
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261415,
+      "events_match": true,
+      "bloom_endpoint": 49604,
+      "exact_endpoint": 49604,
+      "bloom_prefix_numerator": 18952565,
+      "exact_prefix_numerator": 18952565,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405760,
+        "hash_probes": 1085987,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145713
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261416,
+      "events_match": true,
+      "bloom_endpoint": 49631,
+      "exact_endpoint": 49631,
+      "bloom_prefix_numerator": 18935616,
+      "exact_prefix_numerator": 18935616,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405765,
+        "hash_probes": 1096410,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145097
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261417,
+      "events_match": true,
+      "bloom_endpoint": 49905,
+      "exact_endpoint": 49905,
+      "bloom_prefix_numerator": 18933672,
+      "exact_prefix_numerator": 18933672,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405801,
+        "hash_probes": 1091897,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145368
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261418,
+      "events_match": true,
+      "bloom_endpoint": 49678,
+      "exact_endpoint": 49678,
+      "bloom_prefix_numerator": 18938797,
+      "exact_prefix_numerator": 18938797,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405808,
+        "hash_probes": 1087547,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145488
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261419,
+      "events_match": true,
+      "bloom_endpoint": 49775,
+      "exact_endpoint": 49775,
+      "bloom_prefix_numerator": 18943288,
+      "exact_prefix_numerator": 18943288,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405780,
+        "hash_probes": 1087962,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145722
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261420,
+      "events_match": true,
+      "bloom_endpoint": 49789,
+      "exact_endpoint": 49789,
+      "bloom_prefix_numerator": 18919623,
+      "exact_prefix_numerator": 18919623,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405749,
+        "hash_probes": 1094975,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145429
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261421,
+      "events_match": true,
+      "bloom_endpoint": 49745,
+      "exact_endpoint": 49745,
+      "bloom_prefix_numerator": 18936384,
+      "exact_prefix_numerator": 18936384,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405745,
+        "hash_probes": 1090776,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145549
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261422,
+      "events_match": true,
+      "bloom_endpoint": 49673,
+      "exact_endpoint": 49673,
+      "bloom_prefix_numerator": 18929295,
+      "exact_prefix_numerator": 18929295,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405766,
+        "hash_probes": 1087214,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145791
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261423,
+      "events_match": true,
+      "bloom_endpoint": 49768,
+      "exact_endpoint": 49768,
+      "bloom_prefix_numerator": 18931036,
+      "exact_prefix_numerator": 18931036,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405792,
+        "hash_probes": 1086266,
+        "false_positives": 2,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145963
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261424,
+      "events_match": true,
+      "bloom_endpoint": 49740,
+      "exact_endpoint": 49740,
+      "bloom_prefix_numerator": 18939821,
+      "exact_prefix_numerator": 18939821,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405785,
+        "hash_probes": 1092548,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145459
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261425,
+      "events_match": true,
+      "bloom_endpoint": 49756,
+      "exact_endpoint": 49756,
+      "bloom_prefix_numerator": 18916803,
+      "exact_prefix_numerator": 18916803,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405733,
+        "hash_probes": 1084476,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145985
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261426,
+      "events_match": true,
+      "bloom_endpoint": 49714,
+      "exact_endpoint": 49714,
+      "bloom_prefix_numerator": 18942776,
+      "exact_prefix_numerator": 18942776,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405710,
+        "hash_probes": 1096160,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145401
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261427,
+      "events_match": true,
+      "bloom_endpoint": 49738,
+      "exact_endpoint": 49738,
+      "bloom_prefix_numerator": 18933441,
+      "exact_prefix_numerator": 18933441,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405812,
+        "hash_probes": 1090920,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145654
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261428,
+      "events_match": true,
+      "bloom_endpoint": 49758,
+      "exact_endpoint": 49758,
+      "bloom_prefix_numerator": 18942780,
+      "exact_prefix_numerator": 18942780,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405751,
+        "hash_probes": 1091776,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145488
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261429,
+      "events_match": true,
+      "bloom_endpoint": 49619,
+      "exact_endpoint": 49619,
+      "bloom_prefix_numerator": 18947459,
+      "exact_prefix_numerator": 18947459,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405739,
+        "hash_probes": 1092060,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145247
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261430,
+      "events_match": true,
+      "bloom_endpoint": 49674,
+      "exact_endpoint": 49674,
+      "bloom_prefix_numerator": 18943849,
+      "exact_prefix_numerator": 18943849,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405753,
+        "hash_probes": 1091875,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145368
+      }
+    },
+    {
+      "choices": 16,
+      "reservoir_size": 64,
+      "seed": 20261431,
+      "events_match": true,
+      "bloom_endpoint": 49634,
+      "exact_endpoint": 49634,
+      "bloom_prefix_numerator": 18961517,
+      "exact_prefix_numerator": 18961517,
+      "bloom": {
+        "bits": 1048576,
+        "hashes": 7,
+        "membership_queries": 405744,
+        "hash_probes": 1096305,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "changed_choices_vs_exact_online_score": 0,
+        "bits_set": 145074
+      }
+    }
+  ],
+  "limitations": [
+    "The one-megabit finite Bloom sketch is lightly loaded.",
+    "Projected large-run false positives require independent-uniform-hash assumptions.",
+    "Bloom guidance does not certify collisions; exact archive verification remains mandatory.",
+    "No asymptotic, novelty, hardware, or ECDLP speedup claim follows."
+  ],
+  "script_sha256": "06e8ff57a6eb4421635dff284b2ae95f282e053648d2fd07ba3582a22beef92d"
+}

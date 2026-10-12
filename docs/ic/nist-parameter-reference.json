@@ -1,0 +1,921 @@
+{
+  "curves": [
+    {
+      "binary_diagnostics": null,
+      "checks": {
+        "generator_on_curve": true,
+        "generator_subgroup": true,
+        "hasse_bound": true,
+        "positive_cofactor": true,
+        "subgroup_order_prime": true
+      },
+      "curve": "p256",
+      "exact_parameters": {
+        "a": "ffffffff00000001000000000000000000000000fffffffffffffffffffffffc",
+        "b": "5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b",
+        "cofactor": "1",
+        "encoding": "hex-integer",
+        "field": {
+          "characteristic": "ffffffff00000001000000000000000000000000ffffffffffffffffffffffff",
+          "degree": 1
+        },
+        "generator": {
+          "x": "6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296",
+          "y": "4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5"
+        },
+        "model": "short-weierstrass",
+        "subgroup_order": "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551"
+      },
+      "fixtures": [
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "5ecbe4d1a6330a44c8f7ef951d4bf165e6c6b721efada985fb41661bc6e7fd6c",
+            "y": "8734640c4998ff7e374b06ce1a64a2ecd82ab036384fb83d9a79b127a27d5032"
+          },
+          "u": "1",
+          "v": "2",
+          "w": "3",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        },
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "51590b7a515140d2d784c85608668fdfef8c82fd1f5be52421554a0dc3d033ed",
+            "y": "1f3e82566fb58d83751e40c9407586d9f2fed1002b27f7772e2f44bb025e925b"
+          },
+          "u": "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc63254f",
+          "v": "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc63254e",
+          "w": "ffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc63254c",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        }
+      ],
+      "verified": true
+    },
+    {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "289070fb05d38ff58321f2e800536d538ccdaa3d9",
+          "7714cfe32684eef49818f913db78b866904e4d31"
+        ]
+      },
+      "checks": {
+        "generator_on_curve": true,
+        "generator_subgroup": true,
+        "hasse_bound": true,
+        "positive_cofactor": true,
+        "subgroup_order_prime": true
+      },
+      "curve": "sect163k1",
+      "exact_parameters": {
+        "a": "1",
+        "b": "1",
+        "cofactor": "2",
+        "encoding": "hex-polynomial-bits",
+        "field": {
+          "basis": "polynomial",
+          "characteristic": "2",
+          "degree": 163,
+          "modulus_exponents": [
+            0,
+            3,
+            6,
+            7,
+            163
+          ]
+        },
+        "generator": {
+          "x": "2fe13c0537bbc11acaa07d793de4e6d5e5c94eee8",
+          "y": "289070fb05d38ff58321f2e800536d538ccdaa3d9"
+        },
+        "model": "binary-weierstrass",
+        "subgroup_order": "4000000000000000000020108a2e0cc0d99f8a5ef"
+      },
+      "fixtures": [
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "2acfcfcc9a2af8e3f2828024f820033db20f69520",
+            "y": "5729c47f915badc7b4c17df14e5804109ffecdfe4"
+          },
+          "u": "1",
+          "v": "2",
+          "w": "3",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        },
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "3799f22e9423edff60294e8288884a04e107b6b6c",
+            "y": "5fb563b96d17bcd3854733f542c48eb7ec40a81b4"
+          },
+          "u": "4000000000000000000020108a2e0cc0d99f8a5ed",
+          "v": "4000000000000000000020108a2e0cc0d99f8a5ec",
+          "w": "4000000000000000000020108a2e0cc0d99f8a5ea",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        }
+      ],
+      "verified": true
+    },
+    {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "325f41d0ef702dc310254c42d65851a3b91471ac7",
+          "d51fbc6c71a0094fa2cdd545b11c5c0c797324f1"
+        ]
+      },
+      "checks": {
+        "generator_on_curve": true,
+        "generator_subgroup": true,
+        "hasse_bound": true,
+        "positive_cofactor": true,
+        "subgroup_order_prime": true
+      },
+      "curve": "sect163r2",
+      "exact_parameters": {
+        "a": "1",
+        "b": "20a601907b8c953ca1481eb10512f78744a3205fd",
+        "cofactor": "2",
+        "encoding": "hex-polynomial-bits",
+        "field": {
+          "basis": "polynomial",
+          "characteristic": "2",
+          "degree": 163,
+          "modulus_exponents": [
+            0,
+            3,
+            6,
+            7,
+            163
+          ]
+        },
+        "generator": {
+          "x": "3f0eba16286a2d57ea0991168d4994637e8343e36",
+          "y": "d51fbc6c71a0094fa2cdd545b11c5c0c797324f1"
+        },
+        "model": "binary-weierstrass",
+        "subgroup_order": "40000000000000000000292fe77e70c12a4234c33"
+      },
+      "fixtures": [
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "634000577f86aa315009d6f9b906691f6edd691fe",
+            "y": "401a3de0d6c2ec014e6fba5653587bd45dc2230be"
+          },
+          "u": "1",
+          "v": "2",
+          "w": "3",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        },
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "7205899683630522f4c657bb52764867da449f864",
+            "y": "4220be69d6b9df2b99764b1cc271e757c911933f8"
+          },
+          "u": "40000000000000000000292fe77e70c12a4234c31",
+          "v": "40000000000000000000292fe77e70c12a4234c30",
+          "w": "40000000000000000000292fe77e70c12a4234c2e",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        }
+      ],
+      "verified": true
+    },
+    {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "1db537dece819b7f70f555a67c427a8cd9bf18aeb9b56e0c11056fae6a3",
+          "a961c769d267c4edfe7ca84830333dae3fe848806e5cac5c7eb9578785"
+        ]
+      },
+      "checks": {
+        "generator_on_curve": true,
+        "generator_subgroup": true,
+        "hasse_bound": true,
+        "positive_cofactor": true,
+        "subgroup_order_prime": true
+      },
+      "curve": "sect233k1",
+      "exact_parameters": {
+        "a": "0",
+        "b": "1",
+        "cofactor": "4",
+        "encoding": "hex-polynomial-bits",
+        "field": {
+          "basis": "polynomial",
+          "characteristic": "2",
+          "degree": 233,
+          "modulus_exponents": [
+            0,
+            74,
+            233
+          ]
+        },
+        "generator": {
+          "x": "17232ba853a7e731af129f22ff4149563a419c26bf50a4c9d6eefad6126",
+          "y": "1db537dece819b7f70f555a67c427a8cd9bf18aeb9b56e0c11056fae6a3"
+        },
+        "model": "binary-weierstrass",
+        "subgroup_order": "8000000000000000000000000000069d5bb915bcd46efb1ad5f173abdf"
+      },
+      "fixtures": [
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "4656e0aabbe341407715ca4a7fac287b41baa1f789c29bfa27e53a7a46",
+            "y": "f79a7245fba513df787a64c618e97ebcc078638ebaaa562e9862bc00ce"
+          },
+          "u": "1",
+          "v": "2",
+          "w": "3",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        },
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "1e6203d117ffe2c1facb632dcb11d665f96701728b7854d4d562aec4c81",
+            "y": "ddd8d243605c1b6e6a25c236aeed12729ba732cd423dd3ae0a7e3fda79"
+          },
+          "u": "8000000000000000000000000000069d5bb915bcd46efb1ad5f173abdd",
+          "v": "8000000000000000000000000000069d5bb915bcd46efb1ad5f173abdc",
+          "w": "8000000000000000000000000000069d5bb915bcd46efb1ad5f173abda",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        }
+      ],
+      "verified": true
+    },
+    {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "1006a08a41903350678e58528bebf8a0beff867a7ca36716f7e01f81052",
+          "1faa3d76fb58026bd59dc7493cbe0656e53c1782cfcce89840d700545d9"
+        ]
+      },
+      "checks": {
+        "generator_on_curve": true,
+        "generator_subgroup": true,
+        "hasse_bound": true,
+        "positive_cofactor": true,
+        "subgroup_order_prime": true
+      },
+      "curve": "sect233r1",
+      "exact_parameters": {
+        "a": "1",
+        "b": "66647ede6c332c7f8c0923bb58213b333b20e9ce4281fe115f7d8f90ad",
+        "cofactor": "2",
+        "encoding": "hex-polynomial-bits",
+        "field": {
+          "basis": "polynomial",
+          "characteristic": "2",
+          "degree": 233,
+          "modulus_exponents": [
+            0,
+            74,
+            233
+          ]
+        },
+        "generator": {
+          "x": "fac9dfcbac8313bb2139f1bb755fef65bc391f8b36f8f8eb7371fd558b",
+          "y": "1006a08a41903350678e58528bebf8a0beff867a7ca36716f7e01f81052"
+        },
+        "model": "binary-weierstrass",
+        "subgroup_order": "1000000000000000000000000000013e974e72f8a6922031d2603cfe0d7"
+      },
+      "fixtures": [
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "80f50a330911bd753a76364595b9f0158c4d02a85cc0e3fb6ea0aef9ff",
+            "y": "17a49033f12eb52675e98e6432cc27104bd5c42bcbe3daf76901c9b8743"
+          },
+          "u": "1",
+          "v": "2",
+          "w": "3",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        },
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "194ed0ca60c85e59e7c4b69f30c6304a9f485f45032b871c4a23ffec8c1",
+            "y": "131c298ffce7f56025d0b08117e82e5bc1565eec8d648ed110a62d85007"
+          },
+          "u": "1000000000000000000000000000013e974e72f8a6922031d2603cfe0d5",
+          "v": "1000000000000000000000000000013e974e72f8a6922031d2603cfe0d4",
+          "w": "1000000000000000000000000000013e974e72f8a6922031d2603cfe0d2",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        }
+      ],
+      "verified": true
+    },
+    {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "1ccda380f1c9e318d90f95d07e5426fe87e45c0e8184698e45962364e34116177dd2259",
+          "4cffb0777d6dab9b28ac2dc6514ca8abbb3639fcbd910e2f2de0b25fef6bd452f940a6f"
+        ]
+      },
+      "checks": {
+        "generator_on_curve": true,
+        "generator_subgroup": true,
+        "hasse_bound": true,
+        "positive_cofactor": true,
+        "subgroup_order_prime": true
+      },
+      "curve": "sect283k1",
+      "exact_parameters": {
+        "a": "0",
+        "b": "1",
+        "cofactor": "4",
+        "encoding": "hex-polynomial-bits",
+        "field": {
+          "basis": "polynomial",
+          "characteristic": "2",
+          "degree": 283,
+          "modulus_exponents": [
+            0,
+            5,
+            7,
+            12,
+            283
+          ]
+        },
+        "generator": {
+          "x": "503213f78ca44883f1a3b8162f188e553cd265f23c1567a16876913b0c2ac2458492836",
+          "y": "1ccda380f1c9e318d90f95d07e5426fe87e45c0e8184698e45962364e34116177dd2259"
+        },
+        "model": "binary-weierstrass",
+        "subgroup_order": "1ffffffffffffffffffffffffffffffffffe9ae2ed07577265dff7f94451e061e163c61"
+      },
+      "fixtures": [
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "15dccc30a8b1f5146412d51fec337741090321408aac521391ad36c5912e280124fe3b5",
+            "y": "53fc9bed137312952ad97f6a98c4c7ac1b421635fbafe28898e9213d979d5b4d279f192"
+          },
+          "u": "1",
+          "v": "2",
+          "w": "3",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        },
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "7879d57c3bd1a1a0f42683acfc15e85022bad17d02ff0ab922348199ec2e8f524a2b90d",
+            "y": "c20851f3cb85ae686237f39992a531fe0f2af5fec8b9052bd2f8b5268a81ef998fc4f5"
+          },
+          "u": "1ffffffffffffffffffffffffffffffffffe9ae2ed07577265dff7f94451e061e163c5f",
+          "v": "1ffffffffffffffffffffffffffffffffffe9ae2ed07577265dff7f94451e061e163c5e",
+          "w": "1ffffffffffffffffffffffffffffffffffe9ae2ed07577265dff7f94451e061e163c5c",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        }
+      ],
+      "verified": true
+    },
+    {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "3676854fe24141cb98fe6d4b20d02b4516ff702350eddb0826779c813f0df45be8112f4",
+          "69e51717393c98c581ca958c2bddd587f82d2ba6070712c02859850eb3d6188383032a7"
+        ]
+      },
+      "checks": {
+        "generator_on_curve": true,
+        "generator_subgroup": true,
+        "hasse_bound": true,
+        "positive_cofactor": true,
+        "subgroup_order_prime": true
+      },
+      "curve": "sect283r1",
+      "exact_parameters": {
+        "a": "1",
+        "b": "27b680ac8b8596da5a4af8a19a0303fca97fd7645309fa2a581485af6263e313b79a2f5",
+        "cofactor": "2",
+        "encoding": "hex-polynomial-bits",
+        "field": {
+          "basis": "polynomial",
+          "characteristic": "2",
+          "degree": 283,
+          "modulus_exponents": [
+            0,
+            5,
+            7,
+            12,
+            283
+          ]
+        },
+        "generator": {
+          "x": "5f939258db7dd90e1934f8c70b0dfec2eed25b8557eac9c80e2e198f8cdbecd86b12053",
+          "y": "3676854fe24141cb98fe6d4b20d02b4516ff702350eddb0826779c813f0df45be8112f4"
+        },
+        "model": "binary-weierstrass",
+        "subgroup_order": "3ffffffffffffffffffffffffffffffffffef90399660fc938a90165b042a7cefadb307"
+      },
+      "fixtures": [
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "d257a925ba8bbf1a490a06a80d8338453a9a00eed2c51a90467a4283b3a4df9de2bc0b",
+            "y": "22a7592959069fbbc245bee792106e995513d5f6837b90f291feb732b1cbe3427c8e585"
+          },
+          "u": "1",
+          "v": "2",
+          "w": "3",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        },
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "1953364bd3c81790a86e65ff6e875d73f3cb9fcc149b5a6bebabb04f00b1693048a7eb7",
+            "y": "45d6187690b7cfe4754410acb273c88e15a10120997f70f2f54c8946c0c4b98d320053c"
+          },
+          "u": "3ffffffffffffffffffffffffffffffffffef90399660fc938a90165b042a7cefadb305",
+          "v": "3ffffffffffffffffffffffffffffffffffef90399660fc938a90165b042a7cefadb304",
+          "w": "3ffffffffffffffffffffffffffffffffffef90399660fc938a90165b042a7cefadb302",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        }
+      ],
+      "verified": true
+    },
+    {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "183995a6ef307830180ac25b075adbd3a9d71a872896c6bc19e9edd101c6c211e3f74dc5c6ff87744be8ccbeb36ac8731e21f2d",
+          "1e369050b7c4e42acba1dacbf04299c3460782f918ea427e6325165e9ea10e3da5f6c42e9c55215aa9ca27a5863ec48d8e0286b"
+        ]
+      },
+      "checks": {
+        "generator_on_curve": true,
+        "generator_subgroup": true,
+        "hasse_bound": true,
+        "positive_cofactor": true,
+        "subgroup_order_prime": true
+      },
+      "curve": "sect409k1",
+      "exact_parameters": {
+        "a": "0",
+        "b": "1",
+        "cofactor": "4",
+        "encoding": "hex-polynomial-bits",
+        "field": {
+          "basis": "polynomial",
+          "characteristic": "2",
+          "degree": 409,
+          "modulus_exponents": [
+            0,
+            87,
+            409
+          ]
+        },
+        "generator": {
+          "x": "60f05f658f49c1ad3ab1890f7184210efd0987e307c84c27accfb8f9f67cc2c460189eb5aaaa62ee222eb1b35540cfe9023746",
+          "y": "1e369050b7c4e42acba1dacbf04299c3460782f918ea427e6325165e9ea10e3da5f6c42e9c55215aa9ca27a5863ec48d8e0286b"
+        },
+        "model": "binary-weierstrass",
+        "subgroup_order": "7ffffffffffffffffffffffffffffffffffffffffffffffffffe5f83b2d4ea20400ec4557d5ed3e3e7ca5b4b5c83b8e01e5fcf"
+      },
+      "fixtures": [
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "15cdee83fc75049adc9ac4b259a4973fc82fe6c27ad22796b0992521eebfbae63aacd6cc7decd27453215a5c92a2eca614f2fa2",
+            "y": "973314e9c9e2eb4cf9d70cfc9127619d5d190131a8c8638f96e859976d3b34db7ed3651bde3779a5d833a9d05952a7d4d06d16"
+          },
+          "u": "1",
+          "v": "2",
+          "w": "3",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        },
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "147f228d081b0855a5ec01feda37a92ec82523d87156646871d5d0e7f5ea482a3347d86da151b685cbba54de273f98e0ab18b2",
+            "y": "30705891850ee28969f2ca9e19264ac69b202a3d6c0947c091c860ebd8d556c7a608b9e1cc4051515adaef7e2cb04b560f0888"
+          },
+          "u": "7ffffffffffffffffffffffffffffffffffffffffffffffffffe5f83b2d4ea20400ec4557d5ed3e3e7ca5b4b5c83b8e01e5fcd",
+          "v": "7ffffffffffffffffffffffffffffffffffffffffffffffffffe5f83b2d4ea20400ec4557d5ed3e3e7ca5b4b5c83b8e01e5fcc",
+          "w": "7ffffffffffffffffffffffffffffffffffffffffffffffffffe5f83b2d4ea20400ec4557d5ed3e3e7ca5b4b5c83b8e01e5fca",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        }
+      ],
+      "verified": true
+    },
+    {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "13cf9af7be3384062d4abe34098720a322a678f56ca04c0b1475414606d478ce4741599555acf11841bb59de1ba2aeeb90a51a1",
+          "61b1cfab6be5f32bbfa78324ed106a7636b9c5a7bd198d0158aa4f5488d08f38514f1fdf4b4f40d2181b3681c364ba0273c706"
+        ]
+      },
+      "checks": {
+        "generator_on_curve": true,
+        "generator_subgroup": true,
+        "hasse_bound": true,
+        "positive_cofactor": true,
+        "subgroup_order_prime": true
+      },
+      "curve": "sect409r1",
+      "exact_parameters": {
+        "a": "1",
+        "b": "21a5c2c8ee9feb5c4b9a753b7b476b7fd6422ef1f3dd674761fa99d6ac27c8a9a197b272822f6cd57a55aa4f50ae317b13545f",
+        "cofactor": "2",
+        "encoding": "hex-polynomial-bits",
+        "field": {
+          "basis": "polynomial",
+          "characteristic": "2",
+          "degree": 409,
+          "modulus_exponents": [
+            0,
+            87,
+            409
+          ]
+        },
+        "generator": {
+          "x": "15d4860d088ddb3496b0c6064756260441cde4af1771d4db01ffe5b34e59703dc255a868a1180515603aeab60794e54bb7996a7",
+          "y": "61b1cfab6be5f32bbfa78324ed106a7636b9c5a7bd198d0158aa4f5488d08f38514f1fdf4b4f40d2181b3681c364ba0273c706"
+        },
+        "model": "binary-weierstrass",
+        "subgroup_order": "10000000000000000000000000000000000000000000000000001e2aad6a612f33307be5fa47c3c9e052f838164cd37d9a21173"
+      },
+      "fixtures": [
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "d5f0e8b27d12d7a9dcea13a5cfb9dee62d63376e31f7666ba2ac2bf314b91420749ef549a17e5dc6815a7b044ff458c40c415",
+            "y": "1db5b78d491e45cc58e9e44bd7e42537597b9aba85e2e3589f02d466ed31b816235f6d22679690002fcef2b5390f0de885e90be"
+          },
+          "u": "1",
+          "v": "2",
+          "w": "3",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        },
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "4654fed823c1dd4869e734045cbe81c2b2490ecf7fdd4a5282deb135b35340b9e607bb43552c3982b03ace3da8e257964a66d",
+            "y": "a6f5407edfc8adb7f771b065370fe426ae8e2d13634ad1ab747fc8be31637537b33c927d6d60722ea45a16ca2509aa2e790884"
+          },
+          "u": "10000000000000000000000000000000000000000000000000001e2aad6a612f33307be5fa47c3c9e052f838164cd37d9a21171",
+          "v": "10000000000000000000000000000000000000000000000000001e2aad6a612f33307be5fa47c3c9e052f838164cd37d9a21170",
+          "w": "10000000000000000000000000000000000000000000000000001e2aad6a612f33307be5fa47c3c9e052f838164cd37d9a2116e",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        }
+      ],
+      "verified": true
+    },
+    {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "1276b2826dd808bcd527cefc3daaad5e1492e7b9f22af809fe29eb401e99688de39ec443ff6ab4108648bf443bc1e500df10a2332e0d9e0aa8f77df14d30c31e3591e979eed4ed1",
+          "349dc807f4fbf374f4aeade3bca95314dd58cec9f307a54ffc61efc006d8a2c9d4979c0ac44aea74fbebbb9f772aedcb620b01a7ba7af1b320430c8591984f601cd4c143ef1c7a3"
+        ]
+      },
+      "checks": {
+        "generator_on_curve": true,
+        "generator_subgroup": true,
+        "hasse_bound": true,
+        "positive_cofactor": true,
+        "subgroup_order_prime": true
+      },
+      "curve": "sect571k1",
+      "exact_parameters": {
+        "a": "0",
+        "b": "1",
+        "cofactor": "4",
+        "encoding": "hex-polynomial-bits",
+        "field": {
+          "basis": "polynomial",
+          "characteristic": "2",
+          "degree": 571,
+          "modulus_exponents": [
+            0,
+            2,
+            5,
+            10,
+            571
+          ]
+        },
+        "generator": {
+          "x": "26eb7a859923fbc82189631f8103fe4ac9ca2970012d5d46024804801841ca44370958493b205e647da304db4ceb08cbbd1ba39494776fb988b47174dca88c7e2945283a01c8972",
+          "y": "349dc807f4fbf374f4aeade3bca95314dd58cec9f307a54ffc61efc006d8a2c9d4979c0ac44aea74fbebbb9f772aedcb620b01a7ba7af1b320430c8591984f601cd4c143ef1c7a3"
+        },
+        "model": "binary-weierstrass",
+        "subgroup_order": "20000000000000000000000000000000000000000000000000000000000000000000000131850e1f19a63e4b391a8db917f4138b630d84be5d639381e91deb45cfe778f637c1001"
+      },
+      "fixtures": [
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "287b0ccbb649860ccb56f10afea9090c8a05a351d2b70671084c563d37c6536b8be7b6130bfcd60e2111cd8a1283edf48970333c3906a61809d10bbfd4e016650ad4a749a68199a",
+            "y": "2264fc0cb1b83968ff3f8f5689aeacd2b3cc9ce59ef83f0007e2da3045ac8ab2c0b43f4a2c9d2f29710cccee24286c3e4224614eba64f2f1629fd79168094130f31d6ce787cbd41"
+          },
+          "u": "1",
+          "v": "2",
+          "w": "3",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        },
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "2541a1c26f233f751c400f4cfd93e17f77cd429ac196e3e484bef21fc4d8cc690c372f624913bf302299f5aaf99df5ea83f15ae6a61dd7e804b5081cc5f4b47c4c0c9bf2b03f581",
+            "y": "6ac2d447eadae88a747e04310bf69c0d887eaeda1b32d46e647a65bf5e7fcea1234a049707687a3db23d4c1d2c2288bbc371e6cbacbdb7af7b4e96b92738ed0c1c84122628019d8"
+          },
+          "u": "20000000000000000000000000000000000000000000000000000000000000000000000131850e1f19a63e4b391a8db917f4138b630d84be5d639381e91deb45cfe778f637c0fff",
+          "v": "20000000000000000000000000000000000000000000000000000000000000000000000131850e1f19a63e4b391a8db917f4138b630d84be5d639381e91deb45cfe778f637c0ffe",
+          "w": "20000000000000000000000000000000000000000000000000000000000000000000000131850e1f19a63e4b391a8db917f4138b630d84be5d639381e91deb45cfe778f637c0ffc",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        }
+      ],
+      "verified": true
+    },
+    {
+      "binary_diagnostics": {
+        "checks": {
+          "artin_schreier_round_trip": true,
+          "artin_schreier_zero": true,
+          "double_matches_sum": true,
+          "generator_lift_matches_signed_points": true,
+          "generator_lift_roots_on_curve": true,
+          "generator_lift_two_roots": true,
+          "inverse_sum": true,
+          "left_identity": true,
+          "linear_root_verified": true,
+          "nonzero_constant_has_no_roots": true,
+          "order_minus_one_matches_inverse": true,
+          "pure_square_and_two_torsion_verified": true,
+          "right_identity": true,
+          "trace_one_equation_classified": true,
+          "zero_scalar": true
+        },
+        "generator_y_roots": [
+          "37bf27342da639b6dccfffeb73d69d78c6c27a6009cbbca1980f8533921e8a684423e43bab08a576291af8f461bb2a8b3531d2f0485c19b16e2f1516e23dd3c1a4827af1b8ac15b",
+          "78f26e766235b201da3f2aba01bea286fff67495c313c0bc74f79be25ac21b39a707134e7058c4af46be2c1d7c49bc2afd7d2c829130a25c5d52e5a673041bfbaf51339566ec42"
+        ]
+      },
+      "checks": {
+        "generator_on_curve": true,
+        "generator_subgroup": true,
+        "hasse_bound": true,
+        "positive_cofactor": true,
+        "subgroup_order_prime": true
+      },
+      "curve": "sect571r1",
+      "exact_parameters": {
+        "a": "1",
+        "b": "2f40e7e2221f295de297117b7f3d62f5c6a97ffcb8ceff1cd6ba8ce4a9a18ad84ffabbd8efa59332be7ad6756a66e294afd185a78ff12aa520e4de739baca0c7ffeff7f2955727a",
+        "cofactor": "2",
+        "encoding": "hex-polynomial-bits",
+        "field": {
+          "basis": "polynomial",
+          "characteristic": "2",
+          "degree": 571,
+          "modulus_exponents": [
+            0,
+            2,
+            5,
+            10,
+            571
+          ]
+        },
+        "generator": {
+          "x": "303001d34b856296c16c0d40d3cd7750a93d1d2955fa80aa5f40fc8db7b2abdbde53950f4c0d293cdd711a35b67fb1499ae60038614f1394abfa3b4c850d927e1e7769c8eec2d19",
+          "y": "37bf27342da639b6dccfffeb73d69d78c6c27a6009cbbca1980f8533921e8a684423e43bab08a576291af8f461bb2a8b3531d2f0485c19b16e2f1516e23dd3c1a4827af1b8ac15b"
+        },
+        "model": "binary-weierstrass",
+        "subgroup_order": "3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe661ce18ff55987308059b186823851ec7dd9ca1161de93d5174d66e8382e9bb2fe84e47"
+      },
+      "fixtures": [
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "72d033e612ca6dd14c28f1f6689af9a97bba7fd88a25bae969dd1c91e75a9f680442dea747eab06e73b746911780505dab0e03149de396b1020fbaf55580cf4d6eb9738ce0d26f8",
+            "y": "494ba50070ca0fc97e89f3ea55de5aed4d5bd139b3725618dfeb90152230aa53fa37b6e39baad54a77771f0df01bffee82fbb0bad45f2d5c89f704c6eba6722b1e4433638d87dda"
+          },
+          "u": "1",
+          "v": "2",
+          "w": "3",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        },
+        {
+          "point_sum_verified": true,
+          "s3_zero": true,
+          "target": {
+            "x": "77aac79dc0d8891f8c383a000b6457a6e29adb61b6aa83c32f3815f4d0173085599a42d9dd5529022eedaa849397809b8ce613cd800e1676559ad2dab43338e7e10c1c768c8d209",
+            "y": "64b587b634b90ecc0e4881ea62c8c1d544fbcd80ab7d234c931a3e01c3902af801e3cd1937771a6b4f2ac16fab9df2021cabac1bac13453b76b7bf2e93a6d741e019315ddb48877"
+          },
+          "u": "3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe661ce18ff55987308059b186823851ec7dd9ca1161de93d5174d66e8382e9bb2fe84e45",
+          "v": "3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe661ce18ff55987308059b186823851ec7dd9ca1161de93d5174d66e8382e9bb2fe84e44",
+          "w": "3ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe661ce18ff55987308059b186823851ec7dd9ca1161de93d5174d66e8382e9bb2fe84e42",
+          "wrong_s3_rejected": true,
+          "wrong_target_rejected": true
+        }
+      ],
+      "verified": true
+    }
+  ],
+  "sage_version": "10.9",
+  "schema_version": 1,
+  "scope": "independent public-parameter/S3 diagnostic; no DLP recovery",
+  "source_revision": "d1114083390ddcfde9a063fa7187767c7e7b92e9",
+  "source_sha256": {
+    "src/binary_ecc/curve.rs": "4170b75533028a2c0a4cffa75365b1a1db72348b9652d37a1748d3664d4492d2",
+    "src/binary_ecc/f2m.rs": "15d8f5f357e863e0f16d49f04e88bbbd3269a8ddbb930079f41dff8ef2c0f197",
+    "src/ecc/curve.rs": "91a93ecffd5ded981f11518ff010a359b2502d9f9c999ee6627130971feb75ee"
+  }
+}

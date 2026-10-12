@@ -1,0 +1,25 @@
+{
+  "schema": "koblitz_native_process_meter.v1",
+  "meter": "fresh child process wait4/getrusage; all child threads included",
+  "command": [
+    "/usr/bin/env",
+    "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage199-target-75e6eaa1b",
+    "CARGO_TERM_COLOR=never",
+    "/opt/homebrew/bin/cargo",
+    "test",
+    "--release",
+    "--locked",
+    "cryptanalysis::pq_f4_f2::tests::full_m4ri_policy_resolves_selected_and_legacy_controls"
+  ],
+  "environment": {},
+  "pid": 53211,
+  "returncode": 0,
+  "timed_out": false,
+  "watchdog_seconds": 300,
+  "wall_seconds": 101.959375042,
+  "user_seconds": 409.894876,
+  "system_seconds": 12.254015,
+  "total_core_seconds": 422.148891,
+  "single_core_seconds": null,
+  "peak_rss_bytes": 5293916160
+}

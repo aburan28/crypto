@@ -3,3 +3,74 @@ research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-pan
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-panel-20260909/**/*.stderr -whitespace
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-wdsat-correction-20260909/**/*.stdout -whitespace
 research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-13-wdsat-correction-20260909/**/*.stderr -whitespace
+
+# Preserve frozen patch context and verbatim benchmark source/log bytes.
+research/summation_polynomials_20260914/*.patch -whitespace
+research/gaudry_allocation_20260914/*.patch -whitespace
+research/ic_candidate_tournament_20260915/producer/*.patch -whitespace
+research/summation_polynomials_20260914/gaudry-tests.log whitespace=-blank-at-eof
+research/gaudry_allocation_20260914/gaudry-tests.log whitespace=-blank-at-eof
+gpu/macaulay/benchmarks/pipeline-20260914/sources/kernels.cuh whitespace=-blank-at-eof
+research/radical_pair_image_20260921/results/**/*.stdout -whitespace
+
+# Preserve verbatim F4 benchmark stdout/stderr covered by receipt hashes.
+research/sat_factor_base_review_20260908/autolab_groebner_m4ri_20260921/runs/** -whitespace
+research/sat_factor_base_review_20260908/autolab_groebner_linear_tail_20260921/runs/** -whitespace
+research/sat_factor_base_review_20260908/autolab_groebner_active_layout_20260921/runs/** -whitespace
+research/sat_factor_base_review_20260908/autolab_groebner_flat_matrix_20260921/runs/** -whitespace
+research/sat_factor_base_review_20260908/autolab_groebner_fused_hash_20260922/runs/** -whitespace
+
+# Preserve hash-bound compiler diagnostics in the projected-syndrome experiment.
+research/boolean_byte_sieve_20260923/**/worker-compile.txt whitespace=-blank-at-eof
+
+# Preserve the exact executed runner and its matching replay source.
+research/boolean_implicit_minors_20260923/run.py whitespace=-blank-at-eof
+research/boolean_implicit_minors_20260923/run_01/run.py whitespace=-blank-at-eof
+
+# Keep the raw million-clause toy DIMACS downloadable without rendering its full diff.
+research/notes/ecc2k130/rotated_s3_o_branch_20260925/evidence/producer/n13-m5/base.cnf -diff
+# Keep all three retained copies of the pinned dense reference DIMACS downloadable without rendering a million-line diff.
+research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/evidence/first_failure/dense/producer/n13-m5/base.cnf -diff
+research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/evidence/second_attempt/dense/producer/n13-m5/base.cnf -diff
+research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/evidence/final/dense/producer/n13-m5/base.cnf -diff
+
+# Keep pinned SAT solver stdout/stderr bytes verbatim, including padded comment lines.
+research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/**/*.stdout -whitespace
+research/notes/ecc2k130/n13_oaware_sat_benchmark_20260925/evidence/**/*.stderr -whitespace
+# Preserve Stage 193-194 native meter stdout/stderr bytes covered by receipt hashes.
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-193-native-sat-comparators-20261002/development/**/*.txt -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-194-adaptive-table-build-20261002/development/**/*.txt -whitespace
+# Preserve the committed Stage 194 protocol, bootstrap note, and candidate patch bytes.
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-194-adaptive-table-build-20261002/*.patch -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-194-adaptive-table-build-20261002/PROTOCOL.md whitespace=-blank-at-eof
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-194-adaptive-table-build-20261002/BOOTSTRAP_FAILURE.md whitespace=-blank-at-eof
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-195-table-buffer-reuse-20261002/development/**/*.txt -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-195-table-buffer-reuse-20261002/*.patch -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-195-table-buffer-reuse-20261002/PROTOCOL.md whitespace=-blank-at-eof
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-196-elimination-shape-profile-20261002/development/**/*.txt -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-196-elimination-shape-profile-20261002/PROTOCOL.md whitespace=-blank-at-eof
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-197-hybrid-m4ri-screen-20261002/development/**/*.txt -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-197-hybrid-m4ri-screen-20261002/*.patch -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-197-hybrid-m4ri-screen-20261002/PROTOCOL.md whitespace=-blank-at-eof
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-198-hybrid-m4ri-confirm-20261002/development/**/*.txt -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-198-hybrid-m4ri-confirm-20261002/PROTOCOL.md whitespace=-blank-at-eof
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-199-hybrid-m4ri-default-20261002/development/**/*.txt -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-199-hybrid-m4ri-default-20261002/*.patch -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-199-hybrid-m4ri-default-20261002/PROTOCOL.md whitespace=-blank-at-eof
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-199-hybrid-m4ri-default-20261002/BOOTSTRAP_FAILURE.md whitespace=-blank-at-eof
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-199-hybrid-m4ri-default-20261002/VERIFIER_CORRECTION.md whitespace=-blank-at-eof
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-200-parallel-m4ri-screen-20261002/development/**/*.txt -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-200-parallel-m4ri-screen-20261002/*.patch -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-200-parallel-m4ri-screen-20261002/PROTOCOL.md whitespace=-blank-at-eof
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-200-parallel-m4ri-screen-20261002/CANDIDATE_FAILURE.md whitespace=-blank-at-eof
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-201-m4ri-table-end-screen-20261002/development/**/*.txt -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-201-m4ri-table-end-screen-20261002/*.patch -whitespace
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-201-m4ri-table-end-screen-20261002/PROTOCOL.md whitespace=-blank-at-eof
+research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-201-m4ri-table-end-screen-20261002/IMPLEMENTATION_NOTE.md whitespace=-blank-at-eof
+# Preserve sealed Rust test stdout in the Boolean half-word comparison.
+research/boolean_halfword_20260923/*/test.stdout whitespace=-blank-at-eof
+# Preserve hash-bound CUDA compiler and cuobjdump receipts byte for byte.
+ecc2k130/benchmarks/sigma-fused/shared-scratch/results/** -whitespace
+# Preserve manifest-hashed qualified F5 discovery receipts byte for byte.
+research/boolean_f5_graded_batch_20261002/qualified_discovery_01/cpuinfo.txt whitespace=-blank-at-eof
+research/boolean_f5_graded_batch_20261002/qualified_discovery_01/test.stdout whitespace=-blank-at-eof

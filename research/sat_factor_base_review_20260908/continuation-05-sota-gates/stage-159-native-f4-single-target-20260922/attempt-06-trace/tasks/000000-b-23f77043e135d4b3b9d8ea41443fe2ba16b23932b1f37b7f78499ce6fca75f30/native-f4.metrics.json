@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/Volumes/SSD990/koblitz-native-f4-build7-156f8f8c/bin/koblitz_pdp_backend",
+    "native-f4",
+    "/Volumes/SSD990/crypto-phase-b-native-f4-20260922/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-159-native-f4-single-target-20260922/attempt-06-trace/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json",
+    "300"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 360.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 118.36871816700295,
+    "user_seconds": 117.482728,
+    "system_seconds": 0.47759799999999997,
+    "total_core_seconds": 117.960326,
+    "single_core_seconds": 117.960326,
+    "peak_rss_bytes": 637272064,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

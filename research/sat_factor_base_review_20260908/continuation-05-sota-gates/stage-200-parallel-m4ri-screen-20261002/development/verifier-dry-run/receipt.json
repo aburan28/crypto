@@ -1,0 +1,39 @@
+{
+  "metrics": {
+    "bytes": 886,
+    "path": "metrics.json",
+    "sha256": "8a601dcb9cdefc71004269e435148a9bfd377ae647e662caeaf27c729b9ee5cc"
+  },
+  "process": {
+    "command": [
+      "/Volumes/SSD990/kic-stage200-finalizer-5beacd5ee/release/examples/koblitz_f4_stage200",
+      "verify",
+      "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-200-parallel-m4ri-screen-20261002/development/corrected-screen/draft-result.json",
+      "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-200-parallel-m4ri-screen-20261002/development/corrected-screen/draft-reverification.json"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 2359296,
+    "pid": 93581,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.003109,
+    "timed_out": false,
+    "total_core_seconds": 0.0044139999999999995,
+    "user_seconds": 0.001305,
+    "wall_seconds": 0.032307041,
+    "watchdog_seconds": 60
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 0,
+    "path": "stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 0,
+    "path": "stdout.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

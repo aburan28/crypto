@@ -1,0 +1,16 @@
+{
+  "scope": "Report-only platform floating-point differences; every raw run row and frozen decision is byte/value identical.",
+  "ci_run": 36148143827,
+  "differences": [
+    {
+      "path": "/stages/development/table/11/online_ms",
+      "macos": 0.06684807584648403,
+      "linux": 0.06684807584648401,
+      "ulp_distance": 1.0
+    }
+  ],
+  "macos_results_sha256": "ac4029e3a8128ef2c212a9449fdfd5db3a9cebb6b44b7db1592e9e71f7251936",
+  "linux_results_sha256": "0acfe5bcdd704b4d65ea8bc88f4ef31e25e15308ca85426a550ac5dbca7c9ab7",
+  "csv_identical": true,
+  "decision_identical": true
+}

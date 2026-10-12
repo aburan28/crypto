@@ -1,0 +1,111 @@
+{
+  "candidate_id": "IC1N37Ckb0fb3108PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0ha48bfcf857fa",
+  "candidate_manifest_sha256": "a48bfcf857fac9eed2d8aa3dfac771001f645ccb59b20905cd0c3be4c323db4b",
+  "claim_boundary": "one public target on icv1-f2m37-tm534059-32aad96b; one-target online windows as AGENTS.md 'IC measurements' defines them; the IC factor base and oracle tables are reusable set-up outside the window (38.246 ms, reported as ic_reusable_setup_ms); host class ECBENV2hd82681268e96",
+  "claim_boundary_non_claims": [
+    "no claim about other targets, curves or sizes",
+    "no claim about cold end-to-end cost, which the records' S reports",
+    "no multi-target or batch claim",
+    "no transfer to m = 83 or m = 131"
+  ],
+  "ecbench_records": {
+    "ic": "ECR1h83e64e830118",
+    "rho": "ECR1h8d7849cea177",
+    "session": "ECBS1h774f0e722ea2"
+  },
+  "executable_or_source_hash": "4e1bcadfe1a4fe1c6220bcf08209796a232da4908184845719ec4c68ff07435c",
+  "fixture_hash": "649fe0e773e603723c9b856a8e22af2c4ee89a8460cc0df8af81a232bc98ea75",
+  "host_id": "ECBENV2hd82681268e96",
+  "ic_online_phase_ms": {
+    "T_target_PDP_ms": 0.022666,
+    "T_target_descent_ms": 0.00025,
+    "T_target_query_ms": 0.020001,
+    "T_target_recovery_check_ms": 0.014625,
+    "T_target_relation_check_ms": 0.000958
+  },
+  "ic_online_wall_ms": 0.0585,
+  "ic_replay_certificate_sha256": null,
+  "ic_resource_envelope": {
+    "binary_sha256": "4e1bcadfe1a4fe1c6220bcf08209796a232da4908184845719ec4c68ff07435c",
+    "cpus": "none",
+    "env_class_id": "ECBENV2hd82681268e96",
+    "numa_node": null,
+    "threads": 1,
+    "timeout_seconds": 120
+  },
+  "ic_reusable_setup_ms": 38.246375,
+  "ic_scalar_verified": true,
+  "ic_target_hash": "4c9bef4a6f06dc9f3ce03fd9480bda35129220dcd021c114d446fb083f227a4c",
+  "independent_replay": null,
+  "independent_replay_pointer": "none: no independent replay supplied",
+  "independent_validation": false,
+  "isolation_levels": {
+    "ic": "L0",
+    "required": "L2",
+    "rho": "L0"
+  },
+  "n_or_bits": 37,
+  "online_interval": {
+    "ic_included_stages": [
+      "target_query",
+      "target_PDP",
+      "target_relation_check",
+      "target_descent",
+      "target_recovery_check"
+    ],
+    "ic_start_event": "Q subgroup validation after target-blind base, table and rank logs are ready",
+    "ic_stop_event": "[d]G = Q verified by full-point scalar replay",
+    "ic_zero_phases": {},
+    "rho_included_stages": [
+      "walk",
+      "collision",
+      "recovery_check"
+    ],
+    "rho_start_event": "first walk start [c]G + Q (the jump table [a]G is target-independent set-up)",
+    "rho_stop_event": "[d]G = Q verified inside the method"
+  },
+  "online_speedup": 8.953692307692307,
+  "resource_caps": {
+    "binary_sha256": "4e1bcadfe1a4fe1c6220bcf08209796a232da4908184845719ec4c68ff07435c",
+    "cpus": "none",
+    "env_class_id": "ECBENV2hd82681268e96",
+    "numa_node": null,
+    "threads": 1,
+    "timeout_seconds": 120
+  },
+  "rho_online_wall_ms": 0.523791,
+  "rho_policy": {
+    "collision_policy": "distinguished points, dp_bits=8; candidates checked by [d]G = Q",
+    "distinguished_point_memory_bytes": 920,
+    "walk_policy": "signed-Frobenius lockstep walks with batched inversion (koblitz_strong_rho), lanes=32",
+    "worker_count": 1
+  },
+  "rho_replay_certificate_sha256": null,
+  "rho_resource_envelope": {
+    "binary_sha256": "4e1bcadfe1a4fe1c6220bcf08209796a232da4908184845719ec4c68ff07435c",
+    "cpus": "none",
+    "env_class_id": "ECBENV2hd82681268e96",
+    "numa_node": null,
+    "threads": 1,
+    "timeout_seconds": 120
+  },
+  "rho_scalar_verified": true,
+  "rho_target_hash": "4c9bef4a6f06dc9f3ce03fd9480bda35129220dcd021c114d446fb083f227a4c",
+  "run_id": "IC1N37Ckb0fb3108PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0ha48bfcf857faW649fe0e773e6R4",
+  "same_resource_envelope": true,
+  "schema": "ecbench.claim/v1",
+  "seeds": {
+    "algorithm_seed": "6423628901834440082",
+    "target": {
+      "counter": 0,
+      "index": 0,
+      "law": "hash_to_subgroup_v1",
+      "seed": 202610041751
+    }
+  },
+  "target_count": 1,
+  "timing_class": "single_target_online_wall",
+  "verdict": "descriptive only, not admissible: the runs earned L0 and L0, below the spec's L2",
+  "workload_id": "649fe0e773e6",
+  "workload_manifest_sha256": "649fe0e773e603723c9b856a8e22af2c4ee89a8460cc0df8af81a232bc98ea75"
+}

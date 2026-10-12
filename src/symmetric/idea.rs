@@ -63,9 +63,8 @@ fn mul(a: u16, b: u16) -> u16 {
     } else if b == 0 {
         P - a
     } else {
-        let r = (a * b) % P;
         // r ∈ [1, p−1]; map p back to 0 isn't needed (product can't be p)
-        r
+        (a * b) % P
     };
     // Map 2^16 back to 0 for storage.
     (prod & 0xffff) as u16
@@ -122,7 +121,7 @@ fn expand_encryption_key(key: &[u8; 16]) -> [u16; 52] {
         if idx < 52 {
             // Rotate left by 25 bits within 128 bits.
             // u128 is already 128 bits; the shifts saturate exactly.
-            k = (k << 25) | (k >> (128 - 25));
+            k = k.rotate_left(25);
         }
     }
     out

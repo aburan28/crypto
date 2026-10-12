@@ -1,0 +1,373 @@
+{
+  "convention": "research/isogeny_volcano_ic_20260924/identity_schema.json",
+  "curves": {
+    "n13a0": {
+      "curve_id": "ICV1:f2m-13-e068f4ed:181:8012:0x1:unk:unk:r:a349c2b58170",
+      "slug": "icv1-f2m13-t181-pr-a349c2b58170",
+      "model": {
+        "schema": "ICV1-model-1",
+        "field": {
+          "kind": "f2m",
+          "degree": 13,
+          "modulus": {
+            "degree": 13,
+            "low_terms": [
+              0,
+              1,
+              3,
+              4
+            ]
+          },
+          "basis": "polynomial"
+        },
+        "curve": {
+          "form": "y^2+xy=x^3+a2*x^2+a6",
+          "a2": "0x0",
+          "a6": "0x1"
+        },
+        "order": "8012",
+        "subgroup_order": "2003",
+        "cofactor": "4"
+      }
+    },
+    "n17a1": {
+      "curve_id": "ICV1:f2m-17-4a8d1ed1:-101:131174:0x1:unk:unk:r:b7e2f44c2089",
+      "slug": "icv1-f2m17-t-101-pr-b7e2f44c2089",
+      "model": {
+        "schema": "ICV1-model-1",
+        "field": {
+          "kind": "f2m",
+          "degree": 17,
+          "modulus": {
+            "degree": 17,
+            "low_terms": [
+              0,
+              3
+            ]
+          },
+          "basis": "polynomial"
+        },
+        "curve": {
+          "form": "y^2+xy=x^3+a2*x^2+a6",
+          "a2": "0x1",
+          "a6": "0x1"
+        },
+        "order": "131174",
+        "subgroup_order": "65587",
+        "cofactor": "2"
+      }
+    },
+    "n19a0": {
+      "curve_id": "ICV1:f2m-19-185c144b:797:523492:0x1:unk:unk:r:999b48f556de",
+      "slug": "icv1-f2m19-t797-pr-999b48f556de",
+      "model": {
+        "schema": "ICV1-model-1",
+        "field": {
+          "kind": "f2m",
+          "degree": 19,
+          "modulus": {
+            "degree": 19,
+            "low_terms": [
+              0,
+              1,
+              2,
+              5
+            ]
+          },
+          "basis": "polynomial"
+        },
+        "curve": {
+          "form": "y^2+xy=x^3+a2*x^2+a6",
+          "a2": "0x0",
+          "a6": "0x1"
+        },
+        "order": "523492",
+        "subgroup_order": "130873",
+        "cofactor": "4"
+      }
+    },
+    "n23a0": {
+      "curve_id": "ICV1:f2m-23-6b551aa3:5197:8383412:0x1:unk:unk:r:9d6c7fef45ff",
+      "slug": "icv1-f2m23-t5197-pr-9d6c7fef45ff",
+      "model": {
+        "schema": "ICV1-model-1",
+        "field": {
+          "kind": "f2m",
+          "degree": 23,
+          "modulus": {
+            "degree": 23,
+            "low_terms": [
+              0,
+              5
+            ]
+          },
+          "basis": "polynomial"
+        },
+        "curve": {
+          "form": "y^2+xy=x^3+a2*x^2+a6",
+          "a2": "0x0",
+          "a6": "0x1"
+        },
+        "order": "8383412",
+        "subgroup_order": "2095853",
+        "cofactor": "4"
+      }
+    },
+    "n23a1": {
+      "curve_id": "ICV1:f2m-23-6b551aa3:-5197:8393806:0x1:unk:unk:r:0d04e4cf5538",
+      "slug": "icv1-f2m23-t-5197-pr-0d04e4cf5538",
+      "model": {
+        "schema": "ICV1-model-1",
+        "field": {
+          "kind": "f2m",
+          "degree": 23,
+          "modulus": {
+            "degree": 23,
+            "low_terms": [
+              0,
+              5
+            ]
+          },
+          "basis": "polynomial"
+        },
+        "curve": {
+          "form": "y^2+xy=x^3+a2*x^2+a6",
+          "a2": "0x1",
+          "a6": "0x1"
+        },
+        "order": "8393806",
+        "subgroup_order": "4196903",
+        "cofactor": "2"
+      }
+    },
+    "n31a0": {
+      "curve_id": "ICV1:f2m-31-900f9445:-90707:2147574356:0x1:unk:unk:r:7bd17fd4c3c0",
+      "slug": "icv1-f2m31-t-90707-pr-7bd17fd4c3c0",
+      "model": {
+        "schema": "ICV1-model-1",
+        "field": {
+          "kind": "f2m",
+          "degree": 31,
+          "modulus": {
+            "degree": 31,
+            "low_terms": [
+              0,
+              3
+            ]
+          },
+          "basis": "polynomial"
+        },
+        "curve": {
+          "form": "y^2+xy=x^3+a2*x^2+a6",
+          "a2": "0x0",
+          "a6": "0x1"
+        },
+        "order": "2147574356",
+        "subgroup_order": "1439393",
+        "cofactor": "1492"
+      }
+    },
+    "n37a0": {
+      "curve_id": "ICV1:f2m-37-f364a2d2:-534059:137439487532:0x1:unk:unk:r:f7add3ce6190",
+      "slug": "icv1-f2m37-t-534059-pr-f7add3ce6190",
+      "model": {
+        "schema": "ICV1-model-1",
+        "field": {
+          "kind": "f2m",
+          "degree": 37,
+          "modulus": {
+            "degree": 37,
+            "low_terms": [
+              0,
+              1,
+              4,
+              6
+            ]
+          },
+          "basis": "polynomial"
+        },
+        "curve": {
+          "form": "y^2+xy=x^3+a2*x^2+a6",
+          "a2": "0x0",
+          "a6": "0x1"
+        },
+        "order": "137439487532",
+        "subgroup_order": "230603167",
+        "cofactor": "596"
+      }
+    },
+    "n43a1": {
+      "curve_id": "ICV1:f2m-43-eecf2bb3:-998717:8796094020926:0x1:unk:unk:r:062c88f5f4c1",
+      "slug": "icv1-f2m43-t-998717-pr-062c88f5f4c1",
+      "model": {
+        "schema": "ICV1-model-1",
+        "field": {
+          "kind": "f2m",
+          "degree": 43,
+          "modulus": {
+            "degree": 43,
+            "low_terms": [
+              0,
+              3,
+              4,
+              6
+            ]
+          },
+          "basis": "polynomial"
+        },
+        "curve": {
+          "form": "y^2+xy=x^3+a2*x^2+a6",
+          "a2": "0x1",
+          "a6": "0x1"
+        },
+        "order": "8796094020926",
+        "subgroup_order": "4644189029",
+        "cofactor": "1894"
+      }
+    },
+    "n19a1": {
+      "curve_id": "ICV1:f2m-19-185c144b:-797:525086:0x1:unk:unk:r:03eeaf6a7913",
+      "slug": "icv1-f2m19-t-797-pr-03eeaf6a7913",
+      "model": {
+        "schema": "ICV1-model-1",
+        "field": {
+          "kind": "f2m",
+          "degree": 19,
+          "modulus": {
+            "degree": 19,
+            "low_terms": [
+              0,
+              1,
+              2,
+              5
+            ]
+          },
+          "basis": "polynomial"
+        },
+        "curve": {
+          "form": "y^2+xy=x^3+a2*x^2+a6",
+          "a2": "0x1",
+          "a6": "0x1"
+        },
+        "order": "525086",
+        "subgroup_order": "262543",
+        "cofactor": "2"
+      }
+    },
+    "n29a1": {
+      "curve_id": "ICV1:f2m-29-272bc8c7:-40309:536911222:0x1:unk:unk:r:0dceaf5202f9",
+      "slug": "icv1-f2m29-t-40309-pr-0dceaf5202f9",
+      "model": {
+        "schema": "ICV1-model-1",
+        "field": {
+          "kind": "f2m",
+          "degree": 29,
+          "modulus": {
+            "degree": 29,
+            "low_terms": [
+              0,
+              2
+            ]
+          },
+          "basis": "polynomial"
+        },
+        "curve": {
+          "form": "y^2+xy=x^3+a2*x^2+a6",
+          "a2": "0x1",
+          "a6": "0x1"
+        },
+        "order": "536911222",
+        "subgroup_order": "42457",
+        "cofactor": "12646"
+      }
+    },
+    "n59a0": {
+      "curve_id": "ICV1:f2m-59-736d7ac5:943548413:576460751359875076:0x1:unk:unk:r:8d9129b59298",
+      "slug": "icv1-f2m59-t943548413-pr-8d9129b59298",
+      "model": {
+        "schema": "ICV1-model-1",
+        "field": {
+          "kind": "f2m",
+          "degree": 59,
+          "modulus": {
+            "degree": 59,
+            "low_terms": [
+              0,
+              2,
+              4,
+              7
+            ]
+          },
+          "basis": "polynomial"
+        },
+        "curve": {
+          "form": "y^2+xy=x^3+a2*x^2+a6",
+          "a2": "0x0",
+          "a6": "0x1"
+        },
+        "order": "576460751359875076",
+        "subgroup_order": "10063074221",
+        "cofactor": "57284756"
+      }
+    },
+    "n61a1": {
+      "curve_id": "ICV1:f2m-61-54d52be2:-158598901:2305843009372292854:0x1:unk:unk:r:abf8907f5e39",
+      "slug": "icv1-f2m61-t-158598901-pr-abf8907f5e39",
+      "model": {
+        "schema": "ICV1-model-1",
+        "field": {
+          "kind": "f2m",
+          "degree": 61,
+          "modulus": {
+            "degree": 61,
+            "low_terms": [
+              0,
+              1,
+              2,
+              5
+            ]
+          },
+          "basis": "polynomial"
+        },
+        "curve": {
+          "form": "y^2+xy=x^3+a2*x^2+a6",
+          "a2": "0x1",
+          "a6": "0x1"
+        },
+        "order": "2305843009372292854",
+        "subgroup_order": "11514943771",
+        "cofactor": "200247874"
+      }
+    }
+  },
+  "candidates": {
+    "incumbent": {
+      "n13a0": "ICCAN1/icv1-f2m13-t181-pr-a349c2b58170/orbit7/pair-s3/sparse/frob-neg/r01",
+      "n17a1": "ICCAN1/icv1-f2m17-t-101-pr-b7e2f44c2089/orbit8/pair-s3/sparse/frob-neg/r01",
+      "n19a0": "ICCAN1/icv1-f2m19-t797-pr-999b48f556de/orbit8/pair-s3/sparse/frob-neg/r01",
+      "n19a1": "ICCAN1/icv1-f2m19-t-797-pr-03eeaf6a7913/orbit8/pair-s3/sparse/frob-neg/r01",
+      "n23a0": "ICCAN1/icv1-f2m23-t5197-pr-9d6c7fef45ff/orbit8/pair-s3/sparse/frob-neg/r01",
+      "n23a1": "ICCAN1/icv1-f2m23-t-5197-pr-0d04e4cf5538/orbit8/pair-s3/sparse/frob-neg/r01",
+      "n29a1": "ICCAN1/icv1-f2m29-t-40309-pr-0dceaf5202f9/orbit8/pair-s3/sparse/frob-neg/r01",
+      "n31a0": "ICCAN1/icv1-f2m31-t-90707-pr-7bd17fd4c3c0/orbit8/pair-s3/sparse/frob-neg/r01",
+      "n37a0": "ICCAN1/icv1-f2m37-t-534059-pr-f7add3ce6190/orbit16/pair-s3/sparse/frob-neg/r01",
+      "n43a1": "ICCAN1/icv1-f2m43-t-998717-pr-062c88f5f4c1/orbit24/pair-s3/sparse/frob-neg/r01",
+      "n59a0": "ICCAN1/icv1-f2m59-t943548413-pr-8d9129b59298/orbit24/pair-s3/sparse/frob-neg/r01",
+      "n61a1": "ICCAN1/icv1-f2m61-t-158598901-pr-abf8907f5e39/orbit24/pair-s3/sparse/frob-neg/r01"
+    },
+    "counted": {
+      "n13a0": "ICCAN1/icv1-f2m13-t181-pr-a349c2b58170/orbit2/triple-s4-counted/sparse/frob-neg/r01",
+      "n17a1": "ICCAN1/icv1-f2m17-t-101-pr-b7e2f44c2089/orbit2/triple-s4-counted/sparse/frob-neg/r01",
+      "n19a0": "ICCAN1/icv1-f2m19-t797-pr-999b48f556de/orbit2/triple-s4-counted/sparse/frob-neg/r01",
+      "n19a1": "ICCAN1/icv1-f2m19-t-797-pr-03eeaf6a7913/orbit2/triple-s4-counted/sparse/frob-neg/r01",
+      "n23a0": "ICCAN1/icv1-f2m23-t5197-pr-9d6c7fef45ff/orbit2/triple-s4-counted/sparse/frob-neg/r01",
+      "n23a1": "ICCAN1/icv1-f2m23-t-5197-pr-0d04e4cf5538/orbit2/triple-s4-counted/sparse/frob-neg/r01",
+      "n29a1": "ICCAN1/icv1-f2m29-t-40309-pr-0dceaf5202f9/orbit2/triple-s4-counted/sparse/frob-neg/r01",
+      "n31a0": "ICCAN1/icv1-f2m31-t-90707-pr-7bd17fd4c3c0/orbit2/triple-s4-counted/sparse/frob-neg/r01",
+      "n37a0": "ICCAN1/icv1-f2m37-t-534059-pr-f7add3ce6190/orbit2/triple-s4-counted/sparse/frob-neg/r01",
+      "n43a1": "ICCAN1/icv1-f2m43-t-998717-pr-062c88f5f4c1/orbit3/triple-s4-counted/sparse/frob-neg/r01",
+      "n59a0": "ICCAN1/icv1-f2m59-t943548413-pr-8d9129b59298/orbit2/triple-s4-counted/sparse/frob-neg/r01",
+      "n61a1": "ICCAN1/icv1-f2m61-t-158598901-pr-abf8907f5e39/orbit2/triple-s4-counted/sparse/frob-neg/r01"
+    }
+  }
+}

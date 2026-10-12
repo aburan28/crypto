@@ -1,0 +1,45 @@
+[
+  {
+    "name": "exclusive",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--release",
+      "--lib",
+      "exclusive_",
+      "--",
+      "--include-ignored",
+      "--test-threads=1"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "query_accounting",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--release",
+      "--lib",
+      "query_accounting_",
+      "--",
+      "--test-threads=1"
+    ],
+    "exit_code": 0
+  },
+  {
+    "name": "la_accounting",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--release",
+      "--lib",
+      "la_accounting_",
+      "--",
+      "--test-threads=1"
+    ],
+    "exit_code": 101
+  }
+]

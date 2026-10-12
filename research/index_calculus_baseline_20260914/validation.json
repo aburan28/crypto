@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "scope": "Maintained-runner replay agrees with frozen certificates and conflict counts; no timing improvement claimed.",
+  "completed_solver_processes": 18,
+  "cases": 6,
+  "exhaustive_s4_checks": 97504,
+  "runner_sha256": "7d971ded7a064c5bfaed7396a079df467e632a17ec77b49425978cb3406651b0",
+  "binary_sha256": "d42ee64bf6cd961514bf2fd13d8ed7d9abe95d0778a43917aa5c0df501407e52",
+  "build_source_manifest_sha256": "80d73d2869d45376d3bc45b835544d7513d8c11ced7838a5e85efdea600453e6",
+  "source_validation": "All 29 pinned source/input/notice hashes checked by offline build and runner.",
+  "test_command": "python3 -m unittest discover -s . -p 'test_*.py' -v",
+  "replay_commands": "README.md#reproduce",
+  "network_fetch_validation": "URL paths checked against pinned GitHub trees; local compilation used the already fetched, hash-verified cache."
+}

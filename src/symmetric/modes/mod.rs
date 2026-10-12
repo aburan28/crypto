@@ -62,7 +62,7 @@ pub use gcm_siv::{
 };
 pub use kw::{kw_unwrap, kw_wrap};
 pub use ocb3::{ocb3_decrypt, ocb3_encrypt};
-pub use pmac::pmac;
 pub use ofb::ofb_apply;
+pub use pmac::pmac;
 pub use siv::{siv_decrypt, siv_encrypt};
 pub use xts::{xts_decrypt, xts_encrypt};

@@ -1,0 +1,10 @@
+{
+  "all_intervals_sum_to_collected_required": true,
+  "boundary": "complete worker user-space execution, including startup, allocations, reporting and all algorithm phases",
+  "conversion": "1 Ir event = 1 user-space guest instruction; identity, no curve-op conversion",
+  "excluded": "kernel/device work, profiler implementation and external independent audit; reported separately, not silently converted",
+  "floor": "For this required full-rank collector, K columns require at least K relation-producing trials and at least K guest instructions. Weak implementation-specific floor; never evidence of a non-generic advance.",
+  "paired_aa_gate": "same executable/config; both complete, no >=30% promotion, each cell within 5%",
+  "restrictions": "CPU only; fixed compiler/ISA/profiler. This is implementation cost, not a hardware-independent arithmetic complexity claim.",
+  "unit": "valgrind-3.22-amd64-Ir"
+}

@@ -1,0 +1,5 @@
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---|
+| ECBS1hc08f177f1f05 | rho-strong | rho.signed_frobenius_strong | icv1-f2m37-tm534059-32aad96b | 27.78 | 16/16 | 0.285 | [0.240, 0.338] | 0.146 | 1.957 | 1.957 | 1.000 | yes | L0×16 |
+| ECBS1hc08f177f1f05 | ic-legacy-setup | ic.pipeline | icv1-f2m37-tm534059-32aad96b | 27.78 | 16/16 | 4.892 | [4.874, 4.911] | – | – | 33.580 | 17.155 | yes | L0×16 |
+| ECBS1hc08f177f1f05 | ic-counted-setup | ic.pipeline | icv1-f2m37-tm534059-32aad96b | 27.78 | 16/16 | 5.433 | [5.415, 5.451] | – | – | 37.291 | 19.050 | yes | L0×16 |

@@ -1,0 +1,197 @@
+{
+  "schema": "ecc2k130-sigma-fused-star-independent-audit-v1",
+  "audit_status": "PASS_WITH_NONMATERIAL_PACKAGING_NOTE",
+  "audit_scope": "Independent native reopening of the frozen archive; no GPU launched by the audit.",
+  "source_commit": "bb90178b1b2d5620d3537606abe52ff64e518c4f",
+  "archive_sha256": "30623e6cc2abd865650fdfebbe72c66cdf7071ed4b1b509cf1e7165f4a119d6e",
+  "launch_sha256": "12bd3c1c63217fd7ebb6bb962bbda1ab0faaad53e19bc3a7bfa528be00cc7c02",
+  "result_sha256": "0a13722ebc9e6eccb7fa49d9030f5894bed513f761ec970affa1c5176f94edc8",
+  "samples_sha256": "b1115cec4e0a7a6359028bb48a20182839cd32ef03f7c24c672742343d7611c8",
+  "canonical_corpus_sha256": "7dd0ef1b4ee02d3ec5310d7c44322b324db594f695b726a0be5bdf0119aea178",
+  "source_manifest_entries_verified": 65,
+  "artifact_manifest_entries": 150,
+  "artifact_manifest_matches": 149,
+  "artifact_manifest_job_log_race_only": true,
+  "sample_log_hashes_verified": 81,
+  "correctness": {
+    "arms": 11,
+    "replayed_per_arm": 300,
+    "dropped_per_arm": 0,
+    "framing": "v1_headerless",
+    "records_per_arm": 1709940,
+    "sorted_identity": true
+  },
+  "benchmark": {
+    "timing_rows": 81,
+    "updates_per_row": 201863462912,
+    "aa_max_symmetric_drift": 0.00043663395569382146,
+    "required_geometric_mean_ratio": 1.0149999999999999,
+    "required_minimum_pair_ratio": 1.0049999999999999,
+    "selected_arm": null,
+    "qualified_for_confirmation": false,
+    "goal_26b_met": false
+  },
+  "arms": {
+    "pair-ilp": {
+      "baseline_median_million_per_second": 15544.692999999999,
+      "candidate_median_million_per_second": 15472.353999999999,
+      "paired_ratios": [
+        0.99534638606243298,
+        0.995336725982502,
+        0.9948593014759195
+      ],
+      "paired_geometric_mean": 0.99518077853015718,
+      "paired_minimum": 0.9948593014759195,
+      "qualifies": false,
+      "registers_per_thread": 126,
+      "local_bytes_per_thread": 0,
+      "static_shared_bytes_per_block": 1792
+    },
+    "pair-clmul": {
+      "baseline_median_million_per_second": 15547.647999999999,
+      "candidate_median_million_per_second": 15512.038,
+      "paired_ratios": [
+        0.9976283538754025,
+        0.99770962141669284,
+        0.99763289953010037
+      ],
+      "paired_geometric_mean": 0.99765695757737138,
+      "paired_minimum": 0.9976283538754025,
+      "qualifies": false,
+      "registers_per_thread": 121,
+      "local_bytes_per_thread": 0,
+      "static_shared_bytes_per_block": 1792
+    },
+    "l2-persist": {
+      "baseline_median_million_per_second": 15545.369000000001,
+      "candidate_median_million_per_second": 15384.414000000001,
+      "paired_ratios": [
+        0.98998344780365133,
+        0.98948112874736449,
+        0.99028279713673439
+      ],
+      "paired_geometric_mean": 0.98991573596797633,
+      "paired_minimum": 0.98948112874736449,
+      "qualifies": false,
+      "registers_per_thread": 126,
+      "local_bytes_per_thread": 0,
+      "static_shared_bytes_per_block": 1792
+    },
+    "unroll2": {
+      "baseline_median_million_per_second": 15546.543,
+      "candidate_median_million_per_second": 14949.043,
+      "paired_ratios": [
+        0.96153176477201907,
+        0.96164079692829463,
+        0.96195000741142511
+      ],
+      "paired_geometric_mean": 0.9617075067231905,
+      "paired_minimum": 0.96153176477201907,
+      "qualifies": false,
+      "registers_per_thread": 110,
+      "local_bytes_per_thread": 0,
+      "static_shared_bytes_per_block": 1792
+    },
+    "from-reduced": {
+      "baseline_median_million_per_second": 15540.744000000001,
+      "candidate_median_million_per_second": 15591.620000000001,
+      "paired_ratios": [
+        1.00304549326183,
+        1.0033459788025592,
+        1.003065438955169
+      ],
+      "paired_geometric_mean": 1.0031522942926867,
+      "paired_minimum": 1.00304549326183,
+      "qualifies": false,
+      "registers_per_thread": 126,
+      "local_bytes_per_thread": 0,
+      "static_shared_bytes_per_block": 1792
+    },
+    "inv-poly1": {
+      "baseline_median_million_per_second": 15543.421,
+      "candidate_median_million_per_second": 15487.097,
+      "paired_ratios": [
+        0.99637634469271597,
+        0.99702549854016576,
+        0.99551950546648493
+      ],
+      "paired_geometric_mean": 0.99630692531553788,
+      "paired_minimum": 0.99551950546648493,
+      "qualifies": false,
+      "registers_per_thread": 126,
+      "local_bytes_per_thread": 0,
+      "static_shared_bytes_per_block": 1792
+    },
+    "inv-poly2": {
+      "baseline_median_million_per_second": 15539.227999999999,
+      "candidate_median_million_per_second": 15588.653,
+      "paired_ratios": [
+        1.004074912859249,
+        1.003271953184663,
+        1.0031032766132482
+      ],
+      "paired_geometric_mean": 1.0034832913648373,
+      "paired_minimum": 1.0031032766132482,
+      "qualifies": false,
+      "registers_per_thread": 126,
+      "local_bytes_per_thread": 0,
+      "static_shared_bytes_per_block": 1792
+    },
+    "clmul-flat": {
+      "baseline_median_million_per_second": 15538.978999999999,
+      "candidate_median_million_per_second": 15401.233,
+      "paired_ratios": [
+        0.99071386865250288,
+        0.99131682420905687,
+        0.99154770922719404
+      ],
+      "paired_geometric_mean": 0.99119273835379551,
+      "paired_minimum": 0.99071386865250288,
+      "qualifies": false,
+      "registers_per_thread": 117,
+      "local_bytes_per_thread": 0,
+      "static_shared_bytes_per_block": 1792
+    },
+    "alu-square": {
+      "baseline_median_million_per_second": 15536.713,
+      "candidate_median_million_per_second": 15361.17,
+      "paired_ratios": [
+        0.98886701453518522,
+        0.98876008308814145,
+        0.98816391454621766
+      ],
+      "paired_geometric_mean": 0.98859695565365258,
+      "paired_minimum": 0.98816391454621766,
+      "qualifies": false,
+      "registers_per_thread": 126,
+      "local_bytes_per_thread": 0,
+      "static_shared_bytes_per_block": 1792
+    },
+    "late-y": {
+      "baseline_median_million_per_second": 15539.583000000001,
+      "candidate_median_million_per_second": 15516.273999999999,
+      "paired_ratios": [
+        0.99861747061682549,
+        0.9985000240997457,
+        0.99850828098023836
+      ],
+      "paired_geometric_mean": 0.99854192379775619,
+      "paired_minimum": 0.9985000240997457,
+      "qualifies": false,
+      "registers_per_thread": 126,
+      "local_bytes_per_thread": 0,
+      "static_shared_bytes_per_block": 1792
+    }
+  },
+  "scope": {
+    "benchmark_only": true,
+    "single_gpu": true,
+    "search_run": false,
+    "solver_run": false,
+    "collision_recovery_run": false
+  },
+  "notes": [
+    "artifact-files.sha256 captured job.log before the wrapper finished writing it; exit-code was added after the in-job manifest",
+    "binary hashes are recorded but executable bytes are not embedded"
+  ]
+}

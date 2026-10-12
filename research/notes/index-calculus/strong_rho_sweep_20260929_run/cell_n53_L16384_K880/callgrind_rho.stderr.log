@@ -1,0 +1,11 @@
+==9264== Callgrind, a call-graph generating cache profiler
+==9264== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==9264== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==9264== Command: /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong 53 0 signed_frobenius 16384 531310
+==9264== 
+==9264== For interactive control, run 'callgrind_control -h'.
+==9264== 
+==9264== Events    : Ir
+==9264== Collected : 199039001579
+==9264== 
+==9264== I   refs:      199,039,001,579

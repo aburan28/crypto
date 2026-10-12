@@ -1,0 +1,17 @@
+{
+  "schema":"ecc2k130_global_hints.v1",
+  "timingPanelValid":true,
+  "correctnessPreflightPassed":true,
+  "preflightSha256":"7cdfa2ee597f370771adac82ea79dd971dac0f74348a31b00620e22795ec8d81",
+  "updatesPerSample":201863462912,
+  "controlMedianMps":7021.6549999999997,
+  "candidateMedianMps":5610.9740000000002,
+  "geometricMeanRatio":0.79901828425027144,
+  "aaMaximumSymmetricDrift":0.00056253879025389706,
+  "pairedRatios":[0.79897975130138055,0.7988113913315309,0.79897299242332009,0.7991527519896402,0.79917458980879352],
+  "noiseGate":true,
+  "engineeringGate":false,
+  "rateGoalGate":false,
+  "decision":"DO_NOT_PROMOTE",
+  "scope":"bounded complete-update benchmark; correctness gates recorded separately"
+}

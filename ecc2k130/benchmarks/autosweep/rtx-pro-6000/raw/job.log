@@ -1,0 +1,178 @@
+NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05, 2430 MHz, 600.00 W, 97887 MiB, 12.0
+Cuda compilation tools, release 13.3, V13.3.73
+Build cuda_13.3.r13.3/compiler.38244171_0
+source: 1ee6c9ea21e5788d87615d0d423600cefe478192 (uncommitted changes)
+arch: PRO6000_ARCH=-gencode arch=compute_120,code=sm_120
+base: 
+##### phase 1: star
+=== build base: 
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build geo-256x2: THREADS=256 MINBLOCKS=2
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build geo-384x1: THREADS=384 MINBLOCKS=1
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build geo-640x1: THREADS=640 MINBLOCKS=1
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 96 registers, used 1 barriers 
+=== build geo-768x1: THREADS=768 MINBLOCKS=1
+        24 bytes stack frame, 20 bytes spill stores, 40 bytes spill loads ptxas info    : Used 80 registers, used 1 barriers, 24 bytes cumulative stack size 
+=== build batch32-256x1: BATCH=32 THREADS=256 MINBLOCKS=1
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build batch32-512x1: BATCH=32 THREADS=512 MINBLOCKS=1
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build karat3-not-topclmad: PACKED_KARAT3=1 PACKED_TOP_CLMAD=0
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build no-pipe-select: TABLE_PIPE_SELECT=0
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 92 registers, used 1 barriers 
+=== build no-chain-first: PACKED_CHAIN_FIRST=0
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build inline-poly-0: PACKED_INLINE_POLY=0
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 124 registers, used 1 barriers 
+=== build inline-poly-1: PACKED_INLINE_POLY=1
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 124 registers, used 1 barriers 
+=== build unroll2: UNROLL_SLOTS=2
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 118 registers, used 1 barriers 
+=== build no-from-reduced: PACKED_FROM_REDUCED=0
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build no-l2-persist: PACKED_L2_PERSIST=0
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build pivot-nibble: TABLE_PIVOT_BYTES=0
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build clmul-flat: PACKED_CLMUL_FLAT=1
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build fused: TABLE_FUSED=1 TABLE_PIPE_SELECT=0
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build fused-pipe: TABLE_FUSED=1 TABLE_FUSED_PIPE=1 TABLE_PIPE_SELECT=0
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build alu-sqr: PACKED_ALU_SQR=1
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+=== build no-pair-ilp: PACKED_PAIR_ILP=0
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 116 registers, used 1 barriers 
+screen base pass 1: 19.9817 B/s  2422 MHz, 540.27 W, 51
+screen geo-256x2 pass 1: 18.1244 B/s  2422 MHz, 454.68 W, 45
+screen geo-384x1 pass 1: 18.4613 B/s  2422 MHz, 491.73 W, 54
+screen geo-640x1 pass 1: 20.2730 B/s  2422 MHz, 555.01 W, 52
+screen geo-768x1 pass 1: 18.8329 B/s  2272 MHz, 585.46 W, 58
+screen batch32-256x1 pass 1: 17.2868 B/s  2407 MHz, 569.90 W, 61
+screen batch32-512x1 pass 1: 17.0825 B/s  2400 MHz, 549.12 W, 60
+screen karat3-not-topclmad pass 1: 13.9087 B/s  2422 MHz, 391.96 W, 63
+screen no-pipe-select pass 1: 19.9416 B/s  2422 MHz, 532.12 W, 67
+screen no-chain-first pass 1: 19.9370 B/s  2422 MHz, 561.26 W, 68
+screen inline-poly-0 pass 1: 19.1726 B/s  2422 MHz, 550.67 W, 69
+screen inline-poly-1 pass 1: 19.3218 B/s  2422 MHz, 526.88 W, 70
+screen unroll2 pass 1: 19.8066 B/s  2422 MHz, 570.39 W, 71
+screen no-from-reduced pass 1: 19.8727 B/s  2422 MHz, 571.39 W, 71
+screen no-l2-persist pass 1: 18.8241 B/s  2272 MHz, 581.39 W, 70
+screen pivot-nibble pass 1: 19.5463 B/s  2422 MHz, 544.72 W, 73
+screen clmul-flat pass 1: 19.9711 B/s  2422 MHz, 542.82 W, 73
+screen fused pass 1: 19.9960 B/s  2422 MHz, 514.57 W, 73
+screen fused-pipe pass 1: 19.5573 B/s  2422 MHz, 504.99 W, 73
+screen alu-sqr pass 1: 19.8807 B/s  2422 MHz, 548.44 W, 74
+screen no-pair-ilp pass 1: 19.9765 B/s  2422 MHz, 581.13 W, 72
+screen base pass 2: 19.9392 B/s  2422 MHz, 545.69 W, 66
+screen geo-256x2 pass 2: 18.1337 B/s  2422 MHz, 505.09 W, 66
+screen geo-384x1 pass 2: 18.4082 B/s  2422 MHz, 514.30 W, 66
+screen geo-640x1 pass 2: 19.8568 B/s  2362 MHz, 573.32 W, 67
+screen geo-768x1 pass 2: 18.3506 B/s  2205 MHz, 592.03 W, 71
+screen batch32-256x1 pass 2: 17.0922 B/s  2332 MHz, 558.99 W, 69
+screen batch32-512x1 pass 2: 16.9046 B/s  2325 MHz, 568.18 W, 71
+screen karat3-not-topclmad pass 2: 13.8785 B/s  2422 MHz, 415.58 W, 70
+screen no-pipe-select pass 2: 19.9202 B/s  2422 MHz, 590.01 W, 80
+screen no-chain-first pass 2: 19.9161 B/s  2422 MHz, 592.70 W, 79
+screen inline-poly-0 pass 2: 19.1554 B/s  2422 MHz, 571.67 W, 78
+screen inline-poly-1 pass 2: 19.3056 B/s  2422 MHz, 550.68 W, 70
+screen unroll2 pass 2: 19.7844 B/s  2422 MHz, 589.10 W, 79
+screen no-from-reduced pass 2: 19.8566 B/s  2422 MHz, 555.14 W, 70
+screen no-l2-persist pass 2: 18.6573 B/s  2265 MHz, 593.10 W, 76
+screen pivot-nibble pass 2: 19.5341 B/s  2422 MHz, 559.03 W, 71
+screen clmul-flat pass 2: 19.9602 B/s  2422 MHz, 591.20 W, 78
+screen fused pass 2: 19.9876 B/s  2422 MHz, 549.89 W, 77
+screen fused-pipe pass 2: 19.5442 B/s  2422 MHz, 543.12 W, 77
+screen alu-sqr pass 2: 19.8722 B/s  2422 MHz, 548.43 W, 69
+screen no-pair-ilp pass 2: 19.9689 B/s  2422 MHz, 592.77 W, 78
+base 19.9605
+1.0052 geo-640x1 20.0649
+1.0016 fused 19.9918
+1.0006 no-pair-ilp 19.9727
+1.0003 clmul-flat 19.9657
+0.9985 no-pipe-select 19.9309
+0.9983 no-chain-first 19.9265
+0.9958 alu-sqr 19.8764
+0.9952 no-from-reduced 19.8646
+0.9917 unroll2 19.7955
+0.9795 fused-pipe 19.5508
+0.9789 pivot-nibble 19.5402
+0.9676 inline-poly-1 19.3137
+0.9601 inline-poly-0 19.1640
+0.9389 no-l2-persist 18.7407
+0.9314 geo-768x1 18.5917
+0.9236 geo-384x1 18.4348
+0.9082 geo-256x2 18.1290
+0.8612 batch32-256x1 17.1895
+0.8514 batch32-512x1 16.9935
+0.6961 karat3-not-topclmad 13.8936
+##### phase 2: greedy combination
+=== build combo1: THREADS=640 MINBLOCKS=1
+        0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads ptxas info    : Used 96 registers, used 1 barriers 
+greedy combo1 = base + geo-640x1: 20.23415 B/s vs 19.96045  2415 MHz, 576.38 W, 66
+  keep
+greedy result: combo1 (THREADS=640 MINBLOCKS=1) at 20.23415 B/s
+##### phase 3: verify
+=== verify base (batch 16, threads 96256)
+packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed onb inv: 0
+packed chains: 1
+packed top clmad: 0
+packed alu square: 1
+packed table pivot bytes: 1, table shared bytes 48732
+  finished: 4.946 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+=== verify geo-640x1 (batch 16, threads 96256)
+packed kernel: 96 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed onb inv: 0
+packed chains: 1
+packed top clmad: 0
+packed alu square: 1
+packed table pivot bytes: 1, table shared bytes 48732
+  finished: 4.921 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+=== verify combo1 (batch 16, threads 96256)
+packed kernel: 96 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed onb inv: 0
+packed chains: 1
+packed top clmad: 0
+packed alu square: 1
+packed table pivot bytes: 1, table shared bytes 48732
+  finished: 4.899 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)
+base                  1480482 records  sha256 6cb064cdc55d1a81  IDENTICAL to base
+geo-640x1             1480482 records  sha256 6cb064cdc55d1a81  IDENTICAL to base
+combo1                1480482 records  sha256 6cb064cdc55d1a81  IDENTICAL to base
+##### phase 4: final alternating bench
+=== bench base rep 1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19991.744 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 517.01 W, 47
+=== bench geo-640x1 rep 1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 640 packed threads resident per SM   finished: 20271.670 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 598.39 W, 50
+=== bench combo1 rep 1
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 640 packed threads resident per SM   finished: 20264.126 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 566.81 W, 54
+=== bench base rep 2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19981.134 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 566.01 W, 64
+=== bench geo-640x1 rep 2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 640 packed threads resident per SM   finished: 20189.763 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2415 MHz, 561.98 W, 57
+=== bench combo1 rep 2
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 640 packed threads resident per SM   finished: 20132.391 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2415 MHz, 578.47 W, 61
+=== bench base rep 3
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19951.233 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 574.18 W, 69
+=== bench geo-640x1 rep 3
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 640 packed threads resident per SM   finished: 19992.750 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2385 MHz, 564.08 W, 65
+=== bench combo1 rep 3
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 640 packed threads resident per SM   finished: 19907.218 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2377 MHz, 555.53 W, 67
+=== bench base rep 4
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19935.192 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 587.59 W, 76
+=== bench geo-640x1 rep 4
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 640 packed threads resident per SM   finished: 19799.396 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2362 MHz, 585.27 W, 77
+=== bench combo1 rep 4
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 640 packed threads resident per SM   finished: 19753.829 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2355 MHz, 594.92 W, 78
+=== bench base rep 5
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM   finished: 19932.774 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2422 MHz, 576.45 W, 79
+=== bench geo-640x1 rep 5
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 640 packed threads resident per SM   finished: 19754.555 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2355 MHz, 577.52 W, 78
+=== bench combo1 rep 5
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 640 packed threads resident per SM   finished: 19743.796 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped) 2355 MHz, 560.90 W, 73
+=== done

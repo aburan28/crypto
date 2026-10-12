@@ -1,0 +1,8 @@
+instance        word ops ref          cand  ratio  nodes ref   cand  same tree
+K_0/2^9 m=3          1142867        889385   1.29        382    356  False
+K_0/2^13 m=3         9743787       8408962   1.16        200    200  True
+K_0/2^9 m=4          2868312       1477037   1.94        758    558  False
+total               13754966      10775384   1.28
+
+Same instances and the same verified answers on every rung; the tree is not required to match.
+Wrote /home/user/crypto/research/chain_split_order_20260924/comparisons/chain.cross_tree.LD-vs-reference.json

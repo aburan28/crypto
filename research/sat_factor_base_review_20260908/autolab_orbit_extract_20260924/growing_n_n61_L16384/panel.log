@@ -1,0 +1,38 @@
+KS=/Volumes/SSD990/crypto/target/release/examples/koblitz_rho_batch_ks_v2_n61 IC=/Volumes/SSD990/crypto/target/release/examples/koblitz_orbit_dlp_fast L=16384 N=61 2026-09-26T07:46:05Z
+corpus n61-ks-growing-tune-16384-v1
+   16384 scalars_n61-ks-growing-tune-16384-v1.txt
+corpus n61-ks-growing-16384-v1
+   16384 scalars_n61-ks-growing-16384-v1.txt
+tune K=800 start 2026-09-26T08:28:09Z
+tune n=61 K=800 wall=459.60
+tune K=1000 start 2026-09-26T08:35:49Z
+tune n=61 K=1000 wall=381.12
+tune K=1200 start 2026-09-26T08:42:10Z
+tune n=61 K=1200 wall=386.70
+tune K=1400 start 2026-09-26T08:48:37Z
+tune n=61 K=1400 wall=234.56
+chosen n=61 K=1400 wall=234.56
+ic b=0 K=1400 start 2026-09-26T08:52:32Z load=20.31 26.59 34.06
+ic n=61 K=1400 b=0 rc=0 wall=187.35 load=20.31 26.59 34.06
+ks b=0 start 2026-09-26T08:55:39Z load=15.01 22.04 30.69
+ks n=61 b=0 rc=0 wall=1360.74 load=15.01 22.04 30.69
+ks b=1 start 2026-09-26T09:18:20Z load=27.92 24.95 24.98
+ks n=61 b=1 rc=0 wall=1334.26 load=27.92 24.95 24.98
+ic b=1 K=1400 start 2026-09-26T09:40:34Z load=28.83 25.58 24.47
+ic n=61 K=1400 b=1 rc=0 wall=273.59 load=28.83 25.58 24.47
+ic b=2 K=1400 start 2026-09-26T09:45:08Z load=19.21 22.65 23.49
+ic n=61 K=1400 b=2 rc=0 wall=294.52 load=19.21 22.65 23.49
+ks b=2 start 2026-09-26T09:50:02Z load=23.95 23.62 23.66
+ks n=61 b=2 rc=0 wall=1011.63 load=23.95 23.62 23.66
+replay start 2026-09-26T10:06:54Z
+n=61 file=ic_n61_b0.jsonl cumulative pass=16384 fail=0
+n=61 file=ic_n61_b1.jsonl cumulative pass=32768 fail=0
+n=61 file=ic_n61_b2.jsonl cumulative pass=49152 fail=0
+{
+  "61": {
+    "pass": 49152,
+    "fail": 0
+  }
+}
+all_pass True
+DONE 2026-09-26T11:16:34Z

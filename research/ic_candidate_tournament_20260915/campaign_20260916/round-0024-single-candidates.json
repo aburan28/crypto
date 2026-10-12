@@ -1,0 +1,45 @@
+[
+  {
+    "id": "incumbent",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 65536,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "round-0020 promoted `both` plus round21-wide-pair-table.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0023",
+    "hypothesis": "The round-0020 winner, widened so it can run above degree 31, with max_trials raised 4096 -> 65536 so rho completes at every cell. Round 0021 measured the widening at 1.0007x the promoted worker with identical logarithms and factor bases on all eight panel cells; round 0022 bounded the cap change at 14 ppm on either arm. Its factor base is the case's: points = 6*degree, one batch of eight orbits at every cell. Retained by round 0023, which measured it against scaled and rho on the same twelve cells."
+  },
+  {
+    "id": "scaled",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 65536,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round24-sources/scaled",
+    "parent": "incumbent plus round23-scaled-base.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0023",
+    "hypothesis": "Round 0023's scaled arm, unchanged: the orbit count follows the subgroup order, 8*round((r/4196903)^0.157), never fewer than one batch. Round 0023 measured it at 0.7982 [0.6501, 0.9515] of the incumbent, inert on the eight panel cells and 0.40-0.68 at the four crossover cells. Carried as the reference that pairinv must reproduce exactly.",
+    "falsification": "Any bad, missing or unmatched certificate; any recovered logarithm different from the incumbent's on the same fixture; a panel cell whose scaled/incumbent instruction ratio leaves [0.995, 1.005]."
+  },
+  {
+    "id": "pairinv",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 65536,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round24-sources/pairinv",
+    "parent": "scaled plus round24-pairinv.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0023",
+    "hypothesis": "+P and -P share an abscissa, so the decomposition scan's denominator target.x + P.x is the same for both; pairinv inverts it once and reads it twice, halving the elements Montgomery's batch inversion multiplies through. Scan order, rests, witnesses, relations and logarithms are unchanged, so every report equals scaled's apart from its wall clock. The saving is in collection only and grows with collection's share of the job.",
+    "falsification": "Any bad, missing or unmatched certificate; any recovered logarithm or factor base different from scaled's on the same fixture; pairinv/scaled above one at any cell in instructions."
+  }
+]

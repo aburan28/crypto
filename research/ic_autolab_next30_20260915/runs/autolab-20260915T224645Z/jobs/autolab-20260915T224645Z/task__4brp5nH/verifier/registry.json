@@ -1,0 +1,27 @@
+[
+  {
+    "config": {
+      "batch_trials": 1,
+      "collection_window": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Verified fast-lifting batch1/window8 winner",
+    "id": "incumbent"
+  },
+  {
+    "config": {
+      "batch_trials": 1,
+      "collection_window": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Agent-selected development checkpoint; see NOTES.md",
+    "id": "autolab",
+    "source_root": "/app"
+  }
+]

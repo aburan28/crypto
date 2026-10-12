@@ -1,0 +1,45 @@
+{
+  "accepted_relations": 0,
+  "address_space_cap_bytes": 8589934592,
+  "attempts": [
+    {
+      "engine": {
+        "MatrixF4": {
+          "max_degree": 3
+        }
+      },
+      "exhausted": true,
+      "family": "groebner",
+      "outcome": "incomplete",
+      "trial": 0,
+      "unsupported": false
+    }
+  ],
+  "cell": "n17a1",
+  "collector_dispatch": {
+    "collection_window": null,
+    "field_kernel": "pclmulqdq",
+    "pair_table": false,
+    "query_rule": "trial-keyed-sample",
+    "strategy": "Groebner"
+  },
+  "columns": 29,
+  "comparison_kind": "factor-base-policy",
+  "descent_dispatch": null,
+  "exit_code": 2,
+  "generic_phase_policy": "exclusive-owner-thread-v1",
+  "geometric_points": 63,
+  "instruction_count": null,
+  "online_wall_ns": null,
+  "promotion_eligible": false,
+  "rayon_threads": 1,
+  "report_reason": null,
+  "report_status": "incomplete",
+  "runner_status": "completed",
+  "schema_version": 1,
+  "solutions": null,
+  "solve_attempts": 0,
+  "solver": "f4",
+  "valgrind": null,
+  "wall_ns": 6152195286
+}

@@ -1,0 +1,15 @@
+# B4's local branch, bundled in stack-20261001-b4.bundle
+# on b3b-int at eaa842aaead128958d4aa1b7b83a0349df71aa63, which stack-20261001.bundle holds
+
+## branch tip
+b4-int 8a2519e66ca698ddd1c8777fef1cc82b7825a11a B4 (work in progress): design §5's remaining tests
+
+## prerequisite: the commit in stack-20261001.bundle the bundle builds on
+eaa842aaead128958d4aa1b7b83a0349df71aa63 ic B3b (work in progress): the index calculus on two-word binary fields, at F0
+
+## every commit in the bundle, oldest first
+c235fe1af7a7319a91247ca78c213565a414e247 2026-10-01 B4 (work in progress): binary fields of up to nine words
+0c526019b937ce784cf3ca138b57b94ec2f62760 2026-10-01 B4 (work in progress): Koblitz curves, the canonical key and the matched rho at W words
+a5a12506c743129bade78a6e5e793cda5d6a1f18 2026-10-01 B4 (work in progress): the index calculus at W words
+fca148b60c1d05b83a5ae732ae34f86e36ce49c6 2026-10-01 B4 (work in progress): ic past two words, v1's rules past one word, --kic-multi
+8a2519e66ca698ddd1c8777fef1cc82b7825a11a 2026-10-01 B4 (work in progress): design §5's remaining tests

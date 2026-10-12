@@ -2,7 +2,7 @@
 \\ Phase 2 GLV-aware HNP toy demonstration
 \\ ============================================================
 \\
-\\ Implements the GLV-aware lattice from RESEARCH_GLV_HNP_PHASE2.md
+\\ Implements the GLV-aware lattice from research/notes/lattice-hnp/RESEARCH_GLV_HNP_PHASE2.md
 \\ §2 on a small j=0 prime-order toy curve, demonstrating the
 \\ construction concretely.  Recovers d via brute force (the lattice
 \\ build is the contribution; LLL on Phase 2 lattices is deferred
@@ -212,6 +212,6 @@ print("genuinely different from standard HNP.");
 print("");
 print("================================================================");
 print("Phase 2 toy: structural setup verified.");
-print("Lattice implementation: deferred (see RESEARCH_GLV_HNP_PHASE2.md");
+print("Lattice implementation: deferred (see research/notes/lattice-hnp/RESEARCH_GLV_HNP_PHASE2.md");
 print("§4 risk mitigation: prototype on P-256 once degeneracy resolved).");
 print("================================================================");

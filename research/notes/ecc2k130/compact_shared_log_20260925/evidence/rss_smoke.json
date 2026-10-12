@@ -1,0 +1,28 @@
+{
+  "capped": {
+    "cap_bytes": 33554432,
+    "child_cpu_s": 0.017251,
+    "exit_code": -9,
+    "name": "cross_cap",
+    "rss_sample_count": 2,
+    "sampled_peak_rss_bytes": 78954496,
+    "termination": "RSS_CAP",
+    "wait4_peak_rss_bytes": 78954496,
+    "wall_ms": 60.582416
+  },
+  "classification": "RSS_CAP_SMOKE_PASS",
+  "normal": {
+    "cap_bytes": 67108864,
+    "child_cpu_s": 0.013595999999999999,
+    "exit_code": 0,
+    "name": "below_cap",
+    "rss_sample_count": 4,
+    "sampled_peak_rss_bytes": 11829248,
+    "termination": null,
+    "wait4_peak_rss_bytes": 11911168,
+    "wall_ms": 241.566167
+  },
+  "platform": "macOS-26.6-arm64-arm-64bit",
+  "psutil": "7.2.2",
+  "python": "3.9.10 (main, Feb 15 2026, 13:00:19) \n[Clang 17.0.0 (clang-1700.0.13.5)]"
+}

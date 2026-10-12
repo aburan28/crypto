@@ -1,0 +1,332 @@
+[
+  {
+    "config": {
+      "batch_trials": 64,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Unmodified declared baseline.",
+    "id": "incumbent",
+    "parent": null
+  },
+  {
+    "changed_parameters": {
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 52,
+        "seed": 43
+      }
+    },
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 52,
+        "seed": 43
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: factor_base",
+    "id": "factor_base_01",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 52,
+        "seed": 43
+      },
+      "linear_algebra": "dense"
+    },
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 52,
+        "seed": 43
+      },
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: linear_algebra, factor_base",
+    "id": "factor_base_02",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 78,
+        "seed": 71
+      }
+    },
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 78,
+        "seed": 71
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: factor_base",
+    "id": "factor_base_03",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 78,
+        "seed": 71
+      },
+      "linear_algebra": "dense"
+    },
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 78,
+        "seed": 71
+      },
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: linear_algebra, factor_base",
+    "id": "factor_base_04",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 104,
+        "seed": 97
+      }
+    },
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 104,
+        "seed": 97
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: factor_base",
+    "id": "factor_base_05",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 104,
+        "seed": 97
+      },
+      "linear_algebra": "dense"
+    },
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "subgroup_orbits",
+        "points": 104,
+        "seed": 97
+      },
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: linear_algebra, factor_base",
+    "id": "factor_base_06",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      }
+    },
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: factor_base",
+    "id": "factor_base_07",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "dense"
+    },
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: linear_algebra, factor_base",
+    "id": "factor_base_08",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2
+        ]
+      }
+    },
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2
+        ]
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: factor_base",
+    "id": "factor_base_09",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2
+        ]
+      },
+      "linear_algebra": "dense"
+    },
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2
+        ]
+      },
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: linear_algebra, factor_base",
+    "id": "factor_base_10",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          3
+        ]
+      }
+    },
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          3
+        ]
+      },
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: factor_base",
+    "id": "factor_base_11",
+    "parent": "incumbent"
+  },
+  {
+    "changed_parameters": {
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          3
+        ]
+      },
+      "linear_algebra": "dense"
+    },
+    "config": {
+      "batch_trials": 64,
+      "factor_base": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          3
+        ]
+      },
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Incorrect certificate, incomplete workload or no total-cost improvement.",
+    "hypothesis": "Measure complete-pipeline interaction: linear_algebra, factor_base",
+    "id": "factor_base_12",
+    "parent": "incumbent"
+  }
+]

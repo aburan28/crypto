@@ -1,0 +1,7 @@
+benchmarks/global-hints/../../include/packedkernels.cuh(1015): warning #177-D: variable "guard" was declared but never referenced
+          const bool guard = p.maxIters && now % 4096 == 0;
+                     ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+PASS: 49 production selector/resolver device cases; empty/full/sparse, canaries, partial blocks, repeated resets and scalar-reference histories

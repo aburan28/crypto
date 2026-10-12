@@ -1,0 +1,106 @@
+--- a/src/cryptanalysis/f4_fp_tower.rs
++++ b/src/cryptanalysis/f4_fp_tower.rs
+@@ -73,6 +73,23 @@
+ 
+ use rayon::prelude::*;
+ 
++
++fn diag_on() -> bool {
++    std::env::var_os("F4T_DIAG").is_some()
++}
++fn diag_mem() -> String {
++    let s = std::fs::read_to_string("/proc/self/status").unwrap_or_default();
++    let get = |k: &str| {
++        s.lines()
++            .find(|l| l.starts_with(k))
++            .and_then(|l| l.split_whitespace().nth(1))
++            .and_then(|v| v.parse::<u64>().ok())
++            .unwrap_or(0)
++            / 1024
++    };
++    format!("rss {} MB hwm {} MB", get("VmRSS:"), get("VmHWM:"))
++}
++
+ // ── Arithmetic in F_p, p < 2^32 ──────────────────────────────────────
+ 
+ #[derive(Clone, Copy, Debug)]
+@@ -1058,6 +1075,14 @@
+     st.q_cols = nq;
+     let tail_len = |c: u32| nq - q_start[c as usize] as usize;
+     st.dense_entries = piv_leads.iter().map(|&c| tail_len(c) as u64).sum();
++    if diag_on() {
++        eprintln!(
++            "[diag] matrix: cols {n_cols} pivots {} q {nq} s_rows {n_s} dense_entries {} ({})",
++            piv_leads.len(),
++            st.dense_entries,
++            diag_mem()
++        );
++    }
+     if max_dense.is_some_and(|cap| st.dense_entries > cap) {
+         return Err(Stop::Oversize);
+     }
+@@ -1141,6 +1166,9 @@
+     }
+     let residues_started = Instant::now();
+     st.ms_reducers = (residues_started - started).as_secs_f64() * 1e3;
++    if diag_on() {
++        eprintln!("[diag] B' done in {:.0} ms, muladds {} ({})", st.ms_reducers, st.muladds, diag_mem());
++    }
+ 
+     // 2 and 3. The S-rows, in chunks. `ech[l]` is the pivot with lead `l`
+     // (a Q index), stored from `l` on, with 1 at `l`; empty when there is
+@@ -1255,6 +1283,16 @@
+         leads.sort_unstable();
+     }
+     st.ms_residues = residues_started.elapsed().as_secs_f64() * 1e3;
++    if diag_on() {
++        let ee: usize = ech.iter().map(|e| e.len()).sum();
++        eprintln!(
++            "[diag] residues done in {:.0} ms: {} leads, echelon entries {ee}, muladds {} ({})",
++            st.ms_residues,
++            leads.len(),
++            st.muladds,
++            diag_mem()
++        );
++    }
+ 
+     Ok(leads
+         .iter()
+@@ -1959,6 +1997,37 @@
+         tr.basis_active = s.active.iter().filter(|&&a| a).count();
+         tr.pairs_left = s.pairs.len();
+         tr.ms_update = update_started.elapsed().as_secs_f64() * 1e3;
++        if diag_on() {
++            let mut referenced = vec![false; s.polys.len()];
++            for p in &s.pairs {
++                match p.kind {
++                    PairKind::Critical(i, j) => {
++                        referenced[i as usize] = true;
++                        referenced[j as usize] = true;
++                    }
++                    PairKind::Tower(g, _) => referenced[g as usize] = true,
++                }
++            }
++            let terms: usize = s.polys.iter().map(|p| p.len()).sum();
++            let act: usize = (0..s.polys.len()).filter(|&g| s.active[g]).map(|g| s.polys[g].len()).sum();
++            let ret: Vec<usize> = (0..s.polys.len()).filter(|&g| !s.active[g] && !referenced[g]).collect();
++            let ret_terms: usize = ret.iter().map(|&g| s.polys[g].len()).sum();
++            let fresh_terms: usize = s.polys[s.polys.len() - tr.fresh..].iter().map(|p| p.len()).sum();
++            eprintln!(
++                "[diag] step {} deg {} done: elements {} terms {terms}, active {} terms {act}, retirable {} terms {ret_terms}, fresh {} terms {fresh_terms}, pairs {}, dense {}, muladds {}, {:.0} ms ({})",
++                rep.steps,
++                d,
++                s.polys.len(),
++                tr.basis_active,
++                ret.len(),
++                tr.fresh,
++                s.pairs.len(),
++                tr.dense_entries,
++                tr.muladds,
++                step_started.elapsed().as_secs_f64() * 1e3,
++                diag_mem()
++            );
++        }
+         tr.ms = step_started.elapsed().as_secs_f64() * 1e3;
+         rep.trace.push(tr);
+ 

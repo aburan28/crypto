@@ -1,0 +1,7 @@
+{
+  "archive_bytes": 1168806,
+  "archive_sha256": "5e01c894c05919a573f2716bbdeace53952cdd009a85969af56aaad591c2c9ed",
+  "classification": "clean main-derived source; paired full-rank control",
+  "reassembly": "tar -xzf clean_evidence.tar.gz && shasum -a 256 -c SHA256SUMS",
+  "summary_sha256": "71e07979fbe150618a7750dd4eee5d19de8ff1f31c00adfb88a089b04574252f"
+}

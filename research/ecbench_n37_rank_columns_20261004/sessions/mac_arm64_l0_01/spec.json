@@ -1,0 +1,22 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "n37 shared-rank cold factor-base column sweep",
+  "description": "Eight independent public one-target workloads; counted-cost diagnostic only until native work and host isolation are complete.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 37}],
+    "targets_per_curve": 8,
+    "target_seed": 202610042033,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong", "params": {"lanes": "32", "dp_bits": "8", "step_cap_factor": "2000"}}},
+    {"name": "ic-k4", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=4,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}},
+    {"name": "ic-k8", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=8,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}},
+    {"name": "ic-k12", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=12,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}},
+    {"name": "ic-k16", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=16,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}},
+    {"name": "ic-k24", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=24,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}},
+    {"name": "ic-k42", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}},
+    {"name": "ic-k42-control", "role": "control", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}}
+  ],
+  "measurement": {"rounds": 5, "warmup": 1, "order": "alternate", "seed": 202610042034, "isolation_required": "L2", "timeout_seconds": 120}
+}

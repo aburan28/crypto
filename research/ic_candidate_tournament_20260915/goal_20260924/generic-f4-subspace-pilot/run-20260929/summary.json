@@ -1,0 +1,495 @@
+{
+  "budget": {
+    "address_space_cap_bytes": 8589934592,
+    "batch_trials": 1,
+    "conflict_budget": 100000,
+    "factor_base": {
+      "dimension": 6,
+      "kind": "standard_subspace"
+    },
+    "groebner_degree": 3,
+    "linear_algebra": "dense",
+    "max_trials": 1,
+    "node_budget": 4096,
+    "solvers": [
+      "f4",
+      "f5"
+    ],
+    "summands": 3,
+    "wall_cap_seconds": 180
+  },
+  "build_sha256": "de3cb8b896f31f03668f1d0eb14302fef2b1e0bc0be303e7f4021a70dd085335",
+  "comparison_kind": "factor-base-policy",
+  "host": {
+    "cpu": "Intel(R) Xeon(R) Processor",
+    "instruction_unit": null,
+    "logical_cpus": 4,
+    "machine": "x86_64",
+    "note": "Valgrind is absent, so instruction_count stays null. wall_ns is native process practicality only and is not an instruction count.",
+    "rayon_threads": 1,
+    "system": "Linux",
+    "valgrind": null
+  },
+  "inventory_sha256": "be3053b4b637311e8255f294807fde412510fbda2464e678a6a16fdea397d403",
+  "panel_sha256": "26b7bcc0c82f16e8d7a1b1ad7ebb3cb036b0eb926211d8b16d60b47c844f32c6",
+  "promotion_eligible": false,
+  "receipts": [
+    {
+      "accepted_relations": 0,
+      "address_space_cap_bytes": 8589934592,
+      "attempts": [
+        {
+          "engine": {
+            "MatrixF4": {
+              "max_degree": 3
+            }
+          },
+          "exhausted": true,
+          "family": "groebner",
+          "outcome": "incomplete",
+          "trial": 0,
+          "unsupported": false
+        }
+      ],
+      "cell": "n17a1",
+      "collector_dispatch": {
+        "collection_window": null,
+        "field_kernel": "pclmulqdq",
+        "pair_table": false,
+        "query_rule": "trial-keyed-sample",
+        "strategy": "Groebner"
+      },
+      "columns": 29,
+      "comparison_kind": "factor-base-policy",
+      "descent_dispatch": null,
+      "exit_code": 2,
+      "generic_phase_policy": "exclusive-owner-thread-v1",
+      "geometric_points": 63,
+      "instruction_count": null,
+      "online_wall_ns": null,
+      "promotion_eligible": false,
+      "rayon_threads": 1,
+      "report_reason": null,
+      "report_status": "incomplete",
+      "runner_status": "completed",
+      "schema_version": 1,
+      "solutions": null,
+      "solve_attempts": 0,
+      "solver": "f4",
+      "valgrind": null,
+      "wall_ns": 6152195286
+    },
+    {
+      "accepted_relations": 0,
+      "address_space_cap_bytes": 8589934592,
+      "attempts": [
+        {
+          "engine": {
+            "MatrixF5": {
+              "max_degree": 3
+            }
+          },
+          "exhausted": true,
+          "family": "groebner",
+          "outcome": "incomplete",
+          "trial": 0,
+          "unsupported": false
+        }
+      ],
+      "cell": "n17a1",
+      "collector_dispatch": {
+        "collection_window": null,
+        "field_kernel": "pclmulqdq",
+        "pair_table": false,
+        "query_rule": "trial-keyed-sample",
+        "strategy": "Groebner"
+      },
+      "columns": 29,
+      "comparison_kind": "factor-base-policy",
+      "descent_dispatch": null,
+      "exit_code": 2,
+      "generic_phase_policy": "exclusive-owner-thread-v1",
+      "geometric_points": 63,
+      "instruction_count": null,
+      "online_wall_ns": null,
+      "promotion_eligible": false,
+      "rayon_threads": 1,
+      "report_reason": null,
+      "report_status": "incomplete",
+      "runner_status": "completed",
+      "schema_version": 1,
+      "solutions": null,
+      "solve_attempts": 0,
+      "solver": "f5",
+      "valgrind": null,
+      "wall_ns": 4349898645
+    },
+    {
+      "accepted_relations": 0,
+      "address_space_cap_bytes": 8589934592,
+      "attempts": [
+        {
+          "engine": {
+            "MatrixF4": {
+              "max_degree": 3
+            }
+          },
+          "exhausted": true,
+          "family": "groebner",
+          "outcome": "incomplete",
+          "trial": 0,
+          "unsupported": false
+        }
+      ],
+      "cell": "n19a0",
+      "collector_dispatch": {
+        "collection_window": null,
+        "field_kernel": "pclmulqdq",
+        "pair_table": false,
+        "query_rule": "trial-keyed-sample",
+        "strategy": "Groebner"
+      },
+      "columns": 27,
+      "comparison_kind": "factor-base-policy",
+      "descent_dispatch": null,
+      "exit_code": 2,
+      "generic_phase_policy": "exclusive-owner-thread-v1",
+      "geometric_points": 65,
+      "instruction_count": null,
+      "online_wall_ns": null,
+      "promotion_eligible": false,
+      "rayon_threads": 1,
+      "report_reason": null,
+      "report_status": "incomplete",
+      "runner_status": "completed",
+      "schema_version": 1,
+      "solutions": null,
+      "solve_attempts": 0,
+      "solver": "f4",
+      "valgrind": null,
+      "wall_ns": 11422810189
+    },
+    {
+      "accepted_relations": 0,
+      "address_space_cap_bytes": 8589934592,
+      "attempts": [
+        {
+          "engine": {
+            "MatrixF5": {
+              "max_degree": 3
+            }
+          },
+          "exhausted": true,
+          "family": "groebner",
+          "outcome": "incomplete",
+          "trial": 0,
+          "unsupported": false
+        }
+      ],
+      "cell": "n19a0",
+      "collector_dispatch": {
+        "collection_window": null,
+        "field_kernel": "pclmulqdq",
+        "pair_table": false,
+        "query_rule": "trial-keyed-sample",
+        "strategy": "Groebner"
+      },
+      "columns": 27,
+      "comparison_kind": "factor-base-policy",
+      "descent_dispatch": null,
+      "exit_code": 2,
+      "generic_phase_policy": "exclusive-owner-thread-v1",
+      "geometric_points": 65,
+      "instruction_count": null,
+      "online_wall_ns": null,
+      "promotion_eligible": false,
+      "rayon_threads": 1,
+      "report_reason": null,
+      "report_status": "incomplete",
+      "runner_status": "completed",
+      "schema_version": 1,
+      "solutions": null,
+      "solve_attempts": 0,
+      "solver": "f5",
+      "valgrind": null,
+      "wall_ns": 7303168782
+    },
+    {
+      "accepted_relations": 0,
+      "address_space_cap_bytes": 8589934592,
+      "attempts": [
+        {
+          "engine": {
+            "MatrixF4": {
+              "max_degree": 3
+            }
+          },
+          "exhausted": true,
+          "family": "groebner",
+          "outcome": "incomplete",
+          "trial": 0,
+          "unsupported": false
+        }
+      ],
+      "cell": "n23a0",
+      "collector_dispatch": {
+        "collection_window": null,
+        "field_kernel": "pclmulqdq",
+        "pair_table": false,
+        "query_rule": "trial-keyed-sample",
+        "strategy": "Groebner"
+      },
+      "columns": 33,
+      "comparison_kind": "factor-base-policy",
+      "descent_dispatch": null,
+      "exit_code": 2,
+      "generic_phase_policy": "exclusive-owner-thread-v1",
+      "geometric_points": 75,
+      "instruction_count": null,
+      "online_wall_ns": null,
+      "promotion_eligible": false,
+      "rayon_threads": 1,
+      "report_reason": null,
+      "report_status": "incomplete",
+      "runner_status": "completed",
+      "schema_version": 1,
+      "solutions": null,
+      "solve_attempts": 0,
+      "solver": "f4",
+      "valgrind": null,
+      "wall_ns": 19897287805
+    },
+    {
+      "accepted_relations": 0,
+      "address_space_cap_bytes": 8589934592,
+      "attempts": [
+        {
+          "engine": {
+            "MatrixF5": {
+              "max_degree": 3
+            }
+          },
+          "exhausted": true,
+          "family": "groebner",
+          "outcome": "incomplete",
+          "trial": 0,
+          "unsupported": false
+        }
+      ],
+      "cell": "n23a0",
+      "collector_dispatch": {
+        "collection_window": null,
+        "field_kernel": "pclmulqdq",
+        "pair_table": false,
+        "query_rule": "trial-keyed-sample",
+        "strategy": "Groebner"
+      },
+      "columns": 33,
+      "comparison_kind": "factor-base-policy",
+      "descent_dispatch": null,
+      "exit_code": 2,
+      "generic_phase_policy": "exclusive-owner-thread-v1",
+      "geometric_points": 75,
+      "instruction_count": null,
+      "online_wall_ns": null,
+      "promotion_eligible": false,
+      "rayon_threads": 1,
+      "report_reason": null,
+      "report_status": "incomplete",
+      "runner_status": "completed",
+      "schema_version": 1,
+      "solutions": null,
+      "solve_attempts": 0,
+      "solver": "f5",
+      "valgrind": null,
+      "wall_ns": 11777668105
+    },
+    {
+      "accepted_relations": 0,
+      "address_space_cap_bytes": 8589934592,
+      "attempts": [
+        {
+          "engine": {
+            "MatrixF4": {
+              "max_degree": 3
+            }
+          },
+          "exhausted": true,
+          "family": "groebner",
+          "outcome": "incomplete",
+          "trial": 0,
+          "unsupported": false
+        }
+      ],
+      "cell": "n23a1",
+      "collector_dispatch": {
+        "collection_window": null,
+        "field_kernel": "pclmulqdq",
+        "pair_table": false,
+        "query_rule": "trial-keyed-sample",
+        "strategy": "Groebner"
+      },
+      "columns": 23,
+      "comparison_kind": "factor-base-policy",
+      "descent_dispatch": null,
+      "exit_code": 2,
+      "generic_phase_policy": "exclusive-owner-thread-v1",
+      "geometric_points": 53,
+      "instruction_count": null,
+      "online_wall_ns": null,
+      "promotion_eligible": false,
+      "rayon_threads": 1,
+      "report_reason": null,
+      "report_status": "incomplete",
+      "runner_status": "completed",
+      "schema_version": 1,
+      "solutions": null,
+      "solve_attempts": 0,
+      "solver": "f4",
+      "valgrind": null,
+      "wall_ns": 20089475421
+    },
+    {
+      "accepted_relations": 0,
+      "address_space_cap_bytes": 8589934592,
+      "attempts": [
+        {
+          "engine": {
+            "MatrixF5": {
+              "max_degree": 3
+            }
+          },
+          "exhausted": true,
+          "family": "groebner",
+          "outcome": "incomplete",
+          "trial": 0,
+          "unsupported": false
+        }
+      ],
+      "cell": "n23a1",
+      "collector_dispatch": {
+        "collection_window": null,
+        "field_kernel": "pclmulqdq",
+        "pair_table": false,
+        "query_rule": "trial-keyed-sample",
+        "strategy": "Groebner"
+      },
+      "columns": 23,
+      "comparison_kind": "factor-base-policy",
+      "descent_dispatch": null,
+      "exit_code": 2,
+      "generic_phase_policy": "exclusive-owner-thread-v1",
+      "geometric_points": 53,
+      "instruction_count": null,
+      "online_wall_ns": null,
+      "promotion_eligible": false,
+      "rayon_threads": 1,
+      "report_reason": null,
+      "report_status": "incomplete",
+      "runner_status": "completed",
+      "schema_version": 1,
+      "solutions": null,
+      "solve_attempts": 0,
+      "solver": "f5",
+      "valgrind": null,
+      "wall_ns": 11669863892
+    },
+    {
+      "accepted_relations": 0,
+      "address_space_cap_bytes": 8589934592,
+      "attempts": [
+        {
+          "engine": {
+            "MatrixF4": {
+              "max_degree": 3
+            }
+          },
+          "exhausted": true,
+          "family": "groebner",
+          "outcome": "incomplete",
+          "trial": 0,
+          "unsupported": false
+        }
+      ],
+      "cell": "n31a0",
+      "collector_dispatch": {
+        "collection_window": null,
+        "field_kernel": "pclmulqdq",
+        "pair_table": false,
+        "query_rule": "trial-keyed-sample",
+        "strategy": "Groebner"
+      },
+      "columns": 27,
+      "comparison_kind": "factor-base-policy",
+      "descent_dispatch": null,
+      "exit_code": 2,
+      "generic_phase_policy": "exclusive-owner-thread-v1",
+      "geometric_points": 69,
+      "instruction_count": null,
+      "online_wall_ns": null,
+      "promotion_eligible": false,
+      "rayon_threads": 1,
+      "report_reason": null,
+      "report_status": "incomplete",
+      "runner_status": "completed",
+      "schema_version": 1,
+      "solutions": null,
+      "solve_attempts": 0,
+      "solver": "f4",
+      "valgrind": null,
+      "wall_ns": 126161832760
+    },
+    {
+      "accepted_relations": 0,
+      "address_space_cap_bytes": 8589934592,
+      "attempts": [
+        {
+          "engine": {
+            "MatrixF5": {
+              "max_degree": 3
+            }
+          },
+          "exhausted": true,
+          "family": "groebner",
+          "outcome": "incomplete",
+          "trial": 0,
+          "unsupported": false
+        }
+      ],
+      "cell": "n31a0",
+      "collector_dispatch": {
+        "collection_window": null,
+        "field_kernel": "pclmulqdq",
+        "pair_table": false,
+        "query_rule": "trial-keyed-sample",
+        "strategy": "Groebner"
+      },
+      "columns": 27,
+      "comparison_kind": "factor-base-policy",
+      "descent_dispatch": null,
+      "exit_code": 2,
+      "generic_phase_policy": "exclusive-owner-thread-v1",
+      "geometric_points": 69,
+      "instruction_count": null,
+      "online_wall_ns": null,
+      "promotion_eligible": false,
+      "rayon_threads": 1,
+      "report_reason": null,
+      "report_status": "incomplete",
+      "runner_status": "completed",
+      "schema_version": 1,
+      "solutions": null,
+      "solve_attempts": 0,
+      "solver": "f5",
+      "valgrind": null,
+      "wall_ns": 35753462637
+    }
+  ],
+  "rho_online_ratio": null,
+  "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+  "s_operations": null,
+  "schema_version": 1,
+  "source_commit": "765c3c5f19032bd852163805f257c56babef2040",
+  "static_feasibility_status": "PASS_STATIC_LAYOUT_ONLY",
+  "worker_sha256": "46325885cc72e9c4928f180f6a687e85d198887ef93da4488db471920d7ef62b"
+}

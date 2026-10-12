@@ -1,0 +1,39 @@
+{
+  "metrics": {
+    "bytes": 980,
+    "path": "metrics.json",
+    "sha256": "4d29ceda2b3c9efff0e4944fa0c5c61702bfa15fb1cb89afd83824e75d579018"
+  },
+  "process": {
+    "command": [
+      "/Volumes/SSD990/kic-stage188-finalizer-af88ab144/release/examples/koblitz_f4_stage188",
+      "verify-final",
+      "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-188-dense-reducer-stacked-native-20261002/development/composition-pre.json",
+      "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-188-dense-reducer-stacked-native-20261002/development/composition-pre-verification.json"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 1982464,
+    "pid": 75867,
+    "returncode": 2,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.001696,
+    "timed_out": false,
+    "total_core_seconds": 0.0028510000000000002,
+    "user_seconds": 0.001155,
+    "wall_seconds": 0.028347958,
+    "watchdog_seconds": 300
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 227,
+    "path": "stderr.txt",
+    "sha256": "2a028467c830ebdb5794b570fe66e1dd565dfbb75370be4687af3a10ab3f4fb4"
+  },
+  "stdout": {
+    "bytes": 0,
+    "path": "stdout.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

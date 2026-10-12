@@ -1,0 +1,189 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index a2ee2bc03..6878d797e 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -128,6 +128,25 @@ use std::collections::{HashMap, HashSet};
+ use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
+ use std::sync::{Arc, OnceLock};
+ 
++/// A1 exploration probes (2026-10-06): stage timings of the folded build,
++/// printed to stderr when `KIC_BUILD_PROBES` is set.  Not for main.
++pub mod build_probes {
++    use std::sync::atomic::{AtomicU64, Ordering};
++    use std::time::Instant;
++    pub static ADD: AtomicU64 = AtomicU64::new(0);
++    pub static KEY: AtomicU64 = AtomicU64::new(0);
++    pub static EMIT: AtomicU64 = AtomicU64::new(0);
++    pub static ALLOC: AtomicU64 = AtomicU64::new(0);
++    pub fn charge(c: &AtomicU64, since: Instant) -> Instant {
++        let now = Instant::now();
++        c.fetch_add((now - since).as_nanos() as u64, Ordering::Relaxed);
++        now
++    }
++    pub fn take(c: &AtomicU64) -> u64 {
++        c.swap(0, Ordering::Relaxed)
++    }
++}
++
+ use num_bigint::BigUint;
+ use num_traits::{One, ToPrimitive, Zero};
+ use rand::rngs::StdRng;
+@@ -4213,6 +4232,13 @@ impl PairSumTable {
+         let part_bits = bucket_bits.min(8);
+         let parts = 1usize << part_bits;
+         let part_of = |h: u64| (h >> (64 - part_bits)) as usize;
++        let mut lap = std::time::Instant::now();
++        let mut laps: Vec<(&str, u128)> = Vec::new();
++        let mut mark = |name: &'static str, laps: &mut Vec<(&'static str, u128)>| {
++            let now = std::time::Instant::now();
++            laps.push((name, (now - lap).as_nanos()));
++            lap = now;
++        };
+         // 1. Every row keyed once: its pairs' hashes and stored words.
+         let keyed: Vec<(Vec<u64>, Vec<u32>)> = (0..rows)
+             .into_par_iter()
+@@ -4229,6 +4255,7 @@ impl PairSumTable {
+                 (hs, ws)
+             })
+             .collect();
++        mark("keyed", &mut laps);
+         // 2. Where each row's share of each partition goes.
+         let row_counts: Vec<Vec<usize>> = keyed
+             .par_iter()
+@@ -4250,6 +4277,7 @@ impl PairSumTable {
+             part_start[p + 1] += part_start[p];
+         }
+         let total = part_start[parts];
++        mark("counts", &mut laps);
+         let mut row_offset: Vec<Vec<usize>> = Vec::with_capacity(rows);
+         let mut cursor = part_start[..parts].to_vec();
+         for c in &row_counts {
+@@ -4258,9 +4286,11 @@ impl PairSumTable {
+                 cursor[p] += n;
+             }
+         }
++        mark("offsets", &mut laps);
+         // 3. Scatter into partitions: each row owns its slots outright.
+         let mut part_h = vec![0u64; total];
+         let mut part_w = vec![0u32; total];
++        mark("alloc_parts", &mut laps);
+         let (hp, wp) = (part_h.as_mut_ptr() as usize, part_w.as_mut_ptr() as usize);
+         keyed
+             .par_iter()
+@@ -4279,7 +4309,9 @@ impl PairSumTable {
+                     at[p] += 1;
+                 }
+             });
++        mark("scatter", &mut laps);
+         drop(keyed);
++        mark("drop_keyed", &mut laps);
+         // 4. Each partition counting-sorted into its own bucket range.
+         let filter_bits = filter_bits_for(total);
+         let present_mask = (1u64 << filter_bits) - 1;
+@@ -4290,6 +4322,7 @@ impl PairSumTable {
+         let mut bucket_start = vec![0u32; buckets + 1];
+         let mut rests = vec![0u32; total];
+         let rp = rests.as_mut_ptr() as usize;
++        mark("alloc_rests_filter", &mut laps);
+         bucket_start[..buckets]
+             .par_chunks_mut(per_part)
+             .enumerate()
+@@ -4318,10 +4351,16 @@ impl PairSumTable {
+                 }
+             });
+         bucket_start[buckets] = total as u32;
++        mark("sort_fill", &mut laps);
+         let present = present_atomic
+             .iter()
+             .map(|w| w.load(Ordering::Relaxed))
+             .collect();
++        mark("present", &mut laps);
++        if std::env::var_os("KIC_BUILD_PROBES").is_some() {
++            let parts: Vec<String> = laps.iter().map(|(k, v)| format!("{k}={v}")).collect();
++            eprintln!("build-probes-partition: {}", parts.join(" "));
++        }
+         (bucket_start, rests, present, present_mask)
+     }
+ 
+@@ -4344,6 +4383,7 @@ impl PairSumTable {
+         byte_budget: u128,
+         bulk: bool,
+     ) -> Option<Self> {
++        let probe_start = std::time::Instant::now();
+         if matches!(
+             fb.domain,
+             FactorBaseDomain::StandardSubspace | FactorBaseDomain::CofactorProjection
+@@ -4414,12 +4454,14 @@ impl PairSumTable {
+         // control).
+         let bulk = bulk && canon.is_some();
+         let each_row = |r: usize, f: &mut dyn FnMut(u64, u32)| {
++            let t = std::time::Instant::now();
+             let mut sums = Vec::with_capacity(n_points);
+             let mut scratch = BatchScratch::default();
+             let (orbit, rep) = reps[r];
+             let from = suffix[orbit as usize] as usize;
+             if let (true, Some(canon)) = (bulk, canon.as_ref()) {
+                 let mut lambdas = Vec::with_capacity(n_points);
++                let t = build_probes::charge(&build_probes::ALLOC, t);
+                 curve.add_many_lazy(
+                     points[rep],
+                     &by_orbit[from..],
+@@ -4427,11 +4469,14 @@ impl PairSumTable {
+                     &mut lambdas,
+                     &mut scratch,
+                 );
++                let t = build_probes::charge(&build_probes::ADD, t);
+                 let mut keys: Vec<u64> = sums.iter().map(|p| p.x).collect();
+                 canon.canon_in_place(&mut keys);
++                let t = build_probes::charge(&build_probes::KEY, t);
+                 for (key, p) in keys.into_iter().zip(&sums) {
+                     f(if p.infinity { 0 } else { key + 1 }, orbit);
+                 }
++                build_probes::charge(&build_probes::EMIT, t);
+                 return;
+             }
+             curve.add_many(points[rep], &by_orbit[from..], &mut sums, &mut scratch);
+@@ -4442,6 +4487,7 @@ impl PairSumTable {
+         // Keyed once and partitioned (see [`Self::FOLD_PARTITION_BYTES`]),
+         // or, past that transient budget, the two-pass count-then-fill.
+         let partition = bulk && pairs * 12 <= Self::FOLD_PARTITION_BYTES;
++        let probe_t0 = std::time::Instant::now();
+         let (bucket_start, rests, present, present_mask) = if partition {
+             Self::fold_partitioned(reps.len(), bucket_bits, tagged, &each_row)
+         } else {
+@@ -4490,7 +4536,8 @@ impl PairSumTable {
+                 .collect();
+             (bucket_start, rests, present, present_mask)
+         };
+-        Some(Self::assemble_folded(
++        let probe_t1 = std::time::Instant::now();
++        let out = Self::assemble_folded(
+             curve,
+             points,
+             fb,
+@@ -4505,7 +4552,24 @@ impl PairSumTable {
+                 canon_tables: Vec::new(),
+             },
+             tagged,
+-        ))
++        );
++        if std::env::var_os("KIC_BUILD_PROBES").is_some() {
++            eprintln!(
++                "build-probes: pairs={} points={} rows={} partition={} pre_ns={} fill_ns={} assemble_ns={} alloc_ns={} add_ns={} key_ns={} emit_ns={}",
++                pairs,
++                n_points,
++                reps.len(),
++                partition,
++                (probe_t0 - probe_start).as_nanos(),
++                (probe_t1 - probe_t0).as_nanos(),
++                probe_t1.elapsed().as_nanos(),
++                build_probes::take(&build_probes::ALLOC),
++                build_probes::take(&build_probes::ADD),
++                build_probes::take(&build_probes::KEY),
++                build_probes::take(&build_probes::EMIT),
++            );
++        }
++        Some(out)
+     }
+ 
+     /// A folded table around stored words, however they were built:

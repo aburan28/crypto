@@ -1,0 +1,1846 @@
+{
+  "cells": {
+    "n31-l5-m3-ggmp-a0-f0": {
+      "artifact": {
+        "digest": "sha256:e692705df5acbc62003eb5a5993989c0793b028d97a579fe7685cc08ffda550b",
+        "expires_at": "2026-12-10T18:33:21Z",
+        "id": 10276743656,
+        "name": "koblitz-stage27-n31-l5-m3-ggmp-a0-f0-34633920325",
+        "size_in_bytes": 1745814
+      },
+      "classifications": {
+        "true_negative": 20,
+        "true_positive": 20
+      },
+      "factor_points": [
+        63
+      ],
+      "group_additions": 82178,
+      "outer_resources": {
+        "one_cpu_utilization_percent": 99.23244979263451,
+        "process_tree_rss_samples": 2982,
+        "sample_interval_seconds": 0.02,
+        "sampled_peak_process_tree_rss_bytes": 51900416,
+        "scope": "packet integrity verification, setup, exact source verification, factor-point materialisation, exhaustive pair table, and target search",
+        "single_core_elapsed_seconds": 140.53031875300007,
+        "total_core_seconds": 139.45167800000004
+      },
+      "pair_entries": 71960,
+      "process_resources": {
+        "maximum_individual_process_rss_bytes": 14393344,
+        "process_receipts": 40,
+        "summed_process_wall_seconds": 0.901077237,
+        "total_core_seconds": 0.70314
+      },
+      "result_seal_sha256": "705aafea93be9782cde79b4687c87ef6edefe768d7eaa254df2f74cfeb25d2c8",
+      "verification": {
+        "cell_id": "n31-l5-m3-ggmp-a0-f0",
+        "inventory_sha256": "707da231d70ade17ef6dfe3e637e5d5c718beb12e7e1ba1059947224ff99011c",
+        "schema": "koblitz_stage27_direct_mitm_verification.v1",
+        "status": "verified"
+      }
+    },
+    "n31-l5-m3-standard-a1-f0": {
+      "artifact": {
+        "digest": "sha256:0136504ea661aae42497011914b87b7729d035fc4869abd1bfb0f45688aa48ce",
+        "expires_at": "2026-12-10T18:33:21Z",
+        "id": 10277203391,
+        "name": "koblitz-stage27-n31-l5-m3-standard-a1-f0-34633920325",
+        "size_in_bytes": 1213435
+      },
+      "classifications": {
+        "true_negative": 20,
+        "true_positive": 20
+      },
+      "factor_points": [
+        31
+      ],
+      "group_additions": 20645,
+      "outer_resources": {
+        "one_cpu_utilization_percent": 99.93085090242866,
+        "process_tree_rss_samples": 3023,
+        "sample_interval_seconds": 0.02,
+        "sampled_peak_process_tree_rss_bytes": 51269632,
+        "scope": "packet integrity verification, setup, exact source verification, factor-point materialisation, exhaustive pair table, and target search",
+        "single_core_elapsed_seconds": 187.936815612,
+        "total_core_seconds": 187.806859
+      },
+      "pair_entries": 19080,
+      "process_resources": {
+        "maximum_individual_process_rss_bytes": 14393344,
+        "process_receipts": 40,
+        "summed_process_wall_seconds": 0.877681398,
+        "total_core_seconds": 0.643425
+      },
+      "result_seal_sha256": "3497c5cda18030bad29caeba8fdde0620f90071b424d9c05608757582d111970",
+      "verification": {
+        "cell_id": "n31-l5-m3-standard-a1-f0",
+        "inventory_sha256": "5f13a4f2efa75447a9235502d810ee8c382fd28b81c74153a6c55c82a1596a87",
+        "schema": "koblitz_stage27_direct_mitm_verification.v1",
+        "status": "verified"
+      }
+    },
+    "n41-l5-m3-standard-a1-f0": {
+      "artifact": {
+        "digest": "sha256:f22b6b11ebdb1ce17518ba6be0ba005893617dd2cfefaf12c50fd98c19bbda93",
+        "expires_at": "2026-12-10T18:33:21Z",
+        "id": 10277198288,
+        "name": "koblitz-stage27-n41-l5-m3-standard-a1-f0-34633920325",
+        "size_in_bytes": 1391405
+      },
+      "classifications": {
+        "true_negative": 20,
+        "true_positive": 20
+      },
+      "factor_points": [
+        25
+      ],
+      "group_additions": 13632,
+      "outer_resources": {
+        "one_cpu_utilization_percent": 98.66183454114612,
+        "process_tree_rss_samples": 3023,
+        "sample_interval_seconds": 0.02,
+        "sampled_peak_process_tree_rss_bytes": 52867072,
+        "scope": "packet integrity verification, setup, exact source verification, factor-point materialisation, exhaustive pair table, and target search",
+        "single_core_elapsed_seconds": 144.022970646,
+        "total_core_seconds": 142.09570499999998
+      },
+      "pair_entries": 12360,
+      "process_resources": {
+        "maximum_individual_process_rss_bytes": 14393344,
+        "process_receipts": 40,
+        "summed_process_wall_seconds": 0.815458275,
+        "total_core_seconds": 0.629727
+      },
+      "result_seal_sha256": "eb6dc20bc49ba90f3d46a4552fd826aad9d7b122a1abcd6bc930ec266f91db76",
+      "verification": {
+        "cell_id": "n41-l5-m3-standard-a1-f0",
+        "inventory_sha256": "3ecedd2bd79d408c343b69ababfff35165615743ac570fe4ef8ecd1166b72e91",
+        "schema": "koblitz_stage27_direct_mitm_verification.v1",
+        "status": "verified"
+      }
+    },
+    "n59-l9-m3-standard-a1-f0": {
+      "artifact": {
+        "digest": "sha256:1ba9dc9c741ae1731471ed37dd072808786ed6e81e91bde7287de71722f36aa1",
+        "expires_at": "2026-12-10T18:33:21Z",
+        "id": 10277178866,
+        "name": "koblitz-stage27-n59-l9-m3-standard-a1-f0-34633920325",
+        "size_in_bytes": 6003458
+      },
+      "classifications": {
+        "true_negative": 20,
+        "true_positive": 20
+      },
+      "factor_points": [
+        483
+      ],
+      "group_additions": 4687797,
+      "outer_resources": {
+        "one_cpu_utilization_percent": 98.74440761989322,
+        "process_tree_rss_samples": 9829,
+        "sample_interval_seconds": 0.02,
+        "sampled_peak_process_tree_rss_bytes": 85479424,
+        "scope": "packet integrity verification, setup, exact source verification, factor-point materialisation, exhaustive pair table, and target search",
+        "single_core_elapsed_seconds": 294.04855019000007,
+        "total_core_seconds": 290.356499
+      },
+      "pair_entries": 4665400,
+      "process_resources": {
+        "maximum_individual_process_rss_bytes": 38166528,
+        "process_receipts": 40,
+        "summed_process_wall_seconds": 188.861449569,
+        "total_core_seconds": 161.336348
+      },
+      "result_seal_sha256": "434d46111a1295d1604be3c4289f12710f155a2f6731d2c8d3ff0864b9f425f7",
+      "verification": {
+        "cell_id": "n59-l9-m3-standard-a1-f0",
+        "inventory_sha256": "d5ec240475d23e68bbd7d8994a202e5a347a8b1f03cb7fc26284446d387e2d83",
+        "schema": "koblitz_stage27_direct_mitm_verification.v1",
+        "status": "verified"
+      }
+    }
+  },
+  "claim_boundary": "matched public synthetic PDP direct-decomposition control only",
+  "classification_counts": {
+    "true_negative": 80,
+    "true_positive": 80
+  },
+  "conflict_semantics": "direct MITM exposes group additions and pair-table entries rather than SAT conflicts",
+  "conflicts": null,
+  "full_cost_gate_passed": false,
+  "instances": 160,
+  "koblitz_index_calculus_sota": false,
+  "operations": {
+    "group_additions": 4804252,
+    "pair_entries": 4768800
+  },
+  "outcomes": 160,
+  "packet_verification": {
+    "cells": {
+      "n31-l5-m3-ggmp-a0-f0": 40,
+      "n31-l5-m3-standard-a1-f0": 40,
+      "n41-l5-m3-standard-a1-f0": 40,
+      "n59-l9-m3-standard-a1-f0": 40
+    },
+    "instances": 160,
+    "known_witnesses_present": false,
+    "packet_inventory_sha256": "c937afb9b172d114768b0b96a4b5ccf66e91fbf278b77c58ed49f0fd74af37f7",
+    "schema": "koblitz_stage26_affinity_input_verification.v1",
+    "source_run_inventory_sha256": "bb4377054700edf3049a7590b9b9fdd8fe6a0c57b6a216a7928dd211dc74a12c",
+    "status": "truth_free_exact_exports_verified",
+    "truth_labels_present": false
+  },
+  "phase_a_oracle_sha256": "0e4ac5d9dd92b11e6b896342eeef076e985c12ad931c1acc97e0d9c2e626890a",
+  "phase_a_seal_sha256": "01b7fbab8bccbb45c7e3e6a46640ff5997cefee303416afd9671da7cc2e13632",
+  "resources": {
+    "maximum_individual_direct_mitm_process_rss_bytes": 38166528,
+    "maximum_sampled_process_tree_rss_bytes": 85479424,
+    "parallel_cell_job_span_seconds": 307.0,
+    "summed_direct_mitm_process_core_seconds": 163.31264,
+    "summed_outer_total_core_seconds": 759.710741,
+    "summed_single_core_elapsed_seconds": 766.5386552010002,
+    "workflow_wall_seconds": 322.0
+  },
+  "rows": [
+    {
+      "blind_instance_id": "b-9e3309365c494a6edb3dc12059bd3461c70d7e05d9083c4e934fb234d5418f13",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2023,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-2b311daf2f55e29a4ebaad3a1dec6d5baa95ff2429034dd4b7f8745b2921fb04",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-caecdf2d1ea0fd061d69e3b229d3e116236cc5793037298bb5f4b24114d07d38",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-b6ba853c1a3c6bf4d8e254fb5c1bed19f1c9283d51bd2562b371994c858fe525",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2032,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-5b6d58911c9953573331c3ce05f871460d5976b3a3e0f3afc1f355262d0e1bb4",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-d3e6249ad7d8dad94521b9ad56dbee7ec904097e7418637ab52a2835b7260759",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2033,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-e785941cf64518a3b13f668ef8e532dcc2165da1e66d2a1e7ca0b72d9ecefa80",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-53b0de309939f8b7bb91ce7e5916c91643bbabf673137bbc75e74abc667dc552",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2041,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-dd577f93d4b9729ec83572149f195f377ccfdd0ae2e7a7da54c5d950e4c2d26a",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-caa31aaed5bd1380971e020a17b324f6f6735cecc274f2a4bf1b282010cad1ce",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2030,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-57003b0e9c8c0aae15b5de4e12e2b46079d464cb4eb5dc38ec72e1007a43f0ca",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-892a7130eac631c8a9e19904da0a940fcd4689a77d58a5b173bcc5bdea7339e1",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-5326f84f696eee912bb94f5c5c217293c85bf782b7c110e33215ac59d22a18db",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-859dc11265ab80f8c3d698fbc8cb7417e490dcc72f60b2b96a23e69d11114ec6",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2052,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-b8e7f3e6f988a0d080bfe86610c58cbe9062bcc8b35045224e0b40c78bf33572",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-f04fd06ae0a391c9b85f73aa89aee795449ac0f8d9c4751ff510fd8e374686cf",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2035,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-6bc19300bc96d81abb93aa497ab76ba829a4720aed2e4e7c2bca5cca24bee852",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-2032022054fd0cff2932d6b57a7ea1ecfdbabe894d9f21771f1b8f35db20a173",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2017,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-2e456c8fee6a606b0d07abba53a5d403403f0f6ccb976110dfa90e7b5e7272af",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-6d6f33ef27d8ac1996525616fa5c5b52c40bfb19ef602fb838eefdb9a32a20a6",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2032,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-0a252463721a5217d3855cac4856a998a4d142e752225ba0d2dcc4db06435ded",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-8dc368041cf3297f91ffb6badd0f8b42f7a2d159392f906e446f28ab3ed7faca",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-4f19a7f0602247ef89513d9f0f27df73b448fe133753230a313dedc70b878725",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2030,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-fb11db063a9edc37c227208f44dd458ef73c0e4210abdc61ba6db52ddf0b1075",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-9b22ec4b6577b61cb51e856104f392bb2ff460bfd08c3e456b61b96769fb7b76",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-3c9ca5e5c8ccdb14dca5779b7ee3b7496ecd7c776b16f3dbabe9cef89afe032d",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2037,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-a352e99f631c79e147bbe036e70f2c6b63916de54540209b1c5c113b47ee430b",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2026,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-6fe944e91f9543b5dc4e2effb6d4d313309c639ed24710e9c2ad310d928062bb",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2035,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-51fe07790df4e32042ccea8b95ea401d938142dec574ff05503bcc18d7d39068",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2022,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-a69ae389bbe44f0e6d566c347bd7cbfff850bae9103da252f816e3e24e3a6759",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2029,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-6ca4f635c32b03275885d144604fe3a4c341ccc255e5879157e2c8709e89b475",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-51ae0877ab48bcab5c4363a0aa6ed638ea46d8c6b92f20ef9ebff0bad3f036b0",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2044,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-e590e04d9abf6903be620652c4fdee3c325461c92059d7a7cea474fd23190036",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-43432d9c08d51cf45ea2c368b7d7aa71df5a1d82657a528584660b5269864e1e",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-333c55db3a877252feba4f33cc2624dd5c4beb6488287afe6ece1cb1b0c662fb",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-ecc7c83a9fedaa1157117e2a0447a77de6da45c21ea3c70e714dc8ec9cc4e732",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2018,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-2638b332b19dc7244bd398dd37b6520869018a8ec5a0e7fe51f79ce3729ab781",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_negative",
+      "factor_points": 63,
+      "group_additions": 2079,
+      "pair_entries": 1799,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-7b2dd1fcf36d12cf87ebfc50604024f42b787c796276e3a9e4694f5e81046d09",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2018,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-512ded728a1025edd4dc0409b8c9fabad5c05e15f99bd9a4b1952d6719814519",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2022,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-bca8fe4df6f1d1c932583bbb34f63355bf5e929a8f4d500411b133a3645b5a54",
+      "cell_id": "n31-l5-m3-ggmp-a0-f0",
+      "classification": "true_positive",
+      "factor_points": 63,
+      "group_additions": 2022,
+      "pair_entries": 1799,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-2e7e3853c57f8c94fa901d9f560ba6ff848c905a87e165da6886edb9ed3c37e1",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 513,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-0ba2fe956a5a0f16620da2e1083113dabf50e1f81cfb243044cbeb8b3cce267b",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 502,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-ee9691d6c6e72722969a25ebb52904c4446052de77e4d26143f2f46dfa5b8eb2",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-7e74297d6f07067a699d6733e716e746c9e249ccfd2eb2ec09e3fcfe9ebb8a3a",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 499,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-c842b8c7c875021d8fcb434c8cffa91e960fd490ccb8eb8a238db3aceaa9c298",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 499,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-47ee3dce20cb8f83cfbfc3e6bcea688786398d30fa753df9bd977985dfded26d",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 501,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-81f28f1d1c7feabfcbc7209525e278c2da6cb8b81950500323530e3d08d2cb7d",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-df1a60846e0bb2b724bb588c5a5c1706600a5e4a8eeb2add1740147c3ef60d66",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-a3e81c0af99bc3fe2cf99005a6c993b78a3667acf579881b45789667a55f7c9d",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 504,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-5b5b2b70207b5757bd3dbe011ef4362242ecdf08524645aa6f1fc60565fdd42e",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 507,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-2c0bad034b7594cab10b3b4ce4a42ab7e9640b6443bb9c9a2e1f6ca83444d3ad",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-88a4da380a3905ea67679c5c601f5f454f5a7da1b6db236609ae92a011868ba3",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-deb122867100f90925e12404e01e7c7c694cae9e6f63275bb2ee8aade4056659",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-a1a3b03dfb6e74065df0c89949f317ee21532d67838d5f2438b4294d41ce9e4a",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-6bfcfa8b17b2edca9cd955c1910fb717f09bef51562a535b412cd8f2bdd78cae",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-eeaa15d31d513df2a63f779d4734888975a69aaad3da8f409056d535e82832ca",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 498,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-cfe48be8f959c89ee3f2a8e2c437b36cae3dc61547a8bc999787af8e994b3325",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-a002845e08b0846bc52ce197bfb45f7b6a30a96fc969172354dd7eb8a0fe0dce",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 507,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-17804f44d60ac1d53dd5136482866759cea198a8bc0d2b83965f19fede9e1063",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-b5ecb26d5b12d08ccdcc33b0fad209ee26f198cb2509643988c63fd215b25306",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-3b0ca69404b88f933d46714d84c58da4c67ebc1f1c9fe21830de4ee4d4787f0c",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-82ee1685ffc78ee3c65ea2d8bc387486662aa773d60d3f0f814fb72cc3da0320",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 505,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-086b6413f065d7b87e25401a7762997a9c8ff263727158f43605ee1a7255d071",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 515,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-117cdf0355f713a871f82521d944564144d5073463c9bf29ae7387bca2e408ab",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 508,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-b016a597da214a35e537252709a945b48c697d516f0e065e86ddb13a91590eee",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-30a02a9d496b01af0fa395574e4ffbee309acd3346bf483c2f6fafac4e9460c4",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-20447bf48f41cd522e120eb0d036b8b679341f39442928d4bf60db959767529c",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-b444af2941655a7bad5c8c6113b8c98c86ee025a4e5847979ca1b93e2e2a877b",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 497,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-8648db7856eb5a0990953b8cf05538b7d7ddc3c711c91eb26c178edaece0ba00",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-cdea88c50e8bbf41d8af4abfd79ce0f0765bd8737f6def56ef910e22425c4481",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-7f46163acfc1ee2da7938b43889e81cba8a027ee04b5e41e03f4f82731cc262d",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-464645ff723e815ac726339b6f5cf945802db5847a82a85af2e04c2ac1eed57b",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 518,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-58388aea593c75fa2bd1f185aa0624dd8cb5f2772f7e85b08355e198eed3bb14",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 505,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-0599d787d7ea192fbe461c23ca1050b9805f7ff73af67b522fe72c2544bd811d",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 506,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-5c220aa3113f0f560e71607eea0796ef851d1046a89391b56c8dde56a30f515a",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-6748faf6a735d784d5459dc3419be3a5110e44a344af99397f0c6b32f8f7a922",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 31,
+      "group_additions": 527,
+      "pair_entries": 477,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-60abfaa8c702cbf66c9d23d24b7e004b8226973bafdaa694334c05d62d5f3f3b",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 499,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-bff877862c037ef5db4e5c18dd39422909d4083709d63dd47137e3bcd33e8764",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 518,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-bbf9e7628f7c9da88c277138957e04f58b8622b0be7f9ab7a59a3dcb28ac8788",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 505,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-efb6f2636ee28c18f98de3c864f4027516028a4bfe484b2cd3fa685cf96f46c7",
+      "cell_id": "n31-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 31,
+      "group_additions": 499,
+      "pair_entries": 477,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-9efecc2f15733f7970104e7253a2653636a1dd91d928969864ea88a5c36557e5",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-783e6b6e456a2e5db2a4c678b25ce94d7a341a6490965b6ea171d87aed07411b",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-5d067a1281bec913c19a4874f27c1faed5dbdf327d5625d4d57e8b426b92222f",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-884246624f9f3be0405cbb6e1ccf8f7b28fbffb5101f2135ae27add45a1b271d",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 332,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-2d42d8ad4487e5bf9a40819f267e9475519105343b9e541ab75673fb5ef540c2",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-eed094d7f51a0fa29de3e7a14b17309e00aa017f258995d298f9ca32c6227b58",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-8e25d107fb56c523cdcb464b1a549108895d221eba4f4ecf9dba0140a3f76f9b",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 347,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-35ad904533dee2035cb1904baff7e3a401a9aceaada4504e9cc178348af82271",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 326,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-9584c6bcc20ea5245991f7a8847989e27fa0707f14717252b9d9112d793914b5",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 326,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-bf5b75c66a0aae5502df2423634e788b0728cafbc7401849ea2711032511c3d1",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-cbdb7d51227e6b6a40dfe1a4808d18afae41d1bf053a68ea5127fe99fbb0a9e9",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 331,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-f18119af3833ee7ee186481c38b257bb0b551d63b770e6b4cafcf722bafcfa79",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-f09845fd8dd976841946d237362c01b1fcbd0de97db7c26a2f62bdcf847fafb1",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-024a340b103a7cdeb9939059a2843f455ad6acf8177f0bb0df5a5aba0d8ea4f5",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-d17b26c073f8b08ce952761eb70fa040204d0a8b99c8b34ef2bb54102088d211",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 328,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-1bf4beebb076b6964ef78049b75acae01964bc3b82b6b008d6d2a7d65c84f0cc",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 341,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-524925acd56a8a3b0fdd6e8c2657704aa2b2330e6b05e5ec57dc23055d3ea65c",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 327,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-dc76adfda02c0d2ecfd5974d63eb8e49517a9888f6f677b668d8773626b5e2f2",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 326,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-2308c39c3e4b94eebb31e00b984242540193a9065072680a6882edd3e93ed54c",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-def42b541cff2d7e1e2643e708090ed3a10d5b927e190930393faedd659ef6b8",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-8b2b2891e3a71db7a7b716d018b130c37e17442fcfff4b6e8c40e53bdb4e8eee",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-6068d8d90da5fd27b7fca0c15928ecbe4d1b1ec92a8fae7c0ed1a346446aa0ca",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 332,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-575c0a31e593dc4bccd6a7833ac3919fe1bc6c830f252eec11714e0c5f70eb56",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-5e69ce62e6b44130ac0ec61bdae14a65bba49851ace8a59ea90358101dccf23e",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-7da1ae9c9080904fa5ef1ce1405ecf210d07d2a237f50db99d13946b1e635727",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 331,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-124b192739d6128c725f4f9064b677eb79c4d96e58ea12d480b44bf138a6872b",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-c76adc7fc9eb44092af332deb03a72a7edb139b0804254b3e10a646a3bb497fb",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 331,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-07005ee7f534e77930c574735695de991730da52808d8fa1c73e340ddc689ce5",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-df8852b366d77848583cb0ca1951444dd5d518412a7254dd5e4f8faf963cabc9",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 328,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-d1a61bca55b27bbf1d10ff50ac45c31923f19a2245482cc59ed651ae0700e13e",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-1a0196f6b47fe3823904ade15ae593e60f3b5f9b495d3044bda1a0f76918c007",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-69278691faf3dbbd74f87e8c270c779441b224b180efd0aee93fffbed12edd7a",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 327,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-b2f4034b590fdeff99e53e553003cb89dfc4994866cd761f2908e26c96908d05",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 332,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-ee929c547dfaa2866f21808da790093fbf6f3ae9a00bfa35267ffa0718ad2c7f",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-5886510dd27b4a15ab95984274a8e599e221ffd70efa2553b5757d2d496d9d1e",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 343,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-14f62b4371d919c5df435f3922fc67276d027d532b68c0bea0116f6a974d92ca",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 331,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-fa68ee9346577f3ff9bfdd085f36bfe9d3bdb373275c75869ffaa88ac5a50541",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 328,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-f39f0a9e01aaf2f8027bbdc2f92bffc9d92b4013a9104f00b9f759a901817a0e",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 337,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-c8e97cdceff46659013006f8c8d3dc5a9f22e280eb32c20f3c940a9911f8b152",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 25,
+      "group_additions": 328,
+      "pair_entries": 309,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-b4f26defe7cbd6e74ce63164652d52ea8c045e1061a4eac451672d84ef84411d",
+      "cell_id": "n41-l5-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 25,
+      "group_additions": 350,
+      "pair_entries": 309,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 117015,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-421e22a9c1c3b9d56396c8bbd0e46185bbebc32de0306f2bee6e9585703c2be4",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-3911dd33ea3daae0467e1378019c495acb70107c228df43949f454f625491e60",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-158b8f518f9b4c355ea358387136a8b98e7510f3a1932ff6f900adfbad1047af",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 117097,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-96fad90d139df2715fefa3e76e9c0e3938562c795501531dd9a429996aa65f7d",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 117053,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-286b864fd7e255d2e7feb72a9d6ec8da044b2ceabf97bc195e8d2e35ccbd65b0",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-9bd22efdf329e0de9f96f9affad6c63fb91b68afde8acc7bf97e447705d50836",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 117196,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-6630565ff8bd37e61ccb8e443ac888350ffce7c79950d47e3682de899facd896",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 116914,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-28024da2bc2073a506a5da7ea0ee316c4d0db036c44756fa0034950d37f15391",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 116904,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-254020cba2f75314372a4d02395c98cc2019478129ecb663d0fcd4ceb0b21d64",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-ec0b70fe381b585d74b9c13eefb572790f37529d68ecb98e680f1fc8b06bb34f",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-4ca2ba44932f1a0c8bd622c8265400aef5986c1751a26dab069383f2bca92bd7",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-5c8897965266eb109c77a93e1e381e6dc676ccd6770b77e2497f905dfb58c48e",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 116950,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-1a09f1fb617bb9a71264f6a9b8dde9b47cf43e01d04c9442360a691637b8be9a",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 116900,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-5905edf6a0a1d637c5925e218df94c393d0e9c84c64e3ac4f5d8e02ae8f5ae82",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-c6d67aa9914fa522388abab5a16a535bef56b42e8911a7b7a97e1a58f1726b4b",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-bbb2eda8ec708c7719e5088017f00af6e19ca35e2776ae2febd6228451cfd72f",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-589825193b06b16adf128eb19b747d9ac6e46fb3c2cf08be23713ce3f797becc",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 117117,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-51a93f26917a47b5d3634cb4adbdd1adc041c33884323c9f0a528c1d289246dc",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 116956,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-5fe72d6f815c43ba2bdbd2352c68e6ec32905afe024ad53743657706aa363387",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-16886b38814cdaa1b53e2db9d8caa02e5900f55fec73cee0d5e2876de9c63ab4",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-9771debef2ea6588359e663eb634f57d42dc7b48cb6130af64d1fdb3db067c80",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 117097,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-27000ff12b8b55d7f3cec7c9bb901027ec0fa738cc365aad3ce1f7dfae837967",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 117072,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-ca542112649dd188923b93bbf1e60579d95d991411fa831edb94652dbb04e393",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-e93abeba3a201c9aba383324bb1c1444c1770c854a7a35f573bb4762f3f39375",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-de3566c0ce67d0af1e10667062befa0e61074d4223db80aa1dcb15bfcf4e21d4",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-ce965ea4c0154847f327d3d8f6c5966923a2459489a9df341403b4a24220908f",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 116939,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-c7bd575fcc8ef0dabf0d34f4cf886394276c05b423285925b9bfbe209bf26a6f",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 116988,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-8eafcf5051be6a7ac7ced35f242e67c77f5073dd1b6ef1eeb35ed57df19c6fc8",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 116986,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-53392c3aa410afd4ae3666f5393db806dc86d3336066d6943f207f9114352ae1",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 117206,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-a99aa4046a42c9cc7db8b9cd199e754c4244f5fef4b7bb2be63b1872f6202dca",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 117053,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-2ebbb0ec328aa05aa43aaba3161bb0d1e597a02382dc7a66e2f0d9f8547ae407",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 117040,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-6e9c5d1a2a9e713dadbf6643d48a368b08b9db1d676f1511d523a113be5db69a",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-9a884764817dbc7b5517d1798cdb217b47c329a52c03b8d1aaae890411240aa1",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-10c023de48c3028911de41f270180f35b151d8b94828f520285a211997f8fe62",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-5d9eb7d0bef79e7f705cf52d9f36342d70ffa28bbdb3066c9e3107af21d64c90",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-d5e0ce262289b8a25973af51667c992726a375ad86b62ca9918bab85e517ea26",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-bd2f850bf0f2d4b0e11fb3b4f33501e945ec4be48877c7bf97fd0f275a43fdde",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_negative",
+      "factor_points": 483,
+      "group_additions": 117369,
+      "pair_entries": 116635,
+      "solver_status": "unsat",
+      "target_class": "nondecomposable"
+    },
+    {
+      "blind_instance_id": "b-ec040b1c121940e67c167f31521c2de76254c6dc15ad6329c63b731a3e61c032",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 117026,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    },
+    {
+      "blind_instance_id": "b-66926e891b864e3cee6019895bf2131a122b1ae962ea071ee5a194ba9b0ec126",
+      "cell_id": "n59-l9-m3-standard-a1-f0",
+      "classification": "true_positive",
+      "factor_points": 483,
+      "group_additions": 116908,
+      "pair_entries": 116635,
+      "solver_status": "sat",
+      "target_class": "decomposable"
+    }
+  ],
+  "schema": "koblitz_stage27_direct_mitm_score.v1",
+  "status": "complete_verified_truth_scored_direct_mitm_panel",
+  "workflow": {
+    "cell_jobs": {
+      "n31-l5-m3-ggmp-a0-f0": {
+        "completed_at": "2026-09-11T18:36:04Z",
+        "job_id": 103377179206,
+        "started_at": "2026-09-11T18:33:34Z",
+        "url": "https://github.com/aburan28/crypto/actions/runs/34633920325/job/103377179206",
+        "wall_seconds": 150.0
+      },
+      "n31-l5-m3-standard-a1-f0": {
+        "completed_at": "2026-09-11T18:36:56Z",
+        "job_id": 103377179140,
+        "started_at": "2026-09-11T18:33:35Z",
+        "url": "https://github.com/aburan28/crypto/actions/runs/34633920325/job/103377179140",
+        "wall_seconds": 201.0
+      },
+      "n41-l5-m3-standard-a1-f0": {
+        "completed_at": "2026-09-11T18:36:06Z",
+        "job_id": 103377179190,
+        "started_at": "2026-09-11T18:33:34Z",
+        "url": "https://github.com/aburan28/crypto/actions/runs/34633920325/job/103377179190",
+        "wall_seconds": 152.0
+      },
+      "n59-l9-m3-standard-a1-f0": {
+        "completed_at": "2026-09-11T18:38:41Z",
+        "job_id": 103377179194,
+        "started_at": "2026-09-11T18:33:34Z",
+        "url": "https://github.com/aburan28/crypto/actions/runs/34633920325/job/103377179194",
+        "wall_seconds": 307.0
+      }
+    },
+    "commit": "02225ed61e7331c11a1e4665b953a8384b0b08de",
+    "parallel_cell_job_span_seconds": 307.0,
+    "run_id": 34633920325,
+    "url": "https://github.com/aburan28/crypto/actions/runs/34633920325",
+    "workflow_wall_seconds": 322.0
+  }
+}

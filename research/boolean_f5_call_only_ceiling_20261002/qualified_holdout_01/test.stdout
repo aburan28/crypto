@@ -1,0 +1,14 @@
+
+running 9 tests
+test tests::development_route_matches_small_f4_and_phase_accounting ... ok
+test tests::fixture_and_affine_walk_keep_quadratic_core ... ok
+test tests::frozen_route_and_full_core_reservation_parse ... ok
+test tests::optimistic_ceiling_is_at_least_one ... ok
+test verify::tests::ceiling_bootstrap_is_deterministic ... ok
+test verify::tests::cpu_list_parser_covers_smt_ranges ... ok
+test verify::tests::reported_ceiling_survives_json_roundtrip ... ok
+test verify::tests::resource_gate_rejects_contended_receipt ... ok
+test verify::tests::sealed_failure_cannot_be_promoted ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+

@@ -1,0 +1,72 @@
+{
+  "rule": "A candidate needs every smoke trial VERIFIED before development; incomplete arms have null costs.",
+  "stage": "smoke",
+  "tables": [
+    {
+      "S_Ir": 47887.71916235009,
+      "candidate_over_floor": 6664734.540436453,
+      "candidate_over_incumbent": 1,
+      "candidate_over_rho": 1.1154859117788265,
+      "class": "reference",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "incumbent",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": 45714.328355621416,
+      "candidate_over_floor": 6362254.63467265,
+      "candidate_over_incumbent": 0.9546148606627027,
+      "candidate_over_rho": 1.0648594282439523,
+      "class": "engineering experiment",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "combined",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": 45573.387065043185,
+      "candidate_over_floor": 6342639.244674521,
+      "candidate_over_incumbent": 0.9516716991790574,
+      "candidate_over_rho": 1.0615763730728558,
+      "class": "engineering experiment",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "combined_dense",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": 45727.37928199948,
+      "candidate_over_floor": 6364070.986784162,
+      "candidate_over_incumbent": 0.9548873924643075,
+      "candidate_over_rho": 1.0651634336291542,
+      "class": "engineering experiment",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "orbit_projection",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": 47876.059520715695,
+      "candidate_over_floor": 6663111.819252627,
+      "candidate_over_incumbent": 0.9997565212576766,
+      "candidate_over_rho": 1.1152143146719469,
+      "class": "engineering experiment",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "serial_collection",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": 42929.918394025415,
+      "candidate_over_floor": null,
+      "candidate_over_incumbent": 0.8964703089843017,
+      "candidate_over_rho": 1.0,
+      "class": "reference",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "rho",
+      "verified_runs": 12
+    }
+  ]
+}

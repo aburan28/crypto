@@ -1,0 +1,52 @@
+=== ECBENCH-VM-BEGIN
+cmdline: console=ttyS0 rdinit=/init psi=1 isolcpus=6,7 panic=-1 quiet
+uname: Linux (none) 6.8.0-142-generic #142-Ubuntu SMP PREEMPT_DYNAMIC Wed Sep  2 14:24:27 UTC 2026 x86_64 GNU/Linux
+/sys/devices/system/node/node0 cpus=0-3 Node 0 MemTotal:         469152 kB
+/sys/devices/system/node/node1 cpus=4-7 Node 1 MemTotal:         513304 kB
+cpu0 siblings=0-1
+cpu1 siblings=0-1
+cpu2 siblings=2-3
+cpu3 siblings=2-3
+cpu6 siblings=6-7
+cpu7 siblings=6-7
+isolated=6-7 pressure=cpu io memory 
+env class   ECBENV2h91fb339e32fb
+cpu         QEMU TCG CPU version 2.5+ (8 logical, Some(4) cores, 2 NUMA nodes)
+features    adx aes avx avx2 bmi1 bmi2 fma pclmulqdq popcnt sha sse4.2 vaes
+os          linux x86_64 6.8.0-142-generic
+virtual     Some(true)
+binary      5111ebc20d5471ec1188e93e1a0541b6c1cba36b0538eeafd0817ce49df10291
+commit      ? (dirty: None)
+=== RUN-AUTO
+session ECBS1h923e3eb44444 complete -> /out/auto (64 records: {"verified": 64})
+run-auto exit 0
+audit OK: 64 records, 64 verified, 48 replays reproduced, 0 problems
+verify-auto exit 0
+=== RUN-NODE0
+session ECBS1h14bbcca48793 complete -> /out/node0 (64 records: {"verified": 64})
+run-node0 exit 0
+audit OK: 64 records, 64 verified, 48 replays reproduced, 0 problems
+verify-node0 exit 0
+=== RUN-LONE-SIBLING (must be refused)
+ecbench: CPU 2's SMT sibling 3 is not reserved; a neighbour on it shares the core's pipeline and caches
+run-lone exit 2
+=== RUN-SAME-DIR (must be refused, auto must stay intact)
+ecbench: /out/auto exists; a session never overwrites another
+run-same-dir exit 2
+=== INTERRUPT
+sleeper mask before: pid 698's current affinity mask: 3f
+sleeper mask during: pid 698's current affinity mask: 33
+children during: 0
+ecbench: interrupted by signal 15
+runner exit 143
+sleeper mask after: pid 698's current affinity mask: 3f
+children after: 0
+session status:   "status": "interrupted",
+records written: 36
+audit FAILED: 36 records, 35 verified, 0 replays reproduced, 1 problems
+verify-sig exit 0
+  "problems": [
+    "session_complete: session status is `interrupted`"
+  ],
+  "checks": {
+    "arms": true,

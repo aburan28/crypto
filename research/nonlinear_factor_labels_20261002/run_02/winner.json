@@ -1,0 +1,79 @@
+{
+  "anf_degree": 2,
+  "class_index": 1,
+  "discovery_cases": [
+    {
+      "degree_5": {
+        "cols": 3577,
+        "degree": 5,
+        "rank": 2645,
+        "refuted": false,
+        "resolves": false,
+        "rows": 3346,
+        "vars_determined": 1,
+        "vars_occurring": 16
+      },
+      "degree_6": {
+        "cols": 9893,
+        "degree": 6,
+        "rank": 7945,
+        "refuted": false,
+        "resolves": false,
+        "rows": 11186,
+        "vars_determined": 1,
+        "vars_occurring": 16
+      },
+      "draw": 3,
+      "elapsed_ms": 43,
+      "exhaustive_equivalence": true,
+      "exhaustive_solution_count": 0,
+      "input_degree": 5,
+      "input_terms": 699,
+      "resolution_degree_through_6": null,
+      "split": "discovery"
+    },
+    {
+      "degree_5": {
+        "cols": 2077,
+        "degree": 5,
+        "rank": 930,
+        "refuted": false,
+        "resolves": false,
+        "rows": 966,
+        "vars_determined": 0,
+        "vars_occurring": 16
+      },
+      "degree_6": {
+        "cols": 6739,
+        "degree": 6,
+        "rank": 4193,
+        "refuted": false,
+        "resolves": false,
+        "rows": 4998,
+        "vars_determined": 0,
+        "vars_occurring": 16
+      },
+      "draw": 4,
+      "elapsed_ms": 74,
+      "exhaustive_equivalence": true,
+      "exhaustive_solution_count": 0,
+      "input_degree": 5,
+      "input_terms": 815,
+      "resolution_degree_through_6": null,
+      "split": "discovery"
+    }
+  ],
+  "frozen_before_holdout": true,
+  "permutation": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    6
+  ],
+  "permutation_code": 14599816,
+  "selection_key": "SelectionKey { unresolved_through_5: 2, max_resolution_through_6: 99, degree_5_cols: 5654, degree_5_rows: 4312, input_terms: 1514, permutation_code: 14599816 }"
+}

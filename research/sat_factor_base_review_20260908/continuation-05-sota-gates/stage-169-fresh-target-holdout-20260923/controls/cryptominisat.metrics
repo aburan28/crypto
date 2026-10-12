@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/Volumes/SSD990/koblitz-balanced-pdp-phase-b-cms-build-successor-02-20260910/bin/cryptominisat5",
+    "--verb",
+    "1",
+    "--threads",
+    "1",
+    "instance.xor.cnf"
+  ],
+  "returncode": -15,
+  "watchdog_seconds": 120.0,
+  "timed_out": true,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 120.00753962500312,
+    "user_seconds": 119.038102,
+    "system_seconds": 0.612094,
+    "total_core_seconds": 119.650196,
+    "single_core_seconds": 119.650196,
+    "peak_rss_bytes": 210468864,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

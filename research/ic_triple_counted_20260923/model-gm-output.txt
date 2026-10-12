@@ -1,0 +1,9 @@
+n43a1, counted/triple under the count (200,000 simulated pairs each):
+  K+1 hits      : ratio of means 0.796; geometric mean of ratios 0.859; sd of log ratio 0.508
+       32 fixtures: expected interval [0.720, 1.024]
+       64 fixtures: expected interval [0.758, 0.972]
+      128 fixtures: expected interval [0.786, 0.938]
+  one extra hit : ratio of means 0.893; geometric mean of ratios 0.962; sd of log ratio 0.509
+       32 fixtures: expected interval [0.806, 1.147]
+       64 fixtures: expected interval [0.849, 1.090]
+      128 fixtures: expected interval [0.881, 1.050]

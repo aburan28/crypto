@@ -1,0 +1,31 @@
+{
+  "arms": {
+    "37": {
+      "generator": [
+        99424589043,
+        35163014771
+      ],
+      "hash_counter_exclusive": 512,
+      "subgroup_order": 230603167,
+      "target_count": 512,
+      "target_points_sha256": "3289c50a48192c273f485ef137b0c12d03a52728562af170dd68865049d2487e",
+      "target_scalars_sha256": "d3f5cbb00b69b758ea3e05a025c92f0d748716b49f504afbd13f2385791a0860"
+    },
+    "41": {
+      "generator": [
+        2056947637384,
+        1635505394702
+      ],
+      "hash_counter_exclusive": 512,
+      "subgroup_order": 549756390943,
+      "target_count": 512,
+      "target_points_sha256": "e04f2892b85817d34d8be54134ae6cb38ec3c6393dc5131355d290cba4c46a44",
+      "target_scalars_sha256": "a5360892c6b1dc820981339f864e33930b40047b4a1390679a76229cead5a7f0"
+    }
+  },
+  "domain": "ECC2K-COMPACT-FOUR-SUM-ORACLE-20260925-v1/",
+  "independent_math_sha256": "ed804a6bdace125cc41e514d93b1102763581f4feeaad60ba277cace592230bf",
+  "input_spec_sha256": "700ab214498bdd18cc49530e0233ed2f135628124fdb3eea48cbda9e1ef6666b",
+  "schema_version": "1.0",
+  "source_pr747_commit": "fc27150df3238b6863ed5618c721e7fd8b6ce403"
+}

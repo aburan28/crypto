@@ -1,0 +1,80 @@
+{
+ "note": "rho phase split on one fixture a cell from the exposed probe stream random.Random(20260923); diagnostic, fixes the constants of the rho-control prediction",
+ "runs": [
+  {
+   "cell": "n23a1",
+   "target_seed": 4549039760075462331,
+   "algorithm_seed": 6828985640982327911,
+   "walk_group_additions": 90,
+   "phases_ir": {
+    "rho_solve": 1928868,
+    "final_verification": 181006,
+    "curve_and_targets": 233510,
+    "startup_and_input": 11235,
+    "Program termination": 26255
+   },
+   "fixed_ir": 452006,
+   "rho_solve_ir_per_addition": 21431.866666666665
+  },
+  {
+   "cell": "n37a0",
+   "target_seed": 4549039760075462331,
+   "algorithm_seed": 6828985640982327911,
+   "walk_group_additions": 2246,
+   "phases_ir": {
+    "startup_and_input": 11225,
+    "Program termination": 26945,
+    "final_verification": 285005,
+    "rho_solve": 21542600,
+    "curve_and_targets": 571203
+   },
+   "fixed_ir": 894378,
+   "rho_solve_ir_per_addition": 9591.540516473731
+  },
+  {
+   "cell": "n43a1",
+   "target_seed": 4549039760075462331,
+   "algorithm_seed": 6828985640982327911,
+   "walk_group_additions": 6610,
+   "phases_ir": {
+    "curve_and_targets": 1608839,
+    "startup_and_input": 11235,
+    "rho_solve": 65635265,
+    "final_verification": 327790,
+    "Program termination": 27021
+   },
+   "fixed_ir": 1974885,
+   "rho_solve_ir_per_addition": 9929.692133131619
+  },
+  {
+   "cell": "n59a0",
+   "target_seed": 4549039760075462331,
+   "algorithm_seed": 6828985640982327911,
+   "walk_group_additions": 12053,
+   "phases_ir": {
+    "rho_solve": 173856227,
+    "startup_and_input": 11225,
+    "Program termination": 27349,
+    "final_verification": 347385,
+    "curve_and_targets": 258472680
+   },
+   "fixed_ir": 258858639,
+   "rho_solve_ir_per_addition": 14424.311540695262
+  },
+  {
+   "cell": "n61a1",
+   "target_seed": 4549039760075462331,
+   "algorithm_seed": 6828985640982327911,
+   "walk_group_additions": 14773,
+   "phases_ir": {
+    "curve_and_targets": 2629948,
+    "final_verification": 351436,
+    "rho_solve": 217971029,
+    "startup_and_input": 11235,
+    "Program termination": 27470
+   },
+   "fixed_ir": 3020089,
+   "rho_solve_ir_per_addition": 14754.68956880796
+  }
+ ]
+}

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-schedule-lpdpat37/tests"
+  ],
+  "exit_code": 0,
+  "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+  "peak_rss_bytes": 15073280,
+  "process_wall_ns": 494759292,
+  "stderr": "",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout": "\nrunning 7 tests\ntest tests::dense_lookup_refuses_large_dimensions_before_allocation ... ok\ntest tests::current_caps_and_empty_actual_support ... ok\ntest tests::changed_context_falls_back_and_invalid_input_is_rejected ... ok\ntest tests::ranking_matches_numeric_enumeration_and_large_combinations ... ok\ntest tests::full_width_constant_can_be_resource_censored ... ok\ntest tests::exhaustive_coefficients_degrees_masks_and_all_constructors ... ok\ntest tests::fixture_families_and_high_variable_bits_match ... ok\n\ntest result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s\n\n",
+  "stdout_sha256": "278510948c4b7b327182312e032727a1d6d270c8f12e0ad9fb5004f8fbb11d7a",
+  "system_seconds": 0.005986,
+  "timed_out": false,
+  "user_seconds": 0.036869
+}

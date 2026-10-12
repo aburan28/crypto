@@ -1,0 +1,128 @@
+{
+  "combinedHostReceipt": {
+    "path": "/Users/adamburan/Documents/Codex/2026-09-08/pl/outputs/shared-sigma-host-implementation-review.json",
+    "sha256": "9bcebec2029b228ed4b864cfe83042bebc3c5b8c4be7e058e6610113b31bc349"
+  },
+  "findings": [],
+  "goalContext": {
+    "evaluated": false,
+    "targetBillionScalarIterationsPerSecond": 26
+  },
+  "hostEvidence": {
+    "actualHostKernelRuns": 30,
+    "byteComparisons": 15,
+    "compiledHostBinariesRehashed": 8,
+    "copyWidths": [
+      1,
+      3,
+      8,
+      31,
+      32,
+      64,
+      127,
+      128,
+      255,
+      256,
+      512,
+      1024
+    ],
+    "defaultPreprocessingComparisonsReported": 18,
+    "fixtureBytes": 773764,
+    "fixtureSha256": "2b324a74da6153952d70bf67598424d27a8ab9d5e43b475923ff5c11941cf4c4",
+    "initialIncludeFailureRetained": true,
+    "invalidGuardsReported": 6,
+    "pairedBinariesAndLogsRehashed": 3,
+    "pairedBranches": 3,
+    "pairsPerBranchPerGlobalAndSharedHelper": 6240,
+    "positiveTrails": 364,
+    "rawPrefixAndDenominatorScratchIncluded": true,
+    "receiptHashes": {
+      "host-results.json": "ea03fe69fca2fe1cbe8962c294ddce6f1da11ffa8d05a68090cdc8887fc9ee0d",
+      "paired-results.json": "fbf798658dd101509cdb74fb7d029a31e28854c21b5a2d674979c9e465101b1d",
+      "source-checks.json": "0906091e2706032997a4d46c3c85dbe212306762cb8fa4e6023477dad0432219"
+    },
+    "referenceScalarSteps": 9590,
+    "reportReplays": 632,
+    "sourceChecksRerun": false,
+    "stateAndLogFilesRehashed": 30,
+    "zeroBatchSteps": 130
+  },
+  "implementationReadback": {
+    "barrierInCollectiveInitializerOnly": true,
+    "generatorHeaderEqualityCheckedInMemory": true,
+    "guards": "Default0; only0/1; shared1 requiresWP2 and walk-network bit.",
+    "hostBehavior": "Post-barrier values use the original immutable table; nvcc-host branch uses the existing square fallback. No host shared-memory concurrency is claimed.",
+    "initBeforePartialReturn": true,
+    "maskTable": "56x8uint32,1792bytes; direct static shared symbol",
+    "originalGeneratedGlobalScalarInverseBytesPreserved": true,
+    "sharedHelperMathExactAfterNameAccessorNormalization": true,
+    "unmodifiedBehavior": "Whole original kernel restored after removing only initializer and helper-selection changes. Init, field allocation and checkpoint methods unchanged; engine adds only a mode diagnostic."
+  },
+  "initialProbe": {
+    "blocksWithCompleteSnapshots": 114,
+    "boundsAndApi": "No apparent CUDA API or bounded allocation/indexing error found. Inputs are read only after i<n. Outputs are80byte structures with an explicit size assertion; table/output buffers include front/end guards.",
+    "checks": "Shared table is poisoned, synchronized, then filled by the actual initializer before every return. Complete table snapshots and guards are checked. Original/global and selected outputs are checked against independent routing; every inactive/padded output byte is checked.",
+    "compiled": false,
+    "coverageLimitation": "Original powers remain in780-case groups; no original-order warp exercises more than two distinct indices. This is a nonblocking coverage limitation, separately addressed in the additive successor.",
+    "executed": false,
+    "extraEntirelyInactiveBlockEachScenario": true,
+    "inputPairs": 21036,
+    "path": "/private/tmp/ecc2k-shared-sigma-src-20260912/src/testsharedsigmacuda.cu",
+    "repeats": 3,
+    "scenarios": 21,
+    "sha256": "760911d40894f39f1871f7ef24bafa51211d6a2579214b503db0ccc3d89f2248",
+    "sizes": [
+      0,
+      1,
+      3,
+      255,
+      256,
+      257,
+      6240
+    ],
+    "snapshotWords": 51072
+  },
+  "limits": [
+    "No CUDA compiler/device/probe execution was performed by this review. Compiler acceptance, native LDS/resource behavior and GPU synchronization remain separate stages.",
+    "Paired branch emulation uses an earlier arithmetic foundation header plus the actual new generated helper. It does not compile the complete current CUDA client. New flag guards are separately covered by source checks and current-header kernel host tests.",
+    "Counted dummy barriers and sequential cooperative-copy calls establish source/ownership behavior only. The instrumented zero __ldg count in the selected host helper does not mean zero shared-memory loads.",
+    "The initially frozen probe and160-file source remain immutable. This review completed after root reported dispatch of a separate CPU-only wrapper whose dependency closure excludes the probe.",
+    "No broad unchanged checkpoint serialization tests were repeated and no new throughput result is established."
+  ],
+  "nonblockingNotes": [
+    {
+      "file": "src/testsharedsigmacuda.cu",
+      "note": "Add an interleaved-power repeat to exercise all eight indices per warp while retaining original ordering and aggregate counts.",
+      "priority": 3
+    }
+  ],
+  "source": {
+    "addedFile": "src/testsharedsigmacuda.cu",
+    "all160FilesRehashed": true,
+    "canonicalManifestSha256": "d4497caf186b2c7598b2dc41cbda4e1b34b018419dbd414d479d7ab308a5f606",
+    "changedExistingFiles": [
+      "Makefile",
+      "codegen/gensigma.py",
+      "include/packed131.h",
+      "include/packedengine.cuh",
+      "include/packedkernels.cuh",
+      "include/packedsigma131.h"
+    ],
+    "files": 160,
+    "manifestPath": "/private/tmp/ecc2k-shared-sigma-host-20260912/source-manifest.json",
+    "manifestSha256": "61e10ab6dde7fac5c966420cafef49f32eafa6f77a7cef217c342b9fd2d23533",
+    "path": "/private/tmp/ecc2k-shared-sigma-src-20260912",
+    "selectedFiles": {
+      "Makefile": "1228ce2e3231073ec2a95bd943bbcec1ae8300dcec6ba47ff903f97ef02487e3",
+      "codegen/gensigma.py": "6360039e5ff0b2c31ff092c4eb2c1e006e5e681eb19cae88f35c6c1be5f3e0a7",
+      "include/packed131.h": "930ffa60f1b42ac14700ec94b42294c228bf449501ab4accef4097d0b9762ca0",
+      "include/packedengine.cuh": "8c82ce5dfc9f484ec6c939acb2ab256bfe0a17d1afaefcd474e9600cfb4cf7c9",
+      "include/packedkernels.cuh": "19bc960f45cba4a6aa45188fb9d921be6682d0b384d590593f5974e6b0d16249",
+      "include/packedsigma131.h": "a3276bbd3c1cd1467b5dba3afad1dcbd29813b390f5847b032c5b3a91e03a623",
+      "src/testsharedsigmacuda.cu": "760911d40894f39f1871f7ef24bafa51211d6a2579214b503db0ccc3d89f2248"
+    }
+  },
+  "sourceAssessmentSha256": "fd194092de0b4bd24ee98e6d97ce252590f2f4a3488c9473c0080d71253e9471",
+  "status": "frozen source and retained host review passed; original device probe statically reviewed and unrun",
+  "valid": true
+}

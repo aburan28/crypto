@@ -1,0 +1,86 @@
+{
+  "archive_bytes": 28871942,
+  "archive_sha256": "86e84fa1a31d152ef93a88837103ca578862269f333c89f44df26c472030ed84",
+  "audit": {
+    "attempts": 149,
+    "candidate_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h0ef1e080d97e",
+    "columns": 29,
+    "complete_source_bound": true,
+    "exact_feasible": 37,
+    "final_rank": 29,
+    "fresh_target_qualified": false,
+    "headline_online_admissible": false,
+    "online_attempt_wall_ns": 708643292,
+    "online_endpoint_admissible": true,
+    "online_phases_ns": {
+      "target_descent": 12375,
+      "target_pdp": 706185958,
+      "target_query": 333000,
+      "target_recovery_check": 126667,
+      "target_relation_check": 1985292
+    },
+    "online_speedup": null,
+    "online_wall_ns": 708643292,
+    "promotion_eligible": false,
+    "recovered_scalar": "24886",
+    "run_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h0ef1e080d97eWdf5c09464bedR0",
+    "same_point_rho_audited": false,
+    "schema_version": 3,
+    "scientific_control_only": true,
+    "solved_targets": 1,
+    "status": "AUDITED_COMPLETE_SINGLE_ARM",
+    "statuses": {
+      "CONFLICT_BUDGET_INCONCLUSIVE": 6,
+      "SOURCE_UNSAT": 106,
+      "VALID_POINT_WITNESS": 37
+    },
+    "target_attempts": 1,
+    "target_statuses": {
+      "VALID_POINT_WITNESS": 1
+    },
+    "verified_relations": 37,
+    "witness_rate_wilson95": [
+      "0.185862",
+      "0.323433"
+    ],
+    "workload_id": "df5c09464bed"
+  },
+  "budget_extension_permitted": false,
+  "classification": "accounting; development correctness and source-binding control",
+  "executions": 1,
+  "preexecution_receipt_commit": "c8b721db620e042ab2173ea2f77d321257910581",
+  "process": {
+    "binding": {
+      "asset_archive_sha256": "a1fd5bd49c80076f3b64fd5cb51d891b278afde765b4d3e39853692ac318bd96",
+      "asset_manifest_sha256": "e0c7a5edd01a6c64da810f2cf72a80b1b570d9031f96e8463cf1aaed2159e0f0",
+      "callable": "run",
+      "interpreter_sha256": "ec11021561db6edca6d1a8a796ddb94ffa0d0074b68e25f093b4bc117f06a70e",
+      "module": "static_sat_pipeline_v3",
+      "python_archive_sha256": "1f24a5ca7b3493275811f58eafb9885facd27ebe93e9b600ed6999df6bbccbdf",
+      "python_manifest_sha256": "a9c8f6542815770cadbba0674e43da192a6e8152285d35428b214948f4665582"
+    },
+    "execution_sha256": "4e6547c03cfe1fa54ae9a994c160e5d4afa987659dc72880c651885a0e9e8fa9",
+    "exit_code": 0,
+    "online_speedup": null,
+    "process_wall_ns": 2410662720041,
+    "promotion_eligible": false,
+    "python_flags": [
+      "-I",
+      "-S",
+      "-B"
+    ],
+    "schema_version": 3,
+    "scope": "whole runtime process; outside single-target online interval",
+    "status": "EXECUTED_SOURCE_CONTROL",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "8788cfb958e5b73aaf29adf79f777fa43c252d9e7a17b3cb85c0439f5c3f38dc",
+    "timed_out": false,
+    "watchdog_seconds": 7200
+  },
+  "raw_archive": "results-20260930/evidence.tar.gz",
+  "restart_permitted": false,
+  "resume_permitted": false,
+  "schema_version": 3,
+  "source_commit": "e5f2431a76217da4c7accb0f46ff5c0ff8f3df20",
+  "status": "TERMINAL_AUDITED_COMPLETE_SINGLE_ARM"
+}

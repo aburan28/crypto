@@ -1,0 +1,277 @@
+{
+  "L": 1024,
+  "S_ic": null,
+  "S_rho": null,
+  "checks": [
+    {
+      "arm": "ic",
+      "block": 0,
+      "rank_receipt": {
+        "a": 0,
+        "attempts": 255,
+        "base_sha256": "33dd5e81eadcd773db8c3126c356ba6011c0fa7a02dfad62b411ce28e8a791c3",
+        "failed_searches": 0,
+        "miss_nonexistence_proved": false,
+        "n": 41,
+        "orbit_columns": 255,
+        "rank": 255,
+        "relations": 255,
+        "representative_logs_verified": 255,
+        "rows_without_gain": 0,
+        "schema": "compact-orbit-rank-independent-replay-v1",
+        "status": "PASS",
+        "subgroup_order": 549756390943,
+        "summary_sha256": "8fc39ab9975b6df5e9ffa102589d3a77792f88661ad67cc9a45cc9aec275bd74",
+        "trace_sha256": "632ad720112ecd525cd46aa4552e08353a5a1bc37217f193f3123c848bc7d743",
+        "used_base_points_verified": 995
+      },
+      "targets_verified": 1024
+    },
+    {
+      "arm": "rho",
+      "block": 0,
+      "charges": {
+        "canonicalizations": 3627216,
+        "failed_collisions": 0,
+        "group_additions": 3628240,
+        "partition_hashes": 3399415,
+        "scalar_multiplications": 3104,
+        "table_inserts": 225504,
+        "table_queries": 226528
+      },
+      "targets_verified": 1024
+    },
+    {
+      "arm": "rho",
+      "block": 1,
+      "charges": {
+        "canonicalizations": 3627216,
+        "failed_collisions": 0,
+        "group_additions": 3628240,
+        "partition_hashes": 3399415,
+        "scalar_multiplications": 3104,
+        "table_inserts": 225504,
+        "table_queries": 226528
+      },
+      "targets_verified": 1024
+    },
+    {
+      "arm": "ic",
+      "block": 1,
+      "rank_receipt": {
+        "a": 0,
+        "attempts": 255,
+        "base_sha256": "33dd5e81eadcd773db8c3126c356ba6011c0fa7a02dfad62b411ce28e8a791c3",
+        "failed_searches": 0,
+        "miss_nonexistence_proved": false,
+        "n": 41,
+        "orbit_columns": 255,
+        "rank": 255,
+        "relations": 255,
+        "representative_logs_verified": 255,
+        "rows_without_gain": 0,
+        "schema": "compact-orbit-rank-independent-replay-v1",
+        "status": "PASS",
+        "subgroup_order": 549756390943,
+        "summary_sha256": "78f6da610768d1029e9d84a2138802e7e3d82e055f4169018e24deb6a84b4ea2",
+        "trace_sha256": "632ad720112ecd525cd46aa4552e08353a5a1bc37217f193f3123c848bc7d743",
+        "used_base_points_verified": 995
+      },
+      "targets_verified": 1024
+    },
+    {
+      "arm": "ic",
+      "block": 2,
+      "rank_receipt": {
+        "a": 0,
+        "attempts": 255,
+        "base_sha256": "33dd5e81eadcd773db8c3126c356ba6011c0fa7a02dfad62b411ce28e8a791c3",
+        "failed_searches": 0,
+        "miss_nonexistence_proved": false,
+        "n": 41,
+        "orbit_columns": 255,
+        "rank": 255,
+        "relations": 255,
+        "representative_logs_verified": 255,
+        "rows_without_gain": 0,
+        "schema": "compact-orbit-rank-independent-replay-v1",
+        "status": "PASS",
+        "subgroup_order": 549756390943,
+        "summary_sha256": "870c3755c631f697b7926cb534e2018f498945f63c1c96315379e5bf81680e59",
+        "trace_sha256": "632ad720112ecd525cd46aa4552e08353a5a1bc37217f193f3123c848bc7d743",
+        "used_base_points_verified": 995
+      },
+      "targets_verified": 1024
+    },
+    {
+      "arm": "rho",
+      "block": 2,
+      "charges": {
+        "canonicalizations": 3627216,
+        "failed_collisions": 0,
+        "group_additions": 3628240,
+        "partition_hashes": 3399415,
+        "scalar_multiplications": 3104,
+        "table_inserts": 225504,
+        "table_queries": 226528
+      },
+      "targets_verified": 1024
+    },
+    {
+      "arm": "rho",
+      "block": 3,
+      "charges": {
+        "canonicalizations": 3627216,
+        "failed_collisions": 0,
+        "group_additions": 3628240,
+        "partition_hashes": 3399415,
+        "scalar_multiplications": 3104,
+        "table_inserts": 225504,
+        "table_queries": 226528
+      },
+      "targets_verified": 1024
+    },
+    {
+      "arm": "ic",
+      "block": 3,
+      "rank_receipt": {
+        "a": 0,
+        "attempts": 255,
+        "base_sha256": "33dd5e81eadcd773db8c3126c356ba6011c0fa7a02dfad62b411ce28e8a791c3",
+        "failed_searches": 0,
+        "miss_nonexistence_proved": false,
+        "n": 41,
+        "orbit_columns": 255,
+        "rank": 255,
+        "relations": 255,
+        "representative_logs_verified": 255,
+        "rows_without_gain": 0,
+        "schema": "compact-orbit-rank-independent-replay-v1",
+        "status": "PASS",
+        "subgroup_order": 549756390943,
+        "summary_sha256": "90df6487d6bef3eace8babf3c98537cb84ecf9beddb37706f9c1a5d2981c423c",
+        "trace_sha256": "632ad720112ecd525cd46aa4552e08353a5a1bc37217f193f3123c848bc7d743",
+        "used_base_points_verified": 995
+      },
+      "targets_verified": 1024
+    },
+    {
+      "arm": "ic",
+      "block": 4,
+      "rank_receipt": {
+        "a": 0,
+        "attempts": 255,
+        "base_sha256": "33dd5e81eadcd773db8c3126c356ba6011c0fa7a02dfad62b411ce28e8a791c3",
+        "failed_searches": 0,
+        "miss_nonexistence_proved": false,
+        "n": 41,
+        "orbit_columns": 255,
+        "rank": 255,
+        "relations": 255,
+        "representative_logs_verified": 255,
+        "rows_without_gain": 0,
+        "schema": "compact-orbit-rank-independent-replay-v1",
+        "status": "PASS",
+        "subgroup_order": 549756390943,
+        "summary_sha256": "b126843276c2146b53db61db4f5ae56fef74c765f9e41c3ea7223ac0d91eb14f",
+        "trace_sha256": "632ad720112ecd525cd46aa4552e08353a5a1bc37217f193f3123c848bc7d743",
+        "used_base_points_verified": 995
+      },
+      "targets_verified": 1024
+    },
+    {
+      "arm": "rho",
+      "block": 4,
+      "charges": {
+        "canonicalizations": 3627216,
+        "failed_collisions": 0,
+        "group_additions": 3628240,
+        "partition_hashes": 3399415,
+        "scalar_multiplications": 3104,
+        "table_inserts": 225504,
+        "table_queries": 226528
+      },
+      "targets_verified": 1024
+    }
+  ],
+  "common_operation_ratio": null,
+  "cpu_ratio_median": 0.09906063889369265,
+  "cpu_ratio_range": [
+    0.09801444948803828,
+    0.09930497689303555
+  ],
+  "evidence_class": "cold_wall_and_cpu_diagnostic_no_common_operation_unit",
+  "k": 255,
+  "measurements": {
+    "0": {
+      "ic": {
+        "cpu_seconds": 2.554202,
+        "rss_kib": 337360,
+        "wall_seconds": 2.559122322999997
+      },
+      "rho": {
+        "cpu_seconds": 25.784226999999998,
+        "rss_kib": 22024,
+        "wall_seconds": 25.78599429100001
+      }
+    },
+    "1": {
+      "ic": {
+        "cpu_seconds": 2.520519,
+        "rss_kib": 337408,
+        "wall_seconds": 2.5211840830000085
+      },
+      "rho": {
+        "cpu_seconds": 25.715790000000002,
+        "rss_kib": 22076,
+        "wall_seconds": 25.720978236000008
+      }
+    },
+    "2": {
+      "ic": {
+        "cpu_seconds": 2.550346,
+        "rss_kib": 336500,
+        "wall_seconds": 2.551760913999999
+      },
+      "rho": {
+        "cpu_seconds": 25.699386,
+        "rss_kib": 22072,
+        "wall_seconds": 25.702123629
+      }
+    },
+    "3": {
+      "ic": {
+        "cpu_seconds": 2.5508100000000002,
+        "rss_kib": 337612,
+        "wall_seconds": 2.551829037999994
+      },
+      "rho": {
+        "cpu_seconds": 25.686628000000002,
+        "rss_kib": 21864,
+        "wall_seconds": 25.68840020800002
+      }
+    },
+    "4": {
+      "ic": {
+        "cpu_seconds": 2.533883,
+        "rss_kib": 338236,
+        "wall_seconds": 2.5370351629999845
+      },
+      "rho": {
+        "cpu_seconds": 25.755332999999997,
+        "rss_kib": 21944,
+        "wall_seconds": 25.760496629999977
+      }
+    }
+  },
+  "miss_nonexistence_proved": false,
+  "n": 41,
+  "rank_runs_verified": 5,
+  "status": "PASS",
+  "targets_verified_per_arm": 5120,
+  "wall_ratio_median": 0.09924466336724498,
+  "wall_ratio_range": [
+    0.09802053638345949,
+    0.09933779516582313
+  ]
+}

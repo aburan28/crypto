@@ -1,0 +1,32 @@
+{
+  "schema": "ecc2k130-no-fruitless-cycle-v1",
+  "iteration": "R <- sigma^j(R) + R, j = 3 + ((HW(x_R) / 2) mod 8)",
+  "step_exponents": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "max_length": 32,
+  "curves": [
+    {
+      "m": 131,
+      "verdict": "clean",
+      "skip_reason": null,
+      "group_order": "2722258935367507707729280517973639940516",
+      "ell": "680564733841876926932320129493409985129",
+      "lambda": "196511074115861092422032515080945363956",
+      "multisets_checked": 76904684,
+      "orbit_scalars": 262,
+      "hits": [],
+      "expected_by_chance": 2.960633457196071e-29,
+      "degenerate": [],
+      "matches_challenge_constants": true
+    }
+  ],
+  "passed": true
+}

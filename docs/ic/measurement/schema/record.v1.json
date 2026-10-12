@@ -1,0 +1,401 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "icms.record/v1",
+  "title": "ICMS run record, version 1",
+  "description": "One execution of one arm of a session: what ran (spec, workload, implementation), where (environment class and capsule hash), how it was isolated (raw observations and the graded gate computed from them), and what it measured (outcome, units, structural metrics, phases, windows). record_id is the content hash of the record minus record_id. Vocabulary keys (units, phases, windows, metric fields) are checked against docs/ic/measurement/registry.json by `icms audit-sessions`; this schema fixes the structure. Unknown is null, never zero.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "record_id", "session_id", "execution_index", "arm", "round", "warmup", "spec_id", "spec_path",
+               "label", "role", "workload_id", "workload", "adapter", "window", "unit", "implementation", "environment",
+               "execution", "isolation", "outcome", "units", "reference", "metrics", "phases", "windows", "consistency",
+               "producer"],
+  "properties": {
+    "schema": {"const": "icms.record/v1"},
+    "record_id": {"type": "string", "pattern": "^ICR1h[0-9a-f]{12}$"},
+    "session_id": {"type": "string", "pattern": "^ICSESS1h[0-9a-f]{12}$"},
+    "execution_index": {"type": "integer", "minimum": 0},
+    "arm": {"type": "integer", "minimum": 0},
+    "round": {"type": "integer", "description": "0..repetitions-1 for measured rounds; -1, -2, ... for warmups"},
+    "warmup": {"type": "boolean"},
+    "spec_id": {"type": "string", "pattern": "^ICS1h[0-9a-f]{12}$"},
+    "spec_path": {"type": "string", "minLength": 1},
+    "label": {"type": ["string", "null"]},
+    "role": {"enum": ["candidate", "baseline", "reference", null]},
+    "workload_id": {"type": "string", "pattern": "^W[0-9a-f]{12}$"},
+    "workload": {"$ref": "#/$defs/workload"},
+    "adapter": {"type": "string", "minLength": 1},
+    "window": {"type": "string", "minLength": 1},
+    "unit": {"type": "string", "minLength": 1},
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo_commit", "repo_dirty", "producer"],
+      "properties": {
+        "repo_commit": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$"},
+        "repo_dirty": {"type": ["boolean", "null"]},
+        "producer": {"type": "object", "description": "Adapter provenance: binary hashes, lock files, calibration hashes."}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["env_class_id", "capsule_sha256"],
+      "properties": {
+        "env_class_id": {"type": "string", "pattern": "^ENV1h[0-9a-f]{12}$"},
+        "capsule_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "execution": {"$ref": "#/$defs/execution"},
+    "isolation": {"$ref": "#/$defs/isolation"},
+    "outcome": {"$ref": "#/$defs/outcome"},
+    "units": {
+      "type": ["object", "null"],
+      "additionalProperties": {"$ref": "#/$defs/unit_value"}
+    },
+    "reference": {
+      "type": ["object", "null"],
+      "required": ["id"],
+      "properties": {"id": {"type": ["string", "null"]}}
+    },
+    "metrics": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/metrics"}]},
+    "phases": {
+      "type": ["object", "null"],
+      "additionalProperties": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/phase"}]}
+    },
+    "windows": {
+      "type": ["object", "null"],
+      "additionalProperties": {"$ref": "#/$defs/window"}
+    },
+    "consistency": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "problem"],
+        "properties": {"field": {"type": "string"}, "problem": {"type": "string"}}
+      }
+    },
+    "producer": {"type": ["object", "null"]}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "sha256_or_null": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "count": {"type": ["integer", "null"], "minimum": 0},
+    "nonneg": {"type": ["number", "null"], "minimum": 0},
+    "workload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["curve", "targets", "law", "seed", "cold_target_count", "file"],
+      "properties": {
+        "curve": {"type": "object"},
+        "targets": {"type": "integer", "minimum": 1},
+        "law": {"type": "string"},
+        "seed": {"type": "integer"},
+        "cold_target_count": {"type": "integer", "minimum": 1},
+        "file": {"type": ["string", "null"]}
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["argv", "argv0", "cwd", "env", "pinned_cpus", "child_affinity_observed", "tree_affinity",
+                   "descendants_killed", "exit", "wall_ns", "rusage", "schedstat", "max_threads_observed", "contention",
+                   "outputs"],
+      "properties": {
+        "argv": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "argv0": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "resolved", "sha256"],
+          "description": "argv[0] as the child's PATH resolves it, and the hash of that file",
+          "properties": {
+            "name": {"type": "string"},
+            "resolved": {"type": ["string", "null"]},
+            "sha256": {"$ref": "#/$defs/sha256_or_null"}
+          }
+        },
+        "launch_error": {"type": "string", "description": "present only when the command could not be started"},
+        "tree_affinity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["tasks_outside", "cpus_seen", "examples"],
+          "description": "every task of the measured tree on every sample: how many were seen with a CPU mask beyond the pinned CPUs or last running outside them",
+          "properties": {
+            "tasks_outside": {"type": "integer", "minimum": 0},
+            "cpus_seen": {"type": "array", "items": {"type": "integer", "minimum": 0}},
+            "examples": {"type": "array"}
+          }
+        },
+        "descendants_killed": {"type": "integer", "minimum": 0,
+                               "description": "processes the child left running after it exited, killed before its output was hashed"},
+        "subreaper": {"type": "boolean", "description": "the runner was a child subreaper, so a setsid'd descendant could not escape"},
+        "cwd": {"type": ["string", "null"]},
+        "env": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["declared", "defaults", "dropped_engine_knobs", "passthrough", "passthrough_sha256"],
+          "properties": {
+            "declared": {"type": "object", "additionalProperties": {"type": "string"}},
+            "defaults": {"type": "object", "additionalProperties": {"type": "string"}},
+            "dropped_engine_knobs": {"type": "array", "items": {"type": "string"}},
+            "passthrough": {"type": "array", "items": {"type": "string"}},
+            "passthrough_sha256": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"}}
+          }
+        },
+        "pinned_cpus": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 0}},
+        "child_affinity_observed": {"type": ["array", "null"], "items": {"type": "integer", "minimum": 0}},
+        "exit": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["returncode", "signal", "timed_out"],
+          "properties": {
+            "returncode": {"type": ["integer", "null"]},
+            "signal": {"type": ["integer", "null"]},
+            "timed_out": {"type": "boolean"}
+          }
+        },
+        "wall_ns": {"type": "integer", "minimum": 0},
+        "rusage": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "user_s": {"$ref": "#/$defs/nonneg"}, "sys_s": {"$ref": "#/$defs/nonneg"},
+            "maxrss_kib": {"$ref": "#/$defs/count"}, "minflt": {"$ref": "#/$defs/count"},
+            "majflt": {"$ref": "#/$defs/count"}, "nvcsw": {"$ref": "#/$defs/count"}, "nivcsw": {"$ref": "#/$defs/count"}
+          }
+        },
+        "schedstat": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["run_ns", "wait_ns", "slices", "threads_seen", "method"],
+          "properties": {
+            "run_ns": {"$ref": "#/$defs/count"}, "wait_ns": {"$ref": "#/$defs/count"},
+            "slices": {"$ref": "#/$defs/count"}, "threads_seen": {"$ref": "#/$defs/count"},
+            "method": {"type": "string"}
+          }
+        },
+        "max_threads_observed": {"$ref": "#/$defs/count"},
+        "contention": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["interval_s", "samples", "samples_with_foreign_runnable", "foreign_examples",
+                       "pinned_cpu_jiffies_delta", "psi_total_delta_us", "procs_running_after"],
+          "properties": {
+            "interval_s": {"type": "number", "exclusiveMinimum": 0},
+            "samples": {"type": "integer", "minimum": 0},
+            "samples_with_foreign_runnable": {"type": "integer", "minimum": 0},
+            "foreign_examples": {"type": "array"},
+            "pinned_cpu_jiffies_delta": {"type": ["object", "null"], "additionalProperties": {"type": "integer"}},
+            "psi_total_delta_us": {"type": ["object", "null"]},
+            "procs_running_after": {"type": ["integer", "null"]}
+          }
+        },
+        "outputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stdout", "stderr", "files"],
+          "properties": {
+            "stdout": {"$ref": "#/$defs/output"},
+            "stderr": {"$ref": "#/$defs/output"},
+            "files": {
+              "type": "object",
+              "description": "every other file in the execution directory (a producer's metrics file, a trace), by path relative to it",
+              "additionalProperties": {
+                "type": "object", "additionalProperties": false, "required": ["sha256", "bytes"],
+                "properties": {"sha256": {"$ref": "#/$defs/sha256"}, "bytes": {"type": "integer", "minimum": 0}}
+              }
+            }
+          }
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "bytes"],
+      "properties": {
+        "path": {"type": "string"},
+        "sha256": {"$ref": "#/$defs/sha256_or_null"},
+        "bytes": {"$ref": "#/$defs/count"}
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "level", "status", "observed", "threshold", "note"],
+      "properties": {
+        "id": {"enum": ["affinity_observed", "excludes_cpu0", "reservation", "parallelism",
+                        "run_delay", "steal", "foreign_runnable", "memory_stall", "involuntary_switches", "preflight_quiet",
+                        "kernel_isolation", "fixed_frequency", "smt", "bare_metal"]},
+        "level": {"enum": ["L1", "L2", "L3"]},
+        "status": {"enum": ["pass", "fail", "unknown"]},
+        "observed": {},
+        "threshold": {},
+        "note": {"type": "string"}
+      }
+    },
+    "isolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["earned_level", "blocking_next_level", "checks", "thresholds", "required", "wall_admissible"],
+      "properties": {
+        "earned_level": {"enum": ["L0", "L1", "L2", "L3"]},
+        "blocking_next_level": {"type": "array", "items": {"type": "string"}},
+        "checks": {"type": "array", "minItems": 14, "maxItems": 14, "items": {"$ref": "#/$defs/check"}},
+        "thresholds": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0}},
+        "required": {"enum": ["L0", "L1", "L2", "L3"]},
+        "wall_admissible": {"type": "boolean"}
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "required": ["status", "verified"],
+      "properties": {
+        "status": {"enum": ["complete", "insufficient_relations", "budget", "timeout", "oom", "error"]},
+        "verified": {"type": "boolean"},
+        "reason": {"type": "string"}
+      }
+    },
+    "unit_value": {
+      "type": "object",
+      "required": ["total", "deterministic", "host_dependent_because"],
+      "properties": {
+        "total": {"type": ["number", "null"], "minimum": 0},
+        "deterministic": {"type": "boolean"},
+        "host_dependent_because": {"type": "array", "items": {"type": "string"}},
+        "unpriced_counters": {"type": "array", "items": {"type": "string"},
+                              "description": "work the producer counted but charged nothing for; a non-empty list makes total a lower bound"}
+      },
+      "if": {"properties": {"deterministic": {"const": true}}},
+      "then": {"properties": {"host_dependent_because": {"maxItems": 0}}},
+      "else": {"properties": {"host_dependent_because": {"minItems": 1}}}
+    },
+    "phase": {
+      "type": "object",
+      "required": ["ops", "wall_ns"],
+      "properties": {
+        "ops": {"$ref": "#/$defs/nonneg"},
+        "ops_unit": {"type": ["string", "null"], "description": "registry unit id the ops are in"},
+        "wall_ns": {"$ref": "#/$defs/nonneg"},
+        "group_ops": {"type": ["object", "null"]},
+        "native": {"type": ["object", "null"]}
+      }
+    },
+    "window": {
+      "type": "object",
+      "required": ["conformance", "ops", "wall_ns"],
+      "properties": {
+        "conformance": {"enum": ["exact", "exact_operations", "derived", "runner"]},
+        "ops": {"$ref": "#/$defs/nonneg"},
+        "ops_unit": {"type": ["string", "null"], "description": "registry unit id the ops are in; required whenever ops is a number"},
+        "wall_ns": {"$ref": "#/$defs/nonneg"},
+        "composition": {"type": "object", "additionalProperties": {"type": "string"}},
+        "why_derived": {"type": "string"}
+      },
+      "allOf": [
+        {"if": {"properties": {"conformance": {"const": "derived"}}}, "then": {"required": ["why_derived"]}},
+        {"if": {"required": ["ops"], "properties": {"ops": {"type": "number"}}},
+         "then": {"required": ["ops_unit"], "properties": {"ops_unit": {"type": "string"}}}}
+      ]
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["instance", "factor_base", "decomposition", "system", "solver", "linear_algebra"],
+      "properties": {
+        "instance": {"type": ["object", "null"]},
+        "factor_base": {
+          "type": ["object", "null"],
+          "description": "Every size field of registry.factor_base_size_fields, null where the producer does not report it; the five named descriptors; producer-specific values under native only.",
+          "additionalProperties": false,
+          "required": ["family", "usable_points", "signed_points", "abscissae_with_points", "abscissae_allowed", "columns",
+                       "orbit_representatives", "nominal_dimension"],
+          "properties": {
+            "family": {"type": "string"},
+            "producer_name": {"type": ["string", "null"]},
+            "points_per_column": {"$ref": "#/$defs/nonneg"},
+            "usable_points": {"$ref": "#/$defs/count"},
+            "signed_points": {"$ref": "#/$defs/count"},
+            "abscissae_with_points": {"$ref": "#/$defs/count"},
+            "abscissae_allowed": {"$ref": "#/$defs/count"},
+            "columns": {"$ref": "#/$defs/count"},
+            "orbit_representatives": {"$ref": "#/$defs/count"},
+            "nominal_dimension": {"$ref": "#/$defs/count"},
+            "native": {"type": ["object", "null"]}
+          }
+        },
+        "decomposition": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "oracle": {"type": ["string", "null"]},
+            "arity": {"$ref": "#/$defs/count"},
+            "targets_tried": {"$ref": "#/$defs/count"},
+            "relations_found": {"$ref": "#/$defs/count"},
+            "hit_rate": {"$ref": "#/$defs/nonneg"},
+            "native": {"type": ["object", "null"]}
+          }
+        },
+        "system": {
+          "type": ["object", "null"],
+          "description": "Every field of registry.pdp_metrics, null where unknown; producer-specific values under native only.",
+          "additionalProperties": false,
+          "required": ["n_vars", "n_equations", "degrees", "max_degree", "semi_regular_degree", "anf_monomials",
+                       "cnf_variables", "cnf_aux_variables", "cnf_clauses", "xor_rows", "literals"],
+          "properties": {
+            "n_vars": {"$ref": "#/$defs/count"},
+            "n_equations": {"$ref": "#/$defs/count"},
+            "degrees": {"type": ["array", "null"], "items": {"type": "integer", "minimum": 0}},
+            "max_degree": {"$ref": "#/$defs/count"},
+            "semi_regular_degree": {"$ref": "#/$defs/count"},
+            "anf_monomials": {"$ref": "#/$defs/count"},
+            "cnf_variables": {"$ref": "#/$defs/count"},
+            "cnf_aux_variables": {"$ref": "#/$defs/count"},
+            "cnf_clauses": {"$ref": "#/$defs/count"},
+            "xor_rows": {"$ref": "#/$defs/count"},
+            "literals": {"$ref": "#/$defs/count"},
+            "note": {"type": "string"},
+            "native": {"type": ["object", "null"]}
+          }
+        },
+        "solver": {
+          "type": ["object", "null"],
+          "description": "Search effort of the point-decomposition solver. conflicts..restarts and solving_degree are registry.pdp_metrics fields; ops/op_unit/priced_by say how the producer priced the solver.",
+          "additionalProperties": false,
+          "required": ["name", "calls", "ops", "op_unit", "priced_by", "wall_ns"],
+          "properties": {
+            "name": {"type": ["string", "null"]},
+            "calls": {"$ref": "#/$defs/count"},
+            "ops": {"$ref": "#/$defs/nonneg"},
+            "op_unit": {"type": ["string", "null"]},
+            "priced_by": {"type": ["string", "null"]},
+            "wall_ns": {"$ref": "#/$defs/nonneg"},
+            "budget_exceeded": {"type": ["integer", "boolean", "null"]},
+            "solving_degree_mean": {"$ref": "#/$defs/nonneg"},
+            "solving_degree_max": {"$ref": "#/$defs/count"},
+            "peak_bytes": {"$ref": "#/$defs/count"},
+            "conflicts": {"$ref": "#/$defs/nonneg"},
+            "decisions": {"$ref": "#/$defs/nonneg"},
+            "propagations": {"$ref": "#/$defs/nonneg"},
+            "restarts": {"$ref": "#/$defs/nonneg"},
+            "matrix_rows_max": {"$ref": "#/$defs/count"},
+            "matrix_cols_max": {"$ref": "#/$defs/count"},
+            "extra": {"type": ["object", "null"]}
+          }
+        },
+        "linear_algebra": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "method": {"type": ["string", "null"]},
+            "rows": {"$ref": "#/$defs/count"},
+            "rank": {"$ref": "#/$defs/count"},
+            "dependent": {"$ref": "#/$defs/count"},
+            "work": {"$ref": "#/$defs/nonneg"},
+            "work_unit": {"type": ["string", "null"]},
+            "native": {"type": ["object", "null"]}
+          }
+        }
+      }
+    }
+  }
+}

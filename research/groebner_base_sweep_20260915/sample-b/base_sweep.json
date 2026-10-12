@@ -1,0 +1,1222 @@
+{
+  "census": [
+    {
+      "invariant_dimensions": [
+        1,
+        2,
+        3,
+        6,
+        7,
+        8
+      ],
+      "n": 9,
+      "order_of_2": 6
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        12
+      ],
+      "n": 13,
+      "order_of_2": 12
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "n": 15,
+      "order_of_2": 4
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        8,
+        9,
+        16
+      ],
+      "n": 17,
+      "order_of_2": 8
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        18
+      ],
+      "n": 19,
+      "order_of_2": 18
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        11,
+        12,
+        22
+      ],
+      "n": 23,
+      "order_of_2": 11
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        5,
+        6,
+        10,
+        11,
+        15,
+        16,
+        20,
+        21,
+        25,
+        26,
+        30
+      ],
+      "n": 31,
+      "order_of_2": 5
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        20,
+        21,
+        40
+      ],
+      "n": 41,
+      "order_of_2": 20
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        52
+      ],
+      "n": 53,
+      "order_of_2": 52
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        9,
+        10,
+        18,
+        19,
+        27,
+        28,
+        36,
+        37,
+        45,
+        46,
+        54,
+        55,
+        63,
+        64,
+        72
+      ],
+      "n": 73,
+      "order_of_2": 9
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        7,
+        8,
+        14,
+        15,
+        21,
+        22,
+        28,
+        29,
+        35,
+        36,
+        42,
+        43,
+        49,
+        50,
+        56,
+        57,
+        63,
+        64,
+        70,
+        71,
+        77,
+        78,
+        84,
+        85,
+        91,
+        92,
+        98,
+        99,
+        105,
+        106,
+        112,
+        113,
+        119,
+        120,
+        126
+      ],
+      "n": 127,
+      "order_of_2": 7
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        130
+      ],
+      "n": 131,
+      "order_of_2": 130
+    },
+    {
+      "invariant_dimensions": [
+        1,
+        162
+      ],
+      "n": 163,
+      "order_of_2": 162
+    }
+  ],
+  "harness": "examples/groebner_base_sweep.rs",
+  "metric": "C = (U+1)/p * E[word XORs per target], expectation over all targets",
+  "rungs": [
+    {
+      "a": 0,
+      "candidates": [
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.0,
+          "decided": 64,
+          "decomposed": 0,
+          "divisor": [
+            0,
+            1
+          ],
+          "ell": 3,
+          "expected_stage_ops": null,
+          "expected_trials": null,
+          "f4_calls": 62,
+          "is_pipeline_default": false,
+          "max_degree_built": 2,
+          "ops_per_target": 51.015625,
+          "points": 3,
+          "splits": 0,
+          "targets": 64,
+          "unknowns": 2,
+          "wall_ns": 8060043,
+          "word_ops": 3265
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.96875,
+          "decided": 64,
+          "decomposed": 62,
+          "divisor": [
+            0,
+            2
+          ],
+          "ell": 7,
+          "expected_stage_ops": 609290.7096774194,
+          "expected_trials": 8.258064516129032,
+          "f4_calls": 1224,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 73781.296875,
+          "points": 93,
+          "splits": 367,
+          "targets": 64,
+          "unknowns": 7,
+          "wall_ns": 71587148,
+          "word_ops": 4722003
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.96875,
+          "decided": 64,
+          "decomposed": 62,
+          "divisor": [
+            1,
+            2
+          ],
+          "ell": 8,
+          "expected_stage_ops": 1897707.6129032257,
+          "expected_trials": 16.516129032258064,
+          "f4_calls": 992,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 114900.265625,
+          "points": 253,
+          "splits": 434,
+          "targets": 64,
+          "unknowns": 15,
+          "wall_ns": 82015523,
+          "word_ops": 7353617
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.96875,
+          "decided": 64,
+          "decomposed": 62,
+          "divisor": [
+            2
+          ],
+          "ell": 6,
+          "expected_stage_ops": 213902.25806451612,
+          "expected_trials": 5.161290322580645,
+          "f4_calls": 1038,
+          "is_pipeline_default": true,
+          "max_degree_built": 3,
+          "ops_per_target": 41443.5625,
+          "points": 55,
+          "splits": 305,
+          "targets": 64,
+          "unknowns": 4,
+          "wall_ns": 51752795,
+          "word_ops": 2652388
+        }
+      ],
+      "curve": "K_0/2^9",
+      "m": 2,
+      "n": 9
+    },
+    {
+      "a": 0,
+      "candidates": [
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.0,
+          "decided": 32,
+          "decomposed": 0,
+          "divisor": [
+            0
+          ],
+          "ell": 1,
+          "expected_stage_ops": null,
+          "expected_trials": null,
+          "f4_calls": 157,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 21507.3125,
+          "points": 3,
+          "splits": 29,
+          "targets": 32,
+          "unknowns": 2,
+          "wall_ns": 12163181,
+          "word_ops": 688234
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.0,
+          "decided": 32,
+          "decomposed": 0,
+          "divisor": [
+            0,
+            1
+          ],
+          "ell": 3,
+          "expected_stage_ops": null,
+          "expected_trials": null,
+          "f4_calls": 3750,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 2965400.1875,
+          "points": 3,
+          "splits": 854,
+          "targets": 32,
+          "unknowns": 2,
+          "wall_ns": 504273593,
+          "word_ops": 94892806
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.96875,
+          "decided": 32,
+          "decomposed": 31,
+          "divisor": [
+            0,
+            2
+          ],
+          "ell": 7,
+          "expected_stage_ops": 40860090.838709675,
+          "expected_trials": 8.258064516129032,
+          "f4_calls": 1169,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 4947901.625,
+          "points": 93,
+          "splits": 460,
+          "targets": 32,
+          "unknowns": 7,
+          "wall_ns": 554848825,
+          "word_ops": 158332852
+        },
+        {
+          "admissible": false,
+          "divisor": [
+            1
+          ],
+          "ell": 2,
+          "is_pipeline_default": false,
+          "points": 1,
+          "unknowns": 1
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.96875,
+          "decided": 32,
+          "decomposed": 31,
+          "divisor": [
+            1,
+            2
+          ],
+          "ell": 8,
+          "expected_stage_ops": 75650167.22580644,
+          "expected_trials": 16.516129032258064,
+          "f4_calls": 987,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 4580381.21875,
+          "points": 253,
+          "splits": 495,
+          "targets": 32,
+          "unknowns": 15,
+          "wall_ns": 735898898,
+          "word_ops": 146572199
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.96875,
+          "decided": 32,
+          "decomposed": 31,
+          "divisor": [
+            2
+          ],
+          "ell": 6,
+          "expected_stage_ops": 9692523.064516129,
+          "expected_trials": 5.161290322580645,
+          "f4_calls": 748,
+          "is_pipeline_default": true,
+          "max_degree_built": 3,
+          "ops_per_target": 1877926.34375,
+          "points": 55,
+          "splits": 331,
+          "targets": 32,
+          "unknowns": 4,
+          "wall_ns": 281787500,
+          "word_ops": 60093643
+        }
+      ],
+      "curve": "K_0/2^9",
+      "m": 3,
+      "n": 9
+    },
+    {
+      "a": 1,
+      "candidates": [
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.0625,
+          "decided": 64,
+          "decomposed": 4,
+          "divisor": [
+            0,
+            1,
+            2
+          ],
+          "ell": 7,
+          "expected_stage_ops": 60245847.0,
+          "expected_trials": 144.0,
+          "f4_calls": 1962,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 418373.9375,
+          "points": 163,
+          "splits": 429,
+          "targets": 64,
+          "unknowns": 8,
+          "wall_ns": 179983381,
+          "word_ops": 26775932
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.453125,
+          "decided": 64,
+          "decomposed": 29,
+          "divisor": [
+            0,
+            1,
+            3
+          ],
+          "ell": 7,
+          "expected_stage_ops": 5793199.448275862,
+          "expected_trials": 17.655172413793103,
+          "f4_calls": 1540,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 328130.4375,
+          "points": 133,
+          "splits": 355,
+          "targets": 64,
+          "unknowns": 7,
+          "wall_ns": 157593171,
+          "word_ops": 21000348
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.4375,
+          "decided": 64,
+          "decomposed": 28,
+          "divisor": [
+            0,
+            1,
+            4
+          ],
+          "ell": 7,
+          "expected_stage_ops": 6605627.142857144,
+          "expected_trials": 20.571428571428573,
+          "f4_calls": 1466,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 321106.875,
+          "points": 123,
+          "splits": 339,
+          "targets": 64,
+          "unknowns": 8,
+          "wall_ns": 147264078,
+          "word_ops": 20550840
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.84375,
+          "decided": 64,
+          "decomposed": 54,
+          "divisor": [
+            0,
+            2,
+            3
+          ],
+          "ell": 9,
+          "expected_stage_ops": 57796180.33333333,
+          "expected_trials": 21.333333333333332,
+          "f4_calls": 7528,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 2709195.953125,
+          "points": 481,
+          "splits": 1607,
+          "targets": 64,
+          "unknowns": 17,
+          "wall_ns": 906146095,
+          "word_ops": 173388541
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 1.0,
+          "decided": 64,
+          "decomposed": 64,
+          "divisor": [
+            0,
+            2,
+            4
+          ],
+          "ell": 9,
+          "expected_stage_ops": 37282676.953125,
+          "expected_trials": 25.0,
+          "f4_calls": 3902,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 1491307.078125,
+          "points": 651,
+          "splits": 915,
+          "targets": 64,
+          "unknowns": 24,
+          "wall_ns": 495842305,
+          "word_ops": 95443653
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 1.0,
+          "decided": 64,
+          "decomposed": 64,
+          "divisor": [
+            0,
+            3,
+            4
+          ],
+          "ell": 9,
+          "expected_stage_ops": 19910192.75,
+          "expected_trials": 16.0,
+          "f4_calls": 3234,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 1244387.046875,
+          "points": 381,
+          "splits": 786,
+          "targets": 64,
+          "unknowns": 15,
+          "wall_ns": 433875850,
+          "word_ops": 79640771
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.0625,
+          "decided": 64,
+          "decomposed": 4,
+          "divisor": [
+            1,
+            2
+          ],
+          "ell": 6,
+          "expected_stage_ops": 12865740.0,
+          "expected_trials": 96.0,
+          "f4_calls": 876,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 134018.125,
+          "points": 97,
+          "splits": 188,
+          "targets": 64,
+          "unknowns": 5,
+          "wall_ns": 75970649,
+          "word_ops": 8577160
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 1.0,
+          "decided": 64,
+          "decomposed": 64,
+          "divisor": [
+            1,
+            2,
+            3
+          ],
+          "ell": 10,
+          "expected_stage_ops": 50273583.1875,
+          "expected_trials": 38.0,
+          "f4_calls": 1702,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 1322989.03125,
+          "points": 1057,
+          "splits": 615,
+          "targets": 64,
+          "unknowns": 37,
+          "wall_ns": 354093300,
+          "word_ops": 84671298
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 1.0,
+          "decided": 64,
+          "decomposed": 64,
+          "divisor": [
+            1,
+            2,
+            4
+          ],
+          "ell": 10,
+          "expected_stage_ops": 50971227.546875,
+          "expected_trials": 41.0,
+          "f4_calls": 1578,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 1243200.671875,
+          "points": 1127,
+          "splits": 593,
+          "targets": 64,
+          "unknowns": 40,
+          "wall_ns": 320273958,
+          "word_ops": 79564843
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.390625,
+          "decided": 64,
+          "decomposed": 25,
+          "divisor": [
+            1,
+            3
+          ],
+          "ell": 6,
+          "expected_stage_ops": 1513458.6,
+          "expected_trials": 12.8,
+          "f4_calls": 784,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 118238.953125,
+          "points": 67,
+          "splits": 178,
+          "targets": 64,
+          "unknowns": 4,
+          "wall_ns": 79971321,
+          "word_ops": 7567293
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 1.0,
+          "decided": 64,
+          "decomposed": 64,
+          "divisor": [
+            1,
+            3,
+            4
+          ],
+          "ell": 10,
+          "expected_stage_ops": 55219457.8125,
+          "expected_trials": 36.0,
+          "f4_calls": 2229,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 1533873.828125,
+          "points": 977,
+          "splits": 737,
+          "targets": 64,
+          "unknowns": 35,
+          "wall_ns": 433442811,
+          "word_ops": 98167925
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.4375,
+          "decided": 64,
+          "decomposed": 28,
+          "divisor": [
+            1,
+            4
+          ],
+          "ell": 6,
+          "expected_stage_ops": 1575103.5,
+          "expected_trials": 13.714285714285714,
+          "f4_calls": 742,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 114851.296875,
+          "points": 77,
+          "splits": 170,
+          "targets": 64,
+          "unknowns": 5,
+          "wall_ns": 73511899,
+          "word_ops": 7350483
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.84375,
+          "decided": 64,
+          "decomposed": 54,
+          "divisor": [
+            2,
+            3
+          ],
+          "ell": 8,
+          "expected_stage_ops": 15893083.333333332,
+          "expected_trials": 10.666666666666666,
+          "f4_calls": 5245,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 1489976.5625,
+          "points": 211,
+          "splits": 1136,
+          "targets": 64,
+          "unknowns": 8,
+          "wall_ns": 543149824,
+          "word_ops": 95358500
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 1.0,
+          "decided": 64,
+          "decomposed": 64,
+          "divisor": [
+            2,
+            3,
+            4
+          ],
+          "ell": 12,
+          "expected_stage_ops": 397776157.1875,
+          "expected_trials": 140.0,
+          "f4_calls": 1765,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 2841258.265625,
+          "points": 4121,
+          "splits": 745,
+          "targets": 64,
+          "unknowns": 139,
+          "wall_ns": 586972479,
+          "word_ops": 181840529
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 1.0,
+          "decided": 64,
+          "decomposed": 64,
+          "divisor": [
+            2,
+            4
+          ],
+          "ell": 8,
+          "expected_stage_ops": 12938325.5625,
+          "expected_trials": 12.0,
+          "f4_calls": 3710,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 1078193.796875,
+          "points": 281,
+          "splits": 851,
+          "targets": 64,
+          "unknowns": 11,
+          "wall_ns": 394265686,
+          "word_ops": 69004403
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 1.0,
+          "decided": 64,
+          "decomposed": 64,
+          "divisor": [
+            3,
+            4
+          ],
+          "ell": 8,
+          "expected_stage_ops": 9763985.859375,
+          "expected_trials": 11.0,
+          "f4_calls": 3042,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 887635.078125,
+          "points": 251,
+          "splits": 722,
+          "targets": 64,
+          "unknowns": 10,
+          "wall_ns": 342532198,
+          "word_ops": 56808645
+        }
+      ],
+      "curve": "K_1/2^15",
+      "m": 2,
+      "n": 15
+    },
+    {
+      "a": 1,
+      "candidates": [
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.5625,
+          "decided": 48,
+          "decomposed": 27,
+          "divisor": [
+            0,
+            1
+          ],
+          "ell": 9,
+          "expected_stage_ops": 153676312.2222222,
+          "expected_trials": 26.666666666666668,
+          "f4_calls": 8392,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 5762861.708333333,
+          "points": 443,
+          "splits": 2101,
+          "targets": 48,
+          "unknowns": 14,
+          "wall_ns": 1240223074,
+          "word_ops": 276617362
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.6875,
+          "decided": 48,
+          "decomposed": 33,
+          "divisor": [
+            0,
+            2
+          ],
+          "ell": 9,
+          "expected_stage_ops": 143626831.0909091,
+          "expected_trials": 26.181818181818183,
+          "f4_calls": 7984,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 5485747.020833333,
+          "points": 545,
+          "splits": 1999,
+          "targets": 48,
+          "unknowns": 17,
+          "wall_ns": 1173697382,
+          "word_ops": 263315857
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.2708333333333333,
+          "decided": 48,
+          "decomposed": 13,
+          "divisor": [
+            1
+          ],
+          "ell": 8,
+          "expected_stage_ops": 81516061.53846155,
+          "expected_trials": 29.53846153846154,
+          "f4_calls": 5056,
+          "is_pipeline_default": true,
+          "max_degree_built": 3,
+          "ops_per_target": 2759658.3333333335,
+          "points": 205,
+          "splits": 1258,
+          "targets": 48,
+          "unknowns": 7,
+          "wall_ns": 640900091,
+          "word_ops": 132463600
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 1.0,
+          "decided": 48,
+          "decomposed": 48,
+          "divisor": [
+            1,
+            2
+          ],
+          "ell": 16,
+          "expected_stage_ops": 30375465036.8125,
+          "expected_trials": 1931.0,
+          "f4_calls": 1536,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 15730432.4375,
+          "points": 65587,
+          "splits": 720,
+          "targets": 48,
+          "unknowns": 1930,
+          "wall_ns": 1214124768,
+          "word_ops": 755060757
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.2708333333333333,
+          "decided": 48,
+          "decomposed": 13,
+          "divisor": [
+            2
+          ],
+          "ell": 8,
+          "expected_stage_ops": 90152721.6923077,
+          "expected_trials": 33.23076923076923,
+          "f4_calls": 4977,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 2712929.125,
+          "points": 239,
+          "splits": 1235,
+          "targets": 48,
+          "unknowns": 8,
+          "wall_ns": 629182672,
+          "word_ops": 130220598
+        }
+      ],
+      "curve": "K_1/2^17",
+      "m": 2,
+      "n": 17
+    },
+    {
+      "a": 1,
+      "candidates": [
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.5833333333333334,
+          "decided": 24,
+          "decomposed": 14,
+          "divisor": [
+            0,
+            1
+          ],
+          "ell": 12,
+          "expected_stage_ops": 30421672216.571426,
+          "expected_trials": 150.85714285714286,
+          "f4_calls": 29065,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 201658812.04166666,
+          "points": 3957,
+          "splits": 7281,
+          "targets": 24,
+          "unknowns": 87,
+          "wall_ns": 10071381740,
+          "word_ops": 4839811489
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.5,
+          "decided": 24,
+          "decomposed": 12,
+          "divisor": [
+            0,
+            2
+          ],
+          "ell": 12,
+          "expected_stage_ops": 37724119996.0,
+          "expected_trials": 174.0,
+          "f4_calls": 31361,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 216805287.33333334,
+          "points": 3911,
+          "splits": 7850,
+          "targets": 24,
+          "unknowns": 86,
+          "wall_ns": 10836190203,
+          "word_ops": 5203326896
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.375,
+          "decided": 24,
+          "decomposed": 9,
+          "divisor": [
+            1
+          ],
+          "ell": 11,
+          "expected_stage_ops": 12430139673.777777,
+          "expected_trials": 125.33333333333333,
+          "f4_calls": 17400,
+          "is_pipeline_default": true,
+          "max_degree_built": 3,
+          "ops_per_target": 99176646.33333333,
+          "points": 2071,
+          "splits": 4358,
+          "targets": 24,
+          "unknowns": 46,
+          "wall_ns": 5441499606,
+          "word_ops": 2380239512
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.375,
+          "decided": 24,
+          "decomposed": 9,
+          "divisor": [
+            2
+          ],
+          "ell": 11,
+          "expected_stage_ops": 12783200584.88889,
+          "expected_trials": 122.66666666666667,
+          "f4_calls": 18298,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 104210874.33333333,
+          "points": 2025,
+          "splits": 4582,
+          "targets": 24,
+          "unknowns": 45,
+          "wall_ns": 5744372317,
+          "word_ops": 2501060984
+        }
+      ],
+      "curve": "K_1/2^23",
+      "m": 2,
+      "n": 23
+    },
+    {
+      "a": 0,
+      "candidates": [
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.5833333333333334,
+          "decided": 12,
+          "decomposed": 7,
+          "divisor": [
+            1,
+            2,
+            3
+          ],
+          "ell": 15,
+          "expected_stage_ops": 6487317450730.571,
+          "expected_trials": 963.4285714285713,
+          "f4_calls": 111442,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 6733573866.416667,
+          "points": 34721,
+          "splits": 27880,
+          "targets": 12,
+          "unknowns": 561,
+          "wall_ns": 92043473141,
+          "word_ops": 80802886397
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.25,
+          "decided": 12,
+          "decomposed": 3,
+          "divisor": [
+            1,
+            2,
+            4
+          ],
+          "ell": 15,
+          "expected_stage_ops": 22291903822110.0,
+          "expected_trials": 2264.0,
+          "f4_calls": 162274,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 9846247271.25,
+          "points": 34969,
+          "splits": 40573,
+          "targets": 12,
+          "unknowns": 565,
+          "wall_ns": 135018715071,
+          "word_ops": 118154967255
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.3333333333333333,
+          "decided": 12,
+          "decomposed": 4,
+          "divisor": [
+            1,
+            2,
+            5
+          ],
+          "ell": 15,
+          "expected_stage_ops": 14816212139055.0,
+          "expected_trials": 1590.0,
+          "f4_calls": 154426,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 9318372414.5,
+          "points": 32737,
+          "splits": 38612,
+          "targets": 12,
+          "unknowns": 529,
+          "wall_ns": 127659539344,
+          "word_ops": 111820468974
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.5833333333333334,
+          "decided": 12,
+          "decomposed": 7,
+          "divisor": [
+            1,
+            2,
+            6
+          ],
+          "ell": 15,
+          "expected_stage_ops": 6231245143959.856,
+          "expected_trials": 889.7142857142857,
+          "f4_calls": 115710,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 7003647400.083333,
+          "points": 32055,
+          "splits": 28943,
+          "targets": 12,
+          "unknowns": 518,
+          "wall_ns": 95691886803,
+          "word_ops": 84043768801
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.3333333333333333,
+          "decided": 12,
+          "decomposed": 4,
+          "divisor": [
+            1,
+            3,
+            4
+          ],
+          "ell": 15,
+          "expected_stage_ops": 14429012830332.498,
+          "expected_trials": 1587.0,
+          "f4_calls": 147830,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 9092005564.166666,
+          "points": 32675,
+          "splits": 36963,
+          "targets": 12,
+          "unknowns": 528,
+          "wall_ns": 123786680561,
+          "word_ops": 109104066770
+        },
+        {
+          "admissible": true,
+          "budget_exhausted": false,
+          "coverage": 0.5833333333333334,
+          "decided": 12,
+          "decomposed": 7,
+          "divisor": [
+            1,
+            3,
+            5
+          ],
+          "ell": 15,
+          "expected_stage_ops": 6557042800979.0,
+          "expected_trials": 886.2857142857142,
+          "f4_calls": 120754,
+          "is_pipeline_default": false,
+          "max_degree_built": 3,
+          "ops_per_target": 7398339717.416667,
+          "points": 31931,
+          "splits": 30206,
+          "targets": 12,
+          "unknowns": 516,
+          "wall_ns": 101028179056,
+          "word_ops": 88780076609
+        }
+      ],
+      "curve": "K_0/2^31",
+      "m": 2,
+      "n": 31
+    }
+  ],
+  "scope": "decomposition-oracle stage only; not an end-to-end ECDLP cost",
+  "target_seed": 2,
+  "unit": "64-bit word XORs in the Macaulay elimination"
+}

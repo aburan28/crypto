@@ -1,0 +1,18 @@
+{
+  "schema": "ecc2k130-n37-native-column-capacity-replay-v1",
+  "status": "PASS",
+  "verifier_sha256": "bf7820254c2a42687c3ad7336d3264b735b333d2d1f857badc7755106d8437df",
+  "bound_sha256": "48c1282efce436684e18d98738fec2fe5812cef62c4aee70c22b6f6dbcbda26a",
+  "independent_method": "dynamic_programming_over_exact_l1_norm",
+  "checked_arities": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "first_arity_with_counting_ceiling_one_at_k42": 6,
+  "decision": "NATIVE_K42_UP_TO_FIVE_SUMMANDS_CAPACITY_NO_GO",
+  "full_dlp_speedup": null
+}

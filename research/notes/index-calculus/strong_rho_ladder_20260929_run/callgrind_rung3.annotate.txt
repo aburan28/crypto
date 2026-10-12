@@ -1,0 +1,41 @@
+--------------------------------------------------------------------------------
+Profile data file 'callgrind_rung3.out' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 5120129609
+Trigger: Program termination
+Profiled target:  /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong 53 0 signed_frobenius 1024 531310 (PID 2135, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                      
+--------------------------------------------------------------------------------
+46,384,789,571 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                       file:function
+--------------------------------------------------------------------------------
+23,873,979,090 (51.47%)  ???:koblitz_rho_batch_ks_strong::FastCanon::apply [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+ 8,848,963,417 (19.08%)  ???:koblitz_rho_batch_ks_strong::run [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+ 4,359,672,530 ( 9.40%)  ???:crypto_lib::cryptanalysis::semaev_decomp::Gf2::batch_inv [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+ 2,181,846,996 ( 4.70%)  ???:koblitz_rho_batch_ks_strong::Field::inv [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+ 2,064,728,895 ( 4.45%)  ???:crypto_lib::cryptanalysis::semaev_decomp::Gf2::inv [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+ 1,279,889,107 ( 2.76%)  ???:crypto_lib::cryptanalysis::semaev_decomp::clmul_u64 [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   912,156,725 ( 1.97%)  ???:<std::hash::random::DefaultHasher as core::hash::Hasher>::write [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   558,268,169 ( 1.20%)  ???:crypto_lib::cryptanalysis::semaev_decomp::Gf2::sqr [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   462,752,680 ( 1.00%)  ???:core::hash::BuildHasher::hash_one [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   362,410,118 ( 0.78%)  ???:crypto_lib::cryptanalysis::koblitz_index_calculus::factorise [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   289,010,547 ( 0.62%)  ???:num_bigint::biguint::addition::<impl core::ops::arith::AddAssign for num_bigint::biguint::BigUint>::add_assign [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   261,486,174 ( 0.56%)  ???:num_bigint::biguint::multiplication::<impl core::ops::arith::Mul for &num_bigint::biguint::BigUint>::mul [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   243,503,590 ( 0.52%)  ???:koblitz_rho_batch_ks_strong::point_add [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   211,024,630 ( 0.45%)  ???:num_bigint::biguint::multiplication::scalar_mul [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+   126,388,783 ( 0.27%)  ???:hashbrown::map::HashMap<K,V,S,A>::insert [/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong]
+

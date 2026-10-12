@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+    "research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/ci_replay.py",
+    "--evidence",
+    "research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/evidence/receipt.json"
+  ],
+  "cwd": "/private/tmp/ecc2k130-symbolic-dag-fullpoint-20260925",
+  "exit_code": 1,
+  "failure_kind": "relative_archive_path_resolved_against_HERE",
+  "freeze_sha256": "db93bd6185255a65ffd5b0d838a09db9a89f0b25a742c1f6705745851a60e383",
+  "frozen_commit": "c7c8a1049c38561694d0f794baa4b42d37c3395e",
+  "utc": "2026-09-25T17:00:32.038877+00:00"
+}

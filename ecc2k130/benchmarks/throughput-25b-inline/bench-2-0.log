@@ -1,0 +1,39 @@
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM
+packed L2 persist window: 83886080 of 104726528 field bytes, cap 83886080
+packed kernel: 102 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 1
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 0
+packed slot unroll: 2
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed L2 persist: 1
+packed direct reduction: 1
+packed generated product: 1
+packed native carryless multiply: 1
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed top clmad: 0
+packed state tile: 256
+packed add combine: 0
+packed profile ranges: 0
+packed table pivot bytes: 1, table shared bytes 48732
+packed table global: 0
+packed table addend global: 0
+packed table walk: 1 (8 branches, 48732 shared bytes)
+backend cuda-packed131: 96256 threads x 16 slots x 1 lanes = 1540096 walks, dp weight 0, 1024 steps per launch
+       2.0 s   17935.907 M it/s  36272340992 iterations         0 dp         0 stored         0 dropped
+       2.8 s   17933.642 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped
+  finished: 17933.590 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)

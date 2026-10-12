@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "kind": "report_legend_only",
+  "original_report": "run_02/RESULT.md",
+  "original_sha256": "0436c9d711dd1b6b8db6413a4ee06ff97d179687e752f9a176f95269443010c5",
+  "corrected_report": "run_02_REPORT_CORRECTED.md",
+  "corrected_sha256": "5953de2be2f101afad9906eda6230d3050edefa92150eab7db96a578ac5f84ff",
+  "incorrect_repetitions": 12,
+  "actual_repetitions": 20,
+  "authority": {
+    "path": "run_02/protocol.json",
+    "sha256": "10a89e1b0ac316219f93d84da0a0288280ea46d7021edc20207c324759343015",
+    "field": "repetitions"
+  },
+  "unchanged_numerical_results": {
+    "path": "run_02/results.json",
+    "sha256": "1ec408c4674b775073acf472d0161879a2f6ec8ca4e1692f5c5619c98e13e750"
+  },
+  "scope": "The frozen report prose inherited twelve from run_01. The actual worker command, protocol, raw samples and analyzer used twenty. Only the legend is corrected; no timings, samples, medians, intervals, counts or gate outcomes change. Original frozen files are preserved."
+}

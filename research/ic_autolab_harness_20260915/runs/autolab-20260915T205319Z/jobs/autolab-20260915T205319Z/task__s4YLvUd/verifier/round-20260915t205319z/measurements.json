@@ -1,0 +1,242 @@
+{
+  "audit": {
+    "source_files": 450,
+    "status": "VERIFIED",
+    "trial_receipts": 1356
+  },
+  "decision": {
+    "arithmetic_operation_speedup": null,
+    "beats_rho": false,
+    "classification": "engineering",
+    "confirmation": {
+      "candidate": "autolab",
+      "candidate_over_baseline": 0.731278079281907,
+      "ci95": [
+        0.7063051319526432,
+        0.7600346799570532
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.6928064499172422,
+      "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.6960900989365364,
+        "n17a1": 0.713228901514772,
+        "n19a0": 0.7426648360585519,
+        "n19a1": 0.7255744658905725,
+        "n23a0": 0.7817061600271971
+      },
+      "speedup": 1.3674688580600827
+    },
+    "family_wide_or_complexity_claim": false,
+    "independent_replay": "fresh processes, frozen executable, same final cases; independent Python group and rank checker",
+    "instruction_speedup": 1.3674688580600827,
+    "provisional_challenger": "autolab",
+    "reasons": [],
+    "replay": {
+      "candidate": "autolab",
+      "candidate_over_baseline": 0.7312790306807864,
+      "ci95": [
+        0.7063097521762826,
+        0.7600348125248142
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.6964676827782744,
+      "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.69609790355365,
+        "n17a1": 0.7132259035839659,
+        "n19a0": 0.7426665213260227,
+        "n19a1": 0.7255733560808519,
+        "n23a0": 0.7817051881320805
+      },
+      "speedup": 1.3674670789740095
+    },
+    "rho_comparison": {
+      "candidate": "rho",
+      "candidate_over_baseline": 0.07661830638922928,
+      "ci95": [
+        0.06996022081556,
+        0.08271777151074777
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.18543115614092864,
+      "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.07413657849180284,
+        "n17a1": 0.0651297789827307,
+        "n19a0": 0.08225238845015981,
+        "n19a1": 0.07882241112704898,
+        "n23a0": 0.0843436444526372
+      },
+      "speedup": 13.051711100476325
+    },
+    "rho_over_winner": 0.1047731479445769,
+    "rho_verdict_scope": "observed complete instruction cost; no asymptotic crossover claim",
+    "scope": "bounded public-hash ECDLP configuration tournament",
+    "status": "promoted",
+    "unit": "valgrind-3.22-amd64-Ir",
+    "winner": "autolab"
+  },
+  "limits": [
+    "Fixed compiler/ISA user-space instructions; kernel/device/external audit work excluded.",
+    "Bounded Koblitz configuration result; no arithmetic exponent or family-wide claim.",
+    "Native wall times are diagnostics; profiled elapsed time is not native performance."
+  ],
+  "matched_base_audit": {
+    "complete_ic_profiles_checked": 912,
+    "status": "VERIFIED"
+  },
+  "rho_health": {
+    "n13a0": {
+      "expected_steps_model": "sqrt(pi*r/(2*A)), A=2*n",
+      "max_restarts": 1,
+      "median_iterations_over_model": 0.7272374709138522,
+      "median_walk_additions_over_model": 0.6363327870496206,
+      "verified_runs": 36
+    },
+    "n17a1": {
+      "expected_steps_model": "sqrt(pi*r/(2*A)), A=2*n",
+      "max_restarts": 1,
+      "median_iterations_over_model": 0.6994092412534817,
+      "median_walk_additions_over_model": 0.6812427674546899,
+      "verified_runs": 36
+    },
+    "n19a0": {
+      "expected_steps_model": "sqrt(pi*r/(2*A)), A=2*n",
+      "max_restarts": 1,
+      "median_iterations_over_model": 0.9992960481783479,
+      "median_walk_additions_over_model": 0.9857001835772818,
+      "verified_runs": 36
+    },
+    "n19a1": {
+      "expected_steps_model": "sqrt(pi*r/(2*A)), A=2*n",
+      "max_restarts": 1,
+      "median_iterations_over_model": 0.8639212319898547,
+      "median_walk_additions_over_model": 0.8687207943897983,
+      "verified_runs": 36
+    },
+    "n23a0": {
+      "expected_steps_model": "sqrt(pi*r/(2*A)), A=2*n",
+      "max_restarts": 1,
+      "median_iterations_over_model": 0.904594481510862,
+      "median_walk_additions_over_model": 0.8971184940603589,
+      "verified_runs": 36
+    }
+  },
+  "round": "round-20260915t205319z",
+  "schema_version": 1,
+  "tables": {
+    "confirmation": [
+      {
+        "S_Ir": 515445.3096141836,
+        "candidate_over_floor": 20810475.234378837,
+        "candidate_over_incumbent": 1,
+        "candidate_over_rho": 13.051711100476325,
+        "class": "reference",
+        "scheduled_runs": 180,
+        "stage": "confirmation",
+        "variant": "incumbent",
+        "verified_runs": 180
+      },
+      {
+        "S_Ir": 376933.855989528,
+        "candidate_over_floor": 15218244.358340247,
+        "candidate_over_incumbent": 0.731278079281907,
+        "candidate_over_rho": 9.544430224898672,
+        "class": "engineering experiment",
+        "scheduled_runs": 180,
+        "stage": "confirmation",
+        "variant": "autolab",
+        "verified_runs": 180
+      },
+      {
+        "S_Ir": 39492.546658910636,
+        "candidate_over_floor": null,
+        "candidate_over_incumbent": 0.07661830638922928,
+        "candidate_over_rho": 1.0,
+        "class": "reference",
+        "scheduled_runs": 180,
+        "stage": "confirmation",
+        "variant": "rho",
+        "verified_runs": 180
+      }
+    ],
+    "development": [
+      {
+        "S_Ir": 572183.6980605071,
+        "candidate_over_floor": 20584114.028573755,
+        "candidate_over_incumbent": 1,
+        "candidate_over_rho": 13.21682590940272,
+        "class": "reference",
+        "scheduled_runs": 36,
+        "stage": "development",
+        "variant": "incumbent",
+        "verified_runs": 36
+      },
+      {
+        "S_Ir": 404724.00236285187,
+        "candidate_over_floor": 14559808.402400013,
+        "candidate_over_incumbent": 0.7073322846049592,
+        "candidate_over_rho": 9.348687665723844,
+        "class": "engineering experiment",
+        "scheduled_runs": 36,
+        "stage": "development",
+        "variant": "autolab",
+        "verified_runs": 36
+      },
+      {
+        "S_Ir": 43292.06588500518,
+        "candidate_over_floor": null,
+        "candidate_over_incumbent": 0.07566113126212698,
+        "candidate_over_rho": 1.0,
+        "class": "reference",
+        "scheduled_runs": 36,
+        "stage": "development",
+        "variant": "rho",
+        "verified_runs": 36
+      }
+    ],
+    "replay": [
+      {
+        "S_Ir": 515444.5651212891,
+        "candidate_over_floor": 20810445.176386934,
+        "candidate_over_incumbent": 1,
+        "candidate_over_rho": 13.05169437552719,
+        "class": "reference",
+        "scheduled_runs": 180,
+        "stage": "replay",
+        "variant": "incumbent",
+        "verified_runs": 180
+      },
+      {
+        "S_Ir": 376933.8019515754,
+        "candidate_over_floor": 15218242.176623894,
+        "candidate_over_incumbent": 0.7312790306807864,
+        "candidate_over_rho": 9.544430411677393,
+        "class": "engineering experiment",
+        "scheduled_runs": 180,
+        "stage": "replay",
+        "variant": "autolab",
+        "verified_runs": 180
+      },
+      {
+        "S_Ir": 39492.54022433918,
+        "candidate_over_floor": null,
+        "candidate_over_incumbent": 0.07661840457090903,
+        "candidate_over_rho": 1.0,
+        "class": "reference",
+        "scheduled_runs": 180,
+        "stage": "replay",
+        "variant": "rho",
+        "verified_runs": 180
+      }
+    ]
+  },
+  "unit": "valgrind-3.22-amd64-Ir"
+}

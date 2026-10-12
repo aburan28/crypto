@@ -1,0 +1,288 @@
+{
+  "valid": true,
+  "compileOnly": false,
+  "experiment": "ECC_MINBLOCKS=2 versus 3; all other build flags identical",
+  "gpuIdentity": "NVIDIA RTX PRO 4500 Blackwell Server Edition, GPU-ac08a04d-c2a2-1c1c-84b0-e2ee3abcdd84, 595.91.07, 12.0",
+  "matchesHistoricalGpuModel": false,
+  "fieldProductsPerScalarUpdate": 5.3125,
+  "fieldProductRatioToControl": 1.0,
+  "endToEndDlpSpeedup": null,
+  "comparisons": {
+    "0": {
+      "controlMPerSecond": 4692.014,
+      "candidateMPerSecond": 4593.011,
+      "ratio": 0.9788996793274701,
+      "pairedGeometricRatio": 0.9824530447725283,
+      "pairedLogT95": [
+        0.9745531886308162,
+        0.9904169381856667
+      ],
+      "allPairsFaster": false,
+      "passesAcceptance": false
+    },
+    "34": {
+      "controlMPerSecond": 4632.696,
+      "candidateMPerSecond": 4542.281,
+      "ratio": 0.980483286621872,
+      "pairedGeometricRatio": 0.9807575783377503,
+      "pairedLogT95": [
+        0.9730035710743429,
+        0.9885733784151086
+      ],
+      "allPairsFaster": false,
+      "passesAcceptance": false
+    }
+  },
+  "passesAcceptance": false,
+  "meets28BGoal": false,
+  "classification": "engineering",
+  "sourceSha256": "d5d0c59ae97e69afbf5d1ac9741e693e31981c287c8367b639f885ab95aa4c89",
+  "s3ResultPrefix": "benchmarks/native/957acd57e203416db735934cae92c614",
+  "instanceId": "i-049237b8b44c1f13d",
+  "completedUpdatesPerSample": 201863462912,
+  "excludedWarmups": 4,
+  "timedPairs": 10,
+  "dpCorpus": [
+    5149,
+    "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b"
+  ],
+  "archivedBinaryHashesVerified": true,
+  "binaries": {
+    "2": {
+      "binarySha256": "d9fff7db7e1480537e141d9719b5d54397234385eecef807cf2c230539aee354",
+      "resources": {
+        "registers": 104,
+        "stackBytes": 0,
+        "sharedBytes": 2816,
+        "localBytes": 0
+      },
+      "residentBlocksPerSm": 2,
+      "staticWalkInstructions": 4513
+    },
+    "3": {
+      "binarySha256": "ee0c71ccd9278b77152fc00e85afeafa8cd6628ee69353d0b3c9d9f1d1b154d5",
+      "resources": {
+        "registers": 80,
+        "stackBytes": 0,
+        "sharedBytes": 2816,
+        "localBytes": 0
+      },
+      "residentBlocksPerSm": 3,
+      "staticWalkInstructions": 4569
+    }
+  },
+  "pairs": [
+    {
+      "weight": 0,
+      "repeat": 0,
+      "order": [
+        "2",
+        "3"
+      ],
+      "ratio": 0.9739454863348054,
+      "samples": {
+        "2": {
+          "rate": 4839.814,
+          "iterations": 201863462912
+        },
+        "3": {
+          "rate": 4713.715,
+          "iterations": 201863462912
+        }
+      }
+    },
+    {
+      "weight": 0,
+      "repeat": 1,
+      "order": [
+        "3",
+        "2"
+      ],
+      "ratio": 0.990728522909865,
+      "samples": {
+        "3": {
+          "rate": 4669.36,
+          "iterations": 201863462912
+        },
+        "2": {
+          "rate": 4713.057,
+          "iterations": 201863462912
+        }
+      }
+    },
+    {
+      "weight": 0,
+      "repeat": 2,
+      "order": [
+        "2",
+        "3"
+      ],
+      "ratio": 0.9788996793274701,
+      "samples": {
+        "2": {
+          "rate": 4692.014,
+          "iterations": 201863462912
+        },
+        "3": {
+          "rate": 4593.011,
+          "iterations": 201863462912
+        }
+      }
+    },
+    {
+      "weight": 0,
+      "repeat": 3,
+      "order": [
+        "3",
+        "2"
+      ],
+      "ratio": 0.9854310857800563,
+      "samples": {
+        "3": {
+          "rate": 4585.606,
+          "iterations": 201863462912
+        },
+        "2": {
+          "rate": 4653.401,
+          "iterations": 201863462912
+        }
+      }
+    },
+    {
+      "weight": 0,
+      "repeat": 4,
+      "order": [
+        "2",
+        "3"
+      ],
+      "ratio": 0.9833435072871214,
+      "samples": {
+        "2": {
+          "rate": 4642.574,
+          "iterations": 201863462912
+        },
+        "3": {
+          "rate": 4565.245,
+          "iterations": 201863462912
+        }
+      }
+    },
+    {
+      "weight": 34,
+      "repeat": 0,
+      "order": [
+        "2",
+        "3"
+      ],
+      "ratio": 0.9868805014333271,
+      "samples": {
+        "2": {
+          "rate": 4586.532,
+          "iterations": 201863462912,
+          "corpusRecords": 5149,
+          "corpusSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b"
+        },
+        "3": {
+          "rate": 4526.359,
+          "iterations": 201863462912,
+          "corpusRecords": 5149,
+          "corpusSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b"
+        }
+      }
+    },
+    {
+      "weight": 34,
+      "repeat": 1,
+      "order": [
+        "3",
+        "2"
+      ],
+      "ratio": 0.9719965297909715,
+      "samples": {
+        "3": {
+          "rate": 4526.374,
+          "iterations": 201863462912,
+          "corpusRecords": 5149,
+          "corpusSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b"
+        },
+        "2": {
+          "rate": 4656.78,
+          "iterations": 201863462912,
+          "corpusRecords": 5149,
+          "corpusSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b"
+        }
+      }
+    },
+    {
+      "weight": 34,
+      "repeat": 2,
+      "order": [
+        "2",
+        "3"
+      ],
+      "ratio": 0.976497727798711,
+      "samples": {
+        "2": {
+          "rate": 4688.185,
+          "iterations": 201863462912,
+          "corpusRecords": 5149,
+          "corpusSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b"
+        },
+        "3": {
+          "rate": 4578.002,
+          "iterations": 201863462912,
+          "corpusRecords": 5149,
+          "corpusSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b"
+        }
+      }
+    },
+    {
+      "weight": 34,
+      "repeat": 3,
+      "order": [
+        "3",
+        "2"
+      ],
+      "ratio": 0.984096733306049,
+      "samples": {
+        "3": {
+          "rate": 4559.021,
+          "iterations": 201863462912,
+          "corpusRecords": 5149,
+          "corpusSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b"
+        },
+        "2": {
+          "rate": 4632.696,
+          "iterations": 201863462912,
+          "corpusRecords": 5149,
+          "corpusSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b"
+        }
+      }
+    },
+    {
+      "weight": 34,
+      "repeat": 4,
+      "order": [
+        "2",
+        "3"
+      ],
+      "ratio": 0.9843964822247459,
+      "samples": {
+        "2": {
+          "rate": 4614.28,
+          "iterations": 201863462912,
+          "corpusRecords": 5149,
+          "corpusSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b"
+        },
+        "3": {
+          "rate": 4542.281,
+          "iterations": 201863462912,
+          "corpusRecords": 5149,
+          "corpusSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b"
+        }
+      }
+    }
+  ],
+  "resultArchiveSha256": "98010c790a4c09bf10a4762a480324936f5fc6f22573fa4eb5e1ac0d9e4f714d",
+  "evidenceArchiveSha256": "242d175156adf3c5c8166ced480cea075393a63868ae812ba900ca95f10c35ef"
+}

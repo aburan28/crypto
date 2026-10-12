@@ -1,0 +1,42 @@
+{
+  "phase": "native",
+  "n": 37,
+  "L": 1024,
+  "K": 42,
+  "corpus": "n37-strong-sweep-L1024-v1",
+  "batch_seed": "531310",
+  "load_before": "16:59:20 up 24 min,  0 user,  load average: 2.07, 2.19, 1.35",
+  "rho": {
+    "rc": 0,
+    "wall_s": 0.11636285399981716,
+    "child_maxrss_bytes": 11108352,
+    "gates_G1": true,
+    "total_walk_steps": 170613,
+    "table_entries": 11397,
+    "in_process_ms": 112.989206
+  },
+  "ic": {
+    "rc": 0,
+    "wall_s": 0.1908681750001051,
+    "gates_G1": true,
+    "targets_solved": 1024,
+    "targets_failed": 0,
+    "rank": 42,
+    "orbit_columns": 42,
+    "rank_failures": 0,
+    "peak_rss_bytes": 9637888,
+    "timing_ms": {
+      "base_load": 2.911619,
+      "index_build": 34.510682,
+      "linear_algebra": 0.007097,
+      "normal_basis_and_selftest": 2.672499,
+      "process_total": 182.19792700000002,
+      "rank_stage": 1.923802,
+      "setup_total": 40.09541,
+      "target_median": 0.035077000000000004,
+      "targets_total": 140.014679
+    },
+    "root_table_entries": 64467
+  },
+  "load_after": "16:59:20 up 24 min,  0 user,  load average: 2.07, 2.19, 1.35"
+}

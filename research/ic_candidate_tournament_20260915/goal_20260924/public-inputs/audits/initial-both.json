@@ -1,0 +1,244 @@
+{
+  "reference": "both",
+  "rho_rows": [
+    {
+      "cell": "n13a0",
+      "certificate": {
+        "rank": null,
+        "solutions": [
+          "598"
+        ],
+        "verified_relations": 0,
+        "verified_targets": 1
+      },
+      "instruction_phases": {
+        "recovery_check": 91438,
+        "reference_solve": 559350,
+        "setup": 267155
+      },
+      "native_timing": {
+        "cold": {
+          "external_setup_remainder_ns": 636538,
+          "phase_wall_ns": {
+            "recovery_check": 15335,
+            "reference_solve": 127759,
+            "setup": 702875
+          },
+          "remainder_policy": "setup charges process launch/input and report/exit tail outside worker snapshot",
+          "unattributed_wall_ns": 0,
+          "wall_ns": 845969,
+          "worker_snapshot_wall_ns": 209431
+        },
+        "native_report_sha256": "edd189814c1d825c4c8f0d2afc9eb39e3997045f170b0d3800c11f5eb9e0b17e",
+        "online": {
+          "boundary": "supplied public point; target-dependent rho setup, solve and final scalar replay",
+          "phase_wall_ns": {
+            "recovery_check": 15335,
+            "reference_solve": 127759
+          },
+          "scalar_replay_included": true,
+          "target_generation_included": false,
+          "wall_ns": 143094
+        },
+        "schema_version": 1,
+        "target_count": 1,
+        "unit": "native_monotonic_ns"
+      },
+      "promotion_eligible": false,
+      "status": "VERIFIED",
+      "workload_id": "05e22882426f"
+    },
+    {
+      "cell": "n17a1",
+      "certificate": {
+        "rank": null,
+        "solutions": [
+          "39239"
+        ],
+        "verified_relations": 0,
+        "verified_targets": 1
+      },
+      "instruction_phases": {
+        "recovery_check": 129709,
+        "reference_solve": 846733,
+        "setup": 273138
+      },
+      "native_timing": {
+        "cold": {
+          "external_setup_remainder_ns": 540788,
+          "phase_wall_ns": {
+            "recovery_check": 24027,
+            "reference_solve": 163054,
+            "setup": 659156
+          },
+          "remainder_policy": "setup charges process launch/input and report/exit tail outside worker snapshot",
+          "unattributed_wall_ns": 0,
+          "wall_ns": 846237,
+          "worker_snapshot_wall_ns": 305449
+        },
+        "native_report_sha256": "41104940bf2678bf0583fac8a828c691bba75500afeccbf879019419537f820d",
+        "online": {
+          "boundary": "supplied public point; target-dependent rho setup, solve and final scalar replay",
+          "phase_wall_ns": {
+            "recovery_check": 24027,
+            "reference_solve": 163054
+          },
+          "scalar_replay_included": true,
+          "target_generation_included": false,
+          "wall_ns": 187081
+        },
+        "schema_version": 1,
+        "target_count": 1,
+        "unit": "native_monotonic_ns"
+      },
+      "promotion_eligible": false,
+      "status": "VERIFIED",
+      "workload_id": "07535e10ce0b"
+    },
+    {
+      "cell": "n23a1",
+      "certificate": {
+        "rank": null,
+        "solutions": [
+          "2527940"
+        ],
+        "verified_relations": 0,
+        "verified_targets": 1
+      },
+      "instruction_phases": {
+        "recovery_check": 173399,
+        "reference_solve": 2222602,
+        "setup": 397581
+      },
+      "native_timing": {
+        "cold": {
+          "external_setup_remainder_ns": 565210,
+          "phase_wall_ns": {
+            "recovery_check": 31218,
+            "reference_solve": 293001,
+            "setup": 658071
+          },
+          "remainder_policy": "setup charges process launch/input and report/exit tail outside worker snapshot",
+          "unattributed_wall_ns": 0,
+          "wall_ns": 982290,
+          "worker_snapshot_wall_ns": 417080
+        },
+        "native_report_sha256": "02c6e39e6480c6c37835d1324e67a25495ad430a3d11c3aba1a05dd9195eccfe",
+        "online": {
+          "boundary": "supplied public point; target-dependent rho setup, solve and final scalar replay",
+          "phase_wall_ns": {
+            "recovery_check": 31218,
+            "reference_solve": 293001
+          },
+          "scalar_replay_included": true,
+          "target_generation_included": false,
+          "wall_ns": 324219
+        },
+        "schema_version": 1,
+        "target_count": 1,
+        "unit": "native_monotonic_ns"
+      },
+      "promotion_eligible": false,
+      "status": "VERIFIED",
+      "workload_id": "8e322fa2720e"
+    }
+  ],
+  "rho_verified_pairs": 3,
+  "rows": [
+    {
+      "candidate_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0hadde52442a8d",
+      "cell": "n13a0",
+      "matrix_sha256": "4c74b498fc0148e5cc1fcd831d884648965e04e34e3caf3e422d0e1f618cafbc",
+      "native_wall_ns": 513143,
+      "rank": 7,
+      "repetition": 0,
+      "run_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0hadde52442a8dW05e22882426fR0",
+      "total_operations": 719472
+    },
+    {
+      "candidate_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0hadde52442a8d",
+      "cell": "n13a0",
+      "matrix_sha256": "4c74b498fc0148e5cc1fcd831d884648965e04e34e3caf3e422d0e1f618cafbc",
+      "native_wall_ns": 700637,
+      "rank": 7,
+      "repetition": 1,
+      "run_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0hadde52442a8dW05e22882426fR1",
+      "total_operations": 719476
+    },
+    {
+      "candidate_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0hadde52442a8d",
+      "cell": "n13a0",
+      "matrix_sha256": "4c74b498fc0148e5cc1fcd831d884648965e04e34e3caf3e422d0e1f618cafbc",
+      "native_wall_ns": 817900,
+      "rank": 7,
+      "repetition": 2,
+      "run_id": "IC1N13Ckb0fb182PDP3pairRCwalkLAgaussTDpdpISO0hadde52442a8dW05e22882426fR2",
+      "total_operations": 719472
+    },
+    {
+      "candidate_id": "IC1N17Ckb1fb272PDP3pairRCwalkLAgaussTDpdpISO0h14df604e3659",
+      "cell": "n17a1",
+      "matrix_sha256": "58e6a0d94364b9ff72c3e0e2516ba8a66adba50349021a35b53fd876b56f50f1",
+      "native_wall_ns": 616131,
+      "rank": 8,
+      "repetition": 0,
+      "run_id": "IC1N17Ckb1fb272PDP3pairRCwalkLAgaussTDpdpISO0h14df604e3659W07535e10ce0bR0",
+      "total_operations": 952075
+    },
+    {
+      "candidate_id": "IC1N17Ckb1fb272PDP3pairRCwalkLAgaussTDpdpISO0h14df604e3659",
+      "cell": "n17a1",
+      "matrix_sha256": "58e6a0d94364b9ff72c3e0e2516ba8a66adba50349021a35b53fd876b56f50f1",
+      "native_wall_ns": 735727,
+      "rank": 8,
+      "repetition": 1,
+      "run_id": "IC1N17Ckb1fb272PDP3pairRCwalkLAgaussTDpdpISO0h14df604e3659W07535e10ce0bR1",
+      "total_operations": 952113
+    },
+    {
+      "candidate_id": "IC1N17Ckb1fb272PDP3pairRCwalkLAgaussTDpdpISO0h14df604e3659",
+      "cell": "n17a1",
+      "matrix_sha256": "58e6a0d94364b9ff72c3e0e2516ba8a66adba50349021a35b53fd876b56f50f1",
+      "native_wall_ns": 744419,
+      "rank": 8,
+      "repetition": 2,
+      "run_id": "IC1N17Ckb1fb272PDP3pairRCwalkLAgaussTDpdpISO0h14df604e3659W07535e10ce0bR2",
+      "total_operations": 952113
+    },
+    {
+      "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h0c0ce2be2cb1",
+      "cell": "n23a1",
+      "matrix_sha256": "c6009e649f034de6c2cbd1fea97034fa67b352df3f24815e094a2cfb5861d83f",
+      "native_wall_ns": 810599,
+      "rank": 8,
+      "repetition": 0,
+      "run_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h0c0ce2be2cb1W8e322fa2720eR0",
+      "total_operations": 2314828
+    },
+    {
+      "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h0c0ce2be2cb1",
+      "cell": "n23a1",
+      "matrix_sha256": "c6009e649f034de6c2cbd1fea97034fa67b352df3f24815e094a2cfb5861d83f",
+      "native_wall_ns": 929104,
+      "rank": 8,
+      "repetition": 1,
+      "run_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h0c0ce2be2cb1W8e322fa2720eR1",
+      "total_operations": 2314824
+    },
+    {
+      "candidate_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h0c0ce2be2cb1",
+      "cell": "n23a1",
+      "matrix_sha256": "c6009e649f034de6c2cbd1fea97034fa67b352df3f24815e094a2cfb5861d83f",
+      "native_wall_ns": 1015298,
+      "rank": 8,
+      "repetition": 2,
+      "run_id": "IC1N23Ckb1fb368PDP3pairRCwalkLAgaussTDpdpISO0h0c0ce2be2cb1W8e322fa2720eR2",
+      "total_operations": 2314828
+    }
+  ],
+  "scope": "transported producer integration evidence; no comparison",
+  "source_manifest_sha256": "3af46d7abe7c49f7be729a6f5f8b6aa4c2ca9fcca041132e3f07e2de3a14589c",
+  "status": "VERIFIED",
+  "verified_pairs": 9,
+  "worker_sha256": "d1e81e7e172012b122e5b4818c5897c850b9e1613b8d8d5d8bf85e96599820b8"
+}

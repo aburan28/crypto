@@ -1,0 +1,20 @@
+cell                   n   l  unk   ref/target  cand/target
+K_0/2^9 m=4            9   6   42     3.59e+05     1.15e+05
+K_1/2^9 m=4            9   6   42        4e+05     1.46e+05
+K_1/2^11 m=4          11  10   62     2.49e+07     7.46e+05
+K_0/2^15 m=4          15   4   46      2.7e+06     7.06e+05
+K_1/2^15 m=4          15   4   46     4.32e+07     4.94e+06
+K_0/2^15 m=4 div1     15   4   46     1.87e+07      3.7e+06
+K_0/2^15 m=4 div2     15   4   46     5.45e+07      8.1e+06
+K_1/2^15 m=4 div1     15   4   46     3.54e+06     7.35e+05
+K_1/2^15 m=4 div2     15   4   46     2.57e+07     4.23e+06
+
+reference: median per-target word ops n=9 3.79e+05, n=15 2.22e+07;  implied growth 0.98 bits per unit n  (threshold for an exponent below 1/2: < 0.25)
+candidate: median per-target word ops n=9 1.3e+05, n=15 3.97e+06;  implied growth 0.82 bits per unit n  (threshold for an exponent below 1/2: < 0.25)
+
+Context: matched rho on a cofactor-2 subgroup at n = 15 is about 2^4.9 = 29 group operations for the WHOLE logarithm.
+Confounds: the n = 9 cells run l = 6 (x = l/n = 0.67) and the n = 15 cells l = 4 (x = 0.27);
+at a fixed x = 1/4 the n = 9 systems would be smaller and cheaper, so the per-n growth at
+fixed x is, if anything, steeper than printed.  Word operations are not group operations;
+the conversion is a constant and does not move a growth rate.  Two sizes fix one rate and
+no curvature, and the targets mix satisfiable and refuted systems in different proportions.

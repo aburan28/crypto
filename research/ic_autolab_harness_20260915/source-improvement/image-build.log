@@ -1,0 +1,18 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 440B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/sha256:4d162811876c514c07b9f45aa5db12ae55f1df9c41a0fca4478f6bfc26974441
+#2 ERROR: pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+------
+ > [internal] load metadata for docker.io/library/sha256:4d162811876c514c07b9f45aa5db12ae55f1df9c41a0fca4478f6bfc26974441:
+------
+Dockerfile:1
+--------------------
+   1 | >>> FROM sha256:4d162811876c514c07b9f45aa5db12ae55f1df9c41a0fca4478f6bfc26974441
+   2 |     COPY koblitz_index_calculus.rs /app/src/cryptanalysis/koblitz_index_calculus.rs
+   3 |     COPY candidate.json /app/candidate.json
+--------------------
+ERROR: failed to build: failed to solve: sha256:4d162811876c514c07b9f45aa5db12ae55f1df9c41a0fca4478f6bfc26974441: failed to resolve source metadata for docker.io/library/sha256:4d162811876c514c07b9f45aa5db12ae55f1df9c41a0fca4478f6bfc26974441: pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed

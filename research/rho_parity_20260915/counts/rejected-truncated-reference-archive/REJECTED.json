@@ -1,0 +1,5 @@
+{
+  "reason": "The isolated binary produced the expected original counters, but the saved XZ stream ended after its first record despite a 210-process summary. Missing raw evidence blocks acceptance. Preserve this run and repeat with a completed temporary archive validated before publication.",
+  "binary_isolation": "correct; first case has seven F4 reductions",
+  "retained": "all extant files, including the complete summary and truncated raw stream"
+}

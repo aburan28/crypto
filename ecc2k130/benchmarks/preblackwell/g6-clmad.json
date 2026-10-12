@@ -1,0 +1,74 @@
+{
+  "kind": "preblackwell complete-scalar-iteration throughput",
+  "family": "g6",
+  "gpu": "NVIDIA L4",
+  "cc": "89",
+  "valid": true,
+  "packedClmad": true,
+  "batch": 16,
+  "blockThreads": 256,
+  "minBlocks": 2,
+  "workers": "automatic",
+  "automaticThreads": 29696,
+  "steps": 1024,
+  "launches": 32,
+  "repeats": 3,
+  "sms": 58,
+  "sourceSha256": "7e230da07324777f38a2ad7a85712ebc1eb74e47a6d91db661581a63e6b65c19",
+  "binarySha256": "1c4e04bb34906c4180956ca3254374030f23b5f220b2b6ef2653b384f1232c22",
+  "activeBackend": "packed-poly131",
+  "cudaImageVersion": "13.3.1",
+  "gpuUuid": "GPU-abd8ff2d-b9e9-61bf-8a4e-29e61909e5bc",
+  "gpuState": "name, uuid, driver_version, pstate, clocks.current.sm [MHz], clocks.current.memory [MHz], power.limit [W], temperature.gpu\nNVIDIA L4, GPU-abd8ff2d-b9e9-61bf-8a4e-29e61909e5bc, 580.95.05, P8, 210 MHz, 405 MHz, 72.00 W, 37",
+  "compiler": "nvcc 13.3.73",
+  "modalApp": "ap-s7RCepUzZVm45ZLupgf3xm",
+  "ratesM": [
+    2496.854,
+    2490.035,
+    2485.352
+  ],
+  "minRateM": 2485.352,
+  "maxRateM": 2496.854,
+  "medianM": 2490.035,
+  "medianB": 2.4900349999999998,
+  "prior": {
+    "kind": "scaled-H1-H2-before-72W",
+    "B": 2.3
+  },
+  "ratioToPrior": 1.0826239130434783,
+  "ratioTo6000": 0.16473070018428407,
+  "perSmM": 42.93163793103448,
+  "samples": [
+    {
+      "valid": true,
+      "rateM": 2496.854,
+      "packedClmad": true,
+      "expectedPackedClmad": true,
+      "registers": 94,
+      "localBytes": 0,
+      "deviceLine": "device: NVIDIA L4, 58 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 29696
+    },
+    {
+      "valid": true,
+      "rateM": 2490.035,
+      "packedClmad": true,
+      "expectedPackedClmad": true,
+      "registers": 94,
+      "localBytes": 0,
+      "deviceLine": "device: NVIDIA L4, 58 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 29696
+    },
+    {
+      "valid": true,
+      "rateM": 2485.352,
+      "packedClmad": true,
+      "expectedPackedClmad": true,
+      "registers": 94,
+      "localBytes": 0,
+      "deviceLine": "device: NVIDIA L4, 58 SMs, 2 block(s) of 256 packed threads resident per SM",
+      "threads": 29696
+    }
+  ],
+  "recoveredFromWrappedModalLog": true
+}

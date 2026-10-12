@@ -1,0 +1,145 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling cfg-if v1.0.5
+   Compiling libc v0.2.189
+   Compiling zerocopy v0.8.59
+   Compiling crossbeam-utils v0.8.23
+   Compiling autocfg v1.5.1
+   Compiling crossbeam-epoch v0.9.21
+   Compiling shlex v2.0.1
+   Compiling utf8parse v0.2.2
+   Compiling crossbeam-deque v0.8.8
+   Compiling serde_core v1.0.229
+   Compiling find-msvc-tools v0.1.14
+   Compiling anstyle-parse v1.0.0
+   Compiling rayon-core v1.13.0
+   Compiling cc v1.5.1
+   Compiling colorchoice v1.0.5
+   Compiling zmij v1.0.23
+   Compiling anstyle-query v1.1.5
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling anstyle v1.0.14
+   Compiling num-traits v0.2.19
+   Compiling crc32fast v1.5.2
+   Compiling anstream v1.0.0
+   Compiling serde_json v1.0.151
+   Compiling simd-adler32 v0.3.10
+   Compiling blake3 v1.8.7
+   Compiling heck v0.5.0
+   Compiling getrandom v0.2.17
+   Compiling adler2 v2.0.1
+   Compiling rand_core v0.6.4
+   Compiling strsim v0.11.1
+   Compiling clap_lex v1.1.1
+   Compiling serde v1.0.229
+   Compiling syn v3.0.6
+   Compiling syn v2.0.119
+   Compiling clap_builder v4.6.7
+   Compiling miniz_oxide v0.9.1
+   Compiling arrayvec v0.7.8
+   Compiling memchr v2.8.3
+   Compiling either v1.18.0
+   Compiling constant_time_eq v0.4.2
+   Compiling itoa v1.0.18
+   Compiling flate2 v1.1.10
+   Compiling hex v0.4.3
+   Compiling base64 v0.21.7
+   Compiling subtle v2.6.1
+   Compiling rayon v1.12.0
+   Compiling num-integer v0.1.47
+   Compiling clap_derive v4.6.7
+   Compiling serde_derive v1.0.229
+   Compiling zeroize_derive v1.5.0
+   Compiling zeroize v1.9.0
+   Compiling clap v4.6.7
+   Compiling ppv-lite86 v0.2.21
+   Compiling rand_chacha v0.3.1
+   Compiling rand v0.8.8
+   Compiling num-bigint v0.4.8
+   Compiling crypto v0.1.0 (/Volumes/SSD990/crypto-kic-pr660-main-20261001)
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1037:5
+     |
+1035 | enum Lanes {
+     |      ----- variants in this enum
+1036 |     Scalar,
+1037 |     Avx2,
+     |     ^^^^
+1038 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+   --> src/cryptanalysis/koblitz_fast.rs:945:5
+    |
+941 | pub struct BatchScratch {
+    |            ------------ fields in this struct
+...
+945 |     qx: Vec<u64>,
+    |     ^^
+946 |     qy: Vec<u64>,
+    |     ^^
+    |
+    = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2262:13
+     |
+2262 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: `crypto` (lib) generated 4 warnings (run `cargo fix --lib -p crypto` to apply 2 suggestions)
+warning: `crypto` (lib test) generated 5 warnings (3 duplicates) (run `cargo fix --lib -p crypto --tests` to apply 2 suggestions)
+    Finished `release` profile [optimized] target(s) in 5m 17s
+     Running unittests src/lib.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/crypto_lib-9a85b111100957be)
+     Running unittests src/main.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/crypto-b6a40c4eb9750e30)
+     Running unittests src/bin/ecc2k_guard.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/ecc2k_guard-33abff0046ab3795)
+     Running unittests src/bin/ic.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/ic-1db4aa53ae2fe424)
+     Running unittests src/bin/icprog.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/icprog-a2cabd365efbdeb7)
+     Running unittests src/bin/icx.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/icx-9e0bca337e50ed34)
+     Running unittests src/bin/isolated_bench.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/isolated_bench-297b16fabe1baaae)
+     Running unittests src/bin/koblitz_pdp_prepare.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/koblitz_pdp_prepare-6c1e6598cd3974d1)
+     Running tests/curve_audit.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/curve_audit-aa1385209803103f)
+     Running tests/curve_id.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/curve_id-6996be153af1847a)
+     Running tests/ec_vartime_tiny_fields.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/ec_vartime_tiny_fields-ed0e56d39029bffe)
+     Running tests/ec_vartime_walks_pinned.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/ec_vartime_walks_pinned-2fdbac5ada57168c)
+     Running tests/ic_fixed.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/ic_fixed-f58c84587f837003)
+     Running tests/ic_framework.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/ic_framework-74d71762881eb116)
+     Running tests/ic_progress.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/ic_progress-948b3e33a2a2dbc4)
+     Running tests/icprog.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/icprog-cda03bc6d175ce6a)
+     Running tests/icx.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/icx-4fd92b0fecab1429)
+     Running tests/lll_degeneracy_probe.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/lll_degeneracy_probe-d0ec8d1ac33ffec7)
+     Running tests/volcano_metadata_exhaustive.rs (/Volumes/SSD990/kic-stage201-dev-c42c42a46/release/deps/volcano_metadata_exhaustive-b5e3249d3471ed67)

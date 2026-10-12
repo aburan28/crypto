@@ -1,0 +1,40 @@
+{
+  "close_fds": true,
+  "command": [
+    "/usr/bin/git",
+    "archive",
+    "--format=tar",
+    "--output=/Volumes/SSD990/koblitz-native-f4-build18-509e43c7/source.tar",
+    "509e43c79bcf36425f4329a09c34fd20c75949ed",
+    "Cargo.toml",
+    "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-20-rust-build/Cargo.lock",
+    "src",
+    "examples/koblitz_pdp_export.rs",
+    "examples/koblitz_pdp_backend.rs",
+    "docs/ic/calibration.json"
+  ],
+  "cwd": "/Volumes/SSD990/crypto-phase-b-native-f4-20260922",
+  "environment": {
+    "CARGO_HOME": "/Volumes/SSD990/koblitz-native-f4-cargo-fetch-9845f2df",
+    "CARGO_INCREMENTAL": "0",
+    "HOME": "/Users/adamburan",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin:/opt/homebrew/bin:/usr/sbin:/sbin",
+    "RAYON_NUM_THREADS": "1",
+    "RUSTC": "/opt/homebrew/bin/rustc",
+    "TMPDIR": "/tmp",
+    "TZ": "UTC",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "executable_sha256": null,
+  "inputs": [],
+  "role": "archive-source",
+  "schema": "koblitz_pdp_phase_b_child_intent.v1",
+  "stdin": "devnull",
+  "watchdog_seconds": 1800
+}

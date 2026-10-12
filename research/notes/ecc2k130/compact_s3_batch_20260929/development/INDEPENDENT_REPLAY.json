@@ -1,0 +1,61 @@
+{
+  "point_source": "first_32_published_swap_quotient_Q_per_n",
+  "receipts": [
+    {
+      "K": 192,
+      "W": 1,
+      "base_hash": "ee728d2c41d969e3c55635ace8de9c3be3aba74ab2a8a44ca208d71a552eae8e",
+      "n": 41,
+      "rank": 192,
+      "rank_status": "PASS",
+      "targets_verified": 32
+    },
+    {
+      "K": 192,
+      "W": 16,
+      "base_hash": "ee728d2c41d969e3c55635ace8de9c3be3aba74ab2a8a44ca208d71a552eae8e",
+      "n": 41,
+      "rank": 192,
+      "rank_status": "PASS",
+      "targets_verified": 32
+    },
+    {
+      "K": 192,
+      "W": 64,
+      "base_hash": "ee728d2c41d969e3c55635ace8de9c3be3aba74ab2a8a44ca208d71a552eae8e",
+      "n": 41,
+      "rank": 192,
+      "rank_status": "PASS",
+      "targets_verified": 32
+    },
+    {
+      "K": 440,
+      "W": 1,
+      "base_hash": "439146c22fa5ccb588116724a17c240a6aa448e24f751a260d51a09029b5d67e",
+      "n": 53,
+      "rank": 440,
+      "rank_status": "PASS",
+      "targets_verified": 32
+    },
+    {
+      "K": 440,
+      "W": 16,
+      "base_hash": "439146c22fa5ccb588116724a17c240a6aa448e24f751a260d51a09029b5d67e",
+      "n": 53,
+      "rank": 440,
+      "rank_status": "PASS",
+      "targets_verified": 32
+    },
+    {
+      "K": 440,
+      "W": 64,
+      "base_hash": "439146c22fa5ccb588116724a17c240a6aa448e24f751a260d51a09029b5d67e",
+      "n": 53,
+      "rank": 440,
+      "rank_status": "PASS",
+      "targets_verified": 32
+    }
+  ],
+  "schema": "compact-s3-batch-development-replay-v1",
+  "status": "PASS"
+}

@@ -1,0 +1,83 @@
+{
+ "against_the_projection": {
+  "revised_boundary": {
+   "caveat": "An extrapolation from one point along a theoretical slope, not a series of runs. The two wide-base rungs measured here (75.2 at 45 bits, 61.2 at 48) fall more slowly than that slope, which would put the boundary further out; the slope is used because it is the one the cost laws predict.",
+   "charged_reach_bits": 59.9,
+   "method": "the charged ratio falls as the square root of r, so 48 + 2*log2(ratio)",
+   "previous_estimate_bits": 52
+  },
+  "what_was_measured": {
+   "charged_ratio": 61.16,
+   "targets_needed_for_whole_process": "32 sufficed"
+  },
+  "what_was_projected": "docs/ic/runs/koblitz-degree53-and-reach-20260912.json put the charged ratio at 5.1 at 48 bits and said the whole-process class would need about 315 targets there.",
+  "why_it_under_predicted": "The projection used the constants of a 15264-point base with a full scan. Since then collection reached its 2r/|F|^2 floor, two setup costs left the precompute, and the compact pair table more than doubled the base. Each moved a constant the projection had fixed."
+ },
+ "claim_boundary": "synthetic_known_answer",
+ "comparison_with_degree_53": {
+  "charged_53": 75.15,
+  "charged_61": 61.16,
+  "descent_seconds_ratio": 3.25,
+  "note": "rho grew 2.65 times against a square-root prediction of 2.78, and the descent 3.3 times against a probe-count prediction of 6.5 -- the degree-61 probes were about twice as cheap each, on a base with 296 columns against 344.",
+  "rho_seconds_ratio": 2.65,
+  "subgroup_ratio": 7.74
+ },
+ "date": "2026-09-12",
+ "host": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "logical_cores": 4,
+  "memory_megabytes": 16075,
+  "os": "Linux-6.18.44-fc-v24-x86_64-with-glibc2.39"
+ },
+ "measured": {
+  "cofactor": 14156,
+  "curve": "K_0 / F_2^61",
+  "descent_probes_per_target": 213108,
+  "descent_seconds_per_target": 0.05310339306250002,
+  "factor_base": {
+   "abscissae": 18056,
+   "columns": 296,
+   "pair_table": "compact",
+   "points": 36112
+  },
+  "precompute_seconds": 78.99910203699999,
+  "ratio": {
+   "amortised": 1.2879331128075655,
+   "charged": 61.16261432889676
+  },
+  "relations": 336,
+  "rho_seconds_per_target": 3.2479423494375004,
+  "rho_steps_per_target": 2263934,
+  "rho_verified": 32,
+  "stage_seconds": {
+   "collect": 71.5,
+   "logs": 4.54,
+   "select": 2.96,
+   "solve": 2.07
+  },
+  "subgroup_bits": 48,
+  "subgroup_order": 162888033982417,
+  "targets": 32,
+  "trials": 80000,
+  "verdict": {
+   "amortised_crossover": true,
+   "charged_crossover": true,
+   "charged_margin": 0.9836501429676864,
+   "whole_process_crossover": true
+  },
+  "verified": 32
+ },
+ "operation": "koblitz_degree_61_rung",
+ "schema_version": 1,
+ "software": {
+  "commit": "854f9df43fee59b4d2705c51644abfb6b30b65a0",
+  "profile": "release"
+ },
+ "what_this_is": "K_0 over F_2^61 has a 48-bit prime-order subgroup, the largest this curve family offers inside single-word arithmetic, and 7.7 times the degree-53 rung. Run end to end on a 36112-point compact-table base against the signed-Frobenius rho baseline.",
+ "what_this_is_not": [
+  "Not an attack on a curve in use: a 48-bit subgroup is far below any deployed parameter.",
+  "Not a claim that the exponent moved: the descent still costs 2r/|F|^2 probes.",
+  "Not a distributed or multi-machine measurement: one process, four cores.",
+  "The revised boundary is an extrapolation from measured constants, not a measured boundary."
+ ]
+}

@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/opt/harness/probe.py", line 119, in <module>
+    probe()
+  File "/opt/harness/probe.py", line 62, in probe
+    config=t.read(APP/'candidate.json')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/evaluator/tournament.py", line 38, in read
+    return json.loads(Path(path).read_text())
+                      ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1029, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 1015, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 13] Permission denied: '/app/candidate.json'

@@ -1,0 +1,13 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index 5d5e0683..da7b326a 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -2700,7 +2700,7 @@ impl PairSumTable {
+     fn compact_bucket_bits(pairs: u128, degree: u32) -> u32 {
+         let key_bits = degree + 2;
+         let by_run = (128 - (pairs.max(1) >> 4).leading_zeros()).max(1);
+-        by_run.min(key_bits).min(26)
++        by_run.saturating_add(1).min(key_bits).min(27)
+     }
+ 
+     /// [`Self::build`] with an explicit ceiling on the entries.

@@ -1,0 +1,11 @@
+==806== Callgrind, a call-graph generating cache profiler
+==806== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==806== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==806== Command: /home/user/crypto/target/release/ic run --degree 13 --curve-a 0 --summands 3 --solver groebner --random-target --seed 207 --batch 1 --json
+==806== 
+==806== For interactive control, run 'callgrind_control -h'.
+==806== 
+==806== Events    : Ir
+==806== Collected : 629069418
+==806== 
+==806== I   refs:      629,069,418

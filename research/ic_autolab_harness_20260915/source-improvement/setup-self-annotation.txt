@@ -1,0 +1,28 @@
+--------------------------------------------------------------------------------
+Profile data file '/home/ubuntu/crypto/research/ic_autolab_harness_20260915/source-improvement/setup.callgrind' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 2407171 - 31372017
+Trigger: Client Request: factor_base_and_tables
+Profiled target:  /app/probes/20260915T200221-dcd557/worker (PID 10440, part 3)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       85
+Include dirs:     
+User annotated:   
+Auto-annotation:  off
+
+--------------------------------------------------------------------------------
+Ir                   
+--------------------------------------------------------------------------------
+142,035,610 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                   file:function
+--------------------------------------------------------------------------------
+87,050,461 (61.29%)  ./csu/../csu/libc-start.c:__libc_start_main@@GLIBC_2.34 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+87,050,461 (61.29%)  ./csu/../sysdeps/nptl/libc_start_call_main.h:(below main) [/usr/lib/x86_64-linux-gnu/libc.so.6]
+

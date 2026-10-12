@@ -1,0 +1,385 @@
+[
+  {
+    "cell_id": "prime-p17-b3",
+    "factor_base": [
+      "0",
+      "3",
+      "5"
+    ],
+    "factor_base_size": 3,
+    "field": "Finite Field of size 17",
+    "label": "prime-main-b3",
+    "radical_preprocessing": {
+      "basis_degree": 3,
+      "basis_size": 4,
+      "basis_terms": 16,
+      "drl_conversion_seconds": 0.03436620801221579,
+      "exhaustive": true,
+      "image_size": 6,
+      "lex_elimination_seconds": 0.020644207994337194,
+      "total_seconds": 0.05501041600655299
+    },
+    "setup_seconds": 0.09745225000369828,
+    "targets": [
+      "0",
+      "1",
+      "3"
+    ],
+    "variants": [
+      "direct",
+      "norm_symmetric",
+      "radical_symmetric"
+    ]
+  },
+  {
+    "cell_id": "prime-p17-b5",
+    "factor_base": [
+      "0",
+      "3",
+      "5",
+      "6",
+      "7"
+    ],
+    "factor_base_size": 5,
+    "field": "Finite Field of size 17",
+    "label": "prime-main-b5",
+    "radical_preprocessing": {
+      "basis_degree": 5,
+      "basis_size": 6,
+      "basis_terms": 51,
+      "drl_conversion_seconds": 0.004395458003273234,
+      "exhaustive": true,
+      "image_size": 15,
+      "lex_elimination_seconds": 0.0020785000087926164,
+      "total_seconds": 0.00647395801206585
+    },
+    "setup_seconds": 0.009595249997801147,
+    "targets": [
+      "0",
+      "1",
+      "3"
+    ],
+    "variants": [
+      "direct",
+      "norm_symmetric",
+      "radical_symmetric"
+    ]
+  },
+  {
+    "cell_id": "prime-p17-b7",
+    "factor_base": [
+      "0",
+      "3",
+      "5",
+      "6",
+      "7",
+      "9",
+      "10"
+    ],
+    "factor_base_size": 7,
+    "field": "Finite Field of size 17",
+    "label": "prime-main-b7",
+    "radical_preprocessing": {
+      "basis_degree": 7,
+      "basis_size": 8,
+      "basis_terms": 118,
+      "drl_conversion_seconds": 0.006797124995500781,
+      "exhaustive": true,
+      "image_size": 28,
+      "lex_elimination_seconds": 0.002022499989834614,
+      "total_seconds": 0.008819624985335395
+    },
+    "setup_seconds": 0.012088707997463644,
+    "targets": [
+      "0",
+      "1",
+      "3"
+    ],
+    "variants": [
+      "direct",
+      "norm_symmetric",
+      "radical_symmetric"
+    ]
+  },
+  {
+    "cell_id": "prime-p17-b9",
+    "factor_base": [
+      "0",
+      "3",
+      "5",
+      "6",
+      "7",
+      "9",
+      "10",
+      "13",
+      "16"
+    ],
+    "factor_base_size": 9,
+    "field": "Finite Field of size 17",
+    "label": "prime-main-b9",
+    "radical_preprocessing": {
+      "basis_degree": 9,
+      "basis_size": 10,
+      "basis_terms": 221,
+      "drl_conversion_seconds": 0.007528417001594789,
+      "exhaustive": true,
+      "image_size": 45,
+      "lex_elimination_seconds": 0.0031018330046208575,
+      "total_seconds": 0.010630250006215647
+    },
+    "setup_seconds": 0.015728124999441206,
+    "targets": [
+      "0",
+      "1",
+      "3"
+    ],
+    "variants": [
+      "direct",
+      "norm_symmetric",
+      "radical_symmetric"
+    ]
+  },
+  {
+    "cell_id": "prime-p29-b5",
+    "factor_base": [
+      "0",
+      "6",
+      "8",
+      "10",
+      "11"
+    ],
+    "factor_base_size": 5,
+    "field": "Finite Field of size 29",
+    "label": "prime-holdout-b5",
+    "radical_preprocessing": {
+      "basis_degree": 5,
+      "basis_size": 6,
+      "basis_terms": 52,
+      "drl_conversion_seconds": 0.006244709002203308,
+      "exhaustive": true,
+      "image_size": 15,
+      "lex_elimination_seconds": 0.0024857499956851825,
+      "total_seconds": 0.00873045899788849
+    },
+    "setup_seconds": 0.015530250006122515,
+    "targets": [
+      "0",
+      "1",
+      "6"
+    ],
+    "variants": [
+      "direct",
+      "norm_symmetric",
+      "radical_symmetric"
+    ]
+  },
+  {
+    "cell_id": "prime-p29-b7",
+    "factor_base": [
+      "0",
+      "6",
+      "8",
+      "10",
+      "11",
+      "12",
+      "13"
+    ],
+    "factor_base_size": 7,
+    "field": "Finite Field of size 29",
+    "label": "prime-holdout-b7",
+    "radical_preprocessing": {
+      "basis_degree": 7,
+      "basis_size": 8,
+      "basis_terms": 118,
+      "drl_conversion_seconds": 0.005626459009363316,
+      "exhaustive": true,
+      "image_size": 28,
+      "lex_elimination_seconds": 0.0034651660098461434,
+      "total_seconds": 0.00909162501920946
+    },
+    "setup_seconds": 0.015150917010032572,
+    "targets": [
+      "0",
+      "1",
+      "6"
+    ],
+    "variants": [
+      "direct",
+      "norm_symmetric",
+      "radical_symmetric"
+    ]
+  },
+  {
+    "cell_id": "prime-p29-b9",
+    "factor_base": [
+      "0",
+      "6",
+      "8",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "16"
+    ],
+    "factor_base_size": 9,
+    "field": "Finite Field of size 29",
+    "label": "prime-holdout-b9",
+    "radical_preprocessing": {
+      "basis_degree": 9,
+      "basis_size": 10,
+      "basis_terms": 222,
+      "drl_conversion_seconds": 0.00869641600002069,
+      "exhaustive": true,
+      "image_size": 45,
+      "lex_elimination_seconds": 0.0038271250086836517,
+      "total_seconds": 0.012523541008704342
+    },
+    "setup_seconds": 0.020221750004566275,
+    "targets": [
+      "0",
+      "1",
+      "6"
+    ],
+    "variants": [
+      "direct",
+      "norm_symmetric",
+      "radical_symmetric"
+    ]
+  },
+  {
+    "cell_id": "prime-p29-b11",
+    "factor_base": [
+      "0",
+      "6",
+      "8",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "16",
+      "17",
+      "18"
+    ],
+    "factor_base_size": 11,
+    "field": "Finite Field of size 29",
+    "label": "prime-holdout-b11",
+    "radical_preprocessing": {
+      "basis_degree": 11,
+      "basis_size": 12,
+      "basis_terms": 371,
+      "drl_conversion_seconds": 0.012529665997135453,
+      "exhaustive": true,
+      "image_size": 66,
+      "lex_elimination_seconds": 0.0049953749985434115,
+      "total_seconds": 0.017525040995678864
+    },
+    "setup_seconds": 0.028137333007180132,
+    "targets": [
+      "0",
+      "1",
+      "6"
+    ],
+    "variants": [
+      "direct",
+      "norm_symmetric",
+      "radical_symmetric"
+    ]
+  },
+  {
+    "cell_id": "binary-k2-b3",
+    "factor_base": [
+      "a^2 + a",
+      "a^2 + a + 1",
+      "1"
+    ],
+    "factor_base_size": 3,
+    "field": "Finite Field in a of size 2^4",
+    "label": "binary-k2",
+    "radical_preprocessing": {
+      "basis_degrees": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "basis_size": 9,
+      "basis_terms": 22,
+      "image_size": 6,
+      "total_seconds": 0.005321083008311689
+    },
+    "setup_seconds": 0.8018483329942683,
+    "targets": [
+      "a^2 + a",
+      "a^2 + a + 1",
+      "1"
+    ],
+    "variants": [
+      "direct",
+      "radical_symmetric"
+    ]
+  },
+  {
+    "cell_id": "binary-k3-b7",
+    "factor_base": [
+      "a^5 + a^4 + a^2 + 1",
+      "a^4 + a^2 + a + 1",
+      "a^5 + a^4 + a^2",
+      "a^5 + a",
+      "a^5 + a + 1",
+      "a^4 + a^2 + a",
+      "1"
+    ],
+    "factor_base_size": 7,
+    "field": "Finite Field in a of size 2^6",
+    "label": "binary-k3",
+    "radical_preprocessing": {
+      "basis_degrees": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "basis_size": 20,
+      "basis_terms": 159,
+      "image_size": 28,
+      "total_seconds": 0.03491449999273755
+    },
+    "setup_seconds": 0.09479504199407529,
+    "targets": [
+      "a^5 + a^4 + a^2 + 1",
+      "a^4 + a^2 + a + 1",
+      "a^5 + a^4 + a^2",
+      "a^5 + a",
+      "a^5 + a + 1",
+      "a^4 + a^2 + a",
+      "1"
+    ],
+    "variants": [
+      "direct",
+      "radical_symmetric"
+    ]
+  }
+]

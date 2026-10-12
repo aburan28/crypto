@@ -1,0 +1,44 @@
+{
+  "command": [
+    "/Volumes/SSD990/ic-n61c/target/release/examples/koblitz_rho_batch_ks_strong_online",
+    "61",
+    "0",
+    "signed_frobenius",
+    "1",
+    "610031"
+  ],
+  "conditions_after": {
+    "at": "2026-10-01T20:47:33.538863+00:00",
+    "available_memory_bytes": 18850545664,
+    "loadavg": [
+      55.3681640625,
+      39.0869140625,
+      45.7724609375
+    ],
+    "swap": "total = 6144.00M  used = 5099.56M  free = 1044.44M  (encrypted)"
+  },
+  "conditions_before": {
+    "at": "2026-10-01T20:47:33.059540+00:00",
+    "available_memory_bytes": 18655870976,
+    "loadavg": [
+      55.3681640625,
+      39.0869140625,
+      45.7724609375
+    ],
+    "swap": "total = 6144.00M  used = 5099.56M  free = 1044.44M  (encrypted)"
+  },
+  "cycles_elapsed": 1012097876,
+  "exit_code": 0,
+  "instructions_retired": 3480791514,
+  "involuntary_context_switches": 3441,
+  "max_rss_bytes": 15253504,
+  "page_faults": 0,
+  "page_reclaims": 1108,
+  "peak_memory_footprint_bytes": 14385512,
+  "pinned_cpu": null,
+  "swaps": 0,
+  "sys_s": 0.021901999999999998,
+  "user_s": 0.290597,
+  "voluntary_context_switches": 1,
+  "wall_s": 0.4489297919999444
+}

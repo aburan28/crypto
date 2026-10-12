@@ -1,0 +1,92 @@
+[four_weight_two] 4262 abscissae -> 4262 representatives, 18,160,382 signed pairs
+[four_weight_two]   1,560,000/18,160,382 ( 8.59%) kept=1,560,000 elapsed=    30s eta=   322s
+[four_weight_two]   3,060,000/18,160,382 (16.85%) kept=3,060,000 elapsed=    61s eta=   299s
+[four_weight_two]   4,540,000/18,160,382 (25.00%) kept=4,540,000 elapsed=    91s eta=   273s
+[four_weight_two]   6,060,000/18,160,382 (33.37%) kept=6,060,000 elapsed=   121s eta=   242s
+[four_weight_two]   7,540,000/18,160,382 (41.52%) kept=7,540,000 elapsed=   151s eta=   213s
+[four_weight_two]   9,080,000/18,160,382 (50.00%) kept=9,080,000 elapsed=   181s eta=   181s
+[four_weight_two]   10,720,000/18,160,382 (59.03%) kept=10,720,000 elapsed=   212s eta=   147s
+[four_weight_two]   12,200,000/18,160,382 (67.18%) kept=12,200,000 elapsed=   242s eta=   118s
+[four_weight_two]   13,700,000/18,160,382 (75.44%) kept=13,700,000 elapsed=   272s eta=    89s
+[four_weight_two]   15,200,000/18,160,382 (83.70%) kept=15,200,000 elapsed=   302s eta=    59s
+[four_weight_two]   16,940,000/18,160,382 (93.28%) kept=16,940,000 elapsed=   333s eta=    24s
+{
+  "name": "four_weight_two",
+  "description": "the complete weight-two support",
+  "abscissae_supplied": 4262,
+  "representatives": 4262,
+  "signed_pairs_total": 18160382,
+  "signed_pairs_consumed": 18160382,
+  "complete": true,
+  "elapsed_seconds": 356.498,
+  "pair_rate_per_second": 50941.1,
+  "keys_stored": 18160382,
+  "key_bytes": 145283056,
+  "digest_bits": 38,
+  "digest_collision_groups": 1647,
+  "candidates_checked": 1649,
+  "degenerate_candidates": 1041,
+  "false_positive_candidates": 608,
+  "four_point_relations": 0,
+  "log2_predicted_digest_collisions": 9.229,
+  "log2_predicted_genuine_collisions": -82.771,
+  "log2_expected_relations_by_counting": -81.356
+}
+[four_weight_two_frobenius_stable] 1090 abscissae -> 1090 representatives, 1,187,010 signed pairs
+{
+  "name": "four_weight_two_frobenius_stable",
+  "description": "the sigma-stable i<j<=65 part of the weight-two support",
+  "abscissae_supplied": 1090,
+  "representatives": 1090,
+  "signed_pairs_total": 1187010,
+  "signed_pairs_consumed": 1187010,
+  "complete": true,
+  "elapsed_seconds": 20.608,
+  "pair_rate_per_second": 57598.4,
+  "keys_stored": 1187010,
+  "key_bytes": 9496080,
+  "digest_bits": 38,
+  "digest_collision_groups": 140,
+  "candidates_checked": 140,
+  "degenerate_candidates": 139,
+  "false_positive_candidates": 1,
+  "four_point_relations": 0,
+  "log2_predicted_digest_collisions": 1.358,
+  "log2_predicted_genuine_collisions": -90.642,
+  "log2_expected_relations_by_counting": -89.225
+}
+[four_random_matched] 4262 abscissae -> 4262 representatives, 18,160,382 signed pairs
+[four_random_matched]   1,400,000/18,160,382 ( 7.71%) kept=1,400,000 elapsed=    30s eta=   360s
+[four_random_matched]   2,780,000/18,160,382 (15.31%) kept=2,780,000 elapsed=    60s eta=   332s
+[four_random_matched]   4,200,000/18,160,382 (23.13%) kept=4,200,000 elapsed=    90s eta=   301s
+[four_random_matched]   5,580,000/18,160,382 (30.73%) kept=5,580,000 elapsed=   121s eta=   272s
+[four_random_matched]   7,040,000/18,160,382 (38.77%) kept=7,040,000 elapsed=   151s eta=   238s
+[four_random_matched]   8,540,000/18,160,382 (47.03%) kept=8,540,000 elapsed=   181s eta=   204s
+[four_random_matched]   10,140,000/18,160,382 (55.84%) kept=10,140,000 elapsed=   211s eta=   167s
+[four_random_matched]   11,580,000/18,160,382 (63.77%) kept=11,580,000 elapsed=   242s eta=   137s
+[four_random_matched]   13,100,000/18,160,382 (72.14%) kept=13,100,000 elapsed=   272s eta=   105s
+[four_random_matched]   14,560,000/18,160,382 (80.17%) kept=14,560,000 elapsed=   302s eta=    75s
+[four_random_matched]   15,980,000/18,160,382 (87.99%) kept=15,980,000 elapsed=   332s eta=    45s
+[four_random_matched]   17,520,000/18,160,382 (96.47%) kept=17,520,000 elapsed=   362s eta=    13s
+{
+  "name": "four_random_matched",
+  "description": "uniform random abscissae, size matched",
+  "abscissae_supplied": 4262,
+  "representatives": 4262,
+  "signed_pairs_total": 18160382,
+  "signed_pairs_consumed": 18160382,
+  "complete": true,
+  "elapsed_seconds": 374.407,
+  "pair_rate_per_second": 48504.4,
+  "keys_stored": 18160382,
+  "key_bytes": 145283056,
+  "digest_bits": 38,
+  "digest_collision_groups": 576,
+  "candidates_checked": 576,
+  "degenerate_candidates": 0,
+  "false_positive_candidates": 576,
+  "four_point_relations": 0,
+  "log2_predicted_digest_collisions": 9.229,
+  "log2_predicted_genuine_collisions": -82.771,
+  "log2_expected_relations_by_counting": -81.356
+}

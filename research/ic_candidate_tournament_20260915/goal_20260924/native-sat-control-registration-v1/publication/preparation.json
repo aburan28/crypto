@@ -1,0 +1,3431 @@
+{
+  "certificate": {
+    "inputs": {
+      "attempts": [
+        {
+          "indices": [
+            42,
+            14,
+            59
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 61903,
+          "trial": 0
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 56648,
+          "trial": 1
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 54703,
+          "trial": 2
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 57759,
+          "trial": 3
+        },
+        {
+          "indices": [
+            46,
+            11,
+            46
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 44966,
+          "trial": 4
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 48014,
+          "trial": 5
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 55527,
+          "trial": 6
+        },
+        {
+          "indices": [
+            42,
+            53,
+            30
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 56089,
+          "trial": 7
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 48549,
+          "trial": 8
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 8342,
+          "trial": 9
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 64506,
+          "trial": 10
+        },
+        {
+          "indices": null,
+          "outcome": "CONFLICT_BUDGET_INCONCLUSIVE",
+          "scalar": 30150,
+          "trial": 11
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 12419,
+          "trial": 12
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 20208,
+          "trial": 13
+        },
+        {
+          "indices": [
+            9,
+            20,
+            1
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 37033,
+          "trial": 14
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 15316,
+          "trial": 15
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 60081,
+          "trial": 16
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 27831,
+          "trial": 17
+        },
+        {
+          "indices": null,
+          "outcome": "CONFLICT_BUDGET_INCONCLUSIVE",
+          "scalar": 11214,
+          "trial": 18
+        },
+        {
+          "indices": null,
+          "outcome": "CONFLICT_BUDGET_INCONCLUSIVE",
+          "scalar": 63082,
+          "trial": 19
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 56217,
+          "trial": 20
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 34890,
+          "trial": 21
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 60332,
+          "trial": 22
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 31507,
+          "trial": 23
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 48417,
+          "trial": 24
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 18368,
+          "trial": 25
+        },
+        {
+          "indices": null,
+          "outcome": "CONFLICT_BUDGET_INCONCLUSIVE",
+          "scalar": 17283,
+          "trial": 26
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 13285,
+          "trial": 27
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 18321,
+          "trial": 28
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 58866,
+          "trial": 29
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 23400,
+          "trial": 30
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 17414,
+          "trial": 31
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 47499,
+          "trial": 32
+        },
+        {
+          "indices": [
+            42,
+            30,
+            8
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 21612,
+          "trial": 33
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 14656,
+          "trial": 34
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 37905,
+          "trial": 35
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 37451,
+          "trial": 36
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 636,
+          "trial": 37
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 63484,
+          "trial": 38
+        },
+        {
+          "indices": null,
+          "outcome": "CONFLICT_BUDGET_INCONCLUSIVE",
+          "scalar": 33119,
+          "trial": 39
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 12684,
+          "trial": 40
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 61636,
+          "trial": 41
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 63984,
+          "trial": 42
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 43322,
+          "trial": 43
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 53840,
+          "trial": 44
+        },
+        {
+          "indices": [
+            21,
+            58,
+            43
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 45454,
+          "trial": 45
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 50045,
+          "trial": 46
+        },
+        {
+          "indices": [
+            5,
+            13,
+            34
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 32733,
+          "trial": 47
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 52993,
+          "trial": 48
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 60206,
+          "trial": 49
+        },
+        {
+          "indices": [
+            53,
+            2,
+            34
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 49083,
+          "trial": 50
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 10553,
+          "trial": 51
+        },
+        {
+          "indices": [
+            27,
+            8,
+            46
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 46691,
+          "trial": 52
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 55543,
+          "trial": 53
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 52724,
+          "trial": 54
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 28545,
+          "trial": 55
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 31912,
+          "trial": 56
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 10188,
+          "trial": 57
+        },
+        {
+          "indices": [
+            48,
+            4,
+            62
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 59608,
+          "trial": 58
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 33297,
+          "trial": 59
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 63940,
+          "trial": 60
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 52592,
+          "trial": 61
+        },
+        {
+          "indices": null,
+          "outcome": "CONFLICT_BUDGET_INCONCLUSIVE",
+          "scalar": 4178,
+          "trial": 62
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 56020,
+          "trial": 63
+        },
+        {
+          "indices": [
+            16,
+            44,
+            38
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 45925,
+          "trial": 64
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 65167,
+          "trial": 65
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 57189,
+          "trial": 66
+        },
+        {
+          "indices": [
+            53,
+            5,
+            13
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 64466,
+          "trial": 67
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 58051,
+          "trial": 68
+        },
+        {
+          "indices": [
+            62,
+            6,
+            17
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 1179,
+          "trial": 69
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 52657,
+          "trial": 70
+        },
+        {
+          "indices": [
+            25,
+            55,
+            5
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 10974,
+          "trial": 71
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 33765,
+          "trial": 72
+        },
+        {
+          "indices": [
+            2,
+            22,
+            58
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 35051,
+          "trial": 73
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 61267,
+          "trial": 74
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 25016,
+          "trial": 75
+        },
+        {
+          "indices": [
+            20,
+            9,
+            20
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 950,
+          "trial": 76
+        },
+        {
+          "indices": [
+            7,
+            25,
+            41
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 50052,
+          "trial": 77
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 63856,
+          "trial": 78
+        },
+        {
+          "indices": [
+            15,
+            5,
+            28
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 20684,
+          "trial": 79
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 6577,
+          "trial": 80
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 20575,
+          "trial": 81
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 55448,
+          "trial": 82
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 29372,
+          "trial": 83
+        },
+        {
+          "indices": [
+            15,
+            58,
+            26
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 63773,
+          "trial": 84
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 2159,
+          "trial": 85
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 21795,
+          "trial": 86
+        },
+        {
+          "indices": [
+            24,
+            11,
+            6
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 31943,
+          "trial": 87
+        },
+        {
+          "indices": [
+            27,
+            32,
+            2
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 63380,
+          "trial": 88
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 21162,
+          "trial": 89
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 30299,
+          "trial": 90
+        },
+        {
+          "indices": [
+            8,
+            49,
+            36
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 42181,
+          "trial": 91
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 16358,
+          "trial": 92
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 36480,
+          "trial": 93
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 18592,
+          "trial": 94
+        },
+        {
+          "indices": [
+            25,
+            8,
+            12
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 39254,
+          "trial": 95
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 9707,
+          "trial": 96
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 31455,
+          "trial": 97
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 33009,
+          "trial": 98
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 45825,
+          "trial": 99
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 40824,
+          "trial": 100
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 25498,
+          "trial": 101
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 40451,
+          "trial": 102
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 31384,
+          "trial": 103
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 46760,
+          "trial": 104
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 46966,
+          "trial": 105
+        },
+        {
+          "indices": [
+            60,
+            48,
+            17
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 6138,
+          "trial": 106
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 57215,
+          "trial": 107
+        },
+        {
+          "indices": [
+            62,
+            11,
+            21
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 63267,
+          "trial": 108
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 5728,
+          "trial": 109
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 43737,
+          "trial": 110
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 3027,
+          "trial": 111
+        },
+        {
+          "indices": [
+            10,
+            29,
+            58
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 2907,
+          "trial": 112
+        },
+        {
+          "indices": [
+            16,
+            42,
+            10
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 44075,
+          "trial": 113
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 26929,
+          "trial": 114
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 30032,
+          "trial": 115
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 52116,
+          "trial": 116
+        },
+        {
+          "indices": [
+            21,
+            54,
+            29
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 16959,
+          "trial": 117
+        },
+        {
+          "indices": [
+            16,
+            50,
+            36
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 1037,
+          "trial": 118
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 2275,
+          "trial": 119
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 8320,
+          "trial": 120
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 11583,
+          "trial": 121
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 774,
+          "trial": 122
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 42429,
+          "trial": 123
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 5918,
+          "trial": 124
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 51500,
+          "trial": 125
+        },
+        {
+          "indices": [
+            22,
+            30,
+            61
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 57058,
+          "trial": 126
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 17533,
+          "trial": 127
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 26299,
+          "trial": 128
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 51464,
+          "trial": 129
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 5426,
+          "trial": 130
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 44499,
+          "trial": 131
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 30441,
+          "trial": 132
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 6408,
+          "trial": 133
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 33864,
+          "trial": 134
+        },
+        {
+          "indices": [
+            13,
+            40,
+            12
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 11492,
+          "trial": 135
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 35136,
+          "trial": 136
+        },
+        {
+          "indices": [
+            12,
+            7,
+            7
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 12340,
+          "trial": 137
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 3208,
+          "trial": 138
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 34420,
+          "trial": 139
+        },
+        {
+          "indices": [
+            35,
+            47,
+            49
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 29581,
+          "trial": 140
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 56428,
+          "trial": 141
+        },
+        {
+          "indices": [
+            18,
+            15,
+            0
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 4936,
+          "trial": 142
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 40730,
+          "trial": 143
+        },
+        {
+          "indices": [
+            16,
+            50,
+            6
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 12880,
+          "trial": 144
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 40873,
+          "trial": 145
+        },
+        {
+          "indices": null,
+          "outcome": "SOURCE_UNSAT",
+          "scalar": 20033,
+          "trial": 146
+        },
+        {
+          "indices": [
+            44,
+            57,
+            30
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 55017,
+          "trial": 147
+        },
+        {
+          "indices": [
+            52,
+            22,
+            57
+          ],
+          "outcome": "VALID_POINT_WITNESS",
+          "scalar": 26658,
+          "trial": 148
+        }
+      ],
+      "base": [
+        [
+          0,
+          1
+        ],
+        [
+          3,
+          95624
+        ],
+        [
+          3,
+          95627
+        ],
+        [
+          5,
+          106138
+        ],
+        [
+          5,
+          106143
+        ],
+        [
+          8,
+          42505
+        ],
+        [
+          8,
+          42497
+        ],
+        [
+          11,
+          78573
+        ],
+        [
+          11,
+          78566
+        ],
+        [
+          13,
+          39239
+        ],
+        [
+          13,
+          39242
+        ],
+        [
+          17,
+          124076
+        ],
+        [
+          17,
+          124093
+        ],
+        [
+          18,
+          56641
+        ],
+        [
+          18,
+          56659
+        ],
+        [
+          23,
+          72753
+        ],
+        [
+          23,
+          72742
+        ],
+        [
+          24,
+          17952
+        ],
+        [
+          24,
+          17976
+        ],
+        [
+          25,
+          16454
+        ],
+        [
+          25,
+          16479
+        ],
+        [
+          27,
+          99168
+        ],
+        [
+          27,
+          99195
+        ],
+        [
+          28,
+          44561
+        ],
+        [
+          28,
+          44557
+        ],
+        [
+          29,
+          99482
+        ],
+        [
+          29,
+          99463
+        ],
+        [
+          30,
+          68734
+        ],
+        [
+          30,
+          68704
+        ],
+        [
+          33,
+          16320
+        ],
+        [
+          33,
+          16353
+        ],
+        [
+          34,
+          16901
+        ],
+        [
+          34,
+          16935
+        ],
+        [
+          37,
+          5284
+        ],
+        [
+          37,
+          5249
+        ],
+        [
+          38,
+          22582
+        ],
+        [
+          38,
+          22544
+        ],
+        [
+          39,
+          14652
+        ],
+        [
+          39,
+          14619
+        ],
+        [
+          40,
+          45144
+        ],
+        [
+          40,
+          45168
+        ],
+        [
+          45,
+          128602
+        ],
+        [
+          45,
+          128631
+        ],
+        [
+          47,
+          4676
+        ],
+        [
+          47,
+          4715
+        ],
+        [
+          48,
+          5432
+        ],
+        [
+          48,
+          5384
+        ],
+        [
+          49,
+          121032
+        ],
+        [
+          49,
+          121081
+        ],
+        [
+          54,
+          127677
+        ],
+        [
+          54,
+          127627
+        ],
+        [
+          57,
+          96968
+        ],
+        [
+          57,
+          97009
+        ],
+        [
+          59,
+          38223
+        ],
+        [
+          59,
+          38260
+        ],
+        [
+          60,
+          24409
+        ],
+        [
+          60,
+          24421
+        ],
+        [
+          61,
+          30571
+        ],
+        [
+          61,
+          30550
+        ],
+        [
+          62,
+          129624
+        ],
+        [
+          62,
+          129638
+        ],
+        [
+          63,
+          4401
+        ],
+        [
+          63,
+          4366
+        ]
+      ],
+      "fixture": {
+        "cofactor": "2",
+        "curve_a": 1,
+        "degree": 17,
+        "generator": [
+          "43693",
+          "23339"
+        ],
+        "group_order": "131174",
+        "irreducible": {
+          "degree": 17,
+          "low_terms": [
+            0,
+            3
+          ]
+        },
+        "lambda": "17184",
+        "subgroup_order": "65587",
+        "target_scalar_constructed": false,
+        "target_seeds": [],
+        "targets": []
+      },
+      "logs": [
+        {
+          "log": "63339",
+          "point": [
+            471,
+            57570
+          ]
+        },
+        {
+          "log": "4377",
+          "point": [
+            731,
+            20518
+          ]
+        },
+        {
+          "log": "65416",
+          "point": [
+            829,
+            20614
+          ]
+        },
+        {
+          "log": "51034",
+          "point": [
+            985,
+            26841
+          ]
+        },
+        {
+          "log": "19569",
+          "point": [
+            1129,
+            41552
+          ]
+        },
+        {
+          "log": "48468",
+          "point": [
+            1391,
+            127363
+          ]
+        },
+        {
+          "log": "56224",
+          "point": [
+            2655,
+            98654
+          ]
+        },
+        {
+          "log": "55591",
+          "point": [
+            2731,
+            8581
+          ]
+        },
+        {
+          "log": "50531",
+          "point": [
+            2777,
+            21372
+          ]
+        },
+        {
+          "log": "14472",
+          "point": [
+            3023,
+            53794
+          ]
+        },
+        {
+          "log": "61582",
+          "point": [
+            3175,
+            115860
+          ]
+        },
+        {
+          "log": "16657",
+          "point": [
+            3421,
+            90551
+          ]
+        },
+        {
+          "log": "44888",
+          "point": [
+            3681,
+            42918
+          ]
+        },
+        {
+          "log": "41533",
+          "point": [
+            3773,
+            54163
+          ]
+        },
+        {
+          "log": "48375",
+          "point": [
+            5119,
+            100649
+          ]
+        },
+        {
+          "log": "43107",
+          "point": [
+            7111,
+            60995
+          ]
+        },
+        {
+          "log": "38770",
+          "point": [
+            7159,
+            18374
+          ]
+        },
+        {
+          "log": "2895",
+          "point": [
+            7811,
+            52278
+          ]
+        },
+        {
+          "log": "58938",
+          "point": [
+            9099,
+            1429
+          ]
+        },
+        {
+          "log": "45617",
+          "point": [
+            10143,
+            18204
+          ]
+        },
+        {
+          "log": "57054",
+          "point": [
+            10199,
+            19284
+          ]
+        },
+        {
+          "log": "19961",
+          "point": [
+            12063,
+            105083
+          ]
+        },
+        {
+          "log": "5522",
+          "point": [
+            12091,
+            102062
+          ]
+        },
+        {
+          "log": "52742",
+          "point": [
+            13087,
+            36345
+          ]
+        },
+        {
+          "log": "33022",
+          "point": [
+            14073,
+            3990
+          ]
+        },
+        {
+          "log": "14807",
+          "point": [
+            14203,
+            51661
+          ]
+        },
+        {
+          "log": "44336",
+          "point": [
+            18915,
+            34422
+          ]
+        },
+        {
+          "log": "18617",
+          "point": [
+            18941,
+            32935
+          ]
+        },
+        {
+          "log": "35813",
+          "point": [
+            39617,
+            72163
+          ]
+        }
+      ]
+    },
+    "proof": {
+      "all_column_logs_independently_verified": true,
+      "matrix": {
+        "accepted_rows": 37,
+        "column_points": [
+          [
+            471,
+            57570
+          ],
+          [
+            731,
+            20518
+          ],
+          [
+            829,
+            20614
+          ],
+          [
+            985,
+            26841
+          ],
+          [
+            1129,
+            41552
+          ],
+          [
+            1391,
+            127363
+          ],
+          [
+            2655,
+            98654
+          ],
+          [
+            2731,
+            8581
+          ],
+          [
+            2777,
+            21372
+          ],
+          [
+            3023,
+            53794
+          ],
+          [
+            3175,
+            115860
+          ],
+          [
+            3421,
+            90551
+          ],
+          [
+            3681,
+            42918
+          ],
+          [
+            3773,
+            54163
+          ],
+          [
+            5119,
+            100649
+          ],
+          [
+            7111,
+            60995
+          ],
+          [
+            7159,
+            18374
+          ],
+          [
+            7811,
+            52278
+          ],
+          [
+            9099,
+            1429
+          ],
+          [
+            10143,
+            18204
+          ],
+          [
+            10199,
+            19284
+          ],
+          [
+            12063,
+            105083
+          ],
+          [
+            12091,
+            102062
+          ],
+          [
+            13087,
+            36345
+          ],
+          [
+            14073,
+            3990
+          ],
+          [
+            14203,
+            51661
+          ],
+          [
+            18915,
+            34422
+          ],
+          [
+            18941,
+            32935
+          ],
+          [
+            39617,
+            72163
+          ]
+        ],
+        "columns": 29,
+        "dependent_relations": 8,
+        "duplicate_relations": 0,
+        "modulus": "65587",
+        "rank": 29,
+        "rows": [
+          {
+            "entries": [
+              [
+                0,
+                "51566"
+              ],
+              [
+                16,
+                "51777"
+              ],
+              [
+                20,
+                "41385"
+              ]
+            ],
+            "indices": [
+              42,
+              14,
+              59
+            ],
+            "rhs": "58219",
+            "scalar": 61903
+          },
+          {
+            "entries": [
+              [
+                6,
+                "59548"
+              ],
+              [
+                28,
+                "7771"
+              ]
+            ],
+            "indices": [
+              46,
+              11,
+              46
+            ],
+            "rhs": "24345",
+            "scalar": 44966
+          },
+          {
+            "entries": [
+              [
+                0,
+                "51566"
+              ],
+              [
+                22,
+                "57816"
+              ],
+              [
+                24,
+                "44894"
+              ]
+            ],
+            "indices": [
+              42,
+              53,
+              30
+            ],
+            "rhs": "46591",
+            "scalar": 56089
+          },
+          {
+            "entries": [
+              [
+                8,
+                "65586"
+              ],
+              [
+                15,
+                "10346"
+              ],
+              [
+                28,
+                "14021"
+              ]
+            ],
+            "indices": [
+              9,
+              20,
+              1
+            ],
+            "rhs": "8479",
+            "scalar": 37033
+          },
+          {
+            "entries": [
+              [
+                0,
+                "51566"
+              ],
+              [
+                5,
+                "45252"
+              ],
+              [
+                24,
+                "44894"
+              ]
+            ],
+            "indices": [
+              42,
+              30,
+              8
+            ],
+            "rhs": "43224",
+            "scalar": 21612
+          },
+          {
+            "entries": [
+              [
+                23,
+                "44894"
+              ],
+              [
+                25,
+                "10346"
+              ],
+              [
+                27,
+                "51777"
+              ]
+            ],
+            "indices": [
+              21,
+              58,
+              43
+            ],
+            "rhs": "25321",
+            "scalar": 45454
+          },
+          {
+            "entries": [
+              [
+                4,
+                "51550"
+              ],
+              [
+                11,
+                "54691"
+              ],
+              [
+                16,
+                "13810"
+              ]
+            ],
+            "indices": [
+              5,
+              13,
+              34
+            ],
+            "rhs": "65466",
+            "scalar": 32733
+          },
+          {
+            "entries": [
+              [
+                11,
+                "54691"
+              ],
+              [
+                22,
+                "57816"
+              ],
+              [
+                28,
+                "51566"
+              ]
+            ],
+            "indices": [
+              53,
+              2,
+              34
+            ],
+            "rhs": "32579",
+            "scalar": 49083
+          },
+          {
+            "entries": [
+              [
+                5,
+                "45252"
+              ],
+              [
+                6,
+                "29774"
+              ],
+              [
+                19,
+                "17186"
+              ]
+            ],
+            "indices": [
+              27,
+              8,
+              46
+            ],
+            "rhs": "27795",
+            "scalar": 46691
+          },
+          {
+            "entries": [
+              [
+                7,
+                "48409"
+              ],
+              [
+                17,
+                "7771"
+              ],
+              [
+                28,
+                "29774"
+              ]
+            ],
+            "indices": [
+              48,
+              4,
+              62
+            ],
+            "rhs": "53629",
+            "scalar": 59608
+          },
+          {
+            "entries": [
+              [
+                2,
+                "65586"
+              ],
+              [
+                14,
+                "17184"
+              ],
+              [
+                27,
+                "13810"
+              ]
+            ],
+            "indices": [
+              16,
+              44,
+              38
+            ],
+            "rhs": "26263",
+            "scalar": 45925
+          },
+          {
+            "entries": [
+              [
+                4,
+                "51550"
+              ],
+              [
+                16,
+                "13810"
+              ],
+              [
+                22,
+                "57816"
+              ]
+            ],
+            "indices": [
+              53,
+              5,
+              13
+            ],
+            "rhs": "63345",
+            "scalar": 64466
+          },
+          {
+            "entries": [
+              [
+                1,
+                "54691"
+              ],
+              [
+                4,
+                "14037"
+              ],
+              [
+                17,
+                "7771"
+              ]
+            ],
+            "indices": [
+              62,
+              6,
+              17
+            ],
+            "rhs": "2358",
+            "scalar": 1179
+          },
+          {
+            "entries": [
+              [
+                3,
+                "1"
+              ],
+              [
+                4,
+                "51550"
+              ],
+              [
+                12,
+                "54691"
+              ]
+            ],
+            "indices": [
+              25,
+              55,
+              5
+            ],
+            "rhs": "21948",
+            "scalar": 10974
+          },
+          {
+            "entries": [
+              [
+                23,
+                "20693"
+              ],
+              [
+                25,
+                "10346"
+              ],
+              [
+                28,
+                "51566"
+              ]
+            ],
+            "indices": [
+              2,
+              22,
+              58
+            ],
+            "rhs": "4515",
+            "scalar": 35051
+          },
+          {
+            "entries": [
+              [
+                8,
+                "65586"
+              ],
+              [
+                15,
+                "20692"
+              ]
+            ],
+            "indices": [
+              20,
+              9,
+              20
+            ],
+            "rhs": "1900",
+            "scalar": 950
+          },
+          {
+            "entries": [
+              [
+                0,
+                "14021"
+              ],
+              [
+                3,
+                "1"
+              ],
+              [
+                5,
+                "20335"
+              ]
+            ],
+            "indices": [
+              7,
+              25,
+              41
+            ],
+            "rhs": "34517",
+            "scalar": 50052
+          },
+          {
+            "entries": [
+              [
+                2,
+                "1"
+              ],
+              [
+                4,
+                "51550"
+              ],
+              [
+                19,
+                "48401"
+              ]
+            ],
+            "indices": [
+              15,
+              5,
+              28
+            ],
+            "rhs": "41368",
+            "scalar": 20684
+          },
+          {
+            "entries": [
+              [
+                2,
+                "1"
+              ],
+              [
+                3,
+                "65586"
+              ],
+              [
+                25,
+                "10346"
+              ]
+            ],
+            "indices": [
+              15,
+              58,
+              26
+            ],
+            "rhs": "61959",
+            "scalar": 63773
+          },
+          {
+            "entries": [
+              [
+                4,
+                "14037"
+              ],
+              [
+                21,
+                "29774"
+              ],
+              [
+                28,
+                "7771"
+              ]
+            ],
+            "indices": [
+              24,
+              11,
+              6
+            ],
+            "rhs": "63886",
+            "scalar": 31943
+          },
+          {
+            "entries": [
+              [
+                9,
+                "41385"
+              ],
+              [
+                19,
+                "17186"
+              ],
+              [
+                28,
+                "51566"
+              ]
+            ],
+            "indices": [
+              27,
+              32,
+              2
+            ],
+            "rhs": "61173",
+            "scalar": 63380
+          },
+          {
+            "entries": [
+              [
+                5,
+                "45252"
+              ],
+              [
+                18,
+                "17274"
+              ],
+              [
+                26,
+                "44894"
+              ]
+            ],
+            "indices": [
+              8,
+              49,
+              36
+            ],
+            "rhs": "18775",
+            "scalar": 42181
+          },
+          {
+            "entries": [
+              [
+                3,
+                "1"
+              ],
+              [
+                5,
+                "45252"
+              ],
+              [
+                28,
+                "57816"
+              ]
+            ],
+            "indices": [
+              25,
+              8,
+              12
+            ],
+            "rhs": "12921",
+            "scalar": 39254
+          },
+          {
+            "entries": [
+              [
+                1,
+                "54691"
+              ],
+              [
+                7,
+                "48409"
+              ],
+              [
+                20,
+                "24202"
+              ]
+            ],
+            "indices": [
+              60,
+              48,
+              17
+            ],
+            "rhs": "12276",
+            "scalar": 6138
+          },
+          {
+            "entries": [
+              [
+                17,
+                "7771"
+              ],
+              [
+                23,
+                "44894"
+              ],
+              [
+                28,
+                "7771"
+              ]
+            ],
+            "indices": [
+              62,
+              11,
+              21
+            ],
+            "rhs": "60947",
+            "scalar": 63267
+          },
+          {
+            "entries": [
+              [
+                8,
+                "1"
+              ],
+              [
+                24,
+                "20693"
+              ],
+              [
+                25,
+                "10346"
+              ]
+            ],
+            "indices": [
+              10,
+              29,
+              58
+            ],
+            "rhs": "5814",
+            "scalar": 2907
+          },
+          {
+            "entries": [
+              [
+                0,
+                "51566"
+              ],
+              [
+                2,
+                "65586"
+              ],
+              [
+                8,
+                "1"
+              ]
+            ],
+            "indices": [
+              16,
+              42,
+              10
+            ],
+            "rhs": "22563",
+            "scalar": 44075
+          },
+          {
+            "entries": [
+              [
+                22,
+                "7771"
+              ],
+              [
+                23,
+                "44894"
+              ],
+              [
+                24,
+                "20693"
+              ]
+            ],
+            "indices": [
+              21,
+              54,
+              29
+            ],
+            "rhs": "33918",
+            "scalar": 16959
+          },
+          {
+            "entries": [
+              [
+                2,
+                "65586"
+              ],
+              [
+                18,
+                "17274"
+              ],
+              [
+                26,
+                "20693"
+              ]
+            ],
+            "indices": [
+              16,
+              50,
+              36
+            ],
+            "rhs": "2074",
+            "scalar": 1037
+          },
+          {
+            "entries": [
+              [
+                17,
+                "57816"
+              ],
+              [
+                23,
+                "20693"
+              ],
+              [
+                24,
+                "44894"
+              ]
+            ],
+            "indices": [
+              22,
+              30,
+              61
+            ],
+            "rhs": "48529",
+            "scalar": 57058
+          },
+          {
+            "entries": [
+              [
+                10,
+                "48405"
+              ],
+              [
+                16,
+                "13810"
+              ],
+              [
+                28,
+                "57816"
+              ]
+            ],
+            "indices": [
+              13,
+              40,
+              12
+            ],
+            "rhs": "22984",
+            "scalar": 11492
+          },
+          {
+            "entries": [
+              [
+                5,
+                "40670"
+              ],
+              [
+                28,
+                "57816"
+              ]
+            ],
+            "indices": [
+              12,
+              7,
+              7
+            ],
+            "rhs": "24680",
+            "scalar": 12340
+          },
+          {
+            "entries": [
+              [
+                7,
+                "17178"
+              ],
+              [
+                18,
+                "48313"
+              ],
+              [
+                26,
+                "44894"
+              ]
+            ],
+            "indices": [
+              35,
+              47,
+              49
+            ],
+            "rhs": "59162",
+            "scalar": 29581
+          },
+          {
+            "entries": [
+              [
+                1,
+                "10896"
+              ],
+              [
+                2,
+                "1"
+              ]
+            ],
+            "indices": [
+              18,
+              15,
+              0
+            ],
+            "rhs": "9872",
+            "scalar": 4936
+          },
+          {
+            "entries": [
+              [
+                2,
+                "65586"
+              ],
+              [
+                4,
+                "14037"
+              ],
+              [
+                26,
+                "20693"
+              ]
+            ],
+            "indices": [
+              16,
+              50,
+              6
+            ],
+            "rhs": "25760",
+            "scalar": 12880
+          },
+          {
+            "entries": [
+              [
+                24,
+                "44894"
+              ],
+              [
+                25,
+                "55241"
+              ],
+              [
+                27,
+                "13810"
+              ]
+            ],
+            "indices": [
+              44,
+              57,
+              30
+            ],
+            "rhs": "44447",
+            "scalar": 55017
+          },
+          {
+            "entries": [
+              [
+                13,
+                "51566"
+              ],
+              [
+                23,
+                "20693"
+              ],
+              [
+                25,
+                "55241"
+              ]
+            ],
+            "indices": [
+              52,
+              22,
+              57
+            ],
+            "rhs": "53316",
+            "scalar": 26658
+          }
+        ],
+        "rows_sha256": "aa34d1e619c5c54c7a3e644b944cc86e2294730fdfbd786a589707b22a6b3d9e"
+      },
+      "ordinary_outcome_mix": {
+        "CONFLICT_BUDGET_INCONCLUSIVE": 6,
+        "SOURCE_UNSAT": 106,
+        "VALID_POINT_WITNESS": 37
+      },
+      "ordinary_query_count": 149,
+      "preparation_target_count": 0,
+      "previous_target_evidence_retained_in_state": false,
+      "rank_trajectory": [
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5,
+        6,
+        6,
+        7,
+        7,
+        7,
+        8,
+        8,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        10,
+        10,
+        10,
+        10,
+        10,
+        10,
+        11,
+        11,
+        11,
+        12,
+        12,
+        13,
+        13,
+        14,
+        14,
+        15,
+        15,
+        15,
+        16,
+        17,
+        17,
+        18,
+        18,
+        18,
+        18,
+        18,
+        19,
+        19,
+        19,
+        20,
+        21,
+        21,
+        21,
+        22,
+        22,
+        22,
+        22,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        23,
+        24,
+        24,
+        25,
+        25,
+        25,
+        25,
+        26,
+        26,
+        26,
+        26,
+        26,
+        26,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        27,
+        28,
+        28,
+        28,
+        28,
+        28,
+        28,
+        28,
+        28,
+        28,
+        28,
+        28,
+        28,
+        28,
+        29
+      ]
+    }
+  },
+  "fresh_targets_generated": 0,
+  "native_execution": false,
+  "online_speedup": null,
+  "online_wall_ns": null,
+  "promotion_eligible": false,
+  "provenance": {
+    "accepted_merge_commit": "9f1980d20fd98318fca549d2881f1d75b512f3be",
+    "archive_sha256": "86e84fa1a31d152ef93a88837103ca578862269f333c89f44df26c472030ed84",
+    "execution_sha256": "4e6547c03cfe1fa54ae9a994c160e5d4afa987659dc72880c651885a0e9e8fa9",
+    "family": "sat",
+    "parent_candidate_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h0ef1e080d97e",
+    "parent_candidate_record_sha256": "0ef1e080d97ebec2cb3f079ece7ea7262fbb36c91c70fccb3fc25c6b3e71a9cf"
+  },
+  "record": {
+    "column_logs": [
+      {
+        "log": 63339,
+        "point": [
+          471,
+          57570
+        ]
+      },
+      {
+        "log": 4377,
+        "point": [
+          731,
+          20518
+        ]
+      },
+      {
+        "log": 65416,
+        "point": [
+          829,
+          20614
+        ]
+      },
+      {
+        "log": 51034,
+        "point": [
+          985,
+          26841
+        ]
+      },
+      {
+        "log": 19569,
+        "point": [
+          1129,
+          41552
+        ]
+      },
+      {
+        "log": 48468,
+        "point": [
+          1391,
+          127363
+        ]
+      },
+      {
+        "log": 56224,
+        "point": [
+          2655,
+          98654
+        ]
+      },
+      {
+        "log": 55591,
+        "point": [
+          2731,
+          8581
+        ]
+      },
+      {
+        "log": 50531,
+        "point": [
+          2777,
+          21372
+        ]
+      },
+      {
+        "log": 14472,
+        "point": [
+          3023,
+          53794
+        ]
+      },
+      {
+        "log": 61582,
+        "point": [
+          3175,
+          115860
+        ]
+      },
+      {
+        "log": 16657,
+        "point": [
+          3421,
+          90551
+        ]
+      },
+      {
+        "log": 44888,
+        "point": [
+          3681,
+          42918
+        ]
+      },
+      {
+        "log": 41533,
+        "point": [
+          3773,
+          54163
+        ]
+      },
+      {
+        "log": 48375,
+        "point": [
+          5119,
+          100649
+        ]
+      },
+      {
+        "log": 43107,
+        "point": [
+          7111,
+          60995
+        ]
+      },
+      {
+        "log": 38770,
+        "point": [
+          7159,
+          18374
+        ]
+      },
+      {
+        "log": 2895,
+        "point": [
+          7811,
+          52278
+        ]
+      },
+      {
+        "log": 58938,
+        "point": [
+          9099,
+          1429
+        ]
+      },
+      {
+        "log": 45617,
+        "point": [
+          10143,
+          18204
+        ]
+      },
+      {
+        "log": 57054,
+        "point": [
+          10199,
+          19284
+        ]
+      },
+      {
+        "log": 19961,
+        "point": [
+          12063,
+          105083
+        ]
+      },
+      {
+        "log": 5522,
+        "point": [
+          12091,
+          102062
+        ]
+      },
+      {
+        "log": 52742,
+        "point": [
+          13087,
+          36345
+        ]
+      },
+      {
+        "log": 33022,
+        "point": [
+          14073,
+          3990
+        ]
+      },
+      {
+        "log": 14807,
+        "point": [
+          14203,
+          51661
+        ]
+      },
+      {
+        "log": 44336,
+        "point": [
+          18915,
+          34422
+        ]
+      },
+      {
+        "log": 18617,
+        "point": [
+          18941,
+          32935
+        ]
+      },
+      {
+        "log": 35813,
+        "point": [
+          39617,
+          72163
+        ]
+      }
+    ],
+    "curve": {
+      "curve": {
+        "coefficients": {
+          "a1": 1,
+          "a2": 1,
+          "a3": 0,
+          "a4": 0,
+          "a6": 1
+        },
+        "cofactor": 2,
+        "curve_id": "EC1N17Ckb1hbbe2b5b6b1e6",
+        "generator": [
+          43693,
+          23339
+        ],
+        "model": "y^2+x*y=x^3+a2*x^2+a6",
+        "order": 131174,
+        "r": 65587,
+        "tag": "kb1",
+        "target_group": "prime-order-subgroup-generated-by-G",
+        "trace": -101
+      },
+      "field": {
+        "basis": "polynomial",
+        "element_encoding": "unsigned-integer-polynomial-bits",
+        "modulus": 131081,
+        "n": 17,
+        "p": 2
+      }
+    },
+    "factor_base": {
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 29,
+        "geometric_order_sha256": "bec87229df1e344b84b9075e8af273dfd2c0ea7ebbfee6277e851d7a6ca5e72a",
+        "geometric_point_count": 63,
+        "geometric_set_sha256": "767db358416f50c46cfbdfbd58bf25f75369806ea33078e9663a00fcacdb71fe",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 62,
+        "usable_set_sha256": "3461ea31b5bb93065826e34b74658ba916477971c42a212e114387075eb4a2d6"
+      },
+      "points": [
+        [
+          0,
+          1
+        ],
+        [
+          3,
+          95624
+        ],
+        [
+          3,
+          95627
+        ],
+        [
+          5,
+          106138
+        ],
+        [
+          5,
+          106143
+        ],
+        [
+          8,
+          42505
+        ],
+        [
+          8,
+          42497
+        ],
+        [
+          11,
+          78573
+        ],
+        [
+          11,
+          78566
+        ],
+        [
+          13,
+          39239
+        ],
+        [
+          13,
+          39242
+        ],
+        [
+          17,
+          124076
+        ],
+        [
+          17,
+          124093
+        ],
+        [
+          18,
+          56641
+        ],
+        [
+          18,
+          56659
+        ],
+        [
+          23,
+          72753
+        ],
+        [
+          23,
+          72742
+        ],
+        [
+          24,
+          17952
+        ],
+        [
+          24,
+          17976
+        ],
+        [
+          25,
+          16454
+        ],
+        [
+          25,
+          16479
+        ],
+        [
+          27,
+          99168
+        ],
+        [
+          27,
+          99195
+        ],
+        [
+          28,
+          44561
+        ],
+        [
+          28,
+          44557
+        ],
+        [
+          29,
+          99482
+        ],
+        [
+          29,
+          99463
+        ],
+        [
+          30,
+          68734
+        ],
+        [
+          30,
+          68704
+        ],
+        [
+          33,
+          16320
+        ],
+        [
+          33,
+          16353
+        ],
+        [
+          34,
+          16901
+        ],
+        [
+          34,
+          16935
+        ],
+        [
+          37,
+          5284
+        ],
+        [
+          37,
+          5249
+        ],
+        [
+          38,
+          22582
+        ],
+        [
+          38,
+          22544
+        ],
+        [
+          39,
+          14652
+        ],
+        [
+          39,
+          14619
+        ],
+        [
+          40,
+          45144
+        ],
+        [
+          40,
+          45168
+        ],
+        [
+          45,
+          128602
+        ],
+        [
+          45,
+          128631
+        ],
+        [
+          47,
+          4676
+        ],
+        [
+          47,
+          4715
+        ],
+        [
+          48,
+          5432
+        ],
+        [
+          48,
+          5384
+        ],
+        [
+          49,
+          121032
+        ],
+        [
+          49,
+          121081
+        ],
+        [
+          54,
+          127677
+        ],
+        [
+          54,
+          127627
+        ],
+        [
+          57,
+          96968
+        ],
+        [
+          57,
+          97009
+        ],
+        [
+          59,
+          38223
+        ],
+        [
+          59,
+          38260
+        ],
+        [
+          60,
+          24409
+        ],
+        [
+          60,
+          24421
+        ],
+        [
+          61,
+          30571
+        ],
+        [
+          61,
+          30550
+        ],
+        [
+          62,
+          129624
+        ],
+        [
+          62,
+          129638
+        ],
+        [
+          63,
+          4401
+        ],
+        [
+          63,
+          4366
+        ]
+      ]
+    },
+    "policy": "ordinary-relations-only-cofactor-sign-frobenius-v1",
+    "projection": [
+      null,
+      [
+        28,
+        14021
+      ],
+      [
+        28,
+        51566
+      ],
+      [
+        28,
+        35813
+      ],
+      [
+        28,
+        29774
+      ],
+      [
+        4,
+        51550
+      ],
+      [
+        4,
+        14037
+      ],
+      [
+        5,
+        20335
+      ],
+      [
+        5,
+        45252
+      ],
+      [
+        8,
+        65586
+      ],
+      [
+        8,
+        1
+      ],
+      [
+        28,
+        7771
+      ],
+      [
+        28,
+        57816
+      ],
+      [
+        16,
+        13810
+      ],
+      [
+        16,
+        51777
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        65586
+      ],
+      [
+        1,
+        54691
+      ],
+      [
+        1,
+        10896
+      ],
+      [
+        15,
+        55241
+      ],
+      [
+        15,
+        10346
+      ],
+      [
+        23,
+        44894
+      ],
+      [
+        23,
+        20693
+      ],
+      [
+        21,
+        35813
+      ],
+      [
+        21,
+        29774
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        65586
+      ],
+      [
+        19,
+        17186
+      ],
+      [
+        19,
+        48401
+      ],
+      [
+        24,
+        20693
+      ],
+      [
+        24,
+        44894
+      ],
+      [
+        9,
+        24202
+      ],
+      [
+        9,
+        41385
+      ],
+      [
+        11,
+        10896
+      ],
+      [
+        11,
+        54691
+      ],
+      [
+        18,
+        48313
+      ],
+      [
+        18,
+        17274
+      ],
+      [
+        14,
+        48403
+      ],
+      [
+        14,
+        17184
+      ],
+      [
+        10,
+        17182
+      ],
+      [
+        10,
+        48405
+      ],
+      [
+        0,
+        14021
+      ],
+      [
+        0,
+        51566
+      ],
+      [
+        27,
+        51777
+      ],
+      [
+        27,
+        13810
+      ],
+      [
+        6,
+        35813
+      ],
+      [
+        6,
+        29774
+      ],
+      [
+        7,
+        17178
+      ],
+      [
+        7,
+        48409
+      ],
+      [
+        26,
+        44894
+      ],
+      [
+        26,
+        20693
+      ],
+      [
+        13,
+        14021
+      ],
+      [
+        13,
+        51566
+      ],
+      [
+        22,
+        57816
+      ],
+      [
+        22,
+        7771
+      ],
+      [
+        12,
+        54691
+      ],
+      [
+        12,
+        10896
+      ],
+      [
+        25,
+        55241
+      ],
+      [
+        25,
+        10346
+      ],
+      [
+        20,
+        41385
+      ],
+      [
+        20,
+        24202
+      ],
+      [
+        17,
+        57816
+      ],
+      [
+        17,
+        7771
+      ]
+    ]
+  },
+  "record_sha256": "edbff76da6442b9f2e5e8235682c9bf1052465f310c765ba8a37d018a60bf107",
+  "schema_version": 1,
+  "scope": "mathematical preparation certificate; not a measured IC candidate or target result",
+  "state_id": "ICP1hedbff76da644"
+}

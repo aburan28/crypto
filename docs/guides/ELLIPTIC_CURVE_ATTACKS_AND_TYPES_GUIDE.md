@@ -348,9 +348,11 @@ For curves with **small class number** of `End(E)`:
 
 Cheon 2006.  When a single private key is used many times with
 **known-difference** challenges:
-- Time: `O((√n + √(d|p-1)) · log d)`
-- `d` is a parameter related to small subgroup structure of
-  `p - 1`
+- Time: `O((√(n/d) + √d) · log d)` given `[α^i]G` for `i ≤ d`
+- `d` is a divisor of the **group order side** `n − 1` (or of `n + 1`,
+  with `2d` powers); the factorisation of `p − 1` plays no role.  Exact
+  tables for P-192/224/256 are in
+  `research/notes/cm-isogeny/RESEARCH_NIST_CYCLOTOMIC_POINT_HEIGHTS.md`
 - **Practical implication**: vulnerable in some specific
   protocols using long-term keys with structured challenges
 - **Mitigation**: ephemeral keys, fresh randomness
@@ -813,7 +815,7 @@ validation.
 - NIST FIPS 186-4 (current), 186-5 (in preparation)
 - RFC 7748 (Curve25519/Curve448), RFC 8032 (Ed25519/Ed448)
 - IETF Crypto Forum Research Group recommendations
-- This investigation: `RESEARCH_P256_ISOGENY_COVER.md`,
+- This investigation: `research/notes/cm-isogeny/RESEARCH_P256_ISOGENY_COVER.md`,
   `MAINSTREAM_CURVE_AUDIT.pdf`, `P256_PROPERTIES.md`
 
 ---

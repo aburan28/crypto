@@ -76,9 +76,8 @@
 //! - **Only the underlying pairing primitive needs replacement** to
 //!   make the whole stack work end-to-end.
 
-use super::polynomial::{fr_add, fr_inv, fr_mul, fr_neg, fr_reduce, fr_sub, Poly};
+use super::polynomial::{fr_add, fr_inv, fr_mul, fr_neg, fr_reduce, Poly};
 use crate::bls12_381::fq::scalar_modulus;
-use crate::bls12_381::fq12::Fq12;
 use crate::bls12_381::g1::G1Point;
 use crate::bls12_381::g2::G2Point;
 use crate::bls12_381::pairing::pairing;
@@ -336,8 +335,8 @@ pub fn prove(qap: &Qap, srs: &Groth16Srs, z: &[BigUint]) -> Groth16Proof {
     );
     let _ = rem;
 
-    let g1 = G1Point::generator();
-    let g2 = G2Point::generator();
+    let _g1 = G1Point::generator();
+    let _g2 = G2Point::generator();
 
     // A_proof = α·G₁ + Σᵢ z_i · A_i(τ)·G₁ + ρ·δ·G₁
     // We compute Σᵢ z_i · A_i(τ)·G₁ via Σᵢ z_i · (τ-powers commit).
@@ -487,7 +486,7 @@ mod tests {
             constraints: vec![constraint.clone(), constraint.clone(), constraint],
         };
         let qap = r1cs_to_qap(&r1cs);
-        let z = vec![BigUint::one(), BigUint::from(25u32), BigUint::from(5u32)];
+        let z = [BigUint::one(), BigUint::from(25u32), BigUint::from(5u32)];
 
         // Check at each evaluation point.
         for pt in &qap.points {

@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage180-four-target-64e5272ac",
+    "cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--features",
+    "f4-four-tables",
+    "--example",
+    "koblitz_pdp_backend"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1200.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 199.140784833,
+    "user_seconds": 285.841888,
+    "system_seconds": 9.939994,
+    "total_core_seconds": 295.781882,
+    "single_core_seconds": 295.781882,
+    "peak_rss_bytes": 3332997120,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 64,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "6a88218e92eafed7c5cf60c1a27e15cfefee373a356c55122b367838897d3fc8",
+    "hypothesis": "Unmodified frozen worker",
+    "id": "incumbent",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "ab4401852244e9bce35903a9d909c8ddb0da6102bd6aad0f63c9616e52af6e55"
+  },
+  {
+    "binary_relative": "source_candidates/source_control/worker",
+    "config": {
+      "batch_trials": 64,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "6a88218e92eafed7c5cf60c1a27e15cfefee373a356c55122b367838897d3fc8",
+    "hypothesis": "A source-only comment must not create a performance win",
+    "id": "source_control",
+    "source_directory": "source_candidates/source_control/source",
+    "source_manifest_relative": "source_candidates/source_control/source-manifest.json",
+    "source_manifest_sha256": "d511f83daa047f6a15702182bfbb88ea0e525dee44885c495ae75a466012187e"
+  }
+]

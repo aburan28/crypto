@@ -4,6 +4,7 @@
  * checks them against vectors from ecref2k.py:
  *
  *   1. binary field        add, mul, sqr, inv, Frobenius, class weight
+ *   1b. reduction          the specialised reducer against the generic one
  *   2. class weight        Frobenius invariance, on every vector
  *   3. curve               add, double, negate, scalar mul, tau(G) == s*G
  *   4. walk                128-step traces and the per-step exponent j
@@ -33,6 +34,12 @@ static int failures = 0;
 static const uint32_t *cb_flat() {
     return &f2m_cb_table[0][0][0];
 }
+
+#if F2M_FROB_COUNT > 0
+static const uint32_t *frob_flat() { return &f2m_frob_table[0][0][0][0]; }
+#else
+static const uint32_t *frob_flat() { return nullptr; }
+#endif
 
 static f2e vec_f(const uint32_t l[F2M_WORDS]) { return F2::from_limbs(l); }
 
@@ -88,6 +95,119 @@ static void test_field() {
         F2::batch_inv(xs, 9, sc);
         for (int i = 0; i < 9; i++) CHECK(F2::eq(xs[i], ref[i]), "batch_inv #%d", i);
     }
+}
+
+/* The narrowed product and reduction against the full-width ones they replace.
+ *
+ * Both are narrowings: f2m_prod takes the product at the words an element
+ * occupies instead of the four the container has, and f2m_reduce folds only
+ * over the words a product of degree <= 2m-2 can reach.  That is what makes
+ * them cheaper and also the only way they can be wrong, so check them against
+ * the width-4 versions on the products a run actually forms -- from f2m_prod
+ * and from the bit spreading -- and on the degree-2m-2 corner where the
+ * narrowing is tightest. */
+static void test_reduce_specialisation() {
+    const int N = 20000;
+    int wrong_prod = 0;
+    printf("[arith] narrowed product and reduction against full width, "
+           "%d products\n", 3 * N + 2);
+    uint64_t s = 0x9E3779B97F4A7C15ull;
+    auto rnd = [&s]() {
+        s ^= s << 13; s ^= s >> 7; s ^= s << 17;
+        return (uint32_t)(s >> 11);
+    };
+    auto same = [](const f2e &a, const f2e &b) {
+        for (int i = 0; i < F2M_WORDS; i++) if (a.v[i] != b.v[i]) return false;
+        return true;
+    };
+    int bad = 0;
+    uint32_t t[F2M_DWORDS];
+    for (int n = 0; n < N; n++) {
+        f2e a, b;
+        for (int i = 0; i < F2M_WORDS; i++) {
+            a.v[i] = rnd() & f2m_word_mask(i);
+            b.v[i] = rnd() & f2m_word_mask(i);
+        }
+        /* a real multiply's product, and the width-4 product it replaces */
+        f2m_prod(t, a.v, b.v);
+        if (!same(f2m_reduce(t), f2m_reduce_generic(t))) bad++;
+        uint32_t w[F2M_DWORDS];
+        clmul128(w, a.v, b.v);
+        for (int i = 0; i < F2M_DWORDS; i++)
+            if (t[i] != w[i]) { wrong_prod++; break; }
+        /* a real squaring's product */
+        for (int i = 0; i < F2M_WORDS; i++) {
+            uint64_t sp = F2::spread32(a.v[i]);
+            t[2 * i] = (uint32_t)sp;
+            t[2 * i + 1] = (uint32_t)(sp >> 32);
+        }
+        if (!same(f2m_reduce(t), f2m_reduce_generic(t))) bad++;
+        /* an arbitrary buffer of the widest degree a product can have */
+        for (int i = 0; i < F2M_DWORDS; i++) {
+            int lo = 32 * i, bits = (2 * F2M_M - 1) - lo;
+            t[i] = bits <= 0 ? 0u
+                 : (bits >= 32 ? rnd() : (rnd() & ((1u << bits) - 1u)));
+        }
+        if (!same(f2m_reduce(t), f2m_reduce_generic(t))) bad++;
+    }
+    /* the two corners: zero, and the top bit a product can carry */
+    for (int i = 0; i < F2M_DWORDS; i++) t[i] = 0;
+    if (!same(f2m_reduce(t), f2m_reduce_generic(t))) bad++;
+    t[(2 * F2M_M - 2) / 32] = 1u << ((2 * F2M_M - 2) % 32);
+    if (!same(f2m_reduce(t), f2m_reduce_generic(t))) bad++;
+    CHECK(bad == 0, "specialised reduce disagrees with generic on %d inputs", bad);
+    CHECK(wrong_prod == 0, "f2m_prod disagrees with clmul128 on %d inputs", wrong_prod);
+}
+
+/* The tau^k tables against the squaring chain they replace.
+ *
+ * Three levels, because a table that is right on random elements can still be
+ * wired into the inversion wrongly: the map itself, then the inversion that
+ * uses it, then a run of the real stepper, which must come out bit-identical
+ * to the same run without tables. */
+static void test_frob_tables() {
+#if F2M_FROB_COUNT > 0
+    const uint32_t *ftb = frob_flat();
+    constexpr int exps[F2M_FROB_COUNT] = F2M_FROB_EXPS;
+    printf("[frob] tau^k tables against repeated squaring, k =");
+    for (int s = 0; s < F2M_FROB_COUNT; s++) printf(" %d", exps[s]);
+    printf("\n");
+
+    uint64_t st = 0xC0FFEE123456789ull;
+    auto rnd = [&st]() {
+        st ^= st << 13; st ^= st >> 7; st ^= st << 17;
+        return (uint32_t)(st >> 11);
+    };
+    int bad_map = 0, bad_inv = 0;
+    for (int n = 0; n < 4000; n++) {
+        f2e a;
+        for (int i = 0; i < F2M_WORDS; i++) a.v[i] = rnd() & f2m_word_mask(i);
+        for (int s = 0; s < F2M_FROB_COUNT; s++)
+            if (!F2::eq(FrobPow::apply(a, ftb, s), F2::frob(a, exps[s]))) bad_map++;
+        /* the inversion, both ways, and against the defining identity */
+        f2e i0 = F2::inv(a), i1 = F2::inv(a, ftb);
+        if (!F2::eq(i0, i1)) bad_inv++;
+        else if (!F2::is_zero(a) && !F2::eq(F2::mul(a, i1), F2::one())) bad_inv++;
+    }
+    CHECK(bad_map == 0, "tau^k table disagrees with squaring on %d inputs", bad_map);
+    CHECK(bad_inv == 0, "table inversion disagrees on %d inputs", bad_inv);
+
+    /* and a batch inversion, where the table is reached through Montgomery */
+    {
+        f2e xs[16], ys[16], sc[16];
+        for (int i = 0; i < 16; i++) {
+            for (int l = 0; l < F2M_WORDS; l++) xs[i].v[l] = rnd() & f2m_word_mask(l);
+            ys[i] = xs[i];
+        }
+        F2::batch_inv(xs, 16, sc);
+        F2::batch_inv(ys, 16, sc, ftb);
+        int bad = 0;
+        for (int i = 0; i < 16; i++) if (!F2::eq(xs[i], ys[i])) bad++;
+        CHECK(bad == 0, "table batch_inv disagrees on %d of 16", bad);
+    }
+#else
+    printf("[frob] no tau^k table for this field\n");
+#endif
 }
 
 static void test_class_weight() {
@@ -215,20 +335,24 @@ static void test_canonical() {
 
 /* ---------------------------------------------------------------- */
 struct HostState {
-    std::vector<uint32_t> X, Y, steps, restarts;
+    std::vector<uint32_t> X, Y, steps, restarts, wgt;
     std::vector<rho2k_dp> dps;
     uint32_t dp_count = 0;
-    rho2k_ctx ctx;
+    rho2k_ctx ctx{};
 
-    void init(Rho2kHost &h, uint32_t T, uint32_t W, uint32_t cap) {
+    void init(Rho2kHost &h, uint32_t T, uint32_t W, uint32_t cap,
+              const uint32_t *ftb = nullptr) {
+        ctx.ftb = ftb;
         uint32_t n = T * W;
         X.assign(F2M_WORDS * n, 0);
         Y.assign(F2M_WORDS * n, 0);
         steps.assign(n, 0);
         restarts.assign(n, 0);
+        wgt.assign(n, 0);
         dps.resize(cap);
         ctx.X = X.data(); ctx.Y = Y.data();
         ctx.steps = steps.data(); ctx.restarts = restarts.data();
+        ctx.wgt = wgt.data();
         ctx.nthreads = T; ctx.walks_per_thread = W;
         ctx.cb = cb_flat();
         ctx.P = h.P; ctx.Q = h.Q; ctx.prm = h.prm;
@@ -237,7 +361,8 @@ struct HostState {
     }
 
     bool same(const HostState &o) const {
-        return X == o.X && Y == o.Y && steps == o.steps && restarts == o.restarts;
+        return X == o.X && Y == o.Y && steps == o.steps && restarts == o.restarts
+               && wgt == o.wgt;
     }
 
     std::vector<std::string> sorted_dps() const {
@@ -248,6 +373,87 @@ struct HostState {
         return v;
     }
 };
+
+/* What a walk step costs, counted.
+ *
+ * The batching table in README.md used to be derived by hand from the step's
+ * shape.  Count it instead: run the real stepper with the distinguished-point
+ * test disabled, so no step reseeds and every walk pays exactly one step, and
+ * read the field-operation counters.  The numbers here are per walk step, so
+ * the inversion Montgomery's trick amortises shows up divided by W.
+ *
+ * The unit is field operations.  Converting to one number needs the cost of a
+ * squaring relative to a multiply, which is arithmetic-dependent and belongs
+ * with the instruction counts in README.md, not here. */
+#ifdef F2M_COUNT_OPS
+static void test_step_cost() {
+    printf("[step cost] field operations per walk step, dp disabled\n");
+    Rho2kHost h;
+    h.prm.nj = 8; h.prm.jmin = 3;
+    h.prm.dp_threshold = 0;          /* g > 0 always: no step reseeds */
+    h.prm.max_steps = 1u << 30;
+    h.cb = cb_flat();
+    h.P = Koblitz::generator();
+    uint32_t k[SC_WORDS] = {0x1234567u, 0x89abcdefu, 0, 0};
+    h.Q = Koblitz::mul(h.P, k);
+    h.build();
+
+    const int iters = 40;
+    static const char *names[3] = {"batched", "batched+tau^k", "lowmem"};
+    printf("       W   variant          mul/step   sqr/step   tau^k/step   weight/step\n");
+    double prev = 1e30;
+    for (uint32_t W : {1u, 2u, 4u, 8u, 16u, 32u}) {
+        const uint32_t T = 2;
+        double mul[3], sqr[3], tau[3], wgt[3];
+        for (int variant = 0; variant < 3; variant++) {
+            HostState s;
+            s.init(h, T, W, 1 << 20, variant == 1 ? frob_flat() : nullptr);
+            f2m_ops::reset();
+            for (int it = 0; it < iters; it++)
+                for (uint32_t t = 0; t < T; t++) {
+                    if (variant != 2) switch (W) {
+                        case 1: r2k_step_batch<1>(s.ctx, t); break;
+                        case 2: r2k_step_batch<2>(s.ctx, t); break;
+                        case 4: r2k_step_batch<4>(s.ctx, t); break;
+                        case 8: r2k_step_batch<8>(s.ctx, t); break;
+                        case 16: r2k_step_batch<16>(s.ctx, t); break;
+                        default: r2k_step_batch<32>(s.ctx, t); break;
+                    } else switch (W) {
+                        case 1: r2k_step_batch_lowmem<1>(s.ctx, t); break;
+                        case 2: r2k_step_batch_lowmem<2>(s.ctx, t); break;
+                        case 4: r2k_step_batch_lowmem<4>(s.ctx, t); break;
+                        case 8: r2k_step_batch_lowmem<8>(s.ctx, t); break;
+                        case 16: r2k_step_batch_lowmem<16>(s.ctx, t); break;
+                        default: r2k_step_batch_lowmem<32>(s.ctx, t); break;
+                    }
+                }
+            double steps = (double)iters * T * W;
+            mul[variant] = f2m_ops::mul / steps;
+            sqr[variant] = f2m_ops::sqr / steps;
+            tau[variant] = f2m_ops::frobtab / steps;
+            wgt[variant] = f2m_ops::weight / steps;
+        }
+        for (int v = 0; v < 3; v++)
+            printf("     %3u   %-14s %8.2f   %8.2f   %10.2f   %10.2f\n",
+                   W, names[v], mul[v], sqr[v], tau[v], wgt[v]);
+        for (int v = 0; v < 3; v++)
+            CHECK(wgt[v] <= 1.001, "W=%u %s: %.2f class weights per step, "
+                  "the step needs one", W, names[v], wgt[v]);
+        CHECK(mul[0] + sqr[0] < prev, "W=%u did not amortise further than W=%u/2", W, W);
+        /* lowmem re-walks the x chain rather than carrying the denominator,
+         * so it must cost more squarings and never fewer of anything. */
+        CHECK(sqr[2] > sqr[0] && mul[2] >= mul[0] - 1e-9,
+              "W=%u: lowmem is not the more-arithmetic side of the trade", W);
+        /* the tables trade squarings for table applications and touch nothing
+         * else, so the multiply count must be untouched. */
+        CHECK(mul[1] == mul[0], "W=%u: tau^k tables moved the multiply count", W);
+        CHECK(F2M_FROB_COUNT == 0 || (sqr[1] < sqr[0] && tau[1] > 0),
+              "W=%u: tau^k tables did not replace any squarings", W);
+        prev = mul[0] + sqr[0];
+    }
+    f2m_ops::reset();
+}
+#endif
 
 static void test_batched_step() {
     const uint32_t T = 3, W = 8;
@@ -262,24 +468,33 @@ static void test_batched_step() {
     h.Q = Koblitz::mul(h.P, k);
     h.build();
 
-    HostState a, b, c;
+    /* d takes its inversion through the tau^k tables; everything else is a.
+     * The two must stay bit-identical, which is the only way a table wired
+     * into the wrong slot would show up at walk level. */
+    HostState a, b, c, d;
     a.init(h, T, W, 4096);
     b.init(h, T, W, 4096);
     c.init(h, T, W, 4096);
-    CHECK(a.same(b) && a.same(c), "identical init");
+    d.init(h, T, W, 4096, frob_flat());
+    CHECK(a.same(b) && a.same(c) && a.same(d), "identical init");
     for (int it = 0; it < 300; it++) {
         for (uint32_t t = 0; t < T; t++) {
             r2k_step_batch<W>(a.ctx, t);
             r2k_step_thread_ref(b.ctx, t);
             r2k_step_batch_lowmem<W>(c.ctx, t);
+            r2k_step_batch<W>(d.ctx, t);
         }
         if (!a.same(b)) { CHECK(0, "batched vs reference diverged at %d", it); break; }
         if (!a.same(c)) { CHECK(0, "lowmem vs batched diverged at %d", it); break; }
+        if (!a.same(d)) { CHECK(0, "tau^k tables vs squaring diverged at %d", it); break; }
     }
-    CHECK(a.dp_count == b.dp_count && a.dp_count == c.dp_count,
-          "dp counts %u / %u / %u", a.dp_count, b.dp_count, c.dp_count);
+    CHECK(a.dp_count == b.dp_count && a.dp_count == c.dp_count
+          && a.dp_count == d.dp_count,
+          "dp counts %u / %u / %u / %u", a.dp_count, b.dp_count, c.dp_count,
+          d.dp_count);
     CHECK(a.sorted_dps() == b.sorted_dps(), "reference dp multiset");
     CHECK(a.sorted_dps() == c.sorted_dps(), "lowmem dp multiset");
+    CHECK(a.sorted_dps() == d.sorted_dps(), "tau^k table dp multiset");
     printf("  %u distinguished points, all three steppers agree over 300 iterations\n",
            a.dp_count);
 
@@ -412,11 +627,16 @@ int main() {
         return 2;
     }
     test_field();
+    test_reduce_specialisation();
+    test_frob_tables();
     test_class_weight();
     test_points();
     test_walk_vectors();
     test_canonical();
     test_batched_step();
+#ifdef F2M_COUNT_OPS
+    test_step_cost();
+#endif
     test_solve();
     if (failures) { printf("FAILED: %d checks\n", failures); return 1; }
     printf("ALL PASSED\n");

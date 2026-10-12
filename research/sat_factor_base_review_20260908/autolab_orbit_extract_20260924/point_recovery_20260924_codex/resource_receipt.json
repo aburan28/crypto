@@ -1,0 +1,41 @@
+{
+  "negative_controls": [
+    {
+      "case": "off_curve",
+      "expected_rejection": "point target must be on the curve",
+      "point": [
+        0,
+        0
+      ],
+      "returncode": 101,
+      "stderr_sha256": "ebf3c93a96381be103a5c711a133245a90c3c2359301fd608797d73a275be229"
+    },
+    {
+      "case": "wrong_subgroup",
+      "expected_rejection": "point target must belong to the prime-order subgroup",
+      "point": [
+        0,
+        1
+      ],
+      "returncode": 101,
+      "stderr_sha256": "677ee5b84d612695b1575c9cd9374bbeac7c8be0e47e7461fc76264f884204ba"
+    },
+    {
+      "case": "missing_compact_mode",
+      "expected_rejection": "compact batch target files require KIC_ORBIT_LAZY_RELATIVE_SUPPORT=1",
+      "point": [
+        1982694855789544,
+        1466753660120656
+      ],
+      "returncode": 101,
+      "stderr_sha256": "158083c26ab6987ad6b3ad45d993ff7a0d980e49533ca3473a1b8885acd91e37"
+    }
+  ],
+  "positive_process_peak_rss_raw": 646250496,
+  "positive_process_wall_ms": 12394.405832979828,
+  "producer_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "producer_stdout_sha256": "7d4f46316b6a0d718b329dbb1c734edc2baf4726621842d18b2fa4c6a3b45303",
+  "schema_version": "1.0",
+  "targets_extracted": 8,
+  "targets_requested": 8
+}

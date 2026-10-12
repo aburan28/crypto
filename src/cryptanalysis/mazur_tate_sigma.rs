@@ -115,7 +115,7 @@
 use crate::cryptanalysis::canonical_lift::{ZpCurve, ZpInt};
 use crate::cryptanalysis::coleman_integration::PSeries;
 use num_bigint::BigInt;
-use num_traits::{One, Zero};
+use num_traits::Zero;
 
 // ── Phase 3: proper formal-group [d]_F via formal-log reversion ──────
 
@@ -616,6 +616,7 @@ pub struct MazurTateResult {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use num_traits::One;
 
     /// `σ_p(z)` has expected leading coefficients.
     #[test]

@@ -1,0 +1,27 @@
+{
+  "schema": "koblitz_native_process_meter.v1",
+  "meter": "fresh child process wait4/getrusage; all child threads included",
+  "command": [
+    "/usr/bin/env",
+    "VECLIB_MAXIMUM_THREADS=1",
+    "OPENBLAS_NUM_THREADS=1",
+    "OMP_NUM_THREADS=1",
+    "MKL_NUM_THREADS=1",
+    "BLIS_NUM_THREADS=1",
+    "NUMEXPR_NUM_THREADS=1",
+    "/Volumes/SSD990/kic-stage192-target-e575d53f1/release/examples/koblitz_pdp_backend",
+    "direct-mitm",
+    "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json"
+  ],
+  "environment": {},
+  "pid": 58158,
+  "returncode": 0,
+  "timed_out": false,
+  "watchdog_seconds": 120,
+  "wall_seconds": 0.325632375,
+  "user_seconds": 0.307026,
+  "system_seconds": 0.003457,
+  "total_core_seconds": 0.310483,
+  "single_core_seconds": null,
+  "peak_rss_bytes": 40910848
+}

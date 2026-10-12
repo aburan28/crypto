@@ -1,0 +1,158 @@
+{
+  "valid": true,
+  "status": "Completed CLMAD/control full-walk receipt passed independent retained-artifact audit",
+  "rawSha256": "1a831420973455ae36401c5a882b75578513df3f71710d66c1db579bb016a972",
+  "auditorSha256": "53e77d410a368cf9a82535bc9b16ffb412f06867449cc73e19541c0fef2cf8c0",
+  "predispatchReviewSha256": "7e18a570475f39345e61146971b0a1bb31faf828e625ab14dc0147787c4c6080",
+  "driverFreezeSha256": "0756ecf49af7024cb1318c4beb531f8380aed186f1b6ea257a8206a7463de848",
+  "sourceManifestHashes": {
+    "control": "e2b17a4c9a14cea5000d557a5eaeceb5139bb56ab0b19b2ab79950287d7165ec",
+    "candidate": "f90f601393243084d0c154918d47c297b8556869a89aeca79b99d6c40f81d189"
+  },
+  "sourceFilesPerMode": 138,
+  "binaries": {
+    "control": "ec59b82efd0c3489f753fa4891bd68058cf0b1094df95686b94a8e2270c74235",
+    "candidate": "ace4459a1f7e24f6bea4b3bac1b20e875a85bf3efe1e0fb16db8eb98b5fb5243"
+  },
+  "arithmeticBinaries": {
+    "control": "464b9329679331b81200dd1d11875509505727756242a0d99358649469ec6ffd",
+    "candidate": "59a7b27c37faca082d868adf9dea55dbe19fb9614f76cf8b6ae1a94a032baefa"
+  },
+  "gpuBefore": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-d1879a3f-4c43-3adc-4d20-14979a4e14d9",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-d1879a3f-4c43-3adc-4d20-14979a4e14d9",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "180 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "31"
+    }
+  },
+  "gpuAfter": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-d1879a3f-4c43-3adc-4d20-14979a4e14d9",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-d1879a3f-4c43-3adc-4d20-14979a4e14d9",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "2422 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "60"
+    }
+  },
+  "jitEnvironment": {
+    "CUDA_DISABLE_PTX_JIT": "1",
+    "CUDA_FORCE_PTX_JIT": null,
+    "CUDA_FORCE_JIT": null
+  },
+  "sourceAndNativeCodeBindingsPassed": true,
+  "allCorrectnessGatesPassed": true,
+  "allRecordedCommandsSucceeded": true,
+  "warmupsExcluded": 2,
+  "timedRows": 17,
+  "scalarUpdatesEveryTimedRow": 201863462912,
+  "screenQualified": true,
+  "screenRatesM": [
+    7149.255,
+    8702.509,
+    7138.446
+  ],
+  "controlDriftPercent": -0.15119057859874774,
+  "qualificationThresholdM": 7185.001275,
+  "statistics": {
+    "confirmation": {
+      "control": {
+        "ratesM": [
+          7110.44,
+          7110.055,
+          7128.618
+        ],
+        "medianM": 7110.44,
+        "minimumM": 7110.055,
+        "maximumM": 7128.618
+      },
+      "candidate": {
+        "ratesM": [
+          8703.518,
+          8705.273,
+          8701.017
+        ],
+        "medianM": 8703.518,
+        "minimumM": 8701.017,
+        "maximumM": 8705.273
+      }
+    },
+    "collection": {
+      "control": {
+        "ratesM": [
+          7008.12,
+          7021.483,
+          7015.447
+        ],
+        "medianM": 7015.447,
+        "minimumM": 7008.12,
+        "maximumM": 7021.483
+      },
+      "candidate": {
+        "ratesM": [
+          8533.961,
+          8534.325,
+          8535.006
+        ],
+        "medianM": 8534.325,
+        "minimumM": 8533.961,
+        "maximumM": 8535.006
+      }
+    }
+  },
+  "pairedComparisons": {
+    "confirmation": {
+      "ratios": [
+        1.224047738255298,
+        1.224360852342211,
+        1.2205755729932506
+      ],
+      "medianPairedRatio": 1.224047738255298,
+      "ratioOfMedians": 1.224047738255298
+    },
+    "collection": {
+      "ratios": [
+        1.217724725033247,
+        1.2154590419146498,
+        1.216601878682855
+      ],
+      "medianPairedRatio": 1.216601878682855,
+      "ratioOfMedians": 1.2165048071776468
+    }
+  },
+  "corpusIdentity": {
+    "records": 5149,
+    "bytes": 164768,
+    "sortedSha256": "ab237b6352380547fd37fcdc9e2aa83f6ae1a718b842590b9a19e4224e5d336b",
+    "matchingCorpora": 6
+  },
+  "goalEvaluation": {
+    "targetBillionScalarUpdatesPerSecond": 15,
+    "candidateBenchmarkMedianB": 8.703518,
+    "candidateCollectionMedianB": 8.534325,
+    "benchmarkMedianAtLeast15B": false,
+    "allThreeBenchmarkSamplesAtLeast15B": false,
+    "collectionMedianAtLeast15B": false
+  },
+  "findings": [],
+  "limits": [
+    "No job, compiler or numerical test rerun by this audit; it inspects only the owner-supplied terminal artifact.",
+    "Rates are complete scalar updates for this fixed oneGPU walk workload. Repeated benchmark andDP34 collection medians are reported separately; warmups and screen peaks are excluded from goal evaluation.",
+    "The cross-layout-named checkpoint gate checks cross-implementation resume at the sameTILE256 layout.",
+    "DP corpus equality is checked from retained multiset hashes, sizes and reports; temporary corpus payload files are not retained here for an independent rehash.",
+    "GPU inventory records endpoint clocks/power/temperature, not continuous sampling. No universal hardware ceiling or extrapolation to otherdevices/workloads follows."
+  ]
+}

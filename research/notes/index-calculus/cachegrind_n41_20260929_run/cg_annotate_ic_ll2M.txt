@@ -1,0 +1,51 @@
+--------------------------------------------------------------------------------
+-- Metadata
+--------------------------------------------------------------------------------
+Invocation:       /usr/bin/cg_annotate --show=Ir,D1mr,DLmr,D1mw,DLmw,Bcm --sort=DLmr,DLmw cg_ic_ll2M.out
+I1 cache:         32768 B, 64 B, 8-way associative
+D1 cache:         32768 B, 64 B, 8-way associative
+LL cache:         2097152 B, 64 B, 16-way associative
+Command:          /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_orbit_dlp_fast construct:41:0:255 /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/cachegrind_n41_20260929_run/work/scalars.txt 7 /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/cachegrind_n41_20260929_run/work/cg_ic_ll2M.stdout.jsonl
+Events recorded:  Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw Bc Bcm Bi Bim
+Events shown:     Ir D1mr DLmr D1mw DLmw Bcm
+Event sort order: DLmr DLmw
+Threshold:        0.1%
+Annotation:       on
+
+--------------------------------------------------------------------------------
+-- Summary
+--------------------------------------------------------------------------------
+Ir_____________________ D1mr________________ DLmr______________ D1mw______________ DLmw______________ Bcm________________ 
+
+12,442,739,904 (100.0%) 145,801,643 (100.0%) 9,754,699 (100.0%) 5,336,759 (100.0%) 5,248,005 (100.0%) 36,241,529 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+-- File:function summary
+--------------------------------------------------------------------------------
+  Ir___________________________ D1mr______________________ DLmr____________________ D1mw____________________ DLmw____________________ Bcm______________________  file:function
+
+< 12,424,644,734 (99.9%, 99.9%) 145,716,617 (99.9%, 99.9%) 9,743,520 (99.9%, 99.9%) 5,282,080 (99.0%, 99.0%) 5,224,060 (99.5%, 99.5%) 36,123,020 (99.7%, 99.7%)  ???:
+   6,869,277,429 (55.2%)         88,947,583 (61.0%)        6,416,291 (65.8%)        5,231,613 (98.0%)        5,208,939 (99.3%)        24,683,133 (68.1%)           koblitz_orbit_dlp_fast::main
+   4,222,410,313 (33.9%)         55,627,482 (38.2%)        3,317,332 (34.0%)            5,366  (0.1%)               47  (0.0%)         9,967,364 (27.5%)           koblitz_orbit_dlp_fast::extract
+
+--------------------------------------------------------------------------------
+-- Function:file summary
+--------------------------------------------------------------------------------
+  Ir__________________________ D1mr_____________________ DLmr____________________ D1mw____________________ DLmw____________________ Bcm______________________  function:file
+
+> 6,869,277,429 (55.2%, 55.2%) 88,947,583 (61.0%, 61.0%) 6,416,291 (65.8%, 65.8%) 5,231,613 (98.0%, 98.0%) 5,208,939 (99.3%, 99.3%) 24,683,133 (68.1%, 68.1%)  koblitz_orbit_dlp_fast::main:???
+
+> 4,222,410,313 (33.9%, 89.1%) 55,627,482 (38.2%, 99.2%) 3,317,332 (34.0%, 99.8%)     5,366  (0.1%, 98.1%)        47  (0.0%, 99.3%)  9,967,364 (27.5%, 95.6%)  koblitz_orbit_dlp_fast::extract:???
+
+--------------------------------------------------------------------------------
+-- Annotation summary
+--------------------------------------------------------------------------------
+Ir____________________ D1mr_______________ DLmr_____________ D1mw_____________ DLmw_____________ Bcm_______________ 
+
+             0                   0                 0                 0                 0                  0            annotated: files known & above threshold & readable, line numbers known
+             0                   0                 0                 0                 0                  0            annotated: files known & above threshold & readable, line numbers unknown
+             0                   0                 0                 0                 0                  0          unannotated: files known & above threshold & two or more non-identical
+             0                   0                 0                 0                 0                  0          unannotated: files known & above threshold & unreadable 
+    18,095,170  (0.1%)      85,026  (0.1%)    11,179  (0.1%)    54,679  (1.0%)    23,945  (0.5%)    118,509  (0.3%)  unannotated: files known & below threshold
+12,424,644,734 (99.9%) 145,716,617 (99.9%) 9,743,520 (99.9%) 5,282,080 (99.0%) 5,224,060 (99.5%) 36,123,020 (99.7%)  unannotated: files unknown
+

@@ -1,0 +1,103 @@
+{
+  "budget": {
+    "batch_trials": 1,
+    "max_trials": 64,
+    "memory_bytes": 8589934592,
+    "note": "KIC_* unset: exclusive-phase worker rejects undeclared KIC_ overrides",
+    "rayon_num_threads": 1,
+    "timeout_seconds": 300
+  },
+  "build": {
+    "build_sha256": "de3cb8b896f31f03668f1d0eb14302fef2b1e0bc0be303e7f4021a70dd085335",
+    "source_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7",
+    "worker_sha256": "ed8e5a2f7aa5924e81587b9b0ed5bb11935166e226db640b720bc28842faf798"
+  },
+  "comparison_kind": "factor-base-policy",
+  "host": {
+    "logical_cpus": 4,
+    "machine": "x86_64",
+    "node": "cursor",
+    "release": "6.12.94+",
+    "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+    "system": "Linux"
+  },
+  "inventory_control_sha256": "be3053b4b637311e8255f294807fde412510fbda2464e678a6a16fdea397d403",
+  "prior_attempts": [
+    {
+      "kind": "env-error",
+      "path": "runs-env-error",
+      "reason": "KIC_F5_AVX512_UNPACK set; exclusive worker rejected"
+    },
+    {
+      "cell": "n17a1",
+      "kind": "timeout-no-receipt",
+      "max_trials": 1024,
+      "solver": "f4",
+      "timeout_seconds": 300
+    }
+  ],
+  "promotion_eligible": false,
+  "reviewed_generic_commit": "765c3c5f19032bd852163805f257c56babef2040",
+  "rows": [
+    {
+      "cell": "n17a1",
+      "classification": null,
+      "parse_error": null,
+      "process": {
+        "exit_code": null,
+        "process_status": "TIMEOUT",
+        "timeout_seconds": 300,
+        "wall_seconds": 300.0030093193054
+      },
+      "report_status": null,
+      "solver": "f4",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "target": [
+        "853",
+        "39791"
+      ]
+    },
+    {
+      "cell": "n17a1",
+      "classification": null,
+      "parse_error": null,
+      "process": {
+        "exit_code": null,
+        "process_status": "TIMEOUT",
+        "timeout_seconds": 300,
+        "wall_seconds": 300.0059175491333
+      },
+      "report_status": null,
+      "solver": "f5",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "target": [
+        "853",
+        "39791"
+      ]
+    },
+    {
+      "cell": "n19a0",
+      "classification": null,
+      "parse_error": null,
+      "process": {
+        "exit_code": -15,
+        "process_status": "EXITED",
+        "timeout_seconds": 300,
+        "wall_seconds": 59.75568199157715
+      },
+      "report_status": null,
+      "solver": "f4",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "target": [
+        "319974",
+        "349085"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "solvers": [
+    "f4",
+    "f5"
+  ],
+  "status": "RUNNING"
+}

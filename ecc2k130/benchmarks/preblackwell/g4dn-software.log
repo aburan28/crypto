@@ -1,0 +1,1065 @@
+ECC_GPU=T4 ECC_CUDA_VERSION=13.3.1 ECC_PACKED_SINGLE_PRODUCT=1 ECC_PACKED_CACHE_DENOM=1 ECC_PACKED_BY_VALUE=1 ECC_PACKED_PERM_SIGMA=3 ECC_PACKED_POLY_CHAIN=1 ECC_PACKED_UNROLL_INV=1 ECC_PACKED_PAIR_PRODUCTS=1 ECC_PACKED_POLY_STATE=1 ECC_PACKED_DIRECT_REDUCE=1 ECC_PACKED_GENERATED_PRODUCT=1 ECC_PACKED_CLMAD=0 ECC_PACKED_STATE_TILE=256 ECC_PACKED_WEIGHTED_PREFIX=2 ECC_PACKED_COMPACT_STATE=1 ECC_PACKED_SHARED_SIGMA=1 ECC_PACKED_TOP_CLMAD=0 /workspace/ecc2k130/benchmarks/top-clmad/modal-quiet run modal_app.py::bench --packed \
+    --batch 16 --threads 256 --leaf 0 --min-blocks 2 \
+    --steps 1024 --launches 32 --repeats 3
+Building image im-zAbz0DrT9b2lXekK41Tjhs
+
+=> Step 0: FROM base
+
+=> Step 1: ENV ECC_CUDA_VERSION=13.3.1
+
+=> Step 2: ENV ECC_GPU=T4
+
+=> Step 3: ENV ECC_PACKED_SINGLE_PRODUCT=1
+
+=> Step 4: ENV ECC_PACKED_CACHE_DENOM=1
+
+=> Step 5: ENV ECC_PACKED_BY_VALUE=1
+
+=> Step 6: ENV ECC_PACKED_PERM_SIGMA=3
+
+=> Step 7: ENV ECC_PACKED_POLY_CHAIN=1
+
+=> Step 8: ENV ECC_PACKED_UNROLL_INV=1
+
+=> Step 9: ENV ECC_PACKED_PAIR_PRODUCTS=1
+
+=> Step 10: ENV ECC_PACKED_POLY_STATE=1
+
+=> Step 11: ENV ECC_PACKED_DIRECT_REDUCE=1
+
+=> Step 12: ENV ECC_PACKED_GENERATED_PRODUCT=1
+
+=> Step 13: ENV ECC_PACKED_CLMAD=0
+
+=> Step 14: ENV ECC_PACKED_CLMAD_SQUARE=0
+
+=> Step 15: ENV ECC_PACKED_KARAT3=0
+
+=> Step 16: ENV ECC_PACKED_COMPACT_STATE=1
+
+=> Step 17: ENV ECC_PACKED_SHARED_SIGMA=1
+
+=> Step 18: ENV ECC_PACKED_TOP_CLMAD=0
+
+=> Step 19: ENV ECC_PACKED_WEIGHTED_PREFIX=2
+
+=> Step 20: ENV ECC_PACKED_STATE_TILE=256
+Saving image...
+Image saved, took 809.52ms
+
+Built image im-zAbz0DrT9b2lXekK41Tjhs in 1.98s
+
+
+Building image im-jxmjMIYZyPJlXbm1BVflj0
+
+=> Step 0: FROM base
+
+=> Step 1: RUN apt-get update
+Get:1 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+Get:2 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64  InRelease [1578 B]
+Get:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+Get:5 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+Get:6 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64  Packages [1870 kB]
+Get:7 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+Get:8 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+Get:9 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+Get:10 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+Get:11 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1566 kB]
+Get:12 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1922 kB]
+Get:13 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2148 kB]
+Get:14 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [56.2 kB]
+Get:15 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [671 B]
+Get:16 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [48.9 kB]
+Get:17 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [35.9 kB]
+Get:18 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1244 kB]
+Get:19 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [50.0 kB]
+Get:20 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1532 kB]
+Get:21 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1801 kB]
+Fetched 34.5 MB in 2s (16.0 MB/s)
+Reading package lists...
+
+=> Step 2: RUN apt-get install -y build-essential
+Reading package lists...
+Building dependency tree...
+Reading state information...
+build-essential is already the newest version (12.10ubuntu1).
+build-essential set to manually installed.
+0 upgraded, 0 newly installed, 0 to remove and 56 not upgraded.
+Saving image...
+Image saved, took 1.09s
+
+Built image im-jxmjMIYZyPJlXbm1BVflj0 in 8.62s
+
+
+Building image im-jEQF2uhYTaOCo9s6gqilMX
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 410.17ms
+
+Built image im-jEQF2uhYTaOCo9s6gqilMX in 2.80s
+
+
+Building image im-eQeQck6GjXw82O4uKxa18O
+
+=> Step 0: FROM base
+
+=> Step 1: RUN cd /root/ecc2k130/codegen && python3 gen.py --out ../generated --leaf 0
+m=131  n=263  ell=129.0 bits  dpWeight=34  chain=[131, 66]
+        multPrep     331 instr    453 bitops  116 locals  130 peak live
+        toOnb        903 instr   1034 bitops  233 locals  233 peak live
+        mulLeaf     2835 instr   4697 bitops  254 locals  254 peak live
+        hamming      268 instr    760 bitops   89 locals   89 peak live
+        conversions per multiplication: 1565 instructions, leaf cutoff 12
+m= 83  n=167  ell=81.0 bits  dpWeight=22  chain=[83, 42]
+        multPrep     173 instr    248 bitops   67 locals   82 peak live
+        toOnb        492 instr    575 bitops  140 locals  140 peak live
+        mulLeaf     1317 instr   2264 bitops  155 locals  155 peak live
+        hamming      170 instr    474 bitops   57 locals   57 peak live
+        conversions per multiplication: 838 instructions, leaf cutoff 12
+m= 41  n= 83  ell=39.0 bits  dpWeight=13  chain=[41]
+        multPrep      68 instr    102 bitops   28 locals   40 peak live
+        toOnb        201 instr    242 bitops   62 locals   62 peak live
+        mulLeaf     1284 instr   2211 bitops  151 locals  151 peak live
+        hamming       86 instr    226 bitops   29 locals   29 peak live
+        conversions per multiplication: 337 instructions, leaf cutoff 12
+m= 23  n= 47  ell=21.0 bits  dpWeight=10  chain=[23]
+        multPrep      31 instr     48 bitops   13 locals   22 peak live
+        toOnb         92 instr    115 bitops   29 locals   29 peak live
+        mulLeaf      468 instr    739 bitops   84 locals   84 peak live
+        hamming       44 instr    116 bitops   17 locals   17 peak live
+        conversions per multiplication: 154 instructions, leaf cutoff 6
+m= 97  polynomial basis  ell=95.0 bits  dpWeight=25  taps=(6,)
+        mulLeaf     1760 instr   3087 bitops  181 locals  181 peak live
+        reduce       102 instr    192 bitops    6 locals   97 peak live
+        sqr           51 instr     51 bitops    1 locals   51 peak live
+        hamming     1716 instr   2805 bitops  363 locals  363 peak live
+m= 41  polynomial basis  ell=39.0 bits  dpWeight=13  taps=(3,)
+        mulLeaf     1284 instr   2211 bitops  151 locals  151 peak live
+        reduce        43 instr     80 bitops    3 locals   41 peak live
+        sqr           20 instr     20 bitops    2 locals   20 peak live
+        hamming      392 instr    672 bitops  102 locals  102 peak live
+m= 19  polynomial basis  ell=17.0 bits  dpWeight=8  taps=(5, 2, 1)
+        mulLeaf      331 instr    576 bitops   63 locals   63 peak live
+        reduce        40 instr     72 bitops    8 locals   21 peak live
+        sqr           21 instr     30 bitops    3 locals   19 peak live
+        hamming       96 instr    190 bitops   23 locals   23 peak live
+m= 13  polynomial basis  ell=11.0 bits  dpWeight=5  taps=(4, 3, 1)
+        mulLeaf      166 instr    276 bitops   42 locals   42 peak live
+        reduce        26 instr     48 bitops    6 locals   14 peak live
+        sqr           16 instr     24 bitops    3 locals   13 peak live
+        hamming       51 instr    103 bitops   15 locals   15 peak live
+
+=> Step 2: RUN cd /root/ecc2k130 && make cpu MARCH=x86-64-v3
+g++ -O3 -std=c++17 -march=x86-64-v3 -fopenmp -DECC_BATCH=32 -DECC_THREADS=128 -DECC_MINBLOCKS=2 -DECC_STREAM_KARAT=0 -DECC_SMEM_SPILL=0 -DECC_PACKED_SINGLE_PRODUCT=0 -DECC_PACKED_CACHE_DENOM=0 -DECC_PACKED_BY_VALUE=0 -DECC_PACKED_PERM_SIGMA=0 -DECC_PACKED_POLY_CHAIN=0 -DECC_PACKED_UNROLL_INV=0 -DECC_PACKED_PAIR_PRODUCTS=0 -DECC_PACKED_POLY_STATE=0 -DECC_PACKED_DIRECT_REDUCE=0 -DECC_PACKED_GENERATED_PRODUCT=0 -DECC_PACKED_CLMAD=0 -DECC_PACKED_CLMAD_SQUARE=0 -DECC_PACKED_KARAT3=0 -DECC_PACKED_WEIGHTED_PREFIX=0 -DECC_PACKED_COMPACT_STATE=0 -DECC_PACKED_SHARED_SIGMA=0 -DECC_PACKED_TOP_CLMAD=0 -DECC_PACKED_STATE_TILE=0 -DECC_PACKED_ADD_COMBINE=0 -DECC_WALK_TABLE=0 -DECC_TABLE_BRANCHES=8 -DECC_TABLE_PIVOT_BYTES=0 -DECC_PACKED_ALU_SQUARE=0 -DECC_NO_CUDA \
+    -Wall -Wno-unused-function -Wno-unknown-pragmas -x c++ src/main.cu -o ecc2k130-cpu
+
+=> Step 3: RUN cd /root/ecc2k130 && make gpu ARCH="-gencode arch=compute_75,code=sm_75" BATCH=32 THREADS=256 MINBLOCKS=2 PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=0 PACKED_CLMAD_SQUARE=0 PACKED_KARAT3=0 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 PACKED_TOP_CLMAD=0 PACKED_WEIGHTED_PREFIX=2 PACKED_STATE_TILE=256
+nvcc -O3 -std=c++17 -gencode arch=compute_75,code=sm_75 -DECC_BATCH=32 -DECC_THREADS=256 -DECC_MINBLOCKS=2 -DECC_STREAM_KARAT=0 -DECC_SMEM_SPILL=0 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_UNROLL_INV=1 -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=0 -DECC_PACKED_CLMAD_SQUARE=0 -DECC_PACKED_KARAT3=0 -DECC_PACKED_WEIGHTED_PREFIX=2 -DECC_PACKED_COMPACT_STATE=1 -DECC_PACKED_SHARED_SIGMA=1 -DECC_PACKED_TOP_CLMAD=0 -DECC_PACKED_STATE_TILE=256 -DECC_PACKED_ADD_COMBINE=0 -DECC_WALK_TABLE=0 -DECC_TABLE_BRANCHES=8 -DECC_TABLE_PIVOT_BYTES=0 -DECC_PACKED_ALU_SQUARE=0 -Xptxas -v -lineinfo -Xcompiler -O3 \
+    -Xcompiler -fopenmp src/main.cu -o ecc2k130 -lgomp
+ptxas info    : 1792 bytes gmem, 6056 bytes cmem[3], 8 bytes cmem[4]
+ptxas info    : Compiling entry function '_ZN12eccPacked1314walkE10WalkParamsIjEPj' for 'sm_75'
+ptxas info    : Function properties for _ZN12eccPacked1314walkE10WalkParamsIjEPj
+    72 bytes stack frame, 72 bytes spill stores, 72 bytes spill loads
+ptxas info    : Used 128 registers, used 1 barriers, 72 bytes cumulative stack size, 1792 bytes smem, 512 bytes cmem[0], 8 bytes cmem[2]
+ptxas info    : Compile time = 384.108 ms
+ptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13116mulPolynomial131ENS0_4P131ES1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13118sigmaInvNetwork131ENS0_4P131Ei
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13120mulPolynomialPair131ENS0_4P131ES1_S1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13129sigmaWalkNetworkPairShared131ENS0_4P131ES1_i
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked1316mul131ENS0_4P131ES1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_ZN12eccPacked1314initE10WalkParamsIjEb' for 'sm_75'
+ptxas info    : Function properties for _ZN12eccPacked1314initE10WalkParamsIjEb
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 505 bytes cmem[0]
+ptxas info    : Compile time = 116.720 ms
+ptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13118sigmaInvNetwork131ENS0_4P131Ei
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked1316mul131ENS0_4P131ES1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgP97jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z15eccReseedKernelI6CfgP97jEv10WalkParamsIT0_E
+    14528 bytes stack frame, 56 bytes spill stores, 176 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 14528 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 2391.964 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgP97jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2436 bytes spill stores, 2436 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgP97jE11reseedLanesEjPyRK11CurveConstsPjS6_
+    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgP97jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 780 bytes spill stores, 780 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP973sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP976reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP977mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP973sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP976reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP977mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 888 bytes spill stores, 1000 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP97jE3invEPKjPj
+    0 bytes stack frame, 32 bytes spill stores, 20 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP97jE3mulEPKjS3_Pj
+    0 bytes stack frame, 184 bytes spill stores, 168 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgP97jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccInitKernelI6CfgP97jEv10WalkParamsIT0_E
+    13600 bytes stack frame, 44 bytes spill stores, 96 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 13600 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 1360.555 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgP97jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2404 bytes spill stores, 2404 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgP97jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 784 bytes spill stores, 776 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP973sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP976reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP977mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP973sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP976reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP977mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 832 bytes spill stores, 904 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP97jE3invEPKjPj
+    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP97jE3mulEPKjS3_Pj
+    0 bytes stack frame, 148 bytes spill stores, 144 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgP97jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccWalkKernelI6CfgP97jEv10WalkParamsIT0_E
+    11048 bytes stack frame, 472 bytes spill stores, 464 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 11048 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 1291.794 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgP97jE6sigmaJEPKjS3_Pj
+    0 bytes stack frame, 520 bytes spill stores, 524 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP973sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP976reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP977hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP977mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgP97jE12overdueLanesEiiRK10WalkParamsIjEy
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgP97jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP973sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP976reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP977hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 1428 bytes spill stores, 1464 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP977mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 992 bytes spill stores, 1132 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP97jE3invEPKjPj
+    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP97jE3mulEPKjS3_Pj
+    0 bytes stack frame, 192 bytes spill stores, 176 bytes spill loads
+ptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgP41jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z15eccReseedKernelI6CfgP41jEv10WalkParamsIT0_E
+    7200 bytes stack frame, 56 bytes spill stores, 128 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 7200 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 577.903 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgP41jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2448 bytes spill stores, 2448 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgP41jE11reseedLanesEjPyRK11CurveConstsPjS6_
+    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgP41jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 312 bytes spill stores, 320 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP413sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP416reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP417mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP413sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP416reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP417mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 524 bytes spill stores, 552 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP41jE3invEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP41jE3mulEPKjS3_Pj
+    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgP41jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccInitKernelI6CfgP41jEv10WalkParamsIT0_E
+    6864 bytes stack frame, 44 bytes spill stores, 96 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 6864 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 488.977 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgP41jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2404 bytes spill stores, 2404 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgP41jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 320 bytes spill stores, 320 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP413sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP416reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP417mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP413sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP416reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP417mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 452 bytes spill stores, 460 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP41jE3invEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP41jE3mulEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgP41jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccWalkKernelI6CfgP41jEv10WalkParamsIT0_E
+    4176 bytes stack frame, 188 bytes spill stores, 188 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 4176 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 455.581 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgP41jE6sigmaJEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP413sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP416reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP417hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP417mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgP41jE12overdueLanesEiiRK10WalkParamsIjEy
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgP41jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP413sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP416reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP417hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP417mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 560 bytes spill stores, 580 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP41jE3invEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP41jE3mulEPKjS3_Pj
+    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgP19jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z15eccReseedKernelI6CfgP19jEv10WalkParamsIT0_E
+    5216 bytes stack frame, 48 bytes spill stores, 128 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 5216 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 354.536 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgP19jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2448 bytes spill stores, 2448 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgP19jE11reseedLanesEjPyRK11CurveConstsPjS6_
+    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgP19jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP193sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP196reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP197mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP193sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP196reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP197mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP19jE3invEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP19jE3mulEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgP19jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccInitKernelI6CfgP19jEv10WalkParamsIT0_E
+    5024 bytes stack frame, 44 bytes spill stores, 96 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 5024 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 271.587 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgP19jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2404 bytes spill stores, 2404 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgP19jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP193sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP196reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP197mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP193sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP196reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP197mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP19jE3invEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP19jE3mulEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgP19jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccWalkKernelI6CfgP19jEv10WalkParamsIT0_E
+    1984 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 1984 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 208.530 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgP19jE6sigmaJEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP193sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP196reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP197hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP197mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgP19jE12overdueLanesEiiRK10WalkParamsIjEy
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgP19jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP193sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP196reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP197hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP197mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP19jE3invEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP19jE3mulEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgP13jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z15eccReseedKernelI6CfgP13jEv10WalkParamsIT0_E
+    4864 bytes stack frame, 248 bytes spill stores, 248 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 4864 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 290.190 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgP13jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2520 bytes spill stores, 2520 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgP13jE11reseedLanesEjPyRK11CurveConstsPjS6_
+    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgP13jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP133sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP136reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP137mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP133sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP136reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP137mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP13jE3invEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP13jE3mulEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgP13jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccInitKernelI6CfgP13jEv10WalkParamsIT0_E
+    4528 bytes stack frame, 92 bytes spill stores, 80 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 4528 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 243.522 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgP13jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2404 bytes spill stores, 2404 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgP13jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP133sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP136reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP137mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP133sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP136reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP137mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP13jE3invEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP13jE3mulEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgP13jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccWalkKernelI6CfgP13jEv10WalkParamsIT0_E
+    1760 bytes stack frame, 164 bytes spill stores, 212 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 1760 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 176.470 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgP13jE6sigmaJEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP133sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP136reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP137hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgP137mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgP13jE12overdueLanesEiiRK10WalkParamsIjEy
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgP13jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP133sqrIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP136reduceIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP137hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccP137mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 20 bytes spill stores, 20 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP13jE3invEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldPbI6CfgP13jE3mulEPKjS3_Pj
+    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z15eccReseedKernelI7CfgF131jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z15eccReseedKernelI7CfgF131jEv10WalkParamsIT0_E
+    17328 bytes stack frame, 56 bytes spill stores, 176 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 17328 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 2610.326 ms
+ptxas info    : Function properties for _ZN4WalkI7CfgF131jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2444 bytes spill stores, 2444 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI7CfgF131jE11reseedLanesEjPyRK11CurveConstsPjS6_
+    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI7CfgF131jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 616 bytes spill stores, 628 bytes spill loads
+ptxas info    : Function properties for _ZN7CfgF1315toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 4 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN7CfgF1317mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN7CfgF1318multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI7CfgF131jE3invEPKjPj
+    0 bytes stack frame, 32 bytes spill stores, 20 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI7CfgF131jE3mulEPKjS3_Pj
+    0 bytes stack frame, 104 bytes spill stores, 88 bytes spill loads
+ptxas info    : Function properties for _ZN7eccF1315toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 788 bytes spill stores, 796 bytes spill loads
+ptxas info    : Function properties for _ZN7eccF1317mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 2460 bytes spill stores, 3056 bytes spill loads
+ptxas info    : Function properties for _ZN7eccF1318multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccInitKernelI7CfgF131jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccInitKernelI7CfgF131jEv10WalkParamsIT0_E
+    16400 bytes stack frame, 44 bytes spill stores, 96 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 16400 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 1943.415 ms
+ptxas info    : Function properties for _ZN4WalkI7CfgF131jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2420 bytes spill stores, 2420 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI7CfgF131jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 584 bytes spill stores, 580 bytes spill loads
+ptxas info    : Function properties for _ZN7CfgF1315toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7CfgF1317mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN7CfgF1318multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI7CfgF131jE3invEPKjPj
+    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI7CfgF131jE3mulEPKjS3_Pj
+    0 bytes stack frame, 92 bytes spill stores, 84 bytes spill loads
+ptxas info    : Function properties for _ZN7eccF1315toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 748 bytes spill stores, 752 bytes spill loads
+ptxas info    : Function properties for _ZN7eccF1317mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 2552 bytes spill stores, 3244 bytes spill loads
+ptxas info    : Function properties for _ZN7eccF1318multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccWalkKernelI7CfgF131jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccWalkKernelI7CfgF131jEv10WalkParamsIT0_E
+    14048 bytes stack frame, 60 bytes spill stores, 32 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 14048 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 1657.242 ms
+ptxas info    : Function properties for _ZN4WalkI7CfgF131jE6sigmaJEPKjS3_Pj
+    0 bytes stack frame, 376 bytes spill stores, 380 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI7CfgF131jE12overdueLanesEiiRK10WalkParamsIjEy
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI7CfgF131jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7CfgF1315toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 4 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN7CfgF1317hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7CfgF1317mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN7CfgF1318multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI7CfgF131jE3invEPKjPj
+    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI7CfgF131jE3mulEPKjS3_Pj
+    0 bytes stack frame, 180 bytes spill stores, 164 bytes spill loads
+ptxas info    : Function properties for _ZN7eccF1315toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 824 bytes spill stores, 828 bytes spill loads
+ptxas info    : Function properties for _ZN7eccF1317hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7eccF1317mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 2472 bytes spill stores, 3216 bytes spill loads
+ptxas info    : Function properties for _ZN7eccF1318multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 28 bytes spill stores, 28 bytes spill loads
+ptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgF83jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z15eccReseedKernelI6CfgF83jEv10WalkParamsIT0_E
+    11728 bytes stack frame, 48 bytes spill stores, 148 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 11728 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 1380.401 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgF83jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2420 bytes spill stores, 2420 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgF83jE11reseedLanesEjPyRK11CurveConstsPjS6_
+    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgF83jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 344 bytes spill stores, 344 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF835toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF837mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF838multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF835toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF837mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 660 bytes spill stores, 696 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF838multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF83jE3invEPKjPj
+    0 bytes stack frame, 20 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF83jE3mulEPKjS3_Pj
+    0 bytes stack frame, 20 bytes spill stores, 4 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgF83jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccInitKernelI6CfgF83jEv10WalkParamsIT0_E
+    11088 bytes stack frame, 68 bytes spill stores, 116 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 11088 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 1654.213 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgF83jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 3812 bytes spill stores, 3820 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgF83jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 340 bytes spill stores, 348 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF835toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF837mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF838multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF835toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF837mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 620 bytes spill stores, 660 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF838multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF83jE3invEPKjPj
+    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF83jE3mulEPKjS3_Pj
+    0 bytes stack frame, 12 bytes spill stores, 4 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgF83jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccWalkKernelI6CfgF83jEv10WalkParamsIT0_E
+    8608 bytes stack frame, 44 bytes spill stores, 28 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 8608 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 724.784 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgF83jE6sigmaJEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF835toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF837hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF837mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF838multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgF83jE12overdueLanesEiiRK10WalkParamsIjEy
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgF83jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF835toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 28 bytes spill stores, 28 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF837hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF837mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 704 bytes spill stores, 744 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF838multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF83jE3invEPKjPj
+    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF83jE3mulEPKjS3_Pj
+    0 bytes stack frame, 20 bytes spill stores, 4 bytes spill loads
+ptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgF41jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z15eccReseedKernelI6CfgF41jEv10WalkParamsIT0_E
+    6736 bytes stack frame, 80 bytes spill stores, 216 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 6736 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 741.027 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgF41jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2444 bytes spill stores, 2444 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgF41jE11reseedLanesEjPyRK11CurveConstsPjS6_
+    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgF41jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 172 bytes spill stores, 168 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF415toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF417mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF418multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF415toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF417mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 492 bytes spill stores, 496 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF418multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF41jE3invEPKjPj
+    0 bytes stack frame, 20 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF41jE3mulEPKjS3_Pj
+    0 bytes stack frame, 8 bytes spill stores, 4 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgF41jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccInitKernelI6CfgF41jEv10WalkParamsIT0_E
+    6384 bytes stack frame, 68 bytes spill stores, 116 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 6384 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 764.387 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgF41jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2436 bytes spill stores, 2448 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgF41jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 172 bytes spill stores, 180 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF415toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF417mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF418multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF415toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF417mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 452 bytes spill stores, 464 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF418multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF41jE3invEPKjPj
+    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF41jE3mulEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgF41jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccWalkKernelI6CfgF41jEv10WalkParamsIT0_E
+    3968 bytes stack frame, 24 bytes spill stores, 28 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 3968 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 548.689 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgF41jE6sigmaJEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF415toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF417hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF417mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF418multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgF41jE12overdueLanesEiiRK10WalkParamsIjEy
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgF41jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF415toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF417hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF417mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 548 bytes spill stores, 568 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF418multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF41jE3invEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF41jE3mulEPKjS3_Pj
+    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgF23jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z15eccReseedKernelI6CfgF23jEv10WalkParamsIT0_E
+    5248 bytes stack frame, 48 bytes spill stores, 100 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 5248 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 482.825 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgF23jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2444 bytes spill stores, 2432 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgF23jE11reseedLanesEjPyRK11CurveConstsPjS6_
+    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgF23jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 0 bytes spill stores, 20 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF235toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF237mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF238multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF235toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF237mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 40 bytes spill stores, 40 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF238multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF23jE3invEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF23jE3mulEPKjS3_Pj
+    0 bytes stack frame, 4 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgF23jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccInitKernelI6CfgF23jEv10WalkParamsIT0_E
+    5056 bytes stack frame, 44 bytes spill stores, 96 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 5056 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 363.782 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgF23jE10startPointEPKyRK11CurveConstsPjS7_
+    0 bytes stack frame, 2404 bytes spill stores, 2404 bytes spill loads
+ptxas info    : Function properties for _ZN4WalkI6CfgF23jE8pointAddEPKjS3_S3_S3_PjS4_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF235toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF237mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF238multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF235toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF237mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF238multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF23jE3invEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF23jE3mulEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgF23jEv10WalkParamsIT0_E' for 'sm_75'
+ptxas info    : Function properties for _Z13eccWalkKernelI6CfgF23jEv10WalkParamsIT0_E
+    2248 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 128 registers, used 0 barriers, 2248 bytes cumulative stack size, 504 bytes cmem[0]
+ptxas info    : Compile time = 258.159 ms
+ptxas info    : Function properties for _ZN4WalkI6CfgF23jE6sigmaJEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF235toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF237hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF237mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6CfgF238multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgF23jE12overdueLanesEiiRK10WalkParamsIjEy
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6KernelI6CfgF23jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF235toOnbIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF237hammingIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF237mulLeafIjEEvPKT_S3_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN6eccF238multPrepIjEEvPKT_PS1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF23jE3invEPKjPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN7FieldBsI6CfgF23jE3mulEPKjS3_Pj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+Saving image...
+Image saved, took 757.60ms
+
+Built image im-eQeQck6GjXw82O4uKxa18O in 180.24s
+
+
+Building image im-140uiIo8wL2zt8FR5vuiul
+
+=> Step 0: FROM base
+
+=> Step 1: RUN apt-get update
+Hit:1 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:2 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64  InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Reading package lists...
+
+=> Step 2: RUN apt-get install -y nsight-compute-2025.3.1=2025.3.1.4-1
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following NEW packages will be installed:
+  nsight-compute-2025.3.1
+0 upgraded, 1 newly installed, 0 to remove and 56 not upgraded.
+Need to get 314 MB of archives.
+After this operation, 1304 MB of additional disk space will be used.
+Get:1 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64  nsight-compute-2025.3.1 2025.3.1.4-1 [314 MB]
+debconf: delaying package configuration, since apt-utils is not installed
+Fetched 314 MB in 3s (96.5 MB/s)
+Selecting previously unselected package nsight-compute-2025.3.1.
+(Reading database ... 
+[1A(Reading database ... 5%
+[1A(Reading database ... 10%
+[1A(Reading database ... 15%
+[1A(Reading database ... 20%
+[1A(Reading database ... 25%
+[1A(Reading database ... 30%
+[1A(Reading database ... 35%(Reading database ... 40%
+[1A(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%
+[1A(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 17334 files and directories currently installed.)
+Preparing to unpack .../nsight-compute-2025.3.1_2025.3.1.4-1_amd64.deb ...
+Unpacking nsight-compute-2025.3.1 (2025.3.1.4-1) ...
+Setting up nsight-compute-2025.3.1 (2025.3.1.4-1) ...
+Saving image...
+Image saved, took 715.44ms
+
+Built image im-140uiIo8wL2zt8FR5vuiul in 13.70s
+
+
+Building image im-P6S2dtQKlfGjyqout3G49X
+
+=> Step 0: FROM base
+
+=> Step 1: RUN /opt/nvidia/nsight-compute/2025.3.1/ncu --version
+NVIDIA (R) Nsight Compute Command Line Profiler
+Copyright (c) 2018-2025 NVIDIA Corporation
+Version 2025.3.1.0 (build 36398880) (public-release)
+Saving image...
+Image saved, took 338.22ms
+
+Built image im-P6S2dtQKlfGjyqout3G49X in 1.97s
+
+
+{
+  "gpu": "Tesla T4",
+  "cc": "75",
+  "batch": 16,
+  "threads": 256,
+  "leaf": 0,
+  "minBlocks": 2,
+  "workers": 0,
+  "steps": 1024,
+  "launches": 32,
+  "repeats": 3,
+  "streamKarat": false,
+  "smemSpill": false,
+  "globalCg": false,
+  "preferL1": false,
+  "packed": true,
+  "packedPolynomialState": true,
+  "packedDirectReduction": true,
+  "packedGeneratedProduct": true,
+  "packedClmad": false,
+  "packedClmadSquare": false,
+  "packedKarat3": false,
+  "packedCompactState": true,
+  "packedSharedSigma": true,
+  "packedTopClmad": false,
+  "packedWeightedPrefix": 2,
+  "packedStateTile": 256,
+  "buildLog": "nvcc -O3 -std=c++17 -gencode arch=compute_75,code=sm_75 -DECC_BATCH=16 -DECC_THREADS=256 -DECC_MINBLOCKS=2 -DECC_STREAM_KARAT=0 -DECC_SMEM_SPILL=0 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_UNROLL_INV=1 -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=0 -DECC_PACKED_CLMAD_SQUARE=0 -DECC_PACKED_KARAT3=0 -DECC_PACKED_WEIGHTED_PREFIX=2 -DECC_PACKED_COMPACT_STATE=1 -DECC_PACKED_SHARED_SIGMA=1 -DECC_PACKED_TOP_CLMAD=0 -DECC_PACKED_STATE_TILE=256 -DECC_PACKED_ADD_COMBINE=0 -DECC_WALK_TABLE=0 -DECC_TABLE_BRANCHES=8 -DECC_TABLE_PIVOT_BYTES=0 -DECC_PACKED_ALU_SQUARE=0 -Xptxas -v -lineinfo -Xcompiler -O3 \\\n    -Xcompiler -fopenmp src/main.cu -o ecc2k130 -lgomp\nptxas info    : 1792 bytes gmem, 6056 bytes cmem[3], 8 bytes cmem[4]\nptxas info    : Compiling entry function '_ZN12eccPacked1314walkE10WalkParamsIjEPj' for 'sm_75'\nptxas info    : Function properties for _ZN12eccPacked1314walkE10WalkParamsIjEPj\n    64 bytes stack frame, 60 bytes spill stores, 60 bytes spill loads\nptxas info    : Used 128 registers, used 1 barriers, 64 bytes cumulative stack size, 1792 bytes smem, 512 bytes cmem[0], 8 bytes cmem[2]\nptxas info    : Compile time = 341.027 ms\nptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13116mulPolynomial131ENS0_4P131ES1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13118sigmaInvNetwork131ENS0_4P131Ei\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13120mulPolynomialPair131ENS0_4P131ES1_S1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13129sigmaWalkNetworkPairShared131ENS0_4P131ES1_i\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked1316mul131ENS0_4P131ES1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_ZN12eccPacked1314initE10WalkParamsIjEb' for 'sm_75'\nptxas info    : Function properties for _ZN12eccPacked1314initE10WalkParamsIjEb\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 505 bytes cmem[0]\nptxas info    : Compile time = 134.705 ms\nptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13118sigmaInvNetwork131ENS0_4P131Ei\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN33_INTERNAL_220b9792_7_main_cu_main12eccPacked1316mul131ENS0_4P131ES1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgP97jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z15eccReseedKernelI6CfgP97jEv10WalkParamsIT0_E\n    14528 bytes stack frame, 56 bytes spill stores, 176 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 14528 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 2195.058 ms\nptxas info    : Function properties for _ZN4WalkI6CfgP97jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2436 bytes spill stores, 2436 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgP97jE11reseedLanesEjPyRK11CurveConstsPjS6_\n    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgP97jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 780 bytes spill stores, 780 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP973sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP976reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP977mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6eccP973sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP976reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP977mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 888 bytes spill stores, 1000 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP97jE3invEPKjPj\n    0 bytes stack frame, 32 bytes spill stores, 20 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP97jE3mulEPKjS3_Pj\n    0 bytes stack frame, 184 bytes spill stores, 168 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgP97jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccInitKernelI6CfgP97jEv10WalkParamsIT0_E\n    13600 bytes stack frame, 44 bytes spill stores, 96 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 13600 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 1878.532 ms\nptxas info    : Function properties for _ZN4WalkI6CfgP97jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2404 bytes spill stores, 2404 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgP97jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 784 bytes spill stores, 776 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP973sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP976reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP977mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6eccP973sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP976reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP977mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 832 bytes spill stores, 904 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP97jE3invEPKjPj\n    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP97jE3mulEPKjS3_Pj\n    0 bytes stack frame, 148 bytes spill stores, 144 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgP97jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccWalkKernelI6CfgP97jEv10WalkParamsIT0_E\n    10792 bytes stack frame, 472 bytes spill stores, 464 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 10792 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 1751.685 ms\nptxas info    : Function properties for _ZN4WalkI6CfgP97jE6sigmaJEPKjS3_Pj\n    0 bytes stack frame, 520 bytes spill stores, 524 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP973sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP976reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP977hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP977mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgP97jE12overdueLanesEiiRK10WalkParamsIjEy\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgP97jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP973sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP976reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP977hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 1428 bytes spill stores, 1464 bytes spill loads\nptxas info    : Function properties for _ZN6eccP977mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 992 bytes spill stores, 1132 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP97jE3invEPKjPj\n    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP97jE3mulEPKjS3_Pj\n    0 bytes stack frame, 192 bytes spill stores, 176 bytes spill loads\nptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgP41jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z15eccReseedKernelI6CfgP41jEv10WalkParamsIT0_E\n    7200 bytes stack frame, 56 bytes spill stores, 128 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 7200 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 802.684 ms\nptxas info    : Function properties for _ZN4WalkI6CfgP41jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2448 bytes spill stores, 2448 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgP41jE11reseedLanesEjPyRK11CurveConstsPjS6_\n    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgP41jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 312 bytes spill stores, 320 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP413sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP416reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP417mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6eccP413sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP416reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP417mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 524 bytes spill stores, 552 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP41jE3invEPKjPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP41jE3mulEPKjS3_Pj\n    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgP41jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccInitKernelI6CfgP41jEv10WalkParamsIT0_E\n    6864 bytes stack frame, 44 bytes spill stores, 96 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 6864 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 672.820 ms\nptxas info    : Function properties for _ZN4WalkI6CfgP41jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2404 bytes spill stores, 2404 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgP41jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 320 bytes spill stores, 320 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP413sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP416reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP417mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP413sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP416reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP417mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 452 bytes spill stores, 460 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP41jE3invEPKjPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP41jE3mulEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgP41jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccWalkKernelI6CfgP41jEv10WalkParamsIT0_E\n    3920 bytes stack frame, 188 bytes spill stores, 188 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 3920 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 654.397 ms\nptxas info    : Function properties for _ZN4WalkI6CfgP41jE6sigmaJEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP413sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP416reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP417hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP417mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgP41jE12overdueLanesEiiRK10WalkParamsIjEy\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgP41jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP413sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP416reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP417hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP417mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 560 bytes spill stores, 580 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP41jE3invEPKjPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP41jE3mulEPKjS3_Pj\n    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgP19jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z15eccReseedKernelI6CfgP19jEv10WalkParamsIT0_E\n    5216 bytes stack frame, 48 bytes spill stores, 128 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 5216 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 422.160 ms\nptxas info    : Function properties for _ZN4WalkI6CfgP19jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2448 bytes spill stores, 2448 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgP19jE11reseedLanesEjPyRK11CurveConstsPjS6_\n    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgP19jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP193sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP196reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP197mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP193sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP196reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP197mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP19jE3invEPKjPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP19jE3mulEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgP19jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccInitKernelI6CfgP19jEv10WalkParamsIT0_E\n    5024 bytes stack frame, 44 bytes spill stores, 96 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 5024 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 348.793 ms\nptxas info    : Function properties for _ZN4WalkI6CfgP19jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2404 bytes spill stores, 2404 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgP19jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP193sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP196reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP197mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP193sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP196reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP197mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP19jE3invEPKjPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP19jE3mulEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgP19jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccWalkKernelI6CfgP19jEv10WalkParamsIT0_E\n    1728 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 1728 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 283.775 ms\nptxas info    : Function properties for _ZN4WalkI6CfgP19jE6sigmaJEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP193sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP196reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP197hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP197mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgP19jE12overdueLanesEiiRK10WalkParamsIjEy\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgP19jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP193sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP196reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP197hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP197mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP19jE3invEPKjPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP19jE3mulEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgP13jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z15eccReseedKernelI6CfgP13jEv10WalkParamsIT0_E\n    4864 bytes stack frame, 248 bytes spill stores, 248 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 4864 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 379.906 ms\nptxas info    : Function properties for _ZN4WalkI6CfgP13jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2520 bytes spill stores, 2520 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgP13jE11reseedLanesEjPyRK11CurveConstsPjS6_\n    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgP13jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP133sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP136reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP137mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP133sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP136reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP137mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP13jE3invEPKjPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP13jE3mulEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgP13jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccInitKernelI6CfgP13jEv10WalkParamsIT0_E\n    4528 bytes stack frame, 92 bytes spill stores, 80 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 4528 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 268.135 ms\nptxas info    : Function properties for _ZN4WalkI6CfgP13jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2404 bytes spill stores, 2404 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgP13jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP133sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP136reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP137mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP133sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP136reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP137mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP13jE3invEPKjPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP13jE3mulEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgP13jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccWalkKernelI6CfgP13jEv10WalkParamsIT0_E\n    1504 bytes stack frame, 164 bytes spill stores, 212 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 1504 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 202.521 ms\nptxas info    : Function properties for _ZN4WalkI6CfgP13jE6sigmaJEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP133sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP136reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP137hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgP137mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgP13jE12overdueLanesEiiRK10WalkParamsIjEy\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgP13jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP133sqrIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP136reduceIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP137hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccP137mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 20 bytes spill stores, 20 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP13jE3invEPKjPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldPbI6CfgP13jE3mulEPKjS3_Pj\n    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z15eccReseedKernelI7CfgF131jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z15eccReseedKernelI7CfgF131jEv10WalkParamsIT0_E\n    17328 bytes stack frame, 56 bytes spill stores, 176 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 17328 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 2707.597 ms\nptxas info    : Function properties for _ZN4WalkI7CfgF131jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2444 bytes spill stores, 2444 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI7CfgF131jE11reseedLanesEjPyRK11CurveConstsPjS6_\n    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI7CfgF131jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 616 bytes spill stores, 628 bytes spill loads\nptxas info    : Function properties for _ZN7CfgF1315toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 4 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN7CfgF1317mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN7CfgF1318multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI7CfgF131jE3invEPKjPj\n    0 bytes stack frame, 32 bytes spill stores, 20 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI7CfgF131jE3mulEPKjS3_Pj\n    0 bytes stack frame, 104 bytes spill stores, 88 bytes spill loads\nptxas info    : Function properties for _ZN7eccF1315toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 788 bytes spill stores, 796 bytes spill loads\nptxas info    : Function properties for _ZN7eccF1317mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 2460 bytes spill stores, 3056 bytes spill loads\nptxas info    : Function properties for _ZN7eccF1318multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccInitKernelI7CfgF131jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccInitKernelI7CfgF131jEv10WalkParamsIT0_E\n    16400 bytes stack frame, 44 bytes spill stores, 96 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 16400 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 2552.493 ms\nptxas info    : Function properties for _ZN4WalkI7CfgF131jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2420 bytes spill stores, 2420 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI7CfgF131jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 584 bytes spill stores, 580 bytes spill loads\nptxas info    : Function properties for _ZN7CfgF1315toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7CfgF1317mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN7CfgF1318multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI7CfgF131jE3invEPKjPj\n    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI7CfgF131jE3mulEPKjS3_Pj\n    0 bytes stack frame, 92 bytes spill stores, 84 bytes spill loads\nptxas info    : Function properties for _ZN7eccF1315toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 748 bytes spill stores, 752 bytes spill loads\nptxas info    : Function properties for _ZN7eccF1317mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 2552 bytes spill stores, 3244 bytes spill loads\nptxas info    : Function properties for _ZN7eccF1318multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccWalkKernelI7CfgF131jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccWalkKernelI7CfgF131jEv10WalkParamsIT0_E\n    13792 bytes stack frame, 60 bytes spill stores, 32 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 13792 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 2119.021 ms\nptxas info    : Function properties for _ZN4WalkI7CfgF131jE6sigmaJEPKjS3_Pj\n    0 bytes stack frame, 376 bytes spill stores, 380 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI7CfgF131jE12overdueLanesEiiRK10WalkParamsIjEy\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI7CfgF131jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7CfgF1315toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 4 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN7CfgF1317hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7CfgF1317mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN7CfgF1318multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI7CfgF131jE3invEPKjPj\n    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI7CfgF131jE3mulEPKjS3_Pj\n    0 bytes stack frame, 180 bytes spill stores, 164 bytes spill loads\nptxas info    : Function properties for _ZN7eccF1315toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 824 bytes spill stores, 828 bytes spill loads\nptxas info    : Function properties for _ZN7eccF1317hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7eccF1317mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 2472 bytes spill stores, 3216 bytes spill loads\nptxas info    : Function properties for _ZN7eccF1318multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 28 bytes spill stores, 28 bytes spill loads\nptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgF83jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z15eccReseedKernelI6CfgF83jEv10WalkParamsIT0_E\n    11728 bytes stack frame, 48 bytes spill stores, 148 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 11728 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 1862.654 ms\nptxas info    : Function properties for _ZN4WalkI6CfgF83jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2420 bytes spill stores, 2420 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgF83jE11reseedLanesEjPyRK11CurveConstsPjS6_\n    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgF83jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 344 bytes spill stores, 344 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF835toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF837mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF838multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF835toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6eccF837mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 660 bytes spill stores, 696 bytes spill loads\nptxas info    : Function properties for _ZN6eccF838multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF83jE3invEPKjPj\n    0 bytes stack frame, 20 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF83jE3mulEPKjS3_Pj\n    0 bytes stack frame, 20 bytes spill stores, 4 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgF83jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccInitKernelI6CfgF83jEv10WalkParamsIT0_E\n    11088 bytes stack frame, 68 bytes spill stores, 116 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 11088 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 2180.322 ms\nptxas info    : Function properties for _ZN4WalkI6CfgF83jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 3812 bytes spill stores, 3820 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgF83jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 340 bytes spill stores, 348 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF835toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF837mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF838multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF835toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF837mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 620 bytes spill stores, 660 bytes spill loads\nptxas info    : Function properties for _ZN6eccF838multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF83jE3invEPKjPj\n    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF83jE3mulEPKjS3_Pj\n    0 bytes stack frame, 12 bytes spill stores, 4 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgF83jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccWalkKernelI6CfgF83jEv10WalkParamsIT0_E\n    8352 bytes stack frame, 44 bytes spill stores, 28 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 8352 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 964.340 ms\nptxas info    : Function properties for _ZN4WalkI6CfgF83jE6sigmaJEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF835toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF837hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF837mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF838multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgF83jE12overdueLanesEiiRK10WalkParamsIjEy\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgF83jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF835toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 28 bytes spill stores, 28 bytes spill loads\nptxas info    : Function properties for _ZN6eccF837hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF837mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 704 bytes spill stores, 744 bytes spill loads\nptxas info    : Function properties for _ZN6eccF838multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF83jE3invEPKjPj\n    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF83jE3mulEPKjS3_Pj\n    0 bytes stack frame, 20 bytes spill stores, 4 bytes spill loads\nptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgF41jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z15eccReseedKernelI6CfgF41jEv10WalkParamsIT0_E\n    6736 bytes stack frame, 80 bytes spill stores, 216 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 6736 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 986.342 ms\nptxas info    : Function properties for _ZN4WalkI6CfgF41jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2444 bytes spill stores, 2444 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgF41jE11reseedLanesEjPyRK11CurveConstsPjS6_\n    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgF41jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 172 bytes spill stores, 168 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF415toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF417mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF418multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF415toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF417mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 492 bytes spill stores, 496 bytes spill loads\nptxas info    : Function properties for _ZN6eccF418multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF41jE3invEPKjPj\n    0 bytes stack frame, 20 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF41jE3mulEPKjS3_Pj\n    0 bytes stack frame, 8 bytes spill stores, 4 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgF41jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccInitKernelI6CfgF41jEv10WalkParamsIT0_E\n    6384 bytes stack frame, 68 bytes spill stores, 116 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 6384 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 959.894 ms\nptxas info    : Function properties for _ZN4WalkI6CfgF41jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2436 bytes spill stores, 2448 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgF41jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 172 bytes spill stores, 180 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF415toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF417mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF418multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF415toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF417mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 452 bytes spill stores, 464 bytes spill loads\nptxas info    : Function properties for _ZN6eccF418multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF41jE3invEPKjPj\n    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF41jE3mulEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgF41jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccWalkKernelI6CfgF41jEv10WalkParamsIT0_E\n    3712 bytes stack frame, 24 bytes spill stores, 28 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 3712 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 642.814 ms\nptxas info    : Function properties for _ZN4WalkI6CfgF41jE6sigmaJEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF415toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 8 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF417hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF417mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF418multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgF41jE12overdueLanesEiiRK10WalkParamsIjEy\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgF41jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF415toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF417hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF417mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 548 bytes spill stores, 568 bytes spill loads\nptxas info    : Function properties for _ZN6eccF418multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF41jE3invEPKjPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF41jE3mulEPKjS3_Pj\n    0 bytes stack frame, 8 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z15eccReseedKernelI6CfgF23jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z15eccReseedKernelI6CfgF23jEv10WalkParamsIT0_E\n    5248 bytes stack frame, 48 bytes spill stores, 100 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 5248 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 598.429 ms\nptxas info    : Function properties for _ZN4WalkI6CfgF23jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2444 bytes spill stores, 2432 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgF23jE11reseedLanesEjPyRK11CurveConstsPjS6_\n    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgF23jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 0 bytes spill stores, 20 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF235toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF237mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF238multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF235toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF237mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 40 bytes spill stores, 40 bytes spill loads\nptxas info    : Function properties for _ZN6eccF238multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF23jE3invEPKjPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF23jE3mulEPKjS3_Pj\n    0 bytes stack frame, 4 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccInitKernelI6CfgF23jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccInitKernelI6CfgF23jEv10WalkParamsIT0_E\n    5056 bytes stack frame, 44 bytes spill stores, 96 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 5056 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 498.099 ms\nptxas info    : Function properties for _ZN4WalkI6CfgF23jE10startPointEPKyRK11CurveConstsPjS7_\n    0 bytes stack frame, 2404 bytes spill stores, 2404 bytes spill loads\nptxas info    : Function properties for _ZN4WalkI6CfgF23jE8pointAddEPKjS3_S3_S3_PjS4_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF235toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF237mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF238multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF235toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF237mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 4 bytes spill stores, 4 bytes spill loads\nptxas info    : Function properties for _ZN6eccF238multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF23jE3invEPKjPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF23jE3mulEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Compiling entry function '_Z13eccWalkKernelI6CfgF23jEv10WalkParamsIT0_E' for 'sm_75'\nptxas info    : Function properties for _Z13eccWalkKernelI6CfgF23jEv10WalkParamsIT0_E\n    1992 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 128 registers, used 0 barriers, 1992 bytes cumulative stack size, 504 bytes cmem[0]\nptxas info    : Compile time = 364.914 ms\nptxas info    : Function properties for _ZN4WalkI6CfgF23jE6sigmaJEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF235toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF237hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF237mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6CfgF238multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgF23jE12overdueLanesEiiRK10WalkParamsIjEy\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6KernelI6CfgF23jE19handleDistinguishedEiijRK10WalkParamsIjEyPKjS7_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF235toOnbIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF237hammingIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF237mulLeafIjEEvPKT_S3_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN6eccF238multPrepIjEEvPKT_PS1_\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF23jE3invEPKjPj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN7FieldBsI6CfgF23jE3mulEPKjS3_Pj\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\n",
+  "identity": {
+    "sourceSha256": "7e230da07324777f38a2ad7a85712ebc1eb74e47a6d91db661581a63e6b65c19",
+    "binarySha256": "f08e088876fc5fbc745fcc2e8e6fb7a029f2cd4ca995e25d1be1e4738d2b0637",
+    "actualLeaf": null,
+    "generatedLeaf": 66,
+    "activeBackend": "packed-poly131",
+    "compiler": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Tue_Jun_09_02:43:40_PM_PDT_2026\nCuda compilation tools, release 13.3, V13.3.73\nBuild cuda_13.3.r13.3/compiler.38244171_0\n",
+    "compilerReturncode": 0,
+    "packedMultiplier": "single-product",
+    "packedDenominatorCache": true,
+    "packedByValue": true,
+    "packedFrobeniusMode": 3,
+    "packedPolynomialChain": true,
+    "packedUnrolledInverse": true,
+    "packedPairedProducts": true,
+    "packedPolynomialState": true,
+    "packedDirectReduction": true,
+    "packedGeneratedProduct": true,
+    "packedClmad": false,
+    "packedClmadSquare": false,
+    "packedKarat3": false,
+    "packedCompactState": true,
+    "packedSharedSigma": true,
+    "packedTopClmad": false,
+    "packedWeightedPrefix": 2,
+    "packedStateTile": 256,
+    "gpuState": "name, uuid, driver_version, pstate, clocks.current.sm [MHz], clocks.current.memory [MHz], power.limit [W], temperature.gpu\nTesla T4, GPU-114f13d1-aa33-6d14-a1d7-1940e61bb66d, 580.95.05, P8, 300 MHz, 405 MHz, 70.00 W, 32\n",
+    "gpuStateReturncode": 0,
+    "cudaImageVersion": "13.3.1"
+  },
+  "valid": true,
+  "rate": 533.211,
+  "minRate": 529.717,
+  "maxRate": 540.11,
+  "samples": [
+    {
+      "command": "./ecc2k130 --curve 131 --bench --steps 1024 --launches 32 --verify 0 --packed",
+      "returncode": 0,
+      "raw": "device: Tesla T4, 40 SMs, 2 block(s) of 256 packed threads resident per SM\npacked kernel: 128 registers/thread, 64 local bytes/thread, 1792 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 0, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 0\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table walk: 0 (0 branches, 0 shared bytes)\nbackend cuda-packed131: 20480 threads x 16 slots x 1 lanes = 327680 walks, dp weight 0, 1024 steps per launch\n       2.5 s     537.352 M it/s  1342177280 iterations         0 dp         0 stored         0 dropped\n       5.0 s     540.138 M it/s  2684354560 iterations         0 dp         0 stored         0 dropped\n       7.4 s     540.939 M it/s  4026531840 iterations         0 dp         0 stored         0 dropped\n       9.9 s     541.090 M it/s  5368709120 iterations         0 dp         0 stored         0 dropped\n      12.4 s     541.154 M it/s  6710886400 iterations         0 dp         0 stored         0 dropped\n      14.9 s     540.778 M it/s  8053063680 iterations         0 dp         0 stored         0 dropped\n      17.4 s     540.521 M it/s  9395240960 iterations         0 dp         0 stored         0 dropped\n      19.9 s     540.113 M it/s  10737418240 iterations         0 dp         0 stored         0 dropped\n  finished: 540.110 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+      "valid": true,
+      "rate": 540.11,
+      "expectedPackedDirectReduction": true,
+      "packedDirectReduction": true,
+      "expectedPackedGeneratedProduct": true,
+      "packedGeneratedProduct": true,
+      "expectedPackedClmad": false,
+      "packedClmad": false,
+      "expectedPackedClmadSquare": false,
+      "packedClmadSquare": false,
+      "expectedPackedKarat3": false,
+      "packedKarat3": false,
+      "expectedPackedCompactState": true,
+      "packedCompactState": true,
+      "expectedPackedSharedSigma": true,
+      "packedSharedSigma": true,
+      "expectedPackedTopClmad": false,
+      "packedTopClmad": false,
+      "expectedPackedWeightedPrefix": 2,
+      "packedWeightedPrefix": 2,
+      "expectedPackedStateTile": 256,
+      "packedStateTile": 256
+    },
+    {
+      "command": "./ecc2k130 --curve 131 --bench --steps 1024 --launches 32 --verify 0 --packed",
+      "returncode": 0,
+      "raw": "device: Tesla T4, 40 SMs, 2 block(s) of 256 packed threads resident per SM\npacked kernel: 128 registers/thread, 64 local bytes/thread, 1792 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 0, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 0\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table walk: 0 (0 branches, 0 shared bytes)\nbackend cuda-packed131: 20480 threads x 16 slots x 1 lanes = 327680 walks, dp weight 0, 1024 steps per launch\n       2.5 s     536.862 M it/s  1342177280 iterations         0 dp         0 stored         0 dropped\n       5.0 s     536.064 M it/s  2684354560 iterations         0 dp         0 stored         0 dropped\n       7.5 s     535.270 M it/s  4026531840 iterations         0 dp         0 stored         0 dropped\n      10.0 s     534.554 M it/s  5368709120 iterations         0 dp         0 stored         0 dropped\n      12.6 s     534.162 M it/s  6710886400 iterations         0 dp         0 stored         0 dropped\n      15.1 s     533.866 M it/s  8053063680 iterations         0 dp         0 stored         0 dropped\n      17.6 s     533.541 M it/s  9395240960 iterations         0 dp         0 stored         0 dropped\n      20.1 s     533.213 M it/s  10737418240 iterations         0 dp         0 stored         0 dropped\n  finished: 533.211 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+      "valid": true,
+      "rate": 533.211,
+      "expectedPackedDirectReduction": true,
+      "packedDirectReduction": true,
+      "expectedPackedGeneratedProduct": true,
+      "packedGeneratedProduct": true,
+      "expectedPackedClmad": false,
+      "packedClmad": false,
+      "expectedPackedClmadSquare": false,
+      "packedClmadSquare": false,
+      "expectedPackedKarat3": false,
+      "packedKarat3": false,
+      "expectedPackedCompactState": true,
+      "packedCompactState": true,
+      "expectedPackedSharedSigma": true,
+      "packedSharedSigma": true,
+      "expectedPackedTopClmad": false,
+      "packedTopClmad": false,
+      "expectedPackedWeightedPrefix": 2,
+      "packedWeightedPrefix": 2,
+      "expectedPackedStateTile": 256,
+      "packedStateTile": 256
+    },
+    {
+      "command": "./ecc2k130 --curve 131 --bench --steps 1024 --launches 32 --verify 0 --packed",
+      "returncode": 0,
+      "raw": "device: Tesla T4, 40 SMs, 2 block(s) of 256 packed threads resident per SM\npacked kernel: 128 registers/thread, 64 local bytes/thread, 1792 shared bytes/block, single-product multiplier\npacked driver reserved shared bytes/block: 0, device 0\npacked denominator cache: 1\npacked multiply by value: 1\npacked Frobenius network: 3\npacked polynomial chain: 1\npacked polynomial state: 1\npacked unrolled inversion: 1\npacked paired products: 1\npacked direct reduction: 1\npacked generated product: 1\npacked native carryless multiply: 0\npacked native carryless square: 0\npacked three-limb Karatsuba: 0\npacked weighted prefix: 2\npacked compact state: 1\npacked shared sigma: 1\npacked top clmad: 0\npacked state tile: 256\npacked add combine: 0\npacked profile ranges: 0\npacked table walk: 0 (0 branches, 0 shared bytes)\nbackend cuda-packed131: 20480 threads x 16 slots x 1 lanes = 327680 walks, dp weight 0, 1024 steps per launch\n       2.5 s     530.067 M it/s  1342177280 iterations         0 dp         0 stored         0 dropped\n       5.1 s     530.293 M it/s  2684354560 iterations         0 dp         0 stored         0 dropped\n       7.6 s     530.489 M it/s  4026531840 iterations         0 dp         0 stored         0 dropped\n      10.1 s     530.579 M it/s  5368709120 iterations         0 dp         0 stored         0 dropped\n      12.7 s     530.469 M it/s  6710886400 iterations         0 dp         0 stored         0 dropped\n      15.2 s     530.200 M it/s  8053063680 iterations         0 dp         0 stored         0 dropped\n      17.7 s     530.005 M it/s  9395240960 iterations         0 dp         0 stored         0 dropped\n      20.3 s     529.719 M it/s  10737418240 iterations         0 dp         0 stored         0 dropped\n  finished: 529.717 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)\n",
+      "valid": true,
+      "rate": 529.717,
+      "expectedPackedDirectReduction": true,
+      "packedDirectReduction": true,
+      "expectedPackedGeneratedProduct": true,
+      "packedGeneratedProduct": true,
+      "expectedPackedClmad": false,
+      "packedClmad": false,
+      "expectedPackedClmadSquare": false,
+      "packedClmadSquare": false,
+      "expectedPackedKarat3": false,
+      "packedKarat3": false,
+      "expectedPackedCompactState": true,
+      "packedCompactState": true,
+      "expectedPackedSharedSigma": true,
+      "packedSharedSigma": true,
+      "expectedPackedTopClmad": false,
+      "packedTopClmad": false,
+      "expectedPackedWeightedPrefix": 2,
+      "packedWeightedPrefix": 2,
+      "expectedPackedStateTile": 256,
+      "packedStateTile": 256
+    }
+  ]
+}

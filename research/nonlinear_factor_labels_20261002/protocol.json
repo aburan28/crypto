@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "registered": "2026-10-02",
+  "classification": "bounded algebra-stage diagnostic",
+  "hypothesis": "A target-independent nonlinear bijection of three-bit factor-base labels lowers the held-out bounded-Macaulay refutation degree, or exact matrix width at the same degree, without changing decompositions.",
+  "field_degree": 7,
+  "curve_family": "E_0: y^2 + xy = x^3 + 1",
+  "summands": 3,
+  "factor_base_dimension": 3,
+  "boolean_variables": 16,
+  "search": {
+    "label_bijections": 40320,
+    "affine_group_expected": 1344,
+    "right_cosets_expected": 30,
+    "discovery_degrees": [5, 6],
+    "selection": [
+      "fewest unresolved discovery cells through degree 5",
+      "lowest maximum discovery resolution through degree 6",
+      "lowest summed degree-5 columns",
+      "lowest summed degree-5 rows",
+      "lowest total input terms",
+      "lexicographically smallest permutation"
+    ]
+  },
+  "systems": [
+    {"split": "discovery", "draw": 3, "basis": [22, 30, 88], "target_x": 9, "baseline_degree": 6},
+    {"split": "discovery", "draw": 4, "basis": [35, 87, 26], "target_x": 24, "baseline_degree": 6},
+    {"split": "holdout", "draw": 9, "basis": [120, 70, 119], "target_x": 34, "baseline_degree": 6},
+    {"split": "holdout", "draw": 11, "basis": [12, 69, 104], "target_x": 7, "baseline_degree": 6}
+  ],
+  "primary_success": "The frozen discovery winner refutes both holdouts by degree 5 while identity requires degree 6, with exact equivalence checks passing.",
+  "secondary_success": "At equal degree 6, the frozen winner has strictly fewer columns on both holdouts, with exact equivalence checks passing.",
+  "full_ic_cost": null,
+  "calibrated_operation_ratio": null,
+  "rho_ratio": null,
+  "m83_gate": null,
+  "gf2_131_result": null
+}
+

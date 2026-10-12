@@ -710,7 +710,7 @@ fn main() {
                 let valid = (result == SolveResult::Sat).then(|| {
                     let assignment = encoding.solver.model();
                     system.equations.iter().all(|equation| {
-                        equation.terms.iter().fold(false, |parity, term| {
+                        !equation.terms.iter().fold(false, |parity, term| {
                             let monomial = if term.mask == 0 {
                                 true
                             } else {
@@ -719,7 +719,7 @@ fn main() {
                                     .all(|i| assignment[i])
                             };
                             parity ^ monomial
-                        }) == false
+                        })
                     })
                 });
                 (

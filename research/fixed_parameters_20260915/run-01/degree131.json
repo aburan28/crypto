@@ -1,0 +1,397 @@
+[
+  {
+    "schema_version": 1,
+    "operation": "fixed",
+    "stage": "pairs",
+    "status": "pair_budget",
+    "identity": "085dcd7df25069494eb1406c78178c3523fa4184b95cf3b8cf8d3f8abd816c71",
+    "degree": 131,
+    "subgroup_order": "680564733841876926932320129493409985129",
+    "orbit_columns": 14,
+    "signed_base_points": 3668,
+    "solver": "pairs",
+    "targets": {},
+    "coverage_ceiling": {
+      "numerator": "8231743940",
+      "denominator": "680564733841876926932320129493409985128",
+      "fraction": 1.2095460623606999e-29,
+      "kind": "counting_bound_on_uniform_nonzero_targets"
+    },
+    "pair_table": {
+      "hash": "8de3ec55cab9011f5c51518a9aaeac155c40e8b15f9928d9b549cbab62cbcffc",
+      "i": 0,
+      "j": 11,
+      "serial": 10
+    },
+    "logs_available": false,
+    "relations_saved": 0,
+    "attempts_saved": 0,
+    "reuse": {
+      "base_builds": 1,
+      "pair_candidates_built": 11
+    },
+    "accounting": {
+      "elapsed_ns": 1882152936,
+      "phases": {
+        "parameter_validation": {
+          "ns": 108772805,
+          "calls": {
+            "field.fromCoords": 7,
+            "field.add": 2492,
+            "field.toCoords": 131,
+            "field.mul": 2091,
+            "group.onCurve": 2,
+            "group.mul": 3,
+            "group.add": 138,
+            "group.dbl": 388,
+            "field.inv": 521,
+            "polynomial.xor": 271730,
+            "group.frob": 1,
+            "field.frob": 2
+          }
+        },
+        "factor_base": {
+          "ns": 1703532536,
+          "calls": {
+            "field.fromCoords": 65,
+            "field.add": 40899,
+            "field.toCoords": 107,
+            "field.mul": 28947,
+            "group.onCurve": 46,
+            "group.mul": 46,
+            "group.add": 1656,
+            "group.dbl": 5980,
+            "field.inv": 7627,
+            "polynomial.xor": 3934866,
+            "group.frob": 3668,
+            "field.frob": 9416,
+            "group.pointFromX": 65,
+            "field.trace": 65,
+            "group.neg": 3668
+          }
+        },
+        "pair_table": {
+          "ns": 9674090,
+          "calls": {
+            "field.add": 3747,
+            "field.mul": 31,
+            "group.add": 10,
+            "group.dbl": 1,
+            "field.inv": 10,
+            "polynomial.xor": 2714,
+            "group.neg": 3680
+          }
+        }
+      },
+      "orchestration_ns": 60173505,
+      "logical_calls": {
+        "field.fromCoords": 72,
+        "field.add": 47138,
+        "field.toCoords": 238,
+        "field.mul": 31069,
+        "group.onCurve": 48,
+        "group.mul": 49,
+        "group.add": 1804,
+        "group.dbl": 6369,
+        "field.inv": 8158,
+        "polynomial.xor": 4209310,
+        "group.frob": 3669,
+        "field.frob": 9418,
+        "group.pointFromX": 65,
+        "field.trace": 65,
+        "group.neg": 7348
+      },
+      "total_common_operations": null,
+      "S": null,
+      "rho_ratio": null,
+      "note": "nested logical call categories must not be summed; SAT internal operations are uncalibrated",
+      "scope": "through result assembly, including artifact reads, work commits and certificate checks; excludes final report archival/output and connection close; external benchmark wall time includes these"
+    },
+    "cumulative_measured_ns": 1882152936,
+    "source_sha256": {
+      "indexcalc_fixed.py": "297fd14ce17067e39dead9e6bf8d27a25173caf1f966969a2c91b5bd4f297386",
+      "indexcalc_e2e.py": "7c8371c9dab3914c14867f8ed934b9362fb2df41b6245b703b7ea6d5524fb80a",
+      "field.py": "81d0397473a2a55b06a04b19991382a2c3dd1c73ba515921dd7305a10b72dc5f",
+      "curves.py": "eeb52de0491669572a7ecd2be6e19480d84d077fe9134d2a5efdb9f04a1dae17",
+      "decomp.py": "9d0e1af93ffc6674fcbb1163d02a3288f503475bb9f48016c2da2f5da4039c36",
+      "cnf.py": "342ed8d044e7b51796dc8df9e4c4cb2d94668dcbe6e1046f927166d4f9424879"
+    },
+    "previous_invocations": 0
+  },
+  {
+    "schema_version": 1,
+    "operation": "fixed",
+    "stage": "pairs",
+    "status": "pair_budget",
+    "identity": "085dcd7df25069494eb1406c78178c3523fa4184b95cf3b8cf8d3f8abd816c71",
+    "degree": 131,
+    "subgroup_order": "680564733841876926932320129493409985129",
+    "orbit_columns": 14,
+    "signed_base_points": 3668,
+    "solver": "pairs",
+    "targets": {},
+    "coverage_ceiling": {
+      "numerator": "8231743940",
+      "denominator": "680564733841876926932320129493409985128",
+      "fraction": 1.2095460623606999e-29,
+      "kind": "counting_bound_on_uniform_nonzero_targets"
+    },
+    "pair_table": {
+      "hash": "a9d31832b803d54c8216367a75da3f2da847f677afccf1f038945e1ebcc22b9f",
+      "i": 0,
+      "j": 24,
+      "serial": 23
+    },
+    "logs_available": false,
+    "relations_saved": 0,
+    "attempts_saved": 0,
+    "reuse": {
+      "base_loads": 1,
+      "pair_candidates_built": 13
+    },
+    "accounting": {
+      "elapsed_ns": 664825277,
+      "phases": {
+        "parameter_validation": {
+          "ns": 117855937,
+          "calls": {
+            "field.fromCoords": 7,
+            "field.add": 2492,
+            "field.toCoords": 131,
+            "field.mul": 2091,
+            "group.onCurve": 2,
+            "group.mul": 3,
+            "group.add": 138,
+            "group.dbl": 388,
+            "field.inv": 521,
+            "polynomial.xor": 271730,
+            "group.frob": 1,
+            "field.frob": 2
+          }
+        },
+        "factor_base": {
+          "ns": 530725625,
+          "calls": {
+            "field.fromCoords": 28,
+            "field.add": 12474,
+            "field.toCoords": 14,
+            "field.mul": 8764,
+            "group.onCurve": 14,
+            "group.mul": 14,
+            "group.add": 504,
+            "group.dbl": 1820,
+            "field.inv": 2296,
+            "polynomial.xor": 1189016,
+            "group.frob": 1834,
+            "field.frob": 3668,
+            "group.neg": 1834
+          }
+        },
+        "pair_table": {
+          "ns": 10245865,
+          "calls": {
+            "field.add": 3773,
+            "field.mul": 39,
+            "group.add": 13,
+            "field.inv": 13,
+            "polynomial.xor": 3758,
+            "group.neg": 3682
+          }
+        }
+      },
+      "orchestration_ns": 5997850,
+      "logical_calls": {
+        "field.fromCoords": 35,
+        "field.add": 18739,
+        "field.toCoords": 145,
+        "field.mul": 10894,
+        "group.onCurve": 16,
+        "group.mul": 17,
+        "group.add": 655,
+        "group.dbl": 2208,
+        "field.inv": 2830,
+        "polynomial.xor": 1464504,
+        "group.frob": 1835,
+        "field.frob": 3670,
+        "group.neg": 5516
+      },
+      "total_common_operations": null,
+      "S": null,
+      "rho_ratio": null,
+      "note": "nested logical call categories must not be summed; SAT internal operations are uncalibrated",
+      "scope": "through result assembly, including artifact reads, work commits and certificate checks; excludes final report archival/output and connection close; external benchmark wall time includes these"
+    },
+    "cumulative_measured_ns": 2546978213,
+    "source_sha256": {
+      "indexcalc_fixed.py": "297fd14ce17067e39dead9e6bf8d27a25173caf1f966969a2c91b5bd4f297386",
+      "indexcalc_e2e.py": "7c8371c9dab3914c14867f8ed934b9362fb2df41b6245b703b7ea6d5524fb80a",
+      "field.py": "81d0397473a2a55b06a04b19991382a2c3dd1c73ba515921dd7305a10b72dc5f",
+      "curves.py": "eeb52de0491669572a7ecd2be6e19480d84d077fe9134d2a5efdb9f04a1dae17",
+      "decomp.py": "9d0e1af93ffc6674fcbb1163d02a3288f503475bb9f48016c2da2f5da4039c36",
+      "cnf.py": "342ed8d044e7b51796dc8df9e4c4cb2d94668dcbe6e1046f927166d4f9424879"
+    },
+    "previous_invocations": 1
+  },
+  {
+    "schema_version": 1,
+    "operation": "fixed",
+    "stage": "collect",
+    "status": "insufficient_relations",
+    "identity": "085dcd7df25069494eb1406c78178c3523fa4184b95cf3b8cf8d3f8abd816c71",
+    "degree": 131,
+    "subgroup_order": "680564733841876926932320129493409985129",
+    "orbit_columns": 14,
+    "signed_base_points": 3668,
+    "solver": "sat",
+    "targets": {},
+    "coverage_ceiling": {
+      "numerator": "8231743940",
+      "denominator": "680564733841876926932320129493409985128",
+      "fraction": 1.2095460623606999e-29,
+      "kind": "counting_bound_on_uniform_nonzero_targets"
+    },
+    "pair_table": {
+      "hash": "a9d31832b803d54c8216367a75da3f2da847f677afccf1f038945e1ebcc22b9f",
+      "i": 0,
+      "j": 24,
+      "serial": 23
+    },
+    "logs_available": false,
+    "relations_saved": 0,
+    "attempts_saved": 1,
+    "reuse": {
+      "base_loads": 1,
+      "new_attempts": 1
+    },
+    "accounting": {
+      "elapsed_ns": 1373464753,
+      "phases": {
+        "parameter_validation": {
+          "ns": 109358006,
+          "calls": {
+            "field.fromCoords": 7,
+            "field.add": 2492,
+            "field.toCoords": 131,
+            "field.mul": 2091,
+            "group.onCurve": 2,
+            "group.mul": 3,
+            "group.add": 138,
+            "group.dbl": 388,
+            "field.inv": 521,
+            "polynomial.xor": 271730,
+            "group.frob": 1,
+            "field.frob": 2
+          }
+        },
+        "factor_base": {
+          "ns": 529024727,
+          "calls": {
+            "field.fromCoords": 28,
+            "field.add": 12474,
+            "field.toCoords": 14,
+            "field.mul": 8764,
+            "group.onCurve": 14,
+            "group.mul": 14,
+            "group.add": 504,
+            "group.dbl": 1820,
+            "field.inv": 2296,
+            "polynomial.xor": 1189016,
+            "group.frob": 1834,
+            "field.frob": 3668,
+            "group.neg": 1834
+          }
+        },
+        "log_load": {
+          "ns": 35973,
+          "calls": {}
+        },
+        "relation_replay": {
+          "ns": 38479,
+          "calls": {}
+        },
+        "probe_generation": {
+          "ns": 36353295,
+          "calls": {
+            "field.add": 939,
+            "field.mul": 695,
+            "group.mul": 1,
+            "group.add": 62,
+            "group.dbl": 128,
+            "field.inv": 189,
+            "polynomial.xor": 98700
+          }
+        },
+        "symbolic_setup": {
+          "ns": 104771442,
+          "calls": {}
+        },
+        "encoding": {
+          "ns": 146195566,
+          "calls": {
+            "field.toCoords": 1,
+            "cnf.variables": 98506,
+            "cnf.clauses": 91467,
+            "cnf.xors": 67539
+          }
+        },
+        "solver_load": {
+          "ns": 70303208,
+          "calls": {}
+        },
+        "solve": {
+          "ns": 324387906,
+          "calls": {
+            "sat.calls": 1
+          }
+        },
+        "solver_teardown": {
+          "ns": 9449024,
+          "calls": {}
+        },
+        "query_process_overhead": {
+          "ns": 26930180,
+          "calls": {}
+        },
+        "relation_commit": {
+          "ns": 7100183,
+          "calls": {}
+        }
+      },
+      "orchestration_ns": 9516764,
+      "logical_calls": {
+        "field.fromCoords": 35,
+        "field.add": 15905,
+        "field.toCoords": 146,
+        "field.mul": 11550,
+        "group.onCurve": 16,
+        "group.mul": 18,
+        "group.add": 704,
+        "group.dbl": 2336,
+        "field.inv": 3006,
+        "polynomial.xor": 1559446,
+        "group.frob": 1835,
+        "field.frob": 3670,
+        "group.neg": 1834,
+        "cnf.variables": 98506,
+        "cnf.clauses": 91467,
+        "cnf.xors": 67539,
+        "sat.calls": 1
+      },
+      "total_common_operations": null,
+      "S": null,
+      "rho_ratio": null,
+      "note": "nested logical call categories must not be summed; SAT internal operations are uncalibrated",
+      "scope": "through result assembly, including artifact reads, work commits and certificate checks; excludes final report archival/output and connection close; external benchmark wall time includes these"
+    },
+    "cumulative_measured_ns": 3920442966,
+    "source_sha256": {
+      "indexcalc_fixed.py": "297fd14ce17067e39dead9e6bf8d27a25173caf1f966969a2c91b5bd4f297386",
+      "indexcalc_e2e.py": "7c8371c9dab3914c14867f8ed934b9362fb2df41b6245b703b7ea6d5524fb80a",
+      "field.py": "81d0397473a2a55b06a04b19991382a2c3dd1c73ba515921dd7305a10b72dc5f",
+      "curves.py": "eeb52de0491669572a7ecd2be6e19480d84d077fe9134d2a5efdb9f04a1dae17",
+      "decomp.py": "9d0e1af93ffc6674fcbb1163d02a3288f503475bb9f48016c2da2f5da4039c36",
+      "cnf.py": "342ed8d044e7b51796dc8df9e4c4cb2d94668dcbe6e1046f927166d4f9424879"
+    },
+    "previous_invocations": 2
+  }
+]

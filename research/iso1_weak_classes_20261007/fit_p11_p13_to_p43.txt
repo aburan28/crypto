@@ -1,0 +1,10 @@
+set=train n=3238 weak=1470 depth1_weak=0 depth_ge2_missing=148
+set=holdout n=77658 weak=38452 depth1_weak=0 depth_ge2_missing=376
+rule,holdout_correct,holdout_total,tp,fp,fn,tn,unseen_feature_rows
+depth_ge_2,77282,77658,38452,376,0,38830,0
+split_2,52032,77658,12888,62,25564,39144,0
+frobenius_depth,77264,77658,38434,376,18,38830,18
+trace_mod_8,39206,77658,0,0,38452,39206,0
+trace_mod_16,77282,77658,38452,376,0,38830,0
+class_number_parity,39262,77658,58,2,38394,39204,0
+combined,77126,77658,38294,374,158,38832,84

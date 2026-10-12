@@ -12,6 +12,95 @@
 #include <string.h>
 #include <string>
 #include "bigmod.h"
+#include "tablewalk.h"
+
+#ifndef ECC_PACKED_XONLY_23
+#define ECC_PACKED_XONLY_23 0
+#endif
+#if ECC_PACKED_XONLY_23 != 0 && ECC_PACKED_XONLY_23 != 1
+#error "ECC_PACKED_XONLY_23 must be 0 or 1"
+#endif
+#ifndef ECC_PACKED_XONLY_BRIDGE3
+#define ECC_PACKED_XONLY_BRIDGE3 0
+#endif
+#if ECC_PACKED_XONLY_BRIDGE3 != 0 && ECC_PACKED_XONLY_BRIDGE3 != 1
+#error "ECC_PACKED_XONLY_BRIDGE3 must be 0 or 1"
+#endif
+#if ECC_PACKED_XONLY_BRIDGE3 && !ECC_PACKED_XONLY_23
+#error "ECC_PACKED_XONLY_BRIDGE3 requires ECC_PACKED_XONLY_23"
+#endif
+#ifndef ECC_PACKED_XONLY_DOUBLE_ONLY
+#define ECC_PACKED_XONLY_DOUBLE_ONLY 0
+#endif
+#if ECC_PACKED_XONLY_DOUBLE_ONLY != 0 && ECC_PACKED_XONLY_DOUBLE_ONLY != 1
+#error "ECC_PACKED_XONLY_DOUBLE_ONLY must be 0 or 1"
+#endif
+#ifndef ECC_PACKED_XONLY_BRIDGE1_COMMON
+#define ECC_PACKED_XONLY_BRIDGE1_COMMON 0
+#endif
+#if ECC_PACKED_XONLY_BRIDGE1_COMMON != 0 && ECC_PACKED_XONLY_BRIDGE1_COMMON != 1
+#error "ECC_PACKED_XONLY_BRIDGE1_COMMON must be 0 or 1"
+#endif
+#ifndef ECC_PACKED_XONLY_ARITHMETIC_ONLY
+#define ECC_PACKED_XONLY_ARITHMETIC_ONLY 0
+#endif
+#if ECC_PACKED_XONLY_ARITHMETIC_ONLY != 0 && ECC_PACKED_XONLY_ARITHMETIC_ONLY != 1
+#error "ECC_PACKED_XONLY_ARITHMETIC_ONLY must be 0 or 1"
+#endif
+#ifndef ECC_PACKED_XONLY_POLY_SELECT
+#define ECC_PACKED_XONLY_POLY_SELECT 0
+#endif
+#if ECC_PACKED_XONLY_POLY_SELECT != 0 && ECC_PACKED_XONLY_POLY_SELECT != 1
+#error "ECC_PACKED_XONLY_POLY_SELECT must be 0 or 1"
+#endif
+#ifndef ECC_PACKED_XONLY_POLY_SELECT_MASK
+#define ECC_PACKED_XONLY_POLY_SELECT_MASK 0xfffu
+#endif
+#ifndef ECC_PACKED_XONLY_POLY_SELECT_TARGET
+#define ECC_PACKED_XONLY_POLY_SELECT_TARGET 14u
+#endif
+#if ECC_PACKED_XONLY_BRIDGE1_COMMON && !ECC_PACKED_XONLY_DOUBLE_ONLY
+#error "ECC_PACKED_XONLY_BRIDGE1_COMMON requires the doubling-specialized core"
+#endif
+#if ECC_PACKED_XONLY_BRIDGE1_COMMON && !ECC_PACKED_XONLY_BRIDGE3 && \
+    !ECC_PACKED_XONLY_ARITHMETIC_ONLY
+#error "ECC_PACKED_XONLY_BRIDGE1_COMMON requires sparse bridge-3 or arithmetic-only"
+#endif
+#if ECC_PACKED_XONLY_ARITHMETIC_ONLY && \
+    (!ECC_PACKED_XONLY_BRIDGE1_COMMON || ECC_PACKED_XONLY_BRIDGE3 || \
+     ECC_PACKED_XONLY_POLY_SELECT)
+#error "Arithmetic-only is the always-P+sigma(P) diagnostic"
+#endif
+#if ECC_PACKED_XONLY_POLY_SELECT && \
+    (!ECC_PACKED_XONLY_BRIDGE3 || !ECC_PACKED_XONLY_BRIDGE1_COMMON)
+#error "Polynomial-bit selection requires the complete two-bridge map"
+#endif
+#ifndef ECC_PACKED_XONLY_BRIDGE_MOD72
+#define ECC_PACKED_XONLY_BRIDGE_MOD72 0
+#endif
+#if ECC_PACKED_XONLY_BRIDGE_MOD72 != 0 && ECC_PACKED_XONLY_BRIDGE_MOD72 != 1
+#error "ECC_PACKED_XONLY_BRIDGE_MOD72 must be 0 or 1"
+#endif
+#if ECC_PACKED_XONLY_BRIDGE_MOD72 && !ECC_PACKED_XONLY_BRIDGE1_COMMON
+#error "ECC_PACKED_XONLY_BRIDGE_MOD72 requires the complete two-bridge map"
+#endif
+#if ECC_PACKED_XONLY_POLY_SELECT && ECC_PACKED_XONLY_BRIDGE_MOD72
+#error "Polynomial-bit selection replaces the modulus-72 Hamming selector"
+#endif
+#ifndef ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE
+#define ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE 0
+#endif
+#if ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE != 0 && ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE != 1
+#error "ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE must be 0 or 1"
+#endif
+#if ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE && !ECC_PACKED_XONLY_BRIDGE3
+#error "ECC_PACKED_XONLY_SKIP_EMPTY_BRIDGE requires the sparse bridge queue"
+#endif
+#if ECC_PACKED_XONLY_BRIDGE_MOD72
+#define ECC_PACKED_XONLY_IS_BRIDGE3(hw) (((hw) % 72) == 14)
+#else
+#define ECC_PACKED_XONLY_IS_BRIDGE3(hw) (((hw) & 31) == 14)
+#endif
 
 typedef unsigned long long u64;
 
@@ -156,6 +245,8 @@ struct ScalarOnb {
         return r;
     }
     static int trace(const Elem &a) { return weight(a) & 1; }
+    // normal-basis coordinates, which this representation already is
+    static Elem nbCoords(const Elem &a) { return a; }
 
 };
 
@@ -270,6 +361,16 @@ struct ScalarPb {
         }
         return w;
     }
+    // the normal-basis coordinate vector itself, coordinate i at bit i-1
+    static Elem nbCoords(const Elem &a) {
+        Elem r = zero();
+        for (int i = 0; i < M; ++i) {
+            u64 acc = 0;
+            for (int l = 0; l < NL; ++l) acc ^= a.v[l] & Cfg::NB_ROWS[i][l];
+            if (__builtin_popcountll(acc) & 1) setBit(r, i);
+        }
+        return r;
+    }
     static int trace(const Elem &a) {
         Elem t = a, acc = a;
         for (int i = 1; i < M; ++i) {
@@ -304,6 +405,7 @@ struct RefT {
     static void setBit(Elem &a, int i) { SF::setBit(a, i); }
     static int weight(const Elem &a) { return SF::weight(a); }
     static int trace(const Elem &a) { return SF::trace(a); }
+    static Elem nbCoords(const Elem &a) { return SF::nbCoords(a); }
     static Elem fromLimbs(const unsigned long long *p) { return SF::fromLimbs(p); }
     // ---- polynomial-basis interoperability (normal-basis curves only) --
     static Elem fromPolyBasis(const unsigned long long *pb, const unsigned long long ztab[][3]) {
@@ -392,7 +494,84 @@ struct RefT {
 
     // ---- the iteration function ----------------------------------------
     static int jOf(int hw) { return 3 + ((hw >> 1) & 7); }
-    static Point step(const Point &p, int hw) { return addPt(p, frob(p, jOf(hw))); }
+    // Packed polynomial low word of a GF(2^131) normal-basis coordinate.
+    // Matches packedtransform131.h with FAST_CONVERT=1, which is algebraically
+    // the same map as the slower factorization.
+    static unsigned polynomialLowWord131(const Elem &x) {
+        const uint32_t a0 = (uint32_t)x.v[0];
+        const uint32_t a1 = (uint32_t)(x.v[0] >> 32);
+        const uint32_t a2 = (uint32_t)x.v[1];
+        const uint32_t a3 = (uint32_t)(x.v[1] >> 32);
+        const uint32_t a4 = (uint32_t)x.v[2] & 7u;
+        const uint32_t sign = 0u - ((a4 >> 2) & 1u);
+        uint32_t v0 = (a0 << 1) ^ sign;
+        uint32_t v1 = ((a1 << 1) | (a0 >> 31)) ^ sign;
+        uint32_t v2 = ((a2 << 1) | (a1 >> 31)) ^ sign;
+        uint32_t v3 = ((a3 << 1) | (a2 >> 31)) ^ sign;
+        uint32_t v4 = (((a4 << 1) | (a3 >> 31)) ^ sign) & 7u;
+        v0 ^= ((v0 >> 2) | (v1 << 30)) & 0xaaaaaaaau;
+        v1 ^= ((v1 >> 2) | (v2 << 30)) & 0xaaaaaaaau;
+        v2 ^= ((v2 >> 2) | (v3 << 30)) & 0xaaaaaaaau;
+        v3 ^= ((v3 >> 2) | (v4 << 30)) & 0xaaaaaaaau;
+        v0 ^= ((v0 >> 4) | (v1 << 28)) & 0x66666666u;
+        v1 ^= ((v1 >> 4) | (v2 << 28)) & 0x66666666u;
+        v2 ^= ((v2 >> 4) | (v3 << 28)) & 0x66666666u;
+        v3 ^= ((v3 >> 4) | (v4 << 28)) & 0x66666666u;
+        v0 ^= ((v0 >> 8) | (v1 << 24)) & 0x1e1e1e1eu;
+        v1 ^= ((v1 >> 8) | (v2 << 24)) & 0x1e1e1e1eu;
+        v2 ^= ((v2 >> 8) | (v3 << 24)) & 0x1e1e1e1eu;
+        v3 ^= ((v3 >> 8) | (v4 << 24)) & 0x061e1e1eu;
+        v0 ^= ((v0 >> 16) | (v1 << 16)) & 0x01fe01feu;
+        v1 ^= ((v1 >> 16) | (v2 << 16)) & 0x01fe01feu;
+        v2 ^= ((v2 >> 16) | (v3 << 16)) & 0x01fe01feu;
+        v3 ^= ((v3 >> 16) | (v4 << 16)) & 0x000601feu;
+        v0 ^= v1 & 0x0001fffeu;
+        v1 ^= v2 & 0x0001fffeu;
+        v2 ^= v3 & 0x0001fffeu;
+        v3 ^= v4 & 0x00000006u;
+        v0 ^= v2 & 0xfffffffeu;
+        v1 ^= v3 & 0x00000001u;
+        v2 ^= v4 & 0x00000006u;
+        v0 ^= v4 & 0x00000006u;
+        (void)v1;
+        (void)v2;
+        (void)v3;
+        return v0;
+    }
+    static bool polySelectBridge3(const Elem &x) {
+        const unsigned bits = (M == 131) ? polynomialLowWord131(x)
+                                         : (unsigned)x.v[0];
+        return (bits & ECC_PACKED_XONLY_POLY_SELECT_MASK) ==
+               ECC_PACKED_XONLY_POLY_SELECT_TARGET;
+    }
+    static Point step(const Point &p, int hw) {
+#if ECC_PACKED_XONLY_23
+#if ECC_PACKED_XONLY_ARITHMETIC_ONLY
+        (void)hw;
+        return addPt(p, frob(p, 1));
+#else
+#if ECC_PACKED_XONLY_BRIDGE3
+        if (
+#if ECC_PACKED_XONLY_POLY_SELECT
+            polySelectBridge3(p.x)
+#else
+            ECC_PACKED_XONLY_IS_BRIDGE3(hw)
+#endif
+        ) return addPt(p, frob(p, 3));
+#endif
+#if ECC_PACKED_XONLY_BRIDGE1_COMMON
+        return addPt(p, frob(p, 1));
+#elif ECC_PACKED_XONLY_DOUBLE_ONLY
+        return dbl(p);
+#else
+        const Point twice = dbl(p);
+        return ((hw >> 1) & 1) ? addPt(twice, p) : twice;
+#endif
+#endif
+#else
+        return addPt(p, frob(p, jOf(hw)));
+#endif
+    }
 
     // canonical representative of the orbit under sigma (negation leaves x fixed)
     static Elem canonical(const Elem &x) {
@@ -450,3 +629,107 @@ struct RefT {
 
 template <class Cfg>
 using Ref = RefT<Cfg, typename Cfg::Scalar>;
+
+
+// The table walk of tablewalk.h on the reference arithmetic: the table
+// T_h = a_h P + b_h Q with its Frobenius conjugates, one step, and the
+// coefficient bookkeeping a re-walk needs (endpoint = a P + b Q).
+template <class Cfg>
+struct TableWalk {
+    typedef Ref<Cfg> R;
+    typedef typename R::Elem Elem;
+    typedef typename R::Point Point;
+    static const int M = Cfg::M;
+    static const int H = ECC_TABLE_BRANCHES;
+
+    TableWalkConsts<M> consts;
+    Point table[H][M];        // table[h][k] = sigma^k(T_h)
+    U192 ta[H], tb[H];        // T_h = ta[h] P + tb[h] Q
+    bool ready = false;
+    int dpWeight = -1; // caller supplies the campaign reporting threshold
+
+    // The coordinate functions are defined on the permuted type-II normal
+    // basis; the polynomial-basis test curves have no such coordinate order.
+    static bool applicable() { return Cfg::NRING == 2 * M + 1; }
+
+    // Coefficients are fixed constants of the walk, derived from nothing but
+    // the branch index, so every client and the resolver agree on them.
+    static U192 coefficient(int h, int which, const U192 &ell) {
+        U192 r;
+        for (int i = 0; i < 3; ++i) r.v[i] = R::eccPrfHost(0x7ab1e0000000ull + (u64)h * 2 + which, i);
+        r.v[2] &= ~(1ull << 63);   // mod_reduce wants a < 2^191
+        r = mod_reduce(r, ell);
+        if (u192_is_zero(r)) r = u192_from(1);
+        return r;
+    }
+
+    void setup(const Point &basis, const Point &target, const U192 &ell) {
+        consts.build();
+        for (int h = 0; h < H; ++h) {
+            ta[h] = coefficient(h, 0, ell);
+            tb[h] = coefficient(h, 1, ell);
+            const Point t = R::addPt(R::scalarMul(basis, ta[h]), R::scalarMul(target, tb[h]));
+            for (int k = 0; k < M; ++k) table[h][k] = R::frob(t, k);
+        }
+        ready = true;
+    }
+
+    static int branch(int hw) { return (hw >> 1) & (H - 1); }
+    int phase(const Elem &xn, int hw) const { return consts.phase(xn.v, hw); }
+    int negationBit(const Elem &xn, const Elem &yn, int k) const { return consts.negationBit(xn.v, yn.v, k); }
+
+    // The tag the point selects before the cycle rule, from its coordinates.
+    unsigned rawTag(const Point &p, int hw) const {
+        const Elem xn = R::nbCoords(p.x), yn = R::nbCoords(p.y);
+        const int k = phase(xn, hw);
+        return eccTag(branch(hw), k, negationBit(xn, yn, k));
+    }
+    struct CycleOps {
+        const TableWalk *walk;
+        bool distinguished(const Point &p) const { return R::weight(p.x) <= walk->dpWeight; }
+        unsigned tag(const Point &p) const { return walk->rawTag(p, R::weight(p.x)); }
+        bool next(const Point &p, unsigned t, Point *out) const {
+            const Point q = walk->addend(t);
+            if (q.inf || p.x == q.x) return false;
+            *out = R::addPt(p, q);
+            return !out->inf;
+        }
+        bool oppositeCloses(const Point &start, const Point &after, unsigned t) const {
+            Point closed;
+            return next(after, t, &closed) && equal(closed, start);
+        }
+        bool equal(const Point &a, const Point &b) const { return R::eq(a, b); }
+        bool less(const Point &a, const Point &b) const {
+            const int wa = R::weight(a.x), wb = R::weight(b.x);
+            if (wa != wb) return wa < wb;
+            const Elem ca = R::canonical(a.x), cb = R::canonical(b.x);
+            for (int i = R::NL - 1; i >= 0; --i) {
+                if (ca.v[i] != cb.v[i]) return ca.v[i] < cb.v[i];
+            }
+            return false;
+        }
+    };
+    unsigned resolveTag(const Point &p, unsigned t, u64 hist) const {
+        if (!eccTagFruitless(t, hist, M)) return t;
+        return eccCycleAnchorTag(p, t, CycleOps{this}, M, H);
+    }
+    Point addend(unsigned t) const {
+        const Point q = table[eccTagH(t)][eccTagK(t)];
+        return eccTagEps(t) ? R::neg(q) : q;
+    }
+    // One step.  Raw addition, as on the device: the degenerate abscissa
+    // coincidence has probability 2^-m and is never special-cased there.
+    Point step(const Point &p, int hw, u64 *hist, U192 *a, U192 *b, const U192 &ell,
+               const U192 *spow) const {
+        const unsigned t = resolveTag(p, rawTag(p, hw), *hist);
+        *hist = eccHistPush(*hist, t);
+        if (a) {
+            U192 ca = mod_mul(spow[eccTagK(t)], ta[eccTagH(t)], ell);
+            U192 cb = mod_mul(spow[eccTagK(t)], tb[eccTagH(t)], ell);
+            if (eccTagEps(t)) { ca = mod_neg(ca, ell); cb = mod_neg(cb, ell); }
+            *a = mod_add(*a, ca, ell);
+            *b = mod_add(*b, cb, ell);
+        }
+        return R::addPtRaw(p, addend(t));
+    }
+};

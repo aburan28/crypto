@@ -1,0 +1,130 @@
+--- a/examples/ic_tournament_worker.rs
++++ b/examples/ic_tournament_worker.rs
+@@ -46,11 +46,21 @@
+     #[inline(always)]
+     fn base() -> usize { REGION.0.get() as usize }
+ 
++    #[cfg(test)]
++    pub(super) fn contains(ptr: *mut u8) -> bool {
++        (ptr as usize).wrapping_sub(base()) < SIZE
++    }
++
+     pub struct Bump;
+ 
+     unsafe impl GlobalAlloc for Bump {
+         #[inline]
+         unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
++            // Offset alignment is sufficient only up to the region's alignment.
++            // Larger layouts use System, including their realloc/dealloc path.
++            if layout.align() > std::mem::align_of::<Region>() {
++                return System.alloc(layout);
++            }
+             let mut top = TOP.load(Acquire);
+             loop {
+                 let start = (top + layout.align() - 1) & !(layout.align() - 1);
+@@ -111,6 +121,28 @@
+ 
+     fn exclusive() -> MutexGuard<'static, ()> {
+         ARENA_TESTS.lock().unwrap_or_else(|e| e.into_inner())
++    }
++
++    #[test]
++    fn over_aligned_layouts_use_system_and_preserve_bytes_when_resized() {
++        let _guard = exclusive();
++        let allocator = super::arena::Bump;
++        for alignment in [8192, 65536, 1 << 20] {
++            unsafe {
++                let layout = Layout::from_size_align(97, alignment).unwrap();
++                let ptr = allocator.alloc(layout);
++                assert!(!ptr.is_null());
++                assert_eq!((ptr as usize) % alignment, 0);
++                assert!(!super::arena::contains(ptr));
++                std::ptr::write_bytes(ptr, 0x6D, 97);
++                let grown = allocator.realloc(ptr, layout, 257);
++                assert!(!grown.is_null());
++                assert_eq!((grown as usize) % alignment, 0);
++                assert!(!super::arena::contains(grown));
++                assert!((0..97).all(|i| *grown.add(i) == 0x6D));
++                allocator.dealloc(grown, Layout::from_size_align(257, alignment).unwrap());
++            }
++        }
+     }
+ 
+     #[test]
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -2042,3 +2042,74 @@
+         assert_eq!(tiny.diagnostics.rank_events.last().unwrap()[2], tiny.columns() as u64);
+     }
+ }
++
++#[cfg(test)]
++mod row_qualification {
++    use super::Echelon;
++
++    // Batch RREF with Fermat inversion is independent of the incremental
++    // reducer and its extended-Euclidean inverse. All arithmetic is widened.
++    fn reference_rank(input: &[Vec<u64>], columns: usize, prime: u64) -> usize {
++        let modulus = u128::from(prime);
++        let mut matrix: Vec<Vec<u128>> = input.iter()
++            .map(|row| row[..columns].iter().map(|&v| u128::from(v)).collect()).collect();
++        let mut rank = 0;
++        for column in 0..columns {
++            let Some(pivot) = (rank..matrix.len()).find(|&i| matrix[i][column] != 0) else { continue };
++            matrix.swap(rank, pivot);
++            let (mut power, mut exponent, mut inverse) = (matrix[rank][column], prime - 2, 1);
++            while exponent != 0 {
++                if exponent & 1 != 0 { inverse = inverse * power % modulus; }
++                power = power * power % modulus;
++                exponent >>= 1;
++            }
++            for value in &mut matrix[rank] { *value = *value * inverse % modulus; }
++            for row in 0..matrix.len() {
++                if row == rank { continue; }
++                let factor = matrix[row][column];
++                for c in 0..columns {
++                    matrix[row][c] = (matrix[row][c] + modulus - factor * matrix[rank][c] % modulus) % modulus;
++                }
++            }
++            rank += 1;
++        }
++        rank
++    }
++
++    #[test]
++    fn incremental_rank_and_solution_match_independent_batch_elimination() {
++        for prime in [3, 5, 2003, 4_196_903, (1u64 << 61) - 1] {
++            for columns in [1, 2, 7, 16, 24] {
++                let solution: Vec<u64> = (0..columns).map(|i| (prime - 1 - i as u64 % prime) % prime).collect();
++                let mut reducer = Echelon::new(columns, prime);
++                let mut rows: Vec<Vec<u64>> = Vec::new();
++                let mut state = 0xC61D_2026_0925u64 ^ prime ^ columns as u64;
++                for step in 0..(3 * columns + 8) {
++                    let mut row = vec![0; columns + 1];
++                    if step >= 2 * columns + 8 {
++                        // End with a full independent basis even after singular prefixes.
++                        row[step - (2 * columns + 8)] = 1;
++                    } else if step % 4 == 1 && !rows.is_empty() {
++                        row = rows.last().unwrap().clone();
++                    } else if step % 4 != 0 {
++                        for value in &mut row[..columns] {
++                            state ^= state << 13; state ^= state >> 7; state ^= state << 17;
++                            *value = state % prime;
++                        }
++                    }
++                    row[columns] = row[..columns].iter().zip(&solution).fold(0u128,
++                        |sum, (&a, &b)| (sum + u128::from(a) * u128::from(b)) % u128::from(prime)) as u64;
++                    let previous = reducer.rank;
++                    let novel = reducer.push(row.clone());
++                    rows.push(row);
++                    let rank = reference_rank(&rows, columns, prime);
++                    assert_eq!(reducer.rank, rank, "prime={prime} columns={columns} step={step}");
++                    assert_eq!(novel, rank > previous);
++                    if rank == columns { assert_eq!(reducer.solve(), Some(solution.clone())); }
++                    else { assert_eq!(reducer.solve(), None); }
++                }
++                assert_eq!(reducer.rank, columns);
++            }
++        }
++    }
++}

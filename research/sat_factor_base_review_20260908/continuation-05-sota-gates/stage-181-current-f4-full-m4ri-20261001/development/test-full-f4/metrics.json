@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage181-full-m4ri-target-850182efb",
+    "F4_F2_FULL_M4RI=1",
+    "cargo",
+    "test",
+    "--release",
+    "--locked",
+    "--lib",
+    "cryptanalysis::pq_f4_f2::tests",
+    "--",
+    "--test-threads=1"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1200.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.9950234170009935,
+    "user_seconds": 0.16869599999999998,
+    "system_seconds": 0.098189,
+    "total_core_seconds": 0.266885,
+    "single_core_seconds": 0.266885,
+    "peak_rss_bytes": 48431104,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

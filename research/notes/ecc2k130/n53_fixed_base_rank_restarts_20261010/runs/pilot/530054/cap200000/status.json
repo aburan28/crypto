@@ -1,0 +1,50 @@
+{
+  "base_input_sha256": "53c9c8454be7f1454c96295ab3d00848bdf6bbda6a9266d47fc2dc1b18e0b22d",
+  "base_sha256": "53c9c8454be7f1454c96295ab3d00848bdf6bbda6a9266d47fc2dc1b18e0b22d",
+  "binary_sha256": "3c03013e4a12d5eac74e1737c5549558ddf734aa9a324426914778765da0f51e",
+  "candidate_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h6c8de5cfb242",
+  "candidate_label": "cap200000",
+  "cold_in_process_ms": 6704.194458,
+  "command": [
+    "/private/tmp/crypto-compact-target/release/examples/koblitz_orbit_dlp_fast_online",
+    "construct:53:0:220",
+    "/private/tmp/crypto-compact-producer-union-repair-20261010/research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/inputs/development_q.jsonl",
+    "530054",
+    "/private/tmp/crypto-compact-producer-union-repair-20261010/research/notes/ecc2k130/n53_fixed_base_rank_restarts_20261010/runs/pilot/530054/cap200000/targets.jsonl"
+  ],
+  "environment_flags": {
+    "KIC_DUMP_BASE": true,
+    "KIC_DUMP_RANK": true,
+    "KIC_RANK_PROBE_CAP": 200000
+  },
+  "exit_code": 0,
+  "external_wall_ms": 6763.517249997676,
+  "peak_rss_bytes": 348454912,
+  "rank": 220,
+  "rank_attempts": 240,
+  "rank_capped_attempts": 20,
+  "rank_capped_probes": 4000000,
+  "rank_failures": 20,
+  "rank_probe_cap": 200000,
+  "rank_probes_total": 16993325,
+  "rank_relations": 220,
+  "rank_replay_sha256": "b7711151d2fa2e2f69261b1d04df03a0261254976a7923da44551a901b1994b4",
+  "rank_seed": 530054,
+  "rank_trace_sha256": "a98ab660eb5350db49aaaf9eaf1f8ad40fc038ac03aa90425575f77b3cd6fba3",
+  "recovered_scalar": 17385600002971,
+  "resource_envelope": {
+    "observed_rss_cap_bytes": 17179869184,
+    "threads": 1,
+    "wall_cap_seconds": 60
+  },
+  "run_id": "IC1N53Ce0fb23320PDP4rootRCguidedLAgaussTDdirectISO0h6c8de5cfb242W7e5787b0e1c1R1",
+  "source_sha256": "4dd3c5e7823b453ad1fa9046d9be68a04bddc79343ea29576dd1f32b0bc66299",
+  "status": "VERIFIED",
+  "summary_sha256": "203b94c728747f4f9fd8c0434bbfac102da1affe30ccbd77763957d61aba8073",
+  "target_input_sha256": "c63b2f819562326ad1e1e8f348b0cc350c4530fe56e4a5b3b275770dcf13ee4d",
+  "target_online_ms": 7.8565830000000005,
+  "target_replay_sha256": "c2c21642a0bc0a9ea0c4581db20e3f37fc8f3756e164394a8d8afd9dd8a6ded5",
+  "target_sha256": "6afe046d8df97f23d9899d283d74d1be18dcbcd690c66fe32b823695ae9febec",
+  "timed_out": false,
+  "workload_id": "W7e5787b0e1c1"
+}

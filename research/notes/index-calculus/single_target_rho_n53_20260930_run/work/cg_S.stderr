@@ -1,0 +1,11 @@
+==2928== Callgrind, a call-graph generating cache profiler
+==2928== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==2928== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==2928== Command: /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong 53 0 signed_frobenius 1 531310
+==2928== 
+==2928== For interactive control, run 'callgrind_control -h'.
+==2928== 
+==2928== Events    : Ir
+==2928== Collected : 1093432564
+==2928== 
+==2928== I   refs:      1,093,432,564

@@ -1,0 +1,28 @@
+--- published/worker.py
++++ guarded/worker.py
+@@ -1360,0 +1361,25 @@
++        try:
++            from seed_registry import worker_guard
++        except ModuleNotFoundError as exc:
++            if exc.name != "seed_registry" or not hasattr(self.store, "bucket"):
++                raise
++            # Older bootstraps fetched worker.py alone. Install the pinned
++            # guard before starting a client, without requiring a kernel roll.
++            import hashlib
++            import importlib.util
++            expected = "2488a983bf57c4e284363a1f01b9e7c08fccf06c459bcb56509979c26da4bd70"
++            path = os.path.join(self.work, "seed_registry.py")
++            sh(["aws", "s3", "cp", "s3://%s/aws/seed-guard/%s/seed_registry.py"
++                % (self.store.bucket, expected), path, "--only-show-errors"])
++            with open(path, "rb") as source:
++                if hashlib.sha256(source.read()).hexdigest() != expected:
++                    raise RuntimeError("seed guard hash mismatch; refusing launch")
++            spec = importlib.util.spec_from_file_location("seed_registry", path)
++            guard = importlib.util.module_from_spec(spec)
++            spec.loader.exec_module(guard)
++            sys.modules["seed_registry"] = guard
++            worker_guard = guard.worker_guard
++        with worker_guard(self, slot, slot + 1):
++            return self._runClient(slot)
++
++    def _runClient(self, slot):

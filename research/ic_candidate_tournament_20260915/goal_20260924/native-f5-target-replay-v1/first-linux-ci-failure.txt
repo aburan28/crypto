@@ -1,0 +1,19 @@
+Retained excerpt from GitHub Actions run 37103641900, disclosed-sat-replay
+(ubuntu-latest), PR #1282 head f51afc540fbcd6e144a385091e8981d6204cb949.
+The macOS replay and all other fourteen applicable checks passed on that head.
+
+2026-10-03T07:17:50Z
+test f5_target::tests::portable_replay_creates_once_and_never_reopens_the_control ... FAILED
+thread 'f5_target::tests::portable_replay_creates_once_and_never_reopens_the_control' (3489)
+panicked at src/bin/icprog/f5_target.rs:372:71:
+called `Result::unwrap()` on an `Err` value: "input is not a bounded regular file"
+test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 58 filtered out
+
+The original error did not identify the rejected file or its size. The wrapper's
+first read hashes its current checker executable under a 128 MiB limit. Large
+Linux debug/test ELF files are the suspected cause; all five direct mathematical
+controls passed. The revised wrapper permits up to 512 MiB for self-identification
+only and reports the checker path, actual file size and limit on failure. It
+keeps the bounded regular-file/symlink check. Final Linux CI must confirm the fix;
+no failed head is accepted, no mathematical claim is changed, and no scientific
+worker is invoked by this replay.

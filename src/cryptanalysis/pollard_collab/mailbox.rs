@@ -201,7 +201,7 @@ mod tests {
                 for ci in &published {
                     mbox.publish(ci).unwrap();
                 }
-                mbox.sync(&ctx, &mut state.lock().unwrap()).unwrap();
+                mbox.sync(&ctx, state.get_mut().unwrap()).unwrap();
             }
             let solved = peers
                 .iter()

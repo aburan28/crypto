@@ -1,0 +1,185 @@
+{
+  "phase": "audited",
+  "pid": 1240561,
+  "updated_unix": 1789555817.1684835,
+  "decision": {
+    "arithmetic_operation_speedup": null,
+    "beats_rho": false,
+    "classification": "engineering",
+    "confirmation": {
+      "candidate": "orbits2",
+      "candidate_over_baseline": 0.37528727028265907,
+      "ci95": [
+        0.32387886079328404,
+        0.45379932682481017
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.7090681629780772,
+      "native_wall_ci95": [
+        0.6853953419318904,
+        0.735404642949192
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.7412128835110796,
+        "n17a1": 0.6932735001722529,
+        "n19a0": 0.6745299826163696,
+        "n19a1": 0.699333499381182,
+        "n23a0": 0.7394465380899684
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.30522377454045285,
+        "n17a1": 0.32034325469238867,
+        "n19a0": 0.3731650300764449,
+        "n19a1": 0.3874683307060478,
+        "n23a0": 0.5265602540156255
+      },
+      "speedup": 2.664625419473513
+    },
+    "family_wide_or_complexity_claim": false,
+    "independent_replay": "fresh processes, frozen executable, same final cases; independent Python group and rank checker",
+    "instruction_speedup": 2.664625419473513,
+    "parity_definition": "Both candidate/rho upper paired 95% limits and every cell ratio <= 1.10, instructions and native process wall, confirmation and replay.",
+    "provisional_challenger": "orbits2",
+    "reasons": [],
+    "replay": {
+      "candidate": "orbits2",
+      "candidate_over_baseline": 0.3752879473789436,
+      "ci95": [
+        0.3238818950108542,
+        0.4537986030902634
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.7167039371146352,
+      "native_wall_ci95": [
+        0.6950992991673347,
+        0.7413428593957616
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.7476750890299618,
+        "n17a1": 0.7030649854248461,
+        "n19a0": 0.6842815258563488,
+        "n19a1": 0.705851877006004,
+        "n23a0": 0.7448043106108135
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.30523481612341435,
+        "n17a1": 0.32033946139071934,
+        "n19a0": 0.3731642089602555,
+        "n19a1": 0.38746762051597144,
+        "n23a0": 0.5265543150101544
+      },
+      "speedup": 2.6646206119437643
+    },
+    "rho_comparison": {
+      "candidate": "rho",
+      "candidate_over_baseline": 0.32576108298147877,
+      "ci95": [
+        0.27918453886509825,
+        0.3708878077069829
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.6441303922893636,
+      "native_wall_ci95": [
+        0.630552164466047,
+        0.6579165641472405
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.6666475308423411,
+        "n17a1": 0.6451346299367309,
+        "n19a0": 0.628446103293929,
+        "n19a1": 0.6523745665823423,
+        "n23a0": 0.6288647720373154
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.24450305075911183,
+        "n17a1": 0.30280601243811417,
+        "n19a0": 0.3521621110337013,
+        "n19a1": 0.36537083169907775,
+        "n23a0": 0.3850975199207761
+      },
+      "speedup": 3.0697343919895284
+    },
+    "rho_over_winner": 0.8680312623876687,
+    "rho_parity": false,
+    "rho_verdict_scope": "observed complete instruction cost; no asymptotic crossover claim",
+    "scope": "bounded public-hash ECDLP configuration tournament",
+    "status": "promoted",
+    "unit": "valgrind-3.22-amd64-Ir",
+    "winner": "orbits2",
+    "winner_over_rho": {
+      "confirmation": {
+        "candidate": "orbits2",
+        "candidate_over_baseline": 1.1520322404625483,
+        "ci95": [
+          1.0569038248993683,
+          1.2816089650364448
+        ],
+        "eligible": true,
+        "independent_curve_blocks": 5,
+        "native_wall_candidate_over_baseline": 1.100814635462103,
+        "native_wall_ci95": [
+          1.0710875049873299,
+          1.1469251895028603
+        ],
+        "native_wall_per_cell": {
+          "n13a0": 1.1118512395516138,
+          "n17a1": 1.0746183323630343,
+          "n19a0": 1.0733298831529026,
+          "n19a1": 1.0719815504838701,
+          "n23a0": 1.1758434737795922
+        },
+        "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+        "paired_cases": 60,
+        "per_cell": {
+          "n13a0": 1.2483434198175465,
+          "n17a1": 1.0579157663121326,
+          "n19a0": 1.0596399169152346,
+          "n19a1": 1.0604796472236453,
+          "n23a0": 1.3673426256392192
+        },
+        "speedup": 0.8680312623876686
+      },
+      "replay": {
+        "candidate": "orbits2",
+        "candidate_over_baseline": 1.152028239517908,
+        "ci95": [
+          1.056898243454399,
+          1.2816001972444366
+        ],
+        "eligible": true,
+        "independent_curve_blocks": 5,
+        "native_wall_candidate_over_baseline": 1.0933528729428061,
+        "native_wall_ci95": [
+          1.0649139897111202,
+          1.1419276756327945
+        ],
+        "native_wall_per_cell": {
+          "n13a0": 1.0973870471088283,
+          "n17a1": 1.066541750655926,
+          "n19a0": 1.063870112260085,
+          "n19a1": 1.0680791420183848,
+          "n23a0": 1.1748218612345993
+        },
+        "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+        "paired_cases": 60,
+        "per_cell": {
+          "n13a0": 1.2483491862287344,
+          "n17a1": 1.0579041139377676,
+          "n19a0": 1.0596340974456002,
+          "n19a1": 1.0604769935580869,
+          "n23a0": 1.367338557532883
+        },
+        "speedup": 0.8680342770229942
+      }
+    }
+  }
+}

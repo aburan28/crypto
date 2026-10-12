@@ -1,0 +1,16 @@
+      chain         reference K_0/2^9   m=3  frozen   1,142,867  rerun   1,142,867  MATCH
+      chain         reference K_0/2^13  m=3  frozen   9,743,787  rerun   9,743,787  MATCH
+NAMED chain         reference K_0/2^9   m=4  frozen   2,868,312  rerun   2,868,312  MATCH
+      chain         candidate K_0/2^9   m=3  frozen     620,306  rerun     620,306  MATCH
+      chain         candidate K_0/2^13  m=3  frozen   6,009,659  rerun   6,009,659  MATCH
+NAMED chain         candidate K_0/2^9   m=4  frozen     917,450  rerun     917,450  MATCH
+      chain-holdout reference K_1/2^9   m=4  frozen   3,199,188  rerun   3,199,188  MATCH
+      chain-holdout reference K_0/2^15  m=4  frozen  21,561,148  rerun  21,561,148  MATCH
+NAMED chain-holdout reference K_1/2^15  m=4  frozen 345,384,853  rerun 345,384,853  MATCH
+      chain-holdout reference K_0/2^13  m=3  frozen   9,121,538  rerun   9,121,538  MATCH
+      chain-holdout candidate K_1/2^9   m=4  frozen   1,168,831  rerun   1,168,831  MATCH
+      chain-holdout candidate K_0/2^15  m=4  frozen   5,648,706  rerun   5,648,706  MATCH
+NAMED chain-holdout candidate K_1/2^15  m=4  frozen  39,537,587  rerun  39,537,587  MATCH
+      chain-holdout candidate K_0/2^13  m=3  frozen   5,950,481  rerun   5,950,481  MATCH
+
+named cells reproduce exactly: True; every row of both ladders: True

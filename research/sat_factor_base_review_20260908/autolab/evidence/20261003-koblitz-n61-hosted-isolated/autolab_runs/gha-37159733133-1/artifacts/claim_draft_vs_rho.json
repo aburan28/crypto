@@ -1,0 +1,105 @@
+{
+  "K": 700,
+  "autolab_run_id": "gha-37159733133-1",
+  "beat_id": "koblitz.compact_orbit.n61_panel",
+  "claim_boundary": "L=16384 batched whole-process diagnostic; ineligible for the single-target online vs_rho schema.",
+  "claim_boundary_non_claims": [
+    "public synthetic known-answer fixtures only",
+    "no key recovery",
+    "no asymptotic sub-rho claim; both arms scale as sqrt(L*r/n) at optimal K",
+    "multi-target L=16384 batch: diagnostic, not the one-target primary comparison",
+    "comparator is the frozen KS v2 batched rho (koblitz_rho_batch_ks_v2_n61), superseded by strong rho R3 and not listed in measurement_schema.vs_rho.rho_reference_minimum",
+    "same-host replay; independent-host validation still required"
+  ],
+  "comparator": "koblitz_rho_batch_ks_v2_n61",
+  "executable_or_source_hash": {
+    "git_head": "87055a99fd281e889a581366446a0a04049fb04a",
+    "ic_binary_sha256": "aed451b2ef222b7193142eb455131454ed35945a800d52b88f100a25c8751a5f",
+    "koblitz_orbit_dlp_fast.rs_sha256": "8dea682ac4b12413c7b43a8849d6972b682dd0aa605d0ee4f41b7a4c1881ab75",
+    "koblitz_rho_batch_ks_v2_n61.rs_sha256": "019b2e2da563ad5212e46a24ed6c0f2f6e90aab083b3769260d6b056bd4095cf",
+    "rho_binary_sha256": "b6985e8fb90aca138f7e7f5905a6f4190b7aed782d45dab2f1998c7d49fb739d",
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+  },
+  "fixture_hash": {
+    "base_hash": "ea937fd33073c3c855cd171817ca016684dec9d175df3e52891faaffdcd7c626",
+    "disjoint": true,
+    "eval": {
+      "name": "n61-ks-growing-16384-v1",
+      "scalars_sha256": "e9d4a883bd0a80b6386bb27e2936da1b5fb38b11ec5bf65389b507fffbe3b65e",
+      "targets": 16384
+    },
+    "tune": {
+      "name": "n61-ks-growing-tune-16384-v1",
+      "scalars_sha256": "8ad8c3749678c672b596c9c1b03091285f10e6c9383ce26a8d99b8a5237a2102",
+      "targets": 16384
+    }
+  },
+  "host_id": {
+    "cpu": "x86_64",
+    "cpu_count": 4,
+    "machine": "x86_64",
+    "node": "runnervm8df0l",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "ic_scalar_verified": true,
+  "independent_replay_pointer": [
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-37159733133-1/artifacts/replay_ic.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-37159733133-1/artifacts/replay_rho_b0.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-37159733133-1/artifacts/replay_rho_b1.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-37159733133-1/artifacts/replay_rho_b2.json"
+  ],
+  "independent_validation": false,
+  "instructions_retired_ratio_compact_over_rho": null,
+  "n_or_bits": {
+    "a": 0,
+    "n": 61,
+    "subgroup_order_bits": 47.21
+  },
+  "regime": "koblitz",
+  "resource_caps": {
+    "isolation": "children pinned to CPU 3 with taskset; wrap this command in tools/isolated_bench.py reserve for section-10 evidence",
+    "memory": "no cap; K candidates skipped when the estimated IC RSS exceeded available memory",
+    "threads": 1
+  },
+  "result_class": "multi_target_batch_diagnostic",
+  "rho_scalar_verified": true,
+  "schema_version": 2,
+  "seeds": {
+    "batch_seed": 531310,
+    "ic_rank_seed": 7,
+    "rho_env": {
+      "KIC_RHO_DP_BITS": "4"
+    }
+  },
+  "stage": "vs_rho",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "target_count": 16384,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "timing_class": "whole_process_wall",
+  "user_cpu_ratio_compact_over_rho": {
+    "median": 0.3192748541881034,
+    "range": [
+      0.31925136802151516,
+      0.31971493678325524
+    ],
+    "values": [
+      0.3192748541881034,
+      0.31925136802151516,
+      0.31971493678325524
+    ]
+  },
+  "verdict": "BATCH_DIAGNOSTIC_ONLY_NOT_SINGLE_TARGET",
+  "wall_ratio_compact_over_rho": {
+    "median": 0.32255700065001136,
+    "range": [
+      0.32250441577250427,
+      0.32299912218697574
+    ],
+    "values": [
+      0.32255700065001136,
+      0.32250441577250427,
+      0.32299912218697574
+    ]
+  }
+}

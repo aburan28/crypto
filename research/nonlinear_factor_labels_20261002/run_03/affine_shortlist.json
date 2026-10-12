@@ -1,0 +1,938 @@
+[
+  {
+    "class_index": 80,
+    "permutation": [
+      0,
+      4,
+      3,
+      7,
+      1,
+      5,
+      2,
+      6
+    ],
+    "permutation_code": 13278944,
+    "anf_degree": 1,
+    "affine": true,
+    "cases": [
+      {
+        "split": "discovery",
+        "draw": 3,
+        "input_degree": 3,
+        "input_terms": 461,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 7658,
+          "cols": 6513,
+          "rank": 5525,
+          "refuted": false,
+          "vars_determined": 1,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 26866,
+          "cols": 14642,
+          "rank": 14228,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 1925
+      },
+      {
+        "split": "discovery",
+        "draw": 4,
+        "input_degree": 3,
+        "input_terms": 489,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 5838,
+          "cols": 6276,
+          "rank": 4786,
+          "refuted": false,
+          "vars_determined": 0,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 22498,
+          "cols": 14396,
+          "rank": 13423,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 6642
+      }
+    ]
+  },
+  {
+    "class_index": 73,
+    "permutation": [
+      0,
+      4,
+      1,
+      5,
+      3,
+      7,
+      2,
+      6
+    ],
+    "permutation_code": 13351520,
+    "anf_degree": 1,
+    "affine": true,
+    "cases": [
+      {
+        "split": "discovery",
+        "draw": 3,
+        "input_degree": 3,
+        "input_terms": 461,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 7658,
+          "cols": 6513,
+          "rank": 5525,
+          "refuted": false,
+          "vars_determined": 1,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 26866,
+          "cols": 14642,
+          "rank": 14228,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 2035
+      },
+      {
+        "split": "discovery",
+        "draw": 4,
+        "input_degree": 3,
+        "input_terms": 489,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 5838,
+          "cols": 6276,
+          "rank": 4786,
+          "refuted": false,
+          "vars_determined": 0,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 22498,
+          "cols": 14396,
+          "rank": 13423,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 6532
+      }
+    ]
+  },
+  {
+    "class_index": 56,
+    "permutation": [
+      0,
+      3,
+      4,
+      7,
+      1,
+      2,
+      5,
+      6
+    ],
+    "permutation_code": 13967128,
+    "anf_degree": 1,
+    "affine": true,
+    "cases": [
+      {
+        "split": "discovery",
+        "draw": 3,
+        "input_degree": 3,
+        "input_terms": 461,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 7658,
+          "cols": 6513,
+          "rank": 5525,
+          "refuted": false,
+          "vars_determined": 1,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 26866,
+          "cols": 14642,
+          "rank": 14228,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 2239
+      },
+      {
+        "split": "discovery",
+        "draw": 4,
+        "input_degree": 3,
+        "input_terms": 489,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 5838,
+          "cols": 6276,
+          "rank": 4786,
+          "refuted": false,
+          "vars_determined": 0,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 22498,
+          "cols": 14396,
+          "rank": 13423,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 6192
+      }
+    ]
+  },
+  {
+    "class_index": 48,
+    "permutation": [
+      0,
+      3,
+      1,
+      2,
+      4,
+      7,
+      5,
+      6
+    ],
+    "permutation_code": 14140504,
+    "anf_degree": 1,
+    "affine": true,
+    "cases": [
+      {
+        "split": "discovery",
+        "draw": 3,
+        "input_degree": 3,
+        "input_terms": 461,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 7658,
+          "cols": 6513,
+          "rank": 5525,
+          "refuted": false,
+          "vars_determined": 1,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 26866,
+          "cols": 14642,
+          "rank": 14228,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 2253
+      },
+      {
+        "split": "discovery",
+        "draw": 4,
+        "input_degree": 3,
+        "input_terms": 489,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 5838,
+          "cols": 6276,
+          "rank": 4786,
+          "refuted": false,
+          "vars_determined": 0,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 22498,
+          "cols": 14396,
+          "rank": 13423,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 5760
+      }
+    ]
+  },
+  {
+    "class_index": 9,
+    "permutation": [
+      0,
+      1,
+      4,
+      5,
+      3,
+      2,
+      7,
+      6
+    ],
+    "permutation_code": 14498568,
+    "anf_degree": 1,
+    "affine": true,
+    "cases": [
+      {
+        "split": "discovery",
+        "draw": 3,
+        "input_degree": 3,
+        "input_terms": 461,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 7658,
+          "cols": 6513,
+          "rank": 5525,
+          "refuted": false,
+          "vars_determined": 1,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 26866,
+          "cols": 14642,
+          "rank": 14228,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 1994
+      },
+      {
+        "split": "discovery",
+        "draw": 4,
+        "input_degree": 3,
+        "input_terms": 489,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 5838,
+          "cols": 6276,
+          "rank": 4786,
+          "refuted": false,
+          "vars_determined": 0,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 22498,
+          "cols": 14396,
+          "rank": 13423,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 7221
+      }
+    ]
+  },
+  {
+    "class_index": 4,
+    "permutation": [
+      0,
+      1,
+      3,
+      2,
+      4,
+      5,
+      7,
+      6
+    ],
+    "permutation_code": 14599368,
+    "anf_degree": 1,
+    "affine": true,
+    "cases": [
+      {
+        "split": "discovery",
+        "draw": 3,
+        "input_degree": 3,
+        "input_terms": 461,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 7658,
+          "cols": 6513,
+          "rank": 5525,
+          "refuted": false,
+          "vars_determined": 1,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 26866,
+          "cols": 14642,
+          "rank": 14228,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 2771
+      },
+      {
+        "split": "discovery",
+        "draw": 4,
+        "input_degree": 3,
+        "input_terms": 489,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 5838,
+          "cols": 6276,
+          "rank": 4786,
+          "refuted": false,
+          "vars_determined": 0,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 22498,
+          "cols": 14396,
+          "rank": 13423,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 7336
+      }
+    ]
+  },
+  {
+    "class_index": 18,
+    "permutation": [
+      0,
+      1,
+      6,
+      7,
+      4,
+      5,
+      2,
+      3
+    ],
+    "permutation_code": 6999944,
+    "anf_degree": 1,
+    "affine": true,
+    "cases": [
+      {
+        "split": "discovery",
+        "draw": 3,
+        "input_degree": 3,
+        "input_terms": 477,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 7658,
+          "cols": 6513,
+          "rank": 5525,
+          "refuted": false,
+          "vars_determined": 1,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 26866,
+          "cols": 14642,
+          "rank": 14228,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 2328
+      },
+      {
+        "split": "discovery",
+        "draw": 4,
+        "input_degree": 3,
+        "input_terms": 480,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 5838,
+          "cols": 6276,
+          "rank": 4786,
+          "refuted": false,
+          "vars_determined": 0,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 22498,
+          "cols": 14396,
+          "rank": 13423,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 6650
+      }
+    ]
+  },
+  {
+    "class_index": 10,
+    "permutation": [
+      0,
+      1,
+      4,
+      5,
+      6,
+      7,
+      2,
+      3
+    ],
+    "permutation_code": 7072520,
+    "anf_degree": 1,
+    "affine": true,
+    "cases": [
+      {
+        "split": "discovery",
+        "draw": 3,
+        "input_degree": 3,
+        "input_terms": 477,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 7658,
+          "cols": 6513,
+          "rank": 5525,
+          "refuted": false,
+          "vars_determined": 1,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 26866,
+          "cols": 14642,
+          "rank": 14228,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 2558
+      },
+      {
+        "split": "discovery",
+        "draw": 4,
+        "input_degree": 3,
+        "input_terms": 480,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 5838,
+          "cols": 6276,
+          "rank": 4786,
+          "refuted": false,
+          "vars_determined": 0,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 22498,
+          "cols": 14396,
+          "rank": 13423,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 6361
+      }
+    ]
+  },
+  {
+    "class_index": 122,
+    "permutation": [
+      0,
+      6,
+      1,
+      7,
+      4,
+      2,
+      5,
+      3
+    ],
+    "permutation_code": 7687792,
+    "anf_degree": 1,
+    "affine": true,
+    "cases": [
+      {
+        "split": "discovery",
+        "draw": 3,
+        "input_degree": 3,
+        "input_terms": 477,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 7658,
+          "cols": 6513,
+          "rank": 5525,
+          "refuted": false,
+          "vars_determined": 1,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 26866,
+          "cols": 14642,
+          "rank": 14228,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 2672
+      },
+      {
+        "split": "discovery",
+        "draw": 4,
+        "input_degree": 3,
+        "input_terms": 480,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 5838,
+          "cols": 6276,
+          "rank": 4786,
+          "refuted": false,
+          "vars_determined": 0,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 22498,
+          "cols": 14396,
+          "rank": 13423,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 6349
+      }
+    ]
+  },
+  {
+    "class_index": 132,
+    "permutation": [
+      0,
+      6,
+      4,
+      2,
+      1,
+      7,
+      5,
+      3
+    ],
+    "permutation_code": 7836976,
+    "anf_degree": 1,
+    "affine": true,
+    "cases": [
+      {
+        "split": "discovery",
+        "draw": 3,
+        "input_degree": 3,
+        "input_terms": 477,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 7658,
+          "cols": 6513,
+          "rank": 5525,
+          "refuted": false,
+          "vars_determined": 1,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 26866,
+          "cols": 14642,
+          "rank": 14228,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 2264
+      },
+      {
+        "split": "discovery",
+        "draw": 4,
+        "input_degree": 3,
+        "input_terms": 480,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 5838,
+          "cols": 6276,
+          "rank": 4786,
+          "refuted": false,
+          "vars_determined": 0,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 22498,
+          "cols": 14396,
+          "rank": 13423,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 5746
+      }
+    ]
+  },
+  {
+    "class_index": 74,
+    "permutation": [
+      0,
+      4,
+      1,
+      5,
+      6,
+      2,
+      7,
+      3
+    ],
+    "permutation_code": 8219232,
+    "anf_degree": 1,
+    "affine": true,
+    "cases": [
+      {
+        "split": "discovery",
+        "draw": 3,
+        "input_degree": 3,
+        "input_terms": 477,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 7658,
+          "cols": 6513,
+          "rank": 5525,
+          "refuted": false,
+          "vars_determined": 1,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 26866,
+          "cols": 14642,
+          "rank": 14228,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 2678
+      },
+      {
+        "split": "discovery",
+        "draw": 4,
+        "input_degree": 3,
+        "input_terms": 480,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 5838,
+          "cols": 6276,
+          "rank": 4786,
+          "refuted": false,
+          "vars_determined": 0,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 22498,
+          "cols": 14396,
+          "rank": 13423,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 7909
+      }
+    ]
+  },
+  {
+    "class_index": 88,
+    "permutation": [
+      0,
+      4,
+      6,
+      2,
+      1,
+      5,
+      7,
+      3
+    ],
+    "permutation_code": 8295840,
+    "anf_degree": 1,
+    "affine": true,
+    "cases": [
+      {
+        "split": "discovery",
+        "draw": 3,
+        "input_degree": 3,
+        "input_terms": 477,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 7658,
+          "cols": 6513,
+          "rank": 5525,
+          "refuted": false,
+          "vars_determined": 1,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 26866,
+          "cols": 14642,
+          "rank": 14228,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 2236
+      },
+      {
+        "split": "discovery",
+        "draw": 4,
+        "input_degree": 3,
+        "input_terms": 480,
+        "resolution_degree_through_6": 6,
+        "degree_5": {
+          "degree": 5,
+          "rows": 5838,
+          "cols": 6276,
+          "rank": 4786,
+          "refuted": false,
+          "vars_determined": 0,
+          "vars_occurring": 16,
+          "resolves": false
+        },
+        "degree_6": {
+          "degree": 6,
+          "rows": 22498,
+          "cols": 14396,
+          "rank": 13423,
+          "refuted": true,
+          "vars_determined": 16,
+          "vars_occurring": 16,
+          "resolves": true
+        },
+        "exhaustive_equivalence": true,
+        "exhaustive_solution_count": 0,
+        "elapsed_ms": 6655
+      }
+    ]
+  }
+]

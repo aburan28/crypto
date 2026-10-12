@@ -1,0 +1,69 @@
+{
+  "scope": "current-main worker correctness; no new performance claim",
+  "results": [
+    {
+      "mode": "fixture",
+      "status": "fixture",
+      "certificate": {
+        "fixture_matches_frozen_input": true
+      }
+    },
+    {
+      "mode": "ic",
+      "status": "complete",
+      "certificate": {
+        "verified_targets": 16,
+        "verified_relations": 64,
+        "fresh_rows": 63,
+        "rank": 7,
+        "signed_base_size": 182,
+        "factor_base_sha256": "0ea508510aa4e601aeaff85fe5dabc022ec630ead3844f0e2eaf6b2d06002479",
+        "solutions": [
+          "277",
+          "254",
+          "839",
+          "208",
+          "886",
+          "235",
+          "1692",
+          "582",
+          "162",
+          "555",
+          "1610",
+          "304",
+          "1824",
+          "454",
+          "82",
+          "313"
+        ]
+      }
+    },
+    {
+      "mode": "rho",
+      "status": "complete",
+      "certificate": {
+        "verified_targets": 16,
+        "verified_relations": 0,
+        "rank": null,
+        "solutions": [
+          "277",
+          "254",
+          "839",
+          "208",
+          "886",
+          "235",
+          "1692",
+          "582",
+          "162",
+          "555",
+          "1610",
+          "304",
+          "1824",
+          "454",
+          "82",
+          "313"
+        ]
+      }
+    }
+  ]
+}

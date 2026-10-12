@@ -1,0 +1,17 @@
+{
+  "all_calls_ok": true,
+  "archive_bytes": 27268,
+  "archive_sha256": "9bb9cae4d46f39ae167d46abd87c9e8da0408bb0b6d150d32df69ae39e2aee42",
+  "binary_sha256": "ce18ab5797246aa8fc85ddc02a44e07aab26a2b0e0a9be3d8b2fbc2df6d60440",
+  "calls": 44,
+  "candidate_patch_sha256": "d2ff4c30fa2170326956ec6903a4d465a7374061cd107cd62515b4da6ac63136",
+  "candidate_source_head": "8ae66eb764e10e669c1ce7d387bf977a68b23abf",
+  "raw_bytes": 432984,
+  "raw_sha256": "192f7c121662eb3be1ca51ac06e23ee537e38b8f3222dca88e8252ce57c22693",
+  "source_sha256": {
+    "examples/f4_f2_bench.rs": "3f2ab0817ba5679665aa6703880df03be0d74a0a10689ba3ddd77eb373b19aff",
+    "src/cryptanalysis/gf2_elim.rs": "6fd3f10ef8e681490784c624e703eeb8fa887c5817ec9bdf34844e3f943c7f5c",
+    "src/cryptanalysis/matrix_f5_f2.rs": "df560a6ff568de1ec586f364dc7357650d444d59b0f67f699f8400afdeaffaef"
+  },
+  "status": "complete"
+}

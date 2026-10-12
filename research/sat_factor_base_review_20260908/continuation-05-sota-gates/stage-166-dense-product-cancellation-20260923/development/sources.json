@@ -1,0 +1,37 @@
+{
+  "arms": [
+    "clean-control",
+    "dense-candidate-r1",
+    "dense-candidate-r2",
+    "dense-candidate-r3",
+    "dense-control-r1",
+    "dense-control-r2",
+    "dense-control-r3",
+    "dense-v1-candidate-r1",
+    "dense-v1-control-r1",
+    "m4ri-block10",
+    "m4ri-block6",
+    "m4ri-block7",
+    "m4ri-block8",
+    "m4ri-block9"
+  ],
+  "binary_bindings": {
+    "clean-control": {
+      "sha256": "013d3525557a7e3c811f11b1b189d52aaafc782512c35e6c3a5f98947652ba00",
+      "source_commit": "ac3e385cec9c90b489017f6012ebe0b50ca06405"
+    },
+    "dense-final-pairs": {
+      "sha256": "cc7afb5e856c48dc175249eaf446484256b4f78f09137a0524bbb29957755a92",
+      "source_state": "uncommitted implementation-equivalent precursor to ac3e385c; final reporting fields absent"
+    },
+    "dense-v1-pair": {
+      "sha256": null,
+      "source_state": "rejected exploratory binary overwritten before hashing"
+    },
+    "m4ri-block2-through10-subset": {
+      "sha256": "9d2bbc2a0fc567dc771c91e9c1bf7d03473be55784fa1f3f300f03eaf5c46f8f",
+      "source_commit": "341e46d02d49da94ca24837f7116c812ff2299d3"
+    }
+  },
+  "schema": "koblitz_stage166_development_sources.v1"
+}

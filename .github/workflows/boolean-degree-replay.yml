@@ -1,0 +1,23 @@
+name: Boolean degree evidence replay
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r research/boolean_degree_replay_20260922/requirements.txt
+      - run: python -m unittest discover -s research/boolean_degree_replay_20260922 -p test_check.py -v
+      - run: python research/boolean_degree_replay_20260922/check.py
+      - run: python research/boolean_degree_replay_20260922/check.py --sympy
+      - name: Frozen evidence remains unchanged
+        run: git diff --exit-code -- research/boolean_degree_replay_20260922

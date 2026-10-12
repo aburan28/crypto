@@ -1,0 +1,37 @@
+{
+  "name": "weight_at_most_two",
+  "description": "weight 0, 1 and 2 abscissae carrying points",
+  "base_size": 4336,
+  "pairs_enumerated": 9402616,
+  "pairs_total": 9402616,
+  "complete": true,
+  "elapsed_seconds": 493.744,
+  "pair_rate_per_second": 19043.5,
+  "relations_found": 1,
+  "relations_verified_on_curve": 1,
+  "relations": [
+    {
+      "abscissae": [
+        "0x0",
+        "0x1",
+        "0x1"
+      ],
+      "points": [
+        [
+          "0x0",
+          "0x1"
+        ],
+        [
+          "0x1",
+          "0x0"
+        ],
+        [
+          "0x1",
+          "0x0"
+        ]
+      ]
+    }
+  ],
+  "expected_by_yield_law": 1.996398015801893e-29,
+  "log2_expected_by_yield_law": -95.33851537665954
+}

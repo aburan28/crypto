@@ -1,0 +1,83 @@
+{
+  "status": "passed",
+  "gpu_executed": false,
+  "compilations": [
+    {
+      "arch": "compute_89",
+      "m": 83,
+      "fast_square": 0,
+      "returncode": 0,
+      "log": "",
+      "ptx_bytes": 92132,
+      "ptx_sha256": "32b419980eb553e3ca4e204e71e14cb19bcfbf9900a8833281cf84badaff3c73"
+    },
+    {
+      "arch": "compute_89",
+      "m": 83,
+      "fast_square": 1,
+      "returncode": 0,
+      "log": "",
+      "ptx_bytes": 76318,
+      "ptx_sha256": "4d42bff1edc787581c7fc8bb2cfda1a20f391bcbd0d8263711136d4d62be8754"
+    },
+    {
+      "arch": "compute_89",
+      "m": 131,
+      "fast_square": 0,
+      "returncode": 0,
+      "log": "",
+      "ptx_bytes": 114042,
+      "ptx_sha256": "0ff998c5a5568368c6d980cb4b207bb4316134146ba5a20b6e0522ec7d3880db"
+    },
+    {
+      "arch": "compute_89",
+      "m": 131,
+      "fast_square": 1,
+      "returncode": 0,
+      "log": "",
+      "ptx_bytes": 94960,
+      "ptx_sha256": "76b07b4026d7ce27def2740ba9c3278395e6fc6457329d7bcb124dedf62e295f"
+    },
+    {
+      "arch": "compute_120",
+      "m": 83,
+      "fast_square": 0,
+      "returncode": 0,
+      "log": "",
+      "ptx_bytes": 90969,
+      "ptx_sha256": "bb6aa90e5bd8f5599023714f847d0d9a4336b42baa8b28ed792216d6c4ea2c53"
+    },
+    {
+      "arch": "compute_120",
+      "m": 83,
+      "fast_square": 1,
+      "returncode": 0,
+      "log": "",
+      "ptx_bytes": 78625,
+      "ptx_sha256": "efbe3e0bcb43e159e47d16479c5edb3bca6e0c5c260e761741bf62ab0b659675"
+    },
+    {
+      "arch": "compute_120",
+      "m": 131,
+      "fast_square": 0,
+      "returncode": 0,
+      "log": "",
+      "ptx_bytes": 112243,
+      "ptx_sha256": "0969466a2f08ccd6e606520753b5eae77ed3d5e5fbd1678053bee77e5e373a4e"
+    },
+    {
+      "arch": "compute_120",
+      "m": 131,
+      "fast_square": 1,
+      "returncode": 0,
+      "log": "",
+      "ptx_bytes": 93833,
+      "ptx_sha256": "d680858bc68bb5f8be52ef8040b449ce51d9c7412c1b953cb100cb980828b795"
+    }
+  ],
+  "source_sha256": "a77b4fb391185946013ff129c42637ff362567c88fb76d4c5174bf6a4eff8036",
+  "nvrtc_version": [
+    12,
+    8
+  ]
+}

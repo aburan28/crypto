@@ -1,0 +1,679 @@
+{
+  "available_positive_control": {
+    "artifacts": {
+      "metrics": {
+        "bytes": 543,
+        "path": "development/final-runs/n31-l5/metrics.json",
+        "sha256": "a98ed3efcdc6e6c0778821c8efdb30e04f0be0fec95f723ea5fc2b894260a892"
+      },
+      "stderr": {
+        "bytes": 0,
+        "path": "development/final-runs/n31-l5/stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 4948,
+        "path": "development/final-runs/n31-l5/stdout.json",
+        "sha256": "12ed208434bc591555e13d27e5b5ec2f8260ce51ed8692065839b0dd04c504e8"
+      }
+    },
+    "process": {
+      "command": [
+        "/Volumes/SSD990/koblitz-ggmp-build25-c6205c56/bin/koblitz_public_factor_base_discovery",
+        "31",
+        "0",
+        "3",
+        "5"
+      ],
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 2850816,
+        "single_core_seconds": 0.012863,
+        "system_seconds": 0.001264,
+        "total_core_seconds": 0.012863,
+        "user_seconds": 0.011599,
+        "wall_seconds": 0.014588291000109166
+      },
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 120.0
+    },
+    "report": {
+      "a": 0,
+      "candidates": [
+        {
+          "abscissae": 32,
+          "dimension": 5,
+          "divisor_indices": [
+            1
+          ],
+          "divisor_polynomial": 37,
+          "linearised_exponents": [
+            0,
+            2,
+            5
+          ],
+          "m_cofactor_admissible": true,
+          "projected_points": 63,
+          "projected_signed_frobenius_orbits": 1,
+          "rational_points": 63,
+          "signed_frobenius_orbits_before_projection": 2,
+          "timing_ns": {
+            "cofactor_admission": 1391833,
+            "factor_base_construction": 106250,
+            "projection_census": 1534500
+          }
+        },
+        {
+          "abscissae": 32,
+          "dimension": 5,
+          "divisor_indices": [
+            2
+          ],
+          "divisor_polynomial": 41,
+          "linearised_exponents": [
+            0,
+            3,
+            5
+          ],
+          "m_cofactor_admissible": true,
+          "projected_points": 63,
+          "projected_signed_frobenius_orbits": 1,
+          "rational_points": 63,
+          "signed_frobenius_orbits_before_projection": 2,
+          "timing_ns": {
+            "cofactor_admission": 1447709,
+            "factor_base_construction": 111959,
+            "projection_census": 1525833
+          }
+        },
+        {
+          "abscissae": 32,
+          "dimension": 5,
+          "divisor_indices": [
+            3
+          ],
+          "divisor_polynomial": 47,
+          "linearised_exponents": [
+            0,
+            1,
+            2,
+            3,
+            5
+          ],
+          "m_cofactor_admissible": false,
+          "projected_points": 1,
+          "projected_signed_frobenius_orbits": 0,
+          "rational_points": 1,
+          "signed_frobenius_orbits_before_projection": 1,
+          "timing_ns": {
+            "cofactor_admission": 35291,
+            "factor_base_construction": 109667,
+            "projection_census": 4084
+          }
+        },
+        {
+          "abscissae": 32,
+          "dimension": 5,
+          "divisor_indices": [
+            4
+          ],
+          "divisor_polynomial": 55,
+          "linearised_exponents": [
+            0,
+            1,
+            2,
+            4,
+            5
+          ],
+          "m_cofactor_admissible": false,
+          "projected_points": 1,
+          "projected_signed_frobenius_orbits": 0,
+          "rational_points": 1,
+          "signed_frobenius_orbits_before_projection": 1,
+          "timing_ns": {
+            "cofactor_admission": 31958,
+            "factor_base_construction": 102625,
+            "projection_census": 3083
+          }
+        },
+        {
+          "abscissae": 32,
+          "dimension": 5,
+          "divisor_indices": [
+            5
+          ],
+          "divisor_polynomial": 59,
+          "linearised_exponents": [
+            0,
+            1,
+            3,
+            4,
+            5
+          ],
+          "m_cofactor_admissible": false,
+          "projected_points": 1,
+          "projected_signed_frobenius_orbits": 0,
+          "rational_points": 1,
+          "signed_frobenius_orbits_before_projection": 1,
+          "timing_ns": {
+            "cofactor_admission": 32166,
+            "factor_base_construction": 107792,
+            "projection_census": 4292
+          }
+        },
+        {
+          "abscissae": 32,
+          "dimension": 5,
+          "divisor_indices": [
+            6
+          ],
+          "divisor_polynomial": 61,
+          "linearised_exponents": [
+            0,
+            2,
+            3,
+            4,
+            5
+          ],
+          "m_cofactor_admissible": true,
+          "projected_points": 63,
+          "projected_signed_frobenius_orbits": 1,
+          "rational_points": 63,
+          "signed_frobenius_orbits_before_projection": 2,
+          "timing_ns": {
+            "cofactor_admission": 1461542,
+            "factor_base_construction": 115875,
+            "projection_census": 1431458
+          }
+        }
+      ],
+      "cofactor": "1492",
+      "complete_factor_degrees": [
+        1,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "factor_degrees": [
+        1,
+        5,
+        5,
+        5,
+        5,
+        5,
+        5
+      ],
+      "factor_enumeration_degree_cap": 24,
+      "forbidden_inputs": {
+        "discrete_log_labels_constructed": false,
+        "relation_yield_used": false,
+        "solver_timing_used": false,
+        "target_constructed": false,
+        "target_subgroup_enumerated": false
+      },
+      "group_order": "2147574356",
+      "m": 3,
+      "n": 31,
+      "requested_dimension": 5,
+      "requested_divisor_exists": true,
+      "schema": "koblitz_public_factor_base_discovery.v1",
+      "selected": {
+        "abscissae": 32,
+        "dimension": 5,
+        "divisor_indices": [
+          1
+        ],
+        "divisor_polynomial": 37,
+        "linearised_exponents": [
+          0,
+          2,
+          5
+        ],
+        "m_cofactor_admissible": true,
+        "projected_points": 63,
+        "projected_signed_frobenius_orbits": 1,
+        "rational_points": 63,
+        "signed_frobenius_orbits_before_projection": 2,
+        "timing_ns": {
+          "cofactor_admission": 1391833,
+          "factor_base_construction": 106250,
+          "projection_census": 1534500
+        }
+      },
+      "selection_rule": "cofactor admissible; maximize rational points; minimize projected signed-Frobenius columns; lexicographically lower divisor indices",
+      "sizing_gate": {
+        "m_times_dimension": 15,
+        "n": 31,
+        "passes": false
+      },
+      "status": "selected",
+      "subgroup_order": "1439393",
+      "timing_ns": {
+        "curve_and_subgroup_construction": 1316542,
+        "end_to_end": 10934792
+      }
+    }
+  },
+  "campaign_accounting": {
+    "complete_campaign_cost": null,
+    "measured_lower_bound": {
+      "peak_rss_bytes": 6310576128,
+      "resource_components": 328,
+      "summed_wall_seconds": 10289.87293583198,
+      "total_core_seconds": 20135.225658000003
+    },
+    "reason_complete_is_null": "the initial consumer environment failure and cached development compilation lack outer process receipts; every formal build, probe, and final consumer test is metered",
+    "stage172_measured_lower_bound": {
+      "peak_rss_bytes": 6310576128,
+      "resource_components": 316,
+      "summed_wall_seconds": 9893.536146749957,
+      "total_core_seconds": 19752.791276000004
+    },
+    "stage173_incremental_measured": {
+      "peak_rss_bytes": 1714323456,
+      "resource_components": 12,
+      "summed_wall_seconds": 396.33678908202273,
+      "total_core_seconds": 382.43438199999997
+    }
+  },
+  "claim_boundary": "This proves that the GGMP divisor-kernel family has no factor base at the exact n=59, ell=9, m=3 cell and distinguishes that mathematical absence from the implementation's degree-24 factor-enumeration cap. It is not a GGMP speed, licensed-Magma result, full solver panel, crossover, novelty review, or SOTA.",
+  "clean_build": {
+    "artifacts": {
+      "metrics": {
+        "bytes": 489,
+        "path": "development/final-clean-build/metrics.json",
+        "sha256": "67c2d6bd6e49f1fc1dc88b4ecf18799eaa01e08116de3ce1d7d03979a753f687"
+      },
+      "script": {
+        "bytes": 1294,
+        "path": "development/clean-build-c6205c56.sh",
+        "sha256": "1628faa050f54fa9664744b853872136f7781915bb1d958a86fa9cf1414d570e"
+      },
+      "stderr": {
+        "bytes": 34116,
+        "path": "development/final-clean-build/stderr",
+        "sha256": "43070d8d8d7b3b0e8a7a0f6847fcc2bedbf3f5fe2ad59ba4bf285521e15c48c0"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "development/final-clean-build/stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "cold_build_plus_same_cell_probe": {
+      "peak_rss_bytes": 1714323456,
+      "total_core_seconds": 164.504533,
+      "wall_seconds": 170.52024133400118
+    },
+    "process": {
+      "command": [
+        "/Volumes/SSD990/kic-stage173-ggmp-dev/clean-build-c6205c56.sh"
+      ],
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 1714323456,
+        "single_core_seconds": 164.461985,
+        "system_seconds": 5.161906,
+        "total_core_seconds": 164.461985,
+        "user_seconds": 159.300079,
+        "wall_seconds": 170.01487716699194
+      },
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 1800.0
+    }
+  },
+  "date": "2026-09-23",
+  "enumeration_cap_control": {
+    "artifacts": {
+      "metrics": {
+        "bytes": 543,
+        "path": "development/final-runs/n59-l58/metrics.json",
+        "sha256": "9e65473d8dfc11814ebe70680af791b94807a66f0212eff0c16d00e15f62cee4"
+      },
+      "stderr": {
+        "bytes": 0,
+        "path": "development/final-runs/n59-l58/stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 1027,
+        "path": "development/final-runs/n59-l58/stdout.json",
+        "sha256": "c86ad2f3c03ecf32d74d0420ffc6aa7a3aa9b4a8e311fc887719f54383783de7"
+      }
+    },
+    "process": {
+      "command": [
+        "/Volumes/SSD990/koblitz-ggmp-build25-c6205c56/bin/koblitz_public_factor_base_discovery",
+        "59",
+        "1",
+        "3",
+        "58"
+      ],
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 2457600,
+        "single_core_seconds": 0.041512,
+        "system_seconds": 0.001161,
+        "total_core_seconds": 0.041512,
+        "user_seconds": 0.040351,
+        "wall_seconds": 0.04311900000902824
+      },
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 120.0
+    },
+    "report": {
+      "a": 1,
+      "candidates": [],
+      "cofactor": "22894",
+      "complete_factor_degrees": [
+        1,
+        58
+      ],
+      "factor_degrees": [
+        1
+      ],
+      "factor_enumeration_degree_cap": 24,
+      "forbidden_inputs": {
+        "discrete_log_labels_constructed": false,
+        "relation_yield_used": false,
+        "solver_timing_used": false,
+        "target_constructed": false,
+        "target_subgroup_enumerated": false
+      },
+      "group_order": "576460753246971902",
+      "m": 3,
+      "n": 59,
+      "requested_dimension": 58,
+      "requested_divisor_exists": true,
+      "schema": "koblitz_public_factor_base_discovery.v1",
+      "selected": null,
+      "selection_rule": "cofactor admissible; maximize rational points; minimize projected signed-Frobenius columns; lexicographically lower divisor indices",
+      "sizing_gate": {
+        "m_times_dimension": 174,
+        "n": 59,
+        "passes": true
+      },
+      "status": "unavailable_factor_enumeration_degree_cap",
+      "subgroup_order": "25179555920633",
+      "timing_ns": {
+        "curve_and_subgroup_construction": 39631917,
+        "end_to_end": 39647791
+      }
+    }
+  },
+  "formal_protocol_accounting": {
+    "all_formal_components_outer_metered": true,
+    "peak_rss_bytes": 1714323456,
+    "resource_components": 6,
+    "summed_wall_seconds": 182.26213670799916,
+    "total_core_seconds": 178.147286
+  },
+  "full_cost_gate_passed": false,
+  "gates": {
+    "1_all_stage_resource_charging": "partial_historical_campaign_total_null_stage173_formal_protocol_complete",
+    "2_same_instance_solver_matrix": "partial_native_f4_wdsat_cryptominisat_direct_mitm_present_ggmp_same_cell_proven_inapplicable_licensed_magma_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_native_f4_parallel_and_single_core_complete_conflicts_null_magma_missing",
+    "4_n31_n41_larger_pdp": "inherited_satisfied_finite_coverage",
+    "5_unknown_scalar_without_known_base_logs": "inherited_satisfied_finite_controls",
+    "6_full_cost_vs_automorphism_rho": "unchanged_not_tested_by_pdp_stage_and_current_full_cost_gate_false",
+    "7_independent_external_reproduction": "requested_but_missing",
+    "all_seven_gates_passed": false
+  },
+  "ggmp_same_cell_benchmark_applicable": false,
+  "ggmp_same_cell_unavailability_reason": "the complete irreducible-factor degrees of T^59-1 over F_2 are 1 and 58, so no divisor kernel has dimension ell=9",
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "predecessor": {
+    "path": "stage-172-native-f4-single-core-20260923/result.json",
+    "sha256": "9bd040e1e9ec3dca070f1fe3f0120c9fc539d3fef7323b9aa95dad5684f05524",
+    "status": "complete_native_f4_single_core_true_negative"
+  },
+  "protocol": {
+    "construction": "GGMP linearised-polynomial kernel from divisors of T^n-1",
+    "factor_enumeration_degree_cap": 24,
+    "forbidden_inputs": {
+      "discrete_log_labels_constructed": false,
+      "relation_yield_used": false,
+      "solver_timing_used": false,
+      "target_constructed": false,
+      "target_subgroup_enumerated": false
+    },
+    "same_cell": {
+      "curve_a": 1,
+      "ell": 9,
+      "m": 3,
+      "n": 59
+    },
+    "selection_rule": "cofactor admissible; maximize rational points; minimize projected signed-Frobenius columns; lexicographically lower divisor indices",
+    "single_thread_requested": true
+  },
+  "rejected_and_superseded": {
+    "failed_missing_calibration_build": {
+      "metrics": {
+        "bytes": 488,
+        "path": "development/clean-build/failed-missing-calibration.metrics.json",
+        "sha256": "e0a1fc20e89ff95b7d00aeb918707e5c95e580d47ea517f3e161a9c3d6345f1c"
+      },
+      "reason": "source archive omitted a compile-time calibration file; no binary produced",
+      "stderr": {
+        "bytes": 29237,
+        "path": "development/clean-build/failed-missing-calibration.stderr",
+        "sha256": "844c42bf6352b3af49de7fb26181e8966c03b0f2015e8cc07b6e9fd971cefc71"
+      }
+    },
+    "superseded_degree_reporting_build": {
+      "metrics": {
+        "bytes": 505,
+        "path": "development/clean-build/metrics.json",
+        "sha256": "8861749fe4496d95d43e760510a388cb8130957ea1c592bd94e744daa101ae77"
+      },
+      "n59_result": {
+        "bytes": 905,
+        "path": "development/clean-runs/n59-l9/stdout.json",
+        "sha256": "4a3844b3b3b0f3f6a152cb862182a0d7eba63c5c47a66104d5e10e1530109744"
+      },
+      "reason": "enumerated degrees were not distinguished from the complete cyclotomic factor degrees"
+    }
+  },
+  "same_cell_availability": {
+    "artifacts": {
+      "metrics": {
+        "bytes": 553,
+        "path": "development/final-runs/n59-l9/metrics.json",
+        "sha256": "2a3a99980ca130306eaf09b541332e2ae5e9a62d9d044ef21e4e01f10e1a4f2d"
+      },
+      "stderr": {
+        "bytes": 0,
+        "path": "development/final-runs/n59-l9/stderr.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 1031,
+        "path": "development/final-runs/n59-l9/stdout.json",
+        "sha256": "26ec09ccf2a564eec66b334e1ebce2108160bb8bade49a7a8510554303365e94"
+      }
+    },
+    "process": {
+      "command": [
+        "/Volumes/SSD990/koblitz-ggmp-build25-c6205c56/bin/koblitz_public_factor_base_discovery",
+        "59",
+        "1",
+        "3",
+        "9"
+      ],
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 2473984,
+        "single_core_seconds": 0.042548,
+        "system_seconds": 0.0019379999999999998,
+        "total_core_seconds": 0.042548,
+        "user_seconds": 0.04061,
+        "wall_seconds": 0.5053641670092475
+      },
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 120.0
+    },
+    "report": {
+      "a": 1,
+      "candidates": [],
+      "cofactor": "22894",
+      "complete_factor_degrees": [
+        1,
+        58
+      ],
+      "factor_degrees": [
+        1
+      ],
+      "factor_enumeration_degree_cap": 24,
+      "forbidden_inputs": {
+        "discrete_log_labels_constructed": false,
+        "relation_yield_used": false,
+        "solver_timing_used": false,
+        "target_constructed": false,
+        "target_subgroup_enumerated": false
+      },
+      "group_order": "576460753246971902",
+      "m": 3,
+      "n": 59,
+      "requested_dimension": 9,
+      "requested_divisor_exists": false,
+      "schema": "koblitz_public_factor_base_discovery.v1",
+      "selected": null,
+      "selection_rule": "cofactor admissible; maximize rational points; minimize projected signed-Frobenius columns; lexicographically lower divisor indices",
+      "sizing_gate": {
+        "m_times_dimension": 27,
+        "n": 59,
+        "passes": false
+      },
+      "status": "unavailable_no_divisor_of_requested_dimension",
+      "subgroup_order": "25179555920633",
+      "timing_ns": {
+        "curve_and_subgroup_construction": 40031833,
+        "end_to_end": 40063584
+      }
+    }
+  },
+  "schema": "koblitz_stage173_ggmp_same_cell_availability.v1",
+  "source_revision": {
+    "archive_sha256": "b594668c9f04bfe8750f4d9feeadcd667b71ec1f53755a858159c1695ba51d4b",
+    "commit": "c6205c5697cff517a6f46d0a9a96a0293d4af695",
+    "dirty": false,
+    "discovery_binary_sha256": "7704956b1e739c559192108ff2bc106173d8abe73f82e2a8eb54eda29ca009eb",
+    "frozen_cargo_lock_sha256": "10461fc25d189a7e1b533c0a59e1c66d7376ca04d3af5c5868a6f155efc8e5cf",
+    "tree": "6bb1c1a4abdfe3d3aa2d9b1753b052c932a6e43c"
+  },
+  "stage173_development_accounting": {
+    "complete_total": null,
+    "peak_rss_bytes": 1714323456,
+    "reason_complete_total_is_null": "the initial consumer environment failure and cached development compilation lack outer process receipts; every formal build, probe, and final consumer test is metered",
+    "resource_components": 12,
+    "summed_wall_seconds": 396.33678908202273,
+    "total_core_seconds": 382.43438199999997
+  },
+  "status": "complete_ggmp_same_cell_structurally_unavailable",
+  "validation": {
+    "cap_control_requested_divisor_exists": true,
+    "cap_control_terminal": "unavailable_factor_enumeration_degree_cap",
+    "consumer_tests": {
+      "production_consumers": {
+        "artifacts": {
+          "metrics": {
+            "bytes": 502,
+            "path": "development/tests/production-consumers/metrics.json",
+            "sha256": "2413a5d40a485d92c3ace9a54413e6a951ea100e71e6002b028396bda3ed597b"
+          },
+          "stderr": {
+            "bytes": 98,
+            "path": "development/tests/production-consumers/stderr",
+            "sha256": "242fc4f20a7a25ac03a1ccc858edc7d2eacf78e275db31246dc277762f6d5807"
+          },
+          "stdout": {
+            "bytes": 278,
+            "path": "development/tests/production-consumers/stdout",
+            "sha256": "1b0b66dda7172c27d9263dd8633380921123b27347e8184f5c782e58a2534fd1"
+          }
+        },
+        "process": {
+          "command": [
+            "/Volumes/SSD990/kic-stage173-ggmp-dev/test-production-consumers.sh"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 69107712,
+            "single_core_seconds": 7.807869999999999,
+            "system_seconds": 4.491956,
+            "total_core_seconds": 7.807869999999999,
+            "user_seconds": 3.315914,
+            "wall_seconds": 8.488200832987786
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 120.0
+        }
+      },
+      "unknown_scalar_consumers": {
+        "artifacts": {
+          "metrics": {
+            "bytes": 487,
+            "path": "development/tests/unknown-scalar/metrics.json",
+            "sha256": "5f98b68847dd445f5c974e2ad6eaf4522014c4f714eeaaf5b743ef24095d04cd"
+          },
+          "stderr": {
+            "bytes": 98,
+            "path": "development/tests/unknown-scalar/stderr",
+            "sha256": "dc4906a46755642c1a9379c1e4a962e66c43e1859d16a3cfa64e51135678e51a"
+          },
+          "stdout": {
+            "bytes": 0,
+            "path": "development/tests/unknown-scalar/stdout",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "process": {
+          "command": [
+            "/Volumes/SSD990/kic-stage173-ggmp-dev/test-unknown-scalar-consumer.sh"
+          ],
+          "metrics": {
+            "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+            "peak_rss_bytes": 77103104,
+            "single_core_seconds": 5.780508,
+            "system_seconds": 4.510798,
+            "total_core_seconds": 5.780508,
+            "user_seconds": 1.26971,
+            "wall_seconds": 3.1959872500010533
+          },
+          "orphan_group_terminated": false,
+          "returncode": 0,
+          "timed_out": false,
+          "watchdog_seconds": 120.0
+        }
+      }
+    },
+    "positive_control_selected_divisor_indices": [
+      1
+    ],
+    "positive_control_terminal": "selected",
+    "same_cell_complete_factor_degrees": [
+      1,
+      58
+    ],
+    "same_cell_enumerated_factor_degrees": [
+      1
+    ],
+    "same_cell_requested_divisor_exists": false,
+    "same_cell_terminal": "unavailable_no_divisor_of_requested_dimension"
+  }
+}

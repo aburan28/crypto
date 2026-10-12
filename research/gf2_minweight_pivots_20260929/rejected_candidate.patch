@@ -1,0 +1,193 @@
+diff --git a/src/cryptanalysis/gf2_elim.rs b/src/cryptanalysis/gf2_elim.rs
+index 33e58bd4d..c7d741f5e 100644
+--- a/src/cryptanalysis/gf2_elim.rs
++++ b/src/cryptanalysis/gf2_elim.rs
+@@ -80,6 +80,8 @@ pub struct Config {
+     /// Gray-code tables per pass, 1 to 4; the block is `k · tables`
+     /// pivots for `k`-bit tables.
+     pub tables: usize,
++    /// Choose the lightest current row among equal leading-column candidates.
++    pub min_weight_pivot: bool,
+     /// Row words per block from which rows are cleared in parallel.
+     pub parallel_words: usize,
+     /// Use AVX-512 when available, or an explicitly requested AVX2 update.
+@@ -90,6 +92,7 @@ impl Default for Config {
+     fn default() -> Self {
+         Self {
+             tables: DEFAULT_TABLES,
++            min_weight_pivot: false,
+             parallel_words: PARALLEL_WORDS,
+             simd: true,
+         }
+@@ -109,6 +112,7 @@ impl Config {
+             {
+                 c.tables = t.clamp(1, 4);
+             }
++            c.min_weight_pivot = std::env::var("KIC_GF2_MIN_WEIGHT_PIVOT").as_deref() == Ok("1");
+             if let Some(p) = std::env::var("KIC_GF2_PARALLEL_WORDS")
+                 .ok()
+                 .and_then(|v| v.parse::<usize>().ok())
+@@ -194,6 +198,14 @@ fn eliminate_with(
+     let mut pivot_cols: Vec<usize> = Vec::with_capacity(block_cap);
+     let mut table: Vec<u64> = Vec::new();
+     let mut blocks: Vec<(usize, Vec<usize>)> = Vec::new();
++    let mut row_weights: Vec<u32> = if config.min_weight_pivot {
++        matrix
++            .iter()
++            .map(|row| row.iter().map(|w| w.count_ones()).sum())
++            .collect()
++    } else {
++        Vec::new()
++    };
+ 
+     let mut pivot_row = 0usize;
+     let mut word = 0usize;
+@@ -222,10 +234,15 @@ fn eliminate_with(
+                 let v = s & mask;
+                 if v != 0 {
+                     let tz = v.trailing_zeros();
+-                    if tz < best {
++                    let candidate = pivot_row + i;
++                    if tz < best
++                        || (config.min_weight_pivot
++                            && tz == best
++                            && row_weights[candidate] < row_weights[best_row])
++                    {
+                         best = tz;
+-                        best_row = pivot_row + i;
+-                        if tz == low {
++                        best_row = candidate;
++                        if tz == low && !config.min_weight_pivot {
+                             break;
+                         }
+                     }
+@@ -238,6 +255,9 @@ fn eliminate_with(
+             let col = word * 64 + best as usize;
+             matrix.swap(pivot_row, best_row);
+             strip.swap(pivot_row, best_row);
++            if config.min_weight_pivot {
++                row_weights.swap(pivot_row, best_row);
++            }
+             // Reduce the new pivot row in full by the block's earlier
+             // pivots.  They are mutually reduced, so testing the row's
+             // current bit on each pivot column in turn is the same as
+@@ -295,6 +315,9 @@ fn eliminate_with(
+                 simd,
+                 word_ops,
+                 reuse_table,
++                config
++                    .min_weight_pivot
++                    .then_some(row_weights.as_mut_slice()),
+             );
+             if defer_above {
+                 blocks.push((block_start, pivot_cols.clone()));
+@@ -451,6 +474,7 @@ fn clear_block(
+     simd: SimdKind,
+     word_ops: &mut u64,
+     reuse_table: bool,
++    row_weights: Option<&mut [u32]>,
+ ) {
+     let b = pivot_cols.len();
+     if reduce_above && !reduce_below && block_start == 0 {
+@@ -520,7 +544,41 @@ fn clear_block(
+     } else {
+         &mut []
+     };
+-    if (above.len() + below.len()) * suffix >= config.parallel_words {
++    if let Some(weights) = row_weights {
++        let below_weights = &mut weights[block_start + b..block_start + b + below.len()];
++        if (above.len() + below.len()) * suffix >= config.parallel_words {
++            *word_ops += above
++                .par_iter_mut()
++                .with_min_len(64)
++                .map(clear)
++                .sum::<u64>();
++            *word_ops += below
++                .par_iter_mut()
++                .zip(below_weights.par_iter_mut())
++                .with_min_len(64)
++                .map(|(row, weight)| {
++                    let ops = clear(row);
++                    if ops != 0 {
++                        *weight = row.iter().map(|w| w.count_ones()).sum();
++                    }
++                    ops
++                })
++                .sum::<u64>();
++        } else {
++            *word_ops += above.iter_mut().map(clear).sum::<u64>();
++            *word_ops += below
++                .iter_mut()
++                .zip(below_weights.iter_mut())
++                .map(|(row, weight)| {
++                    let ops = clear(row);
++                    if ops != 0 {
++                        *weight = row.iter().map(|w| w.count_ones()).sum();
++                    }
++                    ops
++                })
++                .sum::<u64>();
++        }
++    } else if (above.len() + below.len()) * suffix >= config.parallel_words {
+         *word_ops += above
+             .par_iter_mut()
+             .chain(below.par_iter_mut())
+@@ -764,6 +822,7 @@ mod tests {
+                 for parallel_words in [0, usize::MAX] {
+                     out.push(Config {
+                         tables,
++                        min_weight_pivot: false,
+                         parallel_words,
+                         simd,
+                     });
+@@ -783,6 +842,7 @@ mod tests {
+                     for reduce_above in [false, true] {
+                         let config = Config {
+                             tables,
++                            min_weight_pivot: false,
+                             parallel_words: usize::MAX,
+                             simd: false,
+                         };
+@@ -945,6 +1005,42 @@ mod tests {
+         }
+     }
+ 
++    #[test]
++    fn minimum_weight_pivots_preserve_rank_and_row_space() {
++        let mut rng = StdRng::seed_from_u64(119);
++        for &(rows, cols, density) in &[
++            (70, 130, 0.04),
++            (130, 70, 0.3),
++            (220, 389, 0.1),
++            (300, 700, 0.5),
++        ] {
++            let input = random_matrix(&mut rng, rows, cols, density);
++            let mut expected = input.clone();
++            let rank = naive_rref(&mut expected, cols);
++            for tables in [1, 2, 4] {
++                for parallel_words in [0, usize::MAX] {
++                    let config = Config {
++                        tables,
++                        min_weight_pivot: true,
++                        parallel_words,
++                        simd: false,
++                    };
++                    for reduce_above in [false, true] {
++                        let mut actual = input.clone();
++                        let mut ops = 0;
++                        let actual_rank =
++                            eliminate(&mut actual, cols, reduce_above, config, &mut ops);
++                        assert_eq!(actual_rank, rank, "{config:?} reduce_above={reduce_above}");
++                        if !reduce_above {
++                            naive_rref(&mut actual, cols);
++                        }
++                        assert_eq!(actual, expected, "{config:?} reduce_above={reduce_above}");
++                    }
++                }
++            }
++        }
++    }
++
+     #[test]
+     fn reverse_tile_width_preserves_the_counted_work() {
+         let mut rng = StdRng::seed_from_u64(41);

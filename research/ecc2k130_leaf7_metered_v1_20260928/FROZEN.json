@@ -1,0 +1,204 @@
+{
+  "schema": "ecc2k130-leaf7-metered-v1",
+  "status": "HELD_PROTOCOL_ONLY",
+  "source_main_commit": "340ab55ce011dab855cca1bcf140c1270e917907",
+  "release_main_head": null,
+  "release_gate": "hold_until_structural_PASS_metering_producer_exact_head_CI_and_independent_review",
+  "prerequisite": {
+    "structural_directory": "research/ecc2k130_leaf7_bridge_20260925",
+    "producer_status": "PRODUCER_PASS",
+    "fq_replay_status": "FQ_REPLAY_PASS",
+    "extension_replay_status": "PASS",
+    "structural_gate_status": "PASS",
+    "no_accepted_certificate_yet": true
+  },
+  "input_sha256": {
+    "research/notes/ecc2k130/LEAF_HORIZONTAL_SEVEN_BRIDGE_20260925.md": "ed1e10dad22c678bc45dc5b9ffad79826cd674d151bc081f917293389b7efb82",
+    "research/ecc2k130_leaf7_bridge_20260925/FROZEN.json": "4d8be7c3077fc1b40b08611d43063e24b4b189ac76d6f97e58c63de57d36e125",
+    "research/ecc2k130_leaf7_bridge_20260925/PROTOCOL.md": "f7e4f83b5515d7f10e9c37bf876350b52d4137e505678fd8d965d97bfa5b8a1b",
+    "research/ecc2k130_direction_review_20260924/twist_torsion_results.json": "6f1e7b22f3471214d38ec0d3196c88fe9edaf45791e9c05ea67764831fd75368",
+    "research/ecc2k130_endo_ring_263_20260925/receipt.json": "bbdff7e901b5d33264e1da95bd0cf1655122d2b1bc42ccce30426a1b24a1640e",
+    "research/ecc2k130_dual_transport_20260925/receipt.json": "4f1d6a5ba85b9c33e07c8af3b42448e10e3633128f3ee9bdffa905fc8cbd2ebc",
+    "research/ecc2k130_relations/relations.py": "0180501ef8fe00f5c54f910822a28cd86dc3c2c1af164348976c1c2e25cc763f",
+    "research/ecc2k130_relations/fastfield.py": "b5990fda51700bbfba363251c41f02febfd0fc92edfea4f5ddd647bab472789e",
+    "research/ecc2k130_oriented_transport_20260924/oriented_velu.py": "a1a656cc32efd612250b1ecf50dff18af79a8f62f970ee79841bfd390603423b",
+    "research/ecc2k130_dual_transport_20260925/dual_transport.py": "c913bef64a115e4b42d6675ddbafac10379b166e58ddb94402ebbd44f1e7df9d",
+    "research/ecc2k130_leaf7_bridge_20260925/cubic_velu.py": "aa774740505396c6921691f5ead6ac49e254e17eefce2baf0766fef3faec5839",
+    "research/ecc2k130_leaf7_bridge_20260925/run.py": "4aff73e269a3926b9b2b4a186e425622bbdbce90db03173a8f600e6688645325",
+    "research/ecc2k130_leaf7_bridge_20260925/verify.py": "9805862a2f6cc9d44a2f769131f71d683d359be73109ce696eda858b31cc8eba",
+    "research/ecc2k130_leaf7_bridge_20260925/verify_extension.py": "5aa49510f4117422288cf6ff34a120143b9a57a25b2a9e7373fee7232fa711a8"
+  },
+  "instance": {
+    "field_degree": 131,
+    "field_modulus_hex": "0x800000000000000000000000000002007",
+    "curve": "y^2 + x*y = x^3 + 1",
+    "subgroup_order": "680564733841876926932320129493409985129",
+    "cofactor": 4,
+    "full_group_order": "2722258935367507707729280517973639940516",
+    "trace": "-22283658519494248867",
+    "tau_polynomial": "T^2 + T + 2",
+    "tau_131_coefficients": [
+      "8123678690673902378",
+      "38531015900842053623"
+    ],
+    "source_endomorphism_conductor": 1,
+    "source_endomorphism_discriminant": -7,
+    "leaf_endomorphism_conductor": 263,
+    "leaf_endomorphism_discriminant": -484183,
+    "frobenius_order_conductor": "38531015900842053623"
+  },
+  "kernel_panel": {
+    "torsion_seed": 20260924,
+    "first_line": [
+      1,
+      0
+    ],
+    "other_orbit_line": [
+      1,
+      4
+    ],
+    "norm7_image_line": [
+      1,
+      74
+    ],
+    "twist_frobenius_matrix_columns_mod263": [
+      [
+        186,
+        51
+      ],
+      [
+        73,
+        78
+      ]
+    ],
+    "norm7_matrix_rows_mod263": [
+      [
+        155,
+        117
+      ],
+      [
+        161,
+        108
+      ]
+    ],
+    "other_orbit_conjugacy_exponent": 23,
+    "all_projective_line_cycle_lengths": [
+      1,
+      1,
+      131,
+      131
+    ],
+    "descending_orbit_lengths": [
+      131,
+      131
+    ],
+    "horizontal_line_count": 2,
+    "descending_line_count": 262
+  },
+  "point_panel": {
+    "controls": [
+      "P",
+      "Q",
+      "P+Q",
+      "2P"
+    ],
+    "target_count": 8,
+    "target_prefix": "leaf-seven-bridge-v1",
+    "target_u": "sha256(prefix|i|u) mod r",
+    "target_v": "1 + sha256(prefix|i|v) mod (r-1)",
+    "coefficient_pairs_sha256": "b39da29224f3d503d2409195ae1586b2198dcda62a9e70e4f35a47e516aa22bd",
+    "labels": [
+      "P",
+      "Q",
+      "P+Q",
+      "2P",
+      "target-0",
+      "target-1",
+      "target-2",
+      "target-3",
+      "target-4",
+      "target-5",
+      "target-6",
+      "target-7"
+    ],
+    "point_encoding": "canonical full affine (x,y) over Fq; infinity explicit"
+  },
+  "cost": {
+    "unit": "Fq multiplication equivalent",
+    "square_weight_label": "leaf-seven-cost-v1",
+    "calibration_batches": 11,
+    "calibration_operands_per_batch": 10000,
+    "max_calibration_relative_mad": 0.05,
+    "common_phases": [
+      "torsion_discovery",
+      "first_263_map_and_dual_setup",
+      "point_panel_materialization"
+    ],
+    "direct_phases": [
+      "second_263_kernel_derivation",
+      "second_263_map_and_dual_setup",
+      "source_alpha_panel",
+      "model_normalization",
+      "second_leaf_transport"
+    ],
+    "bridge_phases": [
+      "seven_division_and_kernel_discovery",
+      "seven_map_and_dual_setup",
+      "conjugacy_23_squarings",
+      "model_normalization",
+      "first_leaf_panel_transport",
+      "second_leaf_transport"
+    ],
+    "direct_reference": "PR810 saved-basis Cprime BinaryVeluMap.from_generator; third [1,4] map is structural control only",
+    "inversion_calls_diagnostic_only": true,
+    "inversion_internals_in_mul_and_sq": true,
+    "extension_arithmetic_reduced_to_Fq": true,
+    "no_unmetered_phases": true,
+    "incremental_bridge_over_direct_at_most": 0.9,
+    "cold_bridge_over_direct_below": 1,
+    "wall_time_claims": false,
+    "ecdlp_or_pdp_claims": false,
+    "calibration_operand_scheme": "for batch=0..10,i=0..9999,suffix=a,b: 1+int(SHA256('leaf-seven-cost-v1|batch|i|suffix')) mod (2^131-1); concatenate 17-byte big-endian a,b values",
+    "calibration_operand_pair_sha256": [
+      "e1547868b3230f4c61786741bd82767ac04b2845671c262f18ccbea9b9fafb9e",
+      "28dc6e59621bd09cb62b8401b6d6f8f8b9677ab82f6547579457dfd6d79187f3",
+      "471e1a8b6c0e204f370189284160f4016b76eccabb287f0a2ce97e8ad27a38ac",
+      "0c3e4cce3ef2b995493666c59680c50128681687e9b046ac403e6bda451c6eaa",
+      "9d1e12b4f680f62105f5a97d3321a029d5b8961440caca145c25b78d85b55bf5",
+      "8b7521733b596faccb3232bf5a1befe1900373ddf365e73db91e00f0e45864b0",
+      "32f9442bbb99375e74b0605d3c1a71620e7e07ba7570167d03a0ccb2964c80c0",
+      "74deea247fb8ec63bbb6d5e28ba39d86bb84984001d579c4a6b871902394eb5a",
+      "fc39d9ab1d9c36b4e3865ac1aa96c3179ae8f97c1894c1cc816655222ebd5422",
+      "b4b4375443331237daae7e8eb428a695bcaf4d3b88d5d236cb9a298d3eb7316c",
+      "ec1aae447444bec420a6610003123829299f98a77c919fc72ea9f4312f23127c"
+    ],
+    "host_manifest_fields": [
+      "os",
+      "arch",
+      "cpu_model",
+      "python_version",
+      "sage_version",
+      "git_head",
+      "field_primitive_sha256"
+    ],
+    "field_primitive_paths": [
+      "research/ecc2k130_relations/relations.py",
+      "research/ecc2k130_relations/fastfield.py",
+      "research/ecc2k130_oriented_transport_20260924/oriented_velu.py",
+      "research/ecc2k130_dual_transport_20260925/dual_transport.py",
+      "research/ecc2k130_leaf7_bridge_20260925/cubic_velu.py"
+    ]
+  },
+  "caps": {
+    "child_wall_seconds": 300,
+    "child_peak_rss_bytes": 2147483648
+  },
+  "metering_producer": {
+    "path": "research/ecc2k130_leaf7_metered_v1_20260928/run_metered.py",
+    "sha256": null,
+    "status": "NOT_IMPLEMENTED",
+    "required_before_release": true,
+    "introduction_commit": null
+  },
+  "release_main_head_role": "pre_release_main_ancestor_not_checkout"
+}

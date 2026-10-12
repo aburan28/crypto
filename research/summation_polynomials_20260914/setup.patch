@@ -1,0 +1,12 @@
+--- a/src/cryptanalysis/gaudry_cubic.rs
++++ b/src/cryptanalysis/gaudry_cubic.rs
+@@ -1196,8 +1196,7 @@
+                         acc = acc.mul(f, &e3);
+                     }
+                     acc
+-                })
+-                .clone();
++                });
+             let entry = terms
+                 .entry([key[0], key[1], key[2], d])
+                 .or_insert(Fp3::ZERO);

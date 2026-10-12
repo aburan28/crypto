@@ -1,0 +1,134 @@
+[
+  {
+    "config": {
+      "batch_trials": 64,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "6a88218e92eafed7c5cf60c1a27e15cfefee373a356c55122b367838897d3fc8",
+    "hypothesis": "Frozen complete library pipeline.",
+    "id": "incumbent",
+    "parent": null,
+    "source_manifest_sha256": "ab4401852244e9bce35903a9d909c8ddb0da6102bd6aad0f63c9616e52af6e55"
+  },
+  {
+    "changed_parameters": {
+      "batch_trials": 16
+    },
+    "config": {
+      "batch_trials": 16,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "07d6d048fd6e66f7f93dc8061330cf9871e67ef9719dcbb45101913660f0d0e3",
+    "falsification": "Fails correctness, total-cost or per-cell confirmation gate.",
+    "hypothesis": "Reduce surplus collection and verification before a rank check.",
+    "id": "batch16",
+    "parent": "incumbent",
+    "source_manifest_sha256": "ab4401852244e9bce35903a9d909c8ddb0da6102bd6aad0f63c9616e52af6e55"
+  },
+  {
+    "changed_parameters": {
+      "batch_trials": 32
+    },
+    "config": {
+      "batch_trials": 32,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "6af4d4f0c1d19393c6a76f4e9419d6c3598544cb11beb9e3231ff70a79a0f5a6",
+    "falsification": "Fails correctness, total-cost or per-cell confirmation gate.",
+    "hypothesis": "Balance surplus relations against repeated rank checks.",
+    "id": "batch32",
+    "parent": "incumbent",
+    "source_manifest_sha256": "ab4401852244e9bce35903a9d909c8ddb0da6102bd6aad0f63c9616e52af6e55"
+  },
+  {
+    "changed_parameters": {
+      "batch_trials": 128
+    },
+    "config": {
+      "batch_trials": 128,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "4418d4238070b5e7c2a8d9f91ed38a0672628abae5b8c8d372ef159c820a2b42",
+    "falsification": "Fails correctness, total-cost or per-cell confirmation gate.",
+    "hypothesis": "Amortize rank checks when relation yield is low.",
+    "id": "batch128",
+    "parent": "incumbent",
+    "source_manifest_sha256": "ab4401852244e9bce35903a9d909c8ddb0da6102bd6aad0f63c9616e52af6e55"
+  },
+  {
+    "changed_parameters": {
+      "linear_algebra": "dense"
+    },
+    "config": {
+      "batch_trials": 64,
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "a0e5cc1b339998f3eded7fcff0fdeab4762af705be775f9b3199fa729dd8b3b6",
+    "falsification": "Fails correctness, total-cost or per-cell confirmation gate.",
+    "hypothesis": "Avoid sparse-solver setup on small relation matrices.",
+    "id": "dense",
+    "parent": "incumbent",
+    "source_manifest_sha256": "ab4401852244e9bce35903a9d909c8ddb0da6102bd6aad0f63c9616e52af6e55"
+  },
+  {
+    "changed_parameters": {
+      "sparse": {
+        "filter": {
+          "target_excess": 8
+        }
+      }
+    },
+    "config": {
+      "batch_trials": 64,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "sparse": {
+        "filter": {
+          "target_excess": 8
+        }
+      },
+      "summands": 3
+    },
+    "configuration_sha256": "2a53304449be73b38fdeeda6b567141dadfb17c7e3c20fe64af4972ee5772387",
+    "falsification": "Fails correctness, total-cost or per-cell confirmation gate.",
+    "hypothesis": "Reduce the filtered core by retaining fewer surplus rows.",
+    "id": "excess8",
+    "parent": "incumbent",
+    "source_manifest_sha256": "ab4401852244e9bce35903a9d909c8ddb0da6102bd6aad0f63c9616e52af6e55"
+  },
+  {
+    "changed_parameters": {
+      "collection_window": 8
+    },
+    "config": {
+      "batch_trials": 64,
+      "collection_window": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "835c7b87e18a28ce822d921598b15799602b3e11ed76f24cad22f6da242d14b2",
+    "falsification": "Fails correctness, total-cost or per-cell confirmation gate.",
+    "hypothesis": "Trade extra walked probes for fewer pair-table scans.",
+    "id": "window8",
+    "parent": "incumbent",
+    "source_manifest_sha256": "ab4401852244e9bce35903a9d909c8ddb0da6102bd6aad0f63c9616e52af6e55"
+  }
+]

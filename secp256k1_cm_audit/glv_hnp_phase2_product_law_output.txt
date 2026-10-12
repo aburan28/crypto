@@ -1,0 +1,149 @@
+==============================================================================
+Thread 25b — is PI = NU * nu_hat ~ 1 the viability curve?  (H25b)
+POST-HOC hypothesis from X4; this is its first out-of-sample test.
+==============================================================================
+
+building tables:
+  12 bits: 20 curves in 0.0s,  1000 instances (dim 16) in 1.9s
+  17 bits: 20 curves in 0.0s,  1000 instances (dim 24) in 5.7s
+  20 bits: 20 curves in 0.0s,  1000 instances (dim 24) in 6.2s
+
+------------------------------------------------------------------------------
+EXP Y1: independent logistic fits per size
+        logit p = w0 + w1*log(NU) + w2*log(nu_hat)
+        boundary:  NU * nu_hat^alpha = c ,  alpha = w2/w1 , c = exp(-w0/w1)
+------------------------------------------------------------------------------
+ bits  dim     N       rec        w1        w2    alpha        c      AUC     acc
+   12   16  1000  612/1000   -5.2563   -4.9026   0.9327   0.9289   0.9128  0.8230
+   17   24  1000  393/1000   -8.2056   -7.5446   0.9194   0.9720   0.9357  0.8570
+   20   24  1000  360/1000   -8.3681   -6.7000   0.8007   1.0043   0.9537  0.8820
+
+H25b predicts alpha ~ 1 and c ~ 1 at every size.
+
+------------------------------------------------------------------------------
+EXP Y2: the PARAMETER-FREE rule  PI = NU * nu_hat  vs threshold 1
+------------------------------------------------------------------------------
+ bits     N       rec |  AUC(-PI)  AUC(-NU)  AUC(-nuh) |  acc@PI<1   base |   TP   FP   FN   TN
+   12  1000  612/1000 |    0.9129    0.8376     0.7487 |    0.8270 0.6120 |  566  127   46  261
+   17  1000  393/1000 |    0.9352    0.8041     0.6855 |    0.8420 0.6070 |  334   99   59  508
+   20  1000  360/1000 |    0.9522    0.9095     0.7359 |    0.8880 0.6400 |  321   73   39  567
+
+ bits                     PI | recovered                        PI | failed
+   12      min 0.128 med 0.563 max 1.560      min 0.485 med 1.177 max 3.430
+   17      min 0.287 med 0.747 max 1.634      min 0.632 med 1.343 max 3.143
+   20      min 0.297 med 0.736 max 1.436      min 0.573 med 1.455 max 3.003
+
+ bits   sufficient PI <   necessary PI >  ambiguous width
+   12            0.4845           1.5600            3.22x
+   17            0.6324           1.6340            2.58x
+   20            0.5732           1.4363            2.51x
+compare the NU bracket (Thread 24 W4): 12 bits [1.188, 1.869] = 1.57x , 17 bits [1.040, 2.199] = 2.11x
+
+ bits   sufficient NU <   necessary NU >  ambiguous width
+   12            1.0167           2.6905            2.65x
+   17            1.0105           2.2335            2.21x
+   20            1.0029           2.1765            2.17x
+
+------------------------------------------------------------------------------
+EXP Y3: out-of-sample transfer — fit at one size, score at another
+------------------------------------------------------------------------------
+accuracy of the fitted logistic (rows = fit size, cols = test size)
+fit / test       12b       17b       20b
+   12 bits    0.8230    0.8530    0.8830
+   17 bits    0.8270    0.8570    0.8780
+   20 bits    0.8210    0.8530    0.8820
+PI<1 (free)    0.8270    0.8420    0.8880
+
+The last row uses NO fitted parameter.  If it matches the fitted
+rows, the two degrees of freedom were never being used.
+
+------------------------------------------------------------------------------
+EXP Y4: double conditioning — does PI beat both parents inside
+        NU quintiles AND inside eff strata?
+------------------------------------------------------------------------------
+
+12 bits, conditioned on NU quintile:
+            NU bin     N      rec |   AUC PI   AUC NU  AUC nuhat
+      (-inf,0.759)   200  200/200 |   (degenerate)
+     [0.759,1.097)   200  179/200 |   0.8529   0.9037     0.7418
+     [1.097,1.370)   200  100/200 |   0.8198   0.5644     0.8075
+     [1.370,1.645)   200   75/200 |   0.7638   0.4430     0.7651
+       [1.645,inf)   200   58/200 |   0.9027   0.6136     0.8880
+12 bits, conditioned on eff stratum:
+               eff     N      rec |   AUC PI   AUC NU  AUC nuhat
+              0.05   200  200/200 |   (degenerate)
+              0.10   200  188/200 |   0.7549   0.8298     0.5465
+              0.15   200  112/200 |   0.8508   0.6264     0.8150
+              0.20   200   77/200 |   0.8416   0.5162     0.8432
+              0.25   200   35/200 |   0.7146   0.4939     0.7294
+
+17 bits, conditioned on NU quintile:
+            NU bin     N      rec |   AUC PI   AUC NU  AUC nuhat
+      (-inf,1.047)   200  195/200 |   0.8215   0.9723     0.6159
+     [1.047,1.388)   200   74/200 |   0.7622   0.7222     0.6902
+     [1.388,1.672)   200   35/200 |   0.8416   0.5138     0.8343
+     [1.672,1.964)   200   53/200 |   0.9420   0.5672     0.9436
+       [1.964,inf)   200   36/200 |   0.9842   0.7732     0.9829
+17 bits, conditioned on eff stratum:
+               eff     N      rec |   AUC PI   AUC NU  AUC nuhat
+              0.05   200  199/200 |   0.8543   0.8844     0.4246
+              0.10   200   94/200 |   0.9228   0.6858     0.7389
+              0.15   200   44/200 |   0.8928   0.4161     0.8832
+              0.20   200   37/200 |   0.9239   0.5432     0.9253
+              0.25   200   19/200 |   0.8421   0.6173     0.8649
+
+20 bits, conditioned on NU quintile:
+            NU bin     N      rec |   AUC PI   AUC NU  AUC nuhat
+      (-inf,1.106)   200  186/200 |   0.7343   0.8978     0.5457
+     [1.106,1.479)   200  106/200 |   0.8174   0.6708     0.7998
+     [1.479,1.795)   200   45/200 |   0.9541   0.4949     0.9646
+     [1.795,2.154)   200   22/200 |   0.9533   0.6931     0.9487
+       [2.154,inf)   200    1/200 |   1.0000   0.9598     1.0000
+20 bits, conditioned on eff stratum:
+               eff     N      rec |   AUC PI   AUC NU  AUC nuhat
+              0.05   200  191/200 |   0.9308   0.8668     0.7182
+              0.10   200   99/200 |   0.8603   0.7458     0.7755
+              0.15   200   41/200 |   0.9471   0.6363     0.9702
+              0.20   200   23/200 |   0.9523   0.7593     0.9360
+              0.25   200    6/200 |   0.9149   0.8015     0.9124
+
+------------------------------------------------------------------------------
+EXP Y5: pooled across all three sizes
+------------------------------------------------------------------------------
+N = 3000  (1365 recovered)
+  AUC(-PI      ) = 0.9365  [0.9289, 0.9447]
+  AUC(-NU      ) = 0.8613  [0.8474, 0.8742]
+  AUC(-nuhat   ) = 0.7341  [0.7158, 0.7529]
+  AUC(-eff     ) = 0.8738  [0.8609, 0.8862]
+  AUC(-lamstar ) = 0.4644  [0.4447, 0.4849]
+
+PI < 1 pooled:  TP 1221  FP 299  FN 144  TN 1336   accuracy 0.8523
+  precision 0.8033   recall 0.8945
+Spearman(log NU, log nu_hat) pooled = 0.1011
+(Thread 24 W6 measured this ~0 at fixed eff; PI is a product of two near-independent factors.)
+
+------------------------------------------------------------------------------
+EXP Y6: what PI < 1 actually says
+------------------------------------------------------------------------------
+PI = NU*nu_hat < 1  <=>  NU < 1/nu_hat.  Nearest-plane is
+guaranteed only for NU < 1 (a theorem).  So 1/nu_hat is the factor
+by which Kannan-LLL empirically RELAXES the nearest-plane bound,
+and it is the skewness sqrt(det L2)/lambda_1(L2) of the lambda-block.
+
+nu_hat over all 3000: min 0.2244  median 0.7369  max 1.0665
+Hermite bound for rank 2, (4/3)^(1/4) = 1.0746  -> violations: 0
+relaxation factor 1/nu_hat: min 0.9377  median 1.3585  90th pct 2.0700  max 4.4560
+
+The cases that matter: NU > 1 (no nearest-plane guarantee) but PI < 1.
+ bits  N(NU>1)  of those PI<1   recovered    rate |  NU>1 & PI>=1 rate
+   12      664            357         230  0.6443 |             0.1498
+   17      823            256         157  0.6133 |             0.1041
+   20      871            267         194  0.7266 |             0.0613
+
+If the left rate is high and the right rate is low, 1/nu_hat is
+exactly the right amount of relaxation and PI is not merely NU
+with noise added.
+
+==============================================================================
+done
+==============================================================================

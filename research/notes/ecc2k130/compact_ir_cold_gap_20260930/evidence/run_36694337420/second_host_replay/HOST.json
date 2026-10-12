@@ -1,0 +1,24 @@
+{
+  "actions_run": 36694337420,
+  "machine": "x86_64",
+  "platform": "Linux-6.12.94+-x86_64-with-glibc2.39",
+  "producers_rerun": false,
+  "python": "3.12.8 (main, Sep 29 2026, 17:00:15) [GCC 13.3.0]",
+  "role": "second_host_replay",
+  "verifier": "research/notes/ecc2k130/compact_ir_cold_gap_20260930/verify_cold.py --relocated",
+  "verifier_sha256": "02ddbe38534c1edd1d2d1e6f3887aa94f74c01a2f58fe691f6701fd72249a8d5"
+  "cold_verifier_sha256": "2c74ab8a515d46d515c5ddd9d530733ae510ea7b3e7ff0ce4be5680923106619",
+  "ir_verifier_sha256": "0131c39fb9379a6595683465d8655d310187533af83e5f26d19ab11a72bf8b5e",
+  "machine": "arm64",
+  "measured_main_head": "fe75eea69dc66660c3920342d83f17e3f4eb1151",
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "python": "3.13.1",
+  "receipts_sha256": {
+    "n37_L1": "516e8c50be011f9ed5c1eaa7452517ff94544b5a0ba40812dee514ec4001893f",
+    "n37_L1024": "df653dc7fb61ed9b5afcac697c34b8f7b52965ca16c301e8beea56a2325eaff4",
+    "n41_L1": "c335786760598d012c40e059d4973a41a55c01cad94d50704f7b4742fc83476c",
+    "n53_L1": "09fa193c09fda321cf79ebf6088066c94b7dadbf4eff270481f9dd9545e1f721"
+  },
+  "run_url": "https://github.com/aburan28/crypto/actions/runs/36694337420",
+  "schema": "ecc2k130-compact-ir-cold-second-host-v1"
+}

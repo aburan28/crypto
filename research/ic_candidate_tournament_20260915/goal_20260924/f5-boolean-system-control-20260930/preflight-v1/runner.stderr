@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/ic-f5-boolean-system-control-20260930/research/ic_candidate_tournament_20260915/goal_20260924/f5-boolean-system-control-20260930/run_control.py", line 127, in <module>
+    result = run(args.historical_source.resolve(), args.out.resolve())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/crypto/worktrees/ic-f5-boolean-system-control-20260930/research/ic_candidate_tournament_20260915/goal_20260924/f5-boolean-system-control-20260930/run_control.py", line 87, in run
+    ar=dict(path=env['AR'], sha256=digest(env['AR']), version=command([env['AR'], '--version'], root, env)),
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Volumes/SSD990/crypto/worktrees/ic-f5-boolean-system-control-20260930/research/ic_candidate_tournament_20260915/generic_build.py", line 48, in command
+    require(process.returncode == 0,
+  File "/Volumes/SSD990/crypto/worktrees/ic-f5-boolean-system-control-20260930/research/ic_candidate_tournament_20260915/oracle.py", line 14, in require
+    raise InvalidEvidence(message)
+oracle.InvalidEvidence: build command ['/usr/bin/ar', '--version'] exited 1:
+usage:  ar -d [-TLsv] archive file ...
+	ar -m [-TLsv] archive file ...
+	ar -m [-abiTLsv] position archive file ...
+	ar -p [-TLsv] archive [file ...]
+	ar -q [-cTLsv] archive file ...
+	ar -r [-cuTLsv] archive file ...
+	ar -r [-abciuTLsv] position archive file ...
+	ar -t [-TLsv] archive [file ...]
+	ar -x [-ouTLsv] archive [file ...]
+

@@ -1,0 +1,165 @@
+{
+  "cap_bytes": 536870912,
+  "capped_gh_classification": "GO_PAGE_SUMMARY_REFUSAL",
+  "capped_git_classification": "PACK_MMAP_REFUSAL",
+  "checkout_head": "981fdb39c6437b2cf70b6c744b0c172a8b5ba7ac",
+  "commands": [
+    {
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3",
+        "-c",
+        "import json,resource; print(json.dumps(resource.getrlimit(resource.RLIMIT_AS)))"
+      ],
+      "cap_bytes": 536870912,
+      "exit_code": 0,
+      "label": "hard_limit_observation",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 23,
+      "stdout_sha256": "04b9e71b50d46a6e3c67c8e2fbb0ac2bee4f27dc7695fdf31b0ab856bc997ca8",
+      "wall_seconds": 0.021534785000000056
+    },
+    {
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3",
+        "/home/runner/work/crypto/crypto/research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/v2_child.py",
+        "--gate-only"
+      ],
+      "cap_bytes": 536870912,
+      "exit_code": 0,
+      "label": "capped_child_local_byte_gate",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 119,
+      "stdout_sha256": "66b38f28a97c2c46e3d2ef39974e6bb76fa8788c8ff9b276684a3dd230b6d63c",
+      "wall_seconds": 0.06331687799999486
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cap_bytes": 536870912,
+      "exit_code": 0,
+      "label": "git_cap_rev_parse",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 41,
+      "stdout_sha256": "41a8a8a31b739747d1ded00d3fa0947b884714dbf02748edcd45850a1f0a3272",
+      "wall_seconds": 0.0026967849999834925
+    },
+    {
+      "argv": [
+        "git",
+        "cat-file",
+        "-t",
+        "c739ccf69972c0c0c7c79323d42548a5d319cdcc"
+      ],
+      "cap_bytes": 536870912,
+      "exit_code": 0,
+      "label": "git_cap_base_object",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 7,
+      "stdout_sha256": "50836eee574ecff79dea3b4fd40673d7d000f7a5f177d8a6a3000b59c78383b8",
+      "wall_seconds": 0.0025666720000003806
+    },
+    {
+      "argv": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "c739ccf69972c0c0c7c79323d42548a5d319cdcc",
+        "981fdb39c6437b2cf70b6c744b0c172a8b5ba7ac"
+      ],
+      "cap_bytes": 536870912,
+      "exit_code": 128,
+      "label": "git_cap_checkout_ancestry",
+      "stderr_bytes": 173,
+      "stderr_sha256": "aedcce286c2be3e688a32c41e7dbad0433aff4444d420555965cd74282cc7039",
+      "stderr_tail": "fatal: packfile .git/objects/pack/pack-ca9fa848a53da0382dfbf9e77a9d21bb4a516282.pack cannot be mapped, check sys.vm.max_map_count and/or RLIMIT_DATA: Cannot allocate memory\n",
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_tail": "",
+      "wall_seconds": 0.002719437000024527
+    },
+    {
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3",
+        "/home/runner/work/crypto/crypto/research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/ci_replay.py"
+      ],
+      "cap_bytes": 536870912,
+      "exit_code": 1,
+      "label": "preparation_and_v2_hash_gate",
+      "stderr_bytes": 828,
+      "stderr_sha256": "eb4dced838aeaa4a1a22a63dcc226272320d23d1579519c4cca055dd32153063",
+      "stderr_tail": "Traceback (most recent call last):\n  File \"/home/runner/work/crypto/crypto/research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/ci_replay.py\", line 648, in <module>\n    main()\n  File \"/home/runner/work/crypto/crypto/research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/ci_replay.py\", line 633, in main\n    frozen = check_static()\n             ^^^^^^^^^^^^^^\n  File \"/home/runner/work/crypto/crypto/research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/ci_replay.py\", line 57, in check_static\n    require(HEX40.fullmatch(frozen['base_main_head']) is not None and\n  File \"/home/runner/work/crypto/crypto/research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/ci_replay.py\", line 28, in require\n    raise AssertionError(message)\nAssertionError: v2 branch does not descend from recorded merged main\n",
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_tail": "",
+      "wall_seconds": 0.052764325999987705
+    },
+    {
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3",
+        "/home/runner/work/crypto/crypto/research/notes/ecc2k130/symbolic_dag_dimacs_linux_attempt2_20260926/verify_preparation.py"
+      ],
+      "cap_bytes": 536870912,
+      "exit_code": 1,
+      "label": "preparation_archive_gate",
+      "stderr_bytes": 54,
+      "stderr_sha256": "a1a3f1afde4882cb7d535bd5edc604378c301c3cdb1a74c91166b021a0f9675f",
+      "stderr_tail": "NOT_ADMITTED: first-failure record is not an ancestor\n",
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_tail": "",
+      "wall_seconds": 0.038110441000014816
+    },
+    {
+      "argv": [
+        "gh",
+        "pr",
+        "view",
+        "804",
+        "--repo",
+        "aburan28/crypto",
+        "--json",
+        "state,headRefOid,mergeCommit"
+      ],
+      "cap_bytes": 536870912,
+      "exit_code": 2,
+      "label": "gh_parent_804",
+      "stderr_bytes": 1138,
+      "stderr_sha256": "75ad6dd9a4d116ac5953bf5dbca48cc2c284223414c74bc7c7b8bb46b160400c",
+      "stderr_tail": "fatal error: failed to reserve page summary memory\n\nruntime stack:\nruntime.throw({0x15ab6dc?, 0x20000000?})\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/panic.go:1243 +0x48 fp=0x7fff5820d110 sp=0x7fff5820d0e0 pc=0x48b908\nruntime.(*pageAlloc).sysInit(0x2c23c88, 0x40?)\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/mpagealloc_64bit.go:81 +0x112 fp=0x7fff5820d178 sp=0x7fff5820d110 pc=0x448292\nruntime.(*pageAlloc).init(0x2c23c88, 0x2c23c80, 0x2c43a40, 0x0)\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/mpagealloc.go:327 +0x85 fp=0x7fff5820d1a8 sp=0x7fff5820d178 pc=0x445b25\nruntime.(*mheap).init(0x2c23c80)\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/mheap.go:812 +0x225 fp=0x7fff5820d1e0 sp=0x7fff5820d1a8 pc=0x441d05\nruntime.mallocinit()\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/malloc.go:493 +0xfd fp=0x7fff5820d228 sp=0x7fff5820d1e0 pc=0x42361d\nruntime.schedinit()\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/proc.go:890 +0x113 fp=0x7fff5820d2c0 sp=0x7fff5820d228 pc=0x455313\nruntime.rt0_go()\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/asm_amd64.s:340 +0x11d fp=0x7fff5820d2c8 sp=0x7fff5820d2c0 pc=0x490e3d\n",
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_tail": "",
+      "wall_seconds": 0.014994690000008859
+    },
+    {
+      "argv": [
+        "gh",
+        "api",
+        "repos/aburan28/crypto/actions/runs/36530704726"
+      ],
+      "cap_bytes": 536870912,
+      "exit_code": 2,
+      "label": "gh_actions_current_run",
+      "stderr_bytes": 1138,
+      "stderr_sha256": "325703f3d9ff55546bfc3cd2aaa29e3581e7699f025a20272161e1b42cf2391c",
+      "stderr_tail": "fatal error: failed to reserve page summary memory\n\nruntime stack:\nruntime.throw({0x15ab6dc?, 0x20000000?})\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/panic.go:1243 +0x48 fp=0x7ffc524a4570 sp=0x7ffc524a4540 pc=0x48b908\nruntime.(*pageAlloc).sysInit(0x2c23c88, 0x40?)\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/mpagealloc_64bit.go:81 +0x112 fp=0x7ffc524a45d8 sp=0x7ffc524a4570 pc=0x448292\nruntime.(*pageAlloc).init(0x2c23c88, 0x2c23c80, 0x2c43a40, 0x0)\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/mpagealloc.go:327 +0x85 fp=0x7ffc524a4608 sp=0x7ffc524a45d8 pc=0x445b25\nruntime.(*mheap).init(0x2c23c80)\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/mheap.go:812 +0x225 fp=0x7ffc524a4640 sp=0x7ffc524a4608 pc=0x441d05\nruntime.mallocinit()\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/malloc.go:493 +0xfd fp=0x7ffc524a4688 sp=0x7ffc524a4640 pc=0x42361d\nruntime.schedinit()\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/proc.go:890 +0x113 fp=0x7ffc524a4720 sp=0x7ffc524a4688 pc=0x455313\nruntime.rt0_go()\n\t/opt/hostedtoolcache/go/1.27.1/x64/src/runtime/asm_amd64.s:340 +0x11d fp=0x7ffc524a4728 sp=0x7ffc524a4720 pc=0x490e3d\n",
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_tail": "",
+      "wall_seconds": 0.003916226999990613
+    }
+  ],
+  "decision": "PASS_CHILD_BYTE_GATE_WITH_CAPPED_PREREQUISITE_REFUSALS",
+  "measured_children_started": 0,
+  "release_status": "HELD",
+  "runner_image_os": "ubuntu24",
+  "runner_image_version": "20260920.314.1",
+  "schema": "k0-dag-linux-v2-held-toy-cap-control-v1"
+}

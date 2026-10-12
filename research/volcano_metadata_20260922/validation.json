@@ -1,0 +1,32 @@
+{
+  "classification": "accounting/correctness",
+  "base_commit": "6955a67c0fe759c65844d35c0d8eb1a8a6137f1c",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "checks": [
+    {
+      "command": "cargo test --lib isogeny::cm::tests",
+      "result": "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 2863 filtered out; finished in 0.15s",
+      "log_sha256": "c2cb0ba2172d7677df71aa37fac814ad450e97dfb463fbd73399c9d794ec6175"
+    },
+    {
+      "command": "cargo test --lib isogeny::volcano::tests",
+      "result": "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 2869 filtered out; finished in 0.01s",
+      "log_sha256": "697425672cce6a7ceefa7c85d764e11c04455c86121a71c989b89ab90f6e70c2"
+    },
+    {
+      "command": "cargo check --bin crypto",
+      "result": "cargo check completed successfully",
+      "log_sha256": "ecd0dcfd9b5e4f005c417667660ee56b2892d1002b12bd846e2c514aac6f8028"
+    }
+  ],
+  "source_sha256": {
+    "src/isogeny/cm.rs": "bc851a0a6b5ec0bfd167ba1b77f3d3901a3d348adce8e8411d83e21bb06753c9",
+    "src/isogeny/volcano.rs": "d4d806d62899589abb51a40bafb8ebaa5b20a216193108546cbdac438dcd859a",
+    "src/isogeny/velu.rs": "d2f054b524d03465a1bb7f95182253e1b76945c29c9494cb89962fcb6d59c745",
+    "src/isogeny/mod.rs": "a064a5cd5e3e2c659d3318d0e9af3d3034fa3bedeccee44eac587e1953d21391",
+    "src/main.rs": "54ccc988c00acebd0bd082724f1ba9fd8aa14fbc4a18322076366bea94f244f3"
+  },
+  "full_ecdlp_cost": null,
+  "ratio_to_rho": null,
+  "scope": "Metadata regression checks; no ECDLP speedup claim. Existing compiler warnings remain."
+}

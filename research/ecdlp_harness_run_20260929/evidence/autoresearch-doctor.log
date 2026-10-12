@@ -1,0 +1,38 @@
+environment
+  OK    python 3.12.3
+  OK    repository root /tmp/crypto-autoresearcher
+
+dependencies
+  OK    PyYAML
+  OK    sympy
+  WARN  langgraph not installed — api_direct runtime and evals disabled
+
+configuration
+  OK    policies, providers, bindings load (sha256:c6170e0a6568c3f5129b5ad9a287ec20)
+
+backends
+  WARN  anthropic: $ANTHROPIC_API_KEY unset  (8/8 policies bound)  https://api.anthropic.com
+  WARN  fireworks: $FIREWORKS_API_KEY unset  (7/8 policies bound)  https://api.fireworks.ai/inference/v1
+  WARN  fireworks-anthropic: $FIREWORKS_API_KEY unset  (0/8 policies bound)  https://api.fireworks.ai/inference
+  OK    local: ready (6/8 policies)  http://localhost:8000/v1
+  WARN  openai: $OPENAI_API_KEY unset  (7/8 policies bound)  https://api.openai.com/v1
+  WARN  openrouter: $OPENROUTER_API_KEY unset  (0/8 policies bound)  https://openrouter.ai/api/v1
+  WARN  zai: $ZAI_API_KEY unset  (7/8 policies bound)  https://api.z.ai/api/paas/v4
+  WARN  zai-anthropic: $ZAI_API_KEY unset  (7/8 policies bound)  https://api.z.ai/api/anthropic
+
+role bindings
+  OK    role definitions match roles.yaml
+
+eval suites
+  WARN  skipped — needs the api_direct runtime
+
+Ready.
+  next: pip install -r requirements-agent.txt
+  next: set ANTHROPIC_API_KEY in .env (see .env.example) to use anthropic
+  next: set FIREWORKS_API_KEY in .env (see .env.example) to use fireworks
+  next: set FIREWORKS_API_KEY in .env (see .env.example) to use fireworks-anthropic
+  next: set OPENAI_API_KEY in .env (see .env.example) to use openai
+  next: set OPENROUTER_API_KEY in .env (see .env.example) to use openrouter
+  next: set ZAI_API_KEY in .env (see .env.example) to use zai
+  next: set ZAI_API_KEY in .env (see .env.example) to use zai-anthropic
+  next: verify the configured model ids are real: autoresearch adapter doctor --probe

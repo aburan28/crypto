@@ -1,0 +1,37 @@
+{
+  "task_id": "EVAL-CAP-VERIFY-SCRIPT",
+  "summary": "Write a reusable verifier, not just an answer.",
+  "passed": true,
+  "verdicts": [
+    {
+      "grader": "file_exists",
+      "passed": true,
+      "detail": "work/verify.py exists",
+      "critical": true
+    },
+    {
+      "grader": "discrete_log_certificate",
+      "passed": true,
+      "detail": "verified k=11",
+      "critical": true
+    },
+    {
+      "grader": "command_succeeds",
+      "passed": true,
+      "detail": "exit=0 ",
+      "critical": true
+    },
+    {
+      "grader": "stopped_cleanly",
+      "passed": true,
+      "detail": "stop_reason=completed",
+      "critical": false
+    }
+  ],
+  "answer": {
+    "k": 11,
+    "method": "pollard_rho",
+    "group_operations": 9,
+    "iterations": 3
+  }
+}

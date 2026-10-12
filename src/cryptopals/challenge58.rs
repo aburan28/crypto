@@ -23,12 +23,9 @@
 //! reduce to a kangaroo search for `m` in `[0, (q-1)/r)`.
 
 use crate::cryptopals::challenge57::Bob;
-use crate::cryptopals::set8_util::{
-    biguint_to_bytes_be, crt_combine, hmac_sha256, parse_big, small_factors,
-};
+use crate::cryptopals::set8_util::{crt_combine, parse_big, small_factors};
 use crate::cryptopals::Report;
 use num_bigint::BigUint;
-use num_integer::Integer;
 use num_traits::{One, Zero};
 
 /// Parameters specific to Challenge 58 (the "less accommodating" group).

@@ -1,0 +1,126 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 16,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "07d6d048fd6e66f7f93dc8061330cf9871e67ef9719dcbb45101913660f0d0e3",
+    "hypothesis": "Retain frozen previous winner.",
+    "id": "incumbent",
+    "parent": "round-0002/batch16",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "ab4401852244e9bce35903a9d909c8ddb0da6102bd6aad0f63c9616e52af6e55"
+  },
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "9a5d83fbbb556d1a344cc58e1df321771031ec878f060b231eb47fbd46e9bd81",
+    "hypothesis": "Reduce surplus verification by halving the batch.",
+    "id": "batch8",
+    "parent": "incumbent",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "ab4401852244e9bce35903a9d909c8ddb0da6102bd6aad0f63c9616e52af6e55"
+  },
+  {
+    "binary_relative": "source_candidates/serial_pairs/worker",
+    "config": {
+      "batch_trials": 16,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "07d6d048fd6e66f7f93dc8061330cf9871e67ef9719dcbb45101913660f0d0e3",
+    "falsification": "Wrong certificate or changed base rejects. Promotion requires >=20% lower instructions and native wall, upper95<1 and every cell<=1.10, confirmation and replay.",
+    "hypothesis": "Avoid Rayon scheduling and spin work for a one-CPU pair table.",
+    "id": "serial_pairs",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/serial_pairs/source",
+    "source_manifest_relative": "source_candidates/serial_pairs/source-manifest.json",
+    "source_manifest_sha256": "5149c612b780b35ccd738e5815103a2175be3bbe1aa998e76911d089cee68470"
+  },
+  {
+    "binary_relative": "source_candidates/fast_verify/worker",
+    "config": {
+      "batch_trials": 16,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "07d6d048fd6e66f7f93dc8061330cf9871e67ef9719dcbb45101913660f0d0e3",
+    "falsification": "Wrong certificate or changed base rejects. Promotion requires >=20% lower instructions and native wall, upper95<1 and every cell<=1.10, confirmation and replay.",
+    "hypothesis": "Verify every relation and log with equivalent single-word arithmetic.",
+    "id": "fast_verify",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/fast_verify/source",
+    "source_manifest_relative": "source_candidates/fast_verify/source-manifest.json",
+    "source_manifest_sha256": "a52152c0704a75fcdabdb7f3bec669771e393d3f66b592705fc005ae7763aac3"
+  },
+  {
+    "binary_relative": "source_candidates/fast_cofactor/worker",
+    "config": {
+      "batch_trials": 16,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "07d6d048fd6e66f7f93dc8061330cf9871e67ef9719dcbb45101913660f0d0e3",
+    "falsification": "Wrong certificate or changed base rejects. Promotion requires >=20% lower instructions and native wall, upper95<1 and every cell<=1.10, confirmation and replay.",
+    "hypothesis": "Compute cofactor classes with equivalent single-word arithmetic.",
+    "id": "fast_cofactor",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/fast_cofactor/source",
+    "source_manifest_relative": "source_candidates/fast_cofactor/source-manifest.json",
+    "source_manifest_sha256": "09db885e668e8ef0e126d75ae599ae979a4ccd839994b06e019ca3063c16ce72"
+  },
+  {
+    "binary_relative": "source_candidates/combined/worker",
+    "config": {
+      "batch_trials": 16,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "07d6d048fd6e66f7f93dc8061330cf9871e67ef9719dcbb45101913660f0d0e3",
+    "falsification": "Wrong certificate or changed base rejects. Promotion requires >=20% lower instructions and native wall, upper95<1 and every cell<=1.10, confirmation and replay.",
+    "hypothesis": "Measure the three source changes together, retaining every check.",
+    "id": "combined",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/combined/source",
+    "source_manifest_relative": "source_candidates/combined/source-manifest.json",
+    "source_manifest_sha256": "57525c45130ca71ddfff7df7b617bdd2dcd2ba1523c695e47b074b333e62750d"
+  },
+  {
+    "binary_relative": "source_candidates/combined_batch8/worker",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "9a5d83fbbb556d1a344cc58e1df321771031ec878f060b231eb47fbd46e9bd81",
+    "falsification": "Wrong certificate or changed base rejects. Promotion requires >=20% lower instructions and native wall, upper95<1 and every cell<=1.10, confirmation and replay.",
+    "hypothesis": "Measure the combined source with fewer surplus relations.",
+    "id": "combined_batch8",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/combined_batch8/source",
+    "source_manifest_relative": "source_candidates/combined_batch8/source-manifest.json",
+    "source_manifest_sha256": "57525c45130ca71ddfff7df7b617bdd2dcd2ba1523c695e47b074b333e62750d"
+  }
+]

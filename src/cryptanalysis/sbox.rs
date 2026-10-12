@@ -389,7 +389,7 @@ impl Sbox {
         if lane_bits == 0 {
             return Err("lane_bits must be > 0");
         }
-        if self.n_in % lane_bits != 0 || self.n_out % lane_bits != 0 {
+        if !self.n_in.is_multiple_of(lane_bits) || !self.n_out.is_multiple_of(lane_bits) {
             return Err("lane_bits must divide both n_in and n_out");
         }
         let in_lanes = self.n_in / lane_bits;

@@ -1,0 +1,72 @@
+{
+  "blocks": [
+    {
+      "block": 0,
+      "candidate_attempts": 1024,
+      "fixture_sha256": "d69a61c7acb428785b5642150bc5c064c11a0af8845fde6d48376fac8d7fb5ff",
+      "points_sha256": "13d8f931a7f5cc9d33e71930049f01b9a19b751fe4324a7d2b44579801c7f340",
+      "rejections": {
+        "new_orbit": 0,
+        "prior_orbit": 0,
+        "zero_scalar": 0
+      }
+    },
+    {
+      "block": 1,
+      "candidate_attempts": 1024,
+      "fixture_sha256": "54e9aecea13f4121aeb0edea345a2edca655aa3175ec59d975545ec9b734d256",
+      "points_sha256": "952f885f2258508eb486f7978d869e55d6d2523b8141f44e406905b3724f2707",
+      "rejections": {
+        "new_orbit": 0,
+        "prior_orbit": 0,
+        "zero_scalar": 0
+      }
+    },
+    {
+      "block": 2,
+      "candidate_attempts": 1024,
+      "fixture_sha256": "50748a53bdd5bcbd46fcd0e0bbdd40cacf2e8c70d9fac8f92b79d7c2dcd9290b",
+      "points_sha256": "2193c5d208f002d96833021b4eb038aa38f99d87de8115bdc36fb7740477d5a6",
+      "rejections": {
+        "new_orbit": 0,
+        "prior_orbit": 0,
+        "zero_scalar": 0
+      }
+    },
+    {
+      "block": 3,
+      "candidate_attempts": 1024,
+      "fixture_sha256": "c6e146e4040192e9335bb129b6082b1474c2b848b5cd74b28ec2a50c417ebaba",
+      "points_sha256": "5ce44c0d7129ac92f47e08e16ddb41af956307412d21bda9977e2fd08492b6ab",
+      "rejections": {
+        "new_orbit": 0,
+        "prior_orbit": 0,
+        "zero_scalar": 0
+      }
+    },
+    {
+      "block": 4,
+      "candidate_attempts": 1024,
+      "fixture_sha256": "2c7b3bce5d7a652d8d3641a62b3bf73398a06ff60fd3506d2bdb4da9c954fbe2",
+      "points_sha256": "4757d3fdd76a8c2eaa4795d362ec7f2d85a04c522c295bbcff780e45e65aff69",
+      "rejections": {
+        "new_orbit": 0,
+        "prior_orbit": 0,
+        "zero_scalar": 0
+      }
+    }
+  ],
+  "candidate_rejections": {
+    "new_orbit": 0,
+    "prior_orbit": 0,
+    "zero_scalar": 0
+  },
+  "frozen_sha256": "6487e1c30ef1ae1db5cb99fd39297150b1a327baaff727e3966d3115bc88e2a7",
+  "new_n41_orbits": 5120,
+  "point_equations_verified": 5120,
+  "prior_inventory_digest": "56647a01fd54be86b0c4ece88d2e891ad6839262685cb97ffdc4f0b30b2490b2",
+  "prior_n41_orbits": 18446,
+  "prior_n41_rows": 18446,
+  "schema": "ecc2k130-base-window-input-replay-v1",
+  "status": "PASS"
+}

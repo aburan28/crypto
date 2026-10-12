@@ -1,0 +1,765 @@
+{
+  "valid": true,
+  "fixtureOnly": true,
+  "evidenceClass": "Synthetic in-memory parser review, not measurement or public GPU audit",
+  "reviewedAtUtc": "2026-09-12T10:58:28.635537+00:00",
+  "checkerPath": "/private/tmp/ecc2k-shared-sigma-public-review-20260912/audit.py",
+  "checkerSha256": "05dcc5cd23def5e58cacccf1e65a2f461957a1994012866a54dfb1c4fd74a55a",
+  "checkerUnmodified": true,
+  "pendingConstantsUntouched": true,
+  "measurementsRead": false,
+  "compilerOrGpuRun": false,
+  "cases": 106,
+  "passed": 106,
+  "unexpectedAcceptances": [],
+  "unexpectedRejections": [],
+  "tests": [
+    {
+      "name": "evaluate positive synthetic full record",
+      "expectedAcceptance": true,
+      "actualAcceptance": true,
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "sample positive synthetic benchmark",
+      "expectedAcceptance": true,
+      "actualAcceptance": true,
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "sample positive synthetic collection",
+      "expectedAcceptance": true,
+      "actualAcceptance": true,
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "probe positive synthetic complete record",
+      "expectedAcceptance": true,
+      "actualAcceptance": true,
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "sample accepts public string benchmark command",
+      "expectedAcceptance": true,
+      "actualAcceptance": true,
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "sample 0 shared marker missing",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime marker shared sigma"
+    },
+    {
+      "name": "sample 0 shared marker wrong",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime marker shared sigma"
+    },
+    {
+      "name": "sample 0 shared marker duplicate",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime marker shared sigma"
+    },
+    {
+      "name": "sample 0 shared marker invalid",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime marker shared sigma"
+    },
+    {
+      "name": "sample 0 invalid packedSharedSigma",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: sample boolean identity packedSharedSigma"
+    },
+    {
+      "name": "sample 0 invalid expectedPackedSharedSigma",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: sample boolean identity expectedPackedSharedSigma"
+    },
+    {
+      "name": "sample 0 invalid valid",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: sample completion"
+    },
+    {
+      "name": "sample 0 invalid returncode",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: sample completion"
+    },
+    {
+      "name": "sample 0 invalid timedOut",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: sample completion"
+    },
+    {
+      "name": "sample 0 invalid error",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: sample completion"
+    },
+    {
+      "name": "sample 0 wrong registers",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime kernel resources"
+    },
+    {
+      "name": "sample 0 wrong local bytes",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime kernel resources"
+    },
+    {
+      "name": "sample 0 wrong function extent",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime kernel resources"
+    },
+    {
+      "name": "sample 0 wrong reserved bytes",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: separate driver shared reservation"
+    },
+    {
+      "name": "sample 0 wrong reserved device",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: separate driver shared reservation"
+    },
+    {
+      "name": "sample 0 wrong reservation missing",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: separate driver shared reservation"
+    },
+    {
+      "name": "sample 0 wrong partial scalar transcript",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: monotone complete scalar progress on launch grid"
+    },
+    {
+      "name": "sample 0 wrong progress drops",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: complete progress accounting and zero drops"
+    },
+    {
+      "name": "sample 0 duplicate resource marker",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime kernel resources"
+    },
+    {
+      "name": "sample 0 duplicate reservation",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: separate driver shared reservation"
+    },
+    {
+      "name": "sample 0 partial scalar metadata",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: exact sample geometry/count metadata"
+    },
+    {
+      "name": "sample 0 wrong workers",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: exact sample geometry/count metadata"
+    },
+    {
+      "name": "sample 0 nonfinite rate",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: finite final rate"
+    },
+    {
+      "name": "sample 0 duplicate final",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: final reports/drops"
+    },
+    {
+      "name": "sample 34 shared marker missing",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime marker shared sigma"
+    },
+    {
+      "name": "sample 34 shared marker wrong",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime marker shared sigma"
+    },
+    {
+      "name": "sample 34 shared marker duplicate",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime marker shared sigma"
+    },
+    {
+      "name": "sample 34 shared marker invalid",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime marker shared sigma"
+    },
+    {
+      "name": "sample 34 invalid packedSharedSigma",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: sample boolean identity packedSharedSigma"
+    },
+    {
+      "name": "sample 34 invalid expectedPackedSharedSigma",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: sample boolean identity expectedPackedSharedSigma"
+    },
+    {
+      "name": "sample 34 invalid valid",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: sample completion"
+    },
+    {
+      "name": "sample 34 invalid returncode",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: sample completion"
+    },
+    {
+      "name": "sample 34 invalid timedOut",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: sample completion"
+    },
+    {
+      "name": "sample 34 invalid error",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: sample completion"
+    },
+    {
+      "name": "sample 34 wrong registers",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime kernel resources"
+    },
+    {
+      "name": "sample 34 wrong local bytes",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime kernel resources"
+    },
+    {
+      "name": "sample 34 wrong function extent",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime kernel resources"
+    },
+    {
+      "name": "sample 34 wrong reserved bytes",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: separate driver shared reservation"
+    },
+    {
+      "name": "sample 34 wrong reserved device",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: separate driver shared reservation"
+    },
+    {
+      "name": "sample 34 wrong reservation missing",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: separate driver shared reservation"
+    },
+    {
+      "name": "sample 34 wrong partial scalar transcript",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: monotone complete scalar progress on launch grid"
+    },
+    {
+      "name": "sample 34 wrong progress drops",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: complete progress accounting and zero drops"
+    },
+    {
+      "name": "sample 34 duplicate resource marker",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: runtime kernel resources"
+    },
+    {
+      "name": "sample 34 duplicate reservation",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: separate driver shared reservation"
+    },
+    {
+      "name": "sample 34 partial scalar metadata",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: exact sample geometry/count metadata"
+    },
+    {
+      "name": "sample 34 wrong workers",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: exact sample geometry/count metadata"
+    },
+    {
+      "name": "sample 34 nonfinite rate",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: finite final rate"
+    },
+    {
+      "name": "sample 34 duplicate final",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: final reports/drops"
+    },
+    {
+      "name": "collection wrong corpusRecords",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: public collection counts/sizes"
+    },
+    {
+      "name": "collection wrong corpusBytes",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: public collection counts/sizes"
+    },
+    {
+      "name": "probe marker missing",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: shared probe mode transcript"
+    },
+    {
+      "name": "probe marker wrong",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: shared probe mode transcript"
+    },
+    {
+      "name": "probe marker duplicate",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: shared probe mode transcript"
+    },
+    {
+      "name": "probe marker invalid",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: shared probe mode transcript"
+    },
+    {
+      "name": "probe wrong returncode 9",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: component did not complete"
+    },
+    {
+      "name": "probe wrong timedOut True",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: component did not complete"
+    },
+    {
+      "name": "probe wrong error 'synthetic failure'",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: component did not complete"
+    },
+    {
+      "name": "probe wrong packedSharedSigma False",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: probe shared boolean identity"
+    },
+    {
+      "name": "probe wrong expectedPackedSharedSigma False",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: probe shared boolean identity"
+    },
+    {
+      "name": "probe wrong scenarios 20",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: shared probe count scenarios"
+    },
+    {
+      "name": "probe wrong inputPairs 21035",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: shared probe count inputPairs"
+    },
+    {
+      "name": "probe wrong blockSnapshots 113",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: shared probe count blockSnapshots"
+    },
+    {
+      "name": "probe wrong maskWords 51071",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: shared probe count maskWords"
+    },
+    {
+      "name": "probe wrong maskWords 51072.0",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: shared probe count maskWords"
+    },
+    {
+      "name": "probe malformed coverage 21 GPU",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: both exact shared probe suites"
+    },
+    {
+      "name": "probe malformed coverage 21036 input",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: both exact shared probe suites"
+    },
+    {
+      "name": "probe malformed coverage 114 complete",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: both exact shared probe suites"
+    },
+    {
+      "name": "probe malformed coverage 51072 words",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: both exact shared probe suites"
+    },
+    {
+      "name": "probe missing suite",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: both exact shared probe suites"
+    },
+    {
+      "name": "probe extra suite",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: both exact shared probe suites"
+    },
+    {
+      "name": "probe duplicate suite",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: both exact shared probe suites"
+    },
+    {
+      "name": "probe command wrong shared flag",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: component architecture/flags differ"
+    },
+    {
+      "name": "probe command duplicate shared flag",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: duplicate component setting"
+    },
+    {
+      "name": "evaluate top shared mode mismatch",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: top-level boolean packedSharedSigma"
+    },
+    {
+      "name": "evaluate probe applicability false",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: selected preset must execute shared probe"
+    },
+    {
+      "name": "evaluate failed probe",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: component did not complete"
+    },
+    {
+      "name": "evaluate malformed probe",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: shared probe count maskWords"
+    },
+    {
+      "name": "evaluate missing probe",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "KeyError: 'deviceSharedSigma'"
+    },
+    {
+      "name": "evaluate stale source digest",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: reported source and binary identity"
+    },
+    {
+      "name": "evaluate malformed binary digest",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: reported source and binary identity"
+    },
+    {
+      "name": "evaluate identity shared mode mismatch",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: identity packedSharedSigma"
+    },
+    {
+      "name": "evaluate wrong public workers",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: public command geometry"
+    },
+    {
+      "name": "evaluate partial repetitions",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: three complete repetitions"
+    },
+    {
+      "name": "evaluate stale median",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: recomputed public statistics"
+    },
+    {
+      "name": "evaluate contradictory collection summary",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: collection summary identity"
+    },
+    {
+      "name": "evaluate arithmetic timeout",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: component did not complete"
+    },
+    {
+      "name": "evaluate storage timeout",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: component did not complete"
+    },
+    {
+      "name": "evaluate failed integration",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: complete integration and exact transcript"
+    },
+    {
+      "name": "evaluate integration timeout",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: complete integration and exact transcript"
+    },
+    {
+      "name": "evaluate integration error",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: complete integration and exact transcript"
+    },
+    {
+      "name": "evaluate invalid owner confirmed",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: owner confirmation of terminal result required before reading artifact"
+    },
+    {
+      "name": "evaluate invalid owner session",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: expected owner terminal session/exit"
+    },
+    {
+      "name": "evaluate invalid owner session",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: expected owner terminal session/exit"
+    },
+    {
+      "name": "evaluate invalid owner exitCode",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: expected owner terminal session/exit"
+    },
+    {
+      "name": "evaluate invalid owner appId",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: owner-confirmed app ID required"
+    },
+    {
+      "name": "goal below 26B",
+      "expectedAcceptance": true,
+      "actualAcceptance": true,
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "goal exactly 26B",
+      "expectedAcceptance": true,
+      "actualAcceptance": true,
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "goal median 26B with one low sample",
+      "expectedAcceptance": true,
+      "actualAcceptance": true,
+      "passed": true,
+      "error": null
+    },
+    {
+      "name": "collection final progress report count contradicts finished count",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: monotone fresh report/storage counters"
+    },
+    {
+      "name": "collection stored count exceeds reported records",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: complete progress accounting and zero drops"
+    },
+    {
+      "name": "sample off-launch-grid intermediate scalar count",
+      "expectedAcceptance": false,
+      "actualAcceptance": false,
+      "passed": true,
+      "error": "ValueError: monotone complete scalar progress on launch grid"
+    }
+  ],
+  "limitations": [
+    "prepare()/audit() source-binding acceptance cannot be validated until root pins the final source constants.",
+    "Fixtures deliberately invent all transcripts, source/binary/GPU identities, owner metadata and rates.",
+    "The future public shared audit artifact was not read."
+  ]
+}

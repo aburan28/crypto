@@ -1,0 +1,71 @@
+name: ECC2K-130 degree-263 leaf m10 support census
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ecc2k130-leaf-m10-support.yml'
+      - 'research/notes/ecc2k130/leaf_m10_support_20260930/**'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            research/notes/ecc2k130/leaf_m10_support_20260930
+            research/notes/ecc2k130/m10_export_capacity_20260925/INPUT.json
+            research/notes/ecc2k130/dual_all_lines_20260930/RESULT.json
+            research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py
+            research/notes/ecc2k130/rotated_unequal_arity_20260925/verify.py
+            research/ecc2k130_relations/fastfield.py
+            research/ecc2k130_relations/relations.py
+            .github/workflows/ecc2k130-leaf-m10-support.yml
+      - name: Check frozen source, toy point law and source positive control
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/leaf_m10_support_20260930/*.py
+          python3 -m unittest discover -s research/notes/ecc2k130/leaf_m10_support_20260930 -p 'test_support.py' -v
+          python3 -c 'import sys; sys.path.insert(0,"research/notes/ecc2k130/leaf_m10_support_20260930"); from produce import checked_inputs; checked_inputs()'
+
+  measure:
+    if: github.event_name == 'workflow_dispatch'
+    needs: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            research/notes/ecc2k130/leaf_m10_support_20260930
+            research/notes/ecc2k130/m10_export_capacity_20260925/INPUT.json
+            research/notes/ecc2k130/dual_all_lines_20260930/RESULT.json
+            research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py
+            research/notes/ecc2k130/rotated_unequal_arity_20260925/verify.py
+            research/ecc2k130_relations/fastfield.py
+            research/ecc2k130_relations/relations.py
+            .github/workflows/ecc2k130-leaf-m10-support.yml
+      - name: Enumerate every frozen source and leaf slot
+        run: |
+          python3 research/notes/ecc2k130/leaf_m10_support_20260930/produce.py \
+            --out "${{ runner.temp }}/leaf-m10-evidence"
+      - name: Replay every raw row with independent field and point arithmetic
+        if: always()
+        run: |
+          if test -f "${{ runner.temp }}/leaf-m10-evidence/result.json"; then
+            python3 research/notes/ecc2k130/leaf_m10_support_20260930/verify.py \
+              --evidence "${{ runner.temp }}/leaf-m10-evidence" \
+              --out "${{ runner.temp }}/leaf-m10-evidence/replay.json"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: leaf-m10-support-${{ github.run_id }}
+          path: ${{ runner.temp }}/leaf-m10-evidence
+          if-no-files-found: warn
+          retention-days: 90

@@ -1,0 +1,199 @@
+{
+  "valid": true,
+  "status": "Completed matched B16/B18 compact receipt passed offline evidence checks",
+  "rawSha256": "6f42f7da80d388c181191e4c0ea817d7626167d3a0b6019d1d697b943ccda7af",
+  "auditorSha256": "154644107ed7c2874d555c81fd9880587a960634ca441397b88517251112feff",
+  "weightedPrefixModes": {
+    "control": 2,
+    "b18_m2": 2
+  },
+  "compactStateModes": {
+    "control": 1,
+    "b18_m2": 1
+  },
+  "canonicalInputsOnly": true,
+  "rootPredispatchReviewSha256": "1fb780c390a3410a1e1e41c137c575531bcfece9ed8fdb63cf30c9d9c6fd70f2",
+  "predispatchReviewSha256": "5de5a36a35ad2db2e7c8490a79922932bae08a24f8b4bd4b1ac013a2be61c5e8",
+  "driverFreezeSha256": "2d317fe9614f8b77d09ca54246e9bec467cb9811e60bfc3b59dd5a22aa4698f5",
+  "prebuildSha256": "0fbaec01f16197c73da27071ac59f3e841c09f19f925facda074b878c8799cdb",
+  "sourceManifestHashes": {
+    "control": "2fff64bb2a2f252886923aa65a7f3fc649939bba03ff545e3e7ae37c1833d40c",
+    "b18_m2": "2fff64bb2a2f252886923aa65a7f3fc649939bba03ff545e3e7ae37c1833d40c"
+  },
+  "sourceFilesPerMode": 159,
+  "binaries": {
+    "control": "bc4914a093e3d03ac8890551f16215494b427fb4d54793f033b500e234ba6e12",
+    "b18_m2": "a85e8a1c2eedd1f226fc58ab61cdddebda7083b7d9fb7c4d593892d271e8a4c6"
+  },
+  "arithmeticBinaries": {
+    "control": "b4180889904d35f554639accde51f3fe3b2c47ec9e7376153351221244434c5d",
+    "b18_m2": "704d9551f2b94b1ebda0ea9d049127d587aae8d421ddc0f23722f7a0269e7d08"
+  },
+  "storageBinaries": {
+    "control": "26b60cd1827b48c95932326deeab2c1b554bd86eb5a693b018748c6e059b53b2",
+    "b18_m2": "19a6b730035b74bd907c0f230b14b2577f88a7d1c2296ded0566915dcc7d5647"
+  },
+  "gpuBefore": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-db138398-156b-56f8-bc64-36512e5a84c7",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-db138398-156b-56f8-bc64-36512e5a84c7",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "180 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "32"
+    }
+  },
+  "gpuAfter": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-db138398-156b-56f8-bc64-36512e5a84c7",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-db138398-156b-56f8-bc64-36512e5a84c7",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "2317 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "74"
+    }
+  },
+  "jitEnvironment": {
+    "CUDA_DISABLE_PTX_JIT": "1",
+    "CUDA_FORCE_PTX_JIT": null,
+    "CUDA_FORCE_JIT": null
+  },
+  "sourceAndNativeCodeBindingsPassed": true,
+  "allCorrectnessGatesPassed": true,
+  "allRequiredCommandsCompletedWithExpectedStatus": true,
+  "gpuPairedFrobeniusPairsPerMode": 6240,
+  "gpuPairedFrobeniusOutputsPerMode": 12480,
+  "arithmeticModeLineAndAllSixPassLinesRequired": true,
+  "checkpointChildren": 24,
+  "successfulCheckpointChildren": 20,
+  "expectedCheckpointRejections": 4,
+  "expectedCrossBatchRejections": 2,
+  "expectedWorkerRejections": 2,
+  "checkpointComparisons": 6,
+  "storageCasesPerMode": 128,
+  "storageRecordsByMode": {
+    "control": 297344,
+    "b18_m2": 334512
+  },
+  "normalizedPopulations": [
+    144,
+    36864
+  ],
+  "warmupsExcluded": 2,
+  "timedRows": 5,
+  "scalarUpdatesEveryTimedRow": 454192791552,
+  "scalarWalks": 13860864,
+  "stepsPerWalk": 32768,
+  "batches": {
+    "control": 16,
+    "b18_m2": 18
+  },
+  "workers": {
+    "control": 866304,
+    "b18_m2": 770048
+  },
+  "screenQualified": false,
+  "screenWinner": null,
+  "screenRatesM": [
+    {
+      "mode": "control",
+      "rate": 14468.385
+    },
+    {
+      "mode": "b18_m2",
+      "rate": 14292.785
+    },
+    {
+      "mode": "control",
+      "rate": 14461.831
+    }
+  ],
+  "controlDriftPercent": -0.04529876693217805,
+  "qualificationThresholdM": 14540.726924999999,
+  "reports2History": {
+    "control": {
+      "priorNewReports": 288,
+      "currentNewReports": 288,
+      "expectedCorpusRecords": 576,
+      "newScalarUpdates": 9216
+    },
+    "b18_m2": {
+      "priorNewReports": 288,
+      "currentNewReports": 288,
+      "expectedCorpusRecords": 576,
+      "newScalarUpdates": 9216
+    }
+  },
+  "statistics": {},
+  "pairedComparisons": {},
+  "corpusIdentity": null,
+  "goalEvaluation": {
+    "targetBillionScalarUpdatesPerSecond": 15,
+    "repeatedConfirmationAvailable": false,
+    "benchmarkMedianAtLeast15B": false,
+    "allThreeBenchmarkSamplesAtLeast15B": false,
+    "collectionMedianAtLeast15B": false,
+    "benchmarkAndCollectionMediansAtLeast15B": false
+  },
+  "findings": [],
+  "limits": [
+    "No job, compiler or numerical test rerun by this audit; it inspects only the owner-supplied terminal artifact.",
+    "Complete scalar rates apply to this fixed oneGPU public walk workload. Warmups/screen peaks are excluded from repeated goal evaluation; benchmark and DP34 medians remain separate.",
+    "Batch16/18 and matched-population worker counts vary. Compact1, WP2, minBlocks2, T256, TILE256 and CLMAD1 stay fixed. New corpus counts/hashes must agree within this panel; no prior different-population corpus or rate is used as control.",
+    "Weighted-prefix equivalence is validated for canonical131-bit fields with denominator tags cleared before arithmetic, including the existing whole-batch zero-denominator convention. Arbitrary noncanonical field inputs are outside this proof.",
+    "Checkpoint v2 rejects two directed different-batch imports at equal144-slot payload size and two worker-geometry mismatches. Six same-geometry split/uninterrupted comparisons at8/256/257 workers are required. Cross-batch logical equivalence is checked through normalized144/36864-slot states; this panel performs no same-batch cross-mode import.",
+    "Temporary checkpoint and DP payload bytes are not retained; this audit verifies their recorded hashes, sizes, counts and bound executable helpers rather than independently rehashing those transient payloads.",
+    "API occupancy predictions and endpoint GPU telemetry do not prove achieved occupancy, cache hits, continuous clocks or a universal hardware ceiling."
+  ],
+  "ownerTerminalConfirmation": {
+    "session": 85122,
+    "app": "ap-llhX0xPSTxxLc9FidrwomO",
+    "exitCode": 0,
+    "artifact": "/private/tmp/ecc2k-compact-b18-walk-20260912/result.json",
+    "sha256": "6f42f7da80d388c181191e4c0ea817d7626167d3a0b6019d1d697b943ccda7af"
+  },
+  "rawArtifactPreserved": true,
+  "authorship": {
+    "checkerAuthor": "/root/polystate_checkpoints",
+    "driverAuthor": "/root/polystate_checkpoints",
+    "sameAgentAuthoredCheckerAndDriver": true,
+    "independentRootPredispatchReviewSha256": "1fb780c390a3410a1e1e41c137c575531bcfece9ed8fdb63cf30c9d9c6fd70f2",
+    "independentSourceInvariantReviewer": "/root/polystate_checkpoints/weighted_sigma",
+    "limit": "This is an offline evidence check by the driver author, with separately recorded independent source and root reviews."
+  },
+  "checkerFreeze": {
+    "frozenAtUtc": "2026-09-12T09:14:02.395554+00:00",
+    "auditorSha256": "154644107ed7c2874d555c81fd9880587a960634ca441397b88517251112feff",
+    "testSourceSha256": "9354846b7449874bb710bc5ce048c995f873e2611d4a323103bd2ab3fb3c71a1",
+    "preparationChecksSha256": "2b421d5ba462202dbe1ba63ab762093999e1747b43814868777d041c24c9a241",
+    "sourceInvariantReviewSha256": "46a0c45a7adf2ce828b3937f7cebc1258002e24c61d559ece97baabae0b67785",
+    "priorAuditorSha256": "1e1aa584e656fc902c59b871380ad3018cce4208e3e28605f55ef53e158ac358",
+    "rawArtifactOpenedBeforeFreeze": false,
+    "ownerTerminalAnnouncementAlreadyReceived": true,
+    "knownBeforeFreeze": [
+      "Session85122 exited0; appap-llhX0xPSTxxLc9FidrwomO",
+      "Owner-supplied rawSHA6f42f7da80d388c181191e4c0ea817d7626167d3a0b6019d1d697b943ccda7af and4326788bytes",
+      "Owner stated producer valid/unqualified with5rows; checker statistics and proof were not derived from that statement."
+    ],
+    "authorship": "Checker author also authored driver; this is not an independent-author full-panel audit.",
+    "chronology": "Frozen after owner announced completion but before this agent opened the GPU raw artifact, return receipt, timing outputs or log.",
+    "initialSyntheticTestCorrection": "The initial fixture used decimal100.5 instead of the exact100*1.005 floating threshold and a palindromic row reversal; only the test fixture was corrected. Initial failed test receipt preserved. Checker admission logic unchanged."
+  },
+  "auditorFreezeSha256": "bd83b1b5cabfa671c2be562510c44f3fe58b45f0c2bdac55f1d5469ca7e6785b",
+  "auditCompletedUtc": "2026-09-12T09:14:23.369628+00:00",
+  "auditorLineage": {
+    "adaptedFromAuditorSha256": "1e1aa584e656fc902c59b871380ad3018cce4208e3e28605f55ef53e158ac358",
+    "scope": "Two distinct batches,159 same-source files,13860864 matched walks,454192791552 updates per timed sample,144/36864 normalized states,24 checkpoint children. Cumulative reports2 validation derives its prior count from current-panel verified report history; fresh invocations retain no-reload and stored<=current-DPs.",
+    "priorPopulationCorpusReused": false
+  }
+}

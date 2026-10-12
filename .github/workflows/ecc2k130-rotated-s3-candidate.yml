@@ -1,0 +1,28 @@
+name: ECC2K-130 rotated recursive S3 candidate gate
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify frozen sources and exact S3 root cases
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/rotated_s3_candidate_20260925/{diagnostic,verify,run,ci_replay}.py
+          python3 research/notes/ecc2k130/rotated_s3_candidate_20260925/ci_replay.py
+      - name: Check archived result receipt when present
+        run: |
+          receipt=research/notes/ecc2k130/rotated_s3_candidate_20260925/evidence/receipt.json
+          if test -f "$receipt"; then
+            python3 research/notes/ecc2k130/rotated_s3_candidate_20260925/ci_replay.py --evidence "$receipt"
+            python3 research/notes/ecc2k130/rotated_s3_candidate_20260925/archive_check.py
+          fi

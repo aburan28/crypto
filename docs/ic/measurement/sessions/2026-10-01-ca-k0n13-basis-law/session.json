@@ -1,0 +1,475 @@
+{
+ "affinity_widened_from": null,
+ "arms": [
+  {
+   "adapter": "cryptanalysis.ic_bench",
+   "index": 0,
+   "label": "icv1-f2m13-t181-515ee569 (K_0, n = 13): prefix subspace l=3, Macaulay mxl m=3 (cryptanalysis ic-bench)",
+   "role": "candidate",
+   "spec_id": "ICS1h35585e581598",
+   "spec_path": "docs/ic/measurement/specs/ca-k0n13-prefix-l3-m3.yaml",
+   "workload_id": "Wea67e76bfd9f"
+  },
+  {
+   "adapter": "cryptanalysis.ic_bench",
+   "index": 1,
+   "label": "icv1-f2m13-t181-515ee569 (K_0, n = 13): geomtrace subspace l=3, Macaulay mxl m=3 (cryptanalysis ic-bench)",
+   "role": "candidate",
+   "spec_id": "ICS1h2a42530bb4bd",
+   "spec_path": "docs/ic/measurement/specs/ca-k0n13-geomtrace-l3-m3.yaml",
+   "workload_id": "Wea67e76bfd9f"
+  },
+  {
+   "adapter": "cryptanalysis.ic_bench",
+   "index": 2,
+   "label": "icv1-f2m13-t181-515ee569 (K_0, n = 13): prefix subspace l=3, Macaulay mxl m=3 (cryptanalysis ic-bench)",
+   "role": "candidate",
+   "spec_id": "ICS1h35585e581598",
+   "spec_path": "docs/ic/measurement/specs/ca-k0n13-prefix-l3-m3.yaml",
+   "workload_id": "Wea67e76bfd9f"
+  }
+ ],
+ "capsule_sha256": "ed53409a7c34993d63b873e7173d8c138476fa0ecbb55e40e03451deb58093c2",
+ "env_class_id": "ENV1h7292c40d7f20",
+ "finished_unix": 1790891504.3650007,
+ "implementation": {
+  "icms_sources": {
+   "__init__.py": "9ea31e0828046722584b68472d96e8855e7982dfeb5eef55ece780691bb99311",
+   "__main__.py": "e7df75e41fc7ffa968c03a9f99f333991d81590bf83bc88c5d40d25a64404e8a",
+   "adapters/__init__.py": "96d478024fc1ae156a8d87acb5b4cbbfca1874fd2fd204980b4ca60aef7a2e45",
+   "adapters/autoresearcher_ic.py": "a1bd3cd85956cdd026cf12c8f804cd32989d01124de660e611966baba54c9554",
+   "adapters/command.py": "2ebddffe812e3622a104719f0e37668a62a73fa8e710f112c49aae7254d93308",
+   "adapters/cryptanalysis_cell.py": "009ce2e3d53cc603ebc1a7c734727fa8b2aad4f3b64df8e1493076260fef5125",
+   "adapters/cryptanalysis_ic_bench.py": "ed78d75821b82d1e0751cd6017a054ef3e29f2c947acb781935959b1d4c6e563",
+   "adapters/crypto_ic_bench.py": "05bb3d19047d2faa71eeac796ec9fa535f67d6918b98452b1d3f2d20d3a57a62",
+   "audit.py": "c5e2eb9ca1d9402e94196879616908576d05ccbfdf95f55ae516ef14ca2a6968",
+   "canonical.py": "2eacd8d866510952cbea2233619afa481671f7aa7b9228fe5f8b43ad97d91747",
+   "compare.py": "757369f3e96e60e38226d70e640c59e52302378f35ff8187ce207f4667f39653",
+   "environment.py": "582e80fc8eacba2cc5dc4f7b15b07f9aff360b57c158e03907d16600e270250f",
+   "execute.py": "24c122026e86c7a24d2bb9f0a3baa6c733da5da8b18ccab5ac35ae569b1fee1c",
+   "gates.py": "f60382fcf7ed1cfd886d8660353918cbb7b9166a2f1804ff8409ae633772e7bc",
+   "registry.py": "1f6b5542c338f2cbc4e945f03a1b2585d7c2f273e85d1561dd0726c1ccb4ea64",
+   "schemacheck.py": "481d35dd86a02eb94b2b543e5e6c4e7950404294b0ae8de4fe899d232575418c",
+   "session.py": "eefef43e630c1b0c06dce36b1087b36e948655c992ba71bbe32a647403c1f1aa",
+   "spec.py": "fc68d3fe38e12f80d21aa61bc504ba5ee9dfbc90fb99f07367ba48aa809c5551"
+  },
+  "isolated_bench_sha256": "cf0f3f206280dfbbe9b5efa5aad99869572b475690e11a62650f1e39b5dcc970",
+  "isolation_mode": "reserve-equivalent: the isolated_bench lock, preflight, CPU checks and eviction, imported from tools/isolated_bench.py; ICMS pins its own children",
+  "registry_sha256": "d3e6254d3d2f992856705fcff8e5304fe8d8b183da68c8c10c4fecdf1e6c459a",
+  "repo": {
+   "commit": "c40ce8f02a417e1ffb9c6d5d510316eee52fc413",
+   "diff_sha256": null,
+   "dirty": false,
+   "dirty_paths": [],
+   "remote": "https://github.com/aburan28/crypto",
+   "toplevel": "/home/user/crypto"
+  },
+  "schemas_sha256": {
+   "capsule.v1.json": "73185c3e111d6258e7befd6a59a26a52edfa11a166fdb9363ac2bebb5cf39bcd",
+   "comparison.v1.json": "9939827c2fded1e4a5fde70c037c44cca473f3a056251c52ccd4ef9eda601108",
+   "record.v1.json": "743dd6abb4673925977cd9e937023ae80af651f32db8e610a98d741db7365af0",
+   "session.v1.json": "2a05ebcea27a1e5d5fa9894482eafade03e252e71a405beae93aeee7a1f5d058",
+   "spec.v1.json": "b5c9ea6702128ec65acec692bbf22d9c47063ea6584ed0c2763a7ccc10907141"
+  }
+ },
+ "label": "icv1-f2m13-t181-515ee569 (cryptanalysis): prefix vs geomtrace basis, A/A on prefix",
+ "plan": [
+  {
+   "arm": 0,
+   "round": -1,
+   "warmup": true
+  },
+  {
+   "arm": 1,
+   "round": -1,
+   "warmup": true
+  },
+  {
+   "arm": 2,
+   "round": -1,
+   "warmup": true
+  },
+  {
+   "arm": 0,
+   "round": 0,
+   "warmup": false
+  },
+  {
+   "arm": 1,
+   "round": 0,
+   "warmup": false
+  },
+  {
+   "arm": 2,
+   "round": 0,
+   "warmup": false
+  },
+  {
+   "arm": 0,
+   "round": 1,
+   "warmup": false
+  },
+  {
+   "arm": 1,
+   "round": 1,
+   "warmup": false
+  },
+  {
+   "arm": 2,
+   "round": 1,
+   "warmup": false
+  },
+  {
+   "arm": 0,
+   "round": 2,
+   "warmup": false
+  },
+  {
+   "arm": 1,
+   "round": 2,
+   "warmup": false
+  },
+  {
+   "arm": 2,
+   "round": 2,
+   "warmup": false
+  },
+  {
+   "arm": 0,
+   "round": 3,
+   "warmup": false
+  },
+  {
+   "arm": 1,
+   "round": 3,
+   "warmup": false
+  },
+  {
+   "arm": 2,
+   "round": 3,
+   "warmup": false
+  },
+  {
+   "arm": 0,
+   "round": 4,
+   "warmup": false
+  },
+  {
+   "arm": 1,
+   "round": 4,
+   "warmup": false
+  },
+  {
+   "arm": 2,
+   "round": 4,
+   "warmup": false
+  }
+ ],
+ "preflight": {
+  "detail": {
+   "conditions": {
+    "loadavg": [
+     0.4,
+     0.89,
+     0.89
+    ],
+    "psi_cpu": {
+     "full": {
+      "avg10": 0.0,
+      "avg300": 0.0,
+      "avg60": 0.0,
+      "total": 0.0
+     },
+     "some": {
+      "avg10": 0.83,
+      "avg300": 2.77,
+      "avg60": 0.85,
+      "total": 85784171.0
+     }
+    },
+    "psi_memory": {
+     "full": {
+      "avg10": 0.0,
+      "avg300": 0.0,
+      "avg60": 0.0,
+      "total": 515261.0
+     },
+     "some": {
+      "avg10": 0.0,
+      "avg300": 0.0,
+      "avg60": 0.0,
+      "total": 515505.0
+     }
+    },
+    "unix_time": 1790891494.6891563
+   },
+   "settle": {
+    "other_cpu_seconds": 0.16,
+    "seconds": 2.0,
+    "top": {
+     "claude[111]": 0.16
+    }
+   }
+  },
+  "limits": {
+   "max_other_cpu": 0.1,
+   "max_psi": 5.0,
+   "settle_s": 2.0
+  },
+  "other_cpu_seconds": 0.16,
+  "psi_some_avg10_max": 0.83,
+  "quiet": true
+ },
+ "records_sha256": "a123b115e5e999f9b0aa31c0c455800fa4747136a817d5acac1e48e1eb28cbe0",
+ "reservation": {
+  "cpus": [
+   2
+  ],
+  "evicted": true,
+  "left_on_reserved": {
+   "kernel_threads": 26,
+   "user_threads": []
+  },
+  "threads_moved": 55
+ },
+ "schema": "icms.session/v1",
+ "session_id": "ICSESS1h31417fae01a9",
+ "spec_files": {
+  "ca-k0n13-geomtrace-l3-m3.yaml": "59e85e52cd47d2b8708a853d3d9733c29d4990076483996b3694b5841903223f",
+  "ca-k0n13-prefix-l3-m3.yaml": "4dc15542a9d530cbca52a6fdce9778d587772e13a571041e3dae984bd7d13636"
+ },
+ "standard": "icms/v1",
+ "started_unix": 1790891494.6892838,
+ "volatile_end": {
+  "cur_khz": {},
+  "loadavg": "0.50 0.90 0.90 2/105 337",
+  "proc_stat": {
+   "cpu": {
+    "guest": 0,
+    "guest_nice": 0,
+    "idle": 2473416,
+    "iowait": 83554,
+    "irq": 0,
+    "nice": 7,
+    "softirq": 11619,
+    "steal": 8622,
+    "system": 49844,
+    "user": 282179
+   },
+   "cpu0": {
+    "guest": 0,
+    "guest_nice": 0,
+    "idle": 627042,
+    "iowait": 20702,
+    "irq": 0,
+    "nice": 1,
+    "softirq": 7025,
+    "steal": 2283,
+    "system": 14566,
+    "user": 58900
+   },
+   "cpu1": {
+    "guest": 0,
+    "guest_nice": 0,
+    "idle": 626174,
+    "iowait": 20508,
+    "irq": 0,
+    "nice": 1,
+    "softirq": 3006,
+    "steal": 2234,
+    "system": 14408,
+    "user": 60813
+   },
+   "cpu2": {
+    "guest": 0,
+    "guest_nice": 0,
+    "idle": 578128,
+    "iowait": 24667,
+    "irq": 0,
+    "nice": 3,
+    "softirq": 946,
+    "steal": 2555,
+    "system": 13907,
+    "user": 105522
+   },
+   "cpu3": {
+    "guest": 0,
+    "guest_nice": 0,
+    "idle": 642071,
+    "iowait": 17676,
+    "irq": 0,
+    "nice": 0,
+    "softirq": 641,
+    "steal": 1548,
+    "system": 6962,
+    "user": 56942
+   },
+   "ctxt": 8122555,
+   "procs_blocked": 0,
+   "procs_running": 1
+  },
+  "psi": {
+   "cpu": {
+    "full": {
+     "avg10": 0.0,
+     "avg300": 0.0,
+     "avg60": 0.0,
+     "total": 0.0
+    },
+    "some": {
+     "avg10": 0.71,
+     "avg300": 2.71,
+     "avg60": 0.84,
+     "total": 85913602.0
+    }
+   },
+   "io": {
+    "full": {
+     "avg10": 0.0,
+     "avg300": 0.06,
+     "avg60": 0.01,
+     "total": 351023268.0
+    },
+    "some": {
+     "avg10": 0.0,
+     "avg300": 0.07,
+     "avg60": 0.02,
+     "total": 359712478.0
+    }
+   },
+   "memory": {
+    "full": {
+     "avg10": 0.0,
+     "avg300": 0.0,
+     "avg60": 0.0,
+     "total": 515261.0
+    },
+    "some": {
+     "avg10": 0.0,
+     "avg300": 0.0,
+     "avg60": 0.0,
+     "total": 515505.0
+    }
+   }
+  },
+  "t_monotonic_ns": 7264857378367,
+  "t_unix": 1790891504.364556,
+  "thermal_mC": {}
+ },
+ "volatile_start": {
+  "cur_khz": {},
+  "loadavg": "0.40 0.89 0.89 1/107 32517",
+  "proc_stat": {
+   "cpu": {
+    "guest": 0,
+    "guest_nice": 0,
+    "idle": 2470727,
+    "iowait": 83554,
+    "irq": 0,
+    "nice": 7,
+    "softirq": 11562,
+    "steal": 8600,
+    "system": 49717,
+    "user": 281244
+   },
+   "cpu0": {
+    "guest": 0,
+    "guest_nice": 0,
+    "idle": 626195,
+    "iowait": 20702,
+    "irq": 0,
+    "nice": 1,
+    "softirq": 6986,
+    "steal": 2278,
+    "system": 14531,
+    "user": 58851
+   },
+   "cpu1": {
+    "guest": 0,
+    "guest_nice": 0,
+    "idle": 625321,
+    "iowait": 20508,
+    "irq": 0,
+    "nice": 1,
+    "softirq": 2988,
+    "steal": 2228,
+    "system": 14373,
+    "user": 60765
+   },
+   "cpu2": {
+    "guest": 0,
+    "guest_nice": 0,
+    "idle": 578086,
+    "iowait": 24667,
+    "irq": 0,
+    "nice": 3,
+    "softirq": 946,
+    "steal": 2545,
+    "system": 13850,
+    "user": 104684
+   },
+   "cpu3": {
+    "guest": 0,
+    "guest_nice": 0,
+    "idle": 641122,
+    "iowait": 17676,
+    "irq": 0,
+    "nice": 0,
+    "softirq": 641,
+    "steal": 1548,
+    "system": 6962,
+    "user": 56942
+   },
+   "ctxt": 8087494,
+   "procs_blocked": 0,
+   "procs_running": 1
+  },
+  "psi": {
+   "cpu": {
+    "full": {
+     "avg10": 0.0,
+     "avg300": 0.0,
+     "avg60": 0.0,
+     "total": 0.0
+    },
+    "some": {
+     "avg10": 0.83,
+     "avg300": 2.77,
+     "avg60": 0.85,
+     "total": 85825142.0
+    }
+   },
+   "io": {
+    "full": {
+     "avg10": 0.0,
+     "avg300": 0.06,
+     "avg60": 0.02,
+     "total": 351023268.0
+    },
+    "some": {
+     "avg10": 0.0,
+     "avg300": 0.08,
+     "avg60": 0.02,
+     "total": 359712478.0
+    }
+   },
+   "memory": {
+    "full": {
+     "avg10": 0.0,
+     "avg300": 0.0,
+     "avg60": 0.0,
+     "total": 515261.0
+    },
+    "some": {
+     "avg10": 0.0,
+     "avg300": 0.0,
+     "avg60": 0.0,
+     "total": 515505.0
+    }
+   }
+  },
+  "t_monotonic_ns": 7255371017101,
+  "t_unix": 1790891494.8781946,
+  "thermal_mC": {}
+ }
+}

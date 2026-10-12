@@ -1,0 +1,22 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W5",
+  "slug": "f4-tracer-cost-model",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1714",
+  "papers": ["arXiv 2603.16378"],
+  "kind": "diagnostic",
+  "workload": {
+    "id": "inherited-f4-root-macaulay-shape-4-cells",
+    "description": "f4_lane_probe costmodel: root Macaulay rows, columns and rank at degrees 2-4 of the target-[1]G decomposition system on icv1-f2m17-tm101-00378d4e dim 6, icv1-f2m23-tm5197-1f85e9e1 dim 7, icv1-f2m23-t5197-69e76b73 dim 8, icv1-f2m31-tm90707-c95f16f5 dim 9 (m = 3), against the generic Boolean counts and a dense random system of the same shape",
+    "curve_ids": ["icv1-f2m17-tm101-00378d4e", "icv1-f2m23-tm5197-1f85e9e1", "icv1-f2m23-t5197-69e76b73", "icv1-f2m31-tm90707-c95f16f5"]
+  },
+  "metric": "degree-3 root Macaulay rows, columns, rank: measured / generic Boolean count",
+  "unit": "rows",
+  "isolation": "L0",
+  "samples": 1,
+  "arms": [],
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w5_lane_batched_f4_20261011/reports/run-20261011T2225Z/report.pdf",
+  "note": "Degree 3: rows 1.00x generic with occurring multipliers, 0.67-0.70x with the production support-local ones; columns 0.44-0.49x and 0.28-0.31x; rank = rows - 1 (generic predicts full rank). Dense random systems of the same shape match the generic counts exactly. Degree 2 matches generic rank."
+}

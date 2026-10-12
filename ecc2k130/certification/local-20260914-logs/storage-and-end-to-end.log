@@ -1,0 +1,39 @@
+test_bad_bucket_counts_rejected (test_certification.Certification.test_bad_bucket_counts_rejected) ... ok
+test_campaign_change_rejected_even_after_solved (test_certification.Certification.test_campaign_change_rejected_even_after_solved) ... ok
+test_checkpoint_manifest_corruption_rejected (test_certification.Certification.test_checkpoint_manifest_corruption_rejected) ... ok
+test_chunk_tampering_rejected_before_offset_commit (test_certification.Certification.test_chunk_tampering_rejected_before_offset_commit) ... ok
+test_committed_bucket_bit_corruption_detected (test_certification.Certification.test_committed_bucket_bit_corruption_detected) ... ok
+test_contract_binds_every_semantic_field (test_certification.Certification.test_contract_binds_every_semantic_field) ... ok
+test_contract_rejects_overrides_and_missing_hash (test_certification.Certification.test_contract_rejects_overrides_and_missing_hash) ... ok
+test_corpus_single_writer_lock (test_certification.Certification.test_corpus_single_writer_lock) ... ok
+test_crash_after_bucket_append_before_state_is_idempotent (test_certification.Certification.test_crash_after_bucket_append_before_state_is_idempotent) ... ok
+test_device_file_not_accepted_as_corpus (test_certification.Certification.test_device_file_not_accepted_as_corpus) ... ok
+test_exact_known_cross_corpus_collision_and_idempotence (test_certification.Certification.test_exact_known_cross_corpus_collision_and_idempotence) ... ok
+test_expired_lease_cannot_be_revived_by_old_owner (test_certification.Certification.test_expired_lease_cannot_be_revived_by_old_owner) ... ok
+test_failed_dp_upload_cannot_publish_checkpoint (test_certification.Certification.test_failed_dp_upload_cannot_publish_checkpoint) ... ok
+test_failed_manifest_upload_does_not_commit_offset (test_certification.Certification.test_failed_manifest_upload_does_not_commit_offset) ... ok
+test_foreign_campaign_manifest_rejected (test_certification.Certification.test_foreign_campaign_manifest_rejected) ... ok
+test_input_truncation_not_silently_skipped (test_certification.Certification.test_input_truncation_not_silently_skipped) ... ok
+test_invalid_parameters_rejected (test_certification.Certification.test_invalid_parameters_rejected) ... ok
+test_lease_loss_before_upload_prevents_publication (test_certification.Certification.test_lease_loss_before_upload_prevents_publication) ... ok
+test_lease_loss_during_checkpoint_upload_cannot_commit_pointer (test_certification.Certification.test_lease_loss_during_checkpoint_upload_cannot_commit_pointer) ... ok
+test_legacy_directory_cannot_be_silently_certified (test_certification.Certification.test_legacy_directory_cannot_be_silently_certified) ... ok
+test_merge_exclusive_lock (test_certification.Certification.test_merge_exclusive_lock) ... ok
+test_partial_raw_record_rejected_without_modification (test_certification.Certification.test_partial_raw_record_rejected_without_modification) ... ok
+test_report_overflow_never_checkpoints (test_certification.Certification.test_report_overflow_never_checkpoints) ... ok
+test_rotation_crash_can_only_duplicate_not_skip (test_certification.Certification.test_rotation_crash_can_only_duplicate_not_skip) ... ok
+test_s3_access_denied_is_not_missing_checkpoint (test_certification.Certification.test_s3_access_denied_is_not_missing_checkpoint) ... ok
+test_s3_claim_race_does_not_mutate_scanned_records (test_certification.Certification.test_s3_claim_race_does_not_mutate_scanned_records) ... ok
+test_snapshot_publication_order_and_integrity (test_certification.Certification.test_snapshot_publication_order_and_integrity) ... ok
+test_strict_worker_resume_on_replacement_host (test_certification.Certification.test_strict_worker_resume_on_replacement_host) ... ok
+test_timed_out_solve_remains_retryable (test_certification.Certification.test_timed_out_solve_remains_retryable) ... ok
+test_torn_bucket_fails_closed (test_certification.Certification.test_torn_bucket_fails_closed) ... ok
+test_uncommitted_chunk_not_ingested_then_committed (test_certification.Certification.test_uncommitted_chunk_not_ingested_then_committed) ... ok
+test_unpinned_host_solver_rejected (test_certification.Certification.test_unpinned_host_solver_rejected) ... ok
+test_worker_strict_known_log_end_to_end (test_certification.Certification.test_worker_strict_known_log_end_to_end) ... ok
+test_write_open_failure_is_fatal (test_certification.Certification.test_write_open_failure_is_fatal) ... ok
+
+----------------------------------------------------------------------
+Ran 34 tests in 6.883s
+
+OK

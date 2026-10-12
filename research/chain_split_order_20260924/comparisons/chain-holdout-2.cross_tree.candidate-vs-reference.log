@@ -1,0 +1,14 @@
+instance        word ops ref          cand  ratio  nodes ref   cand  same tree
+K_1/2^11 m=4        99422940       2983641  33.32      48328    124  False
+K_0/2^15 m=3         6960048       1945512   3.58       1557    258  False
+K_0/2^15 m=4       149499912      29609302   5.05      21535   4771  False
+K_0/2^15 m=3         9137800       2757149   3.31       4281    387  False
+K_0/2^15 m=4       436103847      64781197   6.73      94018   8369  False
+K_1/2^15 m=4        28328427       5878761   4.82       8229    264  False
+K_1/2^15 m=4       205293663      33838553   6.07      50138   2870  False
+K_0/2^23 m=3        65321230      38953101   1.68       9279   2380  False
+K_0/2^23 m=3       104466517      44331258   2.36      19166   4758  False
+total             1104534384     225078474   4.91
+
+Same instances and the same verified answers on every rung; the tree is not required to match.
+Wrote /home/user/crypto/research/chain_split_order_20260924/comparisons/chain-holdout-2.cross_tree.candidate-vs-reference.json

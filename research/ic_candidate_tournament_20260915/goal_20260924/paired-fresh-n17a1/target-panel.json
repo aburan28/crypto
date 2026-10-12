@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "status": "TARGET_FROZEN_BEFORE_ARM_OUTCOMES",
+  "purpose": "one-target-paired-F5-static-SAT-incumbent-rho-n17a1",
+  "curve_cell": "n17a1",
+  "curve_id": "EC1N17Ckb1hbbe2b5b6b1e6",
+  "target_input": {
+    "law": "SHA256-x-lift-cofactor; domain ic-paired-target-v1 NUL; little-endian u64 seed and counter; x from low 17 bits of first eight digest bytes little-endian; lift selected by digest byte 8 modulo lift count; multiply by cofactor; first nonidentity point",
+    "seed": 2026092948,
+    "counter": 1,
+    "point": [52411, 72106],
+    "known_scalar_supplied": false,
+    "target_count": 1
+  },
+  "arms_in_fixed_order": [
+    "source-bound-generic-F5-standard-subspace-d6",
+    "revised-static-CryptoMiniSat-wide-S4-standard-subspace-d6",
+    "qualified-pair-table-incumbent-factor-base-policy",
+    "matched-single-target-signed-Frobenius-rho"
+  ],
+  "selection_rule": "Execute and retain every arm regardless of any preceding arm's success, failure, timeout or observed cost; never substitute a new target or restart a capped run",
+  "comparison_kind": "complete-pipeline-and-factor-base-policy; SAT versus F5 controls the geometric base, but incumbent uses its qualified base policy",
+  "accounting": "one previously unseen public target per arm; same point and physical resource envelope; online interval starts after reusable preparation and stops immediately after independently verified scalar; retain failed attempts and separate setup diagnostics",
+  "headline_gate": "Only independently audited complete one-target solves with same-point rho and calibrated conditions may enter an online-speedup ratio",
+  "registration_scope": "target allocation only; exact candidate/workload manifests, source receipts and arm-specific attempt limits must be sealed separately before any paired arm execution"
+}

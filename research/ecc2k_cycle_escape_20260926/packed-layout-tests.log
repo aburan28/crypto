@@ -1,0 +1,15 @@
+make: Entering directory '/workspace/scratch/7d06a41a6de1/crypto/ecc2k130'
+mkdir -p build
+g++ -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=0 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=16 src/testtablewalkhost.cpp -o build/test-table-walk-host-nibble
+g++ -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_PIVOT_BYTES=1 -Wno-unknown-pragmas -Wno-unused-function -DECC_TABLE_PROBE_POINTS=16 src/testtablewalkhost.cpp -o build/test-table-walk-host-bytes
+./build/test-table-walk-host-nibble
+table walk host probe: 16 points, cycle rule fired on 1
+  phase mismatches 0, pivot 0, sign 0, tag 0, addend words 0
+  branches 8, pivot bytes 0, shared bytes 48508
+PASS
+./build/test-table-walk-host-bytes
+table walk host probe: 16 points, cycle rule fired on 1
+  phase mismatches 0, pivot 0, sign 0, tag 0, addend words 0
+  branches 8, pivot bytes 1, shared bytes 48732
+PASS
+make: Leaving directory '/workspace/scratch/7d06a41a6de1/crypto/ecc2k130'

@@ -1,0 +1,22 @@
+[
+  {"strategy":"crossbred","n":7,"m":2,"relations":0,"trials":20000,"wall_ms":671.131,"relations_per_s":0.000,"solved":false},
+  {"strategy":"groebner","n":7,"m":2,"relations":0,"trials":20000,"wall_ms":1509.419,"relations_per_s":0.000,"solved":false},
+  {"strategy":"sat","n":7,"m":2,"relations":0,"trials":20000,"wall_ms":1221.898,"relations_per_s":0.000,"solved":false},
+  {"strategy":"enumerate","n":7,"m":2,"relations":0,"trials":20000,"wall_ms":196.595,"relations_per_s":0.000,"solved":false},
+  {"strategy":"crossbred","n":7,"m":2,"relations":3,"trials":3,"wall_ms":0.384,"relations_per_s":11500.289,"solved":true},
+  {"strategy":"groebner","n":7,"m":2,"relations":3,"trials":3,"wall_ms":0.663,"relations_per_s":5731.502,"solved":true},
+  {"strategy":"sat","n":7,"m":2,"relations":3,"trials":3,"wall_ms":0.432,"relations_per_s":9140.267,"solved":true},
+  {"strategy":"enumerate","n":7,"m":2,"relations":3,"trials":3,"wall_ms":0.172,"relations_per_s":42084.590,"solved":true},
+  {"strategy":"crossbred","n":9,"m":2,"relations":3,"trials":3,"wall_ms":0.906,"relations_per_s":4485.968,"solved":true},
+  {"strategy":"groebner","n":9,"m":2,"relations":3,"trials":3,"wall_ms":5.128,"relations_per_s":613.527,"solved":true},
+  {"strategy":"sat","n":9,"m":2,"relations":3,"trials":3,"wall_ms":2.017,"relations_per_s":1696.596,"solved":true},
+  {"strategy":"enumerate","n":9,"m":2,"relations":3,"trials":3,"wall_ms":0.293,"relations_per_s":53302.063,"solved":true},
+  {"strategy":"crossbred","n":9,"m":2,"relations":2,"trials":2,"wall_ms":0.788,"relations_per_s":3979.791,"solved":true},
+  {"strategy":"groebner","n":9,"m":2,"relations":2,"trials":2,"wall_ms":3.863,"relations_per_s":573.550,"solved":true},
+  {"strategy":"sat","n":9,"m":2,"relations":2,"trials":2,"wall_ms":1.006,"relations_per_s":2930.725,"solved":true},
+  {"strategy":"enumerate","n":9,"m":2,"relations":2,"trials":2,"wall_ms":0.359,"relations_per_s":47084.304,"solved":true},
+  {"strategy":"crossbred","n":9,"m":3,"relations":5,"trials":5,"wall_ms":425.294,"relations_per_s":11.764,"solved":true},
+  {"strategy":"groebner","n":9,"m":3,"relations":5,"trials":5,"wall_ms":149.180,"relations_per_s":33.587,"solved":true},
+  {"strategy":"sat","n":9,"m":3,"relations":5,"trials":5,"wall_ms":97.087,"relations_per_s":51.649,"solved":true},
+  {"strategy":"enumerate","n":9,"m":3,"relations":5,"trials":5,"wall_ms":0.526,"relations_per_s":19379.695,"solved":true}
+]

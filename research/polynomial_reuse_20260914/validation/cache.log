@@ -1,0 +1,9 @@
+
+running 4 tests
+test cryptanalysis::algebra_cache::tests::redis_cross_client_reuse_and_corruption ... ignored, needs IC_TEST_REDIS_URL pointing to a dedicated test Redis
+test cryptanalysis::algebra_cache::tests::layers_are_disjoint_and_none_is_not_cached ... ok
+test cryptanalysis::algebra_cache::tests::bounded_storage_and_corruption_recompute ... ok
+test cryptanalysis::algebra_cache::tests::cached_reductions_preserve_answers_and_node_budgets ... ok
+
+test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 2513 filtered out; finished in 0.00s
+

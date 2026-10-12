@@ -1,0 +1,778 @@
+{
+  "contract": {
+    "id": "bounded-toy-ic-candidate-comparison-20260922-v1",
+    "classification": "accounting and integration; no cryptanalytic advance",
+    "scope": "Only fixed internally generated 5/9-bit Koblitz toy instances; no external targets or field-size option.",
+    "parent": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+    "equivalent_suite_reason": "The WDSat regression fixes another curve/encoding and measures a solver stage. This comparison retains the existing a=0, m=3, normal-basis distinct-abscissa domain and extends its tiny full-DLP smoke test; it does not replace the WDSat baseline or claim a performance optimization.",
+    "panels": [
+      {
+        "n": 5,
+        "d": 3,
+        "curve_order": 44,
+        "subgroup_order": 11
+      },
+      {
+        "n": 9,
+        "d": 4,
+        "curve_order": 508,
+        "subgroup_order": 127
+      }
+    ],
+    "frozen_seeds": [
+      91,
+      137,
+      211
+    ],
+    "fresh_seeds": [
+      733,
+      947,
+      1201,
+      1601,
+      1901,
+      2203,
+      2707
+    ],
+    "repetitions": 3,
+    "variants": [
+      "quadratic-image",
+      "coefficient-pullback",
+      "cached-pullback",
+      "s4-symmetric",
+      "chained-s3",
+      "rho"
+    ],
+    "target_attempt_cap": 128,
+    "decomposition_seconds": 3,
+    "run_seconds": 30,
+    "domain": "Exactly three distinct nonzero normal-basis factor abscissae, excluding the target abscissa. Same raw support, cofactor projection, scalar field, targets and seeds across adapters.",
+    "boundary": "At most 8*C(M,3) signed triples of M rational abscissae can cover #E-1 uniformly sampled nonidentity targets. With B independent columns and at most one row per attempt, expected collection attempts >= B/min(1,8*C(M,3)/(#E-1)). This is an attempt-count bound, not a common-operation lower bound.",
+    "reference": "Existing plain three-partition Floyd rho on the identical target/group. No automorphism-aware rho claim, no real-curve extrapolation.",
+    "success_gate": "Every completed scalar verifies. All five-bit first/enumerate outputs equal an independent group oracle; every full-run attempt is audited after timing, including complete empty answers. All planned attempts, failures and timeouts remain in raw output.",
+    "falsifier": "A false relation, a false empty answer, or a wrong scalar invalidates correctness. Missing completions block unconditional comparisons. No uncalibrated field/SAT/scalar sum, common-operation speedup, or fitted exponent is reported.",
+    "accounting": "Cold starts include toy field/group enumeration, generator/target setup, factor base, every per-call encoding/setup, failed search, lifting, filtering, rank elimination, individual descent, and final verification. Process import is measured separately. Offline truth audit is excluded. Nested solver timings are diagnostics and are not added to their parent phase.",
+    "timing_analysis": "Sequential one-thread runs with randomized variant order, three repetitions. Show per-seed medians, paired diagnostic wall-time ratios and seed-cluster bootstrap intervals. Fresh seeds may collide in tiny groups; preserve and report distinct target counts. S and calibrated boundary ratios remain null.",
+    "unimplemented": [
+      "F4/Magma in this matched full-DLP harness",
+      "WDSat backend",
+      "Frobenius orbit factor-base compression",
+      "large-prime relation graph",
+      "large sparse scalar-field linear algebra",
+      "ECC2K-130 key recovery"
+    ]
+  },
+  "groups": [
+    {
+      "n": 5,
+      "subgroup_order": 11,
+      "variant": "quadratic-image",
+      "attempted_runs": 30,
+      "verified_runs": 30,
+      "failed_runs": 0,
+      "distinct_final_targets": 7,
+      "median_cold_seconds": 0.03945539300002565,
+      "summed_cold_seconds": 1.2037648800005627,
+      "phase_seconds_summed": {
+        "factor_base": 0.02871612300077686,
+        "final_verification": 0.004748356999698444,
+        "individual": 0.1770470489982472,
+        "matrix": 0.0017805649949877989,
+        "relation_collection": 0.8821915320031621,
+        "rho_walk": 0.0,
+        "setup": 0.10776631299722794,
+        "unattributed_orchestration": 0.0015149410064623225
+      },
+      "all_phase_field_api_counts_summed": {
+        "additions": 280335,
+        "multiplications": 282630,
+        "squarings": 98706
+      },
+      "scalar_modular_counts_summed": {
+        "additions": 1533,
+        "multiplications": 1620,
+        "inversions": 150
+      },
+      "decomposition_attempts": 222,
+      "decomposition_timeouts": 0,
+      "field_api_coverage": "field API calls only; scalar and control work remain separate",
+      "diagnostic_wall_time_over_reference": {
+        "coefficient-pullback": {
+          "geomean": 1.3335060592988845,
+          "seed_cluster_bootstrap_95pct": [
+            1.2956613244281947,
+            1.3753232658523815
+          ],
+          "seed_clusters": 10
+        },
+        "rho": {
+          "geomean": 8.13221217217706,
+          "seed_cluster_bootstrap_95pct": [
+            6.96815046575984,
+            9.603902889152916
+          ],
+          "seed_clusters": 10
+        }
+      },
+      "full_dlp_S": null,
+      "calibrated_cost_over_rho": null,
+      "calibrated_cost_over_floor": null,
+      "classification": "accounting/integration; no common-unit speedup claim"
+    },
+    {
+      "n": 5,
+      "subgroup_order": 11,
+      "variant": "coefficient-pullback",
+      "attempted_runs": 30,
+      "verified_runs": 30,
+      "failed_runs": 0,
+      "distinct_final_targets": 7,
+      "median_cold_seconds": 0.02846311299936133,
+      "summed_cold_seconds": 0.8961750919988845,
+      "phase_seconds_summed": {
+        "factor_base": 0.03131495500110759,
+        "final_verification": 0.004754785000841366,
+        "individual": 0.11727983100536221,
+        "matrix": 0.0018177810043198406,
+        "relation_collection": 0.6303229770028338,
+        "rho_walk": 0.0,
+        "setup": 0.10908287499751168,
+        "unattributed_orchestration": 0.0016018879869079683
+      },
+      "all_phase_field_api_counts_summed": {
+        "additions": 165165,
+        "multiplications": 229947,
+        "squarings": 47097
+      },
+      "scalar_modular_counts_summed": {
+        "additions": 1533,
+        "multiplications": 1620,
+        "inversions": 150
+      },
+      "decomposition_attempts": 222,
+      "decomposition_timeouts": 0,
+      "field_api_coverage": "field API calls only; scalar and control work remain separate",
+      "diagnostic_wall_time_over_reference": {
+        "coefficient-pullback": {
+          "geomean": 1.0,
+          "seed_cluster_bootstrap_95pct": [
+            1.0,
+            1.0
+          ],
+          "seed_clusters": 10
+        },
+        "rho": {
+          "geomean": 6.098369119112006,
+          "seed_cluster_bootstrap_95pct": [
+            5.246440740944565,
+            7.13708980090123
+          ],
+          "seed_clusters": 10
+        }
+      },
+      "full_dlp_S": null,
+      "calibrated_cost_over_rho": null,
+      "calibrated_cost_over_floor": null,
+      "classification": "accounting/integration; no common-unit speedup claim"
+    },
+    {
+      "n": 5,
+      "subgroup_order": 11,
+      "variant": "cached-pullback",
+      "attempted_runs": 30,
+      "verified_runs": 30,
+      "failed_runs": 0,
+      "distinct_final_targets": 7,
+      "median_cold_seconds": 0.022886869499870954,
+      "summed_cold_seconds": 0.7057180279998647,
+      "phase_seconds_summed": {
+        "factor_base": 0.02921526599857316,
+        "final_verification": 0.004593000999193464,
+        "individual": 0.09204433399645495,
+        "matrix": 0.0016282239957945421,
+        "relation_collection": 0.47433809200538235,
+        "rho_walk": 0.0,
+        "setup": 0.10246509999979025,
+        "unattributed_orchestration": 0.0014340110046759946
+      },
+      "all_phase_field_api_counts_summed": {
+        "additions": 122169,
+        "multiplications": 169437,
+        "squarings": 44322
+      },
+      "scalar_modular_counts_summed": {
+        "additions": 1533,
+        "multiplications": 1620,
+        "inversions": 150
+      },
+      "decomposition_attempts": 222,
+      "decomposition_timeouts": 0,
+      "field_api_coverage": "field API calls only; scalar and control work remain separate",
+      "diagnostic_wall_time_over_reference": {
+        "coefficient-pullback": {
+          "geomean": 0.7874091725680213,
+          "seed_cluster_bootstrap_95pct": [
+            0.7639275312589296,
+            0.812506060984019
+          ],
+          "seed_clusters": 10
+        },
+        "rho": {
+          "geomean": 4.801911782094359,
+          "seed_cluster_bootstrap_95pct": [
+            4.23775434140437,
+            5.509480233128363
+          ],
+          "seed_clusters": 10
+        }
+      },
+      "full_dlp_S": null,
+      "calibrated_cost_over_rho": null,
+      "calibrated_cost_over_floor": null,
+      "classification": "accounting/integration; no common-unit speedup claim"
+    },
+    {
+      "n": 5,
+      "subgroup_order": 11,
+      "variant": "s4-symmetric",
+      "attempted_runs": 30,
+      "verified_runs": 30,
+      "failed_runs": 0,
+      "distinct_final_targets": 7,
+      "median_cold_seconds": 0.049752054500004306,
+      "summed_cold_seconds": 1.6138476480000463,
+      "phase_seconds_summed": {
+        "factor_base": 0.029834631000994705,
+        "final_verification": 0.004847249999329506,
+        "individual": 0.21102890899783233,
+        "matrix": 0.0024816960003590793,
+        "relation_collection": 1.2522553249873454,
+        "rho_walk": 0.0,
+        "setup": 0.11131313900204987,
+        "unattributed_orchestration": 0.0020866980121354572
+      },
+      "all_phase_field_api_counts_summed": {
+        "additions": 63567,
+        "multiplications": 115500,
+        "squarings": 18702
+      },
+      "scalar_modular_counts_summed": {
+        "additions": 1824,
+        "multiplications": 1875,
+        "inversions": 150
+      },
+      "decomposition_attempts": 234,
+      "decomposition_timeouts": 0,
+      "field_api_coverage": "partial; SAT encoding and SAT search are uncounted",
+      "diagnostic_wall_time_over_reference": {
+        "coefficient-pullback": {
+          "geomean": 1.792388396027886,
+          "seed_cluster_bootstrap_95pct": [
+            1.6301668092234944,
+            1.976392568789868
+          ],
+          "seed_clusters": 10
+        },
+        "rho": {
+          "geomean": 10.930646043791162,
+          "seed_cluster_bootstrap_95pct": [
+            9.7100988807996,
+            12.588946848982435
+          ],
+          "seed_clusters": 10
+        }
+      },
+      "full_dlp_S": null,
+      "calibrated_cost_over_rho": null,
+      "calibrated_cost_over_floor": null,
+      "classification": "accounting/integration; no common-unit speedup claim"
+    },
+    {
+      "n": 5,
+      "subgroup_order": 11,
+      "variant": "chained-s3",
+      "attempted_runs": 30,
+      "verified_runs": 30,
+      "failed_runs": 0,
+      "distinct_final_targets": 7,
+      "median_cold_seconds": 0.04993212650015266,
+      "summed_cold_seconds": 1.5817792170000757,
+      "phase_seconds_summed": {
+        "factor_base": 0.03225594700234069,
+        "final_verification": 0.004755648997161188,
+        "individual": 0.20436136599892052,
+        "matrix": 0.0024888569923859905,
+        "relation_collection": 1.2316319449964794,
+        "rho_walk": 0.0,
+        "setup": 0.10398733300098684,
+        "unattributed_orchestration": 0.0022981200118010747
+      },
+      "all_phase_field_api_counts_summed": {
+        "additions": 63567,
+        "multiplications": 115500,
+        "squarings": 18702
+      },
+      "scalar_modular_counts_summed": {
+        "additions": 1824,
+        "multiplications": 1875,
+        "inversions": 150
+      },
+      "decomposition_attempts": 234,
+      "decomposition_timeouts": 0,
+      "field_api_coverage": "partial; SAT encoding and SAT search are uncounted",
+      "diagnostic_wall_time_over_reference": {
+        "coefficient-pullback": {
+          "geomean": 1.7676760899960102,
+          "seed_cluster_bootstrap_95pct": [
+            1.6341257587759692,
+            1.941758032979118
+          ],
+          "seed_clusters": 10
+        },
+        "rho": {
+          "geomean": 10.779941279824325,
+          "seed_cluster_bootstrap_95pct": [
+            9.72791581229358,
+            12.191518183439992
+          ],
+          "seed_clusters": 10
+        }
+      },
+      "full_dlp_S": null,
+      "calibrated_cost_over_rho": null,
+      "calibrated_cost_over_floor": null,
+      "classification": "accounting/integration; no common-unit speedup claim"
+    },
+    {
+      "n": 5,
+      "subgroup_order": 11,
+      "variant": "rho",
+      "attempted_runs": 30,
+      "verified_runs": 30,
+      "failed_runs": 0,
+      "distinct_final_targets": 7,
+      "median_cold_seconds": 0.004722841499642527,
+      "summed_cold_seconds": 0.1457086590007748,
+      "phase_seconds_summed": {
+        "factor_base": 0.0,
+        "final_verification": 0.004744156998640392,
+        "individual": 0.0,
+        "matrix": 0.0,
+        "relation_collection": 0.0,
+        "rho_walk": 0.0343776070030799,
+        "setup": 0.10623686700091639,
+        "unattributed_orchestration": 0.0003500279981381027
+      },
+      "all_phase_field_api_counts_summed": {
+        "additions": 20208,
+        "multiplications": 39885,
+        "squarings": 7170
+      },
+      "scalar_modular_counts_summed": {
+        "additions": 582,
+        "multiplications": 30,
+        "inversions": 30
+      },
+      "decomposition_attempts": 0,
+      "decomposition_timeouts": 0,
+      "field_api_coverage": "field API calls only; scalar and control work remain separate",
+      "diagnostic_wall_time_over_reference": {
+        "coefficient-pullback": {
+          "geomean": 0.16397826705275126,
+          "seed_cluster_bootstrap_95pct": [
+            0.1397426444939999,
+            0.1906035635380871
+          ],
+          "seed_clusters": 10
+        },
+        "rho": {
+          "geomean": 1.0,
+          "seed_cluster_bootstrap_95pct": [
+            1.0,
+            1.0
+          ],
+          "seed_clusters": 10
+        }
+      },
+      "full_dlp_S": null,
+      "calibrated_cost_over_rho": null,
+      "calibrated_cost_over_floor": null,
+      "classification": "accounting/integration; no common-unit speedup claim"
+    },
+    {
+      "n": 9,
+      "subgroup_order": 127,
+      "variant": "quadratic-image",
+      "attempted_runs": 30,
+      "verified_runs": 30,
+      "failed_runs": 0,
+      "distinct_final_targets": 10,
+      "median_cold_seconds": 0.4096958254999663,
+      "summed_cold_seconds": 12.153782368997781,
+      "phase_seconds_summed": {
+        "factor_base": 0.13868565499979013,
+        "final_verification": 0.022635303000242857,
+        "individual": 0.6592977860018436,
+        "matrix": 0.008412633009356796,
+        "relation_collection": 8.791522859989527,
+        "rho_walk": 0.0,
+        "setup": 2.530976338997789,
+        "unattributed_orchestration": 0.0022517929992318386
+      },
+      "all_phase_field_api_counts_summed": {
+        "additions": 2029215,
+        "multiplications": 1851174,
+        "squarings": 949377
+      },
+      "scalar_modular_counts_summed": {
+        "additions": 10479,
+        "multiplications": 12636,
+        "inversions": 330
+      },
+      "decomposition_attempts": 426,
+      "decomposition_timeouts": 0,
+      "field_api_coverage": "field API calls only; scalar and control work remain separate",
+      "diagnostic_wall_time_over_reference": {
+        "coefficient-pullback": {
+          "geomean": 1.4621309694677296,
+          "seed_cluster_bootstrap_95pct": [
+            1.3901095902600469,
+            1.536257065704153
+          ],
+          "seed_clusters": 10
+        },
+        "rho": {
+          "geomean": 4.223344477526913,
+          "seed_cluster_bootstrap_95pct": [
+            3.4861099975510492,
+            5.1189134047211935
+          ],
+          "seed_clusters": 10
+        }
+      },
+      "full_dlp_S": null,
+      "calibrated_cost_over_rho": null,
+      "calibrated_cost_over_floor": null,
+      "classification": "accounting/integration; no common-unit speedup claim"
+    },
+    {
+      "n": 9,
+      "subgroup_order": 127,
+      "variant": "coefficient-pullback",
+      "attempted_runs": 30,
+      "verified_runs": 30,
+      "failed_runs": 0,
+      "distinct_final_targets": 10,
+      "median_cold_seconds": 0.299753507999867,
+      "summed_cold_seconds": 8.188786794001317,
+      "phase_seconds_summed": {
+        "factor_base": 0.1437390970022534,
+        "final_verification": 0.023452661997907853,
+        "individual": 0.40527287000259093,
+        "matrix": 0.007580659993436711,
+        "relation_collection": 5.088591127994732,
+        "rho_walk": 0.0,
+        "setup": 2.518016898003225,
+        "unattributed_orchestration": 0.0021334790071705356
+      },
+      "all_phase_field_api_counts_summed": {
+        "additions": 1069488,
+        "multiplications": 1456620,
+        "squarings": 384993
+      },
+      "scalar_modular_counts_summed": {
+        "additions": 10479,
+        "multiplications": 12636,
+        "inversions": 330
+      },
+      "decomposition_attempts": 426,
+      "decomposition_timeouts": 0,
+      "field_api_coverage": "field API calls only; scalar and control work remain separate",
+      "diagnostic_wall_time_over_reference": {
+        "coefficient-pullback": {
+          "geomean": 1.0,
+          "seed_cluster_bootstrap_95pct": [
+            1.0,
+            1.0
+          ],
+          "seed_clusters": 10
+        },
+        "rho": {
+          "geomean": 2.888485755188107,
+          "seed_cluster_bootstrap_95pct": [
+            2.507709457628277,
+            3.3443130231952467
+          ],
+          "seed_clusters": 10
+        }
+      },
+      "full_dlp_S": null,
+      "calibrated_cost_over_rho": null,
+      "calibrated_cost_over_floor": null,
+      "classification": "accounting/integration; no common-unit speedup claim"
+    },
+    {
+      "n": 9,
+      "subgroup_order": 127,
+      "variant": "cached-pullback",
+      "attempted_runs": 30,
+      "verified_runs": 30,
+      "failed_runs": 0,
+      "distinct_final_targets": 10,
+      "median_cold_seconds": 0.22252752149961452,
+      "summed_cold_seconds": 6.5008229570003095,
+      "phase_seconds_summed": {
+        "factor_base": 0.14665723200232605,
+        "final_verification": 0.02457402700019884,
+        "individual": 0.28924902400103747,
+        "matrix": 0.007891368009040889,
+        "relation_collection": 3.597534178004935,
+        "rho_walk": 0.0,
+        "setup": 2.4327237989991772,
+        "unattributed_orchestration": 0.002193328983594256
+      },
+      "all_phase_field_api_counts_summed": {
+        "additions": 835764,
+        "multiplications": 1103148,
+        "squarings": 377877
+      },
+      "scalar_modular_counts_summed": {
+        "additions": 10479,
+        "multiplications": 12636,
+        "inversions": 330
+      },
+      "decomposition_attempts": 426,
+      "decomposition_timeouts": 0,
+      "field_api_coverage": "field API calls only; scalar and control work remain separate",
+      "diagnostic_wall_time_over_reference": {
+        "coefficient-pullback": {
+          "geomean": 0.8073975796536672,
+          "seed_cluster_bootstrap_95pct": [
+            0.770996224794149,
+            0.8476021133939661
+          ],
+          "seed_clusters": 10
+        },
+        "rho": {
+          "geomean": 2.3321564076029726,
+          "seed_cluster_bootstrap_95pct": [
+            2.0889918055755894,
+            2.6070356188756487
+          ],
+          "seed_clusters": 10
+        }
+      },
+      "full_dlp_S": null,
+      "calibrated_cost_over_rho": null,
+      "calibrated_cost_over_floor": null,
+      "classification": "accounting/integration; no common-unit speedup claim"
+    },
+    {
+      "n": 9,
+      "subgroup_order": 127,
+      "variant": "s4-symmetric",
+      "attempted_runs": 30,
+      "verified_runs": 30,
+      "failed_runs": 0,
+      "distinct_final_targets": 10,
+      "median_cold_seconds": 1.4344890134998423,
+      "summed_cold_seconds": 44.80774156800089,
+      "phase_seconds_summed": {
+        "factor_base": 0.13812765399688942,
+        "final_verification": 0.02403355599835777,
+        "individual": 2.0462975519985775,
+        "matrix": 0.011240302997066465,
+        "relation_collection": 40.15760431700801,
+        "rho_walk": 0.0,
+        "setup": 2.4271633689977534,
+        "unattributed_orchestration": 0.003274817004239594
+      },
+      "all_phase_field_api_counts_summed": {
+        "additions": 378480,
+        "multiplications": 759645,
+        "squarings": 245466
+      },
+      "scalar_modular_counts_summed": {
+        "additions": 11769,
+        "multiplications": 13890,
+        "inversions": 330
+      },
+      "decomposition_attempts": 447,
+      "decomposition_timeouts": 0,
+      "field_api_coverage": "partial; SAT encoding and SAT search are uncounted",
+      "diagnostic_wall_time_over_reference": {
+        "coefficient-pullback": {
+          "geomean": 5.027354250966198,
+          "seed_cluster_bootstrap_95pct": [
+            4.015587436440242,
+            6.314323198128751
+          ],
+          "seed_clusters": 10
+        },
+        "rho": {
+          "geomean": 14.52144114020024,
+          "seed_cluster_bootstrap_95pct": [
+            10.649910727269127,
+            19.476190155675702
+          ],
+          "seed_clusters": 10
+        }
+      },
+      "full_dlp_S": null,
+      "calibrated_cost_over_rho": null,
+      "calibrated_cost_over_floor": null,
+      "classification": "accounting/integration; no common-unit speedup claim"
+    },
+    {
+      "n": 9,
+      "subgroup_order": 127,
+      "variant": "chained-s3",
+      "attempted_runs": 30,
+      "verified_runs": 30,
+      "failed_runs": 0,
+      "distinct_final_targets": 10,
+      "median_cold_seconds": 1.4354434980000406,
+      "summed_cold_seconds": 44.71135356000286,
+      "phase_seconds_summed": {
+        "factor_base": 0.14734361800037732,
+        "final_verification": 0.02259720800066134,
+        "individual": 2.1047411219988135,
+        "matrix": 0.011821114004305855,
+        "relation_collection": 39.95481595800811,
+        "rho_walk": 0.0,
+        "setup": 2.466945871002281,
+        "unattributed_orchestration": 0.003088668988311838
+      },
+      "all_phase_field_api_counts_summed": {
+        "additions": 378480,
+        "multiplications": 759645,
+        "squarings": 245466
+      },
+      "scalar_modular_counts_summed": {
+        "additions": 11769,
+        "multiplications": 13890,
+        "inversions": 330
+      },
+      "decomposition_attempts": 447,
+      "decomposition_timeouts": 0,
+      "field_api_coverage": "partial; SAT encoding and SAT search are uncounted",
+      "diagnostic_wall_time_over_reference": {
+        "coefficient-pullback": {
+          "geomean": 5.079052159784965,
+          "seed_cluster_bootstrap_95pct": [
+            4.090959669110754,
+            6.332061301134182
+          ],
+          "seed_clusters": 10
+        },
+        "rho": {
+          "geomean": 14.67076981339626,
+          "seed_cluster_bootstrap_95pct": [
+            10.801563178064496,
+            19.623684727415647
+          ],
+          "seed_clusters": 10
+        }
+      },
+      "full_dlp_S": null,
+      "calibrated_cost_over_rho": null,
+      "calibrated_cost_over_floor": null,
+      "classification": "accounting/integration; no common-unit speedup claim"
+    },
+    {
+      "n": 9,
+      "subgroup_order": 127,
+      "variant": "rho",
+      "attempted_runs": 30,
+      "verified_runs": 30,
+      "failed_runs": 0,
+      "distinct_final_targets": 10,
+      "median_cold_seconds": 0.09150399049985936,
+      "summed_cold_seconds": 2.797257550998438,
+      "phase_seconds_summed": {
+        "factor_base": 0.0,
+        "final_verification": 0.023525520998191496,
+        "individual": 0.0,
+        "matrix": 0.0,
+        "relation_collection": 0.0,
+        "rho_walk": 0.32175215600364027,
+        "setup": 2.451410230001784,
+        "unattributed_orchestration": 0.0005696439948223997
+      },
+      "all_phase_field_api_counts_summed": {
+        "additions": 264393,
+        "multiplications": 472146,
+        "squarings": 198690
+      },
+      "scalar_modular_counts_summed": {
+        "additions": 2037,
+        "multiplications": 360,
+        "inversions": 30
+      },
+      "decomposition_attempts": 0,
+      "decomposition_timeouts": 0,
+      "field_api_coverage": "field API calls only; scalar and control work remain separate",
+      "diagnostic_wall_time_over_reference": {
+        "coefficient-pullback": {
+          "geomean": 0.3462021573773962,
+          "seed_cluster_bootstrap_95pct": [
+            0.2988653422721071,
+            0.398739333324021
+          ],
+          "seed_clusters": 10
+        },
+        "rho": {
+          "geomean": 1.0,
+          "seed_cluster_bootstrap_95pct": [
+            1.0,
+            1.0
+          ],
+          "seed_clusters": 10
+        }
+      },
+      "full_dlp_S": null,
+      "calibrated_cost_over_rho": null,
+      "calibrated_cost_over_floor": null,
+      "classification": "accounting/integration; no common-unit speedup claim"
+    }
+  ],
+  "audit": {
+    "audited_calls": 3306,
+    "distinct_oracle_targets": 172,
+    "complete_empty_answers_checked": 498,
+    "nonempty_relation_results_checked": 2808,
+    "historical_counter_replays": 18,
+    "boundaries": [
+      {
+        "n": 5,
+        "d": 3,
+        "rational_abscissae": 5,
+        "affine_targets": 43,
+        "covered_targets": 33,
+        "exact_coverage": 0.7674418604651163,
+        "coverage_upper_bound": 1.0
+      },
+      {
+        "n": 9,
+        "d": 4,
+        "rational_abscissae": 11,
+        "affine_targets": 507,
+        "covered_targets": 440,
+        "exact_coverage": 0.8678500986193294,
+        "coverage_upper_bound": 1.0
+      }
+    ],
+    "offline_audit_seconds": 5.5475107450001815
+  },
+  "any_unverified_run": false,
+  "process_peak_rss_kib": 34752,
+  "import_seconds_excluded_from_per_fixture_cold_times": 0.018396362999737903,
+  "limits": [
+    "Fixed toy fields only",
+    "No ECC2K-130 runtime estimate",
+    "Shared exhaustive curve setup dominates some small runs",
+    "Plain rho control; no automorphism-aware rho",
+    "SAT search work is not converted to field operations",
+    "No F4 backend measured",
+    "Fresh seeds may repeat tiny-group targets"
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "schema": "ecc2k130-direct-sigma-independent-audit-v1",
+  "auditedArchiveSha256": "2734894090f9885640aea546771ce6d5d042f5abb501bc985d1d7983880b3526",
+  "auditedResultSha256": "01a8819e41d85020cccb88950ed6ff275e7c9d1b9680eb6bb822d480ab2e38c7",
+  "verdict": "PASS_DO_NOT_PROMOTE",
+  "goal26bMet": false,
+  "candidateSelected": false,
+  "checks": {
+    "archiveExtracts": true,
+    "archiveOnlyRegularFilesAndDirectories": true,
+    "sourceManifestMatchesCommit": true,
+    "generatedHeaderMatchesFrozenSha256": true,
+    "packedWalkZeroSpillsBothArms": true,
+    "controlResources": {
+      "registersPerThread": 126,
+      "localBytesPerThread": 0,
+      "staticSharedBytesPerBlock": 1792,
+      "dynamicSharedBytesPerBlock": 0,
+      "residentBlocksPerSm": 1,
+      "threadsPerBlock": 512
+    },
+    "candidateResources": {
+      "registersPerThread": 128,
+      "localBytesPerThread": 0,
+      "staticSharedBytesPerBlock": 0,
+      "dynamicSharedBytesPerBlock": 56320,
+      "residentBlocksPerSm": 1,
+      "threadsPerBlock": 512
+    },
+    "gpuDirectCases": 5144,
+    "gpuDirectBasisCases": 1048,
+    "gpuDirectDenseCases": 4096,
+    "referenceReplayPerArm": 300,
+    "droppedPerArm": 0,
+    "sortedCorpusIdentity": true,
+    "recordCountPerArm": 1710327,
+    "checkpointWholeIdentity": true,
+    "checkpointControlToCandidateIdentity": true,
+    "checkpointCandidateToControlIdentity": true,
+    "sampleLogHashesMatch": true,
+    "warmupRows": 4,
+    "aaRows": 6,
+    "abRows": 10,
+    "equalWorkEveryRow": true,
+    "updatesPerRow": 403726925824,
+    "zeroDropsEveryRow": true,
+    "nativeResummarizationByteIdentical": true
+  },
+  "measurement": {
+    "aaRatios": [
+      0.99999132374338717,
+      1.0001472591091649,
+      0.9996290313057965
+    ],
+    "aaMaxAbsoluteDrift": 0.00037096869420349954,
+    "abRatios": [
+      0.8266541493430607,
+      0.82669183440790839,
+      0.82698618289767467,
+      0.82703186408462659,
+      0.82691572297445659
+    ],
+    "abMedianRatio": 0.82691572297445659,
+    "abMinRatio": 0.8266541493430607,
+    "controlMedianMps": 15893.066000000001,
+    "candidateMedianMps": 13143.106,
+    "candidateChangePercent": -17.30842770255434
+  },
+  "interpretation": "The exact direct linear map reduces static ALU but its random shared-memory gathers dominate on this GPU. Every paired sample loses by about 17.3 percent, far outside measured A/A drift. Retain the exact generator and negative evidence; do not enable ECC_DIRECT_SIGMA or claim progress toward 26 B/s.",
+  "limitations": [
+    "The archive records executable SHA-256 values but does not embed the binaries, so executable bytes cannot be independently rehashed from the archive.",
+    "The in-job artifact manifest captured job.log before the wrapper's final append and predates exit-code; all scientific files listed by that manifest verify."
+  ]
+}

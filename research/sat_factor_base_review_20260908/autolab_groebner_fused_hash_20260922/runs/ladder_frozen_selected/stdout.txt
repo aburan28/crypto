@@ -1,0 +1,17 @@
+
+=== Gröbner stage: frozen decomposition ladder (ladder_frozen_selected) ===
+
+| instance | m | ℓ | targets | decomposed | word XORs | F4 calls | build ms | reduce ms | read ms | wall s |
+|:---------|--:|--:|--------:|-----------:|----------:|---------:|---------:|----------:|--------:|-------:|
+| `K_0/2^9` | 2 | 6 | 40 | 39 | 1352350 | 644 | 15.1 | 7.4 | 1.1 | 0.03 |
+| `K_0/2^9` | 3 | 6 | 16 | 15 | 4164666 | 270 | 25.4 | 16.7 | 0.1 | 0.05 |
+| `K_0/2^13` | 2 | 12 | 40 | 40 | 20668245 | 559 | 65.7 | 40.1 | 0.2 | 0.12 |
+| `K_1/2^15` | 2 | 4 | 32 | 0 | 107470 | 55 | 1.2 | 0.7 | 0.1 | 0.00 |
+| `K_1/2^17` | 2 | 8 | 32 | 7 | 55594932 | 3512 | 246.7 | 210.6 | 15.3 | 0.51 |
+| `K_1/2^23` | 2 | 11 | 16 | 9 | 699511508 | 9850 | 1550.7 | 1821.7 | 82.2 | 3.56 |
+
+Unit: 64-bit word XORs in the Macaulay eliminations; wall time is the whole
+stage including building and reading back every matrix.  Per AGENTS.md §8 this
+is a solver-stage diagnostic, not an end-to-end ECDLP measurement.
+
+Wrote research/sat_factor_base_review_20260908/autolab_groebner_fused_hash_20260922/runs/ladder_frozen_selected/artifact/stage.json

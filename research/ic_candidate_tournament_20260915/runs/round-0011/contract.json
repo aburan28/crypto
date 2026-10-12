@@ -1,0 +1,56 @@
+{
+  "bootstrap_draws": 2000,
+  "ci_level": 0.95,
+  "compiler": "rustc 1.94.1 (e408947bf 2026-03-25)",
+  "confirmation_ratio": 0.8,
+  "created_unix": 1789625146.425058,
+  "curve_diversity_limit": "One Koblitz curve per development degree; additional holdout curve in confirmation. Does not meet three curves per size for a broad family claim.",
+  "equivalent_suite_reason": "Point-base collector/rank/descent API, not WDSat ANF/conflict protocol. Fresh reference/candidates, independent point and scalar-field certificates; final suite has 60 inputs in pilot.",
+  "evaluator_sha256": {
+    "oracle.py": "4981a005e7305882d082589c4bd7bc45c3a5acc226fa6e91b12cc78e02823df0",
+    "tournament.py": "d827722c96f65139eccaee27c235b14ee30755f0768e005e6b5f0ad11b2e1655"
+  },
+  "evidence_scope": "bounded public-hash ECDLP configuration tournament",
+  "family_wide_or_scaling_claim": false,
+  "host": {
+    "machine": "x86_64",
+    "node": "vm",
+    "processor": "x86_64",
+    "release": "6.18.44-fc-v33",
+    "system": "Linux",
+    "version": "#1 SMP PREEMPT_DYNAMIC @0"
+  },
+  "limits": {
+    "cpu": 3,
+    "max_profiled_jobs": 1800,
+    "memory_bytes": 8589934592,
+    "timeout_seconds": 60,
+    "worker_threads": 1
+  },
+  "max_cell_ratio": 1.1,
+  "metric_class": "implementation_instruction_cost",
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+  "native_timings": "paired native reruns retained; no runtime claim from profiled elapsed time",
+  "no_regression_ratio": 0.98,
+  "objective": "rho",
+  "parity_margin": 1.1,
+  "pinned_files": {
+    "calibration.json": "d63ed8f9e1d29df6beac7328adf4c5d038cdf7f08dc3be8bd7f3a61892651c2b",
+    "candidates.json": "c0b1d137a3accb39592996b1e45719efb2996372f71611b5985403dcb2e61a9f",
+    "fixtures.json": "e6131c03bc43b19d97d03c06ad03ff3e4c3ae1d2dbef261d67e2464f9a791060",
+    "source-manifest.json": "90c63accaf89b8d502b3232d346b40ae89c44b00b3967251ed7b55e22aa88725",
+    "source_candidates/wordfield_fastio/source-manifest.json": "78a1710799ce9abb5829c752a79fd406dd2d1e5538e46277ffc5ee43f542ec21",
+    "source_candidates/wordfield_fastio/worker": "ad9f4eb7878b3ba4b732dbbf67282be7dd1b5272d443bbf7d695f628fe185cf7",
+    "worker": "a786fdb8345bb22588ece4d7ff8b764988d8244176c94bab91cfa05f6a8ee0d9"
+  },
+  "profile": "pilot",
+  "profiler_version": "valgrind-3.22.0",
+  "repetitions": 3,
+  "require_native_progress": true,
+  "schema_version": 1,
+  "seed": 2026091611,
+  "source_manifest_sha256": "54672220b4818be8513516d2a8e090126c2e98fbc421ba9d8e1772474e64c5bd",
+  "target_count": 1,
+  "unit": "valgrind-3.22-amd64-Ir",
+  "workload": "complete cold batch with all setup charged once and every target verified"
+}

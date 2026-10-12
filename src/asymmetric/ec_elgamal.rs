@@ -244,7 +244,7 @@ fn integer_sqrt_ceil(n: u64) -> u64 {
     let mut hi = 1u64 << 32;
     while lo < hi {
         let mid = lo + (hi - lo) / 2;
-        if mid >= n / mid && (n % mid == 0 || mid > n / mid) {
+        if mid >= n / mid && (n.is_multiple_of(mid) || mid > n / mid) {
             hi = mid;
         } else {
             lo = mid + 1;

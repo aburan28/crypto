@@ -1,0 +1,34 @@
+{
+  "scope": "Fixed driver controls, no improvement round",
+  "runs": [
+    {
+      "directory": "native-v1",
+      "status": "BUILD_FAILED",
+      "reason": "Cargo array merge retained the Linux --gc-sections linker flag on macOS; no measured jobs"
+    },
+    {
+      "directory": "native-v2",
+      "status": "PREPARATION_FAILED",
+      "reason": "Strict canonical writer rejected a floating-point process duration; no measured jobs"
+    },
+    {
+      "directory": "native-v3",
+      "status": "AUDITED",
+      "verified": 12,
+      "scheduled": 12
+    },
+    {
+      "directory": "native-v4",
+      "status": "AUDITED",
+      "verified": 12,
+      "scheduled": 12
+    },
+    {
+      "directory": "native-failure-v1",
+      "status": "AUDITED_EXPECTED_FAILURE",
+      "verified": 5,
+      "scheduled": 6,
+      "reason": "max_trials=1 arm remained a failed canonical row with null instruction total and null verified online interval"
+    }
+  ]
+}

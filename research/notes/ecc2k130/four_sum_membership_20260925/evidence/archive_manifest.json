@@ -1,0 +1,53 @@
+{
+  "attempts": {
+    "extractor-n37-R3-host-contended": "valid target/correctness; local wall overlaps #758 input generation 10:19:42\u201310:19:50 UTC",
+    "extractor-n41-R12-512-invalid": "invalid 512-target input file for preregistered 128-target R12 arm",
+    "oracle-n41-R12-full-file-prefix": "valid first128 oracle answers; superseded to ensure byte-identical literal input file"
+  },
+  "budget_amendment_commit": "4d1b48634d559e38369e85936f5c7a2190e24323",
+  "final_pre_outcome_format_commit": "089052161aaf8a3c37fc7346418596ac1e650552",
+  "historical_source_sha256": {
+    "PROTOCOL_before_prefix.md": "9d6f222efca7dd149aa556212e3fef1cfa48d2b87ef87f6973cbb753b5ddec79",
+    "run_before_prefix.py": "3d90a2d5656db2ac44681a44d517a74e62eb8feb1e31c9cb7a59ceb914c27335"
+  },
+  "method_source_sha256": {
+    "PROTOCOL.md": "f5dc53b3ec75b5a8d3aa6382344b9d38351ef59c74ab54f07cd03d612de973f7",
+    "archive.py": "466bbcc71198b5fdf2919f00f697fe7e61c66e58346dba0ce8a174673e606ce9",
+    "input_amendment.json": "419a9c51e03d4429f2f51b8b78534ea40af4b2c964d04444aaa5d11c1db1c91f",
+    "input_manifest.json": "de605d359df5ee0b35df422e93f2bd65d064878a24d03c1e7e165e4554f95285",
+    "make_inputs.py": "76931a9ce8645745b61608f0a9ce3dcbd8b19af5fd7f9da4948208153efc89f0",
+    "replay_all.py": "49e9a258eb1628be55db881da475a4f61ed7997007ffbe858023bf9f31a65b70",
+    "run.py": "8c0a9b211358cb09ca9863851627d1b5405a63cd1e5ec6499c1e6fa80cf03560",
+    "target_points_n37.jsonl": "3289c50a48192c273f485ef137b0c12d03a52728562af170dd68865049d2487e",
+    "target_points_n41.jsonl": "e04f2892b85817d34d8be54134ae6cb38ec3c6393dc5131355d290cba4c46a44",
+    "target_points_n41_R12.jsonl": "1b154bdd8aa9dabdb37d2dd5a7bfee69a1fa8284ac5db678ef73eaf2c2f297a5",
+    "verify.py": "84fcd50753f48edb0da4a61d60c7cac00c0dc2dd9b65203fc0753320f938c368"
+  },
+  "original_source_input_freeze_commit": "12d2e489de77dc633f02df47de2debf865a3f301",
+  "run_names": [
+    "oracle-n37-R3",
+    "extractor-n37-R3",
+    "oracle-n41-R8",
+    "extractor-n41-R8",
+    "oracle-n41-R12",
+    "extractor-n41-R12"
+  ],
+  "schema_version": "1.0",
+  "source_sha256": {
+    "examples/koblitz_four_sum_membership.rs": "6185018d17e9541245456ffbfec2df36630fe5a4d7e47e8f638ff59f072bdd8a",
+    "examples/koblitz_s5_sat_instance.rs": "c2bc8b05087df69bef9593363e9d7c112e843ef16da122da50eb29ab22115f09"
+  },
+  "stdout_sha256": {
+    "extractor-n37-R3": "41a3f45cd6a242ed1ac2e7c52e5c90197b13bf87cfd61fe603e96b51119f6f1f",
+    "extractor-n41-R12": "caeb73e293acfd928a4bf31d1cb19426ca2114d7e1ca9b622192065e8f244a15",
+    "extractor-n41-R8": "abc3a6d9b8ff035377c7214d1a61dfcee0affbf173bf461d9afc3029eeda640b",
+    "oracle-n37-R3": "f70f080b2d786fda757da69b77cfd6080f5624dc1497aa2c37c7f55b4db0701e",
+    "oracle-n41-R12": "a2ed0e7a70fb22ddf6f19b5ee9cdfb24f557f3cec3f791e88b0975ee02b266fc",
+    "oracle-n41-R8": "8f0648b73aa9fb89bcf47746b2d719ba91424499b150de410bc8fb7d0dba977a"
+  },
+  "validation_sha256": {
+    "independent-n37-R3.json": "ecf6d93806ec26b64a96b0bef1a5f884443f701ec77b7c950a11274b2aee62ce",
+    "independent-n41-R12.json": "951e8af369f684de07d2daad97135c257c5ce47d13e84a735fd0eec0dd99e26b",
+    "independent-n41-R8.json": "cccb03223e47588d665981a706261bb4b8d0b8f73b6cea158e65282f611a6688"
+  }
+}

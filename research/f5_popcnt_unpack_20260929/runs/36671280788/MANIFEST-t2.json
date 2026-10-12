@@ -1,0 +1,585 @@
+{
+  "all_selected_exact": true,
+  "archive_bytes": 67871,
+  "archive_sha256": "1ee7bd7ac1ec7c870055ed2f94df45b3243fda7e980bb5d5e15d12f6897cf543",
+  "artifact_name": "f5-popcnt-unpack-segments-t2-8a37bd7c68d28f621b129f78f226a11013ce84fa",
+  "binary_sha256": "055d3fd9e09e8b4b5827b23ec2d4677ef4b9bc496241ee6db09815b65cb2d343",
+  "f5_source_sha256": "1ba6d597e31a374cd0fe0591e7fa8f2ca8a8b4045aa3838dfc01873bc5c2d405",
+  "files": [
+    {
+      "bytes": 147,
+      "path": "segment-cpu-choice-t2.json",
+      "sha256": "2858d155e5230a50e0b8816a5811feb3865e50272feda617cfbc2d541049c4c6"
+    },
+    {
+      "bytes": 1659,
+      "path": "segments-t2/INDEX.json",
+      "sha256": "57cc7858d0149e4c2ca2b8e83a2f80dd130cf838106bb40f9fa77e8224e01355"
+    },
+    {
+      "bytes": 219,
+      "path": "segments-t2/frozen/attempt1/STATUS.json",
+      "sha256": "7061053678638a2bc35fe644953ac1a6e2f189a62f5af1b298e166e2ce63e399"
+    },
+    {
+      "bytes": 2775,
+      "path": "segments-t2/frozen/attempt1/isolation.jsonl",
+      "sha256": "2eee2718a247dd35ec1fd8b155cd8b4d0525ad68848c5a5940089f5e89e48395"
+    },
+    {
+      "bytes": 213139,
+      "path": "segments-t2/frozen/attempt1/paired.json",
+      "sha256": "30cd8f3defe5ece5bea60f80627d7fe48834f82e59b05daf9a457bd2f16eeeb8"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t2/frozen/attempt1/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2461,
+      "path": "segments-t2/frozen/attempt1/stdout.txt",
+      "sha256": "9421404e4ae97aab76dbf99f48aac991852949d6e617faca6a16c50c7d4dff4c"
+    },
+    {
+      "bytes": 222,
+      "path": "segments-t2/holdout_a/attempt1/STATUS.json",
+      "sha256": "23eaa7f29584f84202882a1ef6eaec18542d44f37429b2eb0f96999f9845e387"
+    },
+    {
+      "bytes": 2916,
+      "path": "segments-t2/holdout_a/attempt1/isolation.jsonl",
+      "sha256": "20bf8747ef6691a8a8ead2a01faa8b56a67b96cea807b5822b444e19a0a51147"
+    },
+    {
+      "bytes": 213073,
+      "path": "segments-t2/holdout_a/attempt1/paired.json",
+      "sha256": "807bd5a86d8e00b59fee220a6649ccfed3b1f4c0ee9fa747a4a2b93bc34c0ba1"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t2/holdout_a/attempt1/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2462,
+      "path": "segments-t2/holdout_a/attempt1/stdout.txt",
+      "sha256": "826f7556fd0bfc3bae9ac6b7514563555c6ab838d9ffc325a33d2319865b1a74"
+    },
+    {
+      "bytes": 222,
+      "path": "segments-t2/holdout_b/attempt1/STATUS.json",
+      "sha256": "abbabefbb6396fe048b68139faa1996f1ed151351c75aa941064c971b6d1cbb2"
+    },
+    {
+      "bytes": 2623,
+      "path": "segments-t2/holdout_b/attempt1/isolation.jsonl",
+      "sha256": "0a7f9ce59c69c844f6eba4a52ba4027d8fc3402b8a40e345c82cfae0b20b0926"
+    },
+    {
+      "bytes": 213010,
+      "path": "segments-t2/holdout_b/attempt1/paired.json",
+      "sha256": "a2a2c4afde8295a94ce9c13cae1b575e8dc9471905c8ec61a914fe562a8589c1"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t2/holdout_b/attempt1/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2465,
+      "path": "segments-t2/holdout_b/attempt1/stdout.txt",
+      "sha256": "d2672aa78deac18b7b0821fef97a5732adb9ef1b2336c5f7653702398e3ddd53"
+    },
+    {
+      "bytes": 222,
+      "path": "segments-t2/holdout_c/attempt1/STATUS.json",
+      "sha256": "e42311073c215d1d50018a645d45b926867a7ec2a1724639acea972c97e386c5"
+    },
+    {
+      "bytes": 2787,
+      "path": "segments-t2/holdout_c/attempt1/isolation.jsonl",
+      "sha256": "4cba50244ee2d13a66f0cd48ab349cff680325de251848fc6b711e48367765db"
+    },
+    {
+      "bytes": 212980,
+      "path": "segments-t2/holdout_c/attempt1/paired.json",
+      "sha256": "00acc262a673439fa753e77391854b259221e43c9af7e3cf234194f5065fddee"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t2/holdout_c/attempt1/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2456,
+      "path": "segments-t2/holdout_c/attempt1/stdout.txt",
+      "sha256": "2d467a513514a68664375b377083fdfc744efb07960c7b11ee5f8565c5d0f6e0"
+    }
+  ],
+  "index": {
+    "seeds": {
+      "frozen": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "frozen",
+            "threads": 2
+          }
+        ],
+        "selected_attempt": 1
+      },
+      "holdout_a": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "holdout_a",
+            "threads": 2
+          }
+        ],
+        "selected_attempt": 1
+      },
+      "holdout_b": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "holdout_b",
+            "threads": 2
+          }
+        ],
+        "selected_attempt": 1
+      },
+      "holdout_c": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "holdout_c",
+            "threads": 2
+          }
+        ],
+        "selected_attempt": 1
+      }
+    },
+    "status": "qualified",
+    "threads": 2
+  },
+  "pr_head_sha": "422327c75dbec2e30c0b36a1d1fb5f0812ea5492",
+  "run_id": 36671280788,
+  "selected": {
+    "frozen": {
+      "attempt": 1,
+      "benchmark_source_sha256": "0769da3389b0ea2853c7099cbed18ef2c9fb58dd44d8704283837b6b63ca0380",
+      "binary_sha256": "055d3fd9e09e8b4b5827b23ec2d4677ef4b9bc496241ee6db09815b65cb2d343",
+      "calls": 22,
+      "f5_source_sha256": "1ba6d597e31a374cd0fe0591e7fa8f2ca8a8b4045aa3838dfc01873bc5c2d405",
+      "gf2_source_sha256": "6fd3f10ef8e681490784c624e703eeb8fa887c5817ec9bdf34844e3f943c7f5c",
+      "github_merge_sha": "8a37bd7c68d28f621b129f78f226a11013ce84fa",
+      "host": {
+        "cpu_count": 4,
+        "cpu_features": [
+          "avx2",
+          "bmi2",
+          "pclmulqdq",
+          "popcnt"
+        ],
+        "cpu_model": "AMD EPYC 7763 64-Core Processor",
+        "load_end": [
+          1.7802734375,
+          1.376953125,
+          0.70751953125
+        ],
+        "load_start": [
+          1.6767578125,
+          1.3330078125,
+          0.67822265625
+        ],
+        "machine": "x86_64",
+        "mem_total": "MemTotal:       16377684 kB",
+        "pinned_cpus": [
+          0,
+          1
+        ],
+        "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      "primary_unpack": {
+        "aa_max": 1.0296949149120125,
+        "aa_min": 0.9699565727483087,
+        "aa_ratios": [
+          1.0103360913964503,
+          0.9975658395849465,
+          1.0296949149120125,
+          1.0024777886904312,
+          0.9699565727483087
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            1.0344892774544199,
+            1.1136173937809137
+          ],
+          "median": 1.0761033777162337,
+          "ratios": [
+            1.0805842994854336,
+            1.1136173937809137,
+            1.0344892774544199,
+            1.0761033777162337,
+            1.07294377647855
+          ]
+        }
+      },
+      "primary_wall": {
+        "aa_max": 1.0089477130206839,
+        "aa_min": 0.9759249064512094,
+        "aa_ratios": [
+          0.9759249064512094,
+          1.0045994397247469,
+          0.998712433355415,
+          1.0089477130206839,
+          0.9959090703855893
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            1.013011426704567,
+            1.0377570257971538
+          ],
+          "median": 1.0257771211970537,
+          "ratios": [
+            1.013523363322767,
+            1.0377570257971538,
+            1.013011426704567,
+            1.0296840962679914,
+            1.0257771211970537
+          ]
+        }
+      },
+      "smaller_case_regressions": [
+        {
+          "aa_min": 1.0010268062497492,
+          "case": "f5_n12_m12_d4",
+          "median": 0.994689978516707
+        },
+        {
+          "aa_min": 1.0052692888885704,
+          "case": "f5_n24_m24_d3",
+          "median": 1.0005817775985237
+        }
+      ]
+    },
+    "holdout_a": {
+      "attempt": 1,
+      "benchmark_source_sha256": "0769da3389b0ea2853c7099cbed18ef2c9fb58dd44d8704283837b6b63ca0380",
+      "binary_sha256": "055d3fd9e09e8b4b5827b23ec2d4677ef4b9bc496241ee6db09815b65cb2d343",
+      "calls": 22,
+      "f5_source_sha256": "1ba6d597e31a374cd0fe0591e7fa8f2ca8a8b4045aa3838dfc01873bc5c2d405",
+      "gf2_source_sha256": "6fd3f10ef8e681490784c624e703eeb8fa887c5817ec9bdf34844e3f943c7f5c",
+      "github_merge_sha": "8a37bd7c68d28f621b129f78f226a11013ce84fa",
+      "host": {
+        "cpu_count": 4,
+        "cpu_features": [
+          "avx2",
+          "bmi2",
+          "pclmulqdq",
+          "popcnt"
+        ],
+        "cpu_model": "AMD EPYC 7763 64-Core Processor",
+        "load_end": [
+          1.609375,
+          1.36376953125,
+          0.7216796875
+        ],
+        "load_start": [
+          1.50634765625,
+          1.3310546875,
+          0.69970703125
+        ],
+        "machine": "x86_64",
+        "mem_total": "MemTotal:       16377684 kB",
+        "pinned_cpus": [
+          0,
+          1
+        ],
+        "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      "primary_unpack": {
+        "aa_max": 1.0028942847376228,
+        "aa_min": 0.9641372911621209,
+        "aa_ratios": [
+          0.9972148203484172,
+          1.0028942847376228,
+          0.9670284905867952,
+          0.9641372911621209,
+          0.9802847765495835
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            1.0671550492662174,
+            1.0828337335518003
+          ],
+          "median": 1.078602970414142,
+          "ratios": [
+            1.0735823426649886,
+            1.0793063466811768,
+            1.0828337335518003,
+            1.078602970414142,
+            1.0671550492662174
+          ]
+        }
+      },
+      "primary_wall": {
+        "aa_max": 1.0033783545992219,
+        "aa_min": 0.9781272975525042,
+        "aa_ratios": [
+          0.9938051772604629,
+          1.0033783545992219,
+          0.9809669669534024,
+          0.9781272975525042,
+          0.9863340181380793
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            1.0214832017067037,
+            1.041406056525596
+          ],
+          "median": 1.0317258492438595,
+          "ratios": [
+            1.0214832017067037,
+            1.0376985138498895,
+            1.0317258492438595,
+            1.041406056525596,
+            1.024455320732914
+          ]
+        }
+      },
+      "smaller_case_regressions": [
+        {
+          "aa_min": 0.984402233349326,
+          "case": "f5_n20_m20_d3",
+          "median": 0.9839269220740768
+        }
+      ]
+    },
+    "holdout_b": {
+      "attempt": 1,
+      "benchmark_source_sha256": "0769da3389b0ea2853c7099cbed18ef2c9fb58dd44d8704283837b6b63ca0380",
+      "binary_sha256": "055d3fd9e09e8b4b5827b23ec2d4677ef4b9bc496241ee6db09815b65cb2d343",
+      "calls": 22,
+      "f5_source_sha256": "1ba6d597e31a374cd0fe0591e7fa8f2ca8a8b4045aa3838dfc01873bc5c2d405",
+      "gf2_source_sha256": "6fd3f10ef8e681490784c624e703eeb8fa887c5817ec9bdf34844e3f943c7f5c",
+      "github_merge_sha": "8a37bd7c68d28f621b129f78f226a11013ce84fa",
+      "host": {
+        "cpu_count": 4,
+        "cpu_features": [
+          "avx2",
+          "bmi2",
+          "pclmulqdq",
+          "popcnt"
+        ],
+        "cpu_model": "AMD EPYC 7763 64-Core Processor",
+        "load_end": [
+          1.4697265625,
+          1.3466796875,
+          0.73681640625
+        ],
+        "load_start": [
+          1.36181640625,
+          1.318359375,
+          0.7138671875
+        ],
+        "machine": "x86_64",
+        "mem_total": "MemTotal:       16377684 kB",
+        "pinned_cpus": [
+          0,
+          1
+        ],
+        "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      "primary_unpack": {
+        "aa_max": 1.0111118943574575,
+        "aa_min": 0.9822176662090933,
+        "aa_ratios": [
+          0.9990771850056585,
+          0.9822176662090933,
+          0.9902786969444574,
+          1.0111118943574575,
+          0.9984448623703996
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            1.062088331915996,
+            1.1017576946443848
+          ],
+          "median": 1.0663573377607134,
+          "ratios": [
+            1.0663573377607134,
+            1.089923396702933,
+            1.1017576946443848,
+            1.062088331915996,
+            1.0663073446701004
+          ]
+        }
+      },
+      "primary_wall": {
+        "aa_max": 1.0103283105910528,
+        "aa_min": 0.9851338216830193,
+        "aa_ratios": [
+          1.0103283105910528,
+          1.0004410545142775,
+          0.9851338216830193,
+          1.0007370534744628,
+          0.9991735245438844
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            1.0070100557117667,
+            1.0474326843226378
+          ],
+          "median": 1.0176534064225176,
+          "ratios": [
+            1.0176534064225176,
+            1.0474326843226378,
+            1.0405633567055335,
+            1.0144556965836853,
+            1.0070100557117667
+          ]
+        }
+      },
+      "smaller_case_regressions": []
+    },
+    "holdout_c": {
+      "attempt": 1,
+      "benchmark_source_sha256": "0769da3389b0ea2853c7099cbed18ef2c9fb58dd44d8704283837b6b63ca0380",
+      "binary_sha256": "055d3fd9e09e8b4b5827b23ec2d4677ef4b9bc496241ee6db09815b65cb2d343",
+      "calls": 22,
+      "f5_source_sha256": "1ba6d597e31a374cd0fe0591e7fa8f2ca8a8b4045aa3838dfc01873bc5c2d405",
+      "gf2_source_sha256": "6fd3f10ef8e681490784c624e703eeb8fa887c5817ec9bdf34844e3f943c7f5c",
+      "github_merge_sha": "8a37bd7c68d28f621b129f78f226a11013ce84fa",
+      "host": {
+        "cpu_count": 4,
+        "cpu_features": [
+          "avx2",
+          "bmi2",
+          "pclmulqdq",
+          "popcnt"
+        ],
+        "cpu_model": "AMD EPYC 7763 64-Core Processor",
+        "load_end": [
+          1.349609375,
+          1.31982421875,
+          0.7431640625
+        ],
+        "load_start": [
+          1.2431640625,
+          1.3017578125,
+          0.72802734375
+        ],
+        "machine": "x86_64",
+        "mem_total": "MemTotal:       16377684 kB",
+        "pinned_cpus": [
+          0,
+          1
+        ],
+        "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      "primary_unpack": {
+        "aa_max": 1.0108593006594975,
+        "aa_min": 0.9861887508321698,
+        "aa_ratios": [
+          0.9900891391358846,
+          0.9990531754317656,
+          1.0108593006594975,
+          0.9967456536666497,
+          0.9861887508321698
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            1.0439521357148567,
+            1.0849478331071871
+          ],
+          "median": 1.0712640967593323,
+          "ratios": [
+            1.0712640967593323,
+            1.0620160419084945,
+            1.0439521357148567,
+            1.0798077452653154,
+            1.0849478331071871
+          ]
+        }
+      },
+      "primary_wall": {
+        "aa_max": 0.998407065927812,
+        "aa_min": 0.9820715325542305,
+        "aa_ratios": [
+          0.9941029005787254,
+          0.9980066281958205,
+          0.998407065927812,
+          0.9820715325542305,
+          0.9955562401973466
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            1.023529691543471,
+            1.0365026341750403
+          ],
+          "median": 1.0245452280385132,
+          "ratios": [
+            1.024238624339091,
+            1.023529691543471,
+            1.0245452280385132,
+            1.0365026341750403,
+            1.030298139106153
+          ]
+        }
+      },
+      "smaller_case_regressions": [
+        {
+          "aa_min": 0.997225274406817,
+          "case": "f5_n12_m12_d4",
+          "median": 0.9888331075908368
+        },
+        {
+          "aa_min": 0.9927020469666699,
+          "case": "f5_n16_m16_d4",
+          "median": 0.9903740282005438
+        },
+        {
+          "aa_min": 0.9917243624113941,
+          "case": "f5_n20_m20_d3",
+          "median": 0.9906228861017776
+        }
+      ]
+    }
+  },
+  "selected_calls": 88,
+  "threads": 2
+}

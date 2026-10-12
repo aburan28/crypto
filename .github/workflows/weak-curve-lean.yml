@@ -1,0 +1,37 @@
+name: Weak curve Lean proofs
+on:
+  pull_request:
+    paths:
+      - 'research/weak_curve_properties_lean_20261011/**'
+      - 'research/weak_curve_properties_20261010/**'
+      - 'docs/curves/weak-families/models.json'
+      - '.github/workflows/weak-curve-lean.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  proofs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: research/weak_curve_properties_lean_20261011
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Verify source and evidence pins
+        run: |
+          rustc --edition=2021 proof_check.rs -o /tmp/weak-curve-proof-check
+          /tmp/weak-curve-proof-check --check
+      - name: Build proofs and replay in a fresh kernel
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/weak_curve_properties_lean_20261011
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose WeakCurveProperties'
+      - name: Audit every theorem's transitive axioms
+        run: lake env lean AxiomAudit.lean

@@ -8,10 +8,10 @@
 //! for doubling) with `a` and `b3 = 3b` carried as
 //! [`P256FieldElement`] constants.  Algorithm 1 has 12 multiplications
 //! + 3 multiplications by `a` + 2 multiplications by `b3` per
-//! addition; Algorithm 3 has 8 + 3·a + 2·b3 per doubling.  Both
-//! formulas are *complete* — they work uniformly for distinct points,
-//! doublings, the identity on either side, and `P + (-P)`, with no
-//! branches on input values.
+//!   addition; Algorithm 3 has 8 + 3·a + 2·b3 per doubling.  Both
+//!   formulas are *complete* — they work uniformly for distinct points,
+//!   doublings, the identity on either side, and `P + (-P)`, with no
+//!   branches on input values.
 //!
 //! The Montgomery ladder over this point type replaces the bit-driven
 //! `if` with [`P256FieldElement::cmov`] over candidate next-states,

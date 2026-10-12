@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "round": 2,
+  "candidate_panel": "round2-v1",
+  "candidate_source_sha256": "8582e4ab4b63e98696a0ff00ee296e2902923a2c39c325ab0f3e3950ffbb2b28",
+  "scope": "synthetic toy mathematical benchmarks only",
+  "development_basis": "Round-1 development portfolio parents only: stop6_full (online), row_word (instructions), stop4 (native time), row_suffix/row_bounded families, and the stop6 exploration slot. Confirmation/replay outcomes are not used for retuning. New pair_table modes half/cover sit between the heuristic and full extremes that dominated the online/cold tradeoff; Full/Suffix kernels skip zero pivot entries.",
+  "candidates": [
+    {
+      "id": "incumbent",
+      "source": "qualified-pairinv",
+      "hypothesis": "Unmodified qualified IC cold reference.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3
+      }
+    },
+    {
+      "id": "compatibility",
+      "source": "round2-v1",
+      "hypothesis": "Recompiled round-2 defaults measure patch and zero-skip dispatch overhead.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 8,
+        "orbit_target": null,
+        "row_kernel": "full",
+        "pair_table": "heuristic"
+      }
+    },
+    {
+      "id": "stop6_word",
+      "source": "round2-v1",
+      "hypothesis": "Recombine the exploration-base parent with the instruction-leading word rows.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 6,
+        "row_kernel": "word",
+        "pair_table": "heuristic"
+      }
+    },
+    {
+      "id": "stop6_half",
+      "source": "round2-v1",
+      "hypothesis": "Shrink to six orbits while materializing half the pair-table rows.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 6,
+        "row_kernel": "full",
+        "pair_table": "half"
+      }
+    },
+    {
+      "id": "half_table",
+      "source": "round2-v1",
+      "hypothesis": "Keep the scaled eight-orbit base; pay for half the pair rows up front.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 8,
+        "orbit_target": null,
+        "row_kernel": "full",
+        "pair_table": "half"
+      }
+    },
+    {
+      "id": "word_half",
+      "source": "round2-v1",
+      "hypothesis": "Combine word rows with a half pair table on the default orbit budget.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 8,
+        "orbit_target": null,
+        "row_kernel": "word",
+        "pair_table": "half"
+      }
+    },
+    {
+      "id": "stop6_word_half",
+      "source": "round2-v1",
+      "hypothesis": "Measure the three-way recombine of stop6, word rows and half tables.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 6,
+        "row_kernel": "word",
+        "pair_table": "half"
+      }
+    },
+    {
+      "id": "cover_table",
+      "source": "round2-v1",
+      "hypothesis": "Materialize all but one orbit row: nearly-full coverage without the full cold cost.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 8,
+        "orbit_target": null,
+        "row_kernel": "full",
+        "pair_table": "cover"
+      }
+    },
+    {
+      "id": "stop5_word",
+      "source": "round2-v1",
+      "hypothesis": "Probe the unmeasured five-orbit stop with word rows.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 5,
+        "row_kernel": "word",
+        "pair_table": "heuristic"
+      }
+    },
+    {
+      "id": "stop7_half",
+      "source": "round2-v1",
+      "hypothesis": "Exploration: seven orbits with a half pair table.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 1,
+        "orbit_target": 7,
+        "row_kernel": "full",
+        "pair_table": "half"
+      }
+    },
+    {
+      "id": "batch4_stop6_word",
+      "source": "round2-v1",
+      "hypothesis": "Coarser orbit sampling batch of four with stop6 and word rows.",
+      "config": {
+        "batch_trials": 1,
+        "linear_algebra": "tiny_gauss",
+        "max_trials": 65536,
+        "solver": "pair_table",
+        "summands": 3,
+        "orbit_batch": 4,
+        "orbit_target": 6,
+        "row_kernel": "word",
+        "pair_table": "heuristic"
+      }
+    }
+  ]
+}

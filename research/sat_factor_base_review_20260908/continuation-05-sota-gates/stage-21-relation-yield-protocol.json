@@ -1,0 +1,208 @@
+{
+  "schema": "koblitz_relation_yield_bridge_protocol.v1",
+  "recorded_at": "2026-09-10",
+  "status": "frozen_before_execution",
+  "objective": "Measure the natural two-summand relation probability for the target-independent degree-23 algebraic divisor factor base, with planted-SAT and exact proven-UNSAT controls, before budgeting a larger scalar-hidden index-calculus run.",
+  "scope": {
+    "public_synthetic_controls_only": true,
+    "private_or_imported_targets": false,
+    "private_key_recovery": false,
+    "factor_base_discrete_log_labels": false,
+    "target_scalar_labels": false,
+    "target_subgroup_enumeration": false
+  },
+  "curve": {
+    "family": "Koblitz",
+    "equation": "y^2 + x*y = x^3 + a*x^2 + 1",
+    "n": 23,
+    "a": 0,
+    "group_order": "8383412",
+    "subgroup_order": "2095853",
+    "cofactor": "4",
+    "summands": 2
+  },
+  "factor_base": {
+    "kind": "GGMP divisor linearised-polynomial kernel",
+    "selection_source": "stage-10-selected-protocol.json",
+    "selection_reused_without_target_dependent_changes": true,
+    "selection_rule": "cofactor admissible; maximize rational points; minimize projected signed-Frobenius columns; lower curve-a variant; lexicographically lower divisor indices",
+    "dimension": 12,
+    "divisor_indices": [
+      0,
+      2
+    ],
+    "divisor_polynomial": 5279,
+    "linearised_exponents": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      7,
+      10,
+      12
+    ],
+    "expected_abscissae": 4096,
+    "expected_rational_points": 4281,
+    "expected_signed_frobenius_orbits_before_projection": 95,
+    "expected_projected_signed_frobenius_columns": 93,
+    "discovery_rerun": {
+      "curve_variants": [
+        0,
+        1
+      ],
+      "requested_dimension": 12,
+      "summands": 2,
+      "fresh_process_per_variant": true,
+      "charged_once_per_panel": true,
+      "must_reproduce_frozen_cross_curve_selection": true
+    }
+  },
+  "target_arms": {
+    "natural": {
+      "count": 256,
+      "seed_hex": "6b6f626c69747a2d737461676532312d6e61747572616c2d7631",
+      "construction": "domain-separated BLAKE3 x-coordinate draws, deterministic lift selection, and cofactor projection; reject infinity and duplicates",
+      "relation_oracle_may_influence_selection": false,
+      "scalar_is_constructed_or_recorded": false
+    },
+    "planted_sat": {
+      "count": 64,
+      "seed_hex": "6b6f626c69747a2d737461676532312d706c616e7465642d7631",
+      "construction": "domain-separated deterministic priorities over canonical factor-base pairs whose sum is a non-infinity subgroup point; reject cross-arm duplicates. The sampling unit is a pair, so targets with multiple decompositions receive multiple priority opportunities and the planted target distribution is multiplicity-weighted",
+      "witness_required": true,
+      "point_sum_verification_required": true
+    },
+    "proven_unsat": {
+      "count": 64,
+      "seed_hex": "6b6f626c69747a2d737461676532312d756e7361742d7631",
+      "construction": "domain-separated hash-to-curve/cofactor candidates accepted only when absent from the complete canonical pair table; reject infinity and cross-arm duplicates",
+      "exact_absence_proof_required": true,
+      "candidate_screening_cost_charged": true
+    }
+  },
+  "exact_reference_oracle": {
+    "method": "enumerate every canonical factor-base pair i <= j exactly once and key its exact curve sum",
+    "canonical_pair_count_formula": "F*(F+1)/2",
+    "complete_for": "two-summand decomposition over the fully materialized frozen factor base with repetition",
+    "point_equality": "exact affine field elements with a distinct infinity key",
+    "all_natural_queries_answered": true,
+    "all_planted_witnesses_reverified": true,
+    "all_proven_unsat_queries_absent": true
+  },
+  "preregistered_covariates": [
+    "target x-coordinate Hamming weight",
+    "target y-coordinate Hamming weight",
+    "target Frobenius orbit length",
+    "hash-to-curve candidate attempts",
+    "arm",
+    "exact pair-table membership"
+  ],
+  "statistics": {
+    "primary_estimand": "natural exact two-summand hit probability under the frozen hash-to-subgroup target distribution",
+    "confidence_interval": "two-sided 95 percent Wilson score interval",
+    "sampling_assumption": "The Wilson interval treats the frozen domain-separated BLAKE3 natural stream as a pseudorandom Bernoulli sample from the stated hash-to-subgroup distribution",
+    "without_replacement": "Accepted natural targets are distinct, so sampling is without replacement",
+    "finite_population_correction": "Not applied. At production size, 256 distinct nonidentity targets are about 0.000122 of the 2,095,852-point nonidentity subgroup population, so the correction is negligible at the reported precision",
+    "planted_multiplicity_boundary": "Planted controls are selected by pair priority and are multiplicity-weighted by decomposition count; their 64/64 hit rate is a correctness control, not a prevalence estimate",
+    "trials_per_relation": "natural_count / natural_hits; infinity when natural_hits is zero",
+    "controls": "planted_sat must be 64/64 hits and proven_unsat must be 64/64 misses",
+    "no_scaling_fit_from_one_n": true
+  },
+  "producer": {
+    "source": "examples/koblitz_relation_yield_bridge.rs",
+    "example": "koblitz_relation_yield_bridge",
+    "production_arguments": [],
+    "smoke_arguments": [
+      "--smoke",
+      "8",
+      "4",
+      "4"
+    ],
+    "production_schema": "koblitz_relation_yield_bridge.v1"
+  },
+  "execution": {
+    "task_order": "one fresh-target locked offline build; two public discovery processes in curve-a order; one relation-yield producer",
+    "parallel_workers": 1,
+    "requested_threads_per_process": 1,
+    "in_stage_retries": 0,
+    "build_watchdog_seconds": 1800,
+    "build_uses_fresh_target_directory": true,
+    "build_offline_and_locked": true,
+    "cargo_incremental_disabled": true,
+    "discovery_watchdog_seconds": 300,
+    "producer_watchdog_seconds": 7200,
+    "whole_driver_watchdog_seconds": 10800,
+    "process_meter": "scripts/process_meter.py",
+    "process_meter_exclusive_create": true,
+    "whole_driver_outer_meter_required": true,
+    "write_once_output": true,
+    "failed_and_capped_processes_retained": true
+  },
+  "accounting": {
+    "required_process_metrics": [
+      "wall_seconds",
+      "user_seconds",
+      "system_seconds",
+      "total_core_seconds",
+      "peak_rss_bytes"
+    ],
+    "single_core_elapsed_seconds": null,
+    "single_core_seconds_legacy_alias": "total_core_seconds",
+    "single_core_claim": "unavailable; the legacy process-meter field is aggregate CPU, not measured single-core elapsed time",
+    "peak_rss_scope": "maximum high-water RSS reported for each fresh process. Scientific producers are sequential and request one worker; the Cargo build may overlap its parent with a compiler child, so simultaneous aggregate build-tree RSS remains unavailable",
+    "internal_stage_timers": [
+      "curve and subgroup construction",
+      "algebraic factor-base predicate and materialization",
+      "canonical pair-table construction",
+      "natural target generation",
+      "planted target selection",
+      "proven-UNSAT target screening",
+      "exact queries",
+      "point-witness validation",
+      "end to end"
+    ],
+    "retained_size_lower_bounds_required": true,
+    "operation_counts_required": true,
+    "source_and_executable_hashes_required": true,
+    "host_and_toolchain_identity_required": true,
+    "outer_envelope_must_enclose_child_cpu_and_wall": true
+  },
+  "production_acceptance": {
+    "checkout_clean_and_committed": true,
+    "protocol_path_and_hash_bound": true,
+    "dependency_lock_bound": true,
+    "discovery_selection_reproduced": true,
+    "factor_base_identity_reproduced": true,
+    "natural_targets": 256,
+    "planted_sat_targets": 64,
+    "proven_unsat_targets": 64,
+    "all_targets_unique_across_arms": true,
+    "planted_sat_hits": 64,
+    "proven_unsat_hits": 0,
+    "natural_arm_never_selected_by_oracle_result": true,
+    "factor_base_logs_absent": true,
+    "target_scalar_labels_absent": true,
+    "complete_process_and_artifact_inventory": true,
+    "terminal_status": "relation_yield_outputs_frozen",
+    "scientific_measurement_admitted_by_control_plane": false,
+    "pending_independent_payload_replay": true,
+    "external_portable_verification_satisfied": false
+  },
+  "smoke": {
+    "scientific_evidence": false,
+    "may_use_smaller_curve_and_arm_counts": true,
+    "must_retain_all_three_nonempty_arms": true,
+    "must_be_labeled": "operational_smoke_only"
+  },
+  "forbidden_inference": [
+    "the balanced Phase-B panel estimates natural relation prevalence",
+    "a planted hit rate estimates natural relation prevalence",
+    "the planted pair-priority target distribution is uniform over distinct decomposable targets",
+    "one n=23 yield estimate is a scaling law",
+    "pair-table performance is a Semaev-SAT performance result",
+    "this experiment is a complete index-calculus run",
+    "this experiment establishes a rho crossover, novelty, external reproduction, or SOTA"
+  ],
+  "claim_boundary": "A complete run measures one public synthetic n=23 two-summand relation-yield distribution and validates its exact controls. It does not recover a scalar, compare full index calculus with rho, establish asymptotic scaling, or satisfy independent external review."
+}

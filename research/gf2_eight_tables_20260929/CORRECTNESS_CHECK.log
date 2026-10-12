@@ -1,0 +1,76 @@
+   Compiling crypto v0.1.0 (/private/tmp/f5-byte-table-unpack-20260929)
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2201:13
+     |
+2201 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:484:9
+    |
+484 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:459:5
+    |
+459 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+    --> src/cryptanalysis/f4_fp_tower.rs:1014:5
+     |
+1012 | enum Lanes {
+     |      ----- variants in this enum
+1013 |     Scalar,
+1014 |     Avx2,
+     |     ^^^^
+1015 |     Avx512,
+     |     ^^^^^^
+     |
+     = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+   --> src/cryptanalysis/koblitz_fast.rs:945:5
+    |
+941 | pub struct BatchScratch {
+    |            ------------ fields in this struct
+...
+945 |     qx: Vec<u64>,
+    |     ^^
+946 |     qy: Vec<u64>,
+    |     ^^
+    |
+    = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `crypto` (lib test) generated 5 warnings (run `cargo fix --lib -p crypto --tests` to apply 3 suggestions)
+    Finished `release` profile [optimized] target(s) in 1m 05s
+     Running unittests src/lib.rs (/private/tmp/f5-further-2x-20260929/target/release/deps/crypto_lib-9a85b111100957be)
+
+running 1 test
+test cryptanalysis::gf2_elim::tests::eight_tables_preserve_four_table_echelon_rows ... FAILED
+
+failures:
+
+---- cryptanalysis::gf2_elim::tests::eight_tables_preserve_four_table_echelon_rows stdout ----
+
+thread 'cryptanalysis::gf2_elim::tests::eight_tables_preserve_four_table_echelon_rows' (14515487) panicked at src/cryptanalysis/gf2_elim.rs:1010:17:
+echelon row differs at 0 for 90x129 density=0.5: four=[1442764906403201025, 7033693675666452550, 0] eight=[9295883729194975233, 12706005379515376712, 0]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    cryptanalysis::gf2_elim::tests::eight_tables_preserve_four_table_echelon_rows
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3230 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`

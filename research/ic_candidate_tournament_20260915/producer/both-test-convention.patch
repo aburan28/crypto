@@ -1,0 +1,21 @@
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -1824,7 +1824,6 @@
+                 }
+                 assert!(tiny.verify_columns());
+                 let r = kc.subgroup_order.to_u64().unwrap();
+-                let h = kc.cofactor.to_u64().unwrap() % r;
+                 // per base index: its column's log times its signed Frobenius coefficient
+                 let orbit_logs: Vec<u64> = (0..base.len())
+                     .map(|i| {
+@@ -1843,7 +1842,9 @@
+                     let sum = w.points.iter().fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &base[i]));
+                     assert_eq!(sum, probe, "n={n} a={a} d={d} witness");
+                     let logsum = w.points.iter().fold(0u64, |s, &i| (s + orbit_logs[i]) % r);
+-                    assert_eq!(mulmod(h, (w.a + mulmod(w.b, d, r)) % r, r), logsum, "n={n} a={a} d={d} scalar");
++                    // Columns are subgroup representatives, not their cofactor
++                    // multiples. Match the group witness checked immediately above.
++                    assert_eq!((w.a + mulmod(w.b, d, r)) % r, logsum, "n={n} a={a} d={d} scalar");
+                 }
+                 let (accepted, duplicates, attempts) = tiny.accounting();
+                 assert_eq!(accepted + duplicates, all.len());

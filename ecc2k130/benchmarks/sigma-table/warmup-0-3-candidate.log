@@ -1,0 +1,53 @@
+packed kernel: 128 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed launch bounds: 512 threads, 1 min blocks
+packed sigma table: 1 (68352 dynamic shared bytes)
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 0
+packed pair clmul: 0
+packed clmul flat: 0
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 0
+packed inline polynomial: 3
+packed slot unroll: 1
+packed chains: 1
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed sigma fused: 1
+packed sigma fused late y: 0
+packed witness: 0
+packed L2 persist: 0
+packed direct reduction: 1
+packed generated product: 1
+packed native carryless multiply: 1
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed top clmad: 0
+packed state tile: 256
+packed add combine: 0
+packed alu square: 0
+packed alu onb square: 0
+packed square table: 0
+packed polynomial inversion: 0
+packed profile ranges: 0
+packed table GPU-wide hints: 0
+packed hint scheduling: table fused 0, pipe select 0, chain first 0, inline polynomial 3, phase profile 0, cycle profile 0
+packed table walk: 0 (0 branches, 68352 shared bytes)
+backend cuda-packed131: 385024 threads x 16 slots x 1 lanes = 6160384 walks, dp weight 0, 1024 steps per launch
+       2.3 s   16133.014 M it/s  37849399296 iterations         0 dp         0 stored         0 dropped
+       4.7 s   16094.171 M it/s  75698798592 iterations         0 dp         0 stored         0 dropped
+       7.1 s   16075.973 M it/s  113548197888 iterations         0 dp         0 stored         0 dropped
+       9.4 s   16063.540 M it/s  151397597184 iterations         0 dp         0 stored         0 dropped
+      11.8 s   16055.245 M it/s  189246996480 iterations         0 dp         0 stored         0 dropped
+      12.6 s   16051.956 M it/s  201863462912 iterations         0 dp         0 stored         0 dropped
+  finished: 16051.822 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)

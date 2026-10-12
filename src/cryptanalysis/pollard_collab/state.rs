@@ -576,7 +576,7 @@ mod tests {
                 steps,
                 dps: dps.len() as u64,
                 dead_trails: dead,
-                completed: walkers.end % ctx.spec.unit_size == 0,
+                completed: walkers.end.is_multiple_of(ctx.spec.unit_size),
             }],
             dps,
             solution: None,

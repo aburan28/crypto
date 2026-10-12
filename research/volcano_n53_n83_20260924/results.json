@@ -1,0 +1,169 @@
+{
+  "status": "exact recurrence with exhaustive small-field controls; no target-size isogeny sweep",
+  "model": "y^2 + xy = x^3 + a*x^2 + 1, a in {0,1}",
+  "reference_small_field_counts": [
+    {
+      "n": 1,
+      "a": 0,
+      "count": 4
+    },
+    {
+      "n": 1,
+      "a": 1,
+      "count": 2
+    },
+    {
+      "n": 3,
+      "a": 0,
+      "count": 4
+    },
+    {
+      "n": 3,
+      "a": 1,
+      "count": 14
+    },
+    {
+      "n": 5,
+      "a": 0,
+      "count": 44
+    },
+    {
+      "n": 5,
+      "a": 1,
+      "count": 22
+    },
+    {
+      "n": 7,
+      "a": 0,
+      "count": 116
+    },
+    {
+      "n": 7,
+      "a": 1,
+      "count": 142
+    }
+  ],
+  "results": [
+    {
+      "n": 53,
+      "a": 0,
+      "q": 9007199254740992,
+      "trace": -56619371,
+      "curve_order": 9007199311360364,
+      "frobenius_discriminant": -32823043846528327,
+      "fundamental_discriminant": -7,
+      "frobenius_conductor": 68476319,
+      "frobenius_conductor_factorization": {
+        "68476319": 1
+      },
+      "local_kernel_prediction": {
+        "68476319": {
+          "legendre_minus7": 1,
+          "horizontal_kernels_on_maximal_order": 2,
+          "descending_kernels_on_maximal_order": 68476318,
+          "ell_divides_rational_group_order": false
+        }
+      },
+      "base_endomorphism_conductor": 1,
+      "candidate_nonmaximal_conductors": "positive divisors of f_pi",
+      "relation_yield": null,
+      "groebner_regularity": null,
+      "isogeny_enumeration_complete": false,
+      "repo_n53_subgroup_order": 21044858204113,
+      "repo_n53_cofactor": 428
+    },
+    {
+      "n": 53,
+      "a": 1,
+      "q": 9007199254740992,
+      "trace": 56619371,
+      "curve_order": 9007199198121622,
+      "frobenius_discriminant": -32823043846528327,
+      "fundamental_discriminant": -7,
+      "frobenius_conductor": 68476319,
+      "frobenius_conductor_factorization": {
+        "68476319": 1
+      },
+      "local_kernel_prediction": {
+        "68476319": {
+          "legendre_minus7": 1,
+          "horizontal_kernels_on_maximal_order": 2,
+          "descending_kernels_on_maximal_order": 68476318,
+          "ell_divides_rational_group_order": false
+        }
+      },
+      "base_endomorphism_conductor": 1,
+      "candidate_nonmaximal_conductors": "positive divisors of f_pi",
+      "relation_yield": null,
+      "groebner_regularity": null,
+      "isogeny_enumeration_complete": false
+    },
+    {
+      "n": 83,
+      "a": 0,
+      "q": 9671406556917033397649408,
+      "trace": -6151469093347,
+      "curve_order": 9671406556923184866742756,
+      "frobenius_discriminant": -845054221264771390935223,
+      "fundamental_discriminant": -7,
+      "frobenius_conductor": 347450761417,
+      "frobenius_conductor_factorization": {
+        "6473": 1,
+        "53676929": 1
+      },
+      "local_kernel_prediction": {
+        "6473": {
+          "legendre_minus7": -1,
+          "horizontal_kernels_on_maximal_order": 0,
+          "descending_kernels_on_maximal_order": 6474,
+          "ell_divides_rational_group_order": false
+        },
+        "53676929": {
+          "legendre_minus7": -1,
+          "horizontal_kernels_on_maximal_order": 0,
+          "descending_kernels_on_maximal_order": 53676930,
+          "ell_divides_rational_group_order": false
+        }
+      },
+      "base_endomorphism_conductor": 1,
+      "candidate_nonmaximal_conductors": "positive divisors of f_pi",
+      "relation_yield": null,
+      "groebner_regularity": null,
+      "isogeny_enumeration_complete": false
+    },
+    {
+      "n": 83,
+      "a": 1,
+      "q": 9671406556917033397649408,
+      "trace": 6151469093347,
+      "curve_order": 9671406556910881928556062,
+      "frobenius_discriminant": -845054221264771390935223,
+      "fundamental_discriminant": -7,
+      "frobenius_conductor": 347450761417,
+      "frobenius_conductor_factorization": {
+        "6473": 1,
+        "53676929": 1
+      },
+      "local_kernel_prediction": {
+        "6473": {
+          "legendre_minus7": -1,
+          "horizontal_kernels_on_maximal_order": 0,
+          "descending_kernels_on_maximal_order": 6474,
+          "ell_divides_rational_group_order": false
+        },
+        "53676929": {
+          "legendre_minus7": -1,
+          "horizontal_kernels_on_maximal_order": 0,
+          "descending_kernels_on_maximal_order": 53676930,
+          "ell_divides_rational_group_order": false
+        }
+      },
+      "base_endomorphism_conductor": 1,
+      "candidate_nonmaximal_conductors": "positive divisors of f_pi",
+      "relation_yield": null,
+      "groebner_regularity": null,
+      "isogeny_enumeration_complete": false
+    }
+  ],
+  "prime_field_volcano_backend_applies": false
+}

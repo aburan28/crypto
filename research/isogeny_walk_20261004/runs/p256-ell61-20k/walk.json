@@ -1,0 +1,446 @@
+{
+  "schema": "isogeny-walk-summary/v1",
+  "tool": "src/bin/isogeny_walk.rs",
+  "root": {
+    "name": "P-256",
+    "icv1_slug": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+    "curve_id": "EC1P256Cp256h0523b774e066",
+    "curve_uid": "urn:ec-record:1:sha256:0523b774e0666cf37ff4dc9cf452eae024192a7f89bdad10ca226d6e64d4dd70"
+  },
+  "config": {
+    "primes": [3, 5, 11, 13, 17, 23, 29, 37, 41, 43, 47, 59],
+    "max_curves": 20000,
+    "max_depth": null,
+    "seed": 1,
+    "audit_points": 1,
+    "skipped_primes": [
+      {
+        "ell": 7,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      },
+      {
+        "ell": 19,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      },
+      {
+        "ell": 31,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      },
+      {
+        "ell": 53,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      },
+      {
+        "ell": 61,
+        "reason": "atkin: (t^2-4p / ell) = -1, no rational ell-isogeny"
+      }
+    ],
+    "threads": 14
+  },
+  "rules": {
+    "canonical_model": "icwalk-canon/v1: the registered model when the curve is the walk's root; else an a=-3 model with the least b when one exists over F_p; else y^2=x^3+3j(1728-j)c^2*x+2j(1728-j)^2c^3 with c the least of {1, least non-residue} that gives an F_p-isomorphic model",
+    "generator": "icwalk-gen/v1: [cofactor]P for the point P with the least x >= 0 whose y is nonzero (the smaller y as an integer) and whose multiple is not the identity",
+    "edge_direction": "d/u/h when both endpoint levels are proved (depth 0: all level 0; depth 1: ell+1 rational ell-isogenies = surface, one = floor); x otherwise"
+  },
+  "class": {
+    "trace": "89188191154553853111372247798585809583",
+    "frobenius_discriminant": "-455213823400003756884736869668539463648899917731097708475249543966132856781915",
+    "frobenius_discriminant_trial_factors": [
+      [3, 1],
+      [5, 1]
+    ],
+    "frobenius_discriminant_trial_bound": 1048576,
+    "frobenius_discriminant_cofactor": "30347588226666917125649124644569297576593327848739847231683302931075523785461",
+    "frobenius_discriminant_cofactor_status": "composite_unfactored",
+    "frobenius_discriminant_fundamental_if_cofactor_prime": false,
+    "order_probable_prime": true,
+    "twist_order": "115792089210356248762697446949407573530175331606444868048645003556665683663535",
+    "twist_order_trial_factors": [
+      [3, 1],
+      [5, 1],
+      [13, 1],
+      [179, 1]
+    ],
+    "twist_order_cofactor": "3317349640749355357762425066592395746459685764401801118712075735758936647",
+    "twist_order_cofactor_status": "probable_prime",
+    "embedding_degree": null,
+    "embedding_degree_searched_to": 1000,
+    "ell": [
+      {
+        "ell": 3,
+        "splitting": "divides_discriminant",
+        "v_ell_discriminant": 1,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 1
+      },
+      {
+        "ell": 5,
+        "splitting": "divides_discriminant",
+        "v_ell_discriminant": 1,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 1
+      },
+      {
+        "ell": 11,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      },
+      {
+        "ell": 13,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      },
+      {
+        "ell": 17,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      },
+      {
+        "ell": 23,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      },
+      {
+        "ell": 29,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      },
+      {
+        "ell": 37,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      },
+      {
+        "ell": 41,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      },
+      {
+        "ell": 43,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      },
+      {
+        "ell": 47,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      },
+      {
+        "ell": 59,
+        "splitting": "elkies",
+        "v_ell_discriminant": 0,
+        "volcano_depth": 0,
+        "level_zero_proved": true,
+        "expected_rational_neighbours": 2
+      }
+    ]
+  },
+  "modular_polynomials": [
+    {
+      "ell": 3,
+      "build_ms": 0,
+      "vanishing_checks_passed": 12
+    },
+    {
+      "ell": 5,
+      "build_ms": 0,
+      "vanishing_checks_passed": 19
+    },
+    {
+      "ell": 11,
+      "build_ms": 4,
+      "vanishing_checks_passed": 64
+    },
+    {
+      "ell": 13,
+      "build_ms": 9,
+      "vanishing_checks_passed": 87
+    },
+    {
+      "ell": 17,
+      "build_ms": 32,
+      "vanishing_checks_passed": 145
+    },
+    {
+      "ell": 23,
+      "build_ms": 118,
+      "vanishing_checks_passed": 262
+    },
+    {
+      "ell": 29,
+      "build_ms": 345,
+      "vanishing_checks_passed": 415
+    },
+    {
+      "ell": 37,
+      "build_ms": 1080,
+      "vanishing_checks_passed": 675
+    },
+    {
+      "ell": 41,
+      "build_ms": 1749,
+      "vanishing_checks_passed": 829
+    },
+    {
+      "ell": 43,
+      "build_ms": 2206,
+      "vanishing_checks_passed": 912
+    },
+    {
+      "ell": 47,
+      "build_ms": 3370,
+      "vanishing_checks_passed": 1090
+    },
+    {
+      "ell": 59,
+      "build_ms": 10080,
+      "vanishing_checks_passed": 1720
+    }
+  ],
+  "counts": {
+    "curves": 20000,
+    "curves_expanded": 3576,
+    "max_depth_reached": 5,
+    "edges_verified": 78672,
+    "edges_beyond_cap": 0,
+    "failures": 0,
+    "order_proved_prime": 20000,
+    "order_consistent_unproved": 0,
+    "order_refuted": 0,
+    "a_minus_3_models": 10195,
+    "qr_prefix_64_min": 16,
+    "qr_prefix_64_max": 48
+  },
+  "qr_prefix_64_histogram": [
+    [16, 1],
+    [18, 4],
+    [19, 12],
+    [20, 20],
+    [21, 51],
+    [22, 110],
+    [23, 163],
+    [24, 260],
+    [25, 462],
+    [26, 721],
+    [27, 900],
+    [28, 1233],
+    [29, 1538],
+    [30, 1727],
+    [31, 1895],
+    [32, 1951],
+    [33, 1954],
+    [34, 1735],
+    [35, 1494],
+    [36, 1190],
+    [37, 885],
+    [38, 660],
+    [39, 467],
+    [40, 245],
+    [41, 152],
+    [42, 92],
+    [43, 42],
+    [44, 20],
+    [45, 9],
+    [46, 3],
+    [47, 3],
+    [48, 1]
+  ],
+  "proved_levels": [
+    {
+      "ell": 3,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 20000]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 5,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 20000]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 11,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 20000]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 13,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 20000]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 17,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 20000]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 23,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 20000]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 29,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 20000]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 37,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 20000]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 41,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 20000]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 43,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 20000]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 47,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 20000]
+      ],
+      "curves_unresolved": 0
+    },
+    {
+      "ell": 59,
+      "volcano_depth": 0,
+      "curves_by_level": [
+        [0, 20000]
+      ],
+      "curves_unresolved": 0
+    }
+  ],
+  "roots_per_expanded_curve": [
+    {
+      "ell": 3,
+      "roots": 1,
+      "curves": 3576
+    },
+    {
+      "ell": 5,
+      "roots": 1,
+      "curves": 3576
+    },
+    {
+      "ell": 11,
+      "roots": 2,
+      "curves": 3576
+    },
+    {
+      "ell": 13,
+      "roots": 2,
+      "curves": 3576
+    },
+    {
+      "ell": 17,
+      "roots": 2,
+      "curves": 3576
+    },
+    {
+      "ell": 23,
+      "roots": 2,
+      "curves": 3576
+    },
+    {
+      "ell": 29,
+      "roots": 2,
+      "curves": 3576
+    },
+    {
+      "ell": 37,
+      "roots": 2,
+      "curves": 3576
+    },
+    {
+      "ell": 41,
+      "roots": 2,
+      "curves": 3576
+    },
+    {
+      "ell": 43,
+      "roots": 2,
+      "curves": 3576
+    },
+    {
+      "ell": 47,
+      "roots": 2,
+      "curves": 3576
+    },
+    {
+      "ell": 59,
+      "roots": 2,
+      "curves": 3576
+    }
+  ],
+  "failures": [],
+  "timing_practicality_note": {
+    "walk_ms": 115344,
+    "audit_ms": 355
+  },
+  "outputs": {
+    "curves.yaml": "44c170cbd9439943947000fb1347b055cc4ad9557167aac91de08b0062877e5e",
+    "isogeny_routes.json": "05f7df41c391e0153c65386262695462bff22151a0a9993aaeae00f302b01dad"
+  }
+}

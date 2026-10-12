@@ -19,7 +19,7 @@
 \\ they ARE Igusa invariants up to normalisation — i.e., the
 \\ formulas are correct.
 \\
-\\ Run: gp -q igusa_clebsch_verification.gp > igusa_clebsch_verification_output.txt
+\\ Run: gp -q igusa_clebsch_verification.gp > secp256k1_cm_audit/igusa_clebsch_verification_output.txt
 
 default(parisize, 256000000);
 default(timer, 0);

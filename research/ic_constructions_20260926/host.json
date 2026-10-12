@@ -1,0 +1,47 @@
+{
+ "commit": "3393673153c4c6547f03cc63bcf033f0dba47abe",
+ "tree_status": "?? research/ic_constructions_20260926/runs/",
+ "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+ "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+ "cpu_flags_relevant": [
+  "pclmulqdq",
+  "popcnt",
+  "avx2",
+  "bmi2",
+  "avx512f",
+  "avx512dq",
+  "avx512ifma",
+  "avx512cd",
+  "avx512bw",
+  "avx512vl",
+  "avx512_bf16",
+  "avx512vbmi",
+  "avx512_vbmi2",
+  "gfni",
+  "vpclmulqdq",
+  "avx512_vnni",
+  "avx512_bitalg",
+  "avx512_vpopcntdq",
+  "avx512_fp16"
+ ],
+ "logical_cores": 4,
+ "memory": "MemTotal:       16481980 kB",
+ "os": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+ "arch": "x86_64",
+ "binaries": {
+  "baseline": {
+   "ic_sha256": "e51e9431777a33572dc56ec4d4cca6ccf8d6d8419dbbe1e329c0446adef9e612",
+   "prices_sha256": "d7b1482d114f29212f569558a25ca864016f5bd05c8c718ec685310259e82b64",
+   "built_from": "e7022b75 (ic); the pricer example at 305d5078, whose library is e7022b75's"
+  },
+  "candidate": {
+   "ic_sha256": "18fcf4e8058fe0c45f119d595a6a4b7b9ae1b6c700827a4fa111a47f4dfc8d8b",
+   "prices_sha256": "34ce96a2fe18a84a891d331afac6a3508f8f6ab67f22cabf8067699ffe8a8a42",
+   "built_from": "33936731 (ic and the pricer example)"
+  }
+ },
+ "build": "cargo build --release --bin ic --example koblitz_construction_prices, clean tree, rustc above",
+ "uptime": "06:05:07 up 26 min,  0 user,  load average: 1.78, 2.52, 1.88",
+ "pinning": "RAYON_NUM_THREADS=1 under taskset -c 2; the thread check RAYON_NUM_THREADS=4 under taskset -c 0-3",
+ "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts"
+}

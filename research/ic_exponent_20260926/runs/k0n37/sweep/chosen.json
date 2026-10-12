@@ -1,0 +1,109 @@
+{
+ "curve": "k0n37",
+ "seed_set": "W",
+ "seed": 101,
+ "grid_requested": [
+  5,
+  7,
+  10,
+  14,
+  20,
+  28,
+  40
+ ],
+ "grid_actual": [
+  8,
+  16,
+  24,
+  32,
+  40
+ ],
+ "extensions": 0,
+ "points": [
+  {
+   "columns": 8,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 0.8608296758824644,
+   "points": 592
+  },
+  {
+   "columns": 8,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 1.063649448022345,
+   "points": 592
+  },
+  {
+   "columns": 16,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 1.1915360143169222,
+   "points": 1184
+  },
+  {
+   "columns": 16,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 1.2935678535831097,
+   "points": 1184
+  },
+  {
+   "columns": 24,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 1.6407759054751476,
+   "points": 1776
+  },
+  {
+   "columns": 24,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 1.6875604476705484,
+   "points": 1776
+  },
+  {
+   "columns": 32,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 2.2303208938908075,
+   "points": 2368
+  },
+  {
+   "columns": 32,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 2.2420813750827966,
+   "points": 2368
+  },
+  {
+   "columns": 40,
+   "descent_summands": 2,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 2.7681875820522137,
+   "points": 2960
+  },
+  {
+   "columns": 40,
+   "descent_summands": 3,
+   "status": "complete",
+   "message": null,
+   "s_per_target": 2.821174503123767,
+   "points": 2960
+  }
+ ],
+ "chosen": {
+  "columns": 8,
+  "descent_summands": 2,
+  "s_per_target": 0.8608296758824644
+ }
+}

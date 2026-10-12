@@ -1,0 +1,15 @@
+{
+  "schema": "koblitz_stage185_lockfile_custody_correction.v1",
+  "status": "evidence_scoped_lock_restored",
+  "selection_commit": "8014149a2b55cd2cca202237a302643e39a50f6e",
+  "selected_replay_result_sha256": "45493745bd5433bae2a13b13d38dd2e1362b9636bc52f074423542b71e604d44",
+  "lockfile_path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-185-dense-pair-default-replay-20261001/Cargo.lock",
+  "lockfile_bytes": 29115,
+  "lockfile_sha256": "4f17b356fa7bac392b6d801d1c74fb9e36b6517f9465c8ebc19bb9a2792a84c5",
+  "root_lock_tracking_selected": false,
+  "reason": "Repository workflows intentionally copy pinned historical lockfiles into the ignored root and remove them before a clean-tree assertion. Tracking root Cargo.lock breaks that established contract; the exact Stage-185 build lock is therefore force-added inside the evidence packet instead.",
+  "scientific_result_changed": false,
+  "timing_changed": false,
+  "routing_changed": false,
+  "claim_changed": false
+}

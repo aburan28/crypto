@@ -1,0 +1,38 @@
+{
+ "schema_version": 2,
+ "name": "C079-T001: icv1-f2m67-t19346764963-e760df38, a public target for B3b's measurement 5",
+ "field": {
+  "kind": "binary",
+  "degree": 67,
+  "modulus": "0x80000000000000027"
+ },
+ "curve": {
+  "form": "koblitz",
+  "a": 1
+ },
+ "subgroup": {
+  "order": "68352708293",
+  "cofactor": "2159006662",
+  "generator": {
+   "x": "0x5c5d76e649fe4f229",
+   "y": "0x47ae4dda33d6dd776"
+  }
+ },
+ "target": {
+  "point": {
+   "x": "0x33b0805d4c3ee5112",
+   "y": "0x2605887baaf8aa602"
+  }
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "auto",
+   "recipe": "auto"
+  },
+  "rho": {
+   "pipeline": "auto",
+   "seed": 2293761
+  }
+ }
+}

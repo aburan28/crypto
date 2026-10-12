@@ -1,0 +1,65 @@
+{
+  "status": "PASSED",
+  "base_commit": "90bb7a02863416c4fcf3d1c0ac9d6ae5421c1e3d",
+  "source_sha256": "ec223182eaf53befa39f86cad381bde46fe56b2343244c0ee11492bb33316f0a",
+  "binary_sha256": "38be468cc73404b41cfbc079d1407a035c608450c2d9b2697f39745529c2deea",
+  "rust_tests": [
+    {
+      "test": "cryptanalysis::koblitz_index_calculus::tests::koblitz_mul_dispatch_matches_general_arithmetic",
+      "status": "PASSED",
+      "seconds": 0.5163988799904473,
+      "log": "validation/koblitz_mul_dispatch_matches_general_arithmetic.log"
+    },
+    {
+      "test": "cryptanalysis::koblitz_index_calculus::tests::fast_base_lifts_preserve_roots_and_order",
+      "status": "PASSED",
+      "seconds": 0.3553381579986308,
+      "log": "validation/fast_base_lifts_preserve_roots_and_order.log"
+    },
+    {
+      "test": "cryptanalysis::koblitz_fast::tests::matches_the_general_arithmetic_on_random_points",
+      "status": "PASSED",
+      "seconds": 0.08889036999607924,
+      "log": "validation/matches_the_general_arithmetic_on_random_points.log"
+    },
+    {
+      "test": "cryptanalysis::koblitz_index_calculus::tests::a_wrong_column_log_fails_the_table_verification",
+      "status": "PASSED",
+      "seconds": 0.0037151279975660145,
+      "log": "validation/a_wrong_column_log_fails_the_table_verification.log"
+    },
+    {
+      "test": "cryptanalysis::koblitz_index_calculus::tests::factor_base_logs_precompute_and_descend_every_target",
+      "status": "PASSED",
+      "seconds": 0.11143791300128214,
+      "log": "validation/factor_base_logs_precompute_and_descend_every_target.log"
+    },
+    {
+      "test": "cryptanalysis::koblitz_index_calculus::tests::sparse_and_dense_linear_algebra_certify_the_same_log_table",
+      "status": "PASSED",
+      "seconds": 0.04218632100673858,
+      "log": "validation/sparse_and_dense_linear_algebra_certify_the_same_log_table.log"
+    },
+    {
+      "test": "cryptanalysis::koblitz_index_calculus::subfield_tests::subfield_factor_bases_are_invariant_and_solve_the_dlp",
+      "status": "PASSED",
+      "seconds": 0.026499371000682004,
+      "log": "validation/subfield_factor_bases_are_invariant_and_solve_the_dlp.log"
+    },
+    {
+      "test": "cryptanalysis::koblitz_index_calculus::tests::pair_table_agrees_with_enumeration_for_two_three_and_four_summands",
+      "status": "PASSED",
+      "seconds": 0.011559662001673132,
+      "log": "validation/pair_table_agrees_with_enumeration_for_two_three_and_four_summands.log"
+    },
+    {
+      "test": "cryptanalysis::koblitz_index_calculus::tests::a_divisor_base_solves_a_curve_the_single_factor_base_cannot",
+      "status": "PASSED",
+      "seconds": 2.8565698099992005,
+      "log": "validation/a_divisor_base_solves_a_curve_the_single_factor_base_cannot.log"
+    }
+  ],
+  "harness_tests": 16,
+  "tournament_tests": 15,
+  "scope": "Integration correctness on the PR base. Historical instruction ratios remain bound to archived benchmark source snapshots."
+}

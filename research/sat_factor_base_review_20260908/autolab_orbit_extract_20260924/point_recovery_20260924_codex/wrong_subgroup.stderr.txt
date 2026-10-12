@@ -1,0 +1,6 @@
+
+thread 'main' (16837408) panicked at examples/koblitz_s5_sat_instance.rs:5889:17:
+assertion `left == right` failed: point target must belong to the prime-order subgroup
+  left: Affine { x: F2mElement { bits: [0], m: 53 }, y: F2mElement { bits: [1], m: 53 } }
+ right: Infinity
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

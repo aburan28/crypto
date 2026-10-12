@@ -1,0 +1,1805 @@
+{
+  "what_this_is": "Endomorphism-invariant factor bases (glv-orbit, gls-line) against the negation-only control on the same points, every phase priced in group-addition equivalents, S = total / sqrt(r), with a counted negation-folded rho on the same instance and target.",
+  "what_this_is_not": [
+    "not a speed claim: the fold divides the columns by the automorphism group's order over 2 and the relation count moves with its floor (AGENTS.md section 3: engineering)",
+    "not a claim about any deployed curve: toy instances with certified orders",
+    "square roots and Legendre symbols in the base build are counted but unpriced on these generated curves, as in `ic bench` on a curve outside the pinned table"
+  ],
+  "command": "glv_invariant_bench --families gls --bits 8,10,12 --seeds 2 --oracles subtract --rho-runs 8 --json experiments/23_glv_invariant_gls_pilot.json",
+  "host": {
+    "arch": "x86_64",
+    "os": "linux",
+    "threads": 4
+  },
+  "rows": [
+    {
+      "family": "gls",
+      "bits": 8,
+      "seed": 1,
+      "instance": "gls-p8bit-p199",
+      "log2_r": 15.259632939195178,
+      "r": 39229,
+      "cofactor": 1,
+      "oracle": "subtract",
+      "seed_abscissae": 0,
+      "planted": 33922,
+      "rho_runs": 8,
+      "rho_s_mean": 1.7500733998802058,
+      "rho_all_verified": true,
+      "folded": {
+        "instance": "gls-p8bit-p199",
+        "log2_r": 15.259632939195178,
+        "r": 39229,
+        "group_order": 39229,
+        "spec": {
+          "factor_base": "gls-line",
+          "factor_base_params": {},
+          "oracle": "subtract",
+          "oracle_params": {},
+          "solver": null,
+          "solver_params": {},
+          "targets": "Walk",
+          "linalg": "",
+          "max_trials": 50000000,
+          "seed": 1,
+          "solver_budget_seconds": 0
+        },
+        "label": "gls-line + subtract + — + walk",
+        "factor_base": {
+          "name": "gls-line",
+          "description": "the ψ-stable line x ∈ u·s·F_p, each ⟨−1, ψ⟩-orbit folded onto one column",
+          "signed_points": 180,
+          "abscissae": 90,
+          "columns": 45,
+          "points_per_column": 4.0,
+          "cost": {
+            "wall_ns": 127343,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "abscissae_scanned": 198,
+              "endomorphism_maps": 360,
+              "sqrt_solves": 198,
+              "torsion_dropped": 0
+            },
+            "gae": 0.0
+          }
+        },
+        "decomposition": {
+          "name": "subtract",
+          "summands": 2,
+          "description": "for each signed base point P, test whether R − P is in the base",
+          "targets_tried": 89,
+          "relations_found": 29,
+          "hit_rate": 0.3258426966292135,
+          "setup": {
+            "wall_ns": 181,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {},
+            "gae": 0.0
+          },
+          "cost": {
+            "wall_ns": 3697901,
+            "group_ops": {
+              "adds": 13301,
+              "doubles": 456,
+              "scalar_mults": 34
+            },
+            "native": {
+              "canonicalisations": 0,
+              "direct_relations_skipped": 0,
+              "frobfold_mismatches": 0,
+              "inversions": 0,
+              "lift_failures": 0,
+              "lookups": 12966,
+              "relations": 29,
+              "repeated_targets_skipped": 0,
+              "s4_hits": 0,
+              "s4_pairs": 0,
+              "sqrt_solves": 0,
+              "target_guard_probes": 89,
+              "trials": 89,
+              "unliftable_systems": 0,
+              "walk_jumps": 16,
+              "walk_pool_offsets": 0,
+              "walk_pool_ops": 0,
+              "walk_pool_restarts": 0,
+              "walk_restarts": 1,
+              "walk_steps": 88
+            },
+            "gae": 13757.0
+          },
+          "system": null,
+          "solver": null
+        },
+        "linear_algebra": {
+          "name": "incremental-gauss",
+          "rows": 29,
+          "rank": 29,
+          "dependent": 0,
+          "work": 454,
+          "work_unit": "row_ops",
+          "cost": {
+            "wall_ns": 27128,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "columns": 46,
+              "pinned_by_repeated_row": 0,
+              "rank": 29,
+              "repeated_column_rows": 0,
+              "row_ops": 454,
+              "rows": 29,
+              "single_column_rows": 1,
+              "two_column_rows": 28
+            },
+            "gae": 5.417410727577212
+          }
+        },
+        "verify": {
+          "wall_ns": 5075,
+          "group_ops": {
+            "adds": 3,
+            "doubles": 15,
+            "scalar_mults": 1
+          },
+          "native": {},
+          "gae": 18.0
+        },
+        "recovered": 33922,
+        "verified": true,
+        "total_gae": 13780.417410727578,
+        "s": 69.57588734153738,
+        "rho_s": 1.7500733998802058,
+        "s_over_rho": 39.75598243267963,
+        "wall_seconds": 0.003869869,
+        "exhausted": false
+      },
+      "control": {
+        "instance": "gls-p8bit-p199",
+        "log2_r": 15.259632939195178,
+        "r": 39229,
+        "group_order": 39229,
+        "spec": {
+          "factor_base": "gls-line",
+          "factor_base_params": {
+            "no_fold": "1"
+          },
+          "oracle": "subtract",
+          "oracle_params": {},
+          "solver": null,
+          "solver_params": {},
+          "targets": "Walk",
+          "linalg": "",
+          "max_trials": 50000000,
+          "seed": 1,
+          "solver_budget_seconds": 0
+        },
+        "label": "gls-line[no_fold=1] + subtract + — + walk",
+        "factor_base": {
+          "name": "gls-line",
+          "description": "the ψ-stable line x ∈ u·s·F_p, folded by negation only (the control)",
+          "signed_points": 180,
+          "abscissae": 90,
+          "columns": 90,
+          "points_per_column": 2.0,
+          "cost": {
+            "wall_ns": 113364,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "abscissae_scanned": 198,
+              "endomorphism_maps": 180,
+              "sqrt_solves": 198,
+              "torsion_dropped": 0
+            },
+            "gae": 0.0
+          }
+        },
+        "decomposition": {
+          "name": "subtract",
+          "summands": 2,
+          "description": "for each signed base point P, test whether R − P is in the base",
+          "targets_tried": 182,
+          "relations_found": 57,
+          "hit_rate": 0.3131868131868132,
+          "setup": {
+            "wall_ns": 76,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {},
+            "gae": 0.0
+          },
+          "cost": {
+            "wall_ns": 12588601,
+            "group_ops": {
+              "adds": 26833,
+              "doubles": 456,
+              "scalar_mults": 34
+            },
+            "native": {
+              "canonicalisations": 0,
+              "direct_relations_skipped": 0,
+              "frobfold_mismatches": 0,
+              "inversions": 0,
+              "lift_failures": 0,
+              "lookups": 26405,
+              "relations": 57,
+              "repeated_targets_skipped": 0,
+              "s4_hits": 0,
+              "s4_pairs": 0,
+              "sqrt_solves": 0,
+              "target_guard_probes": 182,
+              "trials": 182,
+              "unliftable_systems": 0,
+              "walk_jumps": 16,
+              "walk_pool_offsets": 0,
+              "walk_pool_ops": 0,
+              "walk_pool_restarts": 0,
+              "walk_restarts": 1,
+              "walk_steps": 181
+            },
+            "gae": 27289.0
+          },
+          "system": null,
+          "solver": null
+        },
+        "linear_algebra": {
+          "name": "incremental-gauss",
+          "rows": 57,
+          "rank": 57,
+          "dependent": 0,
+          "work": 642,
+          "work_unit": "row_ops",
+          "cost": {
+            "wall_ns": 112295,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "columns": 91,
+              "pinned_by_repeated_row": 0,
+              "rank": 57,
+              "repeated_column_rows": 0,
+              "row_ops": 642,
+              "rows": 57,
+              "single_column_rows": 1,
+              "two_column_rows": 56
+            },
+            "gae": 7.660743804195088
+          }
+        },
+        "verify": {
+          "wall_ns": 5957,
+          "group_ops": {
+            "adds": 3,
+            "doubles": 15,
+            "scalar_mults": 1
+          },
+          "native": {},
+          "gae": 18.0
+        },
+        "recovered": 33922,
+        "verified": true,
+        "total_gae": 27314.660743804194,
+        "s": 137.90886749219993,
+        "rho_s": 1.7500733998802058,
+        "s_over_rho": 78.80176197274922,
+        "wall_seconds": 0.012842613,
+        "exhausted": false
+      },
+      "s_ratio": 1.982135949128847,
+      "column_ratio": 2.0,
+      "trial_ratio": 2.044943820224719
+    },
+    {
+      "family": "gls",
+      "bits": 8,
+      "seed": 2,
+      "instance": "gls-p8bit-p233",
+      "log2_r": 13.396203382141692,
+      "r": 10781,
+      "cofactor": 5,
+      "oracle": "subtract",
+      "seed_abscissae": 0,
+      "planted": 1819,
+      "rho_runs": 8,
+      "rho_s_mean": 1.9249921097199327,
+      "rho_all_verified": true,
+      "folded": {
+        "instance": "gls-p8bit-p233",
+        "log2_r": 13.396203382141692,
+        "r": 10781,
+        "group_order": 53905,
+        "spec": {
+          "factor_base": "gls-line",
+          "factor_base_params": {},
+          "oracle": "subtract",
+          "oracle_params": {},
+          "solver": null,
+          "solver_params": {},
+          "targets": "Walk",
+          "linalg": "",
+          "max_trials": 50000000,
+          "seed": 2,
+          "solver_budget_seconds": 0
+        },
+        "label": "gls-line + subtract + — + walk",
+        "factor_base": {
+          "name": "gls-line",
+          "description": "the ψ-stable line x ∈ u·s·F_p, each ⟨−1, ψ⟩-orbit folded onto one column",
+          "signed_points": 248,
+          "abscissae": 124,
+          "columns": 62,
+          "points_per_column": 4.0,
+          "cost": {
+            "wall_ns": 371406,
+            "group_ops": {
+              "adds": 248,
+              "doubles": 496,
+              "scalar_mults": 248
+            },
+            "native": {
+              "abscissae_scanned": 232,
+              "endomorphism_maps": 496,
+              "sqrt_solves": 232,
+              "torsion_dropped": 0
+            },
+            "gae": 744.0
+          }
+        },
+        "decomposition": {
+          "name": "subtract",
+          "summands": 2,
+          "description": "for each signed base point P, test whether R − P is in the base",
+          "targets_tried": 97,
+          "relations_found": 44,
+          "hit_rate": 0.4536082474226804,
+          "setup": {
+            "wall_ns": 244,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {},
+            "gae": 0.0
+          },
+          "cost": {
+            "wall_ns": 4553808,
+            "group_ops": {
+              "adds": 16488,
+              "doubles": 390,
+              "scalar_mults": 34
+            },
+            "native": {
+              "canonicalisations": 0,
+              "direct_relations_skipped": 0,
+              "frobfold_mismatches": 0,
+              "inversions": 0,
+              "lift_failures": 0,
+              "lookups": 16190,
+              "relations": 44,
+              "repeated_targets_skipped": 0,
+              "s4_hits": 0,
+              "s4_pairs": 0,
+              "sqrt_solves": 0,
+              "target_guard_probes": 97,
+              "trials": 97,
+              "unliftable_systems": 0,
+              "walk_jumps": 16,
+              "walk_pool_offsets": 0,
+              "walk_pool_ops": 0,
+              "walk_pool_restarts": 0,
+              "walk_restarts": 1,
+              "walk_steps": 96
+            },
+            "gae": 16878.0
+          },
+          "system": null,
+          "solver": null
+        },
+        "linear_algebra": {
+          "name": "incremental-gauss",
+          "rows": 44,
+          "rank": 44,
+          "dependent": 0,
+          "work": 480,
+          "work_unit": "row_ops",
+          "cost": {
+            "wall_ns": 37945,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "columns": 63,
+              "pinned_by_repeated_row": 0,
+              "rank": 44,
+              "repeated_column_rows": 0,
+              "row_ops": 480,
+              "rows": 44,
+              "single_column_rows": 0,
+              "two_column_rows": 44
+            },
+            "gae": 5.727173239711654
+          }
+        },
+        "verify": {
+          "wall_ns": 4411,
+          "group_ops": {
+            "adds": 6,
+            "doubles": 10,
+            "scalar_mults": 1
+          },
+          "native": {},
+          "gae": 16.0
+        },
+        "recovered": 1819,
+        "verified": true,
+        "total_gae": 17643.727173239713,
+        "s": 169.92638196141402,
+        "rho_s": 1.9249921097199327,
+        "s_over_rho": 88.27380699557082,
+        "wall_seconds": 0.004980894,
+        "exhausted": false
+      },
+      "control": {
+        "instance": "gls-p8bit-p233",
+        "log2_r": 13.396203382141692,
+        "r": 10781,
+        "group_order": 53905,
+        "spec": {
+          "factor_base": "gls-line",
+          "factor_base_params": {
+            "no_fold": "1"
+          },
+          "oracle": "subtract",
+          "oracle_params": {},
+          "solver": null,
+          "solver_params": {},
+          "targets": "Walk",
+          "linalg": "",
+          "max_trials": 50000000,
+          "seed": 2,
+          "solver_budget_seconds": 0
+        },
+        "label": "gls-line[no_fold=1] + subtract + — + walk",
+        "factor_base": {
+          "name": "gls-line",
+          "description": "the ψ-stable line x ∈ u·s·F_p, folded by negation only (the control)",
+          "signed_points": 248,
+          "abscissae": 124,
+          "columns": 124,
+          "points_per_column": 2.0,
+          "cost": {
+            "wall_ns": 345307,
+            "group_ops": {
+              "adds": 248,
+              "doubles": 496,
+              "scalar_mults": 248
+            },
+            "native": {
+              "abscissae_scanned": 232,
+              "endomorphism_maps": 248,
+              "sqrt_solves": 232,
+              "torsion_dropped": 0
+            },
+            "gae": 744.0
+          }
+        },
+        "decomposition": {
+          "name": "subtract",
+          "summands": 2,
+          "description": "for each signed base point P, test whether R − P is in the base",
+          "targets_tried": 157,
+          "relations_found": 69,
+          "hit_rate": 0.4394904458598726,
+          "setup": {
+            "wall_ns": 68,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {},
+            "gae": 0.0
+          },
+          "cost": {
+            "wall_ns": 7497100,
+            "group_ops": {
+              "adds": 26563,
+              "doubles": 390,
+              "scalar_mults": 34
+            },
+            "native": {
+              "canonicalisations": 0,
+              "direct_relations_skipped": 0,
+              "frobfold_mismatches": 0,
+              "inversions": 0,
+              "lift_failures": 0,
+              "lookups": 26205,
+              "relations": 69,
+              "repeated_targets_skipped": 0,
+              "s4_hits": 0,
+              "s4_pairs": 0,
+              "sqrt_solves": 0,
+              "target_guard_probes": 157,
+              "trials": 157,
+              "unliftable_systems": 0,
+              "walk_jumps": 16,
+              "walk_pool_offsets": 0,
+              "walk_pool_ops": 0,
+              "walk_pool_restarts": 0,
+              "walk_restarts": 1,
+              "walk_steps": 156
+            },
+            "gae": 26953.0
+          },
+          "system": null,
+          "solver": null
+        },
+        "linear_algebra": {
+          "name": "incremental-gauss",
+          "rows": 69,
+          "rank": 69,
+          "dependent": 0,
+          "work": 694,
+          "work_unit": "row_ops",
+          "cost": {
+            "wall_ns": 139000,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "columns": 125,
+              "pinned_by_repeated_row": 0,
+              "rank": 69,
+              "repeated_column_rows": 0,
+              "row_ops": 694,
+              "rows": 69,
+              "single_column_rows": 0,
+              "two_column_rows": 69
+            },
+            "gae": 8.280537975749766
+          }
+        },
+        "verify": {
+          "wall_ns": 4673,
+          "group_ops": {
+            "adds": 6,
+            "doubles": 10,
+            "scalar_mults": 1
+          },
+          "native": {},
+          "gae": 16.0
+        },
+        "recovered": 1819,
+        "verified": true,
+        "total_gae": 27721.28053797575,
+        "s": 266.98309596966135,
+        "rho_s": 1.9249921097199327,
+        "s_over_rho": 138.69308586854663,
+        "wall_seconds": 0.008006188,
+        "exhausted": false
+      },
+      "s_ratio": 1.5711691903749616,
+      "column_ratio": 2.0,
+      "trial_ratio": 1.6185567010309279
+    },
+    {
+      "family": "gls",
+      "bits": 10,
+      "seed": 1,
+      "instance": "gls-p10bit-p727",
+      "log2_r": 17.012024309446023,
+      "r": 132169,
+      "cofactor": 4,
+      "oracle": "subtract",
+      "seed_abscissae": 0,
+      "planted": 105826,
+      "rho_runs": 8,
+      "rho_s_mean": 2.152726786196237,
+      "rho_all_verified": true,
+      "folded": {
+        "instance": "gls-p10bit-p727",
+        "log2_r": 17.012024309446023,
+        "r": 132169,
+        "group_order": 528676,
+        "spec": {
+          "factor_base": "gls-line",
+          "factor_base_params": {},
+          "oracle": "subtract",
+          "oracle_params": {},
+          "solver": null,
+          "solver_params": {},
+          "targets": "Walk",
+          "linalg": "",
+          "max_trials": 50000000,
+          "seed": 1,
+          "solver_budget_seconds": 0
+        },
+        "label": "gls-line + subtract + — + walk",
+        "factor_base": {
+          "name": "gls-line",
+          "description": "the ψ-stable line x ∈ u·s·F_p, each ⟨−1, ψ⟩-orbit folded onto one column",
+          "signed_points": 704,
+          "abscissae": 352,
+          "columns": 176,
+          "points_per_column": 4.0,
+          "cost": {
+            "wall_ns": 828659,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 1408,
+              "scalar_mults": 704
+            },
+            "native": {
+              "abscissae_scanned": 726,
+              "endomorphism_maps": 1408,
+              "sqrt_solves": 726,
+              "torsion_dropped": 0
+            },
+            "gae": 1408.0
+          }
+        },
+        "decomposition": {
+          "name": "subtract",
+          "summands": 2,
+          "description": "for each signed base point P, test whether R − P is in the base",
+          "targets_tried": 253,
+          "relations_found": 97,
+          "hit_rate": 0.383399209486166,
+          "setup": {
+            "wall_ns": 207,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {},
+            "gae": 0.0
+          },
+          "cost": {
+            "wall_ns": 39399926,
+            "group_ops": {
+              "adds": 131148,
+              "doubles": 509,
+              "scalar_mults": 34
+            },
+            "native": {
+              "canonicalisations": 0,
+              "direct_relations_skipped": 0,
+              "frobfold_mismatches": 0,
+              "inversions": 0,
+              "lift_failures": 0,
+              "lookups": 130613,
+              "relations": 97,
+              "repeated_targets_skipped": 0,
+              "s4_hits": 0,
+              "s4_pairs": 0,
+              "sqrt_solves": 0,
+              "target_guard_probes": 253,
+              "trials": 253,
+              "unliftable_systems": 0,
+              "walk_jumps": 16,
+              "walk_pool_offsets": 0,
+              "walk_pool_ops": 0,
+              "walk_pool_restarts": 0,
+              "walk_restarts": 1,
+              "walk_steps": 252
+            },
+            "gae": 131657.0
+          },
+          "system": null,
+          "solver": null
+        },
+        "linear_algebra": {
+          "name": "incremental-gauss",
+          "rows": 97,
+          "rank": 97,
+          "dependent": 0,
+          "work": 1123,
+          "work_unit": "row_ops",
+          "cost": {
+            "wall_ns": 280822,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "columns": 177,
+              "pinned_by_repeated_row": 0,
+              "rank": 97,
+              "repeated_column_rows": 0,
+              "row_ops": 1123,
+              "rows": 97,
+              "single_column_rows": 1,
+              "two_column_rows": 96
+            },
+            "gae": 12.016508296361826
+          }
+        },
+        "verify": {
+          "wall_ns": 7276,
+          "group_ops": {
+            "adds": 8,
+            "doubles": 16,
+            "scalar_mults": 1
+          },
+          "native": {},
+          "gae": 24.0
+        },
+        "recovered": 105826,
+        "verified": true,
+        "total_gae": 133101.01650829636,
+        "s": 366.1141971025167,
+        "rho_s": 2.152726786196237,
+        "s_over_rho": 170.06997796939322,
+        "wall_seconds": 0.040540088,
+        "exhausted": false
+      },
+      "control": {
+        "instance": "gls-p10bit-p727",
+        "log2_r": 17.012024309446023,
+        "r": 132169,
+        "group_order": 528676,
+        "spec": {
+          "factor_base": "gls-line",
+          "factor_base_params": {
+            "no_fold": "1"
+          },
+          "oracle": "subtract",
+          "oracle_params": {},
+          "solver": null,
+          "solver_params": {},
+          "targets": "Walk",
+          "linalg": "",
+          "max_trials": 50000000,
+          "seed": 1,
+          "solver_budget_seconds": 0
+        },
+        "label": "gls-line[no_fold=1] + subtract + — + walk",
+        "factor_base": {
+          "name": "gls-line",
+          "description": "the ψ-stable line x ∈ u·s·F_p, folded by negation only (the control)",
+          "signed_points": 704,
+          "abscissae": 352,
+          "columns": 352,
+          "points_per_column": 2.0,
+          "cost": {
+            "wall_ns": 729424,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 1408,
+              "scalar_mults": 704
+            },
+            "native": {
+              "abscissae_scanned": 726,
+              "endomorphism_maps": 704,
+              "sqrt_solves": 726,
+              "torsion_dropped": 0
+            },
+            "gae": 1408.0
+          }
+        },
+        "decomposition": {
+          "name": "subtract",
+          "summands": 2,
+          "description": "for each signed base point P, test whether R − P is in the base",
+          "targets_tried": 445,
+          "relations_found": 172,
+          "hit_rate": 0.3865168539325843,
+          "setup": {
+            "wall_ns": 71,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {},
+            "gae": 0.0
+          },
+          "cost": {
+            "wall_ns": 63589150,
+            "group_ops": {
+              "adds": 229077,
+              "doubles": 509,
+              "scalar_mults": 34
+            },
+            "native": {
+              "canonicalisations": 0,
+              "direct_relations_skipped": 0,
+              "frobfold_mismatches": 0,
+              "inversions": 0,
+              "lift_failures": 0,
+              "lookups": 228350,
+              "relations": 172,
+              "repeated_targets_skipped": 0,
+              "s4_hits": 0,
+              "s4_pairs": 0,
+              "sqrt_solves": 0,
+              "target_guard_probes": 445,
+              "trials": 445,
+              "unliftable_systems": 0,
+              "walk_jumps": 16,
+              "walk_pool_offsets": 0,
+              "walk_pool_ops": 0,
+              "walk_pool_restarts": 0,
+              "walk_restarts": 1,
+              "walk_steps": 444
+            },
+            "gae": 229586.0
+          },
+          "system": null,
+          "solver": null
+        },
+        "linear_algebra": {
+          "name": "incremental-gauss",
+          "rows": 172,
+          "rank": 172,
+          "dependent": 0,
+          "work": 1644,
+          "work_unit": "row_ops",
+          "cost": {
+            "wall_ns": 622944,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "columns": 353,
+              "pinned_by_repeated_row": 0,
+              "rank": 172,
+              "repeated_column_rows": 0,
+              "row_ops": 1644,
+              "rows": 172,
+              "single_column_rows": 2,
+              "two_column_rows": 170
+            },
+            "gae": 17.591397719696207
+          }
+        },
+        "verify": {
+          "wall_ns": 7135,
+          "group_ops": {
+            "adds": 8,
+            "doubles": 16,
+            "scalar_mults": 1
+          },
+          "native": {},
+          "gae": 24.0
+        },
+        "recovered": 105826,
+        "verified": true,
+        "total_gae": 231035.5913977197,
+        "s": 635.4978516742502,
+        "rho_s": 2.152726786196237,
+        "s_over_rho": 295.2059944388688,
+        "wall_seconds": 0.064999199,
+        "exhausted": false
+      },
+      "s_ratio": 1.7357913369753937,
+      "column_ratio": 2.0,
+      "trial_ratio": 1.7588932806324111
+    },
+    {
+      "family": "gls",
+      "bits": 10,
+      "seed": 2,
+      "instance": "gls-p10bit-p953",
+      "log2_r": 16.09137339935489,
+      "r": 69821,
+      "cofactor": 13,
+      "oracle": "subtract",
+      "seed_abscissae": 0,
+      "planted": 38019,
+      "rho_runs": 8,
+      "rho_s_mean": 1.616921884375419,
+      "rho_all_verified": true,
+      "folded": {
+        "instance": "gls-p10bit-p953",
+        "log2_r": 16.09137339935489,
+        "r": 69821,
+        "group_order": 907673,
+        "spec": {
+          "factor_base": "gls-line",
+          "factor_base_params": {},
+          "oracle": "subtract",
+          "oracle_params": {},
+          "solver": null,
+          "solver_params": {},
+          "targets": "Walk",
+          "linalg": "",
+          "max_trials": 50000000,
+          "seed": 2,
+          "solver_budget_seconds": 0
+        },
+        "label": "gls-line + subtract + — + walk",
+        "factor_base": {
+          "name": "gls-line",
+          "description": "the ψ-stable line x ∈ u·s·F_p, each ⟨−1, ψ⟩-orbit folded onto one column",
+          "signed_points": 952,
+          "abscissae": 476,
+          "columns": 238,
+          "points_per_column": 4.0,
+          "cost": {
+            "wall_ns": 2180819,
+            "group_ops": {
+              "adds": 1904,
+              "doubles": 2856,
+              "scalar_mults": 952
+            },
+            "native": {
+              "abscissae_scanned": 952,
+              "endomorphism_maps": 1904,
+              "sqrt_solves": 952,
+              "torsion_dropped": 0
+            },
+            "gae": 4760.0
+          }
+        },
+        "decomposition": {
+          "name": "subtract",
+          "summands": 2,
+          "description": "for each signed base point P, test whether R − P is in the base",
+          "targets_tried": 222,
+          "relations_found": 93,
+          "hit_rate": 0.4189189189189189,
+          "setup": {
+            "wall_ns": 263,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {},
+            "gae": 0.0
+          },
+          "cost": {
+            "wall_ns": 43630111,
+            "group_ops": {
+              "adds": 151912,
+              "doubles": 480,
+              "scalar_mults": 34
+            },
+            "native": {
+              "canonicalisations": 0,
+              "direct_relations_skipped": 0,
+              "frobfold_mismatches": 0,
+              "inversions": 0,
+              "lift_failures": 0,
+              "lookups": 151426,
+              "relations": 93,
+              "repeated_targets_skipped": 0,
+              "s4_hits": 0,
+              "s4_pairs": 0,
+              "sqrt_solves": 0,
+              "target_guard_probes": 222,
+              "trials": 222,
+              "unliftable_systems": 0,
+              "walk_jumps": 16,
+              "walk_pool_offsets": 0,
+              "walk_pool_ops": 0,
+              "walk_pool_restarts": 0,
+              "walk_restarts": 1,
+              "walk_steps": 221
+            },
+            "gae": 152392.0
+          },
+          "system": null,
+          "solver": null
+        },
+        "linear_algebra": {
+          "name": "incremental-gauss",
+          "rows": 93,
+          "rank": 93,
+          "dependent": 0,
+          "work": 766,
+          "work_unit": "row_ops",
+          "cost": {
+            "wall_ns": 244799,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "columns": 239,
+              "pinned_by_repeated_row": 0,
+              "rank": 93,
+              "repeated_column_rows": 0,
+              "row_ops": 766,
+              "rows": 93,
+              "single_column_rows": 0,
+              "two_column_rows": 93
+            },
+            "gae": 8.813518868852267
+          }
+        },
+        "verify": {
+          "wall_ns": 6191,
+          "group_ops": {
+            "adds": 5,
+            "doubles": 15,
+            "scalar_mults": 1
+          },
+          "native": {},
+          "gae": 20.0
+        },
+        "recovered": 38019,
+        "verified": true,
+        "total_gae": 157180.81351886885,
+        "s": 594.8486768463212,
+        "rho_s": 1.616921884375419,
+        "s_over_rho": 367.88955768020793,
+        "wall_seconds": 0.046087979,
+        "exhausted": false
+      },
+      "control": {
+        "instance": "gls-p10bit-p953",
+        "log2_r": 16.09137339935489,
+        "r": 69821,
+        "group_order": 907673,
+        "spec": {
+          "factor_base": "gls-line",
+          "factor_base_params": {
+            "no_fold": "1"
+          },
+          "oracle": "subtract",
+          "oracle_params": {},
+          "solver": null,
+          "solver_params": {},
+          "targets": "Walk",
+          "linalg": "",
+          "max_trials": 50000000,
+          "seed": 2,
+          "solver_budget_seconds": 0
+        },
+        "label": "gls-line[no_fold=1] + subtract + — + walk",
+        "factor_base": {
+          "name": "gls-line",
+          "description": "the ψ-stable line x ∈ u·s·F_p, folded by negation only (the control)",
+          "signed_points": 952,
+          "abscissae": 476,
+          "columns": 476,
+          "points_per_column": 2.0,
+          "cost": {
+            "wall_ns": 2055152,
+            "group_ops": {
+              "adds": 1904,
+              "doubles": 2856,
+              "scalar_mults": 952
+            },
+            "native": {
+              "abscissae_scanned": 952,
+              "endomorphism_maps": 952,
+              "sqrt_solves": 952,
+              "torsion_dropped": 0
+            },
+            "gae": 4760.0
+          }
+        },
+        "decomposition": {
+          "name": "subtract",
+          "summands": 2,
+          "description": "for each signed base point P, test whether R − P is in the base",
+          "targets_tried": 290,
+          "relations_found": 114,
+          "hit_rate": 0.3931034482758621,
+          "setup": {
+            "wall_ns": 161,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {},
+            "gae": 0.0
+          },
+          "cost": {
+            "wall_ns": 55705374,
+            "group_ops": {
+              "adds": 200964,
+              "doubles": 504,
+              "scalar_mults": 36
+            },
+            "native": {
+              "canonicalisations": 0,
+              "direct_relations_skipped": 0,
+              "frobfold_mismatches": 0,
+              "inversions": 0,
+              "lift_failures": 0,
+              "lookups": 200396,
+              "relations": 114,
+              "repeated_targets_skipped": 1,
+              "s4_hits": 0,
+              "s4_pairs": 0,
+              "sqrt_solves": 0,
+              "target_guard_probes": 290,
+              "trials": 290,
+              "unliftable_systems": 0,
+              "walk_jumps": 17,
+              "walk_pool_offsets": 1,
+              "walk_pool_ops": 38,
+              "walk_pool_restarts": 1,
+              "walk_restarts": 2,
+              "walk_steps": 288
+            },
+            "gae": 201468.0
+          },
+          "system": null,
+          "solver": null
+        },
+        "linear_algebra": {
+          "name": "incremental-gauss",
+          "rows": 114,
+          "rank": 114,
+          "dependent": 0,
+          "work": 924,
+          "work_unit": "row_ops",
+          "cost": {
+            "wall_ns": 447189,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "columns": 477,
+              "pinned_by_repeated_row": 0,
+              "rank": 114,
+              "repeated_column_rows": 0,
+              "row_ops": 924,
+              "rows": 114,
+              "single_column_rows": 0,
+              "two_column_rows": 114
+            },
+            "gae": 10.631450959294378
+          }
+        },
+        "verify": {
+          "wall_ns": 6389,
+          "group_ops": {
+            "adds": 5,
+            "doubles": 15,
+            "scalar_mults": 1
+          },
+          "native": {},
+          "gae": 20.0
+        },
+        "recovered": 38019,
+        "verified": true,
+        "total_gae": 206258.6314509593,
+        "s": 780.5830193900061,
+        "rho_s": 1.616921884375419,
+        "s_over_rho": 482.7586458770258,
+        "wall_seconds": 0.058236267,
+        "exhausted": false
+      },
+      "s_ratio": 1.3122379687021972,
+      "column_ratio": 2.0,
+      "trial_ratio": 1.3063063063063063
+    },
+    {
+      "family": "gls",
+      "bits": 12,
+      "seed": 1,
+      "instance": "gls-p12bit-p2797",
+      "log2_r": 22.89845248400567,
+      "r": 7818457,
+      "cofactor": 1,
+      "oracle": "subtract",
+      "seed_abscissae": 0,
+      "planted": 3979186,
+      "rho_runs": 8,
+      "rho_s_mean": 1.1740695394907585,
+      "rho_all_verified": true,
+      "folded": {
+        "instance": "gls-p12bit-p2797",
+        "log2_r": 22.89845248400567,
+        "r": 7818457,
+        "group_order": 7818457,
+        "spec": {
+          "factor_base": "gls-line",
+          "factor_base_params": {},
+          "oracle": "subtract",
+          "oracle_params": {},
+          "solver": null,
+          "solver_params": {},
+          "targets": "Walk",
+          "linalg": "",
+          "max_trials": 50000000,
+          "seed": 1,
+          "solver_budget_seconds": 0
+        },
+        "label": "gls-line + subtract + — + walk",
+        "factor_base": {
+          "name": "gls-line",
+          "description": "the ψ-stable line x ∈ u·s·F_p, each ⟨−1, ψ⟩-orbit folded onto one column",
+          "signed_points": 2816,
+          "abscissae": 1408,
+          "columns": 704,
+          "points_per_column": 4.0,
+          "cost": {
+            "wall_ns": 2715940,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "abscissae_scanned": 2796,
+              "endomorphism_maps": 5632,
+              "sqrt_solves": 2796,
+              "torsion_dropped": 0
+            },
+            "gae": 0.0
+          }
+        },
+        "decomposition": {
+          "name": "subtract",
+          "summands": 2,
+          "description": "for each signed base point P, test whether R − P is in the base",
+          "targets_tried": 1094,
+          "relations_found": 428,
+          "hit_rate": 0.3912248628884826,
+          "setup": {
+            "wall_ns": 410,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {},
+            "gae": 0.0
+          },
+          "cost": {
+            "wall_ns": 655972372,
+            "group_ops": {
+              "adds": 2242967,
+              "doubles": 706,
+              "scalar_mults": 34
+            },
+            "native": {
+              "canonicalisations": 0,
+              "direct_relations_skipped": 0,
+              "frobfold_mismatches": 0,
+              "inversions": 0,
+              "lift_failures": 0,
+              "lookups": 2241496,
+              "relations": 428,
+              "repeated_targets_skipped": 0,
+              "s4_hits": 0,
+              "s4_pairs": 0,
+              "sqrt_solves": 0,
+              "target_guard_probes": 1094,
+              "trials": 1094,
+              "unliftable_systems": 0,
+              "walk_jumps": 16,
+              "walk_pool_offsets": 0,
+              "walk_pool_ops": 0,
+              "walk_pool_restarts": 0,
+              "walk_restarts": 1,
+              "walk_steps": 1093
+            },
+            "gae": 2243673.0
+          },
+          "system": null,
+          "solver": null
+        },
+        "linear_algebra": {
+          "name": "incremental-gauss",
+          "rows": 428,
+          "rank": 428,
+          "dependent": 0,
+          "work": 5673,
+          "work_unit": "row_ops",
+          "cost": {
+            "wall_ns": 4879866,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "columns": 705,
+              "pinned_by_repeated_row": 0,
+              "rank": 428,
+              "repeated_column_rows": 0,
+              "row_ops": 5673,
+              "rows": 428,
+              "single_column_rows": 0,
+              "two_column_rows": 428
+            },
+            "gae": 63.366387677468474
+          }
+        },
+        "verify": {
+          "wall_ns": 10134,
+          "group_ops": {
+            "adds": 13,
+            "doubles": 21,
+            "scalar_mults": 1
+          },
+          "native": {},
+          "gae": 34.0
+        },
+        "recovered": 3979186,
+        "verified": true,
+        "total_gae": 2243770.3663876774,
+        "s": 802.4498163310487,
+        "rho_s": 1.1740695394907585,
+        "s_over_rho": 683.4772467388121,
+        "wall_seconds": 0.663605813,
+        "exhausted": false
+      },
+      "control": {
+        "instance": "gls-p12bit-p2797",
+        "log2_r": 22.89845248400567,
+        "r": 7818457,
+        "group_order": 7818457,
+        "spec": {
+          "factor_base": "gls-line",
+          "factor_base_params": {
+            "no_fold": "1"
+          },
+          "oracle": "subtract",
+          "oracle_params": {},
+          "solver": null,
+          "solver_params": {},
+          "targets": "Walk",
+          "linalg": "",
+          "max_trials": 50000000,
+          "seed": 1,
+          "solver_budget_seconds": 0
+        },
+        "label": "gls-line[no_fold=1] + subtract + — + walk",
+        "factor_base": {
+          "name": "gls-line",
+          "description": "the ψ-stable line x ∈ u·s·F_p, folded by negation only (the control)",
+          "signed_points": 2816,
+          "abscissae": 1408,
+          "columns": 1408,
+          "points_per_column": 2.0,
+          "cost": {
+            "wall_ns": 2310998,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "abscissae_scanned": 2796,
+              "endomorphism_maps": 2816,
+              "sqrt_solves": 2796,
+              "torsion_dropped": 0
+            },
+            "gae": 0.0
+          }
+        },
+        "decomposition": {
+          "name": "subtract",
+          "summands": 2,
+          "description": "for each signed base point P, test whether R − P is in the base",
+          "targets_tried": 2169,
+          "relations_found": 864,
+          "hit_rate": 0.3983402489626556,
+          "setup": {
+            "wall_ns": 191,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {},
+            "gae": 0.0
+          },
+          "cost": {
+            "wall_ns": 1337379893,
+            "group_ops": {
+              "adds": 4409399,
+              "doubles": 706,
+              "scalar_mults": 34
+            },
+            "native": {
+              "canonicalisations": 0,
+              "direct_relations_skipped": 0,
+              "frobfold_mismatches": 0,
+              "inversions": 0,
+              "lift_failures": 0,
+              "lookups": 4406853,
+              "relations": 864,
+              "repeated_targets_skipped": 0,
+              "s4_hits": 0,
+              "s4_pairs": 0,
+              "sqrt_solves": 0,
+              "target_guard_probes": 2169,
+              "trials": 2169,
+              "unliftable_systems": 0,
+              "walk_jumps": 16,
+              "walk_pool_offsets": 0,
+              "walk_pool_ops": 0,
+              "walk_pool_restarts": 0,
+              "walk_restarts": 1,
+              "walk_steps": 2168
+            },
+            "gae": 4410105.0
+          },
+          "system": null,
+          "solver": null
+        },
+        "linear_algebra": {
+          "name": "incremental-gauss",
+          "rows": 864,
+          "rank": 864,
+          "dependent": 0,
+          "work": 11749,
+          "work_unit": "row_ops",
+          "cost": {
+            "wall_ns": 39049192,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "columns": 1409,
+              "pinned_by_repeated_row": 0,
+              "rank": 864,
+              "repeated_column_rows": 0,
+              "row_ops": 11749,
+              "rows": 864,
+              "single_column_rows": 0,
+              "two_column_rows": 864
+            },
+            "gae": 131.23421273093197
+          }
+        },
+        "verify": {
+          "wall_ns": 10636,
+          "group_ops": {
+            "adds": 13,
+            "doubles": 21,
+            "scalar_mults": 1
+          },
+          "native": {},
+          "gae": 34.0
+        },
+        "recovered": 3979186,
+        "verified": true,
+        "total_gae": 4410270.234212731,
+        "s": 1577.2650323000241,
+        "rho_s": 1.1740695394907585,
+        "s_over_rho": 1343.4170457945343,
+        "wall_seconds": 1.378779213,
+        "exhausted": false
+      },
+      "s_ratio": 1.965562207380863,
+      "column_ratio": 2.0,
+      "trial_ratio": 1.982632541133455
+    },
+    {
+      "family": "gls",
+      "bits": 12,
+      "seed": 2,
+      "instance": "gls-p12bit-p2767",
+      "log2_r": 22.867827141539255,
+      "r": 7654237,
+      "cofactor": 1,
+      "oracle": "subtract",
+      "seed_abscissae": 0,
+      "planted": 4485991,
+      "rho_runs": 8,
+      "rho_s_mean": 1.0318061503493592,
+      "rho_all_verified": true,
+      "folded": {
+        "instance": "gls-p12bit-p2767",
+        "log2_r": 22.867827141539255,
+        "r": 7654237,
+        "group_order": 7654237,
+        "spec": {
+          "factor_base": "gls-line",
+          "factor_base_params": {},
+          "oracle": "subtract",
+          "oracle_params": {},
+          "solver": null,
+          "solver_params": {},
+          "targets": "Walk",
+          "linalg": "",
+          "max_trials": 50000000,
+          "seed": 2,
+          "solver_budget_seconds": 0
+        },
+        "label": "gls-line + subtract + — + walk",
+        "factor_base": {
+          "name": "gls-line",
+          "description": "the ψ-stable line x ∈ u·s·F_p, each ⟨−1, ψ⟩-orbit folded onto one column",
+          "signed_points": 2748,
+          "abscissae": 1374,
+          "columns": 687,
+          "points_per_column": 4.0,
+          "cost": {
+            "wall_ns": 1992890,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "abscissae_scanned": 2766,
+              "endomorphism_maps": 5496,
+              "sqrt_solves": 2766,
+              "torsion_dropped": 0
+            },
+            "gae": 0.0
+          }
+        },
+        "decomposition": {
+          "name": "subtract",
+          "summands": 2,
+          "description": "for each signed base point P, test whether R − P is in the base",
+          "targets_tried": 1112,
+          "relations_found": 403,
+          "hit_rate": 0.36241007194244607,
+          "setup": {
+            "wall_ns": 441,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {},
+            "gae": 0.0
+          },
+          "cost": {
+            "wall_ns": 664092638,
+            "group_ops": {
+              "adds": 2271999,
+              "doubles": 709,
+              "scalar_mults": 34
+            },
+            "native": {
+              "canonicalisations": 0,
+              "direct_relations_skipped": 0,
+              "frobfold_mismatches": 0,
+              "inversions": 0,
+              "lift_failures": 0,
+              "lookups": 2270533,
+              "relations": 403,
+              "repeated_targets_skipped": 0,
+              "s4_hits": 0,
+              "s4_pairs": 0,
+              "sqrt_solves": 0,
+              "target_guard_probes": 1112,
+              "trials": 1112,
+              "unliftable_systems": 0,
+              "walk_jumps": 16,
+              "walk_pool_offsets": 0,
+              "walk_pool_ops": 0,
+              "walk_pool_restarts": 0,
+              "walk_restarts": 1,
+              "walk_steps": 1111
+            },
+            "gae": 2272708.0
+          },
+          "system": null,
+          "solver": null
+        },
+        "linear_algebra": {
+          "name": "incremental-gauss",
+          "rows": 403,
+          "rank": 403,
+          "dependent": 0,
+          "work": 5471,
+          "work_unit": "row_ops",
+          "cost": {
+            "wall_ns": 3894079,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "columns": 688,
+              "pinned_by_repeated_row": 0,
+              "rank": 403,
+              "repeated_column_rows": 0,
+              "row_ops": 5471,
+              "rows": 403,
+              "single_column_rows": 0,
+              "two_column_rows": 403
+            },
+            "gae": 64.39864672456872
+          }
+        },
+        "verify": {
+          "wall_ns": 9952,
+          "group_ops": {
+            "adds": 11,
+            "doubles": 22,
+            "scalar_mults": 1
+          },
+          "native": {},
+          "gae": 33.0
+        },
+        "recovered": 4485991,
+        "verified": true,
+        "total_gae": 2272805.3986467244,
+        "s": 821.5070592007417,
+        "rho_s": 1.0318061503493592,
+        "s_over_rho": 796.183526258869,
+        "wall_seconds": 0.670046891,
+        "exhausted": false
+      },
+      "control": {
+        "instance": "gls-p12bit-p2767",
+        "log2_r": 22.867827141539255,
+        "r": 7654237,
+        "group_order": 7654237,
+        "spec": {
+          "factor_base": "gls-line",
+          "factor_base_params": {
+            "no_fold": "1"
+          },
+          "oracle": "subtract",
+          "oracle_params": {},
+          "solver": null,
+          "solver_params": {},
+          "targets": "Walk",
+          "linalg": "",
+          "max_trials": 50000000,
+          "seed": 2,
+          "solver_budget_seconds": 0
+        },
+        "label": "gls-line[no_fold=1] + subtract + — + walk",
+        "factor_base": {
+          "name": "gls-line",
+          "description": "the ψ-stable line x ∈ u·s·F_p, folded by negation only (the control)",
+          "signed_points": 2748,
+          "abscissae": 1374,
+          "columns": 1374,
+          "points_per_column": 2.0,
+          "cost": {
+            "wall_ns": 1670607,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "abscissae_scanned": 2766,
+              "endomorphism_maps": 2748,
+              "sqrt_solves": 2766,
+              "torsion_dropped": 0
+            },
+            "gae": 0.0
+          }
+        },
+        "decomposition": {
+          "name": "subtract",
+          "summands": 2,
+          "description": "for each signed base point P, test whether R − P is in the base",
+          "targets_tried": 2072,
+          "relations_found": 783,
+          "hit_rate": 0.3778957528957529,
+          "setup": {
+            "wall_ns": 217,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {},
+            "gae": 0.0
+          },
+          "cost": {
+            "wall_ns": 1273038014,
+            "group_ops": {
+              "adds": 4183831,
+              "doubles": 709,
+              "scalar_mults": 34
+            },
+            "native": {
+              "canonicalisations": 0,
+              "direct_relations_skipped": 0,
+              "frobfold_mismatches": 0,
+              "inversions": 0,
+              "lift_failures": 0,
+              "lookups": 4181405,
+              "relations": 783,
+              "repeated_targets_skipped": 0,
+              "s4_hits": 0,
+              "s4_pairs": 0,
+              "sqrt_solves": 0,
+              "target_guard_probes": 2072,
+              "trials": 2072,
+              "unliftable_systems": 0,
+              "walk_jumps": 16,
+              "walk_pool_offsets": 0,
+              "walk_pool_ops": 0,
+              "walk_pool_restarts": 0,
+              "walk_restarts": 1,
+              "walk_steps": 2071
+            },
+            "gae": 4184540.0
+          },
+          "system": null,
+          "solver": null
+        },
+        "linear_algebra": {
+          "name": "incremental-gauss",
+          "rows": 783,
+          "rank": 783,
+          "dependent": 0,
+          "work": 11501,
+          "work_unit": "row_ops",
+          "cost": {
+            "wall_ns": 43418104,
+            "group_ops": {
+              "adds": 0,
+              "doubles": 0,
+              "scalar_mults": 0
+            },
+            "native": {
+              "columns": 1375,
+              "pinned_by_repeated_row": 0,
+              "rank": 783,
+              "repeated_column_rows": 0,
+              "row_ops": 11501,
+              "rows": 783,
+              "single_column_rows": 1,
+              "two_column_rows": 782
+            },
+            "gae": 135.37723194649328
+          }
+        },
+        "verify": {
+          "wall_ns": 10690,
+          "group_ops": {
+            "adds": 11,
+            "doubles": 22,
+            "scalar_mults": 1
+          },
+          "native": {},
+          "gae": 33.0
+        },
+        "recovered": 4485991,
+        "verified": true,
+        "total_gae": 4184708.3772319467,
+        "s": 1512.565692883096,
+        "rho_s": 1.0318061503493592,
+        "s_over_rho": 1465.9397914724161,
+        "wall_seconds": 1.318166956,
+        "exhausted": false
+      },
+      "s_ratio": 1.841208393698646,
+      "column_ratio": 2.0,
+      "trial_ratio": 1.8633093525179856
+    }
+  ],
+  "type_c": []
+}

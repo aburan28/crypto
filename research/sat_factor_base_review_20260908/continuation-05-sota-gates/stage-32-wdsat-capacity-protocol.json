@@ -1,0 +1,178 @@
+{
+  "acceptance": {
+    "post_run": [
+      "The scorer verifies the terminal run seal before opening the oracle",
+      "The raw Phase-A seal authenticates the oracle bytes",
+      "Scoring joins records only by the exact blind instance id and target",
+      "The scored artifact remains a balanced toy PDP result rather than an index-calculus or SOTA claim"
+    ],
+    "solver_phase": [
+      "The sanitized solver root contains exactly the bound blind bundle and sanitized binding",
+      "Every exporter manifest is explicit-target v2 and matches its blind instance exactly",
+      "No forbidden oracle field, path, environment variable, or input reaches a child process",
+      "Every exporter, backend, and model validator has a fresh-process receipt",
+      "Unknown and timeout outcomes remain inconclusive",
+      "All 160 task records and 480 backend outcomes are covered by the terminal inventory seal"
+    ]
+  },
+  "accounting": {
+    "meter": "scripts/process_meter.py in a fresh process for every exporter, solver, and point-witness validator",
+    "outer_driver_meter_required_for_production": true,
+    "required_metrics": [
+      "wall_seconds",
+      "user_seconds",
+      "system_seconds",
+      "total_core_seconds",
+      "single_core_seconds",
+      "peak_rss_bytes",
+      "conflicts_when_exposed"
+    ],
+    "wdsat_build_cost": "A production execution manifest must bind a compatible WDSat executable and its separately charged build receipt; build cost is not hidden in per-target solver time."
+  },
+  "cells": [
+    {
+      "basis": "standard",
+      "curve_a": 1,
+      "ell": 5,
+      "expected_instances": 40,
+      "factor_index": 0,
+      "id": "n31-l5-m3-standard-a1-f0",
+      "m": 3,
+      "n": 31
+    },
+    {
+      "basis": "ggmp",
+      "curve_a": 0,
+      "ell": 5,
+      "expected_instances": 40,
+      "factor_index": 0,
+      "id": "n31-l5-m3-ggmp-a0-f0",
+      "m": 3,
+      "n": 31
+    },
+    {
+      "basis": "standard",
+      "curve_a": 1,
+      "ell": 5,
+      "expected_instances": 40,
+      "factor_index": 0,
+      "id": "n41-l5-m3-standard-a1-f0",
+      "m": 3,
+      "n": 41
+    },
+    {
+      "basis": "standard",
+      "curve_a": 1,
+      "ell": 9,
+      "expected_instances": 40,
+      "factor_index": 0,
+      "id": "n59-l9-m3-standard-a1-f0",
+      "m": 3,
+      "n": 59
+    }
+  ],
+  "claim_boundary": "This phase can measure three SAT backends on a balanced public toy PDP panel. It cannot establish natural decomposability prevalence, an end-to-end index-calculus result, private-key recovery, or a Koblitz index-calculus SOTA claim.",
+  "execution": {
+    "backend_order": [
+      "native-xor",
+      "wdsat",
+      "cryptominisat"
+    ],
+    "expected_backend_runs": 480,
+    "instance_order": "the authenticated blind bundle presentation order",
+    "native_conflict_budget": 100000,
+    "one_process_at_a_time": true,
+    "output_policy": "new output root, write-once task artifacts, no resume, terminal inventory seal",
+    "per_process_watchdog_seconds": 120,
+    "production_execution_status": "not_run",
+    "single_thread_requested": true,
+    "unknown_or_timeout_is_unsat": false
+  },
+  "phase_a_binding": {
+    "blind_bundle_schema": "koblitz_pdp_blind_bundle.v1",
+    "blind_bundle_sha256": "b45d0849e5ff4d3126e8dec1148b7f4da54e8a92da7b9b67d6be58700b7e9d77",
+    "blind_instance_schema": "koblitz_pdp_blind_instance.v1",
+    "instance_count": 160,
+    "protocol_sha256": "69544ee3a0b0250dd720e1b498e8f03cdf7d4427ab11bfb551325cf29b86fd53",
+    "seal_sha256": "01b7fbab8bccbb45c7e3e6a46640ff5997cefee303416afd9671da7cc2e13632",
+    "source_revision": "47235e51b74a6fa8f3c8dc85d68bf886e20a1e88"
+  },
+  "recorded_at": "2026-09-10",
+  "schema": "koblitz_balanced_pdp_phase_b_protocol.v1",
+  "scope": "Blinded explicit-target PDP classification over the sealed Phase-A panel; no oracle labels, relation collection, discrete-log recovery, or key material enter solver execution",
+  "scoring": {
+    "driver": "scripts/score_koblitz_blind_pdp_phase_b.py",
+    "independent_external_reproduction_satisfied": false,
+    "rule": "The solver run must be terminally sealed before the scorer is given the raw Phase-A seal and oracle ledger.",
+    "same_process_as_solver_execution": false
+  },
+  "solver_root": {
+    "access_boundary": "The solver driver receives this sanitized root only. The Phase-A oracle ledger and raw seal are withheld until the separately invoked scoring step.",
+    "binding_schema": "koblitz_pdp_phase_b_solver_input_binding.v1",
+    "exact_files": [
+      "binding.json",
+      "blind/bundle.json"
+    ],
+    "raw_phase_a_seal_copied": false,
+    "symlinks_allowed": false,
+    "unexpected_files_allowed": false
+  },
+  "source_contract": {
+    "export_mode": "explicit-target v2 plus --export-only",
+    "forbidden_solver_material": [
+      "target_class",
+      "witness_indices",
+      "unconditional_draw_index",
+      "selection_priority_hex",
+      "planted_points",
+      "sealed-oracle",
+      "oracle-ledger",
+      "oracle",
+      "decomposable",
+      "nondecomposable"
+    ],
+    "producer_may_solve": false,
+    "required_instance_fields": [
+      "source_nonce",
+      "target.x",
+      "target.y",
+      "blind_instance_id"
+    ],
+    "required_source_schema": "koblitz_pdp_source_instance.v2",
+    "required_target_mode": "explicit_affine"
+  },
+  "status": "frozen_before_solver_execution",
+  "tool_build_accounting": {
+    "cryptominisat_build": {
+      "required_for_full_cost_gate": true,
+      "scope": "Fresh metered clean source copy, configure, and single-build receipt plus binary identity",
+      "source_commit": "7ae1b4a74259cdce223a584281fb8f090bbd3eed",
+      "status": "not_run"
+    },
+    "effect": "A Phase-B solver panel may be an internal engineering measurement, but cannot pass the full-cost or SOTA gate until additive build receipts are frozen and bound.",
+    "full_cost_gate_passed": false,
+    "rust_release_build": {
+      "required_for_full_cost_gate": true,
+      "scope": "Fresh metered release build of the explicit-target exporter and isolated backend plus source and binary identities",
+      "status": "not_run"
+    }
+  },
+  "wdsat_build": {
+    "driver": "scripts/build_koblitz_phase_b_wdsat.py",
+    "frozen_config_path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-32-wdsat-config.h",
+    "frozen_config_sha256": "4a73c3b5a14ded98f749d282b597594ae3ac05355a39cadcb9345a90bf735352",
+    "limits": {
+      "max_anf_id": 79,
+      "max_buffer_size": 32804,
+      "max_degree": 4,
+      "max_eq": 6511,
+      "max_eq_size": 5,
+      "max_id": 2000,
+      "max_xeq": 112,
+      "max_xeq_size": 2001
+    },
+    "sizing_boundary": "The corrected archived n59-l9-m3 config is a frozen overprovision candidate. The no-solver export pass remains separately metered and must prove every exact Phase-B source fits these limits before the first solver starts.",
+    "source_commit": "55d55b2620d768d9f7c78dcd8990a0689533c1d0",
+    "undersized_action": "Seal the export-only sizing artifact as inconclusive, run no solver, and freeze an additive larger-config successor."
+  }
+}

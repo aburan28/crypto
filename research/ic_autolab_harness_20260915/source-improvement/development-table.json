@@ -1,0 +1,72 @@
+{
+  "unit": "valgrind-3.22-amd64-Ir",
+  "scope": "exploratory; 8 development targets, three repetitions per arm; final confirmation pending",
+  "rows": [
+    {
+      "experiment": "Source only",
+      "variant": "incumbent",
+      "S_Ir": 568508.3650431128,
+      "cost_over_incumbent": 1.0,
+      "cost_over_rho": 13.00471096590815,
+      "cost_over_floor": 20451895.172672264,
+      "verified_pairs": 24,
+      "scheduled_pairs": 24,
+      "class": "reference"
+    },
+    {
+      "experiment": "Source only",
+      "variant": "candidate",
+      "S_Ir": 479623.620594867,
+      "cost_over_incumbent": 0.8436527060749484,
+      "cost_over_rho": 10.971459598110965,
+      "cost_over_floor": 17254296.706786137,
+      "verified_pairs": 24,
+      "scheduled_pairs": 24,
+      "class": "engineering experiment"
+    },
+    {
+      "experiment": "Source only",
+      "variant": "rho",
+      "S_Ir": 43715.570959897384,
+      "cost_over_incumbent": 0.07689521148309256,
+      "cost_over_rho": 1.0,
+      "cost_over_floor": null,
+      "verified_pairs": 24,
+      "scheduled_pairs": 24,
+      "class": "reference"
+    },
+    {
+      "experiment": "Source + tuning",
+      "variant": "incumbent",
+      "S_Ir": 568507.1903046329,
+      "cost_over_incumbent": 1.0,
+      "cost_over_rho": 13.004670700858695,
+      "cost_over_floor": 20451852.911854863,
+      "verified_pairs": 24,
+      "scheduled_pairs": 24,
+      "class": "reference"
+    },
+    {
+      "experiment": "Source + tuning",
+      "variant": "candidate",
+      "S_Ir": 406674.1927227818,
+      "cost_over_incumbent": 0.7153369379635572,
+      "cost_over_rho": 9.302721318376646,
+      "cost_over_floor": 14629965.83764731,
+      "verified_pairs": 24,
+      "scheduled_pairs": 24,
+      "class": "engineering experiment"
+    },
+    {
+      "experiment": "Source + tuning",
+      "variant": "rho",
+      "S_Ir": 43715.615979964394,
+      "cost_over_incumbent": 0.07689544956597558,
+      "cost_over_rho": 1.0,
+      "cost_over_floor": null,
+      "verified_pairs": 24,
+      "scheduled_pairs": 24,
+      "class": "reference"
+    }
+  ]
+}

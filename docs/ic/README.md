@@ -2,18 +2,22 @@
 
 The standalone ic executable inspects elliptic-curve parameters and runs
 bounded, reproducible index-calculus experiments on internally generated
-known-answer Koblitz instances. Imported points are used only for mathematical
-validation.
+known-answer or public hash-derived Koblitz targets. The `fixed` command also
+accepts explicit K_0 curve parameters and points through degree 131, with durable
+pair tables, relations and precomputation. See [Fixed parameters](FIXED_PARAMETERS.md).
+The older inspection command uses imported points for mathematical validation.
+
+**Technique inventory:** [ECDLP_RESEARCH_TECHNIQUES.md](ECDLP_RESEARCH_TECHNIQUES.md) maps factor-base, relation, filtering, sparse-linear-algebra, and individual-logarithm research techniques to their native modules and labels each as integrated, experimental, component, or backlog.
 
 **Agent scoreboard:** per-stage records and next targets to beat live in
-[`BOUNDARY_TARGETS.md`](./BOUNDARY_TARGETS.md) and
-[`boundary_targets.json`](./boundary_targets.json) (binary, Koblitz, prime;
+[`BOUNDARY_TARGETS.md`](BOUNDARY_TARGETS.md) and
+[`boundary_targets.json`](boundary_targets.json) (binary, Koblitz, prime;
 `schema_version` 2). Beat claims must include the ledger's **measurement
 schema** fields — including **FFD / degree of regularity** on algebraic
 `decomposition` frontiers — or they fail closed.
 
 **Autolab runner:** agents push those beats with the local control plane at
-[`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab/)
+[`research/sat_factor_base_review_20260908/autolab/`](../../research/sat_factor_base_review_20260908/autolab)
 (`boundary_autolab.py`). It pins the ledger, fail-closed validates measurement
 reports, and launches the public-synthetic `koblitz_rank_fixture` /
 `koblitz_rho_fixture` producers for the priority Koblitz `vs_rho` rungs.
@@ -51,12 +55,30 @@ constructs the target from the declared known answer, then checks both the
 recovered value and the group identity. No public point file can be passed
 to the run command.
 
+The staged `workflow` command also accepts a scalar-blind public target:
+
+```json
+{"targets":[{"public_hash_seed":29}]}
+```
+
+This form hashes the curve identity, seed, and counter to an abscissa,
+chooses a lift from the next digest bit, and applies the public cofactor.
+It constructs and records no target scalar. Both individual descent and
+the signed-Frobenius rho baseline accept a recovered value only after
+checking `[d]G = Q`. The older `known_log` and `random_seed` forms retain
+their expected-scalar check as an additional known-answer control.
+
 The following knobs are recorded in each run report:
 
-- degree: odd values 3 through 41; a curve is usable only when its largest
-  prime factor exceeds the cofactor, which above 23 holds for degrees 29
-  (curve-a 1), 31, 37, and 39 (curve-a 0);
-- curve-a: 0 or 1, with b fixed to 1;
+- degree: the field degree n; odd values 3 through 63 for the Koblitz
+  family (a curve is usable only when its largest prime factor exceeds
+  the cofactor, which above 23 holds for degrees 29 (curve-a 1), 31, 37,
+  and 39 (curve-a 0)), or k times an odd number for a subfield curve;
+- curve-a: 0 or 1, with b fixed to 1, for a Koblitz curve; the
+  coordinate of a in the subfield basis otherwise;
+- subfield: the degree k of the subfield the curve is defined over,
+  q = 2^k (default 1, the Koblitz family; up to 8), see below;
+- curve-b: the coordinate of b in the subfield basis (default 1);
 - known-log: a positive scalar smaller than the selected subgroup order;
 - random-target: draw a known-answer scalar reproducibly from seed;
 - seed: seed for the generated fixture and relation sampler;
@@ -64,7 +86,7 @@ The following knobs are recorded in each run report:
 - factor-base: a recipe file written by `ic search`, replacing factor-index;
 - summands: factor-base points per relation, 2 (default), 3, or 4;
 - max-trials: 1 through 1000000;
-- solver: groebner, sat, enumerate, or pair-table;
+- solver: groebner, sat, enumerate, pair-table, wdsat, or mq-fes;
 - batch: targets decomposed per parallel batch (0 = CPU count);
 - control: legacy accounting, see below.
 
@@ -77,7 +99,19 @@ group before it becomes a relation:
   sums built once per run — one lookup per target for two summands,
   `|F|` for three, `|F|²` for four (16 bytes per table entry);
 - groebner: the Weil-restricted Semaev system reduced by matrix-F4;
-- sat: the same system, CDCL with native parity rows.
+- sat: the same system, CDCL with native parity rows;
+- wdsat: the same Semaev system emitted as Trimoska ANF and solved by an
+  external WDSat binary (`--wdsat-binary PATH`). See
+  [`RESEARCH_WDSAT_IC_UNIFICATION.md`](../../research/notes/ecc2k130/RESEARCH_WDSAT_IC_UNIFICATION.md).
+  Requires a capacity-sufficient build of
+  [`mtrimoska/WDSat`](https://github.com/mtrimoska/WDSat); the frozen
+  baseline builder is
+  `research/index_calculus_baseline_20260914/pilot/build_pilot.py`.
+- mq-fes: ALMASTY/libfes-inspired quadratic Semaev solver (`m = 2` only) —
+  libfes FFS Gray (`L=4` unroll) for early-exit `find_one`, Möbius for
+  all-roots when `n ≤ 24`, Monica hybrid past that
+  (<https://gitlab.lip6.fr/almasty/mq>,
+  <https://github.com/cbouilla/libfes-lite>).
 
 Not every degree/coefficient combination has a usable subgroup. A valid
 curve does not guarantee successful collection or an invertible relation
@@ -96,6 +130,42 @@ restores the earlier accounting for matched comparisons: one column per
 Frobenius orbit, no projection merge, a fixed surplus of relations, and a
 single solve at the end. Incomplete results exit unsuccessfully and remain
 incomplete in JSON reports.
+
+### Subfield curves beyond the Koblitz family
+
+    ./target/release/ic run --degree 14 --subfield 2 --curve-a 0 --curve-b 2 --solver pair-table
+    ./target/release/ic search --degree 22 --subfield 2 --curve-a 1 --curve-b 3 --family divisor
+    ./target/release/ic logs --degree 14 --subfield 2 --curve-a 0 --curve-b 2 --database logs14.json
+
+The Galbraith–Granger–Merz–Petit construction needs only that the curve
+be defined over a subfield: with `--subfield k` the synthetic curve is
+`y² + xy = x³ + a x² + b` with `a, b ∈ GF(2^k) ⊂ GF(2^n)`, `n = k · e`
+and `e` odd, and the `2^k`-power Frobenius `π` plays the role squaring
+plays on a Koblitz curve. `a` and `b` are named by their coordinates in
+an `F_2`-basis of the subfield (the kernel of `X^{2^k} + X`), so
+`--subfield 1 --curve-a a --curve-b 1` is exactly `K_a`. Point counting
+goes through `#E(GF(2^k))`, found by enumeration, and the trace
+recurrence `s_i = t·s_{i−1} − q·s_{i−2}`; `λ` is the root of
+`λ² − tλ + q` with `π(G) = [λ]G`.
+
+The invariant factor bases are the kernels of `q`-linearised
+polynomials `Σ c_i X^{q^i}` with `c_i ∈ GF(q)`, classified by the
+irreducible factors of `x^e − 1` over `GF(q)` (Cantor–Zassenhaus over
+`GF(q)`, carried out inside `GF(2^n)`); a factor of degree `d` gives a
+subspace of `2^{kd}` abscissae whose points fall into orbits of length
+dividing `e`. Recipe indices refer to that factor list, which for `k = 1`
+is the familiar `F_2` list in the same order, so every Koblitz recipe,
+document and report is unchanged. Documents record `subfield` and
+`curve_b` (omitted when 1) and are bound to them. Two things differ
+from the Koblitz case in practice: an even `n` is allowed (the
+Artin–Schreier solve for even degree is a linear solve, not the
+half-trace), and when `x^e − 1` splits into binomials `x^d − c` over
+`GF(q)` the invariant subspaces are multiplicative cosets whose
+inverses land in the reciprocal factor's subspace, so a curve with
+`Tr(a) = 1` and `b = 1` has no points over them at all — the search
+scores such bases at zero and a run over one reports a base with no
+usable columns, so pick `b` (or `a`) accordingly, as the examples above
+do.
 
 ## Searching for a factor base
 
@@ -126,6 +196,49 @@ is even; `--no-saturate` skips it) and after greedy orbit pruning
 expected trial count, which is an exact recount over the witness list
 rather than a re-search. The pruned base stays Frobenius- and
 negation-closed, so every relation identity survives.
+
+### Ranking by what the solver pays, not by trials alone
+
+Expected trials is half the collection cost. A trial is paid whether or not
+it succeeds, so collection spends `trials × (cost per trial)`, and the
+second factor is the one that varies: coverage saturates at 100% as the
+subspace grows while the Weil-restricted summation system keeps `m·ℓ`
+Boolean unknowns. At `icv1-f2m15-t275-b7f03703` the two orders disagree by `22.41×` over
+twelve verified logarithms — see
+[`research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md`](../../research/notes/index-calculus/RESEARCH_FACTOR_BASE_SOLVE_COST.md).
+
+    ./target/release/ic search --degree 15 --curve-a 1 --summands 2 --family divisor \
+        --min-dimension 3 --max-dimension 8 --no-prune --no-saturate \
+        --solver groebner --solve-cost-targets 8
+
+`--solve-cost-targets N` runs the Gröbner oracle on `N` census targets per
+candidate, charging refutations as well as successes, and ranks by
+`expected_stage_ops = expected trials × measured word XORs per target`. The
+report's `scoring_objective` says which of the two ranked it, and each
+candidate carries `measured_ops_per_target`, `expected_stage_ops` and
+`trace_zero`. Omitted, nothing changes: the ranking is the trial count as
+before.
+
+Three restrictions, each refused loudly rather than silently worked around,
+because a number that does not describe the run is worse than no number:
+
+- it prices the **Gröbner** oracle, so `--solver` must be `groebner` —
+  scoring one oracle and running another selects for the wrong thing;
+- only a **linear-subspace** candidate is described by its own system. The
+  restriction is written over the subspace basis, so a pruned, saturated,
+  union or orbit base — a proper subset of that span, carried by the SAT
+  domain trie instead — would be priced on the span rather than on itself,
+  at a cost in time of several orders of magnitude. Such candidates are
+  left unpriced with the reason in `solve_cost_skipped`, and ranked below
+  every priced one, since trials and word XORs are not comparable numbers;
+- nothing is measured while `IC_REDUCTION_CACHE` is set, where a memoised
+  reduction returns without running F4 and the counter diff would report
+  replayed work as free. (A preprocessing hit is harmless: F4 still runs,
+  so it is still counted.)
+
+Free and unmeasured, reported for every candidate: `trace_zero`, true when
+the abscissae lie in `ker Tr`, which doubles the yield and is decided by the
+divisibility `(x+1) ∤ g` rather than by solving anything.
 
 The best `--validate-top` candidates are then validated by real child runs
 on `--holdout` fresh known-answer fixtures with `--solver` (default
@@ -181,7 +294,7 @@ default): its columns are canonical cofactor projections `R_o ∈ ⟨G⟩`, so
 each column logarithm is a genuine, self-certifying discrete log.
 
 The precomputation reaches whatever the factor base and summand count
-support. On `K_0/2^31` over a search-selected dimension-11 base
+support. On `icv1-f2m31-tm90707-c95f16f5` over a search-selected dimension-11 base
 (`--summands 3`, 35 columns) it completes in about 15 s; each subsequent
 target then needs one or two relations. The `logs` trial budget
 (`--max-trials`, default 200000) bounds the search for a full-rank
@@ -204,6 +317,742 @@ are secondary measurements for a separately stated question.
 The `--batch` execution knob in the option list describes internal target scheduling. It
 does not change the primary workload definition: submit exactly one target
 when measuring the one-target online comparison.
+### Linear algebra: filtering, block Wiedemann, and block Lanczos
+
+    ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31.json --linear-algebra sparse --block-size 4
+    ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31-lanczos.json --linear-algebra sparse --sparse-solver block-lanczos --block-size 4 --spmv sharded --spmv-shards 8
+    ./target/release/ic logs --degree 31 --curve-a 0 --summands 3 --factor-base fb31.json --database logs31.json --linear-algebra dense
+
+Each relation has at most `m` nonzero entries, so the relation matrix is
+sparse in exactly the way a number-field-sieve matrix is. By default
+(`--linear-algebra sparse`) `ic logs` solves it the way CADO-NFS does:
+
+1. **Filtering** — duplicate rows are dropped; a column occurring in only
+   one row (a *singleton*) is removed with that row and recovered later
+   by back-substitution; surplus rows beyond a small excess are removed,
+   choosing rows whose removal cascades through the weight-2 columns
+   (the clique rule); light columns are merged away by structured
+   Gaussian elimination under a fill-in bound. Every elimination is
+   recorded, so the eliminated logarithms are reconstructed exactly from
+   the core solution (back-substitution, then propagation through the
+   original rows, then a small dense residual if anything is left).
+2. **Black-box core solve** — block Wiedemann (the default) makes the
+   reduced core square by folding its
+   excess rows into random earlier rows, homogenised to `M (x, 1)ᵀ = 0`,
+   and a kernel vector is read off the Krylov sequence `X Mⁱ Y` of
+   `block_size × block_size` blocks through a matrix Berlekamp–Massey
+   step (a shifted minimal approximant basis). Only sparse
+   matrix-times-block products touch the matrix. `--sparse-solver
+   block-lanczos` instead runs finite-field block Lanczos on the symmetric
+   congruence `A^T D A`; it retries on breakdown and still verifies `A x = b`.
+   Products select `auto`, `serial`, `rayon`, deterministic `sharded`, or
+   `worker` execution with `--spmv`. A worker speaks the CPU-verified `SPMV1`
+   contract in `gpu/spmv`; set `IC_SPMV_WORKER` to the host, CUDA, or cluster
+   launcher executable. Worker failure emits a warning and falls back to the
+   serial CPU product.
+
+The sparse path never attempts a solve before every column occurs in
+some row, and the solution is checked against every relation before
+the group certification `[x_o]G == R_o` runs. `--linear-algebra dense`
+keeps the reference behaviour: full big-integer elimination after every
+new relation. Both paths certify the same database (the `ic` tests
+compare them); the report's `linear_algebra` object records the mode,
+the attempts, the time, and for the sparse path the filtering counts
+and the configured solver/SpMV backend plus the selected Wiedemann or Lanczos
+run (`core_dimension`, iterations or sequence length, and products).
+
+## Running the pipeline as a resumable workflow
+
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31 --stop-after logs
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31          # resumes
+
+Like a number-field-sieve run, `ic workflow` executes the pipeline as
+stages whose outputs live on disk, so a run can be stopped, inspected
+and resumed without redoing finished work:
+
+1. **select** — the factor base, either an explicit recipe or the
+   best-by-census candidate of the factor-base search; written as
+   `factor_base.json`.
+2. **collect** — relations, in work units (see below); each unit is
+   written as `relations/unit-NNNNN.json`.
+3. **logs** — the units are merged, every relation re-verified in the
+   group and deduplicated, and the factor-base logarithm database solved
+   (`logs.json`), every column certified by `[x]G == R`. If the
+   relations do not yet determine every column, further units are
+   collected up to `collection.max_units`.
+4. **solve** — each target descended with one relation reusing the
+   database; `solutions.json` is rewritten after every target, so an
+   interrupted run resumes at the first unsolved one. The pair table is
+   built once per process and shared by collection and descent.
+
+`state.json` records a BLAKE3 digest of the parameter file and each
+stage's status. A rerun in the same directory reloads existing
+artifacts, re-verifies them against the reconstructed curve (a stale or
+tampered artifact is an error, never trusted), and continues from the
+first incomplete stage; a parameter file whose digest differs is refused
+so one directory never mixes two experiments. Artifacts are written
+atomically. `--stop-after select|collect|logs|solve` ends the run early.
+
+### Distributed relation collection
+
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31 --collect-units 0-3    # worker A
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31 --collect-units 4-7    # worker B
+    ./target/release/ic workflow --params wf.json --dir runs/k0n31                        # merge, solve, descend
+
+Relation collection is embarrassingly parallel, and the workflow splits
+it the way a sieve is split into `q`-ranges. The probe scalar of trial
+`t` depends only on the parameter seed and `t`, so the probe sequence
+is one fixed, reproducible sequence; a **work unit** `k` is the slice
+`[k · unit_trials, (k + 1) · unit_trials)` of it. Any process with the
+parameter file (and `factor_base.json`, when the base came from the
+search) can run a set of units with `--collect-units` — it writes
+`relations/unit-NNNNN.json` for each and stops — and the files from
+several workers or machines are simply placed in the run directory. The
+driver without `--collect-units` collects whatever units of the first
+`collection.units` are still missing itself, then merges everything
+present. Inside a unit the trials run in parallel over the cores.
+
+A unit costs what its trials cost and nothing more: the collector — whose
+point index map is keyed by big integers and takes about as long to build
+as a short unit takes to run — is built once for the whole stage rather
+than once per unit, so splitting the same work into eight units instead
+of one no longer adds to the bill.
+
+Two setup costs alongside it were the same shape. Selecting a subgroup
+base rebuilt the whole base after every batch of eight abscissae, which
+is quadratic in the abscissae; it now skips the rebuilds that could only
+have come back short, since an abscissa carries at most two points. And
+the projected signed-orbit map — every base point multiplied by the
+cofactor, then each one's whole Frobenius orbit walked — ran in
+big-integer arithmetic; it now runs in single words where the field fits,
+which it does for every degree this pipeline reaches. At degree 53 on a
+15264-point base, selecting goes from 8.60 s to 0.94 s and the orbit map
+from 8.16 s to 0.048 s, and the base and its columns are unchanged. The
+pair table's 6.7 s is real `|F|²/2` work and is untouched; it is now the
+dominant fixed cost, and unlike the scanning it does not grow with `r`.
+
+A relation file carries only the probe scalar and the factor-base point
+indices of each relation, bound to the parameter digest, curve, factor
+base and summand count. On merge every relation is re-verified in the
+group (`[a]G == Σ P_i`, exactly `m` indices, all in range) and exact
+duplicates are dropped, so a corrupt or forged file cannot poison the
+database — a rejected relation is counted, never used — and a file from
+another run or base is ignored, not merged. Partition invariance is
+tested: the union of any set of units equals the relations of a
+single-process run over the same range, and `ic logs` itself now draws
+its probes from the same sequence in parallel batches.
+
+Parameters (`collection`, all optional):
+
+    "collection":{"unit_trials":4096,"units":4,"max_units":64}
+
+`unit_trials` probes per unit; `units` the number the driver collects
+before the first solve; `max_units` the most it may collect when the
+relations do not yet determine every column. The report's collect stage
+lists the units present, run and ignored; the logs stage reports the
+relations loaded, rejected and deduplicated and which units were used.
+
+A parameter file (schema_version 1):
+
+    {"schema_version":1,"name":"icv1-f2m31-tm90707-c95f16f5","curve":{"degree":31,"curve_a":0},
+     "summands":3,"solver":"pair_table","seed":1,"max_trials":200000,
+     "linear_algebra":{"mode":"sparse",
+                       "sparse":{"solver":"block-wiedemann",
+                                 "spmv":{"backend":"auto","shards":0},
+                                 "wiedemann":{"block_m":4,"block_n":4},
+                                 "lanczos":{"block_size":4,"margin":8},
+                                 "filter":{"target_excess":32,"merge_max_weight":8}}},
+     "collection":{"unit_trials":4096,"units":4,"max_units":64},
+     "factor_base":{"mode":"search","family":"divisor","min_dimension":5,
+                    "max_dimension":11,"targets":256,"saturate":false},
+     "targets":[{"known_log":"654009"},{"random_seed":7},{"random_seed":8}]}
+
+The `search` mode also takes `solve_cost_targets`, the workflow form of
+`--solve-cost-targets` above: with it the select stage ranks candidates by
+measured solving cost instead of by expected trials. It requires
+`solver: "groebner"`, `prune: false`, `saturate: false` and a `factor` or
+`divisor` family, for the reasons given there, and the run is refused if
+they disagree.
+
+`factor_base.mode` is `spec` (with a recipe as written by `ic search`)
+or `search` (the census search's knobs; the best candidate is taken
+without child validation). Each target is a synthetic known-answer
+instance: `known_log` names the scalar, `random_seed` draws one
+reproducibly. Solver is `pair_table` (default), `enumerate`, `groebner`
+or `sat`. `linear_algebra` is optional: `mode` is `sparse` (default;
+filtering plus block Wiedemann or block Lanczos, with every solver and SpMV
+knob under `sparse`) or `dense`. `collection` sizes the work units (above). The
+report lists every stage with whether it ran or was reused — the collect
+stage with its units, the logs stage with its verification counts and
+linear-algebra statistics — and every solution with its expected and
+recovered scalar.
+
+### The ρ baseline (`vs_rho`)
+
+    "baseline":{"rho":true,"rho_seed":5931241263826122831,"rho_max_iterations":268435456}
+
+With `baseline.rho` the driver runs the signed-Frobenius Pollard ρ
+(`koblitz_signed_frobenius_rho_with_progress`, which already carries the
+Koblitz automorphism discount: it walks the `A = 2n` classes) on the
+same known-answer targets, in the same process, after the descent, and
+writes `baseline.json` plus a `vs_rho` block in the report with the
+three timing classes the boundary ledger distinguishes:
+
+- **charged** — per-target descent wall (one decomposition and a lookup
+  against the reused database) against the ρ walk on the same target;
+- **amortised** — select + collect + logs + pair-table wall divided over
+  the targets, plus the descent;
+- **whole process** — the precompute counted once against the ρ total.
+
+Each comes with the ratio `ρ / IC` and a boolean verdict; a verdict is
+`true` only when every target was solved *and* ρ-verified. The ledger's
+`vs_rho` row asks for exactly these fields (`timing_class`,
+`automorphism_discount`, both costs, `claim_boundary`); the report
+carries them, but promoting a row still goes through the ledger's own
+autolab and independent-replay process.
+
+The baseline is a real opponent, not a formality, so read it first:
+
+- It walks the `A = 2n` signed Frobenius classes, by the
+  distinguished-point method — a direct-mapped cache of recent points
+  for the short cycles, a sparse table of stored points for the
+  long-range collision.
+- Fruitless cycles (a cycle whose jumps cancel, which the negation map
+  makes common) are escaped by doubling the cycle's own smallest state,
+  so the walk stays a deterministic map. `charges.fruitless_cycles`
+  counts them.
+- Walks are stepped in batches sharing one field inversion
+  (`parallel_walks`, default 32, scaled down on instances whose whole
+  walk is shorter than the setup would cost).
+- Its step count tracks `√(πr/2) / √(2n)`; a run far above that is a
+  broken baseline, and a `vs_rho` verdict built on one means nothing.
+  `rho.verified` must equal the target count — **a ρ that fails to
+  recover its logarithms makes every ratio in the block meaningless**,
+  which is exactly how an earlier revision of this baseline produced a
+  spurious charged crossover at `n = 41`.
+
+### Pricing every phase: `ic price`
+
+    RAYON_NUM_THREADS=1 taskset -c 2 ./target/release/ic price --params wf.json \
+        --rho-seed 2097353 --cold-rho-seed 2162688 --json --out price.json
+
+`ic workflow`'s stage timers mix phases, which is right for a resumable
+run and wrong for a price:
+
+- the collect stage builds the pair table on its first unit;
+- the logs stage collects further units, verifies relations and solves;
+- files are written between units.
+
+`ic price` (ledger §20) makes the same calls in the same order, in
+memory. It refuses to run on more than one Rayon thread unless told to.
+Each phase is charged to an exclusive clock:
+
+- selection and its projection;
+- the build;
+- the collection, and the collectors and coverage built for it;
+- the log solver's setup, relation verification and the linear algebra;
+- the descent solver's setup, each target's descent, and the final
+  `[d]G = Q` check.
+
+Target construction is on no clock.
+
+Every repetition rebuilds everything from nothing and is converted at
+one batched addition (`add_many` over 1,024 subgroup points), measured
+immediately before and after it. Its native counts must equal the first
+repetition's. The report gives, per phase:
+
+- the median over repetitions, and the first repetition separately;
+- the spread, with the counts beside each phase;
+- three read-outs of the same total: the work a model of the method
+  prices, the constructions around it, and the verification.
+
+With `--rho-seed` it runs batch rho on the same targets
+(`signed_frobenius_rho_batch`) and prices its counted operations at a
+canonical step, one batched addition plus
+`SignedFrobeniusClasses::canon`. The step is measured in the same
+process, with Bailey et al.'s step as a model. `--cold-rho-seed` also
+walks each target alone.
+
+The control that the counts are the workflow's own is
+`research/ic_exponent_20260926/control.py`, which compares a price
+report with `ic workflow`'s report and relation files, field by field.
+
+### Choosing a factor base
+
+Five families are recipes (`ic search --family`): `factor`, `divisor`
+and `union` are linear — an invariant subspace, a divisor of `x^e − 1`,
+or a union of Frobenius translates of a seed span — and `subgroup` is
+not. The linear families exist because the algebraic oracles need them:
+Semaev's polynomials and the Weil descent are written over a subspace.
+The pair-table oracle is a meet-in-the-middle search and needs no
+structure at all, and for it the structure is a cost, not a feature.
+
+`subgroup` draws abscissae pseudo-randomly and keeps `[h]P` for the
+cofactor `h`, so every base point lies in the prime-order subgroup the
+targets live in. Sums of such points cannot leave that subgroup, and the
+measured decomposition rate lands on the `|F|³/(3!·r)` a random base
+would give — at degree 41, one target in 28 against one in 273 for the
+subspace union of the same size, with the same column count. Selection
+uses no logarithm: `[h]P` is in the subgroup whatever `P` is.
+
+Use it with the pair-table solver. `groebner` and `sat` need a linear
+domain and will refuse.
+
+**How big?** With a subgroup base the work per target falls as
+`r/|F|²` — four times cheaper per doubling — while the pair table grows
+as `|F|²`, so the answer depends on how many targets share the database.
+At degree 41: 5248 points costs 3.0 s of precompute and 16.2 ms a
+target, 10496 points costs 9.0 s and 7.2 ms, and the two cross at about
+665 targets. `docs/ic/runs/koblitz-base-size-20260912.json` has the
+sweep and both end-to-end runs. Past about 10500 points at that degree
+the decomposition rate saturates and further growth only makes each
+trial dearer.
+
+`PairSumTable::build` keeps a base inside 4 GiB, and past that budget it
+changes representation rather than refusing. The full table stores each
+pair as `(packed sum, i, j)`, sixteen bytes; the **compact** one stores a
+bucketed hash of the sum in a `u32` — never a false negative, a false
+positive about one time in `2²⁸` — and recovers the summands of a hit by
+one `|F|`-long scan, since `target − P_i` is a base point exactly when
+`i` is a summand. That scan asks the group rather than the table, so a
+false positive costs an empty scan and never a wrong answer. Hits are
+rare, so it is paid about once per relation rather than once per probe.
+
+At a fixed budget `B` the base is `|F| = √(2B / bytes per pair)`, and the
+descent needs `2r/|F|²` probes, so the width of a stored pair is
+proportional to the descent's cost. Four and a half bytes instead of
+sixteen is a base of 42302 points instead of 23169 at 4 GiB, and 3.3
+times fewer probes. Below the budget nothing changes: a base that fits
+with its summands keeps them. Below even the compact size the build
+still refuses with a number instead of an allocation.
+
+`docs/ic/runs/koblitz-reach-versus-memory-20260912.json` collapses the
+cost laws into reach against memory, and then tests them at three
+factor-base widths on one degree. The probe-count law `2r/|F|²` is
+confirmed to within 1.5%; what is not confirmed is the assumption beside
+it, that a probe costs the same whatever the table size. It does not — a
+probe is a random access into a table quadratic in `|F|`, and it measured
+0.148 µs into 0.2 GB against 0.249 µs into 3 GB. The reach therefore
+grows as **`M^1.64`**, not `M²`: 1.64 bits a doubling of memory, and at
+80 bits 576 TiB rather than 64. Read the file's
+`the_exponent_is_an_upper_bound` before quoting any of it — 0.40 was
+fitted entirely inside DRAM, and the law's whole purpose is to push the
+table out of it.
+
+`docs/ic/params/k0n61-subgroup-wide.json` is the largest rung this family
+offers: `icv1-f2m61-t158598901-ab42b6c5`, a 48-bit subgroup, `r = 162 888 033 982 417`, on
+a 36112-point compact base. It solves 32 of 32 with a 53.1 ms descent
+against ρ's 3.248 s — charged 61.2, amortised 1.29, and all three
+verdicts true at 32 targets.
+`docs/ic/runs/koblitz-degree61-20260912.json` records it, and says what
+it does to the earlier reach projection: that projection put the charged
+ratio at 5.1 at 48 bits and wanted 315 targets, because it was measured
+on constants that have since moved three times.
+
+`docs/ic/params/k0n53-subgroup-wide.json` is the degree-53 rung on a
+36464-point base.  Its original compact-table measurement is retained in
+`docs/ic/runs/koblitz-compact-pair-table-20260912.json`: the descent fell
+from 50.4 ms a target to 16.3 ms, but precompute rose from 16.5 s to
+87.8 s.  That is a historical representation comparison; current
+`auto` pricing selects the folded table for this run.
+
+`docs/ic/params/k0n53-subgroup-one-unit.json` is the current same-host
+profile for that base.  A target-independent screen of public relation
+seeds found that seed 6 certifies every one of the 344 orbit columns in
+one 17000-probe unit.  Against the preceding seed-1/26000-probe profile,
+three alternating-order pairs gave median candidate/reference ratios of
+0.840 wall, 0.824 total core-seconds and 0.981 peak RSS; charged work fell
+to 19,363,000 summand scans and 588 verified relations.  The exact first
+complete prefix is trial 16689; the profile keeps a 311-probe cushion.
+
+The primary control is the single scalar-blind target in
+`docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json`:
+
+    target/release/ic workflow \
+      --params docs/ic/params/k0n53-subgroup-one-unit-public-unknown.json \
+      --dir /tmp/k0n53-public-unknown
+
+The select report now exposes its native algebraic-construction counts:
+695 abscissae drawn, 344 lifts, 344 cofactor multiplications, 18,232
+Frobenius squarings and one rebuild.  Fresh and resumed materialisation
+report the same deterministic counts; process CPU, RSS and select wall
+remain charged separately.
+
+Every workflow stage now carries a process-CPU delta and the cumulative
+process RSS high-water mark at its end.  On the current scalar-blind
+replay, select/setup used 1.057 core-seconds, relation collection 7.776,
+logs/verification/LA 1.051, target solve 0.904 and rho 1.581.  Their
+12.369-core-second sum is within 0.012 seconds of the 12.380 whole-process
+meter.  Collection is the measured single-target bottleneck: its folded
+pair-table build used 0.317 s wall and 3.259 core-seconds, while the exact
+17,000-probe relation unit used 0.487 s wall and 4.472 core-seconds.
+
+The single-target successor removes the folded builder's duplicate
+arithmetic pass.  Its count pass retains a six-byte scatter token per
+stored pair; table shapes needing more than 48 token bits use the previous
+recomputation path.  Five matched current-head pairs kept the exact same
+588-relation hash and verified scalar in every run.  Median pair-build
+wall fell from 0.313 s to 0.205 s (0.656x), pair-build CPU from 3.227 to
+2.120 core-seconds (0.659x), full IC wall from 1.225 to 1.105 s (0.901x),
+and whole-process CPU from 12.269 to 11.213 core-seconds (0.914x).  The
+charged trade is memory: median peak RSS rose from 93.9 MB to 125.9 MB
+(1.331x).  A full hash cache was rejected at 2.519x RSS, and a five-byte
+filter variant was rejected after slowing the relation unit by 3.1%.
+A one-worker non-atomic builder cut pair-build wall to 0.957x but
+moved full IC only to 0.988x; duplicating the counting and scatter paths
+was rejected for that small end-to-end gain.  The statically dispatched
+follow-up did not improve it.
+The same exact binaries over five matched one-worker pairs cut the
+single-core pair build from 2.585 to 1.256 s (0.486x), full IC wall from
+8.449 to 7.095 s (0.841x), and whole-process CPU from 10.791 to 9.424
+core-seconds (0.875x).  Median RSS rose from 69.6 to 108.0 MB (1.538x).
+Same-process rho remained faster: rho/IC improved from 0.187 to 0.223,
+leaving IC about 4.49 times slower on one core.
+On this AArch64 host, enabling the scan's existing 32-key lookahead
+with native `PRFM PLDL1KEEP` reduced the one-core relation unit from
+3.929 to 3.877 s (0.989x) over five more matched pairs, full IC from
+7.120 to 7.060 s (0.993x), and whole-process CPU from 9.453 to 9.393
+core-seconds (0.995x), with 5/5 identical relation hashes and essentially
+flat RSS.  Other architectures retain their existing prefetch or no-op
+paths.
+The next successor interleaves eight independent normal-basis rotation
+chains instead of canonicalizing one point at a time.  Over five matched
+one-worker pairs, relation-unit wall fell from 3.901 to 3.566 s (0.915x),
+full IC from 7.090 to 6.757 s (0.953x), and whole-process CPU from 9.414
+to 9.084 core-seconds (0.964x), all winning 5/5 with flat memory.  At
+the default thread count, relation-unit CPU fell from 4.397 to 4.133
+core-seconds (0.939x) and full-process CPU to 0.985x.  The exact current
+one-core replay used 6.744 s for IC against 1.602 s for rho, leaving IC
+4.21 times slower.  Sixteen lanes were rejected after regressing both
+one-core and default-thread relation time.
+Applying the same lanes inside table construction cut one-core pair-build
+CPU to 0.897x but slowed the following relation unit to 1.025x; the
+one-core IC gain was only 0.993x and default-thread process CPU was
+neutral.  That variant was rejected and the scalar table-build path
+retained.
+The workflow also used to rebuild the same public cofactor-projected
+signed-Frobenius predicate in selection, logs, and solve.  A bound
+`ProjectedFactorBase` now constructs and charges it once in selection,
+then reuses exact clones; it carries no logarithm labels.  Over five
+matched one-worker pairs, logs fell from 0.925 to 0.155 s (0.167x), solve
+from 0.790 to 0.019 s (0.024x), full IC from 6.834 to 6.086 s (0.889x),
+and whole-process CPU from 9.157 to 7.634 core-seconds (0.832x), with
+selection unchanged and RSS slightly lower.  At default threads, full IC
+fell from 1.066 to 0.971 s and whole-process CPU to 0.842x.  The exact
+one-core replay used 6.005 s for IC against 1.576 s for rho, leaving IC
+3.81 times slower; the exact default-thread replay used 0.969 s for IC
+against 1.571 s for rho.
+Predicate construction now also uses the factor base's existing signed
+Frobenius coordinates: because `[h](±π^kP) = ±π^k([h]P)`, it performs
+344 representative cofactor multiplications instead of one for all
+36,464 points, then derives every member exactly.  The current native
+receipt also charges 1,896,128 derived-coordinate squarings, 18,232
+negations and 72,928 canonical-orbit coordinate squarings.  Across five
+matched one-worker pairs, selection fell from 0.953 to 0.206 s (0.216x),
+full IC from 6.003 to 5.343 s (0.888x), and whole-process CPU from 7.557
+to 6.909 core-seconds (0.913x), all winning 5/5.  At default threads,
+full IC fell from 0.965 to 0.888 s (0.915x), whole-process CPU to 0.906x,
+and RSS was lower in 5/5 runs.  Median one-core IC remains about 3.37
+times slower than rho; default-thread rho/IC improves to 1.778.
+Making each complete eight-point canonicalization chunk explicitly
+fixed-width, with only the final remainder scalar, reduced the one-core
+relation unit from 3.567 to 3.517 s (0.985x), full IC to 0.988x and
+whole-process CPU to 0.990x over five matched pairs.  At default threads,
+relation-unit wall fell to 0.968x, unit CPU to 0.979x and full IC to
+0.987x; median RSS rose 1.8%.  Every relation-unit and IC comparison won
+5/5 with the same relation hash and scalar.
+
+Public hash seed 53001 constructs no target scalar and supplies no
+factor-base logs; relation-derived logs recovered `7892094459170` and
+verified the published point in all five fresh runs.  The selected
+operational profile charges base materialisation, pair-table predicate
+construction, relation collection and verification, sparse linear
+algebra, descent, process CPU and peak RSS.  It won 4/5 whole-process
+wall comparisons, with medians of 1.380 s IC and 1.589 s rho, but IC
+alone still used 10.573 core-seconds.  The wall crossover is not a
+total-compute crossover.
+
+The parameter search is retained and charged separately rather than
+made free: 45 through-logs processes used 77.960 sequential wall-seconds,
+484.310 core-seconds and at most 106.9 MB RSS.  Charging that discovery
+to a first-ever single target gives 79.340 s wall and 494.883
+core-seconds on the IC side, so it does not cross rho.  The selected-run
+ratio applies only once the public profile is fixed; amortisation must
+name and count later targets explicitly.
+
+Adjacent factor-base widths and collection windows did not reduce the
+complete rank-producing core cost.  Reusing window scratch preserved
+every relation hash and scalar across eight matched pairs but was speed
+neutral (0.997 median wall, 1.001 core) and therefore rejected.  Across
+selection, validation and rejected diagnostics, the retained science
+campaign contains 318 processes, 1,395.641 sequential wall-seconds,
+3,192.182 core-seconds and a 246.0 MB maximum RSS (the maximum belongs to
+a rejected uncompressed-cache run).
+
+Before the cached builder, five fresh scalar-blind repeats with
+`RAYON_NUM_THREADS=1` used a median 8.570 s for full IC against 1.599 s
+for rho: IC was 5.362 times
+slower, with 10.984 total process core-seconds, 68.5 MB peak RSS and a
+1.008 wall/core ratio.  A one-pass 2/4/6/8/10/12/14-thread diagnostic
+first crossed wall at eight threads; no thread count produced a
+single-target core crossover.  As a secondary amortisation control, the
+independent 32-target one-thread holdout spent 8.819 s in IC against
+32.916 s in rho, with 32/32 verified.  The batch result does not repair
+the single-target loss.
+
+`docs/ic/runs/koblitz-n53-one-unit-20260921.json` records the seed
+screen, discovery envelope, thread diagnostic, repeats, resources and
+remaining gate failures.  This is a bounded engineering improvement,
+not a SOTA claim.
+
+**`descent_summands`** lets the descent ask for a different number of
+summands than collection, which shares only the base and its pair table.
+Collection wants few probes (each costs two scalar multiplications) so
+it takes three; the descent walks its probes by `+G` in blocks sharing
+one inversion, which makes a probe cheaper than the lookup after it, so
+two wins. At degree 41 that is 14.35 ms a target against 8.63 on a
+5248-point base, and 7.20 against 4.65 on a 10496-point one.
+
+### Ledger rungs, ready to run
+
+`docs/ic/params/k0n{31,37,39,41}.json` are the four Koblitz rungs of the
+boundary ledger as parameter files — 32 known-answer targets each, the
+ρ baseline on, collection units sized to the base:
+
+    ./target/release/ic workflow --params docs/ic/params/k0n41.json --dir /tmp/n41
+
+`docs/ic/params/k0n53-subgroup.json` is the largest subgroup this family
+offers (44 bits, 38× the degree-41 rung). It solves 32 of 32 with a
+49 ms descent against ρ's 1.216 s, and
+`docs/ic/runs/koblitz-degree53-and-reach-20260912.json` carries it
+together with the projection of where the advantage runs out: the
+charged class survives to about a 52-bit subgroup, and the whole-process
+class needs a batch of targets that grows with `r` (16 at 40 bits, 96 at
+45, 834 at 50). Relation collection is what stops it, not the descent.
+
+`docs/ic/params/k0n{31,37,39,41}-subgroup.json` are the same four rungs
+with subgroup bases; `docs/ic/runs/koblitz-subgroup-bases-20260912.json`
+records them, and the charged ρ/IC ratio there crosses 1 at degrees 37,
+39 and 41 (8.3 at 41). Read that file's `what_this_is_not` before
+quoting it — in particular, its degree-41 whole-process verdict is a
+bulk statement about 32 targets, not a single-instance one.
+
+`docs/ic/runs/koblitz-scaling-20260911.json` records two consecutive
+series of all four, with per-stage timings, filter and Wiedemann
+statistics, and both ρ and IC verification counts. No rung crosses: the
+charged ρ/IC ratio is below 1 at every one. Read its
+`what_this_is_not` before quoting any number from it.
+
+## The boundary ledger: `ic boundary`
+
+    ./target/release/ic boundary --quick
+    ./target/release/ic boundary --regime koblitz --koblitz-degrees 23,31,41 --repeats 2 --out ledger.json
+    ./target/release/ic boundary --oracles --out docs/ic/runs/ic-boundary-ledger-YYYY-MM-DD.json
+
+`boundary` is the one-table-one-unit measurement `AGENTS.md` asks for,
+run over three regimes at once: a generic prime-field curve, a random
+binary curve, and a Koblitz curve.  Every variant of every regime solves
+the same planted logarithm end to end — factor base, relation
+collection, decomposition oracle, linear algebra, verification — and is
+priced in **group-addition equivalents per `√r`** against two
+boundaries: the generic floor `√(π/2A)` for the automorphisms `A` the
+curve offers, and a counted Pollard rho on the same instance in the same
+process, matched to those automorphisms: the negation-map walk on the
+prime and random binary curves, where the plain walk runs beside it on
+the same seeds as the before mark (ledger §18), and the signed
+Frobenius walk on Koblitz curves.  Native counters — trials, pair-table
+probes, square roots, Artin–Schreier solves, pairs of the
+pairs-and-solve loop, multiply-subtracts of the elimination — are exact;
+the conversion to additions uses the ratios **pinned in
+[`calibration.json`](calibration.json)**, so that two runs price
+identical native counts identically.
+
+That pinning is Round 4 (the note's §12).  Through Round 3 the factors
+were measured on the host at the start of each run, and the *ratios*
+between them drifted — a median of `1.08` and up to `3.70` for the same
+instance and unit across three ladders on one machine — which repriced
+rows that had done identical work by up to eight per cent and put a
+floor under every cross-run comparison the ledger makes.  Operation
+counts survive hardware, as `AGENTS.md` §6 requires; a conversion
+re-measured per run does not.  The host's factors are still taken and
+still reported, as `calibration_measured`, because they are the
+wall-clock practicality note and because a host that stops resembling
+the reference one should be visible — they simply price nothing.  An
+instance the table does not carry keeps them and says so in
+`calibration_pinned`, so a row priced the old way is never silent about
+it.  `tools/boundary_pin_calibration.py` regenerates the table as the
+median over a set of frozen runs.
+
+The relation phase also carries its counting ceiling, `C(F+m−1, m)/#E`,
+and the measured yield against it.
+
+Variants: Semaev `S₃` roots, direct subtraction and meet in the middle
+(`m = 2, 3`) on prime curves; `S₄` pairs-and-solve and meet in the
+middle on random binary curves over the low-order subspace of dimension
+`⌈n/3⌉`; meet in the middle over signed-Frobenius-orbit columns, the
+same without the fold, and `S₄` pairs-and-solve over the invariant
+subspace on Koblitz curves.  Exponents `ops ∝ r^α` are fitted per phase
+over the ladder.  `--oracles` additionally prices the decomposition
+oracles that cannot finish a logarithm at these sizes — matrix-F4 (word
+XORs, exact), CDCL SAT (conflicts), enumeration, meet in the middle,
+`S₄` — per target on the Koblitz Semaev systems, with each system's
+unknowns, equations, degree, Macaulay profile and first fall degree.
+
+The frozen run (`runs/ic-boundary-ledger-2026-09-21.json`) and its
+reading are in
+[`research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md`](../../research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md);
+the report JSON carries the Markdown tables under `markdown`.  The
+scripts in `tools/` render a report into the note's tables
+(`boundary_ledger_tables.py`), the scoreboard's rows
+(`boundary_scoreboard_rows.py`) and the ledger twin's records
+(`boundary_ledger_update.py`), so a new run updates the three places
+`AGENTS.md` §7 requires without numbers being typed.
+
+**Round 2** (`runs/ic-boundary-ledger-round2-2026-09-21.json`, the note's
+§10) keeps every first-round row as its *before* mark and adds, per
+regime, the rungs of a cumulative engineering ledger, named by suffix:
+`_negfold` (the pair table built once per pair up to negation, `|F|²/4`
+additions instead of `|F|²/2`), `_frobfold` (Koblitz: once per pair up
+to negation and the Frobenius, keyed by the normal-basis canonical form
+of the sum's abscissa, `|F|²/(4n)`; canonicalisations counted and priced
+at a measured factor), `_walk` (targets from a 16-jump r-adding walk
+with tracked coefficients, one addition each, fresh jumps per segment),
+`mitm_m2_…` rows wherever the cofactor classes admit two summands and
+the exact floor fits the budget, and `_balanced` (Koblitz, `n ≥ 37`: a
+base sized to balance the folded table against the walk's trials).
+Every row carries the **exact** counting ceiling next to the uniform
+one — the `m`-multisets of base points whose cofactor classes cancel,
+over `r` — which is the §3.5 accounting correction of the first round.
+
+Every row is also **guarded against decomposing one group element
+twice**.  Two rows with the same factor-base part and different `(a, b)`
+pin the logarithm by themselves, which is a generic collision resolved
+through the factor base rather than a relation, and it arrives after
+about `√r` targets whatever the oracle costs; measured, it ends 24.4% of
+unguarded two-summand runs and 82% of those whose walk segments share
+one jump table.  The guard is one hash insert per target, counted as
+`target_guard_probes` and priced as a lookup, with
+`repeated_targets_skipped`, `repeated_column_rows` and
+`pinned_by_repeated_row` reported.  `--unguarded-targets` reproduces the
+old behaviour for that diagnostic; the note's §10.2 has the numbers.
+
+**Round 3** (`runs/ic-boundary-ledger-round3-2026-09-21.json`, the note's
+§11) does not add a suffix.  Its first lever makes an existing row
+cheaper: the walk's **restarts**.  Round 2 redrew all sixteen jumps at
+two scalar multiplications each whenever the target guard forced a
+restart, which on the rungs that restart often cost more than every walk
+step put together.  The walk now draws its jumps once, keeps sixteen
+pooled offsets beside them, and restarts by adding one offset to the
+current point while rotating which jump each hash selects — so two
+segments still have different step functions and cannot merge, at one
+group operation per restart instead of thirty-two scalar
+multiplications.  The second lever gives the prime and binary regimes
+the `_balanced` row the Koblitz regime already had.  The third is
+reporting: every row now carries its ratio to the **family shape law**
+
+```text
+    ops(F) = F²/(4t) + c·#E/(2kF),   least at F = (c·#E·t/k)^{1/3}
+    S_family = 0.75·(#E·t/k)^{2/3} / (t·√r)
+```
+
+with `t` the table fold (1 up to negation, `n` up to `⟨σ, −1⟩`) and `k`
+the column fold (1 per abscissa, `n` per signed Frobenius orbit).  On a
+prime-order curve that is `Θ(r^{1/6})`, so no choice of base size
+escapes it and every constant this repository can tune lives inside the
+`0.75`.  It is a model of the family and not a bound on the problem —
+the relation count is an expectation over the cycle structure, so a row
+can land under it — and it is reported next to the generic floor, which
+is a bound.
+
+`tools/boundary_round_compare.py` pairs rows two ways and saves the
+`speedup = baseline_total_operations / candidate_total_operations`
+comparison `AGENTS.md` §8 asks for.  Within a run it pairs each new row
+with the rung it was built on (same curve, target, seed), which is what
+prices a row a round *adds*; with `--across <previous-round.json>` it
+pairs each row with the same-named row of the previous round's run on
+the same instance and seed, which is the only pairing that can see a
+lever that makes an existing row cheaper without renaming it.  It also
+records which first-round rows reproduce the frozen counts and which the
+target guard moved.
+
+## The pluggable benchmarking framework: `ic bench`
+
+`ic bench` runs one index-calculus *configuration* — a factor base, a
+target source, a decomposition oracle, a polynomial-system solver and a
+relation matrix, each chosen by name — end to end against a planted
+logarithm, and prices every stage in the ledger's unit so that swapping
+one stage shows what it changes and nothing else.  `ic bench --list`
+prints what can be plugged in at each stage; `--sweep` runs a matrix of
+configurations from a JSON file and prints one table.
+
+    ./target/release/ic bench --list
+    ./target/release/ic bench --char2-degree 13 \
+        --factor-base binary-subspace:dimension=6 \
+        --oracle descent-algebraic:m=2 --solver buchberger-f2
+    ./target/release/ic bench --sweep docs/ic/sweeps/solver-engines.json
+
+A plug-in is written `name:key=value,key=value`. The `,` ends a
+parameter, so a parameter that takes several values separates them with
+`;`: `--factor-base 'koblitz-orbit:divisor=1;2'` selects factors 1 and 2
+(quote it, since a bare `;` ends a shell command). `divisor=1,2` is
+refused with an error that names the `;`.
+
+[`FRAMEWORK.md`](FRAMEWORK.md) is the manual: the unit, the report
+columns, the stage contracts, a worked example of adding a solver (the
+plug point for F4, F5, XL, SAT), the sweep schema and the reporting
+rules a comparison has to keep.  `ic descent` measures the algebraic
+oracle's systems on their own, in the shape of Petit–Quisquater's
+Table 2 (§14 of the ledger note); it is a stage diagnostic, never a
+speed, and `ic bench` is where the same solver's cost reaches `S`.
+`ic bench` also runs counted Pollard rho on the same instance and
+planted targets (`--rho-runs`, default 16) and fills the table's
+`vs rho` column from it. The column divides by the **matched** walk: the
+negation map (`A = 2`) on prime and random binary curves, and on a
+Koblitz curve the cheaper of the signed-Frobenius and negation walks.
+The plain walk every report used through ledger §17 rides along as the
+before mark. `ic rho` runs the walks paired over a ladder, and
+`ic rho --reprice FILE` re-prices a frozen report against the matched
+walk (ledger §18). `ic rho --batch-koblitz a/n` runs batch rho, `k`
+targets in one group solved together, which is the reference for any
+figure that amortises one build over `k` targets (ledger §19).
+
+    ./target/release/ic rho --prime-bits 16,20,24 --char2-degrees 17,21,25 --runs 64
+    ./target/release/ic rho --reprice docs/ic/runs/ic-boundary-ledger-round5-2026-09-22.json
+    ./target/release/ic rho --batch-koblitz 0/41 --batch-sizes 1,32 --batches 16
+
+With `--solver` (repeated once per engine), `ic descent` prices
+several registered engines on the same seeded systems instead of the
+built-in Buchberger: every engine solves every target `--repeats`
+times, interleaved per target with the engine order rotated each
+repetition, and every answer is checked against the reference engine
+(`fes-f2` on quadratic cells, `exhaustive` otherwise).  Each system
+carries a blake3 fingerprint and each cell a digest of the reference
+answers, so a later run can prove it saw the same inputs and decided
+them the same way.
+
+    ./target/release/ic descent --cells 17:9:2,21:11:2 --targets 8 --repeats 3 \
+        --solver buchberger-f2 --solver f4-f2 --solver matrix-f5 \
+        --solver crossbred-f2 --solver fes-f2 --solver exhaustive
+
+The matched suite that freezes this comparison, with its whole-pipeline
+counterpart, is
+[`research/ic_framework_engines_20260922/`](../../research/ic_framework_engines_20260922/README.md).
+
+## A benchmark corpus: `ic corpus`
+
+    ./target/release/ic corpus --degree 19 --dimension 6 --sat 5 --unsat 5 --dir corpus/n19l6
+
+Writes Weil-descended symmetrised Semaev `S₄` instances — the family of
+`mtrimoska/EC-Index-Calculus-Benchmarks` — for external solvers: DIMACS
+with native `x` parity lines, plain CNF, one GF(2) polynomial per line
+(`.anf`), a Magma script computing the Gröbner basis, and an `INFO`
+file with the target, the label, the planted witness and its SAT
+assignment.  Labels are certified: satisfiable instances plant a sum of
+three factor-base points and are confirmed by a model of this crate's
+solver; unsatisfiable ones are refuted by the complete pairs-and-solve
+search.  `docs/ic/corpus/` holds small generated sets with their
+reports; everything is deterministic in `--seed`.
 
 ## Random fixtures and custom parameters
 
@@ -334,6 +1183,13 @@ unsuccessful. Clap usage errors use its standard nonzero exit status.
     cargo test --release --test ic_framework --test ic_progress
     cargo test --release --lib koblitz_
 
+The end-to-end pipeline is gated in CI as well: `ic-e2e-benchmark.yml` runs
+the whole method plus the in-process ρ baseline on three frozen ledger rungs
+and fails closed on an unverified logarithm, a drifted seeded counter, or a
+regressed same-host end-to-end wall ratio. What it checks, what passing
+does not claim, and how to re-freeze after a deliberate change are in
+[`ci/README.md`](ci/README.md).
+
 Tests cover named profiles, custom prime curves, generated-fixture
 round trips, reproducibility, malformed and ambiguous parameters,
 resource reporting, a degree-11 synthetic run under both accountings,
@@ -343,3 +1199,144 @@ binding of recipes to their curve, and exclusive artifact creation. The
 library tests cross-check the pair table, the exact census, orbit pruning
 and the incremental relation solver against exhaustive search and the
 dense modular solver.
+
+## The pair table, folded by the signed Frobenius group
+
+The base is closed under `π` and negation, so its pair sums are too, and
+the table needs one key per `⟨π, −1⟩`-orbit rather than one per pair. The
+canonical key is `1 + min_k x^{2^k}` — the sign costs nothing, since
+negation does not move the abscissa. Measured at `n = 61`: 122 times fewer
+stored pairs, a base 11.0 times wider at 4 GiB (42302 → 467128), 122 times
+fewer descent probes, and **197×** end to end per decomposed target at
+matched bytes — 2.0× of which is the fold on the code as it stood, the
+rest being five costs that only a base eleven times wider makes visible.
+
+Recovery is `O(n)`, not `O(|F|)`: a folded entry names the signed orbit
+one summand lies in, in the high half of its rest word, so recovering the
+summands walks 122 points rather than 177632. It costs no memory — the
+tag is spent out of the rest, not added to it.
+
+The key itself is the least rotation of the abscissa's coordinates in a
+normal basis, where the Frobenius *is* a rotation — `FrobeniusCanon` in
+`koblitz_fast.rs`. Computed instead as a chain of `n − 1` squarings a
+probe costs 1125 ns rather than 340 and the fold is worth 2.0× rather
+than 2.8×.
+
+The naming is done in a **normal basis**, where `π` is a one-bit
+rotation of the coordinate word and the orbit is that word's `n`
+rotations: the key is the least of them. In a polynomial basis the same
+key is `1 + min_k x^{2^k}`, `n − 1` squarings, and that cost the fold
+most of what it was worth — 733 ns against 85, and 2.0× end to end
+against 3.3×.
+
+- `koblitz_fast::NormalBasis` builds the basis and is the key; the two
+  keys pick different representatives of the same orbit, so a folded
+  table is not portable across the change.
+- `PairSumTable::build_within` chooses the tier by a **measured cost
+  model**, not by what fits. It has been ordered three ways: first that
+  fits (summands, compact, fold), then fold-first, and now neither. Both
+  fixed orders treat the tier as a property of the base, and it is not —
+  the fold buys a build `2n` times cheaper and pays for it on every
+  probe, so the answer depends on how much probing amortises the build.
+  `ProbeBudget` carries that volume; `build_within_for` takes one.
+  Priced in group additions over four widths on one curve, the cheapest
+  tier is full below about 8000 points, compact from there to about
+  16000, and folded above; `full/folded` crosses one at `|F| ≈ 13,623`.
+  The default never picks `full` — it wins only the narrowest width
+  measured, by 5.8%, inside the conversion's own noise, and costs four
+  times the memory — but every tier stays reachable by name and `ic`'s
+  `pair_table_tier` overrides the choice.
+  `docs/ic/runs/koblitz-tier-crossover-20260921.json` is the sweep.
+- `PairSumTable::folded_byte_size` is the sizing law to choose a base by.
+- `PairSumTable::contains_pair` is the probe on its own, without the
+  `O(|F|)` summand recovery a hit would otherwise charge to it — one
+  target at a time, which is *not* how the `m = 3` scan probes and costs
+  roughly twice as much on a folded table; see the probe-shape bullet
+  below before quoting it.
+- `docs/ic/params/k0n61-subgroup-folded.json` asks for a 300000-point
+  base, which only the folded tier can hold.
+- `examples/koblitz_orbit_fold_width.rs` is the measurement;
+  `docs/ic/runs/koblitz-orbit-fold-20260913.json` is what it produced.
+- `examples/koblitz_fold_cost.rs` prices the canonicalisation on its own,
+  four ways: the squaring chain serially and eight points in flight, a
+  shift reduction for a sparse irreducible, and the normal-basis
+  rotation.  At `n = 61` that is 846.8 / 733.7 / 1299.3 ns against
+  **85.5**.
+- `examples/koblitz_orbit_fold_width.rs` also prices a probe in the three
+  shapes the code probes in, because they are far enough apart that "a
+  probe" has to say which.  Median of three runs at `n = 61`: one target
+  at a time the fold costs **2.8×**, blocked at the descent's own
+  `BLOCK = 1024` and prefetched **2.0×**, and inside the `m = 3` scan
+  itself **1.51×**.  What separates the columns of that last one is
+  **74 ns** a base point, and the canonicalisation measured alone is
+  **76** — so the fold's cost in the descent is the canon and nothing
+  else.  Read it down the columns: blocking buys the folded table
+  **1.83×** and the compact table **1.35×**.
+  `docs/ic/runs/koblitz-probe-shape-20260913.json` records it, and what
+  it does not claim.
+- `examples/probe_window_sweep.rs` then asks *why* blocking pays, with
+  the control that comparison lacks: the folded table canonicalised with
+  `k` rotations instead of `n`, so the lookup is held fixed and only the
+  key's length moves.  The gain does not scale with the key — it
+  **steps**, doubling between `k = 8` and `k = 10` and flat on either
+  side, which at six uops a rotation puts the knee at **82 to 94 uops**
+  against this host's **97-entry scheduler**.  So the capacity that
+  binds is the scheduler, not the 224-entry ROB; the `x < best` branch
+  is a `cmovb` and never mispredicted; and TLB pressure was never a
+  competing hypothesis, since it sets how big the exposed round trip is
+  rather than whether it is exposed.
+- `examples/m4_inversion_cost.rs` prices the `m = 4` arm's unbatched
+  `FastCurve::add`: a Fermat inversion at **1300 ns** a `(k, l)` against
+  `add_many`'s **68**, which is twelve times the lone-probe penalty the
+  note used to name as that arm's problem.  The arm now batches that
+  inversion the way `m = 3` does, and the same harness measures the arm
+  itself: **1155.5 → 123 ns** a `(k, l)`, **9.4×**, with the 1030 ns
+  saved matching the Fermat inversion the binary measures alone.
+  Measured at `n = 61` where a target has no witnesses, because at
+  `n = 19` the `|F|`-long compact recovery each hit pays hides the whole
+  difference — 2452 against 2429, 1% apart.
+  `docs/ic/runs/koblitz-m4-batched-20260921.json` records it.  No
+  shipped parameter set asks for `m = 4`, so no `S` moves and no
+  scoreboard row follows: **engineering** by `AGENTS.md` §3.
+- The three bullets above are **stage diagnostics** (`AGENTS.md` §2):
+  each prices one slice — a probe, a key, an inversion — so none is a
+  speedup, and the ones that correct an earlier figure are
+  **accounting** by §3.  The method's speed is its `S` column, whole and
+  cold; none of this moves it, so none of it is a scoreboard row.
+
+- `docs/ic/runs/koblitz-degree61-folded-20260913.json` — the pipeline run
+  whole at 300608 points / 2464 orbits: 32 of 32 verified, **330.7×** over
+  ρ charged, and an unplanned A/B of the orbit tag and row filter in the
+  real pipeline (collection units 31× faster, solve 65× faster, resident
+  memory halved, relation counts identical unit for unit). Amortised over
+  32 targets the wider base is *worse* than the 36112-point one; the two
+  cross at about 3600 targets.
+
+- `docs/ic/runs/koblitz-width-curve-20260913.json` — four folded widths at
+  degree 61, 32 targets each, all verified. The charged ratio rises
+  monotonically with width (71 → 76 → 141 → 326); the amortised ratio is
+  flat at ~6.2 from 45872 to 50752, then falls to 4.21 and 0.673.
+  Optimising the charged number alone points at the widest base memory can
+  hold, which is the worst of them.
+
+**Two laws, two questions.** `r_max ∝ M²/(C + β·log M)²` says how large a
+subgroup can be attacked at all — a charged-regime statement, precompute
+assumed paid. The width curve says which width is cheapest for `T`
+targets at fixed `r`, where precompute is most of the bill. Memory sets
+the reach; the target count sets how much of that memory is worth using.
+
+## Persistent fixed parameters through degree 131
+
+`ic fixed --params docs/ic/params/ecc2k130-fixed.json --dir runs/ecc2k130-fixed --stage select`
+validates the actual fixed parameters and persists the factor base.
+[Fixed parameters](FIXED_PARAMETERS.md) documents bounded collection, resumable
+pair tables, precomputed logarithms, direct target equations and the complete
+small-curve example. This CPU Python workflow accepts full-width coordinates;
+the existing Rust symbolic engine remains limited to degree 63.
+
+### Learned solver and budget selector
+
+The fixed workflow accepts `--solver learned --selector-model MODEL.json`.
+[Solver selection](SOLVER_SELECTION.md) describes the matched natural-query
+benchmark, cost-sensitive tree, exact fallback and audited initial result.
+The initial portfolio selected a constant pair-table policy; no speedup is established.

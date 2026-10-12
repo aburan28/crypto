@@ -1,0 +1,32 @@
+{
+  "checks": [
+    "frozen_input",
+    "small_budget_exhaustive_partition",
+    "fixed_budget_fractions",
+    "threshold_minimality",
+    "physical_slot_maxima",
+    "conditional_orbit_floor",
+    "parent_admission_rank_one_parity"
+  ],
+  "classification": "PASS_INDEPENDENT_REPLAY",
+  "parent_admission_command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+    "/private/tmp/ecc2k130-m3-admission-20260929/research/ecc2k130_leaf_native_m3_gate_20260926/admission.py",
+    "--ordered-slot-sizes",
+    "26590",
+    "26590",
+    "26590",
+    "--target-space-size",
+    "680564733841876926932320129493409985129",
+    "--targets",
+    "1000000",
+    "--required-rank",
+    "1",
+    "--rows-per-target-max",
+    "1"
+  ],
+  "parent_admission_sha256": "2a03a30c337d5dfb4d0d30ddff102293db6c8461ea1520138ef268ea5c8f0ece",
+  "parent_admission_stdout_sha256": "cc3298b72e0d2623e89a12d4c26700e8297a8831a7680ae6169c940487b14679",
+  "result_sha256": "17dd96c37013a2e4d173dcdf5c60acc506466eb6b01c88d88a555c8ca4b6135f",
+  "verifier_sha256": "8f8e16aaa274431f5c8c5d87f86dc51e1b0acff7167fc88981d85b63564eba7f"
+}

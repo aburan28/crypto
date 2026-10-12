@@ -1,0 +1,23 @@
+reference clock: 2.100 GHz
+
+| scheme | operation | kilocycles | ops/s | correct |
+|--------|-----------|-----------:|------:|:-------:|
+| ML-KEM-512 | keygen | 258.256 | 8131 | yes |
+| ML-KEM-512 | encaps | 284.688 | 7376 | yes |
+| ML-KEM-512 | decaps | 258.328 | 8129 | yes |
+| ML-KEM-768 | keygen | 412.946 | 5085 | yes |
+| ML-KEM-768 | encaps | 463.356 | 4532 | yes |
+| ML-KEM-768 | decaps | 410.848 | 5111 | yes |
+| ML-KEM-1024 | keygen | 597.140 | 3517 | yes |
+| ML-KEM-1024 | encaps | 667.598 | 3146 | yes |
+| ML-KEM-1024 | decaps | 615.382 | 3413 | yes |
+| ML-KEM-512 fast | keygen | 51.152 | 41054 | yes |
+| ML-KEM-512 fast | encaps | 51.372 | 40878 | yes |
+| ML-KEM-512 fast | decaps | 67.462 | 31129 | yes |
+| ML-KEM-768 fast | keygen | 85.082 | 24682 | yes |
+| ML-KEM-768 fast | encaps | 85.072 | 24685 | yes |
+| ML-KEM-768 fast | decaps | 104.924 | 20014 | yes |
+| ML-KEM-1024 fast | keygen | 135.286 | 15523 | yes |
+| ML-KEM-1024 fast | encaps | 127.240 | 16504 | yes |
+| ML-KEM-1024 fast | decaps | 155.878 | 13472 | yes |
+

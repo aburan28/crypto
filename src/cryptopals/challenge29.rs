@@ -85,7 +85,8 @@ fn glue_padding(len: usize) -> Vec<u8> {
 pub fn run() -> Report {
     let mut r = Report::new(29, "SHA-1 length extension");
     let key = b"YELLOW SUBMARINE";
-    let msg: &[u8] = b"comment1=cooking%20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon";
+    let msg: &[u8] =
+        b"comment1=cooking%20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon";
     let tag = sha1_mac(key, msg);
     let suffix = b";admin=true";
     // Attack: try keys of plausible length (we don't know it).

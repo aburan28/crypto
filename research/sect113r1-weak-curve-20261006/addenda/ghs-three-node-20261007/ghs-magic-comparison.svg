@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="520" viewBox="0 0 1280 520" role="img" aria-labelledby="title desc">
+  <title id="title">GHS magic number at the three tested sect113r1-class nodes</title>
+  <desc id="desc">All three tested curves have magic number 113. A dashed line at magic number 7 marks the largest magic number whose type-I genus is at most the frozen bound 64.</desc>
+  <rect width="1280" height="520" fill="#ffffff"/>
+  <text x="640" y="34" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="22" font-weight="bold" fill="#1e2d3a">Three-node GHS structural screen</text>
+  <text x="640" y="59" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="14" fill="#4a5b68">Magic number m (exact native diagnostic; n=3 curves)</text>
+
+  <line x1="480" y1="405" x2="1180" y2="405" stroke="#273846" stroke-width="2"/>
+  <line x1="480" y1="88" x2="480" y2="405" stroke="#273846" stroke-width="2"/>
+
+  <g font-family="DejaVu Sans, sans-serif" font-size="12" fill="#435563" text-anchor="middle">
+    <line x1="480" y1="405" x2="480" y2="412" stroke="#273846"/><text x="480" y="432">0</text>
+    <line x1="523.4" y1="405" x2="523.4" y2="412" stroke="#273846"/><text x="523.4" y="432">7</text>
+    <line x1="678.2" y1="405" x2="678.2" y2="412" stroke="#273846"/><text x="678.2" y="432">32</text>
+    <line x1="876.5" y1="405" x2="876.5" y2="412" stroke="#273846"/><text x="876.5" y="432">64</text>
+    <line x1="1074.7" y1="405" x2="1074.7" y2="412" stroke="#273846"/><text x="1074.7" y="432">96</text>
+    <line x1="1180" y1="405" x2="1180" y2="412" stroke="#273846"/><text x="1180" y="432">113</text>
+  </g>
+
+  <line x1="523.4" y1="82" x2="523.4" y2="405" stroke="#c98900" stroke-width="3" stroke-dasharray="9 6"/>
+  <rect x="535" y="77" width="232" height="44" rx="5" fill="#fff4d6" stroke="#c98900"/>
+  <text x="547" y="95" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="bold" fill="#835b00">m = 7 frontier</text>
+  <text x="547" y="112" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#835b00">type-I genus 2^(m-1)-1 &lt;= 64</text>
+
+  <g font-family="DejaVu Sans, sans-serif">
+    <text x="468" y="168" text-anchor="end" font-size="12" fill="#2f4454">icv1-f2m113-tm122610772499221213-97df4ac6</text>
+    <rect x="480" y="139" width="700" height="44" rx="4" fill="#3277b3"/>
+    <text x="1164" y="167" text-anchor="end" font-size="14" font-weight="bold" fill="#ffffff">m = 113</text>
+
+    <text x="468" y="258" text-anchor="end" font-size="12" fill="#2f4454">icv1-f2m113-tm122610772499221213-fd54d0eb</text>
+    <rect x="480" y="229" width="700" height="44" rx="4" fill="#4a9654"/>
+    <text x="1164" y="257" text-anchor="end" font-size="14" font-weight="bold" fill="#ffffff">m = 113</text>
+
+    <text x="468" y="348" text-anchor="end" font-size="12" fill="#2f4454">icv1-f2m113-tm122610772499221213-5de3030f</text>
+    <rect x="480" y="319" width="700" height="44" rx="4" fill="#7653a6"/>
+    <text x="1164" y="347" text-anchor="end" font-size="14" font-weight="bold" fill="#ffffff">m = 113</text>
+  </g>
+
+  <text x="830" y="465" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="13" fill="#2f4454">All three: type I, genus 2^112 - 1, cover degree 2^113; 0 candidates within genus bound 64</text>
+  <text x="830" y="489" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="10" fill="#6a7882">Source: manifest.json and the three preserved ghs-screen/v1 outputs; structural evidence only, not an attack benchmark.</text>
+</svg>

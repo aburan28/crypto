@@ -1,0 +1,29 @@
+{
+  "status": "passed",
+  "purpose": "separate-source no-algorithm-change control",
+  "comparison": {
+    "candidate": "source_control",
+    "candidate_over_baseline": 1.0000219269503994,
+    "ci95": [
+      1.000008387301969,
+      1.0000392576189896
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 4,
+    "native_wall_candidate_over_baseline": 0.9989952087296416,
+    "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+    "paired_cases": 4,
+    "per_cell": {
+      "n13a0": 1.0000278851515818,
+      "n17a1": 1.000004078773627,
+      "n19a0": 1.0000126958488742,
+      "n23a0": 1.0000430484701988
+    },
+    "speedup": 0.9999780735303813
+  },
+  "audit": {
+    "status": "VERIFIED",
+    "trial_receipts": 60,
+    "source_files": 450
+  }
+}

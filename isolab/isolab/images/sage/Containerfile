@@ -1,0 +1,22 @@
+# isolab-sage: the official SageMath image (Debian based) with the base image's Python additions.
+# Sage already ships NumPy, SciPy, SymPy, Cython, gmpy2, PARI, FLINT, GMP and MPFR.
+# DOT_SAGE points at /tmp because containers run with a read-only root filesystem.
+# Behind a TLS-intercepting proxy, pass its CA bundle as a build secret:
+#   podman build --secret id=ca,src=/path/ca.pem ...   (docker: the same flag)
+ARG SAGE_TAG=latest
+FROM docker.io/sagemath/sagemath:${SAGE_TAG}
+USER root
+ENV DEBIAN_FRONTEND=noninteractive DOT_SAGE=/tmp/dot_sage PIP_NO_CACHE_DIR=1
+RUN apt-get update && apt-get install -y --no-install-recommends numactl time hwloc-nox && rm -rf /var/lib/apt/lists/*
+RUN --mount=type=secret,id=ca,required=false \
+    if [ -s /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi; \
+    sage -pip install pandas && sage -python -c "import gmpy2, pandas"
+# Jobs run with every capability dropped, so root cannot read a 0750 home it does not own:
+# open the Sage tree to any uid (podman's automatic user namespace maps jobs to arbitrary uids).
+RUN chmod a+rx /home/sage && mkdir -p /isolab/work /isolab/out /isolab/scratch /isolab/bin \
+    && chmod 1777 /isolab/work /isolab/out /isolab/scratch
+WORKDIR /isolab/work
+# the upstream entrypoint re-joins its arguments into one shell string; the launcher holds the container itself
+ENTRYPOINT []
+CMD ["sage"]
+LABEL org.opencontainers.image.title="isolab-sage"

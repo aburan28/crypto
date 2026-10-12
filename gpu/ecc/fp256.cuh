@@ -8,9 +8,14 @@
  *
  * Two reduction strategies, selected per modulus descriptor:
  *
- *   FAST = true   secp256k1 only.  Elements are canonical integers < p and a
- *                 512-bit product is folded with 2^256 = 2^32 + 977 (mod p).
- *                 ~40% fewer multiply-adds than Montgomery.
+ *   FAST = true   A special reduction for the curve's prime, chosen by the
+ *                 generated header's CURVE_FAST_KIND.  Elements are canonical
+ *                 integers < p.
+ *                   kind 1  secp256k1:  2^256 = 2^32 + 977 (mod p); ~40% fewer
+ *                           multiply-adds than Montgomery.
+ *                   kind 2  curve25519: 2^256 = 38 (mod p), the prime of
+ *                           Ed25519 / X25519; one mac row and two short
+ *                           carry chains, cheaper again than secp256k1's.
  *
  *   FAST = false  Any odd modulus < 2^256.  Elements are in Montgomery form
  *                 (x * 2^256 mod p) and multiplication is CIOS Montgomery.
@@ -60,11 +65,16 @@
 #ifndef FP_PTX
 #define FP_PTX 0
 #endif
-/* Use the secp256k1 special reduction for the base field when the curve is
- * secp256k1.  Override with -DFP_FAST=0 to force Montgomery (used by the
- * tests to exercise both paths on the same vectors). */
+/* Use the special reduction for the base field when the generated header
+ * has one for the curve's prime (CURVE_FAST_KIND: 1 secp256k1, 2 curve25519).
+ * Override with -DFP_FAST=0 to force Montgomery (used by the tests to
+ * exercise both paths on the same vectors).  Headers generated before the
+ * kind existed carry only CURVE_IS_SECP256K1. */
+#ifndef CURVE_FAST_KIND
+#define CURVE_FAST_KIND CURVE_IS_SECP256K1
+#endif
 #ifndef FP_FAST
-#define FP_FAST CURVE_IS_SECP256K1
+#define FP_FAST (CURVE_FAST_KIND != 0)
 #endif
 
 #define FP_LIMBS 8
@@ -467,6 +477,14 @@ struct Field {
         return (int)mp_sub(t.v, h.v, a.v);   /* borrow <=> half < a */
     }
 
+    /* a < b as 256-bit integers, again on the *internal* representation.
+     * Branch-free: the borrow out of a - b.  Used by the fold-6 walk to pick
+     * the smallest of {x, beta x, beta^2 x}. */
+    static FP_HD int lt(const elt &a, const elt &b) {
+        elt t;
+        return (int)mp_sub(t.v, a.v, b.v);
+    }
+
     /* --- Montgomery CIOS: r = a * b * 2^-256 mod p ------------------- */
     static FP_HD elt mont_mul(const elt &a, const elt &b) {
         uint32_t t[10];
@@ -540,10 +558,38 @@ struct Field {
         return out;
     }
 
+    /* --- curve25519 special reduction: 2^256 = 38 (mod p), p = 2^255 - 19 --
+     *
+     * fold 1: T = lo + hi * 38.  hi < 2^254 (the inputs are < 2^255), so
+     *         hi * 38 < 2^260 and T < 2^261: one mac row, t[8] < 2^5.
+     * fold 2: T = T_lo + t[8] * 38, with t[8] * 38 < 2^11: one short carry
+     *         chain, carry out 0 or 1.
+     * fold 3: when the carry is 1 the low half is below 2^11, so adding 38
+     *         cannot carry again.  The value is now < 2^256 = 2p + 38, so up
+     *         to two conditional subtractions of p bring it below p; the
+     *         walk's canonical form needs the fully reduced value. */
+    static FP_HD elt c25519_reduce(const uint32_t r[16]) {
+        uint32_t t[9];
+#pragma unroll
+        for (int j = 0; j < 8; j++) t[j] = r[j];
+        mp_mac_row9(t, r + 8, 38u);                 /* T = lo + hi * 38, writes t[8] */
+        uint32_t carry = mp_add_small(t, t[8] * 38u, 0u, 0u);
+        mp_add_small(t, carry * 38u, 0u, 0u);
+        elt out, s1, s2;
+#pragma unroll
+        for (int j = 0; j < 8; j++) out.v[j] = t[j];
+        uint32_t bw = mp_sub(s1.v, out.v, modulus().v);
+        mp_cmov(out.v, s1.v, bw ^ 1u);
+        bw = mp_sub(s2.v, out.v, modulus().v);
+        mp_cmov(out.v, s2.v, bw ^ 1u);
+        return out;
+    }
+
     static FP_HD elt mul(const elt &a, const elt &b) {
         if (FAST) {
             uint32_t r[16];
             mp_mul_full(r, a.v, b.v);
+            if (CURVE_FAST_KIND == 2) return c25519_reduce(r);
             return secp_reduce(r);
         }
         return mont_mul(a, b);
@@ -611,6 +657,26 @@ struct Field {
         return mul(t, a);
     }
 
+    /* Addition chain for a^(p-2) on curve25519, p - 2 = 2^255 - 21: the
+     * chain of the ref10 / TweetNaCl fe_invert, which builds a^(2^k - 1) for
+     * k = 5, 10, 20, 40, 50, 100, 200, 250 and finishes with a^11.
+     * 254 squarings + 11 multiplications = 265 operations against ~316 for
+     * the 4-bit window, with eight live field elements. */
+    static FP_BIG elt inv_addchain_25519(const elt &a) {
+        elt z2 = sqr(a);                               /* 2 */
+        elt z9 = mul(sqr(sqr(z2)), a);                 /* 9 */
+        elt z11 = mul(z9, z2);                         /* 11 */
+        elt z5 = mul(sqr(z11), z9);                    /* 2^5 - 1 */
+        elt z10 = mul(sqr_n(z5, 5), z5);               /* 2^10 - 1 */
+        elt z20 = mul(sqr_n(z10, 10), z10);            /* 2^20 - 1 */
+        elt z40 = mul(sqr_n(z20, 20), z20);            /* 2^40 - 1 */
+        elt z50 = mul(sqr_n(z40, 10), z10);            /* 2^50 - 1 */
+        elt z100 = mul(sqr_n(z50, 50), z50);           /* 2^100 - 1 */
+        elt z200 = mul(sqr_n(z100, 100), z100);        /* 2^200 - 1 */
+        elt z250 = mul(sqr_n(z200, 50), z50);          /* 2^250 - 1 */
+        return mul(sqr_n(z250, 5), z11);               /* 2^255 - 21 */
+    }
+
     /* Fermat inversion a^(p-2), 4-bit fixed window.  Branch structure is
      * uniform across the warp (depends only on the constant exponent), so
      * no divergence; the window table lives in local memory (L1).
@@ -637,7 +703,10 @@ struct Field {
     /* Inversion entry point: the short addition chain where we have one,
      * the generic window otherwise. */
     static FP_HD elt inv(const elt &a) {
-        if (FAST) return inv_addchain_secp256k1(a);
+        if (FAST) {
+            if (CURVE_FAST_KIND == 2) return inv_addchain_25519(a);
+            return inv_addchain_secp256k1(a);
+        }
         return inv_window(a);
     }
 

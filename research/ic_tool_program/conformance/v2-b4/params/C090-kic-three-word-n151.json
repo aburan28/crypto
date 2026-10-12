@@ -1,0 +1,35 @@
+{
+ "schema_version": 2,
+ "name": "C090: icv1-f2m151-tm97937651335354183120307-ee31df7e, n = 151, a trinomial field",
+ "field": {
+  "kind": "binary",
+  "degree": 151,
+  "modulus": "0x80000000000000000000000000000000000009"
+ },
+ "curve": {
+  "form": "koblitz",
+  "a": 0
+ },
+ "subgroup": {
+  "order": "28016550571",
+  "cofactor": "101886039759891601900254142337483036",
+  "generator": {
+   "x": "0x6318d53089ce907a96dd98811ce357166741a2",
+   "y": "0x57883253f7ad0ec025c4b3b9209b6339cb8d77"
+  }
+ },
+ "target": {
+  "known_log": "9408463826"
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "auto",
+   "recipe": "auto"
+  },
+  "rho": {
+   "pipeline": "auto",
+   "seed": 2293761
+  }
+ }
+}

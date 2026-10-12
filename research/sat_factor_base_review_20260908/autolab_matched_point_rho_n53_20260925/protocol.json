@@ -1,0 +1,77 @@
+{
+  "algorithm": {
+    "batch_seeds": [
+      531310,
+      531311,
+      531312
+    ],
+    "corpus": "compact-point-batch-20260924-v1",
+    "dp_bits": 4,
+    "fresh_table_per_process": true,
+    "jumps": 32,
+    "mode": "signed_frobenius",
+    "precompute_walks": 0,
+    "shared_table_across_targets": true,
+    "signed_automorphism_size": 106,
+    "source_sha256": "fedacb54e441979c8c32860e7b5639e43799234741d49677010164564536d2c8"
+  },
+  "cost_accounting": "Rho includes curve setup, point parsing and subgroup validation, jump-table setup, all walks, table queries/inserts, collision checks and scalar verification in one fresh process. Record wall, child user/system CPU, peak RSS, operations. Compact IC comparator includes its full cold rank-training process plus its cold point batch, including duplicated setup; the 512-relation training receipt is a conservative overcharge relative to first full rank at relation 461. Do not call a stage result an attack speedup.",
+  "decision_rule": "For each size, declare a measured cold no-crossover on this fixed eight-point stream only if all three point-only rho runs recover and independently verify every scalar and all three rho process wall times are below the archived fully charged compact-IC two-process wall. Otherwise inconclusive. This does not establish n131 transfer or general amortized crossover.",
+  "declared_before_measured_runs_utc": "2026-09-25T07:12:17.319362+00:00",
+  "dependency": "https://github.com/aburan28/crypto/pull/735",
+  "external_timeout_s": 180,
+  "hypothesis": "Cold rho will remain cheaper than the archived compact-orbit full-rank training plus eight point-only recovery queries at both L=1 and L=8.",
+  "input": {
+    "a": 0,
+    "field_modulus_low_terms": [
+      0,
+      1,
+      2,
+      6
+    ],
+    "generator": [
+      198217578752339,
+      7929897206038174
+    ],
+    "n": 53,
+    "point_file_1_sha256": "e3f422b5b4b5141e89ef35facd50b52db7595678303b3cfceba7ea23a6200304",
+    "point_file_8_sha256": "41d23eda5bcceba8270bdf0fcc742a570006ff647ddaf8b4735140dcf43fffe8",
+    "prefix_sizes": [
+      1,
+      8
+    ],
+    "source_path": "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/point_recovery_20260924_codex/target_points.jsonl",
+    "subgroup_order": 21044858204113
+  },
+  "limits": "The compact IC archive and these rho runs are same host but not contemporaneous paired blocks; host load is recorded. Wall comparisons are sensitivity evidence and CPU/operation counts are secondary. No claim of optimized rho optimality.",
+  "question": "What is the cold same-point-stream signed-Frobenius batched-rho cost for the eight public n53 point-only compact-IC targets, and for the first target alone?",
+  "run_order": [
+    [
+      531310,
+      1
+    ],
+    [
+      531310,
+      8
+    ],
+    [
+      531311,
+      8
+    ],
+    [
+      531311,
+      1
+    ],
+    [
+      531312,
+      1
+    ],
+    [
+      531312,
+      8
+    ]
+  ],
+  "schema_version": "1.0",
+  "stopping_rule": "One cold process for each scheduled seed and prefix. Internal per-target step cap unchanged from the v3 producer. External timeout 180 seconds per process; preserve timeouts, panics, and incomplete outputs without replacing a seed.",
+  "validation": "Rho child receives only public point coordinates, never validation scalars. After each child exits, independently compute [recovered]G for every row in Python and compare to Q, then compare to the validator labels from PR #735 separately; reject any row mismatch, missing row, wrong order, or nonzero exit."
+}

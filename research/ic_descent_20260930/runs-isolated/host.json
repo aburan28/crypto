@@ -1,0 +1,61 @@
+{
+ "commit": "6029f7beb1aa18066032e6ca01fbe5a78101a363",
+ "tree_status": "",
+ "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+ "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+ "cpu_flags_relevant": [
+  "pclmulqdq",
+  "popcnt",
+  "avx2",
+  "bmi2",
+  "avx512f",
+  "avx512dq",
+  "avx512ifma",
+  "avx512cd",
+  "avx512bw",
+  "avx512vl",
+  "avx512_bf16",
+  "avx512vbmi",
+  "avx512_vbmi2",
+  "gfni",
+  "vpclmulqdq",
+  "avx512_vnni",
+  "avx512_bitalg",
+  "avx512_vpopcntdq",
+  "avx512_fp16"
+ ],
+ "logical_cores": 4,
+ "memory": "MemTotal:       16480972 kB",
+ "os": "Linux-6.18.44-fc-v50-x86_64-with-glibc2.39",
+ "arch": "x86_64",
+ "binaries": {
+  "baseline": {
+   "ic_sha256": "07e527a4d9339e54020db55b5477a95f472b6abb6e6969ed1c003d48e7ee2612",
+   "probe_sha256": "75e59a8646be792a7b364f0062c516ee766d3511fddb12c0e49bc1de4758f711",
+   "built_from": "57e7ce3a"
+  },
+  "candidate": {
+   "ic_sha256": "d390908ae8501426b51c8ba5f7a84e41f23107de9071c5663a2c3b0b361a9886",
+   "probe_sha256": "4caa046cc7fdc6e639ff6977e036261bea61ca19c883d2e49f0085dd7af53c7e",
+   "built_from": "20ff4765"
+  },
+  "copy": {
+   "ic_sha256": "07e527a4d9339e54020db55b5477a95f472b6abb6e6969ed1c003d48e7ee2612",
+   "built_from": "57e7ce3a (byte-identical copy of the baseline)"
+  }
+ },
+ "build": "cargo build --release --bin ic --example koblitz_descent_prices, clean tree, rustc above",
+ "uptime": "04:55:42 up  1:35,  0 user,  load average: 0.01, 0.52, 1.04",
+ "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts",
+ "pinning": "tools/isolated_bench.py run --wait: RAYON_NUM_THREADS=1 on CPU 2; the thread check RAYON_NUM_THREADS=3 on CPUs 1-3; the tool's defaults (settle 2 s, other processes at most 0.10 CPUs, PSI some avg10 at most 5)",
+ "isolation_tool": {
+  "path": "tools/isolated_bench.py",
+  "sha256": "ff59e53fd5566078ad493c8be0d06168699c4fd194bc881d99df19fa20e007ef"
+ },
+ "smt_siblings": {
+  "0": "0",
+  "1": "1",
+  "2": "2",
+  "3": "3"
+ }
+}

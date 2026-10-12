@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/opt/homebrew/bin/rustc",
+    "--version",
+    "--verbose"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1800.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.27892645799875027,
+    "user_seconds": 0.00789,
+    "system_seconds": 0.030753,
+    "total_core_seconds": 0.038643,
+    "single_core_seconds": 0.038643,
+    "peak_rss_bytes": 31703040,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

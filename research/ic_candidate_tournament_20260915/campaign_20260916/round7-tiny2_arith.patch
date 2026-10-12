@@ -1,0 +1,905 @@
+diff -ruN a/src/cryptanalysis/koblitz_tiny_ic.rs b/src/cryptanalysis/koblitz_tiny_ic.rs
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-16 10:55:16.691383280 +0000
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs	2026-09-16 12:23:13.825928505 +0000
+@@ -24,20 +24,23 @@
+ //!
+ //! What differs is only how the work is done: probes are walked
+ //! (`R_{t+1} = R_t + S`) rather than drawn with a scalar multiplication
+-//! each, the pair table stores one witness per Frobenius orbit of a sum
+-//! under a normal-basis rotation key, and decomposition stops at the first
+-//! witness it meets.  None of that changes what is claimed: this is an
+-//! implementation of the same bounded algorithm, not a new one.
+-
+-use std::collections::HashSet;
++//! each; the pair table stores one witness per Frobenius orbit of a sum
++//! under a normal-basis rotation key and builds only the rows a cost
++//! model says pay for themselves; decomposition stops at the first witness
++//! it meets; scalar multiplications run in López–Dahab projective
++//! coordinates or off a doubling table of `G`, with the column
++//! certifications batched behind one inversion per bit; and the module
++//! carries its own field, sampler and tables so that a cold process
++//! touches little code and data before its first relation.  None of that
++//! changes what is claimed: this is an implementation of the same bounded
++//! algorithm, not a new one.
+ 
+ use num_bigint::BigUint;
+ use num_traits::ToPrimitive;
+-use rand::{rngs::StdRng, Rng, SeedableRng};
+ 
+ use crate::binary_ecc::BinaryPoint;
+ use crate::cryptanalysis::koblitz_factor_base_search::FactorBaseSpec;
+-use crate::cryptanalysis::koblitz_fast::{FastCurve, FastPoint};
++use crate::cryptanalysis::koblitz_fast::FastPoint;
+ use crate::cryptanalysis::koblitz_index_calculus::{CollectedRelation, KoblitzCurve};
+ 
+ /// Largest degree handled: keys and packed identities must fit a word.
+@@ -67,21 +70,165 @@
+ 
+ // ── Field and curve arithmetic ──────────────────────────────────────
+ 
+-/// The curve with a Euclidean inverse beside the carry-less multiply.
+-struct Arith {
+-    fc: FastCurve,
++/// `F_{2^n}` in one word: a carry-less multiply, byte-table reduction and
++/// a Euclidean inverse.  Its own small reduction tables rather than the
++/// library's `Gf2`; the carry-less multiplier is looked up in the standard
++/// feature cache, which the worker's target hashing has already filled.
++struct Field {
++    n: u32,
+     irr: u64,
++    mask: u64,
++    red: Vec<u64>,
++    positions: usize,
++    clmul: bool,
++}
++
++#[cfg(target_arch = "x86_64")]
++#[target_feature(enable = "pclmulqdq")]
++unsafe fn clmul_pclmul(a: u64, b: u64) -> u128 {
++    use std::arch::x86_64::*;
++    let x = _mm_set_epi64x(0, a as i64);
++    let y = _mm_set_epi64x(0, b as i64);
++    let z = _mm_clmulepi64_si128::<0x00>(x, y);
++    let lo = _mm_cvtsi128_si64(z) as u64;
++    let hi = _mm_cvtsi128_si64(_mm_srli_si128::<8>(z)) as u64;
++    ((hi as u128) << 64) | (lo as u128)
++}
++
++fn has_pclmul() -> bool {
++    #[cfg(target_arch = "x86_64")]
++    {
++        std::arch::is_x86_feature_detected!("pclmulqdq")
++    }
++    #[cfg(not(target_arch = "x86_64"))]
++    {
++        false
++    }
++}
++
++impl Field {
++    fn new(n: u32, irr: u64) -> Self {
++        let positions = (((n as usize - 1) + 7) / 8).max(1);
++        let mut pow = vec![0u64; positions * 8];
++        let mut cur = irr ^ (1u64 << n);
++        for slot in pow.iter_mut() {
++            *slot = cur;
++            cur <<= 1;
++            if (cur >> n) & 1 != 0 {
++                cur ^= irr;
++            }
++        }
++        let mut red = vec![0u64; positions * 256];
++        for j in 0..positions {
++            for v in 1usize..256 {
++                red[j * 256 + v] = red[j * 256 + (v & (v - 1))] ^ pow[j * 8 + v.trailing_zeros() as usize];
++            }
++        }
++        Self { n, irr, mask: (1u64 << n) - 1, red, positions, clmul: has_pclmul() }
++    }
++
++    #[inline(always)]
++    fn reduce(&self, w: u128) -> u64 {
++        let mut acc = (w as u64) & self.mask;
++        let mut h = (w >> self.n) as u64;
++        for j in 0..self.positions {
++            acc ^= self.red[j * 256 + (h & 0xff) as usize];
++            h >>= 8;
++        }
++        acc
++    }
++
++    #[inline(always)]
++    fn clmul(&self, a: u64, b: u64) -> u128 {
++        #[cfg(target_arch = "x86_64")]
++        if self.clmul {
++            // SAFETY: `clmul` records the runtime feature detection.
++            return unsafe { clmul_pclmul(a, b) };
++        }
++        let mut w = 0u128;
++        let mut aa = a as u128;
++        let mut bb = b;
++        while bb != 0 {
++            if bb & 1 != 0 {
++                w ^= aa;
++            }
++            aa <<= 1;
++            bb >>= 1;
++        }
++        w
++    }
++
++    #[inline]
++    fn mul(&self, a: u64, b: u64) -> u64 {
++        self.reduce(self.clmul(a, b))
++    }
++
++    #[inline]
++    fn sqr(&self, a: u64) -> u64 {
++        self.reduce(self.clmul(a, a))
++    }
++
++    fn sqr_k(&self, mut a: u64, k: u32) -> u64 {
++        for _ in 0..k {
++            a = self.sqr(a);
++        }
++        a
++    }
++}
++
++/// The curve `y² + xy = x³ + ax² + b` over a [`Field`].
++struct Arith {
++    field: Field,
++    n: u32,
++    a: u64,
++    b: u64,
++}
++
++fn word(e: &crate::binary_ecc::F2mElement) -> u64 {
++    e.raw_bits().first().copied().unwrap_or(0)
+ }
+ 
+ impl Arith {
++    fn new(kc: &KoblitzCurve) -> Option<Self> {
++        let n = kc.n;
++        if n > MAX_DEGREE || kc.curve.irreducible.degree != n {
++            return None;
++        }
++        let irr = kc.curve.irreducible.low_terms.iter().fold(1u64 << n, |acc, &t| acc | (1u64 << t));
++        let field = Field::new(n, irr);
++        let a = word(&kc.curve.a) & field.mask;
++        let b = word(&kc.curve.b) & field.mask;
++        Some(Self { field, n, a, b })
++    }
++
++    fn lift(&self, p: &BinaryPoint) -> FastPoint {
++        match p {
++            BinaryPoint::Infinity => FastPoint::INFINITY,
++            BinaryPoint::Affine { x, y } => FastPoint::affine(word(x) & self.field.mask, word(y) & self.field.mask),
++        }
++    }
++
++    fn lower(&self, p: FastPoint) -> BinaryPoint {
++        if p.infinity {
++            BinaryPoint::Infinity
++        } else {
++            BinaryPoint::Affine {
++                x: crate::binary_ecc::F2mElement::from_biguint(&BigUint::from(p.x), self.n),
++                y: crate::binary_ecc::F2mElement::from_biguint(&BigUint::from(p.y), self.n),
++            }
++        }
++    }
++
+     #[inline]
+     fn mul(&self, a: u64, b: u64) -> u64 {
+-        self.fc.field.mul(a, b)
++        self.field.mul(a, b)
+     }
+ 
++    /// Squaring as a carry-less self-product: one multiplier latency
++    /// instead of a dependent bit-spreading chain.
+     #[inline]
+     fn sqr(&self, a: u64) -> u64 {
+-        self.fc.field.sqr(a)
++        self.field.sqr(a)
+     }
+ 
+     /// `a^{-1}` by the extended Euclidean algorithm on `F_2[z]`: about
+@@ -89,7 +236,7 @@
+     /// multiplications of the Fermat inverse.
+     fn inv(&self, a: u64) -> u64 {
+         debug_assert!(a != 0);
+-        let (mut u, mut v) = (a, self.irr);
++        let (mut u, mut v) = (a, self.field.irr);
+         let (mut g1, mut g2) = (1u64, 0u64);
+         while u != 1 {
+             let mut j = (63 - u.leading_zeros()) as i32 - (63 - v.leading_zeros()) as i32;
+@@ -139,14 +286,14 @@
+             return FastPoint::INFINITY;
+         }
+         let lambda = p.x ^ self.mul(p.y, self.inv(p.x));
+-        let x3 = self.sqr(lambda) ^ lambda ^ self.fc.a;
++        let x3 = self.sqr(lambda) ^ lambda ^ self.a;
+         let y3 = self.sqr(p.x) ^ self.mul(lambda ^ 1, x3);
+         FastPoint::affine(x3, y3)
+     }
+ 
+     #[inline]
+     fn add_with_lambda(&self, p: FastPoint, q: FastPoint, lambda: u64) -> FastPoint {
+-        let x3 = self.sqr(lambda) ^ lambda ^ p.x ^ q.x ^ self.fc.a;
++        let x3 = self.sqr(lambda) ^ lambda ^ p.x ^ q.x ^ self.a;
+         let y3 = self.mul(lambda, p.x ^ x3) ^ x3 ^ p.y;
+         FastPoint::affine(x3, y3)
+     }
+@@ -168,11 +315,159 @@
+         self.add_with_lambda(p, q, lambda)
+     }
+ 
+-    /// `[k]P` by double-and-add.
++    /// `[k]P` in López–Dahab projective coordinates (`x = X/Z`,
++    /// `y = Y/Z²`): no field inversion until the final conversion.
+     fn mul_point(&self, p: FastPoint, k: u64) -> FastPoint {
+         if k == 0 || p.infinity {
+             return FastPoint::INFINITY;
+         }
++        let mut acc = Ld::INFINITY;
++        for i in (0..64 - k.leading_zeros()).rev() {
++            acc = self.ld_double(acc);
++            if (k >> i) & 1 == 1 {
++                acc = self.ld_add_affine(acc, p);
++            }
++        }
++        self.ld_to_affine(acc)
++    }
++
++    /// Doubling in López–Dahab coordinates (Hankerson–Menezes–Vanstone,
++    /// Algorithm 3.24): `Z3 = X1²Z1²`, `X3 = X1⁴ + bZ1⁴`,
++    /// `Y3 = bZ1⁴Z3 + X3(aZ3 + Y1² + bZ1⁴)`.
++    #[inline]
++    fn ld_double(&self, p: Ld) -> Ld {
++        if p.z == 0 {
++            return p;
++        }
++        let z2 = self.sqr(p.z);
++        let x2 = self.sqr(p.x);
++        let z3 = self.mul(x2, z2);
++        if z3 == 0 {
++            return Ld::INFINITY;
++        }
++        let bz4 = self.mul(self.b, self.sqr(z2));
++        let x3 = self.sqr(x2) ^ bz4;
++        let y3 = self.mul(bz4, z3) ^ self.mul(x3, self.mul(self.a, z3) ^ self.sqr(p.y) ^ bz4);
++        Ld { x: x3, y: y3, z: z3 }
++    }
++
++    /// Mixed addition `P + Q` with `Q` affine (Algorithm 3.25).  The
++    /// degenerate cases (`Q = ±P`) go through the affine formulas.
++    #[inline]
++    fn ld_add_affine(&self, p: Ld, q: FastPoint) -> Ld {
++        if q.infinity {
++            return p;
++        }
++        if p.z == 0 {
++            return Ld { x: q.x, y: q.y, z: 1 };
++        }
++        let z1sq = self.sqr(p.z);
++        let a = self.mul(q.y, z1sq) ^ p.y;
++        let b = self.mul(q.x, p.z) ^ p.x;
++        if b == 0 {
++            let affine = self.ld_to_affine(p);
++            let sum = self.add(affine, q);
++            return if sum.infinity { Ld::INFINITY } else { Ld { x: sum.x, y: sum.y, z: 1 } };
++        }
++        let c = self.mul(p.z, b);
++        let d = self.mul(self.sqr(b), c ^ self.mul(self.a, z1sq));
++        let z3 = self.sqr(c);
++        let e = self.mul(a, c);
++        let x3 = self.sqr(a) ^ d ^ e;
++        let f = x3 ^ self.mul(q.x, z3);
++        let g = self.mul(q.x ^ q.y, self.sqr(z3));
++        let y3 = self.mul(e ^ z3, f) ^ g;
++        Ld { x: x3, y: y3, z: z3 }
++    }
++
++    #[inline]
++    fn ld_to_affine(&self, p: Ld) -> FastPoint {
++        if p.z == 0 {
++            return FastPoint::INFINITY;
++        }
++        let zi = self.inv(p.z);
++        FastPoint::affine(self.mul(p.x, zi), self.mul(p.y, self.sqr(zi)))
++    }
++
++    /// `[2^i]P` for `i < bits`, affine, with one inversion for the whole
++    /// table (projective doublings, then a batched normalisation).
++    fn doubling_table(&self, p: FastPoint, bits: u32) -> Vec<FastPoint> {
++        let mut projective = Vec::with_capacity(bits as usize);
++        let mut current = Ld { x: p.x, y: p.y, z: 1 };
++        for _ in 0..bits {
++            projective.push(current);
++            current = self.ld_double(current);
++        }
++        let mut zs: Vec<u64> = projective.iter().map(|q| q.z).collect();
++        let mut scratch = Vec::with_capacity(zs.len());
++        self.batch_inv(&mut zs, &mut scratch);
++        projective
++            .iter()
++            .zip(&zs)
++            .map(|(q, &zi)| {
++                if q.z == 0 {
++                    FastPoint::INFINITY
++                } else {
++                    FastPoint::affine(self.mul(q.x, zi), self.mul(q.y, self.sqr(zi)))
++                }
++            })
++            .collect()
++    }
++
++    /// `[k]G` from a doubling table of `G`: affine additions of the set
++    /// bits' entries.
++    fn fixed_base_mul(&self, table: &[FastPoint], k: u64) -> FastPoint {
++        debug_assert!(table.len() >= 64 || k < 1u64 << table.len(), "scalar exceeds the table");
++        let mut acc = FastPoint::INFINITY;
++        for (i, &entry) in table.iter().enumerate() {
++            if (k >> i) & 1 == 1 {
++                acc = self.add(acc, entry);
++            }
++        }
++        acc
++    }
++
++    /// `[k_o]G` for every `o`, all from the same doubling table, with the
++    /// additions of one bit position sharing one field inversion across
++    /// the columns.  Equal to [`Self::fixed_base_mul`] entry by entry.
++    fn fixed_base_mul_many(&self, table: &[FastPoint], ks: &[u64]) -> Vec<FastPoint> {
++        debug_assert!(table.len() >= 64 || ks.iter().all(|&k| k < 1u64 << table.len()), "scalar exceeds the table");
++        let mut acc = vec![FastPoint::INFINITY; ks.len()];
++        let mut dens = Vec::with_capacity(ks.len());
++        let mut scratch = Vec::with_capacity(ks.len());
++        let mut active: Vec<usize> = Vec::with_capacity(ks.len());
++        for (i, &entry) in table.iter().enumerate() {
++            active.clear();
++            dens.clear();
++            for (o, &k) in ks.iter().enumerate() {
++                if (k >> i) & 1 == 0 {
++                    continue;
++                }
++                let s = acc[o];
++                if s.infinity || entry.infinity || s.x == entry.x {
++                    acc[o] = self.add(s, entry);
++                } else {
++                    active.push(o);
++                    dens.push(s.x ^ entry.x);
++                }
++            }
++            self.batch_inv(&mut dens, &mut scratch);
++            for (&o, &inv) in active.iter().zip(&dens) {
++                let s = acc[o];
++                let lambda = self.mul(s.y ^ entry.y, inv);
++                acc[o] = self.add_with_lambda(s, entry, lambda);
++            }
++        }
++        acc
++    }
++
++    /// `[k]P` by affine double-and-add; the reference the projective
++    /// path is tested against.
++    #[cfg(test)]
++    fn mul_point_affine(&self, p: FastPoint, k: u64) -> FastPoint {
++        if k == 0 || p.infinity {
++            return FastPoint::INFINITY;
++        }
+         let mut result = FastPoint::INFINITY;
+         for i in (0..64 - k.leading_zeros()).rev() {
+             result = self.double(result);
+@@ -188,7 +483,7 @@
+         if p.infinity {
+             return p;
+         }
+-        FastPoint::affine(self.fc.field.sqr_k(p.x, k), self.fc.field.sqr_k(p.y, k))
++        FastPoint::affine(self.field.sqr_k(p.x, k), self.field.sqr_k(p.y, k))
+     }
+ 
+     /// The first point the general `factor_base_points_with_x` returns
+@@ -198,9 +493,9 @@
+         if x == 0 {
+             return None;
+         }
+-        let n = self.fc.n;
++        let n = self.n;
+         let inverse = self.inv(x);
+-        let rhs = x ^ self.fc.a ^ self.mul(self.fc.b, self.sqr(inverse));
++        let rhs = x ^ self.a ^ self.mul(self.b, self.sqr(inverse));
+         let mut acc = rhs;
+         let mut u = rhs;
+         for _ in 0..(n - 1) / 2 {
+@@ -214,6 +509,114 @@
+     }
+ }
+ 
++/// A López–Dahab point; `z == 0` is the point at infinity.
++#[derive(Clone, Copy, Debug)]
++struct Ld {
++    x: u64,
++    y: u64,
++    z: u64,
++}
++
++impl Ld {
++    const INFINITY: Self = Self { x: 1, y: 0, z: 0 };
++}
++
++// ── The base sampler's generator ────────────────────────────────────
++
++/// `rand 0.8`'s `StdRng` (ChaCha12) and its `seed_from_u64` and
++/// `gen_range` for `u64`, reproduced word for word so the base recipe
++/// draws the same abscissae from a few dozen lines of scalar code instead
++/// of the generic block-generator machinery.  A test checks the stream
++/// against `StdRng` itself, draw for draw.
++struct SeededChaCha12 {
++    key: [u32; 8],
++    counter: u64,
++    buffer: [u32; 64],
++    index: usize,
++}
++
++impl SeededChaCha12 {
++    fn seed_from_u64(mut state: u64) -> Self {
++        // rand_core's PCG32 seed expansion.
++        const MUL: u64 = 6364136223846793005;
++        const INC: u64 = 11634580027462260723;
++        let mut key = [0u32; 8];
++        for k in key.iter_mut() {
++            state = state.wrapping_mul(MUL).wrapping_add(INC);
++            let xorshifted = (((state >> 18) ^ state) >> 27) as u32;
++            let rot = (state >> 59) as u32;
++            *k = xorshifted.rotate_right(rot);
++        }
++        Self { key, counter: 0, buffer: [0; 64], index: 64 }
++    }
++
++    fn refill(&mut self) {
++        for block in 0..4 {
++            let mut s = [
++                0x6170_7865, 0x3320_646e, 0x7962_2d32, 0x6b20_6574,
++                self.key[0], self.key[1], self.key[2], self.key[3],
++                self.key[4], self.key[5], self.key[6], self.key[7],
++                self.counter as u32, (self.counter >> 32) as u32, 0, 0,
++            ];
++            let input = s;
++            #[inline(always)]
++            fn qr(s: &mut [u32; 16], a: usize, b: usize, c: usize, d: usize) {
++                s[a] = s[a].wrapping_add(s[b]); s[d] = (s[d] ^ s[a]).rotate_left(16);
++                s[c] = s[c].wrapping_add(s[d]); s[b] = (s[b] ^ s[c]).rotate_left(12);
++                s[a] = s[a].wrapping_add(s[b]); s[d] = (s[d] ^ s[a]).rotate_left(8);
++                s[c] = s[c].wrapping_add(s[d]); s[b] = (s[b] ^ s[c]).rotate_left(7);
++            }
++            for _ in 0..6 {
++                qr(&mut s, 0, 4, 8, 12); qr(&mut s, 1, 5, 9, 13); qr(&mut s, 2, 6, 10, 14); qr(&mut s, 3, 7, 11, 15);
++                qr(&mut s, 0, 5, 10, 15); qr(&mut s, 1, 6, 11, 12); qr(&mut s, 2, 7, 8, 13); qr(&mut s, 3, 4, 9, 14);
++            }
++            for (i, w) in s.iter().enumerate() {
++                self.buffer[block * 16 + i] = w.wrapping_add(input[i]);
++            }
++            self.counter = self.counter.wrapping_add(1);
++        }
++        self.index = 0;
++    }
++
++    /// rand_core's `BlockRng::next_u64` over a 64-word buffer.
++    fn next_u64(&mut self) -> u64 {
++        let len = 64;
++        if self.index < len - 1 {
++            let lo = self.buffer[self.index];
++            let hi = self.buffer[self.index + 1];
++            self.index += 2;
++            (u64::from(hi) << 32) | u64::from(lo)
++        } else if self.index >= len {
++            self.refill();
++            self.index = 2;
++            (u64::from(self.buffer[1]) << 32) | u64::from(self.buffer[0])
++        } else {
++            let lo = self.buffer[len - 1];
++            self.refill();
++            self.index = 1;
++            (u64::from(self.buffer[0]) << 32) | u64::from(lo)
++        }
++    }
++
++    /// `rng.gen_range(low..high)` for `u64` in rand 0.8: widening multiply
++    /// with rejection below the zone.
++    fn gen_range_u64(&mut self, low: u64, high: u64) -> u64 {
++        let range = high - low; // inclusive upper bound high - 1
++        if range == 0 {
++            return self.next_u64();
++        }
++        let zone = (range << range.leading_zeros()).wrapping_sub(1);
++        loop {
++            let v = self.next_u64();
++            let wide = (v as u128) * (range as u128);
++            let (hi, lo) = ((wide >> 64) as u64, wide as u64);
++            if lo <= zone {
++                return low.wrapping_add(hi);
++            }
++        }
++    }
++}
++
+ // ── Normal-basis orbit names ────────────────────────────────────────
+ 
+ /// Frobenius as a rotation: in a normal basis `{γ, γ², γ⁴, …}` squaring
+@@ -222,7 +625,7 @@
+ struct NormalBasis {
+     n: u32,
+     mask: u64,
+-    tables: Vec<[u64; 256]>,
++    tables: Vec<[u64; 16]>,
+ }
+ 
+ fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
+@@ -246,7 +649,7 @@
+ 
+ impl NormalBasis {
+     fn new(arith: &Arith) -> Option<Self> {
+-        let n = arith.fc.n;
++        let n = arith.n;
+         let mask = (1u64 << n) - 1;
+         let mut inverse = None;
+         let mut candidate = 2u64;
+@@ -273,14 +676,15 @@
+         let by_bit: Vec<u64> = (0..n)
+             .map(|j| (0..n).fold(0u64, |acc, i| acc | (((inverse[i as usize] >> j) & 1) << i)))
+             .collect();
+-        let bytes = ((n + 7) / 8) as usize;
+-        let tables = (0..bytes)
+-            .map(|bi| {
+-                let mut table = [0u64; 256];
++        // Nibble tables: `n/4` lookups per key and a kilobyte to touch.
++        let nibbles = ((n + 3) / 4) as usize;
++        let tables = (0..nibbles)
++            .map(|ni| {
++                let mut table = [0u64; 16];
+                 for (b, slot) in table.iter_mut().enumerate() {
+                     let mut acc = 0u64;
+-                    for t in 0..8 {
+-                        let j = bi * 8 + t;
++                    for t in 0..4 {
++                        let j = ni * 4 + t;
+                         if (b >> t) & 1 == 1 && j < n as usize {
+                             acc ^= by_bit[j];
+                         }
+@@ -297,7 +701,7 @@
+     fn coords(&self, x: u64) -> u64 {
+         let mut acc = 0u64;
+         for (i, table) in self.tables.iter().enumerate() {
+-            acc ^= table[((x >> (8 * i)) & 0xff) as usize];
++            acc ^= table[((x >> (4 * i)) & 0xf) as usize];
+         }
+         acc
+     }
+@@ -524,6 +928,7 @@
+     h: u64,
+     lambda_pow: Vec<u64>,
+     g: FastPoint,
++    g_table: Vec<FastPoint>,
+     /// Base points, orbit-major: index `o·2n + 2k + s` is `(−1)^s π^k(C_o)`.
+     points: Vec<FastPoint>,
+     negated: Vec<FastPoint>,
+@@ -543,7 +948,7 @@
+     trials: u64,
+     // rows and solution
+     echelon: Echelon,
+-    seen: HashSet<(u64, [u32; 3])>,
++    seen: Vec<(u64, [u32; 3])>,
+     accepted: usize,
+     duplicates: usize,
+     solve_attempts: usize,
+@@ -568,24 +973,17 @@
+         if !supports(kc, spec, 3) {
+             return Err("fast pipeline does not support this curve".into());
+         }
+-        let fc = FastCurve::new(&kc.curve).ok_or("field too wide")?;
+-        let irr = kc
+-            .curve
+-            .irreducible
+-            .low_terms
+-            .iter()
+-            .fold(1u64 << kc.n, |acc, &t| acc | (1u64 << t));
+-        let arith = Arith { fc, irr };
++        let arith = Arith::new(kc).ok_or("field too wide")?;
+         let n = kc.n;
+         let r = kc.subgroup_order.to_u64().ok_or("order too wide")?;
+         let h = kc.cofactor.to_u64().ok_or("cofactor too wide")?;
+         let lambda = kc.lambda.to_u64().ok_or("lambda too wide")? % r;
+-        let g = arith.fc.lift(kc.generator());
++        let g = arith.lift(kc.generator());
+ 
+         // ── The base: the same draws as `build_subgroup_orbit_factor_base`.
+         // Sets are small vectors: a few dozen abscissae do not need a
+         // hashed container, and the hashing was a third of the setup.
+-        let mut rng = StdRng::seed_from_u64(*seed);
++        let mut rng = SeededChaCha12::seed_from_u64(*seed);
+         let cap = 1u64 << n;
+         let target = *points;
+         if target == 0 {
+@@ -606,7 +1004,7 @@
+                         "drew {drawn} abscissae without reaching {target} subgroup points"
+                     ));
+                 }
+-                let x = rng.gen_range(1..cap);
++                let x = rng.gen_range_u64(1, cap);
+                 let Some(point) = arith.lift_x(x) else {
+                     continue;
+                 };
+@@ -718,14 +1116,19 @@
+         }
+         // A scan block pays one inversion and is thrown away on an early
+         // exit; size it to about one expected witness per block.
+-        let hit = 1.0 - (-(lambda_pairs * coverage(table_rows))).exp();
+-        let chunk = ((0.5 / hit.max(1e-9)).ceil() as usize).clamp(8, 64).min(size);
++        // `1 − exp(−x) ≥ min(x, 1)/2`, enough to size a block without libm.
++        let hit = (lambda_pairs * coverage(table_rows)).min(1.0).max(1e-9);
++        let chunk = ((1.0 / hit) as usize + 1).clamp(8, 64).min(size);
+ 
+         let mut prng = SplitMix(algorithm_seed ^ 0x5449_4e59_4943_0001);
+         let probe_scalar = prng.scalar(r);
+         let stride_scalar = prng.scalar(r);
+-        let probe = arith.mul_point(g, probe_scalar);
+-        let stride = arith.mul_point(g, stride_scalar);
++        // `[2^i]G` for every bit of the order: every multiple of `G` the
++        // job needs — probes, strides and the certification of each column
++        // logarithm — is then a handful of affine additions.
++        let g_table = arith.doubling_table(g, 64 - r.leading_zeros());
++        let probe = arith.fixed_base_mul(&g_table, probe_scalar);
++        let stride = arith.fixed_base_mul(&g_table, stride_scalar);
+         Ok(Self {
+             arith,
+             canon,
+@@ -734,6 +1137,7 @@
+             h,
+             lambda_pow,
+             g,
++            g_table,
+             points: points_vec,
+             negated,
+             orbits,
+@@ -749,7 +1153,7 @@
+             probe_scalar,
+             trials: 0,
+             echelon: Echelon::new(orbits, r),
+-            seen: HashSet::new(),
++            seen: Vec::new(),
+             accepted: 0,
+             duplicates: 0,
+             solve_attempts: 0,
+@@ -794,7 +1198,7 @@
+ 
+     /// The base, in the index order relations refer to.
+     pub fn base_points(&self) -> Vec<BinaryPoint> {
+-        self.points.iter().map(|&p| self.arith.fc.lower(p)).collect()
++        self.points.iter().map(|&p| self.arith.lower(p)).collect()
+     }
+ 
+     /// The base as single-word coordinates, in the same order.
+@@ -936,10 +1340,11 @@
+                 *slot = i as u32;
+             }
+             ids.sort_unstable();
+-            if !self.seen.insert((rel.a, ids)) {
++            if self.seen.contains(&(rel.a, ids)) {
+                 self.duplicates += 1;
+                 continue;
+             }
++            self.seen.push((rel.a, ids));
+             self.accepted += 1;
+             let mut row = vec![0u64; self.orbits + 1];
+             for &i in &rel.points {
+@@ -958,23 +1363,27 @@
+         let Some(logs) = self.echelon.solve() else {
+             return false;
+         };
+-        let ok = logs
+-            .iter()
+-            .zip(&self.columns)
+-            .all(|(&l, &c)| l < self.r && self.arith.mul_point(self.g, l) == c);
++        let ok = self.certify(&logs);
+         if ok {
+             self.logs = Some(logs);
+         }
+         ok
+     }
+ 
++    /// `[ℓ_o]G == [h]C_o` for every column, the multiples computed from
++    /// the doubling table of `G` with the columns' additions batched.
++    fn certify(&self, logs: &[u64]) -> bool {
++        if logs.len() != self.columns.len() || logs.iter().any(|&l| l >= self.r) {
++            return false;
++        }
++        let multiples = self.arith.fixed_base_mul_many(&self.g_table, logs);
++        multiples.iter().zip(&self.columns).all(|(m, c)| m == c)
++    }
++
+     /// Re-certify every column logarithm in the group.
+     pub fn verify_columns(&self) -> bool {
+         match &self.logs {
+-            Some(logs) => logs
+-                .iter()
+-                .zip(&self.columns)
+-                .all(|(&l, &c)| l < self.r && self.arith.mul_point(self.g, l) == c),
++            Some(logs) => self.certify(logs),
+             None => false,
+         }
+     }
+@@ -986,7 +1395,7 @@
+             self.columns
+                 .iter()
+                 .zip(logs)
+-                .map(|(&c, &l)| (self.arith.fc.lower(c), BigUint::from(l)))
++                .map(|(&c, &l)| (self.arith.lower(c), BigUint::from(l)))
+                 .collect(),
+         )
+     }
+@@ -1006,7 +1415,7 @@
+     /// the number of descent probes it took.
+     pub fn solve_target(&mut self, q: &BinaryPoint) -> Option<(BigUint, u64)> {
+         let logs = self.logs.clone()?;
+-        let q_fast = self.arith.fc.lift(q);
++        let q_fast = self.arith.lift(q);
+         if q_fast.infinity {
+             return None;
+         }
+@@ -1015,9 +1424,9 @@
+         let mut a = self.rng.scalar(r);
+         let b = self.rng.scalar(r);
+         let stride_scalar = self.rng.scalar(r);
+-        let stride = self.arith.mul_point(self.g, stride_scalar);
++        let stride = self.arith.fixed_base_mul(&self.g_table, stride_scalar);
+         let mut probe = self.arith.add(
+-            self.arith.mul_point(self.g, a),
++            self.arith.fixed_base_mul(&self.g_table, a),
+             self.arith.mul_point(q_fast, b),
+         );
+         let hb_inv = invmod(mulmod(h, b, r), r)?;
+@@ -1042,7 +1451,7 @@
+                 }
+             }
+             if let Some(d) = candidate {
+-                if d < r && self.arith.mul_point(self.g, d) == q_fast {
++                if d < r && self.arith.fixed_base_mul(&self.g_table, d) == q_fast {
+                     return Some((BigUint::from(d), trials));
+                 }
+             }
+@@ -1056,6 +1465,7 @@
+ #[cfg(test)]
+ mod tests {
+     use super::*;
++    use crate::cryptanalysis::koblitz_fast::FastCurve;
+     use crate::binary_ecc::F2mElement;
+     use crate::cryptanalysis::koblitz_index_calculus::point_key;
+ 
+@@ -1076,19 +1486,24 @@
+         for (n, a) in CELLS {
+             let Some(kc) = KoblitzCurve::new(a, n) else { continue };
+             let fc = FastCurve::new(&kc.curve).unwrap();
+-            let irr = kc.curve.irreducible.low_terms.iter().fold(1u64 << n, |acc, &t| acc | (1u64 << t));
+-            let arith = Arith { fc, irr };
++            let arith = Arith::new(&kc).unwrap();
+             let mask = (1u64 << n) - 1;
+             let mut state = 0x1234_5678_9abc_def0u64 ^ u64::from(n);
+             for _ in 0..2000 {
+                 state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+                 let x = (state >> 11) & mask;
++                let y = (state >> 23) & mask;
+                 if x == 0 {
+                     continue;
+                 }
+-                assert_eq!(arith.inv(x), arith.fc.field.inv(x), "n={n} x={x}");
++                assert_eq!(arith.inv(x), fc.field.inv(x), "n={n} x={x}");
+                 assert_eq!(arith.mul(x, arith.inv(x)), 1);
++                assert_eq!(arith.mul(x, y), fc.field.mul(x, y));
++                assert_eq!(arith.sqr(x), fc.field.sqr(x));
++                assert_eq!(arith.field.sqr_k(x, 5), fc.field.sqr_k(x, 5));
+             }
++            assert_eq!(arith.lift(kc.generator()), fc.lift(kc.generator()));
++            assert_eq!(arith.lower(arith.lift(kc.generator())), *kc.generator());
+         }
+     }
+ 
+@@ -1097,17 +1512,39 @@
+         for (n, a) in CELLS {
+             let Some(kc) = KoblitzCurve::new(a, n) else { continue };
+             let fc = FastCurve::new(&kc.curve).unwrap();
+-            let irr = kc.curve.irreducible.low_terms.iter().fold(1u64 << n, |acc, &t| acc | (1u64 << t));
+-            let arith = Arith { fc: fc.clone(), irr };
++            let arith = Arith::new(&kc).unwrap();
+             let g = fc.lift(kc.generator());
+             let r = kc.subgroup_order.to_u64().unwrap();
+-            for k in [1u64, 2, 3, 5, 17, 1000, r - 1, r / 3 + 1] {
++            let table = arith.doubling_table(g, 64 - r.leading_zeros());
++            for (i, entry) in table.iter().enumerate() {
++                assert_eq!(*entry, fc.mul_u64(g, 1u64 << i), "n={n} table {i}");
++            }
++            let mut ks: Vec<u64> = vec![1, 2, 3, 5, 17, 1000, r - 1, r / 3 + 1, r - 2, 12345 % r];
++            let mut state = 0x9e37_79b9u64 ^ u64::from(n);
++            for _ in 0..40 {
++                state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
++                ks.push(1 + (state >> 20) % (r - 1));
++            }
++            for &k in &ks {
+                 let k = k % r;
+                 if k == 0 {
+                     continue;
+                 }
+-                assert_eq!(arith.mul_point(g, k), fc.mul_u64(g, k), "n={n} k={k}");
+-            }
++                let expected = fc.mul_u64(g, k);
++                assert_eq!(arith.mul_point(g, k), expected, "n={n} k={k}");
++                assert_eq!(arith.mul_point_affine(g, k), expected, "n={n} k={k}");
++                assert_eq!(arith.fixed_base_mul(&table, k), expected, "n={n} k={k}");
++                let q = fc.mul_u64(g, 777 % r);
++                assert_eq!(arith.mul_point(q, k), fc.mul_u64(q, k), "n={n} k={k} q");
++            }
++            let reduced: Vec<u64> = ks.iter().map(|k| k % r).filter(|&k| k != 0).collect();
++            let many = arith.fixed_base_mul_many(&table, &reduced);
++            for (&k, m) in reduced.iter().zip(&many) {
++                assert_eq!(*m, fc.mul_u64(g, k), "n={n} k={k} many");
++            }
++            // degenerate: [r]G = O and [r-1]G = -G through the projective path
++            assert_eq!(arith.mul_point(g, r), FastPoint::INFINITY);
++            assert_eq!(arith.mul_point(g, r - 1), fc.neg(g));
+             let p = fc.mul_u64(g, 12345 % r);
+             let q = fc.mul_u64(g, 777 % r);
+             assert_eq!(arith.add(p, q), fc.add(p, q));
+@@ -1121,9 +1558,7 @@
+     fn normal_basis_rotation_locates_frobenius_images() {
+         for (n, a) in CELLS {
+             let Some(kc) = KoblitzCurve::new(a, n) else { continue };
+-            let fc = FastCurve::new(&kc.curve).unwrap();
+-            let irr = kc.curve.irreducible.low_terms.iter().fold(1u64 << n, |acc, &t| acc | (1u64 << t));
+-            let arith = Arith { fc, irr };
++            let arith = Arith::new(&kc).unwrap();
+             let canon = NormalBasis::new(&arith).unwrap();
+             let mask = (1u64 << n) - 1;
+             let mut state = 0xdead_beef_u64 ^ u64::from(n);
+@@ -1135,12 +1570,12 @@
+                 }
+                 let (key, rot_x) = canon.canon(x);
+                 for k in 0..n {
+-                    let y = arith.fc.field.sqr_k(x, k);
++                    let y = arith.field.sqr_k(x, k);
+                     let (key_y, rot_y) = canon.canon(y);
+                     assert_eq!(key, key_y);
+                     assert_eq!((rot_x + n - rot_y) % n, k, "n={n} x={x} k={k}");
+                 }
+-                assert_eq!(arith.fc.field.sqr_k(x, rot_x) , {
++                assert_eq!(arith.field.sqr_k(x, rot_x) , {
+                     // the element whose coords are the least rotation
+                     let mut best = x; let mut bx = x;
+                     for _ in 1..n { bx = arith.sqr(bx); if canon.coords(bx) < canon.coords(best) { best = bx; } }
+@@ -1230,6 +1665,27 @@
+             }
+         }
+     }
++
++    #[test]
++    fn seeded_chacha_matches_std_rng() {
++        use rand::{rngs::StdRng, Rng, SeedableRng};
++        for seed in [0u64, 1, 43, 2026091606, u64::MAX, 0x9e37_79b9_7f4a_7c15] {
++            for cap in [1u64 << 5, 1u64 << 13, 1u64 << 19, 1u64 << 23, 1u64 << 31, 1000, 3] {
++                let mut reference = StdRng::seed_from_u64(seed);
++                let mut ours = SeededChaCha12::seed_from_u64(seed);
++                for i in 0..3000 {
++                    let expected: u64 = reference.gen_range(1..cap);
++                    assert_eq!(ours.gen_range_u64(1, cap), expected, "seed {seed} cap {cap} draw {i}");
++                }
++            }
++            let mut reference = StdRng::seed_from_u64(seed);
++            let mut ours = SeededChaCha12::seed_from_u64(seed);
++            for i in 0..500 {
++                let expected: u64 = reference.gen();
++                assert_eq!(ours.next_u64(), expected, "seed {seed} word {i}");
++            }
++        }
++    }
+ 
+     #[test]
+     fn unsupported_recipes_are_declined() {

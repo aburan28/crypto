@@ -1,0 +1,55 @@
+--- a/oracle.py
++++ b/oracle.py
+@@ -173,6 +173,19 @@
+     else:
+         base = [c.decode(p) for p in report['factor_base']]
+     require(base and all(p is not None for p in base) and len(set(base)) == len(base), 'invalid factor base')
++    # Which convention the report's columns and rows were built under.
++    # 'cofactor' (the default, and every report written before round 0018):
++    #   a base point's column is located by `[h]P` and a relation's row reads
++    #   `sum coeff*log == h*a`.
++    # 'representative': the column IS the orbit representative, so a base
++    #   point is located by itself and the row reads `sum coeff*log == a`.
++    # The two differ by the constant `h` on both sides and recover the same
++    # logarithms; the checker still recomputes every point and every row with
++    # its own group arithmetic under either. A report must not carry both.
++    convention = report.get('column_convention', 'cofactor')
++    require(convention in ('cofactor', 'representative'), 'unknown column convention')
++    scale = c.h if convention == 'cofactor' else 1
++    locate = (lambda p: c.mul(p, c.h)) if convention == 'cofactor' else (lambda p: p)
+     logs = report.get('column_logs', [])
+     require(len(logs) == report.get('columns') and len(logs) > 1, 'missing/nontrivial log matrix')
+     mapping = {}
+@@ -187,9 +200,11 @@
+                 mapping[q] = j, k
+             p = c.frob(p)
+             coeff = coeff*c.lam % c.r
+-    projected = [mapping.get(c.mul(p, c.h)) for p in base]
+-    # An identity projection contributes zero; every other projection needs a column.
+-    require(all(x is not None or c.mul(p,c.h) is None for p,x in zip(base,projected)), 'uncovered base column')
++    projected = [mapping.get(locate(p)) for p in base]
++    # An identity projection contributes zero; every other projection needs a
++    # column.  Under 'representative' no base point projects to the identity --
++    # the base is checked non-degenerate above -- so every one needs a column.
++    require(all(x is not None or locate(p) is None for p,x in zip(base,projected)), 'uncovered base column')
+     matrix = []
+     seen = set()
+     rows = report.get('relations', [])
+@@ -206,7 +221,7 @@
+                 j, k = projected[i]
+                 row[j] = (row[j]+k) % c.r
+         require(q is not None and q == c.mul(c.g,a), 'incorrect point relation')
+-        require(sum(x*int(l['log']) for x,l in zip(row,logs)) % c.r == c.h*a % c.r, 'incorrect scalar-field row')
++        require(sum(x*int(l['log']) for x,l in zip(row,logs)) % c.r == scale*a % c.r, 'incorrect scalar-field row')
+         key = a, tuple(sorted(ids))
+         if key not in seen:
+             matrix.append(row)
+@@ -236,7 +251,7 @@
+                 j, k = projected[i]
+                 logsum = (logsum + k*int(logs[j]['log'])) % c.r
+         require(total == probe, 'descent relation does not hold in the group')
+-        require(c.h*(a + b*int(s['recovered'])) % c.r == logsum, 'logarithm is not the consequence of its descent relation')
++        require(scale*(a + b*int(s['recovered'])) % c.r == logsum, 'logarithm is not the consequence of its descent relation')
+         degenerate += not ids
+     return {'verified_targets':len(targets), 'verified_relations':len(rows), 'fresh_rows':len(seen),
+             'certified_descents':len(solutions), 'degenerate_descents':degenerate,

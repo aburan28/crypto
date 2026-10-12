@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/runner/work/crypto/crypto/research/boolean_halfword_20260923/ci_discovery_36936730092_1/isolated_bench.py",
+    "busy",
+    "--",
+    "/home/runner/.cargo/bin/rustc",
+    "--edition",
+    "2021",
+    "-O",
+    "/home/runner/work/crypto/crypto/research/boolean_halfword_20260923/ci_discovery_36936730092_1/measure.rs",
+    "-o",
+    "/home/runner/work/crypto/crypto/research/boolean_halfword_20260923/ci_discovery_36936730092_1/worker"
+  ],
+  "exit_code": 0,
+  "process_wall_ns": 19466593338,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timed_out": false,
+  "wall_scope": "Operational wrapper duration; not a solver performance sample."
+}

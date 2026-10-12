@@ -1,0 +1,52 @@
+# ECC2K-130: next experimental decisions (2026-09-25)
+
+Update: the fresh four-sum oracle, n53 shared-log comparator, rotated
+support/portfolio, and recursive-S3 semantic gates described below have now
+produced evidence. Use the [current decision ladder](RESEARCH_DECISION_LADDER_20260925.md)
+for the next execution order; this note retains the original gates and their
+pre-outcome reasoning.
+
+Status: evidence-ranked execution plan. The [canonical scoreboard](../../../docs/index-calculus-scoreboard.html) remains the measurement ledger; this note states the next gates and how their outcomes change the work. It does not claim a discrete log for the public challenge.
+
+## Current evidence and what it decides
+
+- [PR #735](https://github.com/aburan28/crypto/pull/735) proved that the compact orbit producer can reach full n=53 relation rank and recover point-only logs. [PR #738](https://github.com/aburan28/crypto/pull/738) measured matched single- and eight-target signed-Frobenius rho controls; the frozen IC chain lost every completed block, with host-load and batching caveats. [PR #754](https://github.com/aburan28/crypto/pull/754) is the preregistered true shared-log follow-up.
+- [PR #747](https://github.com/aburan28/crypto/pull/747) measured six sparse n=37/41 bases. Five reached full training rank, yet all six fixed point-only holdouts had 0/3 relations. Every failed query scanned exactly F²/2 S3 candidates. Unique-root occupancy was 95.9–98.6%, so low occupancy is not the explanation. An exact group-law support oracle is required before redesigning the extractor.
+- The exact unordered four-sum ceiling is C(F+3,4)/q. For the current **materialized-root, exhaustive-miss** n=131 design, the optimistic 1 TiB packed-root cap permits at most 8.82e-15 uniform-target coverage; a base whose ceiling merely reaches 1% projects 1.171 EB of packed root records ([PR #747 addendum](https://github.com/aburan28/crypto/blob/main/research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/COMPACT_ORBIT_N131_UNORDERED_ADDENDUM_20260925.md)). This rules out that particular four-sum representation as the next scale-up. It is not a memory lower bound for every four-sum algorithm.
+- [PR #743](https://github.com/aburan28/crypto/pull/743) and [PR #750](https://github.com/aburan28/crypto/pull/750) established the actual descending degree-263 ring change, dual maps and costs. [PR #753](https://github.com/aburan28/crypto/pull/753) found no reproducible descendant-native advantage on 16 controlled degree-7 cells and only zero-hit exact n=131 m=2 representation smoke. No leaf-PDP yield has been established.
+
+## Gate 1 — complete four-sum support, then choose the repair
+
+Use a fresh, disjoint, preregistered point-only stream and the **identical frozen bases and targets** for (a) a complete full-coordinate group-law pair-sum oracle and (b) the current compact S3 extractor. Start with n=37 R=3 and n=41 R=8, adding R=12 if its measured resource cap permits. The oracle must include repeated points, identity pair sums, all sign choices already in the signed base, and independently replayed four-point witnesses. Charge index construction, query wall/CPU/RSS, and every exhaustive miss; archive input/source hashes and failures in a PR.
+
+For every target, classify: oracle-positive/extractor-positive; oracle-positive/extractor-negative; or oracle-negative/extractor-negative. An extractor-positive/oracle-negative result is a correctness failure and blocks performance interpretation. If the second class occurs, repair root-index completeness or group-lift search, then repeat on **new** frozen targets before benchmarking any speed optimization. If support and extractor agree while useful-target coverage stays too low, stop optimizing this four-sum query loop; change the support model or summand count. If support is adequate but exhaustive misses dominate cost, test a genuinely different implicit pair-query representation under a stated memory cap. A high root occupancy alone does not justify that engineering.
+
+Do not retrofit the #747 targets as the oracle's inferential stream. Their outcomes motivated this gate, so doing so would bias a completeness estimate.
+
+## Gate 2 — settle shared-log economics at n=53
+
+Run the committed [#754 protocol](https://github.com/aburan28/crypto/pull/754) on three disjoint 32-point blocks, with a preregistered 128-point extension gate. Train the compact base exactly once on all 512 targets and require rank 220 and independently verified base logs. Use identical point-only Q files for compact descent and a true same-Q signed-Frobenius batched rho table. The primary IC wall includes cold training/replay, point-query process and recovery; a child-process-only sum is a lower bound. Record operation counters and peak RSS alongside paired wall and CPU, preserve censored failures, independently replay every scalar, and merge the raw archive.
+
+If the IC lower bound exceeds rho in every complete block, retire this specific n=53 chain as a crossover candidate. If the conservative IC upper cost beats rho in every block without an operation/resource regression, replicate with new preregistered blocks and another host before asserting a general crossover. Otherwise mark the result unresolved and isolate its dominant charge. No n=131 conclusion follows directly from an n=53 timing ratio.
+
+## Gate 3 — admit a new implicit m ≥ 3 route only with complete-workload evidence
+
+The four-sum memory/coverage result shifts attention to **implicit, nonmaterialized** support and additional summands, not to a larger four-sum root table. For any proposed m, calculate the necessary ceiling C(F+m-1,m)/(q-1) exactly, then specify how the representation avoids both materializing all pair roots and exhaustive scans. The four-sum addendum shows that a 1%-ceiling base first becomes possible at F=60,591,280 for m=5 or F=4,121,293 for m=6; those counts say nothing about solver time, rank, actual coverage, or memory. A practical proposal must budget each of them independently.
+
+Preregister the same small-rung curves, useful-size-matched bases, target streams, work caps and independent group-law witness checker before comparing encodings. Treat Gray code/FES, crossbred, SAT engines and F4/F5/msolve as candidate **solvers for a fixed decomposition problem**. Pin binary versions, polynomial system, variable order, preprocessing, threading and proof/witness output; report success and censored failures per target plus construction/CPU/RSS. First establish exact support and a solver that actually finds all or a measured fraction of supported targets. Only then pay for full relation rank, point-only descent, linear algebra, scalar replay and a same-Q batched-rho comparator. A fast isolated PDP solve is not an attack-speed result.
+
+Prioritize an m=5/6 implicit design if Gate 1 shows support is the bottleneck. Prioritize extractor completeness if Gate 1 finds supported targets missed by S3. Gate 2 determines whether amortized compact work warrants any further engineering of that existing producer.
+
+## Degree-263 descendant admission
+
+The source has cheap Frobenius action; the measured descending leaf has conductor 263 and discriminant -484183, and its current generic subgroup action is much costlier. The verified dual makes transport and pullback correct, but does not make a native leaf basis cheaper. Reopen a descendant-native PDP branch only with an explicit leaf action and an equal-useful-size base whose **charged** construction, maps, action, supported-target mass, rank and Q recovery beat the original/transported controls on independent streams. Preserve the original and transported arms as same-Q controls. The next exact-target test is implicit m ≥ 3, since the 16-point m=2 smoke has a negligible necessary hit ceiling.
+
+## Exact n=131 Frobenius-linear-subspace exclusion
+
+A separate mathematical gate removes a tempting but poorly sized family of factor bases. The multiplicative order of 2 modulo 131 is 130: the proper-divisor tests give 2^65 ≡ 130, 2^26 ≡ 53 and 2^10 ≡ 107 (mod 131), while 2^130 ≡ 1. Hence (X^131−1)/(X−1) is irreducible of degree 130 over F₂. Under the Frobenius action on F₂¹³¹, invariant **linear** subspaces have dimensions only 0, 1, 130 or 131. The exact check is [frobenius_subspace_gate_20260925.py](frobenius_subspace_gate_20260925.py). The paper [On Index Calculus Algorithms for Subfield Curves](https://sacworkshop.org/SAC20/files/preproceedings/18-IndexCalculus.pdf), Lemma 4.1 and §4.1, gives the factorization criterion and explains the resulting factor-base size restriction.
+
+Decision: do not spend a solver campaign on an intermediate-dimensional Frobenius-invariant *linearized-polynomial* x-space for n=131; none exists. This does **not** exclude nonlinear Galois-invariant sets or unions of full Frobenius orbits. A change of field basis does not change the four allowed invariant linear dimensions. The compact point-defined orbit bases are in the remaining class.
+
+## Goal completion rule
+
+The active Codex goal is a reproducible, PR-reviewed ECC2K-130 index-calculus feasibility verdict. Every research change, including a negative or censored result, gets a branch, raw/hash-addressed evidence, independent replay, CI/review and a merged PR as required by [AGENTS.md](../../../AGENTS.md). The goal is complete only after exact support versus extractor misses are resolved, shared-log economics are measured, and the most promising admitted implicit/descendant route is tested end to end against matched batched rho—or these routes receive a quantitative no-go with the next evidence-ranked direction. Do not infer a challenge solve or attack-speed crossover from relation collection, SAT, Gröbner or transport stages alone.

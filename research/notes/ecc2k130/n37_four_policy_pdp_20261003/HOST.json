@@ -1,0 +1,11 @@
+{
+  "schema": "n37-four-policy-pdp-host-v1",
+  "platform": "Darwin 25.6.0 arm64",
+  "rustc": "1.93.1 (01f6ddf75 2026-02-11)",
+  "cargo": "1.93.1",
+  "build": "release --locked",
+  "isolation": "L0; no core affinity or quiet-host certification",
+  "wall_time_admitted": false,
+  "measurement_scope": "archived-support exact point-decomposition and rank diagnostic",
+  "prior_same_host_manifest": "research/notes/ecc2k130/n37_four_policy_support_20261003/HOST.json"
+}

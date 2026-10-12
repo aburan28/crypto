@@ -1,0 +1,9 @@
+# TPU index-calculus backend (JAX/Pallas).
+#
+# CPU wheels are enough to run every self-check here (JAX runs on CPU and
+# Pallas has interpret mode); a TPU host additionally needs the matching
+# `jax[tpu]` / libtpu build, installed per the JAX install guide.
+jax==0.4.35
+jaxlib==0.4.35
+numpy>=1.26
+pytest>=8.0

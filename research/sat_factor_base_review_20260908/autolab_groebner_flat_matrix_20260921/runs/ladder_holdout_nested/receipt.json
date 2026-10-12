@@ -1,0 +1,26 @@
+{
+  "child_system_ms": 10.776,
+  "child_user_ms": 1599.237,
+  "command": [
+    "target/release/examples/groebner_stage_bench",
+    "--ladder",
+    "holdout",
+    "--out",
+    "research/sat_factor_base_review_20260908/autolab_groebner_flat_matrix_20260921/runs/ladder_holdout_nested/artifact",
+    "--label",
+    "ladder_holdout_nested"
+  ],
+  "ended_unix_ns": 1790046895891477000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/groebner_stage_bench",
+  "executable_sha256": "f329ebbb8dc32de7bb6b3f31f99caaa65d613d7ce8b02debd67319ab2263c702",
+  "exit_code": 0,
+  "peak_rss_bytes": 130252800,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790046894277252000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 816,
+  "stdout_sha256": "66ec90511b6d9b3460406f0d2ea26a532143d49e37f99ae15377aff4a4c4d907",
+  "task_id": "TASK-KIC-GROEBNER-FLAT-MATRIX-LADDER-HOLDOUT-NESTED-20260921",
+  "wall_ms": 1614.241
+}

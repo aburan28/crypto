@@ -1,0 +1,81 @@
+{
+ "note": "callgrind phase dumps (the worker's own client-request boundaries) of the triple arm on four probe fixtures from random.Random(20260923) -- the exposed probe stream of the triple-table study. Diagnostic only: it motivated this study and fixes the fixed-overhead constant in model.py; it is not a measurement of the counted arm.",
+ "runs": [
+  {
+   "cell": "n37a0",
+   "target_seed": 1539234789120373735,
+   "algorithm_seed": 16831653375006196927,
+   "arm": "triple",
+   "total_ir": 14682870,
+   "trials": 28,
+   "phases_ir": {
+    "factor_base_and_tables": 9354330,
+    "collection_and_decomposition": 3185785,
+    "individual_log": 1218042,
+    "curve_and_targets": 558778,
+    "final_verification": 264831,
+    "log_certification": 42481,
+    "verify_filter_and_linear_algebra": 40800,
+    "startup_and_input": 11223,
+    "Program termination": 6600
+   }
+  },
+  {
+   "cell": "n37a0",
+   "target_seed": 3864801173432270603,
+   "algorithm_seed": 10728316618104631146,
+   "arm": "triple",
+   "total_ir": 17351224,
+   "trials": 24,
+   "phases_ir": {
+    "factor_base_and_tables": 9358311,
+    "individual_log": 4335483,
+    "collection_and_decomposition": 2719554,
+    "curve_and_targets": 558719,
+    "final_verification": 278546,
+    "log_certification": 42450,
+    "verify_filter_and_linear_algebra": 40286,
+    "startup_and_input": 11223,
+    "Program termination": 6652
+   }
+  },
+  {
+   "cell": "n43a1",
+   "target_seed": 10268837553636953339,
+   "algorithm_seed": 11748700844095411625,
+   "arm": "triple",
+   "total_ir": 22630919,
+   "trials": 11,
+   "phases_ir": {
+    "factor_base_and_tables": 13438341,
+    "individual_log": 5674635,
+    "curve_and_targets": 1624210,
+    "collection_and_decomposition": 1465863,
+    "final_verification": 321466,
+    "log_certification": 45515,
+    "verify_filter_and_linear_algebra": 42924,
+    "startup_and_input": 11256,
+    "Program termination": 6709
+   }
+  },
+  {
+   "cell": "n43a1",
+   "target_seed": 10318846948551153886,
+   "algorithm_seed": 6808906808786612592,
+   "arm": "triple",
+   "total_ir": 71308531,
+   "trials": 279,
+   "phases_ir": {
+    "collection_and_decomposition": 41337927,
+    "individual_log": 14433281,
+    "factor_base_and_tables": 13446415,
+    "curve_and_targets": 1639503,
+    "final_verification": 327182,
+    "verify_filter_and_linear_algebra": 60748,
+    "log_certification": 45509,
+    "startup_and_input": 11233,
+    "Program termination": 6733
+   }
+  }
+ ]
+}

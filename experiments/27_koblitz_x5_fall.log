@@ -1,0 +1,16 @@
+source 7bcc6460695ce3e80afd0bc5bcb1013bade264a9 Wed Sep 23 17:33:02 UTC 2026
+rung n= 9 ℓ=4 symmetrised chain vars 31 eqs 27 deg 3 | FFD min 4 max 4 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 0.0)] | 522 ms
+rung n= 9 ℓ=4 x-chained         vars 34 eqs 27 deg 3 | FFD min 2 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0625), (3, 3.5625)] | 1117 ms
+rung n=11 ℓ=4 symmetrised chain vars 35 eqs 33 deg 3 | FFD min 4 max 4 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 0.0)] | 1393 ms
+rung n=11 ℓ=4 x-chained         vars 38 eqs 33 deg 3 | FFD min 3 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 1.0)] | 301 ms
+rung n=13 ℓ=5 symmetrised chain vars 43 eqs 39 deg 3 | FFD min — max — no fall 16/16 censored 16 | deficit [(2, 0.0), (3, 0.0)] | 491 ms
+rung n=13 ℓ=5 x-chained         vars 46 eqs 39 deg 3 | FFD min 3 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 1.0)] | 892 ms
+rung n=15 ℓ=5 symmetrised chain vars 47 eqs 45 deg 3 | FFD min — max — no fall 16/16 censored 16 | deficit [(2, 0.0), (3, 0.0)] | 739 ms
+rung n=15 ℓ=5 x-chained         vars 50 eqs 45 deg 3 | FFD min 3 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 1.0)] | 506 ms
+rung n=17 ℓ=6 symmetrised chain vars 55 eqs 51 deg 3 | FFD min — max — no fall 16/16 censored 16 | deficit [(2, 0.0), (3, 0.0)] | 694 ms
+rung n=17 ℓ=6 x-chained         vars 58 eqs 51 deg 3 | FFD min 3 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 1.0)] | 890 ms
+rung n=19 ℓ=6 symmetrised chain vars 59 eqs 57 deg 3 | FFD min — max — no fall 16/16 censored 16 | deficit [(2, 0.0), (3, 0.0)] | 1017 ms
+rung n=19 ℓ=6 x-chained         vars 62 eqs 57 deg 3 | FFD min 3 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 1.0)] | 1353 ms
+cross-check (invariant V) n=15 ℓ=5 symmetrised chain vars 47 eqs 45 deg 3 | FFD min — max — no fall 16/16 censored 16 | deficit [(2, 0.0), (3, 0.0)] | 699 ms
+cross-check (invariant V) n=15 ℓ=5 x-chained         vars 50 eqs 45 deg 3 | FFD min 3 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 1.0)] | 411 ms
+solve K_1/F_2^11 ℓ=4 |F_u|=21 | found 6 refuted 10 budget 0 (decomposable 6/16) gate failures 0 | splits 486.1 word XORs 4.370e6 156.7 ms

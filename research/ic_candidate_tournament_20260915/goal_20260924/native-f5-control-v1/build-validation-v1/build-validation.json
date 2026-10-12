@@ -1,0 +1,104 @@
+{
+  "actual_scientific_registration": false,
+  "build_identity_only_worker_calls": 1,
+  "checker_sha256": "dc9fb1e79aec3f550426806e47a6b19c4e9f723f0d93241a89da9949964cc69a",
+  "files": {
+    "Cargo.lock": {
+      "bytes": 29121,
+      "sha256": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627"
+    },
+    "build-receipts/build-identity.json": {
+      "bytes": 441,
+      "sha256": "c923d9755e162f506cb9075765fb4cf37ad3f9c0b2b19791f4312214b427e1f8"
+    },
+    "build-receipts/build.log": {
+      "bytes": 3864,
+      "sha256": "29d576f16991478c9e274bab68ae384045425e90ce61b8c3e8de0c4b6745bc20"
+    },
+    "build-receipts/build.receipt.json": {
+      "bytes": 2784,
+      "sha256": "fa4ea6adfbe5674f52e0e30b0a73d84096e2433b29dd8085b36f34f97fe35b20"
+    },
+    "build-receipts/cargo.log": {
+      "bytes": 213,
+      "sha256": "2acedc6d91ea99958f144b6e38dc6419f20e834ecc6154591888896d0a1691ea"
+    },
+    "build-receipts/cargo.receipt.json": {
+      "bytes": 2681,
+      "sha256": "800d8ab9328c9131b8bfe951165cbb1cf0aa437cc604bbb68bcf1a198a0b9229"
+    },
+    "build-receipts/rustc.log": {
+      "bytes": 203,
+      "sha256": "dbd639801eacf9d8900b64719640b726c1ad6b3e8fc216b7f0b2eae7c256a602"
+    },
+    "build-receipts/rustc.receipt.json": {
+      "bytes": 2680,
+      "sha256": "d38c19bbf8d51f99c47d1a5e8d939974028b44af243f9e2301bd814a4289f28a"
+    },
+    "build-receipts/vendor.log": {
+      "bytes": 26689,
+      "sha256": "45ff333bfd0bf2e260f2d820b3493a46d6badcad2e41d36f2a0ea8c4ea5e08da"
+    },
+    "build-receipts/vendor.receipt.json": {
+      "bytes": 2234,
+      "sha256": "488363899aff94cebe8c87acf4ecf9ac06bd7d68ada38ddf0a8ca92a31751179"
+    },
+    "build-receipts/worker-identity.log": {
+      "bytes": 239,
+      "sha256": "876035d55e000e2e30b0f95163db8549c637bafe920b4142d9ae2e4177c01a21"
+    },
+    "build-receipts/worker-identity.receipt.json": {
+      "bytes": 738,
+      "sha256": "5b089f0885dbd19667610c82d376036e56129dd067369907b8450e870947f419"
+    },
+    "config.json": {
+      "bytes": 225,
+      "sha256": "ac66f4cf13a531035621f191fc7554d045db3f846db2d808d194d826013d3d34"
+    },
+    "host-context.json": {
+      "bytes": 396,
+      "sha256": "46f492adb765107b88c9eb93ccceb0833b6ad4c6c876712dc7ffaf56cfa093d4"
+    },
+    "job.json": {
+      "bytes": 7223,
+      "sha256": "b0ecbb19d33ecf739499d1db5d23ffd25a1c85309a574d5cf6cffa66cab94fc5"
+    },
+    "preparation.json": {
+      "bytes": 82045,
+      "sha256": "8c5ed3868d9131dd0c319ce436955f18ab9411bf47cc4970b47ac28ec5e56bd1"
+    },
+    "registration.json": {
+      "bytes": 1009033,
+      "sha256": "40157434c4d0e4022f2c7536285c881d50e20af9ee9df84110ed92f2a3721320"
+    },
+    "seal.json": {
+      "bytes": 95,
+      "sha256": "7ce1d290b4310c94f13248c89f86c2e30a32f5aa002b8d1d85851eaf4afa4c1b"
+    }
+  },
+  "fresh_paired_qualification": false,
+  "full_capsule_archive_custody_established_by_this_bundle": false,
+  "full_goal_complete": false,
+  "headline_eligible": false,
+  "immutable_file_count": 5953,
+  "native_f5_runtime_admitted": false,
+  "online_speedup": null,
+  "online_wall_ns": null,
+  "ordinary_queries_executed": 0,
+  "promotion_eligible": false,
+  "schema_version": 1,
+  "scientific_worker_calls": 0,
+  "source_commit": "92b24110d49de660c8e4451f907a58b5c49a09bd",
+  "source_reconstruction": "committed source revision, exact Cargo.lock, offline dependency inventory and original build receipts retained; no archived binary executes",
+  "status": "PASS_NATIVE_F5_OFFLINE_FREEZE_BUILD_VALIDATION",
+  "validation_only": true,
+  "validation_registration_sha256": "421ac32d7833673ae10e414a398ccb887dcf02556d88a135804ad73869eb61bf",
+  "worker_build_identity": {
+    "build_sha256": "daa67b5ca28c678fe2709d4109ef40713f4b23c8f91766bc09ea9b29c0db95e7",
+    "schema_version": 1,
+    "source_manifest_sha256": "17562a52e88fa8a0fe01b9fe6e6588f096ab60ee00ede4a17440bd7ec9eda039",
+    "target_arch": "aarch64",
+    "target_os": "macos"
+  },
+  "worker_sha256": "6646824bac684ce688e4e4d19a4444280e12bc872edfb422f1f681e8e2ae51b6"
+}

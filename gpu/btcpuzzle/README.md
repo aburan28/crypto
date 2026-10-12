@@ -88,7 +88,48 @@ make bench ARCH=sm_100
 ./bench solve --bits 48 --self  # plant a 48-bit key and find it
 ./bench solve --bits 65 --pubkey 02...
 ./bench solve --puzzle 65       # target from puzzles.txt
+./bench solve --puzzle 65 --gpu 0,1,2,3   # the same search across four devices
+./bench bench --gpu all         # per-device throughput, and the sum
 ```
+
+## Multi-GPU
+
+The widely deployed interval solvers are kangaroo, not rho, and they scale
+across GPUs the same way: JeanLucPons's Kangaroo runs one process with one
+host thread per device, every device walks its own herds, and there is
+**one** distinguished-point table on the host where a tame report from any
+device meets a wild report from any other. `--gpu 0,1,2` (or `--gpu all`)
+does exactly that here.
+
+What has to be true for the split to be a search and not N copies of one:
+a kangaroo's start position is a function of its index, so every device must
+own a **disjoint range of global indices**. Each device context carries an
+index base (`kg_ctx::idx_base`), the seeding and the reported records use
+`base + local`, and the bases are the cumulative kangaroo counts, so N
+devices hold exactly the herd one device N times the size would hold, and no
+kangaroo is walked twice. Bases are even, so herd parity — tame for even
+indices, wild for odd — is the same locally and globally. Nothing else is
+shared: the jump table is derived from the job, so it is the same on every
+device, and that is what makes a collision between devices meaningful.
+
+The distinguished-point rate is chosen from the kangaroo count **across all
+devices** (the per-kangaroo tail is `nkang · 2^dp_bits`), so adding devices
+raises the automatic `--dp` rather than silently lengthening the tail.
+Devices need not match: each gets its own thread count from its own SM
+count, and the solver reports the aggregate rate it achieved plus each
+device's share.
+
+`make test` checks the split on the CPU: two contexts with different thread
+counts and disjoint bases seed exactly the single-context herd of the
+combined size with no kangaroo in both (and the control — a second context
+*without* a base — duplicates every one of its kangaroos), reported records
+carry the global index, and a 28-bit search split across the two contexts
+into one table recovers the key. `./bench selftest` runs the device as the
+second lane of such a split, with a non-zero base, against the host code.
+
+Not done: several *machines*. That needs the table to leave the process —
+JeanLucPons's `-s`/`-c` server/client, or `docs/POLLARD_COLLAB_DESIGN.md`'s
+check-in records, which this solver's DP record already fits.
 
 ## Measured cost
 
@@ -191,7 +232,7 @@ used by `make test` as regression targets. They are not puzzle keys.
 | `kangaroo.cuh` | The walk: jump selection, distance accumulation, distinguished points, batched stepping |
 | `kangaroo_host.hpp` | Jump table construction, SEC1 keys, the puzzle registry, collision → private key |
 | `kernels_kangaroo.cuh` | Kernels and launch structure |
-| `kangaroo.cu` | Solver and benchmark CLI |
+| `kangaroo.cu` | Solver and benchmark CLI; one host thread per device, one table |
 | `test_kangaroo.cpp` | CPU verification, including end-to-end solves |
 | `puzzles.txt` | The registry |
 | `ptx_stats_kangaroo.sh` | Static instruction and occupancy analysis, no GPU needed |

@@ -77,7 +77,7 @@ where
 {
     assert!(n_in > 0 && n_out > 0 && samples_per_bit > 0);
 
-    let in_bytes = (n_in + 7) / 8;
+    let in_bytes = n_in.div_ceil(8);
     let mut rng = StdRng::seed_from_u64(seed);
     let mut matrix = vec![vec![0u64; n_out]; n_in];
 
@@ -86,7 +86,7 @@ where
             let mut input = vec![0u8; in_bytes];
             rng.fill_bytes(&mut input);
             // Mask off any bits beyond n_in in the last byte.
-            if n_in % 8 != 0 {
+            if !n_in.is_multiple_of(8) {
                 let keep = (1u8 << (n_in % 8)) - 1;
                 input[in_bytes - 1] &= keep;
             }
@@ -153,14 +153,14 @@ where
         return 1.0;
     }
 
-    let in_bytes = (n_in + 7) / 8;
+    let in_bytes = n_in.div_ceil(8);
     let mut rng = StdRng::seed_from_u64(seed);
 
     let mut v: Vec<Vec<i32>> = Vec::with_capacity(samples);
     for _ in 0..samples {
         let mut input = vec![0u8; in_bytes];
         rng.fill_bytes(&mut input);
-        if n_in % 8 != 0 {
+        if !n_in.is_multiple_of(8) {
             let keep = (1u8 << (n_in % 8)) - 1;
             input[in_bytes - 1] &= keep;
         }

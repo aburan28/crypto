@@ -1,0 +1,15 @@
+{
+  "command": [
+    "sage",
+    "-python",
+    "-c",
+    "import resource; limit=2*1024**3; resource.setrlimit(resource.RLIMIT_AS,(limit,limit)); import sage.all; from sage.version import version; print(version)"
+  ],
+  "exit_code": 1,
+  "host": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "mode": "approved-unsandboxed",
+  "schema": "leaf7-host-limit-preflight-v1",
+  "stderr_file": "unsandboxed.stderr.txt",
+  "stdout_file": "unsandboxed.stdout.txt",
+  "utc": "2026-09-29T08:11:53.683554+00:00"
+}

@@ -1,0 +1,65 @@
+{
+  "claim_boundary": "Public-synthetic n=31 decomposition-solver evidence only. This is not relation-yield evidence, an end-to-end index-calculus crossover, an asymptotic improvement, a sub-rho result, an external-target capability, or a key-recovery claim.",
+  "claim_boundary_non_claims": [
+    "not relation-yield evidence",
+    "not end-to-end index calculus",
+    "not asymptotic or sub-rho evidence",
+    "not external or private targets",
+    "not a key-recovery claim"
+  ],
+  "dimension_l_or_dim": 16,
+  "eq_var_ratio": 0.96875,
+  "executable_or_source_hash": {
+    "frontier_probe_source": "8c530dec67c7f5a8bda548e50c84d958610c28055fd043e3de1a32717b1318de",
+    "koblitz_groebner_source": "9c4c11e1124a39f3b2dd14b7004b7ade43e6adbe79e368c65c5de95fd643c791",
+    "paired_executable_receipt": "7373e97dea9882474614f05eb0ccf07f155c9b7018bff254c562489e129ced55",
+    "profile_executable_receipt": "ba7b1a4ed0b33c1b2ee048442dbc2a54cb2da5a6e1fd667b0c439e08de475822",
+    "rref_tests_source": "d97e0fd6010c5d8f6ff0fc89228c0f9829df4143783131aaa5a896fc48edb64e"
+  },
+  "f4_splits": {
+    "sym": 4095,
+    "x": 7056
+  },
+  "ffd_or_degree_of_regularity": {
+    "symmetrised": 4,
+    "x_chained": 3
+  },
+  "fixture_hash": "93a672fd8f58fc16cd2ac8892c74b7f7b0e950a309878ccc2930a02fd588dc40",
+  "host_id": {
+    "hostname": "Adams-MacBook-Pro.local",
+    "machine": "arm64",
+    "system": "Darwin"
+  },
+  "largest_solvable": {
+    "m": 2,
+    "n": 31,
+    "node_budget": 50000,
+    "unknowns": 32
+  },
+  "m_summands": 2,
+  "macaulay_degree_max": 3,
+  "median_ms_per_target": {
+    "sym_refuted_selected": 15534.0,
+    "x_found_selected": 27696.0
+  },
+  "n_or_bits": 31,
+  "oracle_class": "Boolean matrix-F4 with maximum-degree scheduling and exact linear-tail elimination",
+  "resource_caps": {
+    "node_budget": 50000,
+    "targets_per_arm": 2,
+    "threads": 1
+  },
+  "schema_version": 2,
+  "seeds": [
+    24301
+  ],
+  "stage": "decomposition",
+  "system_degree": "quadratic",
+  "task_id": "TASK-KIC-GROEBNER-LINEAR-TAIL-20260921",
+  "unknowns": 32,
+  "verdict_mix": {
+    "inconclusive": 0,
+    "sym_refuted": 2,
+    "x_found": 2
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "metrics": {
+    "bytes": 704,
+    "path": "metrics.json",
+    "sha256": "f0a61e60a07680eb3744e398137549d6047cc5a9915ac44157e763648e601050"
+  },
+  "process": {
+    "command": [
+      "/usr/bin/env",
+      "RAYON_NUM_THREADS=1",
+      "VECLIB_MAXIMUM_THREADS=1",
+      "OPENBLAS_NUM_THREADS=1",
+      "OMP_NUM_THREADS=1",
+      "MKL_NUM_THREADS=1",
+      "BLIS_NUM_THREADS=1",
+      "NUMEXPR_NUM_THREADS=1",
+      "/opt/homebrew/bin/cryptominisat5",
+      "--version"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 2162688,
+    "pid": 83599,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.003244,
+    "timed_out": false,
+    "total_core_seconds": 0.00527,
+    "user_seconds": 0.002026,
+    "wall_seconds": 0.027214958,
+    "watchdog_seconds": 30
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 0,
+    "path": "stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 1201,
+    "path": "stdout.txt",
+    "sha256": "ffa1cee9f1211a37fa832b1b3f47159508335897ea294a1d8598e5c77c746ec7"
+  }
+}

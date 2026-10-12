@@ -1,0 +1,5557 @@
+{
+  "schema": "p256.dickson_image_atomized_s5_degree/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "prime": 1151,
+  "a": 1148,
+  "b": 241,
+  "round10_sha256": "1e14e88f624bb1dadee3ea398f33d4fe0c51b9ea0956d8a4377bbccd6810bc93",
+  "max_degree": 4,
+  "budget_seconds_per_image_atom": 5,
+  "terminal_results": [
+    {
+      "terminal": 0,
+      "target": [
+        441,
+        24
+      ],
+      "parent_cells": 8,
+      "leaf_atoms": 8,
+      "image_atoms": 8,
+      "signed_tuples": 128,
+      "cells": [
+        {
+          "boundaries": [
+            25,
+            25,
+            384,
+            1110
+          ],
+          "expected_positive": true,
+          "leaf_atoms": 1,
+          "image_atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": true,
+          "identity_positive": false,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                519,
+                519,
+                409,
+                320
+              ],
+              "left_affine_image": [
+                443
+              ],
+              "right_affine_image": [
+                196,
+                820
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 443,
+                  "expected_positive": true,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": false,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 16
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            767,
+            1110
+          ],
+          "expected_positive": true,
+          "leaf_atoms": 1,
+          "image_atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": false,
+          "identity_positive": true,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                519,
+                519,
+                725,
+                320
+              ],
+              "left_affine_image": [
+                443
+              ],
+              "right_affine_image": [
+                441,
+                1071
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": true,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 443,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            1110,
+            384
+          ],
+          "expected_positive": true,
+          "leaf_atoms": 1,
+          "image_atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": true,
+          "identity_positive": false,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                519,
+                519,
+                320,
+                409
+              ],
+              "left_affine_image": [
+                443
+              ],
+              "right_affine_image": [
+                196,
+                820
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 443,
+                  "expected_positive": true,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": false,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 16
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            1110,
+            767
+          ],
+          "expected_positive": true,
+          "leaf_atoms": 1,
+          "image_atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": false,
+          "identity_positive": true,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                519,
+                519,
+                320,
+                725
+              ],
+              "left_affine_image": [
+                443
+              ],
+              "right_affine_image": [
+                441,
+                1071
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": true,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 443,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            25,
+            25
+          ],
+          "expected_positive": false,
+          "leaf_atoms": 1,
+          "image_atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                519,
+                519,
+                519,
+                519
+              ],
+              "left_affine_image": [
+                443
+              ],
+              "right_affine_image": [
+                443
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 2,
+              "image_build_multiplications": 60,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 2,
+              "image_atoms": [
+                {
+                  "left_image_x": 443,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 8
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            25,
+            41
+          ],
+          "expected_positive": false,
+          "leaf_atoms": 1,
+          "image_atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                519,
+                519,
+                519,
+                1061
+              ],
+              "left_affine_image": [
+                443
+              ],
+              "right_affine_image": [
+                493,
+                992
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 443,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            25,
+            262
+          ],
+          "expected_positive": false,
+          "leaf_atoms": 1,
+          "image_atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                519,
+                519,
+                519,
+                372
+              ],
+              "left_affine_image": [
+                443
+              ],
+              "right_affine_image": [
+                700,
+                1010
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 443,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            25,
+            25,
+            25,
+            342
+          ],
+          "expected_positive": false,
+          "leaf_atoms": 1,
+          "image_atoms": 1,
+          "signed_tuples": 16,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                519,
+                519,
+                519,
+                583
+              ],
+              "left_affine_image": [
+                443
+              ],
+              "right_affine_image": [
+                53,
+                956
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 443,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "terminal": 369,
+      "target": [
+        722,
+        28
+      ],
+      "parent_cells": 8,
+      "leaf_atoms": 96,
+      "image_atoms": 144,
+      "signed_tuples": 1536,
+      "cells": [
+        {
+          "boundaries": [
+            94,
+            94,
+            288,
+            614
+          ],
+          "expected_positive": true,
+          "leaf_atoms": 8,
+          "image_atoms": 12,
+          "signed_tuples": 128,
+          "affine_positive": true,
+          "identity_positive": false,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                163,
+                163,
+                574,
+                935
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                124,
+                146
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                577,
+                935
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                359,
+                537
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                574,
+                935
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                124,
+                146
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 17
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                577,
+                935
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                359,
+                537
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                574,
+                935
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                124,
+                146
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 17
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                577,
+                935
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                359,
+                537
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                574,
+                935
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                124,
+                146
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                577,
+                935
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                359,
+                537
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": true,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": false,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 16
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            288,
+            1057
+          ],
+          "expected_positive": true,
+          "leaf_atoms": 16,
+          "image_atoms": 24,
+          "signed_tuples": 256,
+          "affine_positive": false,
+          "identity_positive": true,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                163,
+                163,
+                574,
+                470
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                402,
+                589
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                574,
+                681
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                680,
+                722
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": true,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                577,
+                470
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                428,
+                497
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                577,
+                681
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                675,
+                746
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                574,
+                470
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                402,
+                589
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                574,
+                681
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                680,
+                722
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                577,
+                470
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                428,
+                497
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                577,
+                681
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                675,
+                746
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                574,
+                470
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                402,
+                589
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                574,
+                681
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                680,
+                722
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                577,
+                470
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                428,
+                497
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                577,
+                681
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                675,
+                746
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                574,
+                470
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                402,
+                589
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                574,
+                681
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                680,
+                722
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": true,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                577,
+                470
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                428,
+                497
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                577,
+                681
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                675,
+                746
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            614,
+            288
+          ],
+          "expected_positive": true,
+          "leaf_atoms": 8,
+          "image_atoms": 12,
+          "signed_tuples": 128,
+          "affine_positive": true,
+          "identity_positive": false,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                163,
+                163,
+                935,
+                574
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                124,
+                146
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                935,
+                577
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                359,
+                537
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                935,
+                574
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                124,
+                146
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 17
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                935,
+                577
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                359,
+                537
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                935,
+                574
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                124,
+                146
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 17
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                935,
+                577
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                359,
+                537
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                935,
+                574
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                124,
+                146
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                935,
+                577
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                359,
+                537
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": true,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": false,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 16
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            863,
+            1057
+          ],
+          "expected_positive": true,
+          "leaf_atoms": 16,
+          "image_atoms": 24,
+          "signed_tuples": 256,
+          "affine_positive": true,
+          "identity_positive": false,
+          "combined_positive": true,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                163,
+                163,
+                273,
+                470
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                289,
+                1001
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                273,
+                681
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                0,
+                540
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                878,
+                470
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                203,
+                270
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                878,
+                681
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                607,
+                1118
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                273,
+                470
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                289,
+                1001
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                273,
+                681
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                0,
+                540
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                878,
+                470
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                203,
+                270
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                878,
+                681
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                607,
+                1118
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                273,
+                470
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                289,
+                1001
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                273,
+                681
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                0,
+                540
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                878,
+                470
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                203,
+                270
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                878,
+                681
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                607,
+                1118
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                273,
+                470
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                289,
+                1001
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                273,
+                681
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                0,
+                540
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": true,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": false,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 2,
+                    "field_ops": 8
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                878,
+                470
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                203,
+                270
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                878,
+                681
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                607,
+                1118
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            94,
+            94
+          ],
+          "expected_positive": false,
+          "leaf_atoms": 16,
+          "image_atoms": 24,
+          "signed_tuples": 256,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                163,
+                163,
+                163,
+                163
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                909
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 2,
+              "image_build_multiplications": 60,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 2,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 8
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                163,
+                988
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                9,
+                581
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                988,
+                163
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                9,
+                581
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                988,
+                988
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                1065
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 2,
+              "image_build_multiplications": 60,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 2,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 8
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                163,
+                163
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                909
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 8
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 8
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                163,
+                988
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                9,
+                581
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                988,
+                163
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                9,
+                581
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                988,
+                988
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                1065
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 8
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 8
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                163,
+                163
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                909
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 8
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 8
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                163,
+                988
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                9,
+                581
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                988,
+                163
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                9,
+                581
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                988,
+                988
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                1065
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 8
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 8
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                163,
+                163
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                909
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 2,
+              "image_build_multiplications": 60,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 2,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 8
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                163,
+                988
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                9,
+                581
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                988,
+                163
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                9,
+                581
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                988,
+                988
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                1065
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 2,
+              "image_build_multiplications": 60,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 2,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 8
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            94,
+            166
+          ],
+          "expected_positive": false,
+          "leaf_atoms": 8,
+          "image_atoms": 12,
+          "signed_tuples": 128,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                163,
+                163,
+                163,
+                390
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                479,
+                505
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                988,
+                390
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                203,
+                1083
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                163,
+                390
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                479,
+                505
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                988,
+                390
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                203,
+                1083
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                163,
+                390
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                479,
+                505
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                988,
+                390
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                203,
+                1083
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                163,
+                390
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                479,
+                505
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                988,
+                390
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                203,
+                1083
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            94,
+            288
+          ],
+          "expected_positive": false,
+          "leaf_atoms": 16,
+          "image_atoms": 24,
+          "signed_tuples": 256,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                163,
+                163,
+                163,
+                574
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                480,
+                684
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                163,
+                577
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                340,
+                494
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                988,
+                574
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                261,
+                339
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                988,
+                577
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                28,
+                319
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                163,
+                574
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                480,
+                684
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                163,
+                577
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                340,
+                494
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                988,
+                574
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                261,
+                339
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                988,
+                577
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                28,
+                319
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                163,
+                574
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                480,
+                684
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                163,
+                577
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                340,
+                494
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                988,
+                574
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                261,
+                339
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                988,
+                577
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                28,
+                319
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                163,
+                574
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                480,
+                684
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                163,
+                577
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                340,
+                494
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                988,
+                574
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                261,
+                339
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                988,
+                577
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                28,
+                319
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "boundaries": [
+            94,
+            94,
+            94,
+            507
+          ],
+          "expected_positive": false,
+          "leaf_atoms": 8,
+          "image_atoms": 12,
+          "signed_tuples": 128,
+          "affine_positive": false,
+          "identity_positive": false,
+          "combined_positive": false,
+          "false_negative": false,
+          "false_positive": false,
+          "leaf_runs": [
+            {
+              "leaf_x": [
+                163,
+                163,
+                163,
+                462
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                136,
+                1040
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                163,
+                988,
+                462
+              ],
+              "left_affine_image": [
+                909
+              ],
+              "right_affine_image": [
+                453,
+                614
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 909,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                163,
+                462
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                136,
+                1040
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                163,
+                988,
+                988,
+                462
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                453,
+                614
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                163,
+                462
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                136,
+                1040
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                163,
+                988,
+                462
+              ],
+              "left_affine_image": [
+                9,
+                581
+              ],
+              "right_affine_image": [
+                453,
+                614
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 4,
+              "image_build_multiplications": 90,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 0,
+              "image_atoms": [
+                {
+                  "left_image_x": 9,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                },
+                {
+                  "left_image_x": 581,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                163,
+                462
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                136,
+                1040
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            },
+            {
+              "leaf_x": [
+                988,
+                988,
+                988,
+                462
+              ],
+              "left_affine_image": [
+                1065
+              ],
+              "right_affine_image": [
+                453,
+                614
+              ],
+              "image_build_solves": 2,
+              "image_build_roots": 3,
+              "image_build_multiplications": 75,
+              "identity_chart_positive": false,
+              "identity_s3_checks": 1,
+              "image_atoms": [
+                {
+                  "left_image_x": 1065,
+                  "expected_positive": false,
+                  "coefficient_multiplications": 11,
+                  "f4": {
+                    "arm": "image-atomized-final-join",
+                    "variables": 1,
+                    "equations": 2,
+                    "input_max_degree": 2,
+                    "inconsistent": true,
+                    "complete": true,
+                    "correct": true,
+                    "timed_out": false,
+                    "pairs_above_bound": 0,
+                    "solving_degree_max": 2,
+                    "max_cols_to_solution": 3,
+                    "field_ops": 18
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

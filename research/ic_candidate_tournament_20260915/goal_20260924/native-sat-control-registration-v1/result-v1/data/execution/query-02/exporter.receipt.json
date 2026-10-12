@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "/private/tmp/ic-native-sat-control-20261003-final/immutable/bin/prepared_sat_worker",
+    "child",
+    "--capsule",
+    "/private/tmp/ic-native-sat-control-20261003-final",
+    "--attempt",
+    "/private/tmp/ic-native-sat-control-20261003-execution-v1/query-02",
+    "--role",
+    "exporter"
+  ],
+  "child_wall_ns": 38664750,
+  "cwd": "/private/tmp/ic-native-sat-control-20261003-execution-v1/query-02",
+  "deadline_ms": 30000,
+  "environment": {
+    "LC_ALL": "C"
+  },
+  "executable_sha256_after": "ec3208e308435ebb11a6b1e78c1589e825d8ee581cfc04f198f288668977aca1",
+  "executable_sha256_before": "ec3208e308435ebb11a6b1e78c1589e825d8ee581cfc04f198f288668977aca1",
+  "exit_code": 0,
+  "output_limit": false,
+  "pid": 12477,
+  "process_group_drain_confirmed": true,
+  "process_group_drain_requested": true,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 4048,
+  "stdout_sha256": "c15bbcdf1d7222745adcafd063e0376dd55e5a6cd6a375d82c73d1b28ae042ab",
+  "timed_out": false
+}

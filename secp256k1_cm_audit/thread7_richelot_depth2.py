@@ -333,7 +333,7 @@ def main():
         print("  a non-split Jacobian over F_p.  The entire (2,2)-isogeny")
         print("  neighborhood is covered by B5 (each individual Jacobian has")
         print("  DLP cost >= sqrt(p)).  This strengthens Theorem 4.1 of")
-        print("  PAPER_STRUCTURAL_COMPLETENESS.md: not just individual covers,")
+        print("  research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md: not just individual covers,")
         print("  but the whole isogeny-graph layer fails to provide an ECDLP speedup.")
 
     print()

@@ -99,8 +99,12 @@ done
 # ---------------------------------------------------------------- #
 cat > "$WORK/inst.cu" <<'EOF'
 #include "kernels.cuh"
+#include "kernels_bsgs.cuh"
 template __global__ void k_rho_walk<8>(rho_ctx, uint32_t);
 template __global__ void k_rho_walk_lowmem<8>(rho_ctx, uint32_t);
+template __global__ void k_bsgs_run<8>(bsgs_ctx, uint32_t);
+template __global__ void k_bsgs_run<16>(bsgs_ctx, uint32_t);
+template __global__ void k_bsgs_seed<8>(bsgs_ctx);
 EOF
 
 echo

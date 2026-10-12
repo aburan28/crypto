@@ -1,0 +1,28 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage185-default-target-8014149a2",
+    "F4_F2_DENSE_PAIR_SELECT=0",
+    "cargo",
+    "test",
+    "--release",
+    "--locked",
+    "--lib",
+    "cryptanalysis::pq_f4_f2::tests",
+    "--",
+    "--test-threads=1"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1200.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.38274591699882876,
+    "user_seconds": 0.243969,
+    "system_seconds": 0.080274,
+    "total_core_seconds": 0.324243,
+    "single_core_seconds": 0.324243,
+    "peak_rss_bytes": 48250880,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

@@ -1,0 +1,203 @@
+{
+  "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+  "cell_id": "n59-l9-m3-standard-a1-f0",
+  "export": {
+    "command": [
+      "/Volumes/SSD990/koblitz-native-f4-build11-04e49c93/bin/koblitz_pdp_export",
+      "59",
+      "9",
+      "standard",
+      "207239054604238230",
+      "100000",
+      "/Volumes/SSD990/koblitz-native-f4-run11-04e49c93/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance",
+      "1",
+      "0",
+      "--target-x",
+      "342002423881678665",
+      "--target-y",
+      "482559600513111561",
+      "--blind-instance-id",
+      "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+      "--export-only"
+    ],
+    "inputs": [],
+    "intent_path": "export.intent.json",
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 14352384,
+      "single_core_seconds": 0.08761,
+      "system_seconds": 0.004504,
+      "total_core_seconds": 0.08761,
+      "user_seconds": 0.083106,
+      "wall_seconds": 0.48127304099762114
+    },
+    "metrics_path": "export.metrics.json",
+    "orphan_group_terminated": false,
+    "returncode": 0,
+    "role": "export",
+    "stderr_bytes": 0,
+    "stderr_path": "export.stderr",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_bytes": 4345,
+    "stdout_path": "export.stdout",
+    "stdout_sha256": "41c6af3c42fd731a77b23f114fdbe59c77a8d72ea66fe6e9de6683962bb9273d",
+    "timed_out": false,
+    "watchdog_seconds": 120.0
+  },
+  "ordinal": 0,
+  "schema": "koblitz_pdp_phase_b_task_result.v1",
+  "source_artifacts_before": {
+    "exports": {
+      "cryptominisat_xor_dimacs": {
+        "bytes": 219207,
+        "manifest_blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+        "path": "instance.xor.cnf",
+        "sha256": "58288c556a747da5b22727450ebb4e1d094c909112daaa723c835fd654ae9d1b"
+      },
+      "magma_boolean_f4": {
+        "bytes": 404158,
+        "manifest_blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+        "path": "instance.magma",
+        "sha256": "dceb8d8cc1947306481879649f40a0baaaf1e6f378c6622a8d815d182956a54f"
+      },
+      "wdsat_anf": {
+        "bytes": 255940,
+        "manifest_blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+        "path": "instance.anf",
+        "sha256": "bd87ff66846bc6b0798e951fd452f6e318bac29264ebc05513210473d9f437ee"
+      }
+    },
+    "manifest": {
+      "bytes": 4344,
+      "path": "manifest.json",
+      "sha256": "5a0fe749d3219d4dd0cc7582ec8871a2576f461505ccf142049e62d2c2a1b1c6"
+    }
+  },
+  "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+  "source_system_id": "x-4b8824db5204cff67a887d4166992386cf86804e7547c89717f385097a92d886",
+  "source_verification": {
+    "process": {
+      "command": [
+        "/Volumes/SSD990/koblitz-native-f4-build11-04e49c93/bin/koblitz_pdp_backend",
+        "verify-source",
+        "/Volumes/SSD990/koblitz-native-f4-run11-04e49c93/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json"
+      ],
+      "inputs": [
+        {
+          "bytes": 4344,
+          "path": "/Volumes/SSD990/koblitz-native-f4-run11-04e49c93/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json",
+          "sha256": "5a0fe749d3219d4dd0cc7582ec8871a2576f461505ccf142049e62d2c2a1b1c6"
+        },
+        {
+          "bytes": 255940,
+          "path": "/Volumes/SSD990/koblitz-native-f4-run11-04e49c93/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.anf",
+          "sha256": "bd87ff66846bc6b0798e951fd452f6e318bac29264ebc05513210473d9f437ee"
+        },
+        {
+          "bytes": 219207,
+          "path": "/Volumes/SSD990/koblitz-native-f4-run11-04e49c93/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.xor.cnf",
+          "sha256": "58288c556a747da5b22727450ebb4e1d094c909112daaa723c835fd654ae9d1b"
+        },
+        {
+          "bytes": 404158,
+          "path": "/Volumes/SSD990/koblitz-native-f4-run11-04e49c93/tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.magma",
+          "sha256": "dceb8d8cc1947306481879649f40a0baaaf1e6f378c6622a8d815d182956a54f"
+        }
+      ],
+      "intent_path": "source-verification.intent.json",
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 12632064,
+        "single_core_seconds": 0.048142,
+        "system_seconds": 0.004318,
+        "total_core_seconds": 0.048142,
+        "user_seconds": 0.043823999999999995,
+        "wall_seconds": 0.26097262500115903
+      },
+      "metrics_path": "source-verification.metrics.json",
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "role": "source-verification",
+      "stderr_bytes": 0,
+      "stderr_path": "source-verification.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 1129,
+      "stdout_path": "source-verification.stdout",
+      "stdout_sha256": "c0a85ae2182c8303aac6ba6201ecc25a78ab78388f368385ea1b4b5feb4ff627",
+      "timed_out": false,
+      "watchdog_seconds": 120.0
+    },
+    "regenerated_source_exact": true,
+    "report": {
+      "ell": 9,
+      "interpretation": "The algebraic factor base, explicit affine target, source identity, and all exported equations were independently reconstructed without running a solver",
+      "n": 59,
+      "regenerated_source_exact": true,
+      "schema": "koblitz_pdp_source_verification.v1",
+      "source_artifacts": {
+        "cryptominisat_xor_dimacs": {
+          "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+          "bytes": 219207,
+          "path": "instance.xor.cnf",
+          "valid": true
+        },
+        "magma_boolean_f4": {
+          "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+          "bytes": 404158,
+          "path": "instance.magma",
+          "valid": true
+        },
+        "wdsat_anf": {
+          "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+          "bytes": 255940,
+          "path": "instance.anf",
+          "valid": true
+        }
+      },
+      "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+      "source_instance_verified": true,
+      "source_variables": 78,
+      "status": "verified",
+      "timing_ns": {
+        "source_verification": 43675417
+      }
+    },
+    "source_artifacts": {
+      "cryptominisat_xor_dimacs": {
+        "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+        "bytes": 219207,
+        "path": "instance.xor.cnf",
+        "valid": true
+      },
+      "magma_boolean_f4": {
+        "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+        "bytes": 404158,
+        "path": "instance.magma",
+        "valid": true
+      },
+      "wdsat_anf": {
+        "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+        "bytes": 255940,
+        "path": "instance.anf",
+        "valid": true
+      }
+    },
+    "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+    "source_instance_verified": true,
+    "status": "verified"
+  },
+  "target": {
+    "x": "342002423881678665",
+    "y": "482559600513111561"
+  },
+  "wdsat_requirements": {
+    "max_anf_id": 79,
+    "max_buffer_size": 32000,
+    "max_degree": 4,
+    "max_eq": 6511,
+    "max_eq_size": 5,
+    "max_id": 2000,
+    "max_xeq": 112,
+    "max_xeq_size": 2001
+  }
+}

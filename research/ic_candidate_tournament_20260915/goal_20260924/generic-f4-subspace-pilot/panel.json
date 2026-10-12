@@ -1,0 +1,23 @@
+{
+  "candidates": [
+    {
+      "config": {
+        "factor_base": {"dimension": 6, "kind": "standard_subspace"},
+        "solver": "f4",
+        "summands": 3
+      },
+      "id": "f4_d6"
+    },
+    {
+      "config": {
+        "factor_base": {"dimension": 6, "kind": "standard_subspace"},
+        "solver": "f5",
+        "summands": 3
+      },
+      "id": "f5_d6"
+    }
+  ],
+  "cells": ["n17a1", "n19a0", "n23a0", "n23a1", "n31a0"],
+  "schema_version": 1,
+  "scope": "disclosed-point encoder preflight for the dimension-6 F4/F5 pilot; not a tournament panel and not a fresh seed"
+}

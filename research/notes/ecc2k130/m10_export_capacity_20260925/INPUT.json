@@ -1,0 +1,24 @@
+{
+  "schema": "ecc2k130-m10-complete-chain-capacity-input-v1",
+  "scope": "representation_size_only_no_solver",
+  "field_degree": 131,
+  "field_modulus_hex": "0x800000000000000000000000000002007",
+  "normal_beta": 3,
+  "factor_domain": "x_i=sum_j a_ij beta^(2^(10j+i)); a_ij are independent bits; y_i free and on-curve; factor infinity fixed false",
+  "arms": [
+    {"name": "balanced", "dimensions": [13,13,13,13,13,13,13,13,13,13], "expected_combined_coordinate_rank": 130, "source_pr": 778},
+    {"name": "unequal", "dimensions": [14,13,13,13,13,13,13,13,13,13], "expected_combined_coordinate_rank": 131, "source_pr": 784}
+  ],
+  "caps": {
+    "per_arm_external_wall_seconds": 600,
+    "per_arm_address_space_and_rss_bytes": 2147483648,
+    "dag_nodes": 2000000,
+    "dimacs_bytes": 268435456
+  },
+  "fixed_masks": ["zero", "lowest", "second", "lowest_two", "highest", "all"],
+  "target_pinning_for_size": "generic and canonical O only; no SAT/PDP query",
+  "source_results_sha256": {
+    "balanced_m10_result.json": "1bf1dc09dec347dcd421266bc4ece4b529931f21874fc3e6a26b5620f7a2cc25",
+    "unequal_m10_result.json": "65bc8e10ea1c058a0dddb3a6b8cc2c4de016b3b454b3850baf72552bf557820e"
+  }
+}

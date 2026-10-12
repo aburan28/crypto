@@ -1,0 +1,409 @@
+{
+  "all_complete": true,
+  "calibrated_operation_ratio": null,
+  "campaign_seconds": 1972.2549135419977,
+  "cells": 216,
+  "classification": "engineering",
+  "decisions": {
+    "projected4": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    },
+    "projected5": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    },
+    "projected6": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "incremental_groups": 0,
+      "incremental_pass": false
+    }
+  },
+  "full_ic_cost": null,
+  "n24_holdout_ms": [
+    {
+      "cross_planted": 47.0483125,
+      "planted": 80.001708,
+      "unplanted": 144.082667,
+      "variant": "search"
+    },
+    {
+      "cross_planted": 149.5675415,
+      "planted": 293.7878125,
+      "unplanted": 551.156271,
+      "variant": "flat"
+    },
+    {
+      "cross_planted": 522.0854375,
+      "planted": 1063.1467295,
+      "unplanted": 2073.2740415,
+      "variant": "bucket"
+    },
+    {
+      "cross_planted": 217.0436455,
+      "planted": 514.6553335,
+      "unplanted": 929.0486665,
+      "variant": "hybrid"
+    },
+    {
+      "cross_planted": 55.2800205,
+      "planted": 95.769917,
+      "unplanted": 168.129188,
+      "variant": "small_flat"
+    },
+    {
+      "cross_planted": 48.750083,
+      "planted": 78.9566245,
+      "unplanted": 148.7931665,
+      "variant": "word_tail"
+    },
+    {
+      "cross_planted": 41.8410205,
+      "planted": 67.071146,
+      "unplanted": 125.9678335,
+      "variant": "merge_search"
+    },
+    {
+      "cross_planted": 16.62425,
+      "planted": 27.550375,
+      "unplanted": 50.572479,
+      "variant": "quadratic_state"
+    },
+    {
+      "cross_planted": 10.1981875,
+      "planted": 16.7970205,
+      "unplanted": 31.1428545,
+      "variant": "packed_state"
+    },
+    {
+      "cross_planted": 145.7051045,
+      "planted": 282.821,
+      "unplanted": 473.6443335,
+      "variant": "basis_list"
+    },
+    {
+      "cross_planted": 33.8041665,
+      "planted": 62.981354,
+      "unplanted": 101.9661665,
+      "variant": "basis_wide"
+    },
+    {
+      "cross_planted": 63.002187,
+      "planted": 132.341771,
+      "unplanted": 261.885167,
+      "variant": "tail_list"
+    },
+    {
+      "cross_planted": 19.494583,
+      "planted": 40.3357295,
+      "unplanted": 74.9021665,
+      "variant": "tail_wide"
+    },
+    {
+      "cross_planted": 7.2117285,
+      "planted": 12.085312,
+      "unplanted": 22.438917,
+      "variant": "packed_untraced"
+    },
+    {
+      "cross_planted": 109.4159375,
+      "planted": 261.098875,
+      "unplanted": 570.792292,
+      "variant": "affine_sl_basis_list"
+    },
+    {
+      "cross_planted": 11.3361665,
+      "planted": 22.341,
+      "unplanted": 59.270583,
+      "variant": "affine_sl_basis_fast"
+    },
+    {
+      "cross_planted": 12.198167,
+      "planted": 12.0950835,
+      "unplanted": 20.990667,
+      "variant": "gray_scalar"
+    },
+    {
+      "cross_planted": 1.7350835,
+      "planted": 1.7866875,
+      "unplanted": 3.1273545,
+      "variant": "gray_simd"
+    },
+    {
+      "cross_planted": 10.1104375,
+      "planted": 14.836375,
+      "unplanted": 27.358458,
+      "variant": "packed_gray12_scalar"
+    },
+    {
+      "cross_planted": 4.629062,
+      "planted": 6.599166,
+      "unplanted": 12.4016245,
+      "variant": "packed_gray12_simd"
+    },
+    {
+      "cross_planted": 9.8408335,
+      "planted": 11.7022915,
+      "unplanted": 21.9722915,
+      "variant": "packed_gray16_scalar"
+    },
+    {
+      "cross_planted": 1.859104,
+      "planted": 2.139625,
+      "unplanted": 3.849729,
+      "variant": "packed_gray16_simd"
+    },
+    {
+      "cross_planted": 11.6069795,
+      "planted": 11.774125,
+      "unplanted": 20.9195,
+      "variant": "gray_delta_scalar"
+    },
+    {
+      "cross_planted": 1.6487085,
+      "planted": 1.632521,
+      "unplanted": 2.863208,
+      "variant": "gray_delta_simd"
+    },
+    {
+      "cross_planted": 5.895625,
+      "planted": 11.8139995,
+      "unplanted": 21.233896,
+      "variant": "initial_list"
+    },
+    {
+      "cross_planted": 0.8659795,
+      "planted": 1.626167,
+      "unplanted": 2.890875,
+      "variant": "initial_simd"
+    },
+    {
+      "cross_planted": 9.95075,
+      "planted": 11.4441875,
+      "unplanted": 22.0811455,
+      "variant": "packed_gray16_delta_scalar"
+    },
+    {
+      "cross_planted": 1.855229,
+      "planted": 2.0358545,
+      "unplanted": 3.7846875,
+      "variant": "packed_gray16_delta_simd"
+    },
+    {
+      "cross_planted": 4.303229,
+      "planted": 4.4584375,
+      "unplanted": 8.958771,
+      "variant": "fiber_rows"
+    },
+    {
+      "cross_planted": 4.017104,
+      "planted": 4.115854,
+      "unplanted": 8.5366245,
+      "variant": "fiber_columns"
+    },
+    {
+      "cross_planted": 1.4703745,
+      "planted": 1.554646,
+      "unplanted": 3.321729,
+      "variant": "fiber_simd"
+    },
+    {
+      "cross_planted": 2.065333,
+      "planted": 2.315125,
+      "unplanted": 4.517771,
+      "variant": "fiber_zero_simd"
+    },
+    {
+      "cross_planted": 1.631375,
+      "planted": 1.618208,
+      "unplanted": 2.7249585,
+      "variant": "gray_quiet"
+    },
+    {
+      "cross_planted": 1.0184165,
+      "planted": 1.013438,
+      "unplanted": 1.798479,
+      "variant": "wide64_quiet"
+    },
+    {
+      "cross_planted": 4.1450625,
+      "planted": 4.101854,
+      "unplanted": 7.269125,
+      "variant": "byte_scalar"
+    },
+    {
+      "cross_planted": 1.085,
+      "planted": 1.1432705,
+      "unplanted": 1.9373545,
+      "variant": "byte_simd"
+    },
+    {
+      "cross_planted": 1.649083,
+      "planted": 1.9293125,
+      "unplanted": 3.4575625,
+      "variant": "leaf16_quiet"
+    },
+    {
+      "cross_planted": 3.7021245,
+      "planted": 4.4179165,
+      "unplanted": 8.282917,
+      "variant": "leaf16_byte_scalar"
+    },
+    {
+      "cross_planted": 1.224229,
+      "planted": 1.428667,
+      "unplanted": 2.7145835,
+      "variant": "leaf16_byte_simd"
+    },
+    {
+      "cross_planted": 1.289146,
+      "planted": 1.3041665,
+      "unplanted": 2.3671665,
+      "variant": "byte_single_quiet"
+    },
+    {
+      "cross_planted": 1.388875,
+      "planted": 1.6880625,
+      "unplanted": 3.103,
+      "variant": "leaf16_single_quiet"
+    },
+    {
+      "cross_planted": 1.1482705,
+      "planted": 1.1495625,
+      "unplanted": 2.1016665,
+      "variant": "byte_planes"
+    },
+    {
+      "cross_planted": 1.286229,
+      "planted": 1.493667,
+      "unplanted": 2.807771,
+      "variant": "leaf16_byte_planes"
+    },
+    {
+      "cross_planted": 0.8972085,
+      "planted": 0.8820625,
+      "unplanted": 1.5825415,
+      "variant": "byte_unrolled"
+    },
+    {
+      "cross_planted": 0.4877085,
+      "planted": 0.4816035,
+      "unplanted": 0.8475835,
+      "variant": "wide64_unrolled"
+    },
+    {
+      "cross_planted": 1.03075,
+      "planted": 1.2384585,
+      "unplanted": 2.281375,
+      "variant": "leaf16_byte_unrolled"
+    },
+    {
+      "cross_planted": 0.873667,
+      "planted": 0.897208,
+      "unplanted": 1.5507705,
+      "variant": "word16_unrolled"
+    },
+    {
+      "cross_planted": 0.4855415,
+      "planted": 0.4846045,
+      "unplanted": 0.8486665,
+      "variant": "word_dispatch"
+    },
+    {
+      "cross_planted": 1.0859995,
+      "planted": 1.228167,
+      "unplanted": 2.281417,
+      "variant": "leaf16_word_unrolled"
+    },
+    {
+      "cross_planted": 1.532229,
+      "planted": 1.575,
+      "unplanted": 3.701479,
+      "variant": "projected4"
+    },
+    {
+      "cross_planted": 1.4499375,
+      "planted": 1.586854,
+      "unplanted": 2.955208,
+      "variant": "projected5"
+    },
+    {
+      "cross_planted": 1.398583,
+      "planted": 1.518646,
+      "unplanted": 2.73575,
+      "variant": "projected6"
+    }
+  ],
+  "n24_holdout_work_once_per_fixture": [
+    {
+      "affine_queries": 10796,
+      "affine_rejected": 10790,
+      "annihilated_ranks": [
+        2,
+        4
+      ],
+      "cells": 6,
+      "extensions_checked": 6,
+      "original_rejected": 2,
+      "prefixes": 4513440,
+      "quotient_dimensions": [
+        22,
+        24
+      ],
+      "screen_rejected": 4502644,
+      "variant": "projected4"
+    },
+    {
+      "affine_queries": 105352,
+      "affine_rejected": 105321,
+      "annihilated_ranks": [
+        3,
+        4,
+        5,
+        7
+      ],
+      "cells": 6,
+      "extensions_checked": 31,
+      "original_rejected": 27,
+      "prefixes": 2256736,
+      "quotient_dimensions": [
+        19,
+        21,
+        22,
+        23
+      ],
+      "screen_rejected": 2151378,
+      "variant": "projected5"
+    },
+    {
+      "affine_queries": 310533,
+      "affine_rejected": 309865,
+      "annihilated_ranks": [
+        6,
+        8,
+        12
+      ],
+      "cells": 6,
+      "extensions_checked": 672,
+      "original_rejected": 668,
+      "prefixes": 1128384,
+      "quotient_dimensions": [
+        14,
+        18,
+        20
+      ],
+      "screen_rejected": 817835,
+      "variant": "projected6"
+    }
+  ],
+  "peak_worker_rss_bytes": 24625152,
+  "production_solver_cost": null,
+  "rho_ratio": null,
+  "samples": 89856,
+  "verdict": "Complete recovery is verified; the dramatic-gain gate is rejected"
+}

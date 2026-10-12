@@ -1,0 +1,227 @@
+{
+  "S_ic": null,
+  "S_rho_normal": null,
+  "S_rho_poly": null,
+  "S_rho_v2": null,
+  "arm_order": [
+    [
+      "ic",
+      "rho_v2",
+      "rho_poly",
+      "rho_normal"
+    ],
+    [
+      "rho_v2",
+      "rho_poly",
+      "rho_normal",
+      "ic"
+    ],
+    [
+      "rho_poly",
+      "rho_normal",
+      "ic",
+      "rho_v2"
+    ],
+    [
+      "rho_normal",
+      "ic",
+      "rho_v2",
+      "rho_poly"
+    ],
+    [
+      "ic",
+      "rho_normal",
+      "rho_poly",
+      "rho_v2"
+    ]
+  ],
+  "compact_k": {
+    "37": {
+      "1": 7,
+      "1024": 42
+    },
+    "41": {
+      "1": 85,
+      "1024": 255
+    },
+    "53": {
+      "1": 220,
+      "1024": 440
+    }
+  },
+  "evaluation_repetitions": 5,
+  "hypothesis": "32 batched walks plus normal-basis canonicalization erase the n41/n53 L1024 compact-orbit CPU lead on fresh same-Q held-outs",
+  "per_arm_address_space_limit_bytes": 5368709120,
+  "per_arm_timeout_seconds": 900,
+  "rho_dp_bits": 4,
+  "rho_jump_count": 32,
+  "rho_mode": "signed_frobenius",
+  "rho_parallel_walks_v3": 32,
+  "schema": "compact-orbit-strong-rho-cold-public-point-freeze-v1",
+  "seed": 622901,
+  "source_base_main": "97a4cbb34fd498b45a35003d7c1903d181fcddc5",
+  "source_sha256": {
+    ".github/workflows/compact-orbit-strong-rho.yml": "2fbbef3117889e8abeea4c738b064dbed2553f6e4faf891edc23e602b58ab4d6",
+    "Cargo.toml": "f1b3abc246c4971b48b377d5696bc96594deb729320348c4277307e42ed61721",
+    "docs/ic/calibration.json": "425078627bbc38b3f9cb97351b405f52509431c080ed996bfeab72d12d78acfd",
+    "examples/koblitz_orbit_dlp_fast.rs": "8dea682ac4b12413c7b43a8849d6972b682dd0aa605d0ee4f41b7a4c1881ab75",
+    "examples/koblitz_rho_batch_ks_v2_n61.rs": "019b2e2da563ad5212e46a24ed6c0f2f6e90aab083b3769260d6b056bd4095cf",
+    "examples/koblitz_rho_batch_ks_v3.rs": "98b6e8a27d821ebfc7ae716410184dffe89aadf27dfe36bcac8ce834c39cf04c",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py": "2ba997abbd5e9f17756c101b8ca26567219adf103308701f0c237ae495f23222",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/test_point_mode.py": "ec873c8498578b3732cf5d1629d938c9ea9b29ccddb96fa3e6307585d6d16ead",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py": "649459a53b979b9eaf150ca1973c80b1bde29baf3f5567443c668978d3c06e6d",
+    "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py": "254869e52bdbd417e14d74c87940293490160faaa7fbb45f4edcb6b773a4b0f6",
+    "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/PROTOCOL.md": "288e2604cd440510c9b41f1da8313cf1226bcc3652d569d0578a7351ba974891",
+    "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/prepare.py": "8b949d3aa7e2cf52aa3c4ae37a511ca4266b6f6c8cf810fc0b265fefd6e9be36",
+    "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/run_panel.py": "5be65d8388e229a83f7820d2c7cef3a016b10534b337c448ec6c194c6f7a5a00",
+    "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/verify_panel.py": "a33ab703a94ddb74efd4166a29ae20bd2967e0e7554c42b29740045459bcb75b",
+    "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py": "1df6fc9295cf525be198a19842dfdca7391ac985bfa79ffa1acf8e546cc05ce1",
+    "src/cryptanalysis/koblitz_fast.rs": "1d5ceb6374e455ba40e079328efbf7a62b5cfe0e7fd42ab4e562b3c8b2f183fa",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "747596aa01a360ca4b010457a739ea12c829a81e845100b4cc7d8f6cb226cd20",
+    "src/cryptanalysis/semaev_decomp.rs": "c6e9263b66f4a0892d9b46bfa23e7dd36e93c787a79a1e37181f2449ab33e8b2",
+    "src/lib.rs": "f1e13bc7fa51ff57dd4cd056036669577d1f07a0cb06502b4b839b9af50ffba6"
+  },
+  "specs": {
+    "n37_L1024_eval": {
+      "L": 1024,
+      "a": 0,
+      "automorphism_size": 74,
+      "corpus": "strong-rho-n37-L1024-eval-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        1,
+        4,
+        6
+      ],
+      "fixture_file": "fixtures/n37_L1024_eval.fixture.jsonl",
+      "fixture_sha256": "949239431706716e5daa016d85a8e6be494acefe75f058bfea530c18aa268566",
+      "generator": [
+        99424589043,
+        35163014771
+      ],
+      "kind": "eval",
+      "n": 37,
+      "points_file": "fixtures/n37_L1024_eval.points.jsonl",
+      "points_sha256": "ce8d766e85132f6192b4f69e84fb9c30846fdf71636016c560369bda7dcef8c5",
+      "seed": 622901,
+      "subgroup_order": 230603167
+    },
+    "n37_L1_eval": {
+      "L": 1,
+      "a": 0,
+      "automorphism_size": 74,
+      "corpus": "strong-rho-n37-L1-eval-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        1,
+        4,
+        6
+      ],
+      "fixture_file": "fixtures/n37_L1_eval.fixture.jsonl",
+      "fixture_sha256": "dc476c25aa716be4b277788ec70b0f2ffccf7f332598da5d605db5b860d75af4",
+      "generator": [
+        99424589043,
+        35163014771
+      ],
+      "kind": "eval",
+      "n": 37,
+      "points_file": "fixtures/n37_L1_eval.points.jsonl",
+      "points_sha256": "7893179017f5a403d004331ddeeb8eda31450492db3ede5275da757100cb5bd7",
+      "seed": 622901,
+      "subgroup_order": 230603167
+    },
+    "n41_L1024_eval": {
+      "L": 1024,
+      "a": 0,
+      "automorphism_size": 82,
+      "corpus": "strong-rho-n41-L1024-eval-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        3
+      ],
+      "fixture_file": "fixtures/n41_L1024_eval.fixture.jsonl",
+      "fixture_sha256": "1eb15b3be84dcb19f81b9089f0a2d968d55489bd21b1e309e0ea3d5957370093",
+      "generator": [
+        2056947637384,
+        1635505394702
+      ],
+      "kind": "eval",
+      "n": 41,
+      "points_file": "fixtures/n41_L1024_eval.points.jsonl",
+      "points_sha256": "82704d8c82f658ee038f7a315694fb561118cf7b7d173895a14b3969e9c5b246",
+      "seed": 622901,
+      "subgroup_order": 549756390943
+    },
+    "n41_L1_eval": {
+      "L": 1,
+      "a": 0,
+      "automorphism_size": 82,
+      "corpus": "strong-rho-n41-L1-eval-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        3
+      ],
+      "fixture_file": "fixtures/n41_L1_eval.fixture.jsonl",
+      "fixture_sha256": "a6f60cf87d138ed2c66ea2a597aca962986bd574826293642432ca9ce6062ce5",
+      "generator": [
+        2056947637384,
+        1635505394702
+      ],
+      "kind": "eval",
+      "n": 41,
+      "points_file": "fixtures/n41_L1_eval.points.jsonl",
+      "points_sha256": "515d18bfa4c40b2441e10403e47b0ad9e0893167fb81d38cdcae2eb04fe3c67b",
+      "seed": 622901,
+      "subgroup_order": 549756390943
+    },
+    "n53_L1024_eval": {
+      "L": 1024,
+      "a": 0,
+      "automorphism_size": 106,
+      "corpus": "strong-rho-n53-L1024-eval-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        1,
+        2,
+        6
+      ],
+      "fixture_file": "fixtures/n53_L1024_eval.fixture.jsonl",
+      "fixture_sha256": "68985923f6f3c0902b361d47bc6b8ff664f83008fb77088fc9493b7abe5b8f7c",
+      "generator": [
+        198217578752339,
+        7929897206038174
+      ],
+      "kind": "eval",
+      "n": 53,
+      "points_file": "fixtures/n53_L1024_eval.points.jsonl",
+      "points_sha256": "ffb2374c9fa64346d8eda0fcbfba75c5bb76a44c74a6985befe0baa52b01a0cd",
+      "seed": 622901,
+      "subgroup_order": 21044858204113
+    },
+    "n53_L1_eval": {
+      "L": 1,
+      "a": 0,
+      "automorphism_size": 106,
+      "corpus": "strong-rho-n53-L1-eval-20260929-v1",
+      "field_modulus_low_terms": [
+        0,
+        1,
+        2,
+        6
+      ],
+      "fixture_file": "fixtures/n53_L1_eval.fixture.jsonl",
+      "fixture_sha256": "cdfa91610a335231398f71960e5751d5f2c8f222e0e7596cdbc9b7d7c4a1ff06",
+      "generator": [
+        198217578752339,
+        7929897206038174
+      ],
+      "kind": "eval",
+      "n": 53,
+      "points_file": "fixtures/n53_L1_eval.points.jsonl",
+      "points_sha256": "8d3c692ee2824fca7991142517da324a6651f0fc2c8c97f3780e6ec97390377b",
+      "seed": 622901,
+      "subgroup_order": 21044858204113
+    }
+  }
+}

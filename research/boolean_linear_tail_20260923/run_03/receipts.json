@@ -1,0 +1,29 @@
+[
+  {
+    "batch": 1,
+    "cell": "n12-discovery-17-quadratic-b1",
+    "command": [
+      "/var/folders/cj/2r80qnks3h50r83ztw0tlcqw0000gn/T/boolean-schedule-puo_pkdw/worker",
+      "12",
+      "17",
+      "1",
+      "quadratic",
+      "12",
+      "with-census",
+      "with-census"
+    ],
+    "exit_code": 101,
+    "family": "quadratic",
+    "meter": "wait4 for this fresh worker, not cumulative RUSAGE_CHILDREN",
+    "n": 12,
+    "peak_rss_bytes": 1769472,
+    "process_wall_ns": 210755833,
+    "seed": 17,
+    "split": "discovery",
+    "stderr_sha256": "87fd98c07c3fa3e52d0c490dd8140f7277031396fcddf73b8b19a8d386495fc3",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "system_seconds": 0.003026,
+    "timed_out": false,
+    "user_seconds": 0.0025269999999999997
+  }
+]

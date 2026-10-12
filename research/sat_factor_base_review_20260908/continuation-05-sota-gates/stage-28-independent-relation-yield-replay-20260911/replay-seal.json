@@ -1,0 +1,25 @@
+{
+  "inventory": [
+    {
+      "bytes": 325026,
+      "path": "input-yield-result.json",
+      "sha256": "d69165c4cf6207f03611a08d62ee66dd5c600ae6926ff9d6e21178ba50487f42"
+    },
+    {
+      "bytes": 1502,
+      "path": "replay.json",
+      "sha256": "ab00eada42c95b18fbd526e615dfd36830a86207da6bc19d98e0865dc2ce3950"
+    },
+    {
+      "bytes": 636,
+      "path": "replay.metrics.json",
+      "sha256": "5164e36f90ca9598c631666528b6e330d754fc5cca9daf038eceb2130836e056"
+    }
+  ],
+  "inventory_sha256": "fdbab8741650f7f6f6e36aa8610ca9f5a5684c928d501a326bd6fce7742a770c",
+  "schema": "koblitz_stage28_independent_relation_yield_replay_seal.v1",
+  "seal_payload_sha256": "f33392f5dab520fe6346312bb4e86c9e304fe1fbf19f2e6bf3b9c22688dc6550",
+  "source_stage21_run_inventory_sha256": "66e56bbd4b7f35486e87b8af479e2dd320b84f361c3769303e3f71c576d7fb21",
+  "source_stage21_yield_result_sha256": "d69165c4cf6207f03611a08d62ee66dd5c600ae6926ff9d6e21178ba50487f42",
+  "status": "replay_frozen"
+}

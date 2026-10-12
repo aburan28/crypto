@@ -1,0 +1,35 @@
+icms: icms.spec/v1
+label: "random 16-bit prime curve: 116 smallest abscissae, mitm m=2 (autoresearcher)"
+description: >
+  Demonstration arm for the crypto-autoresearcher producer.  A 16-bit prime
+  field curve drawn from the workload seed, the factor base of the 116
+  smallest on-curve abscissae, a meet-in-the-middle tail table with m = 2, a first-log stop,
+  min-fill Gaussian elimination, and the producer's plain Teske rho run on
+  the same instance.  Counted in S3 solves; group additions and wall time
+  are recorded beside them as separate units.
+role: candidate
+instance:
+  curve: {regime: prime, bits: 16, selected_by_seed: true}
+  workload: {targets: 1, law: known_answer, seeds: [0]}
+factor_base:
+  family: prime_small_abscissa
+  params: {size: 116}
+  quotient: [negation]
+decomposition: {arity: 2, method: mitm}
+relations: {collector: random, stop: first_log}
+linear_algebra: {method: gauss, pivot: min_fill}
+descent: {method: embedded}
+reference: {rho: rho.plain}
+accounting: {unit: count.s3_solves}
+measurement:
+  window: cold_end_to_end
+  repetitions: 5
+  warmup: 1
+  interleave: abab
+  isolation_required: L2
+  timeout_seconds: 120
+execution:
+  adapter: autoresearcher.index_calculus
+  threads: 1
+  cpus: 1
+  args: {root: ../crypto-autoresearcher}

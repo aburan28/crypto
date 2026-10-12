@@ -1,0 +1,22 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -2408,8 +2408,8 @@
+         let points: Vec<FastPoint> = fb.points.iter().map(|p| curve.lift(p)).collect();
+         let negated: Vec<FastPoint> = points.iter().map(|&p| curve.neg(p)).collect();
+         let mut entries: Vec<(u64, u32, u32)> = (0..points.len())
+-            .into_par_iter()
+-            .flat_map_iter(|i| {
++            .into_iter()
++            .flat_map(|i| {
+                 let mut sums = Vec::with_capacity(points.len() - i);
+                 let mut scratch = BatchScratch::default();
+                 curve.add_many(points[i], &points[i..], &mut sums, &mut scratch);
+@@ -2418,7 +2418,7 @@
+                     .map(move |(offset, sum)| (sum.pack(), i as u32, (i + offset) as u32))
+             })
+             .collect();
+-        entries.par_sort_unstable();
++        entries.sort_unstable();
+         if entries.len() > u32::MAX as usize {
+             return None;
+         }

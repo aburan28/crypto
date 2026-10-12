@@ -1,0 +1,9 @@
+# Width-six physical Linux result: original gate failed
+
+GitHub Actions run [37147179016](https://github.com/aburan28/crypto/actions/runs/37147179016) rebuilt PR #1292 on physical Linux x86-64 at its `6ea405635` head (Actions merge SHA `00de94c667f5898843e93dca69e60b8f97c0463d`). The preflight, release tests and native benchmark build passed. The paired runner retained all attempts and chose the first isolation-qualified complete attempt per seed.
+
+The selective-echelon / cut-19-width-6 n24 degree-4 **complete-call** one-thread medians were 2.808, 2.768, 2.759 and 2.808 times for `frozen`, `holdout_a`, `holdout_b` and `holdout_c`. The respective exact five-pair bootstrap 95% lower bounds were 2.780, 2.749, 2.755 and 2.781. Counted reduction word XORs were 24.17–24.24% of the selective reference. Exact rank, canonical row space, criterion and structural counts matched; the candidate returned original rows through the cut-19 certificate. All four two-thread seed blocks passed their separate control gate, with primary medians 2.440–2.469.
+
+**The frozen overall gate failed.** Three of four one-thread seed blocks had a smaller-case median below that case's A/A minimum. The failures were `f5_n16_m16_d3` on `frozen`, and `f5_n24_m24_d3` on `holdout_a` and `holdout_b`. Those cases did not take the candidate certificate and had equal non-timing output and route fields. The preregistered wall control still failed. This run does not establish a passing full gate.
+
+The complete compressed Actions artifact is `linux_run_37147179016.tar.gz` (SHA-256 `0a2249a8ab0e109c9cc8c180d8ed05f5da3a44216a2ce14f38fc238123b3a29c`). It contains every attempted run, per-call output, isolation receipt, CPU choice and analyzer report. Extract with `tar -xzf linux_run_37147179016.tar.gz -C DIR`. Width six did not beat the fixed-cut-19 one-thread primary median on these paired hardware runs, so it is not the confirmation candidate.

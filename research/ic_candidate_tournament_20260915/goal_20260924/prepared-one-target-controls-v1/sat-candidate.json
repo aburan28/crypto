@@ -1,0 +1,157 @@
+{
+  "candidate_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h5f7f1076e104",
+  "record": {
+    "curve": {
+      "coefficients": {
+        "a1": 1,
+        "a2": 1,
+        "a3": 0,
+        "a4": 0,
+        "a6": 1
+      },
+      "cofactor": 2,
+      "curve_id": "EC1N17Ckb1hbbe2b5b6b1e6",
+      "generator": [
+        43693,
+        23339
+      ],
+      "model": "y^2+x*y=x^3+a2*x^2+a6",
+      "order": 131174,
+      "r": 65587,
+      "tag": "kb1",
+      "target_group": "prime-order-subgroup-generated-by-G",
+      "trace": -101
+    },
+    "endomorphism": {
+      "frobenius_order_conductor": null,
+      "order_conductor": null,
+      "volcano_levels": []
+    },
+    "factor_base": {
+      "construction": {
+        "basis_bitmasks": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32
+        ],
+        "dimension": 6,
+        "ordering": "constructor-abscissa-order-then-half-trace-root-and-negative",
+        "recipe": "standard-subspace",
+        "subgroup_map": "cofactor-multiplication-remove-identity-deduplicate"
+      },
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 29,
+        "geometric_order_sha256": "bec87229df1e344b84b9075e8af273dfd2c0ea7ebbfee6277e851d7a6ca5e72a",
+        "geometric_point_count": 63,
+        "geometric_set_sha256": "767db358416f50c46cfbdfbd58bf25f75369806ea33078e9663a00fcacdb71fe",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 62,
+        "usable_set_sha256": "3461ea31b5bb93065826e34b74658ba916477971c42a212e114387075eb4a2d6"
+      },
+      "nominal_bound": 6
+    },
+    "field": {
+      "basis": "polynomial",
+      "element_encoding": "unsigned-integer-polynomial-bits",
+      "modulus": 131081,
+      "n": 17,
+      "p": 2
+    },
+    "implementation": {
+      "components": [
+        {
+          "role": "complete-executed-Python-and-external-source-manifest",
+          "sha256": "c1e07e028c84ccd7d5b0bec7da6461660f9ee5da8a5bbc7aea746b2460116095"
+        }
+      ],
+      "flags": {
+        "algorithm_execution_binding": {
+          "callable": "run",
+          "interpreter_sha256": "ec11021561db6edca6d1a8a796ddb94ffa0d0074b68e25f093b4bc117f06a70e",
+          "module": "prepared_sat_runtime_v1",
+          "native_components": {
+            "cadiback_source_sha256": "e0aa8f5d67c04527135dde5fe5f943e672d6af11a6f7f924e9f0c07ad3bffba0",
+            "cadical_source_sha256": "8264713f3dc1c4455162d2912238712bd8030fceabec0f4b430d106b5a58058d",
+            "cms_binary_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+            "cms_source_sha256": "467b1c3d00a7d6e893332b4d8b42c6326301974d22885aa745f1f926da050323",
+            "exporter_binary_sha256": "4da7f5781da1aba2f76d6b9ce8f6e4ea43845f2465cf8edf0612615931d0629a",
+            "exporter_source_sha256": "67acaff696500679a6239d47e74bba52b41c0c64fd0c7413ae7fbd7e00505b11",
+            "rust_manifest_sha256": "c64e4b3102bface63a2305efbff4bd85810cc112cb43546da2992ba48e9e85b7"
+          },
+          "python_archive_sha256": "0cf69a4f55affa92f85f182496f1706c22042a82ff5927a6792cd118db617dad",
+          "python_manifest_sha256": "721ac20ac87a2e5734d01bc0ff6aa69201dadb0a6a6875b9e101fb8c71f712d8"
+        },
+        "budget_exit_policy": "CMS-code15-indeterminate-is-censored",
+        "cms_binary_sha256": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+        "mathematical_preparation_sha256": "edbff76da6442b9f2e5e8235682c9bf1052465f310c765ba8a37d018a60bf107",
+        "model_limit": 1,
+        "native_thread_environment": "all-listed-pools-one-thread; CMS-one-thread",
+        "native_watchdog_group": "inherit-controller-group-no-native-fork-or-setsid",
+        "observer_cost": "all-target-native-wrapper-source-checks-charged-to-PDP",
+        "online_interval": "first-target-query-through-independent-scalar-replay",
+        "online_stop_event": "immediate-independent-scalar-replay",
+        "preparation_policy": "replay-all-ordinary-rows-and-logs-before-online-v1",
+        "rust_exporter_source_sha256": "67acaff696500679a6239d47e74bba52b41c0c64fd0c7413ae7fbd7e00505b11",
+        "source_encoding": "wide-symmetrised-S4-circuit-XOR-DIMACS"
+      },
+      "source_manifest_sha256": "c1e07e028c84ccd7d5b0bec7da6461660f9ee5da8a5bbc7aea746b2460116095"
+    },
+    "isogeny": "none",
+    "point_decomposition": {
+      "cache_policy": "source-exporter-process-per-query; SAT-process-per-query",
+      "encoding": "source-bound-wide-S4-circuit-XOR-DIMACS",
+      "equation_order": "source-defined-wide-S4-circuit-order",
+      "internal_matrix_kernel": "CryptoMiniSat-native-XOR-CDCL",
+      "limits": {
+        "conflict_budget": 100000,
+        "exporter_watchdog_seconds": 30,
+        "models_per_query": 1,
+        "watchdog_seconds": 60
+      },
+      "monomial_order": "none",
+      "solver": "sat",
+      "source_sha256": "c1e07e028c84ccd7d5b0bec7da6461660f9ee5da8a5bbc7aea746b2460116095",
+      "summands": 3,
+      "summation_polynomial": "symmetrised-S4"
+    },
+    "relation_collection": {
+      "collector": "sample",
+      "dependencies": "retain-unique-dependent-rows",
+      "duplicates": "scalar-and-sorted-base-indices",
+      "filtering": "independent-source-clause-XOR-model-lift-and-group-readd",
+      "query_distribution": "reusable-target-independent-preparation",
+      "query_rule": "import-certified-ordinary-rows; no new ordinary queries",
+      "source_sha256": "c1e07e028c84ccd7d5b0bec7da6461660f9ee5da8a5bbc7aea746b2460116095",
+      "stop_rule": "independent-full-rank-and-all-column-log-replay-before-online",
+      "verification": "complete-source-model-and-exact-group-readd"
+    },
+    "relation_linear_algebra": {
+      "block_parameters": "none",
+      "matrix_construction": "cofactor-project; sorted-sign-Frobenius-columns; rhs=h*a; sum-signed-lambda-powers",
+      "modulus": 65587,
+      "orbit_quotient": "sign-and-Frobenius",
+      "preconditioner": "none",
+      "rank_criterion": "exact-modular-full-column-rank-and-all-rows-checked",
+      "solver": "gauss",
+      "source_sha256": "c1e07e028c84ccd7d5b0bec7da6461660f9ee5da8a5bbc7aea746b2460116095"
+    },
+    "schema_version": 1,
+    "target_descent": {
+      "method": "pdp",
+      "policy": "StdRng08-independent-aG+bQ-pairs",
+      "recursive_solvers": "same-source-SAT-PDP; no-recursion",
+      "source_sha256": "c1e07e028c84ccd7d5b0bec7da6461660f9ee5da8a5bbc7aea746b2460116095",
+      "stop_rule": {
+        "max_queries": 8
+      },
+      "success_rule": "relation-derived-scalar-and-independent-group-replay"
+    }
+  },
+  "record_sha256": "5f7f1076e1049d10180f18e3cc58a8e1452c744b907dd0da174e17e67eecd061"
+}

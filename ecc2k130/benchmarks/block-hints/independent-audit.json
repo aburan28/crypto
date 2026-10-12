@@ -1,0 +1,648 @@
+{
+  "schema": "ecc2k130_block_hints_independent_audit.v1",
+  "generatedAtUtc": "2026-10-01T23:58:32Z",
+  "scope": {
+    "task": "Independent retained-artifact and frozen-source audit of the repaired block-compacted v3 hints GPU A/B",
+    "successfulArtifact": "/private/tmp/ecc2k-block-hints-gpu2-20261001/results.tgz",
+    "failedFirstAttempt": "/private/tmp/ecc2k-block-hints-gpu-20261001/results.tgz",
+    "frozenSource": "/private/tmp/ecc2k130-block-hints-20261001",
+    "frozenCommit": "0aad485bf95633c375b1ff8097fab874e5f36df4",
+    "sourceEdits": false,
+    "gpuLaunches": false,
+    "hostOnlyChecks": [
+      "header-aware fixed-record corpus parsing and canonical multiset hashing",
+      "reference table-walk replay from retained v3 seeds",
+      "raw-log and exact-work parsing",
+      "source, archive and manifest hashing",
+      "summarizer unit, reproduction and mutation tests",
+      "independent queue/fallback scheduling model"
+    ]
+  },
+  "verdict": {
+    "valid": true,
+    "successfulRunDisposition": "PASS_BOUNDED_SAME_WALK_GPU_AB",
+    "failedFirstAttemptDisposition": "PRESERVED_PRODUCER_LAUNCH_FAILURE_NOT_A_PERFORMANCE_SAMPLE",
+    "summarizerDisposition": "EXACT_REPRODUCTION_WITH_COVERAGE_GAPS",
+    "semanticDisposition": "SOURCE_AND_HOST_MODEL_PASS_WITH_UNEXERCISED_GPU_BRANCHES_DISCLOSED",
+    "candidateResult": "The block-compacted candidate completed the same fixed work and exact v3 corpus as control and was faster in all three alternating confirmation pairs.",
+    "medianPairedRatio": 1.4089692900833584,
+    "medianPairedPercentFaster": 40.89692900833584,
+    "ratioOfCandidateAndControlMedians": 1.4099384116238403,
+    "claimBoundary": "This is a bounded same-walk kernel-engineering result on one RTX PRO 6000 run. It does not measure natural relation yield, collision time, extraction, end-to-end ECDLP cost, or a cryptanalytic break."
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "class": "coverage_gap",
+      "severity": "medium",
+      "title": "The producer's literal first-300 replay gate covers only zero-step starts",
+      "evidence": "Independent reference replay of the first 300 persisted records from each arm matched 300/300, but every replay ended at iteration zero.",
+      "impact": "The literal 300/300 producer gate validates start-point and reporting consistency but, by itself, does not validate a completed update through the block hint queue.",
+      "mitigationInThisAudit": "A deterministic 300-record sample spread over each full corpus matched 300/300 in both arms; 298 of 300 samples in each arm had nonzero trails. Full sorted corpus multisets also match exactly."
+    },
+    {
+      "id": "F2",
+      "class": "summarizer_coverage_gap",
+      "severity": "low",
+      "title": "Timed-log validation omits two common configuration checks",
+      "evidence": "After rebinding a TSV row to a mutated log hash, changing split-forward 1 to 0 or changing 96256x16 backend geometry to 48128x32 with the same walk count produced no summarizer error. Block-hint identity and exact-work mutations were correctly rejected.",
+      "impact": "The retained result is accurate, and this audit independently checked every actual timed log's split-forward, batch-hints, fast2, block-hint and backend markers. The summarizer alone is not a complete fail-closed configuration validator if both a raw log and its TSV digest are changed together."
+    },
+    {
+      "id": "F3",
+      "class": "evidence_limit",
+      "severity": "low",
+      "title": "Binary and source manifests have bounded provenance coverage",
+      "evidence": "The bundles retain binary SHA-256 declarations but not the executable files, so the binary hashes cannot be recomputed. source-files.sha256 covers eight named files and all eight match their stated commits, but it omits other transitive headers and generated build inputs.",
+      "impact": "The clean frozen Git commit and Git tree identity provide broader source provenance, while the eight-file manifest alone should not be described as a complete build-input manifest."
+    },
+    {
+      "id": "F4",
+      "class": "evidence_limit",
+      "severity": "informational",
+      "title": "Overflow fallback and partial-block handling were not directly observed on GPU",
+      "evidence": "The run used 96256 threads and 512-thread blocks, so there was no partial block. The artifacts carry no counter proving whether the 512-entry hint queue overflowed.",
+      "impact": "Those paths pass source review and an independent exhaustive/random scheduling model, but their retained evidence is structural rather than an instrumented GPU observation."
+    }
+  ],
+  "inputIntegrity": {
+    "successfulRun": {
+      "launchJsonSha256": "4b45aea106c22c154ab8ed1eabd2b044e628ac935cbe35f5f5e84251f3a80b6b",
+      "resultsTgzBytes": 61214341,
+      "resultsTgzSha256": "2acc1465a5248c1ea0816a4cd5f68f2035fa4e824d7656f710a349aebfa75ad9",
+      "extractedFileCount": 29,
+      "archiveExtractionMatchesProvidedResultsDirectory": true,
+      "archiveComparisonMethod": "fresh tar extraction followed by recursive byte comparison"
+    },
+    "failedFirstAttempt": {
+      "launchJsonSha256": "eb91d0e03e7653d2edcd4e542ffb53f6e6c64db0251d64a138eac59fe61854d0",
+      "resultsTgzBytes": 30699036,
+      "resultsTgzSha256": "432f66c05940040801d0241dfa451b842e0cdfeef426e6c872b867457f83c730",
+      "extractedFileCount": 16,
+      "archiveExtractionMatchesProvidedResultsDirectory": true,
+      "archiveComparisonMethod": "fresh tar extraction followed by recursive byte comparison"
+    }
+  },
+  "sourceProvenance": {
+    "successfulCommit": "0aad485bf95633c375b1ff8097fab874e5f36df4",
+    "successfulTree": "43eecb9c934a1852ab3da25ec4017841189f4b4f",
+    "checkoutClean": true,
+    "trackedRepositoryEntries": 34575,
+    "trackedEcc2k130Entries": 1128,
+    "gitLsTreeRepositorySha256": "f49ce9d60809c61d0ac897b8997f8fe09980aea575319d21f6ef55d6b19061e1",
+    "gitLsTreeEcc2k130Sha256": "c881474d827d4befb14bf613392da9e5ab987241d8a7c609793c5f4b327c5fc8",
+    "successfulRetainedManifestSha256": "ab602c2ecd9fdb73c909680e96c1fc7dfd1f9b246b5004753f4e5e7eb61038cc",
+    "successfulRetainedManifestEntries": {
+      "Makefile": "70a34bb04372467449a924e0a484704353a391f25d4e93bcbc763947bd161b98",
+      "include/packedkernels.cuh": "a594013396b869e78c5c87268dedb0a89ad4112f05feef7b6cc5e476b369ae09",
+      "include/packedengine.cuh": "f7b3ee2bebb306b52181f9d79e92b564443ea7cbff4c21158b4c57ff254297db",
+      "include/packedtablewalk.cuh": "2f0e4ea24577fbd5c17e73b02d00e10d77f995769168bb1247e0515e917c614a",
+      "include/tablewalk.h": "bc96fd999d9da0a42d6564a86015f156021efca6c28f6534a9d5f452b154aaf5",
+      "include/cycleanchor_body.h": "a08cc05183185482f57a140e1ac861168d566e6aac0bf2cc9818440b474cc38c",
+      "include/ref.h": "5543e898c7711a14bf0f7fffd1289e08c34357a0958d71f78eb3ef095614f34e",
+      "src/main.cu": "3f0e857eceb915285b4e419d1632abc3ff49c24fb5fc2614705ab260de8d2147"
+    },
+    "successfulRetainedManifestAllMatchCommit": true,
+    "failedCommit": "0a8e51002a7efbbce8f58062d67ebe54beadf02d",
+    "failedRetainedManifestSha256": "7a5b103d9f94643a326cfb306c2a4fd3ca6d41527f467e0d78af149bfda52cb0",
+    "failedRetainedManifestAllMatchCommit": true,
+    "repairDiff": {
+      "base": "0a8e51002a7efbbce8f58062d67ebe54beadf02d",
+      "head": "0aad485bf95633c375b1ff8097fab874e5f36df4",
+      "filesChanged": 1,
+      "insertions": 4,
+      "deletions": 1,
+      "file": "ecc2k130/include/packedengine.cuh",
+      "semanticChange": "prepareKernel calls cudaFuncSetAttribute for the full dynamic table allocation whenever ECC_TABLE_BLOCK_HINTS is compiled in"
+    },
+    "manifestLimit": "The retained eight-file list is verified but is not a complete transitive build-input manifest."
+  },
+  "failedFirstAttempt": {
+    "classification": "PRODUCER_LAUNCH_CONFIGURATION_FAILURE",
+    "performanceDisposition": "UNMEASURED_AND_EXCLUDED",
+    "sourceCommit": "0a8e51002a7efbbce8f58062d67ebe54beadf02d",
+    "launchExitCode": 1,
+    "retainedExitCode": 1,
+    "launchSeconds": 263.21438813209534,
+    "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "driver": "580.95.05",
+    "cudaImage": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+    "cudaCompiler": "13.3.73",
+    "controlReplay": {
+      "finished": true,
+      "rateMps": 5.459,
+      "distinguishedPoints": 1480278,
+      "verified": 300,
+      "dropped": 0
+    },
+    "candidateReplay": {
+      "finished": false,
+      "error": "CUDA error at src/../include/packedengine.cuh:366: invalid argument",
+      "corpusBytes": 16,
+      "corpusPayloadBytes": 0,
+      "corpusRecords": 0,
+      "corpusSha256": "f8c1a19e4d310fc59d27f60f7fc1be1494bffc12bb5b87e59fd74f985a785ffd"
+    },
+    "preflight": {
+      "valid": false,
+      "decision": "invalid",
+      "timingSuppressed": true,
+      "errors": [
+        "candidate finished marker count 0 and no 300/0 replay result",
+        "candidate table-v3 corpus is header-only and differs from control"
+      ]
+    },
+    "resourceCause": {
+      "dynamicTableBytes": 48732,
+      "candidateStaticSharedBytes": 1040,
+      "userSharedBytes": 49772,
+      "default48KiBBytes": 49152,
+      "bytesOverDefaultUserSharedLimit": 620,
+      "oldPrepareCondition": "dynamicSharedBytes() > 48 * 1024",
+      "oldConditionResult": false,
+      "missingAction": "cudaFuncAttributeMaxDynamicSharedMemorySize opt-in for the 48732-byte dynamic table beside the static queue",
+      "causalValidation": "The only source repair was the opt-in condition, after which the same candidate resource shape launched and completed."
+    },
+    "preservedHashes": {
+      "job.log": "8e0ba5efd75c6f313e2091a39abeadf0dc35c45481ac407e88e4fe03a250fc03",
+      "preflight.json": "e6115a66824e3835e2b1016c90f5b5fbbd7bcfd129a71c8dafdd0b805d6c7b6f",
+      "verify-control.log": "a9d291fbfef29599dd8f061397deda67147c71e635307b303da4c0a7daa9e889",
+      "verify-candidate.log": "0436d2d914020a25b5d5217c778c4307da985b1a758a7df0396910c29a6e4b1e",
+      "dp-control.bin": "cbd6c28ea7eb919231cb7330c3b995be2baaa146acc9d31fdececd361d18b6da",
+      "dp-candidate.bin": "f8c1a19e4d310fc59d27f60f7fc1be1494bffc12bb5b87e59fd74f985a785ffd",
+      "failures.txt": "a9d6dc71f2ca0bd85222dfe423c1d124dc1a22eda2582d8b357a5f29355187be",
+      "binary-sha256.txt": "ca6a4da53e2bcfd1284c57d396d34703a587eec07140b421087998da3dcdcc3c"
+    }
+  },
+  "successfulRun": {
+    "launch": {
+      "sourceCommit": "0aad485bf95633c375b1ff8097fab874e5f36df4",
+      "gitDirty": false,
+      "provider": "modal",
+      "functionCallId": "fc-01M3WWDQMPKYY6J33KB5AGEYBT",
+      "startedAt": "2026-10-01T23:22:33Z",
+      "finishedAt": "2026-10-01T23:39:17Z",
+      "launchSeconds": 589.5061221122742,
+      "launchExitCode": 0,
+      "retainedExitCode": 0,
+      "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "gpuUuid": "GPU-1568cf74-76f1-15a5-5e21-a136c97977d3",
+      "driver": "580.95.05",
+      "cudaImage": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+      "cudaCompiler": "13.3.73"
+    },
+    "configuration": {
+      "threads": 96256,
+      "blockThreads": 512,
+      "blocks": 188,
+      "partialBlockThreads": 0,
+      "batch": 16,
+      "liveSlots": 1540096,
+      "splitForward": 1,
+      "batchHints": 1,
+      "fast2": 1,
+      "hintQueue": 512,
+      "controlBlockHints": 0,
+      "candidateBlockHints": 1,
+      "minBlocks": 1
+    },
+    "binaryManifest": {
+      "manifestSha256": "1d5785add6c4c69fc50d066fb98906ef29842749cd5f617577d482463351acb0",
+      "controlDeclaredSha256": "ac4067b9c6b45ba36d7ef81a7c48cb0a973cacd85681517c8e612f0ea9ce969d",
+      "candidateDeclaredSha256": "c0466b995da1330a03fd16744791835003fd0c21d8fe68efd0b78d7c819665d0",
+      "executablesRetained": false,
+      "hashesIndependentlyRecomputable": false
+    },
+    "resources": {
+      "dynamicTableBytesPerBlock": 48732,
+      "driverReservedSharedBytesPerBlock": 1024,
+      "control": {
+        "buildLogSha256": "0f6b3922106f8905061cc72c84a670dc22b4d3910bd3369204e754989684e38e",
+        "registersPerThread": 128,
+        "stackFrameBytesPerThread": 400,
+        "runtimeLocalBytesPerThread": 400,
+        "spillStoreBytes": 0,
+        "spillLoadBytes": 0,
+        "barriers": 1,
+        "staticSharedBytesPerBlock": 0,
+        "userStaticPlusDynamicSharedBytesPerBlock": 48732
+      },
+      "candidate": {
+        "buildLogSha256": "b540dc3e9c28c1fe1414d4cac2b3fb52ada3a008d5f246e452d37291f30fe999",
+        "registersPerThread": 128,
+        "stackFrameBytesPerThread": 400,
+        "runtimeLocalBytesPerThread": 400,
+        "spillStoreBytes": 0,
+        "spillLoadBytes": 0,
+        "barriers": 1,
+        "staticSharedBytesPerBlock": 1040,
+        "declaredQueueAndCounterBytesBeforeCompilerPadding": 1028,
+        "userStaticPlusDynamicSharedBytesPerBlock": 49772
+      }
+    },
+    "producerReplay": {
+      "workPerArm": 887095296,
+      "formula": "96256 threads * 16 slots * 96 steps * 6 launches",
+      "control": {
+        "logSha256": "51e89626b2b6a10566e5181e5cee12d8fe77d2be2e5b90e4b06b88cfa91be647",
+        "rateMps": 6.074,
+        "distinguishedPoints": 1480278,
+        "stored": 1480278,
+        "verified": 300,
+        "dropped": 0,
+        "mismatchMarkers": 0,
+        "overflowMarkers": 0
+      },
+      "candidate": {
+        "logSha256": "fa954884a7add1422ae23a1461405fcd9634fdd975892d0e21d388828a287206",
+        "rateMps": 6.55,
+        "distinguishedPoints": 1480278,
+        "stored": 1480278,
+        "verified": 300,
+        "dropped": 0,
+        "mismatchMarkers": 0,
+        "overflowMarkers": 0
+      },
+      "sourceMeaning": "verified increments only after Solver::rewalk reproduces the seed's iteration count and full x/y endpoint",
+      "prefixCoverageFinding": "Post hoc replay shows the first 300 persisted records in each arm are all zero-step distinguished starts."
+    },
+    "independentReferenceReplay": {
+      "method": "Host-only C++ helper compiled against the frozen ScalarOnb/TableWalk/Solver implementation with ECC_WALK_TABLE=1, TABLE_BRANCHES=8, TABLE_PIVOT_BYTES=1, TABLE_PHASE_POPC=0, CYCLE_FAST2=1 and dpWeight 48; no CUDA headers, build or launch.",
+      "prefixHelperSha256": "c6ec4cf7a28411ca7e9828057539645bbefd0e015d3bc8c05f3a29e3872dffb6",
+      "spreadHelperSha256": "bb67f38afb17d8e99899e3648071eee60a18dfd50c89501e3a954d6046edcd59",
+      "first300": {
+        "selection": "first 300 persisted records in raw file order",
+        "control": {
+          "checked": 300,
+          "matchedCanonicalOrbit": 300,
+          "mismatches": 0,
+          "notDistinguished": 0,
+          "zeroStep": 300,
+          "nonzeroStep": 0,
+          "totalSteps": 0
+        },
+        "candidate": {
+          "checked": 300,
+          "matchedCanonicalOrbit": 300,
+          "mismatches": 0,
+          "notDistinguished": 0,
+          "zeroStep": 300,
+          "nonzeroStep": 0,
+          "totalSteps": 0
+        }
+      },
+      "spread300": {
+        "selection": "index_i = floor(i * (1480278 - 1) / 299), i=0..299, independently in each raw corpus",
+        "control": {
+          "checked": 300,
+          "matchedCanonicalOrbit": 300,
+          "mismatches": 0,
+          "notDistinguished": 0,
+          "zeroStep": 2,
+          "nonzeroStep": 298,
+          "totalSteps": 63806,
+          "minimumSteps": 0,
+          "medianSteps": 173,
+          "maximumSteps": 572
+        },
+        "candidate": {
+          "checked": 300,
+          "matchedCanonicalOrbit": 300,
+          "mismatches": 0,
+          "notDistinguished": 0,
+          "zeroStep": 2,
+          "nonzeroStep": 298,
+          "totalSteps": 63734,
+          "minimumSteps": 0,
+          "medianSteps": 188,
+          "maximumSteps": 575
+        }
+      },
+      "limit": "A v3 persisted record contains seed plus canonical orbit x, not the producer's transient iteration count and full x/y endpoint. The post hoc check therefore validates seed-to-canonical-orbit replay; the retained producer logs are the evidence for their stronger transient full-endpoint check."
+    },
+    "corpusIdentity": {
+      "headerHex": "454343324b4454330300000020000000",
+      "magic": "ECC2KDT3",
+      "version": 3,
+      "headerBytes": 16,
+      "recordBytes": 32,
+      "recordsPerArm": 1480278,
+      "uniqueRecordsPerArm": 1480278,
+      "duplicateRecordsPerArm": 0,
+      "payloadBytesPerArm": 47368896,
+      "fileBytesPerArm": 47368912,
+      "controlRawSha256": "31101676837a0a425765e0ccb773bdda9eedc2969cc19d299f99cfa34de779f4",
+      "candidateRawSha256": "cfd92d1ccac4b17e229123f2e3c0dc6e1a761c6102b7007057710fa0508241d3",
+      "rawByteOrderIdentical": false,
+      "controlPayloadSha256": "1bf93b0a1e86f12c8086e831d551ef3a45435a5399350c7bbb62b95c654d47fb",
+      "candidatePayloadSha256": "d7d514def7c37ef6a46193bf2921faad54df21affc5fab96a948a15f23ba103b",
+      "sortedRecordMultisetSha256": "2fc6f84d4b1969240418cf6f8e779df9538b1d8f01eb6ff4c6a00be7324fae01",
+      "sameHeader": true,
+      "sameRecordCount": true,
+      "sameSortedRecordMultiset": true,
+      "interpretation": "Atomic report ordering differs, but the complete fixed-record multisets are exactly identical."
+    },
+    "exactWork": {
+      "warmupUpdatesPerLog": 25232932864,
+      "screenUpdatesPerLog": 50465865728,
+      "confirmationUpdatesPerLog": 100931731456,
+      "verificationUpdatesPerArm": 887095296,
+      "totalTimedUpdatesAcrossElevenLogs": 807453851648,
+      "allRawLogsEndAtExpectedWork": true,
+      "allRawLogsHaveExactlyOneFinishedMarker": true,
+      "allRawLogsHaveZeroDrops": true,
+      "allRawLogsHaveNoMismatchOrOverflowMarker": true,
+      "allRawLogHashesMatchSamplesTsv": true,
+      "allRawLogsHaveExpectedBackendAndFeatureMarkers": true
+    },
+    "timedSamples": [
+      {
+        "file": "warmup-0-1-control.log",
+        "phase": "warmup",
+        "pair": 0,
+        "order": 1,
+        "variant": "control",
+        "rateMps": 4727.948,
+        "updates": 25232932864,
+        "sha256": "a7016abb620cd86034cbdb009970e0cd31042b6df562e02c800a9189d7dcb39a",
+        "gpuState": "2370, 317.13, 36"
+      },
+      {
+        "file": "warmup-0-2-candidate.log",
+        "phase": "warmup",
+        "pair": 0,
+        "order": 2,
+        "variant": "candidate",
+        "rateMps": 6195.109,
+        "updates": 25232932864,
+        "sha256": "0c13733e8e9deb37bb425777999cbee12bf5c58922fa1cde5f6c81f09b8c909b",
+        "gpuState": "2362, 313.13, 40"
+      },
+      {
+        "file": "screen-0-1-control.log",
+        "phase": "screen",
+        "pair": 0,
+        "order": 1,
+        "variant": "control",
+        "rateMps": 4134.526,
+        "updates": 50465865728,
+        "sha256": "ea0dfbceb6650b6d5d3d0c2195f510e0310ef772a55a39a65464a340ac715e59",
+        "gpuState": "2377, 307.21, 39"
+      },
+      {
+        "file": "screen-0-2-candidate.log",
+        "phase": "screen",
+        "pair": 0,
+        "order": 2,
+        "variant": "candidate",
+        "rateMps": 5470.673,
+        "updates": 50465865728,
+        "sha256": "57a3bab03403e73702d3d6d433af146a815164949421ec384c3b6b8921505e1d",
+        "gpuState": "2370, 288.02, 40"
+      },
+      {
+        "file": "screen-0-3-control.log",
+        "phase": "screen",
+        "pair": 0,
+        "order": 3,
+        "variant": "control",
+        "rateMps": 4144.668,
+        "updates": 50465865728,
+        "sha256": "62f1297592d22820f0706cb7c0fddde28234739d3de070b5f585ed57707e7a33",
+        "gpuState": "2400, 306.37, 41"
+      },
+      {
+        "file": "confirm-1-1-control.log",
+        "phase": "confirm",
+        "pair": 1,
+        "order": 1,
+        "variant": "control",
+        "rateMps": 3558.739,
+        "updates": 100931731456,
+        "sha256": "7d703450cde392407ef3cdb9bd11fc17e407efd319a951ef010f5e0a7fd18b57",
+        "gpuState": "2385, 309.29, 41"
+      },
+      {
+        "file": "confirm-1-2-candidate.log",
+        "phase": "confirm",
+        "pair": 1,
+        "order": 2,
+        "variant": "candidate",
+        "rateMps": 5019.737,
+        "updates": 100931731456,
+        "sha256": "7ca3e3ce15f28d7cb41abd7f8c4bf0e85b8c058729c0efb72131bef162414aec",
+        "gpuState": "2392, 242.09, 40"
+      },
+      {
+        "file": "confirm-2-1-candidate.log",
+        "phase": "confirm",
+        "pair": 2,
+        "order": 1,
+        "variant": "candidate",
+        "rateMps": 5015.825,
+        "updates": 100931731456,
+        "sha256": "a79de152f5689df9743b0bb9a490f31455653c3a22a43084ca85cf6692b33937",
+        "gpuState": "2415, 283.85, 41"
+      },
+      {
+        "file": "confirm-2-2-control.log",
+        "phase": "confirm",
+        "pair": 2,
+        "order": 2,
+        "variant": "control",
+        "rateMps": 3559.925,
+        "updates": 100931731456,
+        "sha256": "d828395e90e4ef4b7dbdb94d9fe92b9322861aa4afe5eb84f4cba8a3d9a9b416",
+        "gpuState": "2422, 302.34, 41"
+      },
+      {
+        "file": "confirm-3-1-control.log",
+        "phase": "confirm",
+        "pair": 3,
+        "order": 1,
+        "variant": "control",
+        "rateMps": 3563.098,
+        "updates": 100931731456,
+        "sha256": "84595eabf0ca77b66a58919708d9f2e09863f6f0515d229b8048d63ab214f7f4",
+        "gpuState": "2385, 315.22, 41"
+      },
+      {
+        "file": "confirm-3-2-candidate.log",
+        "phase": "confirm",
+        "pair": 3,
+        "order": 2,
+        "variant": "candidate",
+        "rateMps": 5019.275,
+        "updates": 100931731456,
+        "sha256": "3bb13c4fc4f4a3bd90162053ac77d9e4894ebb3a249527fb57ab277839750398",
+        "gpuState": "2392, 291.96, 42"
+      }
+    ],
+    "timingRecomputation": {
+      "screen": {
+        "controlRatesMps": [
+          4134.526,
+          4144.668
+        ],
+        "fasterControlMps": 4144.668,
+        "candidateRateMps": 5470.673,
+        "qualificationThresholdMps": 4165.391339999999,
+        "ratioToFasterControl": 1.3199303297634455,
+        "percentFaster": 31.993032976344548,
+        "qualified": true
+      },
+      "confirmation": {
+        "controlRatesMps": [
+          3558.739,
+          3559.925,
+          3563.098
+        ],
+        "candidateRatesMps": [
+          5019.737,
+          5015.825,
+          5019.275
+        ],
+        "pairedRatios": [
+          1.4105381147648086,
+          1.4089692900833584,
+          1.4086828372388298
+        ],
+        "pairedPercentFaster": [
+          41.05381147648086,
+          40.89692900833584,
+          40.86828372388298
+        ],
+        "medianPairedRatio": 1.4089692900833584,
+        "medianPairedPercentFaster": 40.89692900833584,
+        "controlMedianMps": 3559.925,
+        "candidateMedianMps": 5019.275,
+        "ratioOfMedians": 1.4099384116238403,
+        "ratioOfMediansPercentFaster": 40.99384116238403,
+        "controlMinMaxMps": [
+          3558.739,
+          3563.098
+        ],
+        "candidateMinMaxMps": [
+          5015.825,
+          5019.737
+        ],
+        "candidateFasterInAllPairs": true
+      }
+    }
+  },
+  "semanticAudit": {
+    "sourceLocations": {
+      "compileTimeBounds": "ecc2k130/include/packedkernels.cuh:288-305",
+      "queueAndFallback": "ecc2k130/include/packedkernels.cuh:754-826",
+      "rawTagAndHistoryWrite": "ecc2k130/include/packedkernels.cuh:414-463",
+      "prefixReadsResolvedHistory": "ecc2k130/include/packedkernels.cuh:467-473 and 851-892",
+      "dynamicSharedOptIn": "ecc2k130/include/packedengine.cuh:195-203",
+      "kernelLaunch": "ecc2k130/include/packedengine.cuh:362-369"
+    },
+    "queueProof": [
+      "Each active owner first executes the same tableSelectRawTagSlot operation as control, writes its raw history word, and sets one pending bit per hinted slot.",
+      "One shared atomicAdd per owner reserves a disjoint contiguous range equal to that owner's popcount. Queue order may vary, but every q index is unique.",
+      "When total pending hints are at most 512, every reserved q is written and decoded to exactly one owner pair; the 16-bit encoding is slot*512+thread and ranges only from 0 through 8191 in this build.",
+      "A resolver writes only the uniquely owned p.hist[slot*threads+tid]. The following block barrier makes every resolved history word visible before owners build their original prefix chains.",
+      "When total pending hints exceed 512, queued entries are ignored and each lane runs the same pendingHints warp loop as control. pendingHints is not consumed while populating queueBits, so fallback retains the complete set.",
+      "Inactive threads in a partial last block skip raw selection, contribute zero pending hints, may help resolve active owners, participate in both barriers, and continue before any owner-state prefix access. Queued owner ids can only come from active threads.",
+      "The shared count is reset by thread zero and synchronized at every step. The maximum count is 8192, so neither the counter nor the compile-time 16-bit owner encoding can overflow here."
+    ],
+    "independentModel": {
+      "description": "Atomic reservation order was varied independently of thread order. The model compared the queue or fallback output multiset against the control per-lane pending-pair multiset.",
+      "smallExhaustiveCases": 674064,
+      "smallQueueBranchCases": 228384,
+      "smallFallbackBranchCases": 445680,
+      "smallBoundaryCases": {
+        "zero": 720,
+        "belowCapacity": 176760,
+        "exactCapacity": 50904,
+        "overflow": 445680
+      },
+      "actualGeometryRandomCases": 1000,
+      "targetedActualGeometryCases": [
+        "zero pending",
+        "exactly 512 pending",
+        "8192 pending overflow",
+        "one active thread partial block",
+        "511 active thread partial block"
+      ],
+      "allChecksPass": true
+    },
+    "empiricalCoverage": {
+      "completeCorpusEquality": true,
+      "spreadReferenceReplay": "300/300 per arm, including 298 nonzero trails per arm",
+      "actualRunPartialBlock": false,
+      "actualRunHintQueueOverflowKnown": false
+    },
+    "conclusion": "The source transformation is semantically equivalent for the fixed build under queue-fit and overflow conditions, and its partial-block control flow is barrier-safe. The successful fixed corpus and nonzero host replays support the exercised semantics; overflow and partial-block conclusions remain source/model results because the retained GPU run does not identify those branches."
+  },
+  "summarizerAudit": {
+    "retainedResultSha256": "29da82126beceaa1afef6ae2730364f415ca99eaea9779c282e2a303c017034d",
+    "retainedScreenSha256": "fec5331a6bb4562ca61a6d5b37aa87446553da278b205342ea28c8976cbbd621",
+    "retainedPreflightSha256": "5e8cd87157a735c5421f6029830b854ee022d0cb5a381b48d4ee45a8512705b7",
+    "recomputedResultExactObjectMatch": true,
+    "recomputedResultCanonicalSha256": "29da82126beceaa1afef6ae2730364f415ca99eaea9779c282e2a303c017034d",
+    "recomputedPreflightExactObjectMatch": true,
+    "recomputedScreenTimingExactObjectMatch": true,
+    "reportedDecision": "confirmation_complete",
+    "reportedValid": true,
+    "reportedErrors": [],
+    "unitTests": {
+      "python": "/opt/homebrew/bin/python3 3.14.7",
+      "batchHints": "8/8 pass",
+      "blockHints": "2/2 pass",
+      "dpIdentity": "5/5 pass",
+      "total": "15/15 pass"
+    },
+    "mutationTests": {
+      "blockHintMarkerMutationRejected": true,
+      "exactWorkMutationRejected": true,
+      "splitForwardMarkerMutationRejectedAfterRebindingTsvHash": false,
+      "backendGeometryMutationRejectedAfterRebindingTsvHash": false
+    },
+    "independentChecksBeyondSummarizer": [
+      "all timed split-forward markers equal 1",
+      "all timed batch-hints markers equal 1",
+      "all timed fast2 markers equal 1",
+      "all timed backend markers equal 96256x16x1=1540096 with 1024 steps",
+      "control/candidate block-hint markers match their variants",
+      "build static shared bytes parsed independently",
+      "source manifest entries checked against Git objects",
+      "corpus identity recomputed without importing summarize.py",
+      "timing ratios and medians recomputed without importing summarize.py"
+    ],
+    "conclusion": "The retained JSON is a byte-for-byte canonical reproduction of the checked-in summarizer on these artifacts, and its numerical result is correct. The two disclosed marker omissions should be repaired before treating the summarizer as a complete configuration-integrity gate."
+  },
+  "successfulArtifactFileSha256": {
+    "binary-sha256.txt": "1d5785add6c4c69fc50d066fb98906ef29842749cd5f617577d482463351acb0",
+    "build-candidate.log": "b540dc3e9c28c1fe1414d4cac2b3fb52ada3a008d5f246e452d37291f30fe999",
+    "build-control.log": "0f6b3922106f8905061cc72c84a670dc22b4d3910bd3369204e754989684e38e",
+    "confirm-1-1-control.log": "7d703450cde392407ef3cdb9bd11fc17e407efd319a951ef010f5e0a7fd18b57",
+    "confirm-1-2-candidate.log": "7ca3e3ce15f28d7cb41abd7f8c4bf0e85b8c058729c0efb72131bef162414aec",
+    "confirm-2-1-candidate.log": "a79de152f5689df9743b0bb9a490f31455653c3a22a43084ca85cf6692b33937",
+    "confirm-2-2-control.log": "d828395e90e4ef4b7dbdb94d9fe92b9322861aa4afe5eb84f4cba8a3d9a9b416",
+    "confirm-3-1-control.log": "84595eabf0ca77b66a58919708d9f2e09863f6f0515d229b8048d63ab214f7f4",
+    "confirm-3-2-candidate.log": "3bb13c4fc4f4a3bd90162053ac77d9e4894ebb3a249527fb57ab277839750398",
+    "dp-candidate.bin": "cfd92d1ccac4b17e229123f2e3c0dc6e1a761c6102b7007057710fa0508241d3",
+    "dp-control.bin": "31101676837a0a425765e0ccb773bdda9eedc2969cc19d299f99cfa34de779f4",
+    "dp-identity.txt": "00fad9a4da79636184916aeabbbefcb2535c16c773b85e46f81857c141010ff4",
+    "exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "host.txt": "f67f76c6e503e5f1166f4bf1271045e8ffaef569f6166fccd75d1103a70b9d33",
+    "job.log": "fe75c1f243ad73433265e2d97f467e365c9e7d773fb8949a7bf3fa7f3ae4ffb4",
+    "preflight.json": "5e8cd87157a735c5421f6029830b854ee022d0cb5a381b48d4ee45a8512705b7",
+    "result.json": "29da82126beceaa1afef6ae2730364f415ca99eaea9779c282e2a303c017034d",
+    "samples.tsv": "b4943c3783cf1d76433840b453967ceaeefe1504afe24fa434ddf759a7d6a581",
+    "screen-0-1-control.log": "ea0dfbceb6650b6d5d3d0c2195f510e0310ef772a55a39a65464a340ac715e59",
+    "screen-0-2-candidate.log": "57a3bab03403e73702d3d6d433af146a815164949421ec384c3b6b8921505e1d",
+    "screen-0-3-control.log": "62f1297592d22820f0706cb7c0fddde28234739d3de070b5f585ed57707e7a33",
+    "screen.json": "fec5331a6bb4562ca61a6d5b37aa87446553da278b205342ea28c8976cbbd621",
+    "source-files.sha256": "ab602c2ecd9fdb73c909680e96c1fc7dfd1f9b246b5004753f4e5e7eb61038cc",
+    "verify-candidate.log": "fa954884a7add1422ae23a1461405fcd9634fdd975892d0e21d388828a287206",
+    "verify-candidate.txt": "53ef45340d6b7ec5064bad77c458d4179212af29251deb30037a6085a5d0df77",
+    "verify-control.log": "51e89626b2b6a10566e5181e5cee12d8fe77d2be2e5b90e4b06b88cfa91be647",
+    "verify-control.txt": "36287bfce0315f2ccc937b52c339a3c3ade6ea31aff30267bab91a333b95b356",
+    "warmup-0-1-control.log": "a7016abb620cd86034cbdb009970e0cd31042b6df562e02c800a9189d7dcb39a",
+    "warmup-0-2-candidate.log": "0c13733e8e9deb37bb425777999cbee12bf5c58922fa1cde5f6c81f09b8c909b"
+  }
+}

@@ -1,0 +1,35 @@
+{
+ "schema_version": 2,
+ "name": "C036: y^2 + y = x^3 over GF(2^31), supersingular",
+ "field": {
+  "kind": "binary",
+  "degree": 31,
+  "modulus": "0x80000009"
+ },
+ "curve": {
+  "form": "general_weierstrass",
+  "a1": "0x0",
+  "a2": "0x0",
+  "a3": "0x1",
+  "a4": "0x0",
+  "a6": "0x0"
+ },
+ "subgroup": {
+  "order": "715827883",
+  "cofactor": "3",
+  "generator": {
+   "x": "0x6c0959d7",
+   "y": "0x2d02cff0"
+  }
+ },
+ "target": {
+  "known_log": "32892621"
+ },
+ "method": {
+  "solve": "rho",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 7
+  }
+ }
+}

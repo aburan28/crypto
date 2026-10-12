@@ -1,0 +1,737 @@
+{
+  "schema": "p256.s17_multilevel_selector/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "dependencies": {
+    "round18_sha256": "b9081ea3cd3957dcae7805852371e395a2a63c8d4a2062e5c8e2c0b23980fce3",
+    "round6_sha256": "71d63031111ba48ff831e79430bc87e6c7bac34626d7d0de4acfb4eaa65d40f4"
+  },
+  "factor_base": {
+    "spec": "dickson-torus:depth=18,root_exponent=0x2b6fdc73dc04e7667129",
+    "fb_id": "FB1h2f8621cda105",
+    "fb_sha256": "2f8621cda105a51f8703dabe38dec87f3715ab855770acd7b2af0a14906f9e42",
+    "points_sha256": "70ab21cbda76205ff43ab6bf85c68607be9f6b89df6399e6fa98e3489b888cf1",
+    "terminal": "0x5b17195299a3158b93389ad04c776fff2a8bb23ca8659b5b0c2b75f9009b65e5",
+    "columns": 131458,
+    "signed_points": 262916,
+    "complete_rebuild_verified": true
+  },
+  "active_sizes": [
+    17,
+    18,
+    19,
+    20
+  ],
+  "active_permutation": "column(j)=(90322+23509*j) mod 131458",
+  "targets": [
+    {
+      "kind": "planted-control",
+      "scalar": null,
+      "point": [
+        "0xe4e7e6be5957a82c95e86e17a67fb3e786d1e08a837d33d8dcc22eb2212cc46e",
+        "0x6675087f4e16f36cce17470a9ff79aaadc5487c502df72fafefc8ae6d871c102"
+      ]
+    },
+    {
+      "kind": "hash-public",
+      "scalar": "0x881a90c02e57d422d23fb772058a846745b61b646b4bc21b05426572a52541b4",
+      "point": [
+        "0x8512143750b43da9cfd83bea9bac2b0e63632e35f39991c0350791318ee33b83",
+        "0x66506e340e404571c6beb14061bb9d7be2a667cebb5546183a80cc8d4f7cc52f"
+      ]
+    }
+  ],
+  "planted_negative_mask": 41509,
+  "cells": [
+    {
+      "active_columns": 17,
+      "factor_base_columns": [
+        90322,
+        113831,
+        5882,
+        29391,
+        52900,
+        76409,
+        99918,
+        123427,
+        15478,
+        38987,
+        62496,
+        86005,
+        109514,
+        1565,
+        25074,
+        48583,
+        72092
+      ],
+      "baseline": {
+        "left_records": 6223360,
+        "right_records": 12446720,
+        "record_logical_bytes": 44,
+        "peak_logical_bytes": 273827840,
+        "radix_or_comparison_sort_records": 6223360,
+        "work": {
+          "group_additions": 43928187,
+          "normalization_multiplications": 157039400,
+          "equality_multiplications": 4,
+          "key_lookups": 24893440,
+          "key_matches": 1,
+          "replayed_matches": 1,
+          "replay_failures": 0
+        },
+        "field_multiplication_equivalents": 903818583,
+        "targets": [
+          {
+            "kind": "planted-control",
+            "relations": [
+              {
+                "columns_mask": 131071,
+                "negative_mask": 41509
+              }
+            ],
+            "relation_sha256": "4679da63b1051820593722c2d2fa0d99370aa60e9cd7ca990dee361af2ab20cc",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          },
+          {
+            "kind": "hash-public",
+            "relations": [],
+            "relation_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          }
+        ]
+      },
+      "structured": {
+        "four_records": 38080,
+        "five_records": 198016,
+        "joined_eight_records": 6223360,
+        "joined_nine_records_per_target": 12446720,
+        "dickson_leaf_candidates": 17,
+        "dickson_leaf_rejections": 0,
+        "dickson_survival_ratio": 1.0,
+        "dickson_chain_sha256": "4a17e1a91a87799ecc101f2435755640da6f87479bd6a5d9835caa2c6df92e7e",
+        "propagated_certificate_records": 31352896,
+        "bucket_count": 256,
+        "left_bucket_widths": {
+          "minimum": 23778,
+          "median": 24306,
+          "maximum": 24954,
+          "total": 6223360
+        },
+        "right_bucket_widths": [
+          {
+            "minimum": 48009,
+            "median": 48617,
+            "maximum": 49249,
+            "total": 12446720
+          },
+          {
+            "minimum": 48002,
+            "median": 48630,
+            "maximum": 49290,
+            "total": 12446720
+          }
+        ],
+        "bytes_written": 1275788800,
+        "bytes_read": 1530946560,
+        "peak_resident_logical_bytes": 3251204,
+        "peak_materialized_bytes": 765473280,
+        "work": {
+          "group_additions": 56278245,
+          "normalization_multiplications": 157039400,
+          "equality_multiplications": 4,
+          "key_lookups": 24893440,
+          "key_matches": 1,
+          "replayed_matches": 1,
+          "replay_failures": 0
+        },
+        "field_multiplication_equivalents": 1113769569,
+        "targets": [
+          {
+            "kind": "planted-control",
+            "relations": [
+              {
+                "columns_mask": 131071,
+                "negative_mask": 41509
+              }
+            ],
+            "relation_sha256": "4679da63b1051820593722c2d2fa0d99370aa60e9cd7ca990dee361af2ab20cc",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          },
+          {
+            "kind": "hash-public",
+            "relations": [],
+            "relation_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          }
+        ]
+      },
+      "exhaustive_reference": {
+        "complete": true,
+        "assignments": 131072,
+        "work": {
+          "group_additions": 131105,
+          "normalization_multiplications": 0,
+          "equality_multiplications": 1048580,
+          "key_lookups": 0,
+          "key_matches": 0,
+          "replayed_matches": 1,
+          "replay_failures": 0
+        },
+        "targets": [
+          {
+            "kind": "planted-control",
+            "relations": [
+              {
+                "columns_mask": 131071,
+                "negative_mask": 41509
+              }
+            ],
+            "relation_sha256": "4679da63b1051820593722c2d2fa0d99370aa60e9cd7ca990dee361af2ab20cc",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          },
+          {
+            "kind": "hash-public",
+            "relations": [],
+            "relation_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          }
+        ]
+      },
+      "selector_relation_sets_equal": true,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "exact": true
+    },
+    {
+      "active_columns": 18,
+      "factor_base_columns": [
+        90322,
+        113831,
+        5882,
+        29391,
+        52900,
+        76409,
+        99918,
+        123427,
+        15478,
+        38987,
+        62496,
+        86005,
+        109514,
+        1565,
+        25074,
+        48583,
+        72092,
+        95601
+      ],
+      "baseline": {
+        "left_records": 11202048,
+        "right_records": 24893440,
+        "record_logical_bytes": 44,
+        "peak_logical_bytes": 492890112,
+        "radix_or_comparison_sort_records": 11202048,
+        "work": {
+          "group_additions": 86577651,
+          "normalization_multiplications": 307796458,
+          "equality_multiplications": 4,
+          "key_lookups": 49786880,
+          "key_matches": 1,
+          "replayed_matches": 1,
+          "replay_failures": 0
+        },
+        "field_multiplication_equivalents": 1779616529,
+        "targets": [
+          {
+            "kind": "planted-control",
+            "relations": [
+              {
+                "columns_mask": 131071,
+                "negative_mask": 41509
+              }
+            ],
+            "relation_sha256": "4679da63b1051820593722c2d2fa0d99370aa60e9cd7ca990dee361af2ab20cc",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          },
+          {
+            "kind": "hash-public",
+            "relations": [],
+            "relation_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          }
+        ]
+      },
+      "structured": {
+        "four_records": 48960,
+        "five_records": 274176,
+        "joined_eight_records": 11202048,
+        "joined_nine_records_per_target": 24893440,
+        "dickson_leaf_candidates": 18,
+        "dickson_leaf_rejections": 0,
+        "dickson_survival_ratio": 1.0,
+        "dickson_chain_sha256": "4a17e1a91a87799ecc101f2435755640da6f87479bd6a5d9835caa2c6df92e7e",
+        "propagated_certificate_records": 61312064,
+        "bucket_count": 256,
+        "left_bucket_widths": {
+          "minimum": 42926,
+          "median": 43756,
+          "maximum": 44464,
+          "total": 11202048
+        },
+        "right_bucket_widths": [
+          {
+            "minimum": 96192,
+            "median": 97230,
+            "maximum": 98120,
+            "total": 24893440
+          },
+          {
+            "minimum": 96274,
+            "median": 97255,
+            "maximum": 98176,
+            "total": 24893440
+          }
+        ],
+        "bytes_written": 2500546048,
+        "bytes_read": 2959830016,
+        "peak_resident_logical_bytes": 6271584,
+        "peak_materialized_bytes": 1479915008,
+        "work": {
+          "group_additions": 111142413,
+          "normalization_multiplications": 307796458,
+          "equality_multiplications": 4,
+          "key_lookups": 49786880,
+          "key_matches": 1,
+          "replayed_matches": 1,
+          "replay_failures": 0
+        },
+        "field_multiplication_equivalents": 2197217483,
+        "targets": [
+          {
+            "kind": "planted-control",
+            "relations": [
+              {
+                "columns_mask": 131071,
+                "negative_mask": 41509
+              }
+            ],
+            "relation_sha256": "4679da63b1051820593722c2d2fa0d99370aa60e9cd7ca990dee361af2ab20cc",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          },
+          {
+            "kind": "hash-public",
+            "relations": [],
+            "relation_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          }
+        ]
+      },
+      "exhaustive_reference": {
+        "complete": true,
+        "assignments": 2359296,
+        "work": {
+          "group_additions": 2359601,
+          "normalization_multiplications": 0,
+          "equality_multiplications": 18874372,
+          "key_lookups": 0,
+          "key_matches": 0,
+          "replayed_matches": 1,
+          "replay_failures": 0
+        },
+        "targets": [
+          {
+            "kind": "planted-control",
+            "relations": [
+              {
+                "columns_mask": 131071,
+                "negative_mask": 41509
+              }
+            ],
+            "relation_sha256": "4679da63b1051820593722c2d2fa0d99370aa60e9cd7ca990dee361af2ab20cc",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          },
+          {
+            "kind": "hash-public",
+            "relations": [],
+            "relation_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          }
+        ]
+      },
+      "selector_relation_sets_equal": true,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "exact": true
+    },
+    {
+      "active_columns": 19,
+      "factor_base_columns": [
+        90322,
+        113831,
+        5882,
+        29391,
+        52900,
+        76409,
+        99918,
+        123427,
+        15478,
+        38987,
+        62496,
+        86005,
+        109514,
+        1565,
+        25074,
+        48583,
+        72092,
+        95601,
+        119110
+      ],
+      "baseline": {
+        "left_records": 19348992,
+        "right_records": 47297536,
+        "record_logical_bytes": 44,
+        "peak_logical_bytes": 851355648,
+        "radix_or_comparison_sort_records": 19348992,
+        "work": {
+          "group_additions": 162509715,
+          "normalization_multiplications": 575047850,
+          "equality_multiplications": 4,
+          "key_lookups": 94595072,
+          "key_matches": 1,
+          "replayed_matches": 1,
+          "replay_failures": 0
+        },
+        "field_multiplication_equivalents": 3337713009,
+        "targets": [
+          {
+            "kind": "planted-control",
+            "relations": [
+              {
+                "columns_mask": 131071,
+                "negative_mask": 41509
+              }
+            ],
+            "relation_sha256": "4679da63b1051820593722c2d2fa0d99370aa60e9cd7ca990dee361af2ab20cc",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          },
+          {
+            "kind": "hash-public",
+            "relations": [],
+            "relation_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          }
+        ]
+      },
+      "structured": {
+        "four_records": 62016,
+        "five_records": 372096,
+        "joined_eight_records": 19348992,
+        "joined_nine_records_per_target": 47297536,
+        "dickson_leaf_candidates": 19,
+        "dickson_leaf_rejections": 0,
+        "dickson_survival_ratio": 1.0,
+        "dickson_chain_sha256": "4a17e1a91a87799ecc101f2435755640da6f87479bd6a5d9835caa2c6df92e7e",
+        "propagated_certificate_records": 114378176,
+        "bucket_count": 256,
+        "left_bucket_widths": {
+          "minimum": 74396,
+          "median": 75558,
+          "maximum": 76572,
+          "total": 19348992
+        },
+        "right_bucket_widths": [
+          {
+            "minimum": 183531,
+            "median": 184779,
+            "maximum": 186032,
+            "total": 47297536
+          },
+          {
+            "minimum": 183622,
+            "median": 184748,
+            "maximum": 186257,
+            "total": 47297536
+          }
+        ],
+        "bytes_written": 4671706624,
+        "bytes_read": 5465015296,
+        "peak_resident_logical_bytes": 11538120,
+        "peak_materialized_bytes": 2732507648,
+        "work": {
+          "group_additions": 209031405,
+          "normalization_multiplications": 575047850,
+          "equality_multiplications": 4,
+          "key_lookups": 94595072,
+          "key_matches": 1,
+          "replayed_matches": 1,
+          "replay_failures": 0
+        },
+        "field_multiplication_equivalents": 4128581739,
+        "targets": [
+          {
+            "kind": "planted-control",
+            "relations": [
+              {
+                "columns_mask": 131071,
+                "negative_mask": 41509
+              }
+            ],
+            "relation_sha256": "4679da63b1051820593722c2d2fa0d99370aa60e9cd7ca990dee361af2ab20cc",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          },
+          {
+            "kind": "hash-public",
+            "relations": [],
+            "relation_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          }
+        ]
+      },
+      "exhaustive_reference": null,
+      "selector_relation_sets_equal": true,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "exact": true
+    },
+    {
+      "active_columns": 20,
+      "factor_base_columns": [
+        90322,
+        113831,
+        5882,
+        29391,
+        52900,
+        76409,
+        99918,
+        123427,
+        15478,
+        38987,
+        62496,
+        86005,
+        109514,
+        1565,
+        25074,
+        48583,
+        72092,
+        95601,
+        119110,
+        11161
+      ],
+      "baseline": {
+        "left_records": 32248320,
+        "right_records": 85995520,
+        "record_logical_bytes": 44,
+        "peak_logical_bytes": 1418926080,
+        "radix_or_comparison_sort_records": 32248320,
+        "work": {
+          "group_additions": 292460367,
+          "normalization_multiplications": 1030746139,
+          "equality_multiplications": 4,
+          "key_lookups": 171991040,
+          "key_matches": 1,
+          "replayed_matches": 1,
+          "replay_failures": 0
+        },
+        "field_multiplication_equivalents": 6002572382,
+        "targets": [
+          {
+            "kind": "planted-control",
+            "relations": [
+              {
+                "columns_mask": 131071,
+                "negative_mask": 41509
+              }
+            ],
+            "relation_sha256": "4679da63b1051820593722c2d2fa0d99370aa60e9cd7ca990dee361af2ab20cc",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          },
+          {
+            "kind": "hash-public",
+            "relations": [],
+            "relation_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          }
+        ]
+      },
+      "structured": {
+        "four_records": 77520,
+        "five_records": 496128,
+        "joined_eight_records": 32248320,
+        "joined_nine_records_per_target": 85995520,
+        "dickson_leaf_candidates": 20,
+        "dickson_leaf_rejections": 0,
+        "dickson_survival_ratio": 1.0,
+        "dickson_chain_sha256": "4a17e1a91a87799ecc101f2435755640da6f87479bd6a5d9835caa2c6df92e7e",
+        "propagated_certificate_records": 204813008,
+        "bucket_count": 256,
+        "left_bucket_widths": {
+          "minimum": 124602,
+          "median": 125992,
+          "maximum": 127606,
+          "total": 32248320
+        },
+        "right_bucket_widths": [
+          {
+            "minimum": 334539,
+            "median": 335931,
+            "maximum": 337675,
+            "total": 85995520
+          },
+          {
+            "minimum": 334275,
+            "median": 335885,
+            "maximum": 337611,
+            "total": 85995520
+          }
+        ],
+        "bytes_written": 8373813760,
+        "bytes_read": 9695994880,
+        "peak_resident_logical_bytes": 20472364,
+        "peak_materialized_bytes": 4847997440,
+        "work": {
+          "group_additions": 376880616,
+          "normalization_multiplications": 1030746139,
+          "equality_multiplications": 4,
+          "key_lookups": 171991040,
+          "key_matches": 1,
+          "replayed_matches": 1,
+          "replay_failures": 0
+        },
+        "field_multiplication_equivalents": 7437716615,
+        "targets": [
+          {
+            "kind": "planted-control",
+            "relations": [
+              {
+                "columns_mask": 131071,
+                "negative_mask": 41509
+              }
+            ],
+            "relation_sha256": "4679da63b1051820593722c2d2fa0d99370aa60e9cd7ca990dee361af2ab20cc",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          },
+          {
+            "kind": "hash-public",
+            "relations": [],
+            "relation_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "false_positives": 0,
+            "false_negatives": 0,
+            "exact": true
+          }
+        ]
+      },
+      "exhaustive_reference": null,
+      "selector_relation_sets_equal": true,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "exact": true
+    }
+  ],
+  "growth_fit": {
+    "sizes": [
+      17,
+      18,
+      19,
+      20
+    ],
+    "baseline_fme": [
+      903818583,
+      1779616529,
+      3337713009,
+      6002572382
+    ],
+    "structured_fme": [
+      1113769569,
+      2197217483,
+      4128581739,
+      7437716615
+    ],
+    "baseline_log2_slope_per_log2_b": 11.650223645254233,
+    "structured_log2_slope_per_log2_b": 11.684103905164513
+  },
+  "residual_degree_evidence": {
+    "maximum_by_residual_depth": {
+      "1": 3,
+      "2": 3,
+      "3": 4
+    },
+    "every_component_complete_and_correct": true,
+    "local_join_degree": 2,
+    "structured_residual_maximum": 4,
+    "unsplit_s17_degree_of_regularity": null
+  },
+  "sparse_linear_algebra_projection": {
+    "rows": 138031,
+    "columns": 131458,
+    "row_weight": 17,
+    "nonzeros": 2346527,
+    "csr_bytes": 12836891,
+    "field_vector_bytes": 12619968,
+    "working_bytes": 25456859,
+    "wiedemann_nonzero_additions": 616939492732,
+    "berlekamp_massey_scalar_operations": 17281205764,
+    "optimistic_minimum_fme": 634220698496
+  },
+  "full_projection": {
+    "left_records": "566139037710260120415636851490531741696",
+    "left_records_log2": 128.7344240128084,
+    "right_records": "16537550334891931739696769806317866099097600",
+    "right_records_log2": 143.56865362775886,
+    "exact_key_record_bytes": 41,
+    "baseline_left_materialized_bytes_log2": 134.09197601742648,
+    "structured_frontier_materialized_bytes_log2": 148.9262550201028,
+    "optimistic_per_target_fme_log2": 148.02808524639616,
+    "optimistic_per_usable_relation_fme_log2": 148.08097992234076,
+    "relation_rows": 138031,
+    "whole_factor_base_success": 0.9640001820745058,
+    "projected_targets": 143185.6576032595,
+    "projected_collection_fme_log2": 165.15562049714276,
+    "projected_total_with_sparse_la_fme_log2": 165.15562049714276,
+    "rho_reference_fme_log2": 132.4659744643361,
+    "total_over_rho_log2": 32.689646032806635,
+    "per_relation_below_2_pow_103": false,
+    "collection_below_2_pow_120": false,
+    "storage_below_2_pow_50": false,
+    "optimistic_lower_bound": true
+  },
+  "exact": true,
+  "attack_promotion_gate": false,
+  "full_depth_unplanted_attempted": false,
+  "decision": "negative: exact multilevel selection retains the global 8+9 frontier"
+}

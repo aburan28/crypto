@@ -1,0 +1,42 @@
+name: Degree-263 native full-point edge replay
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ecc2k130-native-fullpoint-edge.yml'
+      - 'research/notes/ecc2k130/native_fullpoint_edge_20260929/**'
+      - 'research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/dag.py'
+      - 'research/ecc2k130_factor_base_replication_20260925/exact_smoke.json'
+      - 'research/ecc2k130_factor_base_replication_20260925/exact_replay.json'
+      - 'research/ecc2k130_relations/relations.py'
+      - 'research/ecc2k130_relations/fastfield.py'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ecc2k130-native-fullpoint-edge.yml'
+      - 'research/notes/ecc2k130/native_fullpoint_edge_20260929/**'
+  workflow_dispatch:
+
+jobs:
+  frozen-and-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/workflows/ecc2k130-native-fullpoint-edge.yml
+            research/notes/ecc2k130/native_fullpoint_edge_20260929
+            research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/dag.py
+            research/ecc2k130_factor_base_replication_20260925/exact_smoke.json
+            research/ecc2k130_factor_base_replication_20260925/exact_replay.json
+            research/ecc2k130_relations/relations.py
+            research/ecc2k130_relations/fastfield.py
+      - name: Validate frozen source and input hashes
+        run: python3 research/notes/ecc2k130/native_fullpoint_edge_20260929/ci_replay.py
+      - name: Independently replay the archived exact rows
+        if: hashFiles('research/notes/ecc2k130/native_fullpoint_edge_20260929/evidence/final/receipt.json') != ''
+        run: |
+          python3 research/notes/ecc2k130/native_fullpoint_edge_20260929/ci_replay.py \
+            --evidence research/notes/ecc2k130/native_fullpoint_edge_20260929/evidence/final

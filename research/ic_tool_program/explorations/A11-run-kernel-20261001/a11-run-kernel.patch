@@ -1,0 +1,301 @@
+From 07eb0dbd5021b5da92805a5d53555bb62a2bfc60 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 1 Oct 2026 05:04:21 +0000
+Subject: [PATCH 1/2] A11 (draft, untested): the least rotation from the
+ longest zero runs, sixteen words at a time
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_013vyAr6TGoMhy56CQmvaUCd
+---
+ src/cryptanalysis/koblitz_fast.rs | 184 +++++++++++++++++++++++++++++-
+ 1 file changed, 182 insertions(+), 2 deletions(-)
+
+diff --git a/src/cryptanalysis/koblitz_fast.rs b/src/cryptanalysis/koblitz_fast.rs
+index ccd8701e..f131363a 100644
+--- a/src/cryptanalysis/koblitz_fast.rs
++++ b/src/cryptanalysis/koblitz_fast.rs
+@@ -761,8 +761,15 @@ impl FrobeniusCanon {
+                 for (slot, &x) in c.iter_mut().zip(chunk.iter()) {
+                     *slot = self.coords(x);
+                 }
+-                // SAFETY: `canon_simd_enabled` checked AVX-512F.
+-                let mins = unsafe { least_rotation16_avx512(&c, self.n, self.mask) };
++                // SAFETY: `canon_simd_enabled` checked AVX-512F and
++                // `canon_runs_enabled` AVX-512CD.
++                let mins = unsafe {
++                    if canon_runs_enabled() {
++                        least_rotation16_runs_avx512(&c, self.n, self.mask)
++                    } else {
++                        least_rotation16_avx512(&c, self.n, self.mask)
++                    }
++                };
+                 chunk.copy_from_slice(&mins);
+             }
+             for x in chunks.into_remainder() {
+@@ -872,6 +879,21 @@ fn canon_simd_enabled() -> bool {
+     })
+ }
+ 
++/// Whether the AVX-512 path finds the least rotation from the longest
++/// zero runs ([`least_rotation16_runs_avx512`]) rather than by trying
++/// every rotation ([`least_rotation16_avx512`]).  It needs AVX-512CD for
++/// its leading-zero count; `KIC_CANON_RUNS=0` keeps the exhaustive
++/// kernel, a same-binary control for what this one is credited with.
++/// Both give the same words.
++#[cfg(target_arch = "x86_64")]
++fn canon_runs_enabled() -> bool {
++    static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
++    *ON.get_or_init(|| {
++        is_x86_feature_detected!("avx512cd")
++            && std::env::var("KIC_CANON_RUNS").as_deref() != Ok("0")
++    })
++}
++
+ /// The least cyclic rotation of each of sixteen `n`-bit words.
+ ///
+ /// Rotation by one is `((v << 1) | (v >> (n − 1))) & mask`, one
+@@ -914,6 +936,107 @@ unsafe fn least_rotation16_avx512(c: &[u64; 16], n: u32, mask: u64) -> [u64; 16]
+     out
+ }
+ 
++/// [`least_rotation16_avx512`]'s words, found from the longest zero
++/// runs as [`FrobeniusCanon::least_rotation`] finds one word's.
++///
++/// `Z_k = Z_{k−1} ∧ rotl^{k−1}(¬c)` has bit `p` set exactly when bits
++/// `p, p−1, …, p−k+1` of `c` are all zero, and the least rotation starts
++/// at the top of one of the longest zero runs.  So instead of `n − 1`
++/// rotate-and-minimum steps this takes one step per bit of the longest
++/// run among a register's eight words (a lane stops growing when its own
++/// runs end), then compares only the rotations that start at a longest
++/// run's top: usually one or two per word.  For random words the longest
++/// run is about `log₂ n` bits.
++///
++/// The words are the same as the exhaustive kernel's: the tests compare
++/// the two on random words and on every pattern class where they could
++/// differ.
++///
++/// # Safety
++///
++/// The CPU must support AVX-512F and AVX-512CD, and `1 ≤ n ≤ 63` with
++/// `mask = 2^n − 1`.
++#[cfg(target_arch = "x86_64")]
++#[target_feature(enable = "avx512f,avx512cd")]
++unsafe fn least_rotation16_runs_avx512(c: &[u64; 16], n: u32, mask: u64) -> [u64; 16] {
++    use std::arch::x86_64::*;
++    let m = _mm512_set1_epi64(mask as i64);
++    let zero = _mm512_setzero_si512();
++    let ca = _mm512_loadu_si512(c.as_ptr().cast());
++    let cb = _mm512_loadu_si512(c.as_ptr().add(8).cast());
++    let za = _mm512_andnot_si512(ca, m);
++    let zb = _mm512_andnot_si512(cb, m);
++    // A word with no zero bit, or no one bit, is its own every rotation.
++    let trivial_a = _mm512_cmpeq_epi64_mask(za, zero) | _mm512_cmpeq_epi64_mask(ca, zero);
++    let trivial_b = _mm512_cmpeq_epi64_mask(zb, zero) | _mm512_cmpeq_epi64_mask(cb, zero);
++    // Grow the runs: a lane is live while its runs reach the next length.
++    let (mut ra, mut rb) = (za, zb);
++    let (mut live_a, mut live_b) = (!trivial_a, !trivial_b);
++    let mut len = 1u32;
++    while (live_a | live_b) != 0 {
++        // rotl^len within `n` bits, every lane by the same amount.  A
++        // live lane's longest run is shorter than `n`, so `len < n` here.
++        let up = _mm_cvtsi64_si128(i64::from(len));
++        let down = _mm_cvtsi64_si128(i64::from(n - len));
++        let rot_a = _mm512_ternarylogic_epi64::<0xA8>(
++            _mm512_sll_epi64(za, up),
++            _mm512_srl_epi64(za, down),
++            m,
++        );
++        let rot_b = _mm512_ternarylogic_epi64::<0xA8>(
++            _mm512_sll_epi64(zb, up),
++            _mm512_srl_epi64(zb, down),
++            m,
++        );
++        let next_a = _mm512_and_si512(ra, rot_a);
++        let next_b = _mm512_and_si512(rb, rot_b);
++        live_a &= _mm512_test_epi64_mask(next_a, next_a);
++        live_b &= _mm512_test_epi64_mask(next_b, next_b);
++        ra = _mm512_mask_mov_epi64(ra, live_a, next_a);
++        rb = _mm512_mask_mov_epi64(rb, live_b, next_b);
++        len += 1;
++    }
++    // `r` marks the top bit `p` of each longest run; the rotation that
++    // starts there is `rotl^{n−1−p}(c)`.  Compare them a candidate at a
++    // time, lowest `p` first, in the lanes that still have one.
++    let nv = _mm512_set1_epi64(i64::from(n));
++    let off = _mm512_set1_epi64(64 - i64::from(n));
++    let mut best_a = _mm512_set1_epi64(-1);
++    let mut best_b = _mm512_set1_epi64(-1);
++    let mut left_a = !trivial_a & _mm512_test_epi64_mask(ra, ra);
++    let mut left_b = !trivial_b & _mm512_test_epi64_mask(rb, rb);
++    while (left_a | left_b) != 0 {
++        // The lowest candidate `2^p`, whose leading-zero count is
++        // `63 − p`, so `t = n − 1 − p` is that count less `64 − n`.
++        let low_a = _mm512_and_si512(ra, _mm512_sub_epi64(zero, ra));
++        let low_b = _mm512_and_si512(rb, _mm512_sub_epi64(zero, rb));
++        let t_a = _mm512_sub_epi64(_mm512_lzcnt_epi64(low_a), off);
++        let t_b = _mm512_sub_epi64(_mm512_lzcnt_epi64(low_b), off);
++        let v_a = _mm512_ternarylogic_epi64::<0xA8>(
++            _mm512_sllv_epi64(ca, t_a),
++            _mm512_srlv_epi64(ca, _mm512_sub_epi64(nv, t_a)),
++            m,
++        );
++        let v_b = _mm512_ternarylogic_epi64::<0xA8>(
++            _mm512_sllv_epi64(cb, t_b),
++            _mm512_srlv_epi64(cb, _mm512_sub_epi64(nv, t_b)),
++            m,
++        );
++        best_a = _mm512_mask_min_epu64(best_a, left_a, best_a, v_a);
++        best_b = _mm512_mask_min_epu64(best_b, left_b, best_b, v_b);
++        ra = _mm512_xor_si512(ra, low_a);
++        rb = _mm512_xor_si512(rb, low_b);
++        left_a &= _mm512_test_epi64_mask(ra, ra);
++        left_b &= _mm512_test_epi64_mask(rb, rb);
++    }
++    best_a = _mm512_mask_mov_epi64(best_a, trivial_a, ca);
++    best_b = _mm512_mask_mov_epi64(best_b, trivial_b, cb);
++    let mut out = [0u64; 16];
++    _mm512_storeu_si512(out.as_mut_ptr().cast(), best_a);
++    _mm512_storeu_si512(out.as_mut_ptr().add(8).cast(), best_b);
++    out
++}
++
+ /// Invert an `n × n` matrix over `F_2` given as its columns, returning
+ /// the rows of the inverse; `None` when the columns are dependent.
+ fn invert_f2(columns: &[u64], n: u32) -> Option<Vec<u64>> {
+@@ -1220,6 +1343,63 @@ mod tests {
+             }
+         }
+     }
++
++    /// The AVX-512 run kernel against the exhaustive AVX-512 kernel and
++    /// the scalar search, sixteen words at a time, on every degree the
++    /// canonical form serves and on the pattern classes of
++    /// `least_rotation_matches_exhaustive_scan`: all zeros and ones,
++    /// single bits, periodic words, and sparse and dense random words,
++    /// mixed so that a register holds lanes with very different run
++    /// lengths.
++    #[cfg(target_arch = "x86_64")]
++    #[test]
++    fn the_avx512_run_kernel_matches_the_exhaustive_kernel() {
++        if !(is_x86_feature_detected!("avx512f") && is_x86_feature_detected!("avx512cd")) {
++            return;
++        }
++        let mut s = 0x9E37_79B9_7F4A_7C15u64;
++        for n in 1u32..=63 {
++            let mask = (1u64 << n) - 1;
++            let canon = FrobeniusCanon {
++                n,
++                mask,
++                tables: Vec::new(),
++            };
++            let mut words = vec![0, mask, 1, 1 << (n - 1), mask ^ 1, mask >> 1];
++            for period in 1..=n.min(12) {
++                if n % period == 0 {
++                    for pat in 1..(1u64 << period).min(64) {
++                        let mut w = 0u64;
++                        for k in 0..n / period {
++                            w |= pat << (k * period);
++                        }
++                        words.push(w & mask);
++                    }
++                }
++            }
++            for _ in 0..640 {
++                s ^= s << 13;
++                s ^= s >> 7;
++                s ^= s << 17;
++                words.push(s & mask);
++                words.push(s & (s >> 3) & (s >> 7) & mask);
++                words.push((s | (s >> 5) | (s >> 11)) & mask);
++            }
++            while words.len() % 16 != 0 {
++                words.push(0);
++            }
++            for chunk in words.chunks_exact(16) {
++                let c: [u64; 16] = chunk.try_into().unwrap();
++                // SAFETY: both features were checked above; `1 ≤ n ≤ 63`.
++                let runs = unsafe { least_rotation16_runs_avx512(&c, n, mask) };
++                let full = unsafe { least_rotation16_avx512(&c, n, mask) };
++                assert_eq!(runs, full, "n = {n}, words {c:x?}");
++                for (&w, &r) in c.iter().zip(&runs) {
++                    assert_eq!(r, canon.least_rotation(w).0, "n = {n}, c = {w:#x}");
++                }
++            }
++        }
++    }
+     use crate::binary_ecc::curve::{point_add, point_double, scalar_mul};
+     use crate::cryptanalysis::koblitz_index_calculus::{pack_point, KoblitzCurve};
+     use rand::rngs::StdRng;
+-- 
+2.43.0
+
+
+From 2791309ec21da5e17898f4c264b1eed560dd7fdd Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 1 Oct 2026 05:14:32 +0000
+Subject: [PATCH 2/2] A11 exploration: canon_kernel_bench, the bulk key's stage
+ timing per kernel
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_013vyAr6TGoMhy56CQmvaUCd
+---
+ examples/canon_kernel_bench.rs | 47 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 47 insertions(+)
+ create mode 100644 examples/canon_kernel_bench.rs
+
+diff --git a/examples/canon_kernel_bench.rs b/examples/canon_kernel_bench.rs
+new file mode 100644
+index 00000000..c4e6ff2e
+--- /dev/null
++++ b/examples/canon_kernel_bench.rs
+@@ -0,0 +1,47 @@
++//! Times the bulk canonical key (`FrobeniusCanon::canon_in_place`) on
++//! fresh abscissae, so the two AVX-512 least-rotation kernels can be
++//! compared on one binary: run it once as is and once with
++//! `KIC_CANON_RUNS=0`.  This is a stage diagnostic of the key alone,
++//! outside the scan, and it reports a checksum of every key so the two
++//! runs can be checked to agree.
++//!
++//! `cargo run --release --example canon_kernel_bench -- 41 53 61`
++use crypto_lib::cryptanalysis::koblitz_fast::{FastCurve, FrobeniusCanon};
++use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
++use std::hint::black_box;
++use std::time::Instant;
++
++fn main() {
++    let degrees: Vec<u32> = std::env::args()
++        .skip(1)
++        .map(|a| a.parse().expect("a degree"))
++        .collect();
++    for n in if degrees.is_empty() { vec![41, 53, 61] } else { degrees } {
++        let kc = KoblitzCurve::new(0, n).expect("a Koblitz curve");
++        let fc = FastCurve::new(&kc.curve).expect("a single-word field");
++        let canon = FrobeniusCanon::new(&fc.field, n).expect("a normal basis");
++        let mask = (1u64 << n) - 1;
++        let mut s = 0x2545_F491_4F6C_DD1Du64 ^ u64::from(n);
++        let words: Vec<u64> = (0..1 << 20)
++            .map(|_| {
++                s ^= s << 13;
++                s ^= s >> 7;
++                s ^= s << 17;
++                s & mask
++            })
++            .collect();
++        let mut best = f64::INFINITY;
++        let mut sum = 0u64;
++        for _ in 0..7 {
++            let mut xs = words.clone();
++            let t = Instant::now();
++            canon.canon_in_place(black_box(&mut xs));
++            best = best.min(t.elapsed().as_nanos() as f64 / xs.len() as f64);
++            sum = xs.iter().fold(0u64, |a, &k| a.wrapping_mul(31).wrapping_add(k));
++        }
++        println!(
++            "{{\"n\": {n}, \"keys\": {}, \"ns_per_key_min_of_7\": {best:.3}, \"checksum\": \"{sum:016x}\"}}",
++            words.len()
++        );
++    }
++}
+-- 
+2.43.0
+

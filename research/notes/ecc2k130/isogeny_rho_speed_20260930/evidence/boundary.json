@@ -1,0 +1,119 @@
+{
+  "schema": "isogeny_rho_speed_boundary/v1",
+  "unit": "S = charged_group_ops / sqrt(r)",
+  "plain_rho_S": 1.2533141373155001,
+  "negation_only_S": 0.8862269254527579,
+  "ecc2k130": {
+    "n": 131,
+    "r_bits_approx": 129,
+    "A_E0": 262,
+    "S_E0": 0.0774300059890314,
+    "S_leaf": 0.8862269254527579,
+    "iteration_ratio_leaf_over_E0": 11.445523142259598,
+    "class_number_OK": 1,
+    "horizontal_263_loops_to_j": 1,
+    "descending_263_neighbors": 262,
+    "derived_verdict": "No reachable isogenous leaf beats E0 on rho iteration count: eligible A drops from 262 to 2, ratio sqrt(131)\u224811.45."
+  },
+  "sizes": [
+    {
+      "n": 13,
+      "A_E0": 26,
+      "A_leaf": 2,
+      "S_E0": 0.24579512472436318,
+      "S_leaf": 0.8862269254527579,
+      "S_leaf_over_S_E0": 3.605551275463989,
+      "prime_extension": true,
+      "intermediate_F2_subfields": [],
+      "note": "only F_2-rational ordinary model in class is Koblitz when n is prime"
+    },
+    {
+      "n": 17,
+      "A_E0": 34,
+      "A_leaf": 2,
+      "S_E0": 0.21494160128871234,
+      "S_leaf": 0.8862269254527579,
+      "S_leaf_over_S_E0": 4.123105625617661,
+      "prime_extension": true,
+      "intermediate_F2_subfields": [],
+      "note": "only F_2-rational ordinary model in class is Koblitz when n is prime"
+    },
+    {
+      "n": 19,
+      "A_E0": 38,
+      "A_leaf": 2,
+      "S_E0": 0.2033144004785961,
+      "S_leaf": 0.8862269254527579,
+      "S_leaf_over_S_E0": 4.358898943540674,
+      "prime_extension": true,
+      "intermediate_F2_subfields": [],
+      "note": "only F_2-rational ordinary model in class is Koblitz when n is prime"
+    },
+    {
+      "n": 23,
+      "A_E0": 46,
+      "A_leaf": 2,
+      "S_E0": 0.1847910880823847,
+      "S_leaf": 0.8862269254527579,
+      "S_leaf_over_S_E0": 4.795831523312719,
+      "prime_extension": true,
+      "intermediate_F2_subfields": [],
+      "note": "only F_2-rational ordinary model in class is Koblitz when n is prime"
+    },
+    {
+      "n": 31,
+      "A_E0": 62,
+      "A_leaf": 2,
+      "S_E0": 0.15917105461020273,
+      "S_leaf": 0.8862269254527579,
+      "S_leaf_over_S_E0": 5.5677643628300215,
+      "prime_extension": true,
+      "intermediate_F2_subfields": [],
+      "note": "only F_2-rational ordinary model in class is Koblitz when n is prime"
+    },
+    {
+      "n": 41,
+      "A_E0": 82,
+      "A_leaf": 2,
+      "S_E0": 0.13840539283493047,
+      "S_leaf": 0.8862269254527579,
+      "S_leaf_over_S_E0": 6.4031242374328485,
+      "prime_extension": true,
+      "intermediate_F2_subfields": [],
+      "note": "only F_2-rational ordinary model in class is Koblitz when n is prime"
+    },
+    {
+      "n": 53,
+      "A_E0": 106,
+      "A_leaf": 2,
+      "S_E0": 0.12173263026670363,
+      "S_leaf": 0.8862269254527579,
+      "S_leaf_over_S_E0": 7.280109889280518,
+      "prime_extension": true,
+      "intermediate_F2_subfields": [],
+      "note": "only F_2-rational ordinary model in class is Koblitz when n is prime"
+    },
+    {
+      "n": 83,
+      "A_E0": 166,
+      "A_leaf": 2,
+      "S_E0": 0.09727604265526046,
+      "S_leaf": 0.8862269254527579,
+      "S_leaf_over_S_E0": 9.1104335791443,
+      "prime_extension": true,
+      "intermediate_F2_subfields": [],
+      "note": "only F_2-rational ordinary model in class is Koblitz when n is prime"
+    },
+    {
+      "n": 131,
+      "A_E0": 262,
+      "A_leaf": 2,
+      "S_E0": 0.0774300059890314,
+      "S_leaf": 0.8862269254527579,
+      "S_leaf_over_S_E0": 11.445523142259598,
+      "prime_extension": true,
+      "intermediate_F2_subfields": [],
+      "note": "only F_2-rational ordinary model in class is Koblitz when n is prime"
+    }
+  ]
+}

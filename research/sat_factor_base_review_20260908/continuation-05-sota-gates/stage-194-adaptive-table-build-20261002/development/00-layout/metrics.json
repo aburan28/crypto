@@ -1,0 +1,20 @@
+{
+  "schema": "koblitz_native_process_meter.v1",
+  "meter": "fresh child process wait4/getrusage; all child threads included",
+  "command": [
+    "/bin/mkdir",
+    "-p",
+    "/Volumes/SSD990/kic-stage194-target-8007e42a1"
+  ],
+  "environment": {},
+  "pid": 11883,
+  "returncode": 0,
+  "timed_out": false,
+  "watchdog_seconds": 30,
+  "wall_seconds": 0.020788292,
+  "user_seconds": 0.000528,
+  "system_seconds": 0.000728,
+  "total_core_seconds": 0.0012560000000000002,
+  "single_core_seconds": null,
+  "peak_rss_bytes": 1228800
+}

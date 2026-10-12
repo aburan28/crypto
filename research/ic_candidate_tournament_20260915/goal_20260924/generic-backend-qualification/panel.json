@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "campaign": "generic-backend-qualification-20260929",
+  "status": "REGISTERED_MEASUREMENT_PENDING",
+  "seed": 2026092901,
+  "stages": ["aa", "smoke", "development"],
+  "cells": ["n17a1", "n19a0", "n23a0", "n23a1", "n31a0"],
+  "holdout_cells_excluded": ["n29a1"],
+  "repetitions": 3,
+  "timeout_seconds": 300,
+  "memory_bytes": 8589934592,
+  "scheduled_pair_bound": 750,
+  "pair_cap": 900,
+  "hypothesis": "At least one registered generic F4/F5/SAT or inherited_f4 pipeline completes independently verified one-target solves on every smoke and development job under the declared envelope.",
+  "success": "Full scientific admission and exclusive phase closure on all scheduled smoke/development jobs for a qualifying arm; separate cold/online leaders retained; no familywise promotion on this development panel.",
+  "stop": "Arm failures, timeouts and OOMs remain rows with null competitive costs; do not widen the envelope or retune on sealed improvement confirmation/replay.",
+  "candidates": [
+    {
+      "id": "incumbent",
+      "adapter": null,
+      "source": "qualified-pairinv",
+      "role": "cold_ic_reference",
+      "config": {
+        "solver": "pair_table",
+        "linear_algebra": "tiny_gauss",
+        "summands": 3,
+        "batch_trials": 1,
+        "max_trials": 65536
+      }
+    },
+    {
+      "id": "prepared_both",
+      "adapter": null,
+      "source": "qualified-both",
+      "role": "online_ic_reference",
+      "config": {
+        "solver": "pair_table",
+        "linear_algebra": "tiny_gauss",
+        "summands": 3,
+        "batch_trials": 1,
+        "max_trials": 65536
+      }
+    },
+    {
+      "id": "generic_pair_dense",
+      "adapter": "generic-v1",
+      "source": "controlled-generic",
+      "hypothesis": "Continuity control: generic pair_table with dense relation LA matches prior qualification scope.",
+      "config": {
+        "solver": "pair_table",
+        "linear_algebra": "dense",
+        "summands": 3,
+        "batch_trials": 1,
+        "max_trials": 65536,
+        "factor_base": {"recipe": "subgroup_orbits", "seed": 43, "requested_points": "6n"}
+      }
+    },
+    {
+      "id": "generic_pair_sparse",
+      "adapter": "generic-v1",
+      "source": "controlled-generic",
+      "hypothesis": "Generic pair_table with sparse filtering and block Wiedemann on the toy panel.",
+      "config": {
+        "solver": "pair_table",
+        "linear_algebra": "sparse",
+        "summands": 3,
+        "batch_trials": 1,
+        "max_trials": 65536,
+        "factor_base": {"recipe": "subgroup_orbits", "seed": 43, "requested_points": "6n"}
+      }
+    },
+    {
+      "id": "generic_f4_dense",
+      "adapter": "generic-v1",
+      "source": "controlled-generic",
+      "hypothesis": "Boolean F4 decomposition with dense final relation LA as a complete pipeline.",
+      "config": {
+        "solver": "f4",
+        "linear_algebra": "dense",
+        "summands": 3,
+        "batch_trials": 1,
+        "max_trials": 65536,
+        "factor_base": {"recipe": "subgroup_orbits", "seed": 43, "requested_points": "6n"}
+      }
+    },
+    {
+      "id": "generic_f4_sparse",
+      "adapter": "generic-v1",
+      "source": "controlled-generic",
+      "hypothesis": "Boolean F4 decomposition with sparse final relation LA.",
+      "config": {
+        "solver": "f4",
+        "linear_algebra": "sparse",
+        "summands": 3,
+        "batch_trials": 1,
+        "max_trials": 65536,
+        "factor_base": {"recipe": "subgroup_orbits", "seed": 43, "requested_points": "6n"}
+      }
+    },
+    {
+      "id": "generic_f5_dense",
+      "adapter": "generic-v1",
+      "source": "controlled-generic",
+      "hypothesis": "F5 decomposition with dense final relation LA.",
+      "config": {
+        "solver": "f5",
+        "linear_algebra": "dense",
+        "summands": 3,
+        "batch_trials": 1,
+        "max_trials": 65536,
+        "factor_base": {"recipe": "subgroup_orbits", "seed": 43, "requested_points": "6n"}
+      }
+    },
+    {
+      "id": "generic_sat_xor_dense",
+      "adapter": "generic-v1",
+      "source": "controlled-generic",
+      "hypothesis": "XOR-SAT decomposition with dense final relation LA.",
+      "config": {
+        "solver": "sat_xor",
+        "linear_algebra": "dense",
+        "summands": 3,
+        "batch_trials": 1,
+        "max_trials": 65536,
+        "factor_base": {"recipe": "subgroup_orbits", "seed": 43, "requested_points": "6n"}
+      }
+    },
+    {
+      "id": "generic_sat_cnf_dense",
+      "adapter": "generic-v1",
+      "source": "controlled-generic",
+      "hypothesis": "CNF-SAT decomposition with dense final relation LA.",
+      "config": {
+        "solver": "sat_cnf",
+        "linear_algebra": "dense",
+        "summands": 3,
+        "batch_trials": 1,
+        "max_trials": 65536,
+        "factor_base": {"recipe": "subgroup_orbits", "seed": 43, "requested_points": "6n"}
+      }
+    },
+    {
+      "id": "generic_inherited_f4_dense",
+      "adapter": "generic-v1",
+      "source": "controlled-generic",
+      "hypothesis": "Inherited-F4 decomposition with dense final relation LA.",
+      "config": {
+        "solver": "inherited_f4",
+        "linear_algebra": "dense",
+        "summands": 3,
+        "batch_trials": 1,
+        "max_trials": 65536,
+        "factor_base": {"recipe": "subgroup_orbits", "seed": 43, "requested_points": "6n"}
+      }
+    }
+  ],
+  "rho_arms": [
+    {"id": "rho", "role": "cold_rho_reference", "config": {"rho_parallel_walks": 8}},
+    {"id": "rho_online", "role": "online_rho_reference", "config": {"rho_parallel_walks": 16, "linear_algebra": "dense"}}
+  ]
+}

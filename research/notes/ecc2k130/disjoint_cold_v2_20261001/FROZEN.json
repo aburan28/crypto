@@ -1,0 +1,1218 @@
+{
+  "candidate_hash_domain": "ecc2k130-disjoint-cold-v2-20261001",
+  "new_orbits_by_n": {
+    "37": 5140,
+    "41": 5125,
+    "53": 5125
+  },
+  "prepare_sha256": "bd2365d5a279a8d8ce28d55f954da7427248e3ffde664171dbcf2fac28ac557d",
+  "preregistration_commit": "8b4da5f88f49bd47c3b962d6f38a5debf3a0e6ad",
+  "prior_inventory_digest": "5dc98a163504b7c24f1ec781c8fbc6fc80a875d300129babff067863a21947fb",
+  "prior_orbits_by_n": {
+    "37": 8206,
+    "41": 13321,
+    "53": 13321
+  },
+  "prior_point_inventory": [
+    {
+      "path": "research/notes/ecc2k130/compact_k_boundary_20260929/fixtures/n41_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "ec851a49e2bc493aeb59174a6740fd810929df16a52fefb51ad74d9a281c53d0"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_k_boundary_20260929/fixtures/n53_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "7c7f14edc2910a43fe962c91ddb0bd74e68f9cd058f0c3c3e2e2caaf89d65b0d"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n37_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "3e249b1ddb41f7c3f6e73cbe893d12db87ce58bebcf92013c8b39d2ee0ec05d6"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n37_L1_eval.points.jsonl",
+      "rows": 1,
+      "sha256": "ff47666b9ff626be49fcaf430502694c4081f8d37187715750083025d1731f58"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n37_L1_tune.points.jsonl",
+      "rows": 1,
+      "sha256": "bd035115583fd695251147cda9b0b1a56263d93810225f69256d986b3c95849b"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n41_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "ca17f683dd60460f8a348979dd0da945d99043323b64c84c2fdbac99591e933b"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n41_L1_eval.points.jsonl",
+      "rows": 1,
+      "sha256": "fff82518e01fa70ef0facfc8273ed112eb2ebfc18ba5c9a71d472d3af1aeb739"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n41_L1_tune.points.jsonl",
+      "rows": 1,
+      "sha256": "95c131fa3115a7224e3eaf3924c9c2c3cb9f52b604557a4afa72e6933d35c9ff"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n53_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "80befa6d82d95d7fc579ea6fdb2f03af9c7573b12b73a30e09593cc81d532601"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n53_L1_eval.points.jsonl",
+      "rows": 1,
+      "sha256": "d71cd294f88cc87f85f0da9f6f3bd6585072f9128b2542047127307fb0c043c5"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n53_L1_tune.points.jsonl",
+      "rows": 1,
+      "sha256": "c8bb7695417a3b19ca7956c9125056bb27f6799442585ed97e46583a4e9c9574"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures/n37_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "ce8d766e85132f6192b4f69e84fb9c30846fdf71636016c560369bda7dcef8c5"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures/n37_L1_eval.points.jsonl",
+      "rows": 1,
+      "sha256": "7893179017f5a403d004331ddeeb8eda31450492db3ede5275da757100cb5bd7"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures/n41_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "82704d8c82f658ee038f7a315694fb561118cf7b7d173895a14b3969e9c5b246"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures/n41_L1_eval.points.jsonl",
+      "rows": 1,
+      "sha256": "515d18bfa4c40b2441e10403e47b0ad9e0893167fb81d38cdcae2eb04fe3c67b"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures/n53_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "ffb2374c9fa64346d8eda0fcbfba75c5bb76a44c74a6985befe0baa52b01a0cd"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures/n53_L1_eval.points.jsonl",
+      "rows": 1,
+      "sha256": "8d3c692ee2824fca7991142517da324a6651f0fc2c8c97f3780e6ec97390377b"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_s3_batch_20260929/fixtures/n41_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "0e2fa6f55badf438cc784543b6b5b412de60cace003f0b17e648dfae7f8e2eec"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_s3_batch_20260929/fixtures/n53_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "03a2ed3685a16b4a680612e04ff029ea5521ded6ae1e1c8d68baeb437e569fda"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_s3_batch_20260929/pilot_622935/fixtures/n41_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "0dc5f6107f574b7b0f8b6002fbd7da548b24a1f84821856ad2cc2e1ecd5c7755"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_s3_batch_20260929/pilot_622935/fixtures/n53_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "338b40377875d69879143e6b387ca8eba0da2fb92eaa72335c3275ad85b72c3b"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_s3_prefilter_20260930/fixtures/n41_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "fc570981e2dd4b6d09a61773fec0330fd0d9967602610df910f0a1e6fb9efb20"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_s3_prefilter_20260930/fixtures/n53_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "0e10e0155566a01993929d838b8830259dc2fd6b8e21fea44ac0c4e13d0d76bb"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_swap_quotient_20260929/fixtures/n41_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "afcfb716dfa50853d66b9887ed1c8b685b70dd7cf57f0f3837dd763ddc5272f3"
+    },
+    {
+      "path": "research/notes/ecc2k130/compact_swap_quotient_20260929/fixtures/n53_L1024_eval.points.jsonl",
+      "rows": 1024,
+      "sha256": "ea22aa0cde071c136c4c236d03afc813cbaf8e85d7530f20ac17467372d970b4"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1024_b00.points.jsonl",
+      "rows": 1024,
+      "sha256": "d2f86fdc2aa40aed5e650fe4b448b6127e26da32939510b4e1d55d38f4db09c7"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1024_b01.points.jsonl",
+      "rows": 1024,
+      "sha256": "788560e88996afa34be5f57f1870317d517d2cb20524f0fb67decbe2efbbdc03"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1024_b02.points.jsonl",
+      "rows": 1024,
+      "sha256": "29f7390fe9c227e42f8556692ab9ba6a3837cb4f51be8fceb24fb6182b4a11a5"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1024_b03.points.jsonl",
+      "rows": 1024,
+      "sha256": "5aeb7122ff58e90d9230bf2775948578ea503db7e074b1446827188f871e635b"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1024_b04.points.jsonl",
+      "rows": 1024,
+      "sha256": "22d58c07d2011ad9899bae955a26984e80e37a0f0800d7a3e4443a5eb0071cb6"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b00.points.jsonl",
+      "rows": 1,
+      "sha256": "370eeb02f8ceb56835feb71ad15492740cd5ca6284c1bb82cd2130f9f8ffa46b"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b01.points.jsonl",
+      "rows": 1,
+      "sha256": "36ad9d201df89ce9e817355f8a9452ad7c4db4bdec45416eec930727c3ec27e4"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b02.points.jsonl",
+      "rows": 1,
+      "sha256": "7a1fa82001089f7017b506809eb5574fa16400fbbb32b0ec25987893de227130"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b03.points.jsonl",
+      "rows": 1,
+      "sha256": "eb9c7b851162566fbb568863b6ae6730971ab254e97d1c9f5232b45ff4428337"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b04.points.jsonl",
+      "rows": 1,
+      "sha256": "ad235cf1ba2fd9ee2a8d21dfbe1185c3a05104ebf348e48fb381def881ed72bc"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b05.points.jsonl",
+      "rows": 1,
+      "sha256": "9029bcda1e5b4b83fbbe4080f171445cf6f53562f8d078e73fd3aabe3c9aea3c"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b06.points.jsonl",
+      "rows": 1,
+      "sha256": "a558addece1ba58980375bf2656e1ed670211e097965ae631cf64ca79d4d6360"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b07.points.jsonl",
+      "rows": 1,
+      "sha256": "22a03a8faf18ee9209dbd83f543916afb2ae305662ae72e03e8170c75e663303"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b08.points.jsonl",
+      "rows": 1,
+      "sha256": "cf838e1625fde2b599029fb8537ebe1accd13b9909c07cec00c0d68b973aa263"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b09.points.jsonl",
+      "rows": 1,
+      "sha256": "48890051c15a63f010f077619c0f6ab0e335387e507fd2507f910fb14c6afbeb"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b10.points.jsonl",
+      "rows": 1,
+      "sha256": "04441d4c23a8a66b7ddc959f57ae8bb732fe8b4028d8c1d2eaf76efdba3f4b59"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b11.points.jsonl",
+      "rows": 1,
+      "sha256": "efd8db0c73660c74406b3e4d04db3211793db59ab68d2b29ee89ef3e3671134f"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b12.points.jsonl",
+      "rows": 1,
+      "sha256": "2c22cbd6fc9055d538d619fec6a588cd0f6fda671ca3ec010d7b586be1ee17fd"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b13.points.jsonl",
+      "rows": 1,
+      "sha256": "38f3162b4dafce95eb97d0393aa55727feb39cce7e6f25f94ecf79134991a8a4"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b14.points.jsonl",
+      "rows": 1,
+      "sha256": "9e6075b2b8ee37ddf592c360ed7fbd36a71df36ae491300f62b482d9e859fe2a"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b15.points.jsonl",
+      "rows": 1,
+      "sha256": "c56872945671fbb9bb5cf8e0083d48376b69987d719edceed0ba647a6baf7b79"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b16.points.jsonl",
+      "rows": 1,
+      "sha256": "17d791bf45590b5e17a0052fb613bf8b151e94658206f72145f9ee4d149d4c0d"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b17.points.jsonl",
+      "rows": 1,
+      "sha256": "3200bc13ce5a18569b6fb9b4dc876c12af258d4dc505a8756bcdcdac23730545"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b18.points.jsonl",
+      "rows": 1,
+      "sha256": "e2e7214cbdddb835b6e1f0d136bdd5de81374fab2cd77cb8552cb028140ddd54"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n37_L1_b19.points.jsonl",
+      "rows": 1,
+      "sha256": "ae9547fcdf43876958c5670473632e7c64b56c918cb27f0a92f8bdd05facf07a"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n41_L1024_b00.points.jsonl",
+      "rows": 1024,
+      "sha256": "c6856bee76ebc190be33a64bac29355f1e5cd5d21ecfbd5c44aa9668dd99c264"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n41_L1024_b01.points.jsonl",
+      "rows": 1024,
+      "sha256": "29994c80110ffe56ee9fd0a479fa2a82de28b09355403874b4ee6e546eb7d58c"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n41_L1024_b02.points.jsonl",
+      "rows": 1024,
+      "sha256": "4e3605f700be1dbaaec44d6b8737e170ba90f58635ca91cdb43750cd5e9f0290"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n41_L1024_b03.points.jsonl",
+      "rows": 1024,
+      "sha256": "a4401647d4d5e78d32d4d470ab662df4b56b41bd9a1a04744d22a13afd3333dd"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n41_L1024_b04.points.jsonl",
+      "rows": 1024,
+      "sha256": "554fe438dbe15ba15561743ff736736a48ffe8e4bcb55a5f8716cfaef0e481aa"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n41_L1_b00.points.jsonl",
+      "rows": 1,
+      "sha256": "33a093e16051b830906022de589ec0ada4728ca304a27404a0207ada305767dd"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n41_L1_b01.points.jsonl",
+      "rows": 1,
+      "sha256": "cb8e726a2dd38b62dbb4416213627764ac257b25104618521b1eac14fba6fc57"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n41_L1_b02.points.jsonl",
+      "rows": 1,
+      "sha256": "878098a45c22a44cb43df34b9635dce6e6e80d967614a8376d70f2798ee7e326"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n41_L1_b03.points.jsonl",
+      "rows": 1,
+      "sha256": "1a41a35af8a590ea04fe180c453d4950363fe9315344e77f40d17d363aa0c688"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n41_L1_b04.points.jsonl",
+      "rows": 1,
+      "sha256": "7dc1c36c2489041c2276e0b98998aae07cdbd6dfbacafa728e52aacfceca9884"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n53_L1024_b00.points.jsonl",
+      "rows": 1024,
+      "sha256": "e15743a480cdc0f70d0562b7ebbc3fcacf8afde435fdb86b72a3d520d0cc0df3"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n53_L1024_b01.points.jsonl",
+      "rows": 1024,
+      "sha256": "c9b6513577f8167135f4bfb3107f525664c86da4590e164cc48b9c6a04b0b154"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n53_L1024_b02.points.jsonl",
+      "rows": 1024,
+      "sha256": "0ed0b6b3a06e020e4f7a8976168866e17a300b008d046c2f5550e0d6923b384d"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n53_L1024_b03.points.jsonl",
+      "rows": 1024,
+      "sha256": "d481c557c98d1d2d76f1f0185bf4c94c08db54e368aefc519fe19937ce07ac38"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n53_L1024_b04.points.jsonl",
+      "rows": 1024,
+      "sha256": "a83c4405817ee65abba4ae5ea45cf1a681a368beb5ad098043cec6e1c692459b"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n53_L1_b00.points.jsonl",
+      "rows": 1,
+      "sha256": "634fe73c8461607e8c11f81ab17c3ae61dd2761e37e70e4e6afb188582f0095a"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n53_L1_b01.points.jsonl",
+      "rows": 1,
+      "sha256": "e8953a9e28b1d2e58f65f577b6b0153e075ebd664a8ccf39b226bfb4a7d3a4df"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n53_L1_b02.points.jsonl",
+      "rows": 1,
+      "sha256": "c73dbbc00baf9f73b48c65af30099851577632891b0b4b69b69c61327b5289f8"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n53_L1_b03.points.jsonl",
+      "rows": 1,
+      "sha256": "3fe8c3b5072da544e21b494fda4fdaaa97704f95848a1966cf095fe24ea8124c"
+    },
+    {
+      "path": "research/notes/ecc2k130/disjoint_cold_q_20260930/fixtures/n53_L1_b04.points.jsonl",
+      "rows": 1,
+      "sha256": "5a375da2919597bc3f3af56118a7d7f49bf3196efbd7289f0b6b09e874a888f8"
+    },
+    {
+      "path": "research/notes/ecc2k130/point_sum_cold_20260930/fixtures/n37_L1.points.jsonl",
+      "rows": 1,
+      "sha256": "16577934fe6bab968a6c2492fba13f11babe391e67d9b9da269440b3cdd98173"
+    },
+    {
+      "path": "research/notes/ecc2k130/point_sum_cold_20260930/fixtures/n37_L1024.points.jsonl",
+      "rows": 1024,
+      "sha256": "805f368a86c80c028b1425e3bea3f48cb0c05ce50f3c95a5f3be31d9f980b3af"
+    },
+    {
+      "path": "research/notes/ecc2k130/point_sum_cold_20260930/fixtures/n41_L1.points.jsonl",
+      "rows": 1,
+      "sha256": "34533e626e856c45c4810e1d612b0d3e9350d9b08bb4af450a5d6b38c4edbbc9"
+    },
+    {
+      "path": "research/notes/ecc2k130/point_sum_cold_20260930/fixtures/n41_L1024.points.jsonl",
+      "rows": 1024,
+      "sha256": "09db02648d3c48c0f29fac80d74d8aff0c8e77fb47ede6cab19836e2a6c9fd42"
+    },
+    {
+      "path": "research/notes/ecc2k130/point_sum_cold_20260930/fixtures/n53_L1.points.jsonl",
+      "rows": 1,
+      "sha256": "75b12a0eb3d0da906fd35d74a50b78155caf3cd1cc412380e3327b65a583ee7c"
+    },
+    {
+      "path": "research/notes/ecc2k130/point_sum_cold_20260930/fixtures/n53_L1024.points.jsonl",
+      "rows": 1024,
+      "sha256": "92d962ddca4e1c9c9ca0de0e0f1cb75a555fcc5aa53abb9a00757c9c2d231f76"
+    }
+  ],
+  "prior_rows_by_n": {
+    "37": 8216,
+    "41": 13321,
+    "53": 13321
+  },
+  "protocol_sha256": "e8d65dbd1ac2796f3cdfd2f7a090c16788525fb50f2b7e0a91911779bdb1d3fa",
+  "schema": "ecc2k130-disjoint-cold-v2-freeze-v1",
+  "source": {
+    "cargo_version": "cargo 1.93.1 (Homebrew)",
+    "compact_source_sha256": "702a0a05709bc14bc10bafbb08edb2a2f5f86794e970d84c317da3bc65cdcf38",
+    "rho_source_sha256": "98b6e8a27d821ebfc7ae716410184dffe89aadf27dfe36bcac8ce834c39cf04c",
+    "rustc_version_verbose": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8",
+    "source_freeze_sha256": "3e9f67cc2cd6de5a8458badb3525983d561d9c3449c05118819fb424c5093b2b",
+    "source_lock_sha256": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627"
+  },
+  "specs": {
+    "n37_L1": {
+      "K": 7,
+      "L": 1,
+      "a": 0,
+      "automorphism_size": 74,
+      "block_specs": [
+        {
+          "block": 0,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b00-20261001",
+          "fixture_file": "fixtures/n37_L1_b00.fixture.jsonl",
+          "fixture_sha256": "da0545f514a827e02ef69d6e6feaba445a10558f538ac6100a2c2050ae2a93d6",
+          "points_file": "fixtures/n37_L1_b00.points.jsonl",
+          "points_sha256": "9e8430875a10e7b24af02317439dab46ef2172a308a42bb3b554057ec10283b2",
+          "seed": 2026100110000
+        },
+        {
+          "block": 1,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b01-20261001",
+          "fixture_file": "fixtures/n37_L1_b01.fixture.jsonl",
+          "fixture_sha256": "4a34569bdaf7a25bf88cf671b1d597077ea39f3c0665d02a4e31c52510de5723",
+          "points_file": "fixtures/n37_L1_b01.points.jsonl",
+          "points_sha256": "b895b509a0f95102f92da50afae22df732f8870784141c4d402249a512176a24",
+          "seed": 2026100110001
+        },
+        {
+          "block": 2,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b02-20261001",
+          "fixture_file": "fixtures/n37_L1_b02.fixture.jsonl",
+          "fixture_sha256": "9dc76a7b9762b565e09e32a3afb15b4649b89060868a82a8a3a091d4bbfe9ead",
+          "points_file": "fixtures/n37_L1_b02.points.jsonl",
+          "points_sha256": "f3e9ff5228cfaf9a3f34c5e4180961c2510017263612619ea197f62235b7731f",
+          "seed": 2026100110002
+        },
+        {
+          "block": 3,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b03-20261001",
+          "fixture_file": "fixtures/n37_L1_b03.fixture.jsonl",
+          "fixture_sha256": "71be30ebc34801025b99383afbefa3d1683a716681bda28d9899e85a91175ffd",
+          "points_file": "fixtures/n37_L1_b03.points.jsonl",
+          "points_sha256": "7e379db2ebec5180c221a8cd7a1a92eb4718368fd590cf7b35d5377ee71254f1",
+          "seed": 2026100110003
+        },
+        {
+          "block": 4,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b04-20261001",
+          "fixture_file": "fixtures/n37_L1_b04.fixture.jsonl",
+          "fixture_sha256": "5633063f0762d60785f138f32ec7a602e6aff415e8b4bce5d62c519ddee3c5b6",
+          "points_file": "fixtures/n37_L1_b04.points.jsonl",
+          "points_sha256": "94426bc91524c0bd345d758a341f57feb0c53200001fbcf967a8a726aafe6986",
+          "seed": 2026100110004
+        },
+        {
+          "block": 5,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b05-20261001",
+          "fixture_file": "fixtures/n37_L1_b05.fixture.jsonl",
+          "fixture_sha256": "6855bac2e829650ce1f7f3206e655ce9d217636b68cbc69a032bc083a12614e4",
+          "points_file": "fixtures/n37_L1_b05.points.jsonl",
+          "points_sha256": "5560848276c720114497e96b761e319d2a7d98c86f92252ac9c7792a928e6178",
+          "seed": 2026100110005
+        },
+        {
+          "block": 6,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b06-20261001",
+          "fixture_file": "fixtures/n37_L1_b06.fixture.jsonl",
+          "fixture_sha256": "f522ba83d55acb3d7d560d0fc16ba52820ea5d75955361c6736680dda45846d7",
+          "points_file": "fixtures/n37_L1_b06.points.jsonl",
+          "points_sha256": "f0d2e631f505e2c3af7923e3c91f613f6a65a380a5500548e44bc09c3b9ef768",
+          "seed": 2026100110006
+        },
+        {
+          "block": 7,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b07-20261001",
+          "fixture_file": "fixtures/n37_L1_b07.fixture.jsonl",
+          "fixture_sha256": "997a4ee2f56fe8cafb8f21440356d30d46af3ccc6fbc40730ddbb34f8ccea248",
+          "points_file": "fixtures/n37_L1_b07.points.jsonl",
+          "points_sha256": "9112e82db25d182e1c3bc861a6b54313e31686614c0fac7d57b45ba9b52a68fb",
+          "seed": 2026100110007
+        },
+        {
+          "block": 8,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b08-20261001",
+          "fixture_file": "fixtures/n37_L1_b08.fixture.jsonl",
+          "fixture_sha256": "ad606c2f956fe502f6ac524c25bd4a47241f45f6be74175fe9ad93fe5d142637",
+          "points_file": "fixtures/n37_L1_b08.points.jsonl",
+          "points_sha256": "8a8cc3fb4be4be3f91864570fb9d99410d267fb6d39753413c2ed3f6a60ae087",
+          "seed": 2026100110008
+        },
+        {
+          "block": 9,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b09-20261001",
+          "fixture_file": "fixtures/n37_L1_b09.fixture.jsonl",
+          "fixture_sha256": "9d6c9d878e601367715e867233884eba41a4cfc278e2c0707fcc204b34561202",
+          "points_file": "fixtures/n37_L1_b09.points.jsonl",
+          "points_sha256": "2c9a37ae74d25a719b67ae7561113e2afd1baef07cc10edf4b450a77864f89e5",
+          "seed": 2026100110009
+        },
+        {
+          "block": 10,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b10-20261001",
+          "fixture_file": "fixtures/n37_L1_b10.fixture.jsonl",
+          "fixture_sha256": "ccd7cc171413d694bd5eb6c2af25e0155c6d5b490aaabf48d8a4ba5f907e01b5",
+          "points_file": "fixtures/n37_L1_b10.points.jsonl",
+          "points_sha256": "69cb62000f8e4b79b5739d5a202dafe068f48266b6b88608a8e7815f417ebd7d",
+          "seed": 2026100110010
+        },
+        {
+          "block": 11,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b11-20261001",
+          "fixture_file": "fixtures/n37_L1_b11.fixture.jsonl",
+          "fixture_sha256": "2dd41d6d9ef162b6d521879b2d9a4277b488e20fe61892868fe380daeffc614b",
+          "points_file": "fixtures/n37_L1_b11.points.jsonl",
+          "points_sha256": "b9d478b39b49b4851842a24793fcf40225d2c54cce3b33361d131d8875628c32",
+          "seed": 2026100110011
+        },
+        {
+          "block": 12,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b12-20261001",
+          "fixture_file": "fixtures/n37_L1_b12.fixture.jsonl",
+          "fixture_sha256": "41cc9e911dad06f1c0e03e9f2816673b7e51d4532fa6788c7356362f82c1a274",
+          "points_file": "fixtures/n37_L1_b12.points.jsonl",
+          "points_sha256": "70714db792e8e3a53fcab14f00bf931977135cc57f927f10550efc1db2994d4b",
+          "seed": 2026100110012
+        },
+        {
+          "block": 13,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b13-20261001",
+          "fixture_file": "fixtures/n37_L1_b13.fixture.jsonl",
+          "fixture_sha256": "e09ef9f2455a840edae20c08d00d2710a642a65815a920f8128d74c6fb985dfa",
+          "points_file": "fixtures/n37_L1_b13.points.jsonl",
+          "points_sha256": "40864ee56f33d3fd795971069cd747a0bb3197d5feaedeb1bd8f42758d5a1fa7",
+          "seed": 2026100110013
+        },
+        {
+          "block": 14,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b14-20261001",
+          "fixture_file": "fixtures/n37_L1_b14.fixture.jsonl",
+          "fixture_sha256": "a091bfaaa50de12a393e4481177e4b87254ce9e063c16378e4d37786c86ed6f4",
+          "points_file": "fixtures/n37_L1_b14.points.jsonl",
+          "points_sha256": "4262eec3e3f85c4c28226678a9ca9e0732445a5a1ab8c02937bcbb8d7ba30d7c",
+          "seed": 2026100110014
+        },
+        {
+          "block": 15,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b15-20261001",
+          "fixture_file": "fixtures/n37_L1_b15.fixture.jsonl",
+          "fixture_sha256": "e917f1a6e23b050089970079a17867a135cfa11792aa4e5fd9e61b8287a61a88",
+          "points_file": "fixtures/n37_L1_b15.points.jsonl",
+          "points_sha256": "afcbe122e3c0df9c75afa61dee6dfbbedbdc6fb706902361330eca0b48a94bf6",
+          "seed": 2026100110015
+        },
+        {
+          "block": 16,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b16-20261001",
+          "fixture_file": "fixtures/n37_L1_b16.fixture.jsonl",
+          "fixture_sha256": "ae6e5811103ea08ba9f128644241b9d0cf41f5649a3e13c3d5bfe0a9fa16af9b",
+          "points_file": "fixtures/n37_L1_b16.points.jsonl",
+          "points_sha256": "bf3e9a4b6e58ca281d189ba4084ac70fe9f6887b2c0468d8f9f581aab4f15551",
+          "seed": 2026100110016
+        },
+        {
+          "block": 17,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b17-20261001",
+          "fixture_file": "fixtures/n37_L1_b17.fixture.jsonl",
+          "fixture_sha256": "58362f463123f5956cfcf688b17e78cafe953f8af15744b2c341937ba63ba92b",
+          "points_file": "fixtures/n37_L1_b17.points.jsonl",
+          "points_sha256": "e341dc5cb85c3c829ef821eddb252093b05ecfdedc878624beeeb4d47154282b",
+          "seed": 2026100110017
+        },
+        {
+          "block": 18,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b18-20261001",
+          "fixture_file": "fixtures/n37_L1_b18.fixture.jsonl",
+          "fixture_sha256": "0dc16b966e262d3066a6a6a68922faa848f01a558c7a1fbc53fdae5d6b4afce7",
+          "points_file": "fixtures/n37_L1_b18.points.jsonl",
+          "points_sha256": "0d82800d05a3ba11143c95996720052750cbbdd6c71119e6452f2fbba40be039",
+          "seed": 2026100110018
+        },
+        {
+          "block": 19,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1-b19-20261001",
+          "fixture_file": "fixtures/n37_L1_b19.fixture.jsonl",
+          "fixture_sha256": "63c8be260288c2f5ae7c50bba85db3525be730e0afe62e3d1bcf30a9a50c2df5",
+          "points_file": "fixtures/n37_L1_b19.points.jsonl",
+          "points_sha256": "d4885b8206e8ff77969546375c54d2674aa120d036b06efa84d1219709a67a11",
+          "seed": 2026100110019
+        }
+      ],
+      "blocks": 20,
+      "field_modulus_low_terms": [
+        0,
+        1,
+        4,
+        6
+      ],
+      "generator": [
+        99424589043,
+        35163014771
+      ],
+      "n": 37,
+      "prefilter": "off",
+      "subgroup_order": 230603167
+    },
+    "n37_L1024": {
+      "K": 42,
+      "L": 1024,
+      "a": 0,
+      "automorphism_size": 74,
+      "block_specs": [
+        {
+          "block": 0,
+          "candidate_attempts": 1026,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 2,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1024-b00-20261001",
+          "fixture_file": "fixtures/n37_L1024_b00.fixture.jsonl",
+          "fixture_sha256": "124c13b3daba0477b471466f95c4a9e6f9ce9fe01d5ea67b6582469cfb9d5697",
+          "points_file": "fixtures/n37_L1024_b00.points.jsonl",
+          "points_sha256": "187ec04fe50326bbb2f17dadf76056841f04af37a8abb8ff7f502fcd531711ad",
+          "seed": 2026100110100
+        },
+        {
+          "block": 1,
+          "candidate_attempts": 1029,
+          "candidate_rejections": {
+            "new_orbit": 2,
+            "prior_orbit": 3,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1024-b01-20261001",
+          "fixture_file": "fixtures/n37_L1024_b01.fixture.jsonl",
+          "fixture_sha256": "3453995c0423e4911ad4a6afa7cfe50ec1d6b0e6c67a771bda590f1d6ed680df",
+          "points_file": "fixtures/n37_L1024_b01.points.jsonl",
+          "points_sha256": "78553fdff5ae66521d3a1052978962258e78d48c92285df6e1df962034b43717",
+          "seed": 2026100110101
+        },
+        {
+          "block": 2,
+          "candidate_attempts": 1026,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 2,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1024-b02-20261001",
+          "fixture_file": "fixtures/n37_L1024_b02.fixture.jsonl",
+          "fixture_sha256": "0d23bb74f85fe3654c55a502c868c9491ab2d2d28417e3d35739c233e128b11c",
+          "points_file": "fixtures/n37_L1024_b02.points.jsonl",
+          "points_sha256": "248d405e834b2ee7c27752e5742ca568d21156d63e981fa49f362cdaab2f9cd9",
+          "seed": 2026100110102
+        },
+        {
+          "block": 3,
+          "candidate_attempts": 1029,
+          "candidate_rejections": {
+            "new_orbit": 3,
+            "prior_orbit": 2,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1024-b03-20261001",
+          "fixture_file": "fixtures/n37_L1024_b03.fixture.jsonl",
+          "fixture_sha256": "13fbb0b6aff3da7303cc99309b5df2424c053aad83a20152819c7740df3a5052",
+          "points_file": "fixtures/n37_L1024_b03.points.jsonl",
+          "points_sha256": "84400a2914f06e4a001d0f113f0195952f692634d4ff8285e23ade2599e2bde2",
+          "seed": 2026100110103
+        },
+        {
+          "block": 4,
+          "candidate_attempts": 1027,
+          "candidate_rejections": {
+            "new_orbit": 1,
+            "prior_orbit": 2,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n37-L1024-b04-20261001",
+          "fixture_file": "fixtures/n37_L1024_b04.fixture.jsonl",
+          "fixture_sha256": "9b91ef98c691a10b8b2e33ad3c861779a5d3b8c9a8b9b0a1b560dfe17e61e7ae",
+          "points_file": "fixtures/n37_L1024_b04.points.jsonl",
+          "points_sha256": "72c5b5361a0b846c9626269ce3928820cb7d420aae479d31dc26f5cbf7e78aa6",
+          "seed": 2026100110104
+        }
+      ],
+      "blocks": 5,
+      "field_modulus_low_terms": [
+        0,
+        1,
+        4,
+        6
+      ],
+      "generator": [
+        99424589043,
+        35163014771
+      ],
+      "n": 37,
+      "prefilter": "off",
+      "subgroup_order": 230603167
+    },
+    "n41_L1": {
+      "K": 85,
+      "L": 1,
+      "a": 0,
+      "automorphism_size": 82,
+      "block_specs": [
+        {
+          "block": 0,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n41-L1-b00-20261001",
+          "fixture_file": "fixtures/n41_L1_b00.fixture.jsonl",
+          "fixture_sha256": "e48cfa60216a5dcdc632ce516c556c45935db36c04b613d6812cd3e51d80a529",
+          "points_file": "fixtures/n41_L1_b00.points.jsonl",
+          "points_sha256": "90f5867ed987082c2ec9d66765db19548827b79f3e2e94fbc19ef4a9e6304c00",
+          "seed": 2026100110200
+        },
+        {
+          "block": 1,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n41-L1-b01-20261001",
+          "fixture_file": "fixtures/n41_L1_b01.fixture.jsonl",
+          "fixture_sha256": "1302ff91accd527dae413ba634e991eb8ba3c074350cd5732b10810727526cdd",
+          "points_file": "fixtures/n41_L1_b01.points.jsonl",
+          "points_sha256": "6d08a2ef1ab91dcc853e106af5b26e4c62239169308ae3be4d985b103acac927",
+          "seed": 2026100110201
+        },
+        {
+          "block": 2,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n41-L1-b02-20261001",
+          "fixture_file": "fixtures/n41_L1_b02.fixture.jsonl",
+          "fixture_sha256": "c27953df6fe746864e78ff1279e5f3a5b56e4fcbddadbb9058e1080682154f88",
+          "points_file": "fixtures/n41_L1_b02.points.jsonl",
+          "points_sha256": "fae565db43fb9f1584509261fd6babf0d6027d60a60f1ded6c8320e326f1473b",
+          "seed": 2026100110202
+        },
+        {
+          "block": 3,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n41-L1-b03-20261001",
+          "fixture_file": "fixtures/n41_L1_b03.fixture.jsonl",
+          "fixture_sha256": "39e0048540a24c04b692fc1f3562a56ff855519d35ca2fef64e1a7df232a0cc2",
+          "points_file": "fixtures/n41_L1_b03.points.jsonl",
+          "points_sha256": "9a54484eee399fc342bfe3d0c3a497e52dc938be03c2d76474f892dcee337699",
+          "seed": 2026100110203
+        },
+        {
+          "block": 4,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n41-L1-b04-20261001",
+          "fixture_file": "fixtures/n41_L1_b04.fixture.jsonl",
+          "fixture_sha256": "0c1da7d3727cdeeeabbbfaf437cf1c6db1a482b0ae10ef4962bd060f6780817e",
+          "points_file": "fixtures/n41_L1_b04.points.jsonl",
+          "points_sha256": "9f55289e91d5ca416b6519cd614658452d216e6c0cdffa856915a782c0432ee9",
+          "seed": 2026100110204
+        }
+      ],
+      "blocks": 5,
+      "field_modulus_low_terms": [
+        0,
+        3
+      ],
+      "generator": [
+        2056947637384,
+        1635505394702
+      ],
+      "n": 41,
+      "prefilter": "off",
+      "subgroup_order": 549756390943
+    },
+    "n41_L1024": {
+      "K": 255,
+      "L": 1024,
+      "a": 0,
+      "automorphism_size": 82,
+      "block_specs": [
+        {
+          "block": 0,
+          "candidate_attempts": 1024,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n41-L1024-b00-20261001",
+          "fixture_file": "fixtures/n41_L1024_b00.fixture.jsonl",
+          "fixture_sha256": "3fd88c597461daacfd2e7b90fe9bdad46ec0322cc13c40b5b1ec5a5c67513def",
+          "points_file": "fixtures/n41_L1024_b00.points.jsonl",
+          "points_sha256": "025f28fdf28a23e75656011dd63bc439689ea8096aa33143ebb5eb6600f425f5",
+          "seed": 2026100110300
+        },
+        {
+          "block": 1,
+          "candidate_attempts": 1024,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n41-L1024-b01-20261001",
+          "fixture_file": "fixtures/n41_L1024_b01.fixture.jsonl",
+          "fixture_sha256": "6e89300b9f75585e5631ee521d31eb953cacc585c7b437a9b33ed823fffaac69",
+          "points_file": "fixtures/n41_L1024_b01.points.jsonl",
+          "points_sha256": "ea44946718c1d29be2367ab957ec452c017bc170304b7504da4f71d1f8032c27",
+          "seed": 2026100110301
+        },
+        {
+          "block": 2,
+          "candidate_attempts": 1024,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n41-L1024-b02-20261001",
+          "fixture_file": "fixtures/n41_L1024_b02.fixture.jsonl",
+          "fixture_sha256": "ab5e8b95fa912055caac29c250b2b7fa50edc20ca30dad738217e578e6fd9a98",
+          "points_file": "fixtures/n41_L1024_b02.points.jsonl",
+          "points_sha256": "c2f6000696c66172db5bbcb90e5a73f2602ca412bbedab70591d7ff418381031",
+          "seed": 2026100110302
+        },
+        {
+          "block": 3,
+          "candidate_attempts": 1024,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n41-L1024-b03-20261001",
+          "fixture_file": "fixtures/n41_L1024_b03.fixture.jsonl",
+          "fixture_sha256": "49cd47ae9403b9b3c4d5a8299aff3b68d845ffb79bfc72b9798623280b617036",
+          "points_file": "fixtures/n41_L1024_b03.points.jsonl",
+          "points_sha256": "169b7c531f63da4d58361bd34d6d77c907409b9154c9f9bcb359251dabe875e0",
+          "seed": 2026100110303
+        },
+        {
+          "block": 4,
+          "candidate_attempts": 1024,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n41-L1024-b04-20261001",
+          "fixture_file": "fixtures/n41_L1024_b04.fixture.jsonl",
+          "fixture_sha256": "df2d386777696b7592398b3a9aa82cb41951dece6d17679feebb26c20fd3d2a2",
+          "points_file": "fixtures/n41_L1024_b04.points.jsonl",
+          "points_sha256": "c59ed079f7964596c15effd70bb617d61e9dcf30a471d587962d60fe322487da",
+          "seed": 2026100110304
+        }
+      ],
+      "blocks": 5,
+      "field_modulus_low_terms": [
+        0,
+        3
+      ],
+      "generator": [
+        2056947637384,
+        1635505394702
+      ],
+      "n": 41,
+      "prefilter": "blocked",
+      "subgroup_order": 549756390943
+    },
+    "n53_L1": {
+      "K": 220,
+      "L": 1,
+      "a": 0,
+      "automorphism_size": 106,
+      "block_specs": [
+        {
+          "block": 0,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n53-L1-b00-20261001",
+          "fixture_file": "fixtures/n53_L1_b00.fixture.jsonl",
+          "fixture_sha256": "c337349135e4c8df5aa7de63a3aeb5f930993c31a96700e60ec95f32260f0a3d",
+          "points_file": "fixtures/n53_L1_b00.points.jsonl",
+          "points_sha256": "56336ed1f8a4a34b6e1e57c7c33e403753220817eccf2a5563f63482042c6031",
+          "seed": 2026100110400
+        },
+        {
+          "block": 1,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n53-L1-b01-20261001",
+          "fixture_file": "fixtures/n53_L1_b01.fixture.jsonl",
+          "fixture_sha256": "92030df432e955fe56f6ef2dcd123674d4492cea86d8ddec778e75fbf6ea68b9",
+          "points_file": "fixtures/n53_L1_b01.points.jsonl",
+          "points_sha256": "e3f5e3550970e9110893bcdd7d09bec54c3c5cb836cd5b4f0c1964258993d46d",
+          "seed": 2026100110401
+        },
+        {
+          "block": 2,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n53-L1-b02-20261001",
+          "fixture_file": "fixtures/n53_L1_b02.fixture.jsonl",
+          "fixture_sha256": "359fe9556ccebd62b0af9da46cb76e3290acc22d55aaf5d5253e8ef883a870da",
+          "points_file": "fixtures/n53_L1_b02.points.jsonl",
+          "points_sha256": "8fd682067a304244ea9072f8eccb837985f554b3321fa7dd73ab365a19e71356",
+          "seed": 2026100110402
+        },
+        {
+          "block": 3,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n53-L1-b03-20261001",
+          "fixture_file": "fixtures/n53_L1_b03.fixture.jsonl",
+          "fixture_sha256": "8e3fbc748a8a7dfecca66eca2f93eddda4ba5704e5719f46a3c725a76ae0def6",
+          "points_file": "fixtures/n53_L1_b03.points.jsonl",
+          "points_sha256": "963e77bf3c944391ba9954f42b381f4240889600526807aa70adcc7ad976e66d",
+          "seed": 2026100110403
+        },
+        {
+          "block": 4,
+          "candidate_attempts": 1,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n53-L1-b04-20261001",
+          "fixture_file": "fixtures/n53_L1_b04.fixture.jsonl",
+          "fixture_sha256": "db2d15f292e9658046b455f3b16e58e6fc2b4aa6227bbc9237844b6c5bdb7bd7",
+          "points_file": "fixtures/n53_L1_b04.points.jsonl",
+          "points_sha256": "2448c8b1385c355d4616d5873ea2c14ebe8521d6df4d9827251d054049523e3f",
+          "seed": 2026100110404
+        }
+      ],
+      "blocks": 5,
+      "field_modulus_low_terms": [
+        0,
+        1,
+        2,
+        6
+      ],
+      "generator": [
+        198217578752339,
+        7929897206038174
+      ],
+      "n": 53,
+      "prefilter": "off",
+      "subgroup_order": 21044858204113
+    },
+    "n53_L1024": {
+      "K": 440,
+      "L": 1024,
+      "a": 0,
+      "automorphism_size": 106,
+      "block_specs": [
+        {
+          "block": 0,
+          "candidate_attempts": 1024,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n53-L1024-b00-20261001",
+          "fixture_file": "fixtures/n53_L1024_b00.fixture.jsonl",
+          "fixture_sha256": "607faf2806b583f9aaa7c57d5d91d19cd0a90ea556971f4b41ddd53ecaa4c09d",
+          "points_file": "fixtures/n53_L1024_b00.points.jsonl",
+          "points_sha256": "96480f2a4680bdcfc0b846c9df46de8ed4e1bf415fb56a4e168c414e60a0e6ba",
+          "seed": 2026100110500
+        },
+        {
+          "block": 1,
+          "candidate_attempts": 1024,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n53-L1024-b01-20261001",
+          "fixture_file": "fixtures/n53_L1024_b01.fixture.jsonl",
+          "fixture_sha256": "f6b1e82a1b608778f61924bb3aff11571d6be682546083836557e8d9998317a7",
+          "points_file": "fixtures/n53_L1024_b01.points.jsonl",
+          "points_sha256": "c6b6dec7f169adc5c1256bdf1a1aec38a626ce45d24d8e5fc93719afff511dec",
+          "seed": 2026100110501
+        },
+        {
+          "block": 2,
+          "candidate_attempts": 1024,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n53-L1024-b02-20261001",
+          "fixture_file": "fixtures/n53_L1024_b02.fixture.jsonl",
+          "fixture_sha256": "a7f4cd694d18a1f34b564fad265296523864f130e62aaa0cb2601007b324a025",
+          "points_file": "fixtures/n53_L1024_b02.points.jsonl",
+          "points_sha256": "00455cab9d92443d8db7cc5e1edec0b705fe2036458aac0fea7b4859fa601a9d",
+          "seed": 2026100110502
+        },
+        {
+          "block": 3,
+          "candidate_attempts": 1024,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n53-L1024-b03-20261001",
+          "fixture_file": "fixtures/n53_L1024_b03.fixture.jsonl",
+          "fixture_sha256": "d5ee83659bdbeb8ee9ab2e69f8ec1acadfeb02da12b2d2836dc08217f77eb67d",
+          "points_file": "fixtures/n53_L1024_b03.points.jsonl",
+          "points_sha256": "e4e85af46913d59b1891c57cd3b014fd3d3fa63e27d12ebdac0d77ee8f5e0dd7",
+          "seed": 2026100110503
+        },
+        {
+          "block": 4,
+          "candidate_attempts": 1024,
+          "candidate_rejections": {
+            "new_orbit": 0,
+            "prior_orbit": 0,
+            "zero_scalar": 0
+          },
+          "corpus": "compact-disjoint-cold-v2-n53-L1024-b04-20261001",
+          "fixture_file": "fixtures/n53_L1024_b04.fixture.jsonl",
+          "fixture_sha256": "ba0329f068f70d068ba77a70b114b679c93e0cdfad2391ffa0397ebb77d421c0",
+          "points_file": "fixtures/n53_L1024_b04.points.jsonl",
+          "points_sha256": "7b1038a15c0d06217674bb07302b22ea43e0ebd1beabd677a4a8b76358bfd7ca",
+          "seed": 2026100110504
+        }
+      ],
+      "blocks": 5,
+      "field_modulus_low_terms": [
+        0,
+        1,
+        2,
+        6
+      ],
+      "generator": [
+        198217578752339,
+        7929897206038174
+      ],
+      "n": 53,
+      "prefilter": "blocked",
+      "subgroup_order": 21044858204113
+    }
+  }
+}

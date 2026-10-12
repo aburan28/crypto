@@ -1,0 +1,38 @@
+{
+  "metrics": {
+    "bytes": 671,
+    "path": "metrics.json",
+    "sha256": "1a1d0643fe4bf1b1a39979472ac324666b0b72f450771db0ba8ae22cd91d071f"
+  },
+  "process": {
+    "command": [
+      "/bin/mkdir",
+      "-p",
+      "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-193-native-sat-comparators-20261002/development/superseded-relative-path-verifier"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 1228800,
+    "pid": 86864,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.001133,
+    "timed_out": false,
+    "total_core_seconds": 0.001683,
+    "user_seconds": 0.00055,
+    "wall_seconds": 0.022099834,
+    "watchdog_seconds": 30
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 0,
+    "path": "stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 0,
+    "path": "stdout.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

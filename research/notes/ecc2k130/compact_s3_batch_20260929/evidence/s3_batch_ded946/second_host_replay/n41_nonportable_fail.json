@@ -1,0 +1,6 @@
+{
+  "error": "",
+  "error_type": "AssertionError",
+  "status": "FAIL",
+  "traceback": "Traceback (most recent call last):\n  File \"/private/tmp/compact-s3-batch-20260929/research/notes/ecc2k130/compact_s3_batch_20260929/verify_panel.py\", line 335, in main\n    receipt = verify(args.n, args.run_dir.resolve())\n  File \"/private/tmp/compact-s3-batch-20260929/research/notes/ecc2k130/compact_s3_batch_20260929/verify_panel.py\", line 177, in verify\n    assert item[\"command\"][2] == str((HERE / spec[\"points_file\"]).resolve())\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+}

@@ -157,14 +157,14 @@ fn h(input: [u8; 4], key: &[u8], offset: usize) -> u32 {
         y[3] = Q0[y[3] as usize] ^ key[4 * (4 + offset) + 3];
     }
     // k_words == 2 base layer.
-    y[0] = Q1[(Q0[(Q0[y[0] as usize] ^ key[4 * (2 + offset)]) as usize]
-        ^ key[4 * offset]) as usize];
-    y[1] = Q0[(Q0[(Q1[y[1] as usize] ^ key[4 * (2 + offset) + 1]) as usize]
-        ^ key[4 * offset + 1]) as usize];
-    y[2] = Q1[(Q1[(Q0[y[2] as usize] ^ key[4 * (2 + offset) + 2]) as usize]
-        ^ key[4 * offset + 2]) as usize];
-    y[3] = Q0[(Q1[(Q1[y[3] as usize] ^ key[4 * (2 + offset) + 3]) as usize]
-        ^ key[4 * offset + 3]) as usize];
+    y[0] =
+        Q1[(Q0[(Q0[y[0] as usize] ^ key[4 * (2 + offset)]) as usize] ^ key[4 * offset]) as usize];
+    y[1] = Q0[(Q0[(Q1[y[1] as usize] ^ key[4 * (2 + offset) + 1]) as usize] ^ key[4 * offset + 1])
+        as usize];
+    y[2] = Q1[(Q1[(Q0[y[2] as usize] ^ key[4 * (2 + offset) + 2]) as usize] ^ key[4 * offset + 2])
+        as usize];
+    y[3] = Q0[(Q1[(Q1[y[3] as usize] ^ key[4 * (2 + offset) + 3]) as usize] ^ key[4 * offset + 3])
+        as usize];
 
     // [y0 y1 y2 y3] = MDS · y
     let mut out = 0u32;
@@ -534,7 +534,11 @@ mod tests {
             }
             let orig = block;
             cipher.encrypt_block(&mut block);
-            assert_ne!(block, orig, "ciphertext equals plaintext for keylen={}", keylen);
+            assert_ne!(
+                block, orig,
+                "ciphertext equals plaintext for keylen={}",
+                keylen
+            );
             cipher.decrypt_block(&mut block);
             assert_eq!(block, orig, "round-trip mismatch for keylen={}", keylen);
         }

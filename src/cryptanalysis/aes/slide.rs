@@ -128,19 +128,12 @@ pub fn run_slide_comparison(n_samples: usize, seed: u64) -> SlideComparisonRepor
     let true_key = AesKey::Aes128(key);
 
     // (a) Symmetric AES — all round keys = `key`.
-    let symm_pair = search_slid_pair_birthday(
-        n_samples,
-        |p| symmetric_aes_encrypt(&key, p),
-        seed,
-    );
+    let symm_pair = search_slid_pair_birthday(n_samples, |p| symmetric_aes_encrypt(&key, p), seed);
 
     // (b) Genuine AES.
     let cipher = ReducedAes128::new(&key, 10, false);
-    let genuine_pair = search_slid_pair_birthday(
-        n_samples,
-        |p| cipher.encrypt(p),
-        seed.wrapping_add(1),
-    );
+    let genuine_pair =
+        search_slid_pair_birthday(n_samples, |p| cipher.encrypt(p), seed.wrapping_add(1));
 
     let _ = true_key.key_len();
     SlideComparisonReport {
@@ -217,7 +210,10 @@ mod tests {
     fn symmetric_aes_is_deterministic() {
         let key = [0x42u8; 16];
         let p = [0xABu8; 16];
-        assert_eq!(symmetric_aes_encrypt(&key, &p), symmetric_aes_encrypt(&key, &p));
+        assert_eq!(
+            symmetric_aes_encrypt(&key, &p),
+            symmetric_aes_encrypt(&key, &p)
+        );
     }
 
     /// **Genuine AES doesn't produce trivial slid pairs at 256 samples.**
@@ -228,7 +224,11 @@ mod tests {
         let key = [0xCCu8; 16];
         let cipher = ReducedAes128::new(&key, 10, false);
         let p = search_slid_pair_birthday(256, |x| cipher.encrypt(x), 0);
-        assert!(p.is_none(), "genuine AES should not have a slid pair at 256 samples, got {:?}", p);
+        assert!(
+            p.is_none(),
+            "genuine AES should not have a slid pair at 256 samples, got {:?}",
+            p
+        );
     }
 
     /// **Slide-comparison driver runs to completion** — checks both

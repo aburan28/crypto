@@ -1,0 +1,40 @@
+{
+  "note": "Cumulative source patches reconstruct each measured revision from the immutable original reference. Add the identical examples/rho_parity_cost.rs harness for instruction profiling, and use the frozen dependency lock. These local commit identifiers are provenance labels; the patches do not require those commits to exist remotely.",
+  "revisions": [
+    {
+      "iteration": 1,
+      "local_source_commit": "30083735c4b092a66b5d18d7dc636e7ae2388e7d",
+      "source_patch": "source-patches/iteration-1.patch",
+      "patch_sha256": "f5f7286d1b0161be20a90b3b9361b4a2052acf1ad165eb0312a9598aadca22bb",
+      "apply_to": "a2963f0d6fb5cb74a20e678cf4def0c7cbafa1d9"
+    },
+    {
+      "iteration": 2,
+      "local_source_commit": "c71d4a8c705dfc597017e476a93312a109f80e86",
+      "source_patch": "source-patches/iteration-2.patch",
+      "patch_sha256": "4136819abcc3543a98249d0aa24e23866d8876ed03e1fe7195d1a0f2c7176291",
+      "apply_to": "a2963f0d6fb5cb74a20e678cf4def0c7cbafa1d9"
+    },
+    {
+      "iteration": 3,
+      "local_source_commit": "7a718c89d09ec896d7c8a244ca84d5b91701bafd",
+      "source_patch": "source-patches/iteration-3.patch",
+      "patch_sha256": "4526bf357452acfd90334bab018c3157ac852f2cb19be8113fed4be48de923e6",
+      "apply_to": "a2963f0d6fb5cb74a20e678cf4def0c7cbafa1d9"
+    },
+    {
+      "iteration": 4,
+      "local_source_commit": "e3121303c3559a8dc4673b31a4abf9dfcf80a527",
+      "source_patch": "source-patches/iteration-4.patch",
+      "patch_sha256": "d4e059856038f71218a7ba312dfc778fd198e5af723958e27cc1ba747bd37d1d",
+      "apply_to": "a2963f0d6fb5cb74a20e678cf4def0c7cbafa1d9"
+    },
+    {
+      "iteration": 5,
+      "local_source_commit": null,
+      "source_patch": "source-patches/iteration-5.patch",
+      "patch_sha256": "860f4baf6eedd0bacbcd9d84fdc6e8c057503743cda3846f49e16fb0ccbaaa45",
+      "apply_to": "a2963f0d6fb5cb74a20e678cf4def0c7cbafa1d9"
+    }
+  ]
+}

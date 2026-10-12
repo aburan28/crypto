@@ -54,7 +54,7 @@ fn scalar_support(
     modulus: u64,
     include_shorter: bool,
 ) -> Vec<u64> {
-    let mut bits = vec![0u64; (anchors.len() + 63) / 64];
+    let mut bits = vec![0u64; anchors.len().div_ceil(64)];
     for a in 0..chosen.len() {
         let i = chosen[a];
         if include_shorter {

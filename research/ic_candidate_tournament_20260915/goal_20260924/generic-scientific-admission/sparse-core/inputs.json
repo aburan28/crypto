@@ -1,0 +1,64 @@
+[
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "sparse": {
+          "filter": {
+            "merge_max_weight": 0,
+            "remove_singletons": false
+          }
+        },
+        "summands": 2
+      },
+      "curve_a": 0,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "sparse-core-a0"
+  },
+  {
+    "expected": "complete",
+    "job": {
+      "algorithm_seed": 2026092557,
+      "config": {
+        "batch_trials": 8,
+        "linear_algebra": "sparse",
+        "max_trials": 256,
+        "solver": "pair_table",
+        "sparse": {
+          "filter": {
+            "merge_max_weight": 0,
+            "remove_singletons": false
+          }
+        },
+        "summands": 2
+      },
+      "curve_a": 1,
+      "degree": 9,
+      "exclusive_phases": true,
+      "factor_base": {
+        "index": 0,
+        "kind": "factor"
+      },
+      "mode": "ic",
+      "target_seeds": [
+        2026092557
+      ]
+    },
+    "name": "sparse-core-a1"
+  }
+]

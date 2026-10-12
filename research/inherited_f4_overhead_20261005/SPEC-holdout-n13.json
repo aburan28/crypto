@@ -1,0 +1,51 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "Inherited-F4 overhead round holdout, E_0 m=13, d=5",
+  "description": "Fresh public one-target workloads for the inherited-F4 overhead round (PROTOCOL.md). Both IC arms of the F6-IC ladder, unchanged; seeds chosen before any holdout run.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 13
+      }
+    ],
+    "targets_per_curve": 4,
+    "target_seed": 202610052113,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "ic-f4",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-f6",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=5",
+          "oracle": "pdp3-koblitz:m=3,engine=f6-ic,degree=3,node_budget=8192",
+          "max_trials": "200000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610052213,
+    "isolation_required": "L2",
+    "timeout_seconds": 3600
+  }
+}

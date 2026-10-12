@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage174-f4-native-target",
+    "CARGO_INCREMENTAL=0",
+    "RUSTFLAGS=-C target-cpu=native",
+    "CARGO_PROFILE_RELEASE_LTO=thin",
+    "CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1",
+    "/opt/homebrew/bin/cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--example",
+    "koblitz_pdp_backend"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1200.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 84.73094612499699,
+    "user_seconds": 104.491593,
+    "system_seconds": 5.083655,
+    "total_core_seconds": 109.57524799999999,
+    "single_core_seconds": 109.57524799999999,
+    "peak_rss_bytes": 2366308352,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

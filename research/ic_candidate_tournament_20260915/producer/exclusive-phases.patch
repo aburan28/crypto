@@ -1,0 +1,600 @@
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -36,6 +36,14 @@
+ //! algorithm, not a new one.
+ 
+ use num_bigint::BigUint;
++use crate::cryptanalysis::ic_phase::{mark, Phase};
++
++/// Cargo tracks this environment dependency and rebuilds the library when the
++/// complete frozen source inventory changes, even across shared cache restores.
++pub fn source_snapshot() -> Option<&'static str> {
++    option_env!("IC_SOURCE_MANIFEST_SHA256")
++}
++
+ use num_traits::ToPrimitive;
+ 
+ use crate::binary_ecc::BinaryPoint;
+@@ -987,9 +995,15 @@
+         z ^ (z >> 31)
+     }
+ 
+-    /// Uniform enough in `[1, r)` for probe scalars.
++    /// Remove modulo bias from each nonzero scalar draw. The additive
++    /// walk still has correlated queries; diagnostics never call them IID.
+     fn scalar(&mut self, r: u64) -> u64 {
+-        1 + self.next() % (r - 1)
++        let span = r - 1;
++        let threshold = span.wrapping_neg() % span;
++        loop {
++            let word = self.next();
++            if word >= threshold { return 1 + word % span; }
++        }
+     }
+ }
+ 
+@@ -1003,7 +1017,19 @@
+ }
+ 
+ /// One complete cold job's state: base, table, relations, logs.
++#[derive(Default, Debug, Clone, serde::Serialize)]
++pub struct StageDiagnostics {
++    pub ordinary_queries: u64,
++    pub identity_queries: u64,
++    pub pdp_verified: u64,
++    pub pdp_unresolved: u64,
++    /// Accepted row order: [query trial, rank before insertion, rank after].
++    pub rank_events: Vec<[u64; 3]>,
++    pub matrix_nonzeros: u64,
++}
++
+ pub struct TinyIc {
++    diagnostics: StageDiagnostics,
+     arith: Arith,
+     canon: NormalBasis,
+     n: u32,
+@@ -1088,6 +1114,7 @@
+         let lambda = kc.lambda.to_u64().ok_or("lambda too wide")? % r;
+         let g = arith.lift(kc.generator());
+ 
++        mark(Phase::FactorBase);
+         // ── The base: the same draws as `build_subgroup_orbit_factor_base`.
+         // Sets are small vectors: a few dozen abscissae do not need a
+         // hashed container, and the hashing was a third of the setup.
+@@ -1195,6 +1222,7 @@
+         if orbits > usize::from(u8::MAX) || points_vec.len() > usize::from(u16::MAX) {
+             return Err("base too large for the packed pair table".into());
+         }
++        mark(Phase::Precompute);
+         let negated: Vec<FastPoint> = points_vec.iter().map(|&p| arith.neg(p)).collect();
+         let mut lambda_pow = vec![1u64; n as usize];
+         for k in 1..n as usize {
+@@ -1268,16 +1296,23 @@
+         let hit = (lambda_pairs * coverage(table_rows)).min(1.0).max(1e-9);
+         let chunk = ((1.0 / hit) as usize + 1).clamp(8, 16).min(size);
+ 
++        mark(Phase::Queries);
+         let mut prng = SplitMix(algorithm_seed ^ 0x5449_4e59_4943_0001);
+         let probe_scalar = prng.scalar(r);
+         let stride_scalar = prng.scalar(r);
+         // `[2^i]G` for every bit of the order: every multiple of `G` the
+         // job needs — probes, strides and the certification of each column
+         // logarithm — is then a handful of affine additions.
++        mark(Phase::Precompute);
+         let g_table = arith.doubling_table(g, 64 - r.leading_zeros());
++        mark(Phase::Queries);
+         let probe = arith.fixed_base_mul(&g_table, probe_scalar);
+         let stride = arith.fixed_base_mul(&g_table, stride_scalar);
++        mark(Phase::MatrixBuild);
++        let echelon = Echelon::new(orbits, r);
++        mark(Phase::Setup);
+         Ok(Self {
++            diagnostics: StageDiagnostics::default(),
+             arith,
+             canon,
+             n,
+@@ -1300,7 +1335,7 @@
+             probe,
+             probe_scalar,
+             trials: 0,
+-            echelon: Echelon::new(orbits, r),
++            echelon,
+             seen: Vec::new(),
+             accepted: 0,
+             duplicates: 0,
+@@ -1392,7 +1427,7 @@
+     /// Exactly three base indices summing to `target`, scanning the base
+     /// from `start` and stopping at the first witness.  The witness is
+     /// re-added in the group before it is returned.
+-    fn decompose(&mut self, target: FastPoint, start: usize) -> Option<[usize; 3]> {
++    fn decompose(&mut self, target: FastPoint, start: usize, collection: bool) -> Option<[usize; 3]> {
+         if target.infinity {
+             return None;
+         }
+@@ -1457,12 +1492,14 @@
+                 let second = self.index(o2, (k2 + k) % n, s2 ^ negated);
+                 let mut witness = [i, first, second];
+                 witness.sort_unstable();
++                if collection { mark(Phase::RelationCheck); }
+                 let sum = witness.iter().fold(FastPoint::INFINITY, |s, &w| {
+                     self.arith.add(s, self.points[w])
+                 });
+                 if sum == target {
+                     return Some(witness);
+                 }
++                if collection { mark(Phase::Pdp); }
+             }
+             scanned += len;
+             offset = end % size;
+@@ -1472,12 +1509,14 @@
+ 
+     /// Walk `count` probes `R_t = [a_t]G` and return the relations found.
+     pub fn collect(&mut self, count: u64) -> Vec<CollectedRelation> {
++        mark(Phase::Pdp);
+         let mut rows = Vec::new();
+         let size = self.points.len();
+         for _ in 0..count {
+             if self.trials >= self.max_trials {
+                 break;
+             }
++            mark(Phase::Queries);
+             let trial = self.trials;
+             self.trials += 1;
+             let a = self.probe_scalar;
+@@ -1486,17 +1525,24 @@
+             self.probe_scalar = (self.probe_scalar + self.stride_scalar) % self.r;
+             self.probe = self.arith.add(self.probe, self.stride);
+             if a == 0 || target.infinity {
++                self.diagnostics.identity_queries += 1;
+                 continue;
+             }
++            self.diagnostics.ordinary_queries += 1;
++            mark(Phase::Pdp);
+             let start = (trial as usize * (2 * self.n as usize + 1)) % size;
+-            if let Some(w) = self.decompose(target, start) {
++            if let Some(w) = self.decompose(target, start, true) {
++                self.diagnostics.pdp_verified += 1;
+                 rows.push(CollectedRelation {
+                     trial,
+                     a,
+                     points: w.to_vec(),
+                 });
+-            }
+-        }
++            } else {
++                self.diagnostics.pdp_unresolved += 1;
++            }
++        }
++        mark(Phase::Setup);
+         rows
+     }
+ 
+@@ -1508,6 +1554,7 @@
+     /// Add rows over the projected columns.
+     pub fn push(&mut self, rows: &[CollectedRelation]) {
+         for rel in rows {
++            mark(Phase::RelationCheck);
+             let mut ids = [0u32; 3];
+             for (slot, &i) in ids.iter_mut().zip(rel.points.iter()) {
+                 *slot = i as u32;
+@@ -1519,6 +1566,7 @@
+             }
+             self.seen.push((rel.a, ids));
+             self.accepted += 1;
++            mark(Phase::MatrixBuild);
+             let mut row = vec![0u64; self.orbits + 1];
+             for &i in &rel.points {
+                 let (o, _, _) = self.location(i);
+@@ -1527,17 +1575,25 @@
+             // Columns are the representatives themselves, so the row's
+             // right-hand side loses the matching factor of `h`.
+             row[self.orbits] = rel.a % self.r;
++            self.diagnostics.matrix_nonzeros += row[..self.orbits].iter().filter(|&&v| v != 0).count() as u64;
++            let before = self.echelon.rank as u64;
++            mark(Phase::RelationLa);
+             self.echelon.push(row);
+-        }
++            mark(Phase::MatrixBuild);
++            self.diagnostics.rank_events.push([rel.trial, before, self.echelon.rank as u64]);
++        }
++        mark(Phase::Setup);
+     }
+ 
+     /// Solve when the rows determine every column; each logarithm is
+     /// certified by `[ℓ]G = [h]C` before the table is accepted.
+     pub fn try_solve(&mut self) -> bool {
++        mark(Phase::RelationLa);
+         self.solve_attempts += 1;
+         let Some(logs) = self.echelon.solve() else {
+             return false;
+         };
++        mark(Phase::RelationCheck);
+         let ok = self.certify(&logs);
+         if ok {
+             self.logs = Some(logs);
+@@ -1557,6 +1613,7 @@
+ 
+     /// Re-certify every column logarithm in the group.
+     pub fn verify_columns(&self) -> bool {
++        mark(Phase::RelationCheck);
+         match &self.logs {
+             Some(logs) => self.certify(logs),
+             None => false,
+@@ -1584,6 +1641,14 @@
+     /// `(accepted, duplicates, solve attempts)`.
+     pub fn accounting(&self) -> (usize, usize, usize) {
+         (self.accepted, self.duplicates, self.solve_attempts)
++    }
++
++    pub fn field_kernel(&self) -> &'static str {
++        if self.arith.field.clmul { "pclmulqdq" } else { "portable" }
++    }
++
++    pub fn stage_diagnostics(&self) -> (&StageDiagnostics, usize) {
++        (&self.diagnostics, self.echelon.rank)
+     }
+ 
+     /// The logarithm of `q`, verified as `[d]G = Q` in the group, with
+@@ -1613,12 +1678,11 @@
+         while trials < self.max_trials {
+             trials += 1;
+             let mut candidate = None;
+-            if probe.infinity {
+-                // [a]G + [b]Q = O
+-                candidate = Some((mulmod((r - a % r) % r, invmod(b, r)?, r), Vec::new()));
+-            } else {
++            // A direct collision is not a three-summand IC descent. Keep
++            // its work charged, advance the walk and seek an actual witness.
++            if !probe.infinity {
+                 let start = (trials as usize * (2 * self.n as usize + 1)) % size;
+-                if let Some(w) = self.decompose(probe, start) {
++                if let Some(w) = self.decompose(probe, start, false) {
+                     let mut sum = 0u64;
+                     for &i in &w {
+                         let (o, _, _) = self.location(i);
+@@ -1884,7 +1948,7 @@
+                     let (found, trials, w) = tiny.solve_target(&q).expect("descent");
+                     assert_eq!(found, BigUint::from(d), "n={n} a={a} d={d}");
+                     assert!(trials >= 1);
+-                    assert!(w.points.is_empty() || w.points.len() == 3);
++                    assert_eq!(w.points.len(), 3);
+                     let probe = kc.add(&kc.mul(g, &BigUint::from(w.a)), &kc.mul(&q, &BigUint::from(w.b)));
+                     let sum = w.points.iter().fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &base[i]));
+                     assert_eq!(sum, probe, "n={n} a={a} d={d} witness");
+@@ -1936,3 +2000,36 @@
+         let _ = F2mElement::zero(13);
+     }
+ }
++
++#[cfg(test)]
++mod phase_admission_tests {
++    use super::*;
++
++    #[test]
++    fn direct_collision_is_skipped_and_real_descent_is_retained() {
++        let kc = KoblitzCurve::new(0, 13).unwrap();
++        let base = FactorBaseSpec::SubgroupOrbits { seed: 43, points: 78 };
++        let mut tiny = TinyIc::new(&kc, &base, 20260925, 4096).unwrap();
++        while !tiny.try_solve() && tiny.trials() < 4096 {
++            let rows = tiny.collect(1);
++            tiny.push(&rows);
++        }
++        assert!(tiny.verify_columns());
++        // Predict only the next descent query, then force it to be the identity.
++        // This is an admission control, never an ordinary-yield sample.
++        let mut next = SplitMix(tiny.rng.0);
++        let a = next.scalar(tiny.r);
++        let b = next.scalar(tiny.r);
++        let d = mulmod(tiny.r - a, invmod(b, tiny.r).unwrap(), tiny.r);
++        let q = kc.mul(kc.generator(), &BigUint::from(d));
++        let (found, attempts, witness) = tiny.solve_target(&q).unwrap();
++        assert_eq!(found, BigUint::from(d));
++        assert!(attempts >= 2);
++        assert_eq!(witness.points.len(), 3);
++        assert_eq!(tiny.diagnostics.ordinary_queries,
++            tiny.diagnostics.pdp_verified + tiny.diagnostics.pdp_unresolved);
++        assert_eq!(tiny.trials(), tiny.diagnostics.ordinary_queries + tiny.diagnostics.identity_queries);
++        assert_eq!(tiny.diagnostics.rank_events.len(), tiny.accepted);
++        assert_eq!(tiny.diagnostics.rank_events.last().unwrap()[2], tiny.columns() as u64);
++    }
++}
+--- a/examples/ic_tournament_worker.rs
++++ b/examples/ic_tournament_worker.rs
+@@ -18,6 +18,7 @@
+ use serde_json::{json, Value};
+ use std::io::Read;
+ use std::time::Instant;
++use crypto_lib::cryptanalysis::ic_phase::{mark, Phase};
+ 
+ /// The whole process allocates well under a megabyte (the largest job of the
+ /// panel, rho on `n23a0`, asks for 321 KB in 5,700 calls) and lives a few
+@@ -175,24 +176,6 @@
+     }
+ }
+ 
+-/// The amd64 Valgrind client-request ABI, as specified in valgrind.h.
+-/// Outside Valgrind the rotation preamble and self-exchange have no effect.
+-/// DUMP_STATS_AT writes the interval then resets counters; collection stays on.
+-#[inline(never)]
+-fn dump(label: &'static [u8]) {
+-    assert_eq!(label.last(), Some(&0));
+-    #[cfg(target_arch = "x86_64")]
+-    unsafe {
+-        let args = [0x4354_0003usize, label.as_ptr() as usize, 0, 0, 0, 0];
+-        std::arch::asm!(
+-            "rol rdi, 3", "rol rdi, 13", "rol rdi, 61", "rol rdi, 51",
+-            "xchg rbx, rbx",
+-            in("rax") args.as_ptr(), inout("rdx") 0usize => _, out("rdi") _,
+-            options(nostack)
+-        );
+-    }
+-}
+-
+ #[derive(Clone, Debug, Deserialize)]
+ #[serde(deny_unknown_fields)]
+ struct Job {
+@@ -215,13 +198,14 @@
+     summands: usize,
+     collection_window: Option<usize>,
+     sparse: SparseSolveOptions,
++    rho_parallel_walks: usize,
+ }
+ impl Default for Config {
+     fn default() -> Self {
+         Self {
+-            solver: "pair_table".into(), linear_algebra: "sparse".into(),
++            solver: "pair_table".into(), linear_algebra: "tiny_gauss".into(),
+             batch_trials: 64, max_trials: 4096, summands: 3,
+-            collection_window: None, sparse: SparseSolveOptions::default(),
++            collection_window: None, sparse: SparseSolveOptions::default(), rho_parallel_walks: 32,
+         }
+     }
+ }
+@@ -284,6 +268,7 @@
+         return Err("target count must be 1..100".into());
+     }
+     let cfg = &job.config;
++    if !(1..=256).contains(&cfg.rho_parallel_walks) { return Err("invalid rho width".into()); }
+     if cfg.batch_trials == 0 || cfg.batch_trials > 4096 || cfg.max_trials > 65536
+         || cfg.max_trials < cfg.batch_trials || !(2..=4).contains(&cfg.summands) {
+         return Err("invalid collection limits".into());
+@@ -299,16 +284,18 @@
+         "generator": point(c.generator()), "targets": targets.iter().map(point).collect::<Vec<_>>(),
+         "target_seeds": job.target_seeds, "target_scalar_constructed": false
+     });
+-    dump(b"curve_and_targets\0");
++
+     if job.mode == "fixture" {
+         return Ok(Report::Tree(json!({"schema_version":1,"status":"fixture","fixture":metadata})));
+     }
+     if job.mode == "rho" {
++        mark(Phase::RhoSolve);
+         let mut solutions = Vec::new();
+         for (i, q) in targets.iter().enumerate() {
+             let options = KoblitzSignedRhoOptions {
+                 seed: job.algorithm_seed ^ (i as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15),
+                 max_iterations_per_restart: cfg.max_trials,
++                parallel_walks: cfg.rho_parallel_walks,
+                 ..KoblitzSignedRhoOptions::default()
+             };
+             let r = koblitz_signed_frobenius_rho_with_progress(&c, q, &options, &mut |_| {});
+@@ -316,90 +303,24 @@
+                 "verified":r.verified,"iterations":r.iterations,"restarts":r.restarts_attempted,
+                 "walk_group_additions":r.charges.walk_group_additions}));
+         }
+-        dump(b"rho_solve\0");
++        mark(Phase::RecoveryCheck);
+         let verified = solutions.iter().zip(&targets).all(|(s,q)| {
+             s["recovered"].as_str().and_then(|x| x.parse::<BigUint>().ok())
+                 .is_some_and(|d| d < c.subgroup_order && c.mul(c.generator(), &d) == *q)
+         });
+-        dump(b"final_verification\0");
++        mark(Phase::Setup);
+         return Ok(Report::Tree(json!({"schema_version":1,"mode":"rho","status":if verified{"complete"}else{"incomplete"},
+             "fixture":metadata,"solutions":solutions,"automorphism_order":2*c.n,
+-            "elapsed_seconds":start.elapsed().as_secs_f64()})));
+-    }
+-    if job.mode != "ic" { return Err("unknown mode".into()); }
++            "elapsed_seconds":start.elapsed().as_secs_f64(),"phase_schema":2,
++            "source_manifest_sha256":koblitz_tiny_ic::source_snapshot(),
++            "executed_method":{"reference":"signed_frobenius_rho","requested_walks":cfg.rho_parallel_walks}})));
++    }
++    if job.mode != "ic" && job.mode != "inventory" { return Err("unknown mode".into()); }
+     if cfg.solver == "pair_table" && cfg.collection_window.is_none()
+         && koblitz_tiny_ic::supports(&c, &job.factor_base, cfg.summands) {
+         return run_tiny(job, &c, &targets, metadata, start);
+     }
+-    let strategy = match cfg.solver.as_str() {
+-        "pair_table" => DecompositionStrategy::PairTable,
+-        "enumerate" => DecompositionStrategy::Enumerate,
+-        _ => return Err("this worker supports pair_table and enumerate".into()),
+-    };
+-    let la = match cfg.linear_algebra.as_str() {
+-        "dense" => LinearAlgebra::Dense,
+-        "sparse" => LinearAlgebra::Sparse(cfg.sparse),
+-        _ => return Err("unknown linear algebra mode".into()),
+-    };
+-    let opts = KoblitzIcOptions { m: cfg.summands, seed: job.algorithm_seed,
+-        max_trials: cfg.max_trials as usize, strategy, linear_algebra: la,
+-        collection_window: cfg.collection_window, allow_direct_relation: false,
+-        ..KoblitzIcOptions::default() };
+-    let fb = job.factor_base.materialize(&c)?;
+-    let pair = if strategy == DecompositionStrategy::PairTable {
+-        Some(PairSumTable::build(&c, &fb).ok_or("pair table unavailable")?)
+-    } else { None };
+-    let collector = RelationCollector::with_pair_table(&c, &fb, &opts, pair.as_ref())
+-        .ok_or("unsupported decomposition")?;
+-    let mut system = FactorBaseLogSolver::new(&c, &fb, &opts).ok_or("no projected columns")?;
+-    let expected_columns = system.columns();
+-    dump(b"factor_base_and_tables\0");
+-    let mut relations = Vec::new();
+-    let mut trials = 0;
+-    let mut solve_attempts = 0;
+-    let mut outcome = None;
+-    while trials < cfg.max_trials && outcome.is_none() {
+-        let count = cfg.batch_trials.min(cfg.max_trials - trials);
+-        let (rows, _) = collector.collect(RelationWorkUnit { seed: job.algorithm_seed, start: trials, count });
+-        trials += count;
+-        dump(b"collection_and_decomposition\0");
+-        system.push(&rows);
+-        solve_attempts += 1;
+-        outcome = system.try_solve();
+-        relations.extend(rows);
+-        dump(b"verify_filter_and_linear_algebra\0");
+-    }
+-    let base = fb.points.iter().map(point).collect::<Vec<_>>();
+-    let report = system.report();
+-    let Some((table, solved)) = outcome else {
+-        return Ok(Report::Tree(json!({"schema_version":1,"mode":"ic","status":"incomplete","fixture":metadata,
+-            "trials":trials,"columns":expected_columns,"relations":relations,
+-            "factor_base":base,"rejected_relations":report.rejected_relations})));
+-    };
+-    if solved.rejected_relations != 0 || !table.verify(&c) {
+-        return Err("invalid relation or factor-base log certificate".into());
+-    }
+-    let columns = table.columns.iter().map(|(p,l)| json!({"point":point(p),"log":l.to_string()})).collect::<Vec<_>>();
+-    dump(b"log_certification\0");
+-    let solver = IndividualLogSolver::new(&c, &fb, &table, &opts, pair.as_ref()).ok_or("descent setup failed")?;
+-    let mut solutions = Vec::new();
+-    for (i,q) in targets.iter().enumerate() {
+-        let answer = solver.solve(q);
+-        solutions.push(json!({"index":i,"recovered":answer.as_ref().map(|(d,_)|d.to_string()),
+-            "trials":answer.as_ref().map(|(_,r)|r.trials)}));
+-    }
+-    dump(b"individual_log\0");
+-    let verified = solutions.iter().zip(&targets).all(|(s,q)| {
+-        s["recovered"].as_str().and_then(|x| x.parse::<BigUint>().ok())
+-            .is_some_and(|d| d < c.subgroup_order && c.mul(c.generator(), &d) == *q)
+-    });
+-    dump(b"final_verification\0");
+-    Ok(Report::Tree(json!({"schema_version":1,"mode":"ic","status":if verified{"complete"}else{"incomplete"},
+-        "fixture":metadata,"solutions":solutions,"factor_base":base,"relations":relations,
+-        "column_logs":columns,"columns":expected_columns,"trials":trials,"solve_attempts":solve_attempts,
+-        "accepted_relations":solved.relations,"duplicate_relations":solved.duplicate_relations,
+-        "rejected_relations":solved.rejected_relations,"summands":cfg.summands,
+-        "sparse_report":solved.sparse_report,"elapsed_seconds":start.elapsed().as_secs_f64()})))
++    Err("no instrumented optimized backend for this configuration".into())
+ }
+ 
+ /// Decimal text of a word, appended: two digits per division from a
+@@ -468,18 +389,28 @@
+ /// field and its JSON type match the general path.
+ fn run_tiny(job: &Job, c: &KoblitzCurve, targets: &[BinaryPoint], metadata: Value, start: Instant) -> Result<Report, String> {
+     let cfg = &job.config;
++    if cfg.linear_algebra != "tiny_gauss" { return Err("tiny backend executes tiny_gauss; choose it explicitly".into()); }
+     let mut ic = TinyIc::new(c, &job.factor_base, job.algorithm_seed, cfg.max_trials)?;
+     let expected_columns = ic.columns();
+-    dump(b"factor_base_and_tables\0");
++    if job.mode == "inventory" {
++        return Ok(Report::Tree(json!({"schema_version":1,"mode":"inventory","status":"inventory",
++            "fixture":metadata,"columns":expected_columns,"column_convention":"representative",
++            "factor_base_orbits":ic.orbit_representatives().iter()
++                .map(|&(x,y)|json!([x.to_string(),y.to_string()])).collect::<Vec<_>>(),
++            "summands":3,"phase_schema":2,"source_manifest_sha256":koblitz_tiny_ic::source_snapshot(),
++            "field_kernel":ic.field_kernel()})));
++    }
++
+     let mut relations: Vec<crypto_lib::cryptanalysis::koblitz_index_calculus::CollectedRelation> = Vec::new();
+     let mut solved = false;
+     while ic.trials() < cfg.max_trials && !solved {
+         let rows = ic.collect(cfg.batch_trials);
+-        dump(b"collection_and_decomposition\0");
++
+         ic.push(&rows);
+         solved = ic.try_solve();
++        mark(Phase::Setup);
+         relations.extend(rows);
+-        dump(b"verify_filter_and_linear_algebra\0");
++
+     }
+     let (accepted, duplicates, solve_attempts) = ic.accounting();
+     let trials = ic.trials();
+@@ -526,11 +457,13 @@
+         out.push_str(&base);
+         out.push_str(",\"column_convention\":\"representative\"");
+         out.push_str(",\"rejected_relations\":0}");
++        append_diagnostics(&mut out, &ic);
+         return Ok(Report::Text(out, false));
+     }
+     if !ic.verify_columns() {
+         return Err("invalid relation or factor-base log certificate".into());
+     }
++    mark(Phase::Setup);
+     let mut columns = String::new();
+     columns.push('[');
+     for (i, &(p, l)) in ic.column_words().ok_or("missing logs")?.iter().enumerate() {
+@@ -542,16 +475,17 @@
+         columns.push_str("\"}");
+     }
+     columns.push(']');
+-    dump(b"log_certification\0");
++
++    mark(Phase::TargetDescent);
+     let mut answers = Vec::with_capacity(targets.len());
+     for q in targets {
+         answers.push(ic.solve_target(q));
+     }
+-    dump(b"individual_log\0");
++    mark(Phase::RecoveryCheck);
+     let verified = answers.iter().zip(targets).all(|(s, q)| {
+         s.as_ref().is_some_and(|(d, _, _)| d < &c.subgroup_order && c.mul(c.generator(), d) == *q)
+     });
+-    dump(b"final_verification\0");
++    mark(Phase::Setup);
+     out.push_str("{\"schema_version\":1,\"mode\":\"ic\",\"status\":\"");
+     out.push_str(if verified { "complete" } else { "incomplete" });
+     out.push_str("\",\"fixture\":");
+@@ -615,7 +549,28 @@
+     out.push_str("},\"elapsed_seconds\":");
+     out.push_str(&format!("{}", start.elapsed().as_secs_f64()));
+     out.push('}');
++    append_diagnostics(&mut out, &ic);
+     Ok(Report::Text(out, verified))
++}
++
++
++fn append_diagnostics(out: &mut String, ic: &TinyIc) {
++    let (stats, rank) = ic.stage_diagnostics();
++    let diagnostics = json!({
++        "source_manifest_sha256":koblitz_tiny_ic::source_snapshot(),"field_kernel":ic.field_kernel(),
++        "ordinary_queries":stats.ordinary_queries,"identity_queries":stats.identity_queries,
++        "pdp_attempts":stats.ordinary_queries,
++        "pdp_outcomes":{"verified":stats.pdp_verified,"unresolved":stats.pdp_unresolved,
++            "proved_unsat":0,"timeout":0,"budget":0,"error":0,"lift_rejected":0},
++        "rank_events":stats.rank_events,"final_rank":rank,
++        "matrix_nonzeros":stats.matrix_nonzeros,
++        "matrix_encoding":"u64-le-row-major-including-rhs",
++        "phase_wall_ns":null
++    });
++    assert_eq!(out.pop(), Some('}'));
++    out.push_str(",\"phase_schema\":2,\"executed_method\":{\"pdp\":\"partial_folded_pair_table\",\"collection\":\"additive_walk\",\"relation_la\":\"incremental_gauss\",\"descent\":\"walked_pdp\",\"direct_collision\":false},\"diagnostics\":");
++    out.push_str(&serde_json::to_string(&diagnostics).expect("diagnostics"));
++    out.push('}');
+ }
+ 
+ /// The C entry point directly: without the std runtime's start-up the process
+@@ -625,17 +580,22 @@
+ #[cfg(not(test))]
+ #[no_mangle]
+ pub extern "C" fn main(_argc: i32, _argv: *const *const u8) -> i32 {
++    if option_env!("IC_SOURCE_MANIFEST_SHA256") != koblitz_tiny_ic::source_snapshot() {
++        eprintln!("worker/library source manifest mismatch");
++        return 2;
++    }
+     let mut input = String::new();
+     std::io::stdin().take(1_048_577).read_to_string(&mut input).expect("stdin");
+     let result = if input.len() > 1_048_576 { Err("job too large".into()) } else {
+         serde_json::from_str::<Job>(&input).map_err(|e|e.to_string()).and_then(|job| {
+-            dump(b"startup_and_input\0"); run(&job)
++            run(&job)
+         })
+     };
++    mark(Phase::Setup);
+     let (mut text, success) = match result {
+         Ok(Report::Text(text, success)) => (text.into_bytes(), success),
+         Ok(Report::Tree(report)) => {
+-            let success = matches!(report["status"].as_str(),Some("complete"|"fixture"));
++            let success = matches!(report["status"].as_str(),Some("complete"|"fixture"|"inventory"));
+             (serde_json::to_vec(&report).expect("serialize report"), success)
+         }
+         Err(reason) => (serde_json::to_vec(&json!({"schema_version":1,"status":"error","reason":reason})).expect("serialize report"), false),

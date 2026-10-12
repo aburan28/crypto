@@ -1,0 +1,178 @@
+{
+  "bin": "/tmp/claude-0/-home-user/85b8ff6b-4815-5d55-ad65-d7c1cf044744/scratchpad/mem_calib",
+  "f_hz_runs": [
+    3224772775,
+    3238086595,
+    3284152021
+  ],
+  "f_hz": 3238086595,
+  "latency_ns_by_bytes": {
+    "16384": {
+      "ns_per_load_median_of_runs": 1.2282,
+      "runs": [
+        1.2282,
+        1.2714,
+        1.2197
+      ]
+    },
+    "262144": {
+      "ns_per_load_median_of_runs": 4.5843,
+      "runs": [
+        4.6451,
+        4.2989,
+        4.5843
+      ]
+    },
+    "524288": {
+      "ns_per_load_median_of_runs": 6.176,
+      "runs": [
+        6.176,
+        5.9402,
+        6.5705
+      ]
+    },
+    "1048576": {
+      "ns_per_load_median_of_runs": 18.8165,
+      "runs": [
+        18.8165,
+        15.2163,
+        19.4934
+      ]
+    },
+    "2097152": {
+      "ns_per_load_median_of_runs": 27.3246,
+      "runs": [
+        31.9495,
+        27.3246,
+        25.2817
+      ]
+    },
+    "4194304": {
+      "ns_per_load_median_of_runs": 140.5787,
+      "runs": [
+        144.7563,
+        140.5787,
+        138.3451
+      ]
+    },
+    "6291456": {
+      "ns_per_load_median_of_runs": 144.3047,
+      "runs": [
+        154.6242,
+        143.6471,
+        144.3047
+      ]
+    },
+    "8388608": {
+      "ns_per_load_median_of_runs": 141.3606,
+      "runs": [
+        154.3568,
+        141.3606,
+        140.1793
+      ]
+    },
+    "12582912": {
+      "ns_per_load_median_of_runs": 150.7771,
+      "runs": [
+        150.7771,
+        150.7337,
+        156.7885
+      ]
+    },
+    "16777216": {
+      "ns_per_load_median_of_runs": 157.3449,
+      "runs": [
+        163.5094,
+        157.3449,
+        153.3182
+      ]
+    },
+    "33554432": {
+      "ns_per_load_median_of_runs": 164.191,
+      "runs": [
+        156.0492,
+        169.7018,
+        164.191
+      ]
+    },
+    "67108864": {
+      "ns_per_load_median_of_runs": 185.2256,
+      "runs": [
+        173.0371,
+        187.9795,
+        185.2256
+      ]
+    },
+    "268435456": {
+      "ns_per_load_median_of_runs": 249.9594,
+      "runs": [
+        222.0342,
+        249.9594,
+        263.7022
+      ]
+    },
+    "1073741824": {
+      "ns_per_load_median_of_runs": 356.2518,
+      "runs": [
+        378.5012,
+        356.2518,
+        355.9492
+      ]
+    }
+  },
+  "mlp_256MiB": {
+    "1": {
+      "ns_per_group_step": 233.9639,
+      "ns_per_load": 233.9639,
+      "mlp": 1.0
+    },
+    "2": {
+      "ns_per_group_step": 192.5475,
+      "ns_per_load": 96.27375,
+      "mlp": 2.4301941079473894
+    },
+    "4": {
+      "ns_per_group_step": 194.5357,
+      "ns_per_load": 48.633925,
+      "mlp": 4.81071392037554
+    },
+    "6": {
+      "ns_per_group_step": 189.2478,
+      "ns_per_load": 31.541300000000003,
+      "mlp": 7.417699967978491
+    },
+    "8": {
+      "ns_per_group_step": 206.5932,
+      "ns_per_load": 25.82415,
+      "mlp": 9.059887740738805
+    },
+    "10": {
+      "ns_per_group_step": 250.4203,
+      "ns_per_load": 25.04203,
+      "mlp": 9.34284880259308
+    },
+    "12": {
+      "ns_per_group_step": 308.9,
+      "ns_per_load": 25.741666666666664,
+      "mlp": 9.088918096471351
+    },
+    "16": {
+      "ns_per_group_step": 380.6092,
+      "ns_per_load": 23.788075,
+      "mlp": 9.835343969615028
+    }
+  },
+  "mlp_max": 9.835343969615028,
+  "branch_ns_per_mispredict_runs": [
+    7.7568,
+    7.279,
+    7.3828
+  ],
+  "branch_ns_per_mispredict": 7.3828,
+  "llb_bytes": 67108864,
+  "penalty_ns_over_L1": {
+    "L2_at_512KiB": 4.9478,
+    "LLB_at_knee": 183.9974,
+    "DRAM_at_256MiB": 248.7312
+  }
+}

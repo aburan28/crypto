@@ -1,0 +1,22 @@
+[package]
+name = "endomorphism-search"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Bounded exact endomorphism-ring and small-field map searches"
+
+# Independent small-field arithmetic is a correctness oracle; the SHA-256
+# implementation below is shared with the repository rather than duplicated.
+[workspace]
+
+[dependencies]
+serde_json = "1.0"
+
+[dev-dependencies]
+hex = "0.4"
+
+[lints.clippy]
+too_many_arguments = "allow"
+type_complexity = "allow"
+# Match the root crate's allowance for its shared SHA-256 implementation.
+chunks_exact_to_as_chunks = "allow"

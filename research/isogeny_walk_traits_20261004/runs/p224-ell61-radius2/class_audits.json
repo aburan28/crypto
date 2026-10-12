@@ -1,0 +1,106 @@
+{
+  "scope": "depend only on p and #E, so they hold for every curve in the class; run once on the root",
+  "ecc_safety": {
+    "order_size": {
+      "verdict": "pass"
+    },
+    "order_smoothness": {
+      "verdict": "pass"
+    },
+    "effective_security": {
+      "verdict": "pass"
+    },
+    "generator_on_curve": {
+      "verdict": "pass"
+    },
+    "non_singular": {
+      "verdict": "pass"
+    },
+    "non_supersingular": {
+      "verdict": "pass"
+    },
+    "non_anomalous": {
+      "verdict": "pass"
+    },
+    "multi_target_margin": {
+      "verdict": "pass"
+    },
+    "no_weil_descent": {
+      "verdict": "pass"
+    },
+    "orbit_brittleness": {
+      "verdict": "pass"
+    },
+    "all_pass": true
+  },
+  "structural": {
+    "cm_discriminant_abs_bits": 226,
+    "cm_discriminant_trial_factors": [
+      [3, 3],
+      [29, 1],
+      [79, 1],
+      [7523, 1],
+      [40927, 1]
+    ],
+    "cm_discriminant_residue_bits": 182,
+    "cm_discriminant_residue_is_prime": false,
+    "twist_order": "26959946667150639794667015087019635406658024805628224565337410229703",
+    "twist_trial_factors": [
+      [3, 2],
+      [11, 1],
+      [47, 1]
+    ],
+    "twist_residue_bits": 212,
+    "twist_residue_is_prime": false,
+    "max_twist_leak_bits": "13.000000",
+    "extension_orders": [
+      {
+        "k": 2,
+        "order": "726838724295606890549323807888004534349369386615476240116700155768385621434229879553748419917579960842525946518034910618358838120715883"
+      },
+      {
+        "k": 3,
+        "order": "19595533242629369747791401605606558417916168840777005103833737523772320278058999124770532518872118909583113422950484079058097010119889036403341850618082182448270796658084803820359307365540738451126088084"
+      },
+      {
+        "k": 4,
+        "order": "528294531135665246352339784916516606512637253666918686387364791072902274468695207528647368220835253005876057605824034893785940463478261864850646040849123602962728983009143245208839277993368851868964503409044583757910172127986516224249943836676113751257948764471254108403"
+      },
+      {
+        "k": 6,
+        "order": "383984923062992702193107238768305990569200733184866694780111691214030419033060223506689261154057459785542219643364462011825415798014584338891973799036785426562288113841914088016038051916441630922995919248019053099013920794296460981561741773660231050035707483595245596826731813073251298952615935537346345635508406910313083985743070899198527082305769896676862601966801218952130284819418154174491134912350400"
+      }
+    ],
+    "phase10_target_parity": [0, 1],
+    "phase10_blocked": true,
+    "trial_bound": 1048576
+  },
+  "pkm": {
+    "solinas_weight": 3,
+    "near_power_of_two": true,
+    "trace_small_factors": [],
+    "n_minus_1_small_factors": [
+      [2, 2],
+      [3, 6],
+      [5, 1],
+      [17, 1],
+      [2153, 1]
+    ],
+    "embedding_degree_within_cap": null,
+    "embedding_cap": 16,
+    "divisor_sets": "not run: field above 20 bits",
+    "scores": {
+      "special_prime": "0.200000",
+      "trace_factors": "1.000000",
+      "order_neighbourhood": "0.875000",
+      "embedding_window": "1.000000",
+      "overall": "0.646784"
+    }
+  },
+  "invariance_check": {
+    "audits": "ecc_safety and pkm re-run on walked curves' own models and generators",
+    "curves_sampled": 8,
+    "identical_to_root": true,
+    "differences": []
+  }
+}

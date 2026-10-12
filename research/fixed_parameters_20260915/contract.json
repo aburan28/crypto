@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "purpose": "Fixed-parameter persistence and full-width correctness; no performance or scaling claim",
+  "classification": "engineering capability; accounting diagnostics only",
+  "boundary": "Uniform nonzero-target yield <= min(1, binomial(B+k-1,k)/(r-1)); enough independent rows remain necessary",
+  "reference": "Matched ephemeral workflow with identical parameters, targets and probe streams; matched rho common cost remains unmeasured",
+  "success": "Identical verified scalars and relation transcripts for ephemeral, uninterrupted durable, and interrupted/resumed execution; no rebuilt completed pairs on resume; corrupted or mismatched artifacts rejected",
+  "failure": "Any invalid witness, false success, coordinate truncation, lost committed progress or cold-cost omission invalidates the result",
+  "suite": {
+    "degrees": [5, 9],
+    "summands": [2, 3],
+    "seeds": [101, 103, 107, 1009, 1013, 1019],
+    "holdout_seeds": [1009, 1013, 1019],
+    "repetitions": 3,
+    "attempt_budget": 256,
+    "wide_validation": "Actual ECC2K-130 parameter and basis checks, bounded pair build/resume; planted wide witnesses separately labelled"
+  },
+  "equivalent_suite": "Persistent ONB pair-table workflow does not use the WDSat ANF interface; compare matched complete cold computations under the parent exclusive-cost contract",
+  "parent_contract": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+  "costs": "All field setup, validation, table construction, probes, failed attempts, witness checks, relation/matrix work, scalar verification, persistence and reload costs retained; logical counters have no common conversion",
+  "total_common_operations": null,
+  "S": null,
+  "rho_ratio": null,
+  "floor_ratio": null
+}

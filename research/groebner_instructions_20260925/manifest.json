@@ -1,0 +1,40 @@
+{
+  "round": "groebner-instructions-20260925",
+  "note": "research/notes/ecc2k130/RESEARCH_GROEBNER_STAGE_INSTRUCTIONS.md",
+  "scope": "accounting: the decomposition oracle and whole logarithms priced in instructions retired (callgrind)",
+  "git_head": "31bedbdf51ac189080dca2a6a937c9fc06f1039c",
+  "built_from": "31bedbdf",
+  "measured_sources_unchanged_since_build": true,
+  "sources_sha256_at_head": {
+    "src/cryptanalysis/koblitz_groebner.rs": "315f2d6cf1627d5cffdd71ff570e4f2120a089b2c50edc32bbeba55da86d7daf",
+    "src/cryptanalysis/inherited_f4.rs": "d8badc9a68886215dbc5712abfecb979e84e18471b640f182ec02b15d1c4f3c5",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "43817045e62acbe6cf505bd743823f1597ab5ba38f645d74ceaacf3b7ff03456",
+    "src/cryptanalysis/ic_boundary.rs": "6dc48e45bd71bf313d66df3f06b8376ec617cccc40e1d50c7b8115dab5c493f0",
+    "examples/groebner_stage_bench.rs": "39a52ee9471258e0f03a5b5bd5925b39ceb8c790a5e9c29ba247fbd378c76837",
+    "examples/ir_calibration.rs": "76be4093ad2b07859362922a420d91158d8e15d3615a525613f822deefd72c87"
+  },
+  "binaries_sha256": {
+    "target/release/examples/groebner_stage_bench": "4d945b6962f1866095e9c6effe92cd738d1bfe4ba05533739c16b65681e0e781",
+    "target/release/examples/ir_calibration": "3d94564de4005825773270981a14b969e726b58b7c691812d2502c59056ce98c",
+    "target/release/ic": "01130fbb4eadeb2634fb44b68fc8ebe522880ab919e4ab9d646abffb9e4672da"
+  },
+  "valgrind": "valgrind-3.22.0",
+  "gates_exit_code": 1,
+  "gates_note": "non-zero because G2 failed on one rung (thread scheduling); see tables.md and the note \u00a75.1",
+  "host": {
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "logical_cores": 4,
+    "os": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+    "note": "instructions do not depend on the host; they do depend on the binary"
+  },
+  "arms": {
+    "A0": "KIC_CHAIN_ORDER=layout KIC_LINEAR_ELIM=0 KIC_F4_MULTIPLIERS=occurring KIC_F4_DROP=complete",
+    "A1": "KIC_CHAIN_ORDER=interleaved KIC_LINEAR_ELIM=1 KIC_F4_MULTIPLIERS=occurring KIC_F4_DROP=complete",
+    "A2": "KIC_CHAIN_ORDER=interleaved KIC_LINEAR_ELIM=1 KIC_F4_MULTIPLIERS=support KIC_F4_DROP=complete"
+  },
+  "commands": [
+    "cargo build --release --example groebner_stage_bench --example ir_calibration --bin ic",
+    "research/groebner_instructions_20260925/run.sh",
+    "python3 research/groebner_instructions_20260925/table.py > research/groebner_instructions_20260925/tables.md"
+  ]
+}

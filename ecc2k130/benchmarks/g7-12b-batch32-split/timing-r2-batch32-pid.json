@@ -1,0 +1,21 @@
+{
+  "pid": 340009,
+  "command": [
+    "/home/ubuntu/crypto/ecc2k130/build/g7-split-batch32",
+    "--packed",
+    "--threads",
+    "262143",
+    "--steps",
+    "1024",
+    "--launches",
+    "4",
+    "--verify",
+    "0",
+    "--run-id",
+    "58401",
+    "--bench"
+  ],
+  "binary_sha256": "38d5aba095270e826fb70857a59ffdab11dea3670a6e548a3c48dc962a951823",
+  "launched_at_utc": "2026-09-17T19:07:59.810160+00:00",
+  "source_sha256": "7dee6c1e2686ae51464ae0d0ac93f6431f89a90d5277f9431044b192cbd4269a"
+}

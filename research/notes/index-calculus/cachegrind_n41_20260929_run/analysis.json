@@ -1,0 +1,197 @@
+{
+  "gates": {
+    "G1_correct_all_runs": true,
+    "G2_binary_identity": true,
+    "G2_detail": {
+      "ic": {
+        "2": 12442739904,
+        "8": 12442729065,
+        "32": 12442733563
+      },
+      "rho": {
+        "2": 8185259272,
+        "8": 8185271121,
+        "32": 8185267767
+      }
+    },
+    "G4_monotone_LL_misses": true,
+    "G3_simulator_sanity": true,
+    "G3_rows": [
+      {
+        "control": "chase_512K_k1",
+        "native_extra_ns": 18185852.4,
+        "model_lower_ns": 1802443.8023060244,
+        "model_upper_ns": 103206192.0,
+        "in_band": true,
+        "mid_hi": 3999000,
+        "far_hi": 0,
+        "far_lo": 0
+      },
+      {
+        "control": "chase_8M_k1",
+        "native_extra_ns": 552391067.7,
+        "model_lower_ns": 2586625.541922636,
+        "model_upper_ns": 1010228209.6808,
+        "in_band": true,
+        "mid_hi": -16,
+        "far_hi": 3999016,
+        "far_lo": 64986
+      },
+      {
+        "control": "chase_256M_k1",
+        "native_extra_ns": 989675319.3000001,
+        "model_lower_ns": 50058303.88962735,
+        "model_upper_ns": 1010228209.6808,
+        "in_band": true,
+        "mid_hi": -16,
+        "far_hi": 3999016,
+        "far_lo": 3999016
+      },
+      {
+        "control": "chase_256M_k10",
+        "native_extra_ns": 986321757.9,
+        "model_lower_ns": 500581324.4902711,
+        "model_upper_ns": 10102249837.9874,
+        "in_band": true,
+        "mid_hi": -20,
+        "far_hi": 39990018,
+        "far_lo": 39990018
+      }
+    ],
+    "G5_native_spread": false
+  },
+  "arms": {
+    "ic": {
+      "LL_misses_2_8_32MiB": [
+        15002704,
+        14717476,
+        13662416
+      ],
+      "Ir": 12442739904,
+      "cpu_s_median": 4.301622,
+      "ns_per_Ir": 0.34571340662816125,
+      "D1_misses": 151138402,
+      "data_refs": 2306778789,
+      "D1_MPKI": 12.146713920413392,
+      "LLd_MPKI_2MiB": 1.2057395811333356,
+      "LLd_MPKI_8MiB": 1.1828163341474922,
+      "LLd_MPKI_32MiB": 1.098023112707508,
+      "I1_misses": 307846,
+      "I1_MPKI": 0.024741013826145793,
+      "branches": 1264963454,
+      "mispredicts": 36241529,
+      "BMPKI": 2.9126646767203854,
+      "stall_ns_per_Ir_hi": 0.5869577547163362,
+      "stall_ns_per_Ir_lo": 0.019747788886050107,
+      "branch_ns_per_Ir": 0.021811489431620607
+    },
+    "rho": {
+      "LL_misses_2_8_32MiB": [
+        1206288,
+        974497,
+        664393
+      ],
+      "Ir": 8185259272,
+      "cpu_s_median": 1.19226,
+      "ns_per_Ir": 0.14565940557050688,
+      "D1_misses": 54229699,
+      "data_refs": 1788533135,
+      "D1_MPKI": 6.6252878739599685,
+      "LLd_MPKI_2MiB": 0.14737321811252213,
+      "LLd_MPKI_8MiB": 0.11905511696294621,
+      "LLd_MPKI_32MiB": 0.08116945082885091,
+      "I1_misses": 723886,
+      "I1_MPKI": 0.08843776060658913,
+      "branches": 769855474,
+      "mispredicts": 19538945,
+      "BMPKI": 2.3870893212678674,
+      "stall_ns_per_Ir_hi": 0.20441134063644356,
+      "stall_ns_per_Ir_lo": 0.004423006297770957,
+      "branch_ns_per_Ir": 0.017875718382314425
+    }
+  },
+  "notes": [],
+  "seq_blind_spot_info": {
+    "native_ns_per_line": 7.6439,
+    "model_upper_ns_per_line": 252.61929999999998,
+    "model_lower_ns_per_line": 12.517657118952627
+  },
+  "native": {
+    "cpu_s_runs": {
+      "ic": [
+        4.416460000000001,
+        4.126178,
+        4.301622,
+        4.277433999999998,
+        5.074706999999999
+      ],
+      "rho": [
+        1.19226,
+        1.1328609999999997,
+        1.2372219999999992,
+        1.1536720000000018,
+        1.2715750000000006
+      ]
+    },
+    "spread": {
+      "ic": 0.229880775865704,
+      "rho": 0.12244573694389782
+    },
+    "cpu_s_median": {
+      "ic": 4.301622,
+      "rho": 1.19226
+    },
+    "ns_per_Ir": {
+      "ic": 0.34571340662816125,
+      "rho": 0.14565940557050688
+    },
+    "IPC": {
+      "ic": 0.901132835774583,
+      "rho": 2.1387819156609673
+    },
+    "wall_s_median": {
+      "ic": 4.351175399999875,
+      "rho": 1.2042664579998927
+    },
+    "delta_ns_per_Ir": 0.20005400105765436
+  },
+  "model": {
+    "F_high": 1.9122157620313978,
+    "F_low": 0.07660322966428769,
+    "F_branch_exploratory": 0.019673543285804698,
+    "no_throughput_gap": false,
+    "prices": {
+      "P_mid_low_ns": 4.9818999999999996,
+      "P_mid_high_ns": 25.808,
+      "P_far_low_ns": 138.35909999999998,
+      "P_far_high_ns": 252.61929999999998,
+      "MLP_max": 11.053114707105568,
+      "branch_ns": 7.4885
+    }
+  },
+  "interference": {
+    "slowdown_minus_1": {
+      "ic": -0.015195203668739166,
+      "rho": 0.04607474426496716
+    },
+    "alone_spread": {
+      "ic": 0.11234691669311281,
+      "rho": 0.10670302563362055
+    },
+    "loaded_spread": {
+      "ic": 0.10156757624207358,
+      "rho": 0.2954095056920103
+    },
+    "S": "ambiguous",
+    "cpu_s_alone": {
+      "ic": 4.437058,
+      "rho": 1.0957629999999932
+    },
+    "cpu_s_loaded": {
+      "ic": 4.369635999999992,
+      "rho": 1.146250000000006
+    }
+  },
+  "verdict": "UNDETERMINED (a registered gate failed)",
+  "gates_all_blocking_ok": false
+}

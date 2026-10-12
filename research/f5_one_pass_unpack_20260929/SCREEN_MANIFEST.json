@@ -1,0 +1,17 @@
+{
+  "all_calls_ok": true,
+  "archive_bytes": 27388,
+  "archive_sha256": "b19c3d9efba70c896bcbd6ee17d770b9d8c11571c0ee9a0839ff2d57b0fb5d82",
+  "binary_sha256": "a34fa706b762ad1b5cf3aebd8f603189dd4d9c1c4caf30960bdb8f9e1a115249",
+  "calls": 44,
+  "candidate_patch_sha256": "54a163c81e4c420157e8e5d5d382226edff72ee379adea067e628b89dfa4515a",
+  "candidate_source_head": "cd8611d79843e5890bf6610a7ae9f3b9f766e0c6",
+  "raw_bytes": 469877,
+  "raw_sha256": "0cf1b9e3bc6434f16e4a3ee8984fc7743b7ebd698546d2c24deb84bce55dfb65",
+  "source_sha256": {
+    "examples/f4_f2_bench.rs": "eac0ff2593d011b03ac454f6ebeaac5373e72afbc54d2ca80dc727d5cbaef709",
+    "src/cryptanalysis/gf2_elim.rs": "6fd3f10ef8e681490784c624e703eeb8fa887c5817ec9bdf34844e3f943c7f5c",
+    "src/cryptanalysis/matrix_f5_f2.rs": "e9f6fe6802e8d78c3135c628be974bfe575cae606ff6333f026edccf1216c041"
+  },
+  "status": "complete"
+}

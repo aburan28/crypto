@@ -1,0 +1,10 @@
+{
+  "hypothesis": "Replace cubic divisibility evaluation by its exact residual quadratic image-space condition, reducing support-test cost enough for full 23/29-bit enumeration.",
+  "panels": [{"n":11,"d":5},{"n":23,"d":6},{"n":29,"d":6}],
+  "seconds_per_instance": 5,
+  "targets": "Exact solver_07 targets and modes, no reselection. These were held out from earlier work but are now development data for this adaptive successor. Known-decomposable stratum is planted from random factor triples and is not a natural-yield estimate.",
+  "method": "Same conditioned candidate functions and per-instance batch inversions as solver_07. Precompute images of w²+uw on V for every nonzero u in V, retaining preimages during elimination. For known root z, u=h2+z and v=h1+z*u; membership of v in that image gives both residual roots. Preserve distinctness and exclusions and verify exact signed sum.",
+  "validation": "Every candidate on all 43 affine five-bit targets: returned roots equal previous full cubic support test, including rejections; complete projected oracle equality. Every larger output checked by independent group-law pair oracle.",
+  "falsification": "Any support or oracle mismatch invalidates correctness. Require all larger-field target/mode slots complete within five-second all-phase budgets. Compare expanded field API counts only for matched completed work. Full three-size calibrated Semaev cost goal remains separate.",
+  "limits": "Setup of all image spaces is charged per instance, with elimination updates counted as field additions. Coordinate conversions, comparisons and container operations are outside field API counts; SAT work has no calibrated matching unit. No asymptotic, generic yield or rho speedup claim. Fixed dimension six at larger fields gives sparse bases. Runs occur after solver_07 completes to avoid CPU contention."
+}

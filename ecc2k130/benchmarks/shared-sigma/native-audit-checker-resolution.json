@@ -1,0 +1,62 @@
+{
+  "valid": true,
+  "fixtureOnly": true,
+  "evidenceClass": "Independent resolution review of synthetic checker fixtures; no GPU measurement",
+  "reviewedAtUtc": "2026-09-12T10:59:27.785519+00:00",
+  "checkerSha256": "05dcc5cd23def5e58cacccf1e65a2f461957a1994012866a54dfb1c4fd74a55a",
+  "reviewedCheckerSnapshot": "/private/tmp/ecc2k-shared-sigma-public-checker-review-20260912/checker-fixed-reviewed.py",
+  "initialFailure": {
+    "checkerSha256": "235b6c5544d7fc423f2402ac2fcbc405a1e67e9a50d8e1304cc87d03fabb6b73",
+    "cases": 106,
+    "passed": 101,
+    "unexpectedAcceptances": 5,
+    "report": "/private/tmp/ecc2k-shared-sigma-public-checker-review-20260912/synthetic-test-review.json",
+    "reportSha256": "8837efc91aff6317999d5e6fa098d9bf420eb5c9714b038636e70bb3f5a9bdea",
+    "reviewSha256": "aafc67f8f880f8f1c866af79560026b8ed80c688c7220cb35d25307c5fe17271",
+    "preserved": true
+  },
+  "resolution": {
+    "cases": 106,
+    "passed": 106,
+    "unexpectedAcceptances": 0,
+    "unexpectedRejections": 0,
+    "allFivePriorAcceptanceGapsNowRejected": true,
+    "fixturesUnchangedApartFromOutputFilename": true,
+    "report": "/private/tmp/ecc2k-shared-sigma-public-checker-review-20260912/synthetic-resolution-test-review.json",
+    "reportSha256": "2525a69762e66ca18bb627d3c4ae70470372047854e3632d49cd553150bc866b",
+    "fixtureScript": "/private/tmp/ecc2k-shared-sigma-public-checker-review-20260912/test_checker_resolution.py",
+    "fixtureScriptSha256": "3d3987156dc71c491f96b9ee44c5506df103e4c4d803461de2c485c5b189c815"
+  },
+  "resolvedFindings": [
+    {
+      "function": "evaluate",
+      "resolution": "Integration requires zero exit, no error, no timeout and exact command/transcript."
+    },
+    {
+      "function": "sample",
+      "resolution": "Complete progress tuples match the iteration inventory, enforce zero drops and monotone fresh report/store bounds, and match final fixed reports/stored count."
+    },
+    {
+      "function": "sample",
+      "resolution": "Every recorded scalar progress count lies on the scalarWalks*1024 launch grid and ends at the exact total."
+    }
+  ],
+  "scope": {
+    "productionEditsByReviewer": false,
+    "pendingConstantsChangedByReviewer": false,
+    "compilerOrGpuRun": false,
+    "remoteJobOrLiveLogsRead": false,
+    "publicSharedAuditArtifactRead": false,
+    "fixtureIdentitiesAndRates": "Entirely synthetic",
+    "measurementsEstablished": false
+  },
+  "sourceBinding": {
+    "status": "Pending final commit constants",
+    "remaining": "Root must bind final HEAD, freeze/count/source aggregate and CORE constants and validate prepare() before public audit dispatch."
+  },
+  "limitations": [
+    "These 106 synthetic cases validate checker acceptance/rejection logic only.",
+    "The positive evaluate() fixture supplies a synthetic source context directly; it does not demonstrate prepare()/audit() source binding.",
+    "The 26B checks use invented threshold cases and establish no measured throughput."
+  ]
+}

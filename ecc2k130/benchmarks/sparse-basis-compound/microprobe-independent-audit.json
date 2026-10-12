@@ -1,0 +1,23 @@
+{
+  "schema": "ecc2k130-sparse-table-microprobe-independent-audit-v1",
+  "auditStatus": "PASS",
+  "manifestRehashRequiredExternally": true,
+  "rankedRowsReopened": 35,
+  "warmupsExcluded": 7,
+  "gpuOneMapOutputsChecked": 16908,
+  "jointKeysObserved": 64,
+  "sassKernelsChecked": 7,
+  "maximumRegistersPerThread": 121,
+  "aaMaximumAbsoluteDrift": 0.000554057907,
+  "medianBillionMapApplicationsPerSecond": {
+    "jointVarying": 28.638982584931,
+    "fixedNormal": 64.225526141236,
+    "fixedToBeta": 64.237371779930,
+    "fixedFromBeta": 64.245682301486
+  },
+  "recomputedLookupOnlyBillionUpdatesPerSecond": 11.448092294734,
+  "recomputedLookupRatioToReference": 0.741616365668,
+  "admissionBillionUpdatesPerSecond": 16.208510850000,
+  "lookupPrerequisitePass": false,
+  "conclusion": "The exact three-bit lookup route fails before arithmetic; primitive timing is not whole-walk throughput."
+}

@@ -1,0 +1,152 @@
+{
+  "candidate_id": "IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0h6c8a5463ba52",
+  "record": {
+    "curve": {
+      "coefficients": {
+        "a1": 1,
+        "a2": 1,
+        "a3": 0,
+        "a4": 0,
+        "a6": 1
+      },
+      "cofactor": 2,
+      "curve_id": "EC1N17Ckb1hbbe2b5b6b1e6",
+      "generator": [
+        43693,
+        23339
+      ],
+      "model": "y^2+x*y=x^3+a2*x^2+a6",
+      "order": 131174,
+      "r": 65587,
+      "tag": "kb1",
+      "target_group": "prime-order-subgroup-generated-by-G",
+      "trace": -101
+    },
+    "endomorphism": {
+      "frobenius_order_conductor": null,
+      "order_conductor": null,
+      "volcano_levels": []
+    },
+    "factor_base": {
+      "construction": {
+        "factor_enumeration": "degree-at-most-24",
+        "ordering": "constructor-abscissa-order-then-half-trace-root-and-negative",
+        "recipe": {
+          "dimension": 6,
+          "kind": "standard_subspace"
+        },
+        "sampled_orbit_batch": 8,
+        "subgroup_map": "cofactor-multiplication-remove-identity-deduplicate"
+      },
+      "inventory": {
+        "duplicate_nonidentity_images": 0,
+        "effective_columns": 29,
+        "geometric_order_sha256": "bec87229df1e344b84b9075e8af273dfd2c0ea7ebbfee6277e851d7a6ca5e72a",
+        "geometric_point_count": 63,
+        "geometric_set_sha256": "767db358416f50c46cfbdfbd58bf25f75369806ea33078e9663a00fcacdb71fe",
+        "identity_images": 1,
+        "quotient": "sign-and-Frobenius",
+        "subgroup_map": "cofactor-multiplication",
+        "usable_point_count": 62,
+        "usable_set_sha256": "3461ea31b5bb93065826e34b74658ba916477971c42a212e114387075eb4a2d6"
+      },
+      "nominal_bound": 6
+    },
+    "field": {
+      "basis": "polynomial",
+      "element_encoding": "unsigned-integer-polynomial-bits",
+      "modulus": 131081,
+      "n": 17,
+      "p": 2
+    },
+    "implementation": {
+      "components": [
+        {
+          "role": "full-frozen-Python-interpreter-Rust-source-and-worker-binding",
+          "sha256": "538d9e07acf5c4d9702aa76acf207252c550c3412d0819f5770ff18c6449e8ed"
+        }
+      ],
+      "flags": {
+        "algorithm_execution_binding": {
+          "callable": "run",
+          "interpreter_sha256": "ec11021561db6edca6d1a8a796ddb94ffa0d0074b68e25f093b4bc117f06a70e",
+          "module": "prepared_f5_runtime_v2",
+          "native_components": {
+            "compile_flags": {
+              "features": [],
+              "incremental": false,
+              "profile": "release",
+              "rustflags": ""
+            },
+            "rust_source_manifest_sha256": "09321707259fea2336bca8b81525473e9fa3f1632974e20996c41bbcbb9f972b",
+            "worker_binary_sha256": "2728c99756835b270362b7237747d354276b2ad2ec120fbdd934bcd0e8917b83"
+          },
+          "python_archive_sha256": "0cf69a4f55affa92f85f182496f1706c22042a82ff5927a6792cd118db617dad",
+          "python_manifest_sha256": "721ac20ac87a2e5734d01bc0ff6aa69201dadb0a6a6875b9e101fb8c71f712d8"
+        },
+        "field_kernel": "runtime-capability-gated; observed-and-audited-per-run",
+        "mathematical_preparation_sha256": "edbff76da6442b9f2e5e8235682c9bf1052465f310c765ba8a37d018a60bf107",
+        "native_watchdog_group": "inherit-controller-group-no-native-fork-or-setsid",
+        "observer_policy": "exclusive-owner-thread-v1; all target attempts charged",
+        "online_interval": "first-target-query-through-general-group-scalar-replay",
+        "preparation_policy": "replay-all-ordinary-rows-and-logs-before-online-v1",
+        "reusable_template": "fixed-zero-symbolic-specialization-before-online; no query",
+        "runtime_policy": "default-environment-one-rayon-v1",
+        "stdin_policy": "canonical-registered-math-only-preparation-and-public-point"
+      },
+      "source_manifest_sha256": "538d9e07acf5c4d9702aa76acf207252c550c3412d0819f5770ff18c6449e8ed"
+    },
+    "isogeny": "none",
+    "point_decomposition": {
+      "cache_policy": "process-local-template-and-layout-caches-source-defaults",
+      "encoding": "polynomial-basis-Weil-descent-Boolean-quotient",
+      "equation_order": "source-defined-ascending-layout",
+      "internal_matrix_kernel": "source-default-packed-GF2-dispatch",
+      "limits": {
+        "max_degree": 3,
+        "max_variables": 64,
+        "node_budget": 8192,
+        "split_rule": "lowest-free",
+        "summands": 3
+      },
+      "monomial_order": "degrevlex",
+      "solver": "f5",
+      "source_sha256": "538d9e07acf5c4d9702aa76acf207252c550c3412d0819f5770ff18c6449e8ed",
+      "summands": 3,
+      "summation_polynomial": "S3-chain"
+    },
+    "relation_collection": {
+      "collector": "sample",
+      "dependencies": "retain-unique-even-if-dependent",
+      "duplicates": "scalar-and-sorted-base-indices",
+      "filtering": "first-group-verified-witness",
+      "query_distribution": "reusable-target-independent-preparation",
+      "query_rule": "import-certified-ordinary-rows; no new ordinary queries",
+      "source_sha256": "538d9e07acf5c4d9702aa76acf207252c550c3412d0819f5770ff18c6449e8ed",
+      "stop_rule": "independent-full-rank-and-all-column-log-replay-before-online",
+      "verification": "group-readd-every-relation"
+    },
+    "relation_linear_algebra": {
+      "block_parameters": "none",
+      "matrix_construction": "cofactor-project; sorted-sign-Frobenius-columns; rhs=h*a; sum-signed-lambda-powers",
+      "modulus": 65587,
+      "orbit_quotient": "sign-and-Frobenius",
+      "preconditioner": "none",
+      "rank_criterion": "independent-full-column-rank",
+      "solver": "gauss",
+      "source_sha256": "538d9e07acf5c4d9702aa76acf207252c550c3412d0819f5770ff18c6449e8ed"
+    },
+    "schema_version": 1,
+    "target_descent": {
+      "method": "pdp",
+      "policy": "sampled-aG+bQ",
+      "recursive_solvers": "same-PDP; no-recursion; direct-collision-disabled",
+      "source_sha256": "538d9e07acf5c4d9702aa76acf207252c550c3412d0819f5770ff18c6449e8ed",
+      "stop_rule": {
+        "max_trials": 8
+      },
+      "success_rule": "relation-derived-scalar-and-general-group-replay"
+    }
+  },
+  "record_sha256": "6c8a5463ba52f63a46a194003ee8968da2950a2b2b4d40d541434ddc16504838"
+}

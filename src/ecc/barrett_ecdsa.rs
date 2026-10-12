@@ -132,7 +132,7 @@ pub fn barrett_reduce(d: &BigUint, ctx: &BarrettContext) -> BigUint {
     let mut c4 = d - &c3_m;
     // At most 2 final subtractions.
     while c4 >= ctx.m {
-        c4 = c4 - &ctx.m;
+        c4 -= &ctx.m;
     }
     c4
 }
@@ -193,7 +193,7 @@ impl BarrettEcdsaParams {
 /// [`generate_barrett_prime`] instead.
 pub fn generate_barrett_ecdsa_params(bit_length: u64) -> BarrettEcdsaParams {
     assert!(
-        bit_length % 2 == 0 && bit_length >= 8,
+        bit_length.is_multiple_of(2) && bit_length >= 8,
         "bit_length must be even and ≥ 8"
     );
     let (p, _alpha) = generate_barrett_prime(bit_length);
@@ -233,7 +233,7 @@ pub fn generate_barrett_ecdsa_params(bit_length: u64) -> BarrettEcdsaParams {
 /// `r ∈ (0, 2ᵁ)` with `U = P/2`.  Then `p = NextPrime(α)`.  If
 /// `p − α ≥ 0.7(P − 1)`, the procedure restarts.
 pub fn generate_barrett_prime(bit_length: u64) -> (BigUint, BigUint) {
-    assert!(bit_length % 2 == 0 && bit_length >= 8);
+    assert!(bit_length.is_multiple_of(2) && bit_length >= 8);
     let u = bit_length / 2;
     let two_to_p_minus_1 = BigUint::one() << ((bit_length - 1) as usize);
     let two_to_u_plus_1 = BigUint::one() << ((u + 1) as usize);
@@ -264,7 +264,7 @@ pub fn generate_barrett_prime(bit_length: u64) -> (BigUint, BigUint) {
 /// given the specific random value `r`.  This lets us verify our
 /// implementation against the paper's published test vector.
 pub fn barrett_prime_from_r(bit_length: u64, r: &BigUint) -> (BigUint, BigUint) {
-    assert!(bit_length % 2 == 0 && bit_length >= 8);
+    assert!(bit_length.is_multiple_of(2) && bit_length >= 8);
     let u = bit_length / 2;
     let two_to_p_minus_1 = BigUint::one() << ((bit_length - 1) as usize);
     let two_to_u_plus_1 = BigUint::one() << ((u + 1) as usize);
@@ -278,7 +278,7 @@ pub fn barrett_prime_from_r(bit_length: u64, r: &BigUint) -> (BigUint, BigUint) 
 fn next_prime(alpha: &BigUint) -> BigUint {
     let mut p = alpha.clone();
     if p.is_even() {
-        p = p + BigUint::one();
+        p += BigUint::one();
     }
     loop {
         if crate::asymmetric::rsa::is_prime(&p) {
@@ -330,7 +330,7 @@ fn count_points_brute(a: u64, b: u64, p: u64) -> u64 {
     count
 }
 
-fn mod_pow(mut base: u64, mut exp: u64, m: u64) -> u64 {
+fn mod_pow(base: u64, mut exp: u64, m: u64) -> u64 {
     let mut result: u128 = 1;
     let mut b = base as u128 % m as u128;
     let m128 = m as u128;

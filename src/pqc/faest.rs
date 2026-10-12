@@ -49,7 +49,9 @@
 //! in FAEST.  Plus the engine simplifications in `pqc::mpcith`.  Toy,
 //! not constant-time; see SECURITY.md.
 
-use super::mpcith::{gf_inv, gf_mul, mpcith_prove, mpcith_verify, MpcRelation, MpcithProof, PartyView};
+use super::mpcith::{
+    gf_inv, gf_mul, mpcith_prove, mpcith_verify, MpcRelation, MpcithProof, PartyView,
+};
 use crate::hash::sha3::shake256;
 use crate::utils::random::random_bytes;
 
@@ -61,8 +63,8 @@ pub const WITNESS_LEN: usize = 2 * BLOCK;
 /// Public key: plaintext, ciphertext, and the public linear layer.
 #[derive(Clone)]
 pub struct FaestPublicKey {
-    pub x: Vec<u8>,       // plaintext (BLOCK bytes)
-    pub y: Vec<u8>,       // ciphertext = F_k(x)
+    pub x: Vec<u8>,        // plaintext (BLOCK bytes)
+    pub y: Vec<u8>,        // ciphertext = F_k(x)
     pub lin: Vec<Vec<u8>>, // BLOCK×BLOCK invertible GF(256) matrix L
 }
 
@@ -84,7 +86,12 @@ fn sbox(a: u8) -> u8 {
 
 fn apply_linear(lin: &[Vec<u8>], v: &[u8]) -> Vec<u8> {
     (0..BLOCK)
-        .map(|i| lin[i].iter().zip(v).fold(0u8, |acc, (&lij, &vj)| acc ^ gf_mul(lij, vj)))
+        .map(|i| {
+            lin[i]
+                .iter()
+                .zip(v)
+                .fold(0u8, |acc, (&lij, &vj)| acc ^ gf_mul(lij, vj))
+        })
         .collect()
 }
 
@@ -112,7 +119,9 @@ fn gf_matrix_invertible(a: &[Vec<u8>]) -> bool {
     let n = a.len();
     let mut m: Vec<Vec<u8>> = a.to_vec();
     for col in 0..n {
-        let Some(pivot) = (col..n).find(|&r| m[r][col] != 0) else { return false };
+        let Some(pivot) = (col..n).find(|&r| m[r][col] != 0) else {
+            return false;
+        };
         m.swap(col, pivot);
         let inv = gf_inv(m[col][col]);
         for j in 0..n {
@@ -164,7 +173,11 @@ impl MpcRelation for AesRelation {
         let u: Vec<u8> = (0..BLOCK).map(|j| gf_mul(eps[j], s_in[j])).collect();
         let v = s_out.to_vec();
         // Target Σ_j ε_j·1 is a public constant → leader's share only.
-        let t = if leader { eps.iter().fold(0u8, |a, &e| a ^ e) } else { 0 };
+        let t = if leader {
+            eps.iter().fold(0u8, |a, &e| a ^ e)
+        } else {
+            0
+        };
 
         // Linear check: reconstructed ciphertext must equal y.
         // L(s_out) ⊕ k, compared to y (public → leader subtracts).
@@ -219,12 +232,20 @@ fn statement(pk: &FaestPublicKey, msg: &[u8]) -> Vec<u8> {
 }
 
 pub fn faest_sign(pk: &FaestPublicKey, sk: &FaestSecretKey, msg: &[u8]) -> FaestSignature {
-    let rel = AesRelation { x: pk.x.clone(), y: pk.y.clone(), lin: pk.lin.clone() };
+    let rel = AesRelation {
+        x: pk.x.clone(),
+        y: pk.y.clone(),
+        lin: pk.lin.clone(),
+    };
     mpcith_prove(&rel, &extended_witness(pk, sk), &statement(pk, msg))
 }
 
 pub fn faest_verify(pk: &FaestPublicKey, msg: &[u8], sig: &FaestSignature) -> bool {
-    let rel = AesRelation { x: pk.x.clone(), y: pk.y.clone(), lin: pk.lin.clone() };
+    let rel = AesRelation {
+        x: pk.x.clone(),
+        y: pk.y.clone(),
+        lin: pk.lin.clone(),
+    };
     mpcith_verify(&rel, &statement(pk, msg), sig)
 }
 
@@ -274,7 +295,11 @@ mod tests {
         let (pk, sk) = faest_keygen();
         let mut bad = sk.clone();
         bad.k[0] ^= 0x3c;
-        let rel = AesRelation { x: pk.x.clone(), y: pk.y.clone(), lin: pk.lin.clone() };
+        let rel = AesRelation {
+            x: pk.x.clone(),
+            y: pk.y.clone(),
+            lin: pk.lin.clone(),
+        };
         let msg = statement(&pk, b"msg");
         // Extended witness recomputed from the *bad* key so the S-box
         // relation still holds internally, but the ciphertext ≠ y.

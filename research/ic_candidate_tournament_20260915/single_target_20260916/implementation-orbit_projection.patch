@@ -1,0 +1,67 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -4480,16 +4480,59 @@
+ /// about 1.6 million point operations — 8.2 seconds in big-integer
+ /// arithmetic, and a large share of a precompute that no longer spends
+ /// most of its time collecting.
++fn project_by_signed_orbit(
++    kc: &KoblitzCurve, fb: &FrobeniusFactorBase, fc: &FastCurve,
++) -> Option<Vec<FastPoint>> {
++    if fb.signed_orbit_of.len() != fb.points.len() { return None; }
++    let mut conjugates = Vec::with_capacity(fb.signed_orbits.len());
++    for orbit in &fb.signed_orbits {
++        let representative = fb.points.get(*orbit.first()?)?;
++        let mut current = fc.mul(fc.lift(representative), &kc.cofactor);
++        let mut powers = Vec::with_capacity(kc.n as usize);
++        for _ in 0..kc.n {
++            powers.push(current);
++            current = fc.frobenius_k(current, kc.k);
++        }
++        conjugates.push(powers);
++    }
++    fb.signed_orbit_of.iter().map(|&(orbit, k, negated)| {
++        let point = *conjugates.get(orbit)?.get(k as usize)?;
++        Some(if negated { fc.neg(point) } else { point })
++    }).collect()
++}
++
++#[cfg(test)]
++mod single_target_projection_equivalence {
++    use super::*;
++    #[test]
++    fn signed_orbit_projection_matches_every_point() {
++        for (n, a) in [(13, 0), (17, 1), (19, 0), (19, 1), (23, 0)] {
++            let kc = KoblitzCurve::new(a, n).unwrap();
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            for seed in [7, 43, 97] {
++                for count in [4, 6] {
++                    let mut fb = build_subgroup_orbit_factor_base(&kc, seed, count*n as usize).unwrap();
++                    let expected: Vec<_> = fb.points.iter()
++                        .map(|p| fc.mul(fc.lift(p), &kc.cofactor).pack()).collect();
++                    let actual: Vec<_> = project_by_signed_orbit(&kc, &fb, &fc).unwrap()
++                        .iter().map(|p| p.pack()).collect();
++                    assert_eq!(actual, expected);
++                    fb.signed_orbit_of[0].0 = usize::MAX;
++                    assert!(project_by_signed_orbit(&kc, &fb, &fc).is_none());
++                }
++            }
++        }
++    }
++}
++
+ fn projected_signed_orbit_map_fast(
+     kc: &KoblitzCurve,
+     fb: &FrobeniusFactorBase,
+ ) -> Option<ProjectedSignedOrbitMap> {
+     let fc = FastCurve::new(&kc.curve)?;
+-    let projected: Vec<FastPoint> = fb
+-        .points
+-        .par_iter()
+-        .map(|point| fc.mul(fc.lift(point), &kc.cofactor))
+-        .collect();
++    let projected = project_by_signed_orbit(kc, fb, &fc).unwrap_or_else(|| {
++        fb.points.iter().map(|point| fc.mul(fc.lift(point), &kc.cofactor)).collect()
++    });
+     let mut representatives: Vec<FastPoint> = Vec::new();
+     let mut seen: HashSet<u64> = HashSet::new();
+     for &point in &projected {

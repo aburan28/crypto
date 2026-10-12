@@ -1,0 +1,180 @@
+{
+  "K": 500,
+  "autolab_run_id": "gha-37156392134-1",
+  "beat_id": "koblitz.compact_orbit.n61_single_target",
+  "candidate_id": "IC1N61Ckb0fb61000PDP4s3rootindexRCguidedLAdenseTDsingleISO0hee23949028fe",
+  "candidate_manifest_sha256": "ee23949028fe506398db04cd430fd436c9c96b284542bdb2ce0bc7f7f3c84f0e",
+  "claim_boundary": "one public point on EC1N61Ce0hd8c15448081e (a=0, n=61); the IC's reusable setup is outside its online interval and is reported beside it",
+  "claim_boundary_non_claims": [
+    "one public target per row; no multi-target or batch result",
+    "the IC's reusable setup (base, index, rank stage, linear algebra) is outside its online interval, is paid again in every process, and is reported beside the claim with the cold ratio",
+    "rho has no precomputed distinguished-point table; Bernstein-Lange is a different reference and is not measured",
+    "no key recovery; public synthetic hash-to-curve points only; no asymptotic claim",
+    "out-of-process replay on the same host; independent-host validation is outstanding",
+    "wall time on one host (x86_64); no claim for other hardware classes"
+  ],
+  "cold": {
+    "cold_ratio_ic_over_rho": 96.48111145907667,
+    "ic_in_process_to_solved_ms": 22100.736301,
+    "ic_process_wall_s": 22.119583433000116,
+    "ic_setup_ms": 22094.793875,
+    "ic_timing_ms": {
+      "base_load": 22.238532,
+      "index_build": 8425.269377999999,
+      "linear_algebra": 0.6300509999999999,
+      "normal_basis_and_selftest": 2.2349200000000002,
+      "process_total": 22100.997150000003,
+      "rank_stage": 13644.348048,
+      "setup_total": 8449.744031,
+      "target_median": 5.9419759999999995,
+      "targets_total": 6.203035
+    },
+    "rho_in_process_to_solved_ms": 229.068011,
+    "rho_process_wall_s": 0.23164183599988064
+  },
+  "counts": {
+    "ic_probes": 19802,
+    "ic_relation_checks": 1,
+    "rho_walk_steps": 987222
+  },
+  "curve_id": "EC1N61Ce0hd8c15448081e",
+  "executable_or_source_hash": {
+    "frozen_ic_binary_sha256": "59fdc159ae56fdbfd5f341273aefc7ef706f03ee5b521f42506624549ddbbf88",
+    "frozen_rho_binary_sha256": "44bc5b29e7e6a5cbe01b62c95920edfd7bdf7948d291df3fca514d75a1c99fb4",
+    "git_head": "b5077d433cb2d14c7447b42479b50bddab8ba930",
+    "ic_binary_sha256": "14e5498e76731f80d7d7be73767c8e14a7a909d7ffe3d3cbdd53781e247ff247",
+    "ic_source_manifest_sha256": "d01b26af5abd69727c331f88c3265982efd5f473d4e13fa9209f802f2e81f346",
+    "rho_binary_sha256": "e4fc1289462f0e55b409c8d74d2f634967f0268e0884c7231a2186480af062e1",
+    "rho_source_manifest_sha256": "6e922673c9d00d51db9b2e57c13d89d8e2cf6f7f6c330da525813c313a07f98c",
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+  },
+  "fixture_hash": "70257fc4a357c7a3eeb9524ec182d4549b8b9c047624dc01711aec15454e4601",
+  "host_id": {
+    "cpu": "x86_64",
+    "cpu_count": 4,
+    "machine": "x86_64",
+    "node": "runnervm8df0l",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "ic_online_phase_ms": {
+    "T_target_PDP_ms": 5.910165999999999,
+    "T_target_descent_ms": 0.000751,
+    "T_target_query_ms": 3.1e-05,
+    "T_target_recovery_check_ms": 0.024997000000000002,
+    "T_target_relation_check_ms": 0.006031000000000001
+  },
+  "ic_online_wall_ms": 5.9419759999999995,
+  "ic_replay_certificate_sha256": "227bbcd2fe9277cb165033c1ff35e2dd784094bae585fbb8602b1a2939df3f13",
+  "ic_resource_envelope": {
+    "cpus_allowed_list": "3",
+    "isolation": "children pinned to CPU 3 with taskset; wrap in tools/isolated_bench.py reserve for section-10 evidence",
+    "memory_cap": "none",
+    "process": "one process per arm per workload; the IC rebuilds its reusable setup in every process and rho starts with an empty distinguished-point table",
+    "rayon_threads": 1,
+    "worker_count": 1
+  },
+  "ic_scalar_verified": true,
+  "ic_target_hash": "639547afdda877146f5c9a34203d91549ba9a8d792594f1dcb9ae2bc9f17fabd",
+  "independent_replay_pointer": "research/sat_factor_base_review_20260908/autolab/runs/gha-37156392134-1/artifacts/claims/w077.replay.json",
+  "independent_validation": true,
+  "independent_validation_scope": "certificates replayed out of process in oracle.py on the same host; independent-host replay outstanding",
+  "memory": {
+    "ic_max_rss_bytes": 1452269568,
+    "rho_max_rss_bytes": 33124352
+  },
+  "n_or_bits": {
+    "a": 0,
+    "n": 61,
+    "subgroup_order_bits": 47.21
+  },
+  "online_interval": {
+    "ic_included_stages": [
+      "target_query",
+      "target_PDP",
+      "target_relation_check",
+      "target_descent",
+      "target_recovery_check"
+    ],
+    "ic_phase_map": {
+      "target_PDP": "target_pdp_ms",
+      "target_descent": "target_descent_ms",
+      "target_query": "target_query_ms",
+      "target_recovery_check": "target_recovery_check_ms",
+      "target_relation_check": "target_relation_check_ms"
+    },
+    "ic_start_event": "target_query_begin: the first operation on the public point (its scan-origin hash), after base, index, rank stage and linear algebra are complete",
+    "ic_stop_event": "recovery_check_end: [d]G = Q evaluated in the producer",
+    "replay": "both certificates replayed after the run in oracle.py, outside both producers",
+    "rho_included_stages": [
+      "walk",
+      "collision",
+      "recovery_check"
+    ],
+    "rho_phase_map": {
+      "recovery_check_ms": [
+        "recovery_check"
+      ],
+      "walk_and_collision_ms": [
+        "walk",
+        "collision"
+      ]
+    },
+    "rho_start_event": "after_target_built: the walk's first start [c]G + Q, after the curve, jump table and target point are ready",
+    "rho_stop_event": "recovery_check_true: a distinguished-point collision returned d with [d]G = Q"
+  },
+  "online_speedup": 38.17519912567806,
+  "regime": "koblitz",
+  "resource_caps": {
+    "cpus": "3",
+    "memory": "none",
+    "rayon_threads": 1
+  },
+  "result_class": "single_target_online",
+  "rho_online_phase_ms": {
+    "recovery_check_ms": 0.011782,
+    "walk_and_collision_ms": 226.824335
+  },
+  "rho_online_wall_ms": 226.836117,
+  "rho_policy": {
+    "automorphism_size": 122,
+    "collision_policy": "distinguished points in one table that starts empty in every process; a stored point reached with a different coefficient of Q gives d, checked as [d]G = Q",
+    "distinguished_point_bits": 4,
+    "distinguished_point_memory_bytes": 2177802,
+    "lanes": 32,
+    "rung": 3,
+    "seed": 610077,
+    "walk_policy": "rung 3: 32 lanes in lockstep, one batched inversion per step; signed-Frobenius class representative (least normal-basis rotation, sign by y); 32 r-adding jumps in G; stride starts [c]G + Q",
+    "worker_count": 1
+  },
+  "rho_reference_uid": "urn:ec-candidate:1:sha256:a7cbb50ee4fa1ce2ce9c90d1ad470191b81b75fe5f8794dd732d6d5af5fe193f",
+  "rho_replay_certificate_sha256": "7fd24526597818ae67531d50829fc9a5ac384920c20d5b0a88e5449462aea600",
+  "rho_resource_envelope": {
+    "cpus_allowed_list": "3",
+    "isolation": "children pinned to CPU 3 with taskset; wrap in tools/isolated_bench.py reserve for section-10 evidence",
+    "memory_cap": "none",
+    "process": "one process per arm per workload; the IC rebuilds its reusable setup in every process and rho starts with an empty distinguished-point table",
+    "rayon_threads": 1,
+    "worker_count": 1
+  },
+  "rho_scalar_verified": true,
+  "rho_target_hash": "639547afdda877146f5c9a34203d91549ba9a8d792594f1dcb9ae2bc9f17fabd",
+  "run_id": "IC1N61Ckb0fb61000PDP4s3rootindexRCguidedLAdenseTDsingleISO0hee23949028feW24f1f472d962R1",
+  "same_resource_envelope": true,
+  "schema_version": 2,
+  "seeds": {
+    "ic_rank_seed": 7,
+    "rho_seed": 610077,
+    "target_domain": "kic-n61-single-target-public-point-v1",
+    "target_seed": 77
+  },
+  "stage": "vs_rho",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "target_count": 1,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "timing_class": "single_target_online_wall",
+  "verdict": "index calculus online faster",
+  "workload_id": "24f1f472d962",
+  "workload_index": 77,
+  "workload_manifest_sha256": "24f1f472d9621c9fb47cd873f812d3f0c2a38c40230f8a75a781ddae30be3da1"
+}

@@ -7,6 +7,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <cstdlib>
 #include <cstring>
 #include <cstdio>
 
@@ -17,6 +18,7 @@ struct RhoHost {
     affine_pt P, Q;
     std::vector<affine_pt> table;   /* M[j] */
     std::vector<fp256> tc, td;      /* c_j, d_j in Fn internal form */
+    fp256 lam[3];                   /* lambda^k in Fn, the scalar action of x -> beta^k x */
     std::unordered_map<std::string, rho_dp> seen;
     unsigned long long useless_collisions = 0;
 
@@ -27,6 +29,21 @@ struct RhoHost {
     }
 
     void build_table() {
+        if (!rho_fold_supported(prm.fold)) {
+            fprintf(stderr, "rho: fold %u is not available on %s (fold 6 needs a j = 0 curve)\n",
+                    prm.fold, CURVE_NAME);
+            abort();
+        }
+        lam[0] = Fn::one();
+#if CURVE_HAS_AUT6
+        {
+            const uint32_t l[8] = CURVE_LAMBDA_LIMBS;
+            lam[1] = Fn::from_limbs(l);
+            lam[2] = Fn::mul(lam[1], lam[1]);
+        }
+#else
+        lam[1] = lam[2] = lam[0];
+#endif
         uint32_t R = 1u << prm.r_bits;
         table.resize(R); tc.resize(R); td.resize(R);
         for (uint32_t j = 0; j < R; j++) {
@@ -38,7 +55,15 @@ struct RhoHost {
         }
     }
 
-    /* Replay walk (walk, restart) for `steps` steps, tracking the
+    /* (a, b) <- mu (a, b), where mu = (-1)^negated lambda^k is the scalar
+     * action of the automorphism named by aut code `code`. */
+    void apply_aut(fp256 &a, fp256 &b, int code) const {
+        int k = code >> 1;
+        if (k) { a = Fn::mul(a, lam[k]); b = Fn::mul(b, lam[k]); }
+        if (code & 1) { a = Fn::neg(a); b = Fn::neg(b); }
+    }
+
+    /* Replay walk (walk, restart) for `steps` counted steps, tracking the
      * coefficients of the current point as a*P + b*Q.  Uses the same
      * phase_a / phase_b pair as the kernel, so the trajectories -- cycle
      * escapes included -- cannot diverge.  Returns false if the walk hits
@@ -53,36 +78,27 @@ struct RhoHost {
         if (st.P.inf) return false;
         a = scalar_to_fn(sa);
         b = scalar_to_fn(sb);
-        if (rho_canonical(st.P, prm)) { a = Fn::neg(a); b = Fn::neg(b); }
-        rho_set_hprev(st, st.P);
-        st.escape = 0;
+        apply_aut(a, b, rho_canonical(st.P, prm));
+        rho_reset_cycle(st, st.P);
 
         uint32_t done = 0;
-        /* Cycle escapes consume an iteration without advancing the step
-         * counter, so bound the loop generously rather than by `steps`. */
+        /* Steps inside a fruitless cycle do not advance the step counter,
+         * so bound the loop generously rather than by `steps`. */
         for (uint64_t iter = 0; done < steps; iter++) {
             if (iter > (uint64_t)steps * 4 + 1024) return false;
             fp256 den;
             uint32_t j;
             int m = rho_phase_a(st, table.data(), prm, den, j);
             if (m == RHO_MODE_INF) return false;
-            int neg, esc_prev;
-            int advanced = rho_phase_b(st, table.data(), prm, m, j, Fp::inv(den),
-                                       &neg, &esc_prev);
-            fp256 na, nb;
+            int aut;
+            int step = rho_phase_b(st, table.data(), prm, m, j, Fp::inv(den), &aut);
             if (m == RHO_MODE_ESCAPE) {
-                na = Fn::dbl(a); nb = Fn::dbl(b);
+                a = Fn::dbl(a); b = Fn::dbl(b);
             } else {
-                na = Fn::add(a, tc[j]); nb = Fn::add(b, td[j]);
+                a = Fn::add(a, tc[j]); b = Fn::add(b, td[j]);
             }
-            if (neg) { na = Fn::neg(na); nb = Fn::neg(nb); }
-            if (advanced) {
-                a = na; b = nb;
-                done++;
-            } else if (esc_prev) {
-                /* the walk rewound to the newly computed point */
-                a = na; b = nb;
-            }
+            apply_aut(a, b, aut);
+            if (step == RHO_STEP_ADVANCED) done++;
         }
         end = st.P;
         return true;
@@ -111,8 +127,9 @@ struct RhoHost {
             fprintf(stderr, "rho: replay mismatch -- kernel and host walks disagree\n");
             return false;
         }
-        /* e1 = s * e2 with s = +-1:  a1 + b1 k = s (a2 + b2 k)
-         *   =>  k = (s a2 - a1) / (b1 - s b2) */
+        /* Same x, so e1 = s * e2 with s = +-1 (both are orbit representatives
+         * whenever the walk is folded, so s = +1 then):
+         *   a1 + b1 k = s (a2 + b2 k)  =>  k = (s a2 - a1) / (b1 - s b2) */
         int same_sign = Fp::eq(e1.y, e2.y);
         fp256 sa2 = same_sign ? a2 : Fn::neg(a2);
         fp256 sb2 = same_sign ? b2 : Fn::neg(b2);

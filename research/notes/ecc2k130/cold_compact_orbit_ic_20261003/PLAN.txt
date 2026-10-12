@@ -1,0 +1,12 @@
+spec ECS1h82c48278615e (n37 cold compact-orbit source against strong rho): 72 executions
+  arm rho-strong       reference  ECM1hb6123afffc07 rho.signed_frobenius_strong {"dp_bits": "4", "lanes": "32", "step_cap_factor": "2000"}
+  arm ic-legacy-setup  baseline   ECM1hd9f51c51ee47 ic.pipeline {"factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000", "linalg": "incremental-gauss", "max_trials": "1000000", "oracle": "mitm-frobenius:m=3", "solver": "", "solver_budget_seconds": "0", "targets": "walk"}
+  arm ic-counted-setup candidate  ECM1h722cc052b4a2 ic.pipeline {"factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000", "linalg": "incremental-gauss", "max_trials": "1000000", "oracle": "mitm-frobenius-counted:m=3", "solver": "", "solver_budget_seconds": "0", "targets": "walk"}
+  workload W8a727ef60282 icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload W928ce8e9f736 icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload W790c41bebda8 icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload W5b6a0d3da5cf icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload Wb555dea2e333 icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload W651d55346dc8 icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload W5d12b17dadbb icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3
+  workload W5c6fc71fcae9 icv1-f2m37-tm534059-32aad96b r=2^27.78 A=74 registered=true ec1=EC1N37Ce0h0c51aa4aa7c3

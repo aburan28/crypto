@@ -1,0 +1,11 @@
+[package]
+name = "hamming_pdp"
+version = "0.1.0"
+edition = "2021"
+description = "Hamming-ideal (La Scala–Marchesin–Tiwari) encodings of a weight-bounded factor base for binary Semaev point decomposition, solved by a truncated Boolean F4 inside MultiSolve"
+
+[dependencies]
+
+[profile.release]
+opt-level = 3
+debug = 1

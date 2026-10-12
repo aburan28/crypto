@@ -1,0 +1,20 @@
+{
+  "changed_main_paths_since_release": [
+    "examples/f4_f2_bench.rs",
+    "examples/f4_fp_bench.rs",
+    "src/cryptanalysis/matrix_f5_f2.rs",
+    "src/cryptanalysis/pq_f4_f2.rs"
+  ],
+  "classification": "SUPERSEDED_EXACT_MAIN_RELEASE_BEFORE_OUTCOME",
+  "frozen_sha256": "c61cb827e78d33a4ed47ddb286e44d143cecf04cccc0ca36f509d88d973f6eae",
+  "measured_children_started": 0,
+  "observed_main_change_pr": 829,
+  "observed_main_head": "66fde6a1e6990358e00b72a0cef54c9fe1c230d3",
+  "outcome_receipt": null,
+  "protocol_sha256": "46a2bb1b83e55233430baaa18e4c7f86227ce73af6ed58975f686671e563bdf1",
+  "reason": "Exact-main equality would reject unrelated monotonic main advancement; release is superseded before measured dispatch.",
+  "recorded_utc": "2026-09-26T04:38:19.709290+00:00",
+  "release_main_head": "6c69273aa1b5011897ea3dd493a3ce00d55bd20a",
+  "release_pr_head": "96fd75a59eb413f6dce995c4fd5cdc8c00b77855",
+  "schema": "k0-dag-dimacs-preoutcome-release-hold-v1"
+}

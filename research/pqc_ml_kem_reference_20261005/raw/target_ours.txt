@@ -1,0 +1,54 @@
+kilocycles (rdtsc), median of 600 samples per cell, ABC interleaved
+| set | op | base | cand | prepared | base/cand | base/prepared |
+|---|---|---:|---:|---:|---:|---:|
+| 512 | keygen | 47.9 | 17.6 | 18.7 | 2.72x | 2.56x |
+| 512 | encaps | 55.2 | 15.9 | 8.2 | 3.47x | 6.72x |
+| 512 | decaps | 72.0 | 21.2 | 16.7 | 3.39x | 4.30x |
+| 512 | prep-ek | | 7.7 | | | |
+| 512 | prep-dk | | 5.6 | | | |
+| 768 | keygen | 82.4 | 29.2 | 29.6 | 2.83x | 2.79x |
+| 768 | encaps | 95.1 | 26.0 | 9.7 | 3.66x | 9.79x |
+| 768 | decaps | 118.1 | 33.0 | 21.7 | 3.58x | 5.44x |
+| 768 | prep-ek | | 16.1 | | | |
+| 768 | prep-dk | | 12.4 | | | |
+| 1024 | keygen | 139.0 | 43.7 | 52.3 | 3.18x | 2.66x |
+| 1024 | encaps | 228.3 | 44.7 | 17.0 | 5.11x | 13.43x |
+| 1024 | decaps | 181.9 | 44.4 | 29.2 | 4.10x | 6.23x |
+| 1024 | prep-ek | | 21.4 | | | |
+| 1024 | prep-dk | | 16.1 | | | |
+kilocycles (rdtsc), median of 600 samples per cell, ABC interleaved
+| set | op | base | cand | prepared | base/cand | base/prepared |
+|---|---|---:|---:|---:|---:|---:|
+| 512 | keygen | 47.6 | 17.2 | 18.9 | 2.77x | 2.52x |
+| 512 | encaps | 54.6 | 15.8 | 8.3 | 3.45x | 6.54x |
+| 512 | decaps | 73.1 | 21.2 | 16.7 | 3.45x | 4.37x |
+| 512 | prep-ek | | 7.7 | | | |
+| 512 | prep-dk | | 5.7 | | | |
+| 768 | keygen | 83.2 | 28.0 | 29.5 | 2.97x | 2.82x |
+| 768 | encaps | 95.0 | 25.8 | 9.9 | 3.68x | 9.62x |
+| 768 | decaps | 121.5 | 33.3 | 21.9 | 3.65x | 5.56x |
+| 768 | prep-ek | | 16.1 | | | |
+| 768 | prep-dk | | 12.5 | | | |
+| 1024 | keygen | 133.5 | 35.9 | 37.5 | 3.72x | 3.56x |
+| 1024 | encaps | 148.5 | 34.4 | 13.2 | 4.32x | 11.26x |
+| 1024 | decaps | 180.1 | 44.2 | 29.2 | 4.07x | 6.17x |
+| 1024 | prep-ek | | 21.4 | | | |
+| 1024 | prep-dk | | 16.2 | | | |
+kilocycles (rdtsc), median of 600 samples per cell, ABC interleaved
+| set | op | base | cand | prepared | base/cand | base/prepared |
+|---|---|---:|---:|---:|---:|---:|
+| 512 | keygen | 47.2 | 17.1 | 18.7 | 2.76x | 2.53x |
+| 512 | encaps | 54.1 | 17.1 | 8.2 | 3.17x | 6.57x |
+| 512 | decaps | 71.8 | 21.2 | 16.7 | 3.39x | 4.29x |
+| 512 | prep-ek | | 7.7 | | | |
+| 512 | prep-dk | | 5.6 | | | |
+| 768 | keygen | 83.0 | 28.1 | 29.4 | 2.95x | 2.82x |
+| 768 | encaps | 95.3 | 26.9 | 9.7 | 3.55x | 9.80x |
+| 768 | decaps | 119.1 | 33.2 | 21.8 | 3.58x | 5.46x |
+| 768 | prep-ek | | 16.1 | | | |
+| 768 | prep-dk | | 12.4 | | | |
+| 1024 | keygen | 133.7 | 36.1 | 37.5 | 3.70x | 3.57x |
+| 1024 | encaps | 147.6 | 35.8 | 12.9 | 4.12x | 11.42x |
+| 1024 | decaps | 180.7 | 44.6 | 29.3 | 4.05x | 6.17x |
+| 1024 | prep-ek | | 21.6 | | | |
+| 1024 | prep-dk | | 16.1 | | | |

@@ -1,0 +1,71 @@
+{
+  "n": 3,
+  "generators": [
+    [
+      1,
+      0
+    ]
+  ],
+  "result": {
+    "complete": true,
+    "reason": null,
+    "stats": {
+      "submitted": 5,
+      "products_formed": 12,
+      "peak_pending_terms": 4,
+      "max_scheduled_degree": 3,
+      "rank": 4,
+      "stored_terms": 8,
+      "packed_payload_bytes": 32,
+      "xor_steps": 1,
+      "peak_row_terms": 2,
+      "pending_terms_at_stop": 0
+    },
+    "certificate": {
+      "n": 3,
+      "rows": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          6,
+          7
+        ]
+      ],
+      "origins": [
+        [
+          "input",
+          0
+        ],
+        [
+          "row_variable",
+          0,
+          1
+        ],
+        [
+          "row_variable",
+          0,
+          2
+        ],
+        [
+          "row_variable",
+          1,
+          2
+        ]
+      ]
+    }
+  },
+  "verification": {
+    "rank": 4,
+    "verified": "exact_ideal"
+  }
+}

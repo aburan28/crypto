@@ -1,0 +1,25 @@
+test_constant_refutation_is_detected (test_f5_production_control.ProductionControlTests.test_constant_refutation_is_detected) ... ok
+test_forces_require_linear_combinations (test_f5_production_control.ProductionControlTests.test_forces_require_linear_combinations) ... ok
+test_nonconstant_consequence_does_not_become_a_force (test_f5_production_control.ProductionControlTests.test_nonconstant_consequence_does_not_become_a_force) ... ok
+test_nonlinear_decisive_rows_are_sound_on_every_exact_model (test_f5_production_control.ProductionControlTests.test_nonlinear_decisive_rows_are_sound_on_every_exact_model) ... ok
+test_specialization_matches_truth_table_with_cancellation (test_f5_production_control.ProductionControlTests.test_specialization_matches_truth_table_with_cancellation) ... ok
+test_actual_native_evidence_replays (test_f5_production_control.TransportedProductionTests.test_actual_native_evidence_replays) ... ok
+test_binary_kernel_and_raw_export_faults_reject (test_f5_production_control.TransportedProductionTests.test_binary_kernel_and_raw_export_faults_reject) ... 
+  test_binary_kernel_and_raw_export_faults_reject (test_f5_production_control.TransportedProductionTests.test_binary_kernel_and_raw_export_faults_reject) (name='root-source.tar.gz') ... FAIL
+test_changed_native_invocation_rejects (test_f5_production_control.TransportedProductionTests.test_changed_native_invocation_rejects) ... ok
+test_external_archive_seal_is_required (test_f5_production_control.TransportedProductionTests.test_external_archive_seal_is_required) ... ok
+test_missing_forced_consequence_rejects_mathematics (test_f5_production_control.TransportedProductionTests.test_missing_forced_consequence_rejects_mathematics) ... ok
+test_model_and_specialization_faults_reject_mathematics (test_f5_production_control.TransportedProductionTests.test_model_and_specialization_faults_reject_mathematics) ... ok
+
+======================================================================
+FAIL: test_binary_kernel_and_raw_export_faults_reject (test_f5_production_control.TransportedProductionTests.test_binary_kernel_and_raw_export_faults_reject) (name='root-source.tar.gz')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Volumes/SSD990/crypto/worktrees/ic-f5-production-control-20260930/research/ic_candidate_tournament_20260915/test_f5_production_control.py", line 78, in test_binary_kernel_and_raw_export_faults_reject
+    replay_files(faulty)
+AssertionError: InvalidEvidence not raised
+
+----------------------------------------------------------------------
+Ran 11 tests in 182.308s
+
+FAILED (failures=1)

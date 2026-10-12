@@ -1,0 +1,59 @@
+{
+  "curve": {
+    "p": 775987,
+    "a": 229261,
+    "b": 239101,
+    "order": 775513
+  },
+  "P": [
+    715285,
+    479610
+  ],
+  "Q": [
+    334089,
+    346701
+  ],
+  "index_calculus": {
+    "k": 575044,
+    "verified": true,
+    "m": 3,
+    "engine": "enumerate",
+    "accelerated": false,
+    "factor_base": {
+      "kind": "small_x",
+      "size": 67,
+      "bound": 135
+    },
+    "relations": 61,
+    "rank": 60,
+    "attempts": 160,
+    "s3_solves": 558967,
+    "membership_tests": 1117872,
+    "group_ops": 24827,
+    "target_ops": 9270,
+    "la_ops": 1683,
+    "la_pivot": "min_fill",
+    "msolve_calls": 0,
+    "msolve_seconds": 0.0,
+    "censored_attempts": 0,
+    "table_arity": 1,
+    "table_entries": 67,
+    "table_s3_solves": 0,
+    "seconds_factor_base": 0.0002057930000205488,
+    "seconds_table": 0.0,
+    "seconds_relations": 1.9982323790000578,
+    "seconds_linalg": 0.001561713999933545,
+    "seconds_total": 1.9999998860000119,
+    "harvest": null,
+    "correct": true
+  },
+  "rho": {
+    "k": 575044,
+    "verified": true,
+    "walk_ops": 410,
+    "setup_ops": 1209,
+    "group_ops": 1619,
+    "walks": 1,
+    "seconds": 0.001434440000025461
+  }
+}

@@ -1,0 +1,127 @@
+== manifest
+{
+ "commit": "3393673153c4c6547f03cc63bcf033f0dba47abe",
+ "tree_status": "?? research/ic_constructions_20260926/runs/",
+ "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+ "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+ "cpu_flags_relevant": [
+  "pclmulqdq",
+  "popcnt",
+  "avx2",
+  "bmi2",
+  "avx512f",
+  "avx512dq",
+  "avx512ifma",
+  "avx512cd",
+  "avx512bw",
+  "avx512vl",
+  "avx512_bf16",
+  "avx512vbmi",
+  "avx512_vbmi2",
+  "gfni",
+  "vpclmulqdq",
+  "avx512_vnni",
+  "avx512_bitalg",
+  "avx512_vpopcntdq",
+  "avx512_fp16"
+ ],
+ "logical_cores": 4,
+ "memory": "MemTotal:       16481980 kB",
+ "os": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+ "arch": "x86_64",
+ "binaries": {
+  "baseline": {
+   "ic_sha256": "e51e9431777a33572dc56ec4d4cca6ccf8d6d8419dbbe1e329c0446adef9e612",
+   "prices_sha256": "d7b1482d114f29212f569558a25ca864016f5bd05c8c718ec685310259e82b64",
+   "built_from": "e7022b75 (ic); the pricer example at 305d5078, whose library is e7022b75's"
+  },
+  "candidate": {
+   "ic_sha256": "18fcf4e8058fe0c45f119d595a6a4b7b9ae1b6c700827a4fa111a47f4dfc8d8b",
+   "prices_sha256": "34ce96a2fe18a84a891d331afac6a3508f8f6ab67f22cabf8067699ffe8a8a42",
+   "built_from": "33936731 (ic and the pricer example)"
+  }
+ },
+ "build": "cargo build --release --bin ic --example koblitz_construction_prices, clean tree, rustc above",
+ "uptime": "06:05:07 up 26 min,  0 user,  load average: 1.78, 2.52, 1.88",
+ "pinning": "RAYON_NUM_THREADS=1 under taskset -c 2; the thread check RAYON_NUM_THREADS=4 under taskset -c 0-3",
+ "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts"
+}
+== inputs
+inputs: all 36 match inputs.sha256
+== main
+k1n19 M1: A/A spread 1.017
+k1n19 M2: A/A spread 1.017
+k1n19 M3: A/A spread 1.068
+k1n19 M4: A/A spread 1.009
+k1n23 M1: A/A spread 1.135
+k1n23 M2: A/A spread 1.033
+k1n23 M3: A/A spread 1.019
+k1n23 M4: A/A spread 1.009
+k1n45 M1: A/A spread 1.023
+k1n45 M2: A/A spread 1.019
+k1n45 M3: A/A spread 1.017
+k1n45 M4: A/A spread 1.114
+k0n37 M1: A/A spread 1.026
+k0n37 M2: A/A spread 1.043
+k0n37 M3: A/A spread 1.012
+k0n37 M4: A/A spread 1.058
+k1n43 M1: A/A spread 1.055
+k1n43 M2: A/A spread 1.033
+k1n43 M3: A/A spread 1.005
+k1n43 M4: A/A spread 1.006
+k1n47 M1: A/A spread 1.242
+k1n47 M2: A/A spread 1.170
+k1n47 M3: A/A spread 1.037
+k1n47 M4: A/A spread 1.022
+k0n41 M1: A/A spread 1.084
+k0n41 M2: A/A spread 1.035
+k0n41 M3: A/A spread 1.037
+k0n41 M4: A/A spread 1.040
+k0n53 M1: A/A spread 1.092
+k0n53 M2: A/A spread 1.059
+k0n53 M3: A/A spread 1.090
+k0n53 M4: A/A spread 1.063
+k0n61 M1: A/A spread 1.074
+k0n61 M2: A/A spread 1.161
+k0n61 M3: A/A spread 1.245
+k0n61 M4: A/A spread 1.120
+== control1
+k1n19-M1 True
+k1n23-M1 True
+k1n45-M1 True
+k0n37-M1 True
+k1n43-M1 True
+k1n47-M1 True
+k0n41-M1 True
+k0n53-M1 True
+k0n61-M1 True
+== rho
+{
+ "control": "candidate batch rho counts == \u00a720's at k0n41 M1",
+ "pass": true,
+ "compared": {
+  "gae": true,
+  "setup_gae": true,
+  "steps_per_target": true,
+  "counters": true,
+  "solved_by": true,
+  "recovered": true,
+  "all_verified": true,
+  "agrees_with_expected": true
+ },
+ "s_priced_per_target": {
+  "s20": 0.061012588579277605,
+  "candidate": 0.060325026088879935
+ },
+ "pipeline_counts_equal_s20": true,
+ "pipeline_recovered_equal_s20": true
+}
+== threads
+k0n53 M1: four threads done
+k0n61 M1: four threads done
+== constructions
+k0n41-M1-baseline.json
+k0n41-M1-candidate.json
+k0n61-M1-baseline.json
+k0n61-M1-candidate.json
+exit 0

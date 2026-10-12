@@ -1,0 +1,171 @@
+{
+  "per_field": {
+    "37": {
+      "log2_r": 27.78083708554834,
+      "targets": 128,
+      "sat": 128,
+      "conflicts_max": 0,
+      "pair_table": 0,
+      "extract_ms_median": 4.0186875,
+      "extract_ms_mean": 5.1063995234375,
+      "extract_ms_p95": 13.27425,
+      "rho_ms_median": 5.664875,
+      "rho_ms_mean": 5.84028284375,
+      "online_ratio_median": 0.6543861967289026,
+      "online_ratio_of_means": 0.8743411338206217,
+      "scan_ms_median": 2.9481465,
+      "regular_states": 1813,
+      "index_entries": 3563,
+      "process_wall_ms_median": 88.20189600000018,
+      "peak_rss_max": 24674304,
+      "trials_median": 1725.5,
+      "direct_relations_per_block": [
+        39,
+        39,
+        39,
+        39
+      ],
+      "explicit_direct_fully_charged_ms_per_block": [
+        36.467580999999996,
+        37.81762799999999,
+        37.260583000000004,
+        38.622544
+      ],
+      "rho_algorithm_ms_per_block": [
+        195.37232799999998,
+        185.030329,
+        181.865538,
+        185.288009
+      ],
+      "modelled_compact_fully_charged_ms_per_block": [
+        211.473444625,
+        250.00906281250002,
+        197.30799040624998,
+        169.6713893125
+      ],
+      "modelled_charged_ratio_vs_rho_median": 1.0836619224436992
+    },
+    "41": {
+      "log2_r": 39.00000151433405,
+      "targets": 128,
+      "sat": 128,
+      "conflicts_max": 0,
+      "pair_table": 0,
+      "extract_ms_median": 60.072874999999996,
+      "extract_ms_mean": 82.4320270390625,
+      "extract_ms_p95": 196.02125,
+      "rho_ms_median": 145.227916,
+      "rho_ms_mean": 158.8830153046875,
+      "online_ratio_median": 0.47377911549896334,
+      "online_ratio_of_means": 0.5188221464766632,
+      "scan_ms_median": 78.744125,
+      "regular_states": 296225,
+      "index_entries": 585055,
+      "process_wall_ms_median": 358.1490204999973,
+      "peak_rss_max": 96354304,
+      "trials_median": 16012.0,
+      "direct_relations_per_block": [
+        117,
+        117,
+        117,
+        117
+      ],
+      "explicit_direct_fully_charged_ms_per_block": [
+        2115.063496,
+        2134.7408339999997,
+        2196.76275,
+        2134.752371
+      ],
+      "rho_algorithm_ms_per_block": [
+        4570.166417,
+        5262.886336,
+        5381.7823769999995,
+        5122.190829
+      ],
+      "modelled_compact_fully_charged_ms_per_block": [
+        8956.805606906251,
+        9557.77382934375,
+        11525.719844218751,
+        9216.608830812498
+      ],
+      "modelled_charged_ratio_vs_rho_median": 1.88795653077081
+    },
+    "53": {
+      "log2_r": 44.258533022667656,
+      "targets": 128,
+      "sat": 128,
+      "conflicts_max": 0,
+      "pair_table": 0,
+      "extract_ms_median": 666.570396,
+      "extract_ms_mean": 772.97629203125,
+      "extract_ms_p95": 1589.9907500000002,
+      "rho_ms_median": 1081.4433960000001,
+      "rho_ms_mean": 1121.52044365625,
+      "online_ratio_median": 0.6229166023047135,
+      "online_ratio_of_means": 0.6892217581975437,
+      "scan_ms_median": 1139.3228125,
+      "regular_states": 2565200,
+      "index_entries": 5081560,
+      "process_wall_ms_median": 2990.2530414999974,
+      "peak_rss_max": 605175808,
+      "trials_median": 47320.0,
+      "direct_relations_per_block": [
+        252,
+        252,
+        252,
+        252
+      ],
+      "explicit_direct_fully_charged_ms_per_block": [
+        28307.55575,
+        27810.450705,
+        28215.489204999998,
+        30376.794079
+      ],
+      "rho_algorithm_ms_per_block": [
+        36930.030625,
+        30953.551035,
+        37444.620001,
+        38226.415127
+      ],
+      "modelled_compact_fully_charged_ms_per_block": [
+        179047.13633875,
+        207080.463262875,
+        210109.97594550002,
+        189686.97886237502
+      ],
+      "modelled_charged_ratio_vs_rho_median": 5.286707861518453
+    }
+  },
+  "slopes": {
+    "axis": "log2 subgroup order",
+    "points": {
+      "37": 27.781,
+      "41": 39.0,
+      "53": 44.259
+    },
+    "compact_extract_median_slope": {
+      "estimate": 0.4318,
+      "ci95": [
+        0.4129,
+        0.4525
+      ]
+    },
+    "rho_median_slope_same_fixtures": {
+      "estimate": 0.4531,
+      "ci95": [
+        0.4449,
+        0.4624
+      ]
+    },
+    "difference_compact_minus_rho": {
+      "estimate": -0.0213,
+      "ci95": [
+        -0.0423,
+        0.0014
+      ]
+    },
+    "compact_modelled_fully_charged_slope": 0.5849,
+    "rho_algorithm_block_slope": 0.4587,
+    "explicit_direct_fully_charged_block_slope": 0.5705
+  }
+}

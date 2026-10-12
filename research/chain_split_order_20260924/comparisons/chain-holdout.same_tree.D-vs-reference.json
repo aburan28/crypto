@@ -1,0 +1,123 @@
+{
+  "unit": "64-bit word XORs in the Macaulay elimination",
+  "scope": "decomposition-oracle stage only; not an end-to-end ECDLP cost",
+  "identity_checked": [
+    "verdict_digest",
+    "reductions",
+    "infeasible_branches",
+    "propagations",
+    "splits",
+    "oversize",
+    "targets",
+    "decomposed",
+    "f4_calls",
+    "ell",
+    "factor_base_points"
+  ],
+  "repetitions": {
+    "baseline": 3,
+    "candidate": 3
+  },
+  "rows": [
+    {
+      "curve": "K_1/2^9",
+      "m": 4,
+      "ell": 6,
+      "targets": 8,
+      "decomposed": 8,
+      "verdict_digest": "60c2905f51ba4d3610ce1bce11031251959c31fcdbd61cab3d9871d13f31951a",
+      "baseline_word_ops": 3199188,
+      "candidate_word_ops": 3645829,
+      "word_op_ratio": 0.8774926086769291,
+      "baseline_wall_ns": 74013423,
+      "candidate_wall_ns": 215165857,
+      "wall_ratio": 0.3439831208907833,
+      "phases_baseline_ns": {
+        "build": 61372195,
+        "reduce": 434210,
+        "readback": 0
+      },
+      "phases_candidate_ns": {
+        "build": 202057011,
+        "reduce": 482129,
+        "readback": 0
+      }
+    },
+    {
+      "curve": "K_0/2^15",
+      "m": 4,
+      "ell": 4,
+      "targets": 8,
+      "decomposed": 0,
+      "verdict_digest": "026f5338de0ed379bd6667b91662652aa830cb7b3d34f982cfc1e490b55e947a",
+      "baseline_word_ops": 21561148,
+      "candidate_word_ops": 13117889,
+      "word_op_ratio": 1.6436446443478825,
+      "baseline_wall_ns": 480286626,
+      "candidate_wall_ns": 431378172,
+      "wall_ratio": 1.1133772109359303,
+      "phases_baseline_ns": {
+        "build": 370827096,
+        "reduce": 13324448,
+        "readback": 0
+      },
+      "phases_candidate_ns": {
+        "build": 323118247,
+        "reduce": 13213307,
+        "readback": 0
+      }
+    },
+    {
+      "curve": "K_1/2^15",
+      "m": 4,
+      "ell": 4,
+      "targets": 8,
+      "decomposed": 5,
+      "verdict_digest": "f859ba309c7374b390fcc230dfdc0604edf3c7063a841c73c067699fe597a82e",
+      "baseline_word_ops": 345384853,
+      "candidate_word_ops": 157865805,
+      "word_op_ratio": 2.187838290882563,
+      "baseline_wall_ns": 7801855339,
+      "candidate_wall_ns": 5688899075,
+      "wall_ratio": 1.3714174282481888,
+      "phases_baseline_ns": {
+        "build": 6825169994,
+        "reduce": 110034029,
+        "readback": 0
+      },
+      "phases_candidate_ns": {
+        "build": 4889095939,
+        "reduce": 104787468,
+        "readback": 0
+      }
+    },
+    {
+      "curve": "K_0/2^13",
+      "m": 3,
+      "ell": 12,
+      "targets": 8,
+      "decomposed": 8,
+      "verdict_digest": "3b50513c142a1957e71504aca0e2b7d7769d742348bce60ff57ae9f31080391d",
+      "baseline_word_ops": 9121538,
+      "candidate_word_ops": 8330957,
+      "word_op_ratio": 1.0948967807660033,
+      "baseline_wall_ns": 125234910,
+      "candidate_wall_ns": 100699256,
+      "wall_ratio": 1.2436527832936521,
+      "phases_baseline_ns": {
+        "build": 98185361,
+        "reduce": 679793,
+        "readback": 0
+      },
+      "phases_candidate_ns": {
+        "build": 76436146,
+        "reduce": 612013,
+        "readback": 0
+      }
+    }
+  ],
+  "total_word_op_ratio": 2.0729434411190875,
+  "total_wall_ratio": 1.3177754349734427,
+  "min_word_op_ratio": 0.8774926086769291,
+  "min_wall_ratio": 0.3439831208907833
+}

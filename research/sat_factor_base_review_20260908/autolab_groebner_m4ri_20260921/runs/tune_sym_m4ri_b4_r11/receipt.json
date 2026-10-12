@@ -1,0 +1,22 @@
+{
+  "child_system_ms": 25.182,
+  "child_user_ms": 2127.527,
+  "command": [
+    "target/release/examples/koblitz_f4_kernel_bench",
+    "11",
+    "sym"
+  ],
+  "ended_unix_ns": 1790029745640962000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/koblitz_f4_kernel_bench",
+  "executable_sha256": "69aff375783d2345f9f93793d8d958461170a9a747b71ea9c2c698c62fb9aa38",
+  "exit_code": 0,
+  "peak_rss_bytes": 27721728,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790029743453166000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 715,
+  "stdout_sha256": "ef88f378da3c6fee250ebf2fdb3a2be077dc57c6cebdbf1ce13c46897ac84f27",
+  "task_id": "TASK-KIC-GROEBNER-M4RI-TUNE-SYM-B4-20260921",
+  "wall_ms": 2187.768792
+}

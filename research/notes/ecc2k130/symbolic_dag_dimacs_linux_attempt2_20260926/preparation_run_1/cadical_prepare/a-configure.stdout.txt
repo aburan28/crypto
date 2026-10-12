@@ -1,0 +1,18 @@
+configure: making default 'build' directory
+configure: building in default '/home/runner/work/_temp/cadical_prepare/source-a/build'
+configure: root directory '/home/runner/work/_temp/cadical_prepare/source-a'
+configure: source directory '/home/runner/work/_temp/cadical_prepare/source-a/src'
+configure: compiler supports all required C99/C++11 extensions
+configure: compiler configuration supports flexible array members
+configure: unlocked IO with '{putc,getc}_unlocked' seems to work
+configure: 'closefrom' seems to be working
+configure: no 'libcadical.so' shared library generated (without '-shared')
+configure: no 'cadical-dynamic' dynamically linked binary generated (without '-shared')
+configure: compiling C++ with '/usr/bin/g++ -Wall -Wextra -O3 -DNDEBUG'
+configure: compiling C with '/usr/bin/gcc -Wall -Wextra -O3 -DNDEBUG'
+configure: generated 'build/makefile' from '../makefile.in'
+configure: generated '../makefile' as proxy to ...
+configure: ... '/home/runner/work/_temp/cadical_prepare/source-a/build/makefile'
+configure: linking '/home/runner/work/_temp/cadical_prepare/source-a/makefile'
+configure: now run 'make' to compile CaDiCaL
+configure: optionally run 'make test'

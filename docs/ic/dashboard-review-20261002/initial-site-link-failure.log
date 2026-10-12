@@ -1,0 +1,38 @@
+test	Site build tests	﻿2026-10-02T22:54:46.0742913Z ##[group]Run python3 scripts/site/test_build.py
+test	Site build tests	2026-10-02T22:54:46.0743343Z ^[[36;1mpython3 scripts/site/test_build.py^[[0m
+test	Site build tests	2026-10-02T22:54:46.0806905Z shell: /usr/bin/bash -e {0}
+test	Site build tests	2026-10-02T22:54:46.0807185Z ##[endgroup]
+test	Site build tests	2026-10-02T22:54:46.2515993Z ...............F........F.................
+test	Site build tests	2026-10-02T22:54:46.2516573Z ======================================================================
+test	Site build tests	2026-10-02T22:54:46.2517373Z FAIL: test_internal_links_resolve (__main__.BuildTests.test_internal_links_resolve)
+test	Site build tests	2026-10-02T22:54:46.2518392Z ----------------------------------------------------------------------
+test	Site build tests	2026-10-02T22:54:46.2518953Z Traceback (most recent call last):
+test	Site build tests	2026-10-02T22:54:46.2519758Z   File "/home/runner/work/crypto/crypto/scripts/site/test_build.py", line 678, in test_internal_links_resolve
+test	Site build tests	2026-10-02T22:54:46.2520824Z     self.assertEqual(missing, [], "unresolvable internal links: %s" % missing)
+test	Site build tests	2026-10-02T22:54:46.2521746Z AssertionError: Lists differ: ['scoreboard/index.html -> ../research/ic_[855 chars].md'] != []
+test	Site build tests	2026-10-02T22:54:46.2522390Z 
+test	Site build tests	2026-10-02T22:54:46.2522570Z First list contains 8 additional elements.
+test	Site build tests	2026-10-02T22:54:46.2523013Z First extra element 0:
+test	Site build tests	2026-10-02T22:54:46.2523735Z 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md'
+test	Site build tests	2026-10-02T22:54:46.2524450Z 
+test	Site build tests	2026-10-02T22:54:46.2530214Z Diff is 973 characters long. Set self.maxDiff to None to see it. : unresolvable internal links: ['scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md', 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/RESULT.md', 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/prepared-one-target-controls-v1/RESULT.md', 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md', 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/RESULTS.json', 'scoreboard/index.html -> ic/dashboard-overview-data.json', 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md', 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/RESULT.md']
+test	Site build tests	2026-10-02T22:54:46.2536355Z 
+test	Site build tests	2026-10-02T22:54:46.2536561Z ======================================================================
+test	Site build tests	2026-10-02T22:54:46.2537495Z FAIL: test_research_evidence_is_linked_absolutely (__main__.BuildTests.test_research_evidence_is_linked_absolutely)
+test	Site build tests	2026-10-02T22:54:46.2538735Z ----------------------------------------------------------------------
+test	Site build tests	2026-10-02T22:54:46.2539335Z Traceback (most recent call last):
+test	Site build tests	2026-10-02T22:54:46.2540337Z   File "/home/runner/work/crypto/crypto/scripts/site/test_build.py", line 692, in test_research_evidence_is_linked_absolutely
+test	Site build tests	2026-10-02T22:54:46.2541353Z     self.assertEqual(
+test	Site build tests	2026-10-02T22:54:46.2542085Z AssertionError: Lists differ: ['scoreboard/index.html -> ../research/ic_[795 chars].md'] != []
+test	Site build tests	2026-10-02T22:54:46.2542777Z 
+test	Site build tests	2026-10-02T22:54:46.2542979Z First list contains 7 additional elements.
+test	Site build tests	2026-10-02T22:54:46.2543488Z First extra element 0:
+test	Site build tests	2026-10-02T22:54:46.2544624Z 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md'
+test	Site build tests	2026-10-02T22:54:46.2545380Z 
+test	Site build tests	2026-10-02T22:54:46.2551506Z Diff is 910 characters long. Set self.maxDiff to None to see it. : link research evidence as https://github.com/aburan28/crypto/blob/main/research/<path>, not relatively: ['scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md', 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/RESULT.md', 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/prepared-one-target-controls-v1/RESULT.md', 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md', 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/RESULTS.json', 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/improvement/round3/README.md', 'scoreboard/index.html -> ../research/ic_candidate_tournament_20260915/goal_20260924/prepared-f5-v3-control-v1/RESULT.md']
+test	Site build tests	2026-10-02T22:54:46.2558212Z 
+test	Site build tests	2026-10-02T22:54:46.2558478Z ----------------------------------------------------------------------
+test	Site build tests	2026-10-02T22:54:46.2559054Z Ran 42 tests in 0.117s
+test	Site build tests	2026-10-02T22:54:46.2559280Z 
+test	Site build tests	2026-10-02T22:54:46.2559427Z FAILED (failures=2)
+test	Site build tests	2026-10-02T22:54:46.2619776Z ##[error]Process completed with exit code 1.

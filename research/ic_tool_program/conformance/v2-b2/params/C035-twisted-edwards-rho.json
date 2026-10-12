@@ -1,0 +1,31 @@
+{
+ "schema_version": 2,
+ "name": "C035: a twisted Edwards curve near 2^24, rho alone",
+ "field": {
+  "kind": "prime",
+  "p": "16777259"
+ },
+ "curve": {
+  "form": "twisted_edwards",
+  "a": "14589900",
+  "d": "13912851"
+ },
+ "subgroup": {
+  "order": "4193239",
+  "cofactor": "4",
+  "generator": {
+   "x": "5670296",
+   "y": "2217768"
+  }
+ },
+ "target": {
+  "known_log": "1712174"
+ },
+ "method": {
+  "solve": "rho",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 7
+  }
+ }
+}

@@ -1,0 +1,22 @@
+{
+  "classification": "accounting/correctness, tiny-field control",
+  "parent_commit": "b0f5dd5dd9422ef4d906518d78c1164017d86e6f",
+  "sha256": {
+    "measure.py": "4b6fcf13ba68098d4c38282348067fa19b7c0b8a3890b5c2ba8afaf8b46d16be",
+    "results.json": "198bcef6ca7520f134088adc98b6a13c530eeefc5b2c121df465619d249a5a6b",
+    "run.log": "edd90185df3c7404b08ed4aaffaf29c55aa5619a6550d6fd8897269090f84fb4"
+  },
+  "command": "python3 research/volcano_regularity_control_20260924/measure.py",
+  "passed": true,
+  "assertions": [
+    "84 points on each curve",
+    "21 distinct subgroup images",
+    "441 subgroup homomorphism comparisons",
+    "504 equal transported target decomposition counts",
+    "480 rationally lifted polynomial root sets",
+    "reduced and raw evaluations agree on every support tuple",
+    "raw d_reg_top independently equals B+1"
+  ],
+  "solver_runtime_measured": false,
+  "n53_n83_measured": false
+}

@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "/home/runner/work/crypto/crypto/research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/verify.py", line 456, in <module>
+    main()
+  File "/home/runner/work/crypto/crypto/research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/verify.py", line 452, in main
+    run(args.produced, args.out)
+  File "/home/runner/work/crypto/crypto/research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/verify.py", line 375, in run
+    tables, cases, located, geometry_cases = parse_cnf(
+                                             ^^^^^^^^^^
+  File "/home/runner/work/crypto/crypto/research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/verify.py", line 208, in parse_cnf
+    sv.check_onehot_block(group["vars"], aux["vars"], actual)
+  File "/home/runner/work/crypto/crypto/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/verify.py", line 145, in check_onehot_block
+    assert all(satisfies(row, truth) for row in block)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/crypto/crypto/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/verify.py", line 145, in <genexpr>
+    assert all(satisfies(row, truth) for row in block)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/crypto/crypto/research/notes/ecc2k130/rotated_s3_sparse_cnf_20260925/verify.py", line 126, in satisfies
+    return any((literal > 0) == (abs(literal) in true_variables) for literal in clause)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/crypto/crypto/research/notes/ecc2k130/rotated_s3_sparse_n19_20260925/verify.py", line 356, in expired
+    raise Censored("independent verifier wall cap")
+Censored: independent verifier wall cap

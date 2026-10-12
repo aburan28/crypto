@@ -1,0 +1,196 @@
+{
+  "exact_relation_hash_equality": true,
+  "factor_base_logs_known_by_construction": false,
+  "factor_base_selection_uses_scalar_labels": false,
+  "fixture_scalar_used_by_collector": false,
+  "full_cost_gate_passed": false,
+  "hosted": {
+    "archive": {
+      "bytes": 2039020,
+      "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage56-n53-pclmul-evidence-34712955835.tar.gz",
+      "sha256": "d8ee26c7a5ef825ad202ab3b5c4e59e2afd4ccfdcd5df0c1d638a4d2b5e12836"
+    },
+    "artifact": {
+      "digest": "sha256:372494e8db1ca6aec025e9edb52afd5e0847fed94c414b488b58d54d538583f4",
+      "expires_at": "2026-12-11T19:02:02Z",
+      "id": 10304460074,
+      "name": "koblitz-stage55-n53-pclmul-34712955835",
+      "size_in_bytes": 2059885
+    },
+    "baseline": {
+      "admitted_relations": 189,
+      "all_relations_group_verified": true,
+      "charged_total_ms": 25506.245235,
+      "collection_ms": 18077.806661,
+      "factor_base_points": 9964,
+      "full_rank_at_relation": 157,
+      "linear_solution_verified": true,
+      "matrix_columns": 95,
+      "orbit_columns": 94,
+      "published_fixture_scalar": 476811900269,
+      "published_q": [
+        2565091273463387,
+        5885236316843894
+      ],
+      "query_batch_inversions": 28308,
+      "query_exact_table_misses": 666810,
+      "query_mode": "pair_pair_parallel_4096",
+      "query_parallel_chunks": 28308,
+      "query_parallel_threads": 4,
+      "query_parallel_waves": 7077,
+      "query_x_filter_rejections": 85030447,
+      "recovered_fixture_scalar": 476811900269,
+      "setup_ms": 7428.438313,
+      "support_queries": 85699806,
+      "target_trials": 189
+    },
+    "build_seal_sha256": "6a948971db0a7e12eae6d8ca96ac56bf737c9fd486adacedc3a58af4b1a97130",
+    "candidate": {
+      "admitted_relations": 189,
+      "all_relations_group_verified": true,
+      "charged_total_ms": 17598.318135,
+      "collection_ms": 10163.724866,
+      "factor_base_points": 9964,
+      "full_rank_at_relation": 157,
+      "linear_solution_verified": true,
+      "matrix_columns": 95,
+      "orbit_columns": 94,
+      "published_fixture_scalar": 476811900269,
+      "published_q": [
+        2565091273463387,
+        5885236316843894
+      ],
+      "query_batch_inversions": 28308,
+      "query_exact_table_misses": 666810,
+      "query_mode": "pair_pair_parallel_4096",
+      "query_parallel_chunks": 28308,
+      "query_parallel_threads": 4,
+      "query_parallel_waves": 7077,
+      "query_x_filter_rejections": 85030447,
+      "recovered_fixture_scalar": 476811900269,
+      "setup_ms": 7434.593059,
+      "support_queries": 85699806,
+      "target_trials": 189
+    },
+    "comparison": {
+      "baseline_over_rho_wall_ratio": 5.232818136325567,
+      "candidate_collection_speedup": 1.7786595858644723,
+      "candidate_direct_core_seconds_ratio": 0.6143520974888967,
+      "candidate_direct_wall_speedup": 1.4186949503361426,
+      "candidate_over_rho_wall_ratio": 3.688473082311116,
+      "candidate_whole_process_crossover": false,
+      "fresh_build_plus_candidate_over_rho_wall_ratio": 21.18208585582923
+    },
+    "processes": {
+      "baseline": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 1391755264,
+        "single_core_seconds": 61.623592,
+        "system_seconds": 0.790303,
+        "total_core_seconds": 61.623592,
+        "user_seconds": 60.833289,
+        "wall_seconds": 26.773639610000004
+      },
+      "candidate": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 1391726592,
+        "single_core_seconds": 37.858582999999996,
+        "system_seconds": 1.015387,
+        "total_core_seconds": 37.858582999999996,
+        "user_seconds": 36.843196,
+        "wall_seconds": 18.872020093999993
+      },
+      "rho": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 35315712,
+        "single_core_seconds": 5.116003,
+        "system_seconds": 0.009,
+        "total_core_seconds": 5.116003,
+        "user_seconds": 5.107003,
+        "wall_seconds": 5.116485785000009
+      }
+    },
+    "resources": {
+      "build_outer": {
+        "average_parallelism": 3.3991017937757966,
+        "process_tree_rss_samples": 1837,
+        "sample_interval_seconds": 0.02,
+        "sampled_peak_process_tree_rss_bytes": 1709281280,
+        "total_core_seconds": 304.23939699999994,
+        "wall_seconds": 89.505821084
+      },
+      "charged_sequential_wall_seconds_available": 140.410988815,
+      "charged_total_core_seconds_available": 428.2326499999999,
+      "maximum_sampled_process_tree_rss_bytes": 1709281280,
+      "science_outer": {
+        "average_parallelism": 2.435769461662949,
+        "process_tree_rss_samples": 1551,
+        "sample_interval_seconds": 0.02,
+        "sampled_peak_process_tree_rss_bytes": 1430966272,
+        "total_core_seconds": 123.993253,
+        "wall_seconds": 50.905167731000006
+      }
+    },
+    "run_seal_sha256": "f7a1425d65696b5776bc5fef1896925c5867d3f70d594262781552e4394e107c",
+    "source_commit": "e0daf815f4c82440c53ac4a2b53c79566f1084aa",
+    "verification": {
+      "baseline_over_rho_wall_ratio": 5.232818136325567,
+      "baseline_wall_seconds": 26.773639610000004,
+      "candidate_collection_speedup": 1.7786595858644723,
+      "candidate_direct_core_seconds_ratio": 0.6143520974888967,
+      "candidate_direct_wall_speedup": 1.4186949503361426,
+      "candidate_over_rho_wall_ratio": 3.688473082311116,
+      "candidate_wall_seconds": 18.872020093999993,
+      "candidate_whole_process_crossover": false,
+      "charged_sequential_wall_seconds_available": 140.410988815,
+      "charged_total_core_seconds_available": 428.2326499999999,
+      "fresh_build_plus_candidate_over_rho_wall_ratio": 21.18208585582923,
+      "full_cost_gate_passed": false,
+      "independent_external_reproduction_satisfied": false,
+      "inventory_sha256": "511fea68013a0afa2aead0ee57d328be0de2bd7e3ca28329665290f5084e3b95",
+      "koblitz_index_calculus_sota": false,
+      "licensed_magma_complete": false,
+      "maximum_sampled_process_tree_rss_bytes": 1709281280,
+      "published_fixture_scalar": 476811900269,
+      "published_q": [
+        2565091273463387,
+        5885236316843894
+      ],
+      "relations": 189,
+      "rho_wall_seconds": 5.116485785000009,
+      "schema": "koblitz_stage55_verification.v1",
+      "source_commit": "e0daf815f4c82440c53ac4a2b53c79566f1084aa",
+      "status": "n53_pclmul_same_target_verified"
+    },
+    "workflow": {
+      "head_sha": "e0daf815f4c82440c53ac4a2b53c79566f1084aa",
+      "production_job_id": 103604968231,
+      "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34712955835/job/103604968231",
+      "production_job_wall_seconds": 150.0,
+      "run_id": 34712955835,
+      "url": "https://github.com/aburan28/crypto/actions/runs/34712955835",
+      "workflow_wall_seconds": 168.0
+    }
+  },
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_complete": false,
+  "predecessor_stage52": {
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-52-n53-lazy-result-20260912/verification.json",
+    "sha256": "5659e43f808d01f1827c79308c7b54fccad76bc7935b49ba7c57b55ab686bd87"
+  },
+  "preferred_field_mul_backend": "x86_64_pclmulqdq",
+  "preferred_query_mode": "pair_pair_parallel_4096",
+  "remaining_blockers": [
+    "preferred n=53 direct remains 3.688473 times same-target rho wall",
+    "fresh build plus preferred direct remains 21.182086 times rho wall",
+    "unknown-scalar n=53, licensed same-instance Magma, and unaffiliated review remain absent",
+    "PCLMUL changes finite constants, not the asymptotic exponent"
+  ],
+  "same_public_target": true,
+  "sat_conflicts": null,
+  "schema": "koblitz_stage56_pclmul_result.v1",
+  "source_commit": "e0daf815f4c82440c53ac4a2b53c79566f1084aa",
+  "status": "hosted_n53_pclmul_result_verified",
+  "target_subgroup_enumerated_for_factor_base": false
+}

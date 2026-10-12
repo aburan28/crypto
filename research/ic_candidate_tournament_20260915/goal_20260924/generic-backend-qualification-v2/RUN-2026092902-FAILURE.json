@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "status": "PRODUCER_FAILURE_NO_CAMPAIGN_ARTIFACT",
+  "campaign_seed": 2026092902,
+  "github_run_id": 36580669479,
+  "github_run_attempt": 1,
+  "github_run_url": "https://github.com/aburan28/crypto/actions/runs/36580669479",
+  "campaign_job_id": 109448846736,
+  "campaign_started_utc": "2026-09-29T14:13:14Z",
+  "solve_step_started_utc": "2026-09-29T14:15:33Z",
+  "solve_step_finished_utc": "2026-09-29T19:15:46Z",
+  "solve_step_conclusion": "failure-at-registered-300-minute-cap",
+  "pack_step_finished_utc": "2026-09-29T19:40:00Z",
+  "pack_step_conclusion": "failure",
+  "pack_diagnostic": "tar: ic-generic-backend-qualification-v2/tournament: file changed as we read it",
+  "upload_step_conclusion": "failure-no-campaign-archive-or-manifest",
+  "surviving_artifacts": [
+    {
+      "name": "ic-generic-pack-smoke-36580669479",
+      "scope": "synthetic artifact-upload smoke only"
+    }
+  ],
+  "independent_campaign_audit": null,
+  "verified_candidate_results": null,
+  "complete_one_target_online_costs": null,
+  "paired_rho_speedups": null,
+  "promotion_eligible": false,
+  "redispatch_permitted": false
+}

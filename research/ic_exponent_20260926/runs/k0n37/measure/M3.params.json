@@ -1,0 +1,126 @@
+{
+ "schema_version": 1,
+ "name": "k0n37-c8-m2-s203",
+ "curve": {
+  "degree": 37,
+  "curve_a": 0
+ },
+ "summands": 3,
+ "descent_summands": 2,
+ "collection_window": 18,
+ "collection_aim": true,
+ "solver": "pair_table",
+ "seed": 203,
+ "max_trials": 100000,
+ "collection": {
+  "unit_trials": 36,
+  "units": 1,
+  "max_units": 100000
+ },
+ "factor_base": {
+  "mode": "spec",
+  "spec": {
+   "kind": "subgroup_orbits",
+   "points": 592,
+   "seed": 203
+  }
+ },
+ "targets": [
+  {
+   "random_seed": 20300
+  },
+  {
+   "random_seed": 20301
+  },
+  {
+   "random_seed": 20302
+  },
+  {
+   "random_seed": 20303
+  },
+  {
+   "random_seed": 20304
+  },
+  {
+   "random_seed": 20305
+  },
+  {
+   "random_seed": 20306
+  },
+  {
+   "random_seed": 20307
+  },
+  {
+   "random_seed": 20308
+  },
+  {
+   "random_seed": 20309
+  },
+  {
+   "random_seed": 20310
+  },
+  {
+   "random_seed": 20311
+  },
+  {
+   "random_seed": 20312
+  },
+  {
+   "random_seed": 20313
+  },
+  {
+   "random_seed": 20314
+  },
+  {
+   "random_seed": 20315
+  },
+  {
+   "random_seed": 20316
+  },
+  {
+   "random_seed": 20317
+  },
+  {
+   "random_seed": 20318
+  },
+  {
+   "random_seed": 20319
+  },
+  {
+   "random_seed": 20320
+  },
+  {
+   "random_seed": 20321
+  },
+  {
+   "random_seed": 20322
+  },
+  {
+   "random_seed": 20323
+  },
+  {
+   "random_seed": 20324
+  },
+  {
+   "random_seed": 20325
+  },
+  {
+   "random_seed": 20326
+  },
+  {
+   "random_seed": 20327
+  },
+  {
+   "random_seed": 20328
+  },
+  {
+   "random_seed": 20329
+  },
+  {
+   "random_seed": 20330
+  },
+  {
+   "random_seed": 20331
+  }
+ ]
+}

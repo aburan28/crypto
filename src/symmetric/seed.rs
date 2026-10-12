@@ -200,13 +200,13 @@ impl Seed {
             if i % 2 == 0 {
                 // Rotate (A, B) right by 8 bits as a 64-bit unit.
                 let ab = ((a as u64) << 32) | (b as u64);
-                let ab = (ab >> 8) | (ab << 56);
+                let ab = ab.rotate_right(8);
                 a = (ab >> 32) as u32;
                 b = ab as u32;
             } else {
                 // Rotate (C, D) left by 8 bits as a 64-bit unit.
                 let cd = ((c as u64) << 32) | (d as u64);
-                let cd = (cd << 8) | (cd >> 56);
+                let cd = cd.rotate_left(8);
                 c = (cd >> 32) as u32;
                 d = cd as u32;
             }

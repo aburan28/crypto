@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-09-23T20:32:48.032740+00:00",
+  "execution_utc": null,
+  "command": [
+    "python3",
+    "research/boolean_affine_substitution_20260923/confirm.py"
+  ],
+  "exit_code": 1,
+  "reason": "No primary treatment passed; retain the rejection instead.",
+  "provenance": "Exit and assertion text observed directly in the tool result in this task. Execution timestamp was not separately captured.",
+  "primary_manifest_sha256": "15eeb41ffb3f00801f63d068e0507cbf385cef15726426245f284a0cd1dd4dd6",
+  "primary_results_sha256": "abf2b476386db186b370d1f31b6747d52bb6aaebe482618952e04a689c5bc7f1",
+  "launcher_sha256": "833c18d3a76134eaa8f937aa0073347472793cb33ad12fa13c446133783f748f",
+  "confirmation_started": false,
+  "execution_protocol_exists": false,
+  "run_02_exists": false
+}

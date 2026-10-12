@@ -1,0 +1,22 @@
+# Registered cell objects: the subspace V (polynomial-basis words of F_2[z]/(f), f from
+# find_irreducible_sparse(n)) and |F| of every cell, as printed on stderr by the audit binary
+# with --targets 0 (no target decided, nothing measured), 2026-09-28/29, binary
+# m4_exponent_audit-2809b498 (sha256 de2ec1b9...).
+#
+#   m4_exponent_audit-2809b498 --arm semaev --a A --n N --targets 0 --seed 20260928 --label objects
+#
+# cell_seed = 20260928 ^ (a << 48) ^ (n << 40) ^ (ell << 32); unknowns = 4*ell + 2n.
+
+cell       ell  unknowns  cell_seed          |F|  V                                             draws
+K_0/2^9    2    26        9904214845504        3  [340, 372]                                    1
+K_0/2^11   -    -         -                    -  no curve: KoblitzCurve::new returns None (#E = 2116 = 2^2*23^2)
+K_0/2^13   3    38        14306556323904      11  [4958, 7960, 1807]                            1
+K_0/2^15   4    46        16509874546752      11  [20509, 17340, 22235, 16379]                  1
+K_0/2^17   -    -         -                    -  no curve: KoblitzCurve::new returns None (#E = 130972 = 2^2*137*239, r < h)
+K_0/2^19   5    58        20912216025152      25  [319967, 57482, 475913, 11592, 456348]        1
+K_1/2^9    2    26        291379191556160      1  [350, 504]                                    1
+K_1/2^11   3    34        293582509779008     11  [1845, 22, 552]                               1
+K_1/2^13   -    -         -                    -  no curve: KoblitzCurve::new returns None (#E = 8374 = 2*53*79, r < h)
+K_1/2^15   4    46        297984851257408     13  [300, 15043, 8908, 4748]                      1
+K_1/2^17   4    50        300183874512960     21  [15115, 53825, 86458, 67680]                  1
+K_1/2^19   5    58        302387192735808     31  [512279, 397390, 253610, 508099, 389383]      1

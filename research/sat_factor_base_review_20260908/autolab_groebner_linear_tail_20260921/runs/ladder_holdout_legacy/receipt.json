@@ -1,0 +1,26 @@
+{
+  "child_system_ms": 9.713,
+  "child_user_ms": 2469.118,
+  "command": [
+    "target/release/examples/groebner_stage_bench",
+    "--ladder",
+    "holdout",
+    "--out",
+    "research/sat_factor_base_review_20260908/autolab_groebner_linear_tail_20260921/runs/ladder_holdout_legacy/artifact",
+    "--label",
+    "ladder_holdout_legacy"
+  ],
+  "ended_unix_ns": 1790040237750744000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/groebner_stage_bench",
+  "executable_sha256": "da435bbff4eb46701a6a594e5dc5400029647b8d61e1f510ae5fb5ff6bce7312",
+  "exit_code": 0,
+  "peak_rss_bytes": 128204800,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790040235269747000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 820,
+  "stdout_sha256": "a3d3c92bc95a32873906587b67e593583aeb0f976ea019b13d81d4114df1f211",
+  "task_id": "TASK-KIC-GROEBNER-LINEAR-TAIL-LADDER-HOLDOUT-LEGACY-20260921",
+  "wall_ms": 2481.000208
+}

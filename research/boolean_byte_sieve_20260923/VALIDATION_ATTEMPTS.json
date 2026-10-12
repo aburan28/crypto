@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "attempts": [
+    {
+      "recorded_utc": "2026-09-24T00:53:53.968471+00:00",
+      "execution_utc": null,
+      "command": "python3 -m unittest discover -s research/boolean_byte_sieve_20260923 -p test_*.py -v",
+      "exit_code": 1,
+      "test_errors": 32,
+      "cause": "System temporary volume exhausted during fixture-copy setup (OSError 28, No space left on device).",
+      "provenance": "Observed directly in task tool output. This is a summary, not a preserved full console log.",
+      "benchmark_changed": false,
+      "repair": "Place temporary evidence copies on the checkout volume and register cleanup before copying."
+    },
+    {
+      "recorded_utc": "2026-09-24T00:58:54.633801+00:00",
+      "execution_utc": null,
+      "command": "python3 -m unittest discover -s research/boolean_byte_sieve_20260923 -p test_*.py -v",
+      "exit_code": 0,
+      "tests_passed": 32,
+      "elapsed_seconds_reported_by_unittest": 92.706,
+      "scratch_location": "Checkout volume via TemporaryDirectory(dir=HERE)",
+      "provenance": "Observed directly in the task tool result; exact execution timestamp was not separately captured.",
+      "benchmark_changed": false
+    }
+  ]
+}

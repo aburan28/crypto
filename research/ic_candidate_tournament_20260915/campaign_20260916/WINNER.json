@@ -1,0 +1,15 @@
+{
+  "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0005-batch16/source_candidates/combined_descent/source",
+  "worker": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0005-batch16/source_candidates/combined_descent/worker",
+  "config": {
+    "batch_trials": 4,
+    "linear_algebra": "sparse",
+    "max_trials": 4096,
+    "solver": "pair_table",
+    "summands": 3
+  },
+  "target_count": 16,
+  "source_manifest_sha256": "1690462c36efebd8325b9afaeab7f7650cf56b1ab2373d39c9637c446cdee7bb",
+  "decision": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0005-batch16/decision.json",
+  "rho_parity": true
+}

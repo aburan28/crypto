@@ -1,0 +1,27 @@
+   Compiling groebner-history v0.1.0 (/workspace/crypto/tools/groebner-history)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.35s
+     Running unittests src/main.rs (/workspace/scratch/groebner-history-target/debug/deps/groebner_history-a6ff0bbb517568a9)
+
+running 19 tests
+test sha256::tests::sha224_abc ... ok
+test sha256::tests::sha256_abc ... ok
+test sha256::tests::sha256_empty ... ok
+test sha256::tests::sha224_empty ... ok
+test sha256::tests::sha256_block_boundary_55 ... ok
+test sha256::tests::sha256_fips180_56byte ... ok
+test sha256::tests::sha256_hello_world ... ok
+test sha256::tests::sha256_fips180_112byte ... ok
+test sha256::tests::sha256_two_blocks_64 ... ok
+test sha256::tests::sha_extensions_agree_with_the_portable_rounds ... ok
+test tests::allocation_outputs_and_frozen_totals_are_checked_against_raw_rows ... ok
+test tests::changed_output_cannot_be_plotted_as_a_valid_allocation_improvement ... ok
+test tests::declared_repetitions_must_match_the_raw_record_coverage ... ok
+test tests::fingerprint_and_machine_changes_break_history_connections ... ok
+test tests::missing_runtime_stays_missing_and_breaks_the_next_connection ... ok
+test tests::unaccepted_comparisons_and_changed_inputs_are_rejected ... ok
+test sha256::tests::streaming_matches_one_shot_at_every_split ... ok
+test sha256::tests::streaming_million_a ... ok
+test sha256::tests::sha256_million_a ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+

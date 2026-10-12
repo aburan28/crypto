@@ -4,8 +4,8 @@ A consolidated reference of every empirically- or analytically-
 established structural property of NIST P-256 that this repository
 has documented across `cryptanalysis::p256_structural`,
 `cryptanalysis::p256_attacks`, `cryptanalysis::p256_speculation`,
-`cryptanalysis::p256_isogeny_cover`, `RESEARCH_P256.md`, and
-`RESEARCH_P256_ISOGENY_COVER.md`.
+`cryptanalysis::p256_isogeny_cover`, `research/notes/cm-isogeny/RESEARCH_P256.md`, and
+`research/notes/cm-isogeny/RESEARCH_P256_ISOGENY_COVER.md`.
 
 This file is the **single source of truth** for "what is currently
 known about P-256's structural quirks".  Each section ends with a
@@ -231,7 +231,7 @@ non-anomalous curves — was probed in 4 escalating phases:
 Verdict: **empirically falsified** for P-256.  The canonical-lift
 correction term cannot be computed at cryptographic scale, and
 the toy-scale analogue test gave a clean null.  See
-`RESEARCH_P256.md` § "The four-step canonical-lift Smart-attack
+`research/notes/cm-isogeny/RESEARCH_P256.md` § "The four-step canonical-lift Smart-attack
 pipeline" for the full negative result.
 
 ---
@@ -272,7 +272,7 @@ classical research direction per the project's TOP-3 list.
 ## 8.  Phase-1 (this repo) — (2,2)-Split-Jacobian cover question
 
 Module: `cryptanalysis::p256_isogeny_cover`,
-`RESEARCH_P256_ISOGENY_COVER.md`.
+`research/notes/cm-isogeny/RESEARCH_P256_ISOGENY_COVER.md`.
 
 Question: does there exist a genus-2 curve `C/F_p` such that
 ```
@@ -382,7 +382,7 @@ not just empirically rare.
 The `(0, 1)` parity column is empirically empty across **6.7
 million Jacobians** examined.
 
-See `RESEARCH_P256_ISOGENY_COVER.md` § "Phase 10 — STRUCTURAL
+See `research/notes/cm-isogeny/RESEARCH_P256_ISOGENY_COVER.md` § "Phase 10 — STRUCTURAL
 OBSTRUCTION" for the full proof sketch via `Sp_4(F_2)` orbit
 analysis (Howe 1995; Maisner–Nart 2002).
 
@@ -394,7 +394,7 @@ to every prime-order EC over an odd prime field.
 
 ---
 
-## 9.  Other empirical nulls (from `RESEARCH_P256.md`)
+## 9.  Other empirical nulls (from `research/notes/cm-isogeny/RESEARCH_P256.md`)
 
 | Direction | Module | Verdict |
 |---|---|---|
@@ -457,7 +457,7 @@ within the expected distribution for a random curve of its size.
 - (3,3)- and higher-`(N,N)`-isogeny analogues of §8.
 - Genus-3 cover analogues of §8.
 - Igusa-invariant + Humbert-surface-direct probe (Phase 8c of
-  `RESEARCH_P256_ISOGENY_COVER.md`).
+  `research/notes/cm-isogeny/RESEARCH_P256_ISOGENY_COVER.md`).
 - Subexponential attacks based on properties not yet measured
   (an unfalsifiable bucket).
 - Quantum attacks at scale (Shor).
@@ -556,6 +556,6 @@ infeasible on P-256)
 
 Cross-reference research notes:
 
-- `RESEARCH_P256.md` — primary structural-analysis log (822 lines)
-- `RESEARCH_P256_ISOGENY_COVER.md` — this session's Phase 1–7 log
+- `research/notes/cm-isogeny/RESEARCH_P256.md` — primary structural-analysis log (822 lines)
+- `research/notes/cm-isogeny/RESEARCH_P256_ISOGENY_COVER.md` — this session's Phase 1–7 log
 - `RESEARCH.md` — CGA-HNC Phase-1 findings (orthogonal direction)

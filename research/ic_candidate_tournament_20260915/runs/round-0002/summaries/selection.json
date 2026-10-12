@@ -1,0 +1,70 @@
+{
+  "comparisons": [
+    {
+      "candidate": "batch16",
+      "candidate_over_baseline": 0.6000355571339151,
+      "ci95": [
+        0.5848693645684525,
+        0.6142920989301766
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 4,
+      "native_wall_candidate_over_baseline": 0.7163216031057734,
+      "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+      "paired_cases": 12,
+      "per_cell": {
+        "n13a0": 0.5798532422446067,
+        "n17a1": 0.5927828785509853,
+        "n19a0": 0.6130273319278253,
+        "n23a0": 0.6151972248207767
+      },
+      "speedup": 1.666567902703175
+    },
+    {
+      "candidate": "batch32",
+      "candidate_over_baseline": 0.7334640233200911,
+      "ci95": [
+        0.723976221446213,
+        0.7427154613041751
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 4,
+      "native_wall_candidate_over_baseline": 0.999013708936149,
+      "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+      "paired_cases": 12,
+      "per_cell": {
+        "n13a0": 0.7220349531775337,
+        "n17a1": 0.7269729100320242,
+        "n19a0": 0.7434472625853356,
+        "n23a0": 0.7416323224833471
+      },
+      "speedup": 1.363393388367448
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 156.0143304571393,
+  "provisional_challenger": "batch16",
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 0.04664820343962663,
+    "ci95": [
+      0.04201238204751527,
+      0.05176360688117224
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 4,
+    "native_wall_candidate_over_baseline": 0.14639384414813505,
+    "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+    "paired_cases": 12,
+    "per_cell": {
+      "n13a0": 0.0433055516103592,
+      "n17a1": 0.040938544320991616,
+      "n19a0": 0.05080199524382975,
+      "n23a0": 0.05257544403690945
+    },
+    "speedup": 21.437052796561115
+  },
+  "runs": 144,
+  "stage": "selection",
+  "verified_runs": 144
+}

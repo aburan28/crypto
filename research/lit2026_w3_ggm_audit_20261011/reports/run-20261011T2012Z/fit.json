@@ -1,0 +1,150 @@
+{
+  "fits": [
+    {
+      "asymptotic_slope": 0.5,
+      "aut": 82.0,
+      "curve": "K_0 / GF(2^41)",
+      "ks": [
+        1,
+        4,
+        16,
+        32
+      ],
+      "kuhn_struik_law_slope_same_ks": 0.5329595634774803,
+      "log2_r": 39.00000151433405,
+      "per_k": [
+        {
+          "batch_law": 1.0,
+          "batches": 16,
+          "k": 1,
+          "mean_total_gae": 105936.5625,
+          "mean_total_over_sqrt_k_r_over_A": 1.2938015269662795,
+          "per_target_over_k1": 1.0
+        },
+        {
+          "batch_law": 0.546875,
+          "batches": 16,
+          "k": 4,
+          "mean_total_gae": 219965.4375,
+          "mean_total_over_sqrt_k_r_over_A": 1.3432171679032237,
+          "per_target_over_k1": 0.5190970716555013
+        },
+        {
+          "batch_law": 0.27989986818283796,
+          "batches": 16,
+          "k": 16,
+          "mean_total_gae": 469266.25,
+          "mean_total_over_sqrt_k_r_over_A": 1.432785283182423,
+          "per_target_over_k1": 0.27685569488815537
+        },
+        {
+          "batch_law": 0.19869350749593379,
+          "batches": 16,
+          "k": 32,
+          "mean_total_gae": 710725.125,
+          "mean_total_over_sqrt_k_r_over_A": 1.53443488037357,
+          "per_target_over_k1": 0.20965528456004034
+        }
+      ],
+      "r": 549756390943.0,
+      "slope": 0.5472647738323989,
+      "slope_ci95_bootstrap": [
+        0.4872821889432108,
+        0.6221390724111571
+      ],
+      "source": "research/ic_rho_koblitz_20260923/batch/k0n41.json"
+    },
+    {
+      "asymptotic_slope": 0.5,
+      "aut": 106.0,
+      "curve": "K_0 / GF(2^53)",
+      "ks": [
+        1,
+        4,
+        16,
+        32
+      ],
+      "kuhn_struik_law_slope_same_ks": 0.5329595634774803,
+      "log2_r": 44.258533022667656,
+      "per_k": [
+        {
+          "batch_law": 1.0,
+          "batches": 16,
+          "k": 1,
+          "mean_total_gae": 482739.875,
+          "mean_total_over_sqrt_k_r_over_A": 1.0834106597395687,
+          "per_target_over_k1": 1.0
+        },
+        {
+          "batch_law": 0.546875,
+          "batches": 16,
+          "k": 4,
+          "mean_total_gae": 1149386.9375,
+          "mean_total_over_sqrt_k_r_over_A": 1.2897816450867223,
+          "per_target_over_k1": 0.5952413489252364
+        },
+        {
+          "batch_law": 0.27989986818283796,
+          "batches": 16,
+          "k": 16,
+          "mean_total_gae": 2495733.3125,
+          "mean_total_over_sqrt_k_r_over_A": 1.4002904124243125,
+          "per_target_over_k1": 0.3231208775352357
+        },
+        {
+          "batch_law": 0.19869350749593379,
+          "batches": 16,
+          "k": 32,
+          "mean_total_gae": 3692806.5,
+          "mean_total_over_sqrt_k_r_over_A": 1.4650805171955619,
+          "per_target_over_k1": 0.2390525603980819
+        }
+      ],
+      "r": 21044858204113.0,
+      "slope": 0.584994699659387,
+      "slope_ci95_bootstrap": [
+        0.5036984790287381,
+        0.6709562473912531
+      ],
+      "source": "research/ic_rho_koblitz_20260923/batch/k0n53.json"
+    },
+    {
+      "asymptotic_slope": 0.5,
+      "aut": 122.0,
+      "curve": "K_0 / GF(2^61)",
+      "ks": [
+        1,
+        32
+      ],
+      "kuhn_struik_law_slope_same_ks": 0.5337233274006877,
+      "log2_r": 47.21087395347554,
+      "per_k": [
+        {
+          "batch_law": 1.0,
+          "batches": 8,
+          "k": 1,
+          "mean_total_gae": 1468520.625,
+          "mean_total_over_sqrt_k_r_over_A": 1.2709116918450925,
+          "per_target_over_k1": 1.0
+        },
+        {
+          "batch_law": 0.19869350749593379,
+          "batches": 8,
+          "k": 32,
+          "mean_total_gae": 8940855.875,
+          "mean_total_over_sqrt_k_r_over_A": 1.3678530073799509,
+          "per_target_over_k1": 0.19026068911613006
+        }
+      ],
+      "r": 162888033982417.0,
+      "slope": 0.5212098827555545,
+      "slope_ci95_bootstrap": [
+        0.4156659987057678,
+        0.6805943340590745
+      ],
+      "source": "research/ic_rho_koblitz_20260923/batch/k0n61.json"
+    }
+  ],
+  "schema": "lit2026-w3-multitarget-fit/v1",
+  "unit": "group-addition equivalents (gae) per batch, whole batch"
+}

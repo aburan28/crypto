@@ -1,0 +1,27 @@
+name: ECC2K-130 DAG Linux v2 first-outcome successor replay
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_outcome_replay_20260929/**'
+      - 'research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/**'
+      - '.github/workflows/ecc2k130-dag-linux-v2-outcome-replay.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  archive-only-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile versioned verifier
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_outcome_replay_20260929/{gate,corrected_replay}.py
+      - name: Bind first-run ZIP and replay all semantics without rerunning children
+        run: |
+          python3 research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_outcome_replay_20260929/gate.py

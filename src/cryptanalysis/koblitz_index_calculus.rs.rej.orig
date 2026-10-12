@@ -1,0 +1,18 @@
+@@ -9550,9 +9667,15 @@
+             return None;
+         }
+         let mut report = self.report.clone();
+-        let table = self.system.attempt(&mut report)?;
++        let table = self.system.attempt(&mut report);
++        // A failed sparse attempt is evidence too: keep its filter,
++        // uncovered-column count, Krylov work, and wall charge.  The
++        // previous early `?` discarded all of it and made an attempted
++        // underdetermined solve look like no solve at all.
++        self.report = report.clone();
++        let table = table?;
+         report.verified = true;
+-        self.report.solve_attempts = report.solve_attempts;
++        self.report.verified = true;
+         Some((table, report))
+     }
+ 

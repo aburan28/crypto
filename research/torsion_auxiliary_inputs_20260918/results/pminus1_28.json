@@ -1,0 +1,345 @@
+{
+ "bits": 28,
+ "case": "p-1",
+ "curve": {
+  "q": 139083619,
+  "a": 52956101,
+  "b": 103124433,
+  "p": 139078669,
+  "G": [
+   15048659,
+   56040806
+  ],
+  "p_minus_1": {
+   "2": 2,
+   "3": 1,
+   "10903": 1,
+   "1063": 1
+  },
+  "p_plus_1": {
+   "2": 1,
+   "5": 1,
+   "1747": 1,
+   "419": 1,
+   "19": 1
+  }
+ },
+ "d": 12756,
+ "log_p_d": 0.5041855774567593,
+ "sqrt_p": 11793.161959372897,
+ "floor_dlpwai": 104.41743187032748,
+ "rows": [
+  {
+   "variant": "cheon_p-1_bsgs_naive",
+   "seed": 0,
+   "alpha": 92407775,
+   "correct": true,
+   "ops": 13610,
+   "add": 4543,
+   "dbl": 9067,
+   "smul": 366,
+   "phases": {
+    "p-1:precompute": 0,
+    "p-1:step1:baby": 3913,
+    "p-1:step1:giant": 3689,
+    "p-1:step2:precompute": 35,
+    "p-1:step2:baby": 4219,
+    "p-1:step2:giant": 1715,
+    "p-1:verify": 39
+   },
+   "S": 1.1540586016613743,
+   "ops_over_floor": 130.34222118105532,
+   "secs": 0.012833356857299805
+  },
+  {
+   "variant": "cheon_p-1_bsgs_comb",
+   "seed": 0,
+   "alpha": 92407775,
+   "correct": true,
+   "ops": 2564,
+   "add": 2368,
+   "dbl": 196,
+   "smul": 366,
+   "phases": {
+    "p-1:precompute": 420,
+    "p-1:step1:baby": 470,
+    "p-1:step1:giant": 446,
+    "p-1:step2:precompute": 455,
+    "p-1:step2:baby": 521,
+    "p-1:step2:giant": 213,
+    "p-1:verify": 39
+   },
+   "S": 0.2174141259852876,
+   "ops_over_floor": 24.555286929333274,
+   "secs": 0.0032930374145507812,
+   "table_points": 744,
+   "comb_w": 5
+  },
+  {
+   "variant": "cheon_p-1_kangaroo_comb",
+   "seed": 0,
+   "alpha": 92407775,
+   "correct": true,
+   "ops": 9427,
+   "add": 9247,
+   "dbl": 180,
+   "smul": 2444,
+   "phases": {
+    "p-1:kang1:precompute": 1064,
+    "p-1:kang1:walk": 2787,
+    "p-1:kang2:shift": 35,
+    "p-1:kang2:precompute": 1064,
+    "p-1:kang2:walk": 4438,
+    "p-1:verify": 39
+   },
+   "S": 0.7993615310699321,
+   "ops_over_floor": 90.28186032871481,
+   "secs": 0.014032840728759766
+  },
+  {
+   "variant": "plain_bsgs_as_in_rust",
+   "seed": 0,
+   "alpha": 92407775,
+   "correct": true,
+   "ops": 20018,
+   "add": 20004,
+   "dbl": 14,
+   "smul": 1,
+   "phases": {
+    "plain:baby": 12755,
+    "plain:giant": 7263
+   },
+   "S": 1.6974243268227327,
+   "ops_over_floor": 191.71128461442805,
+   "secs": 0.021537303924560547
+  },
+  {
+   "variant": "rho_reference",
+   "seed": 0,
+   "alpha": 92407775,
+   "correct": true,
+   "ops": 7373,
+   "add": 5575,
+   "dbl": 1798,
+   "smul": 69,
+   "phases": {
+    "rho:precompute": 2470,
+    "rho:walk": 4864,
+    "rho:verify": 39
+   },
+   "S": 0.6251928045590972,
+   "ops_over_floor": 70.61081533930353,
+   "secs": 0.00880885124206543,
+   "steps": 4655,
+   "walks": 2
+  },
+  {
+   "variant": "cheon_p-1_bsgs_naive",
+   "seed": 1,
+   "alpha": 105553848,
+   "correct": true,
+   "ops": 9687,
+   "add": 3225,
+   "dbl": 6462,
+   "smul": 262,
+   "phases": {
+    "p-1:precompute": 0,
+    "p-1:step1:baby": 3913,
+    "p-1:step1:giant": 1170,
+    "p-1:step2:precompute": 33,
+    "p-1:step2:baby": 4219,
+    "p-1:step2:giant": 312,
+    "p-1:verify": 40
+   },
+   "S": 0.8214082053118099,
+   "ops_over_floor": 92.771866023577,
+   "secs": 0.009224653244018555
+  },
+  {
+   "variant": "cheon_p-1_bsgs_comb",
+   "seed": 1,
+   "alpha": 105553848,
+   "correct": true,
+   "ops": 2083,
+   "add": 1891,
+   "dbl": 192,
+   "smul": 262,
+   "phases": {
+    "p-1:precompute": 420,
+    "p-1:step1:baby": 470,
+    "p-1:step1:giant": 139,
+    "p-1:step2:precompute": 453,
+    "p-1:step2:baby": 521,
+    "p-1:step2:giant": 40,
+    "p-1:verify": 40
+   },
+   "S": 0.1766277786378136,
+   "ops_over_floor": 19.948776393838227,
+   "secs": 0.002408266067504883,
+   "table_points": 744,
+   "comb_w": 5
+  },
+  {
+   "variant": "cheon_p-1_kangaroo_comb",
+   "seed": 1,
+   "alpha": 105553848,
+   "correct": true,
+   "ops": 3987,
+   "add": 3811,
+   "dbl": 176,
+   "smul": 604,
+   "phases": {
+    "p-1:kang1:precompute": 1064,
+    "p-1:kang1:walk": 1374,
+    "p-1:kang2:shift": 33,
+    "p-1:kang2:precompute": 1064,
+    "p-1:kang2:walk": 412,
+    "p-1:verify": 40
+   },
+   "S": 0.3380772700091036,
+   "ops_over_floor": 38.18327963621364,
+   "secs": 0.004667520523071289
+  },
+  {
+   "variant": "plain_bsgs_as_in_rust",
+   "seed": 1,
+   "alpha": 105553848,
+   "correct": true,
+   "ops": 21048,
+   "add": 21034,
+   "dbl": 14,
+   "smul": 1,
+   "phases": {
+    "plain:baby": 12755,
+    "plain:giant": 8293
+   },
+   "S": 1.784763074780941,
+   "ops_over_floor": 201.5755379440744,
+   "secs": 0.02212834358215332
+  },
+  {
+   "variant": "rho_reference",
+   "seed": 1,
+   "alpha": 105553848,
+   "correct": true,
+   "ops": 6976,
+   "add": 5174,
+   "dbl": 1802,
+   "smul": 69,
+   "phases": {
+    "rho:precompute": 2456,
+    "rho:walk": 4480,
+    "rho:verify": 40
+   },
+   "S": 0.5915292288897683,
+   "ops_over_floor": 66.80876818214857,
+   "secs": 0.00839090347290039,
+   "steps": 4275,
+   "walks": 2
+  },
+  {
+   "variant": "cheon_p-1_bsgs_naive",
+   "seed": 2,
+   "alpha": 74305301,
+   "correct": true,
+   "ops": 13468,
+   "add": 4499,
+   "dbl": 8969,
+   "smul": 362,
+   "phases": {
+    "p-1:precompute": 0,
+    "p-1:step1:baby": 3913,
+    "p-1:step1:giant": 3472,
+    "p-1:step2:precompute": 39,
+    "p-1:step2:baby": 4219,
+    "p-1:step2:giant": 1785,
+    "p-1:verify": 40
+   },
+   "S": 1.1420177257292718,
+   "ops_over_floor": 128.98229499386136,
+   "secs": 0.012969493865966797
+  },
+  {
+   "variant": "cheon_p-1_bsgs_comb",
+   "seed": 2,
+   "alpha": 74305301,
+   "correct": true,
+   "ops": 2551,
+   "add": 2356,
+   "dbl": 195,
+   "smul": 362,
+   "phases": {
+    "p-1:precompute": 420,
+    "p-1:step1:baby": 470,
+    "p-1:step1:giant": 419,
+    "p-1:step2:precompute": 459,
+    "p-1:step2:baby": 521,
+    "p-1:step2:giant": 222,
+    "p-1:verify": 40
+   },
+   "S": 0.2163117922731937,
+   "ops_over_floor": 24.430786644590164,
+   "secs": 0.0028853416442871094,
+   "table_points": 744,
+   "comb_w": 5
+  },
+  {
+   "variant": "cheon_p-1_kangaroo_comb",
+   "seed": 2,
+   "alpha": 74305301,
+   "correct": true,
+   "ops": 8988,
+   "add": 8809,
+   "dbl": 179,
+   "smul": 2294,
+   "phases": {
+    "p-1:kang1:precompute": 1064,
+    "p-1:kang1:walk": 240,
+    "p-1:kang2:shift": 39,
+    "p-1:kang2:precompute": 1064,
+    "p-1:kang2:walk": 6541,
+    "p-1:verify": 40
+   },
+   "S": 0.7621365695615308,
+   "ops_over_floor": 86.07758148238982,
+   "secs": 0.011749267578125
+  },
+  {
+   "variant": "plain_bsgs_as_in_rust",
+   "seed": 2,
+   "alpha": 74305301,
+   "correct": true,
+   "ops": 18599,
+   "add": 18585,
+   "dbl": 14,
+   "smul": 1,
+   "phases": {
+    "plain:baby": 12755,
+    "plain:giant": 5844
+   },
+   "S": 1.5771003624026378,
+   "ops_over_floor": 178.12159968746863,
+   "secs": 0.020851612091064453
+  },
+  {
+   "variant": "rho_reference",
+   "seed": 2,
+   "alpha": 74305301,
+   "correct": true,
+   "ops": 13541,
+   "add": 11466,
+   "dbl": 2075,
+   "smul": 75,
+   "phases": {
+    "rho:precompute": 2431,
+    "rho:walk": 11070,
+    "rho:verify": 40
+   },
+   "S": 1.1482077534971837,
+   "ops_over_floor": 129.68141197741883,
+   "secs": 0.01872420310974121,
+   "steps": 10542,
+   "walks": 5
+  }
+ ]
+}

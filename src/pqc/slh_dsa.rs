@@ -56,6 +56,7 @@ const A: usize = 12;
 const K_FORS: usize = 14;
 /// Winternitz parameter w = 2^4 = 16.
 const W: usize = 16;
+#[allow(dead_code)]
 const LG_W: usize = 4;
 /// WOTS+ chain count: len1 = 2n (one nibble per byte), len2 = 3, len = 2n + 3 = 35.
 const LEN1: usize = 2 * N;
@@ -140,6 +141,7 @@ impl Adrs {
     fn set_tree_index(&mut self, i: u32) {
         self.bytes[24..28].copy_from_slice(&i.to_be_bytes());
     }
+    #[allow(dead_code)]
     fn get_tree_index(&self) -> u32 {
         u32::from_be_bytes(self.bytes[24..28].try_into().unwrap())
     }
@@ -245,13 +247,7 @@ fn h_msg(r: &[u8; N], pk_seed: &[u8; N], pk_root: &[u8; N], msg: &[u8]) -> [u8; 
 // ── WOTS+ (FIPS 205 §5) ──────────────────────────────────────────────────────
 
 /// Iterated F-chain: chain^{steps}(input) starting at index `start`.
-fn wots_chain(
-    x: &[u8; N],
-    start: u32,
-    steps: u32,
-    pk_seed: &[u8; N],
-    adrs: &mut Adrs,
-) -> [u8; N] {
+fn wots_chain(x: &[u8; N], start: u32, steps: u32, pk_seed: &[u8; N], adrs: &mut Adrs) -> [u8; N] {
     let mut tmp = *x;
     for j in 0..steps {
         adrs.set_hash_address(start + j);
@@ -278,12 +274,12 @@ fn wots_checksum(msg_digits: &[u32; LEN1]) -> [u32; LEN2] {
     }
     // Left-shift to fill the high nibble of a 12-bit value (lg(w)·LEN2 = 12).
     // For lg(w)=4, no shift needed beyond aligning to LEN2 nibbles.
-    let bytes = [(csum >> 8) as u8 & 0x0f, (csum >> 4) as u8 & 0xff, csum as u8 & 0xff];
+    let bytes = [(csum >> 8) as u8 & 0x0f, ((csum >> 4) as u8), (csum as u8)];
     // We want LEN2=3 nibbles from a 12-bit csum, MSB first.
     let mut out = [0u32; LEN2];
-    out[0] = (csum >> 8) as u32 & 0x0f;
-    out[1] = (csum >> 4) as u32 & 0x0f;
-    out[2] = csum as u32 & 0x0f;
+    out[0] = (csum >> 8) & 0x0f;
+    out[1] = (csum >> 4) & 0x0f;
+    out[2] = csum & 0x0f;
     let _ = bytes;
     out
 }
@@ -591,12 +587,7 @@ fn fors_indices(digest: &[u8]) -> [u32; K_FORS] {
 }
 
 /// Sign an a·k-bit message digest with FORS.  Output is k·(1 + a)·n bytes.
-fn fors_sign(
-    digest: &[u8],
-    sk_seed: &[u8; N],
-    pk_seed: &[u8; N],
-    adrs: &mut Adrs,
-) -> Vec<u8> {
+fn fors_sign(digest: &[u8], sk_seed: &[u8; N], pk_seed: &[u8; N], adrs: &mut Adrs) -> Vec<u8> {
     let indices = fors_indices(digest);
     let mut out = Vec::with_capacity(K_FORS * (1 + A) * N);
 
@@ -612,7 +603,7 @@ fn fors_sign(
             sibling_idx ^= 1;
             let node = fors_node(sk_seed, pk_seed, adrs, sibling_idx, j as u32);
             out.extend_from_slice(&node);
-            sibling_idx = (sibling_idx >> 1) << 1; // move to parent's left child slot
+            // Move to the parent's left-child slot.
             sibling_idx = (leaf_global >> (j + 1)) << 1;
         }
     }
@@ -620,12 +611,7 @@ fn fors_sign(
 }
 
 /// Recover the FORS public key from a FORS signature + message digest.
-fn fors_pk_from_sig(
-    sig: &[u8],
-    digest: &[u8],
-    pk_seed: &[u8; N],
-    adrs: &mut Adrs,
-) -> [u8; N] {
+fn fors_pk_from_sig(sig: &[u8], digest: &[u8], pk_seed: &[u8; N], adrs: &mut Adrs) -> [u8; N] {
     let indices = fors_indices(digest);
     let mut roots = Vec::with_capacity(K_FORS * N);
 
@@ -678,9 +664,7 @@ pub struct SlhDsaSecretKey {
 
 impl Drop for SlhDsaSecretKey {
     fn drop(&mut self) {
-        for b in &mut self.bytes {
-            *b = 0;
-        }
+        self.bytes.fill(0);
     }
 }
 
@@ -785,11 +769,7 @@ fn split_digest(digest: &[u8; M_DIGEST]) -> ([u8; 21], u64, u32) {
 /// Deterministic-friendly signature (`opt_rand` becomes the public randomizer
 /// `R`).  Per FIPS 205 §10.2.1 the official deterministic variant uses
 /// `opt_rand = PK.seed`; the randomized variant uses fresh randomness.
-pub fn slh_dsa_sha2_128s_sign(
-    sk: &SlhDsaSecretKey,
-    msg: &[u8],
-    opt_rand: &[u8; 16],
-) -> Vec<u8> {
+pub fn slh_dsa_sha2_128s_sign(sk: &SlhDsaSecretKey, msg: &[u8], opt_rand: &[u8; 16]) -> Vec<u8> {
     let sk_seed = sk.sk_seed();
     let sk_prf = sk.sk_prf();
     let pk_seed = sk.pk_seed();
@@ -926,11 +906,7 @@ mod tests {
         for i in 0..LEN1 {
             csum += (W as u32) - 1 - d[i];
         }
-        let exp = [
-            (csum >> 8) & 0x0f,
-            (csum >> 4) & 0x0f,
-            csum & 0x0f,
-        ];
+        let exp = [(csum >> 8) & 0x0f, (csum >> 4) & 0x0f, csum & 0x0f];
         assert_eq!([d[LEN1], d[LEN1 + 1], d[LEN1 + 2]], exp);
     }
 

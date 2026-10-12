@@ -1,0 +1,21 @@
+name: Standalone Boolean basis transport
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correctness-and-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Exhaustive bounded algebra and search checks
+        run: |
+          rustc --edition 2021 -O --test research/boolean_basis_transport_20260923/worker.rs -o /tmp/boolean-basis-tests
+          /tmp/boolean-basis-tests
+      - name: Frozen evidence and corruption checks
+        run: python3 -m unittest discover -s research/boolean_basis_transport_20260923 -p 'test_*.py' -v

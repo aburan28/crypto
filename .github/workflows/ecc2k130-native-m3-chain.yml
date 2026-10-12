@@ -1,0 +1,49 @@
+name: ECC2K-130 native m3 chain archive replay
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ecc2k130-native-m3-chain.yml'
+      - 'research/notes/ecc2k130/native_m3_chain_20260929/**'
+      - 'research/notes/ecc2k130/native_fullpoint_edge_20260929/*.py'
+      - 'research/notes/ecc2k130/m10_export_capacity_20260925/capacity.py'
+      - 'research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/dag.py'
+      - 'research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/*.py'
+      - 'research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py'
+      - 'research/ecc2k130_factor_base_replication_20260925/exact_*.json'
+      - 'research/ecc2k130_relations/*.py'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ecc2k130-native-m3-chain.yml'
+      - 'research/notes/ecc2k130/native_m3_chain_20260929/**'
+  workflow_dispatch:
+
+jobs:
+  frozen-and-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            .github/workflows/ecc2k130-native-m3-chain.yml
+            research/notes/ecc2k130/native_m3_chain_20260929
+            research/notes/ecc2k130/native_fullpoint_edge_20260929
+            research/notes/ecc2k130/m10_export_capacity_20260925/capacity.py
+            research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/dag.py
+            research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/export.py
+            research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/verify.py
+            research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py
+            research/ecc2k130_factor_base_replication_20260925/exact_smoke.json
+            research/ecc2k130_factor_base_replication_20260925/exact_replay.json
+            research/ecc2k130_relations/relations.py
+            research/ecc2k130_relations/fastfield.py
+      - name: Check frozen source and input bytes
+        run: python3 research/notes/ecc2k130/native_m3_chain_20260929/ci_replay.py
+      - name: Independently replay raw toy and both exact leaves
+        if: hashFiles('research/notes/ecc2k130/native_m3_chain_20260929/evidence/final/receipt.json') != ''
+        run: |
+          python3 research/notes/ecc2k130/native_m3_chain_20260929/ci_replay.py \
+            --evidence research/notes/ecc2k130/native_m3_chain_20260929/evidence/final

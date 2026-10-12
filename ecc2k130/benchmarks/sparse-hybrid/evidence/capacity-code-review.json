@@ -1,0 +1,233 @@
+{
+  "valid": true,
+  "status": "Retained CPU native-code admission gate passed",
+  "auditorSha256": "99b64ab29c8e4ca2244ff46416e18fe5327317f3cd54acaa4af75e560c2e0522",
+  "compileRawSha256": "dacde7faf98c4ae3e96dca33e74584fb8bb9e8f0fb602796800d713bb86f8dbe",
+  "originalValidatedCompileSha256": "08740322b47770f0000d4c4de2ce55bf33045594abfdec15aebcdd7a57abefc0",
+  "sourceHashes": {
+    "probe.cu": "6836bfef024c2f635e5f25018c19bea842ad0bdd80a2466190c7883aa2e441a9",
+    "bench.cu": "92d60c77acb0e69aa99bbb2a605f9269f7357c3ec0cada624bfabb614e9f39ba"
+  },
+  "compileDriverSha256": "3e99e7fb937e79736f04af76361754f6fb0378d7345b27909e6ac53ec42e2038",
+  "freezeSha256": "83e8665b0af0dc713e69c2c22c1a0e6ce41e1236627bc3d80cfd97d5310f0746",
+  "binarySha256": "675bd67a206cd817aa31e1e1762a577bf6c8be7bf6f863788cb32f46ef59c9be",
+  "binaryVolumeArtifact": "/data/sparse-hybrid-capacity-compile/1789149713960886039/probe",
+  "compileCommand": [
+    "nvcc",
+    "-O3",
+    "-std=c++17",
+    "-arch=sm_120",
+    "-lineinfo",
+    "-Xptxas",
+    "-v",
+    "/root/bench.cu",
+    "-o",
+    "/tmp/sparse-hybrid-capacity-probe"
+  ],
+  "toolVersion": "13.3.73",
+  "image": "nvidia/cuda@sha256:03c372fd9c65fe7739279f8c65473b315dc61efaaffab03e1e65bc7be7aee61e",
+  "compileAttempts": 1,
+  "allCommandsExitZero": true,
+  "allTimeoutFlagsFalse": true,
+  "kernels": {
+    "dense4": {
+      "registers": 40,
+      "stackBytes": 0,
+      "localBytes": 0,
+      "sharedBytes": 0,
+      "spillLoadBytes": 0,
+      "spillStoreBytes": 0,
+      "loopStart": "0x2f0",
+      "backedge": "0x3f0",
+      "encodedInstructionsPerLoop": 17,
+      "denseMmaPerLoop": 12,
+      "sparseMmaPerLoop": 0,
+      "unpredicatedMma": true,
+      "uniformCounterIterationsAt1024": 1024,
+      "zeroRoundSkip": true,
+      "accumulatorQuadBasesInOutputOrder": [
+        28,
+        24,
+        20,
+        4
+      ],
+      "affineSeedsMatchAllComponents": true,
+      "ownAccumulatorFeedbackAndFixedDisjointOperands": true,
+      "loadedOperandByteOffsetsPerChain": [
+        [
+          0,
+          48,
+          false
+        ],
+        [
+          16,
+          56,
+          false
+        ],
+        [
+          32,
+          64,
+          false
+        ]
+      ],
+      "completeScalarOutputStores": 16,
+      "scalarizedWithoutLoopMemory": true,
+      "loopEncodingSha256": "4e6e96447aeba46161b8b1b854996472f69e5e77c452e8e027e824494170208f",
+      "sectionEncodingSha256": "76f8bc484367f921708930026f962dd53f57491018bc01bd01959f7fb8b4568f"
+    },
+    "hybrid4": {
+      "registers": 38,
+      "stackBytes": 0,
+      "localBytes": 0,
+      "sharedBytes": 0,
+      "spillLoadBytes": 0,
+      "spillStoreBytes": 0,
+      "loopStart": "0x2c0",
+      "backedge": "0x380",
+      "encodedInstructionsPerLoop": 13,
+      "denseMmaPerLoop": 4,
+      "sparseMmaPerLoop": 4,
+      "unpredicatedMma": true,
+      "uniformCounterIterationsAt1024": 1024,
+      "zeroRoundSkip": true,
+      "accumulatorQuadBasesInOutputOrder": [
+        20,
+        4,
+        24,
+        28
+      ],
+      "affineSeedsMatchAllComponents": true,
+      "ownAccumulatorFeedbackAndFixedDisjointOperands": true,
+      "loadedOperandByteOffsetsPerChain": [
+        [
+          0,
+          16,
+          false
+        ],
+        [
+          24,
+          40,
+          true
+        ]
+      ],
+      "completeScalarOutputStores": 16,
+      "scalarizedWithoutLoopMemory": true,
+      "loopEncodingSha256": "4fe51697174f312999a8e7d2099a38cf695d6650e7badc1ae19eb5cd5fdeed15",
+      "sectionEncodingSha256": "1d950d45082cfdbfb58a3476a2cb32668a1ff265c6d2ba367a5435eaef08a4d2"
+    },
+    "dense8": {
+      "registers": 56,
+      "stackBytes": 0,
+      "localBytes": 0,
+      "sharedBytes": 0,
+      "spillLoadBytes": 0,
+      "spillStoreBytes": 0,
+      "loopStart": "0x490",
+      "backedge": "0x650",
+      "encodedInstructionsPerLoop": 29,
+      "denseMmaPerLoop": 24,
+      "sparseMmaPerLoop": 0,
+      "unpredicatedMma": true,
+      "uniformCounterIterationsAt1024": 1024,
+      "zeroRoundSkip": true,
+      "accumulatorQuadBasesInOutputOrder": [
+        20,
+        4,
+        44,
+        40,
+        36,
+        8,
+        12,
+        16
+      ],
+      "affineSeedsMatchAllComponents": true,
+      "ownAccumulatorFeedbackAndFixedDisjointOperands": true,
+      "loadedOperandByteOffsetsPerChain": [
+        [
+          0,
+          48,
+          false
+        ],
+        [
+          16,
+          56,
+          false
+        ],
+        [
+          32,
+          64,
+          false
+        ]
+      ],
+      "completeScalarOutputStores": 32,
+      "scalarizedWithoutLoopMemory": true,
+      "loopEncodingSha256": "264dbf66f3cb04b802cc43c93aff301fc3c0327ce0ec7f1d7357c88651f7e1dc",
+      "sectionEncodingSha256": "4b21d9e0a72b3c6768709f192874a17446b25599a2be7427f007515d4eb0e4bf"
+    },
+    "hybrid8": {
+      "registers": 52,
+      "stackBytes": 0,
+      "localBytes": 0,
+      "sharedBytes": 0,
+      "spillLoadBytes": 0,
+      "spillStoreBytes": 0,
+      "loopStart": "0x450",
+      "backedge": "0x590",
+      "encodedInstructionsPerLoop": 21,
+      "denseMmaPerLoop": 8,
+      "sparseMmaPerLoop": 8,
+      "unpredicatedMma": true,
+      "uniformCounterIterationsAt1024": 1024,
+      "zeroRoundSkip": true,
+      "accumulatorQuadBasesInOutputOrder": [
+        36,
+        4,
+        8,
+        12,
+        16,
+        20,
+        40,
+        44
+      ],
+      "affineSeedsMatchAllComponents": true,
+      "ownAccumulatorFeedbackAndFixedDisjointOperands": true,
+      "loadedOperandByteOffsetsPerChain": [
+        [
+          0,
+          16,
+          false
+        ],
+        [
+          24,
+          40,
+          true
+        ]
+      ],
+      "completeScalarOutputStores": 32,
+      "scalarizedWithoutLoopMemory": true,
+      "loopEncodingSha256": "cb470a393ac23fe4c75f5ca85d25fe826fb40f9e08e0b6e62b9d2ea239ea9e14",
+      "sectionEncodingSha256": "ab5b4d8516005327acf744e3f326bc5bff88283c8d88eed63660308d1f56089c"
+    }
+  },
+  "retainedOneShotCodeComparison": {
+    "denseKernel": {
+      "allInstructionOperandsAndBothEncodingWordsEqual": true,
+      "instructions": 56,
+      "encodingSha256": "0d7bcbd7c2b8e0447c8dbef0a84a167bf0ad14ceeef646aa3fec1e6eb7b2b3eb"
+    },
+    "hybridKernel": {
+      "allInstructionOperandsAndBothEncodingWordsEqual": true,
+      "instructions": 48,
+      "encodingSha256": "54de93095efc524babf2e6ccfdea420b16171f5491ce101016523e9d2ba1182a"
+    }
+  },
+  "findings": [],
+  "limits": [
+    "Read-only analysis of retained SASS, resources, compiler logs and frozen source. No compiler or GPU job was run by this review.",
+    "Native instruction counts and output liveness are established for the four capacity loops; runtime output correctness and event timings have not yet been measured.",
+    "The compiler groups each tile operation across independent chains. This is a valid schedule change, not evidence that matrix issue costs are equal or additive.",
+    "Exact code equality applies to all instruction operands and both encoding words in the retained denseKernel and hybridKernel sections. The larger executable as a whole differs and its host sections are not claimed equivalent.",
+    "Register counts are compiler allocation results; actual residency, clocks, instruction throughput, raw-product throughput and complete-walk throughput do not follow from them.",
+    "The binary hash is retained from the CPU build and volume artifact. This review does not independently download or execute that binary."
+  ]
+}

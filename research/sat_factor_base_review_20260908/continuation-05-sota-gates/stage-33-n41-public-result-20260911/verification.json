@@ -1,0 +1,267 @@
+{
+  "archive": {
+    "bytes": 1711461,
+    "path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/koblitz-stage33-n41-public-evidence-34653116265.tar.gz",
+    "sha256": "da22772f7452ff138f0c9e3eb00e6bb223240e3703a647a3aa19bc2519c6f8e1"
+  },
+  "artifact": {
+    "digest": "sha256:9096d4747fc168a5c246af552d9399bc410e6ca61e3b634f866457c4e813b7a7",
+    "expires_at": "2026-12-10T22:14:35Z",
+    "id": 10284816498,
+    "name": "koblitz-stage33-n41-public-34653116265",
+    "size_in_bytes": 1758641
+  },
+  "build_seal_sha256": "0a9418051b1876aff651656e1943908e938734caff13f36e88a0b83831d8b012",
+  "descent_trials": 2066,
+  "factor_base_discovery": {
+    "algebraic_recipe": {
+      "kind": "two_torsion_saturated",
+      "parent": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32
+        ]
+      }
+    },
+    "elapsed_seconds": 5.575777741,
+    "exhaustive_targets": false,
+    "factor_base_logs_known_by_construction": false,
+    "future_target_scalars_available_to_search": false,
+    "sampled_targets": 1024,
+    "selected": {
+      "abscissae": 2380,
+      "columns": 29,
+      "dimension": 41,
+      "domain": "two_torsion_saturation",
+      "family": "two_torsion_saturated",
+      "points": 4759,
+      "signed_orbits": 60,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "kind": "frobenius_union",
+          "seed_masks": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32
+          ]
+        }
+      }
+    },
+    "target_subgroup_enumerated": false
+  },
+  "full_cost_gate_passed": false,
+  "ic_over_rho_amortised_wall_ratio": 36.39144848536493,
+  "ic_over_rho_charged_wall_ratio": 2.2493512858487117,
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_complete": false,
+  "linear_algebra": {
+    "attempts": 1,
+    "mode": "sparse",
+    "seconds": 0.000124052,
+    "sparse": {
+      "attempts": 1,
+      "core_dimension": 3,
+      "core_nonzeros": 30,
+      "filter": {
+        "columns_in": 29,
+        "columns_out": 3,
+        "dependent_rows_dropped": 0,
+        "duplicates_removed": 0,
+        "excess_rows_removed": 0,
+        "merged_columns": 21,
+        "nonzeros_in": 112,
+        "nonzeros_out": 30,
+        "rows_in": 39,
+        "rows_out": 13,
+        "singletons_removed": 5,
+        "uncovered_columns": 0
+      },
+      "reconstructed_columns": 26,
+      "wiedemann": {
+        "block_m": 4,
+        "block_n": 4,
+        "dimension": 4,
+        "extra_steps": 0,
+        "generator_degree": 0,
+        "products": 11,
+        "sequence_length": 10
+      }
+    }
+  },
+  "preinstalled_operating_system_and_rust_toolchain_charged": false,
+  "relations": 39,
+  "remaining_blockers": [
+    "licensed Magma F4 has not executed the same 160-input packet",
+    "the larger n=59 regime remains a PDP benchmark rather than an end-to-end unknown-scalar run",
+    "preinstalled operating-system and Rust-toolchain acquisition remain outside the Stage-33 charge",
+    "unaffiliated reproduction and source-pinned novelty review remain absent"
+  ],
+  "resources": {
+    "build_outer_total_core_seconds": 309.31055,
+    "build_process_total_core_seconds": 270.75774700000005,
+    "charged_sequential_wall_seconds_available": 119.87066223599999,
+    "charged_total_core_seconds_available": 328.73222499999997,
+    "maximum_sampled_process_tree_rss_bytes": 1609519104,
+    "production_job_wall_seconds": 134.0,
+    "scientific_outer_core_seconds": 19.421675,
+    "scientific_process_core_seconds": 14.191111,
+    "scientific_process_peak_rss_bytes": 303247360,
+    "scientific_process_wall_seconds": 19.372771432999997,
+    "scientific_single_core_elapsed_seconds": 19.442666161999995,
+    "workflow_wall_seconds": 195.0
+  },
+  "rho_iterations": 425616,
+  "run_seal_sha256": "a37d3bfee31741efbb05ed689acc54225606726a9d01077790fd3d085f350a06",
+  "sat_conflict_semantics": "not applicable to the direct pair-table end-to-end arm; the same-instance SAT conflict matrix is retained in Phase B",
+  "sat_conflicts": null,
+  "schema": "koblitz_stage33_hosted_result.v1",
+  "source_commit": "18ba75e940cba564e6a08213ff29f6bdba93b577",
+  "status": "hosted_n41_public_unknown_scalar_verified",
+  "target_scalars_constructed_or_supplied": false,
+  "targets_verified": 5,
+  "verification": {
+    "charged_sequential_wall_seconds_available": 119.87066223599999,
+    "charged_total_core_seconds_available": 328.73222499999997,
+    "descent_trials": 2066,
+    "factor_base": {
+      "abscissae": 2380,
+      "columns": 29,
+      "dimension": 41,
+      "domain": "two_torsion_saturation",
+      "family": "two_torsion_saturated",
+      "points": 4759,
+      "signed_orbits": 60,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "kind": "frobenius_union",
+          "seed_masks": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32
+          ]
+        }
+      }
+    },
+    "factor_base_search": {
+      "candidates_scored": 2,
+      "elapsed_ms": 5575.777741,
+      "exhaustive_targets": false,
+      "targets": 1024,
+      "top": [
+        {
+          "columns": 29,
+          "coverage": 0.0029296875,
+          "expected_trials": 10922.666666666666,
+          "family": "two_torsion_saturated",
+          "points": 4759,
+          "spec": {
+            "kind": "two_torsion_saturated",
+            "parent": {
+              "kind": "frobenius_union",
+              "seed_masks": [
+                1,
+                2,
+                4,
+                8,
+                16,
+                32
+              ]
+            }
+          }
+        },
+        {
+          "columns": 29,
+          "coverage": 0.001953125,
+          "expected_trials": 16384.0,
+          "family": "frobenius_union",
+          "points": 2381,
+          "spec": {
+            "kind": "frobenius_union",
+            "seed_masks": [
+              1,
+              2,
+              4,
+              8,
+              16,
+              32
+            ]
+          }
+        }
+      ]
+    },
+    "full_cost_gate_passed": false,
+    "independent_external_reproduction_satisfied": false,
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_complete": false,
+    "linear_algebra": {
+      "attempts": 1,
+      "mode": "sparse",
+      "seconds": 0.000124052,
+      "sparse": {
+        "attempts": 1,
+        "core_dimension": 3,
+        "core_nonzeros": 30,
+        "filter": {
+          "columns_in": 29,
+          "columns_out": 3,
+          "dependent_rows_dropped": 0,
+          "duplicates_removed": 0,
+          "excess_rows_removed": 0,
+          "merged_columns": 21,
+          "nonzeros_in": 112,
+          "nonzeros_out": 30,
+          "rows_in": 39,
+          "rows_out": 13,
+          "singletons_removed": 5,
+          "uncovered_columns": 0
+        },
+        "reconstructed_columns": 26,
+        "wiedemann": {
+          "block_m": 4,
+          "block_n": 4,
+          "dimension": 4,
+          "extra_steps": 0,
+          "generator_degree": 0,
+          "products": 11,
+          "sequence_length": 10
+        }
+      }
+    },
+    "maximum_sampled_process_tree_rss_bytes": 1609519104,
+    "relations": 39,
+    "rho_iterations": 425616,
+    "rho_over_ic_amortised_ratio": 0.027478983157324905,
+    "rho_over_ic_charged_ratio": 0.44457262246732,
+    "sat_conflicts": null,
+    "schema": "koblitz_stage33_verification.v1",
+    "score_inventory_sha256": "77ae4470b0b68d91fc294b4779fbb33859debb9f254ad4de482523291232221a",
+    "single_core_elapsed_seconds": 19.442666161999995,
+    "source_commit": "18ba75e940cba564e6a08213ff29f6bdba93b577",
+    "status": "n41_public_unknown_scalar_build_and_run_verified",
+    "targets_verified": 5,
+    "workflow_outer_core_seconds": 19.421675
+  },
+  "workflow": {
+    "head_sha": "18ba75e940cba564e6a08213ff29f6bdba93b577",
+    "production_job_id": 103439777634,
+    "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34653116265/job/103439777634",
+    "production_job_wall_seconds": 134.0,
+    "run_id": 34653116265,
+    "url": "https://github.com/aburan28/crypto/actions/runs/34653116265",
+    "workflow_wall_seconds": 195.0
+  }
+}

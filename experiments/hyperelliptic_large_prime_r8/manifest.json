@@ -1,0 +1,82 @@
+{
+ "experiment": "hyperelliptic index calculus, round eight: reduced factor base with single large primes",
+ "protocol": "research/notes/index-calculus/RESEARCH_HYPERELLIPTIC_IC_RHO.md, 'Round eight ... protocol, written before measuring' (commit e36b99f3, pushed before code)",
+ "baseline_main": "01a64427",
+ "code_commit": "223fbc4f",
+ "binaries": {
+  "lp_bin (registered sweeps L1-L6)": "54a5899674fd1383f285f552c8d5292a886435e6a297122c8fd7360c9d43499b",
+  "r7cmd_new_bin (pinned-output check PIN)": "849fd549205404bb6f9f7090a253e1ee90b73478783ca4d4faa49fbd0285c246",
+  "lp_bin_posthoc (post-hoc diagnostic only; adds opt-in LP_ONLY/LP_IC_TRIALS env overrides, defaults unchanged)": "e33d3eb9ec5d9dd78e8fb7ed894766c65b086dba80ce29a0323c21863c5a278d"
+ },
+ "commands": {
+  "sweep": "RAYON_NUM_THREADS=1 python3 tools/isolated_bench.py run --wait --cpus 3 --out bench.jsonl --label L -- sh -c 'lp_bin > L.txt'",
+  "pinned_check": "same, running examples/hyperelliptic_ic_vs_rho rebuilt at 223fbc4f; compared against experiments/hyperelliptic_sparse_solve_r7/raw/B1.txt",
+  "posthoc": "LP_ONLY=3:61 LP_IC_TRIALS=60, same isolation"
+ },
+ "seeds": {
+  "index_calculus": "20260916 + t, t < 5 (registered); t < 60 in the post-hoc row",
+  "rho": "0xC0FFEE + t, t < 40"
+ },
+ "hosts": {
+  "hostA": {
+   "cpu": "Intel(R) Xeon(R) Processor @ 2.80GHz",
+   "kernel": "6.18.44-fc-v50",
+   "sweeps": [
+    "PIN",
+    "L1",
+    "L2"
+   ],
+   "interrupted": [
+    "L2_killed (tool time limit)",
+    "L3_killed (container stopped)"
+   ],
+   "role": "pinned-output check and cross-host replication"
+  },
+  "hostB": {
+   "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+   "kernel": "6.18.44-fc-v50",
+   "sweeps": [
+    "L4",
+    "L5",
+    "L6",
+    "POSTHOC_g3p61"
+   ],
+   "role": "primary: the registered median over three sweeps"
+  },
+  "common": {
+   "logical_cpus": 4,
+   "reserved_cpu": 3,
+   "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+   "hardware_class": "Linux x86-64 cloud container; Arm64 and GPU not measured"
+  }
+ },
+ "host_note": "The container was restarted between sweeps, landing on a different CPU. Medians are never pooled across hosts; hostB carries the registered result, hostA replicates it. Within-sweep ratios S(theta)/S(1) are the compared quantity.",
+ "pinned_output": {
+  "rows": 54,
+  "violations": 0,
+  "fields": [
+   "N",
+   "m",
+   "relation_ops",
+   "precompute",
+   "oracle_modmuls",
+   "la_modmuls",
+   "verified",
+   "rho_ops"
+  ]
+ },
+ "contended_sweeps": [],
+ "raw_files": {
+  "raw/hostA/L1.txt": "525252e921b0f81983117f518f42653b9e95f56d379521d81749b7518629876e",
+  "raw/hostA/L2.txt": "a35356e44172c9a355ae83195ebc077eefa80e71f4258d673a0e9732db6d0595",
+  "raw/hostA/L2_killed.txt": "64fd2725c7c8c844c97f35c67d79d951dfe56d2164c2afb71e53c638fcd9b167",
+  "raw/hostA/L3_killed.txt": "ec771d4860251451314ab2ea46265d1ce0b69f3cf6ed2a91fd4a3682c12c5f10",
+  "raw/hostA/PIN.txt": "4a60482c6c914d4e954a11ad185922e698f9ebe2e507c6505a48003312b34c46",
+  "raw/hostA/isolated_bench.jsonl": "764491c4c77ef5ee1be4cc40d2748fe21888cc5550e091db6bc984a7c1764eb2",
+  "raw/hostB/L4.txt": "a5161de9b61cb28f6f4d9ca9c2525d844b52e2ec9995277f4a9689a6fe4a8866",
+  "raw/hostB/L5.txt": "b7ff9641120d100481980d2163bf9ca8979c3f532223849c4e2bb5a57e238286",
+  "raw/hostB/L6.txt": "4b1e80547e568b903853539dd0ce3204284d9755700ec97429fa5738269ac957",
+  "raw/hostB/POSTHOC_g3p61.txt": "3fa2782c07223ff3578e5eb215d7e8201488947919aebb651fb3336cf1d618f4",
+  "raw/hostB/isolated_bench.jsonl": "9ddb03ffe53cca226aced8b8acfe393e00f774c14d5c0082177e7cf0f1072021"
+ }
+}

@@ -1,0 +1,116 @@
+{
+  "K": 1400,
+  "autolab_run_id": "20261002T154358Z-c3faa1f97b",
+  "beat_id": "koblitz.compact_orbit.n61_panel",
+  "claim_boundary": "L=16384 batched whole-process diagnostic; ineligible for the single-target online vs_rho schema.",
+  "claim_boundary_non_claims": [
+    "public synthetic known-answer fixtures only",
+    "no key recovery",
+    "no asymptotic sub-rho claim; both arms scale as sqrt(L*r/n) at optimal K",
+    "multi-target L=16384 batch: diagnostic, not the one-target primary comparison",
+    "comparator is the frozen KS v2 batched rho (koblitz_rho_batch_ks_v2_n61), superseded by strong rho R3 and not listed in measurement_schema.vs_rho.rho_reference_minimum",
+    "same-host replay; independent-host validation still required"
+  ],
+  "comparator": "koblitz_rho_batch_ks_v2_n61",
+  "executable_or_source_hash": {
+    "git_head": "60fb2ae47fcca9352d8bae2b280fce77371e57f0",
+    "ic_binary_sha256": "7bdc21e169c79f15da396100b48cbaf28be9bc92599709ea6ef95c865e21d273",
+    "koblitz_orbit_dlp_fast.rs_sha256": "8dea682ac4b12413c7b43a8849d6972b682dd0aa605d0ee4f41b7a4c1881ab75",
+    "koblitz_rho_batch_ks_v2_n61.rs_sha256": "019b2e2da563ad5212e46a24ed6c0f2f6e90aab083b3769260d6b056bd4095cf",
+    "rho_binary_sha256": "198b9993c9490b34a9cd8e7d9e2d78b68a478f1123491ec0bb55719adcac7d46",
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)"
+  },
+  "fixture_hash": {
+    "base_hash": "0e6a3ccca740800d13e7b9c5686706b5f57a362868cfa1aa0ebe7c9e9065e5bf",
+    "disjoint": true,
+    "eval": {
+      "name": "n61-ks-growing-16384-v1",
+      "scalars_sha256": "e9d4a883bd0a80b6386bb27e2936da1b5fb38b11ec5bf65389b507fffbe3b65e",
+      "targets": 16384
+    },
+    "tune": {
+      "name": "n61-ks-growing-tune-16384-v1",
+      "scalars_sha256": "8ad8c3749678c672b596c9c1b03091285f10e6c9383ce26a8d99b8a5237a2102",
+      "targets": 16384
+    }
+  },
+  "host_id": {
+    "cpu": "Apple M4 Pro",
+    "cpu_count": 14,
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "python": "3.9.10"
+  },
+  "ic_scalar_verified": true,
+  "independent_replay_pointer": [
+    "research/sat_factor_base_review_20260908/autolab/runs/20261002T154358Z-c3faa1f97b/artifacts/replay_ic.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/20261002T154358Z-c3faa1f97b/artifacts/replay_rho_b0.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/20261002T154358Z-c3faa1f97b/artifacts/replay_rho_b1.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/20261002T154358Z-c3faa1f97b/artifacts/replay_rho_b2.json"
+  ],
+  "independent_validation": false,
+  "instructions_retired_ratio_compact_over_rho": {
+    "median": 0.11564700138225945,
+    "range": [
+      0.11483095203922405,
+      0.11799694683337146
+    ],
+    "values": [
+      0.11483095203922405,
+      0.11799694683337146,
+      0.11564700138225945
+    ]
+  },
+  "n_or_bits": {
+    "a": 0,
+    "n": 61,
+    "subgroup_order_bits": 47.21
+  },
+  "regime": "koblitz",
+  "resource_caps": {
+    "isolation": "none: unpinned shared host; per-run load, memory and swap recorded",
+    "memory": "no cap; K candidates skipped when the estimated IC RSS exceeded available memory",
+    "threads": 1
+  },
+  "result_class": "multi_target_batch_diagnostic",
+  "rho_scalar_verified": true,
+  "schema_version": 2,
+  "seeds": {
+    "batch_seed": 531310,
+    "ic_rank_seed": 7,
+    "rho_env": {
+      "KIC_RHO_DP_BITS": "4"
+    }
+  },
+  "stage": "vs_rho",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "target_count": 16384,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "timing_class": "whole_process_wall",
+  "user_cpu_ratio_compact_over_rho": {
+    "median": 0.24518456710412384,
+    "range": [
+      0.24188902524511074,
+      0.25029975648906905
+    ],
+    "values": [
+      0.24188902524511074,
+      0.25029975648906905,
+      0.24518456710412384
+    ]
+  },
+  "verdict": "BATCH_DIAGNOSTIC_ONLY_NOT_SINGLE_TARGET",
+  "wall_ratio_compact_over_rho": {
+    "median": 0.26060749550514484,
+    "range": [
+      0.2548222761033702,
+      0.2952143618636928
+    ],
+    "values": [
+      0.2548222761033702,
+      0.2952143618636928,
+      0.26060749550514484
+    ]
+  }
+}

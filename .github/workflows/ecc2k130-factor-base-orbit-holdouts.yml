@@ -1,0 +1,34 @@
+name: ECC2K-130 factor-base orbit holdouts
+on:
+  pull_request:
+    paths:
+      - 'research/ecc2k130_factor_base_replication_20260925/**'
+      - 'research/ecc2k130_factor_base_pilot_20260924/run.py'
+      - 'research/ecc2k130_factor_base_pilot_20260924/results_final.json'
+      - 'research/ecc2k130_dual_transport_20260925/dual_transport.py'
+      - 'research/ecc2k130_direction_review_20260924/twist_torsion_results.json'
+      - 'research/ecc2k130_oriented_transport_20260924/oriented_velu.py'
+      - 'research/ecc2k130_relations/fastfield.py'
+      - 'research/ecc2k130_relations/relations.py'
+      - '.github/workflows/ecc2k130-factor-base-orbit-holdouts.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Replay disjoint toy holdouts, exact target smoke and independent full-point checks
+        run: |
+          set -euo pipefail
+          base=research/ecc2k130_factor_base_replication_20260925
+          python3 "$base/run.py" --out "$RUNNER_TEMP/fb-toy.json"
+          python3 "$base/verify.py" --input "$RUNNER_TEMP/fb-toy.json" --out "$RUNNER_TEMP/fb-toy-replay.json"
+          python3 "$base/exact_smoke.py" --toy "$RUNNER_TEMP/fb-toy.json" --replay "$RUNNER_TEMP/fb-toy-replay.json" --out "$RUNNER_TEMP/fb-exact.json"
+          python3 "$base/verify_exact.py" --input "$RUNNER_TEMP/fb-exact.json" --out "$RUNNER_TEMP/fb-exact-replay.json"
+          python3 "$base/compare_frozen.py" --frozen-toy "$base/results.json" --fresh-toy "$RUNNER_TEMP/fb-toy.json" --frozen-exact "$base/exact_smoke.json" --fresh-exact "$RUNNER_TEMP/fb-exact.json"

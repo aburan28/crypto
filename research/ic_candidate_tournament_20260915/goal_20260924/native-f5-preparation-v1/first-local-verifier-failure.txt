@@ -1,0 +1,18 @@
+Retained excerpt of the first native F5 preparation verifier test, 2026-10-03.
+Command: cargo test --locked --offline --bin icprog prepared_f5 -- --test-threads=1
+
+running 4 tests
+test prepared_f5::tests::external_seal_rejects_provenance_swaps_and_promotion ... ok
+test prepared_f5::tests::log_rank_target_chronology_and_outcome_corruption_are_rejected ... ok
+test prepared_f5::tests::reconstructs_all_original_queries_and_full_rank_without_search ... FAILED
+test prepared_f5::tests::witness_as_negative_and_false_witness_fail_group_checks ... ok
+
+called `Result::unwrap()` on an `Err` value: "column log failed independent scalar replay"
+test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 51 filtered out
+
+Cause: retained input column points encode coordinates as decimal strings;
+the canonical state encodes them as integers. The first verifier compared JSON
+representations directly. It now decodes the original point through the checked
+field/curve reader before comparing the independently recovered column point.
+No certificate, historical row, scalar, log, seal or solver output was changed.
+No new relation query, target solve, exporter or SAT solver executed.

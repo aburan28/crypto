@@ -1,0 +1,20 @@
+[package]
+name = "mlkem-dev"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crypto = { path = "../crypto" }
+subtle = "2.5"
+zeroize = "1.7"
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "mbench"
+path = "src/bin/mbench.rs"
+
+[features]
+force-avx2 = []
+force-portable = []

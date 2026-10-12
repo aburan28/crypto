@@ -1,0 +1,8 @@
+#!/bin/bash
+# Insert --quiet so Modal's spinner does not interleave with the JSON dump.
+REAL="${MODAL_REAL:-${HOME}/.local/bin/modal}"
+if [ "${1:-}" = run ]; then
+  shift
+  exec "$REAL" run -q "$@"
+fi
+exec "$REAL" "$@"

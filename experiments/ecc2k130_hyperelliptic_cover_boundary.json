@@ -1,0 +1,507 @@
+{
+  "schema": "ecc2k130_hyperelliptic_cover_boundary/v1",
+  "question": "does ECC2K-130 map to a hyperelliptic curve of another genus in a way that costs less than rho on E(F_2^131)?",
+  "verdict": "KILLED for every construction; the residual question is named in boundary F and is not a search anyone can run",
+  "unit": "log2 operations; S = ops / sqrt(r)",
+  "target": {
+    "curve": "K_0 : y^2 + x y = x^3 + 1 over F_2, used over F_2^131",
+    "trace_over_F2": -1,
+    "order": "2722258935367507707729280517973639940516",
+    "cofactor": 4,
+    "r": "680564733841876926932320129493409985129",
+    "r_is_prime": true,
+    "log2_r": 129.0,
+    "rho_automorphism_order": 262,
+    "log2_rho_plain": 64.8257,
+    "log2_rho_reference": 60.809,
+    "S_rho_reference": 0.07743
+  },
+  "boundary_A_transfer_preserves_the_group": {
+    "statement": "a correspondence that preserves the discrete logarithm carries <G> to a cyclic group of the same order r, so the rho reference is invariant under every transfer considered here",
+    "log2_rho_on_the_image": 60.809,
+    "note": "raising the genus buys the attacker index calculus, never a smaller group"
+  },
+  "boundary_B_same_field_covers": {
+    "statement": "over F_2^131 covers exist in every genus, and every one of them is priced by the ambient field: at least q = 2^131",
+    "reference_complexity": "Gaudry/Diem Otilde(q^(2-2/g)) for fixed g, against q^(g/2) for rho on the whole Jacobian",
+    "cheapest_cell": {
+      "genus": 2,
+      "log2_index_calculus_q_pow_2_minus_2_over_g": 131.0,
+      "log2_rho_on_jacobian": 131.0,
+      "log2_best": 131.0,
+      "log2_ratio_to_rho_reference": 70.19
+    },
+    "cells": [
+      {
+        "genus": 2,
+        "log2_index_calculus_q_pow_2_minus_2_over_g": 131.0,
+        "log2_rho_on_jacobian": 131.0,
+        "log2_best": 131.0,
+        "log2_ratio_to_rho_reference": 70.19
+      },
+      {
+        "genus": 3,
+        "log2_index_calculus_q_pow_2_minus_2_over_g": 174.67,
+        "log2_rho_on_jacobian": 196.5,
+        "log2_best": 174.67,
+        "log2_ratio_to_rho_reference": 113.86
+      },
+      {
+        "genus": 4,
+        "log2_index_calculus_q_pow_2_minus_2_over_g": 196.5,
+        "log2_rho_on_jacobian": 262.0,
+        "log2_best": 196.5,
+        "log2_ratio_to_rho_reference": 135.69
+      },
+      {
+        "genus": 5,
+        "log2_index_calculus_q_pow_2_minus_2_over_g": 209.6,
+        "log2_rho_on_jacobian": 327.5,
+        "log2_best": 209.6,
+        "log2_ratio_to_rho_reference": 148.79
+      },
+      {
+        "genus": 6,
+        "log2_index_calculus_q_pow_2_minus_2_over_g": 218.33,
+        "log2_rho_on_jacobian": 393.0,
+        "log2_best": 218.33,
+        "log2_ratio_to_rho_reference": 157.52
+      },
+      {
+        "genus": 7,
+        "log2_index_calculus_q_pow_2_minus_2_over_g": 224.57,
+        "log2_rho_on_jacobian": 458.5,
+        "log2_best": 224.57,
+        "log2_ratio_to_rho_reference": 163.76
+      },
+      {
+        "genus": 8,
+        "log2_index_calculus_q_pow_2_minus_2_over_g": 229.25,
+        "log2_rho_on_jacobian": 524.0,
+        "log2_best": 229.25,
+        "log2_ratio_to_rho_reference": 168.44
+      }
+    ],
+    "quadratic_weil_restriction": {
+      "construction": "Res_{F_2^262/F_2^131}(E) is an abelian surface",
+      "splits_as": "E x E^twist",
+      "why": "E is already defined over F_2^131, so the restriction decomposes along t^2 - 1 = (t-1)(t+1) into the curve and its quadratic twist",
+      "twist_order": "2722258935367507707684713200934651442782",
+      "gcd_with_curve_order": 2,
+      "note": "a split surface is the boundary of the moduli of abelian surfaces, not a genus-2 Jacobian; gluing along torsion (Howe, then Mestre for the equation -- RESEARCH_MESTRE_HOWE.md) produces one, still over F_2^131, so still on the row above"
+    }
+  },
+  "boundary_C_ghs_genus_trichotomy": {
+    "statement": "for every elliptic curve over F_2^131 the GHS magic number is 1, 130 or 131, so the genus of the descended curve over F_2 is 1, 2^129 or 2^130 -- there is no third case",
+    "ord_2_mod_131": 130,
+    "factor_degrees_of_t131_minus_1": {
+      "1": 1,
+      "130": 1
+    },
+    "available_subspace_dimensions": [
+      0,
+      1,
+      130,
+      131
+    ],
+    "magic_number_of_ecc2k130": 1,
+    "genus_of_the_ecc2k130_descent": 1,
+    "magic_number_census": {
+      "m=130,trace=0": 194,
+      "m=131,trace=1": 206
+    },
+    "samples": 400,
+    "log2_available_genera": [
+      0.0,
+      129.0,
+      130.0
+    ],
+    "isogeny_shift_closed": "Hess/Menezes-Teske raise the magic number by walking to an isogenous curve; here every curve over F_2^131 obeys the same trichotomy, so the walk has nowhere to land",
+    "genus_1_transfer_is_the_trace_map": {
+      "frobenius_eigenvalue_lambda": "196511074115861092422032515080945363956",
+      "lambda_pow_131_mod_r": 1,
+      "sum_lambda_i_mod_r": 0,
+      "conclusion": "the conorm-norm map into E(F_2) is the zero map on <G>, not merely a map into a group too small to be useful"
+    },
+    "cost_floor_for_the_large_genus": {
+      "genus": "2^129",
+      "log2_cost_floor": 129.0,
+      "log2_ratio_to_rho": 68.19,
+      "why": "one divisor on a genus-2^129 curve takes 2^129 bits to write down"
+    }
+  },
+  "boundary_D_genus_floor": {
+    "statement": "<G> is A(F_2) for a simple abelian variety A/F_2 of dimension 130, so any correspondence over F_2 carrying the discrete logarithm to a curve C/F_2 forces genus(C) >= 130",
+    "weil_restriction": "Res_{F_2^131/F_2}(E) ~ E x A, from t^131 - 1 = (t-1) Phi_131(t)",
+    "char_poly_of_the_weil_restriction": "T^262 - s T^131 + 2^131",
+    "s_131": "-22283658519494248867",
+    "dim_A": 130,
+    "points_on_A_over_F2": "680564733841876926932320129493409985129",
+    "points_on_A_equal_r": true,
+    "functional_equation_verified": true,
+    "A_is_simple": true,
+    "simplicity_proof": "the Weil numbers of A are zeta*alpha with zeta^131 = 1, zeta != 1 and alpha = (-1+sqrt(-7))/2.  Q(sqrt(-7)) has conductor 7, which does not divide 131, so Q(zeta_131) and Q(sqrt(-7)) are linearly disjoint; the only roots of unity in Q(sqrt(-7)) are +-1 and 131 is odd, so no element of Gal(Q(zeta_131, sqrt(-7))/Q) fixes zeta*alpha.  Its degree is therefore 260 = 2 dim A, and Honda-Tate makes A simple",
+    "weil_bound_genus_floor": 51,
+    "simplicity_genus_floor": 130
+  },
+  "boundary_E_window": {
+    "statement": "index calculus over F_2 beats the rho reference only in a narrow band of genus; the band is bounded below by boundary D and above by its own cost",
+    "operation": "one divisor-class step plus one smoothness test; linear algebra charged as |FB|^2 * g multiplications modulo r",
+    "window_low": 130,
+    "window_high_between": [
+      290,
+      300
+    ],
+    "exact_cell_if_A_were_a_jacobian": {
+      "genus": 130,
+      "smoothness_bound_b": 17,
+      "log2_factor_base": 14.01,
+      "log2_smooth_probability": -22.15,
+      "log2_relations": 36.17,
+      "log2_linear_algebra": 35.05,
+      "log2_total": 37.17,
+      "model": "exact: place counts from the zeta function of A",
+      "log2_ratio_to_rho": -23.64
+    },
+    "log2_gap_from_the_window_to_the_nearest_available_genus": 120.77,
+    "cells": [
+      {
+        "genus": 130,
+        "smoothness_bound_b": 17,
+        "log2_factor_base": 14.01,
+        "log2_smooth_probability": -21.94,
+        "log2_relations": 35.95,
+        "log2_linear_algebra": 35.04,
+        "log2_total": 36.95,
+        "model": "random-polynomial",
+        "log2_ratio_to_rho": -23.86,
+        "beats_rho": true
+      },
+      {
+        "genus": 140,
+        "smoothness_bound_b": 18,
+        "log2_factor_base": 14.92,
+        "log2_smooth_probability": -22.62,
+        "log2_relations": 37.54,
+        "log2_linear_algebra": 36.97,
+        "log2_total": 38.54,
+        "model": "random-polynomial",
+        "log2_ratio_to_rho": -22.27,
+        "beats_rho": true
+      },
+      {
+        "genus": 150,
+        "smoothness_bound_b": 19,
+        "log2_factor_base": 15.84,
+        "log2_smooth_probability": -23.22,
+        "log2_relations": 39.06,
+        "log2_linear_algebra": 38.91,
+        "log2_total": 40.06,
+        "model": "random-polynomial",
+        "log2_ratio_to_rho": -20.75,
+        "beats_rho": true
+      },
+      {
+        "genus": 175,
+        "smoothness_bound_b": 21,
+        "log2_factor_base": 17.69,
+        "log2_smooth_probability": -25.42,
+        "log2_relations": 43.1,
+        "log2_linear_algebra": 42.82,
+        "log2_total": 44.1,
+        "model": "random-polynomial",
+        "log2_ratio_to_rho": -16.71,
+        "beats_rho": true
+      },
+      {
+        "genus": 200,
+        "smoothness_bound_b": 23,
+        "log2_factor_base": 19.55,
+        "log2_smooth_probability": -27.27,
+        "log2_relations": 46.82,
+        "log2_linear_algebra": 46.74,
+        "log2_total": 47.82,
+        "model": "random-polynomial",
+        "log2_ratio_to_rho": -12.99,
+        "beats_rho": true
+      },
+      {
+        "genus": 225,
+        "smoothness_bound_b": 25,
+        "log2_factor_base": 21.42,
+        "log2_smooth_probability": -28.85,
+        "log2_relations": 50.28,
+        "log2_linear_algebra": 50.66,
+        "log2_total": 51.66,
+        "model": "random-polynomial",
+        "log2_ratio_to_rho": -9.15,
+        "beats_rho": true
+      },
+      {
+        "genus": 250,
+        "smoothness_bound_b": 26,
+        "log2_factor_base": 22.36,
+        "log2_smooth_probability": -31.99,
+        "log2_relations": 54.35,
+        "log2_linear_algebra": 52.69,
+        "log2_total": 55.35,
+        "model": "random-polynomial",
+        "log2_ratio_to_rho": -5.46,
+        "beats_rho": true
+      },
+      {
+        "genus": 275,
+        "smoothness_bound_b": 28,
+        "log2_factor_base": 24.25,
+        "log2_smooth_probability": -33.11,
+        "log2_relations": 57.36,
+        "log2_linear_algebra": 56.6,
+        "log2_total": 58.36,
+        "model": "random-polynomial",
+        "log2_ratio_to_rho": -2.45,
+        "beats_rho": true
+      },
+      {
+        "genus": 290,
+        "smoothness_bound_b": 29,
+        "log2_factor_base": 25.2,
+        "log2_smooth_probability": -34.07,
+        "log2_relations": 59.27,
+        "log2_linear_algebra": 58.57,
+        "log2_total": 60.27,
+        "model": "random-polynomial",
+        "log2_ratio_to_rho": -0.54,
+        "beats_rho": true
+      },
+      {
+        "genus": 300,
+        "smoothness_bound_b": 30,
+        "log2_factor_base": 26.15,
+        "log2_smooth_probability": -34.1,
+        "log2_relations": 60.25,
+        "log2_linear_algebra": 60.52,
+        "log2_total": 61.52,
+        "model": "random-polynomial",
+        "log2_ratio_to_rho": 0.71,
+        "beats_rho": false
+      },
+      {
+        "genus": 325,
+        "smoothness_bound_b": 31,
+        "log2_factor_base": 27.1,
+        "log2_smooth_probability": -36.66,
+        "log2_relations": 63.76,
+        "log2_linear_algebra": 62.54,
+        "log2_total": 64.76,
+        "model": "random-polynomial",
+        "log2_ratio_to_rho": 3.95,
+        "beats_rho": false
+      },
+      {
+        "genus": 350,
+        "smoothness_bound_b": 33,
+        "log2_factor_base": 29.0,
+        "log2_smooth_probability": -37.37,
+        "log2_relations": 66.37,
+        "log2_linear_algebra": 66.46,
+        "log2_total": 67.46,
+        "model": "random-polynomial",
+        "log2_ratio_to_rho": 6.65,
+        "beats_rho": false
+      },
+      {
+        "genus": 400,
+        "smoothness_bound_b": 36,
+        "log2_factor_base": 31.87,
+        "log2_smooth_probability": -40.14,
+        "log2_relations": 72.02,
+        "log2_linear_algebra": 72.39,
+        "log2_total": 73.39,
+        "model": "random-polynomial",
+        "log2_ratio_to_rho": 12.58,
+        "beats_rho": false
+      }
+    ]
+  },
+  "boundary_F_constructibility": {
+    "statement": "a curve of genus 130 over F_2 whose Jacobian contains A is not excluded by any point count; it is simply not constructible, and a dimension count says such curves are vanishingly rare",
+    "dim_M_g": 387,
+    "dim_hyperelliptic_locus": 259,
+    "dim_A_g": 8515,
+    "torelli_codimension": 8128,
+    "hyperelliptic_codimension": 8256,
+    "trivial_existence": "every abelian variety is a quotient of a Jacobian: cut A by dim A - 1 hyperplanes of the 3-theta embedding",
+    "log2_degree_of_A_in_P3g": 936.2,
+    "log2_genus_of_that_curve_section": 942.3,
+    "explicit_cm_constructions_cap_at_genus": 3,
+    "caveat": "the codimension count is a heuristic: the isogeny class of A carries as many principally polarised members as the CM field has ideal classes, which is not a number this thread has bounded"
+  },
+  "counterfactual_composite_degree": [
+    {
+      "field_degree_N": 130,
+      "subfield_degree_l": 1,
+      "extension_degree_n": 130,
+      "available_magic_numbers": [
+        0,
+        1,
+        2,
+        4,
+        5,
+        6,
+        8,
+        9,
+        10,
+        12,
+        13,
+        14
+      ],
+      "least_admissible_magic_number": 8,
+      "log2_rho_on_that_group": 60.31,
+      "descended_genus": "128",
+      "cost_model": "large genus over F_2 (boundary E)",
+      "log2_cost": 36.41,
+      "smoothness_bound_b": 17,
+      "breaks_rho": true
+    },
+    {
+      "field_degree_N": 130,
+      "subfield_degree_l": 2,
+      "extension_degree_n": 65,
+      "available_magic_numbers": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "least_admissible_magic_number": 7,
+      "log2_rho_on_that_group": 60.31,
+      "descended_genus": "64",
+      "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+      "log2_cost": 299.93,
+      "breaks_rho": false
+    },
+    {
+      "field_degree_N": 130,
+      "subfield_degree_l": 5,
+      "extension_degree_n": 26,
+      "available_magic_numbers": [
+        0,
+        1,
+        2,
+        12,
+        13,
+        14,
+        24,
+        25,
+        26
+      ],
+      "least_admissible_magic_number": 12,
+      "log2_rho_on_that_group": 60.31,
+      "descended_genus": "2048",
+      "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+      "log2_cost": 19590.18,
+      "breaks_rho": false
+    },
+    {
+      "field_degree_N": 130,
+      "subfield_degree_l": 10,
+      "extension_degree_n": 13,
+      "available_magic_numbers": [
+        0,
+        1,
+        6,
+        7,
+        12,
+        13
+      ],
+      "least_admissible_magic_number": 6,
+      "log2_rho_on_that_group": 60.31,
+      "descended_genus": "32",
+      "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+      "log2_cost": 137.04,
+      "breaks_rho": false
+    },
+    {
+      "field_degree_N": 130,
+      "subfield_degree_l": 13,
+      "extension_degree_n": 10,
+      "available_magic_numbers": [
+        0,
+        1,
+        2,
+        4,
+        5,
+        6,
+        8,
+        9,
+        10
+      ],
+      "least_admissible_magic_number": 5,
+      "log2_rho_on_that_group": 60.31,
+      "descended_genus": "16",
+      "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+      "log2_cost": 68.63,
+      "breaks_rho": false
+    },
+    {
+      "field_degree_N": 130,
+      "subfield_degree_l": 26,
+      "extension_degree_n": 5,
+      "available_magic_numbers": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "least_admissible_magic_number": 4,
+      "log2_rho_on_that_group": 60.31,
+      "descended_genus": "8",
+      "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+      "log2_cost": 60.8,
+      "breaks_rho": false
+    },
+    {
+      "field_degree_N": 130,
+      "subfield_degree_l": 65,
+      "extension_degree_n": 2,
+      "available_magic_numbers": [
+        0,
+        1,
+        2
+      ],
+      "least_admissible_magic_number": 2,
+      "log2_rho_on_that_group": 60.31,
+      "descended_genus": "2",
+      "cost_model": "fixed genus over F_2^l: g! q^(2-2/g)",
+      "log2_cost": 66.0,
+      "breaks_rho": false
+    },
+    {
+      "field_degree_N": 131,
+      "subfield_degree_l": 1,
+      "extension_degree_n": 131,
+      "available_magic_numbers": [
+        0,
+        1,
+        130,
+        131
+      ],
+      "least_admissible_magic_number": 130,
+      "log2_rho_on_that_group": 60.81,
+      "descended_genus": "2^129",
+      "cost_model": "large genus over F_2, cost floor = bits per divisor",
+      "log2_cost": 129.0,
+      "breaks_rho": false
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+//! Baseline implementations of isogeny-computation algorithms.
+//!
+//! Kernel -> isogeny:        `kernel::{velu, kohel, sqrt_velu}`
+//! Find l-isogenies from E:  `find::{divpoly, elkies (Phi_l + BMSS)}`
+//! Find an isogeny E1 -> E2: `path::{galbraith, ghs, volcano (Kohel), couveignes, delfs_galbraith}`
+pub mod adx_gen;
+pub mod api;
+pub mod bigint;
+pub mod cm;
+pub mod binary;
+pub mod curve;
+/// Research-only Eigen-Séta design helpers.  This module is deliberately not
+/// a cryptographic encryption implementation; see its module documentation.
+pub mod eigen_seta;
+/// End-to-end small-parameter Eigen-Séta experiment; exhaustive decapsulation.
+pub mod eigen_seta_toy;
+pub mod ext;
+pub mod field;
+pub mod find;
+pub mod fp2;
+pub mod gls_loop;
+pub mod fpm;
+pub mod fpr;
+pub mod genus2;
+pub mod gf2n;
+pub mod gf3n;
+pub mod icv1;
+pub mod int;
+pub mod json;
+pub mod kernel;
+pub mod path;
+pub mod poly;
+pub mod quat;
+pub mod series;
+pub mod sha256;
+pub mod testdata;
+pub mod theta;
+pub mod theta_g;
+pub mod weier;

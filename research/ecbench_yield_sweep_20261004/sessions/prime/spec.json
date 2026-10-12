@@ -1,0 +1,24 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "yield sweep, prime field: the abscissa base at three sizes under both oracles on the same targets",
+  "description": "PROTOCOL.md. Three prime-field curves, four planted targets each, prime-abscissa bases of 16, 32 and 64 points under the subtract oracle and the negation-folded meet-in-the-middle oracle. No algebraic oracle runs on a prime curve in ecbench. Reference: the negation-map rho.",
+  "workloads": {
+    "curves": [
+      {"kind": "prime_search", "bits": 16, "seed": 59297},
+      {"kind": "prime_search", "bits": 18, "seed": 59297},
+      {"kind": "prime_search", "bits": 20, "seed": 59297}
+    ],
+    "targets_per_curve": 4,
+    "target_seed": 20261004
+  },
+  "arms": [
+    {"name": "rho-neg", "role": "reference", "method": {"id": "rho.negation"}},
+    {"name": "abs16-subtract", "role": "baseline", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=16", "oracle": "subtract"}}},
+    {"name": "abs16-mitm", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=16", "oracle": "mitm:negation_folded=1"}}},
+    {"name": "abs32-subtract", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=32", "oracle": "subtract"}}},
+    {"name": "abs32-mitm", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=32", "oracle": "mitm:negation_folded=1"}}},
+    {"name": "abs64-subtract", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=64", "oracle": "subtract"}}},
+    {"name": "abs64-mitm", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "prime-abscissa:size=64", "oracle": "mitm:negation_folded=1"}}}
+  ],
+  "measurement": {"rounds": 1, "warmup": 0, "order": "alternate", "seed": 20261004, "isolation_required": "L1", "timeout_seconds": 240}
+}

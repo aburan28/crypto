@@ -325,6 +325,14 @@ fn n_to_f64_safe(n: &BigUint) -> f64 {
     }
 }
 
+// `Integer` and `mod_inverse` imports kept in case future variants
+// (e.g., 2-adding walks with offsets) need them.
+#[allow(dead_code)]
+fn _link() {
+    let _ = mod_inverse(&BigUint::one(), &BigUint::from(7u32));
+    let _ = BigUint::from(2u32).gcd(&BigUint::from(3u32));
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -431,12 +439,4 @@ mod tests {
         let result = online_solve(&table, &BigUint::from(2u32), &opts);
         assert!(result.is_err());
     }
-}
-
-// `Integer` and `mod_inverse` imports kept in case future variants
-// (e.g., 2-adding walks with offsets) need them.
-#[allow(dead_code)]
-fn _link() {
-    let _ = mod_inverse(&BigUint::one(), &BigUint::from(7u32));
-    let _ = BigUint::from(2u32).gcd(&BigUint::from(3u32));
 }

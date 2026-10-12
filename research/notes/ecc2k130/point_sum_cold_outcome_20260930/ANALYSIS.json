@@ -1,0 +1,259 @@
+{
+  "common_operation_unit": null,
+  "evidence_class": "complete_process_cpu_diagnostic_only",
+  "fully_eligible_cells": 0,
+  "method_speedup": null,
+  "n131_transfer": null,
+  "rho_crossover": null,
+  "rows": [
+    {
+      "K": 7,
+      "L": 1,
+      "aa_valid": true,
+      "blocks": 20,
+      "cell": "n37_L1",
+      "children": 80,
+      "compact_binary_sha256": "9613643808c2d17fc1f9155bf2209cc709d887c7ca9fc7038c8206b29c2684b4",
+      "frozen_replay": "PASS",
+      "monitor_zero_contention_samples": true,
+      "n": 37,
+      "paired_cpu_diagnostic": {
+        "control_b_over_a": {
+          "interval_95pct": [
+            0.9879509219622195,
+            1.0155720741216556
+          ],
+          "median": 1.0031218511631879
+        },
+        "point_over_control": {
+          "interval_95pct": [
+            0.9901142818707509,
+            1.0063311214827728
+          ],
+          "median": 0.9943319475339274
+        },
+        "point_over_rho": {
+          "interval_95pct": [
+            2.865460473551243,
+            2.966087262932051
+          ],
+          "median": 2.9260282152432344
+        }
+      },
+      "producer_status": "PASS",
+      "remaining_user_threads": 81,
+      "required_point_cpu_reduction_to_match_rho_diagnostic": 0.6582397959149986,
+      "rho_binary_sha256": "974df47f3264b39da785bfbe882718e57edc03df6fbdca8f9b121525b4131449",
+      "source_commit": "d8d67d3b683334db105195b0fc74d8e660dc4b5e",
+      "strict_timing_eligible": false
+    },
+    {
+      "K": 42,
+      "L": 1024,
+      "aa_valid": true,
+      "blocks": 5,
+      "cell": "n37_L1024",
+      "children": 20,
+      "compact_binary_sha256": "9613643808c2d17fc1f9155bf2209cc709d887c7ca9fc7038c8206b29c2684b4",
+      "frozen_replay": "FAIL",
+      "monitor_zero_contention_samples": true,
+      "n": 37,
+      "paired_cpu_diagnostic": {
+        "control_b_over_a": {
+          "interval_95pct": [
+            0.9878280094876853,
+            1.0079621799237677
+          ],
+          "median": 0.9969365472258445
+        },
+        "point_over_control": {
+          "interval_95pct": [
+            0.9993145064175734,
+            1.0198688425758522
+          ],
+          "median": 1.0085923459621298
+        },
+        "point_over_rho": {
+          "interval_95pct": [
+            3.2265730503954377,
+            3.257843962694986
+          ],
+          "median": 3.24276906110582
+        }
+      },
+      "producer_status": "PASS",
+      "remaining_user_threads": 82,
+      "required_point_cpu_reduction_to_match_rho_diagnostic": 0.691621579842325,
+      "rho_binary_sha256": "974df47f3264b39da785bfbe882718e57edc03df6fbdca8f9b121525b4131449",
+      "source_commit": "d8d67d3b683334db105195b0fc74d8e660dc4b5e",
+      "strict_timing_eligible": false
+    },
+    {
+      "K": 85,
+      "L": 1,
+      "aa_valid": true,
+      "blocks": 5,
+      "cell": "n41_L1",
+      "children": 20,
+      "compact_binary_sha256": "9613643808c2d17fc1f9155bf2209cc709d887c7ca9fc7038c8206b29c2684b4",
+      "frozen_replay": "PASS",
+      "monitor_zero_contention_samples": true,
+      "n": 41,
+      "paired_cpu_diagnostic": {
+        "control_b_over_a": {
+          "interval_95pct": [
+            0.9604633052055422,
+            1.0225792068279855
+          ],
+          "median": 0.9982724697136662
+        },
+        "point_over_control": {
+          "interval_95pct": [
+            0.9626878769582573,
+            1.0034816687744634
+          ],
+          "median": 0.9766050159318831
+        },
+        "point_over_rho": {
+          "interval_95pct": [
+            36.763585803631415,
+            40.32039728804649
+          ],
+          "median": 39.12945645821157
+        }
+      },
+      "producer_status": "PASS",
+      "remaining_user_threads": 81,
+      "required_point_cpu_reduction_to_match_rho_diagnostic": 0.9744438054980918,
+      "rho_binary_sha256": "974df47f3264b39da785bfbe882718e57edc03df6fbdca8f9b121525b4131449",
+      "source_commit": "d8d67d3b683334db105195b0fc74d8e660dc4b5e",
+      "strict_timing_eligible": false
+    },
+    {
+      "K": 255,
+      "L": 1024,
+      "aa_valid": true,
+      "blocks": 5,
+      "cell": "n41_L1024",
+      "children": 20,
+      "compact_binary_sha256": "9613643808c2d17fc1f9155bf2209cc709d887c7ca9fc7038c8206b29c2684b4",
+      "frozen_replay": "PASS",
+      "monitor_zero_contention_samples": true,
+      "n": 41,
+      "paired_cpu_diagnostic": {
+        "control_b_over_a": {
+          "interval_95pct": [
+            0.996138930853894,
+            1.0157032153886696
+          ],
+          "median": 1.0066073865898115
+        },
+        "point_over_control": {
+          "interval_95pct": [
+            1.0813150358952244,
+            1.106955683529056
+          ],
+          "median": 1.0954124082117414
+        },
+        "point_over_rho": {
+          "interval_95pct": [
+            1.4543394880011644,
+            1.4816651567707306
+          ],
+          "median": 1.4704043097000372
+        }
+      },
+      "producer_status": "PASS",
+      "remaining_user_threads": 83,
+      "required_point_cpu_reduction_to_match_rho_diagnostic": 0.31991494216716476,
+      "rho_binary_sha256": "974df47f3264b39da785bfbe882718e57edc03df6fbdca8f9b121525b4131449",
+      "source_commit": "d8d67d3b683334db105195b0fc74d8e660dc4b5e",
+      "strict_timing_eligible": false
+    },
+    {
+      "K": 220,
+      "L": 1,
+      "aa_valid": true,
+      "blocks": 5,
+      "cell": "n53_L1",
+      "children": 20,
+      "compact_binary_sha256": "9613643808c2d17fc1f9155bf2209cc709d887c7ca9fc7038c8206b29c2684b4",
+      "frozen_replay": "PASS",
+      "monitor_zero_contention_samples": true,
+      "n": 53,
+      "paired_cpu_diagnostic": {
+        "control_b_over_a": {
+          "interval_95pct": [
+            0.9835997706526945,
+            1.0170704926526986
+          ],
+          "median": 1.0020462357724589
+        },
+        "point_over_control": {
+          "interval_95pct": [
+            0.9319257102380151,
+            0.9940644121585129
+          ],
+          "median": 0.968900175491834
+        },
+        "point_over_rho": {
+          "interval_95pct": [
+            28.650296653819403,
+            29.89446708063803
+          ],
+          "median": 29.18071473454108
+        }
+      },
+      "producer_status": "PASS",
+      "remaining_user_threads": 83,
+      "required_point_cpu_reduction_to_match_rho_diagnostic": 0.965730791411483,
+      "rho_binary_sha256": "974df47f3264b39da785bfbe882718e57edc03df6fbdca8f9b121525b4131449",
+      "source_commit": "d8d67d3b683334db105195b0fc74d8e660dc4b5e",
+      "strict_timing_eligible": false
+    },
+    {
+      "K": 440,
+      "L": 1024,
+      "aa_valid": true,
+      "blocks": 5,
+      "cell": "n53_L1024",
+      "children": 20,
+      "compact_binary_sha256": "9613643808c2d17fc1f9155bf2209cc709d887c7ca9fc7038c8206b29c2684b4",
+      "frozen_replay": "PASS",
+      "monitor_zero_contention_samples": true,
+      "n": 53,
+      "paired_cpu_diagnostic": {
+        "control_b_over_a": {
+          "interval_95pct": [
+            0.9211912721036563,
+            1.0827400013867938
+          ],
+          "median": 1.0010354924968605
+        },
+        "point_over_control": {
+          "interval_95pct": [
+            0.9663330195750716,
+            1.0641927444364412
+          ],
+          "median": 1.0173725290756968
+        },
+        "point_over_rho": {
+          "interval_95pct": [
+            1.4124519272610783,
+            1.5416582421699232
+          ],
+          "median": 1.476345496393391
+        }
+      },
+      "producer_status": "PASS",
+      "remaining_user_threads": 81,
+      "required_point_cpu_reduction_to_match_rho_diagnostic": 0.32265177599489403,
+      "rho_binary_sha256": "974df47f3264b39da785bfbe882718e57edc03df6fbdca8f9b121525b4131449",
+      "source_commit": "d8d67d3b683334db105195b0fc74d8e660dc4b5e",
+      "strict_timing_eligible": false
+    }
+  ],
+  "run_id": 36764654520,
+  "schema": "ecc2k130-point-sum-cold-analysis-v1",
+  "status": "NO_ELIGIBLE_TIMING"
+}

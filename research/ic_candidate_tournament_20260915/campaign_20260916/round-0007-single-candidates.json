@@ -1,0 +1,57 @@
+[
+  {
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "hypothesis": "Retain the round-0006 single-target winner (tiny source, batch 1).",
+    "id": "incumbent",
+    "parent": "tiny_batch1",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0006"
+  },
+  {
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Any bad or unmatched certificate; failure of the no-regression gate against the incumbent; or failure of the strict rho gate (upper 95% limits and every cell below one in both metrics, confirmation and replay).",
+    "hypothesis": "The same pipeline with a work-minimising table-row rule, L\u00f3pez\u2013Dahab projective and fixed-base batched scalar multiplication, carry-less squaring, and its own field, sampler and tables (touching less code and data per cold process) is strictly below matched rho in instructions and native process time.",
+    "id": "tiny2",
+    "parent": "incumbent",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round7-sources/tiny2"
+  },
+  {
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Any bad or unmatched certificate; failure of the no-regression gate against the incumbent; or failure of the strict rho gate (upper 95% limits and every cell below one in both metrics, confirmation and replay).",
+    "hypothesis": "Ablation: only the work-minimising table-row rule on the round-0006 source.",
+    "id": "tiny2_rows",
+    "parent": "incumbent",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round7-sources/tiny2_rows"
+  },
+  {
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "falsification": "Any bad or unmatched certificate; failure of the no-regression gate against the incumbent; or failure of the strict rho gate (upper 95% limits and every cell below one in both metrics, confirmation and replay).",
+    "hypothesis": "Ablation: everything in tiny2 except the row rule (the round-0006 witness-density rule kept).",
+    "id": "tiny2_arith",
+    "parent": "incumbent",
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round7-sources/tiny2_arith"
+  }
+]

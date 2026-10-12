@@ -1,0 +1,90 @@
+{
+  "bootstrap_draws": 2000,
+  "cells": [
+    "n13a0",
+    "n17a1",
+    "n19a0",
+    "n23a0",
+    "n23a1",
+    "n31a0",
+    "n37a0",
+    "n43a1"
+  ],
+  "ci_level": 0.95,
+  "comparison_kind": "factor-base-policy",
+  "compiler": "rustc 1.94.1 (e408947bf 2026-03-25)",
+  "confirmation_allocation": "per-cell; raised at the cells whose measured spread a flat count cannot resolve, never lowered, from frozen prior rounds only; estimator and gate unchanged",
+  "confirmation_cases": 172,
+  "confirmation_cases_per_cell": {
+    "n13a0": 12,
+    "n17a1": 12,
+    "n19a0": 12,
+    "n19a1": 12,
+    "n23a0": 12,
+    "n23a1": 40,
+    "n29a1": 12,
+    "n31a0": 12,
+    "n37a0": 12,
+    "n43a1": 12,
+    "n59a0": 12,
+    "n61a1": 12
+  },
+  "confirmation_ratio": 0.8,
+  "created_unix": 1790125853.3122885,
+  "curve_diversity_limit": "One Koblitz curve per development degree; additional holdout curve in confirmation. Does not meet three curves per size for a broad family claim.",
+  "equivalent_suite_reason": "Point-base collector/rank/descent API, not WDSat ANF/conflict protocol. Fresh reference/candidates, independent point and scalar-field certificates; the final suite has 172 inputs.",
+  "evaluator_sha256": {
+    "oracle.py": "528c14b3e75389758be83d7af07e9cae031898b341939a480e5a749fad9f0e58",
+    "tournament.py": "1e5b27743bf3bf99a3834882ddde4992f658874438576e7532646feb655651cc"
+  },
+  "evidence_scope": "bounded public-hash ECDLP configuration tournament",
+  "family_wide_or_scaling_claim": false,
+  "holdout_cells": [
+    "n19a1",
+    "n29a1",
+    "n59a0",
+    "n61a1"
+  ],
+  "host": {
+    "machine": "x86_64",
+    "node": "vm",
+    "processor": "x86_64",
+    "release": "6.18.44-fc-v37",
+    "system": "Linux",
+    "version": "#1 SMP PREEMPT_DYNAMIC @0"
+  },
+  "limits": {
+    "cpu": 3,
+    "max_profiled_jobs": 5000,
+    "memory_bytes": 8589934592,
+    "timeout_seconds": 300.0,
+    "worker_threads": 1
+  },
+  "max_cell_ratio": 1.1,
+  "metric_class": "implementation_instruction_cost",
+  "native_timing_protocol": "blocking process reap with independent watchdog; complete cold process wall; posix_spawn child without a fork of the evaluator; caps by prlimit before job delivery",
+  "native_timings": "paired native reruns retained; no runtime claim from profiled elapsed time",
+  "no_regression_ratio": 0.98,
+  "objective": "rho",
+  "parity_margin": 1.1,
+  "pinned_files": {
+    "calibration.json": "d63ed8f9e1d29df6beac7328adf4c5d038cdf7f08dc3be8bd7f3a61892651c2b",
+    "candidates.json": "0fdc99075ee5b41bfd6ee25dedd36dd7bc4404efe2f0b09fee823918ec6bc70f",
+    "fixtures.json": "fa57a5029c970692f6db863fe14a577a446d98e55dc897bf9a14c1258928faab",
+    "source-manifest.json": "2524c8bc90dce8783431c5fca978933e5ead15388f6c4ef5bc38fcb546734480",
+    "source_candidates/scaled/source-manifest.json": "cb418362aadacd00f74d2264d3a8b3a6f3d4b2f8363fa37978a5fff6dfae9b60",
+    "source_candidates/scaled/worker": "091bcf1c1270d7e5c09b1e56d9ac19d0d2dc2c26d9698144623acdc70052b88b",
+    "worker": "1f4cf99af107dc0f73d2a9718351df835522f713309e8487ca1559afa59cf34c"
+  },
+  "profile": "pilot",
+  "profiler_version": "valgrind-3.22.0",
+  "repetitions": 3,
+  "require_native_progress": true,
+  "schema_version": 1,
+  "seed": 2026092323,
+  "source_manifest_sha256": "2d30bde93226ba65a7ff94f6d25169ec7ab0acc14eb638bd509e15d8bddf1e41",
+  "support_contract": "Stable support within each arm/case; base policy varies across arms; same public ECDLPs and per-arm floors.",
+  "target_count": 1,
+  "unit": "valgrind-3.22-amd64-Ir",
+  "workload": "complete cold batch with all setup charged once and every target verified"
+}

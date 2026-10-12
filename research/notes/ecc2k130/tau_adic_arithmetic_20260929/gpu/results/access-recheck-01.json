@@ -1,0 +1,32 @@
+{
+  "recorded_utc": "2026-09-29T16:21:18.310536+00:00",
+  "scope": "Read-only unauthenticated HEAD probes through the normal configured network path",
+  "device_files_present": false,
+  "nvidia_smi_available": false,
+  "docker_available": false,
+  "probes": [
+    {
+      "url": "https://api.modal.com",
+      "method": "HEAD",
+      "status": 503,
+      "headers": {
+        "content-type": "text/plain",
+        "server": "envoy"
+      }
+    },
+    {
+      "url": "https://api.runpod.io/graphql",
+      "method": "HEAD",
+      "status": 403,
+      "headers": {
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Server": "cloudflare"
+      }
+    }
+  ],
+  "credentials_sent": false,
+  "cloud_job_launched": false,
+  "credential_validity": "not determined",
+  "failure_origin": "not determined",
+  "note": "Recorded from the tool response in this follow-up; authenticated attempts remain in the original receipts."
+}

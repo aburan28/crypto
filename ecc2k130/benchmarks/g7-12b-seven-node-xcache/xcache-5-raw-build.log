@@ -1,0 +1,112 @@
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(1183): warning #177-D: variable "v5" was declared but never referenced
+      uint32_t v5=0, v6=0, v7=0, t, mask;
+               ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(1183): warning #177-D: variable "v6" was declared but never referenced
+      uint32_t v5=0, v6=0, v7=0, t, mask;
+                     ^
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(1183): warning #177-D: variable "v7" was declared but never referenced
+      uint32_t v5=0, v6=0, v7=0, t, mask;
+                           ^
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(6547): warning #177-D: variable "a5" was declared but never referenced
+      uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+               ^
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(6547): warning #177-D: variable "a6" was declared but never referenced
+      uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+                     ^
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(6547): warning #177-D: variable "a7" was declared but never referenced
+      uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+                           ^
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(6547): warning #177-D: variable "b5" was declared but never referenced
+      uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+                                 ^
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(6547): warning #177-D: variable "b6" was declared but never referenced
+      uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+                                       ^
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(6547): warning #177-D: variable "b7" was declared but never referenced
+      uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+                                             ^
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(7109): warning #177-D: variable "a5" was declared but never referenced
+      uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+               ^
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(7109): warning #177-D: variable "a6" was declared but never referenced
+      uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+                     ^
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(7109): warning #177-D: variable "a7" was declared but never referenced
+      uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+                           ^
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(7109): warning #177-D: variable "b5" was declared but never referenced
+      uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+                                 ^
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(7109): warning #177-D: variable "b6" was declared but never referenced
+      uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+                                       ^
+
+/home/ubuntu/crypto/ecc2k130/build/g7-cache-six-src/src/../include/packedsigma131.h(7109): warning #177-D: variable "b7" was declared but never referenced
+      uint32_t a5=0, a6=0, a7=0, b5=0, b6=0, b7=0, t, mask;
+                                             ^
+
+ptxas info    : 1536 bytes gmem
+ptxas info    : Compiling entry function '_ZN12eccPacked13123walkSharedXReference131E10WalkParamsIjEPj' for 'sm_120'
+ptxas info    : Function properties for _ZN12eccPacked13123walkSharedXReference131E10WalkParamsIjEPj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 80 registers, used 1 barriers, 12160 bytes smem
+ptxas info    : Compile time = 266.120 ms
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_2
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13129sigmaWalkNetworkPairShared131ENS0_4P131ES1_i
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked1316mul131ENS0_4P131ES1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_ZN12eccPacked1314walkE10WalkParamsIjEPj' for 'sm_120'
+ptxas info    : Function properties for _ZN12eccPacked1314walkE10WalkParamsIjEPj
+    16 bytes stack frame, 12 bytes spill stores, 12 bytes spill loads
+ptxas info    : Used 80 registers, used 1 barriers, 16 bytes cumulative stack size, 27776 bytes smem
+ptxas info    : Compile time = 287.598 ms
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_2
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13129sigmaWalkNetworkPairShared131ENS0_4P131ES1_i
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked1316mul131ENS0_4P131ES1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_ZN12eccPacked1314initE10WalkParamsIjEb' for 'sm_120'
+ptxas info    : Function properties for _ZN12eccPacked1314initE10WalkParamsIjEb
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 79 registers, used 0 barriers
+ptxas info    : Compile time = 74.759 ms
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_1
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_2
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked13119sigmaWalkNetwork131ENS0_4P131Ei
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for _ZN45_INTERNAL_98a9a148_18_testsharedxcuda_cu_main12eccPacked1316mul131ENS0_4P131ES1_
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads

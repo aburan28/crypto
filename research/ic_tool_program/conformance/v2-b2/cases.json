@@ -1,0 +1,720 @@
+{
+ "suite": "ic tool programme conformance suite v2, B2's cases",
+ "design": "research/ic_tool_program/design/schema-v2.md §9 (C032-C051); research/ic_tool_program/rounds/B2-fields-forms-estimates/PROTOCOL.md",
+ "includes": "../v1/cases.json (B0) and ../v2/cases.json (B1); ../run.py runs every step's cases",
+ "rules": [
+  "The rules of ../v2/cases.json hold. {here} is this directory's params/; {cases} is ../v2/params/.",
+  "B2's expectations are the design's §9 rows, made exact here: the codes, the exit statuses, the pipelines, and the report keys B2 adds (conversion.from and .to, estimate.<arm>.pipeline and .steps_bits, the disclosure study-pipeline)."
+ ],
+ "generator": {
+  "path": "research/ic_tool_program/conformance/v2-b2/make_cases.py",
+  "sha256": "6cf25651e5e7a7f0fdf0d3afec423df39f69ebdaedb5df02ee510c306d2e723b"
+ },
+ "cases": [
+  {
+   "id": "C032-prime-curve-rho",
+   "step": "B2",
+   "checks": "B2's prime fields: rho-negation recovers a known logarithm",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C032-prime-curve-rho.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "route.rho.pipeline": "rho-negation",
+     "result.scalar": "5275835"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C033-prime-curve-paired",
+   "step": "B2",
+   "checks": "B2's prime pipelines: the study index calculus and rho on one point",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C033-prime-curve-paired.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "route.ic.pipeline": "ic-prime-s3",
+     "route.rho.pipeline": "rho-negation",
+     "result.scalar": "5275835",
+     "all_verified": true
+    },
+    "json_contains": {
+     "disclosures": [
+      {
+       "code": "study-pipeline"
+      }
+     ]
+    }
+   },
+   "timeout_s": 900
+  },
+  {
+   "id": "C034-montgomery-rho",
+   "step": "B2",
+   "checks": "B2's conversions: Montgomery to short Weierstrass, the map recorded",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C034-montgomery-rho.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "result.scalar": "1264369",
+     "conversion.from": "montgomery",
+     "conversion.to": "short_weierstrass"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C035-twisted-edwards-rho",
+   "step": "B2",
+   "checks": "B2's conversions: twisted Edwards to short Weierstrass, the map recorded",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C035-twisted-edwards-rho.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "result.scalar": "1712174",
+     "conversion.from": "twisted_edwards",
+     "conversion.to": "short_weierstrass"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C036-supersingular-binary",
+   "step": "B2",
+   "checks": "design §4.3: a binary curve with a1 = 0 is valid but unsupported",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C036-supersingular-binary.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 3,
+    "json_paths": {
+     "refusal.code": "supersingular-binary",
+     "refusal.class": "unsupported"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C037-general-binary-is-koblitz",
+   "step": "B2",
+   "checks": "B2's conversions: a general binary curve with a1 != 0 that is Koblitz after conversion runs on kic",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C037-general-binary-is-koblitz.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "route.ic.pipeline": "kic",
+     "result.scalar": "999106",
+     "all_verified": true,
+     "conversion.from": "general_weierstrass"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C038-generic-binary-n23-paired",
+   "step": "B2",
+   "checks": "B2's binary importers: ic-binary-s4 and rho-negation on one point",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C038-generic-binary-n23.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "route.ic.pipeline": "ic-binary-s4",
+     "route.rho.pipeline": "rho-negation",
+     "result.scalar": "4015372",
+     "all_verified": true
+    }
+   },
+   "timeout_s": 900
+  },
+  {
+   "id": "C039-generic-binary-n37-paired",
+   "step": "B2",
+   "checks": "ic-binary-s4 enumerates GF(2^n) and stops at n = 32",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C039-generic-binary-n37.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 3,
+    "json_paths": {
+     "refusal.code": "no-ic-route",
+     "refusal.class": "unsupported"
+    },
+    "json_contains": {
+     "route.considered": [
+      {
+       "pipeline": "ic-binary-s4",
+       "admitted": false,
+       "gate": "enumeration-bound"
+      }
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C040-generic-binary-n37-rho",
+   "step": "B2",
+   "checks": "the same file, rho alone, on rho-negation",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C039-generic-binary-n37.json",
+     "set": {
+      "method": {
+       "solve": "rho",
+       "rho": {
+        "pipeline": "auto",
+        "seed": 7
+       }
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "route.rho.pipeline": "rho-negation",
+     "result.scalar": "17969559080"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C041-composite-p",
+   "step": "B2",
+   "checks": "design §4.2: p must be prime",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C032-prime-curve-rho.json",
+     "set": {
+      "field.p": "16777217"
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 2,
+    "json_paths": {
+     "refusal.code": "p-composite",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C042-singular-prime-curve",
+   "step": "B2",
+   "checks": "design §4.3: 4a^3 + 27b^2 = 0 is singular",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C032-prime-curve-rho.json",
+     "set": {
+      "curve": {
+       "form": "short_weierstrass",
+       "a": "16777256",
+       "b": "2"
+      }
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 2,
+    "json_paths": {
+     "refusal.code": "curve-singular",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C043-order-squared",
+   "step": "B2",
+   "checks": "design §4.4: r dividing h is refused",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C043-order-squared.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 2,
+    "json_paths": {
+     "refusal.code": "order-squared",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C044-cardinality-unknown",
+   "step": "B2",
+   "checks": "design §4.5: no exact method finds #E, so the instance is unsupported",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C044-cardinality-unknown.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 3,
+    "json_paths": {
+     "refusal.code": "cardinality-unknown",
+     "refusal.class": "unsupported"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C045-anomalous",
+   "step": "B2",
+   "checks": "design §4.6: an anomalous curve runs, with the disclosure",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C045-anomalous.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "route.rho.pipeline": "rho-negation",
+     "result.scalar": "276186"
+    },
+    "json_contains": {
+     "disclosures": [
+      {
+       "code": "anomalous"
+      }
+     ]
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C046-subfield-curve-on-rho-bignum",
+   "step": "B2",
+   "checks": "B2's rho-bignum takes what no one-word rho admits",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C046-subfield-over-gf2-100-bignum.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "complete",
+     "result.verified": true,
+     "route.rho.pipeline": "rho-bignum",
+     "result.scalar": "699950"
+    }
+   },
+   "timeout_s": 900
+  },
+  {
+   "id": "C047-secp256k1-over-budget",
+   "step": "B2",
+   "checks": "design §5.4: the estimate, near 2^128 steps, exceeds the budget",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C047-secp256k1-over-budget.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 4,
+    "json_paths": {
+     "refusal.code": "over-budget",
+     "refusal.class": "over_budget",
+     "estimate.rho.steps_bits": 128
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C048-suite-row-over-budget",
+   "step": "B2",
+   "checks": "design §3.6 and §5.4: a run whose estimate exceeds its budget is refused before it starts",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C048-suite-row-over-budget.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 4,
+    "json_paths": {
+     "refusal.code": "over-budget",
+     "refusal.class": "over_budget"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C049-gate-estimates",
+   "step": "B2",
+   "checks": "design §5.2 step 5: fidelity F2 runs nothing and estimates both arms",
+   "files": {
+    "params.json": {
+     "copy": "{cases}/gate-m83-T001.json",
+     "set": {
+      "method.fidelity": "F2"
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json",
+    "--repeats",
+    "1",
+    "--repeats-fast",
+    "1"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 0,
+    "json_paths": {
+     "status": "estimated",
+     "estimate.ic.pipeline": "kic",
+     "estimate.rho.pipeline": "rho-koblitz"
+    }
+   },
+   "timeout_s": 300
+  },
+  {
+   "id": "C050-cubic-extension",
+   "step": "B2",
+   "checks": "design §3.1: GF(p^k) is parsed and validated, and routed only from B5",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C050-cubic-extension.json"
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 3,
+    "json_paths": {
+     "refusal.code": "no-pipeline-for-field",
+     "refusal.class": "unsupported"
+    }
+   },
+   "timeout_s": 300,
+   "until": "B5"
+  },
+  {
+   "id": "C051-reducible-cubic-modulus",
+   "step": "B2",
+   "checks": "design §4.2: an extension's modulus must be irreducible",
+   "files": {
+    "params.json": {
+     "copy": "{here}/C050-cubic-extension.json",
+     "set": {
+      "field.modulus": [
+       "1008",
+       "0",
+       "0"
+      ]
+     }
+    }
+   },
+   "argv": [
+    "price",
+    "--params",
+    "{tmp}/params.json",
+    "--json",
+    "--out",
+    "{tmp}/report.json"
+   ],
+   "env": {
+    "RAYON_NUM_THREADS": "1"
+   },
+   "expect": {
+    "json_file": "{tmp}/report.json",
+    "exit": 2,
+    "json_paths": {
+     "refusal.code": "modulus-reducible",
+     "refusal.class": "invalid"
+    }
+   },
+   "timeout_s": 300
+  }
+ ]
+}

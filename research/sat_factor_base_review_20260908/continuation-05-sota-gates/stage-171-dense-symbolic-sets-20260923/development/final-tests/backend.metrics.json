@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/opt/homebrew/bin/cargo",
+    "test",
+    "--release",
+    "--locked",
+    "--offline",
+    "--example",
+    "koblitz_pdp_backend",
+    "--",
+    "--nocapture"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 600.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.10094929099432193,
+    "user_seconds": 0.035336,
+    "system_seconds": 0.039707,
+    "total_core_seconds": 0.075043,
+    "single_core_seconds": 0.075043,
+    "peak_rss_bytes": 48168960,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

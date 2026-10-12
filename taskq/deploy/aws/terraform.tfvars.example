@@ -1,0 +1,29 @@
+# cp terraform.tfvars.example terraform.tfvars and edit. terraform.tfvars is
+# gitignored; nothing secret belongs in it anyway (the AUTH token is generated).
+
+region = "us-west-2"
+name   = "taskq"
+
+# Narrow the Kubernetes API to where you run Terraform and kubectl from.
+cluster_endpoint_public_access_cidrs = ["203.0.113.0/24"]
+
+# Pin the image by commit sha so results name exactly what ran.
+image = { repository = "ghcr.io/aburan28/taskq-worker", tag = "latest" }
+
+cpu_node = { instance_type = "c7i.2xlarge", min_size = 0, desired_size = 3, max_size = 20 }
+gpu_node = { enabled = true, instance_type = "g7e.2xlarge", min_size = 0, desired_size = 0, max_size = 4 }
+
+pools = [
+  # crypto / crypto-autoresearcher jobs
+  { name = "cpu", queues = ["cpu"], replicas = 2, node_group = "cpu",
+    cpu = "6", memory = "12Gi", labels = { pool = "cpu-c7i" },
+    keda = { min_replicas = 0, max_replicas = 20 } }, # used when enable_keda = true
+  # cryptanalysis `ca` jobs, with its toolchain image
+  { name = "ca-cpu", queues = ["ca-cpu"], replicas = 1, node_group = "cpu",
+    cpu = "6", memory = "12Gi", labels = { pool = "cpu-c7i" },
+    image = { repository = "ghcr.io/aburan28/cryptanalysis-taskq-cpu", tag = "latest" } },
+  # GPU: set replicas to 1 after scaling the gpu node group up
+  { name = "ca-gpu-sm120", queues = ["ca-gpu-sm120"], replicas = 0, node_group = "gpu",
+    cpu = "6", memory = "48Gi", gpus = 1, labels = { gpu = "sm120" },
+    image = { repository = "ghcr.io/aburan28/cryptanalysis-taskq-gpu", tag = "latest" } },
+]

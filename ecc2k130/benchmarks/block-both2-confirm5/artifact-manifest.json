@@ -1,0 +1,63 @@
+{
+  "schema": "ecc2k130_block_both2_confirm5_artifact.v1",
+  "protocolCommit": "d9f575c6bd7ed5748d867df996dfa3fb8dc3f16f",
+  "protocolTree": "450f624916774c119380d3a54b6f601c983ed3df",
+  "launch": {
+    "provider": "modal",
+    "gpu": "RTX-PRO-6000",
+    "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "driver": "580.95.05",
+    "cudaCompiler": "13.3.73",
+    "functionCallId": "fc-01M3X2N99RKE1RC883G491GEKE",
+    "volume": "ecc2k130-jobs",
+    "token": "fb6d3522021344edacde6ac26d8ebd23",
+    "startedAt": "2026-10-02T01:11:33Z",
+    "finishedAt": "2026-10-02T01:33:54Z",
+    "seconds": 861.9342513084412,
+    "exitCode": 0,
+    "fetchCommand": "modal run modal_job.py --fetch-token fb6d3522021344edacde6ac26d8ebd23 --out /tmp/ecc2k-block-both2-confirm5-retrieved"
+  },
+  "rawArchive": {
+    "committed": false,
+    "localAuditPath": "/private/tmp/ecc2k-block-both2-confirm5-gpu-20261001/results.tgz",
+    "bytes": 68633856,
+    "sha256": "63023fd84d5a9baff4ec5ee0b5b42478b5073c9b3637d491b56af02cc407b150",
+    "fileCount": 44,
+    "launchJsonBytes": 646,
+    "launchJsonSha256": "8f36c89bd9ce064107f58f0557c57a94c6bda2ced782e222cbcf7be207c31261"
+  },
+  "committedRawFileManifest": {
+    "path": "raw-files.sha256",
+    "entries": 44,
+    "sha256": "c4efb7401e39be31c8974a58731e4fdb9ca213e0c71ca870f5118f077bceb136"
+  },
+  "retainedRawHashes": {
+    "result.json": "4a4f5ec23e50b72470a11e08485ab4bfce9f942e52a5a145545aba4acb71c169",
+    "samples.tsv": "358621ad84946dc85945338e3a7bf29037619bc48afe419f71fa87095fedf2d4",
+    "log-sha256.txt": "833586e542dbe0785edfca356e58c550987f243301a320e3b78e9f5553202228",
+    "dp-identity.txt": "a9c4ffe418df5b1a7c7d2b24bf4978f0b39a784e66d406fcf2694cdc46220c60",
+    "source-files.sha256": "736edff915e7e7dd818217f43c1a08ae4bb8e4893265ef07f42c8d63fb080642",
+    "binary-sha256.txt": "e384fa4e6076e078d3380868ac936d0233a39570f81f321db5753be6a41c7223",
+    "build-control.log": "946c1ab28a9635df493cad70135fca688df72eb9faf312bfefc27bdf2360e68f",
+    "build-candidate.log": "1f125712b5747f64225e6190a9fc66afc58e92917a2745b04d1226f79c60e131",
+    "verify-control.log": "0fe5bc0656c1fd5b5f82f04f77636eb19f0d463647580c952b1e0e0cc6d59a12",
+    "verify-candidate.log": "6cae081b052f822440159fb489f92e7bb3a3d7212076803ee96875b9f2653358",
+    "dp-control.bin": "863c6bbdb6612173bd14190a41fca5942d3d53f188e675ac67ddecca65117f6f",
+    "dp-candidate.bin": "d589a2e1a2c0ae00d5a667dc7a2f60c713627c3f1811bdd63d1d7d127d4cd350",
+    "ecc2k130-control": "1fc67c6aea1394a31b27c3abb150425668aadabfcde14b57f37e0a1b7db13658",
+    "ecc2k130-candidate": "9d9b2479d55cb837165635d3d0b1140e66b8351a822cd84c5861722cbeb13f6d"
+  },
+  "corpus": {
+    "recordsPerArm": 1480278,
+    "uniqueRecordsPerArm": 1480278,
+    "sortedRecordMultisetSha256": "2fc6f84d4b1969240418cf6f8e779df9538b1d8f01eb6ff4c6a00be7324fae01",
+    "sameHeaderAndSortedRecords": true
+  },
+  "audit": {
+    "initialIndependentAuditSha256BeforeManifestDigestCorrection": "ac69a465e0560d1e0e7e836cc32195e3b2af9b0c76c0b25342bc86d56b6d4abd",
+    "independentAuditSha256": "d6cadaea82613b245d578ae62e969a3d2f2407986cd18da20e6e89eea69f8836",
+    "freshExtractionMatchesProvidedResults": true,
+    "nativeResultReproductionByteIdentical": true,
+    "allTimedLogHashesAndExactWorkVerified": true
+  }
+}

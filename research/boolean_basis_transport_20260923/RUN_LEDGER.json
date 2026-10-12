@@ -1,0 +1,46 @@
+{
+  "affine_substitution_implemented": false,
+  "artifacts": [
+    {
+      "kind": "discovery diagnostic",
+      "manifest_sha256": "9290fe1b482a8dfbf5c316eb5bc13d4206b55f04a152687c55ed0504577db21a",
+      "path": "resource_probe_01"
+    },
+    {
+      "kind": "discovery diagnostic",
+      "manifest_sha256": "7c199ce1ef6b4c067781e5e431d64096f4e72feaa2a78c8b400261f8bed96b54",
+      "path": "resource_probe_02"
+    },
+    {
+      "kind": "complete-solve comparison",
+      "manifest_sha256": "997d17c3aeb4d9985a651193b204aa4cfd13a1b4705a43b2cde1962a2691e4d7",
+      "path": "run_01"
+    },
+    {
+      "kind": "discovery diagnostic",
+      "manifest_sha256": "664cacc1e64856555cb66d4b594b1320b53059a7e38ddd79b322ecb06609e527",
+      "path": "affine_opportunity_01"
+    },
+    {
+      "kind": "discovery diagnostic replay after source-only copy fix; raw counts and summary byte-identical",
+      "manifest_sha256": "ded14be612a3a88360d3d2e88137e105c9697a13ede278494b37a41b7f5ef393",
+      "path": "affine_opportunity_02"
+    }
+  ],
+  "classification": "engineering",
+  "full_ic_cost": null,
+  "gates": {
+    "basis_wide_backend_gate": "PASS",
+    "basis_wide_dramatic_gate": "REJECTED",
+    "basis_wide_improvement_gate": "REJECTED",
+    "tail_wide_backend_gate": "PASS",
+    "tail_wide_dramatic_gate": "REJECTED",
+    "tail_wide_improvement_gate": "REJECTED"
+  },
+  "production_solver_cost": null,
+  "rho_ratio": null,
+  "schema_version": 1,
+  "scope": "Complete standalone generic Boolean solves on generated public systems. No curve inputs, imported targets, scalar/key recovery, production solver changes, index-calculus or rho campaigns. This driver is not the repository inherited-F4 solver.",
+  "source_lineage_sha256": "b6678ebb987923db112192ac3843e26459d45c3a56e62dde5d465b0b543c1789",
+  "summary_sha256": "3a1ed79ac61f84db92f0aa81006a62ef84e08fcd971ba78298a038564b140604"
+}

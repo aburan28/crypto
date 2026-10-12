@@ -1,0 +1,236 @@
+{
+  "candidate": {
+    "mathematical_output_changed": false,
+    "rule": "pass already_admitted=true from the selected FIFO consumer into the existing pairs_for_key body, skipping a duplicate filter hash and load"
+  },
+  "claim_boundary": "Finite same-target rejected selected-stack fast path. Skipping the duplicate admission check inside FIFO consumption regresses both wall and CPU, so Stage 149 remains selected. No SOTA claim.",
+  "date": "2026-09-22",
+  "decision": {
+    "full_workflow_followup": false,
+    "reason": "candidate median relation-unit wall regresses 1.99 percent and unit CPU 5.52 percent",
+    "selected_stage149_unchanged": true,
+    "status": "rejected_wall_and_cpu_regression"
+  },
+  "factor_base": {
+    "factor_base_logs_known_by_construction": false,
+    "kind": "cofactor_projected",
+    "points": 32934,
+    "projected_columns": 16344,
+    "target_subgroup_enumerated": false
+  },
+  "gates": {
+    "all_seven_gates_passed": false,
+    "full_cost_vs_rho": "unchanged_failed_large_margin",
+    "independent_external_reproduction": "missing",
+    "koblitz_index_calculus_sota": false,
+    "licensed_magma_f4": "missing"
+  },
+  "instance": {
+    "collection_m": 3,
+    "collection_window": 1024,
+    "curve": "K_1 over GF(2^59)",
+    "ell": 15,
+    "uniform_summands_scanned": 102400000,
+    "uniform_trials": 100000,
+    "uniform_units": 1
+  },
+  "operation": "koblitz_n59_fifo_admitted_fastpath_rejection",
+  "panel": {
+    "comparison": {
+      "pair_table_build_cpu_seconds": {
+        "baseline_median": 144.132319,
+        "candidate_median": 140.48503399999998,
+        "candidate_over_baseline": 0.9746948843583096,
+        "change_fraction": -0.025305115641690402
+      },
+      "pair_table_build_wall_seconds": {
+        "baseline_median": 17.961578396,
+        "candidate_median": 16.9688017085,
+        "candidate_over_baseline": 0.9447277591305066,
+        "change_fraction": -0.05527224086949341
+      },
+      "relation_unit_cpu_seconds": {
+        "baseline_median": 22.485871499999988,
+        "candidate_median": 23.728117999999995,
+        "candidate_over_baseline": 1.0552456461382878,
+        "change_fraction": 0.05524564613828768
+      },
+      "relation_unit_wall_seconds": {
+        "baseline_median": 2.6008051869999997,
+        "candidate_median": 2.6524811045,
+        "candidate_over_baseline": 1.0198691996456712,
+        "change_fraction": 0.019869199645671246
+      },
+      "relations": {
+        "baseline_median": 2157.0,
+        "candidate_median": 2157.0,
+        "candidate_over_baseline": 1.0,
+        "change_fraction": 0.0
+      },
+      "whole_cpu_seconds": {
+        "baseline_median": 172.76456,
+        "candidate_median": 170.25928849999997,
+        "candidate_over_baseline": 0.9854989269790053,
+        "change_fraction": -0.014501073020994704
+      },
+      "whole_wall_seconds": {
+        "baseline_median": 23.9434659165,
+        "candidate_median": 22.9264878125,
+        "candidate_over_baseline": 0.9575258608111878,
+        "change_fraction": -0.042474139188812106
+      }
+    },
+    "exact_relation_equality": true,
+    "medians": {
+      "baseline": {
+        "pair_table_build_cpu_seconds": 144.132319,
+        "pair_table_build_wall_seconds": 17.961578396,
+        "relation_unit_cpu_seconds": 22.485871499999988,
+        "relation_unit_wall_seconds": 2.6008051869999997,
+        "relations": 2157.0,
+        "whole_cpu_seconds": 172.76456,
+        "whole_wall_seconds": 23.9434659165
+      },
+      "candidate": {
+        "pair_table_build_cpu_seconds": 140.48503399999998,
+        "pair_table_build_wall_seconds": 16.9688017085,
+        "relation_unit_cpu_seconds": 23.728117999999995,
+        "relation_unit_wall_seconds": 2.6524811045,
+        "relations": 2157.0,
+        "whole_cpu_seconds": 170.25928849999997,
+        "whole_wall_seconds": 22.9264878125
+      }
+    },
+    "order": [
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline"
+    ],
+    "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+    "runs": [
+      {
+        "arm": "baseline",
+        "binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+        "label": "a1",
+        "pair_table_build_cpu_seconds": 146.56855399999998,
+        "pair_table_build_wall_seconds": 19.201457334,
+        "peak_rss_bytes": 9463562240,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 22.447001999999998,
+        "relation_unit_wall_seconds": 2.695632958,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 175.06058,
+        "whole_wall_seconds": 25.205456833
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "e0532c80778aea6071755e6734695e19f421d7cd274bfdee6ee32f448b8c7f9a",
+        "label": "b1",
+        "pair_table_build_cpu_seconds": 135.11275700000002,
+        "pair_table_build_wall_seconds": 16.416548958,
+        "peak_rss_bytes": 10076094464,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 23.76595499999999,
+        "relation_unit_wall_seconds": 2.794464584,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 164.87654899999998,
+        "whole_wall_seconds": 22.5219695
+      },
+      {
+        "arm": "baseline",
+        "binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+        "label": "a2",
+        "pair_table_build_cpu_seconds": 141.696084,
+        "pair_table_build_wall_seconds": 16.721699458,
+        "peak_rss_bytes": 10085679104,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 22.524740999999977,
+        "relation_unit_wall_seconds": 2.505977416,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 170.46854,
+        "whole_wall_seconds": 22.681475
+      },
+      {
+        "arm": "candidate",
+        "binary_blake3": "e0532c80778aea6071755e6734695e19f421d7cd274bfdee6ee32f448b8c7f9a",
+        "label": "b2",
+        "pair_table_build_cpu_seconds": 145.85731099999998,
+        "pair_table_build_wall_seconds": 17.521054459,
+        "peak_rss_bytes": 9762357248,
+        "relation_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "relation_unit_cpu_seconds": 23.690281,
+        "relation_unit_wall_seconds": 2.510497625,
+        "relations": 2157,
+        "status": "stopped",
+        "whole_cpu_seconds": 175.64202799999998,
+        "whole_wall_seconds": 23.331006125
+      }
+    ]
+  },
+  "params": {
+    "path": "docs/ic/params/k1n59-cofactor-projected-l15-prefetch64-pilot-public-59001.json",
+    "sha256": "f837bf3ca5be26da1431c759e00309e2ac637445da2256d92a9719574a84c288"
+  },
+  "predecessor": {
+    "path": "docs/ic/runs/koblitz-n59-fifo-lookahead16-rejection-20260922.json",
+    "sha256": "f04d1e0965a65b2696a12e4ab42645946720c990af2300ffe6a9539b77fd4d58"
+  },
+  "process_accounting": {
+    "retained_peak_rss_bytes": 10085679104,
+    "retained_processes": 4,
+    "retained_processes_detail": [
+      {
+        "core_seconds": 175.06058,
+        "label": "a1",
+        "peak_rss_bytes": 9463562240,
+        "status": "stopped",
+        "wall_seconds": 25.205456833
+      },
+      {
+        "core_seconds": 164.87654899999998,
+        "label": "b1",
+        "peak_rss_bytes": 10076094464,
+        "status": "stopped",
+        "wall_seconds": 22.5219695
+      },
+      {
+        "core_seconds": 170.46854,
+        "label": "a2",
+        "peak_rss_bytes": 10085679104,
+        "status": "stopped",
+        "wall_seconds": 22.681475
+      },
+      {
+        "core_seconds": 175.64202799999998,
+        "label": "b2",
+        "peak_rss_bytes": 9762357248,
+        "status": "stopped",
+        "wall_seconds": 23.331006125
+      }
+    ],
+    "retained_sequential_wall_seconds": 93.739907458,
+    "retained_total_core_seconds": 686.047697,
+    "scope": "four complete one-unit stop-after-collect workflows; compilation excluded"
+  },
+  "schema_version": 1,
+  "software": {
+    "baseline_binary_blake3": "77521ff72df2a5965e1b4bcbcd76d3182ad16cda811dea97d3027b59a222941a",
+    "candidate_binary_blake3": "e0532c80778aea6071755e6734695e19f421d7cd274bfdee6ee32f448b8c7f9a",
+    "selected_source_stack_head": "9eeb37f2"
+  },
+  "source_patch": {
+    "path": "docs/ic/patches/koblitz-n59-fifo-admitted-fastpath-rejected-20260922.patch",
+    "sha256": "b8ed40098419c15f706d567946d7b68cc33ef4ac373a2e93ec257b4ed2fb678c",
+    "status": "archived_rejected_not_applied_to_selected_source"
+  },
+  "validation": [
+    "all four arms emit exactly 2157 relations with one canonical hash",
+    "candidate passes exact windowed-witness test",
+    "source-pinned binaries distinguish candidate and Stage-149 baseline",
+    "rejected patch applies cleanly to Stage-154 selected source"
+  ]
+}

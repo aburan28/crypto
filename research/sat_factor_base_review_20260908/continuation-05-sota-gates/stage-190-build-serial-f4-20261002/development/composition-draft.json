@@ -1,0 +1,162 @@
+{
+  "schema": "koblitz_stage190_final.v1",
+  "candidate_commit": "42099c29df870b66f9d71980583c40b60dc57d2a",
+  "finalizer_commit": "7da4bc3c2d3069e43f8e5e7460322cbfa1b380a6",
+  "decision_status": "SELECTED_FOR_REPOSITORY_DEFAULT",
+  "candidate_selected": true,
+  "runtime_default": "serial inner monomial-product, symbolic-preprocessing and row-packing sections; parallel inner BlockTables elimination; parallel fixed-X1 outer batch",
+  "claim_boundary": "One opened n=59 decomposition target and a solver-scheduling experiment. Direct MITM and full automorphism-aware rho boundaries are unchanged; no relation-yield, full-DLP, external-reproduction, novelty, or SOTA claim.",
+  "conflicts": null,
+  "screen": {
+    "all_correct": true,
+    "pair_ratios": [
+      {
+        "repeat": 1,
+        "build_serial_over_current": {
+          "wall": 0.6385980834198488,
+          "core": 0.9271322651777842,
+          "rss": 1.3024651867950818
+        }
+      }
+    ],
+    "median_paired_ratios": {
+      "wall": 0.6385980834198488,
+      "core": 0.9271322651777842,
+      "rss": 1.3024651867950818
+    },
+    "passed_performance_gate": true,
+    "status": "CONTINUE_TO_CONFIRMATION"
+  },
+  "confirmation": {
+    "all_correct": true,
+    "pair_ratios": [
+      {
+        "repeat": 1,
+        "build_serial_over_current": {
+          "wall": 0.9086805214752776,
+          "core": 0.927715496281978,
+          "rss": 0.8478739807470586
+        }
+      },
+      {
+        "repeat": 2,
+        "build_serial_over_current": {
+          "wall": 0.9132915276653484,
+          "core": 0.9105015804754004,
+          "rss": 1.0262658951246733
+        }
+      },
+      {
+        "repeat": 3,
+        "build_serial_over_current": {
+          "wall": 0.9481249239179376,
+          "core": 0.9269728077867704,
+          "rss": 1.56420762024504
+        }
+      }
+    ],
+    "median_paired_ratios": {
+      "wall": 0.9132915276653484,
+      "core": 0.9269728077867704,
+      "rss": 1.0262658951246733
+    },
+    "passed_performance_gate": true,
+    "status": "SELECTED_FOR_DEFAULT_REPLAY"
+  },
+  "default_replay_verified": true,
+  "default_replay_process": {
+    "schema": "koblitz_native_process_meter.v1",
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "command": [
+      "/usr/bin/env",
+      "RAYON_NUM_THREADS=12",
+      "PQ_F4_X1_BATCH=512",
+      "F4_F2_DENSE_PAIR_SELECT=1",
+      "F4_F2_FULL_M4RI=0",
+      "VECLIB_MAXIMUM_THREADS=1",
+      "OPENBLAS_NUM_THREADS=1",
+      "OMP_NUM_THREADS=1",
+      "MKL_NUM_THREADS=1",
+      "BLIS_NUM_THREADS=1",
+      "NUMEXPR_NUM_THREADS=1",
+      "/Volumes/SSD990/kic-stage190-selected-45fd284d7/release/examples/koblitz_pdp_backend",
+      "native-f4",
+      "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+      "300"
+    ],
+    "environment": {},
+    "pid": 21668,
+    "returncode": 0,
+    "timed_out": false,
+    "watchdog_seconds": 360,
+    "wall_seconds": 17.519345583,
+    "user_seconds": 178.803902,
+    "system_seconds": 3.008608,
+    "total_core_seconds": 181.81251,
+    "single_core_seconds": null,
+    "peak_rss_bytes": 4176412672
+  },
+  "measured_stage_charge": {
+    "components": 23,
+    "wall_seconds_sum": 485.3894905820001,
+    "total_core_seconds_sum": 3027.1844279999996,
+    "peak_rss_bytes_max": 5897338880,
+    "single_core_seconds": null
+  },
+  "cumulative_measured_lower_bound": {
+    "components": 563,
+    "wall_seconds_sum": 23476.334017457004,
+    "total_core_seconds_sum": 59943.268867000006,
+    "peak_rss_bytes_max": 6310576128,
+    "single_core_seconds": null
+  },
+  "complete_campaign_cost": null,
+  "unmetered_components": [
+    "development compilation and tests before the exact native build",
+    "final result write and final verification after a charged composition control"
+  ],
+  "artifacts": {
+    "confirmation_result": {
+      "path": "development/confirmation/result.json",
+      "bytes": 58413,
+      "sha256": "a31f80f43a0430d9fa2dd30d9ebd03802e9f82d94bede68cac16f40fb2de8a31"
+    },
+    "confirmation_verification": {
+      "path": "development/confirmation/verification.json",
+      "bytes": 192,
+      "sha256": "a2282cc71b36fb962e95b9a415d71c34c342d606885cdf696f5e2937ceae7238"
+    },
+    "default_result": {
+      "path": "development/default-replay/result.json",
+      "bytes": 8897,
+      "sha256": "6110a72abfcaba821ab48507fb0d61d0dd7aec6a2b388f606cb04a4b9c88e7f5"
+    },
+    "default_verification": {
+      "path": "development/default-replay/verification.json",
+      "bytes": 190,
+      "sha256": "fbecdf437598dd1d133380d5451fc60133a716155b45fb878203aa7594186316"
+    },
+    "protocol": {
+      "path": "PROTOCOL.md",
+      "bytes": 4829,
+      "sha256": "e1c0d98466765080630b6a532f593bce79ad3b881deddb67d9edacde8572619d"
+    },
+    "screen_result": {
+      "path": "development/screen/result.json",
+      "bytes": 19885,
+      "sha256": "454aebbbc073175ad036c9ce6e78abb6585c1f798073cc1ab3726aca66dcf495"
+    },
+    "screen_verification": {
+      "path": "development/screen/verification.json",
+      "bytes": 190,
+      "sha256": "7eb56f82249bc6397dfc889f243b8d668364fb76f0e281062f929016d7d46db4"
+    },
+    "selected_patch": {
+      "path": "selected-build-serial-schedule.patch",
+      "bytes": 6354,
+      "sha256": "cf856d6f2609adc29c013a640260811cb6d4f01a41579afe0ae663048b512137"
+    }
+  },
+  "all_seven_gates_passed": false,
+  "koblitz_index_calculus_sota": false
+}

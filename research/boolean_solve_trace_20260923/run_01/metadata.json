@@ -1,0 +1,26 @@
+{
+  "campaign_seconds": 105.4692229160064,
+  "complete": true,
+  "ended_utc": "2026-09-23T10:20:13.697900+00:00",
+  "git_base": "48af1b0d7011d90f481aff177eed6d8fc570e758",
+  "git_status": "?? ./\n",
+  "host": {
+    "cpus": 14,
+    "machine": "arm64",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "system": "Darwin"
+  },
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "schema_version": 1,
+  "scope": "Complete standalone generic Boolean solves on generated public systems. No curve inputs, imported targets, scalar/key recovery, production solver changes, index-calculus or rho campaigns. This driver is not the repository inherited-F4 solver.",
+  "source_hashes": {
+    "analyze.py": "62bde2513247e31bd44923adc9e1fcbdf474688bf68c9cf7af69bb9c4bba5ec9",
+    "kernel.rs": "9d8a1bd48a33bb11427a5f78aa4a0c4598ec9a5b50e12628f2661dd596e433e4",
+    "protocol.json": "b12308f68aa1a0d8f1e5efbbc85925c07de07ac2065042d391690661f34aeb63",
+    "run.py": "55ee117dc8e10bb839eb17141fc72e0e6b8547ea03397cf17b6737d13eac2cf1",
+    "worker.rs": "54f70f42f3342a51f5f46d8e37d2f108780c4b891df5027467e745ee1bf97c36"
+  },
+  "started_utc": "2026-09-23T10:18:25.486681+00:00",
+  "test_executable_sha256": "6cca2fdef95a0f56ca29ac856242d12f8a30f283ac620304928b5f2d3cddce5e",
+  "worker_sha256": "4355be3185ece2b0674934e4542ae53c09226ac19a11441aa019cbdb0f23ee76"
+}

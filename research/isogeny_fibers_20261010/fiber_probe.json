@@ -1,0 +1,62 @@
+{
+ "p": 211,
+ "E1": {
+  "a": 1,
+  "b": 3,
+  "N": 228,
+  "N_factored": {
+   "2": 2,
+   "3": 1,
+   "19": 1
+  },
+  "r": 19,
+  "t": -16
+ },
+ "iso2": {
+  "label": "ell=2 rational kernel",
+  "N": 228,
+  "ker_rational": 2,
+  "image_size": 114,
+  "index": 2,
+  "rational_fiber_size_histogram": {
+   "2": 114,
+   "0": 114
+  }
+ },
+ "iso3": [
+  {
+   "label": "ell=3 rational kernel",
+   "N": 228,
+   "ker_rational": 3,
+   "image_size": 76,
+   "index": 3,
+   "rational_fiber_size_histogram": {
+    "3": 76,
+    "0": 152
+   },
+   "cubic_over_Fp_has_root": false,
+   "y_in_Fp3": true,
+   "fiber_outside_image": {
+    "frobenius_orbit_length": 3,
+    "cocycle_is_T": true,
+    "cocycle_is_minus_T": false,
+    "fiber_equals_orbit": true
+   }
+  }
+ ],
+ "relation": {
+  "factor_base_bound_x": 12,
+  "factor_base_size": 14,
+  "R": "((4,), (156,))",
+  "phi_R": "((27,), (169,))",
+  "P": [
+   "((1,), (65,))",
+   "((1,), (65,))",
+   "((1,), (65,))"
+  ],
+  "sum_on_E1_minus_R": "((77,), (208,))",
+  "kernel_index": 1,
+  "cofactor": 12,
+  "cofactor_projection_equal": true
+ }
+}

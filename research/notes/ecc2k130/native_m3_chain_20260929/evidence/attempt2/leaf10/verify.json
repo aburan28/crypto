@@ -1,0 +1,35 @@
+{
+  "arm": "leaf10",
+  "cnf_target_O": {
+    "bytes": 48285979,
+    "clauses": 2282217,
+    "dag": {
+      "and": 314297,
+      "model_limbs": 21,
+      "total_nodes": 650376,
+      "variables": 1312,
+      "xor": 334765
+    },
+    "dag_prefix_sha256": "54201c0dd9fe4a710e98da3b369dfc25c098237287d6ef15a6968c2da3c90e24",
+    "target": "O",
+    "unit_count": 263,
+    "variables": 650376
+  },
+  "cpu_seconds": 0.905772,
+  "dag": {
+    "and": 314297,
+    "model_limbs": 21,
+    "total_nodes": 650376,
+    "variables": 1312,
+    "xor": 334765
+  },
+  "decision": "PASS",
+  "domain": "ecc2k130-native-m3-chain-20260929-v1",
+  "line": [
+    1,
+    0
+  ],
+  "peak_rss_bytes": 203833344,
+  "producer_sha256": "da678fa01ba7104b401ffcf64d832fd6581b911f2d2bbaf06842e3ad4f49a1c0",
+  "wall_seconds": 0.908069124998292
+}

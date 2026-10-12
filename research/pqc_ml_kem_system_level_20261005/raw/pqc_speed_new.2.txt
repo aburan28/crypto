@@ -1,0 +1,35 @@
+reference clock: 2.100 GHz
+
+| scheme | operation | kilocycles | ops/s | correct |
+|--------|-----------|-----------:|------:|:-------:|
+| ML-KEM-512 | keygen | 252.944 | 8302 | yes |
+| ML-KEM-512 | encaps | 285.144 | 7365 | yes |
+| ML-KEM-512 | decaps | 257.964 | 8141 | yes |
+| ML-KEM-768 | keygen | 411.952 | 5098 | yes |
+| ML-KEM-768 | encaps | 447.956 | 4688 | yes |
+| ML-KEM-768 | decaps | 412.170 | 5095 | yes |
+| ML-KEM-1024 | keygen | 670.280 | 3133 | yes |
+| ML-KEM-1024 | encaps | 654.970 | 3206 | yes |
+| ML-KEM-1024 | decaps | 611.090 | 3436 | yes |
+| ML-KEM-512 fast | keygen | 18.960 | 110759 | yes |
+| ML-KEM-512 fast | encaps | 16.840 | 124703 | yes |
+| ML-KEM-512 fast | decaps | 21.006 | 99971 | yes |
+| ML-KEM-512 fast | keygen, prepared | 21.036 | 99829 | yes |
+| ML-KEM-512 fast | encaps, prepared | 8.858 | 237073 | yes |
+| ML-KEM-512 fast | decaps, prepared | 22.050 | 95238 | yes |
+| ML-KEM-512 fast | prepare ek (once per key) | 7.634 | 275085 | yes |
+| ML-KEM-768 fast | keygen | 29.958 | 70098 | yes |
+| ML-KEM-768 fast | encaps | 27.476 | 76430 | yes |
+| ML-KEM-768 fast | decaps | 40.296 | 52114 | yes |
+| ML-KEM-768 fast | keygen, prepared | 42.386 | 49545 | yes |
+| ML-KEM-768 fast | encaps, prepared | 13.294 | 157966 | yes |
+| ML-KEM-768 fast | decaps, prepared | 37.300 | 56300 | yes |
+| ML-KEM-768 fast | prepare ek (once per key) | 21.668 | 96917 | yes |
+| ML-KEM-1024 fast | keygen | 51.018 | 41162 | yes |
+| ML-KEM-1024 fast | encaps | 46.594 | 45070 | yes |
+| ML-KEM-1024 fast | decaps | 57.528 | 36504 | yes |
+| ML-KEM-1024 fast | keygen, prepared | 54.320 | 38660 | yes |
+| ML-KEM-1024 fast | encaps, prepared | 17.870 | 117515 | yes |
+| ML-KEM-1024 fast | decaps, prepared | 51.860 | 40494 | yes |
+| ML-KEM-1024 fast | prepare ek (once per key) | 28.386 | 73980 | yes |
+

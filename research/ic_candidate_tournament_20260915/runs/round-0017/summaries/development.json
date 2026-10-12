@@ -1,0 +1,145 @@
+{
+  "comparisons": [
+    {
+      "candidate": "scan_io",
+      "candidate_over_baseline": 0.885920257324233,
+      "ci95": [
+        0.8579412615345378,
+        0.9174436864988459
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 0.9892402776443733,
+      "native_wall_ci95": [
+        0.9578599877150158,
+        1.0254813150618864
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9885955370376153,
+        "n17a1": 1.0316026815614974,
+        "n19a0": 0.9671230800458737,
+        "n23a0": 1.0020067457370074,
+        "n23a1": 0.9510756037508088,
+        "n31a0": 0.9970391263379709
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 18,
+      "per_cell": {
+        "n13a0": 0.9391338840613043,
+        "n17a1": 0.9145081806033777,
+        "n19a0": 0.9144041364931095,
+        "n23a0": 0.8584400513187511,
+        "n23a1": 0.8498454474334584,
+        "n31a0": 0.8438486943827318
+      },
+      "speedup": 1.1287697642452887
+    },
+    {
+      "candidate": "orbits",
+      "candidate_over_baseline": 0.8329507523416695,
+      "ci95": [
+        0.8093158183148812,
+        0.8577503041688865
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 0.9619940135395713,
+      "native_wall_ci95": [
+        0.9261666752294395,
+        0.9996488769053589
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9849390543084994,
+        "n17a1": 0.9691248013854836,
+        "n19a0": 0.9154127206823891,
+        "n23a0": 0.9624087326557157,
+        "n23a1": 0.9342722162148847,
+        "n31a0": 1.008777108449595
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 18,
+      "per_cell": {
+        "n13a0": 0.8785732116933233,
+        "n17a1": 0.8412713763922836,
+        "n19a0": 0.8524476871090616,
+        "n23a0": 0.8237523145872118,
+        "n23a1": 0.8215816631029064,
+        "n31a0": 0.7832253881466986
+      },
+      "speedup": 1.2005511696684419
+    },
+    {
+      "candidate": "orbits_rows",
+      "candidate_over_baseline": 0.8670735138198276,
+      "ci95": [
+        0.8124345362230612,
+        0.9731011996571056
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 6,
+      "native_wall_candidate_over_baseline": 0.9567207639416999,
+      "native_wall_ci95": [
+        0.9199587745469006,
+        0.9976173212402502
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.955400341451988,
+        "n17a1": 0.9674043632130813,
+        "n19a0": 0.9309357441537307,
+        "n23a0": 0.9346943483016436,
+        "n23a1": 0.9974663358388192,
+        "n31a0": 0.9559390309851619
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 18,
+      "per_cell": {
+        "n13a0": 0.8786277140986769,
+        "n17a1": 0.8413092803443523,
+        "n19a0": 0.852470951925319,
+        "n23a0": 0.8237643439689647,
+        "n23a1": 1.0451937928869182,
+        "n31a0": 0.7832412333326392
+      },
+      "speedup": 1.1533047475923637
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 70.76411002999976,
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 1.0838598424658152,
+    "ci95": [
+      0.8825855793775825,
+      1.3217390856453892
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 6,
+    "native_wall_candidate_over_baseline": 1.0073346181816376,
+    "native_wall_ci95": [
+      0.9425940058029519,
+      1.0783109650077853
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 1.0972253561674494,
+      "n17a1": 1.1265391833598313,
+      "n19a0": 1.037520776097828,
+      "n23a0": 0.9258797966663996,
+      "n23a1": 0.9012113094875969,
+      "n31a0": 0.9763878695730194
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 18,
+    "per_cell": {
+      "n13a0": 1.221341918062713,
+      "n17a1": 1.424973699008876,
+      "n19a0": 1.3788598214819063,
+      "n23a0": 0.7584241603629597,
+      "n23a1": 0.7859465351394217,
+      "n31a0": 1.1333638679772606
+    },
+    "speedup": 0.92262851783951
+  },
+  "runs": 270,
+  "stage": "development",
+  "verified_runs": 270
+}

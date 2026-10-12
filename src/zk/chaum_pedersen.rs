@@ -117,7 +117,7 @@ fn encode_point(p: &Point) -> Vec<u8> {
 fn push_be32(out: &mut Vec<u8>, v: &BigUint) {
     let bytes = v.to_bytes_be();
     if bytes.len() < 32 {
-        out.extend(std::iter::repeat(0).take(32 - bytes.len()));
+        out.extend(std::iter::repeat_n(0, 32 - bytes.len()));
     }
     out.extend_from_slice(&bytes);
 }

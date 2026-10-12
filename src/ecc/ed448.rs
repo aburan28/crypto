@@ -174,6 +174,7 @@ impl EdPoint {
         (fe_mul(&self.x, &zi), fe_mul(&self.y, &zi))
     }
 
+    #[allow(dead_code)]
     fn is_identity(&self) -> bool {
         let (x, y) = self.to_affine();
         x.is_zero() && y.is_one()
@@ -216,10 +217,7 @@ impl EdPoint {
         let e = fe_mul(&d, &fe_mul(&c, &dd));
         let f = fe_sub(&b, &e);
         let g = fe_add(&b, &e);
-        let xx = fe_mul(
-            &fe_add(&self.x, &self.y),
-            &fe_add(&other.x, &other.y),
-        );
+        let xx = fe_mul(&fe_add(&self.x, &self.y), &fe_add(&other.x, &other.y));
         let h = fe_sub(&fe_sub(&xx, &c), &dd);
         let new_x = fe_mul(&a, &fe_mul(&f, &h));
         let new_y = fe_mul(&a, &fe_mul(&g, &fe_sub(&dd, &c)));

@@ -1,0 +1,24 @@
+{
+  "child_system_ms": 9.949,
+  "child_user_ms": 4844.915,
+  "command": [
+    "target/release/examples/groebner_stage_bench",
+    "--out",
+    "research/sat_factor_base_review_20260908/autolab_groebner_flat_matrix_20260921/runs/ladder_frozen_flat/artifact",
+    "--label",
+    "ladder_frozen_flat"
+  ],
+  "ended_unix_ns": 1790046887601689000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/groebner_stage_bench",
+  "executable_sha256": "f329ebbb8dc32de7bb6b3f31f99caaa65d613d7ce8b02debd67319ab2263c702",
+  "exit_code": 0,
+  "peak_rss_bytes": 14696448,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790046882327733000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 1112,
+  "stdout_sha256": "7de327e73d122494eab05b620a129e1eba312ad1ddc3c906f2e31a18c38761c0",
+  "task_id": "TASK-KIC-GROEBNER-FLAT-MATRIX-LADDER-FROZEN-FLAT-20260921",
+  "wall_ms": 5274.012125
+}

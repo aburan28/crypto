@@ -1,0 +1,47 @@
+[
+  {
+    "n": 24,
+    "seed": 17,
+    "family": "planted",
+    "status": "SAT",
+    "model": 14906211,
+    "verified": true,
+    "variables": 213,
+    "cnf_clauses": 567,
+    "xor_clauses": 26,
+    "encoding_ns": 630917,
+    "solver_ns": 1273073208,
+    "observed_total_ns": 1273773750,
+    "completion_ns": 1273773750
+  },
+  {
+    "n": 24,
+    "seed": 17,
+    "family": "cross_planted",
+    "status": "SAT",
+    "model": 14906211,
+    "verified": true,
+    "variables": 210,
+    "cnf_clauses": 558,
+    "xor_clauses": 26,
+    "encoding_ns": 445458,
+    "solver_ns": 102076000,
+    "observed_total_ns": 102572000,
+    "completion_ns": 102572000
+  },
+  {
+    "n": 24,
+    "seed": 17,
+    "family": "unplanted",
+    "status": "UNSAT",
+    "model": null,
+    "verified": true,
+    "variables": 204,
+    "cnf_clauses": 540,
+    "xor_clauses": 26,
+    "encoding_ns": 393250,
+    "solver_ns": 2204155834,
+    "observed_total_ns": 2204584709,
+    "completion_ns": 2204584709
+  }
+]

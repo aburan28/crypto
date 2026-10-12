@@ -1,0 +1,57 @@
+{
+ "schema_version": 2,
+ "name": "C014: two target forms in one file",
+ "field": {
+  "kind": "binary",
+  "degree": 31,
+  "modulus": "0x80000009"
+ },
+ "curve": {
+  "form": "koblitz",
+  "a": 0
+ },
+ "subgroup": {
+  "order": "1439393",
+  "cofactor": "1492",
+  "generator": {
+   "x": "0x193384c8",
+   "y": "0x2722caae"
+  }
+ },
+ "target": {
+  "known_log": "673310",
+  "public_hash_seed": 23001
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "kic",
+   "recipe": {
+    "summands": 3,
+    "descent_summands": 2,
+    "collection_window": 16,
+    "collection_aim": true,
+    "solver": "pair_table",
+    "seed": 201,
+    "max_trials": 100000,
+    "collection": {
+     "unit_trials": 16,
+     "units": 1,
+     "max_units": 100000
+    },
+    "factor_base": {
+     "mode": "spec",
+     "spec": {
+      "kind": "subgroup_orbits",
+      "points": 496,
+      "seed": 201
+     }
+    }
+   }
+  },
+  "rho": {
+   "pipeline": "rho-koblitz",
+   "seed": 2293761
+  }
+ }
+}

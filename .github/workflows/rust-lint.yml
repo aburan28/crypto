@@ -1,0 +1,204 @@
+name: Rust lint
+
+# Lint for the Rust crates maintained in place: the root `crypto` crate
+# (src/, tests/, examples/, benches/) and cd_attack/. The crates under
+# research/ are archived snapshots and are not linted.
+#
+# - Format is PR-scoped, because the tree predates the check: a changed
+#   .rs file must be rustfmt-clean, the rest of the tree is left alone
+#   until someone touches it.
+# - Clippy runs with -D warnings: every compiler and clippy warning fails
+#   the build. The allow list lives in Cargo.toml `[lints]`, and each
+#   remaining exception is an item-level #[allow] next to the code.
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  # Pinned: under -D warnings, lints added by a new stable clippy would turn
+  # main red with no code change. Bump deliberately, fixing what it flags.
+  RUST_TOOLCHAIN: "1.98"
+
+jobs:
+  scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      rust_root: ${{ steps.scope.outputs.rust_root }}
+      rust_cd: ${{ steps.scope.outputs.rust_cd }}
+      rust_fmt: ${{ steps.scope.outputs.rust_fmt }}
+      release_rust: ${{ steps.scope.outputs.release_rust }}
+      release_native: ${{ steps.scope.outputs.release_native }}
+      release_cuda: ${{ steps.scope.outputs.release_cuda }}
+      ecbench_replay: ${{ steps.scope.outputs.ecbench_replay }}
+      actions: ${{ steps.scope.outputs.actions }}
+      c_cpp: ${{ steps.scope.outputs.c_cpp }}
+      javascript: ${{ steps.scope.outputs.javascript }}
+      python: ${{ steps.scope.outputs.python }}
+      rust: ${{ steps.scope.outputs.rust }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/scripts/
+            /build.rs
+            /rustfmt.toml
+            /clippy.toml
+            /rust-toolchain*
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
+            /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
+      - id: scope
+        env:
+          CI_EVENT: ${{ github.event_name }}
+          CI_BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+        run: node .github/scripts/ci-scope.mjs
+
+  fmt:
+    needs: scope
+    name: rustfmt (changed files)
+    if: always() && !cancelled() && github.event_name == 'pull_request' && (needs.scope.result != 'success' || needs.scope.outputs.rust_fmt != 'false')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require successful scope classification
+        if: needs.scope.result != 'success'
+        run: |
+          echo '::error::CI scope or release metadata failed; refusing to skip validation.'
+          exit 1
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/scripts/
+            /build.rs
+            /rustfmt.toml
+            /clippy.toml
+            /rust-toolchain*
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /cd_attack/
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: rustfmt
+      - name: Changed Rust files are formatted
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE"
+          git diff --name-only -z --diff-filter=AMR "$BASE" HEAD -- \
+            'src/**.rs' 'tests/**.rs' 'examples/**.rs' 'benches/**.rs' 'cd_attack/**.rs' 'build.rs' \
+            > "$RUNNER_TEMP/changed-rust-files"
+          mapfile -d '' -t files < "$RUNNER_TEMP/changed-rust-files"
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "no linted Rust files changed"; exit 0
+          fi
+          printf '%s\n' "${files[@]}"
+          # rustfmt follows `mod` declarations into child files, so keep only
+          # the diffs that land in files this PR changed.
+          out=$(rustfmt --edition 2021 --check "${files[@]}" 2>&1 || true)
+          bad=0
+          for f in "${files[@]}"; do
+            if grep -q "^Diff in $PWD/$f" <<<"$out"; then
+              echo "::error file=$f::not rustfmt-clean; run: rustfmt --edition 2021 $f"
+              bad=1
+            fi
+          done
+          if [ "$bad" -ne 0 ]; then
+            echo "$out"
+          fi
+          exit $bad
+
+  clippy:
+    if: always() && !cancelled()
+    needs: scope
+    name: clippy (${{ matrix.crate }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        crate: [crypto, cd_attack]
+        include:
+          - crate: crypto
+            dir: .
+            scope: rust_root
+          - crate: cd_attack
+            dir: cd_attack
+            scope: rust_cd
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+    steps:
+      - name: Require successful scope classification
+        if: needs.scope.result != 'success'
+        run: |
+          echo '::error::CI scope or release metadata failed; refusing to skip validation.'
+          exit 1
+        working-directory: ${{ github.workspace }}
+      - if: needs.scope.outputs[matrix.scope] != 'false'
+        uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /Cargo.toml
+            /Cargo.lock
+            /.cargo/
+            /rust-toolchain*
+            /.github/scripts/
+            /build.rs
+            /rustfmt.toml
+            /clippy.toml
+            /src/
+            /tests/
+            /examples/
+            /benches/
+            /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
+            /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
+            /cd_attack/
+            /scripts/clippy-maintained.sh
+      - name: Materialize compile-time inputs without research archives
+        if: needs.scope.outputs[matrix.scope] != 'false'
+        run: node .github/scripts/ci-scope.mjs --materialize
+        working-directory: ${{ github.workspace }}
+      - if: needs.scope.outputs[matrix.scope] != 'false'
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: clippy
+      - if: needs.scope.outputs[matrix.scope] != 'false'
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ${{ matrix.dir }}
+      - name: Clippy
+        if: needs.scope.outputs[matrix.scope] != 'false'
+        run: |
+          if [ "${{ matrix.crate }}" = "crypto" ]; then
+            bash scripts/clippy-maintained.sh
+          else
+            cargo clippy --all-targets -- -D warnings
+          fi

@@ -1,0 +1,80 @@
+{
+  "PDP_yield": null,
+  "analysis_sha256": "cbc4cedbc8609c439f01f379eb1de4c222b7f2c88cb04a38a26d5c360eef238d",
+  "cases": {
+    "balanced": {
+      "max_physical_tuple_product_at_equal_columns": "105509332938070832394432577609",
+      "max_product_slot_column_allocation": [
+        399,
+        399,
+        399,
+        399,
+        399,
+        399,
+        399,
+        399,
+        398,
+        398
+      ],
+      "minimum_columns_factor_vs_source": "9.58199598796389",
+      "minimum_disjoint_slot_columns_for_product_at_least_q": 38213,
+      "necessary_single_uniform_target_support_ceiling": "1.55032031034663e-10",
+      "observed_full_leaf_domains": {
+        "leaf_1_0": {
+          "full_domain_physical_tuple_product": "1334234841788902171362588446833961996535",
+          "full_domain_product_over_q": "1.960481898991",
+          "full_domain_uncompressed_columns": 40875
+        },
+        "leaf_1_4": {
+          "full_domain_physical_tuple_product": "1373563353665728741818015662172737006025",
+          "full_domain_product_over_q": "2.018269953413",
+          "full_domain_uncompressed_columns": 40994
+        }
+      },
+      "source_normalized_nonzero_log_columns": 3988
+    },
+    "unequal": {
+      "max_physical_tuple_product_at_equal_columns": "119514333106613002600816201540225",
+      "max_product_slot_column_allocation": [
+        807,
+        807,
+        806,
+        806,
+        806,
+        806,
+        806,
+        806,
+        806,
+        806
+      ],
+      "minimum_columns_factor_vs_source": "4.73989084594393",
+      "minimum_disjoint_slot_columns_for_product_at_least_q": 38213,
+      "necessary_single_uniform_target_support_ceiling": "1.75610529261396e-7",
+      "observed_full_leaf_domains": {
+        "leaf_1_0": {
+          "full_domain_physical_tuple_product": "2663391564474617606406915353845719840597",
+          "full_domain_product_over_q": "3.913502172585",
+          "full_domain_uncompressed_columns": 44932
+        },
+        "leaf_1_4": {
+          "full_domain_physical_tuple_product": "2747295015547811573666887593878885694075",
+          "full_domain_product_over_q": "4.036787213523",
+          "full_domain_uncompressed_columns": 45075
+        }
+      },
+      "source_normalized_nonzero_log_columns": 8062
+    }
+  },
+  "field_degree": 131,
+  "full_ECDLP_cost": null,
+  "method_crossover": null,
+  "schema": "ecc2k130-leaf-m10-column-budget-bound-v1",
+  "scope": "subsets of the archived collision-free, disjoint fixed-leaf m10 slots; no cross-slot log identifications",
+  "source_screen_sha256": {
+    "balanced": "1bf1dc09dec347dcd421266bc4ece4b529931f21874fc3e6a26b5620f7a2cc25",
+    "unequal": "65bc8e10ea1c058a0dddb3a6b8cc2c4de016b3b454b3850baf72552bf557820e"
+  },
+  "status": "PASS_CONDITIONAL_BOUND",
+  "subgroup_order": "680564733841876926932320129493409985129",
+  "summands": 10
+}

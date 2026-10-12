@@ -1,0 +1,330 @@
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -915,8 +915,48 @@
+     Some(old_s.rem_euclid(r as i128) as u64)
+ }
+ 
++/// Explicit scalar-row implementations used by the bounded candidate panel.
++#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
++#[serde(rename_all = "snake_case")]
++pub enum RowKernel { Full, Suffix, Bounded, Word }
++
++impl RowKernel {
++    pub fn parse(name: &str) -> Result<Self, String> {
++        match name { "full" => Ok(Self::Full), "suffix" => Ok(Self::Suffix),
++            "bounded" => Ok(Self::Bounded), "word" => Ok(Self::Word),
++            _ => Err("unknown scalar-row kernel".into()) }
++    }
++    #[inline]
++    fn product(self, a: u64, b: u64, r: u64) -> u64 {
++        if self == Self::Word && r <= u32::MAX as u64 {
++            // Canonical operands are below r: their product fits in u64.
++            (a * b) % r
++        } else { mulmod(a, b, r) }
++    }
++}
++
++/// Choices affect real construction/reduction work and are emitted in reports.
++#[derive(Clone, Copy, Debug, serde::Serialize)]
++pub struct TinyPolicy {
++    pub orbit_batch: usize,
++    pub orbit_target: Option<usize>,
++    pub row_kernel: RowKernel,
++    pub full_pair_table: bool,
++}
++impl Default for TinyPolicy {
++    fn default() -> Self {
++        Self { orbit_batch: 8, orbit_target: None, row_kernel: RowKernel::Full, full_pair_table: false }
++    }
++}
++
++#[inline]
++fn submod(a: u64, b: u64, r: u64) -> u64 {
++    if a >= b { a - b } else { r - (b - a) }
++}
++
+ /// Incremental row echelon form over `Z/rZ`.
+ struct Echelon {
++    kernel: RowKernel,
+     columns: usize,
+     r: u64,
+     pivots: Vec<Option<Vec<u64>>>,
+@@ -925,7 +965,12 @@
+ 
+ impl Echelon {
+     fn new(columns: usize, r: u64) -> Self {
++        Self::with_kernel(columns, r, RowKernel::Full)
++    }
++
++    fn with_kernel(columns: usize, r: u64, kernel: RowKernel) -> Self {
+         Self {
++            kernel,
+             columns,
+             r,
+             pivots: vec![None; columns],
+@@ -944,16 +989,34 @@
+             match &self.pivots[c] {
+                 Some(p) => {
+                     let f = row[c];
+-                    for (x, &y) in row.iter_mut().zip(p.iter()) {
+-                        *x = (*x + r - mulmod(f, y, r)) % r;
++                    match self.kernel {
++                        RowKernel::Full | RowKernel::Suffix => {
++                            let start = if self.kernel == RowKernel::Full { 0 } else { c };
++                            for (x, &y) in row[start..].iter_mut().zip(&p[start..]) {
++                                *x = (*x + r - mulmod(f, y, r)) % r;
++                            }
++                        }
++                        RowKernel::Bounded | RowKernel::Word => {
++                            row[c] = 0;
++                            for (x, &y) in row[c + 1..].iter_mut().zip(&p[c + 1..]) {
++                                if y != 0 { *x = submod(*x, self.kernel.product(f, y, r), r); }
++                            }
++                        }
+                     }
+                 }
+                 None => {
+                     let Some(inv) = invmod(row[c], r) else {
+                         return false;
+                     };
+-                    for x in row.iter_mut() {
+-                        *x = mulmod(*x, inv, r);
++                    match self.kernel {
++                        RowKernel::Full | RowKernel::Suffix => {
++                            let start = if self.kernel == RowKernel::Full { 0 } else { c };
++                            for x in &mut row[start..] { *x = mulmod(*x, inv, r); }
++                        }
++                        RowKernel::Bounded | RowKernel::Word => {
++                            row[c] = 1;
++                            for x in &mut row[c + 1..] { *x = self.kernel.product(*x, inv, r); }
++                        }
+                     }
+                     self.pivots[c] = Some(row);
+                     self.rank += 1;
+@@ -974,7 +1037,10 @@
+             let p = self.pivots[c].as_ref()?;
+             let mut v = p[self.columns];
+             for c2 in c + 1..self.columns {
+-                v = (v + r - mulmod(p[c2], x[c2], r)) % r;
++                v = match self.kernel {
++                    RowKernel::Full | RowKernel::Suffix => (v + r - mulmod(p[c2], x[c2], r)) % r,
++                    RowKernel::Bounded | RowKernel::Word => submod(v, self.kernel.product(p[c2], x[c2], r), r),
++                };
+             }
+             x[c] = v;
+         }
+@@ -1029,6 +1095,7 @@
+ }
+ 
+ pub struct TinyIc {
++    policy: TinyPolicy,
+     diagnostics: StageDiagnostics,
+     arith: Arith,
+     canon: NormalBasis,
+@@ -1104,6 +1171,15 @@
+         algorithm_seed: u64,
+         max_trials: u64,
+     ) -> Result<Self, String> {
++        Self::with_policy(kc, spec, algorithm_seed, max_trials, TinyPolicy::default())
++    }
++
++    pub fn with_policy(kc: &KoblitzCurve, spec: &FactorBaseSpec, algorithm_seed: u64,
++                       max_trials: u64, policy: TinyPolicy) -> Result<Self, String> {
++        if !matches!(policy.orbit_batch, 1 | 2 | 4 | 8)
++            || policy.orbit_target.is_some_and(|n| n == 0 || n > 64) {
++            return Err("invalid bounded orbit policy".into());
++        }
+         let FactorBaseSpec::SubgroupOrbits { seed, points } = spec else {
+             return Err("fast pipeline needs a SubgroupOrbits base".into());
+         };
+@@ -1137,8 +1213,9 @@
+         // small to hold eight orbits it failed to build any base where the
+         // incumbent builds one -- caught by `base_matches_general_construction`
+         // before any measurement.
+-        let policy = policy_orbits(r);
+-        let target = if policy > 8 { 2 * n as usize * policy } else { *points };
++        let scaled_orbits = policy_orbits(r);
++        let target = policy.orbit_target.map(|orbits| 2 * n as usize * orbits)
++            .unwrap_or_else(|| if scaled_orbits > 8 { 2 * n as usize * scaled_orbits } else { *points });
+         if target == 0 {
+             return Err("a factor base needs at least one point".into());
+         }
+@@ -1150,7 +1227,7 @@
+         let mut xs: Vec<u64> = Vec::new();
+         loop {
+             let mut added = 0usize;
+-            while added < 8 {
++            while added < policy.orbit_batch {
+                 drawn += 1;
+                 if drawn > budget {
+                     return Err(format!(
+@@ -1255,9 +1332,10 @@
+         let expected_work = |rows: usize| {
+             (rows * size) as f64 + (orbits as f64 + TABLE_PROBES) / (lambda_pairs * coverage(rows)).max(1e-12)
+         };
+-        let table_rows = (1..=orbits)
+-            .min_by(|&a, &b| expected_work(a).total_cmp(&expected_work(b)))
+-            .unwrap_or(orbits);
++        let table_rows = if policy.full_pair_table { orbits } else {
++            (1..=orbits).min_by(|&a, &b| expected_work(a).total_cmp(&expected_work(b)))
++                .unwrap_or(orbits)
++        };
+         let mut table = PairTable::with_capacity(table_rows * size);
+         let mut sums: Vec<FastPoint> = Vec::with_capacity(size);
+         let mut dens = Vec::with_capacity(size);
+@@ -1312,9 +1390,10 @@
+         let probe = arith.fixed_base_mul(&g_table, probe_scalar);
+         let stride = arith.fixed_base_mul(&g_table, stride_scalar);
+         mark(Phase::MatrixBuild);
+-        let echelon = Echelon::new(orbits, r);
++        let echelon = Echelon::with_kernel(orbits, r, policy.row_kernel);
+         mark(Phase::Setup);
+         Ok(Self {
++            policy,
+             diagnostics: StageDiagnostics::default(),
+             arith,
+             canon,
+@@ -1378,6 +1457,8 @@
+         (self.table_rows, self.orbits, self.table.len(), self.chunk)
+     }
+ 
++    pub fn policy(&self) -> TinyPolicy { self.policy }
++
+     /// Relation columns (signed Frobenius orbits of the base).
+     pub fn columns(&self) -> usize {
+         self.orbits
+@@ -2055,7 +2136,7 @@
+ 
+ #[cfg(test)]
+ mod row_qualification {
+-    use super::Echelon;
++    use super::{Echelon, RowKernel};
+ 
+     // Batch RREF with Fermat inversion is independent of the incremental
+     // reducer and its extended-Euclidean inverse. All arithmetic is widened.
+@@ -2088,10 +2169,11 @@
+ 
+     #[test]
+     fn incremental_rank_and_solution_match_independent_batch_elimination() {
++        for kernel in [RowKernel::Full, RowKernel::Suffix, RowKernel::Bounded, RowKernel::Word] {
+         for prime in [3, 5, 2003, 4_196_903, (1u64 << 61) - 1] {
+             for columns in [1, 2, 7, 16, 24] {
+                 let solution: Vec<u64> = (0..columns).map(|i| (prime - 1 - i as u64 % prime) % prime).collect();
+-                let mut reducer = Echelon::new(columns, prime);
++                let mut reducer = Echelon::with_kernel(columns, prime, kernel);
+                 let mut rows: Vec<Vec<u64>> = Vec::new();
+                 let mut state = 0xC61D_2026_0925u64 ^ prime ^ columns as u64;
+                 for step in 0..(3 * columns + 8) {
+@@ -2121,5 +2203,41 @@
+                 assert_eq!(reducer.rank, columns);
+             }
+         }
+-    }
+-}
++        }
++    }
++}
++
++#[cfg(test)]
++mod candidate_policy_tests {
++    use super::*;
++
++    #[test]
++    fn exact_stop_and_full_pair_policies_have_real_distinct_shapes() {
++        for (n, a) in [(13, 0), (17, 1), (23, 0), (31, 0)] {
++            let kc = KoblitzCurve::new(a, n).unwrap();
++            let spec = FactorBaseSpec::SubgroupOrbits { seed: 43, points: 6 * n as usize };
++            let legacy = TinyIc::new(&kc, &spec, 17, 65536).unwrap();
++            // Distinct sampled abscissae can still share a Frobenius orbit.
++            assert!(legacy.columns() > 3);
++            for count in [2, 3, 4, 6] {
++                let policy = TinyPolicy { orbit_batch: 1, orbit_target: Some(count),
++                    row_kernel: RowKernel::Word, full_pair_table: true };
++                let mut ic = TinyIc::with_policy(&kc, &spec, 17, 65536, policy).unwrap();
++                assert_eq!(ic.columns(), count);
++                assert_eq!(ic.table_shape().0, count);
++                // The same draw stream stops earlier, before the old batch overshoot.
++                let old = legacy.base_points();
++                for point in ic.base_points() { assert!(old.contains(&point)); }
++                while ic.trials() < 65536 {
++                    let rows = ic.collect(1); ic.push(&rows);
++                    if ic.try_solve() { break; }
++                }
++                assert!(ic.verify_columns());
++                let target = kc.mul(kc.generator(), &BigUint::from(71u64));
++                let (answer, _, witness) = ic.solve_target(&target).unwrap();
++                assert!(!witness.points.is_empty());
++                assert_eq!(kc.mul(kc.generator(), &answer), target);
++            }
++        }
++    }
++}
+--- a/examples/ic_tournament_worker.rs
++++ b/examples/ic_tournament_worker.rs
+@@ -12,7 +12,7 @@
+     RelationCollector, RelationWorkUnit,
+ };
+ use crypto_lib::cryptanalysis::koblitz_sparse_la::SparseSolveOptions;
+-use crypto_lib::cryptanalysis::koblitz_tiny_ic::{self, TinyIc};
++use crypto_lib::cryptanalysis::koblitz_tiny_ic::{self, TinyIc, TinyPolicy, RowKernel};
+ use num_bigint::BigUint;
+ use serde::Deserialize;
+ use serde_json::{json, Value};
+@@ -234,6 +234,10 @@
+     collection_window: Option<usize>,
+     sparse: SparseSolveOptions,
+     rho_parallel_walks: usize,
++    orbit_batch: usize,
++    orbit_target: Option<usize>,
++    row_kernel: String,
++    full_pair_table: bool,
+ }
+ impl Default for Config {
+     fn default() -> Self {
+@@ -241,6 +245,7 @@
+             solver: "pair_table".into(), linear_algebra: "tiny_gauss".into(),
+             batch_trials: 64, max_trials: 4096, summands: 3,
+             collection_window: None, sparse: SparseSolveOptions::default(), rho_parallel_walks: 32,
++            orbit_batch: 8, orbit_target: None, row_kernel: "full".into(), full_pair_table: false,
+         }
+     }
+ }
+@@ -470,7 +475,9 @@
+ fn run_tiny(job: &Job, c: &KoblitzCurve, targets: &[BinaryPoint], metadata: Value, start: Instant) -> Result<Report, String> {
+     let cfg = &job.config;
+     if cfg.linear_algebra != "tiny_gauss" { return Err("tiny backend executes tiny_gauss; choose it explicitly".into()); }
+-    let mut ic = TinyIc::new(c, &job.factor_base, job.algorithm_seed, cfg.max_trials)?;
++    let policy = TinyPolicy { orbit_batch: cfg.orbit_batch, orbit_target: cfg.orbit_target,
++        row_kernel: RowKernel::parse(&cfg.row_kernel)?, full_pair_table: cfg.full_pair_table };
++    let mut ic = TinyIc::with_policy(c, &job.factor_base, job.algorithm_seed, cfg.max_trials, policy)?;
+     let expected_columns = ic.columns();
+     if job.mode == "inventory" {
+         return Ok(Report::Tree(json!({"schema_version":1,"mode":"inventory","status":"inventory",
+@@ -478,7 +485,7 @@
+             "factor_base_orbits":ic.orbit_representatives().iter()
+                 .map(|&(x,y)|json!([x.to_string(),y.to_string()])).collect::<Vec<_>>(),
+             "summands":3,"phase_schema":3,"target_input":"supplied_public_point","source_manifest_sha256":koblitz_tiny_ic::source_snapshot(),
+-            "field_kernel":ic.field_kernel()})));
++            "field_kernel":ic.field_kernel(),"implementation_policy":ic.policy()})));
+     }
+ 
+     let mut relations: Vec<crypto_lib::cryptanalysis::koblitz_index_calculus::CollectedRelation> = Vec::new();
+@@ -639,6 +646,7 @@
+     let (phase_wall_ns, online_wall_ns) = ic_phase::wall_snapshot();
+     let diagnostics = json!({
+         "source_manifest_sha256":koblitz_tiny_ic::source_snapshot(),"field_kernel":ic.field_kernel(),
++        "implementation_policy":ic.policy(),
+         "ordinary_queries":stats.ordinary_queries,"identity_queries":stats.identity_queries,
+         "pdp_attempts":stats.ordinary_queries,
+         "pdp_outcomes":{"verified":stats.pdp_verified,"unresolved":stats.pdp_unresolved,
+@@ -650,7 +658,9 @@
+         "target_input":"supplied_public_point"
+     });
+     assert_eq!(out.pop(), Some('}'));
+-    out.push_str(",\"phase_schema\":3,\"executed_method\":{\"pdp\":\"partial_folded_pair_table\",\"collection\":\"additive_walk\",\"relation_la\":\"incremental_gauss\",\"descent\":\"walked_pdp\",\"direct_collision\":false},\"diagnostics\":");
++    out.push_str(",\"phase_schema\":3,\"executed_method\":{\"pdp\":\"");
++    out.push_str(if ic.policy().full_pair_table { "full_folded_pair_table" } else { "partial_folded_pair_table" });
++    out.push_str("\",\"collection\":\"additive_walk\",\"relation_la\":\"incremental_gauss\",\"descent\":\"walked_pdp\",\"direct_collision\":false},\"diagnostics\":");
+     out.push_str(&serde_json::to_string(&diagnostics).expect("diagnostics"));
+     out.push('}');
+ }

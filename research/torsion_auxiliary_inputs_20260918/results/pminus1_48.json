@@ -1,0 +1,292 @@
+{
+ "bits": 48,
+ "case": "p-1",
+ "curve": {
+  "q": 263300597549779,
+  "a": 63025677519555,
+  "b": 230347078598409,
+  "p": 263300620423003,
+  "G": [
+   45246647784802,
+   161358296109784
+  ],
+  "p_minus_1": {
+   "2": 1,
+   "3": 1,
+   "36436507": 1,
+   "38851": 1,
+   "31": 1
+  },
+  "p_plus_1": {
+   "2": 2,
+   "65825155105751": 1
+  }
+ },
+ "d": 36436507,
+ "log_p_d": 0.5243619824209215,
+ "sqrt_p": 16226540.617858231,
+ "floor_dlpwai": 2688.175217503507,
+ "rows": [
+  {
+   "variant": "cheon_p-1_bsgs_naive",
+   "seed": 0,
+   "alpha": 234557360577701,
+   "correct": true,
+   "ops": 823639,
+   "add": 273879,
+   "dbl": 549760,
+   "smul": 11975,
+   "phases": {
+    "p-1:precompute": 0,
+    "p-1:step1:baby": 184796,
+    "p-1:step1:giant": 71959,
+    "p-1:step2:precompute": 69,
+    "p-1:step2:baby": 415420,
+    "p-1:step2:giant": 151330,
+    "p-1:verify": 65
+   },
+   "S": 0.05075875501729176,
+   "ops_over_floor": 306.3933461766338,
+   "secs": 1.8729190826416016
+  },
+  {
+   "variant": "cheon_p-1_bsgs_comb",
+   "seed": 0,
+   "alpha": 234557360577701,
+   "correct": true,
+   "ops": 65031,
+   "add": 64720,
+   "dbl": 311,
+   "smul": 11975,
+   "phases": {
+    "p-1:precompute": 3144,
+    "p-1:step1:baby": 13365,
+    "p-1:step1:giant": 5201,
+    "p-1:step2:precompute": 10389,
+    "p-1:step2:baby": 24095,
+    "p-1:step2:giant": 8772,
+    "p-1:verify": 65
+   },
+   "S": 0.004007693416083382,
+   "ops_over_floor": 24.19150343198012,
+   "secs": 0.8635144233703613,
+   "table_points": 13290,
+   "comb_w": 8
+  },
+  {
+   "variant": "cheon_p-1_kangaroo_comb",
+   "seed": 0,
+   "alpha": 234557360577701,
+   "correct": true,
+   "ops": 841381,
+   "add": 841074,
+   "dbl": 307,
+   "smul": 247635,
+   "phases": {
+    "p-1:kang1:precompute": 10320,
+    "p-1:kang1:walk": 222859,
+    "p-1:kang2:shift": 69,
+    "p-1:kang2:precompute": 32848,
+    "p-1:kang2:walk": 575220,
+    "p-1:verify": 65
+   },
+   "S": 0.05185214888464965,
+   "ops_over_floor": 312.9933623826001,
+   "secs": 2.899409294128418
+  },
+  {
+   "variant": "rho_reference",
+   "seed": 0,
+   "alpha": 234557360577701,
+   "correct": true,
+   "ops": 13402580,
+   "add": 13192920,
+   "dbl": 209660,
+   "smul": 77,
+   "phases": {
+    "rho:precompute": 4492,
+    "rho:walk": 13398023,
+    "rho:verify": 65
+   },
+   "S": 0.825966564016097,
+   "ops_over_floor": 4985.75387226689,
+   "secs": 38.94725489616394,
+   "steps": 13191072,
+   "walks": 6
+  },
+  {
+   "variant": "cheon_p-1_bsgs_naive",
+   "seed": 1,
+   "alpha": 231687625001293,
+   "correct": true,
+   "ops": 936189,
+   "add": 311315,
+   "dbl": 624874,
+   "smul": 13613,
+   "phases": {
+    "p-1:precompute": 0,
+    "p-1:step1:baby": 184796,
+    "p-1:step1:giant": 66515,
+    "p-1:step2:precompute": 69,
+    "p-1:step2:baby": 415420,
+    "p-1:step2:giant": 269316,
+    "p-1:verify": 73
+   },
+   "S": 0.05769492229105634,
+   "ops_over_floor": 348.26189673358914,
+   "secs": 2.1318368911743164
+  },
+  {
+   "variant": "cheon_p-1_bsgs_comb",
+   "seed": 1,
+   "alpha": 231687625001293,
+   "correct": true,
+   "ops": 71494,
+   "add": 71184,
+   "dbl": 310,
+   "smul": 13613,
+   "phases": {
+    "p-1:precompute": 3144,
+    "p-1:step1:baby": 13365,
+    "p-1:step1:giant": 4807,
+    "p-1:step2:precompute": 10389,
+    "p-1:step2:baby": 24095,
+    "p-1:step2:giant": 15621,
+    "p-1:verify": 73
+   },
+   "S": 0.004405991497739006,
+   "ops_over_floor": 26.595736592794,
+   "secs": 0.18346452713012695,
+   "table_points": 13290,
+   "comb_w": 8
+  },
+  {
+   "variant": "cheon_p-1_kangaroo_comb",
+   "seed": 1,
+   "alpha": 231687625001293,
+   "correct": true,
+   "ops": 317341,
+   "add": 317035,
+   "dbl": 306,
+   "smul": 72673,
+   "phases": {
+    "p-1:kang1:precompute": 10320,
+    "p-1:kang1:walk": 225408,
+    "p-1:kang2:shift": 69,
+    "p-1:kang2:precompute": 32848,
+    "p-1:kang2:walk": 48623,
+    "p-1:verify": 73
+   },
+   "S": 0.01955691034050401,
+   "ops_over_floor": 118.05071259257898,
+   "secs": 0.9739246368408203
+  },
+  {
+   "variant": "rho_reference",
+   "seed": 1,
+   "alpha": 231687625001293,
+   "correct": true,
+   "ops": 15024214,
+   "add": 14789578,
+   "dbl": 234636,
+   "smul": 77,
+   "phases": {
+    "rho:precompute": 4448,
+    "rho:walk": 15019693,
+    "rho:verify": 73
+   },
+   "S": 0.9259037002295485,
+   "ops_over_floor": 5589.001007885528,
+   "secs": 43.450289249420166,
+   "steps": 14787766,
+   "walks": 6
+  },
+  {
+   "variant": "cheon_p-1_bsgs_naive",
+   "seed": 2,
+   "alpha": 35552195054905,
+   "correct": true,
+   "ops": 774161,
+   "add": 257354,
+   "dbl": 516807,
+   "smul": 11256,
+   "phases": {
+    "p-1:precompute": 0,
+    "p-1:step1:baby": 184796,
+    "p-1:step1:giant": 52827,
+    "p-1:step2:precompute": 63,
+    "p-1:step2:baby": 415420,
+    "p-1:step2:giant": 120989,
+    "p-1:verify": 66
+   },
+   "S": 0.047709553023766,
+   "ops_over_floor": 287.9875519122443,
+   "secs": 1.722027063369751
+  },
+  {
+   "variant": "cheon_p-1_bsgs_comb",
+   "seed": 2,
+   "alpha": 35552195054905,
+   "correct": true,
+   "ops": 61888,
+   "add": 61583,
+   "dbl": 305,
+   "smul": 11256,
+   "phases": {
+    "p-1:precompute": 3144,
+    "p-1:step1:baby": 13365,
+    "p-1:step1:giant": 3827,
+    "p-1:step2:precompute": 10383,
+    "p-1:step2:baby": 24095,
+    "p-1:step2:giant": 7008,
+    "p-1:verify": 66
+   },
+   "S": 0.003813998402832008,
+   "ops_over_floor": 23.022308812695265,
+   "secs": 0.1575932502746582,
+   "table_points": 13290,
+   "comb_w": 8
+  },
+  {
+   "variant": "cheon_p-1_kangaroo_comb",
+   "seed": 2,
+   "alpha": 35552195054905,
+   "correct": true,
+   "ops": 705118,
+   "add": 704817,
+   "dbl": 301,
+   "smul": 202427,
+   "phases": {
+    "p-1:kang1:precompute": 10320,
+    "p-1:kang1:walk": 220051,
+    "p-1:kang2:shift": 63,
+    "p-1:kang2:precompute": 32848,
+    "p-1:kang2:walk": 441770,
+    "p-1:verify": 66
+   },
+   "S": 0.04345461035755074,
+   "ops_over_floor": 262.30358624272975,
+   "secs": 2.3343985080718994
+  },
+  {
+   "variant": "rho_reference",
+   "seed": 2,
+   "alpha": 35552195054905,
+   "correct": true,
+   "ops": 17472036,
+   "add": 17199683,
+   "dbl": 272353,
+   "smul": 79,
+   "phases": {
+    "rho:precompute": 4439,
+    "rho:walk": 17467531,
+    "rho:verify": 66
+   },
+   "S": 1.076756679779979,
+   "ops_over_floor": 6499.589716561028,
+   "secs": 50.58547329902649,
+   "steps": 17197870,
+   "walks": 7
+  }
+ ]
+}

@@ -1,0 +1,46 @@
+{
+  "metrics": {
+    "bytes": 697,
+    "path": "metrics.json",
+    "sha256": "dabe519e8e86bbb1085e625718b2f2be60eb98ea0931ae7dbaaecdd0250ac12c"
+  },
+  "process": {
+    "command": [
+      "/usr/bin/env",
+      "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage188-native-target-a52376ba6",
+      "F4_F2_INDEXED_REDUCERS=0",
+      "cargo",
+      "test",
+      "--release",
+      "--locked",
+      "--example",
+      "koblitz_pdp_backend",
+      "--",
+      "--nocapture"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 253673472,
+    "pid": 87155,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.224068,
+    "timed_out": false,
+    "total_core_seconds": 3.292531,
+    "user_seconds": 3.068463,
+    "wall_seconds": 2.450695542,
+    "watchdog_seconds": 300
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 1898,
+    "path": "stderr.txt",
+    "sha256": "e66238291537d58394f10391aa1912668c9e1110732eb4d68a891c45bd869e85"
+  },
+  "stdout": {
+    "bytes": 354,
+    "path": "stdout.txt",
+    "sha256": "815fed2b6a0dec3cc0ec8337e8acaaad880969f85ee9258a66cd323aff36fabf"
+  }
+}

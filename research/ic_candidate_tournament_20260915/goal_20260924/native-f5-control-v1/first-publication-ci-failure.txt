@@ -1,0 +1,16 @@
+Original Linux disclosed replay failure, not a scientific solver invocation.
+Head: 09a8578d2fd4814e614b326d1976b1d6febd6dbf
+Workflow: https://github.com/aburan28/crypto/actions/runs/37149086115
+Job: 111278955114, disclosed-sat-replay (ubuntu-latest)
+
+2026-10-03T19:53:01.1874305Z test f5_control::tests::compact_build_replay_binds_external_seal_and_creates_receipt_once ... FAILED
+2026-10-03T19:53:02.7249858Z thread 'f5_control::tests::compact_build_replay_binds_external_seal_and_creates_receipt_once' (3526) panicked at src/bin/icprog/f5_control.rs:793:72:
+2026-10-03T19:53:02.7251072Z called `Result::unwrap()` on an `Err` value: "immutable source/binary tree differs"
+2026-10-03T19:53:02.7254174Z test result: FAILED. 8 passed; 1 failed; 0 ignored; 0 measured; 64 filtered out; finished in 1.62s
+
+Git omitted the retained data/Cargo.lock under its global Cargo.lock ignore
+rule, despite the sealed local bundle containing that original file. The fix
+tracks its unchanged original bytes and adds a narrowly scoped ignore exception.
+No input, registration, build log or scientific result is rewritten or rerun.
+The separate broad harness failed on the same head; exact new-head CI remains
+required. This excerpt is from the original log; the diagnosis is a later audit.

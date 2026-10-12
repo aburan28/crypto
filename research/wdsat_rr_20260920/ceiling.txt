@@ -1,0 +1,14 @@
+WDSat static-allocation ceiling, revision 61c6ff3f, gcc -O3 -mcmodel=medium
+Probe instance: one variable, one equation, trivially satisfiable.
+
+| __MAX_ANF_ID__ | __MAX_ID__ | product (M entries) | result |
+|---:|---:|---:|:---|
+| 3938 | 5314 | 20.9 | ok |
+| 4191 | 5729 | 24.0 | rc=-11 |
+| 4300 | 5314 | 22.9 | ok |
+| 4300 | 5729 | 24.6 | rc=-11 |
+| 4500 | 5314 | 23.9 | rc=-11 |
+| 4875 | 6656 | 32.5 | rc=-11 |
+
+monomials_to_column is __MAX_ANF_ID__ x (__MAX_ID__+1) x (__MAX_DEGREE__-1)
+of uint_fast64_t, so the product is what the solver allocates.

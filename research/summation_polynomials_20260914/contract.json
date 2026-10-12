@@ -1,0 +1,143 @@
+{
+  "classification": "engineering_and_separate_accounting_correction",
+  "parent_contract": "research/index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+  "variants": [
+    "legacy",
+    "reference",
+    "setup",
+    "fixed",
+    "horner",
+    "combined"
+  ],
+  "reference": "reference",
+  "boundary": "All variants must preserve exact specialized polynomials, complete decomposition sets, relation streams and recovered scalars. No change to the summation-polynomial degree, relation-yield ceiling or generic-group boundary.",
+  "accounting": "Legacy charges 15 times the number of symbolic terms. Reference instead measures the Fp3 multiplication-counter delta around specialization, including target powers. Compare optimizations to reference, not to legacy, for operation savings.",
+  "target": "Keep simple exact-output optimizations when their setup/specialization benefit is measured; reject any correctness failure or supported full-DLP regression. Full-DLP speedup claims require paired input-cluster 95% timing interval below 1, not just local-kernel improvement.",
+  "wdsat_exception": "Prime-cubic-field symmetrized S4 specialization and Gaudry solve do not implement WDSat binary ANF. Reuse the prior complete 60-residual corpus, add disjoint fresh curve seeds, cross-check MITM and full scalar recovery under the parent contract.",
+  "stage_cases": [
+    [
+      67,
+      11
+    ],
+    [
+      271,
+      1
+    ],
+    [
+      67,
+      401
+    ],
+    [
+      271,
+      503
+    ],
+    [
+      67,
+      607
+    ],
+    [
+      271,
+      809
+    ]
+  ],
+  "full_dlp_cases": [
+    [
+      67,
+      11
+    ],
+    [
+      67,
+      401
+    ],
+    [
+      67,
+      503
+    ],
+    [
+      67,
+      607
+    ],
+    [
+      67,
+      809
+    ]
+  ],
+  "prior_stage_cases": [
+    [
+      67,
+      11
+    ],
+    [
+      271,
+      1
+    ],
+    [
+      67,
+      401
+    ],
+    [
+      271,
+      503
+    ]
+  ],
+  "prior_full_dlp_cases": [
+    [
+      67,
+      11
+    ],
+    [
+      67,
+      401
+    ],
+    [
+      67,
+      503
+    ]
+  ],
+  "micro_cases": [
+    [
+      67,
+      11
+    ],
+    [
+      271,
+      1
+    ],
+    [
+      67,
+      401
+    ],
+    [
+      271,
+      503
+    ],
+    [
+      67,
+      607
+    ],
+    [
+      271,
+      809
+    ],
+    [
+      67,
+      503
+    ],
+    [
+      67,
+      809
+    ]
+  ],
+  "stage_residuals": 60,
+  "micro_targets": 256,
+  "setup_repetitions": 30,
+  "evaluation_repetitions": 16,
+  "repetitions": 3,
+  "max_residuals": 20000,
+  "timeout_seconds": 180,
+  "timing_order_seed": 20260915,
+  "primary_total_common_operations": null,
+  "full_cost_rho_ratio": null,
+  "full_cost_floor_ratio": null,
+  "limitation": "Counted Fp multiplication reductions are partial operation evidence. Full process timings include setup, output, MITM audit and rho. Uncalibrated bookkeeping and setup prevent a complete common-operation speedup claim."
+}

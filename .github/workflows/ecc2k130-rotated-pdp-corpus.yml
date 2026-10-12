@@ -1,0 +1,31 @@
+name: ECC2K-130 rotated PDP corpus replay
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  independent-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check preregistered source, inputs and merged parent archive
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/rotated_pdp_corpus_20260925/{producer,verify,run,ci_replay}.py
+          python3 research/notes/ecc2k130/rotated_pdp_corpus_20260925/ci_replay.py
+      - name: Require complete evidence archive when receipt exists
+        if: hashFiles('research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/receipt.json') != ''
+        run: test -f research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/raw.tar.gz
+      - name: Replay both exact projected PDP arms
+        if: hashFiles('research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence/raw.tar.gz') != ''
+        run: python3 research/notes/ecc2k130/rotated_pdp_corpus_20260925/ci_replay.py --evidence research/notes/ecc2k130/rotated_pdp_corpus_20260925/evidence

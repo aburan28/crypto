@@ -1,0 +1,14 @@
+==1429== Callgrind, a call-graph generating cache profiler
+==1429== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==1429== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==1429== Command: /home/user/crypto/target/release/examples/groebner_stage_bench --label A2 --ladder r2-holdout --rung 17 --out /home/user/crypto/research/groebner_instructions_20260925/stage/r2-holdout/A2/rung17/stage
+==1429== 
+==1429== For interactive control, run 'callgrind_control -h'.
+==1429== brk segment overflow in thread #1: can't grow to 0x485a000
+==1429== (see section Limitations in user manual)
+==1429== NOTE: further instances of this message will not be shown
+==1429== 
+==1429== Events    : Ir
+==1429== Collected : 2107871796
+==1429== 
+==1429== I   refs:      2,107,871,796

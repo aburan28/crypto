@@ -1,0 +1,28 @@
+gls p_bits=8 seed=1: gls-p8bit-p199 r=2^15.3 h=1
+  gls-p8bit-p199 subtract fold=true: base 180 cols 45 pts/col 4.0 trials 89 S 69.58 correct true
+  gls-p8bit-p199 subtract fold=false: base 180 cols 90 pts/col 2.0 trials 182 S 137.91 correct true
+gls p_bits=8 seed=2: gls-p8bit-p233 r=2^13.4 h=5
+  gls-p8bit-p233 subtract fold=true: base 248 cols 62 pts/col 4.0 trials 97 S 169.93 correct true
+  gls-p8bit-p233 subtract fold=false: base 248 cols 124 pts/col 2.0 trials 157 S 266.98 correct true
+gls p_bits=10 seed=1: gls-p10bit-p727 r=2^17.0 h=4
+  gls-p10bit-p727 subtract fold=true: base 704 cols 176 pts/col 4.0 trials 253 S 366.11 correct true
+  gls-p10bit-p727 subtract fold=false: base 704 cols 352 pts/col 2.0 trials 445 S 635.50 correct true
+gls p_bits=10 seed=2: gls-p10bit-p953 r=2^16.1 h=13
+  gls-p10bit-p953 subtract fold=true: base 952 cols 238 pts/col 4.0 trials 222 S 594.85 correct true
+  gls-p10bit-p953 subtract fold=false: base 952 cols 476 pts/col 2.0 trials 290 S 780.58 correct true
+gls p_bits=12 seed=1: gls-p12bit-p2797 r=2^22.9 h=1
+  gls-p12bit-p2797 subtract fold=true: base 2816 cols 704 pts/col 4.0 trials 1094 S 802.45 correct true
+  gls-p12bit-p2797 subtract fold=false: base 2816 cols 1408 pts/col 2.0 trials 2169 S 1577.27 correct true
+gls p_bits=12 seed=2: gls-p12bit-p2767 r=2^22.9 h=1
+  gls-p12bit-p2767 subtract fold=true: base 2748 cols 687 pts/col 4.0 trials 1112 S 821.51 correct true
+  gls-p12bit-p2767 subtract fold=false: base 2748 cols 1374 pts/col 2.0 trials 2072 S 1512.57 correct true
+| family | log2 r | h | oracle | base | cols fold | cols control | pts/col | trials fold | trials control | S fold | S control | S control / S fold | rho S | S fold / rho | correct |
+|:--|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|:--|
+| gls | 15.3 | 1 | subtract | 180 | 45 | 90 | 4.0 | 89 | 182 | 69.58 | 137.91 | 1.98 | 1.75 | 39.8× | yes |
+| gls | 13.4 | 5 | subtract | 248 | 62 | 124 | 4.0 | 97 | 157 | 169.93 | 266.98 | 1.57 | 1.92 | 88.3× | yes |
+| gls | 17.0 | 4 | subtract | 704 | 176 | 352 | 4.0 | 253 | 445 | 366.11 | 635.50 | 1.74 | 2.15 | 170.1× | yes |
+| gls | 16.1 | 13 | subtract | 952 | 238 | 476 | 4.0 | 222 | 290 | 594.85 | 780.58 | 1.31 | 1.62 | 367.9× | yes |
+| gls | 22.9 | 1 | subtract | 2816 | 704 | 1408 | 4.0 | 1094 | 2169 | 802.45 | 1577.27 | 1.97 | 1.17 | 683.5× | yes |
+| gls | 22.9 | 1 | subtract | 2748 | 687 | 1374 | 4.0 | 1112 | 2072 | 821.51 | 1512.57 | 1.84 | 1.03 | 796.2× | yes |
+
+wrote experiments/23_glv_invariant_gls_pilot.json

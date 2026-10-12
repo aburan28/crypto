@@ -1,0 +1,47 @@
+{
+ "commit": "20ff47654ddbe8e59808ad6a6813e5c8a1400ae9",
+ "tree_status": "?? research/ic_descent_20260930/runs/",
+ "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+ "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+ "cpu_flags_relevant": [
+  "pclmulqdq",
+  "popcnt",
+  "avx2",
+  "bmi2",
+  "avx512f",
+  "avx512dq",
+  "avx512ifma",
+  "avx512cd",
+  "avx512bw",
+  "avx512vl",
+  "avx512_bf16",
+  "avx512vbmi",
+  "avx512_vbmi2",
+  "gfni",
+  "vpclmulqdq",
+  "avx512_vnni",
+  "avx512_bitalg",
+  "avx512_vpopcntdq",
+  "avx512_fp16"
+ ],
+ "logical_cores": 4,
+ "memory": "MemTotal:       16480972 kB",
+ "os": "Linux-6.18.44-fc-v50-x86_64-with-glibc2.39",
+ "arch": "x86_64",
+ "binaries": {
+  "baseline": {
+   "ic_sha256": "07e527a4d9339e54020db55b5477a95f472b6abb6e6969ed1c003d48e7ee2612",
+   "probe_sha256": "75e59a8646be792a7b364f0062c516ee766d3511fddb12c0e49bc1de4758f711",
+   "built_from": "57e7ce3a (ic); the probe at f231d7d1, whose library is 57e7ce3a's"
+  },
+  "candidate": {
+   "ic_sha256": "d390908ae8501426b51c8ba5f7a84e41f23107de9071c5663a2c3b0b361a9886",
+   "probe_sha256": "4caa046cc7fdc6e639ff6977e036261bea61ca19c883d2e49f0085dd7af53c7e",
+   "built_from": "20ff4765 (ic and the probe)"
+  }
+ },
+ "build": "cargo build --release --bin ic --example koblitz_descent_prices, clean tree, rustc above",
+ "uptime": "03:51:59 up 32 min,  0 user,  load average: 2.11, 2.51, 1.85",
+ "pinning": "RAYON_NUM_THREADS=1 under taskset -c 2; the thread check RAYON_NUM_THREADS=4 under taskset -c 0-3",
+ "hardware_class": "one x86-64 cloud container; no claim for Arm64, GPUs or other hosts"
+}

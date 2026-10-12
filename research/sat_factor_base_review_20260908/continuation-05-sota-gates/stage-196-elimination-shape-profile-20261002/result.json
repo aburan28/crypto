@@ -1,0 +1,119 @@
+{
+  "schema": "koblitz_stage196_final.v1",
+  "candidate_commit": "e7c8998de61e2dab27a39c19bca32d0cde859ac1",
+  "finalizer_commit": "e7c8998de61e2dab27a39c19bca32d0cde859ac1",
+  "decision_status": "RECOMMEND_HYBRID_THRESHOLD",
+  "runtime_default": "selected build-serial inner phases, unconditional Rayon BlockTables construction with fresh per-run word buffers, parallel row reduction, and the twelve-worker fixed-X1 outer batch",
+  "claim_boundary": "One opened n=59 decomposition target and an opt-in elimination-shape profile. No runtime is selected here; direct MITM and full automorphism-aware rho boundaries are unchanged, with no relation-yield, full-DLP, external-reproduction, novelty, or SOTA claim.",
+  "conflicts": null,
+  "profile": {
+    "all_correct": true,
+    "recommended_min_rows": 4096,
+    "suffixes": [
+      {
+        "min_rows": 256,
+        "current_matrices": 1204,
+        "full_matrices": 1204,
+        "current_eliminate_ns": 175394866926,
+        "full_eliminate_ns": 108007639489,
+        "current_performed_xors": 147788938000,
+        "full_performed_xors": 99187291668,
+        "eliminate_ns_ratio": 0.6157970377466575,
+        "performed_xors_ratio": 0.6711415144481246,
+        "current_time_share": 0.9999761990261632,
+        "qualifies": true
+      },
+      {
+        "min_rows": 512,
+        "current_matrices": 963,
+        "full_matrices": 963,
+        "current_eliminate_ns": 175361975964,
+        "full_eliminate_ns": 107981689653,
+        "current_performed_xors": 147712585150,
+        "full_performed_xors": 99110938818,
+        "eliminate_ns_ratio": 0.6157645581911527,
+        "performed_xors_ratio": 0.6709715270188675,
+        "current_time_share": 0.9997886782637856,
+        "qualifies": true
+      },
+      {
+        "min_rows": 1024,
+        "current_matrices": 723,
+        "full_matrices": 723,
+        "current_eliminate_ns": 175180336337,
+        "full_eliminate_ns": 107717924739,
+        "current_performed_xors": 147299403131,
+        "full_performed_xors": 98697756799,
+        "eliminate_ns_ratio": 0.6148973508749269,
+        "performed_xors_ratio": 0.6700485860843824,
+        "current_time_share": 0.9987530989051454,
+        "qualifies": true
+      },
+      {
+        "min_rows": 2048,
+        "current_matrices": 722,
+        "full_matrices": 722,
+        "current_eliminate_ns": 175177637712,
+        "full_eliminate_ns": 107713179573,
+        "current_performed_xors": 147295884367,
+        "full_performed_xors": 98694799736,
+        "eliminate_ns_ratio": 0.6148797356777088,
+        "performed_xors_ratio": 0.670044517266305,
+        "current_time_share": 0.9987377132737562,
+        "qualifies": true
+      },
+      {
+        "min_rows": 4096,
+        "current_matrices": 481,
+        "full_matrices": 481,
+        "current_eliminate_ns": 167625839254,
+        "full_eliminate_ns": 103292935285,
+        "current_performed_xors": 139522131743,
+        "full_performed_xors": 94428351487,
+        "eliminate_ns_ratio": 0.6162112938237543,
+        "performed_xors_ratio": 0.6767983710350497,
+        "current_time_share": 0.9556827547667404,
+        "qualifies": true
+      }
+    ],
+    "status": "RECOMMEND_HYBRID_THRESHOLD"
+  },
+  "measured_stage_charge": {
+    "components": 12,
+    "wall_seconds_sum": 207.508687541,
+    "total_core_seconds_sum": 1001.106379,
+    "peak_rss_bytes_max": 5160747008,
+    "single_core_seconds": null
+  },
+  "cumulative_measured_lower_bound": {
+    "components": 658,
+    "wall_seconds_sum": 24806.692585372002,
+    "total_core_seconds_sum": 65220.279737,
+    "peak_rss_bytes_max": 6310576128,
+    "single_core_seconds": null
+  },
+  "complete_campaign_cost": null,
+  "unmetered_components": [
+    "development compilation and tests before the exact native build",
+    "final result write and final verification after a charged composition control"
+  ],
+  "artifacts": {
+    "profile_result": {
+      "path": "development/profile/result.json",
+      "bytes": 31690,
+      "sha256": "6328124ff716e09942c8ef074221edfd2f07bbf3abc14573093371d56e5b623a"
+    },
+    "profile_verification": {
+      "path": "development/profile/verification.json",
+      "bytes": 192,
+      "sha256": "7745655c4e4d45b9be1b446c7574d5ca3dfdd78713fe628a1e452b0db4a75cde"
+    },
+    "protocol": {
+      "path": "PROTOCOL.md",
+      "bytes": 4747,
+      "sha256": "2adb64a25dc98704a86a4e9e94351438468d0a8d775e64229e998ee151f1010d"
+    }
+  },
+  "all_seven_gates_passed": false,
+  "koblitz_index_calculus_sota": false
+}

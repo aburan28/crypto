@@ -1,0 +1,50 @@
+{
+  "attempts": [
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "/private/tmp/ecc2k130-native-m3-producer-20260929/research/notes/ecc2k130/native_fullpoint_edge_20260929/produce.py",
+        "--out",
+        "/private/tmp/ecc2k130-native-m3-producer-20260929/research/notes/ecc2k130/native_fullpoint_edge_20260929/evidence/final/producer"
+      ],
+      "child_cpu_seconds": 6.938740999999999,
+      "child_peak_rss_bytes": 174931968,
+      "child_wall_seconds": 6.962670207998599,
+      "exit_code": 0,
+      "external_timeout": false,
+      "phase": "producer",
+      "result_sha256": "cc13166dc4361a505f97d0433b9fcac65c2a1a1dacf84aa8715f32e96f03ae02",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e86c2bd544538220146f77ddd774a0c50e09b7479c7e3d50cc945a307b888e66",
+      "utc_start": "2026-09-29T18:40:41.108913+00:00",
+      "wall_seconds": 7.018382041002042
+    },
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "/private/tmp/ecc2k130-native-m3-producer-20260929/research/notes/ecc2k130/native_fullpoint_edge_20260929/verify.py",
+        "--producer",
+        "/private/tmp/ecc2k130-native-m3-producer-20260929/research/notes/ecc2k130/native_fullpoint_edge_20260929/evidence/final/producer",
+        "--out",
+        "/private/tmp/ecc2k130-native-m3-producer-20260929/research/notes/ecc2k130/native_fullpoint_edge_20260929/evidence/final/verify.json"
+      ],
+      "child_cpu_seconds": 7.015722,
+      "child_peak_rss_bytes": 173473792,
+      "child_wall_seconds": 7.314496291000978,
+      "exit_code": 0,
+      "external_timeout": false,
+      "phase": "verifier",
+      "result_sha256": "858a17d0cb0a01a5b83c1810d94fa9bbdf1e7b6dbd4b19a1267626dfef462782",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d0fe65ab19780e790683435dbbf29fb518f520ce860a67e25472c5304b110d15",
+      "utc_start": "2026-09-29T18:40:48.128114+00:00",
+      "wall_seconds": 7.3655807500035735
+    }
+  ],
+  "decision": "PASS",
+  "domain": "ecc2k130-native-fullpoint-edge-20260929-v1",
+  "freeze_sha256": "dba44b75ef24f117db6321de5e9aa156fc5634006343480bd0bc2f4615697c3b",
+  "host_sha256": "5865e6fb887d7b749733144d512a81b3051eb2b35b6602c5b02e990887016053",
+  "producer_sha256": "cc13166dc4361a505f97d0433b9fcac65c2a1a1dacf84aa8715f32e96f03ae02",
+  "verifier_sha256": "858a17d0cb0a01a5b83c1810d94fa9bbdf1e7b6dbd4b19a1267626dfef462782"
+}

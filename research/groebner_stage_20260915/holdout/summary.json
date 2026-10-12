@@ -1,0 +1,75 @@
+{
+  "unit": "64-bit word XORs in the Macaulay elimination",
+  "scope": "decomposition-oracle stage only; not an end-to-end ECDLP cost",
+  "identity_checked": [
+    "verdict_digest",
+    "reductions",
+    "infeasible_branches",
+    "propagations",
+    "splits",
+    "oversize",
+    "targets",
+    "decomposed",
+    "f4_calls",
+    "ell",
+    "factor_base_points"
+  ],
+  "repetitions": {
+    "baseline": 3,
+    "candidate": 3
+  },
+  "rows": [
+    {
+      "curve": "K_0/2^19",
+      "m": 2,
+      "ell": 18,
+      "targets": 12,
+      "decomposed": 12,
+      "verdict_digest": "68ec64dac8d429669fbeb161f9bfbfe3083fc5a9907127116ec0235e4a13c134",
+      "baseline_word_ops": 677265262,
+      "candidate_word_ops": 427336282,
+      "word_op_ratio": 1.5848531719101726,
+      "baseline_wall_ns": 971883451,
+      "candidate_wall_ns": 570257735,
+      "wall_ratio": 1.7042880637121038,
+      "phases_baseline_ns": {
+        "build": 221839075,
+        "reduce": 665993360,
+        "readback": 57095781
+      },
+      "phases_candidate_ns": {
+        "build": 222546987,
+        "reduce": 263664663,
+        "readback": 57307289
+      }
+    },
+    {
+      "curve": "K_1/2^17",
+      "m": 2,
+      "ell": 8,
+      "targets": 24,
+      "decomposed": 10,
+      "verdict_digest": "cf3925c40bceb166e759343051f1a9c6d957f6391e077aae2499d4302e25ef45",
+      "baseline_word_ops": 84128533,
+      "candidate_word_ops": 55551058,
+      "word_op_ratio": 1.5144361966967397,
+      "baseline_wall_ns": 384083867,
+      "candidate_wall_ns": 269309619,
+      "wall_ratio": 1.4261795342705528,
+      "phases_baseline_ns": {
+        "build": 100671327,
+        "reduce": 233265625,
+        "readback": 17982926
+      },
+      "phases_candidate_ns": {
+        "build": 99572823,
+        "reduce": 119938967,
+        "readback": 17881765
+      }
+    }
+  ],
+  "total_word_op_ratio": 1.5767524470614616,
+  "total_wall_ratio": 1.6150786610981065,
+  "min_word_op_ratio": 1.5144361966967397,
+  "min_wall_ratio": 1.4261795342705528
+}

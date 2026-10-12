@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "scope": "Standalone generic Boolean degree-3 linear-tail row-space computation on public synthetic inputs. No curve inputs, targets, scalar recovery, complete polynomial solving, production integration or rho runs.",
+  "variables": [
+    12,
+    20,
+    28,
+    36
+  ],
+  "matrix_degree": 3,
+  "discovery_seeds": [
+    17,
+    937
+  ],
+  "holdout_seeds": [
+    20261003,
+    458879
+  ],
+  "families": [
+    "quadratic",
+    "linear_drop",
+    "restricted_cycle",
+    "cross_cancel"
+  ],
+  "batches": [
+    1,
+    4,
+    8
+  ],
+  "repetitions": 12,
+  "variants": [
+    "flat_cached",
+    "sparse_bucket",
+    "stream_plain",
+    "stream_exchange",
+    "stream_census",
+    "hybrid_census"
+  ],
+  "limits": {
+    "variables": 36,
+    "generators": 12,
+    "terms_per_generator": 32,
+    "rows": 4096,
+    "columns": 8192,
+    "batch": 8,
+    "worker_seconds": 60,
+    "campaign_seconds": 600
+  },
+  "fixture_generators": 8,
+  "fixtures": "Eight generators with sixteen quadratic support monomials, constant and up to ten linear monomials. Fresh coefficients per input; no screening. Active multipliers equal the variables actually occurring in that input. Restricted-cycle fixtures use only eight evenly spaced variables within nominal n. Linear-drop and restricted-cycle first generators change degree. Cross-cancel replaces generator 1 by generator 0 XOR a variable and optional constant, so a nontrivial affine consequence must exist although both remain quadratic.",
+  "contract": "Return the canonical basis of W intersect L, where W is the complete capped degree-D product row space and L consists of linear/constant columns. Encode x_i in bit i and the constant in bit n. Preserve exact source-row count, source-column count and high-block rank. Count all nonzero source products before elimination, including dependent rows. No early exit on a constant consequence or full tail rank.",
+  "control_sources": "The fixed source port reproduces degree-reverse-lex column ordering, deterministic u64 column hashing, exact-support layout validation, fused cached packing and the flat high-column elimination strategy. Multiplier schedules are retained within a cold batch for all masks (a conservative strengthening of the source control). A second existing lowest-weight sparse-bucket strategy is included as a strong control. See SOURCE_PORTS.json for source hashes, symbols and implementation differences.",
+  "candidates": {
+    "stream_plain": "Generate parity directly into degree-ordered high-monomial keys and one affine word. Insert each high row in an online pivot map, retain the affine residue, and fully reduce only high-zero affine rows. No global matrix columns or ambient bit-matrix are needed, but original support is tracked for caps.",
+    "stream_exchange": "Same algorithm with lighter-row pivot exchange. Replacing a same-leading pivot retains the old XOR new residual for further reduction; both its high vector and affine word are exchanged. All work remains charged.",
+    "stream_census": "Pivot-exchange streaming with a cached graded binomial index and one exact support bitmap per input instead of a hash-set census. It still returns the exact source-column count and enforces current caps.",
+    "hybrid_census": "Use the unmodified flat_cached path when sum_{j<=D} C(popcount(active),j)<=512 (at most eight u64 words per potential packed row on these occurring-mask fixtures), otherwise stream_census. The rule is fixed before fresh holdouts."
+  },
+  "controls": {
+    "flat_cached": "Retained flat-tail elimination strategy, exact adaptive column-layout cache, fused packing on support matches, full fresh-build fallback on mismatch, and cached multiplier schedules.",
+    "sparse_bucket": "Retained sparse high-column buckets with minimum-weight pivot selection, followed by canonical one-word affine reduction. Source products, columns and packing are rebuilt each input; multiplier schedules are cached."
+  },
+  "correctness": "Independent recursive multiplier enumeration and set parity construct a full matrix in source monomial order. Independent full Gauss-Jordan reduction extracts its exact linear tail. Check every answer including source dimensions and high rank, not only tail rank. Tests cover 24456 small matrix/split cases with explicit row-span intersection, 6144 Boolean coefficient/degree/mask cases, larger fixtures, known cross-cancel consequences, resource caps, exact cache guards, cancellations and invalid inputs. Both added arms join every coefficient/cap/large-fixture regression. Exhaustively compare the binomial census index against ordered monomial enumeration and repeated-insertion set cardinalities; test both dispatch branches and bitmap resource refusals.",
+  "accounting": "Cold batch includes context creation, schedule/layout construction and misses, all product generation and parity, source-support accounting, high elimination, canonical affine reduction, exact output validation and destruction. Cache state lives only within one cold batch. Independent reference preparation is supplied-input work outside arm timing and inside fresh-worker receipts. Twelve balanced repetitions of six arms; retain every sample.",
+  "memory": "Record retained schedule-mask and layout-column counts as counts, not bytes. Max sparse terms reports nonzero fill for sparse representations; it is null for the packed control. Whole-worker peak RSS includes all arms and references and is not candidate-specific peak usage. The bitmap census retains O(nD) binomial entries and uses sum C(n,j) bits temporarily. Retained census entries are counts, not bytes. Exact column counts remain available.",
+  "counters": "High-row XOR counts, packed word XORs and sparse merge input items are separate diagnostics and are not interchangeable calibrated operations. Inapplicable counters remain null.",
+  "performance_gate": "For each candidate separately, batch8 and every family at n=20,28,36: the 95 percent paired-bootstrap lower bound for the pointwise faster of flat_cached and sparse_bucket total_ns divided by candidate total_ns must exceed 2.0 in all twelve comparisons. No dropping empty-tail or nonempty-tail cells. New holdouts cannot be used to tune this run.",
+  "classification": "Finite mathematical engineering experiment for the specialized linear-tail kernel contract. Not a cryptanalytic breakthrough or a measured whole-solver speedup. Full polynomial-solving, full IC and rho costs remain null.",
+  "polynomial_order": "source_degrevlex",
+  "multiplier_order": "source_degree_layers",
+  "predecessor": "run_02 source-order evidence is retained unchanged. This additive experiment adds exact bitmap source accounting and a fixed small-matrix dispatcher, with fresh holdouts and separately declared mixture/non-regression gates. The original universal per-cell 2x gates remain reported.",
+  "predecessor_worker_sha256": "c52ea76f336ab461b351be97d240083f7b100a7bd21447d87c121d67a32780be",
+  "enable_census": true,
+  "portfolio_gate": "Separate from the unchanged per-cell 2x gates: sum one cold batch8 for each of all twelve n>=20/family cells per holdout seed/repetition. Require a 95 percent paired-bootstrap lower bound above 2.0 against pointwise best flat_cached/sparse_bucket totals and above 1.05 against pointwise best of all four prior arms. Also require every one of sixteen n/family batch8 cells, including n=12, to have a lower bound at least 0.95 against the pointwise best prior arm. No cells are dropped; these declared mixture weights are not solver-call frequencies.",
+  "candidate_arms": [
+    "stream_plain",
+    "stream_exchange",
+    "stream_census",
+    "hybrid_census"
+  ]
+}

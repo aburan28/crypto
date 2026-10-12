@@ -1,0 +1,152 @@
+{
+ "what_this_is": "a check after R04's run, not declared: the presence filter's predicted pass rate against the admitted fraction R04 measured",
+ "sizes": [
+  {
+   "slug": "icv1-f2m19-tm797-9c54981b",
+   "log2_r": 18.002,
+   "stored_pairs": 1368,
+   "filter_bits": 13,
+   "filter_bits_per_stored_pair": 5.988,
+   "predicted_pass_rate": 0.1538,
+   "measured_admitted_per_summand": 0.3312,
+   "measured_over_predicted": 2.1537,
+   "true_hits_per_summand": 0.1,
+   "admitted_stage_ns_per_admitted_key": 1133.2,
+   "processes": 6
+  },
+  {
+   "slug": "icv1-f2m23-tm5197-1f85e9e1",
+   "log2_r": 22.001,
+   "stored_pairs": 1656,
+   "filter_bits": 13,
+   "filter_bits_per_stored_pair": 4.947,
+   "predicted_pass_rate": 0.183,
+   "measured_admitted_per_summand": 0.1684,
+   "measured_over_predicted": 0.9201,
+   "true_hits_per_summand": 0.019097222222222224,
+   "admitted_stage_ns_per_admitted_key": 557.9,
+   "processes": 6
+  },
+  {
+   "slug": "icv1-f2m45-tm6236725-40939294",
+   "log2_r": 24.803,
+   "stored_pairs": 3240,
+   "filter_bits": 14,
+   "filter_bits_per_stored_pair": 5.057,
+   "predicted_pass_rate": 0.1794,
+   "measured_admitted_per_summand": 0.1392,
+   "measured_over_predicted": 0.7758,
+   "true_hits_per_summand": 0.011363636363636364,
+   "admitted_stage_ns_per_admitted_key": 539.5,
+   "processes": 6
+  },
+  {
+   "slug": "icv1-f2m37-tm534059-32aad96b",
+   "log2_r": 27.781,
+   "stored_pairs": 2664,
+   "filter_bits": 14,
+   "filter_bits_per_stored_pair": 6.15,
+   "predicted_pass_rate": 0.1501,
+   "measured_admitted_per_summand": 0.1347,
+   "measured_over_predicted": 0.8979,
+   "true_hits_per_summand": 0.000649772579597141,
+   "admitted_stage_ns_per_admitted_key": 83.6,
+   "processes": 6
+  },
+  {
+   "slug": "icv1-f2m43-tm998717-e2e742b0",
+   "log2_r": 32.113,
+   "stored_pairs": 11696,
+   "filter_bits": 16,
+   "filter_bits_per_stored_pair": 5.603,
+   "predicted_pass_rate": 0.1634,
+   "measured_admitted_per_summand": 0.153,
+   "measured_over_predicted": 0.9364,
+   "true_hits_per_summand": 0.0001631986944104447,
+   "admitted_stage_ns_per_admitted_key": 55.8,
+   "processes": 6
+  },
+  {
+   "slug": "icv1-f2m47-t22705043-f4e44623",
+   "log2_r": 36.636,
+   "stored_pairs": 150024,
+   "filter_bits": 20,
+   "filter_bits_per_stored_pair": 6.989,
+   "predicted_pass_rate": 0.1333,
+   "measured_admitted_per_summand": 0.1306,
+   "measured_over_predicted": 0.9798,
+   "true_hits_per_summand": 0.0001388062661114416,
+   "admitted_stage_ns_per_admitted_key": 62.5,
+   "processes": 6
+  },
+  {
+   "slug": "icv1-f2m57-tm747311035-c1f545af",
+   "log2_r": 38.002,
+   "stored_pairs": 237120,
+   "filter_bits": 20,
+   "filter_bits_per_stored_pair": 4.422,
+   "predicted_pass_rate": 0.2024,
+   "measured_admitted_per_summand": 0.1994,
+   "measured_over_predicted": 0.9853,
+   "true_hits_per_summand": 7.500334630314275e-05,
+   "admitted_stage_ns_per_admitted_key": 61.8,
+   "processes": 6
+  },
+  {
+   "slug": "icv1-f2m41-tm2308219-7f48b14a",
+   "log2_r": 39.0,
+   "stored_pairs": 265680,
+   "filter_bits": 21,
+   "filter_bits_per_stored_pair": 7.894,
+   "predicted_pass_rate": 0.119,
+   "measured_admitted_per_summand": 0.1176,
+   "measured_over_predicted": 0.9883,
+   "true_hits_per_summand": 4.360975807982271e-05,
+   "admitted_stage_ns_per_admitted_key": 53.8,
+   "processes": 6
+  },
+  {
+   "slug": "icv1-f2m53-tm56619371-dac20a85",
+   "log2_r": 44.259,
+   "stored_pairs": 3707880,
+   "filter_bits": 24,
+   "filter_bits_per_stored_pair": 4.525,
+   "predicted_pass_rate": 0.1983,
+   "measured_admitted_per_summand": 0.1976,
+   "measured_over_predicted": 0.9963,
+   "true_hits_per_summand": 1.945571224083461e-05,
+   "admitted_stage_ns_per_admitted_key": 117.9,
+   "processes": 6
+  },
+  {
+   "slug": "icv1-f2m59-tm943548413-98844ecc",
+   "log2_r": 44.517,
+   "stored_pairs": 3881728,
+   "filter_bits": 24,
+   "filter_bits_per_stored_pair": 4.322,
+   "predicted_pass_rate": 0.2066,
+   "measured_admitted_per_summand": 0.2056,
+   "measured_over_predicted": 0.9954,
+   "true_hits_per_summand": 1.8864323511358016e-05,
+   "admitted_stage_ns_per_admitted_key": 127.7,
+   "processes": 6
+  },
+  {
+   "slug": "icv1-f2m61-t158598901-ab42b6c5",
+   "log2_r": 47.211,
+   "stored_pairs": 6265920,
+   "filter_bits": 25,
+   "filter_bits_per_stored_pair": 5.355,
+   "predicted_pass_rate": 0.1703,
+   "measured_admitted_per_summand": 0.1697,
+   "measured_over_predicted": 0.9963,
+   "true_hits_per_summand": 4.517166523407957e-06,
+   "admitted_stage_ns_per_admitted_key": 158.8,
+   "processes": 6
+  }
+ ],
+ "measured_over_predicted_range": [
+  0.7758,
+  2.1537
+ ]
+}

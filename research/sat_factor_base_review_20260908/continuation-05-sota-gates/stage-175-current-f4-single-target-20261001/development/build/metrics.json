@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage175-current-f4-target-c38626a5e",
+    "cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--example",
+    "koblitz_pdp_backend"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1200.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 67.12143141700017,
+    "user_seconds": 270.144292,
+    "system_seconds": 8.21672,
+    "total_core_seconds": 278.361012,
+    "single_core_seconds": 278.361012,
+    "peak_rss_bytes": 3460104192,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

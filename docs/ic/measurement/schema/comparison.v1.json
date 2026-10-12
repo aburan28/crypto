@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "icms.comparison/v1",
+  "title": "ICMS paired comparison, version 1",
+  "description": "Arm b against arm a of one session. Deterministic: `icms audit-sessions` recomputes it from the session's records and the request, and refuses a frozen comparison that differs. A refusal is a result, never an error: it names what made the arms incomparable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "session_id", "env_class_id", "records_sha256", "request", "a", "b", "aa", "declared_variables",
+               "confounds", "forbidden", "refusals", "structure", "outcomes", "ops", "wall"],
+  "properties": {
+    "schema": {"const": "icms.comparison/v1"},
+    "session_id": {"type": "string", "pattern": "^ICSESS1h[0-9a-f]{12}$"},
+    "env_class_id": {"type": "string", "pattern": "^ENV1h[0-9a-f]{12}$"},
+    "records_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["a", "b", "declared"],
+      "properties": {
+        "a": {"type": "integer", "minimum": 0},
+        "b": {"type": "integer", "minimum": 0},
+        "declared": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "a": {"$ref": "#/$defs/arm"},
+    "b": {"$ref": "#/$defs/arm"},
+    "aa": {"type": "boolean"},
+    "declared_variables": {"type": "array", "items": {"$ref": "#/$defs/diff"}},
+    "confounds": {"type": "array", "items": {"$ref": "#/$defs/diff"}},
+    "forbidden": {"type": "array", "items": {"$ref": "#/$defs/diff"}},
+    "refusals": {
+      "type": "array",
+      "items": {"type": "object", "required": ["reason"], "properties": {"reason": {"type": "string"}}}
+    },
+    "structure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["a", "b"],
+      "properties": {"a": {"$ref": "#/$defs/structure"}, "b": {"$ref": "#/$defs/structure"}}
+    },
+    "outcomes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["a", "b"],
+      "properties": {
+        "a": {"type": "array", "items": {"type": "string"}},
+        "b": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "ops": {
+      "type": "object",
+      "required": ["admitted"],
+      "properties": {
+        "admitted": {"type": "boolean"},
+        "unit": {"type": "string"},
+        "window": {"type": "string"},
+        "deterministic": {"type": "boolean"},
+        "lower_bound": {"type": "boolean"},
+        "label": {"type": "string"},
+        "ratio_b_over_a": {"type": ["number", "null"]}
+      }
+    },
+    "wall": {
+      "type": "object",
+      "required": ["admitted"],
+      "properties": {
+        "admitted": {"type": "boolean"},
+        "refusals": {"type": "array"},
+        "pairs": {"type": "integer", "minimum": 0},
+        "estimate": {"$ref": "#/$defs/estimate"}
+      }
+    },
+    "aa_noise": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["arms", "spec_id", "estimate"],
+        "properties": {
+          "arms": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "integer"}},
+          "spec_id": {"type": "string"},
+          "estimate": {"$ref": "#/$defs/estimate"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "arm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["arm", "spec_id", "label"],
+      "properties": {
+        "arm": {"type": "integer", "minimum": 0},
+        "spec_id": {"type": "string", "pattern": "^ICS1h[0-9a-f]{12}$"},
+        "label": {"type": ["string", "null"]}
+      }
+    },
+    "diff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "a", "b"],
+      "properties": {"field": {"type": "string"}, "a": {}, "b": {}}
+    },
+    "structure": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["median", "min", "max", "n"],
+        "properties": {
+          "median": {"type": "number"}, "min": {"type": "number"}, "max": {"type": "number"},
+          "n": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "estimate": {
+      "type": "object",
+      "required": ["n_pairs", "median_ratio", "ci95"],
+      "properties": {
+        "n_pairs": {"type": "integer", "minimum": 0},
+        "median_ratio": {"type": ["number", "null"]},
+        "ci95": {"type": ["array", "null"], "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+        "excludes_1": {"type": "boolean"}
+      }
+    }
+  }
+}

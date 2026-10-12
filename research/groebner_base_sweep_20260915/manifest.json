@@ -1,0 +1,19 @@
+{
+  "round": "groebner-base-sweep-20260915",
+  "question": "does the factor base the yield search selects minimise the work the algebraic oracle then does?",
+  "scope": "decomposition-oracle stage cost plus complete toy DLPs; not an ECC2K-130 attack claim",
+  "git_head": "01fa8426d963fefcb8ac048783863f15d9352d91",
+  "working_tree": "dirty; hashes below identify the measured sources",
+  "sources": {
+    "examples/groebner_base_sweep.rs": "51c57b35f7a148476836d315527df452eb2637894bfafd048f0cb7c3caa152bc",
+    "src/cryptanalysis/koblitz_groebner.rs": "fe7c5d3b087aab12b64be6c0b3985a3b5d04069bd4d2dfd664e4c575a9674a93",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "00ac5497404a93591c64e8e68a4412ab096c8035a0bd63509e864c7a0994e8da",
+    "src/bin/ic/experiment.rs": "01e3ca86bc20ced06c28547eaceec46d12df8d2698b047d96695be4a7172147c"
+  },
+  "commands": [
+    "./target/release/examples/groebner_base_sweep --degrees 9,15,17,23,31 --target-seed 1 --out research/groebner_base_sweep_20260915/sample-a",
+    "./target/release/examples/groebner_base_sweep --degrees 9,15,17,23,31 --target-seed 2 --out research/groebner_base_sweep_20260915/sample-b",
+    "python3 research/groebner_base_sweep_20260915/analyse.py sample-a sample-b --output summary.json",
+    "ic run --degree 15 --curve-a 1 --solver groebner --batch 1 --random-target --seed S --factor-base end_to_end/base-<divisor>.json --json"
+  ]
+}

@@ -1,0 +1,211 @@
+{
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "cpu": {
+    "lscpu": [
+      {
+        "field": "Architecture:",
+        "data": "x86_64"
+      },
+      {
+        "field": "CPU op-mode(s):",
+        "data": "32-bit, 64-bit"
+      },
+      {
+        "field": "Address sizes:",
+        "data": "46 bits physical, 57 bits virtual"
+      },
+      {
+        "field": "Byte Order:",
+        "data": "Little Endian"
+      },
+      {
+        "field": "CPU(s):",
+        "data": "9"
+      },
+      {
+        "field": "On-line CPU(s) list:",
+        "data": "0-8"
+      },
+      {
+        "field": "Vendor ID:",
+        "data": "GenuineIntel"
+      },
+      {
+        "field": "Model name:",
+        "data": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz"
+      },
+      {
+        "field": "BIOS Model name:",
+        "data": "  CPU @ 0.0GHz"
+      },
+      {
+        "field": "BIOS CPU family:",
+        "data": "0"
+      },
+      {
+        "field": "CPU family:",
+        "data": "6"
+      },
+      {
+        "field": "Model:",
+        "data": "106"
+      },
+      {
+        "field": "Thread(s) per core:",
+        "data": "1"
+      },
+      {
+        "field": "Core(s) per socket:",
+        "data": "9"
+      },
+      {
+        "field": "Socket(s):",
+        "data": "1"
+      },
+      {
+        "field": "Stepping:",
+        "data": "6"
+      },
+      {
+        "field": "BogoMIPS:",
+        "data": "5586.87"
+      },
+      {
+        "field": "Flags:",
+        "data": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves arat avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm arch_capabilities"
+      },
+      {
+        "field": "Hypervisor vendor:",
+        "data": "KVM"
+      },
+      {
+        "field": "Virtualization type:",
+        "data": "full"
+      },
+      {
+        "field": "L1d cache:",
+        "data": "240 KiB (5 instances)"
+      },
+      {
+        "field": "L1i cache:",
+        "data": "160 KiB (5 instances)"
+      },
+      {
+        "field": "L2 cache:",
+        "data": "6.3 MiB (5 instances)"
+      },
+      {
+        "field": "L3 cache:",
+        "data": "48 MiB (1 instance)"
+      },
+      {
+        "field": "NUMA node(s):",
+        "data": "1"
+      },
+      {
+        "field": "NUMA node0 CPU(s):",
+        "data": "0-8"
+      },
+      {
+        "field": "Vulnerability Gather data sampling:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Ghostwrite:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Indirect target selection:",
+        "data": "Vulnerable"
+      },
+      {
+        "field": "Vulnerability Itlb multihit:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability L1tf:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Mds:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Meltdown:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Mmio stale data:",
+        "data": "Vulnerable"
+      },
+      {
+        "field": "Vulnerability Old microcode:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Reg file data sampling:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Retbleed:",
+        "data": "Vulnerable"
+      },
+      {
+        "field": "Vulnerability Spec rstack overflow:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Spec store bypass:",
+        "data": "Vulnerable"
+      },
+      {
+        "field": "Vulnerability Spectre v1:",
+        "data": "Vulnerable: __user pointer sanitization and usercopy barriers only; no swapgs barriers"
+      },
+      {
+        "field": "Vulnerability Spectre v2:",
+        "data": "Vulnerable; STIBP: disabled; PBRSB-eIBRS: Not affected; BHI: Vulnerable"
+      },
+      {
+        "field": "Vulnerability Srbds:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Tsa:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Tsx async abort:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerability Vmscape:",
+        "data": "Not affected"
+      }
+    ]
+  },
+  "allowed_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "loadavg": [
+    1.7685546875,
+    0.96337890625,
+    0.42236328125
+  ],
+  "top_processes": [],
+  "meminfo": "MemTotal:       10206536 kB\nMemFree:         1438608 kB\nMemAvailable:    7820652 kB\nBuffers:          176972 kB\nCached:          5895588 kB\nSwapCached:            0 kB\nActive:          4435720 kB\nInactive:        3284392 kB\nActive(anon):        172 kB\nInactive(anon):  1677292 kB\nActive(file):    4435548 kB\nInactive(file):  1607100 kB\nUnevictable:       29920 kB\nMlocked:               0 kB\nSwapTotal:             0 kB\nSwapFree:              0 kB\nDirty:              2612 kB\nWriteback:             0 kB\nAnonPages:       1677616 kB\nMapped:           158620 kB\nShmem:                12 kB\nKReclaimable:     653096 kB\nSlab:             753840 kB\nSReclaimable:     653096 kB\nSUnreclaim:       100744 kB\nKernelStack:        3404 kB\nPageTables:         8060 kB\nSecPageTables:         0 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:     5103268 kB\nCommitted_AS:    2302300 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:        4768 kB\nVmallocChunk:          0 kB\nPercpu:             3936 kB\nAnonHugePages:         0 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:   1853440 kB\nFilePmdMapped:         0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      251904 kB\nDirectMap2M:     9908224 kB\nDirectMap1G:    10485760 kB",
+  "cpu_quota": "800000 100000",
+  "memory_limit": "8589934592",
+  "numa_online": "0",
+  "ddr_generation": null,
+  "hardware_scope": "virtualized Linux x86-64; no exclusivity or physical topology guarantee"
+}

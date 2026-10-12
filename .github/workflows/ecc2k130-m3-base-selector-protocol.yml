@@ -1,0 +1,31 @@
+name: ECC2K-130 m3 base-selector protocol freeze
+
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout: |
+            research/notes/ecc2k130/m3_base_selector_20260930
+            research/notes/ecc2k130/m3_four_policy_20260930/CONFIG.json
+            research/notes/ecc2k130/m3_four_policy_20260930/evidence_run_36722040881/result.json
+          sparse-checkout-cone-mode: false
+      - name: Check frozen pre-outcome contract
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/m3_base_selector_20260930/check_protocol.py
+          python3 research/notes/ecc2k130/m3_base_selector_20260930/check_protocol.py \
+            > "$RUNNER_TEMP/pre-outcome.json"
+          cmp "$RUNNER_TEMP/pre-outcome.json" \
+            research/notes/ecc2k130/m3_base_selector_20260930/PRE_OUTCOME.json

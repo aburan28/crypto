@@ -1,0 +1,31 @@
+{
+  "schema": "ecc2k130-sparse-table-microprobe-attempt-v1",
+  "status": "PRODUCER_FAILURE",
+  "scientificDecision": null,
+  "timingSuppressed": true,
+  "sourceCommit": "52d1d155aa31b97889fb4df4aefe43ee8a09eb39",
+  "reason": "The native pre-timing SASS gate found one out-of-line unsigned-division helper call in every benchmark kernel. The call comes from the shared-table initialization loop using runtime blockDim.x as its stride. No correctness or timing kernel was launched, so this attempt is neither evidence for nor evidence against the table layout.",
+  "repair": "Use the frozen 512-thread stride directly in both shared-table initialization loops. Keep every table, kernel body, correctness case, timing count, arm, gate and decision threshold unchanged, then rebuild and rerun from a new clean commit.",
+  "launch": {
+    "provider": "modal",
+    "appId": "ap-v0929m7AQ5OnWHwt47dErW",
+    "functionCallId": "fc-01M3YJWFCD8SK4REG8NJ97EGDR",
+    "token": "6823eb5e7f794b14bfc07c8b1b0c291f",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "driver": "580.95.05",
+    "cuda": "13.3.73",
+    "exitCode": 1,
+    "gpuKernelsExecuted": 0,
+    "timingRows": 0
+  },
+  "artifact": {
+    "archiveSha256": "b3d5383c66d5285250d82f9b2087d16b8b7c8dd7290de083f25dbb57fa24e9f3",
+    "archiveBytes": 626725,
+    "binarySha256": "d383d030c6853fe29e8d4fea0e43fa49b9ce7f8941e2647bf2c6f1f63662aafd",
+    "cubinSha256": "e042959e095ebdbdbb8f7b615d753bef1a25e84fb6884083f4a0620b37d6e720",
+    "sassSha256": "883238e5f2c895549c2ade1ccb3e07fe25ccc508201057d8f50911076bb5b0a7",
+    "sourceManifestSha256": "6899d4dba016564762f1534da658f7e8441ab068d380a14df632b0929c8eaf20",
+    "launchSha256": "1420e7982db8e7b9347b3624c1fbf8795fa0d9cf328c73ff53e3f4ea922b7f94"
+  },
+  "scope": "Preserved compiler/SASS failure before any GPU scientific work; no sparse walk, search, distinguished-point collection, collision recovery or key recovery."
+}

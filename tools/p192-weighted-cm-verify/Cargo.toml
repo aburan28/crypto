@@ -1,0 +1,29 @@
+[package]
+name = "p192-weighted-cm-verify"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Standalone independent verifier for the P-192 weighted-CM reference gate"
+
+[workspace]
+
+[[bin]]
+name = "p192_weighted_cm_verify"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+hex = "0.4"
+num-bigint = { version = "0.4", features = ["serde"] }
+num-integer = "0.1"
+num-traits = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+
+[lints.clippy]
+too_many_arguments = "allow"
+type_complexity = "allow"
+
+[lints.rust]
+unsafe_code = "forbid"

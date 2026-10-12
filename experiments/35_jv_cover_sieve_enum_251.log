@@ -1,0 +1,111 @@
+  [sieve p=251 m=9] B's 63001 lines 32693 hits 24 relations 24 (need ≈ 129) enum 1.49e8 sieve 3.18e7 muls
+  [sieve p=251 m=10] B's 126745 lines 99587 hits 26 relations 26 (need ≈ 129) enum 3.47e8 sieve 9.69e7 muls
+  [sieve p=251 m=10] B's 190489 lines 165259 hits 28 relations 28 (need ≈ 129) enum 5.45e8 sieve 1.61e8 muls
+  [sieve p=251 m=10] B's 254233 lines 230095 hits 35 relations 35 (need ≈ 129) enum 7.44e8 sieve 2.24e8 muls
+  [sieve p=251 m=10] B's 317977 lines 295359 hits 40 relations 40 (need ≈ 129) enum 9.42e8 sieve 2.87e8 muls
+  [sieve p=251 m=10] B's 381721 lines 359942 hits 43 relations 43 (need ≈ 129) enum 1.14e9 sieve 3.50e8 muls
+  [sieve p=251 m=10] B's 445465 lines 424656 hits 51 relations 51 (need ≈ 129) enum 1.34e9 sieve 4.13e8 muls
+  [sieve p=251 m=10] B's 509209 lines 489681 hits 56 relations 56 (need ≈ 129) enum 1.54e9 sieve 4.76e8 muls
+  [sieve p=251 m=10] B's 572953 lines 555430 hits 62 relations 62 (need ≈ 129) enum 1.74e9 sieve 5.40e8 muls
+  [sieve p=251 m=10] B's 636697 lines 620837 hits 69 relations 69 (need ≈ 129) enum 1.93e9 sieve 6.04e8 muls
+  [sieve p=251 m=10] B's 700441 lines 686060 hits 69 relations 69 (need ≈ 129) enum 2.13e9 sieve 6.67e8 muls
+  [sieve p=251 m=10] B's 764185 lines 751395 hits 73 relations 73 (need ≈ 129) enum 2.33e9 sieve 7.31e8 muls
+  [sieve p=251 m=10] B's 827929 lines 816640 hits 78 relations 78 (need ≈ 129) enum 2.53e9 sieve 7.94e8 muls
+  [sieve p=251 m=10] B's 891673 lines 881701 hits 81 relations 81 (need ≈ 129) enum 2.73e9 sieve 8.58e8 muls
+  [sieve p=251 m=10] B's 955417 lines 947618 hits 87 relations 87 (need ≈ 129) enum 2.93e9 sieve 9.22e8 muls
+  [sieve p=251 m=10] B's 1019161 lines 1012700 hits 90 relations 90 (need ≈ 129) enum 3.12e9 sieve 9.85e8 muls
+  [sieve p=251 m=10] B's 1082905 lines 1078542 hits 92 relations 92 (need ≈ 129) enum 3.32e9 sieve 1.05e9 muls
+  [sieve p=251 m=10] B's 1146649 lines 1144082 hits 96 relations 96 (need ≈ 129) enum 3.52e9 sieve 1.11e9 muls
+  [sieve p=251 m=10] B's 1210393 lines 1208975 hits 100 relations 100 (need ≈ 129) enum 3.72e9 sieve 1.18e9 muls
+  [sieve p=251 m=10] B's 1274137 lines 1275654 hits 102 relations 102 (need ≈ 129) enum 3.92e9 sieve 1.24e9 muls
+  [sieve p=251 m=10] B's 1337881 lines 1340997 hits 108 relations 108 (need ≈ 129) enum 4.12e9 sieve 1.30e9 muls
+  [sieve p=251 m=10] B's 1401625 lines 1406936 hits 109 relations 109 (need ≈ 129) enum 4.32e9 sieve 1.37e9 muls
+  [sieve p=251 m=10] B's 1465369 lines 1472226 hits 112 relations 112 (need ≈ 129) enum 4.51e9 sieve 1.43e9 muls
+  [sieve p=251 m=10] B's 1529113 lines 1537964 hits 114 relations 114 (need ≈ 129) enum 4.71e9 sieve 1.50e9 muls
+  [sieve p=251 m=10] B's 1592857 lines 1603169 hits 121 relations 121 (need ≈ 129) enum 4.91e9 sieve 1.56e9 muls
+  [sieve p=251 m=10] B's 1656601 lines 1667937 hits 127 relations 127 (need ≈ 129) enum 5.11e9 sieve 1.62e9 muls
+  [sieve p=251 m=10] B's 1720345 lines 1732707 hits 130 relations 130 (need ≈ 129) enum 5.31e9 sieve 1.69e9 muls
+  [descent p=251] residuals 64 successes 0
+  [descent p=251] residuals 128 successes 0
+  [descent p=251] residuals 192 successes 0
+  [descent p=251] residuals 256 successes 0
+  [descent p=251] residuals 320 successes 0
+  [descent p=251] residuals 384 successes 0
+  [descent p=251] residuals 448 successes 1
+p=  251 seed=1 l=2^45.8 |F|= 129 c_add E 331 J 2122 m 10 (rule 10, 1094 available) | B's 1720345 lines 1732707 steps 434909457 (base 223519203) roots 443488363 hits 130 false 0 | relations 130 (7.503e-5/line vs p/m! 6.917e-5: ratio 1.08) verified 130 failed 0 duplicates 0 per-m [(9, 63001, 32693, 24, 24), (10, 1657344, 1700014, 106, 106)] | C_rel 5.379e7 = enum 4.081e7 + sieve 1.297e7 + extract 6.845e3 + verify 6.883e3 (per relation) | adds 8.398e9 lookups 4.435e8 | descent: residuals 448 successes 2 (224/success) C_cov 1.536e6 muls 6.893e8 stopped 448 incomplete 0 timed out 0 trace true (replayed 432 mismatches 12) | unknowns 130 (filtered 2) row 9.8 LA attempts 1 ops 581592 | solved true correct true exhausted false | S 2.939e0 S+ 7.823e0 | rho S 1.537 ± 0.526 (4 runs) | S/rho 1.9128 (S+/rho 5.0910) = relation 1.7391 + descent 0.1714 + la 0.0023 | 70 s
+  [sieve p=251 m=9] B's 63001 lines 31468 hits 12 relations 12 (need ≈ 123) enum 1.51e8 sieve 2.94e7 muls
+  [sieve p=251 m=10] B's 126745 lines 95074 hits 13 relations 13 (need ≈ 123) enum 3.50e8 sieve 8.90e7 muls
+  [sieve p=251 m=10] B's 190489 lines 157961 hits 18 relations 18 (need ≈ 123) enum 5.50e8 sieve 1.48e8 muls
+  [sieve p=251 m=10] B's 254233 lines 221328 hits 19 relations 19 (need ≈ 123) enum 7.50e8 sieve 2.07e8 muls
+  [sieve p=251 m=10] B's 317977 lines 284267 hits 23 relations 23 (need ≈ 123) enum 9.49e8 sieve 2.66e8 muls
+  [sieve p=251 m=10] B's 381721 lines 347126 hits 26 relations 26 (need ≈ 123) enum 1.15e9 sieve 3.25e8 muls
+  [sieve p=251 m=10] B's 445465 lines 409927 hits 27 relations 27 (need ≈ 123) enum 1.35e9 sieve 3.84e8 muls
+  [sieve p=251 m=10] B's 509209 lines 472560 hits 33 relations 33 (need ≈ 123) enum 1.55e9 sieve 4.42e8 muls
+  [sieve p=251 m=10] B's 572953 lines 534910 hits 37 relations 37 (need ≈ 123) enum 1.75e9 sieve 5.01e8 muls
+  [sieve p=251 m=10] B's 636697 lines 596847 hits 40 relations 40 (need ≈ 123) enum 1.95e9 sieve 5.59e8 muls
+  [sieve p=251 m=10] B's 700441 lines 660059 hits 43 relations 43 (need ≈ 123) enum 2.15e9 sieve 6.18e8 muls
+  [sieve p=251 m=10] B's 764185 lines 722691 hits 46 relations 46 (need ≈ 123) enum 2.35e9 sieve 6.76e8 muls
+  [sieve p=251 m=10] B's 827929 lines 786128 hits 48 relations 48 (need ≈ 123) enum 2.55e9 sieve 7.36e8 muls
+  [sieve p=251 m=10] B's 891673 lines 848567 hits 51 relations 51 (need ≈ 123) enum 2.74e9 sieve 7.94e8 muls
+  [sieve p=251 m=10] B's 955417 lines 911009 hits 52 relations 52 (need ≈ 123) enum 2.94e9 sieve 8.53e8 muls
+  [sieve p=251 m=10] B's 1019161 lines 974005 hits 56 relations 56 (need ≈ 123) enum 3.14e9 sieve 9.12e8 muls
+  [sieve p=251 m=10] B's 1082905 lines 1036323 hits 57 relations 57 (need ≈ 123) enum 3.34e9 sieve 9.70e8 muls
+  [sieve p=251 m=10] B's 1146649 lines 1098720 hits 60 relations 60 (need ≈ 123) enum 3.54e9 sieve 1.03e9 muls
+  [sieve p=251 m=10] B's 1210393 lines 1160708 hits 62 relations 62 (need ≈ 123) enum 3.74e9 sieve 1.09e9 muls
+  [sieve p=251 m=10] B's 1274137 lines 1224097 hits 64 relations 64 (need ≈ 123) enum 3.94e9 sieve 1.15e9 muls
+  [sieve p=251 m=10] B's 1337881 lines 1286254 hits 66 relations 66 (need ≈ 123) enum 4.14e9 sieve 1.20e9 muls
+  [sieve p=251 m=10] B's 1401625 lines 1350145 hits 67 relations 67 (need ≈ 123) enum 4.34e9 sieve 1.26e9 muls
+  [sieve p=251 m=10] B's 1465369 lines 1412888 hits 72 relations 72 (need ≈ 123) enum 4.54e9 sieve 1.32e9 muls
+  [sieve p=251 m=10] B's 1529113 lines 1475719 hits 74 relations 74 (need ≈ 123) enum 4.74e9 sieve 1.38e9 muls
+  [sieve p=251 m=10] B's 1592857 lines 1538385 hits 76 relations 76 (need ≈ 123) enum 4.94e9 sieve 1.44e9 muls
+  [sieve p=251 m=10] B's 1656601 lines 1600938 hits 78 relations 78 (need ≈ 123) enum 5.14e9 sieve 1.50e9 muls
+  [sieve p=251 m=10] B's 1720345 lines 1663379 hits 79 relations 79 (need ≈ 123) enum 5.34e9 sieve 1.56e9 muls
+  [sieve p=251 m=10] B's 1784089 lines 1726243 hits 81 relations 81 (need ≈ 123) enum 5.54e9 sieve 1.62e9 muls
+  [sieve p=251 m=10] B's 1847833 lines 1789012 hits 83 relations 83 (need ≈ 123) enum 5.74e9 sieve 1.67e9 muls
+  [sieve p=251 m=10] B's 1911577 lines 1851995 hits 85 relations 85 (need ≈ 123) enum 5.94e9 sieve 1.73e9 muls
+  [sieve p=251 m=10] B's 1975321 lines 1914163 hits 88 relations 88 (need ≈ 123) enum 6.14e9 sieve 1.79e9 muls
+  [sieve p=251 m=10] B's 2039065 lines 1977548 hits 91 relations 91 (need ≈ 123) enum 6.33e9 sieve 1.85e9 muls
+  [sieve p=251 m=10] B's 2102809 lines 2040368 hits 95 relations 95 (need ≈ 123) enum 6.53e9 sieve 1.91e9 muls
+  [sieve p=251 m=10] B's 2166553 lines 2102944 hits 97 relations 97 (need ≈ 123) enum 6.73e9 sieve 1.97e9 muls
+  [sieve p=251 m=10] B's 2230297 lines 2165308 hits 97 relations 97 (need ≈ 123) enum 6.93e9 sieve 2.03e9 muls
+  [sieve p=251 m=10] B's 2294041 lines 2228113 hits 101 relations 101 (need ≈ 123) enum 7.13e9 sieve 2.09e9 muls
+  [sieve p=251 m=10] B's 2357785 lines 2290625 hits 105 relations 105 (need ≈ 123) enum 7.33e9 sieve 2.14e9 muls
+  [sieve p=251 m=10] B's 2421529 lines 2352632 hits 106 relations 106 (need ≈ 123) enum 7.53e9 sieve 2.20e9 muls
+  [sieve p=251 m=10] B's 2485273 lines 2415386 hits 109 relations 109 (need ≈ 123) enum 7.73e9 sieve 2.26e9 muls
+  [sieve p=251 m=10] B's 2549017 lines 2477762 hits 114 relations 114 (need ≈ 123) enum 7.93e9 sieve 2.32e9 muls
+  [sieve p=251 m=10] B's 2612761 lines 2540317 hits 118 relations 118 (need ≈ 123) enum 8.13e9 sieve 2.38e9 muls
+  [sieve p=251 m=10] B's 2676505 lines 2603588 hits 120 relations 120 (need ≈ 123) enum 8.33e9 sieve 2.44e9 muls
+  [sieve p=251 m=10] B's 2740249 lines 2666653 hits 124 relations 124 (need ≈ 123) enum 8.53e9 sieve 2.50e9 muls
+  [descent p=251] residuals 64 successes 0
+  [descent p=251] residuals 128 successes 0
+  [descent p=251] residuals 192 successes 0
+  [descent p=251] residuals 256 successes 0
+  [descent p=251] residuals 320 successes 0
+  [descent p=251] residuals 384 successes 0
+  [descent p=251] residuals 448 successes 0
+  [descent p=251] residuals 512 successes 0
+  [descent p=251] residuals 576 successes 0
+  [descent p=251] residuals 640 successes 0
+  [descent p=251] residuals 704 successes 1
+  [descent p=251] residuals 768 successes 1
+  [descent p=251] residuals 832 successes 1
+  [descent p=251] residuals 896 successes 1
+  [descent p=251] residuals 960 successes 1
+  [descent p=251] residuals 1024 successes 1
+  [descent p=251] residuals 1088 successes 1
+  [descent p=251] residuals 1152 successes 1
+  [descent p=251] residuals 1216 successes 1
+  [descent p=251] residuals 1280 successes 1
+  [descent p=251] residuals 1344 successes 1
+  [descent p=251] residuals 1408 successes 1
+  [descent p=251] residuals 1472 successes 1
+  [descent p=251] residuals 1536 successes 1
+  [descent p=251] residuals 1600 successes 1
+  [descent p=251] residuals 1664 successes 1
+  [descent p=251] residuals 1728 successes 1
+  [descent p=251] residuals 1792 successes 1
+  [descent p=251] residuals 1856 successes 1
+  [descent p=251] residuals 1920 successes 1
+  [descent p=251] residuals 1984 successes 1
+  [descent p=251] residuals 2048 successes 1
+p=  251 seed=2 l=2^45.8 |F|= 123 c_add E 331 J 2121 m 10 (rule 10, 1094 available) | B's 2740249 lines 2666653 steps 669329903 (base 327998319) roots 650795401 hits 124 false 0 | relations 124 (4.650e-5/line vs p/m! 6.917e-5: ratio 0.67) verified 124 failed 0 duplicates 0 per-m [(9, 63001, 31468, 12, 12), (10, 2677248, 2635185, 112, 112)] | C_rel 8.891e7 = enum 6.877e7 + sieve 2.013e7 + extract 6.986e3 + verify 6.985e3 (per relation) | adds 1.292e10 lookups 6.508e8 | descent: residuals 2048 successes 2 (1024/success) C_cov 1.529e6 muls 3.136e9 stopped 2048 incomplete 0 timed out 0 trace true (replayed 1981 mismatches 67) | unknowns 124 (filtered 2) row 9.9 LA attempts 1 ops 533184 | solved true correct true exhausted false | S 5.415e0 S+ 1.300e1 | rho S 1.009 ± 0.443 (4 runs) | S/rho 5.3640 (S+/rho 12.8822) = relation 4.1738 + descent 1.1870 + la 0.0032 | 71 s

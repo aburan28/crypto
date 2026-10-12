@@ -1,0 +1,27 @@
+{
+  "classification": "source_parity_only_no_scored_q_or_window_comparison",
+  "existing_output_rejected_without_change": true,
+  "frozen_compact_source_sha256": "702a0a05709bc14bc10bafbb08edb2a2f5f86794e970d84c317da3bc65cdcf38",
+  "frozen_fast_arith_sha256": "2a5c54bdedb6a0b1ffcf95dd7badd32c41d1482b53055e31fb9f28d514ac8c9e",
+  "n41": {
+    "archived_v2_header_sha256": "33dd5e81eadcd773db8c3126c356ba6011c0fa7a02dfad62b411ce28e8a791c3",
+    "archived_v2_tar_sha256": "261b5f3e7b209c2163d807dc78554b96b80873eda052405156b1178b29dce4a4",
+    "columns": 255,
+    "generated_header_sha256": "33dd5e81eadcd773db8c3126c356ba6011c0fa7a02dfad62b411ce28e8a791c3",
+    "n": 41,
+    "orbit_members_checked": 20910,
+    "scan_decisions_replayed": 812
+  },
+  "raw_x_cap_failure_replayed": true,
+  "scan_mutation_rejected": true,
+  "schema": "koblitz-base-window-source-control-v1",
+  "status": "PASS",
+  "toy": {
+    "columns": 3,
+    "frozen_construct_header_sha256": "69fa0b23ab0604ecc7259dbe88770bf0514bed26168cb16eaf9b86d23fa41545",
+    "generated_header_sha256": "69fa0b23ab0604ecc7259dbe88770bf0514bed26168cb16eaf9b86d23fa41545",
+    "n": 13,
+    "orbit_members_checked": 78,
+    "scan_decisions_replayed": 11
+  }
+}

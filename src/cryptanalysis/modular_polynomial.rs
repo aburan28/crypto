@@ -104,7 +104,7 @@ impl ModularPolynomial {
         self.coeffs
             .iter()
             .filter(|(_, c)| !c.is_zero())
-            .map(|(_, c)| c.bits() as u64)
+            .map(|(_, c)| c.bits())
             .sum()
     }
 }

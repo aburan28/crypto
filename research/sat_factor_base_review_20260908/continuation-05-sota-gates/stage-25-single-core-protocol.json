@@ -1,0 +1,57 @@
+{
+  "schema": "koblitz_stage25_single_core_protocol.v1",
+  "recorded_at": "2026-09-11",
+  "status": "frozen_before_execution",
+  "objective": "Measure the complete Stage-23 production panel with the outer driver and every descendant restricted by the Linux kernel to one logical CPU.",
+  "upstream_protocol": "stage-23-unknown-scalar-protocol.json",
+  "profile": "production",
+  "affinity": {
+    "platform": "Linux",
+    "mechanism": "os.sched_setaffinity inherited across subprocess creation",
+    "selected_cpu": "lowest CPU in the runner's initial allowed affinity set",
+    "required_effective_cpu_count": 1,
+    "parent_before_and_after_required": true,
+    "fresh_child_probe_before_and_after_required": true,
+    "stage23_outer_command_runs_after_affinity_is_set": true
+  },
+  "execution": {
+    "stage23_targets": 5,
+    "stage23_expected_child_processes": 14,
+    "parallel_workers": 1,
+    "cargo_jobs": 1,
+    "relation_batch_size": 1,
+    "stage23_outer_watchdog_seconds": 7200,
+    "hosted_job_timeout_minutes": 45,
+    "retries": 0,
+    "write_once_output": true
+  },
+  "accounting": {
+    "single_core_elapsed_definition": "Stage-23 inclusive outer-driver wall time while the outer meter and every descendant inherit one-CPU kernel affinity.",
+    "required_fields": [
+      "single_core_elapsed_seconds",
+      "outer_total_core_seconds",
+      "outer_user_seconds",
+      "outer_system_seconds",
+      "outer_peak_rss_bytes",
+      "stage23_child_total_core_seconds",
+      "stage23_summed_process_wall_seconds",
+      "stage23_peak_process_rss_bytes",
+      "ic_total_core_seconds",
+      "rho_total_core_seconds",
+      "online_ic_over_rho_core",
+      "setup_charged_ic_over_rho_core"
+    ],
+    "outer_receipt_reported_separately": true,
+    "simultaneous_process_tree_memory_measured": false
+  },
+  "claim_boundary": {
+    "finite_degree23_single_cpu_control": true,
+    "covers_stage20_n31_n41_n59_backend_matrix": false,
+    "licensed_magma_executed": false,
+    "source_dependency_toolchain_or_license_acquisition_charged": false,
+    "simultaneous_process_tree_memory_measured": false,
+    "independent_external_reproduction_satisfied": false,
+    "full_cost_gate_passed": false,
+    "koblitz_index_calculus_sota": false
+  }
+}

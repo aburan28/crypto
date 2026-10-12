@@ -1,0 +1,143 @@
+[
+ {
+  "bits": 14,
+  "p": 10789,
+  "aux_curve": {
+   "a": 6890,
+   "b": 663,
+   "order": 10698
+  },
+  "d": 6,
+  "delta": 1783,
+  "aux_inputs_needed": 37,
+  "m": 43,
+  "alpha": 6313,
+  "sqrt_p": 103.87011119662864,
+  "floor_dlpwai": 42.404795326315,
+  "rows": [
+   {
+    "variant": "torsion_embedding_honest",
+    "correct": true,
+    "ops": 70350,
+    "phases": {
+     "torsion:L1": 1701,
+     "torsion:L2": 55073,
+     "torsion:pairwise": 12751,
+     "torsion:recover": 825
+    },
+    "S": 677.2881937791108,
+    "ops_over_floor": 1659.0104835700772,
+    "pairs_tested": 749,
+    "m": 43,
+    "L1": 129,
+    "L2": 43
+   },
+   {
+    "variant": "torsion_embedding_oracle_quotient",
+    "collision": true,
+    "samples_to_collision": 32,
+    "ops": 1804,
+    "phases": {
+     "oracle:L1": 1267,
+     "oracle:L2": 537
+    },
+    "S": 17.367845082836045,
+    "ops_over_floor": 42.54235838465414
+   }
+  ]
+ },
+ {
+  "bits": 14,
+  "p": 10789,
+  "aux_curve": {
+   "a": 8278,
+   "b": 6444,
+   "order": 10695
+  },
+  "d": 15,
+  "delta": 713,
+  "aux_inputs_needed": 226,
+  "m": 27,
+  "alpha": 2203,
+  "sqrt_p": 103.87011119662864,
+  "floor_dlpwai": 26.819147388883685,
+  "rows": [
+   {
+    "variant": "torsion_embedding_honest",
+    "correct": true,
+    "ops": 232889,
+    "phases": {
+     "torsion:L1": 913,
+     "torsion:L2": 218244,
+     "torsion:pairwise": 12933,
+     "torsion:recover": 799
+    },
+    "S": 2242.1175573706228,
+    "ops_over_floor": 8683.683959935675,
+    "pairs_tested": 810,
+    "m": 27,
+    "L1": 81,
+    "L2": 27
+   },
+   {
+    "variant": "torsion_embedding_oracle_quotient",
+    "collision": true,
+    "samples_to_collision": 8,
+    "ops": 889,
+    "phases": {
+     "oracle:L1": 751,
+     "oracle:L2": 138
+    },
+    "S": 8.55876622984548,
+    "ops_over_floor": 33.147959072273984
+   }
+  ]
+ },
+ {
+  "bits": 14,
+  "p": 10789,
+  "aux_curve": {
+   "a": 1500,
+   "b": 1390,
+   "order": 10681
+  },
+  "d": 11,
+  "delta": 971,
+  "aux_inputs_needed": 122,
+  "m": 32,
+  "alpha": 928,
+  "sqrt_p": 103.87011119662864,
+  "floor_dlpwai": 31.318016888337326,
+  "rows": [
+   {
+    "variant": "torsion_embedding_honest",
+    "correct": true,
+    "ops": 154112,
+    "phases": {
+     "torsion:L1": 1197,
+     "torsion:L2": 138703,
+     "torsion:pairwise": 13504,
+     "torsion:recover": 708
+    },
+    "S": 1483.6991914667565,
+    "ops_over_floor": 4920.873519848907,
+    "pairs_tested": 756,
+    "m": 32,
+    "L1": 96,
+    "L2": 32
+   },
+   {
+    "variant": "torsion_embedding_oracle_quotient",
+    "collision": true,
+    "samples_to_collision": 111,
+    "ops": 2858,
+    "phases": {
+     "oracle:L1": 940,
+     "oracle:L2": 1918
+    },
+    "S": 27.515133728794577,
+    "ops_over_floor": 91.25737463486409
+   }
+  ]
+ }
+]

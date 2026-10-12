@@ -1,0 +1,120 @@
+{
+  "kind": "cross-tree comparison: same instances, same verified answers, splitting tree may differ",
+  "unit": "64-bit word operations",
+  "scope": "decomposition-oracle stage only; not an end-to-end ECDLP cost",
+  "identity_checked": [
+    "curve",
+    "m",
+    "ell",
+    "factor_base_points",
+    "targets",
+    "decomposed",
+    "oversize",
+    "exhausted"
+  ],
+  "repetitions": {
+    "reference": 3,
+    "candidate": 3
+  },
+  "rows": [
+    {
+      "curve": "K_1/2^9",
+      "m": 4,
+      "ell": 6,
+      "targets": 8,
+      "decomposed": 8,
+      "same_tree": false,
+      "reference": {
+        "word_ops": 3199188,
+        "reductions": 257,
+        "splits": 152,
+        "infeasible_branches": 19,
+        "wall_ns": 74013423
+      },
+      "candidate": {
+        "word_ops": 1465279,
+        "reductions": 226,
+        "splits": 152,
+        "infeasible_branches": 19,
+        "wall_ns": 41206442
+      },
+      "word_op_ratio": 2.183330273620246,
+      "wall_ratio": 1.7961614594145254
+    },
+    {
+      "curve": "K_0/2^15",
+      "m": 4,
+      "ell": 4,
+      "targets": 8,
+      "decomposed": 0,
+      "same_tree": false,
+      "reference": {
+        "word_ops": 21561148,
+        "reductions": 7203,
+        "splits": 3148,
+        "infeasible_branches": 3156,
+        "wall_ns": 480286626
+      },
+      "candidate": {
+        "word_ops": 12862066,
+        "reductions": 7195,
+        "splits": 3148,
+        "infeasible_branches": 3156,
+        "wall_ns": 406704924
+      },
+      "word_op_ratio": 1.6763362899863832,
+      "wall_ratio": 1.1809215912025692
+    },
+    {
+      "curve": "K_1/2^15",
+      "m": 4,
+      "ell": 4,
+      "targets": 8,
+      "decomposed": 5,
+      "same_tree": false,
+      "reference": {
+        "word_ops": 345384853,
+        "reductions": 58955,
+        "splits": 24059,
+        "infeasible_branches": 24001,
+        "wall_ns": 7801855339
+      },
+      "candidate": {
+        "word_ops": 134033711,
+        "reductions": 58727,
+        "splits": 24059,
+        "infeasible_branches": 24001,
+        "wall_ns": 4386973203
+      },
+      "word_op_ratio": 2.5768506327486524,
+      "wall_ratio": 1.778414177151745
+    },
+    {
+      "curve": "K_0/2^13",
+      "m": 3,
+      "ell": 12,
+      "targets": 8,
+      "decomposed": 8,
+      "same_tree": true,
+      "reference": {
+        "word_ops": 9121538,
+        "reductions": 200,
+        "splits": 168,
+        "infeasible_branches": 0,
+        "wall_ns": 125234910
+      },
+      "candidate": {
+        "word_ops": 8330957,
+        "reductions": 200,
+        "splits": 168,
+        "infeasible_branches": 0,
+        "wall_ns": 102849556
+      },
+      "word_op_ratio": 1.0948967807660033,
+      "wall_ratio": 1.2176514403231842
+    }
+  ],
+  "total_word_op_ratio": 2.420459854581101,
+  "total_wall_ratio": 1.717668485846228,
+  "min_word_op_ratio": 1.0948967807660033
+}

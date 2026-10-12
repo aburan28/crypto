@@ -1,0 +1,24 @@
+{
+  "files": {
+    "control/base.jsonl": "dcea2e583bce7d89524a009a388b9c8b7dce5c6ca8233068ec7bec1c5e384ead",
+    "control/command.json": "c0c71cccdaafaabbbf1c86cf25b4b432e26b0c1c6187681b2db59782aaa71a45",
+    "control/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "control/summary.jsonl": "5ac908f9c24c8e57c453446615f33fa2e9831893de7c2da4ceea70bd20ed4677",
+    "control/targets.jsonl": "5c1c6808ceb64a74ccf3827b138088fd4a2f18fdd3a5954c221fef30ed612ce5",
+    "independent_rank_replay.json": "1a35968a420271a2cd67acf9df09dc5ffa68a1ef08999271bbf06ae4735c6ca5",
+    "traced/base.jsonl": "dcea2e583bce7d89524a009a388b9c8b7dce5c6ca8233068ec7bec1c5e384ead",
+    "traced/command.json": "ba3ca858b28c6809546bada71dab11e78982888b03dc1b40c01ea3a702aee489",
+    "traced/rank.jsonl": "0de00af2a9c89d55ed61d3430af96db055e631a76c784a5e63d721b5fd6713bf",
+    "traced/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "traced/summary.jsonl": "d9f53330f4edd7334bccacc543488b13e53e4b2b42ebcaab266830c071c3f265",
+    "traced/targets.jsonl": "428ecb26f345b817c941b973b02a822bde96320c7c0b379c5fa0164ca1616965"
+  },
+  "rank": 2,
+  "rank_attempts": 2,
+  "rank_relations": 2,
+  "representative_logs_verified": 2,
+  "schema": "compact-orbit-rank-control-v1",
+  "status": "PASS",
+  "target_scalars_verified": 1,
+  "traced_and_control_deterministic_outputs_match": true
+}

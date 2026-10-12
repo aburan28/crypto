@@ -1,0 +1,33 @@
+{
+  "instance": "ECC2K-130",
+  "curve": "y^2 + xy = x^3 + 1 over F_2^131",
+  "subgroup_order_r": "680564733841876926932320129493409985129",
+  "log2_r": 129.0,
+  "rho_reference_log2_iterations": 60.9,
+  "python": "3.11.15",
+  "platform": "Linux-6.18.44-fc-v33-x86_64-with-glibc2.39",
+  "budget_seconds_per_experiment": 7200.0,
+  "experiments": [
+    {
+      "name": "constructed_small_coeffs",
+      "base_size": 4000,
+      "pairs_total": 8002000,
+      "complete": true,
+      "elapsed_seconds": 480.059,
+      "relations_found": 2045254,
+      "verification_sampled": true,
+      "relations_submitted_for_verification": 20000,
+      "relations_verified_on_curve": 20000,
+      "log2_expected_by_yield_law": -95.6876096467349,
+      "rank_accounting": {
+        "rows": 20000,
+        "construction_rows": 20000,
+        "determining_rows": 0,
+        "useful_rank": 0,
+        "log": null,
+        "consistent": true,
+        "rows_are_a_sample_of": 2045254
+      }
+    }
+  ]
+}

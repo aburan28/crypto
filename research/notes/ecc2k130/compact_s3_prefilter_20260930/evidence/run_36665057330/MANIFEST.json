@@ -1,0 +1,141 @@
+{
+  "cases": {
+    "n41_L1024": {
+      "host_path": "hosts/n41_L1024.json",
+      "host_sha256": "63276144d4bf30fa30910d69f6dae702677cd724c9e77864d1457c8d52498bbc",
+      "k": 255,
+      "paired": {
+        "filter_to_off_geo": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.8389700487880353,
+            0.8636012597885177
+          ],
+          "cpu_ratio_median": 0.8528130326250599,
+          "wall_ratio_95pct_log_t_interval": [
+            0.8371417373624592,
+            0.862163452989489
+          ],
+          "wall_ratio_median": 0.8454779619891395
+        },
+        "filter_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.2979723876425986,
+            1.3556027920675922
+          ],
+          "cpu_ratio_median": 1.3281593784378438,
+          "wall_ratio_95pct_log_t_interval": [
+            1.296297053780363,
+            1.3547397388671232
+          ],
+          "wall_ratio_median": 1.328407645000424
+        },
+        "off_b_to_off_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.9815959434530155,
+            1.018043360179473
+          ],
+          "cpu_ratio_median": 0.9993066846817963,
+          "wall_ratio_95pct_log_t_interval": [
+            0.9757118948383083,
+            1.017241376864524
+          ],
+          "wall_ratio_median": 0.9902293768488931
+        },
+        "off_geo_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.527930917013512,
+            1.5894045997659332
+          ],
+          "cpu_ratio_median": 1.5711367458035423,
+          "wall_ratio_95pct_log_t_interval": [
+            1.5387490804057398,
+            1.5812625795827815
+          ],
+          "wall_ratio_median": 1.5672510350564461
+        }
+      },
+      "raw_bytes": 7864097,
+      "raw_path": "raw/n41_L1024.tar.gz",
+      "raw_sha256": "8d0ecb18ed9237ad09cdcb3858d499d3c5ea2d776138982a17ee56b49fce8d50",
+      "receipt_path": "receipts/n41_L1024.json",
+      "receipt_sha256": "93c6fce5e935bc50e743cd7d06f0f02556a6ff0515460212c4dded722db76f2b",
+      "second_host_replay_path": "second_host_replay/n41_L1024.json",
+      "second_host_replay_sha256": "144003a34b90142121e2d5c86f8434966601eeb877b46fbac2e5d42094390733",
+      "status": "PASS",
+      "targets_verified_per_arm": 5120
+    },
+    "n53_L1024": {
+      "host_path": "hosts/n53_L1024.json",
+      "host_sha256": "f7d0b5a424cb8374ccafacfdc394b84d163f8de6c233638d196e85b4636a299a",
+      "k": 440,
+      "paired": {
+        "filter_to_off_geo": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.8805243021178275,
+            0.9134113693367035
+          ],
+          "cpu_ratio_median": 0.8923943566332038,
+          "wall_ratio_95pct_log_t_interval": [
+            0.880362533921766,
+            0.9137602531589674
+          ],
+          "wall_ratio_median": 0.8924102922227134
+        },
+        "filter_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.4230676977151588,
+            1.529210560545466
+          ],
+          "cpu_ratio_median": 1.472655362131087,
+          "wall_ratio_95pct_log_t_interval": [
+            1.4227766225989968,
+            1.5289844288578265
+          ],
+          "wall_ratio_median": 1.4726785649732628
+        },
+        "off_b_to_off_a": {
+          "cpu_ratio_95pct_log_t_interval": [
+            0.9922386086017331,
+            1.0155229355683735
+          ],
+          "cpu_ratio_median": 1.0078562486362184,
+          "wall_ratio_95pct_log_t_interval": [
+            0.9924671341314958,
+            1.0150460715632637
+          ],
+          "wall_ratio_median": 1.0077071248659015
+        },
+        "off_geo_to_rho": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.6126181772621955,
+            1.677851569832471
+          ],
+          "cpu_ratio_median": 1.6441539958476765,
+          "wall_ratio_95pct_log_t_interval": [
+            1.612087741165575,
+            1.677479776086202
+          ],
+          "wall_ratio_median": 1.6433644633212254
+        }
+      },
+      "raw_bytes": 16447865,
+      "raw_path": "raw/n53_L1024.tar.gz",
+      "raw_sha256": "035f80309d28898b4a8a2eca8a4245853b505ef7ba1a981b3c76447e11e5296b",
+      "receipt_path": "receipts/n53_L1024.json",
+      "receipt_sha256": "e80d067058cdc8d54cf82a33fcc7c6a3bf5bb822a7555e6d63d9efece17f6bd7",
+      "second_host_replay_path": "second_host_replay/n53_L1024.json",
+      "second_host_replay_sha256": "76e7597d946909f5a614fd6169125d04b905c77e3cd36ed627050b40217a9236",
+      "status": "PASS",
+      "targets_verified_per_arm": 5120
+    }
+  },
+  "extraction": "tar -xzf raw/n41_L1024.tar.gz -C DEST; repeat for n53",
+  "frozen_sha256": "3e9f67cc2cd6de5a8458badb3525983d561d9c3449c05118819fb424c5093b2b",
+  "github_run_url": "https://github.com/aburan28/crypto/actions/runs/36665057330",
+  "independent_replay": "python3 verify_panel.py --n 41 --run-dir DEST/n41_L1024 --out NEW_RECEIPT.json",
+  "schema": "compact-s3-prefilter-hosted-archive-v1",
+  "second_host_replay_host_path": "second_host_replay/HOST.json",
+  "second_host_replay_host_sha256": "e0fd3c80153c75cb3c94936f15204dbf524f4c568dd988e3591b09f92633e3a6",
+  "source_head": "96cf142a4bea65120ccb3985b20c4e2de6876685",
+  "source_head_kind": "PR head; Actions checked out the exact head SHA, not a synthetic merge"
+}

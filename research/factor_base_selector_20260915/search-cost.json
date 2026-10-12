@@ -1,0 +1,613 @@
+{
+  "best_census": {
+    "indices": [
+      0,
+      3
+    ],
+    "kind": "divisor"
+  },
+  "best_scored": {
+    "indices": [
+      0,
+      3
+    ],
+    "kind": "divisor"
+  },
+  "candidate_count": 16,
+  "candidates": [
+    {
+      "abscissae": 32,
+      "build_ms": 0.44573399999999996,
+      "census_ms": 0.067629,
+      "cofactor_admissible": true,
+      "coverage": 0.14285714285714285,
+      "covered": 30,
+      "dimension": 5,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 31.0,
+      "expected_stage_ops": 434644.0,
+      "expected_trials": 28.0,
+      "family": "divisor",
+      "mean_witnesses": 0.14285714285714285,
+      "measured_ops_per_target": 15523.0,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 31,
+      "projected_columns": 1,
+      "prune_steps": [],
+      "sat_variables": 10,
+      "signed_orbits": 2,
+      "skipped": null,
+      "solve_cost_skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          3
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": false,
+      "unknowns": 1
+    },
+    {
+      "abscissae": 64,
+      "build_ms": 0.8829670000000001,
+      "census_ms": 0.182777,
+      "cofactor_admissible": true,
+      "coverage": 0.42857142857142855,
+      "covered": 90,
+      "dimension": 6,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 77.0,
+      "expected_stage_ops": 1757716.3333333335,
+      "expected_trials": 9.333333333333334,
+      "family": "divisor",
+      "mean_witnesses": 0.42857142857142855,
+      "measured_ops_per_target": 188326.75,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 77,
+      "projected_columns": 1,
+      "prune_steps": [],
+      "sat_variables": 12,
+      "signed_orbits": 5,
+      "skipped": null,
+      "solve_cost_skipped": null,
+      "spec": {
+        "indices": [
+          1,
+          4
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": true,
+      "unknowns": 1
+    },
+    {
+      "abscissae": 64,
+      "build_ms": 0.8521540000000001,
+      "census_ms": 0.144055,
+      "cofactor_admissible": true,
+      "coverage": 0.42857142857142855,
+      "covered": 90,
+      "dimension": 6,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 67.0,
+      "expected_stage_ops": 2268621.25,
+      "expected_trials": 11.666666666666666,
+      "family": "divisor",
+      "mean_witnesses": 0.42857142857142855,
+      "measured_ops_per_target": 194453.25,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 67,
+      "projected_columns": 2,
+      "prune_steps": [],
+      "sat_variables": 12,
+      "signed_orbits": 4,
+      "skipped": null,
+      "solve_cost_skipped": null,
+      "spec": {
+        "indices": [
+          1,
+          3
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": true,
+      "unknowns": 2
+    },
+    {
+      "abscissae": 128,
+      "build_ms": 1.653793,
+      "census_ms": 0.38055,
+      "cofactor_admissible": true,
+      "coverage": 0.5714285714285714,
+      "covered": 120,
+      "dimension": 7,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 133.0,
+      "expected_stage_ops": 6279045.28125,
+      "expected_trials": 12.25,
+      "family": "divisor",
+      "mean_witnesses": 0.5714285714285714,
+      "measured_ops_per_target": 512575.125,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 133,
+      "projected_columns": 4,
+      "prune_steps": [],
+      "sat_variables": 14,
+      "signed_orbits": 7,
+      "skipped": null,
+      "solve_cost_skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          1,
+          3
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": false,
+      "unknowns": 4
+    },
+    {
+      "abscissae": 128,
+      "build_ms": 1.602174,
+      "census_ms": 0.344742,
+      "cofactor_admissible": true,
+      "coverage": 0.42857142857142855,
+      "covered": 90,
+      "dimension": 7,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 123.0,
+      "expected_stage_ops": 6360474.166666666,
+      "expected_trials": 11.666666666666666,
+      "family": "divisor",
+      "mean_witnesses": 0.42857142857142855,
+      "measured_ops_per_target": 545183.5,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 123,
+      "projected_columns": 2,
+      "prune_steps": [],
+      "sat_variables": 14,
+      "signed_orbits": 8,
+      "skipped": null,
+      "solve_cost_skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          1,
+          4
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": false,
+      "unknowns": 2
+    },
+    {
+      "abscissae": 64,
+      "build_ms": 0.930798,
+      "census_ms": 0.285765,
+      "cofactor_admissible": true,
+      "coverage": 0.14285714285714285,
+      "covered": 30,
+      "dimension": 6,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 97.0,
+      "expected_stage_ops": 8928108.0,
+      "expected_trials": 42.0,
+      "family": "divisor",
+      "mean_witnesses": 0.14285714285714285,
+      "measured_ops_per_target": 212574.0,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 97,
+      "projected_columns": 3,
+      "prune_steps": [],
+      "sat_variables": 12,
+      "signed_orbits": 5,
+      "skipped": null,
+      "solve_cost_skipped": null,
+      "spec": {
+        "indices": [
+          1,
+          2
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": true,
+      "unknowns": 3
+    },
+    {
+      "abscissae": 256,
+      "build_ms": 3.194661,
+      "census_ms": 0.8796360000000001,
+      "cofactor_admissible": true,
+      "coverage": 1.0,
+      "covered": 210,
+      "dimension": 8,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 251.0,
+      "expected_stage_ops": 10629874.0,
+      "expected_trials": 8.0,
+      "family": "divisor",
+      "mean_witnesses": 1.8571428571428572,
+      "measured_ops_per_target": 1328734.25,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 251,
+      "projected_columns": 5,
+      "prune_steps": [],
+      "sat_variables": 16,
+      "signed_orbits": 10,
+      "skipped": null,
+      "solve_cost_skipped": null,
+      "spec": {
+        "indices": [
+          3,
+          4
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": true,
+      "unknowns": 5
+    },
+    {
+      "abscissae": 256,
+      "build_ms": 3.235144,
+      "census_ms": 1.248506,
+      "cofactor_admissible": true,
+      "coverage": 1.0,
+      "covered": 210,
+      "dimension": 8,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 281.0,
+      "expected_stage_ops": 12628608.75,
+      "expected_trials": 9.0,
+      "family": "divisor",
+      "mean_witnesses": 2.5714285714285716,
+      "measured_ops_per_target": 1403178.75,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 281,
+      "projected_columns": 6,
+      "prune_steps": [],
+      "sat_variables": 16,
+      "signed_orbits": 11,
+      "skipped": null,
+      "solve_cost_skipped": null,
+      "spec": {
+        "indices": [
+          2,
+          4
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": true,
+      "unknowns": 6
+    },
+    {
+      "abscissae": 256,
+      "build_ms": 3.088954,
+      "census_ms": 0.746445,
+      "cofactor_admissible": true,
+      "coverage": 0.8571428571428571,
+      "covered": 180,
+      "dimension": 8,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 211.0,
+      "expected_stage_ops": 23117302.6875,
+      "expected_trials": 8.166666666666666,
+      "family": "divisor",
+      "mean_witnesses": 1.2857142857142858,
+      "measured_ops_per_target": 2830690.125,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 211,
+      "projected_columns": 4,
+      "prune_steps": [],
+      "sat_variables": 16,
+      "signed_orbits": 8,
+      "skipped": null,
+      "solve_cost_skipped": null,
+      "spec": {
+        "indices": [
+          2,
+          3
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": true,
+      "unknowns": 4
+    },
+    {
+      "abscissae": 128,
+      "build_ms": 1.6758739999999999,
+      "census_ms": 0.515591,
+      "cofactor_admissible": true,
+      "coverage": 0.14285714285714285,
+      "covered": 30,
+      "dimension": 7,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 163.0,
+      "expected_stage_ops": 31685372.25,
+      "expected_trials": 49.0,
+      "family": "divisor",
+      "mean_witnesses": 0.14285714285714285,
+      "measured_ops_per_target": 646640.25,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 163,
+      "projected_columns": 4,
+      "prune_steps": [],
+      "sat_variables": 14,
+      "signed_orbits": 8,
+      "skipped": null,
+      "solve_cost_skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          1,
+          2
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": false,
+      "unknowns": 4
+    },
+    {
+      "abscissae": 16,
+      "build_ms": 0.224542,
+      "census_ms": 0.0052569999999999995,
+      "cofactor_admissible": true,
+      "coverage": 0.0,
+      "covered": 0,
+      "dimension": 4,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 1.0,
+      "expected_stage_ops": null,
+      "expected_trials": null,
+      "family": "divisor",
+      "mean_witnesses": 0.0,
+      "measured_ops_per_target": 3746.0,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 1,
+      "projected_columns": 0,
+      "prune_steps": [],
+      "sat_variables": 8,
+      "signed_orbits": 1,
+      "skipped": null,
+      "solve_cost_skipped": "no census target decomposes, so there is no trial count to price",
+      "spec": {
+        "indices": [
+          3
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": true,
+      "unknowns": 0
+    },
+    {
+      "abscissae": 16,
+      "build_ms": 0.26163800000000004,
+      "census_ms": 0.045985,
+      "cofactor_admissible": true,
+      "coverage": 0.0,
+      "covered": 0,
+      "dimension": 4,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 11.0,
+      "expected_stage_ops": null,
+      "expected_trials": null,
+      "family": "divisor",
+      "mean_witnesses": 0.0,
+      "measured_ops_per_target": 76.75,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 11,
+      "projected_columns": 0,
+      "prune_steps": [],
+      "sat_variables": 8,
+      "signed_orbits": 2,
+      "skipped": null,
+      "solve_cost_skipped": "no census target decomposes, so there is no trial count to price",
+      "spec": {
+        "indices": [
+          4
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": true,
+      "unknowns": 0
+    },
+    {
+      "abscissae": 16,
+      "build_ms": 0.27483599999999997,
+      "census_ms": 0.065307,
+      "cofactor_admissible": true,
+      "coverage": 0.0,
+      "covered": 0,
+      "dimension": 4,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 31.0,
+      "expected_stage_ops": null,
+      "expected_trials": null,
+      "family": "divisor",
+      "mean_witnesses": 0.0,
+      "measured_ops_per_target": 4554.375,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 31,
+      "projected_columns": 1,
+      "prune_steps": [],
+      "sat_variables": 8,
+      "signed_orbits": 2,
+      "skipped": null,
+      "solve_cost_skipped": "no census target decomposes, so there is no trial count to price",
+      "spec": {
+        "indices": [
+          2
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": true,
+      "unknowns": 1
+    },
+    {
+      "abscissae": 8,
+      "build_ms": 0.150179,
+      "census_ms": 0.053733,
+      "cofactor_admissible": true,
+      "coverage": 0.0,
+      "covered": 0,
+      "dimension": 3,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 13.0,
+      "expected_stage_ops": null,
+      "expected_trials": null,
+      "family": "divisor",
+      "mean_witnesses": 0.0,
+      "measured_ops_per_target": 75.125,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 13,
+      "projected_columns": 0,
+      "prune_steps": [],
+      "sat_variables": 6,
+      "signed_orbits": 3,
+      "skipped": null,
+      "solve_cost_skipped": "no census target decomposes, so there is no trial count to price",
+      "spec": {
+        "indices": [
+          0,
+          1
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": false,
+      "unknowns": 0
+    },
+    {
+      "abscissae": 32,
+      "build_ms": 0.365035,
+      "census_ms": 0.044108,
+      "cofactor_admissible": true,
+      "coverage": 0.0,
+      "covered": 0,
+      "dimension": 5,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 21.0,
+      "expected_stage_ops": null,
+      "expected_trials": null,
+      "family": "divisor",
+      "mean_witnesses": 0.0,
+      "measured_ops_per_target": 81.625,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 21,
+      "projected_columns": 0,
+      "prune_steps": [],
+      "sat_variables": 10,
+      "signed_orbits": 3,
+      "skipped": null,
+      "solve_cost_skipped": "no census target decomposes, so there is no trial count to price",
+      "spec": {
+        "indices": [
+          0,
+          4
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": false,
+      "unknowns": 0
+    },
+    {
+      "abscissae": 32,
+      "build_ms": 0.5168389999999999,
+      "census_ms": 0.132595,
+      "cofactor_admissible": true,
+      "coverage": 0.0,
+      "covered": 0,
+      "dimension": 5,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 61.0,
+      "expected_stage_ops": null,
+      "expected_trials": null,
+      "family": "divisor",
+      "mean_witnesses": 0.0,
+      "measured_ops_per_target": 15584.75,
+      "pair_table_lookups_per_trial": 1.0,
+      "points": 61,
+      "projected_columns": 2,
+      "prune_steps": [],
+      "sat_variables": 10,
+      "signed_orbits": 3,
+      "skipped": null,
+      "solve_cost_skipped": "no census target decomposes, so there is no trial count to price",
+      "spec": {
+        "indices": [
+          0,
+          2
+        ],
+        "kind": "divisor"
+      },
+      "trace_zero": false,
+      "unknowns": 2
+    }
+  ],
+  "census_ms": 683.666421,
+  "cofactor": "154",
+  "curve_a": 1,
+  "degree": 15,
+  "elapsed_seconds": 0.683765574,
+  "evidence_scope": "exact_yield_census_with_synthetic_validation",
+  "exhaustive_targets": true,
+  "limitations": [
+    "Coverage is exact on the target set, which is the whole subgroup only when exhaustive_targets is true.",
+    "Selected means fastest validated on these holdout fixtures, not a global optimum.",
+    "No imported target was used.",
+    "Solve cost is the mean over 8 census targets of one oracle, the Gröbner one, and only for linear-subspace candidates; pruned, saturated, union and orbit bases are left unmeasured and ranked below every measured one (see solve_cost_skipped).",
+    "Base construction, lifting, filtering and the relation linear algebra are not in the score; all of them grow with the base size, so pricing them would favour the smaller base further."
+  ],
+  "operation": "search",
+  "options": {
+    "exhaustive_cap": 4096,
+    "extra_relations": 2,
+    "families": [
+      "divisor"
+    ],
+    "m": 2,
+    "max_abscissae": 2048,
+    "max_dimension": 8,
+    "min_dimension": 3,
+    "projected_columns": true,
+    "prune": false,
+    "sample_targets": 1024,
+    "saturate": false,
+    "seed": 1,
+    "solve_cost_targets": 8,
+    "union_samples": 3,
+    "union_seed_dimensions": [
+      2,
+      5
+    ]
+  },
+  "resources": {
+    "cpu_seconds": 0.706219,
+    "peak_rss_bytes": 7950336,
+    "scope": "process counters sampled before report emission; peak resident memory, not allocated bytes"
+  },
+  "schema_version": 1,
+  "scoring": "expected_stage_ops = expected_trials × measured Gröbner word XORs per census target, charged on decomposing and refuted targets alike; expected_trials = (columns + 1 + extra) / coverage",
+  "scoring_objective": "expected_stage_ops",
+  "selected": null,
+  "selected_summary": null,
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "3c21998b63d087d2fd62a56cabf7c9e53b4aed66991d219210b7fe1b15f7dcd3",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "spec_out": null,
+  "status": "unvalidated",
+  "subgroup_order": "211",
+  "summands": 2,
+  "targets": 210,
+  "validation": {
+    "holdout_samples": 2,
+    "max_trials": 2000,
+    "runs": [],
+    "solver": "groebner",
+    "timeout_seconds": 60,
+    "validated_top": 0
+  }
+}

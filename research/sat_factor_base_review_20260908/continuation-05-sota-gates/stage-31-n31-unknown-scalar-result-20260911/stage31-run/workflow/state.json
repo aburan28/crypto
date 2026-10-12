@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "params_digest": "1591e92319c465f5fb6409f6aef7c4846c9ffdd172f20a14213b743bd7f46d7b",
+  "name": "k0n31-public-unknown-scalar-stage31",
+  "select": {
+    "status": "complete",
+    "artifact": "factor_base.json",
+    "elapsed_seconds": 0.136455942
+  },
+  "collect": {
+    "status": "complete",
+    "artifact": "relations",
+    "elapsed_seconds": 240.919195582
+  },
+  "logs": {
+    "status": "complete",
+    "artifact": "logs.json",
+    "elapsed_seconds": 2.5759038739999998
+  },
+  "solve": {
+    "status": "complete",
+    "artifact": "solutions.json",
+    "elapsed_seconds": 3.826987511
+  },
+  "solved_targets": 5,
+  "total_targets": 5,
+  "runs": 1,
+  "units_collected": 4,
+  "relations_collected": 11312
+}

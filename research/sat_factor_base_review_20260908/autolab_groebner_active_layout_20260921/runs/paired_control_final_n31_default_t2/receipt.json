@@ -1,0 +1,29 @@
+{
+  "child_system_ms": 293.998,
+  "child_user_ms": 149767.108,
+  "command": [
+    "target/release/examples/symmetrised_oracle_bench",
+    "--only",
+    "0",
+    "31",
+    "2",
+    "--targets",
+    "2",
+    "--no-sat",
+    "--node-budget",
+    "50000"
+  ],
+  "ended_unix_ns": 1790044251515063000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/symmetrised_oracle_bench",
+  "executable_sha256": "5db8a4c68662ccdd3956c700265828ea8b56d8d6f9c5ced1436aed3cfb2bcf8d",
+  "exit_code": 0,
+  "peak_rss_bytes": 467206144,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790044101229102000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 608,
+  "stdout_sha256": "c36a0d7e63c12c41b885884c2fd66bbbe50685e74966cfe486b7af5ff9c62c4e",
+  "task_id": "TASK-KIC-GROEBNER-ACTIVE-LAYOUT-CONTROL-FINAL-N31-T2-20260921",
+  "wall_ms": 150284.788083
+}

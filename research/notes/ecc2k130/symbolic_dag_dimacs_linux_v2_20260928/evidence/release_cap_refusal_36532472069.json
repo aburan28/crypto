@@ -1,0 +1,76 @@
+{
+  "cap_bytes": 536870912,
+  "checkout_head": "c4d4a65f7209bbc3c990113bc46e8b0d7239a043",
+  "commands": [
+    {
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3",
+        "-c",
+        "import json,resource; print(json.dumps(resource.getrlimit(resource.RLIMIT_AS)))"
+      ],
+      "cap_bytes": 536870912,
+      "exit_code": 0,
+      "label": "hard_limit_observation",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 23,
+      "stdout_sha256": "04b9e71b50d46a6e3c67c8e2fbb0ac2bee4f27dc7695fdf31b0ab856bc997ca8",
+      "wall_seconds": 0.022629104000003508
+    },
+    {
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3",
+        "/home/runner/work/crypto/crypto/research/notes/ecc2k130/symbolic_dag_dimacs_linux_v2_20260928/v2_child.py",
+        "--gate-only"
+      ],
+      "cap_bytes": 536870912,
+      "exit_code": 0,
+      "label": "capped_child_local_byte_gate",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 123,
+      "stdout_sha256": "4207af2a32464173e10b76af89fdf07fb71627e146899fdbaa8a86ac7fffa1a0",
+      "wall_seconds": 0.06796178599999791
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cap_bytes": 536870912,
+      "exit_code": 0,
+      "label": "git_cap_rev_parse",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 41,
+      "stdout_sha256": "13e1908aa5d2353aaf94f376c07febf66e9146f3d335e786f7f1e037510d8a1c",
+      "wall_seconds": 0.0031332650000024387
+    },
+    {
+      "argv": [
+        "git",
+        "cat-file",
+        "-t",
+        "c739ccf69972c0c0c7c79323d42548a5d319cdcc"
+      ],
+      "cap_bytes": 536870912,
+      "exit_code": 128,
+      "label": "git_cap_base_object",
+      "stderr_bytes": 173,
+      "stderr_sha256": "e6a6be047f2bc70f7b360cfa9787706bca58d1b9d140c4ab9c2742c21d6d8409",
+      "stderr_tail": "fatal: packfile .git/objects/pack/pack-cd79c627b0acd07ec31421cf777fa2f572f957d9.pack cannot be mapped, check sys.vm.max_map_count and/or RLIMIT_DATA: Cannot allocate memory\n",
+      "stdout_bytes": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_tail": "",
+      "wall_seconds": 0.0028919639999998026
+    }
+  ],
+  "decision": "FAIL_HARMLESS_CONTROL",
+  "error": "RuntimeError: git_cap_base_object exited 128",
+  "measured_children_started": 0,
+  "release_status": "RELEASED",
+  "runner_image_os": "ubuntu24",
+  "runner_image_version": "20260920.314.1",
+  "schema": "k0-dag-linux-v2-held-toy-cap-control-v1"
+}

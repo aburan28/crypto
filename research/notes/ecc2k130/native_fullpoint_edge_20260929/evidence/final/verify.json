@@ -1,0 +1,622 @@
+{
+  "cpu_seconds": 7.015722,
+  "decision": "PASS",
+  "domain": "ecc2k130-native-fullpoint-edge-20260929-v1",
+  "leaves": [
+    {
+      "b": "0x3aad5ebb6187af0a2c53cbc9010d36552",
+      "case_counts": {
+        "copy_p": 1,
+        "copy_q": 1,
+        "double": 1,
+        "generic": 1,
+        "inverse": 2
+      },
+      "dag": {
+        "and": 174518,
+        "model_limbs": 15,
+        "total_nodes": 357429,
+        "variables": 920,
+        "xor": 181989
+      },
+      "line": [
+        1,
+        0
+      ],
+      "mismatches": 0,
+      "model_controls": 3,
+      "rows": 20
+    },
+    {
+      "b": "0x3248ef31f25d6830126239dd3fd7c593a",
+      "case_counts": {
+        "copy_p": 1,
+        "copy_q": 1,
+        "double": 1,
+        "generic": 1,
+        "inverse": 2
+      },
+      "dag": {
+        "and": 174518,
+        "model_limbs": 15,
+        "total_nodes": 357438,
+        "variables": 920,
+        "xor": 181998
+      },
+      "line": [
+        1,
+        4
+      ],
+      "mismatches": 0,
+      "model_controls": 3,
+      "rows": 20
+    }
+  ],
+  "peak_rss_bytes": 173473792,
+  "producer_sha256": "cc13166dc4361a505f97d0433b9fcac65c2a1a1dacf84aa8715f32e96f03ae02",
+  "raw_rows": 19974,
+  "rows_sha256": "543c8c283d87b36de6701f692ac00bc566a9109e8ee3512ffbf54171a82e370a",
+  "toy": [
+    {
+      "a": 0,
+      "b": 1,
+      "case_counts": {
+        "copy_p": 7,
+        "copy_q": 8,
+        "double": 6,
+        "generic": 36,
+        "inverse": 7
+      },
+      "coefficient_controls": 3,
+      "curve_points": 8,
+      "dag": {
+        "and": 107,
+        "model_limbs": 1,
+        "total_nodes": 310,
+        "variables": 17,
+        "xor": 184
+      },
+      "invalid_evaluations": 288,
+      "invalid_points": 24,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 7,
+      "n": 2,
+      "rows": 512,
+      "valid_evaluations": 2048
+    },
+    {
+      "a": 0,
+      "b": 2,
+      "case_counts": {
+        "copy_p": 3,
+        "copy_q": 4,
+        "double": 2,
+        "generic": 4,
+        "inverse": 3
+      },
+      "coefficient_controls": 3,
+      "curve_points": 4,
+      "dag": {
+        "and": 107,
+        "model_limbs": 1,
+        "total_nodes": 310,
+        "variables": 17,
+        "xor": 184
+      },
+      "invalid_evaluations": 336,
+      "invalid_points": 28,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 7,
+      "n": 2,
+      "rows": 64,
+      "valid_evaluations": 256
+    },
+    {
+      "a": 0,
+      "b": 3,
+      "case_counts": {
+        "copy_p": 3,
+        "copy_q": 4,
+        "double": 2,
+        "generic": 4,
+        "inverse": 3
+      },
+      "coefficient_controls": 3,
+      "curve_points": 4,
+      "dag": {
+        "and": 107,
+        "model_limbs": 1,
+        "total_nodes": 313,
+        "variables": 17,
+        "xor": 187
+      },
+      "invalid_evaluations": 336,
+      "invalid_points": 28,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 7,
+      "n": 2,
+      "rows": 64,
+      "valid_evaluations": 256
+    },
+    {
+      "a": 1,
+      "b": 1,
+      "case_counts": {
+        "copy_p": 7,
+        "copy_q": 8,
+        "double": 6,
+        "generic": 36,
+        "inverse": 7
+      },
+      "coefficient_controls": 3,
+      "curve_points": 8,
+      "dag": {
+        "and": 107,
+        "model_limbs": 1,
+        "total_nodes": 318,
+        "variables": 17,
+        "xor": 192
+      },
+      "invalid_evaluations": 288,
+      "invalid_points": 24,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 7,
+      "n": 2,
+      "rows": 512,
+      "valid_evaluations": 2048
+    },
+    {
+      "a": 1,
+      "b": 2,
+      "case_counts": {
+        "copy_p": 3,
+        "copy_q": 4,
+        "double": 2,
+        "generic": 4,
+        "inverse": 3
+      },
+      "coefficient_controls": 3,
+      "curve_points": 4,
+      "dag": {
+        "and": 107,
+        "model_limbs": 1,
+        "total_nodes": 318,
+        "variables": 17,
+        "xor": 192
+      },
+      "invalid_evaluations": 336,
+      "invalid_points": 28,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 7,
+      "n": 2,
+      "rows": 64,
+      "valid_evaluations": 256
+    },
+    {
+      "a": 1,
+      "b": 3,
+      "case_counts": {
+        "copy_p": 3,
+        "copy_q": 4,
+        "double": 2,
+        "generic": 4,
+        "inverse": 3
+      },
+      "coefficient_controls": 3,
+      "curve_points": 4,
+      "dag": {
+        "and": 107,
+        "model_limbs": 1,
+        "total_nodes": 321,
+        "variables": 17,
+        "xor": 195
+      },
+      "invalid_evaluations": 336,
+      "invalid_points": 28,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 7,
+      "n": 2,
+      "rows": 64,
+      "valid_evaluations": 256
+    },
+    {
+      "a": 0,
+      "b": 1,
+      "case_counts": {
+        "copy_p": 3,
+        "copy_q": 4,
+        "double": 2,
+        "generic": 4,
+        "inverse": 3
+      },
+      "coefficient_controls": 3,
+      "curve_points": 4,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 479,
+        "variables": 24,
+        "xor": 280
+      },
+      "invalid_evaluations": 2976,
+      "invalid_points": 124,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 64,
+      "valid_evaluations": 512
+    },
+    {
+      "a": 0,
+      "b": 2,
+      "case_counts": {
+        "copy_p": 7,
+        "copy_q": 8,
+        "double": 6,
+        "generic": 36,
+        "inverse": 7
+      },
+      "coefficient_controls": 3,
+      "curve_points": 8,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 479,
+        "variables": 24,
+        "xor": 280
+      },
+      "invalid_evaluations": 2880,
+      "invalid_points": 120,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 512,
+      "valid_evaluations": 4096
+    },
+    {
+      "a": 0,
+      "b": 3,
+      "case_counts": {
+        "copy_p": 11,
+        "copy_q": 12,
+        "double": 10,
+        "generic": 100,
+        "inverse": 11
+      },
+      "coefficient_controls": 3,
+      "curve_points": 12,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 482,
+        "variables": 24,
+        "xor": 283
+      },
+      "invalid_evaluations": 2784,
+      "invalid_points": 116,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 1728,
+      "valid_evaluations": 13824
+    },
+    {
+      "a": 0,
+      "b": 4,
+      "case_counts": {
+        "copy_p": 7,
+        "copy_q": 8,
+        "double": 6,
+        "generic": 36,
+        "inverse": 7
+      },
+      "coefficient_controls": 3,
+      "curve_points": 8,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 479,
+        "variables": 24,
+        "xor": 280
+      },
+      "invalid_evaluations": 2880,
+      "invalid_points": 120,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 512,
+      "valid_evaluations": 4096
+    },
+    {
+      "a": 0,
+      "b": 5,
+      "case_counts": {
+        "copy_p": 11,
+        "copy_q": 12,
+        "double": 10,
+        "generic": 100,
+        "inverse": 11
+      },
+      "coefficient_controls": 3,
+      "curve_points": 12,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 482,
+        "variables": 24,
+        "xor": 283
+      },
+      "invalid_evaluations": 2784,
+      "invalid_points": 116,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 1728,
+      "valid_evaluations": 13824
+    },
+    {
+      "a": 0,
+      "b": 6,
+      "case_counts": {
+        "copy_p": 7,
+        "copy_q": 8,
+        "double": 6,
+        "generic": 36,
+        "inverse": 7
+      },
+      "coefficient_controls": 3,
+      "curve_points": 8,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 482,
+        "variables": 24,
+        "xor": 283
+      },
+      "invalid_evaluations": 2880,
+      "invalid_points": 120,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 512,
+      "valid_evaluations": 4096
+    },
+    {
+      "a": 0,
+      "b": 7,
+      "case_counts": {
+        "copy_p": 11,
+        "copy_q": 12,
+        "double": 10,
+        "generic": 100,
+        "inverse": 11
+      },
+      "coefficient_controls": 3,
+      "curve_points": 12,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 485,
+        "variables": 24,
+        "xor": 286
+      },
+      "invalid_evaluations": 2784,
+      "invalid_points": 116,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 1728,
+      "valid_evaluations": 13824
+    },
+    {
+      "a": 1,
+      "b": 1,
+      "case_counts": {
+        "copy_p": 13,
+        "copy_q": 14,
+        "double": 12,
+        "generic": 144,
+        "inverse": 13
+      },
+      "coefficient_controls": 3,
+      "curve_points": 14,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 489,
+        "variables": 24,
+        "xor": 290
+      },
+      "invalid_evaluations": 2736,
+      "invalid_points": 114,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 2744,
+      "valid_evaluations": 21952
+    },
+    {
+      "a": 1,
+      "b": 2,
+      "case_counts": {
+        "copy_p": 9,
+        "copy_q": 10,
+        "double": 8,
+        "generic": 64,
+        "inverse": 9
+      },
+      "coefficient_controls": 3,
+      "curve_points": 10,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 489,
+        "variables": 24,
+        "xor": 290
+      },
+      "invalid_evaluations": 2832,
+      "invalid_points": 118,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 1000,
+      "valid_evaluations": 8000
+    },
+    {
+      "a": 1,
+      "b": 3,
+      "case_counts": {
+        "copy_p": 5,
+        "copy_q": 6,
+        "double": 4,
+        "generic": 16,
+        "inverse": 5
+      },
+      "coefficient_controls": 3,
+      "curve_points": 6,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 492,
+        "variables": 24,
+        "xor": 293
+      },
+      "invalid_evaluations": 2928,
+      "invalid_points": 122,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 216,
+      "valid_evaluations": 1728
+    },
+    {
+      "a": 1,
+      "b": 4,
+      "case_counts": {
+        "copy_p": 9,
+        "copy_q": 10,
+        "double": 8,
+        "generic": 64,
+        "inverse": 9
+      },
+      "coefficient_controls": 3,
+      "curve_points": 10,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 489,
+        "variables": 24,
+        "xor": 290
+      },
+      "invalid_evaluations": 2832,
+      "invalid_points": 118,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 1000,
+      "valid_evaluations": 8000
+    },
+    {
+      "a": 1,
+      "b": 5,
+      "case_counts": {
+        "copy_p": 5,
+        "copy_q": 6,
+        "double": 4,
+        "generic": 16,
+        "inverse": 5
+      },
+      "coefficient_controls": 3,
+      "curve_points": 6,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 492,
+        "variables": 24,
+        "xor": 293
+      },
+      "invalid_evaluations": 2928,
+      "invalid_points": 122,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 216,
+      "valid_evaluations": 1728
+    },
+    {
+      "a": 1,
+      "b": 6,
+      "case_counts": {
+        "copy_p": 9,
+        "copy_q": 10,
+        "double": 8,
+        "generic": 64,
+        "inverse": 9
+      },
+      "coefficient_controls": 3,
+      "curve_points": 10,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 492,
+        "variables": 24,
+        "xor": 293
+      },
+      "invalid_evaluations": 2832,
+      "invalid_points": 118,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 1000,
+      "valid_evaluations": 8000
+    },
+    {
+      "a": 1,
+      "b": 7,
+      "case_counts": {
+        "copy_p": 5,
+        "copy_q": 6,
+        "double": 4,
+        "generic": 16,
+        "inverse": 5
+      },
+      "coefficient_controls": 3,
+      "curve_points": 6,
+      "dag": {
+        "and": 173,
+        "model_limbs": 1,
+        "total_nodes": 495,
+        "variables": 24,
+        "xor": 296
+      },
+      "invalid_evaluations": 2928,
+      "invalid_points": 122,
+      "mismatches": 0,
+      "model_controls": 3,
+      "modulus": 11,
+      "n": 3,
+      "rows": 216,
+      "valid_evaluations": 1728
+    }
+  ],
+  "wall_seconds": 7.314496291000978
+}

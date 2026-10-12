@@ -8,26 +8,26 @@
 //! # Construction
 //!
 //!   - Pick a binary Goppa code C with parameters (n, k, t):
-//!       n: code length
-//!       k = n − m·t: dimension     (m = log₂(field size))
-//!       t: error-correction capability
+//!     n: code length
+//!     k = n − m·t: dimension     (m = log₂(field size))
+//!     t: error-correction capability
 //!     The code is defined by a *support* L ⊂ GF(2^m) of n distinct elements
 //!     and an irreducible *Goppa polynomial* g(x) ∈ GF(2^m)[x] of degree t.
 //!
 //!   - Public key:   G' = S · G · P, where
-//!       G:  k×n generator matrix in systematic form for C
-//!       S:  random invertible k×k binary matrix  (the "scrambler")
-//!       P:  random n×n permutation matrix        (the "permuter")
+//!     G:  k×n generator matrix in systematic form for C
+//!     S:  random invertible k×k binary matrix  (the "scrambler")
+//!     P:  random n×n permutation matrix        (the "permuter")
 //!     The transformation hides the algebraic structure of the Goppa code.
 //!
 //!   - Encrypt(m, G'):
-//!       Pick e ∈ GF(2)^n with Hamming weight exactly t
-//!       c = m·G' + e
+//!     Pick e ∈ GF(2)^n with Hamming weight exactly t
+//!     c = m·G' + e
 //!
 //!   - Decrypt(c, S, L, g, P):
-//!       c' = c · P⁻¹            (still has weight-t error)
-//!       Patterson-decode c' over Goppa(L, g) → m·S
-//!       m   = (m·S) · S⁻¹
+//!     c' = c · P⁻¹            (still has weight-t error)
+//!     Patterson-decode c' over Goppa(L, g) → m·S
+//!     m   = (m·S) · S⁻¹
 //!
 //! # This implementation
 //! Educational toy parameters: m = 6, n = 32, t = 3, k = 14.  These are
@@ -64,6 +64,12 @@ const GF_PRIM: u32 = 0b100_0011; // x^6 + x + 1, primitive over GF(2)
 pub struct GfTables {
     exp: Vec<u32>, // length 2*(field_size-1) = 126
     log: Vec<u32>, // length field_size = 64; log[0] is unused (sentinel)
+}
+
+impl Default for GfTables {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl GfTables {
@@ -249,7 +255,7 @@ fn poly_inv_mod(a: &Poly, m: &Poly, gf: &GfTables) -> Poly {
 /// In a field of order 2^{mt}, squaring is a bijection and its inverse is
 /// the (2^{mt-1})-th power.
 fn poly_sqrt_mod_g(v: &Poly, g: &Poly, gf: &GfTables) -> Poly {
-    let t = (g.len() - 1) as usize;
+    let t = g.len() - 1;
     let mut r = poly_mod(v, g, gf);
     for _ in 0..(M * t - 1) {
         r = poly_square(&r, gf);
@@ -418,7 +424,7 @@ fn mat_mul(a: &BinMat, b: &BinMat) -> BinMat {
 fn invert_binary(m: &BinMat) -> Option<BinMat> {
     let n = m.len();
     assert_eq!(m[0].len(), n);
-    let mut a: BinMat = m.iter().map(|r| r.clone()).collect();
+    let mut a: BinMat = m.to_vec();
     let mut inv = mat_identity(n);
     for i in 0..n {
         if a[i][i] == 0 {
@@ -454,7 +460,7 @@ fn invert_binary(m: &BinMat) -> Option<BinMat> {
 fn systematic_form(h: &BinMat) -> Option<(BinMat, Vec<usize>)> {
     let mt = h.len();
     let n = h[0].len();
-    let mut a: BinMat = h.iter().map(|r| r.clone()).collect();
+    let mut a: BinMat = h.to_vec();
     let mut perm: Vec<usize> = (0..n).collect();
 
     for i in 0..mt {
@@ -511,7 +517,7 @@ fn generator_from_systematic(h_sys: &BinMat) -> BinMat {
 /// Strategy: random monic poly of degree t, reject if it has a root in
 /// GF(2^m).  For t ≤ 3 this is equivalent to irreducibility.
 fn random_irreducible_poly(t: usize, gf: &GfTables) -> Poly {
-    assert!(t >= 1 && t <= 3, "this implementation supports t ≤ 3");
+    assert!((1..=3).contains(&t), "this implementation supports t ≤ 3");
     let mut rng = rand::rngs::OsRng;
     loop {
         let mut g: Poly = vec![0u32; t + 1];

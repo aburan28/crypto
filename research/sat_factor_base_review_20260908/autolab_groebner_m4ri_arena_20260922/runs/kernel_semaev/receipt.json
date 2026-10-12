@@ -1,0 +1,31 @@
+{
+  "child_system_ms": 37.131,
+  "child_user_ms": 1083.582,
+  "command": [
+    "/opt/homebrew/bin/cargo",
+    "test",
+    "--release",
+    "-q",
+    "--lib",
+    "cryptanalysis::koblitz_groebner::rref_tests::paired_m4ri_semaev_root_benchmark",
+    "--",
+    "--ignored",
+    "--nocapture"
+  ],
+  "ended_unix_ns": 1790120723664152000,
+  "environment_overrides": {
+    "KIC_F4_M4RI_BENCH_REPEATS": "100"
+  },
+  "executable": "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+  "executable_sha256": "6b40eea215d1127c94953f0e355411ae4e4ce1f695919806e42465079cec7490",
+  "exit_code": 0,
+  "peak_rss_bytes": 46661632,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790120722494026000,
+  "stderr_bytes": 29439,
+  "stderr_sha256": "0c2f6b92d8e82559daeca176c35a656daa9063fcf47a37e80ba16789ffd0b2f2",
+  "stdout_bytes": 132077,
+  "stdout_sha256": "48b96060b8bdf97b9526b7360d8ab7d8f1148d2793727551c754695b39a1ed3c",
+  "task_id": "TASK-KIC-M4RI-ARENA-KERNEL-SEMAEV-DFD5-20260922",
+  "wall_ms": 1170.133708
+}

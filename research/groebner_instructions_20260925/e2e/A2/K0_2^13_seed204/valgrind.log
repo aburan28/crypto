@@ -1,0 +1,11 @@
+==1535== Callgrind, a call-graph generating cache profiler
+==1535== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==1535== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==1535== Command: /home/user/crypto/target/release/ic run --degree 13 --curve-a 0 --summands 3 --solver groebner --random-target --seed 204 --batch 1 --json
+==1535== 
+==1535== For interactive control, run 'callgrind_control -h'.
+==1535== 
+==1535== Events    : Ir
+==1535== Collected : 765452223
+==1535== 
+==1535== I   refs:      765,452,223

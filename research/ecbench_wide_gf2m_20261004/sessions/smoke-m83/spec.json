@@ -1,0 +1,11 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "wide smoke: n = 83, capped",
+  "description": "Pipeline smoke on icv1-f2m83-tm6151469093347-debefd74 with budgets far below a solve: strong rho capped at 10^6 steps (step_cap_factor 0), the claw at cap_multiple 0. Both arms are expected to exhaust; the run checks workload build, wide target laws, dispatch, records, audit and replay.",
+  "workloads": {"curves": [{"kind": "koblitz", "a": 0, "n": 83}], "targets_per_curve": 2, "target_seed": 20261004, "target_kind": "public"},
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong", "params": {"step_cap_factor": "0"}}},
+    {"name": "claw-c1", "role": "candidate", "method": {"id": "claw.pair_table", "params": {"base_scale": "4", "table_scale": "1", "cap_multiple": "0"}}}
+  ],
+  "measurement": {"rounds": 1, "warmup": 0, "order": "alternate", "seed": 20261004, "isolation_required": "L2", "timeout_seconds": 1800}
+}

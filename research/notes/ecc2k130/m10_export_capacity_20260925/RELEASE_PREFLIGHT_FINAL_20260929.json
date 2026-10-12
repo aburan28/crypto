@@ -1,0 +1,50 @@
+{
+  "dispatch_workflow_sha256": "92326f6e97b701c930d904c5e971d0796fa736f825506dbe74adcdb8e5eafe3c",
+  "freeze_sha256": "62e4f0f663a60c2953c2dd7bc82959c2ff095d7e2be10959c6e202ac62f33f39",
+  "negative": [
+    {
+      "case": "non_ancestor_main",
+      "decision": "REJECTED",
+      "error": "NOT_ADMITTED: frozen main is not an ancestor of current main"
+    },
+    {
+      "case": "pinned_input_drift",
+      "decision": "REJECTED",
+      "error": "NOT_ADMITTED: frozen input drift: research/notes/ecc2k130/rotated_arity_screen_20260925/evidence/raw/m10/producer/result.json"
+    },
+    {
+      "case": "dispatch_workflow_drift",
+      "decision": "REJECTED",
+      "error": "NOT_ADMITTED: reviewed dispatch workflow drift"
+    }
+  ],
+  "positive": {
+    "checkout_head": "3bcef70ab1c12cb50a51b9190c2967dbca0c31b9",
+    "frozen_main_ancestor": "01a3dbc04014e87ed12e7b9797b67e0a8ad144e9",
+    "merged_parent_commits": {
+      "784": "de066e39a30bae020b42c84878139c15c9d70311",
+      "802": "4962062cb5e981529a9c089113e098bf2af6ddb0",
+      "804": "8105788c1ddd4d4680f79f5d9041d5bc6a6a7150"
+    },
+    "observed_main_head": "01a3dbc04014e87ed12e7b9797b67e0a8ad144e9"
+  },
+  "schema": "ecc2k130-m10-capacity-release-preflight-v2",
+  "scope": "authenticated source/provenance gate only; no DAG, CNF, solver, or PDP child",
+  "simulated_descendant_main_without_input_drift": {
+    "method": "override observed main ref with actual descendant Git commit; all ancestry and blob reads remain real",
+    "release": {
+      "checkout_head": "3bcef70ab1c12cb50a51b9190c2967dbca0c31b9",
+      "frozen_main_ancestor": "01a3dbc04014e87ed12e7b9797b67e0a8ad144e9",
+      "merged_parent_commits": {
+        "784": "de066e39a30bae020b42c84878139c15c9d70311",
+        "802": "4962062cb5e981529a9c089113e098bf2af6ddb0",
+        "804": "8105788c1ddd4d4680f79f5d9041d5bc6a6a7150"
+      },
+      "observed_main_head": "3bcef70ab1c12cb50a51b9190c2967dbca0c31b9"
+    },
+    "status": "PASS"
+  },
+  "source_head": "3bcef70ab1c12cb50a51b9190c2967dbca0c31b9",
+  "status": "PASS_NONMEASURING_REVIEWED_HEAD_PREPARATION",
+  "utc": "2026-09-29T09:08:40.460490+00:00"
+}

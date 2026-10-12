@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "task_id": "TASK-KIC-COMPACT-ORBIT-VS-BATCHED-RHO-N53-20260924",
+  "question": "Does the compact-orbit shared-factor-log DLP (normal-basis canonical probe, rank-guided relations, no pair table) beat frozen Kuhn-Struik batched signed-Frobenius rho at n=53 on identical published targets?",
+  "arms": {
+    "compact_ic": {
+      "executable": "target/release/examples/koblitz_orbit_dlp_fast",
+      "args": "<base> scalars_<L>.txt 7 ic<L>_b<b>.jsonl",
+      "base": "retained n=53 block_00 header (K=220) for panel 1; construct:53:0:<K> for panel 2",
+      "threads": 1
+    },
+    "rho_ks": {
+      "executable": "research/sat_factor_base_review_20260908/autolab_batched_rho_n53_20260922/frozen/v2/koblitz_rho_batch_ks",
+      "args": "53 0 signed_frobenius <L> 531310",
+      "env": ["KIC_RHO_DP_BITS=4", "KIC_RHO_BATCH_CORPUS=n53-ks-scaling-<L>-v1"],
+      "threads": 1
+    }
+  },
+  "matching": "batched rho generates the corpus; compact arm receives its published scalars; every fixture's published_q and recovered scalar must agree",
+  "decision_rule": "compact arm overtakes at L only if all 3 block wall ratios compact/rho are < 1 (same rule as autolab_batched_rho_n53_20260922)",
+  "panel_1": {
+    "run": "2026-09-24T10:00-10:22-07:00",
+    "L": [32, 1024, 4096],
+    "K": 220,
+    "blocks": 3,
+    "order": "block parity alternates which arm runs first"
+  },
+  "panel_2": {
+    "declared_before_run": "2026-09-24T10:27-07:00",
+    "K_rule": "fit T(K) = a*K^2 + (K + L)*b/K^2 on the L=1024 sweep (K=220/440/660: a ~ 0.028 ms, b ~ 1.3e6 ms); pick the minimizer rounded to a multiple of 220",
+    "L_to_K": {"4096": 660, "16384": 880},
+    "blocks": 3,
+    "order": "block parity alternates which arm runs first",
+    "resource_cap": "peak RSS under 16 GiB"
+  },
+  "host_caveat": "shared host; load average 30-50 from other sessions; load recorded per run; user CPU reported alongside wall",
+  "claim_boundary": "Finite public-synthetic n=53 batches only. Both arms cost ~sqrt(L*r/n) at their optima, so this is a constant-factor comparison, not an asymptotic sub-rho claim. No key recovery, no external points, no deployed-curve claim."
+}

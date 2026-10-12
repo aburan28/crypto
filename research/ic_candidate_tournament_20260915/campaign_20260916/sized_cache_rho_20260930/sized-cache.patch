@@ -1,0 +1,41 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs	2026-09-29 06:20:03.644739685 +0000
++++ b/src/cryptanalysis/koblitz_index_calculus.rs	2026-09-30 02:14:23.728641528 +0000
+@@ -6215,6 +6215,18 @@
+ /// points is what catches a repeat further back than that.
+ const RECENT_SLOTS: usize = 1 << 12;
+ 
++/// Slots of the recent-point cache for a walk expected to take
++/// `expected_steps` steps: four times that, rounded up to a power of two,
++/// between 64 and `RECENT_SLOTS`.  A small group's walk is a few hundred
++/// steps, and zero-filling the full cache on every solve costs more than
++/// the walk.  From about 1,000 expected steps on the size is `RECENT_SLOTS`
++/// again, so larger cells run exactly as before.
++fn rho_recent_slots(expected_steps: f64) -> usize {
++    ((4.0 * expected_steps).ceil() as usize)
++        .next_power_of_two()
++        .clamp(64, RECENT_SLOTS)
++}
++
+ /// A recently visited point: its key and the coefficients it was
+ /// reached with.  `None` for an empty slot.
+ type RecentSlot<K> = Option<(K, u64, u64)>;
+@@ -6667,7 +6679,9 @@
+         // Stored points, shared by every walk of this restart; the
+         // recent-point cache beside it catches the short cycles.
+         let mut table: HashMap<(u64, u64), (u64, u64)> = HashMap::new();
+-        let mut recent: Vec<RecentSlot<(u64, u64)>> = vec![None; RECENT_SLOTS];
++        let recent_slots = rho_recent_slots(rho_expected_steps(modulus, curve.n));
++        let recent_mask = recent_slots - 1;
++        let mut recent: Vec<RecentSlot<(u64, u64)>> = vec![None; recent_slots];
+         let mut escapes: HashMap<(u64, u64), u32> = HashMap::new();
+         let mut addends: Vec<FastPoint> = Vec::with_capacity(states.len());
+         let mut points: Vec<FastPoint> = Vec::with_capacity(states.len());
+@@ -6687,7 +6701,7 @@
+                 // One mix for both the cache slot and the storage rule
+                 // (`recent_slot` and `is_stored` each recomputed it).
+                 let mix = rho_mix(key.0, key.1);
+-                let slot = (mix >> 20) as usize & (RECENT_SLOTS - 1);
++                let slot = (mix >> 20) as usize & recent_mask;
+                 let seen = match recent[slot] {
+                     Some((k, a0, b0)) if k == key => Some((a0, b0)),
+                     _ => None,

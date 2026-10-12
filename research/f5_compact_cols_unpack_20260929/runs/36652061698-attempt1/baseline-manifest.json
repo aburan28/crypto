@@ -1,0 +1,25 @@
+{
+  "binary_bytes": 2180736,
+  "binary_sha256": "604a81550ed7fc1caa232fffa2aee5850658a2092e6f3bd5dad8d26c43abd293",
+  "cases": 0,
+  "contended_samples": null,
+  "cpu_count": 4,
+  "cpu_features": [
+    "avx2",
+    "bmi2",
+    "popcnt"
+  ],
+  "cpu_model": "AMD EPYC 7763 64-Core Processor",
+  "git_sha": "c0e867856ac9fb6b3c8ed110e8afffc0c7f7fd23",
+  "isolation_qualified": false,
+  "left_user_threads": null,
+  "memory": "MemTotal:       16373452 kB",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "primary": null,
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "source": {
+    "examples/f4_f2_bench.rs": "d40f9f0c76e5c56c9f4a52596b9edef41f321aa3d70cfb023c4ba21fdde70336",
+    "src/cryptanalysis/gf2_elim.rs": "6fd3f10ef8e681490784c624e703eeb8fa887c5817ec9bdf34844e3f943c7f5c",
+    "src/cryptanalysis/matrix_f5_f2.rs": "bf35680f431ab7ac13a7615d334ec9b060217b84bdde36f03ce00319491d42da"
+  }
+}

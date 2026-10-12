@@ -1,0 +1,54 @@
+{
+  "acceptance": {
+    "32_of_32_extracted": true,
+    "full_rank_accumulation": false,
+    "matched_published_scalars": true,
+    "measured_shared_setup_and_queries": true,
+    "shared_factor_base_hash": true,
+    "verified_discrete_log": false,
+    "vs_rho": false
+  },
+  "beat_id": "koblitz.vs_rho.n53_probe",
+  "claim_boundary": "Public synthetic n=53 compact-orbit relation extraction on the retained shared-log block-00 fixture corpus only; no full-rank accumulation, no discrete-log recovery, no vs_rho claim, no key recovery, no external points, no asymptotic sub-rho claim.",
+  "cumulative_factor_base_log_rank": 32,
+  "edge_selectors": 0,
+  "factor_base_header_source": "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/runs/n53/block_00/direct/stdout.txt",
+  "factor_base_point_set_hash": "d859319015ea405fd18aee41b51396ce4edcab64ef66265d8edcdeb5e040eb71",
+  "failed_target_scalars": [],
+  "fixture_source": "research/sat_factor_base_review_20260908/autolab_shared_log_scaling_20260912/runs/n53/block_00/rho/stdout.txt",
+  "group_lifted_by_producer": true,
+  "host": {
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O"
+  },
+  "independent_arithmetic_replay": "PENDING",
+  "outer_sat_verification": {
+    "conflicts": 2000,
+    "decomposition_verdict": "UNKNOWN",
+    "scope": "Separate CLI scalar only, does not verify the 32 batch relations; do not count toward batch acceptance.",
+    "valid_x_tuples": 0
+  },
+  "pair_table_entries": 0,
+  "producer_executable_sha256": "e42ff8988b066f7114bda87a45925f2d035b4264caf5e535d2c56c58b3daccb4",
+  "producer_json_sha256": "1b55fc16d850f59b04a24f1c6531a536bafd65ddacaebcbf62ba00ccc7072c04",
+  "producer_source_sha256": "71615c63f32eba46336aefe849e96f9356321b29eb35d0ec24c695332ef193df",
+  "regular_states": 2565200,
+  "relations_extracted": 32,
+  "root_index_entries": 5081560,
+  "round": 1,
+  "schema_version": "1.0",
+  "stage": "relation_yield",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "stiming_ms": {
+    "base_setup": 444.855958,
+    "charged_ms_per_target": 353.606115875,
+    "charged_total": 11315.395708,
+    "queries_total": 9637.559417,
+    "regular_state_scan_shared": 1048.4344999999998,
+    "root_index_build_shared": 184.545833
+  },
+  "target_count": 32,
+  "target_scalars_match_published_fixture": true,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910"
+}

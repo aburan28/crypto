@@ -1,0 +1,17 @@
+{
+  "arms": [
+    "batch39-t10-r1",
+    "batch39-t11-r1",
+    "batch39-t12-r1",
+    "batch39-t12-r2",
+    "batch39-t12-r3",
+    "batch39-t13-r1",
+    "batch39-t14-r1"
+  ],
+  "binary": {
+    "sha256": "58767973f4bc1fcf30d5bbca231d1d5647e6a79f6282c55f1c3874a962820931",
+    "source_commit": "509e43c79bcf36425f4329a09c34fd20c75949ed"
+  },
+  "schema": "koblitz_stage168_development_sources.v1",
+  "selection_caveat": "batch size 39 and thread count 12 selected post hoc on the frozen target"
+}

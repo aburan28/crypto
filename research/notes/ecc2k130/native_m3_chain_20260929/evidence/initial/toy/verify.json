@@ -1,0 +1,27 @@
+{
+  "arm": "toy",
+  "checks": [
+    {
+      "clauses": 4145,
+      "cnf_sha256": "ff5fc50608d67e41db6aae2009597e4b895c5cdf35495e3232902617a2dae8a3",
+      "label": "positive",
+      "status": "SAT",
+      "variables": 1197
+    },
+    {
+      "clauses": 4145,
+      "cnf_sha256": "6fcb5244ac14a5b8d6c27128e6226416a0d224074b7d60fdf9a2a991bad8748f",
+      "label": "negative",
+      "status": "UNSAT",
+      "variables": 1197
+    }
+  ],
+  "cpu_seconds": 0.044038999999999995,
+  "decision": "PASS",
+  "domain": "ecc2k130-native-m3-chain-20260929-v1",
+  "factor_triples": 27,
+  "peak_rss_bytes": 30408704,
+  "producer_sha256": "afe04d088937e3113425bdb2b2469d125b9df0ced3839b4e02adb3f7beb9578a",
+  "supported_targets": 27,
+  "wall_seconds": 0.04520291699736845
+}

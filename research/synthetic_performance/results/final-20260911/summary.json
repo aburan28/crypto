@@ -1,0 +1,360 @@
+{
+  "coverage": {
+    "discovery/32": {
+      "nearest": {
+        "trials": 128,
+        "completed": 128,
+        "censored": 0,
+        "budget": 8192,
+        "restricted_mean_operations": 518.28125,
+        "completion_median": 431,
+        "completion_p90": 946
+      },
+      "refresh": {
+        "trials": 128,
+        "completed": 128,
+        "censored": 0,
+        "budget": 8192,
+        "restricted_mean_operations": 128.828125,
+        "completion_median": 120,
+        "completion_p90": 179
+      },
+      "restricted_mean_ratio": {
+        "ratio": 4.023044269254093,
+        "ci95": [
+          3.59809827545476,
+          4.510319532512744
+        ],
+        "pairs": 128,
+        "bootstrap_samples": 1000
+      },
+      "claim": "finite coverage positive control; no DLP inference"
+    },
+    "discovery/128": {
+      "nearest": {
+        "trials": 128,
+        "completed": 81,
+        "censored": 47,
+        "budget": 8192,
+        "restricted_mean_operations": 6347.5,
+        "completion_median": 7143,
+        "completion_p90": null
+      },
+      "refresh": {
+        "trials": 128,
+        "completed": 128,
+        "censored": 0,
+        "budget": 8192,
+        "restricted_mean_operations": 708.3359375,
+        "completion_median": 667,
+        "completion_p90": 920
+      },
+      "restricted_mean_ratio": {
+        "ratio": 8.961143525207628,
+        "ci95": [
+          8.285216464869544,
+          9.646019752104461
+        ],
+        "pairs": 128,
+        "bootstrap_samples": 1000
+      },
+      "claim": "finite coverage positive control; no DLP inference"
+    },
+    "holdout/32": {
+      "nearest": {
+        "trials": 128,
+        "completed": 128,
+        "censored": 0,
+        "budget": 8192,
+        "restricted_mean_operations": 504.3984375,
+        "completion_median": 460,
+        "completion_p90": 942
+      },
+      "refresh": {
+        "trials": 128,
+        "completed": 128,
+        "censored": 0,
+        "budget": 8192,
+        "restricted_mean_operations": 129.2890625,
+        "completion_median": 121,
+        "completion_p90": 182
+      },
+      "restricted_mean_ratio": {
+        "ratio": 3.9013233428001692,
+        "ci95": [
+          3.5017653527811543,
+          4.354238414597305
+        ],
+        "pairs": 128,
+        "bootstrap_samples": 1000
+      },
+      "claim": "finite coverage positive control; no DLP inference"
+    },
+    "holdout/128": {
+      "nearest": {
+        "trials": 128,
+        "completed": 73,
+        "censored": 55,
+        "budget": 8192,
+        "restricted_mean_operations": 6366.515625,
+        "completion_median": 6789,
+        "completion_p90": null
+      },
+      "refresh": {
+        "trials": 128,
+        "completed": 128,
+        "censored": 0,
+        "budget": 8192,
+        "restricted_mean_operations": 697.6015625,
+        "completion_median": 671,
+        "completion_p90": 903
+      },
+      "restricted_mean_ratio": {
+        "ratio": 9.126292094565084,
+        "ci95": [
+          8.521151397730417,
+          9.714203086319783
+        ],
+        "pairs": 128,
+        "bootstrap_samples": 1000
+      },
+      "claim": "finite coverage positive control; no DLP inference"
+    }
+  },
+  "arithmetic": {
+    "discovery": {
+      "timing_trials": 48,
+      "all_verified_and_paired": true,
+      "statuses": {
+        "completed": 50
+      },
+      "kernel_ratio": {
+        "ratio": 3.8034888478020124,
+        "ci95": [
+          3.359274493869237,
+          4.392064654422622
+        ],
+        "pairs": 24,
+        "bootstrap_samples": 1000
+      },
+      "full_wall_ratio": {
+        "ratio": 1.1587894795174194,
+        "ci95": [
+          1.082235365636577,
+          1.2270135338132355
+        ],
+        "pairs": 24,
+        "bootstrap_samples": 1000
+      },
+      "decision": "finite_end_to_end_improvement",
+      "memory_passes": [
+        {
+          "study": "arithmetic",
+          "split": "discovery",
+          "trial": "memory",
+          "status": "completed",
+          "verified": true,
+          "variant": "power_sum",
+          "seed": 5035682360108469497,
+          "count": 4096,
+          "memory_pass": true,
+          "phases_ns": {
+            "initialize": 2870375,
+            "encode_input": 84958,
+            "decode_input": 43583,
+            "warmup": 1253167,
+            "compute": 103090375,
+            "encode_output": 94916,
+            "verify": 13628584
+          },
+          "worker_ns": 121122000,
+          "unattributed_worker_ns": 56042,
+          "input_bytes": 8242,
+          "output_bytes": 8192,
+          "input_sha256": "3d82b089b16f2e26a0f5d0aacc498180f3b192100f7fdcc0cc5cbc4ccd9fd5d4",
+          "output_sha256": "48a8388cd81df21ef2b54f3e4b1e51222592b459df551120fbb464279659f8ad",
+          "memory": {
+            "python_traced_peak_bytes": 184759,
+            "process_peak_rss_bytes": 26263552
+          },
+          "parent_wall_ns": 178615334,
+          "process_overhead_ns": 57493334
+        },
+        {
+          "study": "arithmetic",
+          "split": "discovery",
+          "trial": "memory",
+          "status": "completed",
+          "verified": true,
+          "variant": "horner",
+          "seed": 5035682360108469497,
+          "count": 4096,
+          "memory_pass": true,
+          "phases_ns": {
+            "initialize": 2623791,
+            "encode_input": 120250,
+            "decode_input": 11833,
+            "warmup": 777416,
+            "compute": 36736084,
+            "encode_output": 50959,
+            "verify": 10422416
+          },
+          "worker_ns": 50795250,
+          "unattributed_worker_ns": 52501,
+          "input_bytes": 8242,
+          "output_bytes": 8192,
+          "input_sha256": "3d82b089b16f2e26a0f5d0aacc498180f3b192100f7fdcc0cc5cbc4ccd9fd5d4",
+          "output_sha256": "48a8388cd81df21ef2b54f3e4b1e51222592b459df551120fbb464279659f8ad",
+          "memory": {
+            "python_traced_peak_bytes": 184759,
+            "process_peak_rss_bytes": 26345472
+          },
+          "parent_wall_ns": 112650959,
+          "process_overhead_ns": 61855709
+        }
+      ],
+      "median_phases_ms": {
+        "power_sum": {
+          "initialize": 0.823062,
+          "encode_input": 0.0372915,
+          "decode_input": 0.008792,
+          "warmup": 0.1812085,
+          "compute": 15.3798125,
+          "encode_output": 0.042354,
+          "verify": 2.033833
+        },
+        "horner": {
+          "initialize": 0.8401875,
+          "encode_input": 0.037021,
+          "decode_input": 0.009083,
+          "warmup": 0.0498545,
+          "compute": 3.9459795,
+          "encode_output": 0.0354165,
+          "verify": 1.3651255
+        }
+      },
+      "median_parent_wall_ms": {
+        "power_sum": 86.500333,
+        "horner": 73.7934995
+      }
+    },
+    "holdout": {
+      "timing_trials": 48,
+      "all_verified_and_paired": true,
+      "statuses": {
+        "completed": 50
+      },
+      "kernel_ratio": {
+        "ratio": 3.6455983657179813,
+        "ci95": [
+          3.071412734641681,
+          4.275460413137265
+        ],
+        "pairs": 24,
+        "bootstrap_samples": 1000
+      },
+      "full_wall_ratio": {
+        "ratio": 1.193484437385323,
+        "ci95": [
+          1.1417230233491544,
+          1.245600364466674
+        ],
+        "pairs": 24,
+        "bootstrap_samples": 1000
+      },
+      "decision": "finite_end_to_end_improvement",
+      "memory_passes": [
+        {
+          "study": "arithmetic",
+          "split": "holdout",
+          "trial": "memory",
+          "status": "completed",
+          "verified": true,
+          "variant": "power_sum",
+          "seed": 12564709862838197433,
+          "count": 4096,
+          "memory_pass": true,
+          "phases_ns": {
+            "initialize": 2495083,
+            "encode_input": 45584,
+            "decode_input": 10833,
+            "warmup": 1225166,
+            "compute": 100071125,
+            "encode_output": 51125,
+            "verify": 13274708
+          },
+          "worker_ns": 117209625,
+          "unattributed_worker_ns": 36001,
+          "input_bytes": 8242,
+          "output_bytes": 8192,
+          "input_sha256": "c4343eecd3576d73b4c105c1f85b237f3587d99aacabcb5c01289ecb9a8b6027",
+          "output_sha256": "29dc6e70f838f0387da02d9a3d63e87482d4408c3f4cda36001a1a471273f87b",
+          "memory": {
+            "python_traced_peak_bytes": 184759,
+            "process_peak_rss_bytes": 26263552
+          },
+          "parent_wall_ns": 184885250,
+          "process_overhead_ns": 67675625
+        },
+        {
+          "study": "arithmetic",
+          "split": "holdout",
+          "trial": "memory",
+          "status": "completed",
+          "verified": true,
+          "variant": "horner",
+          "seed": 12564709862838197433,
+          "count": 4096,
+          "memory_pass": true,
+          "phases_ns": {
+            "initialize": 3061875,
+            "encode_input": 97166,
+            "decode_input": 15000,
+            "warmup": 1371042,
+            "compute": 34601750,
+            "encode_output": 49167,
+            "verify": 8195416
+          },
+          "worker_ns": 47445166,
+          "unattributed_worker_ns": 53750,
+          "input_bytes": 8242,
+          "output_bytes": 8192,
+          "input_sha256": "c4343eecd3576d73b4c105c1f85b237f3587d99aacabcb5c01289ecb9a8b6027",
+          "output_sha256": "29dc6e70f838f0387da02d9a3d63e87482d4408c3f4cda36001a1a471273f87b",
+          "memory": {
+            "python_traced_peak_bytes": 184759,
+            "process_peak_rss_bytes": 26214400
+          },
+          "parent_wall_ns": 113846500,
+          "process_overhead_ns": 66401334
+        }
+      ],
+      "median_phases_ms": {
+        "power_sum": {
+          "initialize": 0.821229,
+          "encode_input": 0.038146,
+          "decode_input": 0.0090835,
+          "warmup": 0.1818125,
+          "compute": 13.238125,
+          "encode_output": 0.0400835,
+          "verify": 1.8724165
+        },
+        "horner": {
+          "initialize": 0.803417,
+          "encode_input": 0.0362085,
+          "decode_input": 0.0089795,
+          "warmup": 0.049854,
+          "compute": 3.4122505,
+          "encode_output": 0.0349165,
+          "verify": 1.097833
+        }
+      },
+      "median_parent_wall_ms": {
+        "power_sum": 81.160271,
+        "horner": 67.10675
+      }
+    }
+  },
+  "suite_before_report_write_ns": 8710400833,
+  "trials_sha256": "1d85720337efa0f20263257a42e2e563119a6218279641b7d72542a928bb61b8"
+}

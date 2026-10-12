@@ -1,0 +1,31 @@
+{
+  "schema": "koblitz_native_process_meter.v1",
+  "meter": "fresh child process wait4/getrusage; all child threads included",
+  "command": [
+    "/usr/bin/env",
+    "RAYON_NUM_THREADS=1",
+    "VECLIB_MAXIMUM_THREADS=1",
+    "OPENBLAS_NUM_THREADS=1",
+    "OMP_NUM_THREADS=1",
+    "MKL_NUM_THREADS=1",
+    "BLIS_NUM_THREADS=1",
+    "NUMEXPR_NUM_THREADS=1",
+    "/opt/homebrew/bin/cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--example",
+    "koblitz_stage193_sat_comparators"
+  ],
+  "environment": {},
+  "pid": 87327,
+  "returncode": 0,
+  "timed_out": false,
+  "watchdog_seconds": 300,
+  "wall_seconds": 1.721341375,
+  "user_seconds": 2.942957,
+  "system_seconds": 0.186302,
+  "total_core_seconds": 3.129259,
+  "single_core_seconds": null,
+  "peak_rss_bytes": 260128768
+}

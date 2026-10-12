@@ -1,0 +1,12 @@
+{
+  "command": "python3 research/toy_symmetry_quotient_20260924/experiment.py --output research/toy_symmetry_quotient_20260924/results/pilot-001 --repetitions 3",
+  "contract_sha256": "38b0b5ca658a2fc4ea478ca0249b7f8c6f7943410457bf4906fe03caf87e3d87",
+  "artifact_byte_hashes": {
+    "certificates.json": "4a7b16fcc49293e6dddc34cfd38287341de9fa102dde5cf82fb3f58b7f47ba94",
+    "contract.json": "38b0b5ca658a2fc4ea478ca0249b7f8c6f7943410457bf4906fe03caf87e3d87",
+    "instances.json": "0ba71f9beabe4f807033c58f0de6289044fb148696c0256db06b85400bdca4dd",
+    "results.json": "6d20ca2e3f70ac881425ef0011baea5357a18cc683fac82d5232a348f2d328e9",
+    "source.py": "19ed98ef56c488fcfae7507576274c9c51e42cab35aff71f6a871a78df010a44"
+  },
+  "scope": "accounting; complete-enumeration stage diagnostic"
+}

@@ -1,0 +1,26 @@
+{
+  "classification": "accounting correction; no performance experiment",
+  "gpu_executed": false,
+  "baseline_commit": "5b075156db18e8c40ebdcf212d526dc434236bfe",
+  "python": "3.12.14",
+  "numpy": "2.3.5",
+  "regression_before_fix": {
+    "command": "python tools/isolated_bench.py busy -- python -m unittest discover -s research/notes/ecc2k130/tau_adic_arithmetic_20260929/gpu -p test_paired_unroll.py -k timeout_never -v",
+    "exit_code": 1,
+    "tests": 1,
+    "failures": 1,
+    "failure": "timed_out=True, benchmark mode: timing_eligible True is not False"
+  },
+  "validation_after_fix": {
+    "command": "python tools/isolated_bench.py busy -- python -m unittest discover -s research/notes/ecc2k130/tau_adic_arithmetic_20260929/gpu -p test_*.py -v",
+    "exit_code": 0,
+    "tests": 16,
+    "failures": 0,
+    "scope": "CPU stubs and local process cleanup; no CUDA execution"
+  },
+  "sources": {
+    "launch_gpu.py": "63f1a6980f58ba972a7d074003ecdd2d343b6d9bfc0cef63870a7ecdfd2c0cc1",
+    "test_paired_unroll.py": "c66f601057853960731ef47a0bfbac0224621332d2db60a6a7429debee32092f"
+  },
+  "speedup": null
+}

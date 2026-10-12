@@ -1,0 +1,20 @@
+name: ECC2K-130 n13 S5 solver panel preflight
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/n13_s5_solver_panel_20260925/**'
+      - '.github/workflows/ecc2k130-n13-s5-solver-panel.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-query-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reconstruct 32 exact queries and check frozen source bytes
+        run: python3 research/notes/ecc2k130/n13_s5_solver_panel_20260925/ci_replay.py

@@ -1,0 +1,66 @@
+[
+  {
+    "id": "incumbent",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3,
+      "factor_base_orbits": 2
+    },
+    "hypothesis": "Promoted two-orbit policy, unchanged complete cold cost."
+  },
+  {
+    "id": "orbit_projection",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3,
+      "factor_base_orbits": 2
+    },
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/implementation-sources/orbit_projection",
+    "hypothesis": "Fixed-support engineering: orbit_projection. See IMPLEMENTATION_PLAN.md."
+  },
+  {
+    "id": "serial_collection",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3,
+      "factor_base_orbits": 2
+    },
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/implementation-sources/serial_collection",
+    "hypothesis": "Fixed-support engineering: serial_collection. See IMPLEMENTATION_PLAN.md."
+  },
+  {
+    "id": "combined",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3,
+      "factor_base_orbits": 2
+    },
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/implementation-sources/combined",
+    "hypothesis": "Fixed-support engineering: combined. See IMPLEMENTATION_PLAN.md."
+  },
+  {
+    "id": "combined_dense",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3,
+      "factor_base_orbits": 2
+    },
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/single_target_20260916/implementation-sources/combined",
+    "hypothesis": "Combined implementation with dense two-column elimination."
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "calibration: generic methods on six registered Koblitz curves",
+  "description": "Preregistered in ../PROTOCOL.md. The signed-Frobenius walk (A = 2m) is the matched reference. Operation counts only; wall time descriptive.",
+  "workloads": {
+    "curves": [
+      {"kind": "koblitz", "a": 1, "n": 17},
+      {"kind": "koblitz", "a": 1, "n": 19},
+      {"kind": "koblitz", "a": 1, "n": 23},
+      {"kind": "koblitz", "a": 0, "n": 37},
+      {"kind": "koblitz", "a": 1, "n": 43},
+      {"kind": "koblitz", "a": 0, "n": 41}
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 20261002
+  },
+  "arms": [
+    {"name": "rho-frob", "role": "reference", "method": {"id": "rho.signed_frobenius"}},
+    {"name": "rho-neg", "role": "baseline", "method": {"id": "rho.negation"}},
+    {"name": "rho-plain", "role": "baseline", "method": {"id": "rho.plain"}},
+    {"name": "bsgs-il", "role": "candidate", "method": {"id": "bsgs.interleaved"}},
+    {"name": "bsgs-neg", "role": "candidate", "method": {"id": "bsgs.negation"}},
+    {"name": "kangaroo", "role": "candidate", "method": {"id": "kangaroo.vow"}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 0, "order": "alternate", "seed": 20261002, "isolation_required": "L2", "timeout_seconds": 900}
+}

@@ -1,0 +1,106 @@
+{
+ "binarySha256": "9f678d70f97cb7a1fb2d3ca13c92ab034d7410b82583a68ec20bd984d20984d7",
+ "buildCommand": "g++ -O3 -std=c++17 -march=native -fopenmp -DECC_BATCH=32 -DECC_THREADS=128 -DECC_MINBLOCKS=2 -DECC_STREAM_KARAT=0 -DECC_SMEM_SPILL=0 -DECC_PACKED_SINGLE_PRODUCT=0 -DECC_PACKED_CACHE_DENOM=0 -DECC_PACKED_BY_VALUE=0 -DECC_PACKED_PERM_SIGMA=0 -DECC_PACKED_POLY_CHAIN=0 -DECC_PACKED_UNROLL_INV=0 -DECC_PACKED_PAIR_PRODUCTS=0 -DECC_PACKED_POLY_STATE=0 -DECC_PACKED_DIRECT_REDUCE=0 -DECC_PACKED_GENERATED_PRODUCT=0 -DECC_PACKED_INLINE_POLY=0 -DECC_PACKED_CLMAD=0 -DECC_PACKED_CLMAD_SQUARE=0 -DECC_PACKED_KARAT3=0 -DECC_PACKED_WEIGHTED_PREFIX=0 -DECC_PACKED_COMPACT_STATE=0 -DECC_PACKED_SHARED_SIGMA=0 -DECC_PACKED_TOP_CLMAD=0 -DECC_PACKED_STATE_TILE=0 -DECC_PACKED_ADD_COMBINE=0 -DECC_PACKED_PAIR_ILP=0 -DECC_UNROLL_SLOTS=1 -DECC_PACKED_SLOT_PREFETCH=0 -DECC_PACKED_SLOT_PIPELINE=0 -DECC_PACKED_L2_PERSIST=0 -DECC_PACKED_TOP_HOIST=0 -DECC_PACKED_ONB_INV=0 -DECC_PACKED_FROM_REDUCED=0 -DECC_PACKED_CLMUL_FLAT=0 -DECC_PACKED_PAIR_CLMUL=0 -DECC_PACKED_ALU_SQR=0 -DECC_WALK_TABLE=0 -DECC_TABLE_BRANCHES=8 -DECC_TABLE_PIVOT_BYTES=0 -DECC_TABLE_TAG_DENOM=0 -DECC_TABLE_FUSED=0 -DECC_TABLE_FUSED_PIPE=0 -DECC_PHASE_PROFILE=0 -DECC_TABLE_PIPE_SELECT=0 -DECC_PACKED_CHAIN_FIRST=0 -DECC_PACKED_CHAINS=1 -DECC_TABLE_GLOBAL=0 -DECC_TABLE_ADDEND_GLOBAL=0 -DECC_PACKED_ALU_SQUARE=0 -DECC_WITNESS=1 -DECC_NO_CUDA      -Wall -Wno-unused-function -Wno-unknown-pragmas -x c++ src/main.cu -DECC_GUARD_PERIOD=64 -o /tmp/ecc2k130-max-iters/ecc2k130-cpu-guard64",
+ "protocol": "PROTOCOL.md",
+ "raw": {
+  "30001-c30.bin": {
+   "bytes": 17451448,
+   "sha256": "b3e97ac6eb416f2649daae6271ee046d7f7be1fdc661543d91b20d460bbfa12c"
+  },
+  "30001-c30.ck": {
+   "bytes": 1325096,
+   "sha256": "690ac8a7566aa166af2089882a21d8d3d8f4ef272a4bb189c5cc5181ce4fba71"
+  },
+  "30001-c31.bin": {
+   "bytes": 17522440,
+   "sha256": "781023526f2a570c88c7e5123c1351956355fca6523c59e4b3c630fe811a2a74"
+  },
+  "30001-c31.ck": {
+   "bytes": 1325096,
+   "sha256": "9ba2e7ae2e808a88017df96b42cb4bcd2412c721d1174768c2b1a23accb8ce16"
+  },
+  "30001-c32.bin": {
+   "bytes": 17521720,
+   "sha256": "880fdc380129104928cacf48b5784ffc9fccf0180af4f4ec06363bb0f38472d7"
+  },
+  "30001-c32.ck": {
+   "bytes": 1325096,
+   "sha256": "782e877a7da6dabf69ca75ef69ef5e60dc7ffc71a07dbce6e2b7b476c02dcedc"
+  },
+  "30001-ref.bin": {
+   "bytes": 17521720,
+   "sha256": "880fdc380129104928cacf48b5784ffc9fccf0180af4f4ec06363bb0f38472d7"
+  },
+  "30001-ref.ck": {
+   "bytes": 1325096,
+   "sha256": "782e877a7da6dabf69ca75ef69ef5e60dc7ffc71a07dbce6e2b7b476c02dcedc"
+  },
+  "30002-c30.bin": {
+   "bytes": 17497600,
+   "sha256": "a055d3c48fc77233182c38a62014db85ecd0d116b9f0b4647966f4d6fbb1b5c2"
+  },
+  "30002-c30.ck": {
+   "bytes": 1325096,
+   "sha256": "b6f155153aed895c0ff457d72672fa60ad669b591bc7419d6255687cff8d402a"
+  },
+  "30002-c31.bin": {
+   "bytes": 17567872,
+   "sha256": "986672ad2c8f84ab594d9ff06c274ca56b6882b0e581b8bf9eb4cdd0daf1e991"
+  },
+  "30002-c31.ck": {
+   "bytes": 1325096,
+   "sha256": "affc4b8ee734bdc9e3268943c175befebd4360b41ad5e81b8488739a6a63a55b"
+  },
+  "30002-c32.bin": {
+   "bytes": 17568880,
+   "sha256": "5526eb232d4eebfdcbb1dded73a2c007ede55ccf19016b2fd7b0731367e0cb04"
+  },
+  "30002-c32.ck": {
+   "bytes": 1325096,
+   "sha256": "b3e35ca57e69ef6b16548f76affb5450a076b03a04df356a739344a67dd1dada"
+  },
+  "30002-ref.bin": {
+   "bytes": 17568880,
+   "sha256": "5526eb232d4eebfdcbb1dded73a2c007ede55ccf19016b2fd7b0731367e0cb04"
+  },
+  "30002-ref.ck": {
+   "bytes": 1325096,
+   "sha256": "b3e35ca57e69ef6b16548f76affb5450a076b03a04df356a739344a67dd1dada"
+  },
+  "30003-c30.bin": {
+   "bytes": 17458072,
+   "sha256": "6fd99cad3e654bf7b0dfa3432cdaca39df5118ef6f6cd1b36ba5bb131fe20255"
+  },
+  "30003-c30.ck": {
+   "bytes": 1325096,
+   "sha256": "57b1d77eb18c9d2ee0f3fd9bc60ea14a5597e8a8f591aca5d82e38f278263dc3"
+  },
+  "30003-c31.bin": {
+   "bytes": 17529208,
+   "sha256": "60c2773cd08f7d40bb70cbecf58a1fc2adb476d431b11ff305ea2d69fe7965d8"
+  },
+  "30003-c31.ck": {
+   "bytes": 1325096,
+   "sha256": "c52d8e117dd73d4a636612d61abb6bfbc212da920f3a3f7cd225364322de9ed4"
+  },
+  "30003-c32.bin": {
+   "bytes": 17532880,
+   "sha256": "66d7855ef5c46020a07f095b89c059705564d5791bc16be8958f10f84f5c386c"
+  },
+  "30003-c32.ck": {
+   "bytes": 1325096,
+   "sha256": "f3c418d432cce5684621a998bace253076fa432f4dc9ed3f74cd31c89db24d4c"
+  },
+  "30003-ref.bin": {
+   "bytes": 17532736,
+   "sha256": "c220bd0cec8a4ccae427989208008c486891b43da5fae95b38a3b190193c789b"
+  },
+  "30003-ref.ck": {
+   "bytes": 1325096,
+   "sha256": "ddf9a0ddf07912aa8b6dcd8159a142c008b65052e2d7b9d04f502a9be4b03fc5"
+  }
+ },
+ "regenerate": "WORK=<dir> ./run.sh (single-thread runs are deterministic in the run id)",
+ "sourceCommit": "dc0993c798d771ebdf9f2fc1fdf24c68f5e5f49a",
+ "sourceDirty": false
+}

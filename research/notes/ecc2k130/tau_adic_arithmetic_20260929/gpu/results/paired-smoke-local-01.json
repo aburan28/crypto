@@ -1,0 +1,63 @@
+{
+  "status": "failed",
+  "mode": "smoke",
+  "study": "square-unroll",
+  "gpu_executed": false,
+  "timing_eligible": false,
+  "timeout_seconds": 540,
+  "termination_grace_seconds": 10,
+  "reserved_cpus": null,
+  "returncode": 1,
+  "stdout": "{\"status\": \"failed\", \"gpu_executed\": false, \"output\": \"/tmp/tau-device-jyn4hytj/benchmark.json\"}\n",
+  "stderr": "",
+  "timed_out": false,
+  "benchmark": {
+    "status": "failed",
+    "stage": "initializing",
+    "mode": "smoke",
+    "study": "square-unroll",
+    "schema_version": 2,
+    "variant_order": [
+      "binary_naf:linear_square=1",
+      "binary_naf:linear_square=1:square_no_unroll=1",
+      "reduced_tau_naf:linear_square=1",
+      "reduced_tau_naf:linear_square=1:square_no_unroll=1"
+    ],
+    "gpu_executed": false,
+    "gpu_launch_submitted": false,
+    "classification": "known-scalar GPU arithmetic stage diagnostic",
+    "smoke": {
+      "status": "pending",
+      "verified_outputs": 0,
+      "panels": []
+    },
+    "sources": {
+      "check_nvrtc.py": "85f9fa565af3ee4c6a2ea617e99620dd0d937e229443abff2a982a059e013dbe",
+      "fixtures.py": "ebc415821e5c3e2870328af9dff45fe52b01ec3fbbbc85d55f6bc335fb1425cf",
+      "launch_gpu.py": "bd451da3fba67b50a121cddb2ea71119db6b4285833855eb4a4758d8e291ead3",
+      "run_gpu.py": "9ac4fb31c391e6cdfe84c97b78f596430b8629b500624ba715d8f59c6b8b6115",
+      "UNROLL_DEVICE_PROTOCOL.md": "3109efc7dd93fbb4c99b0208e05f926d6a17846f5cb4171f5b273681b41a0ed3",
+      "PROTOCOL.md": "a12f445883880e4817295490d8f0470275cc19594ef7dd71931c941ab17eeedb",
+      "test_paired_unroll.py": "c0b5cacd8b3fc2fc41430846fe38734cf51aeb407ecb68c8cfbaeb1fcd60eac5",
+      "README.md": "f91f3d6c3bc9ef9631519da98ad3411bab6fe0249702f060a63a5df63028c116",
+      "check_host.py": "adee994939c412a06067b4fd479cdcbac3fc2edd648cfe01519b7f0c7203912e",
+      "test_readiness.py": "6236e891c6820f989ec84a0809fdd486a1233d75ec3a98cc5839c8ffd9644131",
+      "READINESS_PROTOCOL.md": "146ca2b21f1419db573b1a5064a22fdb1b69d928735449ef05caee494505be07",
+      "arithmetic.cuh": "6d86069b3c28a09e83d341b68836d015e03e3759ee372378932fb677c87982a7",
+      "cloud_modal.py": "437fd65e8d62e17a036d74f3ea52b8d1f71b036698a0da6b357981799886fdd7",
+      "isolated_entry.py": "6780e8bc0c33cb4a50c7225862bdbdc2b357b23233a5d1785ee5037b53f8c08e",
+      "compare_resources.py": "4bc660e7ad663d7dd4d0cf0e048b1e619e6a5026e75afe242b292644513d278f",
+      "receipt_io.py": "08d256fed7b2f56eb4509d246d00ee2cb8f18d13fd355f91c1deb0a215fc203a"
+    },
+    "dependency_sources": {
+      "parent_benchmark.py": "aa18d7ef9d1edba856343137dfcc13c3a1a930bcd721199127f54b2bc4697366",
+      "curve_identity.py": "39aeb32829ab7b5aec7c8fa0448f324ed755248bc3dd25df1b47e74cac067a9e",
+      "parent_run-02.json": "f108dfa628f141b7da5c2885472aa960a25403a8f157e84a74cac2e58be8b797"
+    },
+    "rho_speedup": null,
+    "walk_iterations_per_second": null,
+    "panels": [],
+    "error": "Traceback (most recent call last):\n  File \"/workspace/scratch/7eaf0df2f835/tau-adic-study/research/notes/ecc2k130/tau_adic_arithmetic_20260929/gpu/run_gpu.py\", line 111, in run\n    import cupy as cp\nModuleNotFoundError: No module named 'cupy'\n"
+  },
+  "isolation": null
+}

@@ -1,0 +1,17 @@
+{
+  "boundary": "Complete cold 16-target job; all setup and all target solves charged. Rho uses the existing per-target solver API on the same constructed curve.",
+  "floor": "K relation-producing trials/instructions for K full-rank columns; weak implementation floor.",
+  "followup_gate": "Only a fresh full tournament with confirmation and replay may establish parity.",
+  "hypothesis": "Sharing IC setup across 16 targets may close the instruction/time gap.",
+  "limits": {
+    "cpu": 7,
+    "memory_bytes": 8589934592,
+    "timeout_seconds": 60
+  },
+  "parent_contract_sha256": "82c085781cf5de5be11076e33f76dc3dae89a31dedfe02d6fcb3ebccf1fbcfc6",
+  "repetitions": 3,
+  "scope": "Development screen only: four cells, no promotion or confirmed parity claim.",
+  "seed": 2026091690,
+  "targets": 16,
+  "unit": "valgrind-3.22-amd64-Ir"
+}

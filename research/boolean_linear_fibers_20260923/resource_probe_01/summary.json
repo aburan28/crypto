@@ -1,0 +1,823 @@
+{
+  "cells": [
+    {
+      "cell": "n16-17-planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 788541,
+        "affine_sl_basis_list": 10647542,
+        "basis_list": 2252292,
+        "basis_wide": 478125,
+        "bucket": 44272791,
+        "fiber_columns": 22709,
+        "fiber_rows": 37792,
+        "fiber_simd": 13792,
+        "flat": 6364417,
+        "gray_delta_scalar": 35084,
+        "gray_delta_simd": 6416,
+        "gray_scalar": 31042,
+        "gray_simd": 6750,
+        "hybrid": 10855958,
+        "initial_list": 33750,
+        "initial_simd": 5959,
+        "merge_search": 2797667,
+        "packed_gray12_scalar": 109667,
+        "packed_gray12_simd": 47583,
+        "packed_gray16_delta_scalar": 33875,
+        "packed_gray16_delta_simd": 8084,
+        "packed_gray16_scalar": 32084,
+        "packed_gray16_simd": 8584,
+        "packed_state": 700708,
+        "packed_untraced": 475125,
+        "quadratic_state": 1127000,
+        "search": 3222959,
+        "small_flat": 4579875,
+        "tail_list": 4899500,
+        "tail_wide": 1345750,
+        "word_tail": 4113666
+      },
+      "family": "planted",
+      "n": 16,
+      "new_work": {
+        "fiber_columns": {
+          "fiber_dimension": 2,
+          "fiber_linear_rejected": 173,
+          "fiber_prefixes": 6000,
+          "fiber_queries": 174,
+          "fiber_zero_rejected": 5826
+        },
+        "fiber_rows": {
+          "fiber_dimension": 2,
+          "fiber_linear_rejected": 173,
+          "fiber_prefixes": 6000,
+          "fiber_queries": 174,
+          "fiber_zero_rejected": 5826
+        },
+        "fiber_simd": {
+          "fiber_dimension": 2,
+          "fiber_linear_rejected": 173,
+          "fiber_prefixes": 6000,
+          "fiber_queries": 174,
+          "fiber_zero_rejected": 5826
+        }
+      },
+      "retained_ratio": {
+        "fiber_columns": 0.2645443083573487,
+        "fiber_rows": 0.15545618120237087,
+        "fiber_simd": 0.4410527842227378
+      },
+      "seed": 17,
+      "verified": true
+    },
+    {
+      "cell": "n16-17-cross_planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 546083,
+        "affine_sl_basis_list": 6615292,
+        "basis_list": 2858291,
+        "basis_wide": 592209,
+        "bucket": 22859917,
+        "fiber_columns": 16708,
+        "fiber_rows": 39375,
+        "fiber_simd": 10750,
+        "flat": 3268000,
+        "gray_delta_scalar": 33250,
+        "gray_delta_simd": 6375,
+        "gray_scalar": 31708,
+        "gray_simd": 6417,
+        "hybrid": 6568666,
+        "initial_list": 42625,
+        "initial_simd": 9417,
+        "merge_search": 3349250,
+        "packed_gray12_scalar": 118083,
+        "packed_gray12_simd": 48000,
+        "packed_gray16_delta_scalar": 37084,
+        "packed_gray16_delta_simd": 8500,
+        "packed_gray16_scalar": 35042,
+        "packed_gray16_simd": 7792,
+        "packed_state": 817875,
+        "packed_untraced": 549542,
+        "quadratic_state": 1327834,
+        "search": 3620292,
+        "small_flat": 3059917,
+        "tail_list": 2899000,
+        "tail_wide": 717833,
+        "word_tail": 2730292
+      },
+      "family": "cross_planted",
+      "n": 16,
+      "new_work": {
+        "fiber_columns": {
+          "fiber_dimension": 3,
+          "fiber_linear_rejected": 186,
+          "fiber_prefixes": 2352,
+          "fiber_queries": 187,
+          "fiber_zero_rejected": 2163
+        },
+        "fiber_rows": {
+          "fiber_dimension": 3,
+          "fiber_linear_rejected": 186,
+          "fiber_prefixes": 2352,
+          "fiber_queries": 187,
+          "fiber_zero_rejected": 2163
+        },
+        "fiber_simd": {
+          "fiber_dimension": 3,
+          "fiber_linear_rejected": 186,
+          "fiber_prefixes": 2352,
+          "fiber_queries": 187,
+          "fiber_zero_rejected": 2163
+        }
+      },
+      "retained_ratio": {
+        "fiber_columns": 0.38561204343534056,
+        "fiber_rows": 0.16537891617273498,
+        "fiber_simd": 0.5928666287232024
+      },
+      "seed": 17,
+      "verified": true
+    },
+    {
+      "cell": "n16-17-unplanted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 984709,
+        "affine_sl_basis_list": 12924667,
+        "basis_list": 8896333,
+        "basis_wide": 1699333,
+        "bucket": 47178750,
+        "fiber_columns": 116083,
+        "fiber_rows": 390291,
+        "fiber_simd": 80750,
+        "flat": 6399834,
+        "gray_delta_scalar": 84791,
+        "gray_delta_simd": 13292,
+        "gray_scalar": 80584,
+        "gray_simd": 13708,
+        "hybrid": 12706250,
+        "initial_list": 89125,
+        "initial_simd": 12959,
+        "merge_search": 2790333,
+        "packed_gray12_scalar": 121292,
+        "packed_gray12_simd": 56041,
+        "packed_gray16_delta_scalar": 89417,
+        "packed_gray16_delta_simd": 15458,
+        "packed_gray16_scalar": 83542,
+        "packed_gray16_simd": 19375,
+        "packed_state": 698500,
+        "packed_untraced": 488500,
+        "quadratic_state": 1095125,
+        "search": 3176708,
+        "small_flat": 4577666,
+        "tail_list": 5245209,
+        "tail_wide": 1360792,
+        "word_tail": 4012541
+      },
+      "family": "unplanted",
+      "n": 16,
+      "new_work": {
+        "fiber_columns": {
+          "fiber_dimension": 3,
+          "fiber_linear_rejected": 2597,
+          "fiber_prefixes": 8192,
+          "fiber_queries": 2597,
+          "fiber_zero_rejected": 5595
+        },
+        "fiber_rows": {
+          "fiber_dimension": 3,
+          "fiber_linear_rejected": 2597,
+          "fiber_prefixes": 8192,
+          "fiber_queries": 2597,
+          "fiber_zero_rejected": 5595
+        },
+        "fiber_simd": {
+          "fiber_dimension": 3,
+          "fiber_linear_rejected": 2597,
+          "fiber_prefixes": 8192,
+          "fiber_queries": 2597,
+          "fiber_zero_rejected": 5595
+        }
+      },
+      "retained_ratio": {
+        "fiber_columns": 0.10985338141243707,
+        "fiber_rows": 0.03309581824843514,
+        "fiber_simd": 0.1614550017221867
+      },
+      "seed": 17,
+      "verified": true
+    },
+    {
+      "cell": "n16-937-planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 777000,
+        "affine_sl_basis_list": 9342291,
+        "basis_list": 2209292,
+        "basis_wide": 409625,
+        "bucket": 62764000,
+        "fiber_columns": 20041,
+        "fiber_rows": 46416,
+        "fiber_simd": 13708,
+        "flat": 6381834,
+        "gray_delta_scalar": 20000,
+        "gray_delta_simd": 4708,
+        "gray_scalar": 21458,
+        "gray_simd": 4708,
+        "hybrid": 14078583,
+        "initial_list": 20250,
+        "initial_simd": 4333,
+        "merge_search": 2730292,
+        "packed_gray12_scalar": 102750,
+        "packed_gray12_simd": 44042,
+        "packed_gray16_delta_scalar": 20875,
+        "packed_gray16_delta_simd": 6584,
+        "packed_gray16_scalar": 21375,
+        "packed_gray16_simd": 8125,
+        "packed_state": 667292,
+        "packed_untraced": 452292,
+        "quadratic_state": 1115583,
+        "search": 3193792,
+        "small_flat": 4300083,
+        "tail_list": 5571333,
+        "tail_wide": 1280458,
+        "word_tail": 3856666
+      },
+      "family": "planted",
+      "n": 16,
+      "new_work": {
+        "fiber_columns": {
+          "fiber_dimension": 2,
+          "fiber_linear_rejected": 272,
+          "fiber_prefixes": 3328,
+          "fiber_queries": 273,
+          "fiber_zero_rejected": 3055
+        },
+        "fiber_rows": {
+          "fiber_dimension": 2,
+          "fiber_linear_rejected": 272,
+          "fiber_prefixes": 3328,
+          "fiber_queries": 273,
+          "fiber_zero_rejected": 3055
+        },
+        "fiber_simd": {
+          "fiber_dimension": 2,
+          "fiber_linear_rejected": 272,
+          "fiber_prefixes": 3328,
+          "fiber_queries": 273,
+          "fiber_zero_rejected": 3055
+        }
+      },
+      "retained_ratio": {
+        "fiber_columns": 0.21655698722557098,
+        "fiber_rows": 0.09305420240952404,
+        "fiber_simd": 0.2856725999416399
+      },
+      "seed": 937,
+      "verified": true
+    },
+    {
+      "cell": "n16-937-cross_planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 384667,
+        "affine_sl_basis_list": 4521084,
+        "basis_list": 1026125,
+        "basis_wide": 190625,
+        "bucket": 28103334,
+        "fiber_columns": 19917,
+        "fiber_rows": 41750,
+        "fiber_simd": 12291,
+        "flat": 2999208,
+        "gray_delta_scalar": 20583,
+        "gray_delta_simd": 5625,
+        "gray_scalar": 17792,
+        "gray_simd": 4250,
+        "hybrid": 6802833,
+        "initial_list": 41667,
+        "initial_simd": 9084,
+        "merge_search": 2233500,
+        "packed_gray12_scalar": 75750,
+        "packed_gray12_simd": 34250,
+        "packed_gray16_delta_scalar": 21208,
+        "packed_gray16_delta_simd": 6583,
+        "packed_gray16_scalar": 19667,
+        "packed_gray16_simd": 6416,
+        "packed_state": 563709,
+        "packed_untraced": 373000,
+        "quadratic_state": 908875,
+        "search": 2500375,
+        "small_flat": 2341625,
+        "tail_list": 3045916,
+        "tail_wide": 725500,
+        "word_tail": 1941584
+      },
+      "family": "cross_planted",
+      "n": 16,
+      "new_work": {
+        "fiber_columns": {
+          "fiber_dimension": 2,
+          "fiber_linear_rejected": 257,
+          "fiber_prefixes": 3328,
+          "fiber_queries": 258,
+          "fiber_zero_rejected": 3070
+        },
+        "fiber_rows": {
+          "fiber_dimension": 2,
+          "fiber_linear_rejected": 257,
+          "fiber_prefixes": 3328,
+          "fiber_queries": 258,
+          "fiber_zero_rejected": 3070
+        },
+        "fiber_simd": {
+          "fiber_dimension": 2,
+          "fiber_linear_rejected": 257,
+          "fiber_prefixes": 3328,
+          "fiber_queries": 258,
+          "fiber_zero_rejected": 3070
+        }
+      },
+      "retained_ratio": {
+        "fiber_columns": 0.19809797236676835,
+        "fiber_rows": 0.10039449129520706,
+        "fiber_simd": 0.3457814661134163
+      },
+      "seed": 937,
+      "verified": true
+    },
+    {
+      "cell": "n16-937-unplanted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 1236292,
+        "affine_sl_basis_list": 16886292,
+        "basis_list": 9201083,
+        "basis_wide": 1781625,
+        "bucket": 70627791,
+        "fiber_columns": 88625,
+        "fiber_rows": 235416,
+        "fiber_simd": 56375,
+        "flat": 7800208,
+        "gray_delta_scalar": 84458,
+        "gray_delta_simd": 14000,
+        "gray_scalar": 85250,
+        "gray_simd": 15542,
+        "hybrid": 16087375,
+        "initial_list": 85792,
+        "initial_simd": 12875,
+        "merge_search": 3476542,
+        "packed_gray12_scalar": 122375,
+        "packed_gray12_simd": 52084,
+        "packed_gray16_delta_scalar": 85625,
+        "packed_gray16_delta_simd": 15209,
+        "packed_gray16_scalar": 86125,
+        "packed_gray16_simd": 17958,
+        "packed_state": 858834,
+        "packed_untraced": 591583,
+        "quadratic_state": 1399917,
+        "search": 3946750,
+        "small_flat": 5463792,
+        "tail_list": 6677542,
+        "tail_wide": 1614417,
+        "word_tail": 4852458
+      },
+      "family": "unplanted",
+      "n": 16,
+      "new_work": {
+        "fiber_columns": {
+          "fiber_dimension": 3,
+          "fiber_linear_rejected": 1531,
+          "fiber_prefixes": 8192,
+          "fiber_queries": 1531,
+          "fiber_zero_rejected": 6661
+        },
+        "fiber_rows": {
+          "fiber_dimension": 3,
+          "fiber_linear_rejected": 1531,
+          "fiber_prefixes": 8192,
+          "fiber_queries": 1531,
+          "fiber_zero_rejected": 6661
+        },
+        "fiber_simd": {
+          "fiber_dimension": 3,
+          "fiber_linear_rejected": 1531,
+          "fiber_prefixes": 8192,
+          "fiber_queries": 1531,
+          "fiber_zero_rejected": 6661
+        }
+      },
+      "retained_ratio": {
+        "fiber_columns": 0.14527503526093088,
+        "fiber_rows": 0.05469042036225236,
+        "fiber_simd": 0.22690909090909092
+      },
+      "seed": 937,
+      "verified": true
+    },
+    {
+      "cell": "n24-17-planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 19234417,
+        "affine_sl_basis_list": 170293583,
+        "basis_list": 245551875,
+        "basis_wide": 55816375,
+        "bucket": 1244300291,
+        "fiber_columns": 5367375,
+        "fiber_rows": 18690958,
+        "fiber_simd": 3339708,
+        "flat": 343133958,
+        "gray_delta_scalar": 15548083,
+        "gray_delta_simd": 2121291,
+        "gray_scalar": 15414458,
+        "gray_simd": 2345709,
+        "hybrid": 607904959,
+        "initial_list": 15487208,
+        "initial_simd": 2111459,
+        "merge_search": 74433375,
+        "packed_gray12_scalar": 18418459,
+        "packed_gray12_simd": 8216083,
+        "packed_gray16_delta_scalar": 15335667,
+        "packed_gray16_delta_simd": 2566291,
+        "packed_gray16_scalar": 14941667,
+        "packed_gray16_simd": 2994292,
+        "packed_state": 18706792,
+        "packed_untraced": 13352458,
+        "quadratic_state": 30619542,
+        "search": 84145459,
+        "small_flat": 97561084,
+        "tail_list": 157557500,
+        "tail_wide": 49106917,
+        "word_tail": 87595292
+      },
+      "family": "planted",
+      "n": 24,
+      "new_work": {
+        "fiber_columns": {
+          "fiber_dimension": 4,
+          "fiber_linear_rejected": 73731,
+          "fiber_prefixes": 776864,
+          "fiber_queries": 73732,
+          "fiber_zero_rejected": 703132
+        },
+        "fiber_rows": {
+          "fiber_dimension": 4,
+          "fiber_linear_rejected": 73731,
+          "fiber_prefixes": 776864,
+          "fiber_queries": 73732,
+          "fiber_zero_rejected": 703132
+        },
+        "fiber_simd": {
+          "fiber_dimension": 4,
+          "fiber_linear_rejected": 73731,
+          "fiber_prefixes": 776864,
+          "fiber_queries": 73732,
+          "fiber_zero_rejected": 703132
+        }
+      },
+      "retained_ratio": {
+        "fiber_columns": 0.3936768887000559,
+        "fiber_rows": 0.11251075311623722,
+        "fiber_simd": 0.6299171456296185
+      },
+      "seed": 17,
+      "verified": true
+    },
+    {
+      "cell": "n24-17-cross_planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 12046958,
+        "affine_sl_basis_list": 110362709,
+        "basis_list": 90686583,
+        "basis_wide": 20954000,
+        "bucket": 557539917,
+        "fiber_columns": 5265208,
+        "fiber_rows": 17719375,
+        "fiber_simd": 3317750,
+        "flat": 162895333,
+        "gray_delta_scalar": 15718042,
+        "gray_delta_simd": 2103167,
+        "gray_scalar": 15309792,
+        "gray_simd": 2212542,
+        "hybrid": 245983542,
+        "initial_list": 7808833,
+        "initial_simd": 1062708,
+        "merge_search": 70806709,
+        "packed_gray12_scalar": 17923000,
+        "packed_gray12_simd": 8012333,
+        "packed_gray16_delta_scalar": 15203333,
+        "packed_gray16_delta_simd": 2594291,
+        "packed_gray16_scalar": 14889833,
+        "packed_gray16_simd": 2574208,
+        "packed_state": 17940584,
+        "packed_untraced": 13055500,
+        "quadratic_state": 29253875,
+        "search": 80253250,
+        "small_flat": 93570750,
+        "tail_list": 71748417,
+        "tail_wide": 22457417,
+        "word_tail": 83987375
+      },
+      "family": "cross_planted",
+      "n": 24,
+      "new_work": {
+        "fiber_columns": {
+          "fiber_dimension": 4,
+          "fiber_linear_rejected": 73731,
+          "fiber_prefixes": 776864,
+          "fiber_queries": 73732,
+          "fiber_zero_rejected": 703132
+        },
+        "fiber_rows": {
+          "fiber_dimension": 4,
+          "fiber_linear_rejected": 73731,
+          "fiber_prefixes": 776864,
+          "fiber_queries": 73732,
+          "fiber_zero_rejected": 703132
+        },
+        "fiber_simd": {
+          "fiber_dimension": 4,
+          "fiber_linear_rejected": 73731,
+          "fiber_prefixes": 776864,
+          "fiber_queries": 73732,
+          "fiber_zero_rejected": 703132
+        }
+      },
+      "retained_ratio": {
+        "fiber_columns": 0.20113865897001645,
+        "fiber_rows": 0.05988521195215756,
+        "fiber_simd": 0.3192513706346226
+      },
+      "seed": 17,
+      "verified": true
+    },
+    {
+      "cell": "n24-17-unplanted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 36680500,
+        "affine_sl_basis_list": 342565333,
+        "basis_list": 337246708,
+        "basis_wide": 77458125,
+        "bucket": 892663584,
+        "fiber_columns": 8335167,
+        "fiber_rows": 33431209,
+        "fiber_simd": 5499000,
+        "flat": 370062875,
+        "gray_delta_scalar": 21489291,
+        "gray_delta_simd": 2839666,
+        "gray_scalar": 20723750,
+        "gray_simd": 2981209,
+        "hybrid": 490879542,
+        "initial_list": 21118500,
+        "initial_simd": 2838167,
+        "merge_search": 83721167,
+        "packed_gray12_scalar": 24601708,
+        "packed_gray12_simd": 11175208,
+        "packed_gray16_delta_scalar": 21791833,
+        "packed_gray16_delta_simd": 3678250,
+        "packed_gray16_scalar": 21316750,
+        "packed_gray16_simd": 3728709,
+        "packed_state": 21145625,
+        "packed_untraced": 15513333,
+        "quadratic_state": 33956584,
+        "search": 95507000,
+        "small_flat": 109816875,
+        "tail_list": 162282333,
+        "tail_wide": 51252792,
+        "word_tail": 100552292
+      },
+      "family": "unplanted",
+      "n": 24,
+      "new_work": {
+        "fiber_columns": {
+          "fiber_dimension": 4,
+          "fiber_linear_rejected": 132868,
+          "fiber_prefixes": 1048576,
+          "fiber_queries": 132868,
+          "fiber_zero_rejected": 915708
+        },
+        "fiber_rows": {
+          "fiber_dimension": 4,
+          "fiber_linear_rejected": 132868,
+          "fiber_prefixes": 1048576,
+          "fiber_queries": 132868,
+          "fiber_zero_rejected": 915708
+        },
+        "fiber_simd": {
+          "fiber_dimension": 4,
+          "fiber_linear_rejected": 132868,
+          "fiber_prefixes": 1048576,
+          "fiber_queries": 132868,
+          "fiber_zero_rejected": 915708
+        }
+      },
+      "retained_ratio": {
+        "fiber_columns": 0.34068495568235163,
+        "fiber_rows": 0.08484688042727222,
+        "fiber_simd": 0.5145557374068013
+      },
+      "seed": 17,
+      "verified": true
+    },
+    {
+      "cell": "n24-937-planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 22431291,
+        "affine_sl_basis_list": 212371583,
+        "basis_list": 276770083,
+        "basis_wide": 60138375,
+        "bucket": 1077389125,
+        "fiber_columns": 3074708,
+        "fiber_rows": 14031791,
+        "fiber_simd": 2378750,
+        "flat": 360183166,
+        "gray_delta_scalar": 18897292,
+        "gray_delta_simd": 2545125,
+        "gray_scalar": 18474334,
+        "gray_simd": 2778167,
+        "hybrid": 505728583,
+        "initial_list": 18703667,
+        "initial_simd": 2540500,
+        "merge_search": 86416250,
+        "packed_gray12_scalar": 18747709,
+        "packed_gray12_simd": 8084709,
+        "packed_gray16_delta_scalar": 14368625,
+        "packed_gray16_delta_simd": 2471792,
+        "packed_gray16_scalar": 14140416,
+        "packed_gray16_simd": 2456875,
+        "packed_state": 21749834,
+        "packed_untraced": 15718500,
+        "quadratic_state": 35812166,
+        "search": 97785959,
+        "small_flat": 113844167,
+        "tail_list": 197256375,
+        "tail_wide": 57229916,
+        "word_tail": 101753625
+      },
+      "family": "planted",
+      "n": 24,
+      "new_work": {
+        "fiber_columns": {
+          "fiber_dimension": 5,
+          "fiber_linear_rejected": 41028,
+          "fiber_prefixes": 193296,
+          "fiber_queries": 41029,
+          "fiber_zero_rejected": 152264
+        },
+        "fiber_rows": {
+          "fiber_dimension": 5,
+          "fiber_linear_rejected": 41028,
+          "fiber_prefixes": 193296,
+          "fiber_queries": 41029,
+          "fiber_zero_rejected": 152264
+        },
+        "fiber_simd": {
+          "fiber_dimension": 5,
+          "fiber_linear_rejected": 41028,
+          "fiber_prefixes": 193296,
+          "fiber_queries": 41029,
+          "fiber_zero_rejected": 152264
+        }
+      },
+      "retained_ratio": {
+        "fiber_columns": 0.7986590816741163,
+        "fiber_rows": 0.17642834702212648,
+        "fiber_simd": 1.0328428796636888
+      },
+      "seed": 937,
+      "verified": true
+    },
+    {
+      "cell": "n24-937-cross_planted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 14269542,
+        "affine_sl_basis_list": 166779792,
+        "basis_list": 156040042,
+        "basis_wide": 34412917,
+        "bucket": 256678250,
+        "fiber_columns": 3043625,
+        "fiber_rows": 12680500,
+        "fiber_simd": 2320625,
+        "flat": 78857250,
+        "gray_delta_scalar": 18716291,
+        "gray_delta_simd": 2530459,
+        "gray_scalar": 18506458,
+        "gray_simd": 2652125,
+        "hybrid": 128363250,
+        "initial_list": 9719041,
+        "initial_simd": 1291500,
+        "merge_search": 92368917,
+        "packed_gray12_scalar": 21455333,
+        "packed_gray12_simd": 9377209,
+        "packed_gray16_delta_scalar": 17475167,
+        "packed_gray16_delta_simd": 2982417,
+        "packed_gray16_scalar": 17111208,
+        "packed_gray16_simd": 3026584,
+        "packed_state": 23012250,
+        "packed_untraced": 16606750,
+        "quadratic_state": 37799667,
+        "search": 105099541,
+        "small_flat": 121546083,
+        "tail_list": 39309958,
+        "tail_wide": 12073958,
+        "word_tail": 109604375
+      },
+      "family": "cross_planted",
+      "n": 24,
+      "new_work": {
+        "fiber_columns": {
+          "fiber_dimension": 5,
+          "fiber_linear_rejected": 41028,
+          "fiber_prefixes": 193296,
+          "fiber_queries": 41029,
+          "fiber_zero_rejected": 152264
+        },
+        "fiber_rows": {
+          "fiber_dimension": 5,
+          "fiber_linear_rejected": 41028,
+          "fiber_prefixes": 193296,
+          "fiber_queries": 41029,
+          "fiber_zero_rejected": 152264
+        },
+        "fiber_simd": {
+          "fiber_dimension": 5,
+          "fiber_linear_rejected": 41028,
+          "fiber_prefixes": 193296,
+          "fiber_queries": 41029,
+          "fiber_zero_rejected": 152264
+        }
+      },
+      "retained_ratio": {
+        "fiber_columns": 0.4287906973501299,
+        "fiber_rows": 0.1018492961634005,
+        "fiber_simd": 0.5597809305922894
+      },
+      "seed": 937,
+      "verified": true
+    },
+    {
+      "cell": "n24-937-unplanted",
+      "cost_ns": {
+        "affine_sl_basis_fast": 66334250,
+        "affine_sl_basis_list": 616814542,
+        "basis_list": 480369250,
+        "basis_wide": 101888834,
+        "bucket": 2212910042,
+        "fiber_columns": 11388667,
+        "fiber_rows": 52163125,
+        "fiber_simd": 8021333,
+        "flat": 548986083,
+        "gray_delta_scalar": 21369583,
+        "gray_delta_simd": 2838541,
+        "gray_scalar": 20758500,
+        "gray_simd": 3102500,
+        "hybrid": 1081400667,
+        "initial_list": 21297875,
+        "initial_simd": 2845167,
+        "merge_search": 121384791,
+        "packed_gray12_scalar": 26220584,
+        "packed_gray12_simd": 11722333,
+        "packed_gray16_delta_scalar": 21927417,
+        "packed_gray16_delta_simd": 3735167,
+        "packed_gray16_scalar": 21357167,
+        "packed_gray16_simd": 4073083,
+        "packed_state": 31202417,
+        "packed_untraced": 22324583,
+        "quadratic_state": 50857791,
+        "search": 139465000,
+        "small_flat": 164339708,
+        "tail_list": 294004000,
+        "tail_wide": 82755000,
+        "word_tail": 145569208
+      },
+      "family": "unplanted",
+      "n": 24,
+      "new_work": {
+        "fiber_columns": {
+          "fiber_dimension": 4,
+          "fiber_linear_rejected": 188120,
+          "fiber_prefixes": 1048576,
+          "fiber_queries": 188120,
+          "fiber_zero_rejected": 860456
+        },
+        "fiber_rows": {
+          "fiber_dimension": 4,
+          "fiber_linear_rejected": 188120,
+          "fiber_prefixes": 1048576,
+          "fiber_queries": 188120,
+          "fiber_zero_rejected": 860456
+        },
+        "fiber_simd": {
+          "fiber_dimension": 4,
+          "fiber_linear_rejected": 188120,
+          "fiber_prefixes": 1048576,
+          "fiber_queries": 188120,
+          "fiber_zero_rejected": 860456
+        }
+      },
+      "retained_ratio": {
+        "fiber_columns": 0.24924260231684708,
+        "fiber_rows": 0.05446813361328795,
+        "fiber_simd": 0.3538288499390758
+      },
+      "seed": 937,
+      "verified": true
+    }
+  ],
+  "observations": 1116,
+  "promotion": null,
+  "scope": "Discovery only; generated public Boolean systems, no holdouts or promotion."
+}

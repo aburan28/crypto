@@ -1,0 +1,207 @@
+{
+  "binary-sha256.txt": "ac4067b9c6b45ba36d7ef81a7c48cb0a973cacd85681517c8e612f0ea9ce969d  ecc2k130-control\nc0466b995da1330a03fd16744791835003fd0c21d8fe68efd0b78d7c819665d0  ecc2k130-candidate",
+  "binary-sha256.txtSha256": "1d5785add6c4c69fc50d066fb98906ef29842749cd5f617577d482463351acb0",
+  "build": {
+    "candidate": {
+      "raw": "ptxas info    : Function properties for _ZN12eccPacked1314walkE10WalkParamsIjEPj\n    400 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 128 registers, used 1 barriers, 400 bytes cumulative stack size, 1040 bytes smem\nptxas info    : Compile time = 339.730 ms\nptxas info    : Function properties for _ZN12eccPacked13110twCycleTagERKNS_4P131ES2_jPKjS4_i\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN37_INTERNAL_77c3753b_7_main_cu_adc47f0112eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3",
+      "registers": 128,
+      "spillLoadBytes": 0,
+      "spillStoreBytes": 0,
+      "stackFrameBytes": 400
+    },
+    "control": {
+      "raw": "ptxas info    : Function properties for _ZN12eccPacked1314walkE10WalkParamsIjEPj\n    400 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 128 registers, used 1 barriers, 400 bytes cumulative stack size\nptxas info    : Compile time = 328.489 ms\nptxas info    : Function properties for _ZN12eccPacked13110twCycleTagERKNS_4P131ES2_jPKjS4_i\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Function properties for _ZN37_INTERNAL_77c3753b_7_main_cu_adc47f0112eccPacked13118sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3",
+      "registers": 128,
+      "spillLoadBytes": 0,
+      "spillStoreBytes": 0,
+      "stackFrameBytes": 400
+    }
+  },
+  "claimClass": "same-walk kernel engineering",
+  "common": {
+    "batch": 16,
+    "batchHints": 1,
+    "blockThreads": 512,
+    "fast2": 1,
+    "hintQueue": 512,
+    "minBlocks": 1,
+    "splitForward": 1
+  },
+  "corpora": {
+    "candidate": {
+      "magic": "ECC2KDT3",
+      "payloadBytes": 47368896,
+      "recordBytes": 32,
+      "records": 1480278,
+      "sortedSha256": "2fc6f84d4b1969240418cf6f8e779df9538b1d8f01eb6ff4c6a00be7324fae01",
+      "version": 3
+    },
+    "control": {
+      "magic": "ECC2KDT3",
+      "payloadBytes": 47368896,
+      "recordBytes": 32,
+      "records": 1480278,
+      "sortedSha256": "2fc6f84d4b1969240418cf6f8e779df9538b1d8f01eb6ff4c6a00be7324fae01",
+      "version": 3
+    }
+  },
+  "corpusIdentity": true,
+  "decision": "confirmation_complete",
+  "dp-identity.txt": "control               1480278 records  sha256 2fc6f84d4b196924  IDENTICAL to control\ncandidate             1480278 records  sha256 2fc6f84d4b196924  IDENTICAL to control",
+  "dp-identity.txtSha256": "00fad9a4da79636184916aeabbbefcb2535c16c773b85e46f81857c141010ff4",
+  "errors": [],
+  "host.txt": "NVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-1568cf74-76f1-15a5-5e21-a136c97977d3, 580.95.05, 2430 MHz, 600.00 W, 97887 MiB, 12.0\nCuda compilation tools, release 13.3, V13.3.73\nBuild cuda_13.3.r13.3/compiler.38244171_0\nsource: 0aad485bf95633c375b1ff8097fab874e5f36df4\nverify threads: 96256; batch: 16; live slots: 1540096",
+  "host.txtSha256": "f67f76c6e503e5f1166f4bf1271045e8ffaef569f6166fccd75d1103a70b9d33",
+  "schema": "ecc2k130_block_hints_screen.v1",
+  "source-files.sha256": "70a34bb04372467449a924e0a484704353a391f25d4e93bcbc763947bd161b98  Makefile\na594013396b869e78c5c87268dedb0a89ad4112f05feef7b6cc5e476b369ae09  include/packedkernels.cuh\nf7b3ee2bebb306b52181f9d79e92b564443ea7cbff4c21158b4c57ff254297db  include/packedengine.cuh\n2f0e4ea24577fbd5c17e73b02d00e10d77f995769168bb1247e0515e917c614a  include/packedtablewalk.cuh\nbc96fd999d9da0a42d6564a86015f156021efca6c28f6534a9d5f452b154aaf5  include/tablewalk.h\na08cc05183185482f57a140e1ac861168d566e6aac0bf2cc9818440b474cc38c  include/cycleanchor_body.h\n5543e898c7711a14bf0f7fffd1289e08c34357a0958d71f78eb3ef095614f34e  include/ref.h\n3f0e857eceb915285b4e419d1632abc3ff49c24fb5fc2614705ab260de8d2147  src/main.cu",
+  "source-files.sha256Sha256": "ab602c2ecd9fdb73c909680e96c1fc7dfd1f9b246b5004753f4e5e7eb61038cc",
+  "target": "block hints >= 1.005 * faster bracketing control",
+  "timing": {
+    "decision": "confirmation_complete",
+    "errors": [],
+    "logErrors": [],
+    "pairedConfirmationRatios": [
+      1.4105381147648086,
+      1.4089692900833584,
+      1.4086828372388298
+    ],
+    "qualificationThresholdMps": 4165.391339999999,
+    "qualified": true,
+    "samples": [
+      {
+        "gpuState": "2370, 317.13, 36",
+        "logSha256": "a7016abb620cd86034cbdb009970e0cd31042b6df562e02c800a9189d7dcb39a",
+        "order": 1,
+        "pair": 0,
+        "phase": "warmup",
+        "rateMps": 4727.948,
+        "variant": "control"
+      },
+      {
+        "gpuState": "2362, 313.13, 40",
+        "logSha256": "0c13733e8e9deb37bb425777999cbee12bf5c58922fa1cde5f6c81f09b8c909b",
+        "order": 2,
+        "pair": 0,
+        "phase": "warmup",
+        "rateMps": 6195.109,
+        "variant": "candidate"
+      },
+      {
+        "gpuState": "2377, 307.21, 39",
+        "logSha256": "ea0dfbceb6650b6d5d3d0c2195f510e0310ef772a55a39a65464a340ac715e59",
+        "order": 1,
+        "pair": 0,
+        "phase": "screen",
+        "rateMps": 4134.526,
+        "variant": "control"
+      },
+      {
+        "gpuState": "2370, 288.02, 40",
+        "logSha256": "57a3bab03403e73702d3d6d433af146a815164949421ec384c3b6b8921505e1d",
+        "order": 2,
+        "pair": 0,
+        "phase": "screen",
+        "rateMps": 5470.673,
+        "variant": "candidate"
+      },
+      {
+        "gpuState": "2400, 306.37, 41",
+        "logSha256": "62f1297592d22820f0706cb7c0fddde28234739d3de070b5f585ed57707e7a33",
+        "order": 3,
+        "pair": 0,
+        "phase": "screen",
+        "rateMps": 4144.668,
+        "variant": "control"
+      },
+      {
+        "gpuState": "2385, 309.29, 41",
+        "logSha256": "7d703450cde392407ef3cdb9bd11fc17e407efd319a951ef010f5e0a7fd18b57",
+        "order": 1,
+        "pair": 1,
+        "phase": "confirm",
+        "rateMps": 3558.739,
+        "variant": "control"
+      },
+      {
+        "gpuState": "2392, 242.09, 40",
+        "logSha256": "7ca3e3ce15f28d7cb41abd7f8c4bf0e85b8c058729c0efb72131bef162414aec",
+        "order": 2,
+        "pair": 1,
+        "phase": "confirm",
+        "rateMps": 5019.737,
+        "variant": "candidate"
+      },
+      {
+        "gpuState": "2415, 283.85, 41",
+        "logSha256": "a79de152f5689df9743b0bb9a490f31455653c3a22a43084ca85cf6692b33937",
+        "order": 1,
+        "pair": 2,
+        "phase": "confirm",
+        "rateMps": 5015.825,
+        "variant": "candidate"
+      },
+      {
+        "gpuState": "2422, 302.34, 41",
+        "logSha256": "d828395e90e4ef4b7dbdb94d9fe92b9322861aa4afe5eb84f4cba8a3d9a9b416",
+        "order": 2,
+        "pair": 2,
+        "phase": "confirm",
+        "rateMps": 3559.925,
+        "variant": "control"
+      },
+      {
+        "gpuState": "2385, 315.22, 41",
+        "logSha256": "84595eabf0ca77b66a58919708d9f2e09863f6f0515d229b8048d63ab214f7f4",
+        "order": 1,
+        "pair": 3,
+        "phase": "confirm",
+        "rateMps": 3563.098,
+        "variant": "control"
+      },
+      {
+        "gpuState": "2392, 291.96, 42",
+        "logSha256": "3bb13c4fc4f4a3bd90162053ac77d9e4894ebb3a249527fb57ab277839750398",
+        "order": 2,
+        "pair": 3,
+        "phase": "confirm",
+        "rateMps": 5019.275,
+        "variant": "candidate"
+      }
+    ],
+    "screenRatioToFasterControl": 1.3199303297634455,
+    "valid": true
+  },
+  "valid": true,
+  "verify": {
+    "candidate": {
+      "batch": 16,
+      "blockHints": 1,
+      "distinguishedPoints": 1480278,
+      "dropped": 0,
+      "errors": [],
+      "fast2": 1,
+      "hintQueue": 512,
+      "liveSlots": 1540096,
+      "mode": 1,
+      "rateMps": 6.55,
+      "runtimeThreads": 96256,
+      "valid": true,
+      "verified": 300
+    },
+    "control": {
+      "batch": 16,
+      "blockHints": 0,
+      "distinguishedPoints": 1480278,
+      "dropped": 0,
+      "errors": [],
+      "fast2": 1,
+      "hintQueue": 512,
+      "liveSlots": 1540096,
+      "mode": 1,
+      "rateMps": 6.074,
+      "runtimeThreads": 96256,
+      "valid": true,
+      "verified": 300
+    }
+  }
+}

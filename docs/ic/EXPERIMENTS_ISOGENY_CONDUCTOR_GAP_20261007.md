@@ -24,7 +24,7 @@ A parallel workspace, `/Volumes/SSD990/ecdlp-hardness-work/`, already holds:
   isogeny representation but only in dimension 8 as proved (`≥ 2^72`); a
   characteristic-2 dimension-2/4 pipeline does not exist.
 - `ic-conductor-leads/LEADS.md`: index-calculus leads V1–V5, H1–H4, E2E on
-  toy classes T11/T19/T23 and a 4-level class C37 (`f = 73·2663`, 73 inert
+  small-field classes T11/T19/T23 and a 4-level class C37 (`f = 73·2663`, 73 inert
   like `p`). Result: the only level-dependent IC resource is `τ` (ordered
   τ-slots, `log₂(m!)` bits); decomposition counts, densities and Boolean
   systems are level-blind to within sampling error; transported factor bases
@@ -33,7 +33,7 @@ A parallel workspace, `/Volumes/SSD990/ecdlp-hardness-work/`, already holds:
 
 What that work does **not** do, and what the experiments below target:
 
-1. It measures IC with an exact toy decomposition oracle at `n ≤ 23` (C37
+1. It measures IC with an exact enumeration decomposition oracle at `n ≤ 23` (C37
    end-to-end is pending). It does not run this repository's production
    solvers (compact-orbit S3 root index, matrix-F4/M4RI, WDSat, CryptoMiniSat
    S3 chains) on a non-crater curve at any landed rung. LEADS §6.3 says so
@@ -49,10 +49,10 @@ Host constraints reported there and observed here: load average 100–150, both
 disks at 100%. Set `TMPDIR` to the session scratchpad, keep artifacts under
 1 MB per cell, and prefer JSONL rows over binary dumps.
 
-## E0. Smoke test of a one-level descent at a toy rung (done, see status)
+## E0. Smoke test of a one-level descent at a small-field rung (done, see status)
 
 **Angles:** V2, V9. **Script:** `research/isogeny_conductor_gap_20261007/v2_descend_toy.py`.
-Builds `K_0/F_{2^23}`, finds a point of order 967 in `E(F_{q^21})`, rejects the
+Builds `icv1-f2m23-t5197-69e76b73`, finds a point of order 967 in `E(F_{q^21})`, rejects the
 two τ-eigenlines by a Weil-pairing test, computes the Vélu 967-isogeny,
 checks `j(E') ∈ F_q \ F_2`, descends to `E_1/F_q` by the minimal polynomial of
 `j'`, picks the twist of the right order, and checks that `φ(G)` keeps the
@@ -70,7 +70,7 @@ missing explicit embedding `F_q → F_{q^{21}}`, and a comparison of `φ(G)`
 against the identity of the wrong curve; both are fixed in the committed
 script.
 
-## E1. Production-solver hardness panel across levels at the toy classes (new)
+## E1. Production-solver hardness panel across levels at the small-field classes (new)
 
 **Angles:** V3, V4, V11. **Question:** with this repo's solvers rather than an
 exact oracle, how much of the `log₂(m!)` τ-slot gap is realized, and is
@@ -200,14 +200,14 @@ cyclotomic-sparse factor base (directions note A2) uses?
 
 **Procedure.** (1) Prove or refute: `263 | U_131` iff `(τ/τ̄)` has order
 dividing 131 in `(O_K/263)^×`; compute the analogous statement for every
-toy `n` with `2n+1` prime and `(2n+1) ≡ 7 mod 8` (`n = 11, 23, 83, 131`):
+smaller `n` with `2n+1` prime and `(2n+1) ≡ 7 mod 8` (`n = 11, 23, 83, 131`):
 does `2n+1` divide `f_n`? Tabulate. (2) Build `E0[263]` over `F_{2^262}`
 (the report has a basis), compute `e_263(S, T)` for a basis and check the
 image generates `μ_263`; evaluate the Tate pairing of `G` against `E0[263]`
 and confirm it is trivial (`G ∈ 263E`). (3) For the cyclotomic-sparse base
 `x = Σ γ^k`: check whether `x(T)` for `T ∈ E0[263]` has small γ-weight.
 **Prediction.** (1) The divisibility is a coincidence of probability about
-1/2 per `n`, so roughly half the toy rows have it. (2) Trivial pairing with
+1/2 per `n`, so roughly half the screened rows have it. (2) Trivial pairing with
 `⟨G⟩`, as the theory says. (3) No: `x(T)` is a root of the 263-division
 polynomial and has no reason to be γ-sparse. **Cost:** an afternoon in Sage.
 **Result for (1), 2026-10-08 (pure arithmetic, no Sage):** among the rungs
@@ -262,7 +262,7 @@ conductor `f`, its factorization, `v_ell`, `(−7/ell)`, kernel field degree
 per prime, and the reachability verdict, for `n ∈ {23, 41, 53, 61, 71, 73,
 83, 97, 131}` from `research/isogeny_conductor_gap_20261007/volcano_output.txt`.
 (2) A script `which_component.py` that, given `(n, j)`, reports: crater,
-floor-263 orbit A or B (lookup against the 262 j's at `n=131`; at toy `n`
+floor-263 orbit A or B (lookup against the 262 j's at `n=131`; at smaller `n`
 against the built classes), or "big component, unreachable", with the cost
 class of the ascending isogeny. **Prediction:** n/a. **Acceptance:** the
 checker rejects a manifest missing any field; the component tool classifies
@@ -349,7 +349,23 @@ So the honest status is: not closed by characteristic 2 alone (obstruction 2
 only kills the `2^e` route), but blocked by torsion rationality unless
 2024/924 has a way around it. Next step for E8(1): read that paper's
 Theorem 1 proof for how the `N`-torsion is obtained, then decide whether (2)
-is worth a toy at C37's level 73.
+warrants a C37 level-73 control experiment.
+
+**E8(1) source audit, 2026-10-09.** The [native C37 arithmetic preflight and
+source report](../../research/isogeny_conductor_gap_20261007/E8_CHAR2_PREFLIGHT.md)
+correct two parts of the first pass above. Galbraith 2024/924 Section 4 works
+prime by prime with Frobenius eigenbases, so full smooth-order torsion over one
+compositum is not a necessary materialized input to the efficient method.
+Its Section 3, however, explicitly assumes the Kani degree `M` and both
+input isogeny degrees `N` and `m` are coprime to the characteristic. For odd
+vertical `N` in characteristic two, `M=N+m` cannot make both `M` and `m` odd.
+Thus the cited construction cannot be applied unchanged: choosing odd `M`
+forces an even auxiliary degree, while choosing odd `m` forces even `M` and
+non-etale 2-primary torsion. This is a source-hypothesis obstruction, not a
+proof that all characteristic-two Kani variants fail. At C37's inert degree
+73, `M=81=9·9` has `m=8`; exact Frobenius arithmetic gives full surface
+`9`-torsion at extension degree 24, but no map, subgroup transfer, or cost
+receipt. E8(2) and E8(3) remain open pending an applicable construction.
 
 ## E9. Equal-precompute rho across levels (extends the accounting plan)
 
@@ -394,7 +410,8 @@ same order (E2), and the closed C37 row (E3).
 5. E9 after the accounting plan's Phase 3 arm lands.
 6. E8 (1) at any time; (2)–(3) only if (1) leaves a door open.
 
-Verification rule from `AGENTS.md`: this change set is documentation and
-research scripts only; no Rust or Python package code is touched, so the
-`cargo test --release --lib` gate does not apply. The Sage script runs
-through the checked launcher as `cryptanalysis/AGENTS.md` requires.
+The original 2026-10-07 set was documentation and research scripts. The E8
+follow-up adds a native Rust exact-arithmetic check; its protocol, unit-test
+command, hashes, and result are in the linked E8 report. Earlier Sage receipts
+remain historical evidence. The full Rust library gate for the follow-up is
+separate from its small arithmetic tests and must be recorded with its status.

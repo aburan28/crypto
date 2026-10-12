@@ -1,0 +1,24 @@
+flowchart LR
+    subgraph K["EC kernels inventoried"]
+        direction TB
+        P["point add/double<br/>O(1) field formulas"]
+        S["scalar mul<br/>sequential group ops"]
+        M["batch verify / MSM / IPA-G<br/>group actions"]
+        I["IPA ab (nearest miss)<br/>ONE inner product"]
+        F["extension fields / Miller<br/>O(1) maps, sequential"]
+    end
+    subgraph G["Gates"]
+        direction TB
+        SH["SHAPE:<br/>many wants, one thin middle?"]
+        RI["RING:<br/>small-integer products?"]
+        SC["SCALE:<br/>large N?"]
+    end
+    K --> SH
+    SH -->|fail: O(1), sequential,<br/>single pair, single RHS| NO1["stopped: no (N,D,W) mapping"]
+    SH -->|hypothetical pass| RI
+    RI -->|fail: group action,<br/>256-bit mod-p scalars| NO2["stopped: identity cannot act /<br/>encoding explodes"]
+    RI -->|hypothetical pass| SC
+    SC -->|widest row eps 0.114| OK["screen vs table2.json"]
+    NOTE["One-shot reading bound: |W|=1 can never amortize preprocessing.<br/>Entry-size bound: 256-bit scalars vs O(log N) allowance."]
+    NO1 -.-> NOTE
+    NO2 -.-> NOTE

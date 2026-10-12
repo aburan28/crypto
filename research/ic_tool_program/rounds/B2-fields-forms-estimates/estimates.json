@@ -1,0 +1,85 @@
+{
+ "what_this_is": "The constants B2's F2 estimates read beyond baselines.json (design/schema-v2.md §5.4; PROTOCOL.md, amendment 1). Each names its source. They are models' inputs, not measurements of any run.",
+ "kic": {
+  "source": "research/ic_exponent_20260926/predict.py CONSTANTS, each with its own source there; ledger §20's phase model, evaluated for one target",
+  "scan_units_per_summand": 2.85,
+  "summands_per_relation_times_F2_over_r": 2.0214020864868765,
+  "relations_over_counting_floor": 1.0260416666666667,
+  "build_units_per_stored_pair": 6.14,
+  "select_units_per_point": 37.3,
+  "descent_units_per_probe_m3": 2.67,
+  "descent_units_per_probe_m2": 1.19,
+  "m3_block": 1024,
+  "m2_round": 64
+ },
+ "rho-negation": {
+  "source": "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json: the matched rho (negation map) at each regime's largest rung, rho_s_mean / sqrt(pi/4) x ns_per_add",
+  "prime": {
+   "anchor": "generated-24bit-10935329",
+   "r": 10933753,
+   "rho_s_mean": 3.930029695917065,
+   "ns_per_gae": 218.329685,
+   "ns_per_step": 968.1968815288025
+  },
+  "binary": {
+   "anchor": "random-binary-n27-b845462",
+   "r": 22367531,
+   "rho_s_mean": 2.31351757083648,
+   "ns_per_gae": 411.605765,
+   "ns_per_step": 1074.5071518771554
+  }
+ },
+ "ic-prime-s3": {
+  "source": "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json: fits (phase total) and the instance at the largest prime rung",
+  "variant": "mitm_m2_negfold_walk_balanced",
+  "alpha": 0.4046341898831369,
+  "fit_points": 8,
+  "r_squared": 0.9610938800828579,
+  "anchor": {
+   "instance": "generated-24bit-10935329",
+   "r": 10933753,
+   "log2_r": 23.38228535388855,
+   "total_gae": 47220.34502196123,
+   "ns_per_gae": 218.329685,
+   "repeats": 3
+  }
+ },
+ "ic-binary-s4": {
+  "source": "docs/ic/runs/ic-boundary-ledger-round3-2026-09-21.json: fits (phase total) and the instance at the largest char2 rung",
+  "variant": "mitm_m3_negfold_walk",
+  "alpha": 0.6226507531441399,
+  "fit_points": 5,
+  "r_squared": 0.9766452313478396,
+  "anchor": {
+   "instance": "random-binary-n27-b845462",
+   "r": 22367531,
+   "log2_r": 24.414902680079198,
+   "total_gae": 788579.4046387117,
+   "ns_per_gae": 411.605765,
+   "repeats": 3
+  }
+ },
+ "rho-bignum": {
+  "status": "provisional: one unisolated 20,000-step run each on the development host (examples/rho_bignum_rate.rs, 2026-10-01), until B2's measurement 7 replaces them",
+  "binary": {
+   "points": [
+    {
+     "width": 100,
+     "ns_per_step": 8594
+    },
+    {
+     "width": 127,
+     "ns_per_step": 10232
+    }
+   ]
+  },
+  "prime": {
+   "points": [
+    {
+     "width": 127,
+     "ns_per_step": 24795
+    }
+   ]
+  }
+ }
+}

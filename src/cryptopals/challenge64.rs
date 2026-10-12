@@ -51,8 +51,8 @@
 use crate::cryptopals::challenge63::{pack, unpack, Gf128};
 use crate::cryptopals::Report;
 use crate::symmetric::aes::{encrypt_block, AesKey};
-use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 
 /// 128×128 matrix over GF(2).  Stored as 128 column vectors (`u128`
 /// each).  Row `i` of column `j` is `(cols[j] >> i) & 1`.
@@ -152,7 +152,7 @@ pub struct BitMatrix {
 
 impl BitMatrix {
     pub fn zero(rows: usize, cols: usize) -> Self {
-        let words = (cols + 63) / 64;
+        let words = cols.div_ceil(64);
         BitMatrix {
             rows,
             cols,

@@ -1,0 +1,34 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "n37 cold compact-orbit source against strong rho",
+  "description": "Preregistered L0 operation-count gate: the archived 42-orbit source constructor, unchanged folded-table control, counted folded-table candidate and strong same-public-Q rho. Wall times are descriptive; unpriced native work makes IC costs lower bounds.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 37}],
+    "targets_per_curve": 8,
+    "target_seed": 202610030641,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "ic-legacy-setup", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000",
+      "oracle": "mitm-frobenius:m=3",
+      "targets": "walk",
+      "max_trials": "1000000"
+    }}},
+    {"name": "ic-counted-setup", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+      "factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000",
+      "oracle": "mitm-frobenius-counted:m=3",
+      "targets": "walk",
+      "max_trials": "1000000"
+    }}}
+  ],
+  "measurement": {
+    "rounds": 2,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 202610030642,
+    "isolation_required": "L0",
+    "timeout_seconds": 600
+  }
+}

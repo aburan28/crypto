@@ -1,0 +1,64 @@
+name: ECC2K-130 base-window source lock
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ecc2k130-base-window-source-lock.yml'
+      - 'research/notes/ecc2k130/base_window_screen_20261001/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ecc2k130-base-window-source-lock.yml'
+      - 'research/notes/ecc2k130/base_window_screen_20261001/**'
+
+permissions:
+  contents: read
+
+jobs:
+  source-lock:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /Cargo.toml
+            /docs/ic/calibration.json
+            /src/*
+            /examples/koblitz_base_window.rs
+            /research/notes/ecc2k130/base_window_screen_20261001/*
+            /research/notes/ecc2k130/base_window_screen_20261001/development/*
+            /research/notes/ecc2k130/compact_frozen_source_replay_20260929/*
+            /research/notes/ecc2k130/compact_frozen_source_replay_20260929/historical_snapshots/*
+            /research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json
+            /research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
+            /research/notes/ecc2k130/compact_ir_ledger_20260930/run_panel.py
+            /research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py
+            /research/notes/ecc2k130/disjoint_cold_v2_20261001/FROZEN.json
+            /research/notes/ecc2k130/disjoint_cold_v2_20261001/check_pairing.py
+            /research/notes/ecc2k130/disjoint_cold_v2_outcome_20261001/evidence_run_36803331080/raw/n41_L1024.tar.gz
+            /research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
+            /tools/isolated_bench.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check source syntax and frozen decisions
+        run: |
+          python3 -m py_compile \
+            research/notes/ecc2k130/base_window_screen_20261001/{build_frozen,prepare_inputs,verify_inputs,run_screen,verify_screen,analyze_screen,test_source_lock}.py
+          python3 -m unittest discover \
+            research/notes/ecc2k130/base_window_screen_20261001 \
+            -p 'test_source_lock.py' -v
+      - name: Build the frozen source plus the new generator
+        run: |
+          python3 research/notes/ecc2k130/base_window_screen_20261001/build_frozen.py \
+            --out "$RUNNER_TEMP/base-window-build" --profile dev
+      - name: Replay source-only generator parity
+        run: |
+          python3 research/notes/ecc2k130/base_window_screen_20261001/test_generator.py \
+            --generator "$RUNNER_TEMP/base-window-build/target/debug/examples/koblitz_base_window" \
+            --out "$RUNNER_TEMP/base-window-source-control.json"
+          cmp "$RUNNER_TEMP/base-window-source-control.json" \
+            research/notes/ecc2k130/base_window_screen_20261001/development/SOURCE_CONTROL.json

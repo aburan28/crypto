@@ -1,0 +1,11 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -6957,7 +6957,7 @@
+             })
+         };
+         let mut relations: Vec<CollectedRelation> = (unit.start..end)
+-            .into_par_iter()
++            .into_iter()
+             .filter_map(probe)
+             .collect();
+         relations.sort_by_key(|r| r.trial);

@@ -1,0 +1,24 @@
+{
+  "scope": "producer admission controls, no comparative performance claim",
+  "runs": {
+    "36105578831": {
+      "head": "57d0d47d0f124b632c8ae334951653496b07c172",
+      "status": "failed",
+      "reason": "archived both assertion convention; stale-row iteration in independent stage audit",
+      "source_transport_omission": ".cargo/config.toml omitted by upload-artifact default"
+    },
+    "36105859677": {
+      "head": "6a69df6b30baf741333ee214e1baea0a47849200",
+      "status": "failed overall; scaled/pairinv passed",
+      "reason": "archived both assertion convention; rank audit corrected",
+      "source_transport_omission": ".cargo/config.toml omitted by upload-artifact default"
+    },
+    "36106499204": {
+      "head": "6b5a402558c2c883baa52c2ef585f99886108167",
+      "status": "passed; 39/39 native/profile pairs",
+      "source_transport_omission": null,
+      "executable_and_evaluator_retained": true,
+      "url": "https://github.com/aburan28/crypto/actions/runs/36106499204"
+    }
+  }
+}

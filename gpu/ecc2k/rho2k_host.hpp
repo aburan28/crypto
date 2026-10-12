@@ -45,13 +45,15 @@ struct Rho2kHost {
         st.P = Koblitz::mul2(P, sa, Q, sb);
         st.escape = 0;
         if (st.P.inf) return false;
+        r2k_refresh_weight(st, cb);
         a = Sc::from_limbs(sa);
         b = Sc::from_limbs(sb);
         for (uint32_t i = 0; i < steps; i++) {
             f2e den;
             uint32_t j;
-            if (r2k_phase_a(st, prm, cb, den, j) == R2K_MODE_INF) return false;
-            r2k_phase_b(st, prm, j, F2::inv(den));
+            if (r2k_phase_a(st, prm, den, j) == R2K_MODE_INF) return false;
+            r2k_phase_b(st, j, den, F2::inv(den));
+            r2k_refresh_weight(st, cb);
             /* one step multiplies both coefficients by (1 + s^j) */
             a = Sc::mul(a, step_factor[j]);
             b = Sc::mul(b, step_factor[j]);

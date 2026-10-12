@@ -1,0 +1,48 @@
+{
+  "cases": {
+    "n41_L1024_backend_ab": {
+      "candidate_over_baseline_cpu_95pct_log_t_interval": [
+        0.3282734909929838,
+        0.33154784048872876
+      ],
+      "candidate_over_baseline_cpu_median": 0.3294939639840906,
+      "host_path": "hosts/n41_L1024_backend_ab.json",
+      "host_sha256": "00d92a80375039451fdd513f64b1f7cf57088bb89bbeeb98306db42c32055507",
+      "raw_bytes": 713983,
+      "raw_path": "raw/n41_L1024_backend_ab.tar.gz",
+      "raw_sha256": "3bebe9e0da3c35a7831e37a64556270722f586ccbc6c5504e217ea4feb95c66e",
+      "receipt_path": "receipts/n41_L1024_backend_ab.json",
+      "receipt_sha256": "3cd07bb5018bd0f918aafa2819a520782b1fa1244e7da64a27d9fa9e20049c4a",
+      "same_Q_scalar_walk_and_charges": true,
+      "second_host_replay_path": "second_host_replay/n41_L1024_backend_ab.json",
+      "second_host_replay_sha256": "3cd07bb5018bd0f918aafa2819a520782b1fa1244e7da64a27d9fa9e20049c4a",
+      "status": "PASS"
+    },
+    "n53_L1_backend_ab": {
+      "candidate_over_baseline_cpu_95pct_log_t_interval": [
+        0.23652110375724938,
+        0.23805191112397686
+      ],
+      "candidate_over_baseline_cpu_median": 0.23723616214990254,
+      "host_path": "hosts/n53_L1_backend_ab.json",
+      "host_sha256": "c790acf27c50e1ac34231eeaf5eaf14756fd0da22a3893387c31842b3d569447",
+      "raw_bytes": 4444,
+      "raw_path": "raw/n53_L1_backend_ab.tar.gz",
+      "raw_sha256": "fc8427b15c0611aa2e4011ac814e8500882f7e8f6dd9fa5b3cfc097024e163fd",
+      "receipt_path": "receipts/n53_L1_backend_ab.json",
+      "receipt_sha256": "e65858fd59753cd9a2521ae3161daa417b87ccb87761a098b9f65e3dd59a7368",
+      "same_Q_scalar_walk_and_charges": true,
+      "second_host_replay_path": "second_host_replay/n53_L1_backend_ab.json",
+      "second_host_replay_sha256": "e65858fd59753cd9a2521ae3161daa417b87ccb87761a098b9f65e3dd59a7368",
+      "status": "PASS"
+    }
+  },
+  "checkout_main_parent": "7cb82297ca9a6349e9fbde06219228417ca9e54a",
+  "checkout_merge_commit": "7c12aa495fe1713b3f31f8b4d2cf374a35170082",
+  "frozen_sha256": "eb1a76cc72b02bcef551a83e20ad8372f9a5b7fcde917cd7c89470812bf24dde",
+  "github_run_url": "https://github.com/aburan28/crypto/actions/runs/36556060256",
+  "schema": "compact-orbit-rho-backend-ab-archive-v1",
+  "second_host_replay_host_sha256": "35242b1a319a1e86496ae1bde370a8c132e451c730325fce96819394696194fd",
+  "source_head": "ac63dd5d2ef59b4efa7a61123b7c6be96073c8ef",
+  "source_head_kind": "PR head; GitHub Actions compiled the recorded PR merge checkout"
+}

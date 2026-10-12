@@ -1,0 +1,347 @@
+diff --git a/examples/f4_f2_bench.rs b/examples/f4_f2_bench.rs
+index ec2bb7323..75126c75f 100644
+--- a/examples/f4_f2_bench.rs
++++ b/examples/f4_f2_bench.rs
+@@ -221,6 +221,9 @@ fn main() {
+                 "output_terms": output_terms,
+                 "direct_pack_used": phases.direct_pack_used,
+                 "direct_unpack_used": phases.direct_unpack_used,
++                "one_pass_unpack_used": phases.one_pass_unpack_used,
++                "one_pass_growths": phases.one_pass_growths,
++                "one_pass_max_capacity": phases.one_pass_max_capacity,
+                 "row_space_fp": format!("{row_space_fp:016x}"),
+                 "criterion_ms": phases.criterion_ns as f64 / 1e6, "f5_build_ms": phases.build_ns as f64 / 1e6,
+                 "reduce_ms": phases.reduce_ns as f64 / 1e6, "unpack_ms": phases.unpack_ns as f64 / 1e6,
+diff --git a/research/f5_one_pass_unpack_20260929/screen.py b/research/f5_one_pass_unpack_20260929/screen.py
+new file mode 100644
+index 000000000..45a426382
+--- /dev/null
++++ b/research/f5_one_pass_unpack_20260929/screen.py
+@@ -0,0 +1,191 @@
++#!/usr/bin/env python3
++"""Frozen local same-binary F5 one-pass unpack screen; exploratory only."""
++
++import hashlib
++import itertools
++import json
++import os
++import platform
++import statistics
++import subprocess
++import sys
++import time
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[2]
++HERE = Path(__file__).resolve().parent
++BIN = Path(os.environ.get("F5_SCREEN_BINARY", ROOT / "target/release/examples/f4_f2_bench"))
++SEEDS = ("0", "badc0de1")
++PRIMARY = "f5_n24_m24_d4"
++CASES = {
++    "f5_n12_m12_d4", "f5_n16_m16_d3", "f5_n16_m16_d4",
++    "f5_n20_m20_d3", "f5_n20_m20_d4", "f5_n24_m24_d3", PRIMARY,
++}
++SIGNATURE = (
++    "row_space_fp", "rows_fp", "output_terms", "rank", "rows_f4",
++    "rows_built", "cols", "rows_pruned", "criterion_word_ops", "reduce_word_ops",
++)
++BASE = {
++    "KIC_F5_ECHELON": "2",
++    "KIC_F5_FUSED_BUILD": "1",
++    "KIC_F5_DIRECT_PACK": "1",
++    "KIC_F5_UNPACK_DIRECT": "1",
++    "KIC_GF2_BRANCHLESS_STRIP": "1",
++    "KIC_GF2_REUSE_TABLE": "1",
++    "KIC_GF2_TABLES": "4",
++    "KIC_GF2_SIMD": "1",
++    "KIC_GF2_DEFER_ABOVE": "0",
++    "KIC_GF2_WORD_BATCH": "0",
++    "KIC_F5_AVX512_UNPACK": "0",
++    "RAYON_NUM_THREADS": "1",
++}
++
++
++def sha(path):
++    return hashlib.sha256(path.read_bytes()).hexdigest()
++
++
++def save(path, report):
++    temp = path.with_suffix(path.suffix + ".tmp")
++    temp.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
++    temp.replace(path)
++
++
++def run(seed, mode, phase, pair, position):
++    env = os.environ.copy()
++    env.update(BASE)
++    env["KIC_F5_ONE_PASS_UNPACK"] = str(mode)
++    cmd = [str(BIN), "1", "24", "f5", seed]
++    record = {
++        "seed": seed, "mode": mode, "phase": phase, "pair": pair,
++        "position": position, "cmd": cmd, "options": dict(BASE),
++        "load_before": os.getloadavg(),
++    }
++    record["options"]["KIC_F5_ONE_PASS_UNPACK"] = str(mode)
++    start = time.monotonic()
++    try:
++        proc = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=120)
++        record.update(
++            process_wall_ms=(time.monotonic() - start) * 1000,
++            returncode=proc.returncode, stdout=proc.stdout, stderr=proc.stderr,
++            load_after=os.getloadavg(),
++        )
++        if proc.returncode != 0:
++            record["status"] = "failure"
++            return record
++        cases = [json.loads(line) for line in proc.stdout.splitlines() if line.strip()]
++        record["cases"] = {case["case"]: case for case in cases}
++        record["status"] = (
++            "ok" if len(cases) == len(CASES) and set(record["cases"]) == CASES
++            else "output_error"
++        )
++    except subprocess.TimeoutExpired as exc:
++        record.update(
++            status="timeout", process_wall_ms=(time.monotonic() - start) * 1000,
++            stdout=exc.stdout.decode(errors="replace") if isinstance(exc.stdout, bytes) else exc.stdout,
++            stderr=exc.stderr.decode(errors="replace") if isinstance(exc.stderr, bytes) else exc.stderr,
++            load_after=os.getloadavg(),
++        )
++    except (json.JSONDecodeError, KeyError, TypeError) as exc:
++        record.update(status="output_error", error=str(exc), load_after=os.getloadavg())
++    return record
++
++
++def fingerprint(record):
++    return {
++        name: {field: case[field] for field in SIGNATURE}
++        for name, case in record["cases"].items()
++    }
++
++
++def bootstrap(values):
++    ordered = sorted(
++        statistics.median(values[i] for i in indices)
++        for indices in itertools.product(range(len(values)), repeat=len(values))
++    )
++    return [ordered[int((len(ordered) - 1) * p)] for p in (0.025, 0.975)]
++
++
++def pairs(records, seed, case, phase, field):
++    values = []
++    for pair in range(5):
++        group = [r for r in records if r["seed"] == seed and r["phase"] == phase and r["pair"] == pair]
++        if len(group) != 2:
++            raise ValueError(f"incomplete {phase} pair {pair}")
++        if phase == "aa":
++            left, right = sorted(group, key=lambda r: r["position"])
++        else:
++            left = next(r for r in group if r["mode"] == 0)
++            right = next(r for r in group if r["mode"] == 1)
++        values.append(left["cases"][case][field] / right["cases"][case][field])
++    return values
++
++
++def main():
++    output = HERE / ("screen_" + time.strftime("%Y-%m-%dT%H%M%SZ", time.gmtime()) + ".json")
++    report = {
++        "status": "running", "protocol": "PROTOCOL.md", "seeds": SEEDS,
++        "host": {"platform": platform.platform(), "machine": platform.machine(),
++                 "processor": platform.processor(), "cpu_count": os.cpu_count()},
++        "git_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
++        "binary_sha256": sha(BIN),
++        "source_sha256": {str(p.relative_to(ROOT)): sha(p) for p in (
++            ROOT / "src/cryptanalysis/gf2_elim.rs",
++            ROOT / "src/cryptanalysis/matrix_f5_f2.rs",
++            ROOT / "examples/f4_f2_bench.rs")},
++        "runs": [],
++    }
++    save(output, report)
++    expected = {}
++    for seed in SEEDS:
++        sequence = [("warmup", 0, 0, 0), ("warmup", 0, 1, 1)]
++        for pair in range(5):
++            sequence.extend([("aa", pair, 0, 0), ("aa", pair, 1, 0)])
++        for pair in range(5):
++            modes = [0, 1] if pair % 2 == 0 else [1, 0]
++            sequence.extend(("paired", pair, position, mode) for position, mode in enumerate(modes))
++        for phase, pair, position, mode in sequence:
++            record = run(seed, mode, phase, pair, position)
++            if record["status"] == "ok":
++                try:
++                    actual = fingerprint(record)
++                    if seed not in expected:
++                        expected[seed] = actual
++                    elif actual != expected[seed]:
++                        record["status"] = "output_mismatch"
++                    for name, case in record["cases"].items():
++                        selected = bool(mode == 1 and name == PRIMARY)
++                        if case["one_pass_unpack_used"] != selected:
++                            record["status"] = "route_mismatch"
++                except (KeyError, TypeError) as exc:
++                    record.update(status="output_error", error=str(exc))
++            report["runs"].append(record)
++            save(output, report)
++            if record["status"] != "ok":
++                report["status"] = record["status"]
++                save(output, report)
++                print(output)
++                return 1
++    report["summary"] = {}
++    for seed in SEEDS:
++        report["summary"][seed] = {}
++        for case in sorted(CASES):
++            report["summary"][seed][case] = {}
++            for field in ("wall_ms", "reduce_ms", "unpack_ms"):
++                aa = pairs(report["runs"], seed, case, "aa", field)
++                ab = pairs(report["runs"], seed, case, "paired", field)
++                report["summary"][seed][case][field] = {
++                    "aa_ratios": aa, "aa_min": min(aa), "aa_max": max(aa),
++                    "paired_ratios": ab, "paired_median": statistics.median(ab),
++                    "bootstrap_95pct": bootstrap(ab),
++                }
++    report["status"] = "complete"
++    save(output, report)
++    print(output)
++    for seed in SEEDS:
++        print(seed, json.dumps(report["summary"][seed][PRIMARY], sort_keys=True))
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+diff --git a/src/cryptanalysis/matrix_f5_f2.rs b/src/cryptanalysis/matrix_f5_f2.rs
+index b509bf2ae..ee1f56b07 100644
+--- a/src/cryptanalysis/matrix_f5_f2.rs
++++ b/src/cryptanalysis/matrix_f5_f2.rs
+@@ -460,6 +460,12 @@ pub struct F5Timings {
+     pub direct_pack_used: bool,
+     /// Whether the scalar preallocated direct-write unpack path was used.
+     pub direct_unpack_used: bool,
++    /// Whether the one-pass direct-write unpack path was used.
++    pub one_pass_unpack_used: bool,
++    /// Number of output-row capacity growths in one-pass unpack.
++    pub one_pass_growths: u64,
++    /// Largest allocated output-row capacity in one-pass unpack.
++    pub one_pass_max_capacity: usize,
+ }
+ 
+ /// Row form requested from a matrix-F5 step. Both forms span the same
+@@ -518,6 +524,46 @@ fn unpack_row_scalar_direct(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolP
+     }
+ }
+ 
++/// Decode once, reserving an estimate and growing only between packed words.
++fn unpack_row_one_pass(
++    row: &[u64],
++    cols: &[u64],
++    n_vars: usize,
++    row_index: usize,
++) -> (F2BoolPoly, u64) {
++    let estimate = cols.len().saturating_sub(row_index) / 3 + 64;
++    let mut monos = Vec::<F2BoolMono>::with_capacity(estimate.max(64));
++    let mut written = 0usize;
++    let mut growths = 0u64;
++    for (w, &word) in row.iter().enumerate() {
++        if monos.capacity() - written < 64 {
++            // SAFETY: all earlier slots were initialized before this word.
++            unsafe { monos.set_len(written) };
++            monos.reserve(64);
++            growths += 1;
++        }
++        let out = monos.as_mut_ptr();
++        let mut bits = word;
++        while bits != 0 {
++            let c = w * 64 + bits.trailing_zeros() as usize;
++            bits &= bits - 1;
++            // SAFETY: at least 64 slots were reserved before this word,
++            // which can contain at most 64 set bits.
++            unsafe { out.add(written).write(F2BoolMono::from_mask(cols[c])) };
++            written += 1;
++        }
++    }
++    // SAFETY: exactly `written` slots were initialized above.
++    unsafe { monos.set_len(written) };
++    (
++        F2BoolPoly {
++            terms: monos,
++            n_vars,
++        },
++        growths,
++    )
++}
++
+ #[cfg(target_arch = "x86_64")]
+ #[target_feature(enable = "avx512f")]
+ unsafe fn unpack_row_avx512(row: &[u64], cols: &[u64], n_vars: usize) -> F2BoolPoly {
+@@ -693,15 +739,37 @@ pub fn matrix_f5_f2_with_form_timed(
+     let direct_unpack =
+         *DIRECT_UNPACK.get_or_init(|| std::env::var("KIC_F5_UNPACK_DIRECT").as_deref() == Ok("1"));
+     timings.direct_unpack_used = direct_unpack && !avx512_unpack;
++    static ONE_PASS_UNPACK: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
++    let one_pass_requested = *ONE_PASS_UNPACK
++        .get_or_init(|| std::env::var("KIC_F5_ONE_PASS_UNPACK").as_deref() == Ok("1"));
++    let one_pass_unpack = one_pass_requested
++        && direct_unpack
++        && !avx512_unpack
++        && n_vars >= 24
++        && degree == 4
++        && cols.len() >= 4096;
++    timings.one_pass_unpack_used = one_pass_unpack;
++    let growths = std::sync::atomic::AtomicU64::new(0);
++    let max_capacity = std::sync::atomic::AtomicUsize::new(0);
+     let out = matrix[..rank]
+         .par_iter()
+-        .map(|row| {
+-            let p = unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack);
++        .enumerate()
++        .map(|(row_index, row)| {
++            let p = if one_pass_unpack {
++                let (p, row_growths) = unpack_row_one_pass(row, &cols, n_vars_out, row_index);
++                growths.fetch_add(row_growths, std::sync::atomic::Ordering::Relaxed);
++                max_capacity.fetch_max(p.terms.capacity(), std::sync::atomic::Ordering::Relaxed);
++                p
++            } else {
++                unpack_row(row, &cols, n_vars_out, avx512_unpack, direct_unpack)
++            };
+             debug_assert!(p.is_canonical());
+             p
+         })
+         .filter(|p| !p.is_zero())
+         .collect();
++    timings.one_pass_growths = growths.load(std::sync::atomic::Ordering::Relaxed);
++    timings.one_pass_max_capacity = max_capacity.load(std::sync::atomic::Ordering::Relaxed);
+     timings.unpack_ns = t.elapsed().as_nanos() as u64;
+     Some((out, report, timings))
+ }
+@@ -764,6 +832,31 @@ mod tests {
+         }
+     }
+ 
++    #[test]
++    fn one_pass_unpack_matches_direct_for_sparse_dense_and_partial_words() {
++        for cols_len in [1usize, 7, 63, 64, 65, 127, 129, 4097, 12951] {
++            let cols: Vec<u64> = (0..cols_len)
++                .map(|i| (i as u64).wrapping_mul(0x9e37_79b9_7f4a_7c15))
++                .collect();
++            for salt in [0u64, 1, 3, 7, u64::MAX] {
++                let row: Vec<u64> = (0..cols_len.div_ceil(64))
++                    .map(|w| {
++                        let bits = (w as u64).wrapping_mul(0xd6e8_feb8_6659_fd93) ^ salt;
++                        let valid = (cols_len - w * 64).min(64);
++                        bits & (u64::MAX >> (64 - valid))
++                    })
++                    .collect();
++                for row_index in [0, cols_len / 2, cols_len] {
++                    assert_eq!(
++                        unpack_row_one_pass(&row, &cols, 24, row_index).0,
++                        unpack_row_scalar_direct(&row, &cols, 24),
++                        "cols_len={cols_len}, salt={salt}, row_index={row_index}",
++                    );
++                }
++            }
++        }
++    }
++
+     #[test]
+     fn direct_packed_f5_build_matches_sorted_builder_and_falls_back_on_sparse_columns() {
+         let n_vars = 4;

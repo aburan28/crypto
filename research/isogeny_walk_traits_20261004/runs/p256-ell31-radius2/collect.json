@@ -1,0 +1,59 @@
+{
+  "schema": "isogeny-walk-traits-collected/v1",
+  "isogeny_routes_sha256": "9241deccb95787d8a03a3beb8579dc34a15adb52881a1e2418228cd65879cc9c",
+  "shards": 4,
+  "curves": 84,
+  "traits_sha256": "4b1bbd4dfa62b32f4fba11acef710db109ff8d182cb66339bc89b9bfc2f154e2",
+  "class_audits": "class_audits.json",
+  "distributions": {
+    "a_minus_3_model": {
+      "false": 41,
+      "true": 43
+    },
+    "coefficient_bits.a": {
+      "2": 43,
+      "250": 1,
+      "251": 1,
+      "252": 3,
+      "253": 6,
+      "254": 9,
+      "255": 21
+    },
+    "coefficient_bits.b": {
+      "249": 2,
+      "250": 5,
+      "251": 4,
+      "252": 2,
+      "253": 10,
+      "254": 14,
+      "255": 47
+    },
+    "generator_valid": {
+      "true": 84
+    },
+    "non_singular": {
+      "true": 84
+    },
+    "qr_prefix_64": {
+      "23": 1,
+      "25": 3,
+      "26": 6,
+      "27": 5,
+      "28": 5,
+      "29": 4,
+      "30": 7,
+      "31": 11,
+      "32": 5,
+      "33": 6,
+      "34": 5,
+      "35": 10,
+      "36": 2,
+      "37": 3,
+      "38": 4,
+      "39": 2,
+      "40": 2,
+      "41": 1,
+      "42": 2
+    }
+  }
+}

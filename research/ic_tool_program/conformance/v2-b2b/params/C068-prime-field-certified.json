@@ -1,0 +1,61 @@
+{
+ "schema_version": 2,
+ "name": "C068: y^2 = x^3 + x over a 200-bit p certified two levels deep",
+ "field": {
+  "kind": "prime",
+  "p": "2162870983926870756611804302466017459260948574345081775917171",
+  "p_certificate": {
+   "kind": "pocklington",
+   "factors": [
+    {
+     "prime": "2",
+     "exponent": 1,
+     "witness": "2"
+    },
+    {
+     "prime": "1383907110551755571579200746626419851532932013",
+     "exponent": 1,
+     "witness": "2",
+     "certificate": {
+      "kind": "pocklington",
+      "factors": [
+       {
+        "prime": "2",
+        "exponent": 1,
+        "witness": "2"
+       },
+       {
+        "prime": "981414014223442289715349",
+        "exponent": 1,
+        "witness": "2"
+       }
+      ]
+     }
+    }
+   ]
+  }
+ },
+ "curve": {
+  "form": "short_weierstrass",
+  "a": "1",
+  "b": "0"
+ },
+ "subgroup": {
+  "order": "540717745981717689152951075616504364815237143586270443979293",
+  "cofactor": "4",
+  "generator": {
+   "x": "224879039315742628982654504934813861949233321503564672980784",
+   "y": "1145794938323041411924879921720585240820635001794030129826970"
+  }
+ },
+ "target": {
+  "known_log": "46822929921484394503584688160124381404385635777485795812321"
+ },
+ "method": {
+  "solve": "rho",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 7
+  }
+ }
+}

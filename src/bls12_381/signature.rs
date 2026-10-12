@@ -48,7 +48,7 @@ use super::Fq12;
 use crate::hash::sha256::sha256;
 use crate::kdf::hkdf::{hkdf_expand, hkdf_extract};
 use num_bigint::BigUint;
-use num_traits::{One, Zero};
+use num_traits::One;
 
 /// Default domain-separation tag for the basic scheme.
 pub const DST_BASIC: &[u8] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_";
@@ -159,7 +159,7 @@ pub fn hash_to_g2(msg: &[u8], dst: &[u8]) -> G2Point {
 fn expand_message_xmd(msg: &[u8], dst: &[u8], len_in_bytes: usize) -> Vec<u8> {
     const B_IN_BYTES: usize = 32; // SHA-256 output
     const R_IN_BYTES: usize = 64; // SHA-256 block
-    let ell = (len_in_bytes + B_IN_BYTES - 1) / B_IN_BYTES;
+    let ell = len_in_bytes.div_ceil(B_IN_BYTES);
     assert!(ell <= 255 && len_in_bytes < 65536);
 
     // DST_prime = DST ‖ I2OSP(len(DST), 1)
@@ -234,10 +234,7 @@ fn hash_to_field_fq2(msg: &[u8], dst: &[u8], count: usize) -> Vec<Fq2> {
 // Z (non-square in F_{p²}, chosen as -(2 + I)).
 
 fn fq2_from_u32_pair(c0: u32, c1: u32) -> Fq2 {
-    Fq2::new(
-        Fq::new(BigUint::from(c0)),
-        Fq::new(BigUint::from(c1)),
-    )
+    Fq2::new(Fq::new(BigUint::from(c0)), Fq::new(BigUint::from(c1)))
 }
 
 fn iso_a() -> Fq2 {
@@ -252,8 +249,12 @@ fn sswu_z() -> Fq2 {
     // Z = -(2 + I) = (p-2) + (p-1)·I
     let p = modulus();
     Fq2::new(
-        Fq { value: &p - BigUint::from(2u32) },
-        Fq { value: &p - BigUint::from(1u32) },
+        Fq {
+            value: &p - BigUint::from(2u32),
+        },
+        Fq {
+            value: &p - BigUint::from(1u32),
+        },
     )
 }
 
@@ -288,7 +289,7 @@ fn fq2_sqrt_local(a: &Fq2) -> Option<Fq2> {
     if a.is_zero() {
         return Some(Fq2::zero());
     }
-    let p = modulus();
+    let _p = modulus();
     // Special case a1 == 0: just compute sqrt of a0 (or sqrt(-a0)·i).
     if a.c1.is_zero() {
         if let Some(r) = fp_sqrt(&a.c0) {
@@ -344,11 +345,6 @@ fn fq2_sqrt_local(a: &Fq2) -> Option<Fq2> {
             None
         }
     }
-    .map(|r| {
-        // Normalise: not strictly necessary, but caller may rely on sgn0
-        // consistency.
-        r
-    })
 }
 
 /// Simplified SWU mapping `u ↦ (x, y) ∈ E'2(F_{p²})` returning the
@@ -363,7 +359,7 @@ fn sswu_map_to_iso_curve(u: &Fq2) -> (Fq2, Fq2) {
     let zu2 = z.mul(&u2);
     let zu2_sq = zu2.square();
     let zu2_plus_zu2_sq = zu2.add(&zu2_sq); // Z·u² + Z²·u⁴
-    // x1_num = B · (Z·u² + Z²·u⁴ + 1)
+                                            // x1_num = B · (Z·u² + Z²·u⁴ + 1)
     let x1_num = b.mul(&zu2_plus_zu2_sq.add(&one));
     // x1_den = -A · (Z·u² + Z²·u⁴); fall back to Z·A if zero.
     let neg_a = a.neg();

@@ -1,0 +1,49 @@
+{
+  "schema": "compact-frozen-source-snapshots-v1",
+  "snapshots": [
+    {
+      "bytes": 3291,
+      "gzip_sha256": "aba72f4ce99d4393ab83a3b47c8fc6dd080f82b59d9756acc4560424803ea225",
+      "path": "Cargo.toml",
+      "sha256": "1435eec1bdf7ef0357ae6c8d86083b3352e9c40f850e2ef0e4d27648b0b6b6b8"
+    },
+    {
+      "bytes": 36457,
+      "gzip_sha256": "9e35649430cc7f4319017fbbbc3f62bc134914b2adc3ba7b599cf72357490d3c",
+      "path": "examples/koblitz_rho_fixture.rs",
+      "sha256": "98d6ba2d764b246dc451f78c809fe84669f4aafdcbcfe7ea31d6dcc10e9faaf8"
+    },
+    {
+      "bytes": 22782,
+      "gzip_sha256": "f0f989d79fb4dfac9267234810d960eadbb87bead5c664f129caa1aecaf4f669",
+      "path": "src/cryptanalysis/gf2_elim.rs",
+      "sha256": "5693b918fa8b003448ef340e919e8e80d1635a7c2c3447e4ca2dde98fcdfd258"
+    },
+    {
+      "bytes": 62279,
+      "gzip_sha256": "325e3f86470efcb3a4ec083023dbc64bc279ce7015ed8079d41d62ec85c0d89b",
+      "path": "src/cryptanalysis/koblitz_fast.rs",
+      "sha256": "8ad146df7c8349ae97170f369f27ea8ce42493d28f3b4d325ec738c9ad7a5e2e"
+    },
+    {
+      "bytes": 220198,
+      "gzip_sha256": "95a38f60fa5558323f6869e970ff4f48b32b284a7846fe1053cff36f16ef5320",
+      "path": "src/cryptanalysis/koblitz_groebner.rs",
+      "sha256": "bd95ee98ad095f93aec5a2b79e7f4840dcf4473db174418aef9b77ebae79c015"
+    },
+    {
+      "bytes": 536959,
+      "gzip_sha256": "10f05c3a555390864b04e026d25a0b27ec7adfa2b348dde1a29c31a29f548d57",
+      "path": "src/cryptanalysis/koblitz_index_calculus.rs",
+      "sha256": "f61037007e1aa5867be1bbacb98505e720aa9e0dce243a11f44b18ff790d5630"
+    },
+    {
+      "bytes": 13748,
+      "gzip_sha256": "df1ebc9f0e9744abb0f2ed5ff016bcd9271db9c24b0cd9b37845b2e46a8d7681",
+      "path": "src/cryptanalysis/mod.rs",
+      "sha256": "30e44b6f9facd323b75e8cb4943274f4bc63ec4983e40e5b4727fd0b5d36d1b1"
+    }
+  ],
+  "source_commit": "a045a0a80d3a8af00fedc85c0342f4e7d026aacd",
+  "what": "Frozen bytes of the source files the paired n37/n41 clean panel pins and that later commits changed, taken from the panel run's checkout_head and checked against each pin."
+}

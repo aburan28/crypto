@@ -1,0 +1,16 @@
+unregistered supplement: F4_F2_MAX_ROWS=200000 F4_F2_MAX_COLS=2000000, --allow-raised-caps, driver as committed with this artefact (7bcc6460 plus the flag)
+rung n= 9 ℓ=4 symmetrised chain vars 31 eqs 27 deg 3 | FFD min 4 max 4 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 0.0)] | 480 ms
+rung n= 9 ℓ=4 x-chained         vars 34 eqs 27 deg 3 | FFD min 2 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0625), (3, 3.5625)] | 926 ms
+rung n=11 ℓ=4 symmetrised chain vars 35 eqs 33 deg 3 | FFD min 4 max 4 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 0.0)] | 1203 ms
+rung n=11 ℓ=4 x-chained         vars 38 eqs 33 deg 3 | FFD min 3 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 1.0)] | 2059 ms
+rung n=13 ℓ=5 symmetrised chain vars 43 eqs 39 deg 3 | FFD min 4 max 4 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 0.0)] | 4846 ms
+rung n=13 ℓ=5 x-chained         vars 46 eqs 39 deg 3 | FFD min 3 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 1.0)] | 7980 ms
+rung n=15 ℓ=5 symmetrised chain vars 47 eqs 45 deg 3 | FFD min 4 max 4 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 0.0)] | 9802 ms
+rung n=15 ℓ=5 x-chained         vars 50 eqs 45 deg 3 | FFD min 3 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 1.0)] | 13945 ms
+rung n=17 ℓ=6 symmetrised chain vars 55 eqs 51 deg 3 | FFD min 4 max 4 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 0.0)] | 27093 ms
+rung n=17 ℓ=6 x-chained         vars 58 eqs 51 deg 3 | FFD min 3 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 1.0)] | 40654 ms
+rung n=19 ℓ=6 symmetrised chain vars 59 eqs 57 deg 3 | FFD min 4 max 4 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 0.0)] | 51084 ms
+rung n=19 ℓ=6 x-chained         vars 62 eqs 57 deg 3 | FFD min 3 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 1.0)] | 79229 ms
+cross-check (invariant V) n=15 ℓ=5 symmetrised chain vars 47 eqs 45 deg 3 | FFD min 4 max 4 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 0.0)] | 8779 ms
+cross-check (invariant V) n=15 ℓ=5 x-chained         vars 50 eqs 45 deg 3 | FFD min 3 max 3 no fall 0/16 censored 0 | deficit [(2, 0.0), (3, 1.0)] | 10207 ms
+solve K_1/F_2^11 ℓ=4 |F_u|=21 | found 6 refuted 10 budget 0 (decomposable 6/16) gate failures 0 | splits 486.1 word XORs 4.370e6 147.6 ms

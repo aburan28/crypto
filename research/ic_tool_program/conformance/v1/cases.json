@@ -1,0 +1,84 @@
+{
+ "suite": "ic tool programme conformance suite v1",
+ "plan": "research/notes/index-calculus/IC_TOOL_PROGRAM.md §4 (C suite) and §9 (B0)",
+ "rules": [
+  "A case passes only if the process exits within its timeout, never panics (exit status 101), and meets every expectation.",
+  "{tmp} is the case's own temporary directory; {suite} is research/ic_tool_program/suite/v1.",
+  "Cases are added, never removed or loosened; a case's expectation changes only with a dated note in this file."
+ ],
+ "cases": [
+  {
+   "id": "C001-generate-degree-range-message",
+   "defect": "B0: the odd-degree parser accepted 3..=63 but its refusal said 3..=62",
+   "argv": ["generate", "--degree", "65"],
+   "expect": {"exit": "nonzero", "stderr_contains": ["synthetic degree must be odd and 3..=63"]},
+   "timeout_s": 30
+  },
+  {
+   "id": "C002-workflow-foreign-state-short-digest",
+   "defect": "B0: a foreign state.json whose digest is shorter than 16 bytes panicked on a slice",
+   "files": {
+    "params.json": {"copy": "{suite}/params/smoke/k0n31/M1-T01.json"},
+    "run/state.json": {"text": "{\"schema_version\": 1, \"params_digest\": \"ab\", \"name\": \"foreign\"}"}
+   },
+   "argv": ["workflow", "--params", "{tmp}/params.json", "--dir", "{tmp}/run"],
+   "expect": {"exit": "nonzero", "stderr_contains": ["belongs to a different parameter set (digest ab)"]},
+   "timeout_s": 60
+  },
+  {
+   "id": "C003-subgroup-orbits-points-beyond-the-abscissa-limit",
+   "defect": "B0: an unbounded points request drew for hours before failing, and its budget overflowed in debug builds",
+   "files": {
+    "params.json": {"copy": "{suite}/params/smoke/k0n31/M1-T01.json",
+                    "set": {"factor_base.spec.points": 2000000}}
+   },
+   "argv": ["workflow", "--params", "{tmp}/params.json", "--dir", "{tmp}/run"],
+   "expect": {"exit": "nonzero", "stderr_contains": ["subgroup_orbits points must be 1..=1048576"]},
+   "timeout_s": 60
+  },
+  {
+   "id": "C004-boundary-random-binary-degree-bound",
+   "defect": "B0: random binary curves are counted by enumeration, so degree 40 hung for hours",
+   "argv": ["boundary", "--char2-degrees", "40"],
+   "expect": {"exit": "nonzero", "stderr_contains": ["their degrees must lie in 5..=32, got 40"]},
+   "timeout_s": 60
+  },
+  {
+   "id": "C005-rho-random-binary-degree-bound",
+   "defect": "B0: as C004, in ic rho",
+   "argv": ["rho", "--char2-degrees", "40"],
+   "expect": {"exit": "nonzero", "stderr_contains": ["their degrees must lie in 5..=32, got 40"]},
+   "timeout_s": 60
+  },
+  {
+   "id": "C006-bench-random-binary-degree-bound",
+   "defect": "B0: ic bench --char2-degree had no range check at all",
+   "argv": ["bench", "--char2-degree", "40"],
+   "expect": {"exit": "nonzero", "stderr_contains": ["their degrees must lie in 5..=32, got 40"]},
+   "timeout_s": 60
+  },
+  {
+   "id": "C007-pair-table-budget-named",
+   "defect": "B0: a pair table that does not fit pair_table_bytes was reported as a field too wide",
+   "files": {
+    "params.json": {"copy": "{suite}/params/smoke/k0n31/M1-T01.json", "set": {"pair_table_bytes": 1}}
+   },
+   "argv": ["workflow", "--params", "{tmp}/params.json", "--dir", "{tmp}/run"],
+   "expect": {"exit": "nonzero", "stderr_contains": ["fits pair_table_bytes = 1"]},
+   "timeout_s": 120
+  },
+  {
+   "id": "C008-single-target-smoke-row-solves",
+   "defect": "positive control: a valid file runs to a verified scalar, with the build commit reported",
+   "files": {"params.json": {"copy": "{suite}/params/smoke/k0n31/M1-T01.json"}},
+   "argv": ["price", "--params", "{tmp}/params.json", "--json", "--out", "{tmp}/report.json",
+            "--single-target", "--rho-seed", "2293761", "--repeats", "1", "--repeats-fast", "1"],
+   "env": {"RAYON_NUM_THREADS": "1"},
+   "expect": {"exit": "zero",
+              "json_file": "{tmp}/report.json",
+              "json_equals": {"status": "complete", "all_verified": true, "ic_and_rho_agree": true},
+              "json_equals_build_commit": true},
+   "timeout_s": 120
+  }
+ ]
+}

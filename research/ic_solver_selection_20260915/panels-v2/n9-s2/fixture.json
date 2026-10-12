@@ -1,0 +1,120 @@
+{
+  "parameters": {
+    "schema_version": 1,
+    "curve": {
+      "family": "koblitz-a0",
+      "degree": 9,
+      "basis": "type-ii-onb",
+      "subgroup_order": "127",
+      "cofactor": 4
+    },
+    "generator": {
+      "x": "0x11c",
+      "y": "0x13e"
+    },
+    "factor_base": {
+      "kind": "hamming-weight",
+      "weight": 2
+    },
+    "summands": 2,
+    "targets": [
+      {
+        "id": "target-0",
+        "x": "0x47",
+        "y": "0xd7"
+      },
+      {
+        "id": "target-1",
+        "x": "0x102",
+        "y": "0xd9"
+      }
+    ]
+  },
+  "domain": "2799e14b5dbfcf22f68f3c6f38850325302db68753625adb9abac04c50f37a65",
+  "generator_onb": [
+    284,
+    318
+  ],
+  "prime": "127",
+  "eigen": "22",
+  "base": [
+    [
+      320,
+      55
+    ],
+    [
+      320,
+      375
+    ],
+    [
+      160,
+      94
+    ],
+    [
+      160,
+      254
+    ],
+    [
+      48,
+      453
+    ],
+    [
+      48,
+      501
+    ],
+    [
+      68,
+      440
+    ],
+    [
+      68,
+      508
+    ],
+    [
+      12,
+      227
+    ],
+    [
+      12,
+      239
+    ],
+    [
+      258,
+      217
+    ],
+    [
+      258,
+      475
+    ],
+    [
+      130,
+      301
+    ],
+    [
+      130,
+      431
+    ],
+    [
+      17,
+      362
+    ],
+    [
+      17,
+      379
+    ],
+    [
+      9,
+      406
+    ],
+    [
+      9,
+      415
+    ]
+  ],
+  "representatives": [
+    [
+      9,
+      415
+    ]
+  ]
+}

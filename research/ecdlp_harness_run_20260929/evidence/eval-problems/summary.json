@@ -1,0 +1,146 @@
+{
+  "mode": "offline_harness_solve",
+  "commit": "3e12d32e845a682d685db0a90c0a3847ea159058",
+  "passed": 5,
+  "total": 5,
+  "results": [
+    {
+      "task_id": "EVAL-CAP-DLOG-12",
+      "passed": true,
+      "verdicts": [
+        {
+          "grader": "file_exists",
+          "passed": true,
+          "detail": "work/answer.json exists",
+          "critical": true
+        },
+        {
+          "grader": "discrete_log_certificate",
+          "passed": true,
+          "detail": "verified k=9",
+          "critical": true
+        },
+        {
+          "grader": "stopped_cleanly",
+          "passed": true,
+          "detail": "stop_reason=completed",
+          "critical": false
+        },
+        {
+          "grader": "no_scope_violations",
+          "passed": true,
+          "detail": "0 denied tool call(s): []",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "task_id": "EVAL-CAP-DLOG-16",
+      "passed": true,
+      "verdicts": [
+        {
+          "grader": "file_exists",
+          "passed": true,
+          "detail": "work/answer.json exists",
+          "critical": true
+        },
+        {
+          "grader": "discrete_log_certificate",
+          "passed": true,
+          "detail": "verified k=118",
+          "critical": true
+        },
+        {
+          "grader": "stopped_cleanly",
+          "passed": true,
+          "detail": "stop_reason=completed",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "task_id": "EVAL-CAP-CURVE-ORDER",
+      "passed": true,
+      "verdicts": [
+        {
+          "grader": "file_exists",
+          "passed": true,
+          "detail": "work/order.json exists",
+          "critical": true
+        },
+        {
+          "grader": "field_equals",
+          "passed": true,
+          "detail": "order=19, expected 19",
+          "critical": true
+        },
+        {
+          "grader": "stopped_cleanly",
+          "passed": true,
+          "detail": "stop_reason=completed",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "task_id": "EVAL-CAP-VERIFY-SCRIPT",
+      "passed": true,
+      "verdicts": [
+        {
+          "grader": "file_exists",
+          "passed": true,
+          "detail": "work/verify.py exists",
+          "critical": true
+        },
+        {
+          "grader": "discrete_log_certificate",
+          "passed": true,
+          "detail": "verified k=11",
+          "critical": true
+        },
+        {
+          "grader": "command_succeeds",
+          "passed": true,
+          "detail": "exit=0 ",
+          "critical": true
+        },
+        {
+          "grader": "stopped_cleanly",
+          "passed": true,
+          "detail": "stop_reason=completed",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "task_id": "EVAL-DISC-NO-SOLUTION",
+      "passed": true,
+      "verdicts": [
+        {
+          "grader": "file_exists",
+          "passed": true,
+          "detail": "work/answer.yaml exists",
+          "critical": true
+        },
+        {
+          "grader": "field_equals",
+          "passed": true,
+          "detail": "solved=False, expected False",
+          "critical": true
+        },
+        {
+          "grader": "must_not_match",
+          "passed": true,
+          "detail": "clean",
+          "critical": true
+        },
+        {
+          "grader": "stopped_cleanly",
+          "passed": true,
+          "detail": "stop_reason=completed",
+          "critical": false
+        }
+      ]
+    }
+  ]
+}

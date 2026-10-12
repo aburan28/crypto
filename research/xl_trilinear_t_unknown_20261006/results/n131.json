@@ -1,0 +1,78 @@
+{
+ "omega=2.0,slack=0": {
+  "best": {
+   "l": 30,
+   "b": 30,
+   "a1": 1,
+   "a1_with_slack": 1,
+   "caps": [
+    1,
+    1,
+    1,
+    2
+   ],
+   "log2M": 23.99,
+   "gap_bits": 39.19,
+   "gap_charged": 87.16
+  },
+  "bilinear_best": 71.82,
+  "verdict": "does not beat bilinear"
+ },
+ "omega=2.81,slack=0": {
+  "best": {
+   "l": 4,
+   "b": 0,
+   "a1": 0,
+   "a1_with_slack": 0,
+   "caps": [
+    0,
+    1,
+    1,
+    1
+   ],
+   "log2M": 9.37,
+   "gap_bits": 70.19,
+   "gap_charged": 96.51
+  },
+  "bilinear_best": 78.15,
+  "verdict": "does not beat bilinear"
+ },
+ "omega=2.0,slack=4": {
+  "best": {
+   "l": 30,
+   "b": 30,
+   "a1": 1,
+   "a1_with_slack": 5,
+   "caps": [
+    1,
+    1,
+    1,
+    2
+   ],
+   "log2M": 23.99,
+   "gap_bits": 35.19,
+   "gap_charged": 83.16
+  },
+  "bilinear_best": 71.82,
+  "verdict": "does not beat bilinear"
+ },
+ "omega=2.0,slack=8": {
+  "best": {
+   "l": 30,
+   "b": 30,
+   "a1": 1,
+   "a1_with_slack": 9,
+   "caps": [
+    1,
+    1,
+    1,
+    2
+   ],
+   "log2M": 23.99,
+   "gap_bits": 31.19,
+   "gap_charged": 79.16
+  },
+  "bilinear_best": 71.82,
+  "verdict": "does not beat bilinear"
+ }
+}

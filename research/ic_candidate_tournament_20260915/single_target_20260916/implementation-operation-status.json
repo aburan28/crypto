@@ -1,0 +1,187 @@
+{
+  "phase": "audited",
+  "pid": 1258191,
+  "updated_unix": 1789557374.298115,
+  "decision": {
+    "arithmetic_operation_speedup": null,
+    "beats_rho": false,
+    "classification": "accounting",
+    "confirmation": {
+      "candidate": "combined_dense",
+      "candidate_over_baseline": 0.9564340035232148,
+      "ci95": [
+        0.9474512194228004,
+        0.966125671872147
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.9857877597579922,
+      "native_wall_ci95": [
+        0.981444289834538,
+        0.990511305956245
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9922918577429991,
+        "n17a1": 0.9895647630211234,
+        "n19a0": 0.9825880764640733,
+        "n19a1": 0.9808632097748309,
+        "n23a0": 0.9836792754518291
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.9443285548996816,
+        "n17a1": 0.96636127367719,
+        "n19a0": 0.9470531148567635,
+        "n19a1": 0.9718460860464708,
+        "n23a0": 0.9528851813144377
+      },
+      "speedup": 1.0455504470944166
+    },
+    "family_wide_or_complexity_claim": false,
+    "independent_replay": "fresh processes, frozen executable, same final cases; independent Python group and rank checker",
+    "instruction_speedup": null,
+    "parity_definition": "Both candidate/rho upper paired 95% limits and every cell ratio <= 1.10, instructions and native process wall, confirmation and replay.",
+    "provisional_challenger": "combined_dense",
+    "reasons": [
+      "No challenger passed every confirmation and replay threshold."
+    ],
+    "replay": {
+      "candidate": "combined_dense",
+      "candidate_over_baseline": 0.9564311474247223,
+      "ci95": [
+        0.9474492129170982,
+        0.9661152067764999
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.9837799456786541,
+      "native_wall_ci95": [
+        0.9787936878453654,
+        0.9888968596031991
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9863996927686126,
+        "n17a1": 0.9857809705133518,
+        "n19a0": 0.9795164393736236,
+        "n19a1": 0.9895402902997099,
+        "n23a0": 0.9777127003096265
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.9443236961859675,
+        "n17a1": 0.966356476381503,
+        "n19a0": 0.9470542030539469,
+        "n19a1": 0.9718423705881598,
+        "n23a0": 0.9528831350281624
+      },
+      "speedup": 1.0455535693213158
+    },
+    "rho_comparison": {
+      "candidate": "rho",
+      "candidate_over_baseline": 0.887012431765211,
+      "ci95": [
+        0.8349386231845985,
+        0.9377802347560049
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.924593335165865,
+      "native_wall_ci95": [
+        0.9085555386684016,
+        0.9370405993441078
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.9157703534355808,
+        "n17a1": 0.9298889035337993,
+        "n19a0": 0.9409518828227279,
+        "n19a1": 0.9350363345080618,
+        "n23a0": 0.9018623246015656
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.8257407770975485,
+        "n17a1": 0.9212596412122581,
+        "n19a0": 0.9362114997682465,
+        "n19a1": 0.9434066281703796,
+        "n23a0": 0.8172404629532847
+      },
+      "speedup": 1.12737991508184
+    },
+    "rho_over_winner": 0.887012431765211,
+    "rho_parity": false,
+    "rho_verdict_scope": "observed complete instruction cost; no asymptotic crossover claim",
+    "scope": "bounded public-hash ECDLP configuration tournament",
+    "status": "retained",
+    "unit": "valgrind-3.22-amd64-Ir",
+    "winner": "incumbent",
+    "winner_over_rho": {
+      "confirmation": {
+        "candidate": "incumbent",
+        "candidate_over_baseline": 1.12737991508184,
+        "ci95": [
+          1.0664394518628761,
+          1.1978968142897077
+        ],
+        "eligible": true,
+        "independent_curve_blocks": 5,
+        "native_wall_candidate_over_baseline": 1.0815565740808717,
+        "native_wall_ci95": [
+          1.0672187767654386,
+          1.1006507319022558
+        ],
+        "native_wall_per_cell": {
+          "n13a0": 1.0919768217527739,
+          "n17a1": 1.075397282621356,
+          "n19a0": 1.0627535990471009,
+          "n19a1": 1.0694771562284975,
+          "n23a0": 1.1088166926607015
+        },
+        "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+        "paired_cases": 60,
+        "per_cell": {
+          "n13a0": 1.211033810774087,
+          "n17a1": 1.0854703226596683,
+          "n19a0": 1.0681347112778938,
+          "n19a1": 1.0599883127166239,
+          "n23a0": 1.2236300640160083
+        },
+        "speedup": 0.887012431765211
+      },
+      "replay": {
+        "candidate": "incumbent",
+        "candidate_over_baseline": 1.1273821905629031,
+        "ci95": [
+          1.0664410849430652,
+          1.1978933413637658
+        ],
+        "eligible": true,
+        "independent_curve_blocks": 5,
+        "native_wall_candidate_over_baseline": 1.083146512550573,
+        "native_wall_ci95": [
+          1.06860936740454,
+          1.102554906966594
+        ],
+        "native_wall_per_cell": {
+          "n13a0": 1.0873695118629685,
+          "n17a1": 1.0772791679513258,
+          "n19a0": 1.0702928411309995,
+          "n19a1": 1.0658783719136828,
+          "n23a0": 1.1156304121263958
+        },
+        "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+        "paired_cases": 60,
+        "per_cell": {
+          "n13a0": 1.2110361314392644,
+          "n17a1": 1.0854697907104611,
+          "n19a0": 1.0681347628257962,
+          "n19a1": 1.0599919339349135,
+          "n23a0": 1.223636428318462
+        },
+        "speedup": 0.8870106414406803
+      }
+    }
+  }
+}

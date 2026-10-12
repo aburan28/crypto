@@ -1,0 +1,69 @@
+Probe build only: make the pair-table row count and the scan block settable
+from the environment, so the true cost of each can be measured at every cell.
+NEVER a tournament arm -- a measured arm's row count and block are fixed
+functions of the public parameters, decided before any probe is drawn, and an
+environment variable is neither. With none of the three variables set the
+shipped rules are bit-for-bit unchanged, and every sweep below checks that
+against the frozen `orbits` worker before it measures anything.
+
+  IC_TABLE_ROWS  the pair-table row count        (round18_row_sweep.py)
+  IC_SCAN_CEIL   the ceiling in the block clamp  (round18_block_sweep.py)
+  IC_SCAN_BLOCK  the scan block outright         (round18_block_grid.py)
+
+`IC_SCAN_CEIL` can only lower a block below what the rule asks for, which is
+why `IC_SCAN_BLOCK` exists: at the cells whose rule value is already the floor
+of 8, the ceiling cannot move the block at all, and choosing a constant needs
+the whole grid.
+
+Apply to a copy of `runs/round-0017/source_candidates/orbits/source`:
+
+    cp -a runs/round-0017/source_candidates/orbits/source /tmp/probe18
+    patch -d /tmp/probe18 -p1 -i "$PWD/campaign_20260916/round18-rows-probe.patch"
+    ( cd /tmp/probe18 && cargo build --release --example ic_tournament_worker )
+
+The build must happen inside the tree: a --manifest-path build would not pick
+up the snapshot's .cargo/config.toml, which selects the musl static target.
+
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -1173,6 +1173,19 @@
+         let table_rows = (1..=orbits)
+             .min_by(|&a, &b| expected_work(a).total_cmp(&expected_work(b)))
+             .unwrap_or(orbits);
++        // PROBE BUILD ONLY (round 0018).  Measures the true cost of a given
++        // row count.  `chunk` below is derived from `table_rows`, so the
++        // override flows into the scan block exactly as a shipped rule would.
++        // Never present in a tournament arm: a measured arm's row count is a
++        // fixed function of the public parameters, not of the environment.
++        let table_rows = match std::env::var("IC_TABLE_ROWS") {
++            Ok(v) => v
++                .parse::<usize>()
++                .ok()
++                .filter(|t| (1..=orbits).contains(t))
++                .unwrap_or(table_rows),
++            Err(_) => table_rows,
++        };
+         let mut table = PairTable::with_capacity(table_rows * size);
+         let mut sums: Vec<FastPoint> = Vec::with_capacity(size);
+         let mut dens = Vec::with_capacity(size);
+@@ -1202,6 +1215,20 @@
+         // `1 − exp(−x) ≥ min(x, 1)/2`, enough to size a block without libm.
+         let hit = (lambda_pairs * coverage(table_rows)).min(1.0).max(1e-9);
+         let chunk = ((1.0 / hit) as usize + 1).clamp(8, 64).min(size);
++        // PROBE BUILD ONLY (round 0018).  `IC_SCAN_CEIL` replaces the 64 in the
++        // clamp above so the cost of the ceiling can be measured; `IC_SCAN_BLOCK`
++        // sets the block outright.  Both are absent from every tournament arm.
++        let chunk = match std::env::var("IC_SCAN_CEIL") {
++            Ok(v) => match v.parse::<usize>() {
++                Ok(c) if c >= 8 => ((1.0 / hit) as usize + 1).clamp(8, c).min(size),
++                _ => chunk,
++            },
++            Err(_) => chunk,
++        };
++        let chunk = match std::env::var("IC_SCAN_BLOCK") {
++            Ok(v) => v.parse::<usize>().ok().filter(|b| *b >= 1).map(|b| b.min(size)).unwrap_or(chunk),
++            Err(_) => chunk,
++        };
+ 
+         let mut prng = SplitMix(algorithm_seed ^ 0x5449_4e59_4943_0001);
+         let probe_scalar = prng.scalar(r);

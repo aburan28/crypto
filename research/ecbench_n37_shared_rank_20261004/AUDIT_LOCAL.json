@@ -1,0 +1,126 @@
+{
+  "schema": "ecbench.audit/v1",
+  "session_id": "ECBS1h774f0e722ea2",
+  "session_status": "complete",
+  "ok": true,
+  "problems": [],
+  "checks": {
+    "arms": true,
+    "env_class": true,
+    "executions": true,
+    "host_hash": true,
+    "plan_hash": true,
+    "record_count": true,
+    "records": true,
+    "records_hash": true,
+    "replays": true,
+    "session_complete": true,
+    "spec_id": true,
+    "workloads": true
+  },
+  "records": 18,
+  "verified_records": 18,
+  "regraded": true,
+  "replays": [
+    {
+      "seq": 3,
+      "record_id": "ECR1he6feabf3768b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 4,
+      "record_id": "ECR1h83e64e830118",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 5,
+      "record_id": "ECR1h8d7849cea177",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 6,
+      "record_id": "ECR1hb0ba46d5be11",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 7,
+      "record_id": "ECR1h803b9e34b3bd",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 8,
+      "record_id": "ECR1h267b70d70b6d",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 9,
+      "record_id": "ECR1h4392221058c9",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 10,
+      "record_id": "ECR1hb14de98e2520",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 11,
+      "record_id": "ECR1h20fb22e56bb6",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 12,
+      "record_id": "ECR1h88f5f8491d8e",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 13,
+      "record_id": "ECR1hb49921d7c10b",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 14,
+      "record_id": "ECR1h79944be48189",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 15,
+      "record_id": "ECR1h2632812e9f17",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 16,
+      "record_id": "ECR1hed0aec749da0",
+      "reproduced": true,
+      "detail": "identical"
+    },
+    {
+      "seq": 17,
+      "record_id": "ECR1h9af11d201878",
+      "reproduced": true,
+      "detail": "identical"
+    }
+  ],
+  "files": {
+    "host.json": "e3656e8531ba342aa47159679f42110fd8ddd249faf3bcf6edb23ca3c4a09e4c",
+    "plan.json": "b432feebdf3e4f44390054fdcfa733b2fead29f2d5305077394d56f0f2e8928a",
+    "records.jsonl": "04ff51c137aee7368de8fff16f8c22f47c9ed741cb533244f76715dbaf3297e3",
+    "session.json": "e4a9915f003798878335e0338cc9e88f66f46ef0f86c1dfca0af08dedd50fd1f",
+    "spec.json": "62108306f34b7362c98a3a9c7661f4ec98f8e0db82dca17540bd889ef9497a27"
+  },
+  "auditor_binary_sha256": "4e1bcadfe1a4fe1c6220bcf08209796a232da4908184845719ec4c68ff07435c",
+  "auditor_env_class_id": "ECBENV2hd82681268e96",
+  "audited_unix_ms": 1791079957463
+}

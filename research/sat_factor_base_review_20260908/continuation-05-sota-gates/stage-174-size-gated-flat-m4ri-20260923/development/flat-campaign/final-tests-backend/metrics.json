@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "PQ_F4_FLAT_M4RI=1",
+    "PQ_F4_FLAT_M4RI_MIN_WORDS=1048576",
+    "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage174-flat-target",
+    "/opt/homebrew/bin/cargo",
+    "test",
+    "--release",
+    "--locked",
+    "--example",
+    "koblitz_pdp_backend",
+    "--",
+    "--test-threads=1"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 300.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 68.23853583300661,
+    "user_seconds": 163.099216,
+    "system_seconds": 4.76627,
+    "total_core_seconds": 167.865486,
+    "single_core_seconds": 167.865486,
+    "peak_rss_bytes": 2267414528,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

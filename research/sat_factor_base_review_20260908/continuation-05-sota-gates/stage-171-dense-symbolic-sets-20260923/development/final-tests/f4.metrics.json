@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/opt/homebrew/bin/cargo",
+    "test",
+    "--lib",
+    "--release",
+    "--locked",
+    "--offline",
+    "cryptanalysis::pq_f4_f2::tests::",
+    "--",
+    "--nocapture"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 600.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.31970229199214373,
+    "user_seconds": 0.35924999999999996,
+    "system_seconds": 0.056398,
+    "total_core_seconds": 0.41564799999999996,
+    "single_core_seconds": 0.41564799999999996,
+    "peak_rss_bytes": 48054272,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

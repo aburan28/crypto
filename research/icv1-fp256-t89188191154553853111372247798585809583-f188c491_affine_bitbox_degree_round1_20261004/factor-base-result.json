@@ -1,0 +1,71 @@
+{
+  "schema": "p256.affine_bitbox_result/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "family": "affine-bitbox",
+  "bit_width": 18,
+  "interval_width": 262144,
+  "selection": "max-lifts/k-times-width/k=0..7/v1",
+  "selected_offset": "0x180000",
+  "candidate_counts": [
+    {
+      "offset": "0x0",
+      "columns": 131332
+    },
+    {
+      "offset": "0x40000",
+      "columns": 131355
+    },
+    {
+      "offset": "0x80000",
+      "columns": 130848
+    },
+    {
+      "offset": "0xc0000",
+      "columns": 131058
+    },
+    {
+      "offset": "0x100000",
+      "columns": 131085
+    },
+    {
+      "offset": "0x140000",
+      "columns": 131296
+    },
+    {
+      "offset": "0x180000",
+      "columns": 131440
+    },
+    {
+      "offset": "0x1c0000",
+      "columns": 131063
+    }
+  ],
+  "fb_id": "FB1ha8fa8dae90f9",
+  "fb_sha256": "a8fa8dae90f9b2293103476492b39685842f0e049294b11a23cde29fa55a321d",
+  "fb1_preimage": {
+    "columns": 131440,
+    "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+    "family": "affine-bitbox",
+    "params": {
+      "bit_width": "18",
+      "offset": "0x180000",
+      "point_key_encoding": "prime-affine-x-plus-one-shift-sign/be33/v1",
+      "selection": "max-lifts/k-times-width/k=0..7/v1"
+    },
+    "points_sha256": "a0c0a105ee4096bc0a1181839ff8e1023fff207bd290009598e9d99b66c84147",
+    "schema": "ecbench.factor_base/v1",
+    "signed_points": 262880
+  },
+  "columns": 131440,
+  "signed_points": 262880,
+  "points_sha256": "a0c0a105ee4096bc0a1181839ff8e1023fff207bd290009598e9d99b66c84147",
+  "relation_m17": {
+    "columns": 131440,
+    "relation_length": 17,
+    "signed_domain": "384025787386112563787919314827811363589979495700855704491277096984094913331200",
+    "poisson_mean": 3.3165114301415155,
+    "poisson_success": 0.9637208263186108,
+    "selector_ideal_regularity_bound": 18
+  },
+  "verified": true
+}

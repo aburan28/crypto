@@ -1,0 +1,23 @@
+name: Standalone Boolean projected fibers
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  correctness-and-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Complete affine recovery and retained algebra
+        run: |
+          rustc --edition 2021 -O --test research/boolean_projected_fibers_20260923/measure.rs -o /tmp/boolean-projected-tests
+          /tmp/boolean-projected-tests
+      - name: Immutable evidence and accounting checks
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: python3 -m unittest discover -s research/boolean_projected_fibers_20260923 -p 'test_*.py' -v

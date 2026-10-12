@@ -95,7 +95,7 @@ pub fn hkdf_expand_checked(
     if length > 255 * HASH_LEN {
         return Err("HKDF output too long");
     }
-    let n = (length + HASH_LEN - 1) / HASH_LEN;
+    let n = length.div_ceil(HASH_LEN);
     let mut okm = Vec::with_capacity(n * HASH_LEN);
     let mut t = Vec::new(); // T(0) = empty
 
@@ -126,12 +126,7 @@ pub fn hkdf(salt: Option<&[u8]>, ikm: &[u8], info: &[u8], length: usize) -> Vec<
 
 /// HKDF-Extract generic over a hash function specified by its block
 /// size and hash callable.  Returns the HashLen-byte PRK.
-pub fn hkdf_extract_with<F>(
-    block_size: usize,
-    hash: &F,
-    salt: Option<&[u8]>,
-    ikm: &[u8],
-) -> Vec<u8>
+pub fn hkdf_extract_with<F>(block_size: usize, hash: &F, salt: Option<&[u8]>, ikm: &[u8]) -> Vec<u8>
 where
     F: Fn(&[u8]) -> Vec<u8>,
 {
@@ -381,7 +376,7 @@ mod tests {
     fn hkdf_sha512_deterministic_64bytes() {
         let okm1 = hkdf_sha512(Some(b"salt"), b"ikm-some-bytes", b"info-tag", 64);
         let okm2 = hkdf_sha512(Some(b"salt"), b"ikm-some-bytes", b"info-tag", 64);
-        let okm3 = hkdf_sha512(Some(b"salt"), b"ikm-different!"  , b"info-tag", 64);
+        let okm3 = hkdf_sha512(Some(b"salt"), b"ikm-different!", b"info-tag", 64);
         assert_eq!(okm1, okm2);
         assert_ne!(okm1, okm3);
         assert_eq!(okm1.len(), 64);

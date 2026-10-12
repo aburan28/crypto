@@ -80,7 +80,7 @@
 //!
 //! The numbers behind these predictions are collected by
 //! `examples/residual_walk_bench.rs` and discussed in
-//! `RESEARCH_RESIDUAL_WALKS.md`.
+//! `research/notes/index-calculus/RESEARCH_RESIDUAL_WALKS.md`.
 //!
 //! # Scope
 //!
@@ -90,12 +90,19 @@
 //! curve; the point of the module is the measurement.
 
 use std::cell::Cell;
-use std::collections::HashMap;
+use std::collections::hash_map::Entry;
+use std::hint::select_unpredictable;
 use std::time::{Duration, Instant};
 
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 use serde::Serialize;
+
+// Every map in this module is keyed by points, coordinates or indices
+// produced inside one run and is only probed; the few that are drained
+// are sorted before anything reads them.  So no output depends on the
+// hasher, and SipHash's resistance to chosen keys buys nothing here.
+use super::fx_hash::FxMap;
 
 /// Largest supported field size in bits (keeps `x + y` and all
 /// intermediate `u128` products in range).
@@ -105,25 +112,80 @@ pub const MAX_BITS: u32 = 60;
 
 #[inline]
 fn mul_mod(a: u64, b: u64, p: u64) -> u64 {
-    ((a as u128 * b as u128) % p as u128) as u64
+    let wide = a as u128 * b as u128;
+    match u64::try_from(wide) {
+        // The product fits a word, as it always does for residues of a
+        // modulus below 2^32: one hardware divide instead of a call to the
+        // 128-bit remainder routine (`__umodti3`).  Same remainder either
+        // way.
+        Ok(w) => w % p,
+        Err(_) => (wide % p as u128) as u64,
+    }
 }
+
+// The corrections in `add_mod` and `sub_mod` (and in
+// `FixedFactor::mul`) hinge on a comparison that is a coin flip on
+// random residues, so they select rather than branch: a mispredicted
+// branch costs more than the whole reduction.
 
 #[inline]
 fn add_mod(a: u64, b: u64, p: u64) -> u64 {
     let s = a + b;
-    if s >= p {
-        s - p
-    } else {
-        s
-    }
+    let (d, borrow) = s.overflowing_sub(p);
+    select_unpredictable(borrow, s, d)
 }
 
 #[inline]
 fn sub_mod(a: u64, b: u64, p: u64) -> u64 {
-    if a >= b {
-        a - b
-    } else {
-        a + p - b
+    // `a − b`, or `a + p − b` when that borrows.
+    let (d, borrow) = a.overflowing_sub(b);
+    select_unpredictable(borrow, d.wrapping_add(p), d)
+}
+
+/// Largest modulus [`FixedFactor`] multiplies by: its remainder before
+/// the final correction lies in `[0, 2n)`, which has to fit in a `u64`.
+const SHOUP_MAX_MODULUS: u64 = 1 << 63;
+
+/// A factor `w` that stays fixed while many residues are multiplied by
+/// it, with Shoup's precomputed quotient `w' = ⌊w·2^64 / n⌋`.  Then
+/// `w·x mod n` costs one high and two low multiplications and one
+/// conditional subtraction instead of a 128-bit remainder (`__umodti3`):
+/// the estimate `⌊w'·x / 2^64⌋` falls at most one short of `⌊w·x / n⌋`
+/// for any `x < 2^64`, so the result is exactly `mul_mod(w, x, n)`.
+/// With `SHOUP = false` it *is* [`mul_mod`], for moduli above
+/// [`SHOUP_MAX_MODULUS`].
+#[derive(Clone, Copy)]
+struct FixedFactor {
+    w: u64,
+    w_shoup: u64,
+}
+
+impl FixedFactor {
+    #[inline]
+    fn new<const SHOUP: bool>(w: u64, n: u64) -> FixedFactor {
+        if SHOUP {
+            // `w·x ≡ (w mod n)·x`, and the quotient needs `w < n`.
+            let w = w % n;
+            FixedFactor {
+                w,
+                w_shoup: (((w as u128) << 64) / n as u128) as u64,
+            }
+        } else {
+            FixedFactor { w, w_shoup: 0 }
+        }
+    }
+
+    /// `w·x mod n`.
+    #[inline]
+    fn mul<const SHOUP: bool>(self, x: u64, n: u64) -> u64 {
+        if SHOUP {
+            let q = ((self.w_shoup as u128 * x as u128) >> 64) as u64;
+            let r = self.w.wrapping_mul(x).wrapping_sub(q.wrapping_mul(n));
+            let (d, borrow) = r.overflowing_sub(n);
+            select_unpredictable(borrow, r, d)
+        } else {
+            mul_mod(self.w, x, n)
+        }
     }
 }
 
@@ -143,20 +205,32 @@ pub fn pow_mod(mut base: u64, mut e: u64, p: u64) -> u64 {
 
 /// Modular inverse by the extended Euclidean algorithm.  `a` must be
 /// non-zero mod `p` and `p` prime.
+///
+/// The Bézout coefficients `s_i` of the remainder sequence alternate in
+/// sign from `s_2` on and grow in magnitude, `|s_{i+1}| = |s_{i−1}| +
+/// q_i·|s_i|`, up to `|s_{k+1}| = p / gcd ≤ p` when the remainder
+/// vanishes.  So the loop carries the magnitudes in `u64` and the sign as
+/// the parity of the step count, and every quotient is one hardware
+/// 64-bit divide instead of the `i128` software division (`__divti3`)
+/// this was first written with.  It walks the same sequence, so it
+/// returns the same value for every input, units or not.
 pub fn inv_mod(a: u64, p: u64) -> u64 {
-    let (mut old_r, mut r) = (a as i128 % p as i128, p as i128);
-    let (mut old_s, mut s) = (1i128, 0i128);
+    let (mut old_r, mut r) = (a % p, p);
+    // |s_{i−1}| and |s_i|, with s_i = (−1)^i·|s_i| (s_1 = 0).
+    let (mut old_s, mut s) = (1u64, 0u64);
+    let mut odd = false;
     while r != 0 {
         let q = old_r / r;
-        let tmp = old_r - q * r;
-        old_r = r;
-        r = tmp;
-        let tmp = old_s - q * s;
-        old_s = s;
-        s = tmp;
+        (old_r, r) = (r, old_r - q * r);
+        (old_s, s) = (s, old_s + q * s);
+        odd = !odd;
     }
     debug_assert_eq!(old_r, 1, "inv_mod of a non-unit");
-    old_s.rem_euclid(p as i128) as u64
+    if odd && old_s != 0 {
+        p - old_s
+    } else {
+        old_s
+    }
 }
 
 /// Square root mod an odd prime (Tonelli–Shanks).  Returns `None` for
@@ -174,7 +248,7 @@ pub fn sqrt_mod(n: u64, p: u64) -> Option<u64> {
     }
     let mut q = p - 1;
     let mut s = 0u32;
-    while q % 2 == 0 {
+    while q.is_multiple_of(2) {
         q /= 2;
         s += 1;
     }
@@ -185,7 +259,7 @@ pub fn sqrt_mod(n: u64, p: u64) -> Option<u64> {
     let mut m = s;
     let mut c = pow_mod(z, q, p);
     let mut t = pow_mod(n, q, p);
-    let mut r = pow_mod(n, (q + 1) / 2, p);
+    let mut r = pow_mod(n, q.div_ceil(2), p);
     loop {
         if t == 1 {
             return Some(r);
@@ -217,13 +291,13 @@ pub fn is_prime_u64(n: u64) -> bool {
         return false;
     }
     for &sp in &[2u64, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37] {
-        if n % sp == 0 {
+        if n.is_multiple_of(sp) {
             return n == sp;
         }
     }
     let mut d = n - 1;
     let mut s = 0;
-    while d % 2 == 0 {
+    while d.is_multiple_of(2) {
         d /= 2;
         s += 1;
     }
@@ -486,7 +560,7 @@ fn unique_hasse_multiple(curve: &Curve, pt: &Pt) -> Option<u64> {
     let width = hi - lo + 1;
     let s = isqrt(width) + 1;
 
-    let mut baby: HashMap<Pt, u64> = HashMap::with_capacity(s as usize);
+    let mut baby: FxMap<Pt, u64> = FxMap::with_capacity_and_hasher(s as usize, Default::default());
     let mut cur = Pt::INFINITY;
     for j in 0..s {
         baby.entry(cur).or_insert(j);
@@ -626,13 +700,13 @@ pub fn generate_j0_instance(bits: u32, seed: u64) -> Instance {
 #[derive(Clone, Debug)]
 pub struct FactorBase {
     pub points: Vec<Pt>,
-    by_x: HashMap<u64, usize>,
+    by_x: FxMap<u64, usize>,
 }
 
 impl FactorBase {
     pub fn build(curve: &Curve, size: usize) -> FactorBase {
         let mut points = Vec::with_capacity(size);
-        let mut by_x = HashMap::with_capacity(size);
+        let mut by_x = FxMap::with_capacity_and_hasher(size, Default::default());
         let mut x = 1u64;
         while points.len() < size && x < curve.p {
             if let Some(pt) = curve.lift_x(x) {
@@ -655,7 +729,7 @@ impl FactorBase {
         }
         let curve = &inst.curve;
         let mut points = Vec::with_capacity(size);
-        let mut by_x = HashMap::with_capacity(size);
+        let mut by_x = FxMap::with_capacity_and_hasher(size, Default::default());
         let mut x = 1u64;
         while points.len() < size && x < curve.p {
             if let Some(pt) = curve.lift_x(x) {
@@ -772,7 +846,7 @@ impl Relation {
         r2: (u64, u64, Vec<(usize, i64)>),
     ) -> Relation {
         let (f1, f2) = (f1 % n, f2 % n);
-        let mut acc: HashMap<usize, u64> = HashMap::new();
+        let mut acc: FxMap<usize, u64> = FxMap::default();
         for (f, coeffs, negate) in [(f1, &r1.2, false), (f2, &r2.2, true)] {
             for &(i, c) in coeffs {
                 let mag = mul_mod(f, c.unsigned_abs() % n, n);
@@ -892,7 +966,7 @@ fn centred(v: u64, n: u64) -> i64 {
 }
 
 fn multiset_diff(t1: &[u32], t2: &[u32]) -> Vec<(usize, i64)> {
-    let mut m: HashMap<u32, i64> = HashMap::new();
+    let mut m: FxMap<u32, i64> = FxMap::default();
     for &i in t1 {
         *m.entry(i).or_insert(0) += 1;
     }
@@ -916,6 +990,8 @@ pub struct RelationSystem {
     n: u64,
     cols: usize,
     pivots: Vec<(usize, Vec<u64>, u64)>,
+    /// Multiplications modulo `n` performed so far.
+    ops: u64,
 }
 
 impl RelationSystem {
@@ -924,6 +1000,7 @@ impl RelationSystem {
             n,
             cols: unknowns,
             pivots: Vec::new(),
+            ops: 0,
         }
     }
 
@@ -931,41 +1008,81 @@ impl RelationSystem {
         self.pivots.len()
     }
 
+    /// Multiplications modulo `n` performed by `insert` so far.
+    pub fn ops(&self) -> u64 {
+        self.ops
+    }
+
     /// Insert one equation; returns `true` if it was independent of the
     /// rows already present.
-    pub fn insert(&mut self, mut row: Vec<u64>, mut rhs: u64) -> bool {
+    pub fn insert(&mut self, row: Vec<u64>, rhs: u64) -> bool {
+        if self.n <= SHOUP_MAX_MODULUS {
+            self.insert_by::<true>(row, rhs)
+        } else {
+            self.insert_by::<false>(row, rhs)
+        }
+    }
+
+    /// [`Self::insert`] with every multiplication by a factor that is
+    /// fixed across a row sweep done by [`FixedFactor`] (`SHOUP`) or by
+    /// [`mul_mod`] (moduli above [`SHOUP_MAX_MODULUS`]).  The two compute
+    /// the same residues, so the rows, the pivots and `ops` do not depend
+    /// on which one ran.
+    fn insert_by<const SHOUP: bool>(&mut self, mut row: Vec<u64>, mut rhs: u64) -> bool {
         assert_eq!(row.len(), self.cols);
         let n = self.n;
+        let mut ops = 0u64;
         for (col, prow, prhs) in &self.pivots {
             let f = row[*col];
             if f != 0 {
-                for c in 0..self.cols {
-                    if prow[c] != 0 {
-                        row[c] = sub_mod(row[c], mul_mod(f, prow[c], n), n);
+                let f = FixedFactor::new::<SHOUP>(f, n);
+                for (r, &pv) in row.iter_mut().zip(prow) {
+                    if pv != 0 {
+                        *r = sub_mod(*r, f.mul::<SHOUP>(pv, n), n);
+                        ops += 1;
                     }
                 }
-                rhs = sub_mod(rhs, mul_mod(f, *prhs, n), n);
+                rhs = sub_mod(rhs, f.mul::<SHOUP>(*prhs, n), n);
+                ops += 1;
             }
         }
+        self.ops += ops;
         let Some(col) = row.iter().position(|&v| v != 0) else {
             return false;
         };
-        let inv = inv_mod(row[col], n);
+        let inv = FixedFactor::new::<SHOUP>(inv_mod(row[col], n), n);
         for v in row.iter_mut() {
-            *v = mul_mod(*v, inv, n);
+            *v = inv.mul::<SHOUP>(*v, n);
         }
-        rhs = mul_mod(rhs, inv, n);
+        rhs = inv.mul::<SHOUP>(rhs, n);
+        let mut ops = self.cols as u64 + 1;
+        // The new row is fixed from here on, and after the sweep above its
+        // support lies in the non-pivot columns, so it is short once the
+        // rank is high.  Collect it once and update every pivot row on it
+        // alone: the same updates, in the same order, as testing each of
+        // the `cols` entries for every pivot row.
+        let support: Vec<(usize, u64)> = row
+            .iter()
+            .enumerate()
+            .filter(|&(_, &r)| r != 0)
+            .map(|(c, &r)| (c, r))
+            .collect();
         for (_, prow, prhs) in self.pivots.iter_mut() {
+            // As a slice, so its base and length stay in registers rather
+            // than being reloaded from the `Vec` after every store.
+            let prow = prow.as_mut_slice();
             let f = prow[col];
             if f != 0 {
-                for c in 0..self.cols {
-                    if row[c] != 0 {
-                        prow[c] = sub_mod(prow[c], mul_mod(f, row[c], n), n);
-                    }
+                let f = FixedFactor::new::<SHOUP>(f, n);
+                for &(c, r) in &support {
+                    prow[c] = sub_mod(prow[c], f.mul::<SHOUP>(r, n), n);
                 }
-                *prhs = sub_mod(*prhs, mul_mod(f, rhs, n), n);
+                ops += support.len() as u64;
+                *prhs = sub_mod(*prhs, f.mul::<SHOUP>(rhs, n), n);
+                ops += 1;
             }
         }
+        self.ops += ops;
         self.pivots.push((col, row, rhs));
         true
     }
@@ -1099,6 +1216,25 @@ pub struct WalkOptions {
     /// signed pair `±P_i ± P_j` before walking.  Each seed is a residual
     /// with a known decomposition and is counted in `seeded_points`.
     pub seed_pairs: bool,
+    /// Explicit-state strategies only: test every residual for
+    /// `L = ±P_i ± P_j` algebraically with Semaev's `S₃` (one quadratic
+    /// in `x_j` per factor-base `x_i`, roots looked up in the base)
+    /// instead of from a seed table.  Each quadratic solved is charged as
+    /// one operation-equivalent in `oracle_ops`.
+    pub s3_oracle: bool,
+    /// Explicit-state strategies only: test every residual for
+    /// `L = ±P_i ± P_j ± P_k` (distinct indices) algebraically — `S₃`
+    /// applied twice: the roots `x(L ∓ P_i)` for each `i`, then for each
+    /// `j > i` the quadratic in `x_k` — with no table.  `B²` quadratics
+    /// per residual, each charged as one operation-equivalent.
+    pub s4_oracle: bool,
+    /// Explicit-state strategies only: look the `2B` neighbours
+    /// `L ∓ P_k` of every residual up in the table (one group operation
+    /// each, charged to the oracle).  With `seed_pairs` this is the
+    /// meet-in-the-middle triple oracle; a neighbour that is `±P_m` is a
+    /// pair decomposition and one that matches a walked residual is an
+    /// ordinary collision with one extra term.
+    pub mitm_neighbours: bool,
 }
 
 impl Default for WalkOptions {
@@ -1118,6 +1254,9 @@ impl Default for WalkOptions {
             continue_after_collision: false,
             use_automorphism: false,
             seed_pairs: false,
+            s3_oracle: false,
+            s4_oracle: false,
+            mitm_neighbours: false,
         }
     }
 }
@@ -1146,6 +1285,20 @@ pub struct StrategyReport {
     /// Residuals with known decomposition inserted before walking
     /// (signed pair sums); they count towards the total point count.
     pub seeded_points: u64,
+    pub s3_oracle: bool,
+    pub s4_oracle: bool,
+    pub mitm_neighbours: bool,
+    /// Work charged to the oracles and included in `total_ops`:
+    /// quadratics solved (one operation-equivalent each — a square root
+    /// costs about what an affine addition costs) plus the group
+    /// operations of the neighbour lookups.
+    pub oracle_ops: u64,
+    /// Complete decompositions the oracles found (`L = ±P_i ± P_j`, or
+    /// `± P_k` more).
+    pub oracle_hits: u64,
+    /// Neighbour lookups that matched a *walked* residual rather than a
+    /// seed: ordinary collisions with one extra term.
+    pub neighbour_collisions: u64,
     /// Residuals evaluated (independent samples or walk steps).
     pub samples: u64,
     /// Residuals that passed the filter / distinguished-point test and
@@ -1204,6 +1357,12 @@ impl StrategyReport {
             fold_order: fold_mode(inst, opts).order(),
             j_zero: inst.aut.is_some(),
             seeded_points: 0,
+            s3_oracle: opts.s3_oracle,
+            s4_oracle: opts.s4_oracle,
+            mitm_neighbours: opts.mitm_neighbours,
+            oracle_ops: 0,
+            oracle_hits: 0,
+            neighbour_collisions: 0,
             samples: 0,
             accepted: 0,
             table_entries: 0,
@@ -1244,6 +1403,10 @@ struct Collector<'a> {
     system: RelationSystem,
     report: StrategyReport,
     la_time: Duration,
+    /// Oracle work that was *not* a group operation (quadratic solves);
+    /// `report.oracle_ops` additionally holds the oracle's group ops,
+    /// which the curve counter already contains.
+    oracle_solves: u64,
 }
 
 impl<'a> Collector<'a> {
@@ -1254,7 +1417,25 @@ impl<'a> Collector<'a> {
             system: RelationSystem::new(inst.curve.n, fb.len() + 1),
             report: StrategyReport::new(inst, fb, strategy, opts),
             la_time: Duration::ZERO,
+            oracle_solves: 0,
         }
+    }
+
+    /// Charge `solves` quadratic solves to the oracle.
+    fn charge_solves(&mut self, solves: u64) {
+        self.oracle_solves += solves;
+        self.report.oracle_ops += solves;
+    }
+
+    /// Charge group operations performed since `before` to the oracle
+    /// (they are already in the curve counter).
+    fn charge_group_ops(&mut self, before: u64) {
+        self.report.oracle_ops += self.inst.curve.ops() - before;
+    }
+
+    /// Group operations plus non-group oracle work so far.
+    fn spent(&self) -> u64 {
+        self.inst.curve.ops() + self.oracle_solves
     }
 
     fn count_collision(&mut self, kind: CollisionKind) {
@@ -1303,7 +1484,7 @@ impl<'a> Collector<'a> {
                     self.report.solved = true;
                     self.report.recovered = Some(d);
                     self.report.correct = Some(d == self.inst.d);
-                    self.report.ops_at_solve = Some(curve.ops());
+                    self.report.ops_at_solve = Some(curve.ops() + self.oracle_solves);
                 }
             }
         } else {
@@ -1314,13 +1495,14 @@ impl<'a> Collector<'a> {
     }
 
     fn finish(mut self, start: Instant, setup_ops: u64) -> StrategyReport {
-        let total = self.inst.curve.ops();
+        let total = self.inst.curve.ops() + self.oracle_solves;
         self.report.setup_ops = setup_ops;
         self.report.total_ops = total;
         self.report.walk_ops = total
             .saturating_sub(setup_ops)
             .saturating_sub(self.report.replay_ops)
-            .saturating_sub(self.report.verify_ops);
+            .saturating_sub(self.report.verify_ops)
+            .saturating_sub(self.report.oracle_ops);
         self.report.wall_ms = start.elapsed().as_secs_f64() * 1e3;
         self.report.linear_algebra_ms = self.la_time.as_secs_f64() * 1e3;
         if self.report.relations_independent > 0 {
@@ -1426,15 +1608,24 @@ impl DecompState {
     /// Relation implied by `L(self) = c·P_i` (or `O` when `hit` is
     /// `None`), with `c` a centred signed coefficient.
     pub fn full_relation(&self, hit: Option<(usize, i64)>) -> Relation {
+        match hit {
+            Some(term) => self.full_relation_with(&[term]),
+            None => self.full_relation_with(&[]),
+        }
+    }
+
+    /// Relation implied by `L(self) = Σ c_i P_i` for the given signed
+    /// terms (a complete decomposition of the residual).
+    pub fn full_relation_with(&self, terms: &[(usize, i64)]) -> Relation {
         let mut coeffs = multiset_diff(&self.tuple, &self.minus);
-        if let Some((i, c)) = hit {
+        for &(i, c) in terms {
             match coeffs.iter_mut().find(|(j, _)| *j == i) {
                 Some(entry) => entry.1 += c,
                 None => coeffs.push((i, c)),
             }
-            coeffs.retain(|&(_, c)| c != 0);
-            coeffs.sort_unstable();
         }
+        coeffs.retain(|&(_, c)| c != 0);
+        coeffs.sort_unstable();
         Relation {
             da: self.a,
             db: self.b,
@@ -1442,6 +1633,256 @@ impl DecompState {
             factored: None,
         }
     }
+}
+
+/// The residual table's copy of a [`DecompState`]: `(a, b)` inline and the
+/// two index multisets as one run of words in a [`StateArena`].  Every
+/// accepted residual is stored and only the few that collide are read
+/// back, so this saves an allocation per stored residual (and its free
+/// when the table is dropped) at the price of one per collision.
+#[derive(Clone, Copy)]
+struct StoredState {
+    a: u64,
+    b: u64,
+    at: usize,
+    tuple_len: u32,
+    minus_len: u32,
+}
+
+/// Backing store for [`StoredState`]s; grows by `tuple + minus` words
+/// per stored state and is freed in one piece.
+#[derive(Default)]
+struct StateArena(Vec<u32>);
+
+impl StateArena {
+    fn store(&mut self, s: &DecompState) -> StoredState {
+        let at = self.0.len();
+        self.0.extend_from_slice(&s.tuple);
+        self.0.extend_from_slice(&s.minus);
+        StoredState {
+            a: s.a,
+            b: s.b,
+            at,
+            tuple_len: s.tuple.len() as u32,
+            minus_len: s.minus.len() as u32,
+        }
+    }
+
+    fn parts(&self, st: &StoredState) -> (&[u32], &[u32]) {
+        let mid = st.at + st.tuple_len as usize;
+        (
+            &self.0[st.at..mid],
+            &self.0[mid..mid + st.minus_len as usize],
+        )
+    }
+
+    /// `load(st) == s`, without building the state.
+    fn is(&self, st: &StoredState, s: &DecompState) -> bool {
+        let (tuple, minus) = self.parts(st);
+        st.a == s.a && st.b == s.b && tuple == &s.tuple[..] && minus == &s.minus[..]
+    }
+
+    fn load(&self, st: &StoredState) -> DecompState {
+        let (tuple, minus) = self.parts(st);
+        DecompState {
+            a: st.a,
+            b: st.b,
+            tuple: tuple.to_vec(),
+            minus: minus.to_vec(),
+        }
+    }
+}
+
+// ── Semaev S₃ pair-decomposition oracle ────────────────────────────────
+
+/// Semaev's third summation polynomial for `y² = x³ + ax + b` as a
+/// quadratic in its last argument: `S₃(x₁, x₂, X) = A·X² + B·X + C` with
+///
+/// ```text
+///   A = (x₁ − x₂)²
+///   B = −2[(x₁ + x₂)(x₁x₂ + a) + 2b]
+///   C = (x₁x₂ − a)² − 4b(x₁ + x₂),
+/// ```
+///
+/// which vanishes exactly at `X = x(P₁ ± P₂)`.
+pub fn s3_in_x3(curve: &Curve, x1: u64, x2: u64) -> (u64, u64, u64) {
+    let p = curve.p;
+    let x1x2 = mul_mod(x1, x2, p);
+    let sum = add_mod(x1, x2, p);
+    let diff = sub_mod(x1, x2, p);
+    let a_coef = mul_mod(diff, diff, p);
+    let inner = add_mod(
+        mul_mod(sum, add_mod(x1x2, curve.a, p), p),
+        mul_mod(2, curve.b, p),
+        p,
+    );
+    let b_coef = (p - mul_mod(2, inner, p)) % p;
+    let part = sub_mod(x1x2, curve.a, p);
+    let c_coef = sub_mod(
+        mul_mod(part, part, p),
+        mul_mod(mul_mod(4, curve.b, p), sum, p),
+        p,
+    );
+    (a_coef, b_coef, c_coef)
+}
+
+/// One-exponentiation square root when `p ≡ 3 (mod 4)`; Tonelli–Shanks
+/// otherwise.  Either way it is the unit the oracle is charged in.
+fn sqrt_fast(d: u64, p: u64) -> Option<u64> {
+    if d == 0 {
+        return Some(0);
+    }
+    if p % 4 == 3 {
+        let r = pow_mod(d, (p + 1) / 4, p);
+        if mul_mod(r, r, p) == d {
+            Some(r)
+        } else {
+            None
+        }
+    } else {
+        sqrt_mod(d, p)
+    }
+}
+
+/// Decide `L = s_i·P_i + s_j·P_j` (`i ≤ j`, `s ∈ {±1}`) with Semaev's
+/// `S₃`: for every `i` solve the quadratic `S₃(x_L, x_i, X) = 0` and look
+/// its roots up in the factor base; the signs are then settled by two
+/// group operations.  Returns the decompositions as coefficient lists
+/// and the number of quadratics solved.  `L = ±P_i` itself is left to the
+/// factor-base lookup.
+pub fn s3_pair_oracle(inst: &Instance, fb: &FactorBase, l: &Pt) -> (Vec<Vec<(usize, i64)>>, u64) {
+    let curve = &inst.curve;
+    let p = curve.p;
+    let mut found = Vec::new();
+    let mut solves = 0u64;
+    if l.inf {
+        return (found, 0);
+    }
+    for (i, pi) in fb.points.iter().enumerate() {
+        if pi.x == l.x {
+            continue;
+        }
+        solves += 1;
+        let (a, b, c) = s3_in_x3(curve, l.x, pi.x);
+        // A = (x_L − x_i)² ≠ 0 here.
+        let disc = sub_mod(mul_mod(b, b, p), mul_mod(4, mul_mod(a, c, p), p), p);
+        let Some(r) = sqrt_fast(disc, p) else {
+            continue;
+        };
+        let inv2a = inv_mod(mul_mod(2, a, p), p);
+        let mut roots = vec![mul_mod(sub_mod(p - b, r, p), inv2a, p)];
+        if r != 0 {
+            roots.push(mul_mod(add_mod(p - b, r, p), inv2a, p));
+        }
+        for x in roots {
+            let Some(&j) = fb.by_x.get(&x) else {
+                continue;
+            };
+            if j < i {
+                continue; // found from the smaller index already
+            }
+            let pj = fb.points[j];
+            // L − s_i P_i = s_j P_j for some signs: two additions decide.
+            for s_i in [1i64, -1] {
+                let rest = if s_i == 1 {
+                    curve.sub(l, pi)
+                } else {
+                    curve.add(l, pi)
+                };
+                let s_j = if rest == pj {
+                    1
+                } else if rest == curve.neg(&pj) {
+                    -1
+                } else {
+                    continue;
+                };
+                let terms = if i == j {
+                    vec![(i, s_i + s_j)]
+                } else {
+                    vec![(i, s_i), (j, s_j)]
+                };
+                if terms.iter().all(|&(_, c)| c != 0) {
+                    found.push(terms);
+                }
+            }
+        }
+    }
+    found.sort();
+    found.dedup();
+    (found, solves)
+}
+
+/// Roots of `S₃(x₁, x₂, X) = 0`, i.e. the candidates for `x(P₁ ± P₂)`,
+/// and whether a quadratic was solved (`x₁ = x₂` is skipped).
+fn s3_roots(curve: &Curve, x1: u64, x2: u64) -> (Vec<u64>, bool) {
+    if x1 == x2 {
+        return (Vec::new(), false);
+    }
+    let p = curve.p;
+    let (a, b, c) = s3_in_x3(curve, x1, x2);
+    let disc = sub_mod(mul_mod(b, b, p), mul_mod(4, mul_mod(a, c, p), p), p);
+    let Some(r) = sqrt_fast(disc, p) else {
+        return (Vec::new(), true);
+    };
+    let inv2a = inv_mod(mul_mod(2, a, p), p);
+    let mut roots = vec![mul_mod(sub_mod(p - b, r, p), inv2a, p)];
+    if r != 0 {
+        roots.push(mul_mod(add_mod(p - b, r, p), inv2a, p));
+    }
+    (roots, true)
+}
+
+/// Decide `L = s_i P_i + s_j P_j + s_k P_k` with `i < j < k` by applying
+/// `S₃` twice: the roots `Y = x(L ∓ P_i)` for each `i`, then for each
+/// `j > i` the roots `X` of `S₃(Y, x_j, X)`, looked up in the factor base.
+/// Signs are settled by group arithmetic.  Returns the decompositions
+/// and the number of quadratics solved (`≈ B²`).  Pairs and repeated
+/// indices are left to the other oracles.
+pub fn s4_triple_oracle(inst: &Instance, fb: &FactorBase, l: &Pt) -> (Vec<Vec<(usize, i64)>>, u64) {
+    let curve = &inst.curve;
+    let mut found = Vec::new();
+    let mut solves = 0u64;
+    if l.inf {
+        return (found, 0);
+    }
+    let bsize = fb.len();
+    for i in 0..bsize {
+        let (ys, solved) = s3_roots(curve, l.x, fb.points[i].x);
+        solves += solved as u64;
+        for y in ys {
+            for j in (i + 1)..bsize {
+                let (xs, solved) = s3_roots(curve, y, fb.points[j].x);
+                solves += solved as u64;
+                for x in xs {
+                    let Some(&k) = fb.by_x.get(&x) else {
+                        continue;
+                    };
+                    if k <= j {
+                        continue;
+                    }
+                    // L − s_i P_i − s_j P_j = s_k P_k for some signs.
+                    for s_i in [1i64, -1] {
+                        let after_i = curve.sub(l, &curve.mul_signed(&fb.points[i], s_i));
+                        for s_j in [1i64, -1] {
+                            let rest = curve.sub(&after_i, &curve.mul_signed(&fb.points[j], s_j));
+                            let pk = fb.points[k];
+                            let s_k = if rest == pk {
+                                1
+                            } else if rest == curve.neg(&pk) {
+                                -1
+                            } else {
+                                continue;
+                            };
+                            found.push(vec![(i, s_i), (j, s_j), (k, s_k)]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    found.sort();
+    found.dedup();
+    (found, solves)
 }
 
 /// The fold the options ask for on this instance.
@@ -1459,7 +1900,12 @@ fn fold_mode(inst: &Instance, opts: &WalkOptions) -> Fold {
 /// factor-base point, with `c` centred.
 fn fold_lookup(inst: &Instance, fb: &FactorBase, mode: Fold, pt: &Pt) -> Option<(usize, i64)> {
     let (canon, f) = fold(inst, mode, pt);
-    let (i, sign) = fb.lookup(&canon)?;
+    folded_lookup(inst, fb, &canon, f)
+}
+
+/// [`fold_lookup`] for a point already folded to `(canon, f)`.
+fn folded_lookup(inst: &Instance, fb: &FactorBase, canon: &Pt, f: u64) -> Option<(usize, i64)> {
+    let (i, sign) = fb.lookup(canon)?;
     let c = if sign == 1 {
         f
     } else {
@@ -1493,7 +1939,8 @@ fn run_explicit(
     let start = Instant::now();
     let mut col = Collector::new(inst, fb, strategy, opts);
     let mode = fold_mode(inst, opts);
-    let mut table: HashMap<Pt, (DecompState, u64)> = HashMap::new();
+    let mut table: FxMap<Pt, (StoredState, u64)> = FxMap::default();
+    let mut arena = StateArena::default();
 
     // Optional seeding with every signed pair sum.  A seed is a residual
     // of the state `(0, 0, tuple, minus)` whose decomposition is known;
@@ -1528,12 +1975,14 @@ fn run_explicit(
                         col.push_full(state.full_relation(Some(hit)));
                     }
                     let (key, f) = fold(inst, mode, &pt);
-                    match table.get(&key) {
-                        Some((prev, prev_f)) => {
-                            col.push_collision(state.relation_scaled(f, prev, *prev_f, n));
+                    match table.entry(key) {
+                        Entry::Occupied(slot) => {
+                            let (prev, prev_f) = slot.get();
+                            let prev = arena.load(prev);
+                            col.push_collision(state.relation_scaled(f, &prev, *prev_f, n));
                         }
-                        None => {
-                            table.insert(key, (state, f));
+                        Entry::Vacant(slot) => {
+                            slot.insert((arena.store(&state), f));
                             col.report.seeded_points += 1;
                         }
                     }
@@ -1571,31 +2020,98 @@ fn run_explicit(
             None => true,
         };
         if passes_filter {
+            // The fold class of `L` decides both the complete-decomposition
+            // test and the table key: fold once.
+            let (key, f) = fold(inst, mode, &l);
             if l.inf {
                 col.push_full(state.full_relation(None));
-            } else if let Some(hit) = fold_lookup(inst, fb, mode, &l) {
+            } else if let Some(hit) = folded_lookup(inst, fb, &key, f) {
                 col.push_full(state.full_relation(Some(hit)));
             }
+            if opts.s3_oracle {
+                let before = curve.ops();
+                let (hits, solves) = s3_pair_oracle(inst, fb, &l);
+                col.charge_solves(solves);
+                col.charge_group_ops(before);
+                for terms in hits {
+                    col.report.oracle_hits += 1;
+                    col.push_full(state.full_relation_with(&terms));
+                }
+            }
+            if opts.s4_oracle {
+                let before = curve.ops();
+                let (hits, solves) = s4_triple_oracle(inst, fb, &l);
+                col.charge_solves(solves);
+                col.charge_group_ops(before);
+                for terms in hits {
+                    col.report.oracle_hits += 1;
+                    col.push_full(state.full_relation_with(&terms));
+                }
+            }
+            if opts.mitm_neighbours {
+                let before = curve.ops();
+                for kk in 0..bsize {
+                    for sign in [1i64, -1] {
+                        // z = L − sign·P_k is the residual of `state` with
+                        // one more term.
+                        let z = if sign == 1 {
+                            curve.sub(&l, &fb.points[kk])
+                        } else {
+                            curve.add(&l, &fb.points[kk])
+                        };
+                        let mut zs = state.clone();
+                        if sign == 1 {
+                            zs.tuple.push(kk as u32);
+                        } else {
+                            zs.minus.push(kk as u32);
+                        }
+                        let zs = zs.canonical();
+                        if z.inf {
+                            col.report.oracle_hits += 1;
+                            col.push_full(zs.full_relation(None));
+                            continue;
+                        }
+                        if let Some(hit) = fold_lookup(inst, fb, mode, &z) {
+                            col.report.oracle_hits += 1;
+                            col.push_full(zs.full_relation(Some(hit)));
+                        }
+                        let (zkey, zf) = fold(inst, mode, &z);
+                        if let Some((prev, prev_f)) = table.get(&zkey) {
+                            if prev.a == 0 && prev.b == 0 {
+                                col.report.oracle_hits += 1;
+                            } else {
+                                col.report.neighbour_collisions += 1;
+                            }
+                            if !arena.is(prev, &zs) {
+                                let prev = arena.load(prev);
+                                col.push_collision(zs.relation_scaled(zf, &prev, *prev_f, n));
+                            }
+                        }
+                    }
+                }
+                col.charge_group_ops(before);
+            }
             col.report.accepted += 1;
-            let (key, f) = fold(inst, mode, &l);
-            match table.get(&key) {
-                Some((prev, prev_f)) => {
-                    if *prev == state {
+            match table.entry(key) {
+                Entry::Occupied(slot) => {
+                    let (prev, prev_f) = slot.get();
+                    if arena.is(prev, &state) {
                         // Same state: a revisit, or `f·L = f'·L` with
                         // `f ≠ f'`, i.e. `L = O`, already reported as a
                         // complete decomposition.  Neither is progress.
                         col.count_collision(CollisionKind::Trivial);
                     } else {
-                        col.push_collision(state.relation_scaled(f, prev, *prev_f, n));
+                        let prev = arena.load(prev);
+                        col.push_collision(state.relation_scaled(f, &prev, *prev_f, n));
                     }
                     restart = true;
                 }
-                None => {
-                    table.insert(key, (state.clone(), f));
+                Entry::Vacant(slot) => {
+                    slot.insert((arena.store(&state), f));
                 }
             }
         }
-        if (opts.stop_when_solved && col.report.solved) || curve.ops() >= opts.max_ops {
+        if (opts.stop_when_solved && col.report.solved) || col.spent() >= opts.max_ops {
             break;
         }
         match strategy {
@@ -1673,7 +2189,12 @@ fn run_explicit(
 fn run_fresh_hash_dp(inst: &Instance, fb: &FactorBase, opts: &WalkOptions) -> StrategyReport {
     let strategy = Strategy::FreshHashWalk;
     assert!(
-        !opts.negation_map && !opts.use_automorphism && !opts.seed_pairs,
+        !opts.negation_map
+            && !opts.use_automorphism
+            && !opts.seed_pairs
+            && !opts.s3_oracle
+            && !opts.s4_oracle
+            && !opts.mitm_neighbours,
         "folding and seeding are implemented for exhaustive storage (dp_bits = 0) only"
     );
     let curve = &inst.curve;
@@ -1691,7 +2212,7 @@ fn run_fresh_hash_dp(inst: &Instance, fb: &FactorBase, opts: &WalkOptions) -> St
         (64u64 << opts.dp_bits).max(8 * sqrt_n)
     };
     let mut starts: Vec<DecompState> = Vec::new();
-    let mut table: HashMap<Pt, (u32, u32)> = HashMap::new();
+    let mut table: FxMap<Pt, (u32, u32)> = FxMap::default();
 
     let advance = |state: &mut DecompState, l: &mut Pt| {
         *state = DecompState::from_residual(l, n, bsize, k);
@@ -1724,7 +2245,6 @@ fn run_fresh_hash_dp(inst: &Instance, fb: &FactorBase, opts: &WalkOptions) -> St
             advance(&mut s1, &mut l1);
             advance(&mut s2, &mut l2);
             i1 += 1;
-            i2 += 1;
         }
     };
 
@@ -1831,7 +2351,7 @@ impl<'a> RAddingWalk<'a> {
 
     fn relation(&self, here: &WalkPosition, there: &WalkPosition) -> Relation {
         let n = self.inst.curve.n;
-        let mut by_fb: HashMap<usize, i64> = HashMap::new();
+        let mut by_fb: FxMap<usize, i64> = FxMap::default();
         for (j, m) in self.mults.iter().enumerate() {
             let delta = here.counts[j] as i64 - there.counts[j] as i64;
             if delta != 0 {
@@ -1852,7 +2372,7 @@ impl<'a> RAddingWalk<'a> {
 
     /// Small-coefficient view of a walk position over the factor base.
     fn small_form(&self, pos: &WalkPosition) -> (u64, u64, Vec<(usize, i64)>) {
-        let mut by_fb: HashMap<usize, i64> = HashMap::new();
+        let mut by_fb: FxMap<usize, i64> = FxMap::default();
         for (j, m) in self.mults.iter().enumerate() {
             if pos.counts[j] != 0 {
                 if let Some(i) = m.fb_index {
@@ -1961,7 +2481,7 @@ fn run_radding(
     } else {
         (64u64 << opts.dp_bits).max(8 * sqrt_n)
     };
-    let mut table: HashMap<Pt, (u32, u32, u64)> = HashMap::new();
+    let mut table: FxMap<Pt, (u32, u32, u64)> = FxMap::default();
 
     'outer: loop {
         let w = walk.starts.len();
@@ -2093,7 +2613,8 @@ pub fn mitm_four_decomposition(
     curve.reset_ops();
     let start = Instant::now();
 
-    let mut pairs: HashMap<Pt, (u32, u32)> = HashMap::with_capacity(bsize * (bsize + 1) / 2);
+    let mut pairs: FxMap<Pt, (u32, u32)> =
+        FxMap::with_capacity_and_hasher(bsize * (bsize + 1) / 2, Default::default());
     let mut system = RelationSystem::new(n, bsize + 1);
     let mut verified = 0u64;
     let mut independent = 0u64;
@@ -2321,6 +2842,359 @@ mod tests {
         assert_eq!(sys.solved(0), Some(2));
         assert_eq!(sys.solved(1), Some(3));
         assert_eq!(sys.solved(2), Some(4));
+    }
+
+    #[test]
+    fn modular_helpers_match_their_first_forms() {
+        let mut rng = StdRng::seed_from_u64(0xADD);
+        for trial in 0..100_000u32 {
+            // Moduli of every width up to 2^63, so both `mul_mod` routes
+            // (product within a word or not) and both corrections run.
+            let p = rng.gen_range(1..=u64::MAX >> (1 + trial % 63));
+            let (a, b) = (rng.gen_range(0..p), rng.gen_range(0..p));
+            assert_eq!(
+                mul_mod(a, b, p),
+                ((a as u128 * b as u128) % p as u128) as u64
+            );
+            let s = a + b;
+            assert_eq!(add_mod(a, b, p), if s >= p { s - p } else { s });
+            assert_eq!(sub_mod(a, b, p), if a >= b { a - b } else { a + p - b });
+        }
+        // Unreduced factors reach `mul_mod` too (`mul_mod(4, …)`).
+        for _ in 0..10_000 {
+            let p = rng.gen_range(1..1u64 << 40);
+            let (a, b) = (rng.gen::<u64>(), rng.gen::<u64>() >> rng.gen_range(0..64));
+            assert_eq!(
+                mul_mod(a, b, p),
+                ((a as u128 * b as u128) % p as u128) as u64
+            );
+        }
+    }
+
+    /// [`inv_mod`] as first written, on `i128` Bézout coefficients.
+    fn inv_mod_i128(a: u64, p: u64) -> u64 {
+        let (mut old_r, mut r) = (a as i128 % p as i128, p as i128);
+        let (mut old_s, mut s) = (1i128, 0i128);
+        while r != 0 {
+            let q = old_r / r;
+            let tmp = old_r - q * r;
+            old_r = r;
+            r = tmp;
+            let tmp = old_s - q * s;
+            old_s = s;
+            s = tmp;
+        }
+        old_s.rem_euclid(p as i128) as u64
+    }
+
+    fn gcd(mut a: u64, mut b: u64) -> u64 {
+        while b != 0 {
+            (a, b) = (b, a % b);
+        }
+        a
+    }
+
+    #[test]
+    fn inv_mod_matches_the_i128_euclid() {
+        let mut rng = StdRng::seed_from_u64(0x1_2E7);
+        let mut cases = vec![
+            (0u64, 1u64),
+            (5, 1),
+            (1, 2),
+            (u64::MAX, 3),
+            (2, u64::MAX),
+            (u64::MAX - 1, u64::MAX),
+            (3, (1 << 63) - 25),
+            (u64::MAX, u64::MAX - 58), // 2^64 − 59 is prime
+        ];
+        for trial in 0..50_000u32 {
+            // Moduli of every width, prime or not; operands below and above.
+            let p = (rng.gen::<u64>() >> (trial % 64)).max(1);
+            let a = if trial % 2 == 0 {
+                rng.gen_range(0..p)
+            } else {
+                rng.gen()
+            };
+            cases.push((a, p));
+        }
+        let mut units = 0;
+        for (a, p) in cases {
+            // A non-unit trips the debug assertion; release builds return
+            // whatever the Euclid leaves, and that must not change either.
+            let unit = gcd(a % p, p) == 1;
+            if !unit && cfg!(debug_assertions) {
+                continue;
+            }
+            units += unit as u32;
+            assert_eq!(inv_mod(a, p), inv_mod_i128(a, p), "a = {a}, p = {p}");
+            if unit && p > 1 {
+                assert_eq!(mul_mod(a % p, inv_mod(a, p), p), 1);
+            }
+        }
+        assert!(units > 20_000);
+    }
+
+    #[test]
+    fn fixed_factor_matches_mul_mod() {
+        let mut rng = StdRng::seed_from_u64(0x5_4009);
+        let mut moduli = vec![1u64, 2, 3, 1_000_003, (1 << 61) - 1, SHOUP_MAX_MODULUS - 25];
+        moduli.push(SHOUP_MAX_MODULUS);
+        for bits in 2..=63 {
+            moduli.push(rng.gen_range((1u64 << (bits - 1))..(1u64 << bits)));
+        }
+        for n in moduli {
+            // Factors and operands of any size: the factor is reduced on
+            // construction, the operand never is.
+            let mut ws = vec![0u64, 1, n - 1, n, u64::MAX];
+            let mut xs = vec![0u64, 1, n - 1, n, u64::MAX];
+            for _ in 0..40 {
+                ws.push(rng.gen_range(0..n));
+                ws.push(rng.gen());
+                xs.push(rng.gen_range(0..n));
+                xs.push(rng.gen());
+            }
+            for &w in &ws {
+                let shoup = FixedFactor::new::<true>(w, n);
+                let plain = FixedFactor::new::<false>(w, n);
+                for &x in &xs {
+                    let want = mul_mod(w, x, n);
+                    assert_eq!(shoup.mul::<true>(x, n), want, "w = {w}, x = {x}, n = {n}");
+                    assert_eq!(plain.mul::<false>(x, n), want);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn relation_system_shoup_and_mul_mod_paths_agree() {
+        let mut rng = StdRng::seed_from_u64(0xE11);
+        for (n, cols) in [
+            (3u64, 5usize),
+            (1_000_003, 12),
+            ((1 << 61) - 1, 12),
+            (SHOUP_MAX_MODULUS - 25, 9),
+        ] {
+            let mut shoup = RelationSystem::new(n, cols);
+            let mut plain = RelationSystem::new(n, cols);
+            let mut rows: Vec<(Vec<u64>, u64)> = Vec::new();
+            for t in 0..4 * cols {
+                let (row, rhs): (Vec<u64>, u64) = if t % 5 == 4 && rows.len() >= 2 {
+                    // A combination of earlier rows: dependent, or not
+                    // once the right-hand side is perturbed.
+                    let (i, j) = (rng.gen_range(0..rows.len()), rng.gen_range(0..rows.len()));
+                    let f = rng.gen_range(0..n);
+                    let row = (0..cols)
+                        .map(|c| add_mod(rows[i].0[c], mul_mod(f, rows[j].0[c], n), n))
+                        .collect();
+                    let rhs = add_mod(rows[i].1, mul_mod(f, rows[j].1, n), n);
+                    (
+                        row,
+                        if t % 10 == 4 {
+                            rhs
+                        } else {
+                            add_mod(rhs, 1 % n, n)
+                        },
+                    )
+                } else {
+                    let row = (0..cols)
+                        .map(|_| {
+                            if rng.gen_range(0..3) == 0 {
+                                rng.gen_range(0..n)
+                            } else {
+                                0
+                            }
+                        })
+                        .collect();
+                    (row, rng.gen_range(0..n))
+                };
+                rows.push((row.clone(), rhs));
+                let a = shoup.insert_by::<true>(row.clone(), rhs);
+                let b = plain.insert_by::<false>(row, rhs);
+                assert_eq!(a, b);
+                assert_eq!(shoup.ops(), plain.ops());
+                assert_eq!(shoup.pivots, plain.pivots);
+            }
+            assert!(shoup.rank() > 0 && shoup.ops() > 0);
+        }
+    }
+
+    /// [`RelationSystem::insert`] as first written: a `u128` remainder per
+    /// product, and every column tested for every pivot row the new row
+    /// updates.  Its arithmetic wraps where the original's did in release
+    /// builds, so moduli above 2^63 compare too.
+    fn insert_first_form(sys: &mut RelationSystem, mut row: Vec<u64>, mut rhs: u64) -> bool {
+        let mul = |a: u64, b: u64, n: u64| ((a as u128 * b as u128) % n as u128) as u64;
+        let sub = |a: u64, b: u64, n: u64| {
+            if a >= b {
+                a - b
+            } else {
+                a.wrapping_add(n).wrapping_sub(b)
+            }
+        };
+        assert_eq!(row.len(), sys.cols);
+        let n = sys.n;
+        for (col, prow, prhs) in &sys.pivots {
+            let f = row[*col];
+            if f != 0 {
+                for c in 0..sys.cols {
+                    if prow[c] != 0 {
+                        row[c] = sub(row[c], mul(f, prow[c], n), n);
+                        sys.ops += 1;
+                    }
+                }
+                rhs = sub(rhs, mul(f, *prhs, n), n);
+                sys.ops += 1;
+            }
+        }
+        let Some(col) = row.iter().position(|&v| v != 0) else {
+            return false;
+        };
+        let inv = inv_mod_i128(row[col], n);
+        for v in row.iter_mut() {
+            *v = mul(*v, inv, n);
+        }
+        rhs = mul(rhs, inv, n);
+        sys.ops += sys.cols as u64 + 1;
+        for (_, prow, prhs) in sys.pivots.iter_mut() {
+            let f = prow[col];
+            if f != 0 {
+                for c in 0..sys.cols {
+                    if row[c] != 0 {
+                        prow[c] = sub(prow[c], mul(f, row[c], n), n);
+                        sys.ops += 1;
+                    }
+                }
+                *prhs = sub(*prhs, mul(f, rhs, n), n);
+                sys.ops += 1;
+            }
+        }
+        sys.pivots.push((col, row, rhs));
+        true
+    }
+
+    /// The two routes of `insert` are checked against each other above;
+    /// this checks the one `insert` picks against the original body, so a
+    /// change shared by both routes (the support-only back-substitution)
+    /// cannot hide.  `ops` is compared after every row: the perfbench
+    /// fingerprint does not see it, and `gaudry_cubic` reports it.
+    #[test]
+    fn relation_system_matches_the_first_insert() {
+        let mut rng = StdRng::seed_from_u64(0x1_5E27);
+        let moduli = [
+            2u64,
+            3,
+            65_521,
+            1_000_003,
+            4_294_967_291,
+            (1 << 61) - 1,
+            SHOUP_MAX_MODULUS - 25,
+            SHOUP_MAX_MODULUS + 29, // the least prime above 2^63: the `mul_mod` route
+            u64::MAX - 58,
+        ];
+        let mut inserted = 0u32;
+        for &n in &moduli {
+            // Column counts on both sides of a word, and sparse to dense
+            // rows, so the new row's support ranges from one entry to all.
+            for cols in [1usize, 2, 7, 64, 65, 90] {
+                for density in [5u32, 30, 90] {
+                    for unreduced in [false, true] {
+                        // Unreduced entries (and so non-units, which trip
+                        // the debug assertion in `inv_mod`) in release
+                        // builds only.
+                        if unreduced && cfg!(debug_assertions) {
+                            continue;
+                        }
+                        let mut new = RelationSystem::new(n, cols);
+                        let mut first = RelationSystem::new(n, cols);
+                        let mut rows: Vec<(Vec<u64>, u64)> = Vec::new();
+                        for t in 0..2 * cols + 4 {
+                            let (row, rhs): (Vec<u64>, u64) = if t % 4 == 3 && rows.len() >= 2 {
+                                // A combination of two earlier rows: dependent,
+                                // or inconsistent once the right-hand side moves.
+                                let i = rng.gen_range(0..rows.len());
+                                let j = rng.gen_range(0..rows.len());
+                                let f = rng.gen_range(0..n);
+                                let comb = |x: u64, y: u64| {
+                                    ((x as u128 % n as u128 + f as u128 * (y as u128 % n as u128))
+                                        % n as u128) as u64
+                                };
+                                let row = (0..cols)
+                                    .map(|c| comb(rows[i].0[c], rows[j].0[c]))
+                                    .collect();
+                                let rhs = comb(rows[i].1, rows[j].1);
+                                (row, if t % 8 == 3 { rhs } else { (rhs + 1) % n })
+                            } else {
+                                let entry = |rng: &mut StdRng| {
+                                    if unreduced && rng.gen_range(0..4) == 0 {
+                                        rng.gen()
+                                    } else {
+                                        rng.gen_range(0..n)
+                                    }
+                                };
+                                let row = (0..cols)
+                                    .map(|_| {
+                                        if rng.gen_range(0..100) < density {
+                                            entry(&mut rng)
+                                        } else {
+                                            0
+                                        }
+                                    })
+                                    .collect();
+                                (row, entry(&mut rng))
+                            };
+                            rows.push((row.clone(), rhs));
+                            let a = new.insert(row.clone(), rhs);
+                            let b = insert_first_form(&mut first, row, rhs);
+                            assert_eq!(a, b, "n = {n}, cols = {cols}, row {t}");
+                            assert_eq!(new.ops, first.ops, "n = {n}, cols = {cols}, row {t}");
+                            assert_eq!(new.pivots, first.pivots, "n = {n}, cols = {cols}");
+                            inserted += 1;
+                        }
+                    }
+                }
+            }
+        }
+        assert!(inserted > 2_000);
+    }
+
+    #[test]
+    fn state_arena_round_trips_and_compares_like_the_state() {
+        let mut rng = StdRng::seed_from_u64(0xA7E);
+        let mut arena = StateArena::default();
+        let mut states = Vec::new();
+        for t in 0..500 {
+            // Walked states (empty `minus`), seeds (`a = b = 0`) and
+            // neighbours (both multisets non-empty), of several lengths.
+            let mut s = DecompState::random(&mut rng, 1_000_003, 64, 1 + t % 5);
+            if t % 3 == 0 {
+                s.minus = (0..t % 4).map(|_| rng.gen_range(0..64)).collect();
+            }
+            if t % 7 == 0 {
+                (s.a, s.b) = (0, 0);
+            }
+            states.push(s.canonical());
+        }
+        let stored: Vec<StoredState> = states.iter().map(|s| arena.store(s)).collect();
+        for (i, st) in stored.iter().enumerate() {
+            assert_eq!(arena.load(st), states[i]);
+            for j in [i, (i + 1) % states.len(), (i * 7) % states.len()] {
+                assert_eq!(arena.is(st, &states[j]), states[i] == states[j]);
+            }
+        }
+        // Equal up to the split between `tuple` and `minus` is not equal.
+        let a = DecompState {
+            a: 1,
+            b: 2,
+            tuple: vec![3, 4],
+            minus: vec![5],
+        };
+        let b = DecompState {
+            tuple: vec![3],
+            minus: vec![4, 5],
+            ..a.clone()
+        };
+        let st = arena.store(&a);
+        assert!(arena.is(&st, &a) && !arena.is(&st, &b));
     }
 
     #[test]
@@ -2738,6 +3612,211 @@ mod tests {
             assert_eq!(rep.fold_order, 6);
             assert!(rep.j_zero);
         }
+    }
+
+    #[test]
+    fn s3_quadratic_matches_the_crate_and_vanishes_on_sums() {
+        // Coefficients against the BigUint implementation on the shared
+        // toy curve y² = x³ + 2x + 3 over F_271.
+        let curve = Curve::new(271, 2, 3, 0, Pt::INFINITY);
+        let p = BigUint::from(271u32);
+        let fe = |v: u64| FieldElement::new(BigUint::from(v), p.clone());
+        for (x1, x2) in [(10u64, 17u64), (3, 200), (100, 101)] {
+            let (a, b, c) = s3_in_x3(&curve, x1, x2);
+            let (ba, bb, bc) = crate::cryptanalysis::ec_index_calculus::semaev_s3_in_x3(
+                &fe(x1),
+                &fe(x2),
+                &fe(2),
+                &fe(3),
+            );
+            assert_eq!(BigUint::from(a), ba.value);
+            assert_eq!(BigUint::from(b), bb.value);
+            assert_eq!(BigUint::from(c), bc.value);
+        }
+        // S₃(x_P, x_Q, x_{P±Q}) = 0 on a random instance.
+        let inst = generate_instance(20, 5);
+        let c = &inst.curve;
+        for (u, v) in [(3u64, 77u64), (1234, 5678), (99_991, 7)] {
+            let pu = c.mul(&c.g, u);
+            let pv = c.mul(&c.g, v);
+            let (a, b, cc) = s3_in_x3(c, pu.x, pv.x);
+            for x in [c.add(&pu, &pv).x, c.sub(&pu, &pv).x] {
+                let val = add_mod(
+                    add_mod(mul_mod(a, mul_mod(x, x, c.p), c.p), mul_mod(b, x, c.p), c.p),
+                    cc,
+                    c.p,
+                );
+                assert_eq!(val, 0);
+            }
+        }
+    }
+
+    #[test]
+    fn s3_oracle_agrees_with_brute_force_pairs() {
+        let inst = generate_instance(18, 21);
+        let c = &inst.curve;
+        let fb = FactorBase::build(c, 24);
+        let brute = |l: &Pt| {
+            let mut out = Vec::new();
+            for i in 0..fb.len() {
+                for j in i..fb.len() {
+                    for s_i in [1i64, -1] {
+                        for s_j in [1i64, -1] {
+                            let pt = c.add(
+                                &c.mul_signed(&fb.points[i], s_i),
+                                &c.mul_signed(&fb.points[j], s_j),
+                            );
+                            if pt == *l && !(i == j && s_i + s_j == 0) {
+                                let terms = if i == j {
+                                    vec![(i, s_i + s_j)]
+                                } else {
+                                    vec![(i, s_i), (j, s_j)]
+                                };
+                                out.push(terms);
+                            }
+                        }
+                    }
+                }
+            }
+            out.sort();
+            out.dedup();
+            out
+        };
+        let mut targets: Vec<Pt> = vec![
+            c.add(&fb.points[2], &fb.points[9]),
+            c.sub(&fb.points[5], &fb.points[17]),
+            c.double(&fb.points[7]),
+            c.mul(&c.g, 424_242),
+        ];
+        for k in 1..40u64 {
+            targets.push(c.mul(&c.g, k * 7919));
+        }
+        let mut hits = 0;
+        for l in &targets {
+            let (oracle, solves) = s3_pair_oracle(&inst, &fb, l);
+            assert_eq!(
+                oracle,
+                brute(l),
+                "oracle disagrees with brute force at {l:?}"
+            );
+            assert!(solves <= fb.len() as u64);
+            hits += oracle.len();
+        }
+        assert!(hits >= 3, "the constructed targets must be found");
+    }
+
+    #[test]
+    fn s4_oracle_agrees_with_brute_force_triples() {
+        let inst = generate_instance(18, 23);
+        let c = &inst.curve;
+        let fb = FactorBase::build(c, 12);
+        let brute = |l: &Pt| {
+            let mut out = Vec::new();
+            for i in 0..fb.len() {
+                for j in (i + 1)..fb.len() {
+                    for k in (j + 1)..fb.len() {
+                        for s_i in [1i64, -1] {
+                            for s_j in [1i64, -1] {
+                                for s_k in [1i64, -1] {
+                                    let pt = c.add(
+                                        &c.add(
+                                            &c.mul_signed(&fb.points[i], s_i),
+                                            &c.mul_signed(&fb.points[j], s_j),
+                                        ),
+                                        &c.mul_signed(&fb.points[k], s_k),
+                                    );
+                                    if pt == *l {
+                                        out.push(vec![(i, s_i), (j, s_j), (k, s_k)]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            out.sort();
+            out.dedup();
+            out
+        };
+        let mut targets = vec![
+            c.add(&c.add(&fb.points[1], &fb.points[5]), &c.neg(&fb.points[9])),
+            c.sub(&c.sub(&fb.points[0], &fb.points[3]), &fb.points[11]),
+            c.add(&c.add(&fb.points[2], &fb.points[7]), &fb.points[8]),
+        ];
+        for k in 1..25u64 {
+            targets.push(c.mul(&c.g, k * 104_729));
+        }
+        let mut hits = 0;
+        for l in &targets {
+            let (oracle, solves) = s4_triple_oracle(&inst, &fb, l);
+            assert_eq!(
+                oracle,
+                brute(l),
+                "S4 oracle disagrees with brute force at {l:?}"
+            );
+            assert!(solves <= (fb.len() * fb.len()) as u64);
+            hits += oracle.len();
+        }
+        assert!(hits >= 3);
+    }
+
+    #[test]
+    fn s4_and_mitm_runs_solve_and_are_charged() {
+        let (inst, fb) = small_setup(18, 16, 14);
+        let s4 = run_strategy(
+            &inst,
+            &fb,
+            Strategy::LocalMutationWalk,
+            &WalkOptions {
+                k: 3,
+                max_ops: 1 << 30,
+                seed: 5,
+                negation_map: true,
+                s4_oracle: true,
+                ..WalkOptions::default()
+            },
+        );
+        assert_eq!(s4.correct, Some(true), "{s4:?}");
+        assert_eq!(s4.relations_failed_verification, 0);
+        assert!(s4.oracle_ops >= s4.samples * 100);
+        let mitm = run_strategy(
+            &inst,
+            &fb,
+            Strategy::LocalMutationWalk,
+            &WalkOptions {
+                k: 3,
+                max_ops: 1 << 30,
+                seed: 5,
+                negation_map: true,
+                seed_pairs: true,
+                mitm_neighbours: true,
+                ..WalkOptions::default()
+            },
+        );
+        assert_eq!(mitm.correct, Some(true), "{mitm:?}");
+        assert_eq!(mitm.relations_failed_verification, 0);
+        // Two group operations per factor-base point per residual.
+        assert!(mitm.oracle_ops >= mitm.samples * 2 * fb.len() as u64);
+        assert!(mitm.total_ops >= mitm.oracle_ops + mitm.setup_ops);
+    }
+
+    #[test]
+    fn s3_oracle_run_solves_and_is_charged() {
+        let (inst, fb) = small_setup(18, 24, 12);
+        let opts = WalkOptions {
+            k: 3,
+            max_ops: 1 << 28,
+            seed: 5,
+            negation_map: true,
+            s3_oracle: true,
+            ..WalkOptions::default()
+        };
+        let rep = run_strategy(&inst, &fb, Strategy::LocalMutationWalk, &opts);
+        assert_eq!(rep.correct, Some(true), "{rep:?}");
+        assert_eq!(rep.relations_failed_verification, 0);
+        assert!(rep.s3_oracle);
+        assert!(rep.oracle_ops >= rep.samples * (fb.len() as u64 - 1));
+        assert!(rep.total_ops >= rep.oracle_ops);
     }
 
     #[test]

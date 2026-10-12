@@ -1,0 +1,118 @@
+{
+  "evidence_type": "compiled_reservoir_guided_walk_capacity_envelope",
+  "decimal_limits": {
+    "ram_bytes": 1000000000000,
+    "peak_disk_bytes": 100000000000000
+  },
+  "compiler_ram_placement": {
+    "slope_sketch_bytes": 800000000000,
+    "other_runtime_and_buffers_bytes": 200000000000
+  },
+  "online_record_model": {
+    "record_capacity": 308441358024,
+    "peak_static_bytes": 65000000000,
+    "peak_per_record_bytes": 324,
+    "schedule_bits_per_step": 6
+  },
+  "placements": [
+    {
+      "compiler_mode": "fixed",
+      "sketch_placement": "800GB_RAM",
+      "sketch_bytes": 800000000000,
+      "bloom_hashes": 7,
+      "target_fpr_assumption": 0.01,
+      "maximum_insertions_at_target_fpr": 667156281745,
+      "maximum_order": 193184680645152996804,
+      "maximum_order_log2_floor": 67,
+      "schedule_steps": 20848633803,
+      "reservoir_records": 32,
+      "compiler_insertions": 667156281696,
+      "compiler_insertion_slack": 49,
+      "packed_six_bit_schedule_bytes": 15636475353,
+      "online_exact_records": 20848633806,
+      "online_peak_disk_bytes": 6819957353144,
+      "maximum_plus_one_fails_some_bound": true
+    },
+    {
+      "compiler_mode": "fixed",
+      "sketch_placement": "100TB_external_capacity_only",
+      "sketch_bytes": 100000000000000,
+      "bloom_hashes": 7,
+      "target_fpr_assumption": 0.01,
+      "maximum_insertions_at_target_fpr": 83394535218159,
+      "maximum_order": 42282698372372756016196,
+      "maximum_order_log2_floor": 75,
+      "schedule_steps": 308441358021,
+      "reservoir_records": 32,
+      "compiler_insertions": 9870123456672,
+      "compiler_insertion_slack": 73524411761487,
+      "packed_six_bit_schedule_bytes": 231331018516,
+      "online_exact_records": 308441358024,
+      "online_peak_disk_bytes": 99999999999776,
+      "maximum_plus_one_fails_some_bound": true
+    },
+    {
+      "compiler_mode": "scaled",
+      "sketch_placement": "800GB_RAM",
+      "sketch_bytes": 800000000000,
+      "bloom_hashes": 7,
+      "target_fpr_assumption": 0.01,
+      "maximum_insertions_at_target_fpr": 667156281745,
+      "maximum_order": 3558157870864,
+      "maximum_order_log2_floor": 41,
+      "schedule_steps": 2829462,
+      "reservoir_records": 235789,
+      "compiler_insertions": 667156015518,
+      "compiler_insertion_slack": 266227,
+      "packed_six_bit_schedule_bytes": 2122097,
+      "online_exact_records": 2829465,
+      "online_peak_disk_bytes": 65916746660,
+      "maximum_plus_one_fails_some_bound": true
+    },
+    {
+      "compiler_mode": "scaled",
+      "sketch_placement": "100TB_external_capacity_only",
+      "sketch_bytes": 100000000000000,
+      "bloom_hashes": 7,
+      "target_fpr_assumption": 0.01,
+      "maximum_insertions_at_target_fpr": 83394535218159,
+      "maximum_order": 444770806368100,
+      "maximum_order_log2_floor": 48,
+      "schedule_steps": 31634385,
+      "reservoir_records": 2636199,
+      "compiler_insertions": 83394534102615,
+      "compiler_insertion_slack": 1115544,
+      "packed_six_bit_schedule_bytes": 23725789,
+      "online_exact_records": 31634388,
+      "online_peak_disk_bytes": 75249541712,
+      "maximum_plus_one_fails_some_bound": true
+    }
+  ],
+  "hypothetical_256_bit_order": {
+    "fixed": {
+      "reservoir_records": 32,
+      "schedule_steps": 510423550381407695195061911147652317184,
+      "compiler_insertions": 16333553612205046246241981156724874149888,
+      "over_800GB_ram_sketch_capacity_ratio": 2.4482350026718395e+28,
+      "over_100TB_external_sketch_capacity_ratio": 1.958588002136673e+26,
+      "online_records_fit": false
+    },
+    "scaled": {
+      "reservoir_records": 42535295865117307932921825928971026432,
+      "schedule_steps": 510423550381407695195061911147652317184,
+      "compiler_insertions": 21711016731996786641919559689128982722488122124807605757398297001483711807488,
+      "over_800GB_ram_sketch_capacity_ratio": 3.2542625058119673e+64,
+      "over_100TB_external_sketch_capacity_ratio": 2.6034100046485124e+62,
+      "online_records_fit": false
+    }
+  },
+  "limitations": [
+    "Bloom capacities assume independent uniform hashes and target occupancy.",
+    "The external-sketch rows are capacity only; random bit probes over NVMe have no service guarantee.",
+    "Compilation coefficient work, filter probes, and schedule search are not wall-clock measurements.",
+    "The fixed reservoir fits larger orders but its measured relative gain shrinks with order.",
+    "The scaled reservoir restores finite absolute gain by using linear-in-order compiler insertions.",
+    "Capacity does not establish novelty, asymptotic speedup, or cryptographic-scale feasibility."
+  ],
+  "script_sha256": "adaf7e8cc5d511d18caaf31a96fbee567d56d831bd7bda28b0b4ff2c600f1977"
+}

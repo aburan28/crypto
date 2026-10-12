@@ -1,0 +1,41 @@
+{
+  "repository": "aburan28/crypto",
+  "commit": "524d38773a5ee5ba8f7ffe7e969241f2218dc1e4",
+  "files": [
+    {
+      "path": "ecc2k130/include/walk.h",
+      "git_blob_sha1": "0bd91f6d5e5016ae30ed361b5e5508371265307f",
+      "url": "https://github.com/aburan28/crypto/blob/524d38773a5ee5ba8f7ffe7e969241f2218dc1e4/ecc2k130/include/walk.h"
+    },
+    {
+      "path": "ecc2k130/include/packedkernels.cuh",
+      "git_blob_sha1": "bd32b30c08a391407e4465ef36b5a7c844f342f7",
+      "url": "https://github.com/aburan28/crypto/blob/524d38773a5ee5ba8f7ffe7e969241f2218dc1e4/ecc2k130/include/packedkernels.cuh"
+    },
+    {
+      "path": "ecc2k130/include/tablewalk.h",
+      "git_blob_sha1": "93d940f31ce562c15de06d7c28bffe6585b01557",
+      "url": "https://github.com/aburan28/crypto/blob/524d38773a5ee5ba8f7ffe7e969241f2218dc1e4/ecc2k130/include/tablewalk.h"
+    },
+    {
+      "path": "ecc2k130/include/ref.h",
+      "git_blob_sha1": "899639f8ed90b38c0e6a3bc7f62da33166ad466c",
+      "url": "https://github.com/aburan28/crypto/blob/524d38773a5ee5ba8f7ffe7e969241f2218dc1e4/ecc2k130/include/ref.h"
+    },
+    {
+      "path": "gpu/ecc2k/koblitz.cuh",
+      "git_blob_sha1": "1bb506871f892301036ab60f55b39c38db9ca41b",
+      "url": "https://github.com/aburan28/crypto/blob/524d38773a5ee5ba8f7ffe7e969241f2218dc1e4/gpu/ecc2k/koblitz.cuh"
+    },
+    {
+      "path": "ecc2k130/codegen/gen.py",
+      "git_blob_sha1": "f9ee7b35c8de8c69e840ddece9e2dfd3d0de52a3",
+      "url": "https://github.com/aburan28/crypto/blob/524d38773a5ee5ba8f7ffe7e969241f2218dc1e4/ecc2k130/codegen/gen.py"
+    }
+  ],
+  "table_device": {
+    "path": "ecc2k130/include/packedtablewalk.cuh",
+    "git_blob_sha1": "f9900cbe289d5108e9c86583ffd15bd3c304c799"
+  },
+  "scope": "Read-only source audit; standalone synthetic known-scalar arithmetic. Production kernels unchanged."
+}

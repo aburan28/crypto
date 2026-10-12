@@ -1,0 +1,127 @@
+{
+  "passed": true,
+  "unit": "billion_complete_scalar_updates_per_second",
+  "scalar_walks_per_arm": 8388576,
+  "updates_per_sample": 34359607296,
+  "timing_samples": 15,
+  "rows": [
+    {
+      "variant": "selected",
+      "median_billion_updates_per_second": 6.208908,
+      "rate_over_12b": 0.517409,
+      "paired_geomean_speedup": 1.0,
+      "paired_speedup_95_ci": [
+        1.0,
+        1.0
+      ],
+      "rates": [
+        6.36697,
+        6.208908,
+        6.184966999999999
+      ],
+      "decision": "reference"
+    },
+    {
+      "variant": "batch24-cache4-min3",
+      "median_billion_updates_per_second": 6.056122,
+      "rate_over_12b": 0.5046768333333334,
+      "paired_geomean_speedup": 0.9706020994741681,
+      "paired_speedup_95_ci": [
+        0.960040719324855,
+        0.981279665060633
+      ],
+      "rates": [
+        6.157799,
+        6.056122,
+        5.994997000000001
+      ],
+      "decision": "unconfirmed or regression"
+    },
+    {
+      "variant": "batch24-cache6-min3",
+      "median_billion_updates_per_second": 6.045993,
+      "rate_over_12b": 0.50383275,
+      "paired_geomean_speedup": 0.9678113230000603,
+      "paired_speedup_95_ci": [
+        0.9514620056044707,
+        0.9844415766576627
+      ],
+      "rates": [
+        6.1165460000000005,
+        6.045993,
+        5.993543
+      ],
+      "decision": "unconfirmed or regression"
+    },
+    {
+      "variant": "batch32-cache4-min3",
+      "median_billion_updates_per_second": 5.9505799999999995,
+      "rate_over_12b": 0.4958816666666666,
+      "paired_geomean_speedup": 0.9493335866429458,
+      "paired_speedup_95_ci": [
+        0.9279193555771973,
+        0.9712420085986472
+      ],
+      "rates": [
+        5.991217,
+        5.9505799999999995,
+        5.867696
+      ],
+      "decision": "unconfirmed or regression"
+    },
+    {
+      "variant": "batch32-cache8-min3",
+      "median_billion_updates_per_second": 6.050341,
+      "rate_over_12b": 0.5041950833333334,
+      "paired_geomean_speedup": 0.963304912863705,
+      "paired_speedup_95_ci": [
+        0.9358439863414201,
+        0.9915716387462128
+      ],
+      "rates": [
+        6.061593,
+        6.050341,
+        5.959504
+      ],
+      "decision": "unconfirmed or regression"
+    }
+  ],
+  "contrasts": {
+    "batch24_cache6_over_cache4_min3": {
+      "paired_geomean_speedup": 0.9971246956135581,
+      "paired_speedup_95_ci": [
+        0.9887292627812411,
+        1.0055914151925056
+      ]
+    },
+    "batch32_cache8_over_cache4_min3": {
+      "paired_geomean_speedup": 1.0147169829629277,
+      "paired_speedup_95_ci": [
+        1.0081896374729478,
+        1.0212865885967948
+      ]
+    }
+  },
+  "raw_labels": [
+    "followup-r0-selected",
+    "followup-r0-batch24-cache4-min3",
+    "followup-r0-batch24-cache6-min3",
+    "followup-r0-batch32-cache4-min3",
+    "followup-r0-batch32-cache8-min3",
+    "followup-r1-batch32-cache8-min3",
+    "followup-r1-batch32-cache4-min3",
+    "followup-r1-batch24-cache6-min3",
+    "followup-r1-batch24-cache4-min3",
+    "followup-r1-selected",
+    "followup-r2-batch24-cache6-min3",
+    "followup-r2-batch32-cache4-min3",
+    "followup-r2-selected",
+    "followup-r2-batch32-cache8-min3",
+    "followup-r2-batch24-cache4-min3"
+  ],
+  "goal_billion_updates_per_second": 12,
+  "goal_met": false,
+  "generic_work_boundary": "sqrt(n/262)",
+  "generic_work_ratio": 1,
+  "full_dlp_S": null
+}

@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "scope": "Complete standalone generic Boolean solves on generated public systems. No curve inputs, imported targets, scalar/key recovery, production solver changes, index-calculus or rho campaigns. This driver is not the repository inherited-F4 solver.",
+  "variables": [
+    12,
+    16,
+    20,
+    24
+  ],
+  "families": [
+    "planted",
+    "cross_planted",
+    "unplanted"
+  ],
+  "discovery_seeds": [
+    17,
+    937
+  ],
+  "holdout_seeds": [
+    20261010,
+    1310719
+  ],
+  "variants": [
+    "search",
+    "flat",
+    "bucket",
+    "hybrid",
+    "small_flat",
+    "word_tail"
+  ],
+  "repetitions": 6,
+  "limits": {
+    "nodes": 200000,
+    "variables": 24,
+    "generators": 36,
+    "terms_per_generator": 32,
+    "kernel_degree": 3,
+    "rows": 4096,
+    "columns": 8192,
+    "worker_seconds": 90,
+    "campaign_seconds": 900
+  },
+  "fixtures": "n+2 equations, twelve distinct quadratic monomials and up to four linear monomials per equation. Planted families choose constants to satisfy a public reproducible Boolean witness that is never passed to the solver. Cross-planted makes a pair differ by a valid affine consequence. Unplanted constants are independent; its status is established by complete search when available. No fixture screening.",
+  "solver": "Exact Boolean specialization with parity cancellation; zero/constant checks; canonical affine reduction and forced assignments; degree-3 linear-tail calls for kernel arms; most-frequent-variable branching with low-index ties, zero branch first. Complete affine residuals are solved directly. Search-only uses identical non-kernel operations. Every solve has fresh solve-lifetime caches and a deterministic node budget.",
+  "controls": {
+    "search": "Complete search with exact specialization and cheap affine propagation, without a Macaulay kernel. Also supplies the independent status reference when it completes.",
+    "flat": "Same search, with retained cached flat linear-tail strategy.",
+    "bucket": "Same search, with retained sparse-bucket tail strategy.",
+    "hybrid": "Same search, with the measured fixed 512-column dispatcher and exact-bitmap streamed kernel.",
+    "small_flat": "Call the existing flat degree-2 tail only when at most ten variables remain active; otherwise continue exact search. This is the same inference policy as word_tail.",
+    "word_tail": "The same selective degree-2 policy, with compressed active-variable coordinates. Its entire possible degree<=2 space has at most 56 columns and fits in one u64. Generate and eliminate complete degree-2 rows directly in that word; return the identical canonical affine tail."
+  },
+  "correctness": "Verify every SAT assignment independently against original equations. An UNSAT output counts as independently verified only when complete search-only also returns UNSAT. Kernel arms must match outcome/model, every logical search counter and a stable trace digest. The digest is a reproducibility diagnostic, not a collision-resistant proof. Exhaustive small-system tests compare all arms with full Boolean enumeration. Node/kernel caps return UNKNOWN, never UNSAT. Small-flat and word-tail policies must match outcomes/models, all logical counters and trace digests. Word-kernel tails/source dimensions are cross-checked against the existing degree-2 flat kernel on embedded variable sets. All solver modes join exhaustive small-system tests.",
+  "accounting": "Cold total includes solver creation, original-system copy, specialization, cheap propagation, all recursive decisions, kernel generation/elimination/readback, solver/context destruction and independent result validation. Kernel time is a measured subset. Fixture generation, reference preparation and diagnostic-record formatting are outside arm timing and inside fresh-process receipts. Six rotated repetitions balance six arm positions; this macro-workload study makes no tiny-latency non-regression claim.",
+  "resource_probe": "resource_probe_01 uses only n24/discovery seed17/planted with one repetition, before this protocol. It sized the budget and is not holdout or promotion evidence. The probe found matrix methods can save nodes while costing more total time.",
+  "performance_gate": "For each of search,bucket,hybrid against flat separately, require every n=16/20/24 and every family holdout cell to have a 95 percent paired-bootstrap lower bound above 2.0. Also test hybrid against the pointwise fastest of all three controls. All arms on the full grid must complete with verified results before any unqualified full-solve promotion. Missing/censored cells retain null completion costs and block promotion.",
+  "memory": "Fresh-worker peak RSS includes fixture/reference work and all arms. Kernel cache limits are explicit: 128 layouts/200000 retained layout columns, 256 schedules. This is not candidate-specific peak-memory accounting.",
+  "classification": "Complete bounded generic Boolean-search diagnostic, not a production inherited-solver benchmark or a cryptanalytic result. Index-calculus cost and rho ratios remain null.",
+  "enable_word": true,
+  "candidate_arms": [
+    "search",
+    "bucket",
+    "hybrid",
+    "small_flat",
+    "word_tail"
+  ],
+  "word_gate": "On every family at n=16/20/24, require the 95 percent paired lower bound above 2.0 against the pointwise fastest of all four prior whole-solve methods and above 1.05 against the same-policy small_flat control. All 18 comparisons and all grid completions/verification must pass. Gates against flat are also retained, without dropping any failures.",
+  "predecessor": "run_01 complete-solve evidence retained unchanged. Always invoking degree-3 kernels saved nodes but lost wall time; this successor tests a selective smaller-degree policy and its one-word implementation on new holdouts.",
+  "predecessor_source_hashes": {
+    "worker.rs": "54f70f42f3342a51f5f46d8e37d2f108780c4b891df5027467e745ee1bf97c36",
+    "kernel.rs": "9d8a1bd48a33bb11427a5f78aa4a0c4598ec9a5b50e12628f2661dd596e433e4"
+  }
+}

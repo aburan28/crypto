@@ -1,0 +1,327 @@
+{
+  "cases": {
+    "n37_L1": {
+      "host_path": "hosts/n37_L1.json",
+      "host_sha256": "e939345fdfa2d3f218047abaea50d31ea782b5991570eee7d46b6ba19b8eadf9",
+      "k": 7,
+      "paired_to_normal_rho": {
+        "ic": {
+          "cpu_ratio_95pct_log_t_interval": [
+            3.742294466837334,
+            4.080815114049902
+          ],
+          "cpu_ratio_median": 3.922435362802335,
+          "wall_ratio_95pct_log_t_interval": [
+            1.2573268024064983,
+            3.9862592413099898
+          ],
+          "wall_ratio_median": 1.8256084646155328
+        },
+        "rho_poly": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.081035928496932,
+            1.1708123677807762
+          ],
+          "cpu_ratio_median": 1.1317764804003336,
+          "wall_ratio_95pct_log_t_interval": [
+            0.9830496090138527,
+            1.011142469760418
+          ],
+          "wall_ratio_median": 1.0021290995735739
+        },
+        "rho_v2": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.7290567673692954,
+            1.8094867860492125
+          ],
+          "cpu_ratio_median": 1.7683615819209044,
+          "wall_ratio_95pct_log_t_interval": [
+            0.9901821827082605,
+            1.0132642055209424
+          ],
+          "wall_ratio_median": 1.000787676420077
+        }
+      },
+      "raw_bytes": 55970,
+      "raw_path": "raw/n37_L1.tar.gz",
+      "raw_sha256": "59c9ec55afc5cd7c4ad2494810a4dfb709900cd31dcdff7e9ad4b473ab5b8c0f",
+      "receipt_path": "receipts/n37_L1.json",
+      "receipt_sha256": "c20bee5848e656dbc97c11dde26d37fc550d3f2bfd6065835dbe506a9e9bd86f",
+      "second_host_replay_path": "second_host_replay/n37_L1.json",
+      "second_host_replay_sha256": "c20bee5848e656dbc97c11dde26d37fc550d3f2bfd6065835dbe506a9e9bd86f",
+      "status": "PASS",
+      "targets_verified_per_arm": 5
+    },
+    "n37_L1024": {
+      "host_path": "hosts/n37_L1024.json",
+      "host_sha256": "0951d863a68f039fa003c4c59f37cb0f8bed140facbe7def2b53d94a6f1a83cd",
+      "k": 42,
+      "paired_to_normal_rho": {
+        "ic": {
+          "cpu_ratio_95pct_log_t_interval": [
+            2.0732809985703593,
+            2.0903892685667875
+          ],
+          "cpu_ratio_median": 2.080760714917118,
+          "wall_ratio_95pct_log_t_interval": [
+            1.9657536959815731,
+            2.1486634283120947
+          ],
+          "wall_ratio_median": 2.030911935865098
+        },
+        "rho_poly": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.6950985698423067,
+            1.7040966275774645
+          ],
+          "cpu_ratio_median": 1.6994182669237181,
+          "wall_ratio_95pct_log_t_interval": [
+            1.6471513646457303,
+            1.6868764960029337
+          ],
+          "wall_ratio_median": 1.6609804656821454
+        },
+        "rho_v2": {
+          "cpu_ratio_95pct_log_t_interval": [
+            2.642055350709861,
+            2.676980723850339
+          ],
+          "cpu_ratio_median": 2.66130675264979,
+          "wall_ratio_95pct_log_t_interval": [
+            2.5671362162577647,
+            2.632107225235082
+          ],
+          "wall_ratio_median": 2.5980361294176597
+        }
+      },
+      "raw_bytes": 1726494,
+      "raw_path": "raw/n37_L1024.tar.gz",
+      "raw_sha256": "f2c9de90c94b24ca3128f4ed87374cede547e9f6c9a67a7ab86cea1c43d8d95d",
+      "receipt_path": "receipts/n37_L1024.json",
+      "receipt_sha256": "04e9257bbe6a517ecf7a875cbf8a0747ee4664df9a32dca2e38e6f64ae5e9754",
+      "second_host_replay_path": "second_host_replay/n37_L1024.json",
+      "second_host_replay_sha256": "04e9257bbe6a517ecf7a875cbf8a0747ee4664df9a32dca2e38e6f64ae5e9754",
+      "status": "PASS",
+      "targets_verified_per_arm": 5120
+    },
+    "n41_L1": {
+      "host_path": "hosts/n41_L1.json",
+      "host_sha256": "d56a630c19e4991becfccf68482ca528100716b9870a1c5b9a5f9465ef7031e2",
+      "k": 85,
+      "paired_to_normal_rho": {
+        "ic": {
+          "cpu_ratio_95pct_log_t_interval": [
+            17.330500257026678,
+            18.973150933681815
+          ],
+          "cpu_ratio_median": 18.025605852766347,
+          "wall_ratio_95pct_log_t_interval": [
+            16.40185640065184,
+            17.890530388436048
+          ],
+          "wall_ratio_median": 16.98782115556907
+        },
+        "rho_poly": {
+          "cpu_ratio_95pct_log_t_interval": [
+            1.6223741290243896,
+            1.651933767844208
+          ],
+          "cpu_ratio_median": 1.6358164224214562,
+          "wall_ratio_95pct_log_t_interval": [
+            1.600521041695871,
+            1.6086259222805728
+          ],
+          "wall_ratio_median": 1.6034550601575657
+        },
+        "rho_v2": {
+          "cpu_ratio_95pct_log_t_interval": [
+            4.410626643300126,
+            4.534835214931403
+          ],
+          "cpu_ratio_median": 4.462327897170146,
+          "wall_ratio_95pct_log_t_interval": [
+            4.225354891992414,
+            4.376203855396861
+          ],
+          "wall_ratio_median": 4.277198083784476
+        }
+      },
+      "raw_bytes": 575825,
+      "raw_path": "raw/n41_L1.tar.gz",
+      "raw_sha256": "910612cfbefa93cb193c5a0afedb2fdf7d464721014f6d6753ee37aa6e431f26",
+      "receipt_path": "receipts/n41_L1.json",
+      "receipt_sha256": "f732be065c7b9366666336151a5a9c307760c2418281d630bc22731b5c38d881",
+      "second_host_replay_path": "second_host_replay/n41_L1.json",
+      "second_host_replay_sha256": "f732be065c7b9366666336151a5a9c307760c2418281d630bc22731b5c38d881",
+      "status": "PASS",
+      "targets_verified_per_arm": 5
+    },
+    "n41_L1024": {
+      "host_path": "hosts/n41_L1024.json",
+      "host_sha256": "2a0fa5d68929bd0efa9f1455e5abf0c401b25550c278654863d8b50f973ba1a7",
+      "k": 255,
+      "paired_to_normal_rho": {
+        "ic": {
+          "cpu_ratio_95pct_log_t_interval": [
+            2.8771531873413765,
+            3.115863549864277
+          ],
+          "cpu_ratio_median": 2.9889994725299136,
+          "wall_ratio_95pct_log_t_interval": [
+            2.837245277031832,
+            3.1815209592601867
+          ],
+          "wall_ratio_median": 2.9726938349969196
+        },
+        "rho_poly": {
+          "cpu_ratio_95pct_log_t_interval": [
+            2.7492625628721212,
+            2.9116177311972162
+          ],
+          "cpu_ratio_median": 2.8477482062909165,
+          "wall_ratio_95pct_log_t_interval": [
+            2.740683170643339,
+            2.901967652469907
+          ],
+          "wall_ratio_median": 2.837755837019556
+        },
+        "rho_v2": {
+          "cpu_ratio_95pct_log_t_interval": [
+            7.345954930263774,
+            7.977057071277896
+          ],
+          "cpu_ratio_median": 7.7358518873731565,
+          "wall_ratio_95pct_log_t_interval": [
+            7.3257785408919025,
+            7.934674983083448
+          ],
+          "wall_ratio_median": 7.707344184635053
+        }
+      },
+      "raw_bytes": 3390498,
+      "raw_path": "raw/n41_L1024.tar.gz",
+      "raw_sha256": "bc99b0556f45e3b43c0938dbe0b0d9f7db9100e86e92340d0f53aaf64b2debf3",
+      "receipt_path": "receipts/n41_L1024.json",
+      "receipt_sha256": "c70f3a9e9d37c39d338110dd947b8f35714d75af226890d9ec18e937611e89a3",
+      "second_host_replay_path": "second_host_replay/n41_L1024.json",
+      "second_host_replay_sha256": "c70f3a9e9d37c39d338110dd947b8f35714d75af226890d9ec18e937611e89a3",
+      "status": "PASS",
+      "targets_verified_per_arm": 5120
+    },
+    "n53_L1": {
+      "host_path": "hosts/n53_L1.json",
+      "host_sha256": "9574d1d820adfb6065893d480bdbf8e573c96f912006b096f9fdac705b9de88c",
+      "k": 220,
+      "paired_to_normal_rho": {
+        "ic": {
+          "cpu_ratio_95pct_log_t_interval": [
+            42.173562240280475,
+            43.327754077850074
+          ],
+          "cpu_ratio_median": 42.58471031882071,
+          "wall_ratio_95pct_log_t_interval": [
+            41.145378339563635,
+            42.43149726143518
+          ],
+          "wall_ratio_median": 41.565350145749164
+        },
+        "rho_poly": {
+          "cpu_ratio_95pct_log_t_interval": [
+            3.7248731580006718,
+            3.7980971093094467
+          ],
+          "cpu_ratio_median": 3.7692794761070827,
+          "wall_ratio_95pct_log_t_interval": [
+            3.683305010263367,
+            3.712078699188012
+          ],
+          "wall_ratio_median": 3.6961963656849863
+        },
+        "rho_v2": {
+          "cpu_ratio_95pct_log_t_interval": [
+            11.498088726962576,
+            11.679714772697249
+          ],
+          "cpu_ratio_median": 11.603748937553833,
+          "wall_ratio_95pct_log_t_interval": [
+            11.319290449861569,
+            11.344681242727091
+          ],
+          "wall_ratio_median": 11.331722330769434
+        }
+      },
+      "raw_bytes": 2182937,
+      "raw_path": "raw/n53_L1.tar.gz",
+      "raw_sha256": "52ca5a1c254a8d9df164cadb4ab2a92826eb5ff3cc3f117af9e4360ac1fd8701",
+      "receipt_path": "receipts/n53_L1.json",
+      "receipt_sha256": "107a2d1f2624ab9b1d1fd030485dd556bb088a3d33593ecaa8d3ecf71c992d9d",
+      "second_host_replay_path": "second_host_replay/n53_L1.json",
+      "second_host_replay_sha256": "107a2d1f2624ab9b1d1fd030485dd556bb088a3d33593ecaa8d3ecf71c992d9d",
+      "status": "PASS",
+      "targets_verified_per_arm": 5
+    },
+    "n53_L1024": {
+      "host_path": "hosts/n53_L1024.json",
+      "host_sha256": "b9a96cd5d2ec3a7072ed60748f365281d59aab35cf1aaaffcebdc326c7a72c41",
+      "k": 440,
+      "paired_to_normal_rho": {
+        "ic": {
+          "cpu_ratio_95pct_log_t_interval": [
+            3.0205740816981126,
+            3.1312738091100774
+          ],
+          "cpu_ratio_median": 3.0862102310174255,
+          "wall_ratio_95pct_log_t_interval": [
+            3.015547408520858,
+            3.126652246591619
+          ],
+          "wall_ratio_median": 3.084171458870173
+        },
+        "rho_poly": {
+          "cpu_ratio_95pct_log_t_interval": [
+            2.7302628169684353,
+            2.8652646417576397
+          ],
+          "cpu_ratio_median": 2.799132473288073,
+          "wall_ratio_95pct_log_t_interval": [
+            2.7351801233271966,
+            2.8572726535196242
+          ],
+          "wall_ratio_median": 2.7971152900780236
+        },
+        "rho_v2": {
+          "cpu_ratio_95pct_log_t_interval": [
+            8.771998421144579,
+            9.188352893427929
+          ],
+          "cpu_ratio_median": 8.99855936615467,
+          "wall_ratio_95pct_log_t_interval": [
+            8.75262930280198,
+            9.176969428579392
+          ],
+          "wall_ratio_median": 8.991701694316163
+        }
+      },
+      "raw_bytes": 6318156,
+      "raw_path": "raw/n53_L1024.tar.gz",
+      "raw_sha256": "33cb74715f22dfcba90828fe0a4dfbe4b14dee94fc55b7cec4773aaf90f98337",
+      "receipt_path": "receipts/n53_L1024.json",
+      "receipt_sha256": "bf529d7cd853db77d12ab53e4d20ef72790fd954564a4cf57dce914600a1fc45",
+      "second_host_replay_path": "second_host_replay/n53_L1024.json",
+      "second_host_replay_sha256": "bf529d7cd853db77d12ab53e4d20ef72790fd954564a4cf57dce914600a1fc45",
+      "status": "PASS",
+      "targets_verified_per_arm": 5120
+    }
+  },
+  "checkout_main_parent": "97a4cbb34fd498b45a35003d7c1903d181fcddc5",
+  "checkout_merge_commit": "9fd7342dfa4cbd1508cfe317ed9b6cb5bf275781",
+  "extraction": "tar -xzf raw/n37_L1.tar.gz -C DEST; repeat per case",
+  "frozen_sha256": "a50fa09883ea1d44d8625b7f1558e98149cdc6efb1f86f7c5ff5e5c0a8372a33",
+  "github_run_url": "https://github.com/aburan28/crypto/actions/runs/36564223665",
+  "independent_replay": "python3 verify_panel.py --n 37 --L 1 --run-dir DEST/n37_L1 --out NEW_RECEIPT.json",
+  "schema": "compact-orbit-strong-rho-hosted-archive-v1",
+  "second_host_replay_host_path": "second_host_replay/HOST.json",
+  "second_host_replay_host_sha256": "425fa2a991adf2756f46cff1fb140e2a61567778c1594647e8ab2d7c43a6eba2",
+  "source_head": "cbda34858428a222b861f375e37254527cb4e919",
+  "source_head_kind": "PR head; Actions compiled the recorded PR merge checkout"
+}

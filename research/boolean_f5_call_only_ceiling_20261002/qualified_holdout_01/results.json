@@ -1,0 +1,85 @@
+{
+  "cells": 48,
+  "complete_f5_speedup": null,
+  "direct_pack_fallbacks": 924,
+  "direct_pack_hits": 8484,
+  "full_ic_cost": null,
+  "gate_pass": true,
+  "phase": "holdout",
+  "primary_groups": [
+    {
+      "aa_noise_floor_975": 1.006134591123266,
+      "batch": 32,
+      "bootstrap_upper_95": 4.435247368607216,
+      "family": "independent_affine",
+      "median_optimistic_ceiling": 4.398256998874801,
+      "n": 24,
+      "observations": 14,
+      "pass": true,
+      "seed": 20261018
+    },
+    {
+      "aa_noise_floor_975": 1.0074122532593552,
+      "batch": 32,
+      "bootstrap_upper_95": 4.472581721468523,
+      "family": "walk_affine",
+      "median_optimistic_ceiling": 4.462282347318018,
+      "n": 24,
+      "observations": 14,
+      "pass": true,
+      "seed": 20261018
+    },
+    {
+      "aa_noise_floor_975": 1.0108372341469087,
+      "batch": 32,
+      "bootstrap_upper_95": 4.45933879804449,
+      "family": "independent_affine",
+      "median_optimistic_ceiling": 4.451599956507831,
+      "n": 24,
+      "observations": 14,
+      "pass": true,
+      "seed": 4242509
+    },
+    {
+      "aa_noise_floor_975": 1.003606397119426,
+      "batch": 32,
+      "bootstrap_upper_95": 4.416031507788018,
+      "family": "walk_affine",
+      "median_optimistic_ceiling": 4.399095080581805,
+      "n": 24,
+      "observations": 14,
+      "pass": true,
+      "seed": 4242509
+    }
+  ],
+  "primary_passed": 4,
+  "protocol_sha256": "8ec427456cc5dce1bcd3964adc7755030d976693ee6470b8999f06417706b098",
+  "raw_bytes": 5918965,
+  "raw_sha256": "96938c5719d26fddaa75b6e8a13987a90d8398a4b118a6cbb8e23e2ba2aed811",
+  "readiness": {
+    "accepted": true,
+    "samples": [
+      {
+        "accepted": true,
+        "index": 0,
+        "psi_some_avg10": 1.12
+      }
+    ]
+  },
+  "resource": {
+    "contended": false,
+    "max_rss_kib": 125576,
+    "other_cpu_seconds": 7.0200000000000005,
+    "psi_some_avg10": 0.91,
+    "reserved_cpus": [
+      2,
+      3
+    ],
+    "wall_seconds": 633.931258985
+  },
+  "rho_ratio": null,
+  "schema_version": 1,
+  "source_sha256": "9b045d0bc9404afa2ce03c1ab98ac64dfa1793bb896cdc8dc5bd3b8b801173da",
+  "timed_calls": 9408,
+  "verifier_sha256": "5658e8707c819f669a063c2f56405f055fbf0374dafb5126e92fa4758e05a6b0"
+}

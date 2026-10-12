@@ -1,0 +1,6 @@
+apiVersion: v2
+name: taskq
+description: Redis-backed task queue for measured CPU/GPU research runs (Redis + worker pools)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

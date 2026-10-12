@@ -20,6 +20,7 @@
 pub mod asymmetric;
 pub mod binary_ecc;
 pub mod bls12_381;
+pub mod build_provenance;
 pub mod cryptanalysis;
 pub mod cryptopals;
 pub mod ct_bignum;
@@ -32,6 +33,7 @@ pub mod kdf;
 pub mod keys;
 pub mod pqc;
 pub mod prime_hyperelliptic;
+pub mod store;
 pub mod symmetric;
 pub mod tls13;
 pub mod utils;

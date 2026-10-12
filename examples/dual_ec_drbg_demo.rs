@@ -10,8 +10,8 @@
 //!   cargo run --release --example dual_ec_drbg_demo
 
 use crypto_lib::cryptanalysis::ec_index_calculus::sqrt_mod_p;
-use crypto_lib::ecc::{CurveParams, Point};
 use crypto_lib::ecc::p256_point::ct_scalar_mul_p256;
+use crypto_lib::ecc::{CurveParams, Point};
 use crypto_lib::utils::mod_inverse;
 use num_bigint::{BigUint, RandBigInt};
 use num_traits::One;
@@ -26,7 +26,12 @@ fn x_of(p: &Point) -> BigUint {
 }
 
 /// One DRBG iteration: state -> (new_state, output_block).
-fn drbg_step(state: &BigUint, p_pt: &Point, q_pt: &Point, curve: &CurveParams) -> (BigUint, BigUint) {
+fn drbg_step(
+    state: &BigUint,
+    p_pt: &Point,
+    q_pt: &Point,
+    curve: &CurveParams,
+) -> (BigUint, BigUint) {
     let s_new = x_of(&ct_scalar_mul_p256(p_pt, state, curve));
     let r = x_of(&ct_scalar_mul_p256(q_pt, &s_new, curve));
     let mask = (BigUint::one() << OUTPUT_BITS) - BigUint::one();
@@ -79,7 +84,9 @@ fn main() {
         let x3 = (&x2 * &x_full) % prime;
         let ax = (a * &x_full) % prime;
         let rhs = (x3 + ax + b) % prime;
-        let Some(y) = sqrt_mod_p(&rhs, prime) else { continue };
+        let Some(y) = sqrt_mod_p(&rhs, prime) else {
+            continue;
+        };
         let y2 = (prime - &y) % prime;
 
         for cand_y in [&y, &y2] {

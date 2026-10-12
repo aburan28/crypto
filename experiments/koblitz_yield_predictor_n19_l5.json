@@ -1,0 +1,6866 @@
+{
+  "calibration": 0.9457827055306443,
+  "corr_expected": 0.8176891118540539,
+  "corr_size": 0.8138785269214939,
+  "dispersion": 0.9994514428894549,
+  "l": 5,
+  "members": 457,
+  "n": 19,
+  "rows": [
+    {
+      "C": 179,
+      "a6": 1,
+      "expected": 27.271723108214655,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 179,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 17
+    },
+    {
+      "C": 232,
+      "a6": 13,
+      "expected": 35.34659084416648,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 232,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 38,
+      "unknowns": 20
+    },
+    {
+      "C": 116,
+      "a6": 81,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 14
+    },
+    {
+      "C": 148,
+      "a6": 1251,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 9,
+      "unknowns": 16
+    },
+    {
+      "C": 115,
+      "a6": 1625,
+      "expected": 17.52093942706528,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 115,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 13
+    },
+    {
+      "C": 112,
+      "a6": 1715,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 14
+    },
+    {
+      "C": 105,
+      "a6": 3005,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 13
+    },
+    {
+      "C": 144,
+      "a6": 3647,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 16
+    },
+    {
+      "C": 129,
+      "a6": 4027,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 15
+    },
+    {
+      "C": 116,
+      "a6": 4353,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 14
+    },
+    {
+      "C": 105,
+      "a6": 5639,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 13
+    },
+    {
+      "C": 180,
+      "a6": 6989,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 18
+    },
+    {
+      "C": 129,
+      "a6": 9459,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 15
+    },
+    {
+      "C": 60,
+      "a6": 9563,
+      "expected": 9.141359701077537,
+      "factor_base_points": 11,
+      "parts": [
+        {
+          "C": 60,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 10
+    },
+    {
+      "C": 88,
+      "a6": 11371,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 12
+    },
+    {
+      "C": 84,
+      "a6": 11783,
+      "expected": 12.797903581508553,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 12
+    },
+    {
+      "C": 105,
+      "a6": 12847,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 4,
+      "unknowns": 13
+    },
+    {
+      "C": 97,
+      "a6": 13059,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 13
+    },
+    {
+      "C": 40,
+      "a6": 14313,
+      "expected": 6.094239800718358,
+      "factor_base_points": 9,
+      "parts": [
+        {
+          "C": 40,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 6,
+      "unknowns": 8
+    },
+    {
+      "C": 73,
+      "a6": 14401,
+      "expected": 11.121987636311005,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 73,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 11
+    },
+    {
+      "C": 148,
+      "a6": 15145,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 16
+    },
+    {
+      "C": 199,
+      "a6": 15365,
+      "expected": 30.318843008573833,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 199,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 35,
+      "unknowns": 19
+    },
+    {
+      "C": 180,
+      "a6": 16297,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 18
+    },
+    {
+      "C": 97,
+      "a6": 16785,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 13
+    },
+    {
+      "C": 116,
+      "a6": 18123,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 14
+    },
+    {
+      "C": 88,
+      "a6": 19007,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 12
+    },
+    {
+      "C": 180,
+      "a6": 19289,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 18
+    },
+    {
+      "C": 112,
+      "a6": 21579,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 14
+    },
+    {
+      "C": 105,
+      "a6": 21687,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 13
+    },
+    {
+      "C": 97,
+      "a6": 23275,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 13
+    },
+    {
+      "C": 180,
+      "a6": 23389,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 18
+    },
+    {
+      "C": 161,
+      "a6": 25497,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 17
+    },
+    {
+      "C": 201,
+      "a6": 25557,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 19
+    },
+    {
+      "C": 99,
+      "a6": 26413,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 13
+    },
+    {
+      "C": 220,
+      "a6": 29337,
+      "expected": 33.51831890395097,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 220,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 32,
+      "unknowns": 20
+    },
+    {
+      "C": 129,
+      "a6": 30303,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 15
+    },
+    {
+      "C": 129,
+      "a6": 32415,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 27,
+      "unknowns": 15
+    },
+    {
+      "C": 64,
+      "a6": 32771,
+      "expected": 9.750783681149374,
+      "factor_base_points": 11,
+      "parts": [
+        {
+          "C": 64,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 10
+    },
+    {
+      "C": 97,
+      "a6": 33033,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 13
+    },
+    {
+      "C": 179,
+      "a6": 33059,
+      "expected": 27.271723108214655,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 179,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 17
+    },
+    {
+      "C": 112,
+      "a6": 33331,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 14
+    },
+    {
+      "C": 84,
+      "a6": 35011,
+      "expected": 12.797903581508553,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 12
+    },
+    {
+      "C": 163,
+      "a6": 39585,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 33,
+      "unknowns": 17
+    },
+    {
+      "C": 169,
+      "a6": 39639,
+      "expected": 25.748163158035066,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 169,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 17
+    },
+    {
+      "C": 112,
+      "a6": 41029,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 14
+    },
+    {
+      "C": 129,
+      "a6": 42493,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 15
+    },
+    {
+      "C": 199,
+      "a6": 42701,
+      "expected": 30.318843008573833,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 199,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 33,
+      "unknowns": 19
+    },
+    {
+      "C": 88,
+      "a6": 43381,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 12
+    },
+    {
+      "C": 97,
+      "a6": 48389,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 13
+    },
+    {
+      "C": 144,
+      "a6": 49715,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 16
+    },
+    {
+      "C": 144,
+      "a6": 50437,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 16
+    },
+    {
+      "C": 129,
+      "a6": 51527,
+      "expected": 19.653923357316707,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 13
+    },
+    {
+      "C": 124,
+      "a6": 54879,
+      "expected": 18.892143382226912,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 124,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 14
+    },
+    {
+      "C": 163,
+      "a6": 55577,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 17
+    },
+    {
+      "C": 116,
+      "a6": 55625,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 14
+    },
+    {
+      "C": 124,
+      "a6": 56943,
+      "expected": 18.892143382226912,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 124,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 14
+    },
+    {
+      "C": 163,
+      "a6": 56973,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 17
+    },
+    {
+      "C": 116,
+      "a6": 59283,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 14
+    },
+    {
+      "C": 89,
+      "a6": 59417,
+      "expected": 13.559683556598348,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 89,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 11
+    },
+    {
+      "C": 148,
+      "a6": 60803,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 16
+    },
+    {
+      "C": 163,
+      "a6": 64333,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 17
+    },
+    {
+      "C": 220,
+      "a6": 66187,
+      "expected": 33.51831890395097,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 220,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 20
+    },
+    {
+      "C": 148,
+      "a6": 66785,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 16
+    },
+    {
+      "C": 127,
+      "a6": 68579,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 15
+    },
+    {
+      "C": 184,
+      "a6": 69377,
+      "expected": 28.03350308330445,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 184,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 18
+    },
+    {
+      "C": 180,
+      "a6": 69443,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 18
+    },
+    {
+      "C": 112,
+      "a6": 77003,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 14
+    },
+    {
+      "C": 201,
+      "a6": 79355,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 19
+    },
+    {
+      "C": 124,
+      "a6": 79877,
+      "expected": 18.892143382226912,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 124,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 14
+    },
+    {
+      "C": 184,
+      "a6": 80785,
+      "expected": 28.03350308330445,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 184,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 18
+    },
+    {
+      "C": 79,
+      "a6": 82993,
+      "expected": 12.036123606418759,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 79,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 10,
+      "unknowns": 11
+    },
+    {
+      "C": 199,
+      "a6": 83129,
+      "expected": 30.318843008573833,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 199,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 19
+    },
+    {
+      "C": 127,
+      "a6": 87213,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 15
+    },
+    {
+      "C": 199,
+      "a6": 91227,
+      "expected": 30.318843008573833,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 199,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 35,
+      "unknowns": 19
+    },
+    {
+      "C": 163,
+      "a6": 91347,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 17
+    },
+    {
+      "C": 169,
+      "a6": 91641,
+      "expected": 25.748163158035066,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 169,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 29,
+      "unknowns": 17
+    },
+    {
+      "C": 156,
+      "a6": 92477,
+      "expected": 23.767535222801598,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 156,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 26,
+      "unknowns": 16
+    },
+    {
+      "C": 99,
+      "a6": 93459,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 13
+    },
+    {
+      "C": 112,
+      "a6": 94791,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 14
+    },
+    {
+      "C": 97,
+      "a6": 96059,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 13
+    },
+    {
+      "C": 220,
+      "a6": 96243,
+      "expected": 33.51831890395097,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 220,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 30,
+      "unknowns": 20
+    },
+    {
+      "C": 161,
+      "a6": 96969,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 30,
+      "unknowns": 17
+    },
+    {
+      "C": 129,
+      "a6": 100429,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 15
+    },
+    {
+      "C": 169,
+      "a6": 101953,
+      "expected": 25.748163158035066,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 169,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 17
+    },
+    {
+      "C": 105,
+      "a6": 102453,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 13
+    },
+    {
+      "C": 220,
+      "a6": 102463,
+      "expected": 33.51831890395097,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 220,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 35,
+      "unknowns": 20
+    },
+    {
+      "C": 144,
+      "a6": 102507,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 16
+    },
+    {
+      "C": 220,
+      "a6": 103041,
+      "expected": 33.51831890395097,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 220,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 34,
+      "unknowns": 20
+    },
+    {
+      "C": 180,
+      "a6": 104531,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 18
+    },
+    {
+      "C": 96,
+      "a6": 105697,
+      "expected": 14.626175521724061,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 96,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 12
+    },
+    {
+      "C": 71,
+      "a6": 106495,
+      "expected": 10.817275646275087,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 71,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 9,
+      "unknowns": 11
+    },
+    {
+      "C": 112,
+      "a6": 110685,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 14
+    },
+    {
+      "C": 112,
+      "a6": 111933,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 14
+    },
+    {
+      "C": 201,
+      "a6": 112143,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 30,
+      "unknowns": 19
+    },
+    {
+      "C": 156,
+      "a6": 112473,
+      "expected": 23.767535222801598,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 156,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 16
+    },
+    {
+      "C": 116,
+      "a6": 113771,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 14
+    },
+    {
+      "C": 224,
+      "a6": 114979,
+      "expected": 34.12774288402281,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 224,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 35,
+      "unknowns": 20
+    },
+    {
+      "C": 116,
+      "a6": 116613,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 14
+    },
+    {
+      "C": 169,
+      "a6": 117111,
+      "expected": 25.748163158035066,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 169,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 17
+    },
+    {
+      "C": 105,
+      "a6": 118651,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 13
+    },
+    {
+      "C": 201,
+      "a6": 118779,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 35,
+      "unknowns": 19
+    },
+    {
+      "C": 127,
+      "a6": 122063,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 15
+    },
+    {
+      "C": 79,
+      "a6": 123255,
+      "expected": 12.036123606418759,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 79,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 11
+    },
+    {
+      "C": 192,
+      "a6": 123373,
+      "expected": 29.252351043448122,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 192,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 30,
+      "unknowns": 18
+    },
+    {
+      "C": 144,
+      "a6": 125995,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 16
+    },
+    {
+      "C": 127,
+      "a6": 127347,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 15
+    },
+    {
+      "C": 116,
+      "a6": 127583,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 14
+    },
+    {
+      "C": 217,
+      "a6": 128597,
+      "expected": 33.061250918897095,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 217,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 19
+    },
+    {
+      "C": 135,
+      "a6": 128603,
+      "expected": 20.56805932742446,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 135,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 15
+    },
+    {
+      "C": 163,
+      "a6": 129821,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 32,
+      "unknowns": 17
+    },
+    {
+      "C": 116,
+      "a6": 130823,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 14
+    },
+    {
+      "C": 179,
+      "a6": 132300,
+      "expected": 27.271723108214655,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 179,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 17
+    },
+    {
+      "C": 199,
+      "a6": 136392,
+      "expected": 30.318843008573833,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 199,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 32,
+      "unknowns": 19
+    },
+    {
+      "C": 135,
+      "a6": 137146,
+      "expected": 20.56805932742446,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 135,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 15
+    },
+    {
+      "C": 116,
+      "a6": 138188,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 14
+    },
+    {
+      "C": 169,
+      "a6": 138234,
+      "expected": 25.748163158035066,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 169,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 17
+    },
+    {
+      "C": 144,
+      "a6": 139976,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 16
+    },
+    {
+      "C": 201,
+      "a6": 141286,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 19
+    },
+    {
+      "C": 220,
+      "a6": 141330,
+      "expected": 33.51831890395097,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 220,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 20
+    },
+    {
+      "C": 289,
+      "a6": 141514,
+      "expected": 44.03088256019014,
+      "factor_base_points": 24,
+      "parts": [
+        {
+          "C": 289,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 45,
+      "unknowns": 23
+    },
+    {
+      "C": 99,
+      "a6": 142514,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 13
+    },
+    {
+      "C": 161,
+      "a6": 143650,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 35,
+      "unknowns": 17
+    },
+    {
+      "C": 184,
+      "a6": 144240,
+      "expected": 28.03350308330445,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 184,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 30,
+      "unknowns": 18
+    },
+    {
+      "C": 127,
+      "a6": 144398,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 15
+    },
+    {
+      "C": 49,
+      "a6": 145070,
+      "expected": 7.465443755879989,
+      "factor_base_points": 10,
+      "parts": [
+        {
+          "C": 49,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 7,
+      "unknowns": 9
+    },
+    {
+      "C": 220,
+      "a6": 146418,
+      "expected": 33.51831890395097,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 220,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 26,
+      "unknowns": 20
+    },
+    {
+      "C": 201,
+      "a6": 152058,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 36,
+      "unknowns": 19
+    },
+    {
+      "C": 163,
+      "a6": 152394,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 17
+    },
+    {
+      "C": 144,
+      "a6": 154230,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 16
+    },
+    {
+      "C": 97,
+      "a6": 155772,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 13
+    },
+    {
+      "C": 129,
+      "a6": 157170,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 15
+    },
+    {
+      "C": 105,
+      "a6": 159620,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 13
+    },
+    {
+      "C": 84,
+      "a6": 159712,
+      "expected": 12.797903581508553,
+      "factor_base_points": 11,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 10
+    },
+    {
+      "C": 96,
+      "a6": 160942,
+      "expected": 14.626175521724061,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 96,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 12
+    },
+    {
+      "C": 163,
+      "a6": 163052,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 17
+    },
+    {
+      "C": 127,
+      "a6": 163060,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 15
+    },
+    {
+      "C": 199,
+      "a6": 163324,
+      "expected": 30.318843008573833,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 199,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 19
+    },
+    {
+      "C": 112,
+      "a6": 164454,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 14
+    },
+    {
+      "C": 144,
+      "a6": 164846,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 16
+    },
+    {
+      "C": 163,
+      "a6": 166020,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 17
+    },
+    {
+      "C": 180,
+      "a6": 167176,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 18
+    },
+    {
+      "C": 129,
+      "a6": 167702,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 15
+    },
+    {
+      "C": 112,
+      "a6": 168692,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 14
+    },
+    {
+      "C": 243,
+      "a6": 168746,
+      "expected": 37.02250678936403,
+      "factor_base_points": 22,
+      "parts": [
+        {
+          "C": 243,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 35,
+      "unknowns": 21
+    },
+    {
+      "C": 161,
+      "a6": 170290,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 17
+    },
+    {
+      "C": 145,
+      "a6": 170508,
+      "expected": 22.09161927760405,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 145,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 15
+    },
+    {
+      "C": 116,
+      "a6": 170758,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 14
+    },
+    {
+      "C": 129,
+      "a6": 172010,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 15
+    },
+    {
+      "C": 112,
+      "a6": 172392,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 14
+    },
+    {
+      "C": 71,
+      "a6": 172740,
+      "expected": 10.817275646275087,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 71,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 11
+    },
+    {
+      "C": 116,
+      "a6": 174676,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 14
+    },
+    {
+      "C": 116,
+      "a6": 177108,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 14
+    },
+    {
+      "C": 163,
+      "a6": 177288,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 17
+    },
+    {
+      "C": 51,
+      "a6": 178960,
+      "expected": 7.770155745915907,
+      "factor_base_points": 10,
+      "parts": [
+        {
+          "C": 51,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 10,
+      "unknowns": 9
+    },
+    {
+      "C": 71,
+      "a6": 182214,
+      "expected": 10.817275646275087,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 71,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 11
+    },
+    {
+      "C": 180,
+      "a6": 186326,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 18
+    },
+    {
+      "C": 112,
+      "a6": 191928,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 14
+    },
+    {
+      "C": 129,
+      "a6": 191932,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 15
+    },
+    {
+      "C": 99,
+      "a6": 192288,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 13
+    },
+    {
+      "C": 201,
+      "a6": 192954,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 27,
+      "unknowns": 19
+    },
+    {
+      "C": 144,
+      "a6": 194918,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 16
+    },
+    {
+      "C": 73,
+      "a6": 196640,
+      "expected": 11.121987636311005,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 73,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 11
+    },
+    {
+      "C": 116,
+      "a6": 196846,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 10,
+      "unknowns": 14
+    },
+    {
+      "C": 99,
+      "a6": 197608,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 13
+    },
+    {
+      "C": 180,
+      "a6": 198756,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 18
+    },
+    {
+      "C": 148,
+      "a6": 199020,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 16
+    },
+    {
+      "C": 163,
+      "a6": 199082,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 17
+    },
+    {
+      "C": 73,
+      "a6": 199630,
+      "expected": 11.121987636311005,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 73,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 11
+    },
+    {
+      "C": 161,
+      "a6": 200204,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 17
+    },
+    {
+      "C": 179,
+      "a6": 200306,
+      "expected": 27.271723108214655,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 179,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 26,
+      "unknowns": 17
+    },
+    {
+      "C": 163,
+      "a6": 200474,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 17
+    },
+    {
+      "C": 135,
+      "a6": 201536,
+      "expected": 20.56805932742446,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 135,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 15
+    },
+    {
+      "C": 88,
+      "a6": 207860,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 12
+    },
+    {
+      "C": 116,
+      "a6": 209084,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 14
+    },
+    {
+      "C": 127,
+      "a6": 210852,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 15
+    },
+    {
+      "C": 144,
+      "a6": 212302,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 16
+    },
+    {
+      "C": 99,
+      "a6": 212462,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 13
+    },
+    {
+      "C": 163,
+      "a6": 213682,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 17
+    },
+    {
+      "C": 73,
+      "a6": 214488,
+      "expected": 11.121987636311005,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 73,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 11
+    },
+    {
+      "C": 179,
+      "a6": 214514,
+      "expected": 27.271723108214655,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 179,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 26,
+      "unknowns": 17
+    },
+    {
+      "C": 112,
+      "a6": 218646,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 14
+    },
+    {
+      "C": 207,
+      "a6": 219056,
+      "expected": 31.537690968717506,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 207,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 38,
+      "unknowns": 19
+    },
+    {
+      "C": 144,
+      "a6": 219632,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 16
+    },
+    {
+      "C": 169,
+      "a6": 221544,
+      "expected": 25.748163158035066,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 169,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 33,
+      "unknowns": 17
+    },
+    {
+      "C": 161,
+      "a6": 222066,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 17
+    },
+    {
+      "C": 289,
+      "a6": 224074,
+      "expected": 44.03088256019014,
+      "factor_base_points": 24,
+      "parts": [
+        {
+          "C": 289,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 27,
+      "unknowns": 23
+    },
+    {
+      "C": 127,
+      "a6": 225166,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 15
+    },
+    {
+      "C": 116,
+      "a6": 225178,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 10,
+      "unknowns": 14
+    },
+    {
+      "C": 112,
+      "a6": 225392,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 14
+    },
+    {
+      "C": 156,
+      "a6": 226364,
+      "expected": 23.767535222801598,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 156,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 16
+    },
+    {
+      "C": 224,
+      "a6": 228162,
+      "expected": 34.12774288402281,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 224,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 46,
+      "unknowns": 20
+    },
+    {
+      "C": 161,
+      "a6": 232456,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 29,
+      "unknowns": 17
+    },
+    {
+      "C": 148,
+      "a6": 232776,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 16
+    },
+    {
+      "C": 97,
+      "a6": 233422,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 13
+    },
+    {
+      "C": 207,
+      "a6": 234482,
+      "expected": 31.537690968717506,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 207,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 29,
+      "unknowns": 19
+    },
+    {
+      "C": 64,
+      "a6": 235316,
+      "expected": 9.750783681149374,
+      "factor_base_points": 11,
+      "parts": [
+        {
+          "C": 64,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 10
+    },
+    {
+      "C": 163,
+      "a6": 236570,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 17
+    },
+    {
+      "C": 264,
+      "a6": 236852,
+      "expected": 40.221982684741164,
+      "factor_base_points": 23,
+      "parts": [
+        {
+          "C": 264,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 48,
+      "unknowns": 22
+    },
+    {
+      "C": 161,
+      "a6": 238044,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 17
+    },
+    {
+      "C": 161,
+      "a6": 238056,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 17
+    },
+    {
+      "C": 97,
+      "a6": 238072,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 13
+    },
+    {
+      "C": 88,
+      "a6": 238464,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 12
+    },
+    {
+      "C": 112,
+      "a6": 238698,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 14
+    },
+    {
+      "C": 199,
+      "a6": 239088,
+      "expected": 30.318843008573833,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 199,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 19
+    },
+    {
+      "C": 232,
+      "a6": 243858,
+      "expected": 35.34659084416648,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 232,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 40,
+      "unknowns": 20
+    },
+    {
+      "C": 129,
+      "a6": 244088,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 15
+    },
+    {
+      "C": 112,
+      "a6": 245646,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 14
+    },
+    {
+      "C": 161,
+      "a6": 246450,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 17
+    },
+    {
+      "C": 161,
+      "a6": 247282,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 17
+    },
+    {
+      "C": 40,
+      "a6": 247608,
+      "expected": 6.094239800718358,
+      "factor_base_points": 9,
+      "parts": [
+        {
+          "C": 40,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 4,
+      "unknowns": 8
+    },
+    {
+      "C": 163,
+      "a6": 247966,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 17
+    },
+    {
+      "C": 105,
+      "a6": 249342,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 13
+    },
+    {
+      "C": 184,
+      "a6": 249936,
+      "expected": 28.03350308330445,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 184,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 18
+    },
+    {
+      "C": 161,
+      "a6": 250422,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 35,
+      "unknowns": 17
+    },
+    {
+      "C": 148,
+      "a6": 251040,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 16
+    },
+    {
+      "C": 192,
+      "a6": 251836,
+      "expected": 29.252351043448122,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 192,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 32,
+      "unknowns": 18
+    },
+    {
+      "C": 112,
+      "a6": 256006,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 14
+    },
+    {
+      "C": 84,
+      "a6": 256914,
+      "expected": 12.797903581508553,
+      "factor_base_points": 11,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 10
+    },
+    {
+      "C": 97,
+      "a6": 258358,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 13
+    },
+    {
+      "C": 163,
+      "a6": 259074,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 27,
+      "unknowns": 17
+    },
+    {
+      "C": 127,
+      "a6": 259864,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 15
+    },
+    {
+      "C": 201,
+      "a6": 263187,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 19
+    },
+    {
+      "C": 88,
+      "a6": 263203,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 7,
+      "unknowns": 12
+    },
+    {
+      "C": 84,
+      "a6": 263355,
+      "expected": 12.797903581508553,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 12
+    },
+    {
+      "C": 79,
+      "a6": 266511,
+      "expected": 12.036123606418759,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 79,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 5,
+      "unknowns": 11
+    },
+    {
+      "C": 73,
+      "a6": 266979,
+      "expected": 11.121987636311005,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 73,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 10,
+      "unknowns": 11
+    },
+    {
+      "C": 96,
+      "a6": 267061,
+      "expected": 14.626175521724061,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 96,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 12
+    },
+    {
+      "C": 145,
+      "a6": 268321,
+      "expected": 22.09161927760405,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 145,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 15
+    },
+    {
+      "C": 112,
+      "a6": 268611,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 14
+    },
+    {
+      "C": 96,
+      "a6": 269835,
+      "expected": 14.626175521724061,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 96,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 9,
+      "unknowns": 12
+    },
+    {
+      "C": 64,
+      "a6": 269897,
+      "expected": 9.750783681149374,
+      "factor_base_points": 11,
+      "parts": [
+        {
+          "C": 64,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 7,
+      "unknowns": 10
+    },
+    {
+      "C": 180,
+      "a6": 270237,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 18
+    },
+    {
+      "C": 180,
+      "a6": 271507,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 18
+    },
+    {
+      "C": 163,
+      "a6": 271563,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 17
+    },
+    {
+      "C": 144,
+      "a6": 273367,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 16
+    },
+    {
+      "C": 116,
+      "a6": 274241,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 14
+    },
+    {
+      "C": 129,
+      "a6": 277405,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 15
+    },
+    {
+      "C": 96,
+      "a6": 279427,
+      "expected": 14.626175521724061,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 96,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 12
+    },
+    {
+      "C": 148,
+      "a6": 279883,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 16
+    },
+    {
+      "C": 84,
+      "a6": 280699,
+      "expected": 12.797903581508553,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 12
+    },
+    {
+      "C": 97,
+      "a6": 281197,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 6,
+      "unknowns": 13
+    },
+    {
+      "C": 144,
+      "a6": 281487,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 16
+    },
+    {
+      "C": 84,
+      "a6": 283331,
+      "expected": 12.797903581508553,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 8,
+      "unknowns": 12
+    },
+    {
+      "C": 169,
+      "a6": 284847,
+      "expected": 25.748163158035066,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 169,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 17
+    },
+    {
+      "C": 129,
+      "a6": 286427,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 15
+    },
+    {
+      "C": 84,
+      "a6": 290825,
+      "expected": 12.797903581508553,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 10,
+      "unknowns": 12
+    },
+    {
+      "C": 136,
+      "a6": 292815,
+      "expected": 20.72041532244242,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 136,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 14
+    },
+    {
+      "C": 148,
+      "a6": 293305,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 16
+    },
+    {
+      "C": 73,
+      "a6": 295469,
+      "expected": 11.121987636311005,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 73,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 7,
+      "unknowns": 11
+    },
+    {
+      "C": 201,
+      "a6": 299023,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 32,
+      "unknowns": 19
+    },
+    {
+      "C": 88,
+      "a6": 299157,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 12
+    },
+    {
+      "C": 129,
+      "a6": 299525,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 15
+    },
+    {
+      "C": 88,
+      "a6": 300133,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 12
+    },
+    {
+      "C": 268,
+      "a6": 300353,
+      "expected": 40.831406664813,
+      "factor_base_points": 23,
+      "parts": [
+        {
+          "C": 268,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 43,
+      "unknowns": 22
+    },
+    {
+      "C": 249,
+      "a6": 300955,
+      "expected": 37.93664275947178,
+      "factor_base_points": 22,
+      "parts": [
+        {
+          "C": 249,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 44,
+      "unknowns": 21
+    },
+    {
+      "C": 127,
+      "a6": 303563,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 15
+    },
+    {
+      "C": 72,
+      "a6": 303795,
+      "expected": 10.969631641293045,
+      "factor_base_points": 11,
+      "parts": [
+        {
+          "C": 72,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 8,
+      "unknowns": 10
+    },
+    {
+      "C": 184,
+      "a6": 303797,
+      "expected": 28.03350308330445,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 184,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 18
+    },
+    {
+      "C": 79,
+      "a6": 305087,
+      "expected": 12.036123606418759,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 79,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 11
+    },
+    {
+      "C": 112,
+      "a6": 305999,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 14
+    },
+    {
+      "C": 105,
+      "a6": 306315,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 13
+    },
+    {
+      "C": 169,
+      "a6": 308303,
+      "expected": 25.748163158035066,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 169,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 17
+    },
+    {
+      "C": 201,
+      "a6": 309987,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 19
+    },
+    {
+      "C": 127,
+      "a6": 310753,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 15
+    },
+    {
+      "C": 112,
+      "a6": 313983,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 14
+    },
+    {
+      "C": 112,
+      "a6": 314591,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 14
+    },
+    {
+      "C": 144,
+      "a6": 315857,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 16
+    },
+    {
+      "C": 112,
+      "a6": 316349,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 14
+    },
+    {
+      "C": 99,
+      "a6": 317095,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 13
+    },
+    {
+      "C": 161,
+      "a6": 318571,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 17
+    },
+    {
+      "C": 116,
+      "a6": 319433,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 14
+    },
+    {
+      "C": 79,
+      "a6": 322319,
+      "expected": 12.036123606418759,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 79,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 11
+    },
+    {
+      "C": 112,
+      "a6": 322763,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 14
+    },
+    {
+      "C": 89,
+      "a6": 323327,
+      "expected": 13.559683556598348,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 89,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 10,
+      "unknowns": 11
+    },
+    {
+      "C": 116,
+      "a6": 325193,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 14
+    },
+    {
+      "C": 129,
+      "a6": 325767,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 15
+    },
+    {
+      "C": 84,
+      "a6": 326953,
+      "expected": 12.797903581508553,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 12
+    },
+    {
+      "C": 148,
+      "a6": 330069,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 16
+    },
+    {
+      "C": 156,
+      "a6": 330897,
+      "expected": 23.767535222801598,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 156,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 16
+    },
+    {
+      "C": 105,
+      "a6": 331753,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 13
+    },
+    {
+      "C": 99,
+      "a6": 331883,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 13
+    },
+    {
+      "C": 163,
+      "a6": 332313,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 17
+    },
+    {
+      "C": 88,
+      "a6": 333193,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 12
+    },
+    {
+      "C": 148,
+      "a6": 333473,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 16
+    },
+    {
+      "C": 148,
+      "a6": 333669,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 16
+    },
+    {
+      "C": 116,
+      "a6": 335041,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 14
+    },
+    {
+      "C": 144,
+      "a6": 335295,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 16
+    },
+    {
+      "C": 201,
+      "a6": 335809,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 36,
+      "unknowns": 19
+    },
+    {
+      "C": 135,
+      "a6": 337043,
+      "expected": 20.56805932742446,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 135,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 15
+    },
+    {
+      "C": 115,
+      "a6": 337095,
+      "expected": 17.52093942706528,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 115,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 13
+    },
+    {
+      "C": 112,
+      "a6": 337373,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 14
+    },
+    {
+      "C": 99,
+      "a6": 340935,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 13
+    },
+    {
+      "C": 105,
+      "a6": 342785,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 13
+    },
+    {
+      "C": 145,
+      "a6": 343301,
+      "expected": 22.09161927760405,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 145,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 15
+    },
+    {
+      "C": 112,
+      "a6": 344943,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 14
+    },
+    {
+      "C": 135,
+      "a6": 345139,
+      "expected": 20.56805932742446,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 135,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 15
+    },
+    {
+      "C": 97,
+      "a6": 345193,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 13
+    },
+    {
+      "C": 99,
+      "a6": 346803,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 7,
+      "unknowns": 13
+    },
+    {
+      "C": 156,
+      "a6": 348759,
+      "expected": 23.767535222801598,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 156,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 26,
+      "unknowns": 16
+    },
+    {
+      "C": 112,
+      "a6": 349957,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 14
+    },
+    {
+      "C": 129,
+      "a6": 350623,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 15
+    },
+    {
+      "C": 88,
+      "a6": 350857,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 9,
+      "unknowns": 12
+    },
+    {
+      "C": 156,
+      "a6": 351865,
+      "expected": 23.767535222801598,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 156,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 16
+    },
+    {
+      "C": 144,
+      "a6": 352077,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 16
+    },
+    {
+      "C": 108,
+      "a6": 353111,
+      "expected": 16.45444746193957,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 108,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 12
+    },
+    {
+      "C": 116,
+      "a6": 353125,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 14
+    },
+    {
+      "C": 112,
+      "a6": 353275,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 14
+    },
+    {
+      "C": 115,
+      "a6": 354243,
+      "expected": 17.52093942706528,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 115,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 13
+    },
+    {
+      "C": 99,
+      "a6": 355533,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 13
+    },
+    {
+      "C": 168,
+      "a6": 355535,
+      "expected": 25.595807163017106,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 168,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 16
+    },
+    {
+      "C": 71,
+      "a6": 357125,
+      "expected": 10.817275646275087,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 71,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 9,
+      "unknowns": 11
+    },
+    {
+      "C": 129,
+      "a6": 358873,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 15
+    },
+    {
+      "C": 129,
+      "a6": 359327,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 15
+    },
+    {
+      "C": 145,
+      "a6": 360627,
+      "expected": 22.09161927760405,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 145,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 15
+    },
+    {
+      "C": 148,
+      "a6": 362903,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 27,
+      "unknowns": 16
+    },
+    {
+      "C": 199,
+      "a6": 363415,
+      "expected": 30.318843008573833,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 199,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 19
+    },
+    {
+      "C": 99,
+      "a6": 364609,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 10,
+      "unknowns": 13
+    },
+    {
+      "C": 88,
+      "a6": 368829,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 12
+    },
+    {
+      "C": 124,
+      "a6": 369259,
+      "expected": 18.892143382226912,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 124,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 14
+    },
+    {
+      "C": 112,
+      "a6": 369643,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 14
+    },
+    {
+      "C": 99,
+      "a6": 373569,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 13
+    },
+    {
+      "C": 169,
+      "a6": 375181,
+      "expected": 25.748163158035066,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 169,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 17
+    },
+    {
+      "C": 88,
+      "a6": 375273,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 12
+    },
+    {
+      "C": 97,
+      "a6": 376307,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 13
+    },
+    {
+      "C": 124,
+      "a6": 377795,
+      "expected": 18.892143382226912,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 124,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 14
+    },
+    {
+      "C": 124,
+      "a6": 379045,
+      "expected": 18.892143382226912,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 124,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 14
+    },
+    {
+      "C": 112,
+      "a6": 379241,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 15,
+      "unknowns": 14
+    },
+    {
+      "C": 84,
+      "a6": 380125,
+      "expected": 12.797903581508553,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 12
+    },
+    {
+      "C": 99,
+      "a6": 380431,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 13
+    },
+    {
+      "C": 129,
+      "a6": 380893,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 15
+    },
+    {
+      "C": 180,
+      "a6": 381253,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 42,
+      "unknowns": 18
+    },
+    {
+      "C": 105,
+      "a6": 382235,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 13
+    },
+    {
+      "C": 161,
+      "a6": 383413,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 17
+    },
+    {
+      "C": 169,
+      "a6": 383473,
+      "expected": 25.748163158035066,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 169,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 17
+    },
+    {
+      "C": 60,
+      "a6": 383571,
+      "expected": 9.141359701077537,
+      "factor_base_points": 11,
+      "parts": [
+        {
+          "C": 60,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 10
+    },
+    {
+      "C": 105,
+      "a6": 384561,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 13
+    },
+    {
+      "C": 105,
+      "a6": 387215,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 13
+    },
+    {
+      "C": 99,
+      "a6": 389073,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 13
+    },
+    {
+      "C": 201,
+      "a6": 393043,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 38,
+      "unknowns": 19
+    },
+    {
+      "C": 220,
+      "a6": 393300,
+      "expected": 33.51831890395097,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 220,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 20
+    },
+    {
+      "C": 145,
+      "a6": 393414,
+      "expected": 22.09161927760405,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 145,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 15
+    },
+    {
+      "C": 287,
+      "a6": 393572,
+      "expected": 43.726170570154224,
+      "factor_base_points": 24,
+      "parts": [
+        {
+          "C": 287,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 32,
+      "unknowns": 23
+    },
+    {
+      "C": 168,
+      "a6": 394158,
+      "expected": 25.595807163017106,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 168,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 27,
+      "unknowns": 16
+    },
+    {
+      "C": 163,
+      "a6": 394466,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 17
+    },
+    {
+      "C": 112,
+      "a6": 394580,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 14
+    },
+    {
+      "C": 201,
+      "a6": 396946,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 19
+    },
+    {
+      "C": 217,
+      "a6": 397074,
+      "expected": 33.061250918897095,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 217,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 33,
+      "unknowns": 19
+    },
+    {
+      "C": 163,
+      "a6": 401932,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 17
+    },
+    {
+      "C": 148,
+      "a6": 402174,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 16
+    },
+    {
+      "C": 161,
+      "a6": 402738,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 17
+    },
+    {
+      "C": 168,
+      "a6": 403854,
+      "expected": 25.595807163017106,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 168,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 16
+    },
+    {
+      "C": 127,
+      "a6": 404912,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 15
+    },
+    {
+      "C": 116,
+      "a6": 410260,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 14
+    },
+    {
+      "C": 179,
+      "a6": 410644,
+      "expected": 27.271723108214655,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 179,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 17
+    },
+    {
+      "C": 220,
+      "a6": 414676,
+      "expected": 33.51831890395097,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 220,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 20
+    },
+    {
+      "C": 364,
+      "a6": 415266,
+      "expected": 55.45758218653706,
+      "factor_base_points": 27,
+      "parts": [
+        {
+          "C": 364,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 56,
+      "unknowns": 26
+    },
+    {
+      "C": 64,
+      "a6": 415456,
+      "expected": 9.750783681149374,
+      "factor_base_points": 11,
+      "parts": [
+        {
+          "C": 64,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 10,
+      "unknowns": 10
+    },
+    {
+      "C": 163,
+      "a6": 415806,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 30,
+      "unknowns": 17
+    },
+    {
+      "C": 204,
+      "a6": 416120,
+      "expected": 31.080622983663627,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 204,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 18
+    },
+    {
+      "C": 112,
+      "a6": 416610,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 14
+    },
+    {
+      "C": 163,
+      "a6": 416924,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 17
+    },
+    {
+      "C": 201,
+      "a6": 417732,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 19
+    },
+    {
+      "C": 220,
+      "a6": 419144,
+      "expected": 33.51831890395097,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 220,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 20
+    },
+    {
+      "C": 127,
+      "a6": 419340,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 15
+    },
+    {
+      "C": 135,
+      "a6": 423206,
+      "expected": 20.56805932742446,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 135,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 15
+    },
+    {
+      "C": 84,
+      "a6": 424666,
+      "expected": 12.797903581508553,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 12
+    },
+    {
+      "C": 201,
+      "a6": 424708,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 35,
+      "unknowns": 19
+    },
+    {
+      "C": 148,
+      "a6": 424712,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 16
+    },
+    {
+      "C": 136,
+      "a6": 425622,
+      "expected": 20.72041532244242,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 136,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 26,
+      "unknowns": 14
+    },
+    {
+      "C": 71,
+      "a6": 425792,
+      "expected": 10.817275646275087,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 71,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 11
+    },
+    {
+      "C": 156,
+      "a6": 426542,
+      "expected": 23.767535222801598,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 156,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 16
+    },
+    {
+      "C": 96,
+      "a6": 428216,
+      "expected": 14.626175521724061,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 96,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 12
+    },
+    {
+      "C": 148,
+      "a6": 430092,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 16
+    },
+    {
+      "C": 116,
+      "a6": 432434,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 14
+    },
+    {
+      "C": 163,
+      "a6": 433320,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 17
+    },
+    {
+      "C": 115,
+      "a6": 433882,
+      "expected": 17.52093942706528,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 115,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 13
+    },
+    {
+      "C": 184,
+      "a6": 434608,
+      "expected": 28.03350308330445,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 184,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 18
+    },
+    {
+      "C": 264,
+      "a6": 437338,
+      "expected": 40.221982684741164,
+      "factor_base_points": 23,
+      "parts": [
+        {
+          "C": 264,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 33,
+      "unknowns": 22
+    },
+    {
+      "C": 163,
+      "a6": 441066,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 17
+    },
+    {
+      "C": 84,
+      "a6": 441318,
+      "expected": 12.797903581508553,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 12
+    },
+    {
+      "C": 184,
+      "a6": 441798,
+      "expected": 28.03350308330445,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 184,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 18
+    },
+    {
+      "C": 135,
+      "a6": 442312,
+      "expected": 20.56805932742446,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 135,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 15
+    },
+    {
+      "C": 184,
+      "a6": 442788,
+      "expected": 28.03350308330445,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 184,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 18
+    },
+    {
+      "C": 232,
+      "a6": 443154,
+      "expected": 35.34659084416648,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 232,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 34,
+      "unknowns": 20
+    },
+    {
+      "C": 148,
+      "a6": 444186,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 16
+    },
+    {
+      "C": 60,
+      "a6": 444216,
+      "expected": 9.141359701077537,
+      "factor_base_points": 11,
+      "parts": [
+        {
+          "C": 60,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 10
+    },
+    {
+      "C": 268,
+      "a6": 444308,
+      "expected": 40.831406664813,
+      "factor_base_points": 23,
+      "parts": [
+        {
+          "C": 268,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 39,
+      "unknowns": 22
+    },
+    {
+      "C": 129,
+      "a6": 446674,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 15
+    },
+    {
+      "C": 129,
+      "a6": 447720,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 15
+    },
+    {
+      "C": 116,
+      "a6": 447942,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 14
+    },
+    {
+      "C": 184,
+      "a6": 449258,
+      "expected": 28.03350308330445,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 184,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 18
+    },
+    {
+      "C": 161,
+      "a6": 450174,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 17
+    },
+    {
+      "C": 224,
+      "a6": 451774,
+      "expected": 34.12774288402281,
+      "factor_base_points": 21,
+      "parts": [
+        {
+          "C": 224,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 20
+    },
+    {
+      "C": 135,
+      "a6": 453054,
+      "expected": 20.56805932742446,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 135,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 15
+    },
+    {
+      "C": 201,
+      "a6": 453254,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 26,
+      "unknowns": 19
+    },
+    {
+      "C": 169,
+      "a6": 453410,
+      "expected": 25.748163158035066,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 169,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 29,
+      "unknowns": 17
+    },
+    {
+      "C": 129,
+      "a6": 457694,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 15
+    },
+    {
+      "C": 127,
+      "a6": 459834,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 15
+    },
+    {
+      "C": 163,
+      "a6": 460202,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 17
+    },
+    {
+      "C": 156,
+      "a6": 464066,
+      "expected": 23.767535222801598,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 156,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 16
+    },
+    {
+      "C": 144,
+      "a6": 465566,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 16
+    },
+    {
+      "C": 163,
+      "a6": 465926,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 29,
+      "unknowns": 17
+    },
+    {
+      "C": 88,
+      "a6": 466560,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 12
+    },
+    {
+      "C": 84,
+      "a6": 466574,
+      "expected": 12.797903581508553,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 12
+    },
+    {
+      "C": 116,
+      "a6": 466830,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 14
+    },
+    {
+      "C": 88,
+      "a6": 467282,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 12
+    },
+    {
+      "C": 169,
+      "a6": 468796,
+      "expected": 25.748163158035066,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 169,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 17
+    },
+    {
+      "C": 144,
+      "a6": 469408,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 16
+    },
+    {
+      "C": 96,
+      "a6": 470062,
+      "expected": 14.626175521724061,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 96,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 12
+    },
+    {
+      "C": 180,
+      "a6": 471678,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 37,
+      "unknowns": 18
+    },
+    {
+      "C": 112,
+      "a6": 472090,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 11,
+      "unknowns": 14
+    },
+    {
+      "C": 127,
+      "a6": 472492,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 15
+    },
+    {
+      "C": 163,
+      "a6": 474160,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 17
+    },
+    {
+      "C": 148,
+      "a6": 474538,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 16
+    },
+    {
+      "C": 148,
+      "a6": 474724,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 16
+    },
+    {
+      "C": 199,
+      "a6": 475756,
+      "expected": 30.318843008573833,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 199,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 19
+    },
+    {
+      "C": 179,
+      "a6": 475908,
+      "expected": 27.271723108214655,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 179,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 29,
+      "unknowns": 17
+    },
+    {
+      "C": 84,
+      "a6": 477560,
+      "expected": 12.797903581508553,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 8,
+      "unknowns": 12
+    },
+    {
+      "C": 156,
+      "a6": 481480,
+      "expected": 23.767535222801598,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 156,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 22,
+      "unknowns": 16
+    },
+    {
+      "C": 97,
+      "a6": 482134,
+      "expected": 14.778531516742019,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 97,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 18,
+      "unknowns": 13
+    },
+    {
+      "C": 89,
+      "a6": 483092,
+      "expected": 13.559683556598348,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 89,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 10,
+      "unknowns": 11
+    },
+    {
+      "C": 79,
+      "a6": 484430,
+      "expected": 12.036123606418759,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 79,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 8,
+      "unknowns": 11
+    },
+    {
+      "C": 163,
+      "a6": 485068,
+      "expected": 24.834027187927312,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 163,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 17
+    },
+    {
+      "C": 112,
+      "a6": 486316,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 14
+    },
+    {
+      "C": 135,
+      "a6": 488806,
+      "expected": 20.56805932742446,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 135,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 24,
+      "unknowns": 15
+    },
+    {
+      "C": 184,
+      "a6": 490734,
+      "expected": 28.03350308330445,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 184,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 29,
+      "unknowns": 18
+    },
+    {
+      "C": 180,
+      "a6": 492482,
+      "expected": 27.424079103232614,
+      "factor_base_points": 19,
+      "parts": [
+        {
+          "C": 180,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 25,
+      "unknowns": 18
+    },
+    {
+      "C": 169,
+      "a6": 497212,
+      "expected": 25.748163158035066,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 169,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 17
+    },
+    {
+      "C": 105,
+      "a6": 497544,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 13
+    },
+    {
+      "C": 264,
+      "a6": 500724,
+      "expected": 40.221982684741164,
+      "factor_base_points": 23,
+      "parts": [
+        {
+          "C": 264,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 35,
+      "unknowns": 22
+    },
+    {
+      "C": 144,
+      "a6": 501268,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 16
+    },
+    {
+      "C": 64,
+      "a6": 501354,
+      "expected": 9.750783681149374,
+      "factor_base_points": 11,
+      "parts": [
+        {
+          "C": 64,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 10
+    },
+    {
+      "C": 105,
+      "a6": 501902,
+      "expected": 15.99737947688569,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 105,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 13
+    },
+    {
+      "C": 201,
+      "a6": 502688,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 27,
+      "unknowns": 19
+    },
+    {
+      "C": 144,
+      "a6": 503178,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 26,
+      "unknowns": 16
+    },
+    {
+      "C": 84,
+      "a6": 503574,
+      "expected": 12.797903581508553,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 84,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 6,
+      "unknowns": 12
+    },
+    {
+      "C": 88,
+      "a6": 504872,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 8,
+      "unknowns": 12
+    },
+    {
+      "C": 129,
+      "a6": 504968,
+      "expected": 19.653923357316707,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 129,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 15
+    },
+    {
+      "C": 116,
+      "a6": 505900,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 21,
+      "unknowns": 14
+    },
+    {
+      "C": 144,
+      "a6": 505966,
+      "expected": 21.93926328258609,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 144,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 16
+    },
+    {
+      "C": 201,
+      "a6": 506090,
+      "expected": 30.62355499860975,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 201,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 19
+    },
+    {
+      "C": 116,
+      "a6": 506584,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 14,
+      "unknowns": 14
+    },
+    {
+      "C": 99,
+      "a6": 506698,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 10,
+      "unknowns": 13
+    },
+    {
+      "C": 199,
+      "a6": 507266,
+      "expected": 30.318843008573833,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 199,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 19
+    },
+    {
+      "C": 112,
+      "a6": 508814,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 20,
+      "unknowns": 14
+    },
+    {
+      "C": 161,
+      "a6": 512820,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 23,
+      "unknowns": 17
+    },
+    {
+      "C": 161,
+      "a6": 515714,
+      "expected": 24.529315197891393,
+      "factor_base_points": 18,
+      "parts": [
+        {
+          "C": 161,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 31,
+      "unknowns": 17
+    },
+    {
+      "C": 88,
+      "a6": 515802,
+      "expected": 13.407327561580388,
+      "factor_base_points": 13,
+      "parts": [
+        {
+          "C": 88,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 12
+    },
+    {
+      "C": 73,
+      "a6": 516280,
+      "expected": 11.121987636311005,
+      "factor_base_points": 12,
+      "parts": [
+        {
+          "C": 73,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 13,
+      "unknowns": 11
+    },
+    {
+      "C": 112,
+      "a6": 518556,
+      "expected": 17.063871442011404,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 112,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 14
+    },
+    {
+      "C": 127,
+      "a6": 518618,
+      "expected": 19.349211367280787,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 127,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 15
+    },
+    {
+      "C": 148,
+      "a6": 519194,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 16,
+      "unknowns": 16
+    },
+    {
+      "C": 207,
+      "a6": 519380,
+      "expected": 31.537690968717506,
+      "factor_base_points": 20,
+      "parts": [
+        {
+          "C": 207,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 33,
+      "unknowns": 19
+    },
+    {
+      "C": 116,
+      "a6": 520608,
+      "expected": 17.67329542208324,
+      "factor_base_points": 15,
+      "parts": [
+        {
+          "C": 116,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 19,
+      "unknowns": 14
+    },
+    {
+      "C": 99,
+      "a6": 522054,
+      "expected": 15.083243506777936,
+      "factor_base_points": 14,
+      "parts": [
+        {
+          "C": 99,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 12,
+      "unknowns": 13
+    },
+    {
+      "C": 135,
+      "a6": 522258,
+      "expected": 20.56805932742446,
+      "factor_base_points": 16,
+      "parts": [
+        {
+          "C": 135,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 17,
+      "unknowns": 15
+    },
+    {
+      "C": 148,
+      "a6": 523838,
+      "expected": 22.548687262657925,
+      "factor_base_points": 17,
+      "parts": [
+        {
+          "C": 148,
+          "prime_power": 2
+        }
+      ],
+      "probes": 20000.0,
+      "relations": 28,
+      "unknowns": 16
+    }
+  ]
+}

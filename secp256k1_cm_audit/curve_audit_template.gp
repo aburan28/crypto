@@ -118,7 +118,7 @@ if (!isprime(n) || (n - 1) % 3 != 0, print("P_IS_CUBE_MOD_N=-1"), p_cube = (lift
 
 \\ ------------------------------------------------------------
 \\ Verdict.  For prime-order ordinary curves over F_p, the
-\\ structural-completeness theorem of PAPER_STRUCTURAL_COMPLETENESS.md
+\\ structural-completeness theorem of research/notes/cm-isogeny/PAPER_STRUCTURAL_COMPLETENESS.md
 \\ requires:
 \\
 \\   • n prime (else use ℓ-subgroup)

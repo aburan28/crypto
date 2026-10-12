@@ -5,7 +5,7 @@
 //! `D*`; this module samples **many** non-decomposable targets per
 //! `(n, n')` and reports the `D*` *distribution* (min / mean / max plus a
 //! histogram), which is what the proposal's prediction #1 actually talks
-//! about (`RESEARCH_FFD_PROOF_COMPLEXITY.md` §4 item 1, §6).
+//! about (`research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md` §4 item 1, §6).
 //!
 //! Only **non-decomposable** (genuinely unsatisfiable) targets are
 //! counted — those are the instances for which a refutation exists and
@@ -34,7 +34,7 @@
 //!
 //! ## References
 //!
-//! See `pc_degree_harness` and `RESEARCH_FFD_PROOF_COMPLEXITY.md`.
+//! See `pc_degree_harness` and `research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md`.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
 use crate::cryptanalysis::ffd_harness::{choose_irreducible, random_nonzero_f2m};
@@ -460,7 +460,10 @@ mod tests {
         assert!(row.n_targets >= 1, "no non-decomposable target found");
         // Non-decomposable ⇒ a refutation exists, so within a generous
         // degree budget there should be no `none`s.
-        assert_eq!(row.refutation.n_none, 0, "non-decomposable target failed to refute");
+        assert_eq!(
+            row.refutation.n_none, 0,
+            "non-decomposable target failed to refute"
+        );
     }
 
     /// The averaged sweep runs end-to-end and produces one row per `n`.

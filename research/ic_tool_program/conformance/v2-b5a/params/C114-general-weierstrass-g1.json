@@ -1,0 +1,79 @@
+{
+ "schema_version": 2,
+ "name": "C114: G1's curve in general Weierstrass form, its points mapped",
+ "field": {
+  "kind": "prime_extension",
+  "p": "271",
+  "degree": 3,
+  "modulus": [
+   "269",
+   "0",
+   "0"
+  ]
+ },
+ "curve": {
+  "form": "general_weierstrass",
+  "a1": [
+   "17",
+   "129",
+   "157"
+  ],
+  "a2": [
+   "266",
+   "49",
+   "78"
+  ],
+  "a3": [
+   "243",
+   "59",
+   "141"
+  ],
+  "a4": [
+   "79",
+   "150",
+   "132"
+  ],
+  "a6": [
+   "264",
+   "113",
+   "230"
+  ]
+ },
+ "subgroup": {
+  "order": "19907087",
+  "cofactor": "1",
+  "generator": {
+   "x": [
+    "264",
+    "219",
+    "102"
+   ],
+   "y": [
+    "245",
+    "229",
+    "29"
+   ]
+  }
+ },
+ "target": {
+  "point": {
+   "x": [
+    "98",
+    "206",
+    "138"
+   ],
+   "y": [
+    "47",
+    "155",
+    "211"
+   ]
+  }
+ },
+ "method": {
+  "solve": "rho",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 2293761
+  }
+ }
+}

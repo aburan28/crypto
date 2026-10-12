@@ -1,0 +1,31 @@
+name: ECC2K-130 symbolic DAG DIMACS gate
+on:
+  pull_request:
+    paths:
+      - 'research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/**'
+      - '.github/workflows/ecc2k130-symbolic-dag-dimacs-gate.yml'
+      - 'research/notes/ecc2k130/symbolic_dag_fullpoint_20260925/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frozen-preflight-and-archive-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile source and check frozen bytes
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/{export,verify,bounded,produce,run,ci_replay}.py
+          python3 research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/ci_replay.py
+      - name: Replay committed archive when present
+        run: |
+          receipt=research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/evidence/receipt.json
+          if test -f "$receipt"; then
+            python3 research/notes/ecc2k130/symbolic_dag_dimacs_gate_20260925/ci_replay.py --evidence "$receipt"
+          fi

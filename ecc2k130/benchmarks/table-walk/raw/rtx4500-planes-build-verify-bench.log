@@ -1,0 +1,164 @@
++ cd /work
++ curl -sf -o src.tgz 'https://ecc2k130-590183823895.s3.amazonaws.com/bench/iterfn-20260916/src.tgz?AWSAccessKeyId=REDACTED&Signature=REDACTED&Expires=REDACTED'
++ rm -rf ecc
++ mkdir ecc
++ tar xzf src.tgz -C ecc
++ cat
++ docker run --rm --gpus all -v /work/ecc:/src -w /src nvidia/cuda:13.3.1-devel-ubuntu24.04 bash /src/gpujob.sh
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.3.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
++ cd /src
++ export DEBIAN_FRONTEND=noninteractive
++ DEBIAN_FRONTEND=noninteractive
++ apt-get update -qq
++ apt-get install -y -qq make g++ python3
++ which make g++ nvcc
+/usr/bin/make
+/usr/bin/g++
+/usr/local/cuda/bin/nvcc
++ nvidia-smi --query-gpu=name,clocks.max.sm,power.limit,memory.total --format=csv
+name, clocks.max.sm [MHz], power.limit [W], memory.total [MiB]
+NVIDIA RTX PRO 4500 Blackwell Server Edition, 2415 MHz, 165.00 W, 32623 MiB
+=== unit test: device table-walk primitives
++ F='ARCH=-gencode arch=compute_120,code=sm_120'
++ K='BATCH=16 THREADS=256 MINBLOCKS=2 PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1'
++ echo '=== unit test: device table-walk primitives'
++ make test-table-walk-cuda 'ARCH=-gencode arch=compute_120,code=sm_120' BATCH=16 THREADS=256 MINBLOCKS=2 PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1
++ grep -v '^ptxas\|^$'
++ tail -12
+mkdir -p build
+nvcc -O3 -std=c++17 -gencode arch=compute_120,code=sm_120 -DECC_BATCH=16 -DECC_THREADS=256 -DECC_MINBLOCKS=2 -DECC_STREAM_KARAT=0 -DECC_SMEM_SPILL=0 -DECC_PACKED_SINGLE_PRODUCT=1 -DECC_PACKED_CACHE_DENOM=1 -DECC_PACKED_BY_VALUE=1 -DECC_PACKED_PERM_SIGMA=3 -DECC_PACKED_POLY_CHAIN=1 -DECC_PACKED_UNROLL_INV=1 -DECC_PACKED_PAIR_PRODUCTS=1 -DECC_PACKED_POLY_STATE=1 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 -DECC_PACKED_CLMAD=1 -DECC_PACKED_WEIGHTED_PREFIX=2 -DECC_PACKED_COMPACT_STATE=1 -DECC_PACKED_SHARED_SIGMA=1 -DECC_PACKED_STATE_TILE=256 -DECC_TABLE_BRANCHES=8 -DECC_WALK_TABLE=1 \
+    -Xcompiler -fopenmp src/testtablewalkcuda.cu -o build/test-table-walk-cuda -lgomp
+./build/test-table-walk-cuda
+table walk device probe: 4096 points, cycle rule fired on 1536
+  phase mismatches 0, pivot 0, sign 0, tag 0, addend words 0
+  branches 8, shared bytes 47688
+PASS
+
+real	2m0.268s
+user	1m59.428s
+sys	0m0.818s
+=== build table walk
++ echo '=== build table walk'
++ make -B ecc2k130 'ARCH=-gencode arch=compute_120,code=sm_120' BATCH=16 THREADS=256 MINBLOCKS=2 PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 WALK_TABLE=1
++ grep -E 'error|warning: .*spill|registers|Used|bytes stack'
++ grep -B1 -A2 walk
++ head -20
+
+real	0m49.710s
+user	0m48.654s
+sys	0m0.995s
++ mv ecc2k130 ecc2k130-table
++ echo '=== build legacy walk'
+=== build legacy walk
++ make -B ecc2k130 'ARCH=-gencode arch=compute_120,code=sm_120' BATCH=16 THREADS=256 MINBLOCKS=2 PACKED_SINGLE_PRODUCT=1 PACKED_CACHE_DENOM=1 PACKED_BY_VALUE=1 PACKED_PERM_SIGMA=3 PACKED_POLY_CHAIN=1 PACKED_UNROLL_INV=1 PACKED_PAIR_PRODUCTS=1 PACKED_POLY_STATE=1 PACKED_DIRECT_REDUCE=1 PACKED_GENERATED_PRODUCT=1 PACKED_CLMAD=1 PACKED_STATE_TILE=256 PACKED_WEIGHTED_PREFIX=2 PACKED_COMPACT_STATE=1 PACKED_SHARED_SIGMA=1 WALK_TABLE=0
++ grep -E 'error|registers|Used|bytes stack'
++ grep -B1 -A2 walk
++ head -20
+
+real	0m52.818s
+user	0m51.723s
+sys	0m1.028s
++ mv ecc2k130 ecc2k130-legacy
++ for b in table legacy
++ echo '=== verify table: device reports re-walked by the host reference'
+=== verify table: device reports re-walked by the host reference
++ ./ecc2k130-table --curve 131 --packed --dp-weight 50 --steps 16 --launches 6 --verify 300
++ grep -vE '^  [0-9]'
++ tail -12
+packed compact state: 1
+packed shared sigma: 1
+packed state tile: 256
+packed table walk: 1 (8 branches, 47688 shared bytes)
+backend cuda-packed131: 41984 threads x 16 slots x 1 lanes = 671744 walks, dp weight 50, 16 steps per launch
+      10.9 s       0.988 M it/s    10747904 iterations     55291 dp     55291 stored         0 dropped
+      14.4 s       1.491 M it/s    21495808 iterations    110211 dp    110211 stored         0 dropped
+      18.0 s       1.795 M it/s    32243712 iterations    165392 dp    165392 stored         0 dropped
+      21.5 s       1.997 M it/s    42991616 iterations    220609 dp    220609 stored         0 dropped
+      25.1 s       2.141 M it/s    53739520 iterations    276220 dp    276220 stored         0 dropped
+      28.6 s       2.252 M it/s    64487424 iterations    331227 dp    331227 stored         0 dropped
+  finished: 2.252 M it/s, 331227 distinguished points (300 verified against the reference, 0 dropped)
++ for b in table legacy
++ echo '=== verify legacy: device reports re-walked by the host reference'
+=== verify legacy: device reports re-walked by the host reference
++ ./ecc2k130-legacy --curve 131 --packed --dp-weight 50 --steps 16 --launches 6 --verify 300
++ grep -vE '^  [0-9]'
++ tail -12
+packed compact state: 1
+packed shared sigma: 1
+packed state tile: 256
+packed table walk: 0 (0 branches, 0 shared bytes)
+backend cuda-packed131: 41984 threads x 16 slots x 1 lanes = 671744 walks, dp weight 50, 16 steps per launch
+      12.4 s       0.866 M it/s    10747904 iterations     55209 dp     55209 stored         0 dropped
+      16.3 s       1.319 M it/s    21495808 iterations    110733 dp    110733 stored         0 dropped
+      20.2 s       1.599 M it/s    32243712 iterations    166015 dp    166015 stored         0 dropped
+      24.0 s       1.789 M it/s    42991616 iterations    221086 dp    221086 stored         0 dropped
+      27.9 s       1.926 M it/s    53739520 iterations    276469 dp    276469 stored         0 dropped
+      31.8 s       2.030 M it/s    64487424 iterations    331611 dp    331611 stored         0 dropped
+  finished: 2.030 M it/s, 331611 distinguished points (300 verified against the reference, 0 dropped)
++ for rep in 1 2
++ for b in table legacy
++ echo '=== bench table rep 1'
+=== bench table rep 1
++ ./ecc2k130-table --curve 131 --packed --bench --steps 1024 --launches 32 --verify 0
++ grep -E 'backend|it/s|finished|table walk|threads'
+device: NVIDIA RTX PRO 4500 Blackwell Server Edition, 82 SMs, 2 block(s) of 256 packed threads resident per SM
+packed table walk: 1 (8 branches, 47688 shared bytes)
+backend cuda-packed131: 41984 threads x 16 slots x 1 lanes = 671744 walks, dp weight 0, 1024 steps per launch
+       2.1 s    5528.970 M it/s  11693719552 iterations         0 dp         0 stored         0 dropped
+       4.0 s    5508.957 M it/s  22011707392 iterations         0 dp         0 stored         0 dropped
+  finished: 5508.951 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
++ for b in table legacy
++ echo '=== bench legacy rep 1'
+=== bench legacy rep 1
++ ./ecc2k130-legacy --curve 131 --packed --bench --steps 1024 --launches 32 --verify 0
++ grep -E 'backend|it/s|finished|table walk|threads'
+device: NVIDIA RTX PRO 4500 Blackwell Server Edition, 82 SMs, 2 block(s) of 256 packed threads resident per SM
+packed table walk: 0 (0 branches, 0 shared bytes)
+backend cuda-packed131: 41984 threads x 16 slots x 1 lanes = 671744 walks, dp weight 0, 1024 steps per launch
+       2.0 s    5156.266 M it/s  10317987840 iterations         0 dp         0 stored         0 dropped
+       4.0 s    5134.385 M it/s  20635975680 iterations         0 dp         0 stored         0 dropped
+       4.3 s    5132.567 M it/s  22011707392 iterations         0 dp         0 stored         0 dropped
+  finished: 5132.563 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
++ for rep in 1 2
++ for b in table legacy
++ echo '=== bench table rep 2'
+=== bench table rep 2
++ ./ecc2k130-table --curve 131 --packed --bench --steps 1024 --launches 32 --verify 0
++ grep -E 'backend|it/s|finished|table walk|threads'
+device: NVIDIA RTX PRO 4500 Blackwell Server Edition, 82 SMs, 2 block(s) of 256 packed threads resident per SM
+packed table walk: 1 (8 branches, 47688 shared bytes)
+backend cuda-packed131: 41984 threads x 16 slots x 1 lanes = 671744 walks, dp weight 0, 1024 steps per launch
+       2.0 s    5496.319 M it/s  11005853696 iterations         0 dp         0 stored         0 dropped
+       4.0 s    5477.912 M it/s  22011707392 iterations         0 dp         0 stored         0 dropped
+  finished: 5477.905 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
++ for b in table legacy
++ echo '=== bench legacy rep 2'
+=== bench legacy rep 2
++ ./ecc2k130-legacy --curve 131 --packed --bench --steps 1024 --launches 32 --verify 0
++ grep -E 'backend|it/s|finished|table walk|threads'
+device: NVIDIA RTX PRO 4500 Blackwell Server Edition, 82 SMs, 2 block(s) of 256 packed threads resident per SM
+packed table walk: 0 (0 branches, 0 shared bytes)
+backend cuda-packed131: 41984 threads x 16 slots x 1 lanes = 671744 walks, dp weight 0, 1024 steps per launch
+       2.0 s    5129.537 M it/s  10317987840 iterations         0 dp         0 stored         0 dropped
+       4.0 s    5107.455 M it/s  20635975680 iterations         0 dp         0 stored         0 dropped
+       4.3 s    5105.970 M it/s  22011707392 iterations         0 dp         0 stored         0 dropped
+  finished: 5105.966 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
++ nvidia-smi --query-gpu=clocks.sm,power.draw,temperature.gpu --format=csv
+clocks.current.sm [MHz], power.draw [W], temperature.gpu
+2010 MHz, 153.46 W, 58
++ echo JOB_DONE
+JOB_DONE

@@ -1,0 +1,37 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index 5d5e0683..5f1aae19 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -3772,6 +3772,22 @@ impl PairSumTable {
+         }
+     }
+ 
++    /// Once the bucket index has had time to arrive, prefetch the first
++    /// compact rest in its run. A typical run is one or two cache lines.
++    #[inline]
++    fn prefetch_bucket_payload(&self, key: u64) {
++        if !self.is_compact() {
++            return;
++        }
++        let bucket = self.bucket_of(key);
++        let Some(&lo) = self.bucket_start.get(bucket) else {
++            return;
++        };
++        if let Some(rest) = self.rests.get(lo as usize) {
++            prefetch((rest as *const u32).cast::<u64>());
++        }
++    }
++
+     /// The lookup half of [`Self::contains_pair`].
+     #[doc(hidden)]
+     pub fn contains_key(&self, key: u64) -> bool {
+@@ -4033,6 +4049,9 @@ impl PairSumTable {
+                 self.prefetch_bucket(keys[within]);
+                 admitted_offsets.push(within);
+             }
++            for &within in &admitted_offsets {
++                self.prefetch_bucket_payload(keys[within]);
++            }
+             for &within in &admitted_offsets {
+                 let rest = block[within];
+                 let offset = b * BLOCK + within;

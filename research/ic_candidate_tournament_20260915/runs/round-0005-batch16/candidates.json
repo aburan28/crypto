@@ -1,0 +1,74 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "hypothesis": "Previous single-target winner, freshly measured on complete cold 16-target jobs.",
+    "id": "incumbent",
+    "parent": "folded_lift_batch4",
+    "parent_round": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0004",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "d1f968a924273701a5e4869448e2ffa35140527cb8464ff28360a00afbdca9ad"
+  },
+  {
+    "binary_relative": "source_candidates/lazy_descent/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any incorrect/missing target rejects; promotion and rho parity require both metric gates on confirmation and replay.",
+    "hypothesis": "Try the first existing probe before initializing the other 63 walks, preserving probe order and checks.",
+    "id": "lazy_descent",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/lazy_descent/source",
+    "source_manifest_relative": "source_candidates/lazy_descent/source-manifest.json",
+    "source_manifest_sha256": "b7f27c6da3e94cefa773d10a992217e6157c1537d5957efdca0433e2edb33dd0"
+  },
+  {
+    "binary_relative": "source_candidates/fast_descent_check/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any incorrect/missing target rejects; promotion and rho parity require both metric gates on confirmation and replay.",
+    "hypothesis": "Use the cached exact single-word curve for each recovered-log check; retain general final worker verification.",
+    "id": "fast_descent_check",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/fast_descent_check/source",
+    "source_manifest_relative": "source_candidates/fast_descent_check/source-manifest.json",
+    "source_manifest_sha256": "c0ceac0f37f432f153043ac7642ca647d71d18f66685ed45c4c5b7087ee2c15a"
+  },
+  {
+    "binary_relative": "source_candidates/combined_descent/worker",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "dd93456366b8e3c7aa7465abf87a1aec86a531810c6c14cee51ea666c8016072",
+    "falsification": "Any incorrect/missing target rejects; promotion and rho parity require both metric gates on confirmation and replay.",
+    "hypothesis": "Measure lazy walk initialization and the faster internal scalar check together.",
+    "id": "combined_descent",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/combined_descent/source",
+    "source_manifest_relative": "source_candidates/combined_descent/source-manifest.json",
+    "source_manifest_sha256": "1690462c36efebd8325b9afaeab7f7650cf56b1ab2373d39c9637c446cdee7bb"
+  }
+]

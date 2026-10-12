@@ -1,0 +1,11 @@
+flowchart LR
+    A["Exact binary curve and prime subgroup"] --> B["GHS screen: each tower"]
+    B --> C["Koblitz controls: magic 1, genus 0"]
+    C --> D["Checked trace: generator killed on every tower"]
+    B --> E["Degree-15 non-Koblitz: magic 3, genus 3"]
+    E --> F["Trace precondition fails; higher-genus point map absent"]
+    B --> G["sect113r1/r2: magic 113, genus 2^112 - 1"]
+    G --> H["No genus <= 4 tower in this screen"]
+    D --> I["Matched generic ECDLP: rho and BSGS counts"]
+    F --> I
+    H --> I

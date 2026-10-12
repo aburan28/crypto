@@ -1,0 +1,53 @@
+{
+  "classification": "engineering capability; accounting diagnostics only",
+  "matched_cases": 72,
+  "complete_runs": {
+    "ephemeral": 72,
+    "durable": 72,
+    "resumed": 72
+  },
+  "whole_process_scope_ns": {
+    "ephemeral": 486248362,
+    "durable": 8659221777,
+    "resumed": 13023860283
+  },
+  "verified_targets": {
+    "ephemeral": 144,
+    "durable": 144,
+    "resumed": 144
+  },
+  "disagreements": 0,
+  "warm_replays": 72,
+  "warm_new_pair_candidates": 0,
+  "warm_new_attempts": 0,
+  "total_common_operations": null,
+  "S": null,
+  "rho_ratio": null,
+  "floor_ratio": null,
+  "timing_scope": "Python API including campaign construction, report archival and connection close; no timing speedup claim",
+  "contract_sha256": "06ec360299ee89af07f9a5de5554bec72a7985b4a7ecef8e4109bd622636b522",
+  "degree131": {
+    "orbit_columns": 14,
+    "signed_base_points": 3668,
+    "coverage_ceiling": {
+      "numerator": "8231743940",
+      "denominator": "680564733841876926932320129493409985128",
+      "fraction": 1.2095460623606999e-29,
+      "kind": "counting_bound_on_uniform_nonzero_targets"
+    },
+    "pair_candidates_committed": 24,
+    "relations_saved": 0,
+    "status": "insufficient_relations",
+    "complete_dlp": false
+  },
+  "source_sha256": {
+    "ecc2k130/codegen/indexcalc_fixed.py": "297fd14ce17067e39dead9e6bf8d27a25173caf1f966969a2c91b5bd4f297386",
+    "ecc2k130/codegen/indexcalc_e2e.py": "7c8371c9dab3914c14867f8ed934b9362fb2df41b6245b703b7ea6d5524fb80a",
+    "ecc2k130/codegen/curves.py": "eeb52de0491669572a7ecd2be6e19480d84d077fe9134d2a5efdb9f04a1dae17",
+    "ecc2k130/codegen/field.py": "81d0397473a2a55b06a04b19991382a2c3dd1c73ba515921dd7305a10b72dc5f",
+    "ecc2k130/codegen/test_indexcalc_fixed.py": "95421f5f16d7c198fd1d095579f672dfa5b0d0accc2f195ea766dc734a106fca",
+    "src/bin/ic/fixed.rs": "e5db91f420c7268a3a6b0b29fbc26f9d9bdda0946d1dd9f1da0721f51e898b97",
+    "docs/ic/params/ecc2k130-fixed.json": "f41972681d260ef4eeb2fea7441f31859f4a121fdd5f2ecc4ff3dee54082aeae",
+    "research/fixed_parameters_20260915/run.py": "74189b0863ae90d8607d2e81141e774b6229d092e949d85e3f45913f9fbfe8d8"
+  }
+}

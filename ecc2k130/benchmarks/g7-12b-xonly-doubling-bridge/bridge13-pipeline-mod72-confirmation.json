@@ -1,0 +1,15 @@
+{
+  "status": "confirmed",
+  "run_id": 62574,
+  "scalar_updates_per_sample": 68719476736,
+  "rates_billion_per_second": [12.567029, 12.457221, 12.366415],
+  "median_billion_per_second": 12.457221,
+  "all_samples_exceed_12_billion_per_second": true,
+  "production_confirmation": {
+    "run_id": 62577,
+    "scalar_updates": 68719476736,
+    "billion_per_second": 12.632704,
+    "binary_sha256": "ee64bfe589eceb92988972a53d6885526e9fa36dd8c2ee2071b2281c34146c27",
+    "external_gpu_processes": []
+  }
+}

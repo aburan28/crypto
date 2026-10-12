@@ -1,0 +1,6 @@
+{
+  "error": "",
+  "error_type": "AssertionError",
+  "status": "FAIL",
+  "traceback": "Traceback (most recent call last):\n  File \"/Volumes/SSD990/llm/tmp/ecc2k130-leaf-m10-column-bound-20260930/research/notes/ecc2k130/point_sum_cold_20260930/verify_cold.py\", line 244, in main\n    receipt = verify(args.cell, args.run_dir.resolve(), args.relocated)\n  File \"/Volumes/SSD990/llm/tmp/ecc2k130-leaf-m10-column-bound-20260930/research/notes/ecc2k130/point_sum_cold_20260930/verify_cold.py\", line 83, in verify\n    checked_files(run_dir, item)\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^\n  File \"/Volumes/SSD990/llm/tmp/ecc2k130-leaf-m10-column-bound-20260930/research/notes/ecc2k130/point_sum_cold_20260930/verify_cold.py\", line 48, in checked_files\n    assert sha(path) == metadata[\"sha256\"]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+}

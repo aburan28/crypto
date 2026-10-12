@@ -1,0 +1,886 @@
+{
+  "provenance": {
+    "commit": "6fdd71d7374b85528b24593841d8cfedb4d08c09",
+    "command": [
+      "/usr/local/bin/python3",
+      "research/nagao_relations/solver_15/run.py"
+    ],
+    "python": "3.11.15",
+    "seed": 20260917,
+    "sha256": {
+      "ecc2k130/codegen/profilereport.py": "c33f68f18f1e20a52a7ed5a488d5316db79883f1339ad4f426ce29eb4d225ea9",
+      "ecc2k130/codegen/gen.py": "cb5c82187ea771204c505213ff6f02e639ffb450125974608d9de122890941d0",
+      "ecc2k130/codegen/testnagaoannihilator.py": "50a99ca4d0c87b282fd29f583ca2a1d7dcf87b63aa8b3b7834171abd6bdeebd7",
+      "ecc2k130/codegen/testprofilereport.py": "c4bd1bec9a2800aab37769b69ef77792dfee4f26e5a8a2e08a8c9116b5bd0607",
+      "ecc2k130/codegen/nagaodecomp.py": "bb51628284100957ec22a8da294204943a08358ee46713d6d254d721143fc446",
+      "ecc2k130/codegen/field.py": "81d0397473a2a55b06a04b19991382a2c3dd1c73ba515921dd7305a10b72dc5f",
+      "ecc2k130/codegen/testnagaodecomp.py": "ecf7fc17385d46e62c2aded58aa7cbd1f3842745c4e7ac03ec285ddc07f9a8e1",
+      "ecc2k130/codegen/testautotuneconfigs.py": "1d47957840da8f0543ba244f3ac76453a1cb9189cdee2980740b7030c2e42a5b",
+      "ecc2k130/codegen/testpackedauditreport.py": "e791654580cb29b4e071a2b5c35a34d1102017d55c9282c6de4c145a015bf6fc",
+      "ecc2k130/codegen/testclmad.py": "4eb7a541c7b1dd5a789573c3bf91253c44eaf72059e4808d58893f2d15155d89",
+      "ecc2k130/codegen/cycles.py": "95b87c81fd3c4ad468da46f95b250604894c57e8a232407d4db42c8e49c5d44f",
+      "ecc2k130/codegen/testdirectbuild.py": "959885d3de4e87931c799889697eaa1b1a8c2446f7e9811b433b707b33407bbf",
+      "ecc2k130/codegen/gendirectreduce.py": "8da4febbad7f8d5892552377a0f8dd93c922557a0f905ec5a5c628dd3247c130",
+      "ecc2k130/codegen/testgeneratedproduct.py": "c435b96acade224e6c0fe641ad74eeef68af1d17e41436cce80f37e0282be85c",
+      "ecc2k130/codegen/benchreport.py": "987c68e73c8257d5ed1f0779dc7937862ae9eba89354e4f785a83fa0c6a659c2",
+      "ecc2k130/codegen/testprobereport.py": "829528f1d2614ed6b77a4a6b54b27ae2d2be4746d9079d2f6deeefbc70b53a80",
+      "ecc2k130/codegen/genverilog.py": "5f955d9dfebd411bd1c540bf1ea94b3a66475743bafae55d808e1fb9a80f9f15",
+      "ecc2k130/codegen/genpacked.py": "9ea560927f9efa15fba5fd035245f3dc883fb96e89e63658bbff1dbaceda0516",
+      "ecc2k130/codegen/indexcalc.py": "1be6ee84858db71349a034241b92d842e0c79ee6a0fabaefbc497d586ada71a7",
+      "ecc2k130/codegen/testbenchreport.py": "e3683fc37628344dc0a3d1e08bab75df1d25daf4f3d3b44d7ab006b7bdc17ae4",
+      "ecc2k130/codegen/decomp.py": "9d0e1af93ffc6674fcbb1163d02a3288f503475bb9f48016c2da2f5da4039c36",
+      "ecc2k130/codegen/testwalkvariants.py": "8a050d66001348a7ec12d6540069452022f6c97d67eb288f2b15714358e30b39",
+      "ecc2k130/codegen/genpolyreduce.py": "c8fb7793009203c2769cd9ddee9bc54587063138d0a4926d0a885e370bbef998",
+      "ecc2k130/codegen/cnf.py": "342ed8d044e7b51796dc8df9e4c4cb2d94668dcbe6e1046f927166d4f9424879",
+      "ecc2k130/codegen/gensigma.py": "6360039e5ff0b2c31ff092c4eb2c1e006e5e681eb19cae88f35c6c1be5f3e0a7",
+      "ecc2k130/codegen/nagaocompare.py": "57b27ec7098196d07734568c2b2bc76a7532fd2ac753a835c2f8cd3104a7fa5a",
+      "ecc2k130/codegen/genpackedproduct.py": "490760f7345e742b360bbbd3676a61cb9910ce43817c227365ec71e746fe8602",
+      "ecc2k130/codegen/ir.py": "48fce7b23c6603eda336645ff9c6c04226be9d2488bb2ca1679d32b3859f9343",
+      "ecc2k130/codegen/testdecomp.py": "3f892c2e260cc59515193d57a612a348cdad5c8e3ec4eee3cf99f23833465b3e",
+      "ecc2k130/codegen/testpolystate.py": "99e73c203520faa4e8c161f2fb595a13878324b7624baa57a96f119fc2b31e59",
+      "ecc2k130/codegen/autolab.py": "f9ffeed42a93da2631f4fa033fb7f92542e3cdcbe28352b07998cd50731d6eef",
+      "ecc2k130/codegen/perfmodel.py": "e2cb16b1c2761b24ffe91c6e67b95c0e06a43210a953ca0e1b1387599d188c41",
+      "ecc2k130/codegen/build.py": "eeeb25eb6482b233c8d4ae56f5cc564d331897aaa4647ac2e83c6ccdbf8479a5",
+      "ecc2k130/codegen/nagaoannihilator.py": "7cf9d7f9fc6f2d7f9154e32a8dacd16429a50d9e2a745a84aa2335fb513b1b73",
+      "ecc2k130/codegen/testverilog.py": "2c9d52491fe8662a09d177b3cb7958adce397857f023c3471780f65b31c39ae4",
+      "ecc2k130/codegen/testpackedclient.py": "f728e53148da7282bdc1b4ea4c5754eb7d95fccb028fb1feb3602ebe840da653",
+      "ecc2k130/codegen/testnagaoreview.py": "76840372bc80ba9068cb88c4c3727a61b3f047a04b0a04953d59d63079012e57",
+      "ecc2k130/codegen/curves.py": "eeb52de0491669572a7ecd2be6e19480d84d077fe9134d2a5efdb9f04a1dae17",
+      "ecc2k130/codegen/checkcli.py": "d4a967ba382ad2498cfdb8991fd6965f75eee7360147a9f2d9f8478ce5f3cdae",
+      "ecc2k130/codegen/testpolystateaudit.py": "2c07531f14c9d1cc37322eda003e678d091910056781fe5a7d88b2b7c6231864",
+      "research/nagao_relations/solver_15/run.py": "675ffebfcdf12957c1c78cd2614ceacba985e05a7cc44607e6bb4b911e5f1c25",
+      "research/nagao_relations/solver_15/contract.json": "9f8e543b6a2f9226829be97bf06f135fb40b7249f744542f272549e0763bccee"
+    }
+  },
+  "anf": [],
+  "span": [
+    {
+      "kind": "span",
+      "d": 4,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 71,
+          "certificate": true
+        },
+        {
+          "dimension": 71,
+          "certificate": true
+        },
+        {
+          "dimension": 71,
+          "certificate": true
+        },
+        {
+          "dimension": 71,
+          "certificate": true
+        },
+        {
+          "dimension": 71,
+          "certificate": true
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 71,
+          "certificate": false,
+          "planted": [
+            6,
+            10,
+            12
+          ]
+        },
+        {
+          "dimension": 71,
+          "certificate": false,
+          "planted": [
+            10,
+            12,
+            13
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": true,
+      "saturated": false
+    },
+    {
+      "kind": "span",
+      "d": 5,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 97,
+          "certificate": true
+        },
+        {
+          "dimension": 97,
+          "certificate": true
+        },
+        {
+          "dimension": 97,
+          "certificate": true
+        },
+        {
+          "dimension": 97,
+          "certificate": true
+        },
+        {
+          "dimension": 97,
+          "certificate": true
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 97,
+          "certificate": false,
+          "planted": [
+            6,
+            12,
+            28
+          ]
+        },
+        {
+          "dimension": 93,
+          "certificate": false,
+          "planted": [
+            3,
+            10,
+            27
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": true,
+      "saturated": false
+    },
+    {
+      "kind": "span",
+      "d": 6,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 123,
+          "certificate": true
+        },
+        {
+          "dimension": 123,
+          "certificate": true
+        },
+        {
+          "dimension": 123,
+          "certificate": true
+        },
+        {
+          "dimension": 123,
+          "certificate": true
+        },
+        {
+          "dimension": 123,
+          "certificate": true
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 123,
+          "certificate": false,
+          "planted": [
+            31,
+            46,
+            59
+          ]
+        },
+        {
+          "dimension": 123,
+          "certificate": false,
+          "planted": [
+            10,
+            35,
+            45
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": true,
+      "saturated": false
+    },
+    {
+      "kind": "span",
+      "d": 7,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            12,
+            48,
+            81
+          ]
+        },
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            27,
+            49,
+            86
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": false,
+      "saturated": true
+    },
+    {
+      "kind": "span",
+      "d": 8,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            19,
+            107,
+            255
+          ]
+        },
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            31,
+            60,
+            153
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": false,
+      "saturated": true
+    },
+    {
+      "kind": "span",
+      "d": 10,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            344,
+            843,
+            983
+          ]
+        },
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            143,
+            623,
+            853
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": false,
+      "saturated": true
+    },
+    {
+      "kind": "span",
+      "d": 12,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            2792,
+            3057,
+            3844
+          ]
+        },
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            1305,
+            2413,
+            3516
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": false,
+      "saturated": true
+    },
+    {
+      "kind": "span",
+      "d": 16,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            43224,
+            58951,
+            59282
+          ]
+        },
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            2248,
+            24143,
+            44498
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": false,
+      "saturated": true
+    },
+    {
+      "kind": "span",
+      "d": 24,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            8863357,
+            13704461,
+            13979430
+          ]
+        },
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            2524115,
+            3528133,
+            11322348
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": false,
+      "saturated": true
+    },
+    {
+      "kind": "span",
+      "d": 32,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            157034073,
+            1844497847,
+            2389285139
+          ]
+        },
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            364073311,
+            1292538776,
+            2224785624
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": false,
+      "saturated": true
+    },
+    {
+      "kind": "span",
+      "d": 40,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            44254191068,
+            283396426873,
+            509976949823
+          ]
+        },
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            187151160200,
+            324339147889,
+            427998010032
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": false,
+      "saturated": true
+    },
+    {
+      "kind": "span",
+      "d": 44,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            11577207694127,
+            12328107094067,
+            16689580825373
+          ]
+        },
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            6611427746126,
+            7611674175406,
+            11361550039583
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": false,
+      "saturated": true
+    },
+    {
+      "kind": "span",
+      "d": 45,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            1010028760074,
+            16375731967982,
+            29124421765189
+          ]
+        },
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            5214869373815,
+            10496648308509,
+            10589093170787
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": false,
+      "saturated": true
+    },
+    {
+      "kind": "span",
+      "d": 48,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            14644129363155,
+            38189729583796,
+            212926860703898
+          ]
+        },
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            38212605404008,
+            245323824997410,
+            271954117428814
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": false,
+      "saturated": true
+    },
+    {
+      "kind": "span",
+      "d": 64,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            8971036053584230596,
+            13531328887957060533,
+            15337189584384739471
+          ]
+        },
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            5483342486786566337,
+            13211536932821785748,
+            14318208098001780553
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": false,
+      "saturated": true
+    },
+    {
+      "kind": "span",
+      "d": 80,
+      "samples": 524,
+      "field_dimension": 131,
+      "uniform": [
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        },
+        {
+          "dimension": 131,
+          "certificate": false
+        }
+      ],
+      "planted": [
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            656172832142267810157911,
+            763909342297730279174945,
+            853322350401180965579427
+          ]
+        },
+        {
+          "dimension": 131,
+          "certificate": false,
+          "planted": [
+            116834357095326210158078,
+            147880195458702618802525,
+            1101906596059827331515747
+          ]
+        }
+      ],
+      "certificate_on_all_uniform": false,
+      "saturated": true
+    }
+  ],
+  "verdict": {
+    "certificate_alive_at_d": [
+      4,
+      5,
+      6
+    ],
+    "certificate_dead_at_d": [
+      7,
+      8,
+      10,
+      12,
+      16,
+      24,
+      32,
+      40,
+      44,
+      45,
+      48,
+      64,
+      80
+    ],
+    "largest_d_with_certificate": 6,
+    "existence_threshold_d": 45,
+    "certificate_available_at_existence_threshold": false,
+    "soundness_gate_passed": true,
+    "conclusion": "The F2-subspace structure yields a genuine linear NO-certificate, computable in time polynomial in d and requiring no search at all. It exists only while the affine span of the S4 value set misses 0, and the span saturates F_2^131 at small d. The cheap regime therefore ends far below the d at which decompositions begin to exist, and the two never overlap. The certificate is also one-sided: it proves absence and never produces a witness."
+  },
+  "limits": "THE CERTIFICATE IS ONE-SIDED AND FINDS NOTHING. It can only prove that no decomposition exists; its absence proves nothing, and it never produces a witness. Section 3.2 of the background note converts a yes/no detector into a witness finder with k|F| further whole-base queries, but that conversion needs a detector that is correct in both directions, which this is not. M1 and M2 build the ANF by exhausting 2^(3d) assignments, which is a MEASUREMENT cost and larger than the brute-force search it is analysing; a deployed oracle would build the same ANF symbolically in poly(d), and no cost claim here rests on the exhaustive construction. M3's span dimension is computed from samples and is therefore a lower bound that rises to the true value; it is reported with the sample count and is stable well before the reported figure. Saturation at 131 is reported as measured on the sampled targets, not proved for all targets. No yield, Lambda, S or rho ratio is computed, and nothing here is an attack cost."
+}

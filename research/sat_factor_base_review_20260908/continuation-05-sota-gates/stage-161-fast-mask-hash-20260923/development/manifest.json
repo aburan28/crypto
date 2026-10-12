@@ -1,0 +1,87 @@
+{
+  "candidate": {
+    "artifacts": {
+      "metrics": {
+        "bytes": 847,
+        "path": "fast-hash-provisional.metrics",
+        "sha256": "5a6c7563b68a5bf5e8690c03032f9b40f4722c5d6d21cbc2acc701f060ea2ae1"
+      },
+      "stderr": {
+        "bytes": 0,
+        "path": "fast-hash-provisional.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 3581,
+        "path": "fast-hash-provisional.stdout",
+        "sha256": "d44f34b14b4dae32489ef69809f3eb0b9501de04e57d0f9f2afcc98bc42afbd5"
+      }
+    },
+    "decision": "promoted_after_clean_rebuild",
+    "f4_build_ns": 17170557584,
+    "f4_eliminate_ns": 25950542039,
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 951304192,
+      "single_core_seconds": 60.277167,
+      "system_seconds": 0.26220299999999996,
+      "total_core_seconds": 60.277167,
+      "user_seconds": 60.014964,
+      "wall_seconds": 60.85009995799919
+    },
+    "word_xors": 87513949370
+  },
+  "complete_development_cost": null,
+  "failed_profiler_attempt": {
+    "charged": false,
+    "resource_receipt": null,
+    "status": "sandbox_process_enumeration_denied_then_interrupted"
+  },
+  "profile": {
+    "artifacts": {
+      "metrics": {
+        "bytes": 863,
+        "path": "profile-baseline.metrics",
+        "sha256": "cf32050ad1c10783329937fd06dad75f9103db790cb5a654375196764e6e450d"
+      },
+      "sample.txt": {
+        "bytes": 99604,
+        "path": "profile-baseline.sample.txt",
+        "sha256": "9384bcbc64979a6e8101d1364b1cda157a455b38b336f04ec50e1275846cef82"
+      },
+      "stderr": {
+        "bytes": 0,
+        "path": "profile-baseline.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "bytes": 3514,
+        "path": "profile-baseline.stdout",
+        "sha256": "3d978a6afc8ba58bdfdf1be7ad201be343b6dae1dbc87922d0fdbd844b4e84f0"
+      }
+    },
+    "decision": "diagnostic_baseline",
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 913653760,
+      "single_core_seconds": 75.09750199999999,
+      "system_seconds": 0.24526299999999998,
+      "total_core_seconds": 75.09750199999999,
+      "user_seconds": 74.852239,
+      "wall_seconds": 75.57422229199437
+    },
+    "sample_duration_seconds": 20,
+    "sample_interval_ms": 5,
+    "samples": 3334,
+    "top_of_stack": {
+      "columns_pack": 238,
+      "echelon": 1143,
+      "siphash_write": 225,
+      "state_insert": 533,
+      "vec_retain": 118
+    }
+  },
+  "reason_complete_is_null": "one interrupted sandboxed profiling attempt and incremental compiles lack complete outer receipts",
+  "schema": "koblitz_stage161_development.v1",
+  "status": "profile_and_provisional_candidate_retained"
+}

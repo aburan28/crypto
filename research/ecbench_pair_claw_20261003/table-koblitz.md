@@ -1,0 +1,32 @@
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---|
+| ECBS1ha960fa84a3c2 | rho-strong | rho.signed_frobenius_strong | icv1-f2m43-tm998717-e2e742b0 | 32.11 | 24/24 | 0.183 | [0.139, 0.229] | 0.135 | 1.354 | 1.354 | 1.000 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | rho-strong | rho.signed_frobenius_strong | icv1-f2m47-t22705043-f4e44623 | 36.64 | 24/24 | 0.164 | [0.136, 0.193] | 0.129 | 1.265 | 1.265 | 1.000 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | rho-strong | rho.signed_frobenius_strong | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 24/24 | 0.138 | [0.102, 0.178] | 0.138 | 1.000 | 1.000 | 1.000 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | rho-strong | rho.signed_frobenius_strong | icv1-f2m53-tm56619371-dac20a85 | 44.26 | 24/24 | 0.099 | [0.078, 0.122] | 0.122 | 0.813 | 0.813 | 1.000 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | rho-strong | rho.signed_frobenius_strong | icv1-f2m59-tm943548413-98844ecc | 44.52 | 24/24 | 0.114 | [0.086, 0.143] | 0.115 | 0.986 | 0.986 | 1.000 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | rho-strong | rho.signed_frobenius_strong | icv1-f2m61-t158598901-ab42b6c5 | 47.21 | 24/24 | 0.127 | [0.101, 0.157] | 0.113 | 1.115 | 1.115 | 1.000 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | claw-c1 | claw.pair_table | icv1-f2m43-tm998717-e2e742b0 | 32.11 | 24/24 | 0.338 | [0.263, 0.425] | – | – | 2.502 | 1.848 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | claw-c1 | claw.pair_table | icv1-f2m47-t22705043-f4e44623 | 36.64 | 24/24 | 0.338 | [0.248, 0.457] | – | – | 2.615 | 2.066 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | claw-c1 | claw.pair_table | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 24/24 | 0.347 | [0.281, 0.425] | – | – | 2.505 | 2.506 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | claw-c1 | claw.pair_table | icv1-f2m53-tm56619371-dac20a85 | 44.26 | 24/24 | 0.293 | [0.244, 0.345] | – | – | 2.403 | 2.957 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | claw-c1 | claw.pair_table | icv1-f2m59-tm943548413-98844ecc | 44.52 | 24/24 | 0.236 | [0.185, 0.300] | – | – | 2.044 | 2.072 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | claw-c1 | claw.pair_table | icv1-f2m61-t158598901-ab42b6c5 | 47.21 | 24/24 | 0.258 | [0.194, 0.342] | – | – | 2.274 | 2.039 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | claw-pr | claw.pair_table | icv1-f2m43-tm998717-e2e742b0 | 32.11 | 24/24 | 4.793 | [1.990, 8.610] | – | – | 35.464 | 26.201 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | claw-pr | claw.pair_table | icv1-f2m47-t22705043-f4e44623 | 36.64 | 24/24 | 4.522 | [2.950, 6.153] | – | – | 34.984 | 27.648 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | claw-pr | claw.pair_table | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 24/24 | 5.774 | [3.396, 8.572] | – | – | 41.719 | 41.733 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | claw-pr | claw.pair_table | icv1-f2m53-tm56619371-dac20a85 | 44.26 | 24/24 | 3.383 | [1.642, 5.594] | – | – | 27.792 | 34.196 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | claw-pr | claw.pair_table | icv1-f2m59-tm943548413-98844ecc | 44.52 | 24/24 | 4.798 | [2.588, 7.499] | – | – | 41.585 | 42.159 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | claw-pr | claw.pair_table | icv1-f2m61-t158598901-ab42b6c5 | 47.21 | 24/24 | 3.635 | [2.268, 5.153] | – | – | 32.033 | 28.719 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | bsgs-neg | bsgs.negation | icv1-f2m43-tm998717-e2e742b0 | 32.11 | 24/24 | 0.910 | [0.726, 1.102] | 1.000 | 0.910 | 6.735 | 4.976 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | bsgs-neg | bsgs.negation | icv1-f2m47-t22705043-f4e44623 | 36.64 | 24/24 | 1.021 | [0.822, 1.229] | 1.000 | 1.021 | 7.896 | 6.240 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | bsgs-neg | bsgs.negation | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 24/24 | 0.915 | [0.663, 1.183] | 1.000 | 0.915 | 6.612 | 6.614 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | bsgs-neg | bsgs.negation | icv1-f2m53-tm56619371-dac20a85 | 44.26 | 24/24 | 1.056 | [0.842, 1.261] | 1.000 | 1.056 | 8.678 | 10.677 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | bsgs-neg | bsgs.negation | icv1-f2m59-tm943548413-98844ecc | 44.52 | 24/24 | 0.937 | [0.767, 1.092] | 1.000 | 0.937 | 8.122 | 8.235 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | bsgs-neg | bsgs.negation | icv1-f2m61-t158598901-ab42b6c5 | 47.21 | 24/24 | 0.904 | [0.748, 1.044] | 1.000 | 0.904 | 7.969 | 7.145 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | rho-strong-aa | rho.signed_frobenius_strong | icv1-f2m43-tm998717-e2e742b0 | 32.11 | 24/24 | 0.183 | [0.139, 0.229] | 0.135 | 1.354 | 1.354 | 1.000 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | rho-strong-aa | rho.signed_frobenius_strong | icv1-f2m47-t22705043-f4e44623 | 36.64 | 24/24 | 0.164 | [0.136, 0.193] | 0.129 | 1.265 | 1.265 | 1.000 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | rho-strong-aa | rho.signed_frobenius_strong | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 24/24 | 0.138 | [0.102, 0.178] | 0.138 | 1.000 | 1.000 | 1.000 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | rho-strong-aa | rho.signed_frobenius_strong | icv1-f2m53-tm56619371-dac20a85 | 44.26 | 24/24 | 0.099 | [0.078, 0.122] | 0.122 | 0.813 | 0.813 | 1.000 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | rho-strong-aa | rho.signed_frobenius_strong | icv1-f2m59-tm943548413-98844ecc | 44.52 | 24/24 | 0.114 | [0.086, 0.143] | 0.115 | 0.986 | 0.986 | 1.000 | yes | L0×24 |
+| ECBS1ha960fa84a3c2 | rho-strong-aa | rho.signed_frobenius_strong | icv1-f2m61-t158598901-ab42b6c5 | 47.21 | 24/24 | 0.127 | [0.101, 0.157] | 0.113 | 1.115 | 1.115 | 1.000 | yes | L0×24 |

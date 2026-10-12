@@ -1,0 +1,542 @@
+{
+  "schema": "ecc2k130_cycle_probe_profile_independent_audit.v1",
+  "generatedAtUtc": "2026-10-01T23:31:34Z",
+  "auditRole": "independent post-run archive, source, host-control, counter, and claim-boundary audit",
+  "constraints": {
+    "gpuLaunches": 0,
+    "sourceEdits": 0,
+    "hostOnlyCompilations": 2,
+    "hostOnlyExecutions": 2,
+    "auditOutputWrites": 2
+  },
+  "verdict": {
+    "status": "PASS_WITH_MATERIAL_SCOPE_LIMITATIONS",
+    "artifactIntegrity": "pass",
+    "sourceIdentity": "pass",
+    "binaryIdentity": "recorded_but_not_independently_recomputable",
+    "hostCounterControls": "pass",
+    "jsonCounterReconciliation": "pass",
+    "exactUpdateAccounting": "pass",
+    "phaseLogHashAccounting": "pass",
+    "declaredDpWeightConsistency": "fail",
+    "timingAdmissible": false,
+    "claimClass": "finite instrumented counter diagnostic",
+    "supportedClaim": "The retained artifact contains internally exact cumulative cold-probe counters for three fresh B16 fast2 benchmark-mode runs at the effective runtime DP weight 0. Every terminal partition, zero-abort affine-call identity, exact update budget, and phase-log digest independently reconciles.",
+    "unsupportedClaims": [
+      "The observed rates were measured at DP weight 48.",
+      "The displayed instrumented iteration rates are performance evidence.",
+      "The profile establishes a kernel speedup, end-to-end ECDLP speedup, or cryptanalytic advance.",
+      "The recorded executable SHA-256 was independently recomputed from retained executable bytes."
+    ],
+    "summary": "Archive and extracted bytes match, all eleven recorded source hashes match both the frozen commit and its clean checkout, the two host controls pass both in the retained transcript and an independent Apple-clang rebuild, and all three JSON records reconcile exactly. The launcher declares and passes DP_WEIGHT=48, but --bench unconditionally resets o.dpWeight to 0 before engine setup; every raw phase log confirms the effective value was 0. The reported cold-probe rates therefore apply only to the effective DP-weight-0 benchmark configuration. The executable itself was not retained, so its recorded hash remains provenance metadata rather than an independently rehashable binary identity. Timing is explicitly inadmissible."
+  },
+  "inputs": {
+    "archive": {
+      "path": "/private/tmp/ecc2k-cycle-probe-profile-gpu-20261001/results.tgz",
+      "bytes": 6024,
+      "sha256": "e08ffba7345e1713b4610ddba498e4d01881ade97b45e347715acadd2e2591bf",
+      "regularFileMembers": 12
+    },
+    "extractedResults": {
+      "path": "/private/tmp/ecc2k-cycle-probe-profile-gpu-20261001/results",
+      "regularFiles": 12
+    },
+    "launchMetadata": {
+      "path": "/private/tmp/ecc2k-cycle-probe-profile-gpu-20261001/launch.json",
+      "bytes": 646,
+      "sha256": "e8cce49debe4cd53b6f8446ffff33847698396148cd4a5cd1e7466ed3838c774",
+      "provider": "modal",
+      "job": "benchmarks/cycle-probe-profile/gpujob.sh",
+      "gpuClass": "RTX-PRO-6000",
+      "cudaImage": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+      "startedAt": "2026-10-01T23:20:19Z",
+      "finishedAt": "2026-10-01T23:21:25Z",
+      "providerSeconds": 54.810585498809814,
+      "functionCallId": "fc-01M3WW9M4QBQX91GTYH2HW014Y",
+      "exitCode": 0,
+      "gitDirty": false,
+      "gitRevision": "bd250b1a1ff1f148641c53d05ff9ec190544fc52"
+    },
+    "frozenSource": {
+      "path": "/private/tmp/ecc2k130-batched-hints-20261001",
+      "commit": "bd250b1a1ff1f148641c53d05ff9ec190544fc52",
+      "tree": "5d81f5083fe1faf0c35ca58f95713fa4864611a9",
+      "parent": "a0282c0a4706980180a716fb7f23731898e5262c",
+      "branch": "codex/ecc2k130-batched-hints-20261001",
+      "detachedHead": false,
+      "trackedWorktreeCleanDuringAudit": true,
+      "commitTimestamp": "2026-10-01T16:17:35-07:00",
+      "commitSubject": "ecc2k130: stage cycle probe profile job"
+    }
+  },
+  "archiveIntegrity": {
+    "all12ArchiveMembersMatchExtractedBytes": true,
+    "missingExtractedMembers": [],
+    "mismatchedExtractedMembers": [],
+    "nonArchiveFilesPresentInExtraction": [],
+    "recordedJobExitCode": 0,
+    "launchExitCodeMatchesResult": true,
+    "countsRowsAppearExactlyInJobLog": true,
+    "hostControlExtractMatchesFullHostControlLog": true,
+    "archiveMemberSha256": {
+      "binary-sha256.txt": "10b215236fa3feb10b82b2c2aaea0cad3983c754dde203dce2d89df00194c79b",
+      "build.log": "33aae6bf4a30deeb932657986f846dd612b7046c4a1e03216127ddd47d96ba4b",
+      "counts.tsv": "552b42a1b56d1d3338a2d37b9f9bdb4a91fd04ec787c1a8344bc7dde57efd72e",
+      "early.log": "83ec5ec857f18e136a9b51eec3dd0f416f2f96143168abf5ec125a26489175a4",
+      "exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "host-controls.log": "2bf2d55201d47c09b22b86a1697f42dc3a01a069e0dbcda2ee124af974b76eab",
+      "host-controls.txt": "39fb9f7319cbca1e6a4d0afe7fd3630c7883259fd134af9941fa498bf8b5ed1f",
+      "host.txt": "0d8961315ffe00d37ba20fa005e5e2ec2bc01f68175884b684e4cdcaa18023f6",
+      "job.log": "e45458620e057b8bf1993d835df3d56f6159b19cd63c7c1af40b1ebe3470ec24",
+      "long.log": "9bec8a5be29ec9059cf502802c10fdedf5bc5c9d2e1e736f9e2fbf7b2cdca55a",
+      "medium.log": "c71dd62e618bc24eaa8387754e3f5c7f1777342cf657f20bba5ea1a566551306",
+      "source-files.sha256": "9f09cda7dcaea84cb9302587c6b269f973b643276e8768b90860e80309585545"
+    }
+  },
+  "sourceIdentity": {
+    "launchRevisionMatchesFrozenHead": true,
+    "artifactManifestSha256": "9f09cda7dcaea84cb9302587c6b269f973b643276e8768b90860e80309585545",
+    "all11RecordedSourceHashesMatchFrozenCommit": true,
+    "all11RecordedSourceHashesMatchCleanCheckout": true,
+    "recordedFiles": [
+      {
+        "path": "Makefile",
+        "sha256": "9d854d7d298df5f86b8b6f26dca7e00940de7d6bcd8063e2bf972dec17359b59",
+        "matchesFrozenCommit": true
+      },
+      {
+        "path": "include/kernel.h",
+        "sha256": "5f8fea27962653eb2c044b15fc125d0cba9f1238609de52eb0320cda162ee167",
+        "matchesFrozenCommit": true
+      },
+      {
+        "path": "include/packedengine.cuh",
+        "sha256": "4e87c8658568a0dc236988a92cfaf01ad2769b59fc9f6660fc4afce448084e89",
+        "matchesFrozenCommit": true
+      },
+      {
+        "path": "include/packedkernels.cuh",
+        "sha256": "fcc24d46766ea16aca56875b6844ae25f13656867285326cf16bd5da2d6696a7",
+        "matchesFrozenCommit": true
+      },
+      {
+        "path": "include/packedtablewalk.cuh",
+        "sha256": "88dfcb0a35f970fbdf018237fcd3ec9763f9aa3a740a6c24f2593dee16b7ecde",
+        "matchesFrozenCommit": true
+      },
+      {
+        "path": "include/tablewalk.h",
+        "sha256": "ca385d0340226b24750087fcd4ec25367973a89f8bc506f95997aadb901fec6d",
+        "matchesFrozenCommit": true
+      },
+      {
+        "path": "include/cycleanchor_body.h",
+        "sha256": "4f37f8a3fd5d49dcc42e7ebabd9b72cc239da0dea0ebd8d32d56c0511ce6403f",
+        "matchesFrozenCommit": true
+      },
+      {
+        "path": "src/main.cu",
+        "sha256": "3f0e857eceb915285b4e419d1632abc3ff49c24fb5fc2614705ab260de8d2147",
+        "matchesFrozenCommit": true
+      },
+      {
+        "path": "src/testcycleprofile.cpp",
+        "sha256": "132aaa921c75355fc432e94c707615f543e965b41ab6bdc409afe5e21650cd16",
+        "matchesFrozenCommit": true
+      },
+      {
+        "path": "benchmarks/cycle-probe-profile/gpujob.sh",
+        "sha256": "19744038f7aaf79301b6c44e29fd41dbfb6f99aa27a2d5f737ea91964d2ed595",
+        "matchesFrozenCommit": true
+      },
+      {
+        "path": "benchmarks/cycle-probe-profile/README.md",
+        "sha256": "631ab4cd74069114b4cd4bf4c911471702bf012093d3d963759840accadf8213",
+        "matchesFrozenCommit": true
+      }
+    ],
+    "manifestScope": "The retained manifest covers the launcher, protocol README, Makefile, direct instrumentation/control files, main translation unit, and principal packed-walk headers. It is not a complete transitive include manifest or full source snapshot. The clean Git revision and tree bind the wider tracked source state."
+  },
+  "binaryIdentity": {
+    "recordedExecutableName": "ecc2k130-cycle-profile",
+    "recordedSha256": "e4088220ca81a4455a765302bc2b1598dd824aab6159a15adc5f5ffe40ac0f49",
+    "recordedHashFileRetained": true,
+    "buildLogRetained": true,
+    "executableRetainedInArchive": false,
+    "executablePresentInFrozenCheckout": false,
+    "recordedHashRecomputedFromExecutable": false,
+    "assessment": "The archive binds a binary name and recorded digest to source/build evidence, but omits the executable bytes. Independent binary rehashing, inspection, and replay are therefore unavailable."
+  },
+  "hostAndBuild": {
+    "gpu": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-6e71b2de-a0ca-1ed8-aba0-3befa33b1ed1",
+      "driverVersion": "580.95.05",
+      "maxSmClockMHz": 2430,
+      "powerLimitW": 600.0,
+      "memoryMiB": 97887,
+      "computeCapability": "12.0"
+    },
+    "cuda": {
+      "release": "13.3",
+      "nvccVersion": "13.3.73",
+      "build": "cuda_13.3.r13.3/compiler.38244171_0",
+      "target": "sm_120"
+    },
+    "geometry": {
+      "runtimeThreads": 96256,
+      "batch": 16,
+      "liveWalksPerLaunch": 1540096,
+      "blockThreads": 512,
+      "blocks": 188,
+      "minBlocks": 1,
+      "stepsPerLaunch": 64,
+      "dpCap": 262144,
+      "splitForward": 1,
+      "batchHints": 1,
+      "fast2": 1,
+      "cycleProfile": 1
+    },
+    "walkKernelCompilerEvidence": {
+      "registersPerThread": 128,
+      "stackFrameBytes": 416,
+      "spillStoreBytes": 8,
+      "spillLoadBytes": 8,
+      "barriers": 1
+    },
+    "runtimeResourceEvidence": {
+      "localBytesPerThread": 416,
+      "staticSharedBytesPerBlock": 0,
+      "dynamicTableSharedBytesPerBlock": 48732,
+      "driverReservedSharedBytesPerBlock": 1024
+    }
+  },
+  "dpWeightAudit": {
+    "launcherVariable": 48,
+    "launcherCommandArgument": 48,
+    "hostTxtDeclaredValue": 48,
+    "effectiveRuntimeValueInAllThreePhaseLogs": 0,
+    "sourceCause": "src/main.cu executes `if (o.bench) o.dpWeight = 0;` after parsing --dp-weight and before runCurve/engine setup.",
+    "allRunsUsedBenchMode": true,
+    "consistencyPass": false,
+    "effectOnInterpretation": "Distinguished-point handling and cold-probe distinguished-point tests used threshold 0, not 48. The zero dp_aborts counters and all hint/outcome rates belong to that effective threshold. They must not be cited as DP-weight-48 measurements.",
+    "scopePreserved": "The three runs otherwise share the same effective threshold, run id, geometry, step count, build, and initial-state construction, so within-artifact early/medium/long counter comparisons remain internally matched at DP weight 0."
+  },
+  "hostCounterControls": {
+    "retainedTranscript": {
+      "fast2Disabled": "PASS: hints 11; fast2 0; cycles 1,1,1,1,1,1,1,1; open 1; dp 1; exceptional 1; next 52; exits 2",
+      "fast2Enabled": "PASS: hints 12; fast2 1; cycles 1,1,1,1,1,1,1,1; open 1; dp 1; exceptional 1; next 53; exits 2",
+      "passLines": 2,
+      "exitStatus": 0
+    },
+    "independentRebuildAndRun": {
+      "compiler": "Apple clang 17.0.0 (clang-1700.0.13.5), arm64-apple-darwin25.6.0",
+      "sourceCommit": "bd250b1a1ff1f148641c53d05ff9ec190544fc52",
+      "fast2Disabled": {
+        "binaryPath": "/private/tmp/ecc2k-cycle-profile-host-audit-20261001/test-cycle-profile",
+        "binarySha256": "d1ed1063746eb7419caf11ccc0547e44fefbe826b6226e25542a7f8f717db55a",
+        "exitCode": 0,
+        "outputMatchesRetainedTranscript": true
+      },
+      "fast2Enabled": {
+        "binaryPath": "/private/tmp/ecc2k-cycle-profile-host-audit-20261001/test-cycle-profile-fast2",
+        "binarySha256": "ed95c002dd10fb40e5175155dd7e4f130189b7d012df05c5ac46ae1f70ccdc49",
+        "exitCode": 0,
+        "outputMatchesRetainedTranscript": true
+      },
+      "pass": true
+    },
+    "coverage": "The synthetic graph controls exercise one general cycle of every length 1 through 8, an open eight-step probe, a distinguished-point abort, an exceptional-denominator abort, exact affine-call totals, terminal partitioning, and two anchor exits in both fast2 configurations.",
+    "deviceAggregationScope": "The GPU aggregation implementation groups active-warp hints, terminal outcomes, next-call counts, and exit ballots before atomic addition. No GPU was relaunched during this audit; device aggregation is checked through frozen-source inspection plus the exact aggregate identities in the retained GPU output."
+  },
+  "counterContract": {
+    "terminalPartition": "hints = fast2_hits + sum(general_cycles_by_length_1_8) + open_eight_step_probes + dp_aborts + exceptional_denominator_aborts",
+    "affineCallMeaning": "affine_next_calls counts actual full affine Ops::next calls. The fast2 second-denominator check is deliberately excluded.",
+    "zeroAbortAffineIdentityUsedByThisAudit": "affine_next_calls = fast2_hits + sum(length * general_cycles[length]) + 8 * open_eight_step_probes, because all retained GPU dp_aborts and exceptional_denominator_aborts are zero",
+    "anchorExitMeaning": "anchor_exits is a subset of exact cycles and therefore must not exceed fast2_hits + sum(general_cycles_by_length_1_8).",
+    "allThreeRowsSatisfyContract": true
+  },
+  "runs": [
+    {
+      "phase": "early",
+      "launches": 1,
+      "stepsPerLaunch": 64,
+      "runId": 7,
+      "effectiveDpWeight": 0,
+      "exactUpdates": {
+        "formula": "96256 * 16 * 64 * 1",
+        "recorded": 98566144,
+        "computed": 98566144,
+        "rawLog": 98566144,
+        "pass": true
+      },
+      "log": {
+        "sha256Recorded": "83ec5ec857f18e136a9b51eec3dd0f416f2f96143168abf5ec125a26489175a4",
+        "sha256Computed": "83ec5ec857f18e136a9b51eec3dd0f416f2f96143168abf5ec125a26489175a4",
+        "jsonByteEqualToCountsTsv": true,
+        "oneJsonLine": true,
+        "instrumentationFlagsMatch": true
+      },
+      "counters": {
+        "hints": 207651,
+        "fast2Hits": 70790,
+        "generalCyclesByLength1Through8": [0, 0, 0, 76, 0, 0, 0, 0],
+        "generalCycleTotal": 76,
+        "openEightStepProbes": 136785,
+        "dpAborts": 0,
+        "exceptionalDenominatorAborts": 0,
+        "affineNextCalls": 1165374,
+        "anchorExits": 47123,
+        "terminalTotalReported": 207651
+      },
+      "independentReconciliation": {
+        "terminalTotalComputed": 207651,
+        "terminalPartitionPass": true,
+        "affineNextCallsComputed": 1165374,
+        "affineIdentityPass": true,
+        "exactCycles": 70866,
+        "anchorExitSubsetPass": true
+      },
+      "rates": {
+        "perUpdate": {
+          "hints": 0.002106717292298662,
+          "fast2Hits": 0.0007181979240255153,
+          "openEightStepProbes": 0.0013877483124428607,
+          "generalCycles": 7.710558302859042e-7,
+          "affineNextCalls": 0.011823268646889545
+        },
+        "perMillionUpdates": {
+          "hints": 2106.717292298662,
+          "fast2Hits": 718.1979240255152,
+          "openEightStepProbes": 1387.7483124428607,
+          "generalCycles": 0.7710558302859043,
+          "generalCyclesByLength1Through8": [0, 0, 0, 0.7710558302859043, 0, 0, 0, 0],
+          "affineNextCalls": 11823.268646889544
+        },
+        "percentOfHints": {
+          "fast2Hits": 34.09085436622024,
+          "openEightStepProbes": 65.87254576187931,
+          "generalCycles": 0.03659987190044835
+        },
+        "affineCallsPerHint": 5.612176199488565,
+        "percentAnchorExitsAmongExactCycles": 66.49592188073265
+      }
+    },
+    {
+      "phase": "medium",
+      "launches": 8,
+      "stepsPerLaunch": 64,
+      "runId": 7,
+      "effectiveDpWeight": 0,
+      "exactUpdates": {
+        "formula": "96256 * 16 * 64 * 8",
+        "recorded": 788529152,
+        "computed": 788529152,
+        "rawLog": 788529152,
+        "pass": true
+      },
+      "log": {
+        "sha256Recorded": "c71dd62e618bc24eaa8387754e3f5c7f1777342cf657f20bba5ea1a566551306",
+        "sha256Computed": "c71dd62e618bc24eaa8387754e3f5c7f1777342cf657f20bba5ea1a566551306",
+        "jsonByteEqualToCountsTsv": true,
+        "oneJsonLine": true,
+        "instrumentationFlagsMatch": true
+      },
+      "counters": {
+        "hints": 1768879,
+        "fast2Hits": 607035,
+        "generalCyclesByLength1Through8": [0, 0, 0, 462, 0, 1, 0, 0],
+        "generalCycleTotal": 463,
+        "openEightStepProbes": 1161381,
+        "dpAborts": 0,
+        "exceptionalDenominatorAborts": 0,
+        "affineNextCalls": 9899937,
+        "anchorExits": 404881,
+        "terminalTotalReported": 1768879
+      },
+      "independentReconciliation": {
+        "terminalTotalComputed": 1768879,
+        "terminalPartitionPass": true,
+        "affineNextCallsComputed": 9899937,
+        "affineIdentityPass": true,
+        "exactCycles": 607498,
+        "anchorExitSubsetPass": true
+      },
+      "rates": {
+        "perUpdate": {
+          "hints": 0.0022432639243754934,
+          "fast2Hits": 0.0007698320327921116,
+          "openEightStepProbes": 0.0014728447224231476,
+          "generalCycles": 5.871691602341672e-7,
+          "affineNextCalls": 0.012554941025186093
+        },
+        "perMillionUpdates": {
+          "hints": 2243.2639243754934,
+          "fast2Hits": 769.8320327921117,
+          "openEightStepProbes": 1472.8447224231477,
+          "generalCycles": 0.5871691602341672,
+          "generalCyclesByLength1Through8": [0, 0, 0, 0.5859009763027759, 0, 0.0012681839313912898, 0, 0],
+          "affineNextCalls": 12554.941025186092
+        },
+        "percentOfHints": {
+          "fast2Hits": 34.317497126711324,
+          "openEightStepProbes": 65.6563281038443,
+          "generalCycles": 0.026174769444376918
+        },
+        "affineCallsPerHint": 5.596729341012019,
+        "percentAnchorExitsAmongExactCycles": 66.64729760427196
+      }
+    },
+    {
+      "phase": "long",
+      "launches": 32,
+      "stepsPerLaunch": 64,
+      "runId": 7,
+      "effectiveDpWeight": 0,
+      "exactUpdates": {
+        "formula": "96256 * 16 * 64 * 32",
+        "recorded": 3154116608,
+        "computed": 3154116608,
+        "rawLog": 3154116608,
+        "pass": true
+      },
+      "log": {
+        "sha256Recorded": "9bec8a5be29ec9059cf502802c10fdedf5bc5c9d2e1e736f9e2fbf7b2cdca55a",
+        "sha256Computed": "9bec8a5be29ec9059cf502802c10fdedf5bc5c9d2e1e736f9e2fbf7b2cdca55a",
+        "jsonByteEqualToCountsTsv": true,
+        "oneJsonLine": true,
+        "instrumentationFlagsMatch": true
+      },
+      "counters": {
+        "hints": 7834496,
+        "fast2Hits": 2876286,
+        "generalCyclesByLength1Through8": [0, 0, 0, 2282, 0, 14, 0, 0],
+        "generalCycleTotal": 2296,
+        "openEightStepProbes": 4955914,
+        "dpAborts": 0,
+        "exceptionalDenominatorAborts": 0,
+        "affineNextCalls": 42532810,
+        "anchorExits": 1917977,
+        "terminalTotalReported": 7834496
+      },
+      "independentReconciliation": {
+        "terminalTotalComputed": 7834496,
+        "terminalPartitionPass": true,
+        "affineNextCallsComputed": 42532810,
+        "affineIdentityPass": true,
+        "exactCycles": 2878582,
+        "anchorExitSubsetPass": true
+      },
+      "rates": {
+        "perUpdate": {
+          "hints": 0.002483895484437334,
+          "fast2Hits": 0.0009119149218214319,
+          "openEightStepProbes": 0.0015712526250392833,
+          "generalCycles": 7.279375766186004e-7,
+          "affineNextCalls": 0.013484856549729692
+        },
+        "perMillionUpdates": {
+          "hints": 2483.895484437334,
+          "fast2Hits": 911.9149218214319,
+          "openEightStepProbes": 1571.2526250392832,
+          "generalCycles": 0.7279375766186004,
+          "generalCyclesByLength1Through8": [0, 0, 0, 0.7234989328587309, 0, 0.0044386437598695145, 0, 0],
+          "affineNextCalls": 13484.856549729691
+        },
+        "percentOfHints": {
+          "fast2Hits": 36.71309552012025,
+          "openEightStepProbes": 63.25759819138334,
+          "generalCycles": 0.02930628849641381
+        },
+        "affineCallsPerHint": 5.428914635989347,
+        "percentAnchorExitsAmongExactCycles": 66.62922925245833
+      }
+    }
+  ],
+  "prefixAndWindowAudit": {
+    "freshProcessPerPhase": true,
+    "sameRunId": true,
+    "sameBuildAndGeometry": true,
+    "onlyLauncherInputChangedAcrossPhases": "launch budget",
+    "sourceAndInvocationSupportDeterministicSharedPrefix": true,
+    "directPerEventPrefixTraceRetained": false,
+    "allCumulativeCountersMonotone": true,
+    "derivedDisjointWindows": [
+      {
+        "window": "launch_1",
+        "launches": 1,
+        "exactUpdates": 98566144,
+        "hints": 207651,
+        "fast2Hits": 70790,
+        "openEightStepProbes": 136785,
+        "generalCycles": 76,
+        "perMillionUpdates": {
+          "hints": 2106.717292298662,
+          "fast2Hits": 718.1979240255152,
+          "openEightStepProbes": 1387.7483124428607,
+          "generalCycles": 0.7710558302859043
+        }
+      },
+      {
+        "window": "launches_2_through_8",
+        "launches": 7,
+        "exactUpdates": 689963008,
+        "hints": 1561228,
+        "fast2Hits": 536245,
+        "openEightStepProbes": 1024596,
+        "generalCycles": 387,
+        "perMillionUpdates": {
+          "hints": 2262.7705861007553,
+          "fast2Hits": 777.2083340444826,
+          "openEightStepProbes": 1485.0013524203314,
+          "generalCycles": 0.560899635941062
+        }
+      },
+      {
+        "window": "launches_9_through_32",
+        "launches": 24,
+        "exactUpdates": 2365587456,
+        "hints": 6065617,
+        "fast2Hits": 2269251,
+        "openEightStepProbes": 3794533,
+        "generalCycles": 1833,
+        "perMillionUpdates": {
+          "hints": 2564.106004457947,
+          "fast2Hits": 959.2758848312053,
+          "openEightStepProbes": 1604.0552592446618,
+          "generalCycles": 0.7748603820800781
+        }
+      }
+    ],
+    "interpretation": "These are finite cumulative/profile-window rates, not a stationary long-run estimate. The hint rate rises across the derived windows as history evolves."
+  },
+  "timingExclusion": {
+    "admissible": false,
+    "hostTxtStatement": "diagnostic only: instrumented timing is not performance evidence",
+    "jobLogTerminalStatement": "diagnostic profile complete; no timing claim is admissible",
+    "protocolStatement": "The README says the instrumented elapsed time and displayed iteration rate must not be compared with uninstrumented throughput results.",
+    "instrumentationChangesRuntimeWork": true,
+    "matchedUninstrumentedControlPresent": false,
+    "pairedTimingProtocolPresent": false,
+    "displayedFinishedRatesMpsRetainedButExcluded": {
+      "early": 7270.402,
+      "medium": 6882.687,
+      "long": 6192.536
+    },
+    "providerSecondsRetainedButExcluded": 54.810585498809814,
+    "conclusion": "No elapsed-time, throughput, speedup, or regression claim is admissible from this artifact."
+  },
+  "limitations": [
+    "The declared DP weight 48 is not the effective runtime value. Benchmark mode resets it to 0, as confirmed independently by source and all three raw logs.",
+    "The executable bytes are absent. The recorded executable SHA-256 cannot be independently recomputed or used to replay the exact binary.",
+    "No GPU job was launched during this audit. GPU evidence was checked from the immutable archive, extracted bytes, frozen source, raw logs, and exact arithmetic.",
+    "The selected source manifest is not a complete transitive build-input manifest, although the launch metadata and clean Git commit/tree bind the tracked repository state.",
+    "The device warp-aggregation implementation was not independently rerun with per-event tracing; aggregate counter identities and frozen-source inspection are the retained checks.",
+    "The early, medium, and long rates are finite cumulative observations at one GPU/build/run id and effective DP weight 0. They are not asymptotic probabilities or transferable rate guarantees.",
+    "The artifact contains no matched uninstrumented baseline, correctness replay corpus, scalar recovery, or full-pipeline accounting."
+  ],
+  "selfIntegrity": {
+    "sha256Method": "A sibling .sha256 sidecar hashes this completed JSON because embedding the file's own digest would be circular.",
+    "sidecarPath": "/Users/adamburan/Documents/Codex/2026-09-08/pl/outputs/ecc2k-cycle-probe-profile-gpu-20261001-independent-audit.json.sha256"
+  }
+}

@@ -1,0 +1,84 @@
+--- a/examples/ic_tournament_worker.rs
++++ b/examples/ic_tournament_worker.rs
+@@ -96,28 +96,51 @@
+ #[cfg(test)]
+ mod arena_tests {
+     use std::alloc::{GlobalAlloc, Layout};
++    use std::sync::{Mutex, MutexGuard};
++
++    /// The arena is the process allocator, so the test harness and the other
++    /// test threads allocate from it too and can move its top between two
++    /// calls of a test.  These tests take one lock so they do not disturb
++    /// each other, and retry the sequences whose claim is about the *most
++    /// recent* block, which only holds when nothing else allocated in
++    /// between; an interleaving is a retry, never a failure.  Reported on
++    /// PR #403; the measured executable contains none of this.
++    static ARENA_TESTS: Mutex<()> = Mutex::new(());
++
++    fn exclusive() -> MutexGuard<'static, ()> {
++        ARENA_TESTS.lock().unwrap_or_else(|e| e.into_inner())
++    }
+ 
+     #[test]
+     fn grows_the_last_block_in_place_and_gives_it_back() {
++        let _guard = exclusive();
+         let a = super::arena::Bump;
+-        unsafe {
+-            let l = Layout::from_size_align(48, 8).unwrap();
+-            let p = a.alloc(l);
+-            assert!(!p.is_null() && (p as usize) % 8 == 0);
+-            std::ptr::write_bytes(p, 0xA5, 48);
+-            let q = a.realloc(p, l, 96);
+-            assert_eq!(q, p, "the most recent block grows in place");
+-            assert!((0..48).all(|i| *q.add(i) == 0xA5));
+-            let l96 = Layout::from_size_align(96, 8).unwrap();
+-            a.dealloc(q, l96);
+-            let r = a.alloc(l);
+-            assert_eq!(r, p, "a freed last block is reused");
+-            a.dealloc(r, l);
++        let l = Layout::from_size_align(48, 8).unwrap();
++        let l96 = Layout::from_size_align(96, 8).unwrap();
++        for _ in 0..10_000 {
++            unsafe {
++                let p = a.alloc(l);
++                assert!(!p.is_null() && (p as usize) % 8 == 0);
++                std::ptr::write_bytes(p, 0xA5, 48);
++                let q = a.realloc(p, l, 96);
++                assert!((0..48).all(|i| *q.add(i) == 0xA5), "its bytes survive the growth");
++                a.dealloc(q, l96);
++                if q != p {
++                    continue; // something else allocated in between
++                }
++                let r = a.alloc(l);
++                a.dealloc(r, l);
++                if r == p {
++                    return; // grew in place and the freed block was reused
++                }
++            }
+         }
++        panic!("the most recent block never grew in place and was reused once freed");
+     }
+ 
+     #[test]
+     fn honours_alignment_and_moves_a_block_that_cannot_grow() {
++        let _guard = exclusive();
+         let a = super::arena::Bump;
+         unsafe {
+             let l = Layout::from_size_align(24, 8).unwrap();
+@@ -126,6 +149,8 @@
+             let big = Layout::from_size_align(200, 64).unwrap();
+             let q = a.alloc(big);
+             assert_eq!((q as usize) % 64, 0);
++            // `p` is not the most recent block whatever else ran, because
++            // this thread allocated `q` after it.
+             let r = a.realloc(p, l, 1000);
+             assert_ne!(r, p, "a block that is not the last one moves");
+             assert!((0..24).all(|i| *r.add(i) == 0x3C), "its bytes travel with it");
+@@ -137,6 +162,7 @@
+ 
+     #[test]
+     fn falls_back_to_the_system_allocator_beyond_the_region() {
++        let _guard = exclusive();
+         let a = super::arena::Bump;
+         unsafe {
+             let huge = Layout::from_size_align(80 << 20, 16).unwrap();

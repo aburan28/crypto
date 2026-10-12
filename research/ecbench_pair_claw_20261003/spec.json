@@ -1,0 +1,32 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "pair claw of aburan28/cryptanalysis#175 against the strong signed-Frobenius rho, same targets, six Koblitz curves",
+  "description": "PROTOCOL.md. claw.pair_table (native port of the four-point signed-Frobenius quotient pair-table search with a known-log orbit base) at the cost-minimising shape (c = 1) and at the PR's n=83 shape (base_scale 1.06, table_scale 1/32), against rho.signed_frobenius_strong on the same one-target workloads, with bsgs.negation as the generic-table comparator and an A/A control.",
+  "workloads": {
+    "curves": [
+      {"kind": "koblitz", "a": 1, "n": 43},
+      {"kind": "koblitz", "a": 1, "n": 47},
+      {"kind": "koblitz", "a": 0, "n": 41},
+      {"kind": "koblitz", "a": 0, "n": 53},
+      {"kind": "koblitz", "a": 1, "n": 59},
+      {"kind": "koblitz", "a": 0, "n": 61}
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 20261003175
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "claw-c1", "role": "candidate", "method": {"id": "claw.pair_table", "params": {"base_scale": "4", "table_scale": "1"}}},
+    {"name": "claw-pr", "role": "candidate", "method": {"id": "claw.pair_table", "params": {"base_scale": "1.06", "table_scale": "0.03125"}}},
+    {"name": "bsgs-neg", "role": "baseline", "method": {"id": "bsgs.negation"}},
+    {"name": "rho-strong-aa", "role": "control", "method": {"id": "rho.signed_frobenius_strong"}}
+  ],
+  "measurement": {
+    "rounds": 3,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 20261003175,
+    "isolation_required": "L2",
+    "timeout_seconds": 1800
+  }
+}

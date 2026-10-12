@@ -1,0 +1,32 @@
+n    ord_n(2)  #Phi_n factors  stable dims (nontrivial, 2..n-2)            m=3 bal/sat   m=4 bal/sat   m=5 bal/sat
+-- tournament degrees
+13         12               1  -                                               -/-         -/-         -/-  
+17          8               2  8,9                                             8/8         8/8         8/8  
+19         18               1  -                                               -/-         -/-         -/-  
+23         11               2  11,12                                          11/11       11/11       11/11 
+29         28               1  -                                               -/-         -/-         -/-  
+31          5               6  5,6,10,11,15,16,20,21,25,26                     6/10        6/6         5/6  
+37         36               1  -                                               -/-         -/-         -/-  
+41         20               2  20,21                                          20/20       20/20       20/20 
+43         14               3  14,15,28,29                                    14/14       14/14       14/14 
+47         23               2  23,24                                          23/23       23/23       23/23 
+53         52               1  -                                               -/-         -/-         -/-  
+59         58               1  -                                               -/-         -/-         -/-  
+61         60               1  -                                               -/-         -/-         -/-  
+-- cryptographic / reference degrees
+73          9               8  9,10,18,19,27,28,36,37,45,46,54,55,63,64       18/27       18/18       10/18 
+127         7              18  7,8,14,15,21,22,28,29,35,36,42,43,49,50,5...   29/42       28/29       21/28 
+131       130               1  -                                               -/-         -/-         -/-  
+151        15              10  15,16,30,31,45,46,60,61,75,76,90,91,105,1...   31/46       30/31       30/30 
+163       162               1  -                                               -/-         -/-         -/-  
+233        29               8  29,30,58,59,87,88,116,117,145,146,174,175...   58/87       58/58       30/58 
+239       119               2  119,120                                       119/119     119/119     119/119
+257        16              16  16,17,32,33,48,49,64,65,80,81,96,97,112,1...   64/81       49/64       48/49 
+283        94               3  94,95,188,189                                  94/94       94/94       94/94 
+409       204               2  204,205                                       204/204     204/204     204/204
+571       114               5  114,115,228,229,342,343,456,457               115/228     114/115     114/114
+
+Reading: a stable base folds the factor base, the relation count and the linear algebra by n
+(the orbit length), a poly(n) factor that does not move the exponent.  Where the nearest stable
+dimension is far from n/(m+1) or n/m, the fold costs more than it buys; where it is '-', it
+does not exist and only an orbit-union base (materialised, not a subspace) is available.

@@ -1,0 +1,22 @@
+{
+  "schema": "ecbench.curve-corpus/v1",
+  "families": [
+    {
+      "id": "koblitz-n11-l4",
+      "field": {"characteristic": 2, "degree": 11, "modulus": 2323},
+      "curve": {
+        "equation": "y^2 + x*y = x^3 + x^2 + 1",
+        "order": 1982
+      },
+      "factor_base": {"dimension": 4, "small_dimension": 3},
+      "dlog_challenge": {
+        "base_point": {"x": 1193, "y": 1007},
+        "target_point": {"x": 1126, "y": 52},
+        "group_order": 1982,
+        "subgroup_order": 991,
+        "cofactor": 2,
+        "planted_log": 688
+      }
+    }
+  ]
+}

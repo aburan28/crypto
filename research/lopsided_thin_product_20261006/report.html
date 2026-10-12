@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lopsided thin products and the IC pipeline — integration report (2026-10-06)</title>
+<style>
+body { font-family: Georgia, 'Times New Roman', serif; max-width: 900px; margin: 2em auto; color: #111; line-height: 1.5; }
+h1 { font-size: 1.6em; } h2 { font-size: 1.25em; border-bottom: 1px solid #ccc; padding-bottom: 0.2em; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9em; }
+th, td { border: 1px solid #999; padding: 6px 8px; text-align: left; vertical-align: top; }
+th { background: #f0f0f0; }
+code { font-size: 0.92em; }
+figure { margin: 1.5em 0; } figcaption { font-size: 0.9em; color: #333; margin-top: 0.5em; }
+.label { font-weight: bold; }
+@media print { body { margin: 1cm; } }
+</style>
+</head>
+<body>
+<h1>Lopsided thin products and the IC pipeline: integration report (2026-10-06)</h1>
+<p><span class="label">Question:</span> can the Alman–Vassilevska Williams thin-matrix-product technique
+(<a href="https://arxiv.org/abs/2610.06783">arXiv:2610.06783v1</a>) reduce end-to-end index-calculus cost in this repository?
+Scope, method, frozen inputs, and stop rules are in the accompanying protocol (<code>README.md</code>).
+Statement status is labelled <b>[proposed]</b> / <b>[derived]</b> / <b>[verified]</b> / <b>[measured]</b> (none in this round).</p>
+
+<h2>Method</h2>
+<ol>
+<li>Downloaded <a href="https://arxiv.org/pdf/2610.06783">the paper PDF</a> (v1, 76 pages;
+<code>sha256:d91a79c5dbf1fc662f0c5c1bb2b690ac3d83d9ef5bf872bde4cdaf7cc9e76005</code>) <b>[verified]</b>;
+read Sections 1–2, 4 (core technique) plus 3, 5.2 (reductions) at survey depth.</li>
+<li>Implemented the problem interface natively in Rust
+(<code>src/cryptanalysis/lopsided_thin_product.rs</code>, 8 unit tests) <b>[verified]</b>
+(<code>cargo test --lib cryptanalysis::lopsided_thin_product</code>: 8 passed).</li>
+<li>Assessed four IC insertion points; implemented none <b>[derived]</b>.</li>
+</ol>
+
+<h2>What the paper shows [derived]</h2>
+<ul>
+<li><b>Thin product (Thm 1 / Thm 5).</b> <code>X</code>: <code>N x D</code>, <code>Y</code>: <code>D x N</code>,
+<code>D &le; N^(1/18)</code>, <code>|W| &le; N^2/sqrt(D)</code> wanted positions: all
+<code>(XY)[i,j]</code> for <code>(i,j)</code> in <code>W</code> in <code>O(N^2/D^0.063)</code> operations —
+polynomially less than one operation per entry of the full product. General form: for every
+<code>&epsilon; &lt; 0.1204</code>, <code>&kappa; &gt; 0</code> there is <code>&gamma; &gt; 0</code> with
+<code>O(N^2/D^&gamma;)</code> when <code>D &le; N^&epsilon;</code>, <code>|W| &le; N^2/D^&kappa;</code>.</li>
+<li><b>Technique.</b> Schoenhage's 10-multiplication identity inside a Coppersmith-style recursion, visiting
+only the recursion-tree leaves the wanted entries need; encoding work is shared across blocks.</li>
+<li><b>Graph reading.</b> With <code>X</code>, <code>Y</code> as biadjacency matrices this is the counting
+Lopsided All-Edges Sparse Triangle: <code>(XY)[a,b]</code> counts middle vertices adjacent to both outer
+vertices <code>a</code>, <code>b</code>. Cost for <code>&epsilon; &lt; 1/18</code>:
+<code>O(|W| n^(0.437 &epsilon;) + n^(2-0.063 &epsilon;))</code>.</li>
+<li><b>Data structure (Thm 3).</b> Preprocess <code>(X,Y)</code> in <code>O(N^2/D^0.063)</code>, answer any
+single entry in <code>O(D^0.437)</code>.</li>
+<li><b>Reductions.</b> 3SUM / Exact Triangle / APSP reduce to the lopsided problem, giving
+<code>O(n^1.9992)</code> 3SUM and <code>O(n^2.9995)</code> APSP. SETH / Orthogonal Vectors are explicitly unaffected.</li>
+</ul>
+
+<h2>Pipeline diagram</h2>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1200 520" font-family="sans-serif" role="img" aria-label="Pipeline diagram">
+<defs>
+<marker id="arr" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 z" fill="#333"/></marker>
+</defs>
+<rect x="0" y="0" width="1200" height="520" fill="#ffffff"/>
+<text x="20" y="28" font-size="17" font-weight="bold">Thin lopsided products into the IC pipeline — proved technique vs this round's proposals</text>
+<text x="20" y="48" font-size="12" fill="#444">Source: Alman–Vassilevska Williams, arXiv:2610.06783v1. Green = proved in the paper. Amber = proposal assessed (not implemented) in this round.</text>
+<g font-size="11">
+<rect x="20" y="70" width="210" height="86" rx="8" fill="#e8f5e9" stroke="#2e7d32"/>
+<text x="30" y="90" font-weight="bold">Schoenhage identity [paper]</text>
+<text x="30" y="106">10-multiplication identity</text>
+<text x="30" y="121">Lemma 6, Sec 2.2 — sparsity</text>
+<text x="30" y="136">is load-bearing</text>
+<rect x="250" y="70" width="210" height="86" rx="8" fill="#e8f5e9" stroke="#2e7d32"/>
+<text x="260" y="90" font-weight="bold">Coppersmith recursion [paper]</text>
+<text x="260" y="106">batch of thin products</text>
+<text x="260" y="121">Sec 2.3 (modified variant)</text>
+<text x="260" y="136">encoding shared over blocks</text>
+<rect x="480" y="70" width="210" height="86" rx="8" fill="#e8f5e9" stroke="#2e7d32"/>
+<text x="490" y="90" font-weight="bold">Prune by wanted set [paper]</text>
+<text x="490" y="106">visit only leaves W needs</text>
+<text x="490" y="121">Sec 2.4 — the new idea</text>
+<text x="490" y="136">union ≈ N²/D^{1/18} leaves</text>
+<rect x="710" y="70" width="220" height="86" rx="8" fill="#e8f5e9" stroke="#2e7d32"/>
+<text x="720" y="90" font-weight="bold">Thin product [paper Thm 1/5]</text>
+<text x="720" y="106">N×D by D×N, |W| ≤ N²/√D</text>
+<text x="720" y="121">cost O(N²/D^0.063) ops</text>
+<text x="720" y="136">D ≤ N^{1/18} (general: ε&lt;0.1204)</text>
+<rect x="950" y="70" width="230" height="86" rx="8" fill="#e8f5e9" stroke="#2e7d32"/>
+<text x="960" y="90" font-weight="bold">Lopsided sparse triangle [paper]</text>
+<text x="960" y="106">(XY)[a,b] = # shared middle</text>
+<text x="960" y="121">vertices; data-structure form:</text>
+<text x="960" y="136">query O(D^0.437) (Thm 3)</text>
+</g>
+<g stroke="#333" stroke-width="1.5">
+<line x1="230" y1="113" x2="250" y2="113" marker-end="url(#arr)"/>
+<line x1="460" y1="113" x2="480" y2="113" marker-end="url(#arr)"/>
+<line x1="690" y1="113" x2="710" y2="113" marker-end="url(#arr)"/>
+<line x1="930" y1="113" x2="950" y2="113" marker-end="url(#arr)"/>
+</g>
+<g font-size="11">
+<rect x="20" y="180" width="440" height="80" rx="8" fill="#e8f5e9" stroke="#2e7d32"/>
+<text x="30" y="200" font-weight="bold">Paper consequences [paper Thm 2, Sec 3–5]</text>
+<text x="30" y="216">3SUM O(n^1.9992) · APSP O(n^2.9995) · Exact Triangle O(n^2.9983) · thin-hint OMv refuted</text>
+<text x="30" y="232">via known reductions (Patrascu; VW–Xu; Chan–Xu; CVX22). SETH / OV unaffected.</text>
+<text x="30" y="248">Real-valued versions: Las Vegas, comparison/addition/subtraction only.</text>
+</g>
+<line x1="1065" y1="156" x2="240" y2="180" stroke="#333" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="20" y="288" font-size="14" font-weight="bold">IC insertion points — all PROPOSALS, none implemented (this round: stage diagnostic, S unset)</text>
+<g font-size="11">
+<rect x="20" y="300" width="270" height="120" rx="8" fill="#fff8e1" stroke="#f9a825"/>
+<text x="30" y="320" font-weight="bold">Relation-verification batch</text>
+<text x="30" y="336">PROPOSAL — blocked:</text>
+<text x="30" y="352">PDP systems are polynomial</text>
+<text x="30" y="368">(Semaev / Weil), not inner</text>
+<text x="30" y="384">products; needs a new</text>
+<text x="30" y="400">reduction, not substitution.</text>
+<rect x="310" y="300" width="270" height="120" rx="8" fill="#fff3c4" stroke="#f9a825" stroke-width="2.5"/>
+<text x="320" y="320" font-weight="bold">Factor-base queries ★ closest fit</text>
+<text x="320" y="336">PROPOSAL — blocked:</text>
+<text x="320" y="352">offline W vs online queries</text>
+<text x="320" y="368">mirrors relation queries, but</text>
+<text x="320" y="384">IC yield is algebraic, not</text>
+<text x="320" y="400">set-theoretic.</text>
+<rect x="600" y="300" width="270" height="120" rx="8" fill="#fff8e1" stroke="#f9a825"/>
+<text x="610" y="320" font-weight="bold">Sparse-LA block</text>
+<text x="610" y="336">PROPOSAL — blocked:</text>
+<text x="610" y="352">block Wiedemann needs large</text>
+<text x="610" y="368">sparse matvecs over Z/rZ,</text>
+<text x="610" y="384">not dense small-integer thin</text>
+<text x="610" y="400">products.</text>
+<rect x="890" y="300" width="290" height="120" rx="8" fill="#fff8e1" stroke="#f9a825"/>
+<text x="900" y="320" font-weight="bold">Target-descent batch</text>
+<text x="900" y="336">PROPOSAL — blocked:</text>
+<text x="900" y="352">descent is per-target recursion;</text>
+<text x="900" y="368">batching changes the workload</text>
+<text x="900" y="384">to multi-target, which cannot</text>
+<text x="900" y="400">replace the one-target comparison.</text>
+</g>
+<rect x="20" y="440" width="1160" height="60" rx="8" fill="#eceff1" stroke="#546e7a"/>
+<text x="30" y="462" font-size="12" font-weight="bold">Promotion gate (AGENTS.md §§3, 8, 12): full-pipeline S below matched baseline with floor ratio falling = advance; stage count down / S flat-or-worse = relabelling.</text>
+<text x="30" y="482" font-size="12">Reference interface implemented + tested: src/cryptanalysis/lopsided_thin_product.rs (8 tests green). End-to-end S, phase costs, speedup: null.</text>
+</svg>
+<figcaption>Figure 1 — green boxes are proved in the paper; amber boxes are proposals assessed (not implemented)
+in this round. The ★ box is the closest fit and still blocked. Editable source: <code>figure.mmd</code>.</figcaption>
+</figure>
+
+<h2>Findings for our IC pipeline</h2>
+<table>
+<tr><th>Insertion point</th><th>Implemented?</th><th>Blocking difference [derived]</th><th>Required experiment [proposed]</th></tr>
+<tr><td>Relation-verification batch</td><td>No</td><td>PDP systems are polynomial (Semaev/Weil), not inner products; needs a new reduction</td><td>Matched baseline/candidate full-DLP suites, all phases in <code>S</code></td></tr>
+<tr><td>Factor-base intersection query</td><td>No — closest fit</td><td>Offline <code>W</code> vs online queries mirrors relation queries, but IC yield is algebraic, not set-theoretic</td><td>One-target workloads paired vs matched rho, five online phases named</td></tr>
+<tr><td>Sparse-LA block</td><td>No</td><td>Block Wiedemann needs large sparse matvecs over <code>Z/rZ</code>, not dense small-integer thin products</td><td>Price matrix build + final LA inside total <code>S</code></td></tr>
+<tr><td>Target-descent batch</td><td>No</td><td>Descent is per-target recursion; batching changes the workload to multi-target</td><td>Single-target first, then a separate <code>k</code>-target question</td></tr>
+</table>
+<p>Positive <b>[verified]</b>: the interface (spec validation, regime gates, <code>epsilon</code>/<code>kappa</code>,
+checked naive reference, quoted-bound hooks, Boolean triangle-count equivalence) is implemented and tested.
+Negative <b>[verified]</b>: no insertion point is wired into any candidate; <code>S</code>, phase costs, and speedup
+are <code>null</code>; no <code>ecbench</code> session was run; no curve was named or registered.</p>
+
+<h2>Cost-model illustration (quoted bounds, not measurements)</h2>
+<figure>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1000 480" font-family="sans-serif" role="img" aria-label="Cost-model graph">
+<rect x="0" y="0" width="1000" height="480" fill="#ffffff"/>
+<text x="20" y="26" font-size="16" font-weight="bold">Quoted-bound illustration — NOT a measurement (log scale, operations, N = 2^36)</text>
+<text x="20" y="46" font-size="12" fill="#444">Curves evaluate closed forms from arXiv:2610.06783v1: naive-max = N²√D (|W| = N²/√D inner products) · full ≈ N² · paper = N²/D^0.063 (Thm 1). No code was timed.</text>
+<rect x="275" y="60" width="705" height="300" fill="#f5f5f5"/>
+<text x="600" y="80" font-size="12" fill="#666">D &gt; 4: outside concrete regime N ≥ D^18 (dashed; general ε &lt; 0.1204 form applies with its own γ)</text>
+<line x1="120" y1="60" x2="120" y2="360" stroke="#333" stroke-width="1.5"/>
+<line x1="120" y1="360" x2="980" y2="360" stroke="#333" stroke-width="1.5"/>
+<g font-size="11" fill="#333">
+<text x="60" y="363">1e21</text>
+<text x="60" y="288">3e21</text>
+<text x="60" y="213">1e22</text>
+<text x="60" y="138">3e22</text>
+<text x="60" y="63">1e23</text>
+<text x="150" y="380">D=4</text>
+<text x="400" y="380">D=16</text>
+<text x="650" y="380">D=64</text>
+<text x="900" y="380">D=256</text>
+<text x="420" y="410">inner dimension D (log axis, four evaluated points)</text>
+</g>
+<g stroke="#ddd" stroke-width="1">
+<line x1="120" y1="360" x2="980" y2="360"/>
+<line x1="120" y1="285" x2="980" y2="285"/>
+<line x1="120" y1="210" x2="980" y2="210"/>
+<line x1="120" y1="135" x2="980" y2="135"/>
+<line x1="120" y1="60" x2="980" y2="60"/>
+</g>
+<line x1="150" y1="259" x2="900" y2="259" stroke="#1565c0" stroke-width="2.5"/>
+<polyline points="150,214 400,168 650,123 900,78" fill="none" stroke="#c62828" stroke-width="2.5"/>
+<line x1="150" y1="265" x2="275" y2="268" stroke="#2e7d32" stroke-width="2.5"/>
+<line x1="275" y1="268" x2="400" y2="270" stroke="#2e7d32" stroke-width="2.5" stroke-dasharray="7 4"/>
+<line x1="400" y1="270" x2="650" y2="276" stroke="#2e7d32" stroke-width="2.5" stroke-dasharray="7 4"/>
+<line x1="650" y1="276" x2="900" y2="282" stroke="#2e7d32" stroke-width="2.5" stroke-dasharray="7 4"/>
+<g font-size="12">
+<circle cx="150" cy="214" r="4" fill="#c62828"/><circle cx="400" cy="168" r="4" fill="#c62828"/><circle cx="650" cy="123" r="4" fill="#c62828"/><circle cx="900" cy="78" r="4" fill="#c62828"/>
+<circle cx="150" cy="265" r="4" fill="#2e7d32"/><circle cx="400" cy="270" r="4" fill="#2e7d32"/><circle cx="650" cy="276" r="4" fill="#2e7d32"/><circle cx="900" cy="282" r="4" fill="#2e7d32"/>
+</g>
+<g font-size="13">
+<text x="640" y="120" fill="#c62828" font-weight="bold">naive-max N²√D (one inner product per wanted entry)</text>
+<text x="640" y="250" fill="#1565c0" font-weight="bold">full product ≈ N² (must write every entry)</text>
+<text x="640" y="305" fill="#2e7d32" font-weight="bold">paper N²/D^0.063 — solid only at D=4 (in-regime)</text>
+</g>
+<text x="20" y="435" font-size="12" fill="#444">Reading: at max wanted size the paper's bound beats per-entry inner products by D^0.563 for every D &gt; 1 (closed-form ratio, not timed).</text>
+<text x="20" y="453" font-size="12" fill="#444">For tiny |W| (e.g. 2 entries) the naive cost wins outright — see unit test cost_model_hooks_are_monotone_and_ordered.</text>
+</svg>
+<figcaption>Figure 2 — closed-form evaluation of the paper's bounds at N = 2^36. At max wanted size the paper's
+bound beats per-entry inner products by D^0.563 for every D &gt; 1 (closed-form ratio, not timed). For tiny |W|
+the naive cost wins outright. Only D = 4 satisfies the concrete-regime gate N ≥ D^18 at this N.</figcaption>
+</figure>
+
+<h2>Boundary, table, ratio (AGENTS.md §§1–8)</h2>
+<ul>
+<li>Boundaries stated before measuring: generic floor + matched rho, both unchanged; the unit is <code>S</code>.</li>
+<li>No table row is produced: a row without a verified answer is not a result.</li>
+<li>Falsification target for a follow-up: full-pipeline <code>S</code> below the matched baseline with the floor
+ratio falling (advance); <code>S</code> down with the floor ratio flat is engineering; a stage count down with
+<code>S</code> up is relabelling; a re-derived number with no algorithm change is accounting.</li>
+<li>All phases unpriced (<code>null</code>); wall time appears nowhere.</li>
+</ul>
+
+<h2>Graphs checked — no change [verified by inspection]</h2>
+<ul>
+<li><code>docs/index-calculus-scoreboard.html</code> + <code>docs/ic/progress-timeline.json</code>: no new IC/rho ratio, no point added.</li>
+<li><code>docs/ic-leaderboard.html</code> / <code>LEADERBOARD.md</code> / <code>leaderboard.json</code>: no whole-pipeline measurement.</li>
+<li><code>docs/browser/data.json</code>: no new curve, session, round, or IC1 identity.</li>
+<li><code>docs/curves/registry.json</code>: no new curve named; no retired spellings introduced.</li>
+<li>Figures 1–2 above are new visuals for this search round (research-visuals skill), not canonical-graph updates.</li>
+</ul>
+
+<h2>Open checks [proposed]</h2>
+<ol>
+<li>A follow-up protocol implementing the pruned-recursion algorithm natively and replaying it against
+<code>wanted_product_i64</code> on frozen inputs.</li>
+<li>Whether factor-base intersection queries on any concrete toy base admit a thin-product encoding that
+preserves decomposition probability — reduction argument first, code second.</li>
+<li>Re-reading the paper's Section 4 trade-offs once a concrete IC shape (<code>N</code>, <code>D</code>, <code>|W|</code>) is proposed.</li>
+</ol>
+
+<h2>Sources</h2>
+<ul>
+<li>Paper PDF: <a href="https://arxiv.org/pdf/2610.06783">https://arxiv.org/pdf/2610.06783</a> (v1).</li>
+<li>Code: <code>src/cryptanalysis/lopsided_thin_product.rs</code> (this repo, this PR).</li>
+<li>Visuals: <code>figure.mmd</code> / <code>figure.svg</code>, <code>cost_model.svg</code>.</li>
+</ul>
+</body>
+</html>

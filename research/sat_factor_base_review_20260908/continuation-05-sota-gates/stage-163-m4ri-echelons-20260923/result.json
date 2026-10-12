@@ -1,0 +1,788 @@
+{
+  "campaign_accounting": {
+    "complete_campaign_cost": null,
+    "measured_lower_bound": {
+      "peak_rss_bytes": 6310576128,
+      "resource_components": 52,
+      "summed_wall_seconds": 3589.954839372015,
+      "total_core_seconds": 3532.297699
+    },
+    "reason_complete_is_null": "some development commands lack complete outer receipts",
+    "stage162_measured_lower_bound": {
+      "peak_rss_bytes": 6310576128,
+      "resource_components": 46,
+      "summed_wall_seconds": 3029.348390705014,
+      "total_core_seconds": 2981.63296
+    },
+    "stage163_incremental_measured": {
+      "peak_rss_bytes": 1690451968,
+      "resource_components": 6,
+      "summed_wall_seconds": 560.606448667001,
+      "total_core_seconds": 550.664739
+    },
+    "unmetered_development_commands_present": true,
+    "unmetered_scope": [
+      "incremental compiles and focused tests",
+      "failed runner outer-driver overhead",
+      "score/evidence composition and Git operations"
+    ]
+  },
+  "claim_boundary": "Strong internal engineering and one finite public toy-PDP native-F4 M4RI improvement. It is not a full solver panel, direct-MITM improvement, full IC/rho crossover, independent reproduction, or Koblitz index-calculus SOTA.",
+  "comparisons": {
+    "same_binary_m4ri_over_streaming": {
+      "core_ratio": 0.9407402508903966,
+      "m4ri_wall_seconds": 54.53891529199609,
+      "same_equation_fingerprint": true,
+      "same_verified_witness": true,
+      "streaming_wall_seconds": 58.37005220800347,
+      "wall_ratio": 0.9343646823827567,
+      "wall_speedup": 1.0702459316525794,
+      "word_xor_ratio": 0.5242513869877702
+    },
+    "selected_cold_build_plus_run": {
+      "peak_rss_bytes": 1689485312,
+      "total_core_seconds": 218.41592500000002,
+      "wall_seconds": 223.24849729199894
+    },
+    "selected_over_same_host_direct_mitm": {
+      "core_ratio": 18.27114409817682,
+      "rss_ratio": 19.974267333809863,
+      "wall_ratio": 18.25999122000824
+    },
+    "selected_over_stage162": {
+      "core_ratio": 0.9467611805462905,
+      "rss_ratio": 0.9457954680069723,
+      "same_equation_fingerprint": true,
+      "same_verified_witness": true,
+      "wall_ratio": 0.946613202435783,
+      "wall_speedup": 1.0563976896020935,
+      "word_xor_ratio": 0.5242513869877702
+    }
+  },
+  "date": "2026-09-23",
+  "development": {
+    "arms": {
+      "m4ri-provisional": {
+        "artifacts": {
+          "metrics": {
+            "bytes": 844,
+            "path": "m4ri-provisional.metrics",
+            "sha256": "56991615f8cc26b141254053464912415f5f3fbb564c70bf0cc3f5d4a6660ec1"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "m4ri-provisional.stderr",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 3868,
+            "path": "m4ri-provisional.stdout",
+            "sha256": "55a0fd3c890ecc6e755f9e6588657257ed4b7b40e0d8965b14bac5cee7f3b271"
+          }
+        },
+        "cost": {
+          "degree_reached": 6,
+          "extra": {
+            "basis_len": 17,
+            "build_ns": 17111838159,
+            "divisor_tests": 1151209154,
+            "eliminate_ns": 22375567044,
+            "extraction_tests": 119560,
+            "f4_calls": 65,
+            "field_pairs_reduced": 186661,
+            "m4ri_matrices": 196,
+            "m4ri_scratch_bytes_max": 73312,
+            "m4ri_table_word_xors": 316714298,
+            "matrix_cols_max": 29308,
+            "matrix_rows_max": 39756,
+            "matrix_rows_sum": 1330924,
+            "new_elements": 265523,
+            "oversize": 0,
+            "pairs_chain_skipped": 229620889,
+            "pairs_left": 0,
+            "pairs_product_skipped": 70978814,
+            "pairs_reduced": 412194,
+            "reducer_rows": 501779,
+            "steps": 325,
+            "symbolic_bytes_estimate_max": 494983728,
+            "symbolic_cap_hit": 0
+          },
+          "op_unit": "word XORs (elimination only)",
+          "ops": 45879309338,
+          "peak_bytes": 145665984,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 53429453083
+        },
+        "decision": "promoted_after_clean_rebuild",
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 971915264,
+          "single_core_seconds": 54.413163999999995,
+          "system_seconds": 0.255748,
+          "total_core_seconds": 54.413163999999995,
+          "user_seconds": 54.157416,
+          "wall_seconds": 54.53891529199609
+        }
+      },
+      "streaming-control": {
+        "artifacts": {
+          "metrics": {
+            "bytes": 826,
+            "path": "streaming-control.metrics",
+            "sha256": "4bd0e0d97f8d2e78970805fe7d056cf9de168f424bbd2fdd7317bc48936e80c6"
+          },
+          "stderr": {
+            "bytes": 0,
+            "path": "streaming-control.stderr",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "stdout": {
+            "bytes": 3854,
+            "path": "streaming-control.stdout",
+            "sha256": "e163820e6425ca4dd2cdd3385fb4df213170cbf0c14985df3c7827b98efe0be0"
+          }
+        },
+        "cost": {
+          "degree_reached": 6,
+          "extra": {
+            "basis_len": 17,
+            "build_ns": 17084963668,
+            "divisor_tests": 1151227822,
+            "eliminate_ns": 25819689715,
+            "extraction_tests": 119560,
+            "f4_calls": 65,
+            "field_pairs_reduced": 186661,
+            "m4ri_matrices": 0,
+            "m4ri_scratch_bytes_max": 0,
+            "m4ri_table_word_xors": 0,
+            "matrix_cols_max": 29308,
+            "matrix_rows_max": 39756,
+            "matrix_rows_sum": 1330928,
+            "new_elements": 265523,
+            "oversize": 0,
+            "pairs_chain_skipped": 229620889,
+            "pairs_left": 0,
+            "pairs_product_skipped": 70978814,
+            "pairs_reduced": 412194,
+            "reducer_rows": 501782,
+            "steps": 325,
+            "symbolic_bytes_estimate_max": 495286352,
+            "symbolic_cap_hit": 0
+          },
+          "op_unit": "word XORs (elimination only)",
+          "ops": 87513949370,
+          "peak_bytes": 145665984,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 56823065166
+        },
+        "decision": "same_binary_control",
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 963821568,
+          "single_core_seconds": 57.840795,
+          "system_seconds": 0.274781,
+          "total_core_seconds": 57.840795,
+          "user_seconds": 57.566014,
+          "wall_seconds": 58.37005220800347
+        }
+      }
+    },
+    "complete_development_cost": null,
+    "parser_rejected_clean_run": {
+      "backend_status": "sat",
+      "build_resources": {
+        "aggregate_process_tree_peak_rss_bytes": null,
+        "largest_child_peak_rss_bytes": 1690451968,
+        "single_core_elapsed_seconds": null,
+        "summed_process_wall_seconds": 168.759934000002,
+        "total_core_seconds": 165.117292
+      },
+      "inventory": [
+        {
+          "bytes": 32317,
+          "path": "execution-plan.json",
+          "sha256": "c3a228dd252d4351d11681c89bae0ff88e4c8f78fceedb8f22c5afd56bdeb458"
+        },
+        {
+          "bytes": 7886,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/export-result.json",
+          "sha256": "b48f0d215cfd6a75c3e39418b5e9f4f7196438505b494595e3d26af424c22422"
+        },
+        {
+          "bytes": 1190,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/export.intent.json",
+          "sha256": "bcd05ac5ac19786a0cf5ff765f2dec31f5945c18b52d6203d9d6b6ed4675d6b6"
+        },
+        {
+          "bytes": 954,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/export.metrics.json",
+          "sha256": "44a3fc5d23755b6bee8ef7178e688403faf9661e1951ab2ecaf92a3b680f508d"
+        },
+        {
+          "bytes": 0,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/export.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 4344,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/export.stdout",
+          "sha256": "cedf0874803d4f8f95d3e3f896f195713a32f2e2a8da072ea7e40977eade7adc"
+        },
+        {
+          "bytes": 255940,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.anf",
+          "sha256": "bd87ff66846bc6b0798e951fd452f6e318bac29264ebc05513210473d9f437ee"
+        },
+        {
+          "bytes": 404158,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.magma",
+          "sha256": "dceb8d8cc1947306481879649f40a0baaaf1e6f378c6622a8d815d182956a54f"
+        },
+        {
+          "bytes": 219207,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/instance.xor.cnf",
+          "sha256": "58288c556a747da5b22727450ebb4e1d094c909112daaa723c835fd654ae9d1b"
+        },
+        {
+          "bytes": 4343,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/instance/manifest.json",
+          "sha256": "5a125a36c8d894294f50bd2be4790133789303828d1853e6cf8b7ea4d1e16919"
+        },
+        {
+          "bytes": 2176,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/native-f4.intent.json",
+          "sha256": "4e634ebc2a8b2a558ba9e2cc44999cfda2c8c2573911ab05714b03b9ff61add5"
+        },
+        {
+          "bytes": 683,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/native-f4.metrics.json",
+          "sha256": "332ac64996246e7f8424cfecad9895b700f5c734ba85001b8e2c3812347f26f8"
+        },
+        {
+          "bytes": 0,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/native-f4.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 4029,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/native-f4.stdout",
+          "sha256": "de0ed856e5efc3fa64bec7b3a2e24486b58446a6fae01bba9262cc6eb5e5df31"
+        },
+        {
+          "bytes": 2179,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/source-verification.intent.json",
+          "sha256": "7d8dcfdef5ad19574a1b3c7effa3f9bd202085aa06295e1bc7a19010529b0925"
+        },
+        {
+          "bytes": 720,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/source-verification.metrics.json",
+          "sha256": "b4b89d3ee7502f99cc518c59ce885414d0714575820240c58c142ed1d54b117b"
+        },
+        {
+          "bytes": 0,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/source-verification.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 1129,
+          "path": "tasks/000000-b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30/source-verification.stdout",
+          "sha256": "218683bc0419ab44fc740c5fe86f9dafacbfd33a555c386456c37b738a0444da"
+        },
+        {
+          "bytes": 29115,
+          "path": "tool-builds/rust/evidence/Cargo.lock",
+          "sha256": "10461fc25d189a7e1b533c0a59e1c66d7376ca04d3af5c5868a6f155efc8e5cf"
+        },
+        {
+          "bytes": 1228,
+          "path": "tool-builds/rust/evidence/archive-source.intent.json",
+          "sha256": "47f7f3d848103dbe48614c323a9666807250ca80753a834ba45b8e64a6bd9a42"
+        },
+        {
+          "bytes": 858,
+          "path": "tool-builds/rust/evidence/archive-source.metrics.json",
+          "sha256": "4de328b7753df79d54b2d8c04314cc96f84accc8c8f21e9e9ed668f11a2e1f60"
+        },
+        {
+          "bytes": 0,
+          "path": "tool-builds/rust/evidence/archive-source.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 0,
+          "path": "tool-builds/rust/evidence/archive-source.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 1098,
+          "path": "tool-builds/rust/evidence/build.intent.json",
+          "sha256": "cb5df92d4165a372db7fded7bd517dd56620eb899c0ec0264115aa7e36a4cf70"
+        },
+        {
+          "bytes": 704,
+          "path": "tool-builds/rust/evidence/build.metrics.json",
+          "sha256": "e6d44d2e74e93cfd235a09a2dd19fd3b5b717cff0f75e2ec5498d5ffbdf3ea95"
+        },
+        {
+          "bytes": 34121,
+          "path": "tool-builds/rust/evidence/build.stderr",
+          "sha256": "7418acb378d4204addfc50a5b1e8ce6a4530498238490f3cbb77fedabe3c4839"
+        },
+        {
+          "bytes": 0,
+          "path": "tool-builds/rust/evidence/build.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 152,
+          "path": "tool-builds/rust/evidence/cargo-config.toml",
+          "sha256": "4314871d5488da987f3c096bd0e4be9998683e9a65bc80240e6640d5f96a1bce"
+        },
+        {
+          "bytes": 1008,
+          "path": "tool-builds/rust/evidence/copy-backend.intent.json",
+          "sha256": "44fdf5f4e26e9e47437513a69936a61b53045ba98a2d24da663b61710576b722"
+        },
+        {
+          "bytes": 651,
+          "path": "tool-builds/rust/evidence/copy-backend.metrics.json",
+          "sha256": "e77c7e7ec8d1e2bdd4eca5b7bb634e247ec78fe61a77c824effb138d753c15ec"
+        },
+        {
+          "bytes": 0,
+          "path": "tool-builds/rust/evidence/copy-backend.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 0,
+          "path": "tool-builds/rust/evidence/copy-backend.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 1007,
+          "path": "tool-builds/rust/evidence/copy-exporter.intent.json",
+          "sha256": "5e51dda1ef6e18c36d31ffa2a4f448692c25008df15061c1dcf6d68a55a9c274"
+        },
+        {
+          "bytes": 635,
+          "path": "tool-builds/rust/evidence/copy-exporter.metrics.json",
+          "sha256": "c5e5bc7a48eae6cbab9dcea9f489bca7dd32e9f471d7cdd137a8c5a553f76473"
+        },
+        {
+          "bytes": 0,
+          "path": "tool-builds/rust/evidence/copy-exporter.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 0,
+          "path": "tool-builds/rust/evidence/copy-exporter.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 979,
+          "path": "tool-builds/rust/evidence/extract-source.intent.json",
+          "sha256": "2692abbece9fd048e491988d647e496c7c4c7e45b000f71fa073394af6223f26"
+        },
+        {
+          "bytes": 585,
+          "path": "tool-builds/rust/evidence/extract-source.metrics.json",
+          "sha256": "bd04d51abc94a4cc8021aaca2d044fdb09c15b19c2672aa6748248b61d2e2e99"
+        },
+        {
+          "bytes": 0,
+          "path": "tool-builds/rust/evidence/extract-source.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 0,
+          "path": "tool-builds/rust/evidence/extract-source.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 1057,
+          "path": "tool-builds/rust/evidence/install-lock.intent.json",
+          "sha256": "145d93b3847a7ceae878af673b362c78eafbba8f5717d402f0384c150e0098d3"
+        },
+        {
+          "bytes": 669,
+          "path": "tool-builds/rust/evidence/install-lock.metrics.json",
+          "sha256": "fc1a4765b419de310827c54d04ca006027ccef3ca876b2a29c184cd85f86690e"
+        },
+        {
+          "bytes": 0,
+          "path": "tool-builds/rust/evidence/install-lock.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 0,
+          "path": "tool-builds/rust/evidence/install-lock.stdout",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 970,
+          "path": "tool-builds/rust/evidence/vendor.intent.json",
+          "sha256": "62da66b4cc21dec08487fc61cfaf8dcce33d73767b25ae69085cda4da93d3111"
+        },
+        {
+          "bytes": 590,
+          "path": "tool-builds/rust/evidence/vendor.metrics.json",
+          "sha256": "b9676f4861cad8a92822dcff46dab176704d4fa28b6c3e8904f2a23c94f364e5"
+        },
+        {
+          "bytes": 28829,
+          "path": "tool-builds/rust/evidence/vendor.stderr",
+          "sha256": "1e7abf4953984f7f444a1f2336c9ee71dda9d23f7e936a61e32a4b950ecbbd5f"
+        },
+        {
+          "bytes": 152,
+          "path": "tool-builds/rust/evidence/vendor.stdout",
+          "sha256": "4314871d5488da987f3c096bd0e4be9998683e9a65bc80240e6640d5f96a1bce"
+        },
+        {
+          "bytes": 875,
+          "path": "tool-builds/rust/evidence/version-cargo.intent.json",
+          "sha256": "940b212cf68b0cab5f74ea076b6ecdf2cf8fc6725c02e34e699b6b010bf4b533"
+        },
+        {
+          "bytes": 478,
+          "path": "tool-builds/rust/evidence/version-cargo.metrics.json",
+          "sha256": "cce6bfe01dd73fe85bce2347ce38a86ec506bb1ce4e8fda5f373ccca3807ff41"
+        },
+        {
+          "bytes": 0,
+          "path": "tool-builds/rust/evidence/version-cargo.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 213,
+          "path": "tool-builds/rust/evidence/version-cargo.stdout",
+          "sha256": "2acedc6d91ea99958f144b6e38dc6419f20e834ecc6154591888896d0a1691ea"
+        },
+        {
+          "bytes": 875,
+          "path": "tool-builds/rust/evidence/version-rustc.intent.json",
+          "sha256": "8bf8d2f180210019617123bfd5ab22cd651b85b376dfa7e7e98dd8dfad74d2db"
+        },
+        {
+          "bytes": 502,
+          "path": "tool-builds/rust/evidence/version-rustc.metrics.json",
+          "sha256": "5e4e8b85868e2c697db5c28565c26859c123cc8a09f90b125d52a50ed083e325"
+        },
+        {
+          "bytes": 0,
+          "path": "tool-builds/rust/evidence/version-rustc.stderr",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "bytes": 203,
+          "path": "tool-builds/rust/evidence/version-rustc.stdout",
+          "sha256": "dbd639801eacf9d8900b64719640b726c1ad6b3e8fc216b7f0b2eae7c256a602"
+        },
+        {
+          "bytes": 26637,
+          "path": "tool-builds/rust/receipt.json",
+          "sha256": "096e3e04d34d535da9f5c4a64584b0d99d6109b1285bd0b552fb4feb2d420ef6"
+        }
+      ],
+      "inventory_sha256": "db5050b26cf4ea453fc1ae01c160eda4de479b4b25955a59366a3bf14ce67f99",
+      "path": "parser-rejected-clean-run",
+      "scientific_terminal_promoted": false,
+      "source_commit": "907cf071487abe84188fbff947dac38b5803a602",
+      "status": "backend_contract_error_before_parser_compatibility_fix",
+      "task_process_resources": {
+        "peak_rss_bytes": 946077696,
+        "resource_components": 3,
+        "summed_wall_seconds": 55.689049875,
+        "total_core_seconds": 54.877563
+      }
+    },
+    "reason_complete_is_null": "incremental compile and focused tests lack outer receipts",
+    "schema": "koblitz_stage163_development.v1",
+    "status": "same_binary_pair_and_parser_rejection_retained"
+  },
+  "factor_base": {
+    "definition": "span(1,z,...,z^8), with exact rational-lift membership checks",
+    "discrete_log_labels_used": false,
+    "factor_base_logs_known_by_construction": false,
+    "target_subgroup_enumerated": false
+  },
+  "full_cost_gate_passed": false,
+  "gates": {
+    "1_all_stage_resource_charging": "partial_measured_lower_bound_complete_total_null",
+    "2_same_instance_solver_matrix": "partial_one_native_f4_n59_target_licensed_magma_and_full_panel_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_native_f4_complete_conflicts_null_magma_missing",
+    "4_n31_n41_larger_pdp": "inherited_satisfied_finite_coverage",
+    "5_unknown_scalar_without_known_base_logs": "inherited_satisfied_finite_controls",
+    "6_full_cost_vs_automorphism_rho": "unchanged_not_tested_by_pdp_stage_and_current_full_cost_gate_false",
+    "7_independent_external_reproduction": "requested_but_missing",
+    "all_seven_gates_passed": false
+  },
+  "independent_external_reproduction_satisfied": false,
+  "instance": {
+    "basis": "standard polynomial subspace",
+    "blind_instance_id": "b-23f77043e135d4b3b9d8ea41443fe2ba16b23932b1f37b7f78499ce6fca75f30",
+    "curve": "K_1 over GF(2^59)",
+    "ell": 9,
+    "m": 3,
+    "n": 59,
+    "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+    "target": {
+      "x": "342002423881678665",
+      "y": "482559600513111561"
+    },
+    "target_class_opened_after_run_seal": "decomposable"
+  },
+  "koblitz_index_calculus_sota": false,
+  "licensed_magma_f4_complete": false,
+  "mechanism": {
+    "large_matrix_test_shapes": 4,
+    "name": "shape_selected_block4_m4ri",
+    "row_space_test": "m4ri_and_streaming_have_the_same_row_space",
+    "same_binary_disable": "PQ_F4_DISABLE_M4RI=1",
+    "selection": "rows >= 128, columns >= 256, columns <= 4*rows"
+  },
+  "predecessor": {
+    "stage162_result_sha256": "071c0027ed4deb8f0768b1b1afe189b851acf659d3c6f9e5a6aea507cbed3916",
+    "stage162_seal_sha256": "e6ce66ca1854ccbd847b80ca7017b1112301f15b052503c13750b8360340b2c2"
+  },
+  "same_target_table": [
+    {
+      "backend": "native-f4-selected",
+      "classification": "true_positive",
+      "conflicts": null,
+      "formulation": "fixed-X1 direct S4; fast masks; grouped pairs; shape-selected block-4 M4RI",
+      "host": "local arm64",
+      "operations": {
+        "f4_calls": 65,
+        "m4ri_matrices": 196,
+        "word_xors_including_m4ri_tables": 45879309338
+      },
+      "peak_rss_bytes": 915668992,
+      "status": "sat",
+      "total_core_seconds": 54.662604,
+      "wall_seconds": 54.77377895799873
+    },
+    {
+      "backend": "native-xor",
+      "classification": "inconclusive",
+      "conflicts": 100000,
+      "formulation": "frozen S4 correspondence system",
+      "host": "local arm64",
+      "operations": null,
+      "peak_rss_bytes": 168361984,
+      "status": "unknown_inconclusive",
+      "total_core_seconds": 8.890455,
+      "wall_seconds": 8.906471791000513
+    },
+    {
+      "backend": "direct-mitm",
+      "classification": "true_positive",
+      "conflicts": null,
+      "formulation": "exact factor-point pair table",
+      "host": "local arm64",
+      "operations": {
+        "group_additions": 117015,
+        "pair_entries": 116635
+      },
+      "peak_rss_bytes": 45842432,
+      "status": "sat",
+      "total_core_seconds": 2.991745,
+      "wall_seconds": 2.999660749999748
+    },
+    {
+      "backend": "wdsat",
+      "classification": "inconclusive",
+      "conflicts": null,
+      "formulation": "frozen S4 ANF",
+      "host": "GitHub Linux x86_64",
+      "operations": null,
+      "peak_rss_bytes": 19632128,
+      "status": "timeout_inconclusive",
+      "total_core_seconds": 88.060134,
+      "wall_seconds": 120.00305557999997
+    },
+    {
+      "backend": "cryptominisat",
+      "classification": "inconclusive",
+      "conflicts": null,
+      "formulation": "frozen S4 CNF plus XOR",
+      "host": "GitHub Linux x86_64",
+      "operations": null,
+      "peak_rss_bytes": 69353472,
+      "status": "timeout_inconclusive",
+      "total_core_seconds": 87.983526,
+      "wall_seconds": 120.005938571
+    },
+    {
+      "backend": "magma-f4",
+      "classification": "not_run",
+      "conflicts": null,
+      "formulation": "frozen direct Boolean F4 source",
+      "host": null,
+      "operations": null,
+      "peak_rss_bytes": null,
+      "status": "not_run_licensed_tool_missing",
+      "total_core_seconds": null,
+      "wall_seconds": null
+    },
+    {
+      "backend": "ggmp",
+      "classification": "not_applicable",
+      "conflicts": null,
+      "formulation": "GGMP invariant-kernel base exists only in the frozen n31 cell",
+      "host": null,
+      "operations": null,
+      "peak_rss_bytes": null,
+      "status": "not_same_instance",
+      "total_core_seconds": null,
+      "wall_seconds": null
+    }
+  ],
+  "schema": "koblitz_stage163_m4ri_echelons.v1",
+  "selected_native_f4": {
+    "classification": "true_positive",
+    "metrics": {
+      "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+      "peak_rss_bytes": 915668992,
+      "single_core_seconds": 54.662604,
+      "system_seconds": 0.24115799999999998,
+      "total_core_seconds": 54.662604,
+      "user_seconds": 54.421446,
+      "wall_seconds": 54.77377895799873
+    },
+    "report": {
+      "algebraic_roots": 2,
+      "backend": "native-f4",
+      "budget_seconds": 300,
+      "conflicts": null,
+      "cost": {
+        "degree_reached": 6,
+        "extra": {
+          "basis_len": 17,
+          "build_ns": 17296289547,
+          "divisor_tests": 1151209154,
+          "eliminate_ns": 22604091084,
+          "extraction_tests": 119560,
+          "f4_calls": 65,
+          "field_pairs_reduced": 186661,
+          "m4ri_matrices": 196,
+          "m4ri_scratch_bytes_max": 73312,
+          "m4ri_table_word_xors": 316714298,
+          "matrix_cols_max": 29308,
+          "matrix_rows_max": 39756,
+          "matrix_rows_sum": 1330924,
+          "new_elements": 265523,
+          "oversize": 0,
+          "pairs_chain_skipped": 229620889,
+          "pairs_left": 0,
+          "pairs_product_skipped": 70978814,
+          "pairs_reduced": 412194,
+          "reducer_rows": 501779,
+          "steps": 325,
+          "symbolic_bytes_estimate_max": 494983728,
+          "symbolic_cap_hit": 0
+        },
+        "op_unit": "word XORs (elimination, including M4RI tables)",
+        "ops": 45879309338,
+        "peak_bytes": 145665984,
+        "solving_degree": 5,
+        "timed_out": false,
+        "wall_ns": 53679461711
+      },
+      "exhaustive": true,
+      "factor_base_contract": {
+        "discrete_log_labels_used": false,
+        "target_subgroup_enumerated": false
+      },
+      "fixed_x1_nonrational_skipped": 73,
+      "fixed_x1_systems_completed": 65,
+      "fixed_x1_systems_constructed": 65,
+      "fixed_x1_values": 512,
+      "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+      "regenerated_source_exact": true,
+      "same_instance_fields": [
+        "n",
+        "ell",
+        "m",
+        "curve",
+        "algebraic_factor_base",
+        "affine_target"
+      ],
+      "schema": "koblitz_pdp_isolated_backend.v1",
+      "single_thread_requested": true,
+      "solver": "f4-f2",
+      "solver_constructor": "fixed_x1_constant_linear_specialisation",
+      "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, Gebauer\u2013M\u00f6ller, field pairs, shape-selected block-4 M4RI/streaming bit-packed elimination, reduced basis",
+      "solver_echelon_policy": "block4_m4ri_for_rows_ge_128_cols_ge_256_and_cols_le_4x_rows_else_streaming",
+      "solver_equations_blake3": "d6969c5f89b5be6a7eacbdac45799fc734a273c9034949a482723b4422504ae7",
+      "solver_equations_total": 3835,
+      "solver_internal_mask_hasher": "splitmix64_for_trusted_u64_masks_with_exact_key_equality",
+      "solver_max_degree": 4,
+      "solver_pair_selector": "grouped_lcm_exact_submask_equivalent_to_quadratic_update",
+      "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+      "solver_schedule": "enumerate x1 coefficients in ascending bitmask order; run full f4-f2 on x2,x3",
+      "solver_terms_max_per_system": 61922,
+      "solver_terms_total": 3864601,
+      "solver_variables": 18,
+      "source_artifacts": {
+        "cryptominisat_xor_dimacs": {
+          "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+          "bytes": 219207,
+          "path": "instance.xor.cnf",
+          "valid": true
+        },
+        "magma_boolean_f4": {
+          "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+          "bytes": 404158,
+          "path": "instance.magma",
+          "valid": true
+        },
+        "wdsat_anf": {
+          "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+          "bytes": 255940,
+          "path": "instance.anf",
+          "valid": true
+        }
+      },
+      "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+      "source_instance_verified": true,
+      "source_model_valid": true,
+      "source_representation": "symmetrised_s4",
+      "source_variables": 78,
+      "source_witness_valid": true,
+      "status": "sat",
+      "timing_ns": {
+        "factor_base_x1_membership": 9019045,
+        "fixed_x1_s4_construction": 959452793,
+        "native_f4_whole": 54720466833,
+        "source_verification": 39494333
+      },
+      "witness_points": [
+        {
+          "x": "137",
+          "y": "164288105115948905"
+        },
+        {
+          "x": "286",
+          "y": "349643848945327627"
+        },
+        {
+          "x": "159",
+          "y": "15349584312879311"
+        }
+      ]
+    },
+    "run_inventory_sha256": "7e872884b261420bc56cdc6d8a7f86e3950d836199dbbfd8581d6f973abb5d70",
+    "source_model_valid": true,
+    "source_revision": {
+      "commit": "04e49c930caccea31bad7172aa8f567d96744b17",
+      "dirty": false,
+      "porcelain": []
+    },
+    "source_witness_valid": true,
+    "status": "sat"
+  },
+  "status": "complete_m4ri_true_positive"
+}

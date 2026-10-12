@@ -1,0 +1,49 @@
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 384 packed threads resident per SM
+packed L2 persist window: 58908672 of 58908672 field bytes, cap 83886080
+packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 1
+packed pair clmul: 0
+packed clmul flat: 0
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 1
+packed slot unroll: 1
+packed chains: 1
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed L2 persist: 1
+packed direct reduction: 1
+packed generated product: 1
+packed native carryless multiply: 1
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed top clmad: 0
+packed state tile: 256
+packed add combine: 0
+packed alu square: 1
+packed alu onb square: 0
+packed profile ranges: 0
+packed table pivot bytes: 1, table shared bytes 48732
+packed table global: 0
+packed table addend global: 0
+packed table walk: 1 (8 branches, 48732 shared bytes)
+backend cuda-packed131: 72192 threads x 16 slots x 1 lanes = 1155072 walks, dp weight 48, 96 steps per launch
+WARNING: --verify 300 replays reports on the CPU; campaign collection uses --verify 0 so a cutoff-32 trail cannot stall the GPU
+      23.0 s       4.814 M it/s   110886912 iterations    184708 dp    184708 stored         0 dropped
+      37.3 s       5.944 M it/s   221773824 iterations    369329 dp    369329 stored         0 dropped
+      51.7 s       6.439 M it/s   332660736 iterations    555442 dp    555442 stored         0 dropped
+      66.0 s       6.720 M it/s   443547648 iterations    740498 dp    740498 stored         0 dropped
+      80.4 s       6.897 M it/s   554434560 iterations    925611 dp    925611 stored         0 dropped
+      94.7 s       7.022 M it/s   665321472 iterations   1110451 dp   1110451 stored         0 dropped
+  finished: 7.022 M it/s, 1110451 distinguished points (300 verified against the reference, 0 dropped)

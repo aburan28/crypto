@@ -1,0 +1,360 @@
+{
+  "claim_boundary": "Public-synthetic decomposition-stage engineering evidence only. The retained result changes allocation overhead, not the Macaulay row space, solver tree, relation yield, asymptotic complexity, Pollard-rho comparison, external-target capability, or any key-recovery result.",
+  "classification": "INHERITED_F4_M4RI_ARENA_ROOT_KERNEL_PASS_STAGE_TIMING_INDETERMINATE",
+  "exact_equivalence": {
+    "matrix_cases": 96,
+    "receipt": {
+      "child_system_ms": 4850.389,
+      "child_user_ms": 227149.92799999999,
+      "command": [
+        "/opt/homebrew/bin/cargo",
+        "test",
+        "--release",
+        "-q",
+        "--lib",
+        "cryptanalysis::koblitz_groebner::rref_tests::m4ri_arena_matches_the_allocating_implementation"
+      ],
+      "ended_unix_ns": 1790120702676302000,
+      "environment_overrides": {},
+      "executable": "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+      "executable_sha256": "6b40eea215d1127c94953f0e355411ae4e4ce1f695919806e42465079cec7490",
+      "exit_code": 0,
+      "peak_rss_bytes": 3547561984,
+      "schema_version": "1.0",
+      "started_unix_ns": 1790120628224568000,
+      "stderr_bytes": 29439,
+      "stderr_sha256": "0c2f6b92d8e82559daeca176c35a656daa9063fcf47a37e80ba16789ffd0b2f2",
+      "stdout_bytes": 115,
+      "stdout_sha256": "27ff1d2635f5de0569e8f2b77dac3c17a4620db9649ae5d96db505507a210c9b",
+      "task_id": "TASK-KIC-M4RI-ARENA-EXACT-DFD5-20260922",
+      "wall_ms": 74452.510666
+    },
+    "status": "PASS"
+  },
+  "interpretation": {
+    "root_kernel": "PASS: every retained cell improved with identical algebraic output and counted work",
+    "scientific_promotion": "engineering only",
+    "whole_stage": "INDETERMINATE: inherited F4 leaves root elimination as a small fraction of total cost and host-sensitive CPU and wall metrics disagree"
+  },
+  "schema_version": "1.0",
+  "selected_policy": {
+    "controls": {
+      "KIC_F4_DISABLE_M4RI_SCRATCH": "1 keeps one arena per matrix but disables reuse across calls",
+      "KIC_F4_M4RI_ALLOCATING": "1 restores the pre-arena allocation policy in the same binary",
+      "KIC_F4_M4RI_BLOCK": "selects a bounded block width from 2 through 10"
+    },
+    "kernel": "block-4 Four Russians elimination with a thread-local reusable pivot/table arena",
+    "pivot_storage": "one retained Vec per pivot row, preserving the allocating implementation's locality"
+  },
+  "semaev_root_kernel": {
+    "aggregate_paired_ratio_median": 1.1305316397651777,
+    "cells": [
+      {
+        "allocating_median_ns": 240062.0,
+        "arena_median_ns": 215500.0,
+        "case": "binary-n13-ell12-m2-d3",
+        "input_hash": "1f4423b4b58c44facb6c5b97f0cec1a4458258ee6ec109c851df5500d1763b45",
+        "median_speedup": 1.1139767981438515,
+        "paired_ratio_median": 1.1232948150886597,
+        "rank": 324,
+        "reduce_above": false,
+        "samples": 100,
+        "word_ops": 70703
+      },
+      {
+        "allocating_median_ns": 1955708.0,
+        "arena_median_ns": 1646896.0,
+        "case": "binary-n19-ell18-m2-d3",
+        "input_hash": "f6377797d18fcb3d258e6d87ac4f948b3d41e889b8cd8137c90c39cb1d834779",
+        "median_speedup": 1.1875115368547862,
+        "paired_ratio_median": 1.1746081309256984,
+        "rank": 702,
+        "reduce_above": false,
+        "samples": 100,
+        "word_ops": 1041678
+      },
+      {
+        "allocating_median_ns": 590292.0,
+        "arena_median_ns": 536959.0,
+        "case": "binary-n23-ell11-m2-d3",
+        "input_hash": "3d483d2d94adc0d1473f4d5c570755c3dabe9be917e98352d89fa4b5d429a796",
+        "median_speedup": 1.0993241569654293,
+        "paired_ratio_median": 1.090966502226184,
+        "rank": 525,
+        "reduce_above": true,
+        "samples": 100,
+        "word_ops": 363241
+      },
+      {
+        "allocating_median_ns": 2546104.0,
+        "arena_median_ns": 2157625.0,
+        "case": "binary-n31-ell16-m2-d3",
+        "input_hash": "e2e30f7adbd5e0a38be6cc8cee14f485fad9416de88280d141dfcc64a46a211c",
+        "median_speedup": 1.180049359828515,
+        "paired_ratio_median": 1.1751890295559404,
+        "rank": 1021,
+        "reduce_above": false,
+        "samples": 100,
+        "word_ops": 1112120
+      }
+    ],
+    "receipt": {
+      "child_system_ms": 37.131,
+      "child_user_ms": 1083.582,
+      "command": [
+        "/opt/homebrew/bin/cargo",
+        "test",
+        "--release",
+        "-q",
+        "--lib",
+        "cryptanalysis::koblitz_groebner::rref_tests::paired_m4ri_semaev_root_benchmark",
+        "--",
+        "--ignored",
+        "--nocapture"
+      ],
+      "ended_unix_ns": 1790120723664152000,
+      "environment_overrides": {
+        "KIC_F4_M4RI_BENCH_REPEATS": "100"
+      },
+      "executable": "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+      "executable_sha256": "6b40eea215d1127c94953f0e355411ae4e4ce1f695919806e42465079cec7490",
+      "exit_code": 0,
+      "peak_rss_bytes": 46661632,
+      "schema_version": "1.0",
+      "started_unix_ns": 1790120722494026000,
+      "stderr_bytes": 29439,
+      "stderr_sha256": "0c2f6b92d8e82559daeca176c35a656daa9063fcf47a37e80ba16789ffd0b2f2",
+      "stdout_bytes": 132077,
+      "stdout_sha256": "48b96060b8bdf97b9526b7360d8ab7d8f1148d2793727551c754695b39a1ed3c",
+      "task_id": "TASK-KIC-M4RI-ARENA-KERNEL-SEMAEV-DFD5-20260922",
+      "wall_ms": 1170.133708
+    },
+    "samples": 400
+  },
+  "stage_panels": {
+    "frozen": {
+      "exact_gate": "PASS",
+      "exact_scientific_fields": [
+        "curve",
+        "a",
+        "n",
+        "m",
+        "ell",
+        "targets",
+        "decomposed",
+        "verdict_digest",
+        "word_ops",
+        "f4_calls",
+        "f4_oversize",
+        "reductions",
+        "infeasible_branches",
+        "propagations",
+        "splits",
+        "matrix_rows",
+        "matrix_cols",
+        "rows_pruned",
+        "criterion_word_ops",
+        "specialise_word_ops",
+        "exhausted",
+        "oversize"
+      ],
+      "medians": {
+        "allocating": {
+          "build_ms": 346.413905,
+          "child_cpu_ms": 407.23499999999996,
+          "peak_rss_bytes": 10633216,
+          "process_wall_ms": 695.616166,
+          "readback_ms": 0.0,
+          "reduce_ms": 4.118671,
+          "stage_wall_ms": 674.625585
+        },
+        "arena": {
+          "build_ms": 380.577814,
+          "child_cpu_ms": 394.233,
+          "peak_rss_bytes": 10584064,
+          "process_wall_ms": 794.15175,
+          "readback_ms": 0.0,
+          "reduce_ms": 3.718477,
+          "stage_wall_ms": 708.556374
+        }
+      },
+      "repetitions_per_policy": 13,
+      "speedups": {
+        "allocating_over_arena_peak_rss": 1.0046439628482973,
+        "build_ms": 0.910231475027601,
+        "child_cpu_ms": 1.0329804963054843,
+        "process_wall_ms": 0.8759234818786208,
+        "readback_ms": 1.0,
+        "reduce_ms": 1.1076230940785703,
+        "stage_wall_ms": 0.9521127884173123
+      }
+    },
+    "holdout": {
+      "exact_gate": "PASS",
+      "exact_scientific_fields": [
+        "curve",
+        "a",
+        "n",
+        "m",
+        "ell",
+        "targets",
+        "decomposed",
+        "verdict_digest",
+        "word_ops",
+        "f4_calls",
+        "f4_oversize",
+        "reductions",
+        "infeasible_branches",
+        "propagations",
+        "splits",
+        "matrix_rows",
+        "matrix_cols",
+        "rows_pruned",
+        "criterion_word_ops",
+        "specialise_word_ops",
+        "exhausted",
+        "oversize"
+      ],
+      "medians": {
+        "allocating": {
+          "build_ms": 98.645843,
+          "child_cpu_ms": 788.553,
+          "peak_rss_bytes": 123355136,
+          "process_wall_ms": 803.222541,
+          "readback_ms": 0.0,
+          "reduce_ms": 0.602084,
+          "stage_wall_ms": 137.086334
+        },
+        "arena": {
+          "build_ms": 99.383622,
+          "child_cpu_ms": 789.646,
+          "peak_rss_bytes": 123633664,
+          "process_wall_ms": 813.399,
+          "readback_ms": 0.0,
+          "reduce_ms": 0.619069,
+          "stage_wall_ms": 138.9415
+        }
+      },
+      "repetitions_per_policy": 15,
+      "speedups": {
+        "allocating_over_arena_peak_rss": 0.9977471508083753,
+        "build_ms": 0.9925764528887868,
+        "child_cpu_ms": 0.9986158354503157,
+        "process_wall_ms": 0.9874889703577211,
+        "readback_ms": 1.0,
+        "reduce_ms": 0.9725636399173597,
+        "stage_wall_ms": 0.9866478625896511
+      }
+    }
+  },
+  "synthetic_kernel": {
+    "aggregate_paired_ratio_median": 1.2009429242853464,
+    "cells": [
+      {
+        "allocating_median_ns": 190354.5,
+        "arena_median_ns": 173479.0,
+        "case": "deficient-512x768",
+        "input_hash": "9328f8a96968ab02838055b5c877023f83c99d2d043035efcd94b81e9e8af2d9",
+        "median_speedup": 1.0972769038327406,
+        "paired_ratio_median": 1.1008006355563729,
+        "rank": 256,
+        "reduce_above": false,
+        "samples": 100,
+        "word_ops": 186928
+      },
+      {
+        "allocating_median_ns": 225667.0,
+        "arena_median_ns": 206041.0,
+        "case": "deficient-512x768",
+        "input_hash": "9328f8a96968ab02838055b5c877023f83c99d2d043035efcd94b81e9e8af2d9",
+        "median_speedup": 1.0952528865614126,
+        "paired_ratio_median": 1.0926954588601847,
+        "rank": 256,
+        "reduce_above": true,
+        "samples": 100,
+        "word_ops": 261520
+      },
+      {
+        "allocating_median_ns": 56562.5,
+        "arena_median_ns": 43917.0,
+        "case": "dense-257x511",
+        "input_hash": "402725b1cf7be0b6abf1d19f48430d321d948b37b48fb341d0cedee9198a4958",
+        "median_speedup": 1.287940888494205,
+        "paired_ratio_median": 1.243840876456507,
+        "rank": 257,
+        "reduce_above": false,
+        "samples": 100,
+        "word_ops": 64000
+      },
+      {
+        "allocating_median_ns": 92229.5,
+        "arena_median_ns": 80875.0,
+        "case": "dense-257x511",
+        "input_hash": "402725b1cf7be0b6abf1d19f48430d321d948b37b48fb341d0cedee9198a4958",
+        "median_speedup": 1.1403956723338486,
+        "paired_ratio_median": 1.1173017780971808,
+        "rank": 257,
+        "reduce_above": true,
+        "samples": 100,
+        "word_ops": 108898
+      },
+      {
+        "allocating_median_ns": 16583.0,
+        "arena_median_ns": 11375.0,
+        "case": "sparse-129x257",
+        "input_hash": "a855bb04c283948d0d4815657a1c88a6eaa72b64e2204e4a2adfbd3ba58574f2",
+        "median_speedup": 1.4578461538461538,
+        "paired_ratio_median": 1.4592888888888889,
+        "rank": 129,
+        "reduce_above": false,
+        "samples": 100,
+        "word_ops": 8745
+      },
+      {
+        "allocating_median_ns": 25625.0,
+        "arena_median_ns": 19791.0,
+        "case": "sparse-129x257",
+        "input_hash": "a855bb04c283948d0d4815657a1c88a6eaa72b64e2204e4a2adfbd3ba58574f2",
+        "median_speedup": 1.2947804557627205,
+        "paired_ratio_median": 1.2863401396234075,
+        "rank": 129,
+        "reduce_above": true,
+        "samples": 100,
+        "word_ops": 15821
+      }
+    ],
+    "receipt": {
+      "child_system_ms": 67.50699999999999,
+      "child_user_ms": 158.652,
+      "command": [
+        "/opt/homebrew/bin/cargo",
+        "test",
+        "--release",
+        "-q",
+        "--lib",
+        "cryptanalysis::koblitz_groebner::rref_tests::paired_m4ri_arena_benchmark",
+        "--",
+        "--ignored",
+        "--nocapture"
+      ],
+      "ended_unix_ns": 1790120722437021000,
+      "environment_overrides": {
+        "KIC_F4_M4RI_BENCH_REPEATS": "100"
+      },
+      "executable": "/opt/homebrew/Cellar/rust/1.93.1_1/bin/cargo",
+      "executable_sha256": "6b40eea215d1127c94953f0e355411ae4e4ce1f695919806e42465079cec7490",
+      "exit_code": 0,
+      "peak_rss_bytes": 46399488,
+      "schema_version": "1.0",
+      "started_unix_ns": 1790120722047101000,
+      "stderr_bytes": 29439,
+      "stderr_sha256": "0c2f6b92d8e82559daeca176c35a656daa9063fcf47a37e80ba16789ffd0b2f2",
+      "stdout_bytes": 168966,
+      "stdout_sha256": "9f6e8464bae1d6ac7ba9974221f988fc59d4043ddf99a78706e6e2852f2c6672",
+      "task_id": "TASK-KIC-M4RI-ARENA-KERNEL-SYNTHETIC-DFD5-20260922",
+      "wall_ms": 389.919
+    },
+    "samples": 600
+  },
+  "task_id": "TASK-KIC-GROEBNER-M4RI-ARENA-20260922"
+}

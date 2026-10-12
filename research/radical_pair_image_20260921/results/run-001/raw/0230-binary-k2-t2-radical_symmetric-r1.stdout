@@ -1,0 +1,125 @@
+Initial seed for pseudo-random number generator is 0
+
+--------------- INPUT DATA ---------------
+#variables                      16
+#equations                      38
+#invalid equations               0
+field characteristic             2
+homogeneous input?               0
+signature-based computation      0
+monomial order                 DRL
+basis hash table resetting     OFF
+linear algebra option            2
+initial hash table size     131072 (2^17)
+max pair selection             ALL
+reduce gb                        1
+#threads                         1
+info level                       2
+generate pbm files               0
+------------------------------------------
+
+Legend for f4 information
+--------------------------------------------------------
+deg       current degree of pairs selected in this round
+sel       number of pairs selected in this round
+pairs     total number of pairs in pair list
+mat       matrix dimensions (# rows x # columns)
+density   density of the matrix
+new data  # new elements for basis in this round
+          # zero reductions during linear algebra
+time(rd)  time of the current f4 round in seconds given
+          for real and cpu time
+--------------------------------------------------------
+
+deg     sel   pairs        mat          density            new data         time(rd) in sec (real|cpu)
+------------------------------------------------------------------------------------------------------
+  2       6      70      25 x 71          6.65%        5 new       1 zero         0.00 | 0.00         
+  3      92      92     427 x 527         0.85%       57 new      35 zero         0.00 | 0.00         
+  2      30     174      87 x 68          3.70%        3 new      27 zero         0.00 | 0.00         
+  2       4     136      19 x 24          9.87%        3 new       1 zero         0.00 | 0.00         
+  3     131     141     425 x 319         0.97%        6 new     125 zero         0.00 | 0.00         
+  3      32      59     257 x 257         1.36%        4 new      28 zero         0.00 | 0.00         
+  3      36      63     238 x 227         1.47%        1 new      35 zero         0.00 | 0.00         
+  4      36      36     478 x 469         0.72%        0 new      36 zero         0.00 | 0.00         
+------------------------------------------------------------------------------------------------------
+reduce final basis       68 x 88          3.68%       42 new       0 zero         0.00 | 0.00         
+------------------------------------------------------------------------------------------------------
+
+---------------- TIMINGS ----------------
+overall(elapsed)        0.00 sec
+overall(cpu)            0.00 sec
+select                  0.00 sec   7.8%
+symbolic prep.          0.00 sec   6.0%
+update                  0.00 sec  62.8%
+convert                 0.00 sec   8.5%
+linear algebra          0.00 sec   8.7%
+reduce gb               0.00 sec   0.0%
+-----------------------------------------
+
+---------- COMPUTATIONAL DATA -----------
+size of basis                    42
+#terms in basis                 157
+#pairs reduced                  367
+#GM criterion                  6419
+#redundant elements              75
+#rows reduced                   776
+#zero reductions                288
+max. matrix data                427 x 527 (0.854%)
+max. symbolic hash table size  2^11
+max. basis hash table size     2^16
+-----------------------------------------
+
+#Leading ideal data
+#---
+#field characteristic: 2
+#variable order:       t1_0, t1_1, t2_0, t2_1, s1_0, s1_1, s2_0, s2_1, u0, u1, u2, u3, v0, v1, v2, v3
+#monomial order:       graded reverse lexicographical
+#length of basis:      42 elements sorted by increasing leading monomials
+#---
+[v3^1,
+v1^1,
+u3^1,
+u2^1,
+u1^1,
+s2_1^1,
+s1_1^1,
+v2^2,
+u0^1*v2^1,
+t2_1^1*v2^1,
+t2_0^1*v2^1,
+t1_1^1*v2^1,
+t1_0^1*v2^1,
+v0^2,
+t2_1^1*v0^1,
+t2_0^1*v0^1,
+t1_1^1*v0^1,
+t1_0^1*v0^1,
+u0^2,
+t2_1^1*u0^1,
+t2_0^1*u0^1,
+t1_1^1*u0^1,
+t1_0^1*u0^1,
+s2_0^2,
+t2_1^1*s2_0^1,
+t2_0^1*s2_0^1,
+s1_0^2,
+t1_1^1*s1_0^1,
+t1_0^1*s1_0^1,
+t2_1^2,
+t2_0^1*t2_1^1,
+t1_1^1*t2_1^1,
+t1_0^1*t2_1^1,
+t2_0^2,
+t1_1^1*t2_0^1,
+t1_0^1*t2_0^1,
+t1_1^2,
+t1_0^1*t1_1^1,
+t1_0^2,
+s2_0^1*v0^1*v2^1,
+s1_0^1*v0^1*v2^1,
+s1_0^1*s2_0^1*v2^1]:
+
+
+------------------------------------------------------------------------------------
+msolve overall time           0.00 sec (elapsed) /  0.00 sec (cpu)
+------------------------------------------------------------------------------------

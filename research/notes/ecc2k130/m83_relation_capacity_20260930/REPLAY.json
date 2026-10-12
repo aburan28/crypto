@@ -1,0 +1,50 @@
+{
+  "archived_rows_checked": 6,
+  "decision": "M83_M3_FIXED_BASES_UNDERPOWERED",
+  "derive_source_sha256": "2b3045a6334a7d20227320941307c4a14c138b30dcd282ef53a3de0af383e561",
+  "derived_json_sha256": "da364105c77e8ef04c11d57430f076c23b660e75560e479c90ab9b7995226eac",
+  "input_sha256": {
+    "challenge_source": "0180501ef8fe00f5c54f910822a28cd86dc3c2c1af164348976c1c2e25cc763f",
+    "m83_results": "00a1e65642713dc04a71e158386e6d0048806fe87d73233766ea041afcc0e687",
+    "m83_summary": "ff5b525fd188fb30f13b1959eec823ae3a239424c8c493503382ccc751c00261"
+  },
+  "m83_m3_joint_eight_target_upper": "4.44407482E-17",
+  "small_group_controls": [
+    {
+      "actual_support": 13,
+      "base_points": [
+        1,
+        3,
+        7,
+        9
+      ],
+      "counting_ceiling": 20,
+      "modulus": 37,
+      "summands": 3
+    },
+    {
+      "actual_support": 14,
+      "base_points": [
+        0,
+        1,
+        4
+      ],
+      "counting_ceiling": 15,
+      "modulus": 19,
+      "summands": 4
+    },
+    {
+      "actual_support": 3,
+      "base_points": [
+        0,
+        1
+      ],
+      "counting_ceiling": 3,
+      "modulus": 11,
+      "summands": 2
+    }
+  ],
+  "thresholds_checked": 8,
+  "verified": true,
+  "verifier_source_sha256": "79b0fabec8b4c00b4d501ab15813e045f43896e4fce691a769f7e32106c48c12"
+}

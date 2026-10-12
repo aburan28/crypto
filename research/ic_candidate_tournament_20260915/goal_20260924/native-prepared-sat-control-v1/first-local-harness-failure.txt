@@ -1,0 +1,13 @@
+Native harness regression, macOS ARM64. No scientific solver dispatch.
+Command: cargo test --offline --bin icprog --bin prepared_sat_worker --test icprog -- --test-threads=1
+
+Unit results: icprog 47 passed; prepared_sat_worker 4 passed.
+Integration results: 5 passed; 1 failed; 2 ignored with explicit capability reasons.
+Failure: icprog_reproduces_r05s_pin_byte_for_byte
+icprog failed: icprog: no isolation tool at /bin/true
+
+The unchanged test hardcoded Linux /bin/true for a preflight placeholder.
+On macOS that program is /usr/bin/true. The test now chooses the host's path.
+Its saved outputs prevent any child invocation; frozen expected pin is unchanged.
+The two existing ignored controls require callgrind_annotate and an archived build
+commit. The Linux CI harness installs/fetches these and executes both controls.

@@ -1,0 +1,63 @@
+{
+  "archive": {
+    "bytes": 18774023,
+    "file": "ic-public-linux-controls-20260925.tar.zst",
+    "files": 32311,
+    "sha256": "b0d6ea6d1ef6035702f366624e4161a7a7fcb9abca2ffa4009715cc5deed6ac2",
+    "uncompressed_file_bytes": 113582270
+  },
+  "extraction": "fresh directory; Python tarfile data filter",
+  "final_ic_pairs": 39,
+  "final_rho_pairs": 13,
+  "promotion_eligible": false,
+  "replay_rows": [
+    {
+      "ic_pairs": 9,
+      "label": "initial",
+      "reference": "both",
+      "replay": "MATCHES_COMMITTED_RECEIPT",
+      "rho_pairs": 3,
+      "timing_status": "SUPERSEDED_RHO_PREPARATION_BOUNDARY"
+    },
+    {
+      "ic_pairs": 15,
+      "label": "initial",
+      "reference": "scaled",
+      "replay": "MATCHES_COMMITTED_RECEIPT",
+      "rho_pairs": 5,
+      "timing_status": "SUPERSEDED_RHO_PREPARATION_BOUNDARY"
+    },
+    {
+      "ic_pairs": 15,
+      "label": "initial",
+      "reference": "pairinv",
+      "replay": "MATCHES_COMMITTED_RECEIPT",
+      "rho_pairs": 5,
+      "timing_status": "SUPERSEDED_RHO_PREPARATION_BOUNDARY"
+    },
+    {
+      "ic_pairs": 9,
+      "label": "final",
+      "reference": "both",
+      "replay": "MATCHES_COMMITTED_RECEIPT",
+      "rho_pairs": 3,
+      "timing_status": "VERIFIED"
+    },
+    {
+      "ic_pairs": 15,
+      "label": "final",
+      "reference": "scaled",
+      "replay": "MATCHES_COMMITTED_RECEIPT",
+      "rho_pairs": 5,
+      "timing_status": "VERIFIED"
+    },
+    {
+      "ic_pairs": 15,
+      "label": "final",
+      "reference": "pairinv",
+      "replay": "MATCHES_COMMITTED_RECEIPT",
+      "rho_pairs": 5,
+      "timing_status": "VERIFIED"
+    }
+  ]
+}

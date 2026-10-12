@@ -1,0 +1,9 @@
+# Boolean F4 matrix-only products without sorting
+
+Frozen before the paired run. Compare the original `F4_F2_UNSORTED_PRODUCTS=0` with the opt-in `=1` in one binary. The candidate cancels equal monomial products with parity before symbolic preprocessing counts columns, puts the surviving lead first, and leaves the other terms unordered. Packing XORs terms into the matrix. The reduced basis remains canonical. Critical-pair halves and reducer rows supply their expected lead; field-pair rows find theirs after cancellation.
+
+Use `examples/f4_f2_bench.rs` with one repetition and the seven standard F4 cases, primary `n20_m30`. The frozen seed XOR is zero; untouched holdouts are `1ac0ffee` and `2468ace0`. Pin one Linux CPU and set `RAYON_NUM_THREADS=1`. Warm each arm once on each workload, then run five A/A pairs and five alternating-order A/B pairs. Retain every call and its process status, host/load, source and binary hashes, full output, basis fingerprint, phase timing and counters. The script writes the receipt before the next call. The A/A ratios measure run noise; report paired median, minimum, and exact five-pair bootstrap 95% interval.
+
+Exact basis fingerprints, steps, divisor tests, matrix row/column maxima, word XOR counts and all seven cases must match mode 0. Accept a stage gain only if the primary build ratio is at least 1.05 with interval lower bound above 1, the complete F4-call ratio and lower bound exceed 1, both holdout primary ratios clear their own A/A noise, and no smaller case materially regresses beyond its A/A noise. If it passes, check a four-thread paired control with identical outputs before considering default promotion. Keep a failed, negative, or inconclusive arm opt-in with its raw receipt.
+
+This is an internal Boolean F4 stage comparison. It does not establish an online IC or DLP speedup; candidate IDs, rho reference, and one-target scoreboard values remain unset.

@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "--verb",
+    "1",
+    "--threads",
+    "1",
+    "--random",
+    "1",
+    "--maxsol",
+    "1",
+    "--maxconfl",
+    "1000000",
+    "instance/instance.xor.cnf"
+  ],
+  "binary_sha256_before_exec": "6c509f09622f103d8a3ad90afc151e1c4031275c052d7f8af481465b4f27f2af",
+  "config_sha256": "c67d7463489cfcb9a8e967da76aa92138491db8be360bcb1ba715d9a3df69966",
+  "cwd": "/private/tmp/ic-native-sat-control-20261003-execution-v1/query-01",
+  "environment": {
+    "LC_ALL": "C"
+  },
+  "pid": 9631,
+  "program": "/private/tmp/ic-native-sat-control-20261003-final/immutable/assets/bin/cms",
+  "query_sha256": "bcfa9a611c8bfd567a410224b304fb23676d6e0c0ae2a5caf55f84a9166b40f3",
+  "role": "cms"
+}

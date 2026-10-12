@@ -1,0 +1,147 @@
+{
+  "claim_boundary": "Dense pair selection is a reproducible one-target current-F4 engineering improvement. Full attack cost, licensed Magma, matched automorphism-rho crossover, and unaffiliated reproduction/novelty remain open; this is not Koblitz index-calculus SOTA.",
+  "decision_chain": {
+    "175": "REJECTED_REGRESSION",
+    "176": "REJECTED_NO_JOINT_SCREEN_WIN",
+    "177": "REJECTED_PAIRED_TIMING_REGRESSION",
+    "178": "REJECTED_CPU_THRESHOLD",
+    "179": "REJECTED_WIDER_TABLE_REGRESSION",
+    "180": "REJECTED_SCREEN_WORK_REGRESSION",
+    "181": "RETAIN_OPT_IN_CONFIRMATION_WALL_FAIL",
+    "182": "REJECTED_SINGLE_CORE_TIMING_REGRESSION",
+    "183": "ACCEPTED_FOR_FULL_M4RI_STACK",
+    "184": "ACCEPTED_FOR_REPOSITORY_DEFAULT",
+    "185": "SELECTED_DEFAULT_REPLAY_PASS",
+    "186": "REJECTED_SCREEN_CPU_REGRESSION"
+  },
+  "external_review_snapshot": {
+    "authors": [
+      "aburan28"
+    ],
+    "comments": 36,
+    "issue": "https://github.com/mtrimoska/EC-Index-Calculus-Benchmarks/issues/1",
+    "snapshot_bytes": 122000,
+    "snapshot_sha256": "58bf22c31b8dac4463d3393b25ebd1f66ae09c3ece8f7df68c7f33524f9a3441",
+    "unaffiliated_comments": 0
+  },
+  "full_cost_gate_passed": false,
+  "gates": {
+    "1_all_stage_resource_charging": "partial_measured_lower_bound_extended_through_stage186_complete_campaign_total_null",
+    "2_same_instance_solver_matrix": "partial_native_f4_wdsat_cryptominisat_direct_mitm_present_ggmp_same_cell_proven_inapplicable_licensed_magma_missing",
+    "3_single_core_core_memory_conflicts_wall": "partial_native_f4_parallel_and_single_core_complete_conflicts_null_magma_missing",
+    "4_n31_n41_larger_pdp": "inherited_satisfied_finite_coverage",
+    "5_unknown_scalar_without_known_base_logs": "inherited_satisfied_finite_controls",
+    "6_full_cost_vs_automorphism_rho": "unchanged_current_full_cost_gate_false",
+    "7_independent_external_reproduction": "requested_but_missing_zero_unaffiliated_comments",
+    "all_seven_gates_passed": false
+  },
+  "independent_reproduction_and_novelty_review_passed": false,
+  "measured_campaign_lower_bound_through_stage186": {
+    "complete_campaign_cost": null,
+    "peak_rss_bytes": 6310576128,
+    "reason_complete_is_null": "interactive incremental compiles and tests outside process meters remain; the value is a measured lower bound with inherited setup de-duplicated",
+    "resource_components": 508,
+    "summed_wall_seconds": 21808.881289946952,
+    "total_core_seconds": 52387.262218
+  },
+  "predecessor": "stage-186-dense-pair-elimination-policy-20261001",
+  "schema": "koblitz_stage187_current_gate_audit.v1",
+  "selected_implementation": {
+    "discrete_log_labels_used": false,
+    "elimination": "current five-column BlockTables",
+    "f4_engine": "current repository Boolean F4",
+    "factor_base": "algebraic polynomial subspace with exact rational lift checks",
+    "full_m4ri_control": "F4_F2_FULL_M4RI=1",
+    "pair_selector": "dense exact LCM groups and submask cover lookup through 20 variables",
+    "pair_selector_default": true,
+    "quadratic_control": "F4_F2_DENSE_PAIR_SELECT=0",
+    "target_subgroup_enumerated": false
+  },
+  "sota_claim": false,
+  "stage175_through_186_increment": {
+    "peak_rss_bytes": 4863803392,
+    "resource_components": 96,
+    "summed_wall_seconds": 9028.458755114996,
+    "total_core_seconds": 22105.70387
+  },
+  "stage_records": {
+    "174": {
+      "directory": "stage-174-size-gated-flat-m4ri-20260923",
+      "result_sha256": "36f1be8e74940f710b526a297a311f51a2c69643fc5ae138704a8858669a1a1a",
+      "verification_checks": 306,
+      "verification_sha256": "4a77efe9071be9a8dff9d949b72272332023b0969da7c32d76b144da3240611f"
+    },
+    "175": {
+      "directory": "stage-175-current-f4-single-target-20261001",
+      "result_sha256": "258403026fc4abdddad9cb02e975e9a1c4fbbc006e6e3444d02312ef582e9c5f",
+      "verification_checks": 82,
+      "verification_sha256": "fa30e6515db8daba092a183ce291e2e6f98f71c30e8c6407797a7d8748e72e69"
+    },
+    "176": {
+      "directory": "stage-176-current-f4-x1-schedule-20261001",
+      "result_sha256": "f97e3ef516f0f5bbf2303aa3506bc3cbb1c4effa9d7e32c156f66df43044156f",
+      "verification_checks": 111,
+      "verification_sha256": "4cbfdb769c4d7162db781c4c1841750c7b2684bddbb3b69ff784c0f208b49375"
+    },
+    "177": {
+      "directory": "stage-177-current-f4-indexed-reducers-20261001",
+      "result_sha256": "7d6b66c2f2e07edc029bec5dc620ab5c3c575a7a8ffdfe9b9dfcb820cf157543",
+      "verification_checks": 74,
+      "verification_sha256": "503384c03abe2fbb5dcedafdd015f913297a28cc4b3a68b85a096043a4751440"
+    },
+    "178": {
+      "directory": "stage-178-current-f4-dense-reducer-index-20261001",
+      "result_sha256": "05d23b7b4bce3d84acf39c25c143d3e861de59b4e3b1fd3cb2b500c281dffa5b",
+      "verification_checks": 70,
+      "verification_sha256": "cda10c754487c5682bbbd2e65af6cf809b458802d0f8a94bb342288cf58d0a2a"
+    },
+    "179": {
+      "directory": "stage-179-current-f4-wide-tables-single-target-20261001",
+      "result_sha256": "b0f227aecdfba6e4fdfef335e5b5cae887cf50f0d95db7322d1cd381340e4e98",
+      "verification_checks": 72,
+      "verification_sha256": "d2bbad240e4613d719158c98fed6f3e8f685a1c7048605fb571483f64463769f"
+    },
+    "180": {
+      "directory": "stage-180-current-f4-four-table-screen-20261001",
+      "result_sha256": "2c168e8d9dde8811af02f343153c0e7d02ab7ca527fd1f00b50450353ee6dbb4",
+      "verification_checks": 36,
+      "verification_sha256": "2c3ac8c1ef77925e6567cc0f4683a65da226a9406f127e52c94272ffe81478ad"
+    },
+    "181": {
+      "directory": "stage-181-current-f4-full-m4ri-20261001",
+      "result_sha256": "b039b760962d669a3e6b4ecfc5256ef3f6503c0f7c0536fc9b0f1daaa8452430",
+      "verification_checks": 93,
+      "verification_sha256": "4da54d6fb97f46608ea7dc3fb0ac24cba6a12f498760719821536429108102f1"
+    },
+    "182": {
+      "directory": "stage-182-current-f4-full-m4ri-single-core-20261001",
+      "result_sha256": "2e8a17221f4c79a3662c90cfd059f49770e1b81c56ca61346c6525b8ca2d7548",
+      "verification_checks": 69,
+      "verification_sha256": "e9dac178a6b0a51253a032cac1b10f5773cfbae9e8b64c8916d6aea4afc7a98b"
+    },
+    "183": {
+      "directory": "stage-183-current-f4-dense-pair-selection-20261001",
+      "result_sha256": "44ac8e8718143ab682dce8c6e4537353ad9410a5c2cf91568e1dd6db22f52b31",
+      "verification_checks": 92,
+      "verification_sha256": "6ae1d77c9c6c6708880fb020caaa939226708983d1b48d6bdf63cc8dfc9f62c2"
+    },
+    "184": {
+      "directory": "stage-184-current-f4-dense-pair-default-path-20261001",
+      "result_sha256": "b669f4b1803c1ef9bfca111acb081c7d911bd43e39b7a524fb97a022110f38f7",
+      "verification_checks": 62,
+      "verification_sha256": "3d1176317286e9abce12282b4adc4484d3b6d068b20beb538a5920e143b0d4f4"
+    },
+    "185": {
+      "directory": "stage-185-dense-pair-default-replay-20261001",
+      "result_sha256": "45493745bd5433bae2a13b13d38dd2e1362b9636bc52f074423542b71e604d44",
+      "verification_checks": 58,
+      "verification_sha256": "dbb8c7ee25005f528c0a8610f6dc863c27218c7d6041fa7aad6fadaefbe4dbea"
+    },
+    "186": {
+      "directory": "stage-186-dense-pair-elimination-policy-20261001",
+      "result_sha256": "0ff778d6b28b2e92e4bdb05e373ff173be36704059795d3230e18b2b95100847",
+      "verification_checks": 23,
+      "verification_sha256": "9a57988f5ebde971e8767581363daa49aa37cc75f26cad23b4a71416776d0026"
+    }
+  }
+}

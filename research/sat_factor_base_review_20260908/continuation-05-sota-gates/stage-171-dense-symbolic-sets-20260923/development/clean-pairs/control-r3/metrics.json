@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/Volumes/SSD990/koblitz-native-f4-build21-6de26d8c/bin/koblitz_pdp_backend",
+    "native-f4",
+    "manifest.json",
+    "300"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 360.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 14.666323624987854,
+    "user_seconds": 152.308535,
+    "system_seconds": 1.688992,
+    "total_core_seconds": 153.99752700000002,
+    "single_core_seconds": 153.99752700000002,
+    "peak_rss_bytes": 3177005056,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

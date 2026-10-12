@@ -1,0 +1,114 @@
+# m = 4 exponent audit readout  (runs: research/ic_m4_head_engine_20260929/runs)
+
+oracle/enumeration disagreements: 0 []
+returned decompositions failing the group check: 0 []
+structurally excluded (no such curve in the tooling): K0n11l3: r = 23 <= h = 92 (23^2 | #E)
+structurally excluded (no such curve in the tooling): K0n17l4: r = 239 <= h = 548
+structurally excluded (no such curve in the tooling): K1n13l3: r = 79 <= h = 106
+
+## Primary: Semaev m = 4, all targets (word XORs)
+cell       targets censored   lower-median    log2
+K0n9l2          16        0          30805   14.91
+K0n13l3         16        0         985448   19.91
+K0n15l4         16        0        3345342   21.67
+K0n19l5         16        0       33575448   25.00
+K1n9l2          16        0          12624   13.62
+K1n11l3         16        0         454647   18.79
+K1n15l4         16        0        3299274   21.65
+K1n17l4         16        0       12787163   23.61
+K1n19l5         16        0       54785935   25.71
+slope c_hat = 1.0603 bits per unit n; bootstrap 95% band [1.0576, 1.0929] (B = 10000, invalid replicates 0)
+verdict reading (before control gating): CLOSED for this engine at these sizes (lower end above c* = 0.25)
+
+## Sensitivity (not decisive): Semaev, prime n only
+cell       targets censored   lower-median    log2
+K0n13l3         16        0         985448   19.91
+K0n19l5         16        0       33575448   25.00
+K1n11l3         16        0         454647   18.79
+K1n17l4         16        0       12787163   23.61
+K1n19l5         16        0       54785935   25.71
+slope c_hat = 0.8453 bits per unit n; bootstrap 95% band [0.8427, 0.9651] (B = 10000, invalid replicates 0)
+verdict reading (before control gating): CLOSED for this engine at these sizes (lower end above c* = 0.25)
+
+## Secondary: Semaev, refuted-only (oracle verdict)
+cell       targets censored   lower-median    log2
+K0n9l2          14        0          30805   14.91
+K0n13l3         14        0         997573   19.93
+K0n15l4         16        0        3345342   21.67
+K0n19l5         16        0       33575448   25.00
+K1n9l2          16        0          12624   13.62
+K1n11l3         10        0         459043   18.81
+K1n15l4         15        0        3302580   21.66
+K1n17l4         15        0       12804897   23.61
+K1n19l5         15        0       54814044   25.71
+slope c_hat = 1.0599 bits per unit n; bootstrap 95% band [1.0563, 1.0621] (B = 10000, invalid replicates 0)
+
+## Secondary: Semaev, satisfiable-only (oracle verdict)
+K0n9l2     satisfiable  2  lower-median 14936
+K0n13l3    satisfiable  2  lower-median 278897
+K0n15l4    satisfiable  0  lower-median -
+K0n19l5    satisfiable  0  lower-median -
+K1n9l2     satisfiable  0  lower-median -
+K1n11l3    satisfiable  6  lower-median 132466
+K1n15l4    satisfiable  1  lower-median 525091
+K1n17l4    satisfiable  1  lower-median 6156506
+K1n19l5    satisfiable  1  lower-median 10358252
+satisfiable-only slope: not fitted (a cell has fewer than 3 satisfiable targets)
+
+## Control: enumeration null (point additions)
+cell       targets censored   lower-median    log2
+K0n9l2          16        0             19    4.25
+K0n13l3         16        0            363    8.50
+K0n15l4         16        0            363    8.50
+K0n19l5         16        0           3275   11.68
+K1n9l2          16        0              3    1.58
+K1n11l3         16        0            363    8.50
+K1n15l4         16        0            559    9.13
+K1n17l4         16        0           2023   10.98
+K1n19l5         16        0           5983   12.55
+slope c_hat = 0.8281 bits per unit n; bootstrap 95% band [0.8281, 0.8450] (B = 10000, invalid replicates 0)
+enumeration control: c_hat_enum = 0.828, model 0.828, registered range (0.6, 1.0): PASS
+
+## Control: random-system null (word XORs)
+cell       targets censored   lower-median    log2
+K0n9l2           8        8            inf       -
+K0n13l3          8        8            inf       -
+K0n15l4          8        8            inf       -
+K0n19l5          8        8            inf       -
+K1n9l2           8        8            inf       -
+K1n11l3          8        8            inf       -
+K1n15l4          8        8            inf       -
+K1n17l4          8        8            inf       -
+K1n19l5          8        8            inf       -
+dropped from fit (more than half censored, or empty): K0n9l2
+dropped from fit (more than half censored, or empty): K0n13l3
+dropped from fit (more than half censored, or empty): K0n15l4
+dropped from fit (more than half censored, or empty): K0n19l5
+dropped from fit (more than half censored, or empty): K1n9l2
+dropped from fit (more than half censored, or empty): K1n11l3
+dropped from fit (more than half censored, or empty): K1n15l4
+dropped from fit (more than half censored, or empty): K1n17l4
+dropped from fit (more than half censored, or empty): K1n19l5
+slope: not fitted (fewer than 3 distinct n retained)
+
+null vs Semaev per retained Semaev cell (lower medians):
+K0n9l2: semaev 30805  null censored  -> censored (dearer than its budget)
+K0n13l3: semaev 985448  null censored  -> censored (dearer than its budget)
+K0n15l4: semaev 3345342  null censored  -> censored (dearer than its budget)
+K0n19l5: semaev 33575448  null censored  -> censored (dearer than its budget)
+K1n9l2: semaev 12624  null censored  -> censored (dearer than its budget)
+K1n11l3: semaev 454647  null censored  -> censored (dearer than its budget)
+K1n15l4: semaev 3299274  null censored  -> censored (dearer than its budget)
+K1n17l4: semaev 12787163  null censored  -> censored (dearer than its budget)
+K1n19l5: semaev 54785935  null censored  -> censored (dearer than its budget)
+null control (dearer at every retained size): PASS; sizes where both are measured: 0 (growth comparison needs >= 3; otherwise 'growth not measurable within budget')
+
+## REGISTERED VERDICT: CLOSED for this engine at these sizes
+
+## Secondary: refutation degree D(l) on Boolean-unsatisfiable targets
+K0n9l2     Boolean-sat  0/1  unsat outcomes: 6
+K0n13l3    Boolean-sat  0/0  unsat outcomes: -
+K1n9l2     Boolean-sat  0/1  unsat outcomes: 6
+K1n11l3    Boolean-sat  0/0  unsat outcomes: -
+exact-count vs solver-root-count faults: 0 (any fault voids this secondary arm)
+refutation-degree slope: not fitted (resolved degrees at fewer than 2 distinct l)

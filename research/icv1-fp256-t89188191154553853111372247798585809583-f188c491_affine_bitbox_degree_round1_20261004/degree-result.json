@@ -1,0 +1,1988 @@
+{
+  "schema": "p256.factor_base_degree/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "prime": 127,
+  "a": 124,
+  "b": 78,
+  "max_degree": 12,
+  "budget_seconds": 30,
+  "targets_per_class": 3,
+  "depths": [
+    {
+      "depth": 2,
+      "dickson": {
+        "family": "dickson",
+        "offset": null,
+        "abscissae": [
+          48,
+          79,
+          85
+        ],
+        "signed_points": 6
+      },
+      "affine_bitbox": {
+        "family": "affine-bitbox",
+        "offset": 4,
+        "abscissae": [
+          5,
+          6,
+          7
+        ],
+        "signed_points": 6
+      },
+      "targets": {
+        "positive_available": 0,
+        "negative_available": 95,
+        "selected_positive": [],
+        "selected_negative": [
+          [
+            1,
+            40
+          ],
+          [
+            1,
+            87
+          ],
+          [
+            9,
+            48
+          ]
+        ]
+      },
+      "runs": [
+        {
+          "depth": 2,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 6,
+          "equations": 7,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 38,
+          "field_ops": 3703,
+          "milliseconds": 0.294173
+        },
+        {
+          "depth": 2,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 6,
+          "equations": 7,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 38,
+          "field_ops": 3703,
+          "milliseconds": 0.214336
+        },
+        {
+          "depth": 2,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            9,
+            48
+          ],
+          "variables": 6,
+          "equations": 7,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 68,
+          "field_ops": 6497,
+          "milliseconds": 0.29034699999999997
+        },
+        {
+          "depth": 2,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 6,
+          "equations": 7,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 135,
+          "field_ops": 8409,
+          "milliseconds": 0.441271
+        },
+        {
+          "depth": 2,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 6,
+          "equations": 7,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 135,
+          "field_ops": 8409,
+          "milliseconds": 0.422313
+        },
+        {
+          "depth": 2,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            9,
+            48
+          ],
+          "variables": 6,
+          "equations": 7,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 135,
+          "field_ops": 5619,
+          "milliseconds": 0.383625
+        },
+        {
+          "depth": 2,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 10,
+          "equations": 12,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 3,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 112,
+          "field_ops": 23736,
+          "milliseconds": 0.612452
+        },
+        {
+          "depth": 2,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 10,
+          "equations": 12,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 3,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 112,
+          "field_ops": 23736,
+          "milliseconds": 0.585252
+        },
+        {
+          "depth": 2,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            9,
+            48
+          ],
+          "variables": 10,
+          "equations": 12,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 3,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 112,
+          "field_ops": 25226,
+          "milliseconds": 0.556921
+        },
+        {
+          "depth": 2,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 10,
+          "equations": 12,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 3,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 218,
+          "field_ops": 108678,
+          "milliseconds": 1.890075
+        },
+        {
+          "depth": 2,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 10,
+          "equations": 12,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 3,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 218,
+          "field_ops": 108678,
+          "milliseconds": 1.6672069999999999
+        },
+        {
+          "depth": 2,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            9,
+            48
+          ],
+          "variables": 10,
+          "equations": 12,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 3,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 218,
+          "field_ops": 112937,
+          "milliseconds": 1.6791740000000002
+        }
+      ]
+    },
+    {
+      "depth": 3,
+      "dickson": {
+        "family": "dickson",
+        "offset": null,
+        "abscissae": [
+          9,
+          47,
+          50,
+          67,
+          77,
+          118
+        ],
+        "signed_points": 12
+      },
+      "affine_bitbox": {
+        "family": "affine-bitbox",
+        "offset": 32,
+        "abscissae": [
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "signed_points": 12
+      },
+      "targets": {
+        "positive_available": 21,
+        "negative_available": 30,
+        "selected_positive": [
+          [
+            1,
+            40
+          ],
+          [
+            1,
+            87
+          ],
+          [
+            26,
+            47
+          ]
+        ],
+        "selected_negative": [
+          [
+            7,
+            20
+          ],
+          [
+            7,
+            107
+          ],
+          [
+            10,
+            63
+          ]
+        ]
+      },
+      "runs": [
+        {
+          "depth": 3,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 8,
+          "equations": 9,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 6,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 186,
+          "field_ops": 90360,
+          "milliseconds": 2.940042
+        },
+        {
+          "depth": 3,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 8,
+          "equations": 9,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 6,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 186,
+          "field_ops": 90360,
+          "milliseconds": 3.392549
+        },
+        {
+          "depth": 3,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            26,
+            47
+          ],
+          "variables": 8,
+          "equations": 9,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 6,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 169,
+          "field_ops": 94943,
+          "milliseconds": 3.010145
+        },
+        {
+          "depth": 3,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            7,
+            20
+          ],
+          "variables": 8,
+          "equations": 9,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 169,
+          "field_ops": 67442,
+          "milliseconds": 5.256906000000001
+        },
+        {
+          "depth": 3,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            7,
+            107
+          ],
+          "variables": 8,
+          "equations": 9,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 169,
+          "field_ops": 67442,
+          "milliseconds": 1.23495
+        },
+        {
+          "depth": 3,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            10,
+            63
+          ],
+          "variables": 8,
+          "equations": 9,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 169,
+          "field_ops": 67211,
+          "milliseconds": 1.20115
+        },
+        {
+          "depth": 3,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 8,
+          "equations": 9,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 350,
+          "field_ops": 356996,
+          "milliseconds": 9.597698
+        },
+        {
+          "depth": 3,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 8,
+          "equations": 9,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 350,
+          "field_ops": 356996,
+          "milliseconds": 11.038886
+        },
+        {
+          "depth": 3,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            26,
+            47
+          ],
+          "variables": 8,
+          "equations": 9,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 350,
+          "field_ops": 404652,
+          "milliseconds": 15.961164
+        },
+        {
+          "depth": 3,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            7,
+            20
+          ],
+          "variables": 8,
+          "equations": 9,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 350,
+          "field_ops": 179554,
+          "milliseconds": 2.654872
+        },
+        {
+          "depth": 3,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            7,
+            107
+          ],
+          "variables": 8,
+          "equations": 9,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 350,
+          "field_ops": 179554,
+          "milliseconds": 5.209606
+        },
+        {
+          "depth": 3,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            10,
+            63
+          ],
+          "variables": 8,
+          "equations": 9,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 350,
+          "field_ops": 179041,
+          "milliseconds": 5.675231999999999
+        },
+        {
+          "depth": 3,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 12,
+          "equations": 14,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 189,
+          "field_ops": 286851,
+          "milliseconds": 7.782057
+        },
+        {
+          "depth": 3,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 12,
+          "equations": 14,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 189,
+          "field_ops": 286851,
+          "milliseconds": 9.60303
+        },
+        {
+          "depth": 3,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            26,
+            47
+          ],
+          "variables": 12,
+          "equations": 14,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 191,
+          "field_ops": 324261,
+          "milliseconds": 8.004585
+        },
+        {
+          "depth": 3,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            7,
+            20
+          ],
+          "variables": 12,
+          "equations": 14,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 3,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 196,
+          "field_ops": 203702,
+          "milliseconds": 4.341538
+        },
+        {
+          "depth": 3,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            7,
+            107
+          ],
+          "variables": 12,
+          "equations": 14,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 3,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 196,
+          "field_ops": 203702,
+          "milliseconds": 4.364311
+        },
+        {
+          "depth": 3,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            10,
+            63
+          ],
+          "variables": 12,
+          "equations": 14,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 3,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 196,
+          "field_ops": 203481,
+          "milliseconds": 8.436927
+        },
+        {
+          "depth": 3,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 12,
+          "equations": 14,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 370,
+          "field_ops": 4010913,
+          "milliseconds": 28.091874
+        },
+        {
+          "depth": 3,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 12,
+          "equations": 14,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 370,
+          "field_ops": 4010913,
+          "milliseconds": 22.888012
+        },
+        {
+          "depth": 3,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            26,
+            47
+          ],
+          "variables": 12,
+          "equations": 14,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 370,
+          "field_ops": 3870095,
+          "milliseconds": 20.516211
+        },
+        {
+          "depth": 3,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            7,
+            20
+          ],
+          "variables": 12,
+          "equations": 14,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 3,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 370,
+          "field_ops": 734136,
+          "milliseconds": 5.088063
+        },
+        {
+          "depth": 3,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            7,
+            107
+          ],
+          "variables": 12,
+          "equations": 14,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 3,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 370,
+          "field_ops": 734136,
+          "milliseconds": 4.732193
+        },
+        {
+          "depth": 3,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            10,
+            63
+          ],
+          "variables": 12,
+          "equations": 14,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 3,
+          "solving_degree_max": 3,
+          "max_cols_to_solution": 370,
+          "field_ops": 758277,
+          "milliseconds": 4.328208
+        }
+      ]
+    },
+    {
+      "depth": 4,
+      "dickson": {
+        "family": "dickson",
+        "offset": null,
+        "abscissae": [
+          7,
+          14,
+          30,
+          35,
+          45,
+          58,
+          92
+        ],
+        "signed_points": 14
+      },
+      "affine_bitbox": {
+        "family": "affine-bitbox",
+        "offset": 0,
+        "abscissae": [
+          1,
+          5,
+          6,
+          7,
+          9,
+          10,
+          14
+        ],
+        "signed_points": 14
+      },
+      "targets": {
+        "positive_available": 26,
+        "negative_available": 26,
+        "selected_positive": [
+          [
+            1,
+            40
+          ],
+          [
+            1,
+            87
+          ],
+          [
+            5,
+            51
+          ]
+        ],
+        "selected_negative": [
+          [
+            30,
+            8
+          ],
+          [
+            30,
+            119
+          ],
+          [
+            34,
+            52
+          ]
+        ]
+      },
+      "runs": [
+        {
+          "depth": 4,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 309,
+          "field_ops": 1162960,
+          "milliseconds": 12.738695
+        },
+        {
+          "depth": 4,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 309,
+          "field_ops": 1162960,
+          "milliseconds": 14.749424000000001
+        },
+        {
+          "depth": 4,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            5,
+            51
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 309,
+          "field_ops": 1178142,
+          "milliseconds": 11.316085
+        },
+        {
+          "depth": 4,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            30,
+            8
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 309,
+          "field_ops": 767028,
+          "milliseconds": 4.436087
+        },
+        {
+          "depth": 4,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            30,
+            119
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 309,
+          "field_ops": 767028,
+          "milliseconds": 4.618736
+        },
+        {
+          "depth": 4,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            34,
+            52
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 309,
+          "field_ops": 765525,
+          "milliseconds": 4.608891000000001
+        },
+        {
+          "depth": 4,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 9,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 971,
+          "field_ops": 24587681,
+          "milliseconds": 96.319318
+        },
+        {
+          "depth": 4,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 9,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 971,
+          "field_ops": 24587681,
+          "milliseconds": 92.81217099999999
+        },
+        {
+          "depth": 4,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            5,
+            51
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 9,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 999,
+          "field_ops": 34094535,
+          "milliseconds": 125.115091
+        },
+        {
+          "depth": 4,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            30,
+            8
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 999,
+          "field_ops": 5259134,
+          "milliseconds": 14.881408
+        },
+        {
+          "depth": 4,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            30,
+            119
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 999,
+          "field_ops": 5259134,
+          "milliseconds": 15.211394
+        },
+        {
+          "depth": 4,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            34,
+            52
+          ],
+          "variables": 10,
+          "equations": 11,
+          "input_max_degree": 4,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 5,
+          "max_cols_to_solution": 999,
+          "field_ops": 5244047,
+          "milliseconds": 14.601335
+        },
+        {
+          "depth": 4,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 14,
+          "equations": 16,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 952,
+          "field_ops": 3743183,
+          "milliseconds": 21.684582000000002
+        },
+        {
+          "depth": 4,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 14,
+          "equations": 16,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 952,
+          "field_ops": 3743183,
+          "milliseconds": 21.991816
+        },
+        {
+          "depth": 4,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            5,
+            51
+          ],
+          "variables": 14,
+          "equations": 16,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 5,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 948,
+          "field_ops": 3975388,
+          "milliseconds": 23.335445
+        },
+        {
+          "depth": 4,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            30,
+            8
+          ],
+          "variables": 14,
+          "equations": 16,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 964,
+          "field_ops": 3969470,
+          "milliseconds": 13.921404
+        },
+        {
+          "depth": 4,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            30,
+            119
+          ],
+          "variables": 14,
+          "equations": 16,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 964,
+          "field_ops": 3969470,
+          "milliseconds": 13.796299
+        },
+        {
+          "depth": 4,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "negative",
+          "target": [
+            34,
+            52
+          ],
+          "variables": 14,
+          "equations": 16,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 964,
+          "field_ops": 3978351,
+          "milliseconds": 13.351529
+        },
+        {
+          "depth": 4,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 14,
+          "equations": 16,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 1690,
+          "field_ops": 218589170,
+          "milliseconds": 261.932113
+        },
+        {
+          "depth": 4,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 14,
+          "equations": 16,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 1690,
+          "field_ops": 218589170,
+          "milliseconds": 259.056656
+        },
+        {
+          "depth": 4,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            5,
+            51
+          ],
+          "variables": 14,
+          "equations": 16,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 1690,
+          "field_ops": 296352891,
+          "milliseconds": 319.503716
+        },
+        {
+          "depth": 4,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            30,
+            8
+          ],
+          "variables": 14,
+          "equations": 16,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 1690,
+          "field_ops": 8689822,
+          "milliseconds": 24.229442
+        },
+        {
+          "depth": 4,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            30,
+            119
+          ],
+          "variables": 14,
+          "equations": 16,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 1690,
+          "field_ops": 8689822,
+          "milliseconds": 23.091947
+        },
+        {
+          "depth": 4,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "negative",
+          "target": [
+            34,
+            52
+          ],
+          "variables": 14,
+          "equations": 16,
+          "input_max_degree": 2,
+          "inconsistent": true,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 4,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 1690,
+          "field_ops": 8685538,
+          "milliseconds": 24.375217000000003
+        }
+      ]
+    },
+    {
+      "depth": 5,
+      "dickson": {
+        "family": "dickson",
+        "offset": null,
+        "abscissae": [
+          10,
+          27,
+          37,
+          38,
+          43,
+          46,
+          51,
+          52,
+          63,
+          73,
+          75,
+          76,
+          81,
+          90,
+          100,
+          109,
+          117,
+          123,
+          124
+        ],
+        "signed_points": 37
+      },
+      "affine_bitbox": {
+        "family": "affine-bitbox",
+        "offset": 22,
+        "abscissae": [
+          26,
+          27,
+          30,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          41,
+          43,
+          45,
+          46,
+          47,
+          48,
+          50,
+          51,
+          52,
+          53
+        ],
+        "signed_points": 38
+      },
+      "targets": {
+        "positive_available": 125,
+        "negative_available": 0,
+        "selected_positive": [
+          [
+            1,
+            40
+          ],
+          [
+            1,
+            87
+          ],
+          [
+            5,
+            51
+          ]
+        ],
+        "selected_negative": []
+      },
+      "runs": [
+        {
+          "depth": 5,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 12,
+          "equations": 13,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 648,
+          "field_ops": 30719829,
+          "milliseconds": 85.717958
+        },
+        {
+          "depth": 5,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 12,
+          "equations": 13,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 648,
+          "field_ops": 30719829,
+          "milliseconds": 91.00465700000001
+        },
+        {
+          "depth": 5,
+          "formulation": "s3",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            5,
+            51
+          ],
+          "variables": 12,
+          "equations": 13,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 646,
+          "field_ops": 33558989,
+          "milliseconds": 94.48073
+        },
+        {
+          "depth": 5,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 12,
+          "equations": 13,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 10,
+          "solving_degree_max": 6,
+          "max_cols_to_solution": 5117,
+          "field_ops": 1767777263,
+          "milliseconds": 3119.687234
+        },
+        {
+          "depth": 5,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 12,
+          "equations": 13,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 10,
+          "solving_degree_max": 6,
+          "max_cols_to_solution": 5117,
+          "field_ops": 1767777263,
+          "milliseconds": 2977.727213
+        },
+        {
+          "depth": 5,
+          "formulation": "s3",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            5,
+            51
+          ],
+          "variables": 12,
+          "equations": 13,
+          "input_max_degree": 4,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 10,
+          "solving_degree_max": 6,
+          "max_cols_to_solution": 5117,
+          "field_ops": 1787698301,
+          "milliseconds": 2418.409436
+        },
+        {
+          "depth": 5,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 16,
+          "equations": 18,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 1305,
+          "field_ops": 55302796,
+          "milliseconds": 196.56913500000002
+        },
+        {
+          "depth": 5,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 16,
+          "equations": 18,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 1305,
+          "field_ops": 55302796,
+          "milliseconds": 201.41305400000002
+        },
+        {
+          "depth": 5,
+          "formulation": "quadratic-incidence",
+          "family": "dickson",
+          "expected": "positive",
+          "target": [
+            5,
+            51
+          ],
+          "variables": 16,
+          "equations": 18,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 1346,
+          "field_ops": 46666335,
+          "milliseconds": 201.764771
+        },
+        {
+          "depth": 5,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            1,
+            40
+          ],
+          "variables": 16,
+          "equations": 18,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 2989,
+          "field_ops": 9690106874,
+          "milliseconds": 7207.798613
+        },
+        {
+          "depth": 5,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            1,
+            87
+          ],
+          "variables": 16,
+          "equations": 18,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 2989,
+          "field_ops": 9690106874,
+          "milliseconds": 7088.6565089999995
+        },
+        {
+          "depth": 5,
+          "formulation": "quadratic-incidence",
+          "family": "affine-bitbox",
+          "expected": "positive",
+          "target": [
+            5,
+            51
+          ],
+          "variables": 16,
+          "equations": 18,
+          "input_max_degree": 2,
+          "inconsistent": false,
+          "complete": true,
+          "certified_correct": true,
+          "certified_mismatch": false,
+          "timed_out": false,
+          "pairs_above_bound": 0,
+          "degree_reached": 7,
+          "solving_degree_max": 4,
+          "max_cols_to_solution": 2989,
+          "field_ops": 10336876200,
+          "milliseconds": 7441.427407
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,357 @@
+{
+ "schema_version": 1,
+ "operation": "koblitz_n59_standard_subspace_bounded_end_to_end_attempt",
+ "date": "2026-09-21",
+ "claim_boundary": "Censored larger-PDP end-to-end attempt on the exact standard n59 ell9 m3 Phase-B factor base. The exact oracle found zero natural relations under the cap, so linear algebra and descent could not run. This is not UNSAT, a completed IC attack, scaling success, or SOTA evidence.",
+ "params": {
+  "path": "docs/ic/params/k1n59-standard-l9-m3-cap-public-59001.json",
+  "sha256": "87db535bf73480bc4a29653504f0742a10e60689223c5073368ae30ca4b0a821"
+ },
+ "phase_b_binding": {
+  "manifest_path": "research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-1-wdsat-rebuild-20260909-v3/n59-l9-m3-standard/manifest.json",
+  "manifest_sha256": "71bb8c99628201089331c34faf66f1e69a4f07b75ea402d49c79d102b8fbdd52",
+  "cell_id": "n59-l9-m3-standard-a1-f0",
+  "same_factor_base_predicate": true
+ },
+ "curve": {
+  "n": 59,
+  "a": 1,
+  "subgroup_order": 25179555920633,
+  "cofactor": 22894
+ },
+ "factor_base": {
+  "kind": "standard_subspace",
+  "ell": 9,
+  "definition": "x = sum(c_i z^i), 0 <= i < 9",
+  "abscissae": 512,
+  "points": 483,
+  "signed_negation_orbits": 242,
+  "projected_columns": 231,
+  "target_samples": 0,
+  "target_subgroup_enumerated": false,
+  "discrete_log_labels_used": false,
+  "pair_table_tier": "compact",
+  "pair_table_entries": 116886,
+  "folded_table_forbidden": true,
+  "projected_predicate_cost": {
+   "canonical_frobenius_coordinate_squarings": 54516,
+   "cofactor_multiplications": 242,
+   "derived_frobenius_coordinate_squarings": 0,
+   "derived_negations": 241,
+   "input_points": 483,
+   "input_signed_orbits": 242,
+   "output_columns": 231
+  }
+ },
+ "public_target": {
+  "seed": 59001,
+  "counter": 0,
+  "x": 551007654412192707,
+  "y": 76595654768815112,
+  "target_scalar_constructed_or_supplied": false
+ },
+ "counting_ceiling": {
+  "unordered_triples_with_repetition": 18896570,
+  "subgroup_order": 25179555920633,
+  "maximum_uniform_target_coverage": 7.504727271427172e-07,
+  "expected_relations_upper_bound_at_150000_probes": 0.11257090907140758,
+  "expected_relations_upper_bound_at_1200000_probes": 0.9005672725712607,
+  "probes_for_231_relations_lower_bound_ignoring_rank_and_window": 307805989.0057414,
+  "interpretation": "best-case counting upper bound assumes every triple gives a distinct nonzero subgroup target and every window catches it; actual yield can only be lower"
+ },
+ "bounded_collection": {
+  "trial_cap": 1200000,
+  "units": 8,
+  "trials_per_unit": 150000,
+  "collection_window": 256,
+  "summands_scanned": 307200000,
+  "relations": 0,
+  "canonical_empty_relation_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "status": "cap_reached_zero_relations_censored",
+  "linear_algebra": {
+   "attempts": 0,
+   "mode": "sparse",
+   "seconds": 0.0,
+   "sparse": null
+  },
+  "failure": "relations from 8 units (1200000 probes; 0 accepted, 0 rejected, 0 duplicates) did not determine every one of 231 columns; raise collection.max_units or collection.unit_trials",
+  "full_process": {
+   "wall_seconds": 18.155840458,
+   "total_core_seconds": 78.395618,
+   "peak_rss_bytes": 14696448,
+   "stages": [
+    {
+     "elapsed_seconds": 0.06044175,
+     "projected_predicate_cost": {
+      "canonical_frobenius_coordinate_squarings": 54516,
+      "cofactor_multiplications": 242,
+      "derived_frobenius_coordinate_squarings": 0,
+      "derived_negations": 241,
+      "input_points": 483,
+      "input_signed_orbits": 242,
+      "output_columns": 231
+     },
+     "ran": true,
+     "resources": {
+      "cpu_seconds": 0.060797000000000004,
+      "peak_rss_bytes_at_end": 7487488,
+      "scope": "process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"
+     },
+     "stage": "select",
+     "status": "complete"
+    },
+    {
+     "elapsed_seconds": 15.949641209,
+     "pair_table_build_resources": {
+      "cpu_seconds": 0.053394,
+      "peak_rss_bytes_at_end": 9109504,
+      "scope": "process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"
+     },
+     "pair_table_build_seconds": 0.021876416,
+     "ran": true,
+     "relation_unit_resources": {
+      "cpu_seconds": 73.738372,
+      "peak_rss_bytes_at_end": 12910592,
+      "scope": "process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"
+     },
+     "relation_unit_seconds": 12.180957918,
+     "relations_now": 0,
+     "relations_total": 0,
+     "resources": {
+      "cpu_seconds": 76.18874500000001,
+      "peak_rss_bytes_at_end": 12910592,
+      "scope": "process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"
+     },
+     "stage": "collect",
+     "status": "complete",
+     "summands_scanned_now": 307200000,
+     "summands_scanned_total": 307200000,
+     "trials_now": 1200000,
+     "trials_total": 1200000,
+     "units": {
+      "ignored": 0,
+      "indices": [
+       0,
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7
+      ],
+      "max": 8,
+      "present": 8,
+      "ran_now": 8,
+      "requested": 8,
+      "trials_per_unit": 150000
+     },
+     "worker": false
+    },
+    {
+     "duplicates": 0,
+     "elapsed_seconds": 2.1450855,
+     "linear_algebra": {
+      "attempts": 0,
+      "mode": "sparse",
+      "seconds": 0.0,
+      "sparse": null
+     },
+     "ran": true,
+     "reason": "relations from 8 units (1200000 probes; 0 accepted, 0 rejected, 0 duplicates) did not determine every one of 231 columns; raise collection.max_units or collection.unit_trials",
+     "rejected": 0,
+     "relations_loaded": 0,
+     "resources": {
+      "cpu_seconds": 2.136388000000011,
+      "peak_rss_bytes_at_end": 14680064,
+      "scope": "process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"
+     },
+     "stage": "logs",
+     "status": "failed",
+     "summands_scanned": 307200000,
+     "units_extended": 0,
+     "units_used": 8
+    }
+   ]
+  },
+  "one_core_one_unit": {
+   "trials": 150000,
+   "wall_seconds": 9.592867167,
+   "total_core_seconds": 9.553862,
+   "peak_rss_bytes": 12288000,
+   "collect": {
+    "elapsed_seconds": 9.523442459,
+    "pair_table_build_resources": {
+     "cpu_seconds": 0.030869,
+     "peak_rss_bytes_at_end": 7815168,
+     "scope": "process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"
+    },
+    "pair_table_build_seconds": 0.030920916,
+    "ran": true,
+    "relation_unit_resources": {
+     "cpu_seconds": 7.324839000000001,
+     "peak_rss_bytes_at_end": 12238848,
+     "scope": "process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"
+    },
+    "relation_unit_seconds": 7.337712125,
+    "relations_now": 0,
+    "relations_total": 0,
+    "resources": {
+     "cpu_seconds": 9.493442,
+     "peak_rss_bytes_at_end": 12238848,
+     "scope": "process CPU delta for this stage; RSS is the process high-water mark sampled at stage end, not a phase-local allocation or delta"
+    },
+    "stage": "collect",
+    "status": "complete",
+    "summands_scanned_now": 38400000,
+    "summands_scanned_total": 38400000,
+    "trials_now": 150000,
+    "trials_total": 150000,
+    "units": {
+     "ignored": 0,
+     "indices": [
+      0
+     ],
+     "max": 8,
+     "present": 1,
+     "ran_now": 1,
+     "requested": 1,
+     "trials_per_unit": 150000
+    },
+    "worker": false
+   }
+  },
+  "default_thread_stop_after_collect_control": {
+   "wall_seconds": 8.774566958,
+   "total_core_seconds": 71.86667,
+   "peak_rss_bytes": 13811712
+  }
+ },
+ "rho": {
+  "algorithm": "packed signed-Frobenius quotient rho",
+  "runs": [
+   {
+    "rep": 1,
+    "wall_seconds": 1.6998095829912927,
+    "user_seconds": 1.685865,
+    "system_seconds": 0.008846,
+    "total_core_seconds": 1.6947109999999999,
+    "peak_rss_bytes": 23527424,
+    "internal_total_seconds": 1.6564421679999999,
+    "walk_steps": 220949,
+    "restarts": 50,
+    "recovered_scalar": 17861472351607,
+    "verified": true
+   },
+   {
+    "rep": 2,
+    "wall_seconds": 2.018220832993393,
+    "user_seconds": 2.003436,
+    "system_seconds": 0.008675,
+    "total_core_seconds": 2.0121110000000004,
+    "peak_rss_bytes": 45252608,
+    "internal_total_seconds": 1.974169874,
+    "walk_steps": 264372,
+    "restarts": 67,
+    "recovered_scalar": 17861472351607,
+    "verified": true
+   },
+   {
+    "rep": 3,
+    "wall_seconds": 3.7283866250072606,
+    "user_seconds": 3.708169,
+    "system_seconds": 0.011051,
+    "total_core_seconds": 3.71922,
+    "peak_rss_bytes": 88375296,
+    "internal_total_seconds": 3.6846252499999994,
+    "walk_steps": 494936,
+    "restarts": 126,
+    "recovered_scalar": 17861472351607,
+    "verified": true
+   },
+   {
+    "rep": 4,
+    "wall_seconds": 3.7997389160009334,
+    "user_seconds": 3.779632,
+    "system_seconds": 0.010898,
+    "total_core_seconds": 3.79053,
+    "peak_rss_bytes": 87752704,
+    "internal_total_seconds": 3.755425916,
+    "walk_steps": 502868,
+    "restarts": 129,
+    "recovered_scalar": 17861472351607,
+    "verified": true
+   },
+   {
+    "rep": 5,
+    "wall_seconds": 6.302183124993462,
+    "user_seconds": 6.257656,
+    "system_seconds": 0.023309,
+    "total_core_seconds": 6.280965,
+    "peak_rss_bytes": 88522752,
+    "internal_total_seconds": 6.258334168,
+    "walk_steps": 839970,
+    "restarts": 209,
+    "recovered_scalar": 17861472351607,
+    "verified": true
+   }
+  ],
+  "summary": {
+   "runs": 5,
+   "median_wall_seconds": 3.7283866250072606,
+   "median_core_seconds": 3.71922,
+   "median_walk_steps": 494936,
+   "maximum_peak_rss_bytes": 88522752,
+   "all_verified": true,
+   "recovered_scalars": [
+    17861472351607
+   ]
+  },
+  "public_target_matches_workflow_domain": true
+ },
+ "process_accounting": {
+  "ic": {
+   "processes": 5,
+   "sequential_wall_seconds": 39.604796666,
+   "total_core_seconds": 170.793175,
+   "peak_rss_bytes": 14696448
+  },
+  "rho_metered": {
+   "processes": 5,
+   "sequential_wall_seconds": 17.54833908198634,
+   "total_core_seconds": 17.497537,
+   "peak_rss_bytes": 88522752
+  },
+  "rho_preliminary_missing_rss": {
+   "processes": 5,
+   "sequential_wall_seconds": 15.879999999999999,
+   "total_core_seconds": 15.78,
+   "peak_rss_bytes": null,
+   "missing_field_reason": "macOS /usr/bin/time -l could not read kern.clockrate; repeated with process_meter.py for the retained panel"
+  },
+  "total_metered_processes": 10,
+  "metered_sequential_wall_seconds": 57.15313574798634,
+  "metered_total_core_seconds": 188.29071199999998,
+  "metered_peak_rss_bytes": 88522752
+ },
+ "comparison": {
+  "ic_completion": false,
+  "rho_completion": true,
+  "ic_cap_wall_over_median_rho_wall": 4.8696238571998,
+  "ic_cap_core_over_median_rho_core": 21.078510547910582,
+  "ratio_interpretation": "spent-cap/rho ratio, not completed-IC/rho ratio"
+ },
+ "gates": {
+  "algebraic_factor_base": "pass_exact_phase_b_standard_predicate",
+  "same_instance_rho": "pass_public_hash_target",
+  "single_core_resources": "partial_one_unit_only",
+  "larger_pdp_end_to_end": "censored_zero_relations_at_cap",
+  "unknown_scalar_completion": "rho_only_ic_incomplete",
+  "full_cost_vs_rho": "fail_ic_incomplete_after_more_than_rho_cost",
+  "independent_external_reproduction": "missing"
+ },
+ "software": {
+  "binary_blake3": "e0e81ef8e399b267bd9576536f3d28b4c81158c619ecdda93ccda7e2207b1d59",
+  "source_stack_head": "0520a380"
+ }
+}

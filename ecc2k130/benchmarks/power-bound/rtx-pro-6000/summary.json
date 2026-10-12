@@ -1,0 +1,317 @@
+{
+  "note": "POWER-BOUND.md",
+  "host": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05, 2430 MHz, 600.00 W, 300.00 W, 600.00 W, 12.0\nCuda compilation tools, release 13.3, V13.3.73\nBuild cuda_13.3.r13.3/compiler.38244171_0\nsource: 340a837937faedee3daf600ee2fbf5e6d76515b7 (uncommitted changes)",
+  "powercap": "=== power limit: try 378 W\nFailed to set power management limit for GPU 00000000:92:00.0: Insufficient Permissions\nTerminating early due to previous errors.\npower limit not settable in this container; capped pass skipped",
+  "launch": {
+    "job": "benchmarks/power-bound/gpujob.sh",
+    "gpu": "RTX-PRO-6000",
+    "cudaImage": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+    "gitRev": "340a837937faedee3daf600ee2fbf5e6d76515b7",
+    "gitDirty": true,
+    "env": {
+      "SOURCE_REV": "340a837937faedee3daf600ee2fbf5e6d76515b7 (uncommitted changes)",
+      "REPS": "3"
+    },
+    "provider": "modal",
+    "token": "b6859d264e594c2f9ad318b39128d9cf",
+    "volume": "ecc2k130-jobs",
+    "startedAt": "2026-09-22T22:43:13Z",
+    "functionCallId": "fc-01M35MK6AXCMV02C5D8DK2BG91",
+    "exitCode": 1,
+    "seconds": 1572.519448518753,
+    "deviceLine": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05",
+    "finishedAt": "2026-09-22T23:09:41Z"
+  },
+  "passes": {
+    "uncapped": {
+      "ship-256x2": {
+        "reps": [
+          {
+            "rep": 1,
+            "rateBps": 14.45924,
+            "samples": 61,
+            "meanPowerW": 552.2909836065573,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 52.0,
+            "updatesPerJouleM": 26.180474476658333
+          },
+          {
+            "rep": 2,
+            "rateBps": 14.467149,
+            "samples": 64,
+            "meanPowerW": 567.44953125,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 65.0,
+            "updatesPerJouleM": 25.49504088606999
+          },
+          {
+            "rep": 3,
+            "rateBps": 14.479323,
+            "samples": 63,
+            "meanPowerW": 583.1741269841269,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 67.0,
+            "updatesPerJouleM": 24.82847288661368
+          }
+        ],
+        "medianBps": 14.467149,
+        "medianPowerW": 567.44953125,
+        "medianClockMHz": 2422.0,
+        "medianUpdatesPerJouleM": 25.49504088606999,
+        "verify": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked kernel: 104 registers/thread, 0 local bytes/thread, 1792 shared bytes/block, single-product multiplier\npacked chains: 1\npacked alu onb square: 0\npacked table walk: 0 (0 branches, 0 shared bytes)\n  finished: 6.794 M it/s, 1478764 distinguished points (300 verified against the reference, 0 dropped)"
+      },
+      "table-256x2": {
+        "reps": [
+          {
+            "rep": 1,
+            "rateBps": 16.688086,
+            "samples": 55,
+            "meanPowerW": 581.690909090909,
+            "meanClockMHz": 2412.8727272727274,
+            "maxTempC": 56.0,
+            "updatesPerJouleM": 28.6889235145188
+          },
+          {
+            "rep": 2,
+            "rateBps": 16.497889,
+            "samples": 56,
+            "meanPowerW": 582.085,
+            "meanClockMHz": 2382.9464285714284,
+            "maxTempC": 64.0,
+            "updatesPerJouleM": 28.342748911241483
+          },
+          {
+            "rep": 3,
+            "rateBps": 16.449889,
+            "samples": 57,
+            "meanPowerW": 578.4643859649123,
+            "meanClockMHz": 2375.842105263158,
+            "maxTempC": 66.0,
+            "updatesPerJouleM": 28.437168128441698
+          }
+        ],
+        "medianBps": 16.497889,
+        "medianPowerW": 581.690909090909,
+        "medianClockMHz": 2382.9464285714284,
+        "medianUpdatesPerJouleM": 28.437168128441698,
+        "verify": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM\npacked kernel: 102 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked chains: 1\npacked alu onb square: 0\npacked table walk: 1 (8 branches, 48508 shared bytes)\n  finished: 7.309 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)"
+      },
+      "ref20b": {
+        "reps": [
+          {
+            "rep": 1,
+            "rateBps": 20.050304,
+            "samples": 45,
+            "meanPowerW": 541.1617777777777,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 60.0,
+            "updatesPerJouleM": 37.05048069421016
+          },
+          {
+            "rep": 2,
+            "rateBps": 20.094799,
+            "samples": 45,
+            "meanPowerW": 564.9055555555556,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 66.0,
+            "updatesPerJouleM": 35.5719620782235
+          },
+          {
+            "rep": 3,
+            "rateBps": 20.097168,
+            "samples": 44,
+            "meanPowerW": 568.0245454545454,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 68.0,
+            "updatesPerJouleM": 35.38080908795555
+          }
+        ],
+        "medianBps": 20.094799,
+        "medianPowerW": 564.9055555555556,
+        "medianClockMHz": 2422.0,
+        "medianUpdatesPerJouleM": 35.5719620782235,
+        "verify": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM\npacked kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked chains: 1\npacked alu onb square: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\n  finished: 7.061 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)"
+      },
+      "ref20b-384x1": {
+        "reps": [
+          {
+            "rep": 1,
+            "rateBps": 18.522128000000002,
+            "samples": 37,
+            "meanPowerW": 487.7316216216216,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 59.0,
+            "updatesPerJouleM": 37.976065481293155
+          },
+          {
+            "rep": 2,
+            "rateBps": 18.533055,
+            "samples": 35,
+            "meanPowerW": 513.9585714285714,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 65.0,
+            "updatesPerJouleM": 36.05943363973194
+          },
+          {
+            "rep": 3,
+            "rateBps": 18.543294999999997,
+            "samples": 37,
+            "meanPowerW": 509.1543243243243,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 66.0,
+            "updatesPerJouleM": 36.419792809592586
+          }
+        ],
+        "medianBps": 18.533055,
+        "medianPowerW": 509.1543243243243,
+        "medianClockMHz": 2422.0,
+        "medianUpdatesPerJouleM": 36.419792809592586,
+        "verify": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 384 packed threads resident per SM\npacked kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked chains: 1\npacked alu onb square: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\n  finished: 7.022 M it/s, 1110451 distinguished points (300 verified against the reference, 0 dropped)"
+      },
+      "ref20b-640x1": {
+        "reps": [
+          {
+            "rep": 1,
+            "rateBps": 20.230002,
+            "samples": 55,
+            "meanPowerW": 593.1267272727273,
+            "meanClockMHz": 2412.090909090909,
+            "maxTempC": 63.0,
+            "updatesPerJouleM": 34.10738560546773
+          },
+          {
+            "rep": 2,
+            "rateBps": 20.126652,
+            "samples": 56,
+            "meanPowerW": 592.1071428571429,
+            "meanClockMHz": 2398.339285714286,
+            "maxTempC": 67.0,
+            "updatesPerJouleM": 33.99157102358405
+          },
+          {
+            "rep": 3,
+            "rateBps": 20.099494,
+            "samples": 57,
+            "meanPowerW": 587.4363157894737,
+            "meanClockMHz": 2394.9122807017543,
+            "maxTempC": 67.0,
+            "updatesPerJouleM": 34.215613607387674
+          }
+        ],
+        "medianBps": 20.126652,
+        "medianPowerW": 592.1071428571429,
+        "medianClockMHz": 2398.339285714286,
+        "medianUpdatesPerJouleM": 34.10738560546773,
+        "verify": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 640 packed threads resident per SM\npacked kernel: 96 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked chains: 1\npacked alu onb square: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)"
+      },
+      "ref20b-fused": {
+        "reps": [
+          {
+            "rep": 1,
+            "rateBps": 20.092997999999998,
+            "samples": 44,
+            "meanPowerW": 509.6318181818182,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 62.0,
+            "updatesPerJouleM": 39.426498274155136
+          },
+          {
+            "rep": 2,
+            "rateBps": 20.150718,
+            "samples": 44,
+            "meanPowerW": 529.2131818181819,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 66.0,
+            "updatesPerJouleM": 38.07674996070496
+          },
+          {
+            "rep": 3,
+            "rateBps": 20.152771,
+            "samples": 44,
+            "meanPowerW": 530.6756818181818,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 67.0,
+            "updatesPerJouleM": 37.97568211709515
+          }
+        ],
+        "medianBps": 20.150718,
+        "medianPowerW": 529.2131818181819,
+        "medianClockMHz": 2422.0,
+        "medianUpdatesPerJouleM": 38.07674996070496,
+        "verify": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM\npacked kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked chains: 1\npacked alu onb square: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\n  finished: 6.979 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)"
+      },
+      "ref20b-alusqr": {
+        "reps": [
+          {
+            "rep": 1,
+            "rateBps": 19.995793000000003,
+            "samples": 43,
+            "meanPowerW": 570.2023255813954,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 64.0,
+            "updatesPerJouleM": 35.06789099748355
+          },
+          {
+            "rep": 2,
+            "rateBps": 20.031197,
+            "samples": 44,
+            "meanPowerW": 583.1413636363636,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 67.0,
+            "updatesPerJouleM": 34.35049929418331
+          },
+          {
+            "rep": 3,
+            "rateBps": 20.034368999999998,
+            "samples": 43,
+            "meanPowerW": 584.3583720930233,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 68.0,
+            "updatesPerJouleM": 34.284387726391216
+          }
+        ],
+        "medianBps": 20.031197,
+        "medianPowerW": 583.1413636363636,
+        "medianClockMHz": 2422.0,
+        "medianUpdatesPerJouleM": 34.35049929418331,
+        "verify": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 512 packed threads resident per SM\npacked kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked chains: 1\npacked alu onb square: 1\npacked table walk: 1 (8 branches, 48732 shared bytes)\n  finished: 7.216 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)"
+      },
+      "c2-256x32": {
+        "reps": [
+          {
+            "rep": 1,
+            "rateBps": 13.885228999999999,
+            "samples": 66,
+            "meanPowerW": 425.35045454545457,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 59.0,
+            "updatesPerJouleM": 32.6442086792602
+          },
+          {
+            "rep": 2,
+            "rateBps": 13.905533,
+            "samples": 66,
+            "meanPowerW": 428.60015151515154,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 62.0,
+            "updatesPerJouleM": 32.444069258590595
+          },
+          {
+            "rep": 3,
+            "rateBps": 13.895194,
+            "samples": 65,
+            "meanPowerW": 434.66923076923075,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 62.0,
+            "updatesPerJouleM": 31.96728228361088
+          }
+        ],
+        "medianBps": 13.895194,
+        "medianPowerW": 428.60015151515154,
+        "medianClockMHz": 2422.0,
+        "medianUpdatesPerJouleM": 32.444069258590595,
+        "verify": "device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 1 block(s) of 256 packed threads resident per SM\npacked kernel: 182 registers/thread, 40 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked chains: 2\npacked alu onb square: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\n  finished: 7.037 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)"
+      }
+    }
+  }
+}

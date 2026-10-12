@@ -1,0 +1,131 @@
+{
+  "arm_order_offsets": [
+    0,
+    1,
+    2,
+    3,
+    0
+  ],
+  "ci_materialization_amendment": "research/notes/ecc2k130/compact_s3_prefilter_20260930/CI_MATERIALIZATION_AMENDMENT.md",
+  "evaluation_repetitions": 5,
+  "evaluation_source_commit": "2c207b41",
+  "hypothesis": "A no-false-negative 512-bit blocked Bloom root prefilter lowers complete W64 compact CPU on fresh n41/n53 L1024 public Q against same-binary off controls; normal-basis batched rho is the matched boundary",
+  "k_by_n": {
+    "41": 255,
+    "53": 440
+  },
+  "per_arm_address_space_limit_bytes": 5368709120,
+  "per_arm_timeout_seconds": 900,
+  "preregistered_protocol_commit": "52270f7e",
+  "prior_panels": [
+    "compact_orbit_point_panel_20260929",
+    "compact_orbit_strong_rho_20260929",
+    "compact_k_boundary_20260929",
+    "compact_swap_quotient_20260929",
+    "compact_s3_batch_20260929/pilot_622935",
+    "compact_s3_batch_20260929"
+  ],
+  "rho_canonicalization_backend": "normal_basis",
+  "rho_dp_bits": 4,
+  "rho_jump_count": 32,
+  "rho_parallel_walks": 32,
+  "schema": "compact-s3-prefilter-evaluation-freeze-v1",
+  "seed": 623051,
+  "source_base_main": "16dd178b38698b9ce2084247118f7b9a6c1dd010",
+  "source_freeze_revision": 4,
+  "source_lock_sha256": "46fe88116feb1ea8b61a6d8df636459adf355559aaee47da63709a7d0afa9295",
+  "source_sha256": {
+    ".github/workflows/compact-s3-prefilter.yml": "29b154568920e1e5aeec0f1d86f63629a43dfd4624a0dfa2bea1d4f1c075893c",
+    "Cargo.toml": "f1b3abc246c4971b48b377d5696bc96594deb729320348c4277307e42ed61721",
+    "docs/ic/calibration.json": "425078627bbc38b3f9cb97351b405f52509431c080ed996bfeab72d12d78acfd",
+    "examples/koblitz_orbit_dlp_s3_batch.rs": "702a0a05709bc14bc10bafbb08edb2a2f5f86794e970d84c317da3bc65cdcf38",
+    "examples/koblitz_rho_batch_ks_v2_n61.rs": "019b2e2da563ad5212e46a24ed6c0f2f6e90aab083b3769260d6b056bd4095cf",
+    "examples/koblitz_rho_batch_ks_v3.rs": "98b6e8a27d821ebfc7ae716410184dffe89aadf27dfe36bcac8ce834c39cf04c",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py": "2ba997abbd5e9f17756c101b8ca26567219adf103308701f0c237ae495f23222",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py": "649459a53b979b9eaf150ca1973c80b1bde29baf3f5567443c668978d3c06e6d",
+    "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py": "254869e52bdbd417e14d74c87940293490160faaa7fbb45f4edcb6b773a4b0f6",
+    "research/notes/ecc2k130/compact_s3_prefilter_20260930/PROTOCOL.md": "74bd16b4bb8fd21b2457e2e7690ce88f548bc2b5ea40edbeced492ff81e87bdf",
+    "research/notes/ecc2k130/compact_s3_prefilter_20260930/prepare.py": "eda8080fa4f508c08130129479e0ad26f3235e1b628e27b5bbfc9db52ce85362",
+    "research/notes/ecc2k130/compact_s3_prefilter_20260930/run_panel.py": "98cc9a6d20b50742a973ed7e35a1235be753b7fcf2f05390c821f0a66c073ab9",
+    "research/notes/ecc2k130/compact_s3_prefilter_20260930/verify_panel.py": "9c6acec9cc5f0129f71392d8943aedcf37e96f7bd95d6e439fa4842f0dc355c6",
+    "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py": "1df6fc9295cf525be198a19842dfdca7391ac985bfa79ffa1acf8e546cc05ce1",
+    "src/cryptanalysis/koblitz_fast.rs": "1d5ceb6374e455ba40e079328efbf7a62b5cfe0e7fd42ab4e562b3c8b2f183fa",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "22b3601a082e706abf709a9798823a21d6748f84b47647cdfe6a7fcc1c73382c",
+    "src/cryptanalysis/semaev_decomp.rs": "c6e9263b66f4a0892d9b46bfa23e7dd36e93c787a79a1e37181f2449ab33e8b2",
+    "src/lib.rs": "f1e13bc7fa51ff57dd4cd056036669577d1f07a0cb06502b4b839b9af50ffba6",
+    "tools/isolated_bench.py": "4575860a5da9a6a6e997b91fc173ac515a2497290c0e830301c83fa3b712c05c"
+  },
+  "specs": {
+    "n41_L1024_eval": {
+      "L": 1024,
+      "a": 0,
+      "automorphism_size": 82,
+      "corpus": "compact-s3-prefilter-n41-L1024-eval-20260930-v1",
+      "field_modulus_low_terms": [
+        0,
+        3
+      ],
+      "fixture_file": "fixtures/n41_L1024_eval.fixture.jsonl",
+      "fixture_sha256": "c859ff318495c289cede5fa88f32b8e8150d909ca6c7ac9ddf2653605a96f449",
+      "generator": [
+        2056947637384,
+        1635505394702
+      ],
+      "n": 41,
+      "points_file": "fixtures/n41_L1024_eval.points.jsonl",
+      "points_sha256": "fc570981e2dd4b6d09a61773fec0330fd0d9967602610df910f0a1e6fb9efb20",
+      "prior_overlap_count": 0,
+      "prior_point_sha256": {
+        "research/notes/ecc2k130/compact_k_boundary_20260929/fixtures/n41_L1024_eval.points.jsonl": "ec851a49e2bc493aeb59174a6740fd810929df16a52fefb51ad74d9a281c53d0",
+        "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n41_L1024_eval.points.jsonl": "ca17f683dd60460f8a348979dd0da945d99043323b64c84c2fdbac99591e933b",
+        "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n41_L1_eval.points.jsonl": "fff82518e01fa70ef0facfc8273ed112eb2ebfc18ba5c9a71d472d3af1aeb739",
+        "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n41_L1_tune.points.jsonl": "95c131fa3115a7224e3eaf3924c9c2c3cb9f52b604557a4afa72e6933d35c9ff",
+        "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures/n41_L1024_eval.points.jsonl": "82704d8c82f658ee038f7a315694fb561118cf7b7d173895a14b3969e9c5b246",
+        "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures/n41_L1_eval.points.jsonl": "515d18bfa4c40b2441e10403e47b0ad9e0893167fb81d38cdcae2eb04fe3c67b",
+        "research/notes/ecc2k130/compact_s3_batch_20260929/fixtures/n41_L1024_eval.points.jsonl": "0e2fa6f55badf438cc784543b6b5b412de60cace003f0b17e648dfae7f8e2eec",
+        "research/notes/ecc2k130/compact_s3_batch_20260929/pilot_622935/fixtures/n41_L1024_eval.points.jsonl": "0dc5f6107f574b7b0f8b6002fbd7da548b24a1f84821856ad2cc2e1ecd5c7755",
+        "research/notes/ecc2k130/compact_swap_quotient_20260929/fixtures/n41_L1024_eval.points.jsonl": "afcfb716dfa50853d66b9887ed1c8b685b70dd7cf57f0f3837dd763ddc5272f3"
+      },
+      "prior_points_checked": 6147,
+      "seed": 623051,
+      "subgroup_order": 549756390943
+    },
+    "n53_L1024_eval": {
+      "L": 1024,
+      "a": 0,
+      "automorphism_size": 106,
+      "corpus": "compact-s3-prefilter-n53-L1024-eval-20260930-v1",
+      "field_modulus_low_terms": [
+        0,
+        1,
+        2,
+        6
+      ],
+      "fixture_file": "fixtures/n53_L1024_eval.fixture.jsonl",
+      "fixture_sha256": "db0dc42f76cbabd7c4dca4144c4ed17e1071a2336d4cdc1689ceb3588a1656e9",
+      "generator": [
+        198217578752339,
+        7929897206038174
+      ],
+      "n": 53,
+      "points_file": "fixtures/n53_L1024_eval.points.jsonl",
+      "points_sha256": "0e10e0155566a01993929d838b8830259dc2fd6b8e21fea44ac0c4e13d0d76bb",
+      "prior_overlap_count": 0,
+      "prior_point_sha256": {
+        "research/notes/ecc2k130/compact_k_boundary_20260929/fixtures/n53_L1024_eval.points.jsonl": "7c7f14edc2910a43fe962c91ddb0bd74e68f9cd058f0c3c3e2e2caaf89d65b0d",
+        "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n53_L1024_eval.points.jsonl": "80befa6d82d95d7fc579ea6fdb2f03af9c7573b12b73a30e09593cc81d532601",
+        "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n53_L1_eval.points.jsonl": "d71cd294f88cc87f85f0da9f6f3bd6585072f9128b2542047127307fb0c043c5",
+        "research/notes/ecc2k130/compact_orbit_point_panel_20260929/fixtures/n53_L1_tune.points.jsonl": "c8bb7695417a3b19ca7956c9125056bb27f6799442585ed97e46583a4e9c9574",
+        "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures/n53_L1024_eval.points.jsonl": "ffb2374c9fa64346d8eda0fcbfba75c5bb76a44c74a6985befe0baa52b01a0cd",
+        "research/notes/ecc2k130/compact_orbit_strong_rho_20260929/fixtures/n53_L1_eval.points.jsonl": "8d3c692ee2824fca7991142517da324a6651f0fc2c8c97f3780e6ec97390377b",
+        "research/notes/ecc2k130/compact_s3_batch_20260929/fixtures/n53_L1024_eval.points.jsonl": "03a2ed3685a16b4a680612e04ff029ea5521ded6ae1e1c8d68baeb437e569fda",
+        "research/notes/ecc2k130/compact_s3_batch_20260929/pilot_622935/fixtures/n53_L1024_eval.points.jsonl": "338b40377875d69879143e6b387ca8eba0da2fb92eaa72335c3275ad85b72c3b",
+        "research/notes/ecc2k130/compact_swap_quotient_20260929/fixtures/n53_L1024_eval.points.jsonl": "ea22aa0cde071c136c4c236d03afc813cbaf8e85d7530f20ac17467372d970b4"
+      },
+      "prior_points_checked": 6147,
+      "seed": 623051,
+      "subgroup_order": 21044858204113
+    }
+  }
+}

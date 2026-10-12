@@ -205,7 +205,7 @@ print("  via a (2,2)-isogeny.  The kernel of Jac(C) → E × E^t is");
 print("  the graph of the F_p-Galois-equivariant iso E[2] → E^t[2].");
 print("");
 print("This is a *concrete structural hit* for the slice-3 hypothesis");
-print("documented in RESEARCH_SECP256K1_CM.md §8 / §8.5.");
+print("documented in research/notes/cm-isogeny/RESEARCH_SECP256K1_CM.md §8 / §8.5.");
 print("");
 print("---- ECDLP implications ----");
 print("");

@@ -1,0 +1,1609 @@
+{
+  "schema_version": "hyperelliptic-infrastructure/v1",
+  "identity_rule": "sha256_sorted_key_compact_utf8_json_without_record_uid",
+  "records": [
+    {
+      "schema_version": "hyperelliptic-infrastructure-record/v1",
+      "record_uid": "urn:hyperelliptic-infrastructure:record:1:sha256:159c7d8dffb134ebac4c9e7e8c9b610a7d5f0545875aa53055b293ac4cae5afb",
+      "record_kind": "transfer_certificate",
+      "input_support": {
+        "status": "supported",
+        "reason": null,
+        "family_boundary": "ordinary binary Weierstrass target over an exact polynomial-basis field; checked one-infinity arithmetic and bounded rational-point transfer; arbitrary Jacobian pushforward unsupported"
+      },
+      "elliptic_input": {
+        "ec1": {
+          "status": "verified_preimage",
+          "curve_id": "EC1N7Ce0hb6d297a2ca08",
+          "curve_uid": "urn:ec-record:1:sha256:b6d297a2ca085e9d7b8a6858df7421083e12e740c89b1647660b413e00ed02ff",
+          "curve_sha256": "b6d297a2ca085e9d7b8a6858df7421083e12e740c89b1647660b413e00ed02ff",
+          "field_sha256": "f6cb409ece982e1b95b14f1c804985bdf458f06f2219287957905a469f706092",
+          "field": {
+            "characteristic": 2,
+            "degree": 7,
+            "representation": "polynomial",
+            "modulus_exponents": [
+              7,
+              1,
+              0
+            ],
+            "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant"
+          },
+          "curve": {
+            "model": "binary Weierstrass",
+            "coefficients": [
+              1,
+              0,
+              0,
+              0,
+              1
+            ],
+            "subgroup_order": "29",
+            "cofactor": 4,
+            "generator": [
+              "0x26",
+              "0x5"
+            ],
+            "target_group": "prime-order subgroup"
+          },
+          "source_ref": "docs/curves/registry.json#icv1-f2m7-t13-616700dd",
+          "unresolved_reason": null
+        },
+        "icv1": {
+          "status": "registered_representation",
+          "slug": "icv1-f2m7-t13-616700dd",
+          "full": "ICV1:f2m-7-e1a6f45a:13:116:0x1:-7:unk:r:616700ddc6fe",
+          "model_sha256": "616700ddc6fe573b005e3eda71414a83ce40b069edaf6105b8dccf5d1692a48c",
+          "registry_ref": "docs/curves/registry.json#icv1-f2m7-t13-616700dd",
+          "registry_sha256": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed",
+          "unresolved_reason": null
+        }
+      },
+      "fields": [
+        {
+          "field_id": "field.target",
+          "family": "characteristic_two",
+          "characteristic": 2,
+          "degree": 7,
+          "representation": "polynomial_basis",
+          "defining_modulus": {
+            "encoding": "hex_polynomial_bitset",
+            "value": "0x83",
+            "exponents": [
+              7,
+              1,
+              0
+            ]
+          },
+          "element_encoding": "hex polynomial coefficient bitset, least significant bit is constant",
+          "base_field_ref": null,
+          "validation": {
+            "status": "supported",
+            "scope": "irreducibility of x^7+x+1 over F_2",
+            "rationale": "The native cover checker applies the exact Rabin criterion.",
+            "evidence_refs": [
+              "evidence:pr1383_checker"
+            ]
+          }
+        }
+      ],
+      "field_relationships": [
+        {
+          "relationship_id": "field.same",
+          "kind": "same_field_identity",
+          "base_field_ref": "field.target",
+          "working_field_ref": "field.target",
+          "degree": 1,
+          "embedding": {
+            "kind": "identity"
+          },
+          "descent": null,
+          "assessment": {
+            "status": "supported",
+            "scope": "field of definition of H and pi",
+            "rationale": "The binary cubic pullback is defined over the target field.",
+            "evidence_refs": [
+              "evidence:pr1383_catalog"
+            ]
+          }
+        }
+      ],
+      "hyperelliptic_curve": {
+        "curve_id": "h.binary_cubic_pullback.f2m7",
+        "curve_sha256": "69f12d8f0223492012d100846350f531df565ec826fb8ec56f09e1c1046e947e",
+        "field_ref": "field.target",
+        "genus": 3,
+        "model": {
+          "family": "characteristic_two",
+          "equation": "v^2+h(u)*v=f(u)",
+          "h": {
+            "variable": "u",
+            "coefficient_order": "ascending_power",
+            "coefficients": [
+              "0x0",
+              "0x0",
+              "0x1"
+            ]
+          },
+          "f": {
+            "variable": "u",
+            "coefficient_order": "ascending_power",
+            "coefficients": [
+              "0x0",
+              "0x1",
+              "0x0",
+              "0x0",
+              "0x0",
+              "0x0",
+              "0x0",
+              "0x1"
+            ]
+          },
+          "degree_h": 2,
+          "degree_f": 7
+        },
+        "infinity": {
+          "kind": "one_rational_point",
+          "places": [
+            {
+              "label": "infinity",
+              "residue_degree": 1,
+              "coordinates": null
+            }
+          ],
+          "base_divisor": {
+            "place": "infinity",
+            "degree": 1
+          },
+          "assessment": {
+            "status": "supported",
+            "scope": "smooth projective binary cubic-pullback model",
+            "rationale": "The infinity chart has one smooth rational point.",
+            "evidence_refs": [
+              "evidence:pr1383_cover_docs"
+            ]
+          }
+        },
+        "smoothness": {
+          "status": "supported",
+          "scope": "the exact displayed binary model",
+          "rationale": "The affine and infinity-chart family checks are replayed by the native verifier.",
+          "evidence_refs": [
+            "evidence:pr1383_checker"
+          ]
+        },
+        "genus_verification": {
+          "status": "supported",
+          "scope": "the exact displayed binary model",
+          "rationale": "Two odd Artin-Schreier poles of order three give genus three.",
+          "evidence_refs": [
+            "evidence:pr1383_cover_docs"
+          ]
+        }
+      },
+      "jacobian": {
+        "jacobian_id": "jac.binary_cubic_pullback.f2m7",
+        "curve_ref": "h.binary_cubic_pullback.f2m7",
+        "dimension": 3,
+        "divisor_representation": "mumford_one_infinity",
+        "normalization": {
+          "canonical": true,
+          "rules": [
+            "u is monic",
+            "degree(v) is less than degree(u)",
+            "degree(u) is at most 3",
+            "u divides v^2+h*v+f"
+          ]
+        },
+        "infinity_configuration": {
+          "kind": "one_rational_point",
+          "places": [
+            {
+              "label": "infinity",
+              "residue_degree": 1,
+              "coordinates": null
+            }
+          ],
+          "base_divisor": {
+            "place": "infinity",
+            "degree": 1
+          },
+          "assessment": {
+            "status": "supported",
+            "scope": "base divisor for the displayed source curve",
+            "rationale": "The source has one rational point at infinity.",
+            "evidence_refs": [
+              "evidence:pr1383_cover_docs"
+            ]
+          }
+        },
+        "operations": {
+          "validity": {
+            "assessment": {
+              "status": "supported",
+              "scope": "checked one-infinity characteristic-two Mumford divisors for the binary cubic-pullback family",
+              "rationale": "Checked constructors bind the field and curve and enforce monic u, degree bounds, and u dividing v^2+h*v+f; the local test target passed on 2026-10-06.",
+              "evidence_refs": [
+                "evidence:binary_arithmetic_local_test"
+              ]
+            },
+            "implementation_ref": "implementation:binary_mumford_feature_snapshot",
+            "exception_policy": "Malformed field bindings, polynomials, degree bounds, and divisibility return typed errors."
+          },
+          "reduction": {
+            "assessment": {
+              "status": "supported",
+              "scope": "one-rational-infinity characteristic-two models with degree(f)=2g+1",
+              "rationale": "Checked Cantor reduction is exercised across all 486 reduced classes of the deterministic F8 genus-three fixture.",
+              "evidence_refs": [
+                "evidence:binary_arithmetic_local_test"
+              ]
+            },
+            "implementation_ref": "implementation:binary_mumford_feature_snapshot",
+            "exception_policy": "Even-degree and generalized infinity configurations are outside this implementation boundary."
+          },
+          "equality": {
+            "assessment": {
+              "status": "supported",
+              "scope": "canonical reduced divisors in the declared one-infinity model",
+              "rationale": "Equality validates both operands and compares their canonical reduced representatives.",
+              "evidence_refs": [
+                "evidence:binary_arithmetic_local_test"
+              ]
+            },
+            "implementation_ref": "implementation:binary_mumford_feature_snapshot",
+            "exception_policy": "Operands from a different field or curve are rejected."
+          },
+          "addition": {
+            "assessment": {
+              "status": "supported",
+              "scope": "canonical reduced divisors in the declared one-infinity model",
+              "rationale": "The deterministic F8 fixture exhausts 486 classes and includes retained and cancelling nontrivial shared-support branches.",
+              "evidence_refs": [
+                "evidence:binary_arithmetic_local_test"
+              ]
+            },
+            "implementation_ref": "implementation:binary_mumford_feature_snapshot",
+            "exception_policy": "Nonexact Cantor divisions and invalid operands return typed errors."
+          },
+          "negation": {
+            "assessment": {
+              "status": "supported",
+              "scope": "canonical reduced divisors in the declared one-infinity model",
+              "rationale": "Negation is checked against inverse identities over the exhaustive deterministic F8 class set.",
+              "evidence_refs": [
+                "evidence:binary_arithmetic_local_test"
+              ]
+            },
+            "implementation_ref": "implementation:binary_mumford_feature_snapshot",
+            "exception_policy": "Invalid inputs return typed errors."
+          },
+          "scalar_multiplication": {
+            "assessment": {
+              "status": "supported",
+              "scope": "nonnegative scalars on canonical reduced divisors in the declared one-infinity model",
+              "rationale": "Checked double-and-add is compared with repeated addition on the exhaustive deterministic F8 class set.",
+              "evidence_refs": [
+                "evidence:binary_arithmetic_local_test"
+              ]
+            },
+            "implementation_ref": "implementation:binary_mumford_feature_snapshot",
+            "exception_policy": "Invalid operands return typed errors; this is not a discrete-log solver."
+          }
+        }
+      },
+      "morphism": {
+        "morphism_id": "morphism.binary_cubic_pullback.f2m7",
+        "kind": "curve_morphism",
+        "domain_curve_ref": "h.binary_cubic_pullback.f2m7",
+        "codomain_ec1_curve_uid": "urn:ec-record:1:sha256:b6d297a2ca085e9d7b8a6858df7421083e12e740c89b1647660b413e00ed02ff",
+        "field_relationship_ref": "field.same",
+        "degree": 3,
+        "separability": {
+          "status": "supported",
+          "scope": "the exact degree-three map in characteristic two",
+          "rationale": "The degree is prime to the characteristic.",
+          "evidence_refs": [
+            "evidence:pr1383_cover_docs"
+          ]
+        },
+        "coordinate_map": {
+          "source_coordinates": [
+            "u",
+            "v"
+          ],
+          "target_coordinates": [
+            "x",
+            "y"
+          ],
+          "expressions": [
+            {
+              "target_coordinate": "x",
+              "function": {
+                "numerator": {
+                  "variables": [
+                    "u",
+                    "v"
+                  ],
+                  "terms": [
+                    {
+                      "coefficient": "0x1",
+                      "exponents": [
+                        3,
+                        0
+                      ]
+                    }
+                  ]
+                },
+                "denominator": {
+                  "variables": [
+                    "u",
+                    "v"
+                  ],
+                  "terms": [
+                    {
+                      "coefficient": "0x1",
+                      "exponents": [
+                        0,
+                        0
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "target_coordinate": "y",
+              "function": {
+                "numerator": {
+                  "variables": [
+                    "u",
+                    "v"
+                  ],
+                  "terms": [
+                    {
+                      "coefficient": "0x1",
+                      "exponents": [
+                        1,
+                        1
+                      ]
+                    },
+                    {
+                      "coefficient": "0x1",
+                      "exponents": [
+                        0,
+                        0
+                      ]
+                    }
+                  ]
+                },
+                "denominator": {
+                  "variables": [
+                    "u",
+                    "v"
+                  ],
+                  "terms": [
+                    {
+                      "coefficient": "0x1",
+                      "exponents": [
+                        0,
+                        0
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "defining_equation_identity": {
+          "status": "supported",
+          "scope": "exact polynomial substitution for the displayed map",
+          "rationale": "The checker verifies the two reduced coefficients identically.",
+          "evidence_refs": [
+            "evidence:pr1383_checker"
+          ]
+        },
+        "infinity_behavior": {
+          "images": [
+            {
+              "source_place": "infinity",
+              "target_place": "identity"
+            }
+          ],
+          "ramification": null,
+          "assessment": {
+            "status": "supported",
+            "scope": "the unique source infinity",
+            "rationale": "The family proof checks the infinity chart and degree.",
+            "evidence_refs": [
+              "evidence:pr1383_cover_docs"
+            ]
+          }
+        },
+        "verification": {
+          "status": "supported",
+          "scope": "curve-level map only",
+          "rationale": "Construction and replay succeed for the exact catalog row.",
+          "evidence_refs": [
+            "evidence:pr1383_catalog",
+            "evidence:pr1383_checker"
+          ]
+        }
+      },
+      "induced_maps": {
+        "pullback": {
+          "assessment": {
+            "status": "supported",
+            "scope": "rational elliptic point classes [P]-[O] for the binary cubic-pullback family",
+            "rationale": "The feature implementation constructs checked reduced Mumford representatives for generic, exceptional two-torsion, and infinity fibers.",
+            "evidence_refs": [
+              "evidence:binary_transfer_local_test"
+            ]
+          },
+          "map": {
+            "map_id": "map.binary_pullback.f2m7",
+            "kind": "pullback",
+            "morphism_ref": "morphism.binary_cubic_pullback.f2m7",
+            "domain_ref": "target.pic0.rational_point_classes",
+            "codomain_ref": "jac.binary_cubic_pullback.f2m7",
+            "field_relationship_ref": "field.same",
+            "divisor_rule": {
+              "algorithm": "Infinity maps to the identity; T=(0,d) maps to reduced (u,0); for P=(x,y), x!=0, construct U(t)=t^3+x and V(t)=((y+d)/x)t^2",
+              "normalization": "validate and reduce in the checked one-infinity Mumford model",
+              "artifact_ref": "evidence:binary_transfer_source"
+            },
+            "exceptional_divisors": {
+              "policy": "Handle the totally ramified infinity and the totally ramified exceptional two-torsion point (0,d) explicitly; reject off-target points.",
+              "tested_cases": [
+                "evidence:binary_transfer_local_test"
+              ]
+            },
+            "homomorphism_verification": {
+              "status": "unknown",
+              "scope": "an independently replayed additivity law on the exact F2^7 target",
+              "rationale": "The point-class construction and composition identity are checked, but no external CAS homomorphism oracle was run for this exact catalog record.",
+              "evidence_refs": []
+            },
+            "implementation_ref": "implementation:binary_transfer_feature_snapshot"
+          }
+        },
+        "pushforward": {
+          "assessment": {
+            "status": "supported",
+            "scope": "rational source-point divisors [Q]-[infinity] and the three typed point-pullback witnesses produced by this implementation",
+            "rationale": "Rational point divisors are mapped by phi, and the private composition verifier handles only its infinity, exceptional, and generic typed pullback fibers.",
+            "evidence_refs": [
+              "evidence:binary_transfer_local_test"
+            ]
+          },
+          "map": {
+            "map_id": "map.binary_pushforward.f2m7",
+            "kind": "pushforward",
+            "morphism_ref": "morphism.binary_cubic_pullback.f2m7",
+            "domain_ref": "jac.binary.rational_point_divisors",
+            "codomain_ref": "target.pic0",
+            "field_relationship_ref": "field.same",
+            "divisor_rule": {
+              "algorithm": "Map [Q]-[infinity_H] to [phi(Q)]-[O_E]; for composition certificates, formally sum the three typed geometric fiber images",
+              "normalization": "checked binary elliptic group normalization with explicit ramification multiplicities",
+              "artifact_ref": "evidence:binary_transfer_source"
+            },
+            "exceptional_divisors": {
+              "policy": "Infinity and Q=(0,0) are explicit. Arbitrary Mumford classes return Unsupported(ArbitraryJacobianPushforward).",
+              "tested_cases": [
+                "evidence:binary_transfer_local_test",
+                "evidence:arbitrary_pushforward_unsupported"
+              ]
+            },
+            "homomorphism_verification": {
+              "status": "refuted",
+              "scope": "claim that this implementation supplies the norm of an arbitrary Jac(H) Mumford class",
+              "rationale": "The public arbitrary-class entry point returns a typed unsupported result; only the declared point-divisor domain is implemented.",
+              "evidence_refs": [
+                "evidence:arbitrary_pushforward_unsupported"
+              ]
+            },
+            "implementation_ref": "implementation:binary_transfer_feature_snapshot"
+          }
+        },
+        "composition_identities": [
+          {
+            "identity": "pushforward_after_pullback_equals_degree",
+            "left_map_ref": "map.binary_pushforward.f2m7",
+            "right_map_ref": "map.binary_pullback.f2m7",
+            "multiplier": 3,
+            "domain_scope": "rational point classes [P]-[O] represented by E(K), including infinity, exceptional two-torsion, and generic points",
+            "assessment": {
+              "status": "supported",
+              "scope": "the declared rational point-class pullback domain for the binary cubic-pullback family",
+              "rationale": "The implementation certifies phi_*phi^*([P]-[O])=[3]([P]-[O]); the local test exhausts all rational target points over all 56 ordinary F8 models and includes infinity and the exceptional fiber.",
+              "evidence_refs": [
+                "evidence:binary_transfer_local_test"
+              ]
+            }
+          }
+        ],
+        "subgroup_transfer": {
+          "source_subgroup": {
+            "order": "29",
+            "generator": [
+              "0x26",
+              "0x5"
+            ],
+            "ec1_curve_uid": "urn:ec-record:1:sha256:b6d297a2ca085e9d7b8a6858df7421083e12e740c89b1647660b413e00ed02ff"
+          },
+          "image_subgroup": {
+            "representation": "checked reduced Mumford pullback of the exact EC1 generator",
+            "source_generator": [
+              "0x26",
+              "0x5"
+            ],
+            "order": "29",
+            "nonidentity": true,
+            "order_check": "[29]pi*(G)=0"
+          },
+          "kernel_intersection": {
+            "status": "supported",
+            "scope": "intersection of the order-29 subgroup with ker(pi*)",
+            "rationale": "The fixture independently checks G is nonidentity and [29]G=O; primality of 29 therefore proves the supplied integer is the exact order. The degree-three composition and inverse 10 modulo 29 then prove the pullback kernel meets this subgroup trivially. The generic classifier alone is only conditional on an independently verified exact order.",
+            "evidence_refs": [
+              "evidence:binary_transfer_local_test"
+            ]
+          },
+          "order_preservation": {
+            "status": "supported",
+            "scope": "order of the pullback image",
+            "rationale": "The exact pullback image is nonidentity and [29] annihilates it; primality of 29 gives image order 29.",
+            "evidence_refs": [
+              "evidence:binary_transfer_local_test"
+            ]
+          },
+          "log_recovery": {
+            "status": "supported",
+            "scope": "degree-inverse recovery on the exact order-29 subgroup using the typed pull-push composition witness",
+            "rationale": "The control verifies [10](pi_*pi^*G)=G because 10*3 is congruent to 1 modulo 29. This does not implement an arbitrary-Jacobian norm or solve a logarithm.",
+            "evidence_refs": [
+              "evidence:binary_transfer_local_test"
+            ]
+          },
+          "assessment": {
+            "status": "supported",
+            "scope": "the exact EC1 prime-order subgroup",
+            "rationale": "The fixture independently verifies the exact EC1 generator order before replaying the nontrivial pullback image, coprime-degree kernel argument, image order, and inverse-degree recovery in the bounded transfer domain.",
+            "evidence_refs": [
+              "evidence:binary_transfer_local_test"
+            ]
+          }
+        }
+      },
+      "claims": {
+        "proved_existence": {
+          "status": "supported",
+          "scope": "same-field hyperelliptic source for the exact target",
+          "rationale": "The explicit construction and family proof establish existence.",
+          "evidence_refs": [
+            "evidence:pr1383_catalog",
+            "evidence:pr1383_cover_docs"
+          ]
+        },
+        "explicit_construction": {
+          "status": "supported",
+          "scope": "the exact binary source and coordinate map",
+          "rationale": "All coefficients and map polynomials are retained.",
+          "evidence_refs": [
+            "evidence:pr1383_catalog"
+          ]
+        },
+        "verified_curve_morphism": {
+          "status": "supported",
+          "scope": "the exact curve-level map",
+          "rationale": "The polynomial identity, degree, separability, and infinity checks replay.",
+          "evidence_refs": [
+            "evidence:pr1383_checker"
+          ]
+        },
+        "jacobian_arithmetic": {
+          "status": "supported",
+          "scope": "checked characteristic-two one-infinity arithmetic for the exact binary cubic-pullback model family",
+          "rationale": "The feature snapshot provides checked canonical operations, rejects trailing-zero polynomial encodings, and passed deterministic exhaustive F8 class and shared-support controls; this is local validation, not external CAS certification.",
+          "evidence_refs": [
+            "evidence:binary_arithmetic_local_test"
+          ]
+        },
+        "verified_pullback": {
+          "status": "supported",
+          "scope": "rational point classes [P]-[O] under the exact binary cubic-pullback formulas",
+          "rationale": "Typed generic, exceptional, and infinity pullback witnesses are constructed and checked.",
+          "evidence_refs": [
+            "evidence:binary_transfer_local_test"
+          ]
+        },
+        "verified_pushforward": {
+          "status": "refuted",
+          "scope": "claim of a verified pushforward for arbitrary Jac(H) classes",
+          "rationale": "Only rational source-point divisors and typed pullback witnesses are supported; arbitrary Mumford-class pushforward returns a structured unsupported result.",
+          "evidence_refs": [
+            "evidence:arbitrary_pushforward_unsupported"
+          ]
+        },
+        "subgroup_preservation": {
+          "status": "supported",
+          "scope": "the exact EC1 order-29 subgroup",
+          "rationale": "The test independently establishes exact order 29 from G!=O and [29]G=O before checking the nonidentity pullback image of order 29, degree inverse 10 modulo 29, and inverse-degree recovery. No unconditional claim is taken from the generic order helper.",
+          "evidence_refs": [
+            "evidence:binary_transfer_local_test"
+          ]
+        },
+        "computational_advantage": {
+          "status": "unknown",
+          "scope": "end-to-end discrete-log cost",
+          "rationale": "No complete solver or matched measurement was run.",
+          "evidence_refs": []
+        }
+      },
+      "evidence": [
+        {
+          "evidence_id": "evidence:pr1383_catalog",
+          "kind": "construction_certificate",
+          "title": "PR #1383 exact 115-row cover catalog",
+          "uri": "https://github.com/aburan28/crypto/blob/7c186ca89b8efeb0db2cea53e10e6da520166b56/docs/curves/covers.json",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "7c186ca89b8efeb0db2cea53e10e6da520166b56",
+          "path": "docs/curves/covers.json",
+          "sha256": "5f90fe0c1dfaa5cd2bd187a87dfd5ee5985c4d0171ea93e7874f9246527aaf9b",
+          "command": null,
+          "exit_status": null,
+          "independent": false,
+          "scope": "curve construction and certificate data; no Jacobian transfer"
+        },
+        {
+          "evidence_id": "evidence:pr1383_checker",
+          "kind": "implementation_source",
+          "title": "PR #1383 native cover checker",
+          "uri": "https://github.com/aburan28/crypto/blob/7c186ca89b8efeb0db2cea53e10e6da520166b56/src/bin/curve_cover_check/checker.rs",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "7c186ca89b8efeb0db2cea53e10e6da520166b56",
+          "path": "src/bin/curve_cover_check/checker.rs",
+          "sha256": "65a51b7265d1a426b915deffc58c34562204c8f649219ce50deaed5cb8d23f18",
+          "command": null,
+          "exit_status": null,
+          "independent": false,
+          "scope": "constructor and geometry verifier"
+        },
+        {
+          "evidence_id": "evidence:pr1383_cover_docs",
+          "kind": "proof",
+          "title": "PR #1383 family proofs and scope",
+          "uri": "https://github.com/aburan28/crypto/blob/7c186ca89b8efeb0db2cea53e10e6da520166b56/docs/curves/COVERS.md",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "7c186ca89b8efeb0db2cea53e10e6da520166b56",
+          "path": "docs/curves/COVERS.md",
+          "sha256": "566d2c93ca8d4eea9b15fb4a984b517064df0d568bc9daa8599db0cdd9957636",
+          "command": null,
+          "exit_status": null,
+          "independent": false,
+          "scope": "smoothness, genus, map degree, separability, and infinity arguments"
+        },
+        {
+          "evidence_id": "evidence:registry",
+          "kind": "construction_certificate",
+          "title": "Exact ICV1 and EC1 registry at audit baseline",
+          "uri": "https://github.com/aburan28/crypto/blob/5874ce8b393dccc4c735cc7ca5a47de7fe196c59/docs/curves/registry.json",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "5874ce8b393dccc4c735cc7ca5a47de7fe196c59",
+          "path": "docs/curves/registry.json",
+          "sha256": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed",
+          "command": null,
+          "exit_status": null,
+          "independent": false,
+          "scope": "identity binding only"
+        },
+        {
+          "evidence_id": "evidence:curve_cover_check_local_test",
+          "kind": "test",
+          "title": "Feature-snapshot cover constructor and verifier tests",
+          "uri": "src/bin/curve_cover_check.rs#tests",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "path": "src/bin/curve_cover_check/checker.rs + src/bin/curve_cover_check.rs",
+          "sha256": "205e2b9b250568c2b3235c2fd803122a085505798c28fee7e93ce08e0b6d3cc0",
+          "command": [
+            "cargo",
+            "test",
+            "--bin",
+            "curve_cover_check"
+          ],
+          "exit_status": 0,
+          "independent": false,
+          "scope": "local 2026-10-06 validation with Rust 1.90: 6 passed, 0 failed, 0 ignored in 0.33 s; digest is the exact checker module UTF-8 followed by the exact curve_cover_check wrapper UTF-8"
+        },
+        {
+          "evidence_id": "evidence:binary_arithmetic_local_test",
+          "kind": "test",
+          "title": "Feature-snapshot binary one-infinity arithmetic tests",
+          "uri": "src/binary_ecc/hyperelliptic.rs#tests",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "path": "src/binary_ecc/hyperelliptic.rs",
+          "sha256": "09ce8a689aa8e190f51c871f9e94467271ea731b9629f69d322ae716de507c5c",
+          "command": [
+            "cargo",
+            "test",
+            "--lib",
+            "binary_ecc::hyperelliptic::tests"
+          ],
+          "exit_status": 0,
+          "independent": false,
+          "scope": "local 2026-10-06 validation with Rust 1.90: 11 passed, 0 failed in 29.07 s; includes canonical and trailing-zero rejection, all 486 reduced F8 classes, and nontrivial retained and cancelling shared-support cases"
+        },
+        {
+          "evidence_id": "evidence:binary_transfer_source",
+          "kind": "implementation_source",
+          "title": "Feature-snapshot bounded binary cover transfer",
+          "uri": "src/binary_ecc/cover_transfer.rs",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "path": "src/binary_ecc/cover_transfer.rs",
+          "sha256": "67b94112f70becf100ccc2cc7e0b3bc057e5663a4019b63fe966de9e62fd5069",
+          "command": null,
+          "exit_status": null,
+          "independent": false,
+          "scope": "rational point-divisor pushforward, rational elliptic point-class pullback, typed composition witnesses, a classifier conditional on independently verified exact subgroup order, and explicit arbitrary-class unsupported result"
+        },
+        {
+          "evidence_id": "evidence:binary_transfer_local_test",
+          "kind": "test",
+          "title": "Feature-snapshot bounded binary transfer tests",
+          "uri": "src/binary_ecc/cover_transfer.rs#tests",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "path": "src/binary_ecc/cover_transfer.rs",
+          "sha256": "67b94112f70becf100ccc2cc7e0b3bc057e5663a4019b63fe966de9e62fd5069",
+          "command": [
+            "cargo",
+            "test",
+            "--lib",
+            "binary_ecc::cover_transfer::tests"
+          ],
+          "exit_status": 0,
+          "independent": false,
+          "scope": "local 2026-10-06 validation with Rust 1.90: 4 passed, 0 failed in 0.27 s; exhaustive rational-point maps and [3] compositions over all 56 ordinary F8 models, plus independent exact-order verification for the F2^7 EC1 order-29 generator before the image-order, kernel, and inverse-degree recovery control"
+        },
+        {
+          "evidence_id": "evidence:arbitrary_pushforward_unsupported",
+          "kind": "unsupported_result",
+          "title": "Arbitrary binary Jacobian pushforward is explicitly unsupported",
+          "uri": "src/binary_ecc/cover_transfer.rs#pushforward_arbitrary_jacobian_class",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "path": "src/binary_ecc/cover_transfer.rs",
+          "sha256": "67b94112f70becf100ccc2cc7e0b3bc057e5663a4019b63fe966de9e62fd5069",
+          "command": [
+            "cargo",
+            "test",
+            "--lib",
+            "binary_ecc::cover_transfer::tests"
+          ],
+          "exit_status": 0,
+          "independent": false,
+          "scope": "negative control: an arbitrary Mumford class returns Unsupported(ArbitraryJacobianPushforward), rather than a fabricated norm"
+        },
+        {
+          "evidence_id": "evidence:standalone_cli_local_test",
+          "kind": "test",
+          "title": "Feature-snapshot standalone hyperelliptic interface tests",
+          "uri": "src/bin/hyperelliptic_cover.rs#tests",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "path": "src/bin/hyperelliptic_cover.rs",
+          "sha256": "cd32103c2ea0f23ca0dc568155e836cc055a854f23975a37314b63f5aa8361a1",
+          "command": [
+            "cargo",
+            "test",
+            "--bin",
+            "hyperelliptic-cover"
+          ],
+          "exit_status": 0,
+          "independent": false,
+          "scope": "local 2026-10-06 validation with Rust 1.90: 6 passed, 0 failed in 0.00 s; strict supported model shapes, unknown-field rejection, structured prime even-infinity rejection, checked odd-model arithmetic, malformed-divisor handling, and structured odd-prime zero-modulus rejection"
+        },
+        {
+          "evidence_id": "evidence:catalog_producer_contract",
+          "kind": "implementation_source",
+          "title": "Catalog-export wrapper and checker producer snapshot",
+          "uri": "src/bin/hyperelliptic_cover.rs#catalog-export",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "path": "src/bin/curve_cover_check/checker.rs + src/bin/hyperelliptic_cover.rs",
+          "sha256": "3927efaddd7e7e966bb284affc56ac22a823f98f498017509e266b603b244e37",
+          "command": null,
+          "exit_status": null,
+          "independent": false,
+          "scope": "SHA-256 of the exact checker UTF-8 source followed by the exact wrapper UTF-8 source; catalog export requires a caller-supplied registry, records the wrapper in generated_by, records this combined digest in producer_source_sha256, caps input at 32 MiB, and propagates output errors"
+        }
+      ],
+      "implementations": [
+        {
+          "implementation_id": "implementation:curve_cover_check_v1",
+          "revision_kind": "git_commit",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "7c186ca89b8efeb0db2cea53e10e6da520166b56",
+          "base_commit": null,
+          "path": "src/bin/curve_cover_check/checker.rs",
+          "source_sha256": "65a51b7265d1a426b915deffc58c34562204c8f649219ce50deaed5cb8d23f18",
+          "version": "curve-covers/v1",
+          "entry_point": "curve_cover_check"
+        },
+        {
+          "implementation_id": "implementation:binary_mumford_feature_snapshot",
+          "revision_kind": "git_commit",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "base_commit": null,
+          "path": "src/binary_ecc/hyperelliptic.rs",
+          "source_sha256": "09ce8a689aa8e190f51c871f9e94467271ea731b9629f69d322ae716de507c5c",
+          "version": "2026-10-06-feature-snapshot",
+          "entry_point": "binary_ecc::HyperellipticCurve"
+        },
+        {
+          "implementation_id": "implementation:binary_transfer_feature_snapshot",
+          "revision_kind": "git_commit",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "base_commit": null,
+          "path": "src/binary_ecc/cover_transfer.rs",
+          "source_sha256": "67b94112f70becf100ccc2cc7e0b3bc057e5663a4019b63fe966de9e62fd5069",
+          "version": "2026-10-06-feature-snapshot",
+          "entry_point": "binary_ecc::OrdinaryBinaryCover"
+        },
+        {
+          "implementation_id": "implementation:hyperelliptic_cover_cli_feature_snapshot",
+          "revision_kind": "git_commit",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "base_commit": null,
+          "path": "src/bin/hyperelliptic_cover.rs",
+          "source_sha256": "cd32103c2ea0f23ca0dc568155e836cc055a854f23975a37314b63f5aa8361a1",
+          "version": "2026-10-06-feature-snapshot",
+          "entry_point": "hyperelliptic-cover"
+        }
+      ],
+      "provenance": {
+        "created_utc": "2026-10-06T00:00:00Z",
+        "producer": "manual evidence audit; hashes replayed with sha256sum",
+        "repository": "https://github.com/aburan28/crypto",
+        "commit": "5874ce8b393dccc4c735cc7ca5a47de7fe196c59",
+        "registry_ref": "docs/curves/registry.json",
+        "registry_sha256": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed",
+        "schema_sha256": "5781f96509e10239161dc2fa7ae004022d83dfefe1cde788ea2d1584313cd3fe"
+      }
+    },
+    {
+      "schema_version": "hyperelliptic-infrastructure-record/v1",
+      "record_uid": "urn:hyperelliptic-infrastructure:record:1:sha256:974a0afe389490c403add1f7df25d54273d8c637f3acade6aa653b44458253f9",
+      "record_kind": "unsupported_case",
+      "input_support": {
+        "status": "unsupported",
+        "reason": "the explicit prime cover is an even-degree sextic with two rational infinities; the audited odd-characteristic arithmetic supports only odd degree with one rational infinity",
+        "family_boundary": "construction and curve morphism are supported; Jacobian arithmetic and transfer are unsupported"
+      },
+      "elliptic_input": {
+        "ec1": {
+          "status": "verified_preimage",
+          "curve_id": "EC1P10Cfphcf15d87ab724",
+          "curve_uid": "urn:ec-record:1:sha256:cf15d87ab724c8d1fc74d88af320937e4c1cc7e706d4e0e8a0d11734831342a3",
+          "curve_sha256": "cf15d87ab724c8d1fc74d88af320937e4c1cc7e706d4e0e8a0d11734831342a3",
+          "field_sha256": "b4dfc768c25cf9310fe5e12f77016bcb9d7bca6e3d916c1c6fcc643a7f324449",
+          "field": {
+            "characteristic": 827,
+            "degree": 1,
+            "representation": "prime",
+            "element_encoding": "hex integer modulo the characteristic"
+          },
+          "curve": {
+            "model": "short Weierstrass",
+            "coefficients": [
+              0,
+              0,
+              0,
+              1,
+              15
+            ],
+            "subgroup_order": "823",
+            "cofactor": 1,
+            "generator": [
+              "0x2",
+              "0x336"
+            ],
+            "target_group": "prime-order subgroup"
+          },
+          "source_ref": "docs/curves/registry.json#icv1-fp10-t5-192cb216",
+          "unresolved_reason": null
+        },
+        "icv1": {
+          "status": "registered_representation",
+          "slug": "icv1-fp10-t5-192cb216",
+          "full": "ICV1:fp-827:5:823:463:unk:unk:r:192cb216d592",
+          "model_sha256": "192cb216d592d1a2e502bebb1e4154f5d89ed9893de389c2dd0c2b89de94b4e4",
+          "registry_ref": "docs/curves/registry.json#icv1-fp10-t5-192cb216",
+          "registry_sha256": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed",
+          "unresolved_reason": null
+        }
+      },
+      "fields": [
+        {
+          "field_id": "field.target",
+          "family": "odd_characteristic",
+          "characteristic": 827,
+          "degree": 1,
+          "representation": "prime",
+          "defining_modulus": null,
+          "element_encoding": "hex integer modulo the characteristic",
+          "base_field_ref": null,
+          "validation": {
+            "status": "supported",
+            "scope": "primality of the exact characteristic 827 under the bounded feature-snapshot field contract",
+            "rationale": "The checked prime-field implementation applies deterministic 64-bit Miller-Rabin validation for every supported modulus, including 827. This does not strengthen the older PR #1383 checker contract or add even-degree Jacobian support.",
+            "evidence_refs": [
+              "evidence:prime_feature_validation"
+            ]
+          }
+        }
+      ],
+      "field_relationships": [
+        {
+          "relationship_id": "field.same",
+          "kind": "same_field_identity",
+          "base_field_ref": "field.target",
+          "working_field_ref": "field.target",
+          "degree": 1,
+          "embedding": {
+            "kind": "identity"
+          },
+          "descent": null,
+          "assessment": {
+            "status": "supported",
+            "scope": "field of definition of H and pi",
+            "rationale": "The prime quadratic pullback is defined over the target field.",
+            "evidence_refs": [
+              "evidence:pr1383_catalog"
+            ]
+          }
+        }
+      ],
+      "hyperelliptic_curve": {
+        "curve_id": "h.prime_quadratic_pullback.fp827",
+        "curve_sha256": "cb102633b8233d0e63db05d02d73aba4883797e6061f8a08d850b4b277326781",
+        "field_ref": "field.target",
+        "genus": 2,
+        "model": {
+          "family": "odd_characteristic",
+          "equation": "v^2=f(u)",
+          "f": {
+            "variable": "u",
+            "coefficient_order": "ascending_power",
+            "coefficients": [
+              "0xf",
+              "0x0",
+              "0x1",
+              "0x0",
+              "0x0",
+              "0x0",
+              "0x1"
+            ]
+          },
+          "degree_f": 6,
+          "degree_parity": "even"
+        },
+        "infinity": {
+          "kind": "two_rational_points",
+          "places": [
+            {
+              "label": "infinity_plus",
+              "residue_degree": 1,
+              "coordinates": {
+                "v_over_u_cubed": "0x1"
+              }
+            },
+            {
+              "label": "infinity_minus",
+              "residue_degree": 1,
+              "coordinates": {
+                "v_over_u_cubed": "0x33a"
+              }
+            }
+          ],
+          "base_divisor": null,
+          "assessment": {
+            "status": "supported",
+            "scope": "smooth projective prime quadratic-pullback model",
+            "rationale": "The monic even sextic has two base-field rational infinity points.",
+            "evidence_refs": [
+              "evidence:pr1383_cover_docs"
+            ]
+          }
+        },
+        "smoothness": {
+          "status": "supported",
+          "scope": "the exact displayed sextic",
+          "rationale": "The native checker verifies the sextic is squarefree.",
+          "evidence_refs": [
+            "evidence:pr1383_checker"
+          ]
+        },
+        "genus_verification": {
+          "status": "supported",
+          "scope": "the exact displayed sextic",
+          "rationale": "A squarefree degree-six hyperelliptic model has genus two.",
+          "evidence_refs": [
+            "evidence:pr1383_cover_docs"
+          ]
+        }
+      },
+      "jacobian": {
+        "jacobian_id": "jac.prime_quadratic_pullback.fp827",
+        "curve_ref": "h.prime_quadratic_pullback.fp827",
+        "dimension": 2,
+        "divisor_representation": "balanced_two_infinity",
+        "normalization": {
+          "canonical": false,
+          "rules": [
+            "a balanced or real-model representation is required but is not implemented"
+          ]
+        },
+        "infinity_configuration": {
+          "kind": "two_rational_points",
+          "places": [
+            {
+              "label": "infinity_plus",
+              "residue_degree": 1,
+              "coordinates": {
+                "v_over_u_cubed": "0x1"
+              }
+            },
+            {
+              "label": "infinity_minus",
+              "residue_degree": 1,
+              "coordinates": {
+                "v_over_u_cubed": "0x33a"
+              }
+            }
+          ],
+          "base_divisor": null,
+          "assessment": {
+            "status": "supported",
+            "scope": "infinity configuration only",
+            "rationale": "The two points are part of the verified source geometry.",
+            "evidence_refs": [
+              "evidence:pr1383_cover_docs"
+            ]
+          }
+        },
+        "operations": {
+          "validity": {
+            "assessment": {
+              "status": "refuted",
+              "scope": "claim that the one-infinity prime implementation validates this balanced model",
+              "rationale": "The audited implementation explicitly excludes even-degree models.",
+              "evidence_refs": [
+                "evidence:prime_one_infinity_source"
+              ]
+            },
+            "implementation_ref": null,
+            "exception_policy": "Return structured unsupported for the two-infinity model."
+          },
+          "reduction": {
+            "assessment": {
+              "status": "refuted",
+              "scope": "claim that one-infinity Cantor reduction is valid for this balanced model",
+              "rationale": "The infinity divisor bookkeeping is different.",
+              "evidence_refs": [
+                "evidence:prime_one_infinity_source"
+              ]
+            },
+            "implementation_ref": null,
+            "exception_policy": "Return structured unsupported for the two-infinity model."
+          },
+          "equality": {
+            "assessment": {
+              "status": "refuted",
+              "scope": "claim that one-infinity pair equality is canonical for this balanced model",
+              "rationale": "No balanced representation or normalization is implemented.",
+              "evidence_refs": [
+                "evidence:prime_one_infinity_source"
+              ]
+            },
+            "implementation_ref": null,
+            "exception_policy": "Return structured unsupported for the two-infinity model."
+          },
+          "addition": {
+            "assessment": {
+              "status": "refuted",
+              "scope": "claim that current prime addition supports this exact cover",
+              "rationale": "The source has two rational infinity points.",
+              "evidence_refs": [
+                "evidence:prime_one_infinity_source"
+              ]
+            },
+            "implementation_ref": null,
+            "exception_policy": "Return structured unsupported for the two-infinity model."
+          },
+          "negation": {
+            "assessment": {
+              "status": "refuted",
+              "scope": "claim that current prime negation supports this exact cover",
+              "rationale": "The source has two rational infinity points.",
+              "evidence_refs": [
+                "evidence:prime_one_infinity_source"
+              ]
+            },
+            "implementation_ref": null,
+            "exception_policy": "Return structured unsupported for the two-infinity model."
+          },
+          "scalar_multiplication": {
+            "assessment": {
+              "status": "refuted",
+              "scope": "claim that current prime scalar multiplication supports this exact cover",
+              "rationale": "It depends on unsupported balanced addition.",
+              "evidence_refs": [
+                "evidence:prime_one_infinity_source"
+              ]
+            },
+            "implementation_ref": null,
+            "exception_policy": "Return structured unsupported for the two-infinity model."
+          }
+        }
+      },
+      "morphism": {
+        "morphism_id": "morphism.prime_quadratic_pullback.fp827",
+        "kind": "curve_morphism",
+        "domain_curve_ref": "h.prime_quadratic_pullback.fp827",
+        "codomain_ec1_curve_uid": "urn:ec-record:1:sha256:cf15d87ab724c8d1fc74d88af320937e4c1cc7e706d4e0e8a0d11734831342a3",
+        "field_relationship_ref": "field.same",
+        "degree": 2,
+        "separability": {
+          "status": "supported",
+          "scope": "the exact degree-two map in odd characteristic",
+          "rationale": "The degree is prime to the characteristic.",
+          "evidence_refs": [
+            "evidence:pr1383_cover_docs"
+          ]
+        },
+        "coordinate_map": {
+          "source_coordinates": [
+            "u",
+            "v"
+          ],
+          "target_coordinates": [
+            "x",
+            "y"
+          ],
+          "expressions": [
+            {
+              "target_coordinate": "x",
+              "function": {
+                "numerator": {
+                  "variables": [
+                    "u",
+                    "v"
+                  ],
+                  "terms": [
+                    {
+                      "coefficient": "0x1",
+                      "exponents": [
+                        2,
+                        0
+                      ]
+                    }
+                  ]
+                },
+                "denominator": {
+                  "variables": [
+                    "u",
+                    "v"
+                  ],
+                  "terms": [
+                    {
+                      "coefficient": "0x1",
+                      "exponents": [
+                        0,
+                        0
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "target_coordinate": "y",
+              "function": {
+                "numerator": {
+                  "variables": [
+                    "u",
+                    "v"
+                  ],
+                  "terms": [
+                    {
+                      "coefficient": "0x1",
+                      "exponents": [
+                        0,
+                        1
+                      ]
+                    }
+                  ]
+                },
+                "denominator": {
+                  "variables": [
+                    "u",
+                    "v"
+                  ],
+                  "terms": [
+                    {
+                      "coefficient": "0x1",
+                      "exponents": [
+                        0,
+                        0
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "defining_equation_identity": {
+          "status": "supported",
+          "scope": "exact polynomial substitution for the displayed map",
+          "rationale": "The checker verifies the identity over F_827.",
+          "evidence_refs": [
+            "evidence:pr1383_checker"
+          ]
+        },
+        "infinity_behavior": {
+          "images": [
+            {
+              "source_place": "infinity_plus",
+              "target_place": "identity"
+            },
+            {
+              "source_place": "infinity_minus",
+              "target_place": "identity"
+            }
+          ],
+          "ramification": null,
+          "assessment": {
+            "status": "supported",
+            "scope": "both source infinity points",
+            "rationale": "The family proof checks the smooth projective map and degree.",
+            "evidence_refs": [
+              "evidence:pr1383_cover_docs"
+            ]
+          }
+        },
+        "verification": {
+          "status": "supported",
+          "scope": "curve-level map only",
+          "rationale": "Construction and replay succeed for the exact catalog row.",
+          "evidence_refs": [
+            "evidence:pr1383_catalog",
+            "evidence:pr1383_checker"
+          ]
+        }
+      },
+      "induced_maps": {
+        "pullback": {
+          "assessment": {
+            "status": "unknown",
+            "scope": "Pic^0(E) to the balanced Jac(H)",
+            "rationale": "No balanced divisor implementation or transfer certificate exists.",
+            "evidence_refs": []
+          },
+          "map": null
+        },
+        "pushforward": {
+          "assessment": {
+            "status": "unknown",
+            "scope": "balanced Jac(H) to Pic^0(E)",
+            "rationale": "No balanced divisor implementation or transfer certificate exists.",
+            "evidence_refs": []
+          },
+          "map": null
+        },
+        "composition_identities": [
+          {
+            "identity": "pushforward_after_pullback_equals_degree",
+            "left_map_ref": "map.prime_pushforward.fp827",
+            "right_map_ref": "map.prime_pullback.fp827",
+            "multiplier": 2,
+            "domain_scope": "Pic^0(E)",
+            "assessment": {
+              "status": "unknown",
+              "scope": "all classes and the exact EC1 subgroup",
+              "rationale": "Neither induced map is implemented for the balanced model.",
+              "evidence_refs": []
+            }
+          }
+        ],
+        "subgroup_transfer": {
+          "source_subgroup": {
+            "order": "823",
+            "generator": [
+              "0x2",
+              "0x336"
+            ],
+            "ec1_curve_uid": "urn:ec-record:1:sha256:cf15d87ab724c8d1fc74d88af320937e4c1cc7e706d4e0e8a0d11734831342a3"
+          },
+          "image_subgroup": null,
+          "kernel_intersection": {
+            "status": "unknown",
+            "scope": "intersection of the order-823 subgroup with ker(pi*)",
+            "rationale": "No pullback implementation or kernel certificate is present.",
+            "evidence_refs": []
+          },
+          "order_preservation": {
+            "status": "unknown",
+            "scope": "order of the pullback image",
+            "rationale": "No image generator has been computed.",
+            "evidence_refs": []
+          },
+          "log_recovery": {
+            "status": "unknown",
+            "scope": "recovering an elliptic logarithm from a Jacobian logarithm",
+            "rationale": "No pushforward and inverse-degree recovery certificate is present.",
+            "evidence_refs": []
+          },
+          "assessment": {
+            "status": "unknown",
+            "scope": "the exact EC1 order-823 subgroup",
+            "rationale": "Curve-level cover existence is insufficient.",
+            "evidence_refs": []
+          }
+        }
+      },
+      "claims": {
+        "proved_existence": {
+          "status": "supported",
+          "scope": "same-field hyperelliptic source for the exact target",
+          "rationale": "The explicit construction and family proof establish existence.",
+          "evidence_refs": [
+            "evidence:pr1383_catalog",
+            "evidence:pr1383_cover_docs"
+          ]
+        },
+        "explicit_construction": {
+          "status": "supported",
+          "scope": "the exact prime source and coordinate map",
+          "rationale": "All coefficients and map polynomials are retained.",
+          "evidence_refs": [
+            "evidence:pr1383_catalog"
+          ]
+        },
+        "verified_curve_morphism": {
+          "status": "supported",
+          "scope": "the exact curve-level map",
+          "rationale": "The polynomial identity, degree, separability, and infinity checks replay.",
+          "evidence_refs": [
+            "evidence:pr1383_checker"
+          ]
+        },
+        "jacobian_arithmetic": {
+          "status": "refuted",
+          "scope": "claim that the current one-infinity odd-characteristic code supports this even sextic",
+          "rationale": "The source has two rational points at infinity and requires a balanced representation.",
+          "evidence_refs": [
+            "evidence:prime_one_infinity_source"
+          ]
+        },
+        "verified_pullback": {
+          "status": "unknown",
+          "scope": "Pic^0(E) to balanced Jac(H)",
+          "rationale": "No implementation or certificate is supplied.",
+          "evidence_refs": []
+        },
+        "verified_pushforward": {
+          "status": "unknown",
+          "scope": "balanced Jac(H) to Pic^0(E)",
+          "rationale": "No implementation or certificate is supplied.",
+          "evidence_refs": []
+        },
+        "subgroup_preservation": {
+          "status": "unknown",
+          "scope": "the exact EC1 order-823 subgroup",
+          "rationale": "Kernel intersection and image order are unverified.",
+          "evidence_refs": []
+        },
+        "computational_advantage": {
+          "status": "unknown",
+          "scope": "end-to-end discrete-log cost",
+          "rationale": "No complete solver or matched measurement was run.",
+          "evidence_refs": []
+        }
+      },
+      "evidence": [
+        {
+          "evidence_id": "evidence:pr1383_catalog",
+          "kind": "construction_certificate",
+          "title": "PR #1383 exact 115-row cover catalog",
+          "uri": "https://github.com/aburan28/crypto/blob/7c186ca89b8efeb0db2cea53e10e6da520166b56/docs/curves/covers.json",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "7c186ca89b8efeb0db2cea53e10e6da520166b56",
+          "path": "docs/curves/covers.json",
+          "sha256": "5f90fe0c1dfaa5cd2bd187a87dfd5ee5985c4d0171ea93e7874f9246527aaf9b",
+          "command": null,
+          "exit_status": null,
+          "independent": false,
+          "scope": "curve construction and certificate data; no Jacobian transfer"
+        },
+        {
+          "evidence_id": "evidence:pr1383_checker",
+          "kind": "implementation_source",
+          "title": "PR #1383 native cover checker",
+          "uri": "https://github.com/aburan28/crypto/blob/7c186ca89b8efeb0db2cea53e10e6da520166b56/src/bin/curve_cover_check/checker.rs",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "7c186ca89b8efeb0db2cea53e10e6da520166b56",
+          "path": "src/bin/curve_cover_check/checker.rs",
+          "sha256": "65a51b7265d1a426b915deffc58c34562204c8f649219ce50deaed5cb8d23f18",
+          "command": null,
+          "exit_status": null,
+          "independent": false,
+          "scope": "constructor and geometry verifier"
+        },
+        {
+          "evidence_id": "evidence:pr1383_cover_docs",
+          "kind": "proof",
+          "title": "PR #1383 family proofs and scope",
+          "uri": "https://github.com/aburan28/crypto/blob/7c186ca89b8efeb0db2cea53e10e6da520166b56/docs/curves/COVERS.md",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "7c186ca89b8efeb0db2cea53e10e6da520166b56",
+          "path": "docs/curves/COVERS.md",
+          "sha256": "566d2c93ca8d4eea9b15fb4a984b517064df0d568bc9daa8599db0cdd9957636",
+          "command": null,
+          "exit_status": null,
+          "independent": false,
+          "scope": "smoothness, genus, map degree, separability, and infinity arguments"
+        },
+        {
+          "evidence_id": "evidence:registry",
+          "kind": "construction_certificate",
+          "title": "Exact ICV1 and EC1 registry at audit baseline",
+          "uri": "https://github.com/aburan28/crypto/blob/5874ce8b393dccc4c735cc7ca5a47de7fe196c59/docs/curves/registry.json",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "5874ce8b393dccc4c735cc7ca5a47de7fe196c59",
+          "path": "docs/curves/registry.json",
+          "sha256": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed",
+          "command": null,
+          "exit_status": null,
+          "independent": false,
+          "scope": "identity binding only"
+        },
+        {
+          "evidence_id": "evidence:curve_cover_check_local_test",
+          "kind": "test",
+          "title": "Feature-snapshot cover constructor and verifier tests",
+          "uri": "src/bin/curve_cover_check.rs#tests",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "path": "src/bin/curve_cover_check/checker.rs + src/bin/curve_cover_check.rs",
+          "sha256": "205e2b9b250568c2b3235c2fd803122a085505798c28fee7e93ce08e0b6d3cc0",
+          "command": [
+            "cargo",
+            "test",
+            "--bin",
+            "curve_cover_check"
+          ],
+          "exit_status": 0,
+          "independent": false,
+          "scope": "local 2026-10-06 validation with Rust 1.90: 6 passed, 0 failed, 0 ignored in 0.33 s; digest is the exact checker module UTF-8 followed by the exact curve_cover_check wrapper UTF-8"
+        },
+        {
+          "evidence_id": "evidence:prime_one_infinity_source",
+          "kind": "unsupported_result",
+          "title": "Odd-characteristic arithmetic scope at the audit baseline",
+          "uri": "https://github.com/aburan28/crypto/blob/5874ce8b393dccc4c735cc7ca5a47de7fe196c59/src/prime_hyperelliptic/curve.rs",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "5874ce8b393dccc4c735cc7ca5a47de7fe196c59",
+          "path": "src/prime_hyperelliptic/curve.rs",
+          "sha256": "e474693f7394138f81352bc92b3675c801c28c8687d120fb49f1f5cd26a0493c",
+          "command": null,
+          "exit_status": null,
+          "independent": false,
+          "scope": "odd-degree one-rational-infinity Mumford arithmetic; even degree excluded by module contract"
+        },
+        {
+          "evidence_id": "evidence:prime_feature_validation",
+          "kind": "test",
+          "title": "Feature-snapshot checked odd-prime arithmetic and field validation",
+          "uri": "src/prime_hyperelliptic/curve.rs#tests",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "path": "src/prime_hyperelliptic/curve.rs",
+          "sha256": "7a769bfb7abfe92ce06da7c02340f2a2426827d8066ebef510375149b8c3d5ad",
+          "command": [
+            "cargo",
+            "test",
+            "--lib",
+            "prime_hyperelliptic::curve::tests"
+          ],
+          "exit_status": 0,
+          "independent": false,
+          "scope": "local 2026-10-06 validation with Rust 1.90: 10 passed, 0 failed, 1 ignored in 36.18 s; deterministic primality for supported moduli of at most 64 bits, canonical checked one-infinity arithmetic, explicit even-degree rejection, linear point enumeration bounded to p <= 1000000, and quadratic point counting bounded to p <= 4096"
+        },
+        {
+          "evidence_id": "evidence:fp2_feature_validation",
+          "kind": "test",
+          "title": "Feature-snapshot checked bounded Fp2 context",
+          "uri": "src/prime_hyperelliptic/fp2.rs#tests",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "path": "src/prime_hyperelliptic/fp2.rs",
+          "sha256": "b833bdff5247f2eea0cde7feb89d0378cfe8305671f9065d2dae7ab538c03e55",
+          "command": [
+            "cargo",
+            "test",
+            "--lib",
+            "prime_hyperelliptic::fp2::tests"
+          ],
+          "exit_status": 0,
+          "independent": false,
+          "scope": "local 2026-10-06 validation with Rust 1.90: 6 passed, 0 failed, 0 ignored in 0.00 s; p <= 4096, deterministic prime validation, checked nonzero quadratic nonresidue, forged-context rejection, and canonicalization of public element coordinates before field operations"
+        }
+      ],
+      "implementations": [
+        {
+          "implementation_id": "implementation:curve_cover_check_v1",
+          "revision_kind": "git_commit",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "7c186ca89b8efeb0db2cea53e10e6da520166b56",
+          "base_commit": null,
+          "path": "src/bin/curve_cover_check/checker.rs",
+          "source_sha256": "65a51b7265d1a426b915deffc58c34562204c8f649219ce50deaed5cb8d23f18",
+          "version": "curve-covers/v1",
+          "entry_point": "curve_cover_check"
+        },
+        {
+          "implementation_id": "implementation:prime_mumford_audit_baseline",
+          "revision_kind": "git_commit",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "5874ce8b393dccc4c735cc7ca5a47de7fe196c59",
+          "base_commit": null,
+          "path": "src/prime_hyperelliptic/curve.rs",
+          "source_sha256": "e474693f7394138f81352bc92b3675c801c28c8687d120fb49f1f5cd26a0493c",
+          "version": "audit-baseline",
+          "entry_point": "prime_hyperelliptic::HyperellipticCurveP"
+        },
+        {
+          "implementation_id": "implementation:prime_mumford_feature_snapshot",
+          "revision_kind": "git_commit",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "base_commit": null,
+          "path": "src/prime_hyperelliptic/curve.rs",
+          "source_sha256": "7a769bfb7abfe92ce06da7c02340f2a2426827d8066ebef510375149b8c3d5ad",
+          "version": "2026-10-06-feature-snapshot",
+          "entry_point": "prime_hyperelliptic::HyperellipticCurveP"
+        },
+        {
+          "implementation_id": "implementation:fp2_feature_snapshot",
+          "revision_kind": "git_commit",
+          "repository": "https://github.com/aburan28/crypto",
+          "commit": "3b8664a466efd56121509cd77866a07e3cb55741",
+          "base_commit": null,
+          "path": "src/prime_hyperelliptic/fp2.rs",
+          "source_sha256": "b833bdff5247f2eea0cde7feb89d0378cfe8305671f9065d2dae7ab538c03e55",
+          "version": "2026-10-06-feature-snapshot",
+          "entry_point": "prime_hyperelliptic::Fp2Ctx"
+        }
+      ],
+      "provenance": {
+        "created_utc": "2026-10-06T00:00:00Z",
+        "producer": "manual evidence audit; hashes replayed with sha256sum",
+        "repository": "https://github.com/aburan28/crypto",
+        "commit": "5874ce8b393dccc4c735cc7ca5a47de7fe196c59",
+        "registry_ref": "docs/curves/registry.json",
+        "registry_sha256": "a43b9dd3529815ae68a90449f1ce76007a529421a1b0c1b078f99d62d698beed",
+        "schema_sha256": "5781f96509e10239161dc2fa7ae004022d83dfefe1cde788ea2d1584313cd3fe"
+      }
+    }
+  ]
+}

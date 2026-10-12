@@ -1,0 +1,54 @@
+{
+  "created_at": "2026-09-13T02:01:00Z",
+  "runs": [
+    {
+      "archive": "koblitz-stage100-fixed-base-validation-evidence-34730900638.tar.gz",
+      "archive_sha256": "92d7b85dc617e50bc66ca109e472bf51afe4e1d4463c9547ef1f7b7f35d56561",
+      "artifact_digest": "sha256:98588bffe6cbe9cc0073daaab05d744bf689814596a806e2b63f378ac8c15225",
+      "artifact_expires_at": "2026-12-12T01:35:14Z",
+      "artifact_id": 10309356170,
+      "artifact_name": "koblitz-stage100-fixed-base-validation-34730900638",
+      "artifact_size_in_bytes": 1517977,
+      "head_sha": "0dfb6cbe78216a5d340a364dc124092d5d57c19a",
+      "production_job_id": 103653569099,
+      "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34730900638/job/103653569099",
+      "run_id": 34730900638,
+      "run_url": "https://github.com/aburan28/crypto/actions/runs/34730900638",
+      "stage": 100,
+      "workflow": "Koblitz Stage 100 n53 fixed-base validation"
+    },
+    {
+      "archive": "koblitz-stage101-selected-panel-evidence-34731259688.tar.gz",
+      "archive_sha256": "d65056203e8c4dc199c376d4b607c1f08d1c008aad0fe88cbb1dbd20af10729d",
+      "artifact_digest": "sha256:1dbb4a55bf2f0a7c0d90b9bff5ac39356e17cad09d9f9e765256a2beec63b4ff",
+      "artifact_expires_at": "2026-12-12T01:43:52Z",
+      "artifact_id": 10309740843,
+      "artifact_name": "koblitz-stage101-selected-panel-34731259688",
+      "artifact_size_in_bytes": 1562559,
+      "head_sha": "4a352a8635be5be1ca21411ff83344bc145c06c6",
+      "production_job_id": 103654535485,
+      "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34731259688/job/103654535485",
+      "run_id": 34731259688,
+      "run_url": "https://github.com/aburan28/crypto/actions/runs/34731259688",
+      "stage": 101,
+      "workflow": "Koblitz Stage 101 n53 compact fixed-base five-pair panel"
+    },
+    {
+      "archive": "koblitz-stage102-host-class-panel-evidence-34731822161.tar.gz",
+      "archive_sha256": "a8033873db9eca11f1ec2ce4b161a3eda64052f1ec42d5d8348af3bf042d1bb2",
+      "artifact_digest": "sha256:f9f8557f3a127669abb9c1bba4759391c6f20263e5c2fdb0596c4bab2a306766",
+      "artifact_expires_at": "2026-12-12T01:57:37Z",
+      "artifact_id": 10309372439,
+      "artifact_name": "koblitz-stage102-host-class-panel-34731822161",
+      "artifact_size_in_bytes": 1564618,
+      "head_sha": "aa8967c6b97ae2d11315cc0b01f8ba72e3fed74c",
+      "production_job_id": 103655912893,
+      "production_job_url": "https://github.com/aburan28/crypto/actions/runs/34731822161/job/103655912893",
+      "run_id": 34731822161,
+      "run_url": "https://github.com/aburan28/crypto/actions/runs/34731822161",
+      "stage": 102,
+      "workflow": "Koblitz Stage 102 n53 host-class panel"
+    }
+  ],
+  "schema": "koblitz_stage103_hosted_receipts.v1"
+}

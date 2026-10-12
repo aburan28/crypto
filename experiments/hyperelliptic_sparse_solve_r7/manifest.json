@@ -1,0 +1,72 @@
+{
+ "experiment": "hyperelliptic index calculus, round seven: sparse solve bookkeeping",
+ "protocol": "research/notes/index-calculus/RESEARCH_HYPERELLIPTIC_IC_RHO.md, section 'Round seven: the sparse solve \u2014 protocol, written before measuring' (commit fa75c9ac, pushed before candidate code)",
+ "baseline": {
+  "commit": "4ccaf6e56edf78656d4af1dbed9c5fa15200c395",
+  "binary_sha256": "dda5225cdb2e4465c0a0877bfedf154e121f00cb5e218d6b05b797ceb743b5f7"
+ },
+ "candidate": {
+  "commit": "d485fe4156aaf6476042dcb52cda620af3a74256",
+  "binary_sha256": "6c67d27bcfceaa037120820a1f4ae06c5d7e3f7f466575f49e18f214522574e1"
+ },
+ "command": "cargo build --release --example hyperelliptic_ic_vs_rho; RAYON_NUM_THREADS=1 python3 tools/isolated_bench.py run --wait --cpus 3 --out bench.jsonl --label L -- sh -c 'BIN > L.txt'",
+ "example_source": "examples/hyperelliptic_ic_vs_rho.rs (unchanged between baseline and candidate)",
+ "seeds": {
+  "index_calculus": 20260916,
+  "rho": "0xC0FFEE"
+ },
+ "trials_per_row": {
+  "index_calculus": 5,
+  "rho": 40
+ },
+ "schedule": [
+  "A0",
+  "A1",
+  "B1",
+  "A2",
+  "B2",
+  "A3",
+  "B3",
+  "A4",
+  "B4",
+  "A5",
+  "B5"
+ ],
+ "schedule_note": "A0/A1 is the A/A pair; then five interleaved baseline/candidate rounds. A0 ran alone as a timing probe before the candidate existed.",
+ "host": {
+  "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "logical_cpus": 4,
+  "reserved_cpu": 3,
+  "kernel": "6.18.44-fc-v37",
+  "arch": "x86_64",
+  "memory_gib": 15,
+  "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+  "cpu_flags_note": "container exposes sse/sse2 baseline flags only in /proc/cpuinfo excerpt; no target-cpu flags used",
+  "hardware_class": "Linux x86-64 cloud container; Arm64, GPU not measured"
+ },
+ "raw_files": {
+  "A0.txt": "03b800056087c9e64bdaa52c0721794e18578c350dc336cf01ee29d8fe607206",
+  "A1.txt": "d059fd84e34cb4375bcf9607a326ed8e87d5e2566f77767ff68a514bd19ab2c0",
+  "A2.txt": "96f2b352e22116616ed1df9e836a103198dc03a6a4b6385387fb9948ee3ecd9d",
+  "A3.txt": "e0e1d6538ec692b0d0c039b455ba5cff5965ffd7be4eb2350f220cfefd4f22a2",
+  "A4.txt": "ad04f8b7613dd45db85d8b333b3424939fbe9f95ce3cbdc4820a602789fe111f",
+  "A5.txt": "c34847ac45f3e43f8ca15cbe135e62d89f37c2b9a65e78f954c7d5cd9c53c1b4",
+  "B1.txt": "71f4a95ad85a91b8394ebf246c9d7535cf27d09f0021abdab74e305cd550d201",
+  "B2.txt": "059aa10e2db4509fdb920bd8f770c5ee55621ab061e266fa5520a2c5763e53e1",
+  "B3.txt": "e8292168b675adef121941e6ba771b216d268571b2566922359657480e8890e4",
+  "B4.txt": "c81cbeeada3f454af5fa93d52de473009a959e784f7515224e2645674c8ebed2",
+  "B5.txt": "26748800bb8a8afab1ce31d3a3beef09612e6b896561f262a199ca55cf9e6dd4",
+  "isolated_bench.jsonl": "1e4602bd2bc84abdd95dc70d95f090ff2103163f96cd7c326baa2ae062c36708"
+ },
+ "contended_sweeps": [],
+ "pinned_output_violations": 0,
+ "pinned_fields": [
+  "N",
+  "m",
+  "relation_ops",
+  "precompute",
+  "oracle_modmuls",
+  "verified",
+  "rho_ops"
+ ]
+}

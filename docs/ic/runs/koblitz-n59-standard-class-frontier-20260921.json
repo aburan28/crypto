@@ -1,0 +1,406 @@
+{
+ "schema_version": 1,
+ "operation": "koblitz_n59_standard_subspace_class_aware_frontier",
+ "date": "2026-09-21",
+ "claim_boundary": "Exact finite no-go frontier for materialized standard polynomial subspaces ell=9..16 under the current 4 GiB compact-pair-table budget. It does not cover implicit bases, other algebraic families, larger storage, solver breakthroughs, or prove an asymptotic lower bound.",
+ "curve": {
+  "n": 59,
+  "a": 1,
+  "subgroup_order": 25179555920633,
+  "cofactor": 22894,
+  "cofactor_group": "cyclic as independently enumerated by the counter"
+ },
+ "method": {
+  "factor_base": "standard polynomial span for each ell",
+  "class_map": "public [r]P cofactor-torsion classes; no prime-subgroup logarithms",
+  "count": "Burnside S3 orbit formula cross-checked against explicit unordered triples in a small synthetic quotient",
+  "target_subgroup_enumerated": false,
+  "target_samples": 0,
+  "factor_base_log_labels": false
+ },
+ "selection_processes": [
+  {
+   "ell": 10,
+   "wall_seconds": 0.065232917,
+   "total_core_seconds": 0.08982200000000001,
+   "peak_rss_bytes": 14761984,
+   "factor_base": {
+    "abscissae": 1024,
+    "columns": 490,
+    "dimension": 10,
+    "domain": "standard_subspace",
+    "family": "standard_subspace",
+    "points": 1001,
+    "projected_predicate_cost": {
+     "canonical_frobenius_coordinate_squarings": 115640,
+     "cofactor_multiplications": 501,
+     "derived_frobenius_coordinate_squarings": 0,
+     "derived_negations": 500,
+     "input_points": 1001,
+     "input_signed_orbits": 501,
+     "output_columns": 490
+    },
+    "signed_orbits": 501,
+    "spec": {
+     "dimension": 10,
+     "kind": "standard_subspace"
+    }
+   },
+   "report_sha256": "6f7f6f1d19e62bc0770acaad541d9f9d1240f7d29b62a9df6970ae09b4937d9e"
+  },
+  {
+   "ell": 11,
+   "wall_seconds": 0.073471791,
+   "total_core_seconds": 0.117528,
+   "peak_rss_bytes": 15106048,
+   "factor_base": {
+    "abscissae": 2048,
+    "columns": 954,
+    "dimension": 11,
+    "domain": "standard_subspace",
+    "family": "standard_subspace",
+    "points": 1959,
+    "projected_predicate_cost": {
+     "canonical_frobenius_coordinate_squarings": 225144,
+     "cofactor_multiplications": 980,
+     "derived_frobenius_coordinate_squarings": 0,
+     "derived_negations": 979,
+     "input_points": 1959,
+     "input_signed_orbits": 980,
+     "output_columns": 954
+    },
+    "signed_orbits": 980,
+    "spec": {
+     "dimension": 11,
+     "kind": "standard_subspace"
+    }
+   },
+   "report_sha256": "bd1d4f97e8552a5c7792601275e34b68a1e4086f3891af14a7fd54a066b18ca7"
+  },
+  {
+   "ell": 12,
+   "wall_seconds": 0.096388042,
+   "total_core_seconds": 0.199174,
+   "peak_rss_bytes": 40222720,
+   "factor_base": {
+    "abscissae": 4096,
+    "columns": 1957,
+    "dimension": 12,
+    "domain": "standard_subspace",
+    "family": "standard_subspace",
+    "points": 3965,
+    "projected_predicate_cost": {
+     "canonical_frobenius_coordinate_squarings": 461852,
+     "cofactor_multiplications": 1983,
+     "derived_frobenius_coordinate_squarings": 0,
+     "derived_negations": 1982,
+     "input_points": 3965,
+     "input_signed_orbits": 1983,
+     "output_columns": 1957
+    },
+    "signed_orbits": 1983,
+    "spec": {
+     "dimension": 12,
+     "kind": "standard_subspace"
+    }
+   },
+   "report_sha256": "d06cab0bfc46563a261f12f0bffd081a2bae01758de5ef757fa752b134f4826f"
+  },
+  {
+   "ell": 13,
+   "wall_seconds": 0.143080333,
+   "total_core_seconds": 0.345767,
+   "peak_rss_bytes": 74629120,
+   "factor_base": {
+    "abscissae": 8192,
+    "columns": 4008,
+    "dimension": 13,
+    "domain": "standard_subspace",
+    "family": "standard_subspace",
+    "points": 8137,
+    "projected_predicate_cost": {
+     "canonical_frobenius_coordinate_squarings": 945888,
+     "cofactor_multiplications": 4069,
+     "derived_frobenius_coordinate_squarings": 0,
+     "derived_negations": 4068,
+     "input_points": 8137,
+     "input_signed_orbits": 4069,
+     "output_columns": 4008
+    },
+    "signed_orbits": 4069,
+    "spec": {
+     "dimension": 13,
+     "kind": "standard_subspace"
+    }
+   },
+   "report_sha256": "3000b47a728fce49fad85eed1d53bcf2e59544da27f20132a1937bb9c2a3efa8"
+  },
+  {
+   "ell": 14,
+   "wall_seconds": 0.318640875,
+   "total_core_seconds": 0.720634,
+   "peak_rss_bytes": 143015936,
+   "factor_base": {
+    "abscissae": 16384,
+    "columns": 8094,
+    "dimension": 14,
+    "domain": "standard_subspace",
+    "family": "standard_subspace",
+    "points": 16309,
+    "projected_predicate_cost": {
+     "canonical_frobenius_coordinate_squarings": 1910184,
+     "cofactor_multiplications": 8155,
+     "derived_frobenius_coordinate_squarings": 0,
+     "derived_negations": 8154,
+     "input_points": 16309,
+     "input_signed_orbits": 8155,
+     "output_columns": 8094
+    },
+    "signed_orbits": 8155,
+    "spec": {
+     "dimension": 14,
+     "kind": "standard_subspace"
+    }
+   },
+   "report_sha256": "a91e07fa5f58e88b24514e358cac27453a24dcd0181512c02d8fdb1b88e13327"
+  },
+  {
+   "ell": 15,
+   "wall_seconds": 0.535554125,
+   "total_core_seconds": 1.3445150000000001,
+   "peak_rss_bytes": 279412736,
+   "factor_base": {
+    "abscissae": 32768,
+    "columns": 16344,
+    "dimension": 15,
+    "domain": "standard_subspace",
+    "family": "standard_subspace",
+    "points": 32935,
+    "projected_predicate_cost": {
+     "canonical_frobenius_coordinate_squarings": 3857184,
+     "cofactor_multiplications": 16468,
+     "derived_frobenius_coordinate_squarings": 0,
+     "derived_negations": 16467,
+     "input_points": 32935,
+     "input_signed_orbits": 16468,
+     "output_columns": 16344
+    },
+    "signed_orbits": 16468,
+    "spec": {
+     "dimension": 15,
+     "kind": "standard_subspace"
+    }
+   },
+   "report_sha256": "bdee770089a9445b0edc9841a053a5de7c6f9065c0d8966a1c153e5e06749dad"
+  },
+  {
+   "ell": 16,
+   "wall_seconds": 0.828652375,
+   "total_core_seconds": 2.50929,
+   "peak_rss_bytes": 553910272,
+   "factor_base": {
+    "abscissae": 65536,
+    "columns": 32710,
+    "dimension": 16,
+    "domain": "standard_subspace",
+    "family": "standard_subspace",
+    "points": 65683,
+    "projected_predicate_cost": {
+     "canonical_frobenius_coordinate_squarings": 7719560,
+     "cofactor_multiplications": 32842,
+     "derived_frobenius_coordinate_squarings": 0,
+     "derived_negations": 32841,
+     "input_points": 65683,
+     "input_signed_orbits": 32842,
+     "output_columns": 32710
+    },
+    "signed_orbits": 32842,
+    "spec": {
+     "dimension": 16,
+     "kind": "standard_subspace"
+    }
+   },
+   "report_sha256": "bbdc61b7ecf4cdf5dace40b17140ae9e3a99158db5d2a56afa225442323789ef"
+  }
+ ],
+ "class_counts": [
+  {
+   "ell": 9,
+   "points": 483,
+   "columns": 231,
+   "admissible_fraction": 4.593426214387055e-05,
+   "coverage_ceiling": 3.447241098039901e-11,
+   "probes_for_columns_lower_bound": 6701010849845.879,
+   "pair_entries": 116886,
+   "compact_bytes": 558755,
+   "fits_4gib": true,
+   "counter_wall": 1.109450875010225,
+   "counter_core": 1.01749,
+   "counter_rss": 8486912,
+   "result_sha256": "ded54cb5dd0aa784234a6938bda6b9fe07bdd26956bddb4eac29f166731115ea",
+   "metrics_sha256": "c2e7112d6ee5cab320897ce153989fa2a120152ae7fade9ba7da7672aae68c2e"
+  },
+  {
+   "ell": 10,
+   "points": 1001,
+   "columns": 490,
+   "admissible_fraction": 4.388421173992604e-05,
+   "coverage_ceiling": 2.9222119814951143e-10,
+   "probes_for_columns_lower_bound": 1676811959922.5564,
+   "pair_entries": 501501,
+   "compact_bytes": 2387826,
+   "fits_4gib": true,
+   "counter_wall": 0.9614469590014778,
+   "counter_core": 0.979609,
+   "counter_rss": 14925824,
+   "result_sha256": "b450494fa4b6a219b062fe9cc17499bd09ba54106873a87ee7904d517e377ab7",
+   "metrics_sha256": "4ef4340732246f2b397f9d99acaa5da6fbe505650fef6a1a2d16ef031caa8ceb"
+  },
+  {
+   "ell": 11,
+   "points": 1959,
+   "columns": 954,
+   "admissible_fraction": 4.366963456878136e-05,
+   "coverage_ceiling": 2.1764482333500307e-09,
+   "probes_for_columns_lower_bound": 438328826471.36755,
+   "pair_entries": 1919820,
+   "compact_bytes": 9163478,
+   "fits_4gib": true,
+   "counter_wall": 1.1257723749877186,
+   "counter_core": 1.173411,
+   "counter_rss": 15679488,
+   "result_sha256": "9c74bc5b7488703152acc0a823e936dc74a21e9547360e1f91db25a4ceb2ffeb",
+   "metrics_sha256": "2e05f5d1aa98cffe2486d8e57de4ae54e6c1443527abbb4fc48ce978ade6aa30"
+  },
+  {
+   "ell": 12,
+   "points": 3965,
+   "columns": 1957,
+   "admissible_fraction": 4.353998680859127e-05,
+   "coverage_ceiling": 1.7978236050980352e-08,
+   "probes_for_columns_lower_bound": 108853838299.2966,
+   "pair_entries": 7862595,
+   "compact_bytes": 37478829,
+   "fits_4gib": true,
+   "counter_wall": 1.9534598750033183,
+   "counter_core": 1.695429,
+   "counter_rss": 41385984,
+   "result_sha256": "2b3dab73c074b6ae970d164be02f4226599e87ba0298b9ea05215b9231f4067b",
+   "metrics_sha256": "8022204b722b14fa17472bae912fd199a199d8e50f0a878eadbc83e4ceafddee"
+  },
+  {
+   "ell": 13,
+   "points": 8137,
+   "columns": 4008,
+   "admissible_fraction": 4.366404335424761e-05,
+   "coverage_ceiling": 1.557677987794075e-07,
+   "probes_for_columns_lower_bound": 25730606912.382313,
+   "pair_entries": 33109453,
+   "compact_bytes": 157381146,
+   "fits_4gib": true,
+   "counter_wall": 2.5809314159996575,
+   "counter_core": 2.695788,
+   "counter_rss": 75300864,
+   "result_sha256": "0a8936c9dacd893800c3b460e856a87d9352f6f9f1905e188ca2453f71ead799",
+   "metrics_sha256": "e66a3c897a684b220ed1733deaca55402e2122feba69c39f937ce09b1210889d"
+  },
+  {
+   "ell": 14,
+   "points": 16309,
+   "columns": 8094,
+   "admissible_fraction": 4.3677167354619334e-05,
+   "coverage_ceiling": 1.2543450765991905e-06,
+   "probes_for_columns_lower_bound": 6452769776.834171,
+   "pair_entries": 132999895,
+   "compact_bytes": 632053959,
+   "fits_4gib": true,
+   "counter_wall": 4.6530017080076504,
+   "counter_core": 4.5019979999999995,
+   "counter_rss": 145883136,
+   "result_sha256": "81a8da046ebd08d611582d35b56f26b49a03d777f327d8ad546cc52451a2c4aa",
+   "metrics_sha256": "47ed46b4dbf501463088e2763759014f5ede892c3bf7bff04d501079d61041e5"
+  },
+  {
+   "ell": 15,
+   "points": 32935,
+   "columns": 16344,
+   "admissible_fraction": 4.3681634454654914e-05,
+   "coverage_ceiling": 1.0330280757130244e-05,
+   "probes_for_columns_lower_bound": 1582144801.7004688,
+   "pair_entries": 542373580,
+   "compact_bytes": 2709116566,
+   "fits_4gib": true,
+   "counter_wall": 6.668803416992887,
+   "counter_core": 7.507459,
+   "counter_rss": 282542080,
+   "result_sha256": "b6f3a7750f0d567c9ecf43c842d373a0475140b7a969aed3bf1b96210371c319",
+   "metrics_sha256": "4d438c46a99133c709b6e9ea8bdbdd39cfc4c073d6146a7bf65c740c2f58b4da"
+  },
+  {
+   "ell": 16,
+   "points": 65683,
+   "columns": 32710,
+   "admissible_fraction": 4.367817070312e-05,
+   "coverage_ceiling": 8.19301786140531e-05,
+   "probes_for_columns_lower_bound": 399242386.0576011,
+   "pair_entries": 2157161086,
+   "compact_bytes": 9975660343,
+   "fits_4gib": false,
+   "counter_wall": 12.303813666003407,
+   "counter_core": 13.953386,
+   "counter_rss": 556957696,
+   "result_sha256": "06c404d51697b3d0e05cdd2abe8048a1a8835aeb2ebdfa603e3ae494f7813c97",
+   "metrics_sha256": "6496d6e21aea7450512d0cbfc8c6c6a616d3431d7bc66147361bf625f1d593f3"
+  }
+ ],
+ "frontier": {
+  "default_pair_table_budget_bytes": 4294967296,
+  "widest_fitting_ell": 15,
+  "widest_fitting_compact_bytes": 2709116566,
+  "best_fitting_probe_lower_bound": 1582144801.7004688,
+  "first_nonfitting_ell": 16,
+  "first_nonfitting_compact_bytes": 9975660343,
+  "first_nonfitting_probe_lower_bound": 399242386.0576011,
+  "admissible_fraction_min": 4.353998680859127e-05,
+  "admissible_fraction_max": 4.593426214387055e-05,
+  "inverse_cofactor": 4.367956669869835e-05,
+  "conclusion": "Every measured standard base fitting the exact 4 GiB compact-table budget needs at least 1.582 billion probes before window, collision, dependency, and rank losses; ell=16 lowers the bound to 399 million but its exact compact table needs 9.976 GB."
+ },
+ "ell14_pilot": {
+  "report_sha256": "2ddb8f2afff1d4a6c318354a72533ebff4616b0af42e1e3fececb8de5f395843",
+  "points": 16309,
+  "columns": 8094,
+  "pair_entries": 132999895,
+  "wall_seconds": 85.949929666,
+  "total_core_seconds": 146.76600200000001,
+  "peak_rss_bytes": 896630784,
+  "pair_table_build_wall_seconds": 6.858893542,
+  "pair_table_build_core_seconds": 48.064204000000004,
+  "trials": 100000,
+  "summands_scanned": 102400000,
+  "relations": 0,
+  "status": "zero_relations_expected_under_class_aware_ceiling"
+ },
+ "process_accounting": {
+  "processes": 16,
+  "sequential_wall_seconds": 119.36763041500635,
+  "total_core_seconds": 185.617302,
+  "peak_rss_bytes": 896630784,
+  "scope": "seven fresh selection processes for ell=10..16, eight metered cofactor-class counters for ell=9..16, and one ell=14 relation pilot; compilation and JSON reduction excluded"
+ },
+ "validation": [
+  "n59 ell9 standard base matches frozen Phase-B 512-abscissa/483-point predicate",
+  "Burnside class count equals explicit unordered count on a small quotient",
+  "each class counter enumerates and closes the complete public cofactor group",
+  "ell14 exact relation pilot returns zero relations consistently with its class-aware expectation"
+ ],
+ "gates": {
+  "larger_pdp_factor_base_search": "finite_standard_family_frontier_complete_ell9_through16",
+  "larger_pdp_end_to_end": "censored_materialized_standard_bases_infeasible_under_current_budget",
+  "independent_external_reproduction": "missing"
+ },
+ "software": {
+  "source_stack_head": "bb48f979",
+  "counter": "examples/koblitz_standard_class_count.rs"
+ }
+}

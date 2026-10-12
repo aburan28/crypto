@@ -1,0 +1,166 @@
+{
+  "attempts": [
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/panel.py",
+        "--arm",
+        "toy",
+        "--out",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/evidence/final/toy/producer"
+      ],
+      "arm": "toy",
+      "child_cpu_seconds": 0.027499000000000003,
+      "child_peak_rss_bytes": 28098560,
+      "child_wall_seconds": 0.06390166700293776,
+      "exit_code": 0,
+      "external_timeout": false,
+      "external_wall_seconds": 0.1229151669977,
+      "phase": "producer",
+      "result_decision": "PASS",
+      "result_sha256": "afe04d088937e3113425bdb2b2469d125b9df0ced3839b4e02adb3f7beb9578a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e424e4c0b5049d0cc56d95216dcb5a32ac0f339d9222051c2349ca1dda525274",
+      "utc_start": "2026-09-29T19:06:04.464490+00:00"
+    },
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/verify_panel.py",
+        "--arm",
+        "toy",
+        "--producer",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/evidence/final/toy/producer",
+        "--out",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/evidence/final/toy/verify.json"
+      ],
+      "arm": "toy",
+      "child_cpu_seconds": 0.044038999999999995,
+      "child_peak_rss_bytes": 30408704,
+      "child_wall_seconds": 0.04520291699736845,
+      "exit_code": 0,
+      "external_timeout": false,
+      "external_wall_seconds": 0.09759450001001824,
+      "phase": "verifier",
+      "result_decision": "PASS",
+      "result_sha256": "2e22e3ff633af6dc5edbd6564d963161ae71f899767a9844fb11ddd36ab50c29",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "750d68e7c3c83165352891885238357ed9a6a9f7bdb79b8713a98205d7e9033c",
+      "utc_start": "2026-09-29T19:06:04.587976+00:00"
+    },
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/panel.py",
+        "--arm",
+        "leaf10",
+        "--out",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/evidence/final/leaf10/producer"
+      ],
+      "arm": "leaf10",
+      "child_cpu_seconds": 1.954386,
+      "child_peak_rss_bytes": 202162176,
+      "child_wall_seconds": 1.969197707992862,
+      "exit_code": 0,
+      "external_timeout": false,
+      "external_wall_seconds": 2.019266458999482,
+      "phase": "producer",
+      "result_decision": "PASS",
+      "result_sha256": "1d6f4a163e2b19566bbe5b4e817475bd476d5b8d4727ff2281a93b72f6bc46ad",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "03c1d2bfe080250dacefa24f5972dc45abd1a817e9ffec9005c8b238a4be2258",
+      "utc_start": "2026-09-29T19:06:04.686179+00:00"
+    },
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/verify_panel.py",
+        "--arm",
+        "leaf10",
+        "--producer",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/evidence/final/leaf10/producer",
+        "--out",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/evidence/final/leaf10/verify.json"
+      ],
+      "arm": "leaf10",
+      "child_cpu_seconds": 0.955734,
+      "child_peak_rss_bytes": 202850304,
+      "child_wall_seconds": 0.966995875001885,
+      "exit_code": 0,
+      "external_timeout": false,
+      "external_wall_seconds": 1.0202767500013579,
+      "phase": "verifier",
+      "result_decision": "PASS",
+      "result_sha256": "6a5f79f0615a72c0f77b5e7d728279b1e9bda1fa53a63cf82919825241d1f800",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4201e47c7db3ff6254b0040eeae8240e855b8d4709c6cc089c54c972be12cbd1",
+      "utc_start": "2026-09-29T19:06:06.706012+00:00"
+    },
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/panel.py",
+        "--arm",
+        "leaf14",
+        "--out",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/evidence/final/leaf14/producer"
+      ],
+      "arm": "leaf14",
+      "child_cpu_seconds": 1.9081910000000002,
+      "child_peak_rss_bytes": 202260480,
+      "child_wall_seconds": 1.9290948749985546,
+      "exit_code": 0,
+      "external_timeout": false,
+      "external_wall_seconds": 1.9816864999884274,
+      "phase": "producer",
+      "result_decision": "PASS",
+      "result_sha256": "2fca52b1a5ebac8a40a27314dd0eb55a83abbda5519bd396465adb6687291627",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f80d5be5c9eed787c02b5c65683bd6987d499ffab12e73d4cc28c69a53ae8d44",
+      "utc_start": "2026-09-29T19:06:07.726999+00:00"
+    },
+    {
+      "argv": [
+        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/verify_panel.py",
+        "--arm",
+        "leaf14",
+        "--producer",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/evidence/final/leaf14/producer",
+        "--out",
+        "/private/tmp/ecc2k130-native-m3-chain-20260929/research/notes/ecc2k130/native_m3_chain_20260929/evidence/final/leaf14/verify.json"
+      ],
+      "arm": "leaf14",
+      "child_cpu_seconds": 0.9445600000000001,
+      "child_peak_rss_bytes": 202932224,
+      "child_wall_seconds": 0.9571020420116838,
+      "exit_code": 0,
+      "external_timeout": false,
+      "external_wall_seconds": 1.015082917001564,
+      "phase": "verifier",
+      "result_decision": "PASS",
+      "result_sha256": "c43d0e92124e931256916986616df40caabf8f535032ffe0dc2dd0a817254535",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "31244a8286cca294723e9213d3b522ac0c15010e66382a331563de09bf83f2f5",
+      "utc_start": "2026-09-29T19:06:09.709555+00:00"
+    }
+  ],
+  "decision": "PASS",
+  "domain": "ecc2k130-native-m3-chain-20260929-v1",
+  "freeze_sha256": "73b591f110775c2c38aa67239f7663b80fc02ba16e9dc5cf231a9819a4676688",
+  "host_sha256": "de72d164b441bf96545a04a94a0d462b277cbe86b0b4cfdef3bddb6d3a65d7e4",
+  "results": {
+    "leaf10": {
+      "producer": "1d6f4a163e2b19566bbe5b4e817475bd476d5b8d4727ff2281a93b72f6bc46ad",
+      "verifier": "6a5f79f0615a72c0f77b5e7d728279b1e9bda1fa53a63cf82919825241d1f800"
+    },
+    "leaf14": {
+      "producer": "2fca52b1a5ebac8a40a27314dd0eb55a83abbda5519bd396465adb6687291627",
+      "verifier": "c43d0e92124e931256916986616df40caabf8f535032ffe0dc2dd0a817254535"
+    },
+    "toy": {
+      "producer": "afe04d088937e3113425bdb2b2469d125b9df0ced3839b4e02adb3f7beb9578a",
+      "verifier": "2e22e3ff633af6dc5edbd6564d963161ae71f899767a9844fb11ddd36ab50c29"
+    }
+  }
+}

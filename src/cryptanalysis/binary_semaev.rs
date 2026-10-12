@@ -185,8 +185,9 @@ pub fn binary_semaev_s4(
 /// For odd `m` we use the half-trace formula
 /// `t = c + c^{2²} + c^{2⁴} + … + c^{2^{m-1}}`, which gives a valid
 /// solution whenever `Tr(c) = 0`.  For even `m` the half-trace recipe
-/// requires a fixed non-AS element; we fall back to brute force,
-/// which is fine for the toy fields this module targets (`m ≤ 16`).
+/// does not apply; there `t ↦ t² + t` is solved as the `F_2`-linear map
+/// it is, by Gaussian elimination on its `m × m` matrix in the
+/// polynomial basis (`m ≤ 63`).
 pub fn solve_artin_schreier(c: &F2mElement, m: u32, irr: &IrreduciblePoly) -> Option<F2mElement> {
     // Compute Tr(c) = c + c² + c⁴ + … + c^{2^{m-1}}.
     let mut acc = c.clone();
@@ -214,30 +215,62 @@ pub fn solve_artin_schreier(c: &F2mElement, m: u32, irr: &IrreduciblePoly) -> Op
         return Some(t);
     }
 
-    // Even m: brute force (sufficient for the toy field sizes here).
-    if m > 20 {
+    // Even m: solve the linear system  L(t) = t² + t = c  over F_2.
+    // Column i of L is L(z^i); row-reduce [image | preimage] and reduce
+    // c against the pivots — it lands on 0 exactly when Tr(c) = 0.
+    if m > 63 {
         return None;
     }
-    for v in 0u64..(1u64 << m) {
-        let bits: Vec<u32> = (0..m).filter(|i| (v >> i) & 1 == 1).collect();
-        let cand = F2mElement::from_bit_positions(&bits, m);
-        let lhs = cand.square(irr).add(&cand);
-        if &lhs == c {
-            return Some(cand);
+    let mut pivots: Vec<(u64, u64)> = Vec::with_capacity(m as usize);
+    for i in 0..m {
+        let basis = F2mElement::from_bit_positions(&[i], m);
+        let mut img = basis
+            .square(irr)
+            .add(&basis)
+            .raw_bits()
+            .first()
+            .copied()
+            .unwrap_or(0);
+        let mut pre = 1u64 << i;
+        for &(pimg, ppre) in &pivots {
+            let lead = 1u64 << (63 - pimg.leading_zeros());
+            if img & lead != 0 {
+                img ^= pimg;
+                pre ^= ppre;
+            }
+        }
+        if img != 0 {
+            pivots.push((img, pre));
+            pivots.sort_by_key(|p| std::cmp::Reverse(p.0));
         }
     }
-    None
+    let mut target = c.raw_bits().first().copied().unwrap_or(0);
+    let mut solution = 0u64;
+    for &(pimg, ppre) in &pivots {
+        let lead = 1u64 << (63 - pimg.leading_zeros());
+        if target & lead != 0 {
+            target ^= pimg;
+            solution ^= ppre;
+        }
+    }
+    if target != 0 {
+        return None;
+    }
+    let bits: Vec<u32> = (0..m).filter(|i| (solution >> i) & 1 == 1).collect();
+    let t = F2mElement::from_bit_positions(&bits, m);
+    debug_assert_eq!(t.square(irr).add(&t), *c);
+    Some(t)
 }
 
 /// Solve `A · X² + B · X + C = 0` over `F_{2^m}`.
 ///
 /// - `A = 0, B ≠ 0`: linear, single root `X = C / B`.
 /// - `A = 0, B = 0`: degenerate (the polynomial is the constant `C`);
-///    no usable roots reported.
+///   no usable roots reported.
 /// - `A ≠ 0, B = 0`: pure square, `X = √(C/A)`.  In char 2 the square
-///    root is the absolute Frobenius `m-1` times.
+///   root is the absolute Frobenius `m-1` times.
 /// - `A ≠ 0, B ≠ 0`: substitute `X = (B/A) · z` to get
-///    `z² + z = A · C / B²`, an Artin-Schreier equation in `z`.
+///   `z² + z = A · C / B²`, an Artin-Schreier equation in `z`.
 ///
 /// Returns up to two solutions (no guaranteed order).
 pub fn solve_quadratic_f2m(

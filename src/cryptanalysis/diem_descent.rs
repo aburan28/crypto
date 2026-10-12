@@ -60,16 +60,16 @@
 //! # What this is NOT
 //!
 //! - **Not the full Diem algorithm.**  We brute-force the polynomial
-//!    system over `F_p^k` rather than solving it via Gröbner basis.
-//!    Real Diem at scale needs `groebner_f4.rs` (or msolve, or…).
+//!   system over `F_p^k` rather than solving it via Gröbner basis.
+//!   Real Diem at scale needs `groebner_f4.rs` (or msolve, or…).
 //! - **Not subexponential asymptotics.**  At `k = 2` the cost is
-//!    still `O(p^k) = O(p²)`, which is exactly the same as Pollard ρ
-//!    on a `p²`-element group.  Diem's win starts at `k ≥ 3` over
-//!    cryptographically-sized `p`.
+//!   still `O(p^k) = O(p²)`, which is exactly the same as Pollard ρ
+//!   on a `p²`-element group.  Diem's win starts at `k ≥ 3` over
+//!   cryptographically-sized `p`.
 //! - **Not transferable to prime-field curves yet.**  Hidden-extension
-//!    attacks on prime curves (`p` itself) are the open "Holy Grail"
-//!    question of the screenshot — no public attack works.  This
-//!    module shows the *construction site*, not the attack.
+//!   attacks on prime curves (`p` itself) are the open "Holy Grail"
+//!   question of the screenshot — no public attack works.  This
+//!   module shows the *construction site*, not the attack.
 //!
 //! # References
 //!
@@ -83,7 +83,6 @@
 
 use num_bigint::BigUint;
 use num_traits::Zero;
-use std::collections::HashMap;
 
 // ── Tiny F_{p^k} arithmetic ─────────────────────────────────────────
 
@@ -248,11 +247,9 @@ impl ECurveFpk {
         let x3 = x2.mul(x, self.irr_const);
         let rhs = x3.add(&self.a.mul(x, self.irr_const)).add(&self.b);
         // Brute-force a square root in F_{p^k}.
-        let q = (self.p as u64).pow(self.k);
+        let q = self.p.pow(self.k);
         for v in 0..q {
-            let coeffs: Vec<u64> = (0..self.k)
-                .map(|i| (v / (self.p as u64).pow(i)) % self.p)
-                .collect();
+            let coeffs: Vec<u64> = (0..self.k).map(|i| (v / self.p.pow(i)) % self.p).collect();
             let cand = Fpk::from_coeffs(coeffs, self.p, self.k);
             if cand.mul(&cand, self.irr_const) == rhs {
                 return Some(cand);
@@ -293,9 +290,14 @@ impl ECurveFpk {
             // Doubling.
             let two = Fpk::from_base(2, self.p, self.k);
             let three = Fpk::from_base(3, self.p, self.k);
-            let num = three.mul(&x1.mul(x1, self.irr_const), self.irr_const).add(&self.a);
+            let num = three
+                .mul(&x1.mul(x1, self.irr_const), self.irr_const)
+                .add(&self.a);
             let den = two.mul(y1, self.irr_const);
-            let lam = num.mul(&fpk_inv(&den, self.irr_const).expect("non-zero den"), self.irr_const);
+            let lam = num.mul(
+                &fpk_inv(&den, self.irr_const).expect("non-zero den"),
+                self.irr_const,
+            );
             let lam_sq = lam.mul(&lam, self.irr_const);
             let x3 = lam_sq.sub(&two.mul(x1, self.irr_const));
             let y3 = lam.mul(&x1.sub(&x3), self.irr_const).sub(y1);
@@ -306,7 +308,10 @@ impl ECurveFpk {
         }
         let num = y2.sub(y1);
         let den = x2.sub(x1);
-        let lam = num.mul(&fpk_inv(&den, self.irr_const).expect("non-zero den"), self.irr_const);
+        let lam = num.mul(
+            &fpk_inv(&den, self.irr_const).expect("non-zero den"),
+            self.irr_const,
+        );
         let lam_sq = lam.mul(&lam, self.irr_const);
         let x3 = lam_sq.sub(x1).sub(x2);
         let y3 = lam.mul(&x1.sub(&x3), self.irr_const).sub(y1);
@@ -337,7 +342,7 @@ pub fn fpk_inv(x: &Fpk, irr_const: u64) -> Option<Fpk> {
     if x.is_zero() {
         return None;
     }
-    let q = (x.p as u64).pow(x.k);
+    let q = x.p.pow(x.k);
     let exp = q - 2;
     let mut acc = Fpk::one(x.p, x.k);
     let mut base = x.clone();
@@ -414,13 +419,7 @@ pub fn find_2_decomposition(curve: &ECurveFpk, fb: &[Pt], r: &Pt) -> Option<Deco
 }
 
 /// Convenience: random R = a G + b Q, returns (a, b, R).
-pub fn random_relation_target(
-    curve: &ECurveFpk,
-    g: &Pt,
-    q: &Pt,
-    a: &BigUint,
-    b: &BigUint,
-) -> Pt {
+pub fn random_relation_target(curve: &ECurveFpk, g: &Pt, q: &Pt, a: &BigUint, b: &BigUint) -> Pt {
     let ag = curve.scalar_mul(a, g);
     let bq = curve.scalar_mul(b, q);
     curve.add(&ag, &bq)

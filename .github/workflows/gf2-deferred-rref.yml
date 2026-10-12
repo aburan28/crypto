@@ -1,0 +1,49 @@
+name: GF2 deferred RREF experiment
+
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+# PRs retain source, correctness and existing-evidence checks.
+# Fresh timing panels and their result gates run only after merge or by manual dispatch.
+jobs:
+  f5-exact-output-and-paired-stage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
+    env:
+      RAYON_NUM_THREADS: '1'
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: Shared GF(2) RREF exact-output controls
+        run: cargo test --release --lib cryptanalysis::gf2_elim::tests -- --test-threads=1
+      - name: Full matrix-F5 correctness controls
+        run: cargo test --release --lib cryptanalysis::matrix_f5_f2::tests -- --test-threads=1
+      - name: Build frozen F5 stage benchmark
+        run: cargo build --release --example f4_f2_bench
+      - name: Five A/A and five paired A/B samples
+        if: github.event_name != 'pull_request'
+        run: |
+          python3 research/gf2_deferred_rref_20260926/paired_f5.py \
+            target/release/examples/f4_f2_bench \
+            research/gf2_deferred_rref_20260926/ci-result.json \
+            --pairs 5
+      - name: Preserve raw runs and failures
+        if: github.event_name != 'pull_request' && (always())
+        uses: actions/upload-artifact@v4
+        with:
+          name: gf2-deferred-rref-${{ github.sha }}
+          path: research/gf2_deferred_rref_20260926/ci-result.json
+          if-no-files-found: warn

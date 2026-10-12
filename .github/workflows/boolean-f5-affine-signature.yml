@@ -1,0 +1,34 @@
+name: Boolean F5 affine signature
+
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  native-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 360 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Native algebra and verifier tests
+        run: |
+          python3 tools/isolated_bench.py busy -- cargo test --locked --release --manifest-path research/boolean_f5_affine_signature_20261002/Cargo.toml -- --test-threads=1
+      - name: Rust formatting
+        run: cargo fmt --manifest-path research/boolean_f5_affine_signature_20261002/Cargo.toml --check
+      - name: Replay retained discovery when present
+        run: |
+          if test -f research/boolean_f5_affine_signature_20261002/qualified_discovery_01/manifest.json; then
+            python3 tools/isolated_bench.py busy -- cargo build --locked --release --manifest-path research/boolean_f5_affine_signature_20261002/Cargo.toml
+            research/boolean_f5_affine_signature_20261002/target/release/boolean-f5-affine-signature --verify-bundle research/boolean_f5_affine_signature_20261002/qualified_discovery_01
+          fi

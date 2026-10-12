@@ -1,0 +1,17 @@
+
+running 12 tests
+test tests::cancellations_degree_drops_and_zero_rows ... ok
+test tests::changed_assignment_is_recomputed_and_all_control_arms_agree ... ok
+test tests::coefficient_slot_31_and_empty_or_high_degree_envelopes ... ok
+test tests::compilation_limits_are_explicit_refusals ... ok
+test tests::current_output_caps_apply_after_parity_and_compaction ... ok
+test tests::degree_cutoffs_reduce_quadratic_plan_visits_without_losing_rows ... ok
+test tests::exhaustive_coefficients_degrees_and_active_masks ... ok
+test tests::legacy_envelope_implementation_is_exactly_ported ... ok
+test tests::support_escape_and_context_changes_use_direct_fallback ... ok
+test verify::tests::intervals_are_deterministic_and_use_paired_values ... ok
+test verify::tests::replay_rejects_changed_output_or_charged_work ... ok
+test verify::tests::resource_threshold_rejects_a_short_contended_window ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

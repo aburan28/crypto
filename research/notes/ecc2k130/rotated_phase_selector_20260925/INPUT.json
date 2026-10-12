@@ -1,0 +1,39 @@
+{
+  "schema": "ecc2k130_rotated_phase_selector_input_v1",
+  "domain": "ECC2K130-ROTATED-PHASE-SELECTOR-20260925-v1",
+  "curve": "y^2+x*y=x^3+1",
+  "field_polynomial": 524327,
+  "n": 19,
+  "q": 130873,
+  "cofactor": 4,
+  "generator_h": [385982, 301867],
+  "lambda": 41811,
+  "beta": 3,
+  "m": 6,
+  "d": 2,
+  "physical_points_per_slot": 7,
+  "signed_nonzero_columns": 3,
+  "tuple_count": 117649,
+  "reference_support": 62389,
+  "phase_orders": {
+    "spread": [0, 5, 10, 15, 1, 6, 11, 16, 2, 7, 12, 17, 3, 8, 13, 18, 4, 9, 14],
+    "contiguous_control": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+  },
+  "caps": [1, 4, 8, 19],
+  "comparators": {
+    "four_beta_cap4": {"support": 121851, "oracle_probes": 249827},
+    "five_beta_cap19": {"support": 126265, "oracle_probes": 258849}
+  },
+  "material_screen": {
+    "primary_cap4_dominance": {"minimum_support": 121851, "maximum_oracle_probes": 249827},
+    "primary_cap8_fallback": {"minimum_support": 126265, "maximum_oracle_probes_numerator": 9, "maximum_oracle_probes_denominator": 4}
+  },
+  "sample": {
+    "source": "rotated_four_base_joint_rank_20260925/inputs/point_only.json",
+    "case_count": 64,
+    "selection": "all 64 frozen unconditional point-only holdouts; no phase outcome used"
+  },
+  "phase_producer_wall_seconds": 120,
+  "independent_replay_wall_seconds": 300,
+  "child_rss_cap_bytes": 536870912
+}

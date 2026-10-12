@@ -1,0 +1,42 @@
+=== ECBENCH-VM-BEGIN
+cmdline: console=ttyS0 rdinit=/init psi=1 isolcpus=6,7 panic=-1 quiet
+uname: Linux (none) 6.8.0-142-generic #142-Ubuntu SMP PREEMPT_DYNAMIC Wed Sep  2 14:24:27 UTC 2026 x86_64 GNU/Linux
+/sys/devices/system/node/node0 cpus=0-3 Node 0 MemTotal:         469152 kB
+/sys/devices/system/node/node1 cpus=4-7 Node 1 MemTotal:         513300 kB
+cpu0 siblings=0-1
+cpu1 siblings=0-1
+cpu2 siblings=2-3
+cpu3 siblings=2-3
+cpu6 siblings=6-7
+cpu7 siblings=6-7
+isolated=6-7 pressure=cpu io memory 
+env class   ECBENV1hb8c5c33506f0
+cpu         QEMU TCG CPU version 2.5+ (8 logical, Some(4) cores, 2 NUMA nodes)
+features    adx aes avx avx2 bmi1 bmi2 fma pclmulqdq popcnt sha sse4.2 vaes
+os          linux x86_64 6.8.0-142-generic
+virtual     Some(true)
+binary      3ff9988dd054d0222f17afea61cae00b944b466c0358b5e582a86eff922921d1
+commit      ? (dirty: None)
+=== RUN-AUTO
+session ECBS1hafb48c7c6d26 complete -> /out/auto (64 records: {"verified": 64})
+run-auto exit 0
+audit OK: 64 records, 64 verified, 4 replays reproduced, 0 problems
+verify-auto exit 0
+| session | arm | method | curve | log2 r | verified | mean S | 95% interval | theory S | S / theory | S / floor | S / reference | lower bound | levels |
+|---|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|---|
+| ECBS1hafb48c7c6d26 | rho-neg | rho.negation | icv1-fp20-t727-cd198a38 | 19.10 | 6/6 | 1.319 | [0.969, 1.744] | 0.886 | 1.488 | 1.488 | 1.000 | yes | L1×2 L2×4 |
+| ECBS1hafb48c7c6d26 | rho-neg | rho.negation | icv1-f2m17-tm101-00378d4e | 16.00 | 6/6 | 1.758 | [1.368, 2.129] | 0.886 | 1.983 | 8.178 | 1.000 | yes | L2×6 |
+| ECBS1hafb48c7c6d26 | bsgs-neg | bsgs.negation | icv1-fp20-t727-cd198a38 | 19.10 | 6/6 | 0.937 | [0.767, 1.108] | 1.000 | 0.937 | 1.058 | 0.711 | yes | L2×6 |
+| ECBS1hafb48c7c6d26 | bsgs-neg | bsgs.negation | icv1-f2m17-tm101-00378d4e | 16.00 | 6/6 | 0.964 | [0.715, 1.214] | 1.000 | 0.964 | 4.487 | 0.549 | yes | L1×1 L2×5 |
+| ECBS1hafb48c7c6d26 | kangaroo | kangaroo.vow | icv1-fp20-t727-cd198a38 | 19.10 | 6/6 | 1.947 | [1.519, 2.376] | 2.000 | 0.974 | 2.197 | 1.477 | yes | L2×6 |
+| ECBS1hafb48c7c6d26 | kangaroo | kangaroo.vow | icv1-f2m17-tm101-00378d4e | 16.00 | 6/6 | 1.607 | [1.324, 1.890] | 2.000 | 0.803 | 7.476 | 0.914 | yes | L1×1 L2×5 |
+| ECBS1hafb48c7c6d26 | rho-neg-aa | rho.negation | icv1-fp20-t727-cd198a38 | 19.10 | 6/6 | 1.319 | [0.969, 1.744] | 0.886 | 1.488 | 1.488 | 1.000 | yes | L1×3 L2×3 |
+| ECBS1hafb48c7c6d26 | rho-neg-aa | rho.negation | icv1-f2m17-tm101-00378d4e | 16.00 | 6/6 | 1.758 | [1.368, 2.129] | 0.886 | 1.983 | 8.178 | 1.000 | yes | L1×2 L2×4 |
+=== RUN-NODE0
+session ECBS1h445dba3005bc complete -> /out/node0 (64 records: {"verified": 64})
+run-node0 exit 0
+audit OK: 64 records, 64 verified, 4 replays reproduced, 0 problems
+verify-node0 exit 0
+=== RUN-LONE-SIBLING (must be refused)
+ecbench: CPU 2's SMT sibling 3 is not reserved; a neighbour on it shares the core's pipeline and caches
+run-lone exit 2

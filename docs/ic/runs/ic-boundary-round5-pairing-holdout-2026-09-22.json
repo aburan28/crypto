@@ -1,0 +1,378 @@
+{
+ "what": "Check that drawing the walk's restart pool on first use moved cost and nothing else: every counter of every row compared between the eager and the lazy arm, the saving checked against the offsets each row stopped drawing, and the size of the saving by instance.",
+ "eager": "docs/ic/runs/ic-boundary-ledger-round5-eager-holdout-2026-09-22.json",
+ "lazy": "docs/ic/runs/ic-boundary-ledger-round5-holdout-2026-09-22.json",
+ "rows_compared": 106,
+ "rows_identical_but_for_the_pool": 106,
+ "rows_whose_trajectory_moved": 0,
+ "trajectory_mismatches": [],
+ "walk_rows": 48,
+ "walk_rows_that_drew_fewer_offsets": 31,
+ "rows_whose_saving_is_not_the_offsets_they_dropped": 0,
+ "accounting_mismatches": [],
+ "rows_whose_s_rose": 0,
+ "rows_that_rose_on_identical_counters_at_unpinned_instances": 32,
+ "instances_the_pinned_table_does_not_carry": {
+  "generated-22bit-2987209": [
+   "ns_per_double",
+   "ns_per_lookup",
+   "ns_per_row_op",
+   "ns_per_sqrt",
+   "ns_per_word_xor",
+   "ns_per_legendre",
+   "ns_per_inversion"
+  ],
+  "generated-24bit-12832957": [
+   "ns_per_double",
+   "ns_per_lookup",
+   "ns_per_row_op",
+   "ns_per_sqrt",
+   "ns_per_word_xor",
+   "ns_per_legendre",
+   "ns_per_inversion"
+  ],
+  "random-binary-n24-bf19f6f": [
+   "ns_per_double",
+   "ns_per_lookup",
+   "ns_per_row_op",
+   "ns_per_as_solve",
+   "ns_per_s4_pair",
+   "ns_per_word_xor",
+   "ns_per_frobenius"
+  ],
+  "random-binary-n27-b7ade7fe": [
+   "ns_per_double",
+   "ns_per_lookup",
+   "ns_per_row_op",
+   "ns_per_as_solve",
+   "ns_per_s4_pair",
+   "ns_per_word_xor",
+   "ns_per_frobenius"
+  ]
+ },
+ "largest_savings": [
+  {
+   "log2_r": 21.0,
+   "delta_s": 0.842427,
+   "ratio": 0.989397,
+   "regime": "char2",
+   "instance": "random-binary-n24-bf19f6f",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 21.0,
+   "delta_s": 0.824587,
+   "ratio": 0.99053,
+   "regime": "char2",
+   "instance": "random-binary-n24-bf19f6f",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 21.51,
+   "delta_s": 0.551246,
+   "ratio": 0.988134,
+   "regime": "prime",
+   "instance": "generated-22bit-2987209",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 21.51,
+   "delta_s": 0.54808,
+   "ratio": 0.987477,
+   "regime": "prime",
+   "instance": "generated-22bit-2987209",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "log2_r": 21.51,
+   "delta_s": 0.53875,
+   "ratio": 0.988366,
+   "regime": "prime",
+   "instance": "generated-22bit-2987209",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 21.0,
+   "delta_s": 0.418496,
+   "ratio": 0.985062,
+   "regime": "char2",
+   "instance": "random-binary-n24-bf19f6f",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "log2_r": 21.51,
+   "delta_s": 0.362031,
+   "ratio": 0.991838,
+   "regime": "prime",
+   "instance": "generated-22bit-2987209",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "log2_r": 23.613,
+   "delta_s": 0.309752,
+   "ratio": 0.990325,
+   "regime": "prime",
+   "instance": "generated-24bit-12832957",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 23.613,
+   "delta_s": 0.302887,
+   "ratio": 0.990543,
+   "regime": "prime",
+   "instance": "generated-24bit-12832957",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 21.0,
+   "delta_s": 0.276947,
+   "ratio": 0.990813,
+   "regime": "char2",
+   "instance": "random-binary-n24-bf19f6f",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "log2_r": 23.613,
+   "delta_s": 0.211971,
+   "ratio": 0.990709,
+   "regime": "prime",
+   "instance": "generated-24bit-12832957",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "log2_r": 21.0,
+   "delta_s": 0.159391,
+   "ratio": 0.996203,
+   "regime": "char2",
+   "instance": "random-binary-n24-bf19f6f",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "log2_r": 26.0,
+   "delta_s": 0.146268,
+   "ratio": 0.998681,
+   "regime": "char2",
+   "instance": "random-binary-n27-b7ade7fe",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 26.032,
+   "delta_s": 0.144987,
+   "ratio": 0.999769,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 26.032,
+   "delta_s": 0.144987,
+   "ratio": 0.999723,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 26.0,
+   "delta_s": 0.144012,
+   "ratio": 0.998635,
+   "regime": "char2",
+   "instance": "random-binary-n27-b7ade7fe",
+   "variant": "mitm_m3_negfold_walk"
+  },
+  {
+   "log2_r": 23.613,
+   "delta_s": 0.142085,
+   "ratio": 0.993836,
+   "regime": "prime",
+   "instance": "generated-24bit-12832957",
+   "variant": "mitm_m2_negfold_walk"
+  },
+  {
+   "log2_r": 26.032,
+   "delta_s": 0.139313,
+   "ratio": 0.999802,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 26.032,
+   "delta_s": 0.139313,
+   "ratio": 0.999736,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 21.0,
+   "delta_s": 0.125995,
+   "ratio": 0.996258,
+   "regime": "char2",
+   "instance": "random-binary-n24-bf19f6f",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "log2_r": 26.032,
+   "delta_s": 0.120963,
+   "ratio": 0.999708,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 27.781,
+   "delta_s": 0.083302,
+   "ratio": 0.999487,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 27.781,
+   "delta_s": 0.083302,
+   "ratio": 0.999287,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 27.781,
+   "delta_s": 0.08271,
+   "ratio": 0.999626,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 27.781,
+   "delta_s": 0.08271,
+   "ratio": 0.999205,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 27.781,
+   "delta_s": 0.068288,
+   "ratio": 0.994613,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 26.032,
+   "delta_s": 0.062293,
+   "ratio": 0.999851,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 23.613,
+   "delta_s": 0.003673,
+   "ratio": 0.999731,
+   "regime": "prime",
+   "instance": "generated-24bit-12832957",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "log2_r": 39.0,
+   "delta_s": 0.002488,
+   "ratio": 0.999954,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 39.0,
+   "delta_s": 0.002488,
+   "ratio": 0.999803,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 39.0,
+   "delta_s": 0.002469,
+   "ratio": 0.999923,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 39.0,
+   "delta_s": 0.002469,
+   "ratio": 0.999803,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m3_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 39.0,
+   "delta_s": 0.002332,
+   "ratio": 0.999621,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 23.613,
+   "delta_s": 0.001617,
+   "ratio": 0.999861,
+   "regime": "prime",
+   "instance": "generated-24bit-12832957",
+   "variant": "mitm_m2_negfold_walk_balanced"
+  },
+  {
+   "log2_r": 39.0,
+   "delta_s": 0.001235,
+   "ratio": 0.999808,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^41)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 26.032,
+   "delta_s": 0.0,
+   "ratio": 1.0,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 27.781,
+   "delta_s": 0.0,
+   "ratio": 1.0,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  },
+  {
+   "log2_r": 27.781,
+   "delta_s": 0.0,
+   "ratio": 1.0,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 27.781,
+   "delta_s": 0.0,
+   "ratio": 1.0,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^37)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk_balanced"
+  },
+  {
+   "log2_r": 26.032,
+   "delta_s": 0.0,
+   "ratio": 1.0,
+   "regime": "koblitz",
+   "instance": "K_0 / GF(2^39)",
+   "variant": "mitm_m2_signed_orbit_columns_frobfold_walk"
+  }
+ ],
+ "best_ratio_below_2_20": NaN,
+ "best_ratio_at_or_above_2_20": 0.985062,
+ "largest_delta_s_at_or_above_2_20": 0.842427
+}

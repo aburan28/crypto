@@ -1,0 +1,167 @@
+{
+  "freezes": [
+    "research/notes/ecc2k130/compact_s3_batch_20260929/FROZEN.json",
+    "research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json",
+    "research/notes/ecc2k130/compact_swap_quotient_20260929/FROZEN.json"
+  ],
+  "schema": "compact-frozen-source-snapshots-v1",
+  "snapshots": [
+    {
+      "bytes": 3536,
+      "gzip_sha256": "ae906875cad520e34f8f7aba0e0076ee84d52f7be1f251cb5035516ca22dd932",
+      "path": ".github/workflows/compact-s3-batch.yml",
+      "sha256": "8a1d24841733cc5913b570004543a8d7f1e5fdd3ce2f98267ba7924849184888"
+    },
+    {
+      "bytes": 5196,
+      "gzip_sha256": "fc5ddc62071f7fc7410a71e4bc8a1b42d1a14c067da48907837b6a14981c11b2",
+      "path": ".github/workflows/compact-s3-prefilter.yml",
+      "sha256": "29b154568920e1e5aeec0f1d86f63629a43dfd4624a0dfa2bea1d4f1c075893c"
+    },
+    {
+      "bytes": 3933,
+      "gzip_sha256": "44a63363e3d636abaa6b24f54a86ae30331937abc7dc7d8e1c1d0014b59d7b77",
+      "path": ".github/workflows/compact-swap-quotient.yml",
+      "sha256": "4e3094a6037e696b2d57230ca5eedd6d7e0178b502801501c71fe7e77c6de216"
+    },
+    {
+      "bytes": 3527,
+      "gzip_sha256": "1c6fc7963226055f68d81eb3ddb999d6456a758bba17c104a48809863bb39d68",
+      "path": "Cargo.toml",
+      "sha256": "f1b3abc246c4971b48b377d5696bc96594deb729320348c4277307e42ed61721"
+    },
+    {
+      "bytes": 7257,
+      "gzip_sha256": "0567daae584f337eaaae279b99fe41d81a42945b9821fa42564b62d6fd28d56b",
+      "path": "docs/ic/calibration.json",
+      "sha256": "425078627bbc38b3f9cb97351b405f52509431c080ed996bfeab72d12d78acfd"
+    },
+    {
+      "bytes": 37339,
+      "gzip_sha256": "8cade9cb2fffaee7e053324c715508a4734ea8b23289bfd43c009080dad6b4ed",
+      "path": "examples/koblitz_orbit_dlp_fast.rs",
+      "sha256": "8dea682ac4b12413c7b43a8849d6972b682dd0aa605d0ee4f41b7a4c1881ab75"
+    },
+    {
+      "bytes": 67739,
+      "gzip_sha256": "8a411517c6e21c82695b920717eea32f2edd745339b65c1d230099e8b3e64622",
+      "path": "examples/koblitz_orbit_dlp_s3_batch.rs",
+      "sha256": "702a0a05709bc14bc10bafbb08edb2a2f5f86794e970d84c317da3bc65cdcf38"
+    },
+    {
+      "bytes": 60280,
+      "gzip_sha256": "bc04a15841388344c8c77910a4566f2c9676322b2077a1269cdfc646a15b8043",
+      "path": "examples/koblitz_orbit_dlp_s3_batch.rs",
+      "sha256": "e998120842faf393910a6b4a9740b3af9880eb626578fa88c575a32e5254f2c7"
+    },
+    {
+      "bytes": 42184,
+      "gzip_sha256": "794906172b409c87ccc0e43a753b303030b167e01f826b6405bf630847209d7c",
+      "path": "examples/koblitz_orbit_dlp_swap.rs",
+      "sha256": "b008bfbdbc008ac8919af1160da6c3cd2cf414250beb7f01ec7bb58de4eed608"
+    },
+    {
+      "bytes": 26881,
+      "gzip_sha256": "baa7914affa36674a2ee0c61eda9a7a23655e989b9bd843cb23ed5c8f7e1c9ce",
+      "path": "examples/koblitz_rho_batch_ks_v2_n61.rs",
+      "sha256": "019b2e2da563ad5212e46a24ed6c0f2f6e90aab083b3769260d6b056bd4095cf"
+    },
+    {
+      "bytes": 48769,
+      "gzip_sha256": "2dd9a0f741ec13e1ca65501be67797a162e18126aeeb3e2c92bd054c0fe9ff86",
+      "path": "examples/koblitz_rho_batch_ks_v3.rs",
+      "sha256": "98b6e8a27d821ebfc7ae716410184dffe89aadf27dfe36bcac8ce834c39cf04c"
+    },
+    {
+      "bytes": 9797,
+      "gzip_sha256": "9d9746abaec67d585996ab0fd774dbc65da3399b98a16a2c2feaf057d57607b0",
+      "path": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py",
+      "sha256": "2ba997abbd5e9f17756c101b8ca26567219adf103308701f0c237ae495f23222"
+    },
+    {
+      "bytes": 12646,
+      "gzip_sha256": "6aaef812383f77f02df65d92d790cee1528294edba2e6f3526f525768022d383",
+      "path": "research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py",
+      "sha256": "649459a53b979b9eaf150ca1973c80b1bde29baf3f5567443c668978d3c06e6d"
+    },
+    {
+      "bytes": 8238,
+      "gzip_sha256": "6390b3ad02c520b8ca31e492b7155d5991b07c74e76b9237bb5ae410ed564c4f",
+      "path": "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py",
+      "sha256": "254869e52bdbd417e14d74c87940293490160faaa7fbb45f4edcb6b773a4b0f6"
+    },
+    {
+      "bytes": 5268,
+      "gzip_sha256": "ddde91db84a90c0cd01f18d78eedb577404b98c6367ad59cff13b35a169db796",
+      "path": "research/notes/ecc2k130/compact_s3_prefilter_20260930/PROTOCOL.md",
+      "sha256": "74bd16b4bb8fd21b2457e2e7690ce88f548bc2b5ea40edbeced492ff81e87bdf"
+    },
+    {
+      "bytes": 3975,
+      "gzip_sha256": "783d6c27c840a8d9e5e458e660aec63388673629abe52d9cbba5887c960ff279",
+      "path": "research/notes/ecc2k130/compact_s3_prefilter_20260930/prepare.py",
+      "sha256": "eda8080fa4f508c08130129479e0ad26f3235e1b628e27b5bbfc9db52ce85362"
+    },
+    {
+      "bytes": 5743,
+      "gzip_sha256": "cf0097c8a428f676b4c3f0066828e92002a92de2e0b9183ff3109c8d2f5c6d96",
+      "path": "research/notes/ecc2k130/compact_s3_prefilter_20260930/run_panel.py",
+      "sha256": "98cc9a6d20b50742a973ed7e35a1235be753b7fcf2f05390c821f0a66c073ab9"
+    },
+    {
+      "bytes": 19703,
+      "gzip_sha256": "49367daec39501f4263ef0510428ceeec9ef7c1fa113a097e10e7822fda0867c",
+      "path": "research/notes/ecc2k130/compact_s3_prefilter_20260930/verify_panel.py",
+      "sha256": "9c6acec9cc5f0129f71392d8943aedcf37e96f7bd95d6e439fa4842f0dc355c6"
+    },
+    {
+      "bytes": 29121,
+      "gzip_sha256": "1e52ee8d8da43a9ebaca9766ea21c44e52c4f2f88800c0311875938ac4785e91",
+      "path": "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock",
+      "sha256": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627"
+    },
+    {
+      "bytes": 9971,
+      "gzip_sha256": "206c032836451184b0957db3500320fbb9af23f2acf9d2deb1aca5aace7b4ab8",
+      "path": "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py",
+      "sha256": "1df6fc9295cf525be198a19842dfdca7391ac985bfa79ffa1acf8e546cc05ce1"
+    },
+    {
+      "bytes": 65487,
+      "gzip_sha256": "1da9352c137f326739364b6109a4361171a6b6a13c1b3c1ca1928ec6a4665a2d",
+      "path": "src/cryptanalysis/koblitz_fast.rs",
+      "sha256": "1d5ceb6374e455ba40e079328efbf7a62b5cfe0e7fd42ab4e562b3c8b2f183fa"
+    },
+    {
+      "bytes": 670128,
+      "gzip_sha256": "a3c46105f33606171cfea62a2f8de24c753051b2fac7c6d1d882d1e86dc21ed9",
+      "path": "src/cryptanalysis/koblitz_index_calculus.rs",
+      "sha256": "22b3601a082e706abf709a9798823a21d6748f84b47647cdfe6a7fcc1c73382c"
+    },
+    {
+      "bytes": 669217,
+      "gzip_sha256": "e5bfdb9eeaeff3e2145a920f8f6e2dbb5f2aff77c06f7965c6be106dd01230ee",
+      "path": "src/cryptanalysis/koblitz_index_calculus.rs",
+      "sha256": "747596aa01a360ca4b010457a739ea12c829a81e845100b4cc7d8f6cb226cd20"
+    },
+    {
+      "bytes": 57354,
+      "gzip_sha256": "a3eb7417ec427ad60a79d0d1ec95203d0564d9c8d1e595b8b39ef57eb5270350",
+      "path": "src/cryptanalysis/semaev_decomp.rs",
+      "sha256": "c6e9263b66f4a0892d9b46bfa23e7dd36e93c787a79a1e37181f2449ab33e8b2"
+    },
+    {
+      "bytes": 1765,
+      "gzip_sha256": "4da43a8e504e117980f95b2bd19c924520615f1c6b76b74a633ef03ab45f1d46",
+      "path": "src/lib.rs",
+      "sha256": "f1e13bc7fa51ff57dd4cd056036669577d1f07a0cb06502b4b839b9af50ffba6"
+    },
+    {
+      "bytes": 15277,
+      "gzip_sha256": "09e90796796898948f24926ca79b35775deaa57417884ee11eea328befd54e86",
+      "path": "tools/isolated_bench.py",
+      "sha256": "4575860a5da9a6a6e997b91fc173ac515a2497290c0e830301c83fa3b712c05c"
+    }
+  ],
+  "source_commit": "f84e6193a5b33b939b5dfa8934852a4115a6f1fd"
+}

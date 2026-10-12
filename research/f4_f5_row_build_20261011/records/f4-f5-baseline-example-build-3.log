@@ -1,0 +1,292 @@
+   Compiling crypto v0.1.0 (/workspace/crypto)
+error[E0428]: the name `to_fast_point` is defined multiple times
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5594:1
+     |
+3647 | / pub(crate) fn to_fast_point(
+3648 | |     fast: &FastBinaryCurve,
+3649 | |     p: &BinaryPoint,
+3650 | | ) -> crate::cryptanalysis::koblitz_fast_arith::FastPoint {
+...    |
+3655 | | }
+     | |_- previous definition of the value `to_fast_point` here
+...
+5594 |   pub(crate) fn to_fast_point(fast: &FastBinaryCurve, p: &BinaryPoint) -> ArithFastPoint {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `to_fast_point` redefined here
+     |
+     = note: `to_fast_point` must be defined only once in the value namespace of this module
+
+error[E0428]: the name `from_fast_point` is defined multiple times
+    --> src/cryptanalysis/koblitz_index_calculus.rs:5602:1
+     |
+3658 | / pub(crate) fn from_fast_point(
+3659 | |     fast: &FastBinaryCurve,
+3660 | |     p: crate::cryptanalysis::koblitz_fast_arith::FastPoint,
+3661 | | ) -> BinaryPoint {
+...    |
+3669 | | }
+     | |_- previous definition of the value `from_fast_point` here
+...
+5602 |   pub(crate) fn from_fast_point(fast: &FastBinaryCurve, p: ArithFastPoint) -> BinaryPoint {
+     |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `from_fast_point` redefined here
+     |
+     = note: `from_fast_point` must be defined only once in the value namespace of this module
+
+error[E0252]: the name `FastBinaryCurve` is defined multiple times
+   --> src/cryptanalysis/koblitz_index_calculus.rs:155:5
+    |
+153 |     pack_fast, FastBinaryCurve, FastPoint as ArithFastPoint,
+    |                --------------- previous import of the type `FastBinaryCurve` here
+154 | };
+155 | use crate::cryptanalysis::koblitz_fast_arith::FastBinaryCurve;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `FastBinaryCurve` reimported here
+    |
+    = note: `FastBinaryCurve` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `IncrementalRelationSolver` is defined multiple times
+   --> src/cryptanalysis/koblitz_index_calculus.rs:164:53
+    |
+162 |     to_u64_mod, IncrementalRelationSolver, RowStatus, U64RankTracker,
+    |                 ------------------------- previous import of the type `IncrementalRelationSolver` here
+163 | };
+164 | use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
+    |                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^--
+    |                                                     |
+    |                                                     `IncrementalRelationSolver` reimported here
+    |                                                     help: remove unnecessary import
+    |
+    = note: `IncrementalRelationSolver` must be defined only once in the type namespace of this module
+
+error[E0252]: the name `RowStatus` is defined multiple times
+   --> src/cryptanalysis/koblitz_index_calculus.rs:164:80
+    |
+162 |     to_u64_mod, IncrementalRelationSolver, RowStatus, U64RankTracker,
+    |                                            --------- previous import of the type `RowStatus` here
+163 | };
+164 | use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
+    |                                                                                ^^^^^^^^^ `RowStatus` reimported here
+    |
+    = note: `RowStatus` must be defined only once in the type namespace of this module
+
+warning: unused import: `super::koblitz_fast_arith::FastBinaryCurve`
+  --> src/cryptanalysis/koblitz_factor_base_search.rs:77:5
+   |
+77 | use super::koblitz_fast_arith::FastBinaryCurve;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `crate::cryptanalysis::koblitz_fast_arith::FastBinaryCurve`
+   --> src/cryptanalysis/koblitz_index_calculus.rs:155:5
+    |
+155 | use crate::cryptanalysis::koblitz_fast_arith::FastBinaryCurve;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `U64RankTracker` and `to_u64_mod`
+   --> src/cryptanalysis/koblitz_index_calculus.rs:162:5
+    |
+162 |     to_u64_mod, IncrementalRelationSolver, RowStatus, U64RankTracker,
+    |     ^^^^^^^^^^                                        ^^^^^^^^^^^^^^
+
+warning: unused imports: `IncrementalRelationSolver` and `RowStatus`
+   --> src/cryptanalysis/koblitz_index_calculus.rs:164:53
+    |
+164 | use crate::cryptanalysis::koblitz_relation_solver::{IncrementalRelationSolver, RowStatus};
+    |                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^
+
+error[E0124]: field `tail_enumerations` is already declared
+    --> src/cryptanalysis/koblitz_groebner.rs:4958:5
+     |
+4951 |     pub tail_enumerations: usize,
+     |     ---------------------------- `tail_enumerations` first declared here
+...
+4958 |     pub tail_enumerations: usize,
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field already declared
+
+error[E0124]: field `tail_assignments_tested` is already declared
+    --> src/cryptanalysis/koblitz_groebner.rs:4961:5
+     |
+4953 |     pub tail_assignments_tested: usize,
+     |     ---------------------------------- `tail_assignments_tested` first declared here
+...
+4961 |     pub tail_assignments_tested: usize,
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field already declared
+
+error[E0618]: expected function, found `std::option::Option<_>`
+   --> src/cryptanalysis/koblitz_fast_arith.rs:396:5
+    |
+396 |       None
+    |       -^^^- help: consider using a semicolon here to finish the statement: `;`
+    |  _____|
+    | |
+397 | |     (0..(1u64 << n)).find(|&v| (gf.sqr(v) ^ v) == c)
+    | |____________________- call expression requires function
+
+error[E0062]: field `tail_enumerations` specified more than once
+    --> src/cryptanalysis/koblitz_groebner.rs:4958:5
+     |
+4951 |     pub tail_enumerations: usize,
+     |     ---------------------------- first use of `tail_enumerations`
+...
+4958 |     pub tail_enumerations: usize,
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ used more than once
+
+error[E0062]: field `tail_assignments_tested` specified more than once
+    --> src/cryptanalysis/koblitz_groebner.rs:4961:5
+     |
+4953 |     pub tail_assignments_tested: usize,
+     |     ---------------------------------- first use of `tail_assignments_tested`
+...
+4961 |     pub tail_assignments_tested: usize,
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ used more than once
+
+error[E0062]: field `tail_enumerations` specified more than once
+    --> src/cryptanalysis/koblitz_groebner.rs:4958:9
+     |
+4939 | #[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+     |                                                                  ------------------ first use of `tail_enumerations`
+...
+4958 |     pub tail_enumerations: usize,
+     |         ^^^^^^^^^^^^^^^^^ used more than once
+
+error[E0062]: field `tail_assignments_tested` specified more than once
+    --> src/cryptanalysis/koblitz_groebner.rs:4961:9
+     |
+4939 | #[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+     |                                                                  ------------------ first use of `tail_assignments_tested`
+...
+4961 |     pub tail_assignments_tested: usize,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^ used more than once
+
+error[E0277]: a value of type `()` cannot be built from an iterator over elements of type `binary_ecc::curve::BinaryPoint`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1794:22
+     |
+1794 |                     .collect()
+     |                      ^^^^^^^ value of type `()` cannot be built from `std::iter::Iterator<Item=binary_ecc::curve::BinaryPoint>`
+     |
+help: the trait `FromIterator<binary_ecc::curve::BinaryPoint>` is not implemented for `()`
+      but trait `FromIterator<()>` is implemented for it
+    --> /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/unit.rs:17:0
+     = help: for that trait implementation, expected `()`, found `binary_ecc::curve::BinaryPoint`
+note: the method call chain might not have had the expected associated types
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1793:22
+     |
+1791 |                 fast.batch_scalar_mul(&pts, &rs)
+     |                 ---- this expression has type `FastBinaryCurve`
+1792 |                     .into_iter()
+     |                      ----------- `Iterator::Item` is `Option<(u64, u64)>` here
+1793 |                     .map(|p| from_fast_point(&fast, p))
+     |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Iterator::Item` changed to `BinaryPoint` here
+note: required by a bound in `std::iter::Iterator::collect`
+    --> /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/iter/traits/iterator.rs:2073:4
+
+error[E0277]: a value of type `()` cannot be built from an iterator over elements of type `binary_ecc::curve::BinaryPoint`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1800:18
+     |
+1800 |                 .collect(),
+     |                  ^^^^^^^ value of type `()` cannot be built from `std::iter::Iterator<Item=binary_ecc::curve::BinaryPoint>`
+     |
+help: the trait `FromIterator<binary_ecc::curve::BinaryPoint>` is not implemented for `()`
+      but trait `FromIterator<()>` is implemented for it
+    --> /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/unit.rs:17:0
+     = help: for that trait implementation, expected `()`, found `binary_ecc::curve::BinaryPoint`
+note: the method call chain might not have had the expected associated types
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1799:18
+     |
+1796 |               _ => self
+     |  __________________-
+1797 | |                 .points
+     | |_______________________- this expression has type `Vec<BinaryPoint>`
+1798 |                   .iter()
+     |                    ------ `Iterator::Item` is `&BinaryPoint` here
+1799 |                   .map(|p| kc.mul(p, &kc.subgroup_order))
+     |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Iterator::Item` changed to `BinaryPoint` here
+note: required by a bound in `std::iter::Iterator::collect`
+    --> /rustc/b940084d7eb6a299eb4bfeb8e34901bc051e7ac4/library/core/src/iter/traits/iterator.rs:2073:4
+
+error[E0308]: mismatched types
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1862:40
+     |
+1862 |                 current = kc.frobenius(&current);
+     |                              --------- ^^^^^^^^ expected `&BinaryPoint`, found `&Option<(u64, u64)>`
+     |                              |
+     |                              arguments to this method are incorrect
+     |
+     = note: expected reference `&binary_ecc::curve::BinaryPoint`
+                found reference `&std::option::Option<(u64, u64)>`
+note: method defined here
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1222:12
+     |
+1222 |     pub fn frobenius(&self, p: &BinaryPoint) -> BinaryPoint {
+     |            ^^^^^^^^^        ---------------
+
+error[E0308]: mismatched types
+    --> src/cryptanalysis/koblitz_index_calculus.rs:1862:27
+     |
+1854 |             let mut current = projected;
+     |                               --------- expected due to this value
+...
+1862 |                 current = kc.frobenius(&current);
+     |                           ^^^^^^^^^^^^^^^^^^^^^^ expected `Option<(u64, u64)>`, found `BinaryPoint`
+     |
+     = note: expected enum `std::option::Option<(u64, u64)>`
+                found enum `binary_ecc::curve::BinaryPoint`
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:846:11
+    |
+831 |         FactorBaseSpec::StandardSubspace { dimension } => {
+    |         ---------------------------------------------- matches all the relevant values
+...
+846 |         | FactorBaseSpec::StandardSubspace { .. }
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+    |
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:847:11
+    |
+840 |         FactorBaseSpec::CofactorProjected { .. } | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |         ---------------------------------------- matches all the relevant values
+...
+847 |         | FactorBaseSpec::CofactorProjected { .. }
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+
+warning: unreachable pattern
+   --> src/cryptanalysis/koblitz_factor_base_search.rs:848:11
+    |
+840 |         FactorBaseSpec::CofactorProjected { .. } | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |                                                    ------------------------------------- matches all the relevant values
+...
+848 |         | FactorBaseSpec::SubgroupOrbits { .. } => None,
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+
+warning: unreachable pattern
+    --> src/cryptanalysis/koblitz_groebner.rs:4958:9
+     |
+4951 |     pub tail_enumerations: usize,
+     |         ----------------- matches all the relevant values
+...
+4958 |     pub tail_enumerations: usize,
+     |         ^^^^^^^^^^^^^^^^^ no value can reach this
+
+warning: unreachable pattern
+    --> src/cryptanalysis/koblitz_groebner.rs:4961:9
+     |
+4953 |     pub tail_assignments_tested: usize,
+     |         ----------------------- matches all the relevant values
+...
+4961 |     pub tail_assignments_tested: usize,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+
+warning: unused variable: `sums`
+    --> src/cryptanalysis/koblitz_index_calculus.rs:3191:9
+     |
+3191 |     let sums = fast.batch_add(&pairs);
+     |         ^^^^ help: if this is intentional, prefix it with an underscore: `_sums`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+Some errors have detailed explanations: E0062, E0124, E0252, E0277, E0308, E0428, E0618.
+For more information about an error, try `rustc --explain E0062`.
+warning: `crypto` (lib) generated 10 warnings
+error: could not compile `crypto` (lib) due to 18 previous errors; 10 warnings emitted

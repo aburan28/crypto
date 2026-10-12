@@ -15,7 +15,7 @@
 #
 # Run: sage howe_mestre.sage
 #
-# Companion to RESEARCH_MESTRE_HOWE.md and the partial PARI
+# Companion to research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md and the partial PARI
 # implementation in secp256k1_cm_audit/igusa_clebsch.gp /
 # mestre_scaffold.gp.
 
@@ -142,6 +142,6 @@ print("    - Or use Magma's HyperellipticCurveFromInvariants directly")
 print("")
 print("• The Igusa invariants of (E × E^t)/Γ_α require a Sage extension")
 print("  that's beyond core Sage's elliptic-curves and genus-2 modules.")
-print("  See RESEARCH_MESTRE_HOWE.md §7 for the implementation roadmap.")
+print("  See research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md §7 for the implementation roadmap.")
 print("")
 print("================================================================")

@@ -1,0 +1,31 @@
+
+| instance | log₂ r | row | S | vs rho (frozen, A = 1) | vs rho (matched) | vs floor (A = 2) |
+|:--|--:|:--|--:|--:|--:|--:|
+| random-binary-n13-b1c1b | 11.0 | **rho** (frozen 18.7 → matched 3.098) | | | | |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + mitm[m=2] + — + walk | 83.3 | 4.442× | 26.9× | 94.0× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + mitm[m=2] + — + walk | 83.6 | 4.459× | 27.0× | 94.3× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + buchberger-f2 + walk | 73244 | 3908× | 23639× | 82647× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + buchberger-f2 + walk | 34948 | 1865× | 11279× | 39435× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + f4-f2 + walk | 6470 | 345× | 2088× | 7300× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + f4-f2 + walk | 3785 | 202× | 1221× | 4271× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + matrix-f4 + walk | 8050 | 429× | 2598× | 9084× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + matrix-f4 + walk | 4829 | 258× | 1558× | 5449× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + matrix-f5 + walk | 8934 | 477× | 2883× | 10081× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + matrix-f5 + walk | 4996 | 267× | 1612× | 5638× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + inherited-f4 + walk | 6465 | 345× | 2086× | 7295× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + inherited-f4 + walk | 3974 | 212× | 1283× | 4484× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + crossbred-f2 + walk | 12994 | 693× | 4194× | 14662× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + crossbred-f2 + walk | 6190 | 330× | 1998× | 6985× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + fes-f2 + walk | 386 | 20.6× | 125× | 435× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + fes-f2 + walk | 234 | 12.5× | 75.4× | 264× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + exhaustive + walk | 854 | 45.6× | 276× | 964× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + exhaustive + walk | 471 | 25.1× | 152× | 531× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + sat-cdcl + walk | 158676 | 8466× | 51211× | 179046× |
+| random-binary-n13-b1c1b | 11.0 | binary-subspace[dimension=6] + descent-algebraic[m=2] + sat-cdcl + walk | 76953 | 4106× | 24836× | 86832× |
+
+Re-priced research/ic_framework_engines_20260922/results/baseline_v1/W13-s20260923.json: "complete"; the frozen walk reproduced on every recorded seed: true
+Report saved: research/ic_rho_reference_20260923/reprice/W13-s20260923.json
+
+real	0m0.028s
+user	0m0.010s
+sys	0m0.004s

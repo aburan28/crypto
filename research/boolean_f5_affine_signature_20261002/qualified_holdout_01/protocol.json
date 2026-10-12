@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "study": "boolean_f5_affine_selected_row_signature",
+  "degree_bound": 4,
+  "variables": [12, 16, 20, 24],
+  "batches": [2, 8, 32],
+  "families": ["independent_affine", "walk_affine"],
+  "discovery_seeds": [20261005, 3141601, 2718293],
+  "holdout_seeds": [20261012, 4242433, 5772169],
+  "worker_seconds": 600,
+  "selected_row_budget_per_system": 8192,
+  "evidence_cap_bytes": 67108864,
+  "primary_variables": [16, 20, 24],
+  "primary_batch": 32,
+  "minimum_largest_signature_fraction": 0.8,
+  "advance_only_if_all_primary_discovery_cells_pass": true,
+  "complete_f5_cost": null,
+  "full_ic_cost": null,
+  "rho_ratio": null
+}

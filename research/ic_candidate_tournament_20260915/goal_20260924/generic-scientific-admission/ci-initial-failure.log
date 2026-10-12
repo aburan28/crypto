@@ -1,0 +1,35 @@
+linux-integration	Build source-bound generic worker and audit scientific controls	﻿2026-09-26T03:26:48.1133831Z ##[group]Run python research/ic_candidate_tournament_20260915/generic_build.py \
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1134816Z ^[[36;1mpython research/ic_candidate_tournament_20260915/generic_build.py \^[[0m
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1135547Z ^[[36;1m  --out "$RUNNER_TEMP/ic-generic-build"^[[0m
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1136565Z ^[[36;1mpython research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/run_controls.py \^[[0m
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1137724Z ^[[36;1m  --build "$RUNNER_TEMP/ic-generic-build" --out "$RUNNER_TEMP/ic-generic-admission"^[[0m
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1184065Z shell: /usr/bin/bash -e {0}
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1184345Z env:
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1184614Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1185040Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1185470Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1185849Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1186255Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1186617Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1186973Z   CARGO_HOME: /home/runner/.cargo
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1187221Z   CARGO_INCREMENTAL: 0
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1187446Z   CARGO_TERM_COLOR: always
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1187689Z   CACHE_ON_FAILURE: false
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.1187908Z ##[endgroup]
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2310755Z Traceback (most recent call last):
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2316996Z   File "/home/runner/work/crypto/crypto/research/ic_candidate_tournament_20260915/generic_build.py", line 163, in <module>
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2317661Z     result = build(args.root, args.out)
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2317943Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2318483Z   File "/home/runner/work/crypto/crypto/research/ic_candidate_tournament_20260915/generic_build.py", line 121, in build
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2319236Z     metadata = json.loads(command(['cargo', 'metadata', '--locked', '--offline', '--format-version', '1'], root, env))
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2319792Z                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2320381Z   File "/home/runner/work/crypto/crypto/research/ic_candidate_tournament_20260915/generic_build.py", line 46, in command
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2321069Z     return subprocess.check_output(args, cwd=root, env=env, text=True, stderr=subprocess.STDOUT).strip()
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2321565Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2322086Z   File "/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/subprocess.py", line 466, in check_output
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2910366Z     return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2911170Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2912016Z   File "/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/subprocess.py", line 571, in run
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2913154Z     raise CalledProcessError(retcode, process.args,
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2915297Z subprocess.CalledProcessError: Command '['cargo', 'metadata', '--locked', '--offline', '--format-version', '1']' returned non-zero exit status 101.
+linux-integration	Build source-bound generic worker and audit scientific controls	2026-09-26T03:26:48.2987641Z ##[error]Process completed with exit code 1.

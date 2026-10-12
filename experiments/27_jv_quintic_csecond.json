@@ -1,0 +1,702 @@
+[
+  {
+    "p": 271,
+    "seed": 1,
+    "n": 1461661263463,
+    "bits": 40.410746147514274,
+    "base": 140,
+    "fp_muls_per_add": 220.0,
+    "precompute_muls": 1872961524,
+    "precompute_ms": 2000.1908190000001,
+    "max_degree": 24,
+    "budget_secs": 900.0,
+    "random_residuals": 3,
+    "constructed_residuals": 2,
+    "random_decomposable": 0,
+    "expected_rate": 0.00015375153751537516,
+    "planted_found": 2,
+    "unverified": 0,
+    "mismatches": 0,
+    "undetermined": 0,
+    "timed_out": 0,
+    "c_second": {
+      "mean": 30231050735.666668,
+      "min": 30229740361,
+      "max": 30232154178
+    },
+    "weil_muls": {
+      "mean": 129427.0,
+      "min": 129427,
+      "max": 129427
+    },
+    "f4_muls": {
+      "mean": 30230921308.666668,
+      "min": 30229610934,
+      "max": 30232024751
+    },
+    "roots_muls": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "sign_group_ops": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "f4_ms": {
+      "mean": 15265.666666666666,
+      "min": 15013,
+      "max": 15468
+    },
+    "solving_degree": {
+      "mean": 2.0,
+      "min": 2,
+      "max": 2
+    },
+    "degree_reached": {
+      "mean": 19.0,
+      "min": 19,
+      "max": 19
+    },
+    "max_rows": {
+      "mean": 8825.666666666666,
+      "min": 8825,
+      "max": 8826
+    },
+    "max_cols": {
+      "mean": 8443.666666666666,
+      "min": 8443,
+      "max": 8444
+    },
+    "c_second_decomposable": {
+      "mean": 48095309462.5,
+      "min": 48094624306,
+      "max": 48095994619
+    },
+    "f4_ms_decomposable": {
+      "mean": 83109.0,
+      "min": 80894,
+      "max": 85324
+    },
+    "degree_reached_decomposable": {
+      "mean": 24.0,
+      "min": 24,
+      "max": 24
+    },
+    "max_cols_decomposable": {
+      "mean": 16301.5,
+      "min": 16301,
+      "max": 16302
+    },
+    "per_test": [
+      {
+        "weil_muls": 129427,
+        "f4_muls": 30231128241,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 8826,
+        "max_cols": 8444,
+        "f4_ms": 15316.385279,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 30229610934,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 8825,
+        "max_cols": 8443,
+        "f4_ms": 15013.777413,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 30232024751,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 8826,
+        "max_cols": 8444,
+        "f4_ms": 15468.738605,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 48094491873,
+        "roots_muls": 1026,
+        "group_ops": 9,
+        "solving_degree": 3,
+        "degree_reached": 24,
+        "max_rows": 45495,
+        "max_cols": 16301,
+        "f4_ms": 85324.410778,
+        "inconsistent": false,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 1,
+        "decompositions": 1
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 48095863615,
+        "roots_muls": 917,
+        "group_ops": 3,
+        "solving_degree": 3,
+        "degree_reached": 24,
+        "max_rows": 45495,
+        "max_cols": 16302,
+        "f4_ms": 80894.45428,
+        "inconsistent": false,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 1,
+        "decompositions": 1
+      }
+    ],
+    "mitm4_group_ops": 39200.0,
+    "wall_ms": 214670.99955500002
+  },
+  {
+    "p": 521,
+    "seed": 1,
+    "n": 38387403997039,
+    "bits": 45.12569823270901,
+    "base": 274,
+    "fp_muls_per_add": 220.0,
+    "precompute_muls": 1872961524,
+    "precompute_ms": 1837.889961,
+    "max_degree": 24,
+    "budget_secs": 900.0,
+    "random_residuals": 3,
+    "constructed_residuals": 2,
+    "random_decomposable": 0,
+    "expected_rate": 0.0000799744081893794,
+    "planted_found": 2,
+    "unverified": 0,
+    "mismatches": 0,
+    "undetermined": 0,
+    "timed_out": 0,
+    "c_second": {
+      "mean": 30321011704.0,
+      "min": 30318912561,
+      "max": 30322638020
+    },
+    "weil_muls": {
+      "mean": 129427.0,
+      "min": 129427,
+      "max": 129427
+    },
+    "f4_muls": {
+      "mean": 30320882277.0,
+      "min": 30318783134,
+      "max": 30322508593
+    },
+    "roots_muls": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "sign_group_ops": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "f4_ms": {
+      "mean": 14771.0,
+      "min": 14376,
+      "max": 15560
+    },
+    "solving_degree": {
+      "mean": 2.0,
+      "min": 2,
+      "max": 2
+    },
+    "degree_reached": {
+      "mean": 19.0,
+      "min": 19,
+      "max": 19
+    },
+    "max_rows": {
+      "mean": 8826.0,
+      "min": 8826,
+      "max": 8826
+    },
+    "max_cols": {
+      "mean": 8444.0,
+      "min": 8444,
+      "max": 8444
+    },
+    "c_second_decomposable": {
+      "mean": 48219179470.5,
+      "min": 48218942459,
+      "max": 48219416482
+    },
+    "f4_ms_decomposable": {
+      "mean": 85655.5,
+      "min": 85148,
+      "max": 86163
+    },
+    "degree_reached_decomposable": {
+      "mean": 24.0,
+      "min": 24,
+      "max": 24
+    },
+    "max_cols_decomposable": {
+      "mean": 16302.0,
+      "min": 16302,
+      "max": 16302
+    },
+    "per_test": [
+      {
+        "weil_muls": 129427,
+        "f4_muls": 30322508593,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 8826,
+        "max_cols": 8444,
+        "f4_ms": 14376.976709999999,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 30318783134,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 8826,
+        "max_cols": 8444,
+        "f4_ms": 14377.241872,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 30321355104,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 8826,
+        "max_cols": 8444,
+        "f4_ms": 15560.630631,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 48219284601,
+        "roots_muls": 1134,
+        "group_ops": 6,
+        "solving_degree": 3,
+        "degree_reached": 24,
+        "max_rows": 45495,
+        "max_cols": 16302,
+        "f4_ms": 85148.012936,
+        "inconsistent": false,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 1,
+        "decompositions": 1
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 48218808769,
+        "roots_muls": 963,
+        "group_ops": 15,
+        "solving_degree": 3,
+        "degree_reached": 24,
+        "max_rows": 45495,
+        "max_cols": 16302,
+        "f4_ms": 86163.17387700001,
+        "inconsistent": false,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 1,
+        "decompositions": 1
+      }
+    ],
+    "mitm4_group_ops": 150152.0,
+    "wall_ms": 218358.460793
+  },
+  {
+    "p": 761,
+    "seed": 1,
+    "n": 255225022210237,
+    "bits": 47.85876310599362,
+    "base": 371,
+    "fp_muls_per_add": 220.0,
+    "precompute_muls": 1872961524,
+    "precompute_ms": 2364.0368070000004,
+    "max_degree": 24,
+    "budget_secs": 900.0,
+    "random_residuals": 3,
+    "constructed_residuals": 2,
+    "random_decomposable": 0,
+    "expected_rate": 0.00005475251861585633,
+    "planted_found": 2,
+    "unverified": 0,
+    "mismatches": 0,
+    "undetermined": 0,
+    "timed_out": 0,
+    "c_second": {
+      "mean": 30351820563.666668,
+      "min": 30351239175,
+      "max": 30352376944
+    },
+    "weil_muls": {
+      "mean": 129427.0,
+      "min": 129427,
+      "max": 129427
+    },
+    "f4_muls": {
+      "mean": 30351691136.666668,
+      "min": 30351109748,
+      "max": 30352247517
+    },
+    "roots_muls": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "sign_group_ops": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "f4_ms": {
+      "mean": 20573.0,
+      "min": 18028,
+      "max": 22670
+    },
+    "solving_degree": {
+      "mean": 2.0,
+      "min": 2,
+      "max": 2
+    },
+    "degree_reached": {
+      "mean": 19.0,
+      "min": 19,
+      "max": 19
+    },
+    "max_rows": {
+      "mean": 8825.666666666666,
+      "min": 8825,
+      "max": 8826
+    },
+    "max_cols": {
+      "mean": 8443.666666666666,
+      "min": 8443,
+      "max": 8444
+    },
+    "c_second_decomposable": {
+      "mean": 48257495234.0,
+      "min": 48256207882,
+      "max": 48258782586
+    },
+    "f4_ms_decomposable": {
+      "mean": 98846.0,
+      "min": 98626,
+      "max": 99066
+    },
+    "degree_reached_decomposable": {
+      "mean": 24.0,
+      "min": 24,
+      "max": 24
+    },
+    "max_cols_decomposable": {
+      "mean": 16302.0,
+      "min": 16302,
+      "max": 16302
+    },
+    "per_test": [
+      {
+        "weil_muls": 129427,
+        "f4_muls": 30351109748,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 8826,
+        "max_cols": 8444,
+        "f4_ms": 18028.423152,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 30352247517,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 8825,
+        "max_cols": 8443,
+        "f4_ms": 21021.867621999998,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 30351716145,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 8826,
+        "max_cols": 8444,
+        "f4_ms": 22670.813556999998,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 48256071818,
+        "roots_muls": 1357,
+        "group_ops": 24,
+        "solving_degree": 3,
+        "degree_reached": 24,
+        "max_rows": 45495,
+        "max_cols": 16302,
+        "f4_ms": 99066.84257899999,
+        "inconsistent": false,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 1,
+        "decompositions": 1
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 48258649530,
+        "roots_muls": 1649,
+        "group_ops": 9,
+        "solving_degree": 3,
+        "degree_reached": 24,
+        "max_rows": 45495,
+        "max_cols": 16302,
+        "f4_ms": 98626.16685800001,
+        "inconsistent": false,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 1,
+        "decompositions": 1
+      }
+    ],
+    "mitm4_group_ops": 275282.0,
+    "wall_ms": 263496.379161
+  },
+  {
+    "p": 1031,
+    "seed": 1,
+    "n": 1164912539872901,
+    "bits": 50.04914306657783,
+    "base": 523,
+    "fp_muls_per_add": 220.0,
+    "precompute_muls": 1872961524,
+    "precompute_ms": 4101.284814,
+    "max_degree": 24,
+    "budget_secs": 900.0,
+    "random_residuals": 3,
+    "constructed_residuals": 2,
+    "random_decomposable": 0,
+    "expected_rate": 0.00004041383769802781,
+    "planted_found": 2,
+    "unverified": 0,
+    "mismatches": 0,
+    "undetermined": 0,
+    "timed_out": 0,
+    "c_second": {
+      "mean": 30367019554.333332,
+      "min": 30366422832,
+      "max": 30367371032
+    },
+    "weil_muls": {
+      "mean": 129427.0,
+      "min": 129427,
+      "max": 129427
+    },
+    "f4_muls": {
+      "mean": 30366890127.333332,
+      "min": 30366293405,
+      "max": 30367241605
+    },
+    "roots_muls": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "sign_group_ops": {
+      "mean": 0.0,
+      "min": 0,
+      "max": 0
+    },
+    "f4_ms": {
+      "mean": 21185.666666666668,
+      "min": 21117,
+      "max": 21226
+    },
+    "solving_degree": {
+      "mean": 2.0,
+      "min": 2,
+      "max": 2
+    },
+    "degree_reached": {
+      "mean": 19.0,
+      "min": 19,
+      "max": 19
+    },
+    "max_rows": {
+      "mean": 8826.0,
+      "min": 8826,
+      "max": 8826
+    },
+    "max_cols": {
+      "mean": 8444.0,
+      "min": 8444,
+      "max": 8444
+    },
+    "c_second_decomposable": {
+      "mean": 48279997917.0,
+      "min": 48278797342,
+      "max": 48281198492
+    },
+    "f4_ms_decomposable": {
+      "mean": 88054.5,
+      "min": 86968,
+      "max": 89141
+    },
+    "degree_reached_decomposable": {
+      "mean": 24.0,
+      "min": 24,
+      "max": 24
+    },
+    "max_cols_decomposable": {
+      "mean": 16302.0,
+      "min": 16302,
+      "max": 16302
+    },
+    "per_test": [
+      {
+        "weil_muls": 129427,
+        "f4_muls": 30367241605,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 8826,
+        "max_cols": 8444,
+        "f4_ms": 21214.153254,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 30367135372,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 8826,
+        "max_cols": 8444,
+        "f4_ms": 21226.936962,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 30366293405,
+        "roots_muls": 0,
+        "group_ops": 0,
+        "solving_degree": 2,
+        "degree_reached": 19,
+        "max_rows": 8826,
+        "max_cols": 8444,
+        "f4_ms": 21117.543334,
+        "inconsistent": true,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 0,
+        "decompositions": 0
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 48281062673,
+        "roots_muls": 1112,
+        "group_ops": 24,
+        "solving_degree": 3,
+        "degree_reached": 24,
+        "max_rows": 45495,
+        "max_cols": 16302,
+        "f4_ms": 89141.574022,
+        "inconsistent": false,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 1,
+        "decompositions": 1
+      },
+      {
+        "weil_muls": 129427,
+        "f4_muls": 48278664173,
+        "roots_muls": 1102,
+        "group_ops": 12,
+        "solving_degree": 3,
+        "degree_reached": 24,
+        "max_rows": 45495,
+        "max_cols": 16302,
+        "f4_ms": 86968.651403,
+        "inconsistent": false,
+        "undetermined": false,
+        "timed_out": false,
+        "e_solutions": 1,
+        "decompositions": 1
+      }
+    ],
+    "mitm4_group_ops": 547058.0,
+    "wall_ms": 247041.351868
+  }
+]

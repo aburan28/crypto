@@ -22,7 +22,10 @@ pub fn run() -> Report {
         pt.extend_from_slice(&dec);
     }
     let unpadded = pkcs7_unpad(&pt, 16).unwrap();
-    r.line(format!("Plaintext (first line): {:?}", &String::from_utf8_lossy(&unpadded)[..40]));
+    r.line(format!(
+        "Plaintext (first line): {:?}",
+        &String::from_utf8_lossy(&unpadded)[..40]
+    ));
     assert!(unpadded.starts_with(b"I'm back and I'm ringin' the bell"));
     r.succeed()
 }

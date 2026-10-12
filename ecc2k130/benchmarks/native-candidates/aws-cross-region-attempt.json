@@ -1,0 +1,64 @@
+{
+  "valid": false,
+  "gpuExecuted": false,
+  "throughput": null,
+  "attempts": [
+    {
+      "region": "us-east-1",
+      "instanceType": "g7e.2xlarge",
+      "automaticPlacement": true,
+      "outcome": "InsufficientInstanceCapacity",
+      "reportedVcpuLimit": null,
+      "instanceId": null,
+      "sourceSha256": "a26ee130374676570b562af71038d7fcbe4a1f88586f19e14da4b831889b527d"
+    },
+    {
+      "region": "us-east-1",
+      "instanceType": "g7e.4xlarge",
+      "automaticPlacement": true,
+      "outcome": "VcpuLimitExceeded",
+      "reportedVcpuLimit": 32,
+      "instanceId": null,
+      "sourceSha256": "cb2f1dd03d177cab69794653317c1c3a9c279992077347b87ca303a6042aeb84"
+    },
+    {
+      "region": "us-east-2",
+      "instanceType": "g7e.2xlarge",
+      "automaticPlacement": true,
+      "outcome": "VcpuLimitExceeded",
+      "reportedVcpuLimit": 0,
+      "instanceId": null,
+      "sourceSha256": "bfc6d4f989915b03cf49ca45627d92de7951bdd4ace57ccbe27fe8d4468b5fa5"
+    },
+    {
+      "region": "us-west-2",
+      "instanceType": "g7e.4xlarge",
+      "automaticPlacement": true,
+      "outcome": "InsufficientInstanceCapacity",
+      "reportedVcpuLimit": null,
+      "instanceId": null,
+      "sourceSha256": "c7a977c2e7cba3d41dbf79cf8d61d6876f78e1828842445d6c8cb52eda1e048f"
+    }
+  ],
+  "finalInstanceCheck": {
+    "checkedAt": "2026-09-13T20:37:17.393360+00:00",
+    "checks": [
+      {
+        "region": "us-east-1",
+        "requestsChecked": 2,
+        "instances": []
+      },
+      {
+        "region": "us-east-2",
+        "requestsChecked": 1,
+        "instances": []
+      },
+      {
+        "region": "us-west-2",
+        "requestsChecked": 1,
+        "instances": []
+      }
+    ]
+  },
+  "offlineTestsPassed": 8
+}

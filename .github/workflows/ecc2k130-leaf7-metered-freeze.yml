@@ -1,0 +1,32 @@
+name: ECC2K-130 leaf7 metered route freeze
+
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hash-and-scope-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Pin exact protocol freeze
+        run: |
+          echo 'c6199257fe42c59f3e91efe7af4bed2bcdbbdd360441bd2f5cf9b5d49251e0a3  research/ecc2k130_leaf7_metered_v1_20260928/FROZEN.json' | sha256sum -c -
+      - name: Check input hashes and static algebra only
+        run: python3 research/ecc2k130_leaf7_metered_v1_20260928/ci_preflight.py
+      - name: Check cost-scope negative controls only
+        run: python3 research/ecc2k130_leaf7_metered_v1_20260928/cost_scope.py --self-test
+      - name: Check Python syntax only
+        run: |
+          python3 -m py_compile \
+            research/ecc2k130_leaf7_metered_v1_20260928/ci_preflight.py \
+            research/ecc2k130_leaf7_metered_v1_20260928/cost_scope.py

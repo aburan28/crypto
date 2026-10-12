@@ -1,0 +1,44 @@
+{
+  "metrics": {
+    "bytes": 688,
+    "path": "metrics.json",
+    "sha256": "9e41da8a02c5732f0e998fe231699673b7cb2cc04dfedb66e5129edc54ebede7"
+  },
+  "process": {
+    "command": [
+      "/usr/bin/env",
+      "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage200-finalizer-5beacd5ee",
+      "CARGO_TERM_COLOR=never",
+      "/opt/homebrew/bin/cargo",
+      "build",
+      "--release",
+      "--locked",
+      "--example",
+      "koblitz_f4_stage200"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 3352608768,
+    "pid": 91297,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 11.644448,
+    "timed_out": false,
+    "total_core_seconds": 265.520796,
+    "user_seconds": 253.876348,
+    "wall_seconds": 87.875363583,
+    "watchdog_seconds": 600
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 3518,
+    "path": "stderr.txt",
+    "sha256": "a7728d89d9025b202a2f0e277571a1e268e4f446ad081dc0085a91f90bdefeb7"
+  },
+  "stdout": {
+    "bytes": 0,
+    "path": "stdout.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

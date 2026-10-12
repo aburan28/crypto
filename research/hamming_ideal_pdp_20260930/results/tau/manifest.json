@@ -1,0 +1,52 @@
+{
+ "tag": "tau",
+ "cells": [
+  [
+   7,
+   2,
+   24
+  ],
+  [
+   11,
+   2,
+   24
+  ],
+  [
+   13,
+   2,
+   24
+  ],
+  [
+   17,
+   2,
+   8
+  ],
+  [
+   19,
+   2,
+   8
+  ]
+ ],
+ "encodings": [
+  "C",
+  "FC",
+  "QFC",
+  "MONO",
+  "SUB"
+ ],
+ "sources": {
+  "boolpoly.rs": "03006515f7a90d3d99687afd1d30c8d4328f667e5925f4db6e905e6aa6244c76",
+  "curve.rs": "a92448c173ec419e1b9b2261ac3821a3d0b962c068ba88d599a09aeff989e2f5",
+  "f4.rs": "014448833a95f3905df93c6e135632eab087fb2f624ed5a9aed15f28495b09c0",
+  "gf2n.rs": "e0f0daee61f52d59b8c825f334263c5d3b5b4dcfc9600d32cc7bf93d0161af7e",
+  "hamming.rs": "fee167aee8af8a663da8fe9b966f547f53abb4bf807bbb103e7cbc2ba00e77b3",
+  "main.rs": "6afc37700d24141accd940a4f5acd21761a1c84020467617d48b6481b0cf4319",
+  "multisolve.rs": "8e9e98f14b12c34c319bc9939b53fc0720eee4abdeff9122825b96e8e0940d41",
+  "selftest.rs": "8b45fd9923c12b89ce67b505b39e43861024335993ea971ec83666462237238f",
+  "semaev.rs": "887b5408d6f43e0aa0518ad71f930da433c56625de276b7aef7ce2e688e0998b",
+  "binary": "68392ff00847db84bb03f14f766a99a6d27cec1eef4ca05554a6a9621db2c677"
+ },
+ "host": "x86_64",
+ "cpus": 4,
+ "finished": "2026-09-30T06:28:38Z"
+}

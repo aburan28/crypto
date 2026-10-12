@@ -1,0 +1,305 @@
+{
+  "format": "ic-evidence-v1 (zstd tar with lossless expanded gzip profiles)",
+  "extraction_root": "research/ic_candidate_tournament_20260915",
+  "excluded": [
+    "Cargo build caches (build, preflight-next-build and preflight-build)",
+    "Python bytecode caches",
+    "operation.lock"
+  ],
+  "archives": [
+    {
+      "file": "round-0002.tar.zst",
+      "sha256": "4693cf862086a8391d69eeff7b574b6e0bf6c98be258177c6519e84631e87b3b",
+      "bytes": 18220289,
+      "uncompressed_file_bytes": 199362906,
+      "files": 23229
+    },
+    {
+      "file": "round-0003b.tar.zst",
+      "sha256": "0923b90a10ffe3d94a96a289be1c7337bd85c27e9ecbe881996030b61017dc6a",
+      "bytes": 20015191,
+      "uncompressed_file_bytes": 258049876,
+      "files": 26122
+    },
+    {
+      "file": "round-0004.tar.zst",
+      "sha256": "ab15eeabfac16062a35d8cb0cbb53431d63c4a6f8be6a5e9f6f413c726cf75ef",
+      "bytes": 19456374,
+      "uncompressed_file_bytes": 235113871,
+      "files": 26398
+    },
+    {
+      "file": "round-0005-batch16.tar.zst",
+      "sha256": "9b306ec58a5f871cea55a430f7b77b01486a887fa7e368fecfccb8c588aa7e4a",
+      "bytes": 18946085,
+      "uncompressed_file_bytes": 239175236,
+      "files": 26164
+    },
+    {
+      "file": "development-and-validation.tar.zst",
+      "sha256": "3e458c1233c48e8d3976d73474984cb203643ada0eeeca6792e2a645c0cc7beb",
+      "bytes": 4964372,
+      "uncompressed_file_bytes": 172467099,
+      "files": 9533
+    },
+    {
+      "file": "round-0006-batch16.tar.zst",
+      "sha256": "e4da0a34ee93ba20b4597a5d53d14cf843fa1eb820b059b67a58f189cb744d57",
+      "bytes": 17660414,
+      "uncompressed_file_bytes": 307201372,
+      "files": 32055
+    },
+    {
+      "file": "round-0006.tar.zst",
+      "sha256": "eb2218988af14f043d90147088417f2ef5174e1c4d901b674a43f2af97d46f34",
+      "bytes": 12019477,
+      "uncompressed_file_bytes": 222515292,
+      "files": 32775
+    },
+    {
+      "file": "round-0007.tar.zst",
+      "sha256": "0d379388dc7d065702f4bdf812dee6988c414e2ca53260fbf246ee7ede6bf0f5",
+      "bytes": 8256331,
+      "uncompressed_file_bytes": 183266553,
+      "files": 37706
+    },
+    {
+      "file": "round-0008.tar.zst",
+      "sha256": "9e607c42a8e3f25caf14aad24e01c8945912b4d9ed51def1789d4eba3683cf7e",
+      "bytes": 6373486,
+      "uncompressed_file_bytes": 124671325,
+      "files": 27392
+    },
+    {
+      "file": "round-0009.tar.zst",
+      "sha256": "acc4726db10d0a746597e1d717ce37370d3bfbe51f898967286d1541bf6f865e",
+      "bytes": 6376270,
+      "uncompressed_file_bytes": 125217396,
+      "files": 28022
+    },
+    {
+      "file": "round-0010.tar.zst",
+      "sha256": "32174430c0a8d7d1b61a6ab46d14221268052ce155432ee8a4006a031e2de0ec",
+      "bytes": 6677328,
+      "uncompressed_file_bytes": 96756362,
+      "files": 35425
+    },
+    {
+      "file": "round-0011.tar.zst",
+      "sha256": "bcbd4351ebe82c4784467ae89529db7550f99b465a74885ba4b13f6c28038473",
+      "bytes": 6652836,
+      "uncompressed_file_bytes": 95143885,
+      "files": 35576
+    },
+    {
+      "file": "round-0006b-single.tar.zst",
+      "sha256": "f6feb0273a2cd3a1ac4b875f260370a85a0cdd3e71a3f3cc195dfc7192a86596",
+      "bytes": 22425730,
+      "uncompressed_file_bytes": 283581208,
+      "files": 35055
+    },
+    {
+      "file": "round-0007-single-policy.tar.zst",
+      "sha256": "e8442542e5d4062a60672180a27ddf418fbe7ace57c4a0aac980e93e88344434",
+      "bytes": 21010280,
+      "uncompressed_file_bytes": 258717170,
+      "files": 42978
+    },
+    {
+      "file": "round-0008-single-implementation.tar.zst",
+      "sha256": "65919afe8cb4d4b3ee51488fc431525306c5eeb8720a617162c1e1afbc04b73f",
+      "bytes": 18559633,
+      "uncompressed_file_bytes": 253917884,
+      "files": 45387
+    },
+    {
+      "file": "single-target-development.tar.zst",
+      "sha256": "96128edebbabb6567161791a2965cb4b1efc1ef1407f91f58047387429db3229",
+      "bytes": 4830330,
+      "uncompressed_file_bytes": 144132213,
+      "files": 6830
+    },
+    {
+      "file": "round-0012.tar.zst",
+      "sha256": "577642a0a716073b095ec94200abc41552e3104bbbbe274c21e5c1ebecb77e19",
+      "bytes": 7654775,
+      "uncompressed_file_bytes": 114131424,
+      "files": 39171
+    },
+    {
+      "file": "round-0013.tar.zst",
+      "sha256": "7109728107b8b1db8391865e267715e9abc825509adbc8ee091a0b873c7e5357",
+      "bytes": 6244097,
+      "uncompressed_file_bytes": 98256668,
+      "files": 36722
+    },
+    {
+      "file": "round-0014.tar.zst",
+      "sha256": "f8cbf290c0624edb448dfd3b2062f28389d8ceb6bc1821266fcd062213aea00f",
+      "bytes": 5961502,
+      "uncompressed_file_bytes": 88012893,
+      "files": 37040
+    },
+    {
+      "file": "round-0015.tar.zst",
+      "sha256": "9b3380d753cfb1679b0123d02cb51a0a90aeae53d50ca50109bbb67413bf9d7d",
+      "bytes": 5870039,
+      "uncompressed_file_bytes": 87982223,
+      "files": 36908
+    },
+    {
+      "file": "round-0016.tar.zst",
+      "sha256": "ad6e987a2dae4bf53968c2dc1d2e3c6032d05023bb31a188279a408457b2bf25",
+      "bytes": 7285879,
+      "uncompressed_file_bytes": 110022990,
+      "files": 54924
+    },
+    {
+      "file": "round-0017.tar.zst",
+      "sha256": "f266c05db1166533d0b03fadb36d012966540db4fb7ae825b293df54a9de84db",
+      "bytes": 8439488,
+      "uncompressed_file_bytes": 130219576,
+      "files": 62470
+    },
+    {
+      "file": "round-0018.tar.zst",
+      "sha256": "11379eafac1827b652a9aca6e5beb31f7ea4af4533d311b2c21bf4e46eb1624c",
+      "bytes": 8297146,
+      "uncompressed_file_bytes": 128287780,
+      "files": 61680
+    },
+    {
+      "file": "round-0018b.tar.zst",
+      "sha256": "99efc1b7b0a0e65e58a068e960188197be7c1683517c934dfb36712446c0a36d",
+      "bytes": 7898824,
+      "uncompressed_file_bytes": 118004859,
+      "files": 61685
+    },
+    {
+      "file": "round-0019.tar.zst",
+      "sha256": "11cf99af0cf018ab970d883e141c4224d1336b1bfa0da5795b786321a81f8054",
+      "bytes": 8902343,
+      "uncompressed_file_bytes": 105491584,
+      "files": 68485
+    },
+    {
+      "file": "round-0020.tar.zst",
+      "sha256": "944a4bd2d6e54fc95fc7bb108ef09a5a1319da45882cf5565c30a8d30f653c2f",
+      "bytes": 8981800,
+      "uncompressed_file_bytes": 105817354,
+      "files": 69001
+    },
+    {
+      "file": "round-0023.tar.zst",
+      "sha256": "e2aa7111bb03ae606a3af6f249c9bd18beb3df1cc3ca4f813812010336dd47da",
+      "bytes": 38573318,
+      "uncompressed_file_bytes": 405356760,
+      "files": 481082
+    },
+    {
+      "file": "autolab-20260924.tar.zst",
+      "sha256": "04a7759a0cb929b9be344d9641bff24b54575ad17340d7cbfa6db549d2cdad30",
+      "bytes": 3424127,
+      "uncompressed_file_bytes": 101409099,
+      "files": 9436
+    },
+    {
+      "file": "ic-producer-admission-20260925.tar.zst",
+      "sha256": "7e3581b0f068f24635dd6fcd95441c27d58b5d0061827fe0c6549957227e0047",
+      "bytes": 4220264,
+      "uncompressed_file_bytes": 121341621,
+      "files": 32400
+    },
+    {
+      "file": "ic-public-native-controls-20260925.tar.zst",
+      "sha256": "af5154ad4443a157c9a36ea552cb52def611c6b27669e3cc0740c83ecee78bd8",
+      "bytes": 1172054,
+      "uncompressed_file_bytes": 4948881,
+      "files": 178
+    },
+    {
+      "file": "ic-rho-prepared-controls-20260925.tar.zst",
+      "sha256": "4312b53b4bc33f46402dee9788511958fd4541a28b800e96972448c1fccc3734",
+      "bytes": 471726,
+      "uncompressed_file_bytes": 1192226,
+      "files": 59
+    },
+    {
+      "file": "ic-public-linux-controls-20260925.tar.zst",
+      "sha256": "b0d6ea6d1ef6035702f366624e4161a7a7fcb9abca2ffa4009715cc5deed6ac2",
+      "bytes": 18774023,
+      "uncompressed_file_bytes": 113582270,
+      "files": 32311
+    },
+    {
+      "file": "ic-driver-native-controls-20260925.tar.zst",
+      "sha256": "93808969fe84a1a3eaf169908f8295b1f763d09b32abb4bc3389d544845621be",
+      "bytes": 10570117,
+      "uncompressed_file_bytes": 48193193,
+      "files": 2698
+    },
+    {
+      "file": "ic-driver-linux-controls-20260925.tar.zst",
+      "sha256": "972f1b6e16cc9a09960fccc80ba5f64331c3d12a5a312581521c53cea53d334c",
+      "bytes": 9324450,
+      "uncompressed_file_bytes": 372870950,
+      "files": 83113,
+      "profile_storage": "Original gzip streams preserved without re-encoding"
+    },
+    {
+      "file": "ic-reference-qualification-20260925.tar.zst",
+      "sha256": "a61e6b7c8154dfc594365a044dc74346880018a9c57e14d699ab4c55444950ac",
+      "bytes": 40999253,
+      "uncompressed_file_bytes": 405702110,
+      "files": 122855,
+      "profile_storage": "Original gzip streams preserved without re-encoding"
+    },
+    {
+      "file": "ic-improvement-round1-20260925.tar.zst",
+      "sha256": "f2b0f9b5c226ddc9331449d9e37ace1c2d7a94faa5ef74396d9a0a1231b13593",
+      "bytes": 30030589,
+      "uncompressed_file_bytes": 443365491,
+      "files": 351311
+    },
+    {
+      "file": "ic-generic-reference-qualification-20260926.tar.zst",
+      "sha256": "680369a9b822dcc3321380bff751bd2b94f0892c915f201a67916fc7bd49fc5a",
+      "bytes": 25623677,
+      "uncompressed_file_bytes": 348522674,
+      "files": 95496
+    },
+    {
+      "file": "ic-improvement-round2-20260928.tar.zst",
+      "sha256": "020e0cef5f044e01613625da93d9cedaa48e875a59523f2859477c484f23b6f0",
+      "bytes": 36473587,
+      "uncompressed_file_bytes": 468890707,
+      "files": 352644
+    },
+    {
+      "file": "round-0024.tar.zst",
+      "sha256": "18d7f6c17afa9601e1d1bf32d0d5c077b94322157b3941b57d058784dab33d44",
+      "bytes": 28478021,
+      "uncompressed_file_bytes": 308282483,
+      "files": 318518
+    },
+    {
+      "file": "ic-improvement-round3-20260928.tar.zst",
+      "sha256": "a2e88ae540ddfa3430b03873f5cd85df0d5b1ad12b8e59b7dea82a5b33df0a4f",
+      "bytes": 37223911,
+      "uncompressed_file_bytes": 514447908,
+      "files": 361985
+    },
+    {
+      "file": "round-0025.tar.zst",
+      "sha256": "fa63139aa0e5a2cc7572cacdeb7eb1b5ccd68f3bd3a6d9b1faefcf8f9150aeae",
+      "bytes": 31104305,
+      "uncompressed_file_bytes": 337912570,
+      "files": 356402
+    }
+  ],
+  "profile_encoder": {
+    "algorithm": "raw DEFLATE",
+    "level": 9,
+    "zlib_runtime": "1.3"
+  }
+}

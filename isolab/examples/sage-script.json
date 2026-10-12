@@ -1,0 +1,11 @@
+{
+  "schema": "isolab.job/v1",
+  "name": "sage-point-counting",
+  "runtime": {"image": "localhost/isolab-sage:latest"},
+  "inputs": [{"path": "count.sage", "content": "import json, os\nE = EllipticCurve(GF(2^31, 'a'), [1, 0, 0, 0, 1])\nn = E.order()\nprint(n)\njson.dump({'order': int(n)}, open(os.path.join(os.environ['ISOLAB_OUTPUT_DIR'], 'metrics.json'), 'w'))\n"}],
+  "command": {"argv": ["sage", "count.sage"]},
+  "measure": {"warmups": 1, "repeats": 3},
+  "resources": {"cpus": 1, "memory_mb": 4096},
+  "fidelity": {"policy": "standard"},
+  "limits": {"timeout_s": 600}
+}

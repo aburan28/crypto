@@ -1,0 +1,70 @@
+name: n53 true shared-log batch
+
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# PRs retain source, correctness and existing-evidence checks.
+# Fresh timing panels and their result gates run only after merge or by manual dispatch.
+jobs:
+  paired-panel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 58 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check study scripts
+        run: python3 -m py_compile research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/{generate_targets,run_panel,verify_pair,archive,verify_archive,verify_failed_attempt}.py
+      - name: Replay committed evidence if present
+        run: |
+          bundle=research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/evidence
+          if test -f "$bundle/archive_manifest.json"; then
+            python3 research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/verify_archive.py --bundle "$bundle"
+            echo 'PANEL_ARCHIVED=1' >> "$GITHUB_ENV"
+          fi
+      - name: Replay retained first-run verifier failure
+        if: env.PANEL_ARCHIVED == '1'
+        run: python3 research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/verify_failed_attempt.py --bundle research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/failed_attempt_1
+      - name: Build exact checked-out producers
+        if: github.event_name != 'pull_request' && (env.PANEL_ARCHIVED != '1')
+        run: cargo build --release --example koblitz_s5_sat_instance --example koblitz_rho_batch_ks
+      - name: Check clean source and preregistered ancestry
+        if: github.event_name != 'pull_request' && (env.PANEL_ARCHIVED != '1')
+        run: |
+          test -z "$(git status --porcelain)"
+          git merge-base --is-ancestor fc27150df3238b6863ed5618c721e7fd8b6ce403 HEAD
+          git rev-parse HEAD
+          sha256sum examples/koblitz_s5_sat_instance.rs examples/koblitz_rho_batch_ks.rs
+      - name: Run cold training and matched point batches
+        if: github.event_name != 'pull_request' && (env.PANEL_ARCHIVED != '1')
+        run: python3 research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/run_panel.py --out /tmp/n53-shared-log-panel
+      - name: Seal all attempted outputs including censored runs
+        if: github.event_name != 'pull_request' && (always() && env.PANEL_ARCHIVED != '1')
+        run: |
+          if test -d /tmp/n53-shared-log-panel; then
+            python3 research/sat_factor_base_review_20260908/autolab_shared_log_n53_20260925/archive.py \
+              --panel /tmp/n53-shared-log-panel --out /tmp/n53-shared-log-sealed
+          fi
+      - name: Upload all attempted raw outputs
+        if: github.event_name != 'pull_request' && (always() && env.PANEL_ARCHIVED != '1')
+        uses: actions/upload-artifact@v4
+        with:
+          name: n53-shared-log-${{ github.sha }}
+          path: /tmp/n53-shared-log-panel/
+          if-no-files-found: warn
+          retention-days: 30

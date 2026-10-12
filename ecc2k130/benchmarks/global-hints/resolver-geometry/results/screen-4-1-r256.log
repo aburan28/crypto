@@ -1,0 +1,74 @@
+packed L2 persist window: 83886080 of 314179584 field bytes, cap 83886080
+packed kernel: 126 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed launch bounds: 512 threads, 1 min blocks
+packed driver reserved shared bytes/block: 1024, device 0
+packed denominator cache: 1
+packed multiply by value: 1
+packed Frobenius network: 3
+packed polynomial chain: 1
+packed polynomial state: 1
+packed unrolled inversion: 1
+packed paired products: 1
+packed pair ilp: 1
+packed pair clmul: 0
+packed clmul flat: 0
+packed top hoist: 0
+packed onb inv: 0
+packed from reduced: 1
+packed slot unroll: 1
+packed chains: 1
+packed slot prefetch: 0
+packed slot pipeline: 0
+packed sigma fused: 0
+packed sigma fused late y: 0
+packed witness: 0
+packed L2 persist: 1
+packed direct reduction: 1
+packed generated product: 1
+packed native carryless multiply: 1
+packed native carryless square: 0
+packed three-limb Karatsuba: 0
+packed weighted prefix: 2
+packed compact state: 1
+packed shared sigma: 1
+packed top clmad: 0
+packed state tile: 256
+packed add combine: 0
+packed alu square: 1
+packed alu onb square: 0
+packed square table: 1
+packed polynomial inversion: 2
+packed profile ranges: 0
+packed table GPU-wide hints: 1
+packed hint scheduling: table fused 0, pipe select 1, chain first 1, inline polynomial 3, phase profile 0, cycle profile 0
+packed GPU-wide hint queue: 6160384 entries, 188 resolver blocks of 256 threads
+packed GPU-wide hint memory: 24641536 queue bytes, 4 counter bytes
+packed GPU-wide resolver geometry: 188 blocks, 256 threads/block, 8 warps/block, 1 active block(s)/SM, 57052 dynamic shared bytes, launch bounds 256 x 1
+packed hint select kernel: 56 registers/thread, 0 local bytes/thread, 0 static shared bytes
+packed hint resolve kernel: 124 registers/thread, 400 local bytes/thread, 0 static shared bytes
+packed table pivot bytes: 1, table shared bytes 57052
+packed table phase popc: 0
+packed table split forward: 1
+packed table batch hints: 1
+packed table block hints: 0, queue 512
+packed cycle fast2: 1
+packed cycle profile: 0
+packed table global: 0
+packed table addend global: 0
+packed table walk: 1 (8 branches, 57052 shared bytes)
+backend cuda-packed131: 385024 threads x 16 slots x 1 lanes = 6160384 walks, dp weight 0, 1024 steps per launch
+       2.7 s    4738.156 M it/s  12616466432 iterations         0 dp         0 stored         0 dropped
+       5.6 s    5640.117 M it/s  31541166080 iterations         0 dp         0 stored         0 dropped
+       8.5 s    5913.601 M it/s  50465865728 iterations         0 dp         0 stored         0 dropped
+      11.5 s    6038.096 M it/s  69390565376 iterations         0 dp         0 stored         0 dropped
+      14.5 s    6101.218 M it/s  88315265024 iterations         0 dp         0 stored         0 dropped
+      16.5 s    6118.927 M it/s  100931731456 iterations         0 dp         0 stored         0 dropped
+      18.6 s    6120.133 M it/s  113548197888 iterations         0 dp         0 stored         0 dropped
+      20.7 s    6092.607 M it/s  126164664320 iterations         0 dp         0 stored         0 dropped
+      22.9 s    6049.717 M it/s  138781130752 iterations         0 dp         0 stored         0 dropped
+      25.2 s    6006.689 M it/s  151397597184 iterations         0 dp         0 stored         0 dropped
+      27.5 s    5957.516 M it/s  164014063616 iterations         0 dp         0 stored         0 dropped
+      29.9 s    5910.560 M it/s  176630530048 iterations         0 dp         0 stored         0 dropped
+      32.3 s    5867.372 M it/s  189246996480 iterations         0 dp         0 stored         0 dropped
+      33.7 s    5982.160 M it/s  201863462912 iterations         0 dp         0 stored         0 dropped
+  finished: 5982.142 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)

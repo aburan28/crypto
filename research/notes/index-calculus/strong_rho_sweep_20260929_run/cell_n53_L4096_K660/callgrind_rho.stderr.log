@@ -1,0 +1,11 @@
+==5886== Callgrind, a call-graph generating cache profiler
+==5886== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==5886== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==5886== Command: /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_rho_batch_ks_strong 53 0 signed_frobenius 4096 531310
+==5886== 
+==5886== For interactive control, run 'callgrind_control -h'.
+==5886== 
+==5886== Events    : Ir
+==5886== Collected : 95528133576
+==5886== 
+==5886== I   refs:      95,528,133,576

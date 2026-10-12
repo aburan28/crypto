@@ -1,0 +1,29 @@
+{
+  "hashes": {
+    "frozen_ic_binary_sha256": "e7ffc74e7bd61343a0f8a38e73ee821376aee7524b786ea0b02d1ced25df254a",
+    "frozen_rho_binary_sha256": "72d4774390cad069f7bf28fd88196bf439be5934fa90dcd33dca7a5392756ec4",
+    "git_head": "34f70a32bbbf4988169e965fba0ddcffcc707208",
+    "ic_binary_sha256": "71052d89ce1ac6199cfd4b401e65d607a4928a33657f1f0cc596efd146358770",
+    "ic_source_manifest_sha256": "8e7dda4a037bb1e51eec46e890f74955c7c98940c3d3daf192ad0f7196f17513",
+    "rho_binary_sha256": "a7048e2817dfd6eb61c8f187448747af637ff296f70246020c5182389ba098f9",
+    "rho_source_manifest_sha256": "4d12b1f4b9ecf60e9bc7b547b3e4f7b5fce9377f344aba9076acf627383124f2",
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)"
+  },
+  "ic_sources": {
+    "examples/koblitz_orbit_dlp_fast_online.rs": "639338230d98c8f4ab1dcc5c813907edb47db65ff4d709ca9afa06fa5f2feaf2",
+    "src/cryptanalysis/koblitz_fast_arith.rs": "2a5c54bdedb6a0b1ffcf95dd7badd32c41d1482b53055e31fb9f28d514ac8c9e",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "b618e29a5573f84d3737922ba7c685fc34d1525c0b98db482568ac018adc7a5f",
+    "src/cryptanalysis/semaev_decomp.rs": "c6e9263b66f4a0892d9b46bfa23e7dd36e93c787a79a1e37181f2449ab33e8b2"
+  },
+  "paths": {
+    "frozen_ic": "/Volumes/SSD990/ic-n61c/target/release/examples/koblitz_orbit_dlp_fast",
+    "frozen_rho": "/Volumes/SSD990/ic-n61c/target/release/examples/koblitz_rho_batch_ks_strong",
+    "ic": "/Volumes/SSD990/ic-n61c/target/release/examples/koblitz_orbit_dlp_fast_online",
+    "rho": "/Volumes/SSD990/ic-n61c/target/release/examples/koblitz_rho_batch_ks_strong_online"
+  },
+  "rho_sources": {
+    "examples/koblitz_rho_batch_ks_strong_online.rs": "152edae1d801aca95ed7ece478c4a586aa87052650dadf2a7698c0a45cf0a134",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "b618e29a5573f84d3737922ba7c685fc34d1525c0b98db482568ac018adc7a5f",
+    "src/cryptanalysis/semaev_decomp.rs": "c6e9263b66f4a0892d9b46bfa23e7dd36e93c787a79a1e37181f2449ab33e8b2"
+  }
+}

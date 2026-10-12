@@ -1,0 +1,756 @@
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -6074,6 +6074,100 @@
+     /// Frobenius is one squaring and the orbit is the whole rotation group:
+     /// the orbit is then named by a least rotation instead of `n` squarings.
+     normal: Option<crate::cryptanalysis::koblitz_tiny_ic::NormalBasis>,
++    /// The IC arm's own single-word arithmetic, when `normal` is present:
++    /// the walk then adds, inverts and multiplies exactly as the IC arm
++    /// does (see [`LeanRho`]).  `None` keeps every operation of the matched
++    /// walk as it was.
++    lean: Option<LeanRho>,
++}
++
++/// **The lean walk's arithmetic.**  The same walk, the same points, the
++/// same coefficients and the same ledger as the matched walk; only how
++/// each value is computed changes, and every change uses what the IC arm
++/// already uses for the same job:
++///
++/// - field multiplication, squaring and inversion are the IC arm's
++///   (`koblitz_tiny_ic::Arith`): a carry-less squaring and a Euclidean
++///   inverse, where the matched walk used a bit-spreading squaring and a
++///   Fermat inverse of `n` squarings and `n` multiplications;
++/// - the setup points `[a]G + [b]Q` come from doubling tables of `G` and
++///   `Q` with the additions of one bit position sharing one inversion
++///   (`Arith::fixed_base_mul_many`, the IC arm's fixed-base product),
++///   instead of two López–Dahab double-and-add products and three
++///   inversions per point; the scalars are drawn in the same order;
++/// - a collision's candidate `d` is checked as `[d]G = Q` in the same
++///   single-word arithmetic from the table of `G`, as the IC arm checks its
++///   own candidates (the worker still re-verifies the reported log in the
++///   general arithmetic, as before).
++struct LeanRho {
++    arith: crate::cryptanalysis::koblitz_tiny_ic::Arith,
++    /// `[2^i]G` and `[2^i]Q` for every bit of the subgroup order.
++    g_table: Vec<FastPoint>,
++    q_table: Vec<FastPoint>,
++    target: FastPoint,
++    /// For every `k < n`, the canonical form's two coefficient factors
++    /// `λ^k` and `−λ^k mod r`, each with its Shoup quotient, at
++    /// `2k` and `2k + 1`.
++    factor_quotient: Vec<(u64, u64)>,
++}
++
++impl LeanRho {
++    fn new(
++        curve: &KoblitzCurve,
++        g: FastPoint,
++        q: FastPoint,
++        modulus: u64,
++        lambda_pow: &[u64],
++    ) -> Option<Self> {
++        if g.infinity || q.infinity || modulus >= 1 << 62 {
++            return None;
++        }
++        let arith = crate::cryptanalysis::koblitz_tiny_ic::Arith::new(curve)?;
++        let bits = 64 - modulus.leading_zeros();
++        let g_table = arith.doubling_table(g, bits);
++        let q_table = arith.doubling_table(q, bits);
++        let factor_quotient = lambda_pow
++            .iter()
++            .flat_map(|&l| {
++                let negated = if l == 0 { 0 } else { modulus - l };
++                [shoup_quotient(l, modulus), shoup_quotient(negated, modulus)]
++            })
++            .collect();
++        Some(Self { arith, g_table, q_table, target: q, factor_quotient })
++    }
++
++    /// `[a_i]G + [b_i]Q` for every pair, in order.
++    fn setup_points(&self, scalars: &[(u64, u64)]) -> Vec<FastPoint> {
++        let a: Vec<u64> = scalars.iter().map(|s| s.0).collect();
++        let b: Vec<u64> = scalars.iter().map(|s| s.1).collect();
++        let ag = self.arith.fixed_base_mul_many(&self.g_table, &a);
++        let bq = self.arith.fixed_base_mul_many(&self.q_table, &b);
++        let mut dens: Vec<u64> = ag
++            .iter()
++            .zip(&bq)
++            .map(|(p, q)| if p.infinity || q.infinity || p.x == q.x { 0 } else { p.x ^ q.x })
++            .collect();
++        let mut scratch = Vec::with_capacity(dens.len());
++        self.arith.batch_inv(&mut dens, &mut scratch);
++        ag.iter()
++            .zip(&bq)
++            .zip(&dens)
++            .map(|((&p, &q), &inv)| {
++                if inv == 0 {
++                    self.arith.add(p, q)
++                } else {
++                    self.arith.add_with_lambda(p, q, self.arith.mul(p.y ^ q.y, inv))
++                }
++            })
++            .collect()
++    }
++
++    /// Whether `[d]G = Q`.
++    fn is_log(&self, d: &BigUint) -> bool {
++        d.bits() <= self.g_table.len() as u64
++            && self.arith.fixed_base_mul(&self.g_table, d.to_u64_digits().first().copied().unwrap_or(0))
++                == self.target
++    }
+ }
+ 
+ #[inline]
+@@ -6081,6 +6175,28 @@
+     ((a as u128 * b as u128) % m as u128) as u64
+ }
+ 
++/// `(w, ⌊w·2^64/m⌋)` for a fixed multiplier `w < m`.
++fn shoup_quotient(w: u64, m: u64) -> (u64, u64) {
++    (w, (((w as u128) << 64) / m as u128) as u64)
++}
++
++/// `a·w mod m` for `a < m < 2^63`, from [`shoup_quotient`]: the estimate
++/// `⌊a·w'/2^64⌋` is the true quotient or one less, so one conditional
++/// subtraction finishes it.  Equal to [`mulmod_u64`].
++#[inline]
++fn shoup_mulmod(a: u64, (w, quotient): (u64, u64), m: u64) -> u64 {
++    let q = ((a as u128 * quotient as u128) >> 64) as u64;
++    let r = a.wrapping_mul(w).wrapping_sub(q.wrapping_mul(m));
++    if r >= m { r - m } else { r }
++}
++
++/// `(a + b) mod m` for `a, b < m < 2^63`.
++#[inline]
++fn addmod_u64(a: u64, b: u64, m: u64) -> u64 {
++    let s = a + b;
++    if s >= m { s - m } else { s }
++}
++
+ /// The expected number of walk steps before a useful collision, for a
+ /// subgroup of order `r` under the signed Frobenius group of order
+ /// `2n`: `√(πr/2) / √(2n)`.  The birthday bound divided by the square
+@@ -6122,10 +6238,29 @@
+ }
+ 
+ impl FastRhoWalk<'_> {
+-    /// Whether this point is one of the stored ones.
++    /// `P + Q`, in the IC arm's arithmetic when the walk is lean.
++    #[inline]
++    fn add(&self, p: FastPoint, q: FastPoint) -> FastPoint {
++        match &self.lean {
++            Some(lean) => lean.arith.add(p, q),
++            None => self.fc.add(p, q),
++        }
++    }
++
++    /// `[2]P`, likewise.
+     #[inline]
+-    fn is_stored(&self, key: (u64, u64)) -> bool {
+-        rho_mix(key.0, key.1) & self.trail_mask == 0
++    fn double(&self, p: FastPoint) -> FastPoint {
++        match &self.lean {
++            Some(lean) => lean.arith.double(p),
++            None => self.fc.double(p),
++        }
++    }
++
++    /// Whether the point whose [`rho_mix`] is `mix` is one of the stored
++    /// ones.
++    #[inline]
++    fn is_stored(&self, mix: u64) -> bool {
++        mix & self.trail_mask == 0
+     }
+ 
+     /// The smallest `(x, y)` over the signed Frobenius orbit of the
+@@ -6155,8 +6290,19 @@
+         let named = self.normal.as_ref().and_then(|nb| {
+             let (key, k) = nb.canon(state.point.x);
+             (key != 0 && key != nb.mask()).then(|| {
+-                let y = nb.from_coords(nb.frobenius_coords(nb.coords(state.point.y), k));
+-                (nb.from_coords(key), k, y)
++                if self.lean.is_some() {
++                    // Lean: no basis changes for `k = 0` (the point is its
++                    // own representative up to sign), and the ordinate's
++                    // round trip in one call.  The same values.
++                    if k == 0 {
++                        (state.point.x, 0, state.point.y)
++                    } else {
++                        (nb.from_coords(key), k, nb.frobenius_poly(state.point.y, k))
++                    }
++                } else {
++                    let y = nb.from_coords(nb.frobenius_coords(nb.coords(state.point.y), k));
++                    (nb.from_coords(key), k, y)
++                }
+             })
+         });
+         let (best_x, best_k, y) = match named {
+@@ -6191,6 +6337,17 @@
+         } else {
+             (FastPoint::affine(best_x, y), lambda_k)
+         };
++        if let Some(lean) = &self.lean {
++            // The same products by the same factor, by Shoup's
++            // precomputed quotient instead of a 128-bit division.
++            let shoup = lean.factor_quotient[2 * best_k as usize + usize::from(negated_y < y)];
++            debug_assert_eq!(shoup.0, factor);
++            return FastRhoState {
++                point,
++                coefficient_a: shoup_mulmod(state.coefficient_a, shoup, self.modulus),
++                coefficient_b: shoup_mulmod(state.coefficient_b, shoup, self.modulus),
++            };
++        }
+         FastRhoState {
+             point,
+             coefficient_a: mulmod_u64(state.coefficient_a, factor, self.modulus),
+@@ -6244,7 +6401,7 @@
+             charges.cycle_escape_doublings += 1;
+             escaped = self.canonicalize(
+                 FastRhoState {
+-                    point: self.fc.double(escaped.point),
++                    point: self.double(escaped.point),
+                     coefficient_a: (escaped.coefficient_a * 2) % self.modulus,
+                     coefficient_b: (escaped.coefficient_b * 2) % self.modulus,
+                 },
+@@ -6271,7 +6428,7 @@
+         let m = self.modulus;
+         self.canonicalize(
+             FastRhoState {
+-                point: self.fc.add(state.point, jump.0),
++                point: self.add(state.point, jump.0),
+                 coefficient_a: (state.coefficient_a + jump.1) % m,
+                 coefficient_b: (state.coefficient_b + jump.2) % m,
+             },
+@@ -6304,6 +6461,7 @@
+     walk_started: std::time::Instant,
+     report: &mut KoblitzSignedRhoReport,
+     progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
++    is_log: &dyn Fn(&BigUint) -> bool,
+ ) -> Option<KoblitzSignedRhoReport> {
+     report.charges.collisions += 1;
+     let numerator = rho_sub_mod(&BigUint::from(first.0), &BigUint::from(second.0), modulus);
+@@ -6315,10 +6473,12 @@
+     // counted in `walk_ns` as well.
+     report.walk_ns += walk_started.elapsed().as_nanos();
+     let verification_started = std::time::Instant::now();
+-    // Verified in the general arithmetic, independently of the walk.
++    // Verified as `[d]G = Q` by the caller's check: the general
++    // arithmetic, or the lean walk's single-word product.
++    let _ = (curve, target);
+     let verified = candidate.as_ref().is_some_and(|value| {
+         report.charges.candidate_verification_scalar_multiplications += 1;
+-        curve.mul(curve.generator(), value) == *target
++        is_log(value)
+     });
+     report.verification_ns += verification_started.elapsed().as_nanos();
+     progress(KoblitzSignedRhoEvent::Collision { restart, verified });
+@@ -6343,6 +6503,20 @@
+     options: &KoblitzSignedRhoOptions,
+     progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
+ ) -> KoblitzSignedRhoReport {
++    signed_rho_fast_with(fc, curve, target, options, progress, true)
++}
++
++/// The single-word walk; `lean` allows [`LeanRho`] where it applies.  Both
++/// settings take the same walk and fill the same report (a test holds them
++/// to that); `lean = false` is the matched walk as it was.
++fn signed_rho_fast_with(
++    fc: &FastCurve,
++    curve: &KoblitzCurve,
++    target: &BinaryPoint,
++    options: &KoblitzSignedRhoOptions,
++    progress: &mut dyn FnMut(KoblitzSignedRhoEvent),
++    lean: bool,
++) -> KoblitzSignedRhoReport {
+     assert!(options.jump_count > 0, "rho needs at least one jump");
+     assert!(options.parallel_walks > 0, "rho needs at least one walk");
+     let modulus_big = &curve.subgroup_order;
+@@ -6360,6 +6534,16 @@
+         lambda_pow.push(current);
+         current = mulmod_u64(current, lambda, modulus);
+     }
++    let g = fc.lift(curve.generator());
++    let q = fc.lift(target);
++    let normal = (curve.k == 1 && fc.field.n == curve.n)
++        .then(|| crate::cryptanalysis::koblitz_tiny_ic::NormalBasis::from_squaring(fc.field.n, |c| fc.field.sqr(c)))
++        .flatten();
++    let lean = if lean && normal.is_some() {
++        LeanRho::new(curve, g, q, modulus, &lambda_pow)
++    } else {
++        None
++    };
+     let walk = FastRhoWalk {
+         fc,
+         frobenius_degree: curve.k,
+@@ -6367,12 +6551,13 @@
+         modulus,
+         lambda_pow,
+         trail_mask: rho_trail_mask(rho_expected_steps(modulus, curve.n)),
+-        normal: (curve.k == 1 && fc.field.n == curve.n)
+-            .then(|| crate::cryptanalysis::koblitz_tiny_ic::NormalBasis::from_squaring(fc.field.n, |c| fc.field.sqr(c)))
+-            .flatten(),
++        normal,
++        lean,
+     };
+-    let g = fc.lift(curve.generator());
+-    let q = fc.lift(target);
++    let general_check = |value: &BigUint| curve.mul(curve.generator(), value) == *target;
++    let lean_check = |value: &BigUint| walk.lean.as_ref().is_some_and(|l| l.is_log(value));
++    let is_log: &dyn Fn(&BigUint) -> bool =
++        if walk.lean.is_some() { &lean_check } else { &general_check };
+     let mut rng = StdRng::seed_from_u64(options.seed);
+     let mut report = KoblitzSignedRhoReport {
+         recovered_log: None,
+@@ -6387,42 +6572,91 @@
+         verification_ns: 0,
+         charges: KoblitzSignedRhoCharges::default(),
+     };
++    // The lean advance's buffers: each walk's jump index, and the
++    // denominators it inverts in one batch.
++    let mut buckets: Vec<usize> = Vec::new();
++    let mut dens: Vec<u64> = Vec::new();
++    let mut inv_scratch: Vec<u64> = Vec::new();
+ 
+     'restarts: for restart in 0..options.max_restarts {
+         report.restarts_attempted += 1;
+         progress(KoblitzSignedRhoEvent::RestartStarted { restart });
+         let setup_started = std::time::Instant::now();
+-        let mut draw = |report: &mut KoblitzSignedRhoReport| {
+-            let a = rng.gen_range(1..modulus);
+-            let b = rng.gen_range(1..modulus);
+-            report.charges.coefficient_draws += 2;
+-            report.charges.setup_scalar_multiplications += 2;
+-            report.charges.setup_group_additions += 1;
+-            (fc.add(fc.mul_u64(g, a), fc.mul_u64(q, b)), a, b)
++        let (jumps, mut states) = match &walk.lean {
++            Some(lean) => {
++                // The same draws in the same order -- the jumps' scalars,
++                // then the walks' -- and the same points, from one batched
++                // fixed-base product.
++                let walks = rho_effective_walks(options.parallel_walks, rho_expected_steps(modulus, curve.n));
++                let scalars: Vec<(u64, u64)> = (0..options.jump_count + walks)
++                    .map(|_| {
++                        let a = rng.gen_range(1..modulus);
++                        let b = rng.gen_range(1..modulus);
++                        report.charges.coefficient_draws += 2;
++                        report.charges.setup_scalar_multiplications += 2;
++                        report.charges.setup_group_additions += 1;
++                        (a, b)
++                    })
++                    .collect();
++                let points = lean.setup_points(&scalars);
++                let jumps: Vec<(FastPoint, u64, u64)> = (0..options.jump_count)
++                    .map(|i| (points[i], scalars[i].0, scalars[i].1))
++                    .collect();
++                report.jump_table_rebuilds += 1;
++                progress(KoblitzSignedRhoEvent::JumpTableReady {
++                    restart,
++                    jumps: jumps.len(),
++                });
++                report.parallel_walks = walks;
++                let states: Vec<FastRhoState> = (options.jump_count..options.jump_count + walks)
++                    .map(|i| {
++                        walk.canonicalize(
++                            FastRhoState {
++                                point: points[i],
++                                coefficient_a: scalars[i].0,
++                                coefficient_b: scalars[i].1,
++                            },
++                            &mut report.charges,
++                        )
++                    })
++                    .collect();
++                (jumps, states)
++            }
++            None => {
++                let mut draw = |report: &mut KoblitzSignedRhoReport| {
++                    let a = rng.gen_range(1..modulus);
++                    let b = rng.gen_range(1..modulus);
++                    report.charges.coefficient_draws += 2;
++                    report.charges.setup_scalar_multiplications += 2;
++                    report.charges.setup_group_additions += 1;
++                    (fc.add(fc.mul_u64(g, a), fc.mul_u64(q, b)), a, b)
++                };
++                let jumps = (0..options.jump_count)
++                    .map(|_| draw(&mut report))
++                    .collect::<Vec<_>>();
++                report.jump_table_rebuilds += 1;
++                progress(KoblitzSignedRhoEvent::JumpTableReady {
++                    restart,
++                    jumps: jumps.len(),
++                });
++                report.parallel_walks =
++                    rho_effective_walks(options.parallel_walks, rho_expected_steps(modulus, curve.n));
++                let states: Vec<FastRhoState> = (0..report.parallel_walks)
++                    .map(|_| {
++                        let (point, a, b) = draw(&mut report);
++                        walk.canonicalize(
++                            FastRhoState {
++                                point,
++                                coefficient_a: a,
++                                coefficient_b: b,
++                            },
++                            &mut report.charges,
++                        )
++                    })
++                    .collect();
++                (jumps, states)
++            }
+         };
+-        let jumps = (0..options.jump_count)
+-            .map(|_| draw(&mut report))
+-            .collect::<Vec<_>>();
+-        report.jump_table_rebuilds += 1;
+-        progress(KoblitzSignedRhoEvent::JumpTableReady {
+-            restart,
+-            jumps: jumps.len(),
+-        });
+-        report.parallel_walks =
+-            rho_effective_walks(options.parallel_walks, rho_expected_steps(modulus, curve.n));
+-        let mut states: Vec<FastRhoState> = (0..report.parallel_walks)
+-            .map(|_| {
+-                let (point, a, b) = draw(&mut report);
+-                walk.canonicalize(
+-                    FastRhoState {
+-                        point,
+-                        coefficient_a: a,
+-                        coefficient_b: b,
+-                    },
+-                    &mut report.charges,
+-                )
+-            })
+-            .collect();
+         report.setup_ns += setup_started.elapsed().as_nanos();
+ 
+         let walk_started = std::time::Instant::now();
+@@ -6450,7 +6684,10 @@
+                 examined += 1;
+                 let state = states[index];
+                 let key = (state.point.x, state.point.y);
+-                let slot = recent_slot(key.0, key.1);
++                // One mix for both the cache slot and the storage rule
++                // (`recent_slot` and `is_stored` each recomputed it).
++                let mix = rho_mix(key.0, key.1);
++                let slot = (mix >> 20) as usize & (RECENT_SLOTS - 1);
+                 let seen = match recent[slot] {
+                     Some((k, a0, b0)) if k == key => Some((a0, b0)),
+                     _ => None,
+@@ -6461,7 +6698,7 @@
+                     Some(previous) => Some(previous),
+                     None => {
+                         recent[slot] = Some((key, state.coefficient_a, state.coefficient_b));
+-                        if walk.is_stored(key) {
++                        if walk.is_stored(mix) {
+                             match table.get(&key) {
+                                 Some(&previous) => Some(previous),
+                                 None => {
+@@ -6495,6 +6732,7 @@
+                             walk_started,
+                             &mut report,
+                             progress,
++                            is_log,
+                         ) {
+                             return outcome;
+                         }
+@@ -6514,6 +6752,47 @@
+                 // looked at, so it is never charged either.
+                 break;
+             }
++            if let Some(lean) = &walk.lean {
++                // Advance every walk, sharing one field inversion: the
++                // partition hashed once per walk (the matched walk hashed
++                // it again to find the coefficients' jump), and the sums
++                // formed in place as the IC arm forms its probes.
++                buckets.clear();
++                dens.clear();
++                for state in states.iter().take(examined as usize) {
++                    let bucket = if state.point.infinity {
++                        0
++                    } else {
++                        rho_bucket(state.point.x, state.point.y, jumps.len())
++                    };
++                    report.charges.partition_hashes += 1;
++                    report.charges.walk_group_additions += 1;
++                    let j = jumps[bucket].0;
++                    buckets.push(bucket);
++                    let p = state.point;
++                    dens.push(if p.infinity || j.infinity || p.x == j.x { 0 } else { p.x ^ j.x });
++                }
++                lean.arith.batch_inv(&mut dens, &mut inv_scratch);
++                for index in 0..examined as usize {
++                    let state = states[index];
++                    let jump = &jumps[buckets[index]];
++                    let (p, j, inv) = (state.point, jump.0, dens[index]);
++                    let sum = if inv == 0 {
++                        lean.arith.add(p, j)
++                    } else {
++                        lean.arith.add_with_lambda(p, j, lean.arith.mul(p.y ^ j.y, inv))
++                    };
++                    states[index] = walk.canonicalize(
++                        FastRhoState {
++                            point: sum,
++                            coefficient_a: addmod_u64(state.coefficient_a, jump.1, modulus),
++                            coefficient_b: addmod_u64(state.coefficient_b, jump.2, modulus),
++                        },
++                        &mut report.charges,
++                    );
++                }
++                continue;
++            }
+             // Advance every walk, sharing one field inversion.
+             addends.clear();
+             points.clear();
+@@ -6720,6 +6999,7 @@
+                             walk_started,
+                             &mut report,
+                             progress,
++                            &|value: &BigUint| curve.mul(curve.generator(), value) == *target,
+                         ) {
+                             return outcome;
+                         }
+@@ -8430,6 +8710,98 @@
+         }
+     }
+ 
++    /// The lean walk is the matched walk computed more cheaply: on every
++    /// tournament cell shape it takes the same steps, restarts, escapes and
++    /// charges, emits the same events and recovers the same logarithm.
++    #[test]
++    fn lean_rho_walk_matches_the_matched_walk_exactly() {
++        for (a, n, seed) in [
++            (0u8, 13u32, 1u64),
++            (1, 17, 2),
++            (0, 19, 3),
++            (1, 19, 4),
++            (1, 23, 5),
++            (1, 29, 6),
++            (0, 31, 7),
++            (0, 37, 8),
++            (1, 43, 9),
++        ] {
++            let kc = KoblitzCurve::new(a, n).unwrap();
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            let r = kc.subgroup_order.to_u64_digits()[0];
++            for (i, parallel_walks) in [1usize, 4, 32].into_iter().enumerate() {
++                let d = BigUint::from((seed * 7919 + i as u64 * 104_729) % r + 1);
++                let q = kc.mul(kc.generator(), &d);
++                let options = KoblitzSignedRhoOptions {
++                    seed: seed ^ (i as u64) << 32,
++                    progress_interval: 64,
++                    parallel_walks,
++                    ..KoblitzSignedRhoOptions::default()
++                };
++                let mut lean_events = Vec::new();
++                let mut matched_events = Vec::new();
++                let lean = signed_rho_fast_with(&fc, &kc, &q, &options, &mut |e| lean_events.push(e), true);
++                let matched =
++                    signed_rho_fast_with(&fc, &kc, &q, &options, &mut |e| matched_events.push(e), false);
++                assert!(lean.verified, "K_{a}/2^{n}: lean walk found the log");
++                assert_eq!(lean.recovered_log, Some(d.clone()), "K_{a}/2^{n}");
++                assert_eq!(lean.recovered_log, matched.recovered_log);
++                assert_eq!(lean.iterations, matched.iterations, "K_{a}/2^{n} w={parallel_walks}");
++                assert_eq!(lean.restarts_attempted, matched.restarts_attempted);
++                assert_eq!(lean.jump_table_rebuilds, matched.jump_table_rebuilds);
++                assert_eq!(lean.parallel_walks, matched.parallel_walks);
++                assert_eq!(lean.charges, matched.charges, "K_{a}/2^{n} w={parallel_walks}");
++                assert_eq!(lean_events, matched_events);
++            }
++        }
++    }
++
++    /// The lean setup's batched fixed-base points are the matched setup's
++    /// double-and-add points, and its candidate check agrees with the
++    /// general arithmetic.
++    #[test]
++    fn lean_rho_setup_points_match_double_and_add() {
++        for (a, n) in [(0u8, 13u32), (1, 23), (1, 43), (1, 61)] {
++            let kc = KoblitzCurve::new(a, n).unwrap();
++            let fc = FastCurve::new(&kc.curve).unwrap();
++            let r = kc.subgroup_order.to_u64_digits()[0];
++            let d = BigUint::from(r / 3 + 1);
++            let target = kc.mul(kc.generator(), &d);
++            let (g, q) = (fc.lift(kc.generator()), fc.lift(&target));
++            let lambda = (&kc.lambda % &kc.subgroup_order).to_u64_digits()[0];
++            let lambda_pow: Vec<u64> = (0..n)
++                .scan(1u64, |c, _| {
++                    let v = *c;
++                    *c = mulmod_u64(*c, lambda, r);
++                    Some(v)
++                })
++                .collect();
++            let lean = LeanRho::new(&kc, g, q, r, &lambda_pow).unwrap();
++            for (k, &l) in lambda_pow.iter().enumerate() {
++                for (s, w) in [(0, l), (1, r - l)] {
++                    assert_eq!(lean.factor_quotient[2 * k + s].0, w);
++                    for &a in &[0, 1, r / 2, r - 1, (k as u64 * 0x9e37_79b9) % r] {
++                        assert_eq!(shoup_mulmod(a, lean.factor_quotient[2 * k + s], r), mulmod_u64(a, w, r));
++                    }
++                }
++            }
++            let mut state = 0x243f_u64 ^ u64::from(n);
++            let mut scalars = vec![(1, 1), (r - 1, 1), (1, r - 1), (r - 1, r - 1)];
++            for _ in 0..60 {
++                state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
++                let x = (state >> 11) % (r - 1) + 1;
++                state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
++                scalars.push((x, (state >> 11) % (r - 1) + 1));
++            }
++            let points = lean.setup_points(&scalars);
++            for (&(x, y), &p) in scalars.iter().zip(&points) {
++                assert_eq!(p, fc.add(fc.mul_u64(g, x), fc.mul_u64(q, y)), "n={n} ({x}, {y})");
++            }
++            assert!(lean.is_log(&d));
++            assert!(!lean.is_log(&(&d + 1u32)));
++        }
++    }
++
+     #[test]
+     fn descent_solver_reuses_its_setup_across_targets() {
+         let kc = KoblitzCurve::new(0, 9).unwrap();
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -170,7 +170,7 @@
+ }
+ 
+ /// The curve `y² + xy = x³ + ax² + b` over a [`Field`].
+-struct Arith {
++pub(crate) struct Arith {
+     field: Field,
+     n: u32,
+     a: u64,
+@@ -182,7 +182,7 @@
+ }
+ 
+ impl Arith {
+-    fn new(kc: &KoblitzCurve) -> Option<Self> {
++    pub(crate) fn new(kc: &KoblitzCurve) -> Option<Self> {
+         let n = kc.n;
+         if n > MAX_DEGREE || kc.curve.irreducible.degree != n {
+             return None;
+@@ -213,14 +213,14 @@
+     }
+ 
+     #[inline]
+-    fn mul(&self, a: u64, b: u64) -> u64 {
++    pub(crate) fn mul(&self, a: u64, b: u64) -> u64 {
+         self.field.mul(a, b)
+     }
+ 
+     /// Squaring as a carry-less self-product: one multiplier latency
+     /// instead of a dependent bit-spreading chain.
+     #[inline]
+-    fn sqr(&self, a: u64) -> u64 {
++    pub(crate) fn sqr(&self, a: u64) -> u64 {
+         self.field.sqr(a)
+     }
+ 
+@@ -246,7 +246,7 @@
+ 
+     /// Montgomery's trick: one inversion for the whole slice.  Zeros stay
+     /// zero.
+-    fn batch_inv(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
++    pub(crate) fn batch_inv(&self, xs: &mut [u64], scratch: &mut Vec<u64>) {
+         scratch.clear();
+         let mut acc = 1u64;
+         for &x in xs.iter() {
+@@ -274,7 +274,7 @@
+         }
+     }
+ 
+-    fn double(&self, p: FastPoint) -> FastPoint {
++    pub(crate) fn double(&self, p: FastPoint) -> FastPoint {
+         if p.infinity || p.x == 0 {
+             return FastPoint::INFINITY;
+         }
+@@ -293,13 +293,13 @@
+     }
+ 
+     #[inline]
+-    fn add_with_lambda(&self, p: FastPoint, q: FastPoint, lambda: u64) -> FastPoint {
++    pub(crate) fn add_with_lambda(&self, p: FastPoint, q: FastPoint, lambda: u64) -> FastPoint {
+         let x3 = self.sqr(lambda) ^ lambda ^ p.x ^ q.x ^ self.a;
+         let y3 = self.mul(lambda, p.x ^ x3) ^ x3 ^ p.y;
+         FastPoint::affine(x3, y3)
+     }
+ 
+-    fn add(&self, p: FastPoint, q: FastPoint) -> FastPoint {
++    pub(crate) fn add(&self, p: FastPoint, q: FastPoint) -> FastPoint {
+         if p.infinity {
+             return q;
+         }
+@@ -392,7 +392,7 @@
+ 
+     /// `[2^i]P` for `i < bits`, affine, with one inversion for the whole
+     /// table (projective doublings, then a batched normalisation).
+-    fn doubling_table(&self, p: FastPoint, bits: u32) -> Vec<FastPoint> {
++    pub(crate) fn doubling_table(&self, p: FastPoint, bits: u32) -> Vec<FastPoint> {
+         let mut projective = Vec::with_capacity(bits as usize);
+         let mut current = Ld { x: p.x, y: p.y, z: 1 };
+         for _ in 0..bits {
+@@ -417,7 +417,7 @@
+ 
+     /// `[k]G` from a doubling table of `G`: affine additions of the set
+     /// bits' entries.
+-    fn fixed_base_mul(&self, table: &[FastPoint], k: u64) -> FastPoint {
++    pub(crate) fn fixed_base_mul(&self, table: &[FastPoint], k: u64) -> FastPoint {
+         debug_assert!(table.len() >= 64 || k < 1u64 << table.len(), "scalar exceeds the table");
+         let mut acc = FastPoint::INFINITY;
+         for (i, &entry) in table.iter().enumerate() {
+@@ -431,7 +431,7 @@
+     /// `[k_o]G` for every `o`, all from the same doubling table, with the
+     /// additions of one bit position sharing one field inversion across
+     /// the columns.  Equal to [`Self::fixed_base_mul`] entry by entry.
+-    fn fixed_base_mul_many(&self, table: &[FastPoint], ks: &[u64]) -> Vec<FastPoint> {
++    pub(crate) fn fixed_base_mul_many(&self, table: &[FastPoint], ks: &[u64]) -> Vec<FastPoint> {
+         debug_assert!(table.len() >= 64 || ks.iter().all(|&k| k < 1u64 << table.len()), "scalar exceeds the table");
+         let mut acc = vec![FastPoint::INFINITY; ks.len()];
+         let mut dens = Vec::with_capacity(ks.len());
+@@ -714,15 +714,36 @@
+     }
+ 
+     /// `x` from its normal coordinates: the inverse of [`Self::coords`].
++    /// The word is consumed a nibble at a time rather than re-shifted by
++    /// `4i` for every table (the same lookups, fewer instructions); only
++    /// the rho walk calls this.
+     #[inline]
+     pub(crate) fn from_coords(&self, c: u64) -> u64 {
+         let mut acc = 0u64;
+-        for (i, table) in self.columns.iter().enumerate() {
+-            acc ^= table[((c >> (4 * i)) & 0xf) as usize];
++        let mut w = c;
++        for table in &self.columns {
++            acc ^= table[(w & 0xf) as usize];
++            w >>= 4;
+         }
+         acc
+     }
+ 
++    /// `x^{2^k}` in the polynomial basis, through the normal basis: the
++    /// same value as `from_coords(frobenius_coords(coords(x), k))`, with
++    /// the forward change written like [`Self::from_coords`].  The rho
++    /// walk's ordinate lift; [`Self::coords`], which `canon` uses, is
++    /// left as it is.
++    #[inline]
++    pub(crate) fn frobenius_poly(&self, x: u64, k: u32) -> u64 {
++        let mut c = 0u64;
++        let mut w = x;
++        for table in &self.tables {
++            c ^= table[(w & 0xf) as usize];
++            w >>= 4;
++        }
++        self.from_coords(self.frobenius_coords(c, k))
++    }
++
+     /// Normal coordinates of `x^{2^k}` from those of `x`: squaring moves the
+     /// coefficient of `γ^{2^i}` to `γ^{2^{i+1}}`, a left rotation.
+     #[inline]
+@@ -1828,6 +1849,9 @@
+                 }
+                 let (key, k) = nb.canon(x);
+                 assert_eq!(nb.from_coords(key), arith.field.sqr_k(x, k), "n={n}");
++                for k in [0u32, 1, 2, n / 2, n - 1] {
++                    assert_eq!(nb.frobenius_poly(x, k), arith.field.sqr_k(x, k), "n={n} k={k}");
++                }
+             }
+         }
+     }

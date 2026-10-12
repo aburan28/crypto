@@ -1,0 +1,100 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "follow-up 3: index calculus on the two Koblitz curves where koblitz-orbit:divisor=0;1 has no invariant subspace, with the polynomial-basis subspace base",
+  "description": "PROTOCOL-3. The arms, curves, targets, seeds and rounds of spec-koblitz-followup.json, with the ic.pipeline trial budget cut from 100,000,000 to 1,000,000 so that a run which finds no relation exhausts in well under a second instead of 44 s. Two earlier attempts at the full budget (sessions koblitz-followup, interrupted at 102 records, and koblitz-followup-2, which died at 80) found no relation in any of 24 n=29 index-calculus runs; the budget cut makes the session fit the host, and an exhausted row is inadmissible at any budget.",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 19
+      },
+      {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 29
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 20261003
+  },
+  "arms": [
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong"
+      }
+    },
+    {
+      "name": "rho-frob",
+      "role": "baseline",
+      "method": {
+        "id": "rho.signed_frobenius"
+      }
+    },
+    {
+      "name": "ic-sub6-mitm",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=6",
+          "oracle": "mitm:m=2",
+          "max_trials": "1000000"
+        }
+      }
+    },
+    {
+      "name": "ic-sub6-subtract",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=6",
+          "oracle": "subtract",
+          "max_trials": "1000000"
+        }
+      }
+    },
+    {
+      "name": "ic-sub8-mitm",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "mitm:m=2",
+          "max_trials": "1000000"
+        }
+      }
+    },
+    {
+      "name": "ic-sub8-subtract",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "subtract",
+          "max_trials": "1000000"
+        }
+      }
+    },
+    {
+      "name": "rho-strong-aa",
+      "role": "control",
+      "method": {
+        "id": "rho.signed_frobenius_strong"
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 3,
+    "warmup": 1,
+    "order": "alternate",
+    "seed": 20261003,
+    "isolation_required": "L2",
+    "timeout_seconds": 300
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "n37 shared-rank one-public-target versus strong signed-Frobenius rho",
+  "description": "Preregistered one-point, five-round correctness and accounting comparison; L2 and other-class replay gate any online speed claim.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 37}],
+    "targets_per_curve": 1,
+    "target_seed": 202610041751,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong", "params": {"lanes": "32", "dp_bits": "8", "step_cap_factor": "2000"}}},
+    {"name": "ic-shared", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000", "rank_seed": "202610031137", "rank_max_trials": "1000000", "target_max_attempts": "64"}}},
+    {"name": "ic-control", "role": "control", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=42,raw_x_cap=1000000", "rank_seed": "202610031137", "rank_max_trials": "1000000", "target_max_attempts": "64"}}}
+  ],
+  "measurement": {"rounds": 5, "warmup": 1, "order": "alternate", "seed": 202610041752, "isolation_required": "L2", "timeout_seconds": 120}
+}

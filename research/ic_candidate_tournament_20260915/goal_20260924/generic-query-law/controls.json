@@ -1,0 +1,140 @@
+{
+  "accepted_parent": "62ef21ec1e083f197593edbe1309c5ddf60b7789",
+  "classification": "accounting",
+  "clippy": "succeeded with existing warnings, including an unknown configured lint",
+  "cold_ms": null,
+  "complete_worker_controls": 40,
+  "files": {
+    ".github/workflows/ic-autolab.yml": {
+      "bytes": 3568,
+      "sha256": "6b76dd79a5cbccc28962a20ad77ceea289e185233899bd39d9cb200d09f5a063"
+    },
+    "examples/ic_query_law_vectors.rs": {
+      "bytes": 1276,
+      "sha256": "2ef603e1bac0d470a33d527f313bc82a5393ec56be1aa26a8431602d3d6fa946"
+    },
+    "research/ic_candidate_tournament_20260915/ci_smoke.py": {
+      "bytes": 11697,
+      "sha256": "cccc59361ab55929bdea98449a753d19aa9b8c685718fd3e61a411c1cf923ee6"
+    },
+    "research/ic_candidate_tournament_20260915/generic_query_law.py": {
+      "bytes": 11089,
+      "sha256": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/PROTOCOL.md": {
+      "bytes": 2221,
+      "sha256": "09fb1ab58fec051181cc71bdfd0bc5de3a26f44496bdc3bec5a274bc80dd6fb3"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/RESULTS.md": {
+      "bytes": 4449,
+      "sha256": "f9344ee86bec9557d13dcc0ce7b721b6254f25166a54b43d18344be74e950be0"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/build.log": {
+      "bytes": 1745,
+      "sha256": "85e370ae1633149aa3628cea9a46ec1548caf803669ac262e2ff6e576ec82c31"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/clippy.log": {
+      "bytes": 3022,
+      "sha256": "08987447d2555c5d02a78b90392222752382a056dd20c326edef69863acd4dff"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/environment.json": {
+      "bytes": 1751,
+      "sha256": "1b8e7b874c81725d288ee10788b330cce45c5a5bee4b660bc68d82348c34f484"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/final-replay.json": {
+      "bytes": 41773,
+      "sha256": "53ed10b30a1cce278659212b8eb3900417c9cc7607be54646238496e45691493"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/fixture-n13a0-job.json": {
+      "bytes": 388,
+      "sha256": "a8379ce1ac1be54b99a9357bc9d60ca1d2059c278a2a7c0402f777aec0350855"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/fixture-n13a0.json": {
+      "bytes": 317,
+      "sha256": "08431bb161954148144711c836548e7bee7696cafeee18f8cf9a5cfa97c14b44"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/fixture-n9a0-job.json": {
+      "bytes": 330,
+      "sha256": "1cdad438f52e188d130be4b30c04a05950255f4a9427d05663a4cc20dac9d960"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/fixture-n9a0.json": {
+      "bytes": 304,
+      "sha256": "e7068a06e44258593465fd7c827d0ce5fe461ba540b4e7e4346245c19a5174df"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/fixture-n9a1-job.json": {
+      "bytes": 330,
+      "sha256": "70f03b67b66ec163dc8872295707e876f29cc5a8dd5e80f4b613dd45b03e5f67"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/fixture-n9a1.json": {
+      "bytes": 305,
+      "sha256": "330b50f4954845cb24988e1b03ae1e5a99c9393e83e78140d5a111a4e0d05c21"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/historical-replay.json": {
+      "bytes": 31051,
+      "sha256": "387656389907a6d5b8e93c2d5cb92a64c6fcfcd12e04f38f87e5711b0ede1267"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/initial-python.log": {
+      "bytes": 21560,
+      "sha256": "6cb70d24caba43d823f443442af2fddfcea7ad0c1baf1a8c3ddc88c63347e6e9"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/initial-unit.log": {
+      "bytes": 1426,
+      "sha256": "256ef2bf60958ca1569146f6ddb05fb9657c57f032e21cb5f8dfb3040ac6c8f9"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/inputs.json": {
+      "bytes": 23543,
+      "sha256": "2615cdcc8f000bcf374d862a15dd3c75e56ed88f911cbcf353193e4d35a39530"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/python-tests.log": {
+      "bytes": 21707,
+      "sha256": "ddb46abe0dff7cb6dc96021e1d29a1d7794cb7a03d5911053a155f1e9b97ae42"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/run_controls.py": {
+      "bytes": 8558,
+      "sha256": "8819eee98f2849c33a1512b038d99db4442c3ae64e788124b2e1a7f0d1f649b3"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/rust-vectors.json": {
+      "bytes": 68821,
+      "sha256": "dc98542d910783a052dca5bd4f5bf2662d7247a86b8d985c47a2f4ffb7c9ea88"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/site-tests.log": {
+      "bytes": 5464,
+      "sha256": "e90b00daa02affc0bcda36ef3b80f142bae1bbaf8c488c9a1042db88671dbae5"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/summary.json": {
+      "bytes": 108828,
+      "sha256": "2bff388483a6a17f82b3b114a93c73e821118d1a9f0a022dde5bf8461a124e54"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/vector-receipt.json": {
+      "bytes": 230,
+      "sha256": "812046956a213e4759fa4ed535afc83fa06ec3a2d197fbf125fc75d1c892d5fe"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/worker-raw.jsonl": {
+      "bytes": 522405,
+      "sha256": "cb1a599b4a2f625e6e4b58301f792b18614b528c2f2aaaaa143c2c63d5b5dd7d"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-law/worker.log": {
+      "bytes": 1133,
+      "sha256": "98d6f4b189091dab040605f298f91f94faebd49a4653417550e582a401d5020b"
+    },
+    "research/ic_candidate_tournament_20260915/test_generic_query_law.py": {
+      "bytes": 6150,
+      "sha256": "16b579163633afef03d3c8141e9c49f27e127ea4a1c600a102ce9d8f1e0783e5"
+    }
+  },
+  "fresh_worker_controls": 47,
+  "historical_ic_reports": 35,
+  "instruction_cost": null,
+  "intended_preparation_failures": 7,
+  "new_tests": 10,
+  "online_ms": null,
+  "promotion_eligible": false,
+  "python": "3.12.13 (main, Mar 25 2026, 03:16:06) [Clang 22.1.1 ]",
+  "python_passed": 136,
+  "python_skipped": 2,
+  "rust_vector_values": 7436,
+  "schema_version": 1,
+  "site_tests_passed": 39,
+  "source_base": "ed427f31c4b9d74cb483b414b0c418541b2e3689",
+  "speedup": null
+}

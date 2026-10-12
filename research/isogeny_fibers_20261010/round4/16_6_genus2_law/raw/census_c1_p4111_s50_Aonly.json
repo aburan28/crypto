@@ -1,0 +1,2123 @@
+{
+  "p": 4111,
+  "b": 3984,
+  "order": 16582255,
+  "factorisation": [
+    [
+      5,
+      1
+    ],
+    [
+      3316451,
+      1
+    ]
+  ],
+  "r": 3316451,
+  "h": 5,
+  "zeta5": 966,
+  "kernels": [
+    [
+      "M5",
+      5
+    ]
+  ],
+  "validation": {
+    "n1": 4033,
+    "n2": 16907643,
+    "l_s1": 79,
+    "l_e2": 6781,
+    "order_lpoly": 16582255,
+    "order_exhaustive": 16582255,
+    "exhaustive_solver_failures": 0,
+    "random_order_checks": 40,
+    "assoc_checks": 300,
+    "library_crosschecks": 300,
+    "zeta_hom_checks": 200,
+    "zeta_eigenvalue_on_g": 1843406,
+    "rational_2_torsion_points": 0,
+    "two_sylow_order": 1,
+    "index_2j": 1
+  },
+  "size": 50,
+  "reps": 40,
+  "seed": 4,
+  "summary": [
+    {
+      "arm": "A",
+      "predicted": [
+        0.2,
+        1.0,
+        1.0,
+        0.2,
+        0.2
+      ],
+      "n_reps": 40,
+      "columns": {
+        "value": 0.20470829068577276,
+        "ci95": [
+          0.20304568527918782,
+          0.2066115702479339
+        ],
+        "smallx": 0.2
+      },
+      "c2": {
+        "value": 1.3160569105691058,
+        "ci95": [
+          1.2268518518518519,
+          1.406572964034725
+        ],
+        "smallx": 1.1071428571428572
+      },
+      "c3": {
+        "value": 0.9780200035934599,
+        "ci95": [
+          0.9171668095646375,
+          1.0418162239770279
+        ],
+        "smallx": 1.0323033707865168
+      },
+      "c2_strict": {
+        "value": 1.3269190103615986,
+        "ci95": [
+          1.2358252834943302,
+          1.4238761662425783
+        ],
+        "smallx": 1.0984848484848484
+      },
+      "c3_strict": {
+        "value": 0.9758283541553504,
+        "ci95": [
+          0.9113007778738116,
+          1.043945565257666
+        ],
+        "smallx": 1.0100210970464134
+      },
+      "cost2": {
+        "value": 0.15554668574115862,
+        "ci95": [
+          0.14538810480084263,
+          0.16680806809162813
+        ],
+        "smallx": 0.18064516129032257
+      },
+      "cost3": {
+        "value": 0.20930889954564286,
+        "ci95": [
+          0.19668039400633697,
+          0.22283330931680997
+        ],
+        "smallx": 0.19374149659863948
+      },
+      "cost2_nominal": {
+        "value": 0.15196911196911198,
+        "ci95": [
+          0.1421895664952241,
+          0.16301886792452833
+        ],
+        "smallx": 0.18064516129032257
+      },
+      "cost3_nominal": {
+        "value": 0.2044947948560931,
+        "ci95": [
+          0.19197243755383292,
+          0.21806284082056612
+        ],
+        "smallx": 0.19374149659863948
+      },
+      "hit_rate3": {
+        "value": 0.0012309845675392162,
+        "ci95": [
+          0.0011564319810544465,
+          0.0013099092976196546
+        ],
+        "smallx": 0.0013297347073724292
+      },
+      "plain_columns_frac": {
+        "value": 0.977,
+        "ci95": [
+          0.968,
+          0.985
+        ],
+        "smallx": 1.0
+      },
+      "plain_diag_frac2": {
+        "value": 0.03882113821138211,
+        "ci95": [
+          0.034162118455629664,
+          0.043424572957398544
+        ],
+        "smallx": 0.05714285714285716
+      }
+    }
+  ],
+  "census": [
+    {
+      "arm": "plain",
+      "rep": "smallx",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 280,
+        "distinct_strict": 264,
+        "representations": 280,
+        "hit_rate": 0.00008442760046809073,
+        "c": 0.224,
+        "cost_model": 296111.6964285714
+      },
+      "m3": {
+        "distinct": 4272,
+        "distinct_strict": 3792,
+        "representations": 4660,
+        "hit_rate": 0.0012881239614274415,
+        "c": 0.205056,
+        "cost_model": 970403.4995318352
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "smallx",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 310,
+        "distinct_strict": 290,
+        "representations": 310,
+        "hit_rate": 0.0000934734148039576,
+        "c": 0.248,
+        "cost_model": 53491.145161290326
+      },
+      "m3": {
+        "distinct": 4410,
+        "distinct_strict": 3830,
+        "representations": 4890,
+        "hit_rate": 0.0013297347073724292,
+        "c": 0.21168,
+        "cost_model": 188007.42630385488
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand1",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 24,
+      "classes": 5,
+      "m2": {
+        "distinct": 250,
+        "distinct_strict": 246,
+        "representations": 250,
+        "hit_rate": 0.00007538178613222387,
+        "c": 0.2,
+        "cost_model": 318379.296
+      },
+      "m3": {
+        "distinct": 4284,
+        "distinct_strict": 3744,
+        "representations": 4380,
+        "hit_rate": 0.0012917422871617883,
+        "c": 0.205632,
+        "cost_model": 928977.8711484594
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand1",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 3,
+      "m2": {
+        "distinct": 430,
+        "distinct_strict": 420,
+        "representations": 430,
+        "hit_rate": 0.00012965667214742506,
+        "c": 0.344,
+        "cost_model": 38563.38372093023
+      },
+      "m3": {
+        "distinct": 3940,
+        "distinct_strict": 3850,
+        "representations": 4220,
+        "hit_rate": 0.0011880169494438483,
+        "c": 0.18912,
+        "cost_model": 210434.7081218274
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand2",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 256,
+        "distinct_strict": 240,
+        "representations": 256,
+        "hit_rate": 0.00007719094899939725,
+        "c": 0.2048,
+        "cost_model": 323872.16796875
+      },
+      "m3": {
+        "distinct": 4110,
+        "distinct_strict": 3584,
+        "representations": 4504,
+        "hit_rate": 0.0012392765640137605,
+        "c": 0.19728,
+        "cost_model": 1008652.9805352798
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand2",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 400,
+        "distinct_strict": 400,
+        "representations": 400,
+        "hit_rate": 0.0001206108578115582,
+        "c": 0.32,
+        "cost_model": 41455.637500000004
+      },
+      "m3": {
+        "distinct": 2700,
+        "distinct_strict": 2300,
+        "representations": 2700,
+        "hit_rate": 0.0008141232902280179,
+        "c": 0.1296,
+        "cost_model": 307078.7962962963
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand3",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 282,
+        "distinct_strict": 264,
+        "representations": 282,
+        "hit_rate": 0.00008503065475714853,
+        "c": 0.2256,
+        "cost_model": 294011.6134751773
+      },
+      "m3": {
+        "distinct": 4236,
+        "distinct_strict": 3690,
+        "representations": 4668,
+        "hit_rate": 0.0012772689842244012,
+        "c": 0.203328,
+        "cost_model": 978650.5547686496
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand3",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 300,
+        "distinct_strict": 300,
+        "representations": 300,
+        "hit_rate": 0.00009045814335866865,
+        "c": 0.24,
+        "cost_model": 55274.183333333334
+      },
+      "m3": {
+        "distinct": 4040,
+        "distinct_strict": 3440,
+        "representations": 4050,
+        "hit_rate": 0.0012181696638967378,
+        "c": 0.19392,
+        "cost_model": 205225.92821782178
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand4",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 24,
+      "classes": 5,
+      "m2": {
+        "distinct": 232,
+        "distinct_strict": 224,
+        "representations": 232,
+        "hit_rate": 0.00006995429753070376,
+        "c": 0.1856,
+        "cost_model": 343081.1379310345
+      },
+      "m3": {
+        "distinct": 4222,
+        "distinct_strict": 3726,
+        "representations": 4418,
+        "hit_rate": 0.0012730476042009968,
+        "c": 0.202656,
+        "cost_model": 942619.8957839886
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand4",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 230,
+        "distinct_strict": 220,
+        "representations": 230,
+        "hit_rate": 0.00006935124324164596,
+        "c": 0.184,
+        "cost_model": 72096.76086956522
+      },
+      "m3": {
+        "distinct": 4180,
+        "distinct_strict": 3690,
+        "representations": 4420,
+        "hit_rate": 0.0012603834641307832,
+        "c": 0.20064,
+        "cost_model": 198352.33253588516
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand5",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 244,
+        "distinct_strict": 230,
+        "representations": 244,
+        "hit_rate": 0.0000735726232650505,
+        "c": 0.1952,
+        "cost_model": 339800.3073770492
+      },
+      "m3": {
+        "distinct": 4120,
+        "distinct_strict": 3618,
+        "representations": 4456,
+        "hit_rate": 0.0012422918354590493,
+        "c": 0.19776,
+        "cost_model": 1006204.7936893204
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand5",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 280,
+        "distinct_strict": 270,
+        "representations": 280,
+        "hit_rate": 0.00008442760046809073,
+        "c": 0.224,
+        "cost_model": 59222.33928571429
+      },
+      "m3": {
+        "distinct": 4130,
+        "distinct_strict": 3740,
+        "representations": 4370,
+        "hit_rate": 0.0012453071069043384,
+        "c": 0.19824,
+        "cost_model": 200753.69249394676
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand6",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 23,
+      "classes": 5,
+      "m2": {
+        "distinct": 236,
+        "distinct_strict": 228,
+        "representations": 236,
+        "hit_rate": 0.00007116040610881933,
+        "c": 0.1888,
+        "cost_model": 323213.44491525425
+      },
+      "m3": {
+        "distinct": 4208,
+        "distinct_strict": 3720,
+        "representations": 4404,
+        "hit_rate": 0.0012688262241775923,
+        "c": 0.201984,
+        "cost_model": 906349.489068441
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand6",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 310,
+        "distinct_strict": 290,
+        "representations": 310,
+        "hit_rate": 0.0000934734148039576,
+        "c": 0.248,
+        "cost_model": 53491.145161290326
+      },
+      "m3": {
+        "distinct": 4410,
+        "distinct_strict": 3830,
+        "representations": 4890,
+        "hit_rate": 0.0013297347073724292,
+        "c": 0.21168,
+        "cost_model": 188007.42630385488
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand7",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 240,
+        "distinct_strict": 234,
+        "representations": 240,
+        "hit_rate": 0.00007236651468693492,
+        "c": 0.192,
+        "cost_model": 345463.6458333333
+      },
+      "m3": {
+        "distinct": 4256,
+        "distinct_strict": 3746,
+        "representations": 4400,
+        "hit_rate": 0.0012832995271149792,
+        "c": 0.204288,
+        "cost_model": 974051.6329887217
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand7",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 280,
+        "distinct_strict": 270,
+        "representations": 280,
+        "hit_rate": 0.00008442760046809073,
+        "c": 0.224,
+        "cost_model": 59222.33928571429
+      },
+      "m3": {
+        "distinct": 4130,
+        "distinct_strict": 3740,
+        "representations": 4370,
+        "hit_rate": 0.0012453071069043384,
+        "c": 0.19824,
+        "cost_model": 200753.69249394676
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand8",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 256,
+        "distinct_strict": 250,
+        "representations": 256,
+        "hit_rate": 0.00007719094899939725,
+        "c": 0.2048,
+        "cost_model": 323872.16796875
+      },
+      "m3": {
+        "distinct": 4148,
+        "distinct_strict": 3676,
+        "representations": 4304,
+        "hit_rate": 0.0012507345955058585,
+        "c": 0.199104,
+        "cost_model": 999412.6687560269
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand8",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 400,
+        "distinct_strict": 400,
+        "representations": 400,
+        "hit_rate": 0.0001206108578115582,
+        "c": 0.32,
+        "cost_model": 41455.637500000004
+      },
+      "m3": {
+        "distinct": 2700,
+        "distinct_strict": 2300,
+        "representations": 2700,
+        "hit_rate": 0.0008141232902280179,
+        "c": 0.1296,
+        "cost_model": 307078.7962962963
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand9",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 23,
+      "classes": 5,
+      "m2": {
+        "distinct": 236,
+        "distinct_strict": 228,
+        "representations": 236,
+        "hit_rate": 0.00007116040610881933,
+        "c": 0.1888,
+        "cost_model": 323213.44491525425
+      },
+      "m3": {
+        "distinct": 4208,
+        "distinct_strict": 3722,
+        "representations": 4404,
+        "hit_rate": 0.0012688262241775923,
+        "c": 0.201984,
+        "cost_model": 906349.489068441
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand9",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 230,
+        "distinct_strict": 220,
+        "representations": 230,
+        "hit_rate": 0.00006935124324164596,
+        "c": 0.184,
+        "cost_model": 72096.76086956522
+      },
+      "m3": {
+        "distinct": 4180,
+        "distinct_strict": 3690,
+        "representations": 4420,
+        "hit_rate": 0.0012603834641307832,
+        "c": 0.20064,
+        "cost_model": 198352.33253588516
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand10",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 246,
+        "distinct_strict": 240,
+        "representations": 246,
+        "hit_rate": 0.00007417567755410829,
+        "c": 0.1968,
+        "cost_model": 337037.7032520325
+      },
+      "m3": {
+        "distinct": 4220,
+        "distinct_strict": 3722,
+        "representations": 4364,
+        "hit_rate": 0.001272444549911939,
+        "c": 0.20256,
+        "cost_model": 982361.0781990521
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand10",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 230,
+        "distinct_strict": 220,
+        "representations": 230,
+        "hit_rate": 0.00006935124324164596,
+        "c": 0.184,
+        "cost_model": 72096.76086956522
+      },
+      "m3": {
+        "distinct": 4180,
+        "distinct_strict": 3690,
+        "representations": 4420,
+        "hit_rate": 0.0012603834641307832,
+        "c": 0.20064,
+        "cost_model": 198352.33253588516
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand11",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 232,
+        "distinct_strict": 222,
+        "representations": 232,
+        "hit_rate": 0.00006995429753070376,
+        "c": 0.1856,
+        "cost_model": 357376.1853448276
+      },
+      "m3": {
+        "distinct": 4168,
+        "distinct_strict": 3686,
+        "representations": 4418,
+        "hit_rate": 0.0012567651383964364,
+        "c": 0.200064,
+        "cost_model": 994617.022552783
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand11",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 400,
+        "distinct_strict": 400,
+        "representations": 400,
+        "hit_rate": 0.0001206108578115582,
+        "c": 0.32,
+        "cost_model": 41455.637500000004
+      },
+      "m3": {
+        "distinct": 2700,
+        "distinct_strict": 2300,
+        "representations": 2700,
+        "hit_rate": 0.0008141232902280179,
+        "c": 0.1296,
+        "cost_model": 307078.7962962963
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand12",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 24,
+      "classes": 4,
+      "m2": {
+        "distinct": 300,
+        "distinct_strict": 300,
+        "representations": 300,
+        "hit_rate": 0.00009045814335866865,
+        "c": 0.24,
+        "cost_model": 265316.07999999996
+      },
+      "m3": {
+        "distinct": 4038,
+        "distinct_strict": 3438,
+        "representations": 4050,
+        "hit_rate": 0.00121756660960768,
+        "c": 0.193824,
+        "cost_model": 985572.3625557206
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand12",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 3,
+      "m2": {
+        "distinct": 410,
+        "distinct_strict": 390,
+        "representations": 410,
+        "hit_rate": 0.00012362612925684714,
+        "c": 0.328,
+        "cost_model": 40444.5243902439
+      },
+      "m3": {
+        "distinct": 5520,
+        "distinct_strict": 5140,
+        "representations": 6040,
+        "hit_rate": 0.0016644298377995032,
+        "c": 0.26496,
+        "cost_model": 150201.58514492755
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand13",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 24,
+      "classes": 5,
+      "m2": {
+        "distinct": 234,
+        "distinct_strict": 222,
+        "representations": 234,
+        "hit_rate": 0.00007055735181976155,
+        "c": 0.1872,
+        "cost_model": 340148.8205128205
+      },
+      "m3": {
+        "distinct": 4138,
+        "distinct_strict": 3646,
+        "representations": 4426,
+        "hit_rate": 0.0012477193240605696,
+        "c": 0.198624,
+        "cost_model": 961754.7607539875
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand13",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 310,
+        "distinct_strict": 290,
+        "representations": 310,
+        "hit_rate": 0.0000934734148039576,
+        "c": 0.248,
+        "cost_model": 53491.145161290326
+      },
+      "m3": {
+        "distinct": 4410,
+        "distinct_strict": 3830,
+        "representations": 4890,
+        "hit_rate": 0.0013297347073724292,
+        "c": 0.21168,
+        "cost_model": 188007.42630385488
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand14",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 238,
+        "distinct_strict": 228,
+        "representations": 238,
+        "hit_rate": 0.00007176346039787713,
+        "c": 0.1904,
+        "cost_model": 348366.70168067224
+      },
+      "m3": {
+        "distinct": 4166,
+        "distinct_strict": 3692,
+        "representations": 4412,
+        "hit_rate": 0.0012561620841073787,
+        "c": 0.199968,
+        "cost_model": 995094.5151224196
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand14",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 310,
+        "distinct_strict": 290,
+        "representations": 310,
+        "hit_rate": 0.0000934734148039576,
+        "c": 0.248,
+        "cost_model": 53491.145161290326
+      },
+      "m3": {
+        "distinct": 4410,
+        "distinct_strict": 3830,
+        "representations": 4890,
+        "hit_rate": 0.0013297347073724292,
+        "c": 0.21168,
+        "cost_model": 188007.42630385488
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand15",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 232,
+        "distinct_strict": 222,
+        "representations": 232,
+        "hit_rate": 0.00006995429753070376,
+        "c": 0.1856,
+        "cost_model": 357376.1853448276
+      },
+      "m3": {
+        "distinct": 4172,
+        "distinct_strict": 3690,
+        "representations": 4418,
+        "hit_rate": 0.001257971246974552,
+        "c": 0.200256,
+        "cost_model": 993663.4108341322
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand15",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 310,
+        "distinct_strict": 290,
+        "representations": 310,
+        "hit_rate": 0.0000934734148039576,
+        "c": 0.248,
+        "cost_model": 53491.145161290326
+      },
+      "m3": {
+        "distinct": 4410,
+        "distinct_strict": 3830,
+        "representations": 4890,
+        "hit_rate": 0.0013297347073724292,
+        "c": 0.21168,
+        "cost_model": 188007.42630385488
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand16",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 24,
+      "classes": 5,
+      "m2": {
+        "distinct": 246,
+        "distinct_strict": 234,
+        "representations": 246,
+        "hit_rate": 0.00007417567755410829,
+        "c": 0.1968,
+        "cost_model": 323556.1951219512
+      },
+      "m3": {
+        "distinct": 4156,
+        "distinct_strict": 3688,
+        "representations": 4444,
+        "hit_rate": 0.0012531468126620897,
+        "c": 0.199488,
+        "cost_model": 957589.3166506256
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand16",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 3,
+      "m2": {
+        "distinct": 540,
+        "distinct_strict": 510,
+        "representations": 540,
+        "hit_rate": 0.00016282465804560357,
+        "c": 0.432,
+        "cost_model": 30707.879629629628
+      },
+      "m3": {
+        "distinct": 7240,
+        "distinct_strict": 6370,
+        "representations": 7960,
+        "hit_rate": 0.0021830565263892036,
+        "c": 0.34752,
+        "cost_model": 114518.33563535914
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand17",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 24,
+      "classes": 5,
+      "m2": {
+        "distinct": 236,
+        "distinct_strict": 228,
+        "representations": 236,
+        "hit_rate": 0.00007116040610881933,
+        "c": 0.1888,
+        "cost_model": 337266.2033898305
+      },
+      "m3": {
+        "distinct": 4212,
+        "distinct_strict": 3724,
+        "representations": 4404,
+        "hit_rate": 0.001270032332755708,
+        "c": 0.202176,
+        "cost_model": 944857.8347578348
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand17",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 310,
+        "distinct_strict": 290,
+        "representations": 310,
+        "hit_rate": 0.0000934734148039576,
+        "c": 0.248,
+        "cost_model": 53491.145161290326
+      },
+      "m3": {
+        "distinct": 4410,
+        "distinct_strict": 3830,
+        "representations": 4890,
+        "hit_rate": 0.0013297347073724292,
+        "c": 0.21168,
+        "cost_model": 188007.42630385488
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand18",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 236,
+        "distinct_strict": 228,
+        "representations": 236,
+        "hit_rate": 0.00007116040610881933,
+        "c": 0.1888,
+        "cost_model": 351318.96186440677
+      },
+      "m3": {
+        "distinct": 4212,
+        "distinct_strict": 3724,
+        "representations": 4404,
+        "hit_rate": 0.001270032332755708,
+        "c": 0.202176,
+        "cost_model": 984226.911206078
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand18",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 230,
+        "distinct_strict": 220,
+        "representations": 230,
+        "hit_rate": 0.00006935124324164596,
+        "c": 0.184,
+        "cost_model": 72096.76086956522
+      },
+      "m3": {
+        "distinct": 4180,
+        "distinct_strict": 3690,
+        "representations": 4420,
+        "hit_rate": 0.0012603834641307832,
+        "c": 0.20064,
+        "cost_model": 198352.33253588516
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand19",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 256,
+        "distinct_strict": 248,
+        "representations": 256,
+        "hit_rate": 0.00007719094899939725,
+        "c": 0.2048,
+        "cost_model": 323872.16796875
+      },
+      "m3": {
+        "distinct": 4142,
+        "distinct_strict": 3694,
+        "representations": 4334,
+        "hit_rate": 0.0012489254326386852,
+        "c": 0.198816,
+        "cost_model": 1000860.3935296958
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand19",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 310,
+        "distinct_strict": 290,
+        "representations": 310,
+        "hit_rate": 0.0000934734148039576,
+        "c": 0.248,
+        "cost_model": 53491.145161290326
+      },
+      "m3": {
+        "distinct": 4410,
+        "distinct_strict": 3830,
+        "representations": 4890,
+        "hit_rate": 0.0013297347073724292,
+        "c": 0.21168,
+        "cost_model": 188007.42630385488
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand20",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 24,
+      "classes": 5,
+      "m2": {
+        "distinct": 232,
+        "distinct_strict": 222,
+        "representations": 232,
+        "hit_rate": 0.00006995429753070376,
+        "c": 0.1856,
+        "cost_model": 343081.1379310345
+      },
+      "m3": {
+        "distinct": 4178,
+        "distinct_strict": 3692,
+        "representations": 4418,
+        "hit_rate": 0.0012597804098417253,
+        "c": 0.200544,
+        "cost_model": 952546.9602680709
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand20",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 3,
+      "m2": {
+        "distinct": 410,
+        "distinct_strict": 390,
+        "representations": 410,
+        "hit_rate": 0.00012362612925684714,
+        "c": 0.328,
+        "cost_model": 40444.5243902439
+      },
+      "m3": {
+        "distinct": 5520,
+        "distinct_strict": 5140,
+        "representations": 6040,
+        "hit_rate": 0.0016644298377995032,
+        "c": 0.26496,
+        "cost_model": 150201.58514492755
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand21",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 258,
+        "distinct_strict": 246,
+        "representations": 258,
+        "hit_rate": 0.00007779400328845503,
+        "c": 0.2064,
+        "cost_model": 321361.53100775194
+      },
+      "m3": {
+        "distinct": 4174,
+        "distinct_strict": 3730,
+        "representations": 4462,
+        "hit_rate": 0.00125857430126361,
+        "c": 0.200352,
+        "cost_model": 993187.2903689506
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand21",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 230,
+        "distinct_strict": 220,
+        "representations": 230,
+        "hit_rate": 0.00006935124324164596,
+        "c": 0.184,
+        "cost_model": 72096.76086956522
+      },
+      "m3": {
+        "distinct": 4180,
+        "distinct_strict": 3690,
+        "representations": 4420,
+        "hit_rate": 0.0012603834641307832,
+        "c": 0.20064,
+        "cost_model": 198352.33253588516
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand22",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 238,
+        "distinct_strict": 226,
+        "representations": 238,
+        "hit_rate": 0.00007176346039787713,
+        "c": 0.1904,
+        "cost_model": 348366.70168067224
+      },
+      "m3": {
+        "distinct": 4144,
+        "distinct_strict": 3660,
+        "representations": 4432,
+        "hit_rate": 0.0012495284869277429,
+        "c": 0.198912,
+        "cost_model": 1000377.3527992278
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand22",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 300,
+        "distinct_strict": 300,
+        "representations": 300,
+        "hit_rate": 0.00009045814335866865,
+        "c": 0.24,
+        "cost_model": 55274.183333333334
+      },
+      "m3": {
+        "distinct": 4050,
+        "distinct_strict": 3450,
+        "representations": 4050,
+        "hit_rate": 0.0012211849353420269,
+        "c": 0.1944,
+        "cost_model": 204719.19753086418
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand23",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 250,
+        "distinct_strict": 246,
+        "representations": 250,
+        "hit_rate": 0.00007538178613222387,
+        "c": 0.2,
+        "cost_model": 331645.1
+      },
+      "m3": {
+        "distinct": 4284,
+        "distinct_strict": 3744,
+        "representations": 4380,
+        "hit_rate": 0.0012917422871617883,
+        "c": 0.205632,
+        "cost_model": 967685.2824463118
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand23",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 400,
+        "distinct_strict": 400,
+        "representations": 400,
+        "hit_rate": 0.0001206108578115582,
+        "c": 0.32,
+        "cost_model": 41455.637500000004
+      },
+      "m3": {
+        "distinct": 2700,
+        "distinct_strict": 2300,
+        "representations": 2700,
+        "hit_rate": 0.0008141232902280179,
+        "c": 0.1296,
+        "cost_model": 307078.7962962963
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand24",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 234,
+        "distinct_strict": 222,
+        "representations": 234,
+        "hit_rate": 0.00007055735181976155,
+        "c": 0.1872,
+        "cost_model": 354321.68803418806
+      },
+      "m3": {
+        "distinct": 4132,
+        "distinct_strict": 3640,
+        "representations": 4426,
+        "hit_rate": 0.0012459101611933961,
+        "c": 0.198336,
+        "cost_model": 1003282.6113262343
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand24",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 300,
+        "distinct_strict": 300,
+        "representations": 300,
+        "hit_rate": 0.00009045814335866865,
+        "c": 0.24,
+        "cost_model": 55274.183333333334
+      },
+      "m3": {
+        "distinct": 4050,
+        "distinct_strict": 3450,
+        "representations": 4050,
+        "hit_rate": 0.0012211849353420269,
+        "c": 0.1944,
+        "cost_model": 204719.19753086418
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand25",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 256,
+        "distinct_strict": 240,
+        "representations": 256,
+        "hit_rate": 0.00007719094899939725,
+        "c": 0.2048,
+        "cost_model": 323872.16796875
+      },
+      "m3": {
+        "distinct": 4120,
+        "distinct_strict": 3592,
+        "representations": 4504,
+        "hit_rate": 0.0012422918354590493,
+        "c": 0.19776,
+        "cost_model": 1006204.7936893204
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand25",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 300,
+        "distinct_strict": 300,
+        "representations": 300,
+        "hit_rate": 0.00009045814335866865,
+        "c": 0.24,
+        "cost_model": 55274.183333333334
+      },
+      "m3": {
+        "distinct": 4050,
+        "distinct_strict": 3450,
+        "representations": 4050,
+        "hit_rate": 0.0012211849353420269,
+        "c": 0.1944,
+        "cost_model": 204719.19753086418
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand26",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 244,
+        "distinct_strict": 230,
+        "representations": 244,
+        "hit_rate": 0.0000735726232650505,
+        "c": 0.1952,
+        "cost_model": 339800.3073770492
+      },
+      "m3": {
+        "distinct": 4120,
+        "distinct_strict": 3618,
+        "representations": 4456,
+        "hit_rate": 0.0012422918354590493,
+        "c": 0.19776,
+        "cost_model": 1006204.7936893204
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand26",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 400,
+        "distinct_strict": 400,
+        "representations": 400,
+        "hit_rate": 0.0001206108578115582,
+        "c": 0.32,
+        "cost_model": 41455.637500000004
+      },
+      "m3": {
+        "distinct": 2680,
+        "distinct_strict": 2300,
+        "representations": 2700,
+        "hit_rate": 0.0008080927473374399,
+        "c": 0.12864,
+        "cost_model": 309370.42910447763
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand27",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 24,
+      "classes": 5,
+      "m2": {
+        "distinct": 248,
+        "distinct_strict": 238,
+        "representations": 248,
+        "hit_rate": 0.00007477873184316609,
+        "c": 0.1984,
+        "cost_model": 320946.87096774194
+      },
+      "m3": {
+        "distinct": 4158,
+        "distinct_strict": 3704,
+        "representations": 4402,
+        "hit_rate": 0.0012537498669511476,
+        "c": 0.199584,
+        "cost_model": 957128.7157287158
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand27",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 310,
+        "distinct_strict": 290,
+        "representations": 310,
+        "hit_rate": 0.0000934734148039576,
+        "c": 0.248,
+        "cost_model": 53491.145161290326
+      },
+      "m3": {
+        "distinct": 4410,
+        "distinct_strict": 3830,
+        "representations": 4890,
+        "hit_rate": 0.0013297347073724292,
+        "c": 0.21168,
+        "cost_model": 188007.42630385488
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand28",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 23,
+      "classes": 5,
+      "m2": {
+        "distinct": 244,
+        "distinct_strict": 236,
+        "representations": 244,
+        "hit_rate": 0.0000735726232650505,
+        "c": 0.1952,
+        "cost_model": 312616.2827868853
+      },
+      "m3": {
+        "distinct": 4184,
+        "distinct_strict": 3712,
+        "representations": 4376,
+        "hit_rate": 0.0012615895727088988,
+        "c": 0.200832,
+        "cost_model": 911548.4345124284
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand28",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 300,
+        "distinct_strict": 300,
+        "representations": 300,
+        "hit_rate": 0.00009045814335866865,
+        "c": 0.24,
+        "cost_model": 55274.183333333334
+      },
+      "m3": {
+        "distinct": 4050,
+        "distinct_strict": 3450,
+        "representations": 4050,
+        "hit_rate": 0.0012211849353420269,
+        "c": 0.1944,
+        "cost_model": 204719.19753086418
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand29",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 250,
+        "distinct_strict": 236,
+        "representations": 250,
+        "hit_rate": 0.00007538178613222387,
+        "c": 0.2,
+        "cost_model": 331645.1
+      },
+      "m3": {
+        "distinct": 4144,
+        "distinct_strict": 3654,
+        "representations": 4480,
+        "hit_rate": 0.0012495284869277429,
+        "c": 0.198912,
+        "cost_model": 1000377.3527992278
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand29",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 310,
+        "distinct_strict": 290,
+        "representations": 310,
+        "hit_rate": 0.0000934734148039576,
+        "c": 0.248,
+        "cost_model": 53491.145161290326
+      },
+      "m3": {
+        "distinct": 4410,
+        "distinct_strict": 3830,
+        "representations": 4890,
+        "hit_rate": 0.0013297347073724292,
+        "c": 0.21168,
+        "cost_model": 188007.42630385488
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand30",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 24,
+      "classes": 5,
+      "m2": {
+        "distinct": 232,
+        "distinct_strict": 222,
+        "representations": 232,
+        "hit_rate": 0.00006995429753070376,
+        "c": 0.1856,
+        "cost_model": 343081.1379310345
+      },
+      "m3": {
+        "distinct": 4178,
+        "distinct_strict": 3692,
+        "representations": 4418,
+        "hit_rate": 0.0012597804098417253,
+        "c": 0.200544,
+        "cost_model": 952546.9602680709
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand30",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 310,
+        "distinct_strict": 290,
+        "representations": 310,
+        "hit_rate": 0.0000934734148039576,
+        "c": 0.248,
+        "cost_model": 53491.145161290326
+      },
+      "m3": {
+        "distinct": 4410,
+        "distinct_strict": 3830,
+        "representations": 4890,
+        "hit_rate": 0.0013297347073724292,
+        "c": 0.21168,
+        "cost_model": 188007.42630385488
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand31",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 24,
+      "classes": 5,
+      "m2": {
+        "distinct": 234,
+        "distinct_strict": 222,
+        "representations": 234,
+        "hit_rate": 0.00007055735181976155,
+        "c": 0.1872,
+        "cost_model": 340148.8205128205
+      },
+      "m3": {
+        "distinct": 4136,
+        "distinct_strict": 3644,
+        "representations": 4426,
+        "hit_rate": 0.0012471162697715117,
+        "c": 0.198528,
+        "cost_model": 962219.825918762
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand31",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 230,
+        "distinct_strict": 220,
+        "representations": 230,
+        "hit_rate": 0.00006935124324164596,
+        "c": 0.184,
+        "cost_model": 72096.76086956522
+      },
+      "m3": {
+        "distinct": 4180,
+        "distinct_strict": 3690,
+        "representations": 4420,
+        "hit_rate": 0.0012603834641307832,
+        "c": 0.20064,
+        "cost_model": 198352.33253588516
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand32",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 258,
+        "distinct_strict": 246,
+        "representations": 258,
+        "hit_rate": 0.00007779400328845503,
+        "c": 0.2064,
+        "cost_model": 321361.53100775194
+      },
+      "m3": {
+        "distinct": 4174,
+        "distinct_strict": 3730,
+        "representations": 4462,
+        "hit_rate": 0.00125857430126361,
+        "c": 0.200352,
+        "cost_model": 993187.2903689506
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand32",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 300,
+        "distinct_strict": 300,
+        "representations": 300,
+        "hit_rate": 0.00009045814335866865,
+        "c": 0.24,
+        "cost_model": 55274.183333333334
+      },
+      "m3": {
+        "distinct": 4050,
+        "distinct_strict": 3450,
+        "representations": 4050,
+        "hit_rate": 0.0012211849353420269,
+        "c": 0.1944,
+        "cost_model": 204719.19753086418
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand33",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 24,
+      "classes": 5,
+      "m2": {
+        "distinct": 232,
+        "distinct_strict": 224,
+        "representations": 232,
+        "hit_rate": 0.00006995429753070376,
+        "c": 0.1856,
+        "cost_model": 343081.1379310345
+      },
+      "m3": {
+        "distinct": 4218,
+        "distinct_strict": 3722,
+        "representations": 4418,
+        "hit_rate": 0.0012718414956228812,
+        "c": 0.202464,
+        "cost_model": 943513.7980085348
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand33",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 310,
+        "distinct_strict": 290,
+        "representations": 310,
+        "hit_rate": 0.0000934734148039576,
+        "c": 0.248,
+        "cost_model": 53491.145161290326
+      },
+      "m3": {
+        "distinct": 4410,
+        "distinct_strict": 3830,
+        "representations": 4890,
+        "hit_rate": 0.0013297347073724292,
+        "c": 0.21168,
+        "cost_model": 188007.42630385488
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand34",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 238,
+        "distinct_strict": 232,
+        "representations": 238,
+        "hit_rate": 0.00007176346039787713,
+        "c": 0.1904,
+        "cost_model": 348366.70168067224
+      },
+      "m3": {
+        "distinct": 4268,
+        "distinct_strict": 3754,
+        "representations": 4412,
+        "hit_rate": 0.001286917852849326,
+        "c": 0.204864,
+        "cost_model": 971312.9686035614
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand34",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 400,
+        "distinct_strict": 400,
+        "representations": 400,
+        "hit_rate": 0.0001206108578115582,
+        "c": 0.32,
+        "cost_model": 41455.637500000004
+      },
+      "m3": {
+        "distinct": 2700,
+        "distinct_strict": 2300,
+        "representations": 2700,
+        "hit_rate": 0.0008141232902280179,
+        "c": 0.1296,
+        "cost_model": 307078.7962962963
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand35",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 24,
+      "classes": 5,
+      "m2": {
+        "distinct": 290,
+        "distinct_strict": 286,
+        "representations": 290,
+        "hit_rate": 0.00008744287191337969,
+        "c": 0.232,
+        "cost_model": 274464.9103448276
+      },
+      "m3": {
+        "distinct": 3928,
+        "distinct_strict": 3468,
+        "representations": 4040,
+        "hit_rate": 0.0011843986237095015,
+        "c": 0.188544,
+        "cost_model": 1013172.4032586559
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand35",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 230,
+        "distinct_strict": 220,
+        "representations": 230,
+        "hit_rate": 0.00006935124324164596,
+        "c": 0.184,
+        "cost_model": 72096.76086956522
+      },
+      "m3": {
+        "distinct": 4180,
+        "distinct_strict": 3690,
+        "representations": 4420,
+        "hit_rate": 0.0012603834641307832,
+        "c": 0.20064,
+        "cost_model": 198352.33253588516
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand36",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 238,
+        "distinct_strict": 228,
+        "representations": 238,
+        "hit_rate": 0.00007176346039787713,
+        "c": 0.1904,
+        "cost_model": 348366.70168067224
+      },
+      "m3": {
+        "distinct": 4172,
+        "distinct_strict": 3698,
+        "representations": 4412,
+        "hit_rate": 0.001257971246974552,
+        "c": 0.200256,
+        "cost_model": 993663.4108341322
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand36",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 3,
+      "m2": {
+        "distinct": 430,
+        "distinct_strict": 420,
+        "representations": 430,
+        "hit_rate": 0.00012965667214742506,
+        "c": 0.344,
+        "cost_model": 38563.38372093023
+      },
+      "m3": {
+        "distinct": 3980,
+        "distinct_strict": 3890,
+        "representations": 4220,
+        "hit_rate": 0.0012000780352250042,
+        "c": 0.19104,
+        "cost_model": 208319.7864321608
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand37",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 25,
+      "classes": 5,
+      "m2": {
+        "distinct": 260,
+        "distinct_strict": 246,
+        "representations": 260,
+        "hit_rate": 0.00007839705757751283,
+        "c": 0.208,
+        "cost_model": 318889.51923076925
+      },
+      "m3": {
+        "distinct": 4184,
+        "distinct_strict": 3714,
+        "representations": 4520,
+        "hit_rate": 0.0012615895727088988,
+        "c": 0.200832,
+        "cost_model": 990813.5157743786
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand37",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 280,
+        "distinct_strict": 270,
+        "representations": 280,
+        "hit_rate": 0.00008442760046809073,
+        "c": 0.224,
+        "cost_model": 59222.33928571429
+      },
+      "m3": {
+        "distinct": 4130,
+        "distinct_strict": 3740,
+        "representations": 4370,
+        "hit_rate": 0.0012453071069043384,
+        "c": 0.19824,
+        "cost_model": 200753.69249394676
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand38",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 24,
+      "classes": 5,
+      "m2": {
+        "distinct": 244,
+        "distinct_strict": 236,
+        "representations": 244,
+        "hit_rate": 0.0000735726232650505,
+        "c": 0.1952,
+        "cost_model": 326208.29508196726
+      },
+      "m3": {
+        "distinct": 4184,
+        "distinct_strict": 3712,
+        "representations": 4376,
+        "hit_rate": 0.0012615895727088988,
+        "c": 0.200832,
+        "cost_model": 951180.9751434033
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand38",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 300,
+        "distinct_strict": 300,
+        "representations": 300,
+        "hit_rate": 0.00009045814335866865,
+        "c": 0.24,
+        "cost_model": 55274.183333333334
+      },
+      "m3": {
+        "distinct": 4050,
+        "distinct_strict": 3450,
+        "representations": 4050,
+        "hit_rate": 0.0012211849353420269,
+        "c": 0.1944,
+        "cost_model": 204719.19753086418
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand39",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 23,
+      "classes": 5,
+      "m2": {
+        "distinct": 232,
+        "distinct_strict": 224,
+        "representations": 232,
+        "hit_rate": 0.00006995429753070376,
+        "c": 0.1856,
+        "cost_model": 328786.0905172414
+      },
+      "m3": {
+        "distinct": 4220,
+        "distinct_strict": 3726,
+        "representations": 4418,
+        "hit_rate": 0.001272444549911939,
+        "c": 0.20256,
+        "cost_model": 903772.191943128
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand39",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 5,
+      "m2": {
+        "distinct": 280,
+        "distinct_strict": 270,
+        "representations": 280,
+        "hit_rate": 0.00008442760046809073,
+        "c": 0.224,
+        "cost_model": 59222.33928571429
+      },
+      "m3": {
+        "distinct": 4130,
+        "distinct_strict": 3740,
+        "representations": 4370,
+        "hit_rate": 0.0012453071069043384,
+        "c": 0.19824,
+        "cost_model": 200753.69249394676
+      }
+    },
+    {
+      "arm": "plain",
+      "rep": "rand40",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 23,
+      "classes": 5,
+      "m2": {
+        "distinct": 240,
+        "distinct_strict": 234,
+        "representations": 240,
+        "hit_rate": 0.00007236651468693492,
+        "c": 0.192,
+        "cost_model": 317826.5541666667
+      },
+      "m3": {
+        "distinct": 4254,
+        "distinct_strict": 3744,
+        "representations": 4400,
+        "hit_rate": 0.0012826964728259215,
+        "c": 0.204192,
+        "cost_model": 896548.8128819934
+      }
+    },
+    {
+      "arm": "A",
+      "rep": "rand40",
+      "points": 50,
+      "degree1_points": 50,
+      "columns": 5,
+      "classes": 4,
+      "m2": {
+        "distinct": 400,
+        "distinct_strict": 400,
+        "representations": 400,
+        "hit_rate": 0.0001206108578115582,
+        "c": 0.32,
+        "cost_model": 41455.637500000004
+      },
+      "m3": {
+        "distinct": 2700,
+        "distinct_strict": 2300,
+        "representations": 2700,
+        "hit_rate": 0.0008141232902280179,
+        "c": 0.1296,
+        "cost_model": 307078.7962962963
+      }
+    }
+  ]
+}

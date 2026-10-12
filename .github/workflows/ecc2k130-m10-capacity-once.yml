@@ -1,0 +1,101 @@
+name: ECC2K-130 n131 m10 capacity once
+
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ecc2k130-m10-capacity-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    if: >-
+      github.event.label.name == 'run-ecc2k130-m10-capacity-once' &&
+      github.event.pull_request.head.ref == 'codex/n131-m10-capacity-attempt-20260929' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check exact source/input freeze and tiny full-point control
+        run: |
+          python3 research/notes/ecc2k130/m10_export_capacity_20260925/ci_replay.py
+          python3 -m py_compile \
+            research/notes/ecc2k130/m10_export_capacity_20260925/dispatch_gate.py \
+            research/notes/ecc2k130/m10_export_capacity_20260925/run.py \
+            research/notes/ecc2k130/m10_export_capacity_20260925/verify.py
+          python3 -m unittest discover -s research/notes/ecc2k130/m10_export_capacity_20260925 -p 'test_dispatch_gate.py' -v
+
+  admission:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require independent exact-head review and zero prior capacity jobs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 research/notes/ecc2k130/m10_export_capacity_20260925/dispatch_gate.py --out /tmp/n131-m10-admission
+      - name: Preserve admission or refusal receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n131-m10-admission-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/n131-m10-admission/
+          if-no-files-found: warn
+          retention-days: 30
+
+  capacity:
+    needs: admission
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recheck live approval and one-shot gate immediately before dispatch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 research/notes/ecc2k130/m10_export_capacity_20260925/dispatch_gate.py --out /tmp/n131-m10-attempt-gate
+      - name: Run the frozen representation-size producer once
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 research/notes/ecc2k130/m10_export_capacity_20260925/run.py --out /tmp/n131-m10-attempt
+      - name: Independently replay complete or cap-censored arms
+        if: success()
+        run: python3 research/notes/ecc2k130/m10_export_capacity_20260925/verify.py --evidence /tmp/n131-m10-attempt --out /tmp/n131-m10-independent.json
+      - name: Preserve every attempted output, including STOP
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: n131-m10-capacity-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            /tmp/n131-m10-attempt-gate/
+            /tmp/n131-m10-attempt/
+            /tmp/n131-m10-independent.json
+          if-no-files-found: warn
+          retention-days: 30

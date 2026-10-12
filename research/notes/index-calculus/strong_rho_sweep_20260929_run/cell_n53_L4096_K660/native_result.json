@@ -1,0 +1,42 @@
+{
+  "phase": "native",
+  "n": 53,
+  "L": 4096,
+  "K": 660,
+  "corpus": "n53-strong-sweep-L4096-v1",
+  "batch_seed": "531310",
+  "load_before": "17:01:11 up 26 min,  0 user,  load average: 2.93, 2.46, 1.54",
+  "rho": {
+    "rc": 0,
+    "wall_s": 11.953907524999977,
+    "child_maxrss_bytes": 311463936,
+    "gates_G1": true,
+    "total_walk_steps": 40288078,
+    "table_entries": 2684237,
+    "in_process_ms": 11944.861794999999
+  },
+  "ic": {
+    "rc": 0,
+    "wall_s": 52.79507517100001,
+    "gates_G1": true,
+    "targets_solved": 4096,
+    "targets_failed": 0,
+    "rank": 660,
+    "orbit_columns": 660,
+    "rank_failures": 0,
+    "peak_rss_bytes": 2715701248,
+    "timing_ms": {
+      "base_load": 123.10296199999999,
+      "index_build": 30726.621409,
+      "linear_algebra": 1.572963,
+      "normal_basis_and_selftest": 3.4920020000000003,
+      "process_total": 52641.934576,
+      "rank_stage": 3322.9887040000003,
+      "setup_total": 30853.216883999998,
+      "target_median": 2.983279,
+      "targets_total": 18463.750867000002
+    },
+    "root_table_entries": 23083500
+  },
+  "load_after": "17:02:16 up 27 min,  0 user,  load average: 2.98, 2.57, 1.65"
+}

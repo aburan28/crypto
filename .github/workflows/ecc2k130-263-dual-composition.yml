@@ -1,0 +1,32 @@
+name: ECC2K-130 degree-263 dual composition
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Replay exact dual and exceptional inputs
+        run: python3 research/ecc2k130_dual_transport_20260925/certificate.py --out /tmp/dual_263_replay.json
+      - name: Compare deterministic full-point and cost evidence
+        run: |
+          python3 - <<'PYCODE'
+          import json
+          from pathlib import Path
+          frozen = json.loads(Path('research/ecc2k130_dual_transport_20260925/receipt.json').read_text())
+          fresh = json.loads(Path('/tmp/dual_263_replay.json').read_text())
+          assert frozen['status'] == fresh['status'] == 'PASS'
+          for key in ('source_sha256', 'input_sha256', 'deterministic_sha256'):
+              assert fresh[key] == frozen[key], key
+          assert len(fresh['rows']) == 8
+          assert all(row['raw_reverse_scalar_sign'] == -1 for row in fresh['rows'])
+          PYCODE

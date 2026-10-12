@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/5ef6d6b590d6/crypto-experiments/research/nagao_relations/pullback_incremental/run.py", line 198, in <module>
+    main()
+  File "/workspace/scratch/5ef6d6b590d6/crypto-experiments/research/nagao_relations/pullback_incremental/run.py", line 149, in main
+    validation = validate();record({'kind':'validation',**validation});print(validation,flush=True)
+                 ^^^^^^^^^^
+  File "/workspace/scratch/5ef6d6b590d6/crypto-experiments/research/nagao_relations/pullback_incremental/run.py", line 75, in validate
+    for cls in (pullback.Search,optimized.NormalizedSearch,optimized.CachedSearch):
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'optimized' has no attribute 'NormalizedSearch'

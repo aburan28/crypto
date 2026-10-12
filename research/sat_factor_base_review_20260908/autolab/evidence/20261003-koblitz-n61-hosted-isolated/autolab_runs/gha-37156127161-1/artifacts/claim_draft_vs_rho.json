@@ -1,0 +1,111 @@
+{
+  "K": 700,
+  "autolab_run_id": "gha-37156127161-1",
+  "beat_id": "koblitz.compact_orbit.n61_panel",
+  "claim_boundary": "L=4096 batched whole-process diagnostic; ineligible for the single-target online vs_rho schema.",
+  "claim_boundary_non_claims": [
+    "public synthetic known-answer fixtures only",
+    "no key recovery",
+    "no asymptotic sub-rho claim; both arms scale as sqrt(L*r/n) at optimal K",
+    "multi-target L=4096 batch: diagnostic, not the one-target primary comparison",
+    "comparator is the frozen KS v2 batched rho (koblitz_rho_batch_ks_v2_n61), superseded by strong rho R3 and not listed in measurement_schema.vs_rho.rho_reference_minimum",
+    "same-host replay; independent-host validation still required"
+  ],
+  "comparator": "koblitz_rho_batch_ks_v2_n61",
+  "executable_or_source_hash": {
+    "git_head": "b5077d433cb2d14c7447b42479b50bddab8ba930",
+    "ic_binary_sha256": "59fdc159ae56fdbfd5f341273aefc7ef706f03ee5b521f42506624549ddbbf88",
+    "koblitz_orbit_dlp_fast.rs_sha256": "8dea682ac4b12413c7b43a8849d6972b682dd0aa605d0ee4f41b7a4c1881ab75",
+    "koblitz_rho_batch_ks_v2_n61.rs_sha256": "019b2e2da563ad5212e46a24ed6c0f2f6e90aab083b3769260d6b056bd4095cf",
+    "rho_binary_sha256": "b181b2b693682eae5189982a56019207115ab79d1da66725e6cb675678c72760",
+    "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+  },
+  "fixture_hash": {
+    "base_hash": "ea937fd33073c3c855cd171817ca016684dec9d175df3e52891faaffdcd7c626",
+    "disjoint": true,
+    "eval": {
+      "name": "n61-ks-growing-4096-v1",
+      "scalars_sha256": "8e310c4ac975b176dc02de0136dd53bfad787efea37e83aa5fc6c937d55fc8e7",
+      "targets": 4096
+    },
+    "tune": {
+      "name": "n61-ks-growing-tune-4096-v1",
+      "scalars_sha256": "a34efc4a48a570432ce99b453e7d3d7755e6d829a8b4d7cf04bc6dfa43060a41",
+      "targets": 4096
+    }
+  },
+  "host_id": {
+    "cpu": "x86_64",
+    "cpu_count": 4,
+    "machine": "x86_64",
+    "node": "runnervm8df0l",
+    "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "ic_scalar_verified": true,
+  "independent_replay_pointer": [
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-37156127161-1/artifacts/replay_ic.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-37156127161-1/artifacts/replay_rho_b0.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-37156127161-1/artifacts/replay_rho_b1.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-37156127161-1/artifacts/replay_rho_b2.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-37156127161-1/artifacts/replay_rho_b3.json",
+    "research/sat_factor_base_review_20260908/autolab/runs/gha-37156127161-1/artifacts/replay_rho_b4.json"
+  ],
+  "independent_validation": false,
+  "instructions_retired_ratio_compact_over_rho": null,
+  "n_or_bits": {
+    "a": 0,
+    "n": 61,
+    "subgroup_order_bits": 47.21
+  },
+  "regime": "koblitz",
+  "resource_caps": {
+    "isolation": "children pinned to CPU 3 with taskset; wrap this command in tools/isolated_bench.py reserve for section-10 evidence",
+    "memory": "no cap; K candidates skipped when the estimated IC RSS exceeded available memory",
+    "threads": 1
+  },
+  "result_class": "multi_target_batch_diagnostic",
+  "rho_scalar_verified": true,
+  "schema_version": 2,
+  "seeds": {
+    "batch_seed": 531310,
+    "ic_rank_seed": 7,
+    "rho_env": {
+      "KIC_RHO_DP_BITS": "4"
+    }
+  },
+  "stage": "vs_rho",
+  "status": "PENDING_INDEPENDENT_VALIDATION",
+  "target_count": 4096,
+  "task_id": "TASK-IC-BOUNDARY-AUTOLAB-20260910",
+  "timing_class": "whole_process_wall",
+  "user_cpu_ratio_compact_over_rho": {
+    "median": 0.21102416033217922,
+    "range": [
+      0.2104561450394342,
+      0.21130839322827272
+    ],
+    "values": [
+      0.21102416033217922,
+      0.21130839322827272,
+      0.2108879458220825,
+      0.2110678282124376,
+      0.2104561450394342
+    ]
+  },
+  "verdict": "BATCH_DIAGNOSTIC_ONLY_NOT_SINGLE_TARGET",
+  "wall_ratio_compact_over_rho": {
+    "median": 0.21309433108200956,
+    "range": [
+      0.2124597139494548,
+      0.21319976186431458
+    ],
+    "values": [
+      0.21316864790554485,
+      0.21319976186431458,
+      0.21290444650474766,
+      0.21309433108200956,
+      0.2124597139494548
+    ]
+  }
+}

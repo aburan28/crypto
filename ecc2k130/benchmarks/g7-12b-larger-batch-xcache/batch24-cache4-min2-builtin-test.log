@@ -1,0 +1,117 @@
+ECC2K-130 validation suite
+GF(2^23), n = 47, l = 2095853
+  published parameters are consistent            ok
+  bitsliced multiply matches reference           ok
+  bitsliced squaring matches reference           ok
+  bitsliced inversion matches reference          ok
+  bitsliced sigma^7 matches reference            ok
+  bitsliced Hamming weight matches reference     ok
+  iteration commutes with Frobenius              ok
+  iteration commutes with negation               ok
+  weight is constant on an orbit                 ok
+  subgroup x-coordinates have even weight        ok
+  bitsliced start point matches reference        ok
+  tracked start scalar reproduces the point      ok
+  collision solver recovers a known discrete log ok
+GF(2^41), n = 83, l = 549756390943
+  published parameters are consistent            ok
+  bitsliced multiply matches reference           ok
+  bitsliced squaring matches reference           ok
+  bitsliced inversion matches reference          ok
+  bitsliced sigma^7 matches reference            ok
+  bitsliced Hamming weight matches reference     ok
+  iteration commutes with Frobenius              ok
+  iteration commutes with negation               ok
+  weight is constant on an orbit                 ok
+  subgroup x-coordinates have even weight        ok
+  bitsliced start point matches reference        ok
+  tracked start scalar reproduces the point      ok
+  collision solver recovers a known discrete log ok
+GF(2^83), n = 167, l = 2417851639230796216685689
+  published parameters are consistent            ok
+  bitsliced multiply matches reference           ok
+  bitsliced squaring matches reference           ok
+  bitsliced inversion matches reference          ok
+  bitsliced sigma^7 matches reference            ok
+  bitsliced Hamming weight matches reference     ok
+  iteration commutes with Frobenius              ok
+  iteration commutes with negation               ok
+  weight is constant on an orbit                 ok
+  subgroup x-coordinates have even weight        ok
+  bitsliced start point matches reference        ok
+  tracked start scalar reproduces the point      ok
+  collision solver recovers a known discrete log ok
+GF(2^131), n = 263, l = 680564733841876926932320129493409985129
+  published parameters are consistent            ok
+  bitsliced multiply matches reference           ok
+  bitsliced squaring matches reference           ok
+  bitsliced inversion matches reference          ok
+  bitsliced sigma^7 matches reference            ok
+  bitsliced Hamming weight matches reference     ok
+  iteration commutes with Frobenius              ok
+  iteration commutes with negation               ok
+  weight is constant on an orbit                 ok
+  subgroup x-coordinates have even weight        ok
+  bitsliced start point matches reference        ok
+  tracked start scalar reproduces the point      ok
+  collision solver recovers a known discrete log ok
+GF(2^13), n = 0, l = 2003
+  published parameters are consistent            ok
+  bitsliced multiply matches reference           ok
+  bitsliced squaring matches reference           ok
+  bitsliced inversion matches reference          ok
+  bitsliced sigma^7 matches reference            ok
+  bitsliced Hamming weight matches reference     ok
+  iteration commutes with Frobenius              ok
+  iteration commutes with negation               ok
+  weight is constant on an orbit                 ok
+  subgroup x-coordinates have even weight        ok
+  bitsliced start point matches reference        ok
+  tracked start scalar reproduces the point      ok
+    ... not applicable for                       2 of 16 lanes (degenerate addition on a toy field)
+  collision solver recovers a known discrete log ok
+GF(2^19), n = 0, l = 130873
+  published parameters are consistent            ok
+  bitsliced multiply matches reference           ok
+  bitsliced squaring matches reference           ok
+  bitsliced inversion matches reference          ok
+  bitsliced sigma^7 matches reference            ok
+  bitsliced Hamming weight matches reference     ok
+  iteration commutes with Frobenius              ok
+  iteration commutes with negation               ok
+  weight is constant on an orbit                 ok
+  subgroup x-coordinates have even weight        ok
+  bitsliced start point matches reference        ok
+  tracked start scalar reproduces the point      ok
+    ... not applicable for                       1 of 16 lanes (degenerate addition on a toy field)
+  collision solver recovers a known discrete log ok
+GF(2^41), n = 0, l = 549756390943
+  published parameters are consistent            ok
+  bitsliced multiply matches reference           ok
+  bitsliced squaring matches reference           ok
+  bitsliced inversion matches reference          ok
+  bitsliced sigma^7 matches reference            ok
+  bitsliced Hamming weight matches reference     ok
+  iteration commutes with Frobenius              ok
+  iteration commutes with negation               ok
+  weight is constant on an orbit                 ok
+  subgroup x-coordinates have even weight        ok
+  bitsliced start point matches reference        ok
+  tracked start scalar reproduces the point      ok
+  collision solver recovers a known discrete log ok
+GF(2^97), n = 0, l = 39614081257132074233778707191
+  published parameters are consistent            ok
+  published challenge solution satisfies [k]P == Q ok
+  bitsliced multiply matches reference           ok
+  bitsliced squaring matches reference           ok
+  bitsliced inversion matches reference          ok
+  bitsliced sigma^7 matches reference            ok
+  bitsliced Hamming weight matches reference     ok
+  iteration commutes with Frobenius              ok
+  iteration commutes with negation               ok
+  weight is constant on an orbit                 ok
+  subgroup x-coordinates have even weight        ok
+  bitsliced start point matches reference        ok
+  tracked start scalar reproduces the point      ok
+  collision solver recovers a known discrete log ok
+all checks passed (0 failures)

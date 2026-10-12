@@ -1,0 +1,81 @@
+name: Koblitz degree-73 descent at 2^37
+
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  exact-isogeny-and-matched-stage:
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ github.event_name == 'pull_request' && 'debian:bookworm-slim' || 'sagemath/sagemath:10.6' }}
+      options: --user root
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 120 }}
+    steps:
+      - name: Prepare lightweight pull-request custody tools
+        if: github.event_name == 'pull_request'
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends git jq ca-certificates
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            research/koblitz_isogeny_descent_37_20260925
+            research/koblitz_isogeny_descent_37_results_20260925
+            research/toy_f5_neighbors_20260924
+      - name: Verify frozen archive and source hashes on pull requests
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          archive=research/koblitz_isogeny_descent_37_results_20260925
+          source=research/koblitz_isogeny_descent_37_20260925
+          git fetch --no-tags --depth=1 origin "$BASE"
+          git show "$BASE:$archive/EVIDENCE.json" > "$RUNNER_TEMP/isogeny-base-evidence.json"
+          cmp "$RUNNER_TEMP/isogeny-base-evidence.json" "$archive/EVIDENCE.json"
+          git show "$BASE:$archive/REPLAY.json" > "$RUNNER_TEMP/isogeny-base-replay.json"
+          cmp "$RUNNER_TEMP/isogeny-base-replay.json" "$archive/REPLAY.json"
+          jq -e '.schema == "ecc2k130-n37-degree73-archive-repair-v1"' "$archive/EVIDENCE.json"
+          test "$(stat -c %s "$archive/raw.json.gz")" = "$(jq -r .restored_raw_bytes "$archive/EVIDENCE.json")"
+          {
+            jq -r --arg path "$archive/raw.json.gz" '.restored_raw_sha256 + "  " + $path' "$archive/EVIDENCE.json"
+            jq -r --arg path "$archive/summary.json" '.summary_sha256 + "  " + $path' "$archive/EVIDENCE.json"
+            jq -r --arg path "$source/experiment.py" '.source_file_sha256["experiment.py"] + "  " + $path' "$archive/EVIDENCE.json"
+            jq -r --arg path "$source/contract.json" '.source_file_sha256["contract.json"] + "  " + $path' "$archive/EVIDENCE.json"
+            jq -r --arg path 'research/toy_f5_neighbors_20260924/matrix.py' '.source_file_sha256["matrix.py"] + "  " + $path' "$archive/EVIDENCE.json"
+          } | sha256sum --check --strict
+          jq -e --slurpfile evidence "$archive/EVIDENCE.json" '
+            .status == "PASS" and .raw_sha256 == $evidence[0].restored_raw_sha256
+            and .summary_sha256 == $evidence[0].summary_sha256
+            and .source_file_sha256 == $evidence[0].source_file_sha256
+            and .cases == 128 and .full_dlp_speedup == null
+          ' "$archive/REPLAY.json"
+          echo 'PR checks validate frozen archive custody. Full Sage construction and algebraic experiment run by manual dispatch; this check does not create an independent replay certificate.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Construct map and run frozen comparison
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p "$RUNNER_TEMP/koblitz-37-run"
+          chown sage:sage "$RUNNER_TEMP/koblitz-37-run"
+          su - sage -c "sage -python '$GITHUB_WORKSPACE/research/koblitz_isogeny_descent_37_20260925/experiment.py' --output '$RUNNER_TEMP/koblitz-37-run'"
+      - name: Verify saved evidence
+        if: github.event_name != 'pull_request'
+        run: |
+          su - sage -c "sage -python '$GITHUB_WORKSPACE/research/koblitz_isogeny_descent_37_20260925/verify.py' '$RUNNER_TEMP/koblitz-37-run'"
+      - name: Retain raw run and summary
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: koblitz-isogeny-descent-37
+          path: |
+            ${{ runner.temp }}/koblitz-37-run/raw.json.gz
+            ${{ runner.temp }}/koblitz-37-run/summary.json
+          retention-days: 90

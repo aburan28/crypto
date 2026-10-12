@@ -1,0 +1,49 @@
+{
+  "classification": "PREFLIGHT_AND_SMOKE_COMPLETE_PANEL_HELD",
+  "file_count": 28,
+  "files_sha256": {
+    "preflight/receipt.json": "059ba69db00c3d91caeaf62f5dc91597b63b28e6c91da94e16d79b6b61a6c7df",
+    "preflight/result.json": "c7faccc2135a14b42e674fa1ab6d0648ff718da54f03eb6522c0d9ae5397a6e4",
+    "smoke/cadical-sat.cnf": "6642f3ff4fae6f869a53f303bc768802cec0a16af731686c6bf03f342cf0489e",
+    "smoke/cadical-sat.json": "f839f5490abb8ed44ffdb9111991a0ff36312897e0924a1ce021f425b08b5193",
+    "smoke/cadical-sat.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "smoke/cadical-sat.stdout": "4a72334b85eedd6d074ae2696d30c0b5f2132fbefe0e57f144e2e3e2f1a58e8a",
+    "smoke/cadical-unsat.cnf": "ac42a371b5a124286c410ed5dfa2e3be7ee7d5b1feac6f08e7e1715f0c3669a8",
+    "smoke/cadical-unsat.json": "547e9dacf18aefdee76dee6a07e8113cb9fcfa9b454c2c03a596965f602c2f3f",
+    "smoke/cadical-unsat.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "smoke/cadical-unsat.stdout": "860a12cfbfba6f8bb141d4c38093c723e01dceb63c21d646b24c8023e8e72292",
+    "smoke/cryptominisat5-sat.cnf": "6642f3ff4fae6f869a53f303bc768802cec0a16af731686c6bf03f342cf0489e",
+    "smoke/cryptominisat5-sat.json": "0ef38cdb2026ed0d554b2d4fc759601454918752fb3818c76b734ff2b25b10e6",
+    "smoke/cryptominisat5-sat.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "smoke/cryptominisat5-sat.stdout": "f5d108e5be9ea122e069a928413aa296c08f42bb1856e95e7ae85eb63fcf6431",
+    "smoke/cryptominisat5-unsat.cnf": "ac42a371b5a124286c410ed5dfa2e3be7ee7d5b1feac6f08e7e1715f0c3669a8",
+    "smoke/cryptominisat5-unsat.json": "24e2bcb135e0bbcb2466f7d89e9a0827aa95c4593cd9bc83677eb123ec56929e",
+    "smoke/cryptominisat5-unsat.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "smoke/cryptominisat5-unsat.stdout": "bde6e1eede96772c07c8ce29fd18088863815bd043aa59a06f11f5838cf8a162",
+    "smoke/kissat-sat.cnf": "6642f3ff4fae6f869a53f303bc768802cec0a16af731686c6bf03f342cf0489e",
+    "smoke/kissat-sat.json": "7f4058b1d8ffa1f29689b0370a56a70877eb97dcbd63babc24632ff69dc2cf1e",
+    "smoke/kissat-sat.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "smoke/kissat-sat.stdout": "007593f0bf5f875bb9ce835c6bcfe717ff9bf283a158a5d112b9069a3b32cccb",
+    "smoke/kissat-unsat.cnf": "ac42a371b5a124286c410ed5dfa2e3be7ee7d5b1feac6f08e7e1715f0c3669a8",
+    "smoke/kissat-unsat.json": "89642762c07335defcffae0b3d309e315c3ac060f65034c8a3033a8475a42c7c",
+    "smoke/kissat-unsat.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "smoke/kissat-unsat.stdout": "0f752f3f2a0893899c469049bac20f7d6f3f08ff23b9156819281d5dbe1cee3e",
+    "smoke/receipt.json": "944b3c1219b19c37216c59824e3bf233c50daf7a2028c28874a14273a40f4c45",
+    "smoke/result.json": "9d9f23ebdde554c61e0453a2e698a5898a6dfe42fc2261028c625dd7a1d7c8b3"
+  },
+  "freeze_sha256": "ada0ecb94236cd3430653cb6203eb80782a731b4b508f5d427d879a43b00f717",
+  "host_gate_sha256": "c9144aaf8c4a5e8a9f0bdab807ad9e3eb4530d9c3377f3eabc5aaa279ad41b8d",
+  "host_observation": {
+    "disk_free_bytes": 5392801792,
+    "load_1_5_15": [
+      6.3203125,
+      6.80126953125,
+      10.4560546875
+    ],
+    "logical_cpus": 14,
+    "utc": "2026-09-29T08:32:49.035886+00:00"
+  },
+  "schema": "n13-oaware-paired-first-local-attempt-v1",
+  "source_head": "3fa70fc1b30425a78654c20f46342faca7f01772",
+  "verifier_sha256": "1850b8e1e5ebc6db92a1c4502f7fb26cf2c28a2ded0d2c97e0119d23aaaf7d64"
+}

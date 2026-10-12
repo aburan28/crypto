@@ -1,0 +1,35 @@
+coefficient panel {'n': 5, 'dimension': 4, 'targets': 'all'} solutions 864
+coefficient panel {'n': 5, 'dimension': 5, 'targets': 8} solutions 1780
+SAT 9 chained-s3 [456, 33] complete False solutions 15
+SAT 9 rr-norm [456, 33] complete True solutions 50
+SAT 9 chained-s3 [310, 286] complete False solutions 13
+SAT 9 rr-norm [310, 286] complete True solutions 44
+SAT 9 chained-s3 [356, 388] complete False solutions 24
+SAT 9 rr-norm [356, 388] complete True solutions 49
+SAT 9 chained-s3 [48, 501] complete False solutions 13
+SAT 9 rr-norm [48, 501] complete True solutions 32
+SAT 9 chained-s3 [338, 98] complete False solutions 22
+SAT 9 rr-norm [338, 98] complete True solutions 49
+SAT 9 chained-s3 [430, 393] complete False solutions 12
+SAT 9 rr-norm [430, 393] complete True solutions 47
+SAT 9 chained-s3 [219, 421] complete False solutions 16
+SAT 9 rr-norm [219, 421] complete True solutions 43
+SAT 9 chained-s3 [204, 134] complete False solutions 13
+SAT 9 rr-norm [204, 134] complete True solutions 49
+SAT 11 chained-s3 [429, 933] complete False solutions 0
+SAT 11 rr-norm [429, 933] complete False solutions 0
+SAT 11 chained-s3 [1760, 575] complete False solutions 0
+SAT 11 rr-norm [1760, 575] complete False solutions 0
+SAT 11 chained-s3 [1648, 1200] complete False solutions 0
+SAT 11 rr-norm [1648, 1200] complete False solutions 0
+SAT 11 chained-s3 [1995, 189] complete False solutions 2
+SAT 11 rr-norm [1995, 189] complete False solutions 5
+SAT 11 chained-s3 [1769, 1643] complete False solutions 0
+SAT 11 rr-norm [1769, 1643] complete False solutions 0
+SAT 11 chained-s3 [1637, 1054] complete False solutions 2
+SAT 11 rr-norm [1637, 1054] complete False solutions 4
+SAT 11 chained-s3 [655, 1716] complete False solutions 0
+SAT 11 rr-norm [655, 1716] complete False solutions 0
+SAT 11 chained-s3 [1404, 544] complete False solutions 0
+SAT 11 rr-norm [1404, 544] complete False solutions 0
+[{"n": 9, "weight": 2, "variant": "chained-s3", "attempted": 8, "complete": 0, "correct_completed": 0, "errors": 0, "projected_solutions_completed": 0, "projected_solutions_partial": 128, "diagnostic_seconds": 40.73209765899628}, {"n": 9, "weight": 2, "variant": "rr-norm", "attempted": 8, "complete": 8, "correct_completed": 8, "errors": 0, "projected_solutions_completed": 363, "projected_solutions_partial": 0, "diagnostic_seconds": 26.135316945996237}, {"n": 11, "weight": 2, "variant": "chained-s3", "attempted": 8, "complete": 0, "correct_completed": 0, "errors": 0, "projected_solutions_completed": 0, "projected_solutions_partial": 4, "diagnostic_seconds": 40.31739456499781}, {"n": 11, "weight": 2, "variant": "rr-norm", "attempted": 8, "complete": 0, "correct_completed": 0, "errors": 0, "projected_solutions_completed": 0, "projected_solutions_partial": 9, "diagnostic_seconds": 40.22607899999639}]

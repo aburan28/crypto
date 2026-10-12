@@ -1,0 +1,153 @@
+{
+ "kind": "RTX PRO 6000 20 B/s attempt: complete scalar updates/s",
+ "unit": "B scalar updates / s",
+ "class": "engineering",
+ "targetB": 20.0,
+ "floorB": [
+  22.0,
+  25.0
+ ],
+ "eighteenReferenceB": 16.666638,
+ "sku": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+ "driver": "595.91.07",
+ "cuda": "13.3.73",
+ "workers": 96256,
+ "updatesPerSample": 50465865728,
+ "steps": 1024,
+ "launches": 32,
+ "repeats": 3,
+ "clockLock": "nvidia-smi -lgc 2430,2430 -pl 600 (SM still 2340-2422 under load)",
+ "anyOver20": false,
+ "productsPerUpdate": 5.3125,
+ "table": {
+  "shipping": {
+   "medianB": 14.435869,
+   "ratesB": [
+    14.462848,
+    14.435869,
+    14.415023999999999
+   ],
+   "minB": 14.415023999999999,
+   "maxB": 14.462848,
+   "ratioTo20": 0.7217934500000001,
+   "ratioToFloor22": 0.6561758636363636,
+   "ratioToEighteen": 0.8661536297842433,
+   "valid": true,
+   "registers": 104,
+   "pairIlp": false,
+   "l2Persist": false,
+   "unrollSlots": 1,
+   "walkTable": false,
+   "verify300": true
+  },
+  "table_pivot": {
+   "medianB": 16.473803,
+   "ratesB": [
+    16.613229,
+    16.473803,
+    16.40418
+   ],
+   "minB": 16.40418,
+   "maxB": 16.613229,
+   "ratioTo20": 0.82369015,
+   "ratioToFloor22": 0.7488092272727273,
+   "ratioToEighteen": 0.9884298800993938,
+   "valid": true,
+   "registers": 102,
+   "pairIlp": false,
+   "l2Persist": false,
+   "unrollSlots": 1,
+   "walkTable": true,
+   "verify300": true
+  },
+  "table_pivot_ilp": {
+   "medianB": 16.617283,
+   "ratesB": [
+    16.720457,
+    16.617283,
+    16.526732
+   ],
+   "minB": 16.526732,
+   "maxB": 16.720457,
+   "ratioTo20": 0.83086415,
+   "ratioToFloor22": 0.7553310454545454,
+   "ratioToEighteen": 0.9970386949065553,
+   "valid": true,
+   "registers": 104,
+   "pairIlp": true,
+   "l2Persist": false,
+   "unrollSlots": 1,
+   "walkTable": true,
+   "verify300": true
+  },
+  "table_pivot_persist": {
+   "medianB": 17.08071,
+   "ratesB": [
+    17.095145,
+    17.08071,
+    17.077398000000002
+   ],
+   "minB": 17.077398000000002,
+   "maxB": 17.095145,
+   "ratioTo20": 0.8540355,
+   "ratioToFloor22": 0.776395909090909,
+   "ratioToEighteen": 1.024844362732304,
+   "valid": true,
+   "registers": 104,
+   "pairIlp": true,
+   "l2Persist": true,
+   "unrollSlots": 1,
+   "walkTable": true,
+   "verify300": true
+  },
+  "table_pivot_unroll": {
+   "medianB": 17.297791,
+   "ratesB": [
+    17.303314999999998,
+    17.297791,
+    17.293812000000003
+   ],
+   "minB": 17.293812000000003,
+   "maxB": 17.303314999999998,
+   "ratioTo20": 0.86488955,
+   "ratioToFloor22": 0.7862632272727272,
+   "ratioToEighteen": 1.0378692451351017,
+   "valid": true,
+   "registers": 110,
+   "pairIlp": true,
+   "l2Persist": true,
+   "unrollSlots": 2,
+   "walkTable": true,
+   "verify300": true
+  }
+ },
+ "smi": {
+  "bench_shipping_0": "2422 MHz, 546.08 W, 48",
+  "bench_table_pivot_0": "2377 MHz, 556.05 W, 52",
+  "bench_table_pivot_ilp_0": "2370 MHz, 563.61 W, 53",
+  "bench_table_pivot_persist_0": "2422 MHz, 522.76 W, 51",
+  "bench_table_pivot_unroll_0": "2422 MHz, 532.45 W, 53",
+  "bench_table_pivot_unroll_1": "2422 MHz, 534.60 W, 56",
+  "bench_table_pivot_persist_1": "2422 MHz, 529.44 W, 54",
+  "bench_table_pivot_ilp_1": "2347 MHz, 556.49 W, 55",
+  "bench_table_pivot_1": "2355 MHz, 550.26 W, 60",
+  "bench_shipping_1": "2415 MHz, 555.32 W, 61",
+  "bench_shipping_2": "2415 MHz, 555.84 W, 62",
+  "bench_table_pivot_2": "2340 MHz, 550.28 W, 59",
+  "bench_table_pivot_ilp_2": "2340 MHz, 548.83 W, 62",
+  "bench_table_pivot_persist_2": "2422 MHz, 540.21 W, 59",
+  "bench_table_pivot_unroll_2": "2422 MHz, 540.61 W, 60"
+ },
+ "receipts": {
+  "resultJsonSha256": "6e3fbc1da0c2d545cedd0bdbd97d40330d4199a31edf9506f0d85166b1ca1564",
+  "resultJson": "result.json"
+ },
+ "rejectedScouts": {
+  "note": "Not in the verified table: no 300-report replay on these binaries.",
+  "slotPrefetch": "regression versus persist control in an unofficial scout",
+  "tableGlobal80reg3blocks": "~15.5 B/s; 1.5x working set, SM clock dropped to ~2280-2317 MHz",
+  "tableGlobal104reg": "~16.08 B/s versus persist 17.08 at the same occupancy: LDS table wins",
+  "maxrregcount80 with smem table": "still 2 blocks/SM (100 KB shared cap); ~16.65 B/s",
+  "unroll4": "~17.19 B/s, slightly under unroll2"
+ }
+}

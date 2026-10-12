@@ -1,6 +1,6 @@
 //! **`F_{p²}` reduced pairing and a working MOV attack on supersingular
 //! curves** — the one regime where the EDS/elliptic-net→pairing machinery
-//! actually *breaks* the ECDLP (§5.10 of `RESEARCH_EDS_RESIDUE.md`).
+//! actually *breaks* the ECDLP (§5.10 of `research/notes/cm-isogeny/RESEARCH_EDS_RESIDUE.md`).
 //!
 //! For `y²=x³+x` over `p≡3 (mod 4)` (supersingular, `#E=p+1`, embedding
 //! degree 2), the distortion map `φ(x,y) = (−x, iy)` with `i²=−1 ∈ F_{p²}`
@@ -13,7 +13,7 @@
 //! elements `(a,b) = a+bi`.  The Miller routine evaluates the `F_p`-rational
 //! function `f_{r,P}` at the `F_{p²}` point `φ(P)`, accumulating in `F_{p²}`.
 
-use crate::cryptanalysis::eds_tate::{ec_add, ec_mul, ec_order, Pt};
+use crate::cryptanalysis::eds_tate::{ec_mul, ec_order, Pt};
 
 // ── F_p helpers ─────────────────────────────────────────────────────────────
 #[inline]
@@ -49,6 +49,7 @@ fn invm(x: u64, p: u64) -> u64 {
 pub type Fp2 = (u64, u64);
 
 #[inline]
+#[allow(dead_code)]
 fn f2_add(x: Fp2, y: Fp2, p: u64) -> Fp2 {
     (addm(x.0, y.0, p), addm(x.1, y.1, p))
 }
@@ -92,19 +93,17 @@ fn f2_of(x: u64) -> Fp2 {
 
 /// Doubling step: `(g_{T,T}(R), 2T)`; `T` an `F_p` affine point, `R` an
 /// `F_{p²}` point.  Returns `g ∈ F_{p²}` and `2T ∈ E(F_p)` (`None` = `O`).
-fn step_double_fp2(
-    t: (u64, u64),
-    rx: Fp2,
-    ry: Fp2,
-    a: u64,
-    p: u64,
-) -> Option<(Fp2, Pt)> {
+fn step_double_fp2(t: (u64, u64), rx: Fp2, ry: Fp2, a: u64, p: u64) -> Option<(Fp2, Pt)> {
     let (x1, y1) = t;
     if y1 == 0 {
         // 2T = O; vertical tangent x − x1.
         return Some((f2_sub(rx, f2_of(x1), p), None));
     }
-    let lam = mulm(addm(mulm(3, mulm(x1, x1, p), p), a, p), invm(mulm(2, y1, p), p), p);
+    let lam = mulm(
+        addm(mulm(3, mulm(x1, x1, p), p), a, p),
+        invm(mulm(2, y1, p), p),
+        p,
+    );
     let x3 = subm(subm(mulm(lam, lam, p), x1, p), x1, p);
     let y3 = subm(mulm(lam, subm(x1, x3, p), p), y1, p);
     // l(R) = R_y − y1 − λ(R_x − x1)
@@ -121,14 +120,7 @@ fn step_double_fp2(
 }
 
 /// Addition step: `(g_{T,P}(R), T+P)`.
-fn step_add_fp2(
-    t: Pt,
-    pp: (u64, u64),
-    rx: Fp2,
-    ry: Fp2,
-    a: u64,
-    p: u64,
-) -> Option<(Fp2, Pt)> {
+fn step_add_fp2(t: Pt, pp: (u64, u64), rx: Fp2, ry: Fp2, a: u64, p: u64) -> Option<(Fp2, Pt)> {
     let (x1, y1) = match t {
         Some(v) => v,
         None => return Some(((1, 0), Some(pp))),

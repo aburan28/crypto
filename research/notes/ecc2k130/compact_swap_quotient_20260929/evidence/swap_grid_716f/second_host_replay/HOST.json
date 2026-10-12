@@ -1,0 +1,27 @@
+{
+  "host_machine": "arm64",
+  "host_platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "host_uname": [
+    "Darwin",
+    "<redacted-host>",
+    "25.6.0",
+    "Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041",
+    "arm64",
+    "arm"
+  ],
+  "python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "receipts": {
+    "n41_L1024": {
+      "byte_identical": true,
+      "linux_sha256": "56d7a57eb62b2a1b5071530a2e97b29388a397975bb7a10b6f54a4ccec21b690",
+      "second_sha256": "56d7a57eb62b2a1b5071530a2e97b29388a397975bb7a10b6f54a4ccec21b690"
+    },
+    "n53_L1024": {
+      "byte_identical": true,
+      "linux_sha256": "42a191dfd292ecbd14d64f78fe5d74f385339687c1a14341d69ab8c2faec2034",
+      "second_sha256": "42a191dfd292ecbd14d64f78fe5d74f385339687c1a14341d69ab8c2faec2034"
+    }
+  },
+  "schema": "compact-swap-second-host-replay-v1",
+  "verifier_sha256": "f2d2c4a2476c49ebd42d75977fe26d1ac5d567d4754dfa55e9a651f69a251ee7"
+}

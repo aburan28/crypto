@@ -1,0 +1,169 @@
+{
+  "stage": "interference_controls",
+  "load_before": "20:12:19 up 37 min,  0 user,  load average: 0.97, 1.18, 1.10",
+  "reps": [
+    {
+      "alone": {
+        "pos": {
+          "mode": "chase",
+          "bytes": 268435456,
+          "k": 1,
+          "steps": 6000000,
+          "reps": 3,
+          "warm": 600000,
+          "ns_per_step_min": 215.8918,
+          "ns_per_step_median": 244.2427,
+          "ns_per_load_median": 244.2427,
+          "sink": 32213248
+        },
+        "neg": {
+          "mode": "chase",
+          "bytes": 16384,
+          "k": 1,
+          "steps": 200000000,
+          "reps": 3,
+          "warm": 20000000,
+          "ns_per_step_min": 1.3137,
+          "ns_per_step_median": 1.327,
+          "ns_per_load_median": 1.327,
+          "sink": 0
+        }
+      },
+      "loaded": {
+        "pos": {
+          "mode": "chase",
+          "bytes": 268435456,
+          "k": 1,
+          "steps": 6000000,
+          "reps": 3,
+          "warm": 600000,
+          "ns_per_step_min": 190.959,
+          "ns_per_step_median": 216.7551,
+          "ns_per_load_median": 216.7551,
+          "sink": 78350592
+        },
+        "neg": {
+          "mode": "chase",
+          "bytes": 16384,
+          "k": 1,
+          "steps": 200000000,
+          "reps": 3,
+          "warm": 20000000,
+          "ns_per_step_min": 1.3237,
+          "ns_per_step_median": 1.3899,
+          "ns_per_load_median": 1.3899,
+          "sink": 0
+        }
+      }
+    },
+    {
+      "alone": {
+        "pos": {
+          "mode": "chase",
+          "bytes": 268435456,
+          "k": 1,
+          "steps": 6000000,
+          "reps": 3,
+          "warm": 600000,
+          "ns_per_step_min": 234.5559,
+          "ns_per_step_median": 247.4955,
+          "ns_per_load_median": 247.4955,
+          "sink": 216762624
+        },
+        "neg": {
+          "mode": "chase",
+          "bytes": 16384,
+          "k": 1,
+          "steps": 200000000,
+          "reps": 3,
+          "warm": 20000000,
+          "ns_per_step_min": 1.2397,
+          "ns_per_step_median": 1.2872,
+          "ns_per_load_median": 1.2872,
+          "sink": 0
+        }
+      },
+      "loaded": {
+        "pos": {
+          "mode": "chase",
+          "bytes": 268435456,
+          "k": 1,
+          "steps": 6000000,
+          "reps": 3,
+          "warm": 600000,
+          "ns_per_step_min": 216.3367,
+          "ns_per_step_median": 220.0891,
+          "ns_per_load_median": 220.0891,
+          "sink": 128682240
+        },
+        "neg": {
+          "mode": "chase",
+          "bytes": 16384,
+          "k": 1,
+          "steps": 200000000,
+          "reps": 3,
+          "warm": 20000000,
+          "ns_per_step_min": 1.2728,
+          "ns_per_step_median": 1.2788,
+          "ns_per_load_median": 1.2788,
+          "sink": 0
+        }
+      }
+    },
+    {
+      "alone": {
+        "pos": {
+          "mode": "chase",
+          "bytes": 268435456,
+          "k": 1,
+          "steps": 6000000,
+          "reps": 3,
+          "warm": 600000,
+          "ns_per_step_min": 215.6997,
+          "ns_per_step_median": 224.2698,
+          "ns_per_load_median": 224.2698,
+          "sink": 262899968
+        },
+        "neg": {
+          "mode": "chase",
+          "bytes": 16384,
+          "k": 1,
+          "steps": 200000000,
+          "reps": 3,
+          "warm": 20000000,
+          "ns_per_step_min": 1.2348,
+          "ns_per_step_median": 1.2371,
+          "ns_per_load_median": 1.2371,
+          "sink": 0
+        }
+      },
+      "loaded": {
+        "pos": {
+          "mode": "chase",
+          "bytes": 268435456,
+          "k": 1,
+          "steps": 6000000,
+          "reps": 3,
+          "warm": 600000,
+          "ns_per_step_min": 199.8638,
+          "ns_per_step_median": 225.0742,
+          "ns_per_load_median": 225.0742,
+          "sink": 8462764288
+        },
+        "neg": {
+          "mode": "chase",
+          "bytes": 16384,
+          "k": 1,
+          "steps": 200000000,
+          "reps": 3,
+          "warm": 20000000,
+          "ns_per_step_min": 1.2352,
+          "ns_per_step_median": 1.243,
+          "ns_per_load_median": 1.243,
+          "sink": 0
+        }
+      }
+    }
+  ],
+  "load_after": "20:13:17 up 38 min,  0 user,  load average: 2.07, 1.46, 1.20"
+}

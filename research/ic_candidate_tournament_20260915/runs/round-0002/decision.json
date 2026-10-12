@@ -1,0 +1,79 @@
+{
+  "arithmetic_operation_speedup": null,
+  "beats_rho": false,
+  "classification": "engineering",
+  "confirmation": {
+    "candidate": "batch16",
+    "candidate_over_baseline": 0.6069788550065816,
+    "ci95": [
+      0.5920526378557471,
+      0.6237890398557485
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 0.7658610261237809,
+    "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 0.5881151126130085,
+      "n17a1": 0.5905162552603908,
+      "n19a0": 0.6310179517221893,
+      "n19a1": 0.6068837723017018,
+      "n23a0": 0.6194786943207
+    },
+    "speedup": 1.6475038491895353
+  },
+  "family_wide_or_complexity_claim": false,
+  "independent_replay": "fresh processes, frozen executable, same final cases; independent Python group and rank checker",
+  "instruction_speedup": 1.6475038491895353,
+  "provisional_challenger": "batch16",
+  "reasons": [],
+  "replay": {
+    "candidate": "batch16",
+    "candidate_over_baseline": 0.6069784911623156,
+    "ci95": [
+      0.5920493667813089,
+      0.6237873482741558
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 0.7666313214202541,
+    "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 0.5881094227554567,
+      "n17a1": 0.590517657716508,
+      "n19a0": 0.6310166457518362,
+      "n19a1": 0.6068857138531513,
+      "n23a0": 0.6194806599670324
+    },
+    "speedup": 1.647504836761315
+  },
+  "rho_comparison": {
+    "candidate": "rho",
+    "candidate_over_baseline": 0.04656562361841098,
+    "ci95": [
+      0.04270044860491589,
+      0.05050224094926049
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 0.1492851213605846,
+    "native_wall_status": "diagnostic; separate timing-confidence gate not applied",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 0.0431427770770772,
+      "n17a1": 0.040553497773479545,
+      "n19a0": 0.051120815444994465,
+      "n19a1": 0.04776964479052281,
+      "n23a0": 0.05124375161462968
+    },
+    "speedup": 21.47506942448899
+  },
+  "rho_over_winner": 0.07671704415124324,
+  "rho_verdict_scope": "observed complete instruction cost; no asymptotic crossover claim",
+  "scope": "bounded public-hash ECDLP configuration tournament",
+  "status": "promoted",
+  "unit": "valgrind-3.22-amd64-Ir",
+  "winner": "batch16"
+}

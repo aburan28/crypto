@@ -1,0 +1,26 @@
+{
+ "note": "control rho (rho-normal-basis.patch) phase split on the same exposed-stream fixture as rho-phases-probe.json; diagnostic",
+ "runs": [
+  {
+   "cell": "n37a0",
+   "walk_group_additions": 2569,
+   "rho_solve_ir": 9379056,
+   "per_addition": 3650.858699883223,
+   "old_rho_per_addition": 9591.540516473731
+  },
+  {
+   "cell": "n43a1",
+   "walk_group_additions": 5353,
+   "rho_solve_ir": 15906311,
+   "per_addition": 2971.4759947692883,
+   "old_rho_per_addition": 9929.692133131619
+  },
+  {
+   "cell": "n61a1",
+   "walk_group_additions": 8073,
+   "rho_solve_ir": 26481385,
+   "per_addition": 3280.2409265452743,
+   "old_rho_per_addition": 14754.68956880796
+  }
+ ]
+}

@@ -1,0 +1,457 @@
+{
+  "cross_engine_operation_ratio": null,
+  "fixed_phase_normal_subspace": [
+    {
+      "algebraic_false_positives": 0,
+      "completed": 2,
+      "engine": "f4-boolean",
+      "max_solver_stage_wall_s": 0.20485213299980387,
+      "median_solver_stage_wall_s": 0.19574814749967118,
+      "natural_verified_queries": 0,
+      "payload_bits": 2,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 2,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 0,
+      "completed": 2,
+      "engine": "f5b-boolean",
+      "max_solver_stage_wall_s": 0.1331772590001492,
+      "median_solver_stage_wall_s": 0.1215068905003136,
+      "natural_verified_queries": 0,
+      "payload_bits": 2,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 2,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 0,
+      "completed": 2,
+      "engine": "fes",
+      "max_solver_stage_wall_s": 0.00032002799980546115,
+      "median_solver_stage_wall_s": 0.00031085649970918894,
+      "natural_verified_queries": 0,
+      "payload_bits": 2,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 2,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 0,
+      "completed": 2,
+      "engine": "sat-cms-xor",
+      "max_solver_stage_wall_s": 0.03501685500032181,
+      "median_solver_stage_wall_s": 0.03185146550003992,
+      "natural_verified_queries": 0,
+      "payload_bits": 2,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 2,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 0,
+      "completed": 2,
+      "engine": "sat-z3",
+      "max_solver_stage_wall_s": 0.22415177399943786,
+      "median_solver_stage_wall_s": 0.21553583599961712,
+      "natural_verified_queries": 0,
+      "payload_bits": 2,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 2,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 0,
+      "completed": 0,
+      "engine": "f4-boolean",
+      "max_solver_stage_wall_s": null,
+      "median_solver_stage_wall_s": null,
+      "natural_verified_queries": 0,
+      "payload_bits": 3,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 2,
+      "timeout": 2
+    },
+    {
+      "algebraic_false_positives": 0,
+      "completed": 0,
+      "engine": "f5b-boolean",
+      "max_solver_stage_wall_s": null,
+      "median_solver_stage_wall_s": null,
+      "natural_verified_queries": 0,
+      "payload_bits": 3,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 2,
+      "timeout": 2
+    },
+    {
+      "algebraic_false_positives": 0,
+      "completed": 2,
+      "engine": "fes",
+      "max_solver_stage_wall_s": 0.010113389999787614,
+      "median_solver_stage_wall_s": 0.01001816999996663,
+      "natural_verified_queries": 0,
+      "payload_bits": 3,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 2,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 0,
+      "completed": 2,
+      "engine": "sat-cms-xor",
+      "max_solver_stage_wall_s": 0.032095744999423914,
+      "median_solver_stage_wall_s": 0.03108988549956848,
+      "natural_verified_queries": 0,
+      "payload_bits": 3,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 2,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 0,
+      "completed": 2,
+      "engine": "sat-z3",
+      "max_solver_stage_wall_s": 0.7940312410000843,
+      "median_solver_stage_wall_s": 0.716586050999922,
+      "natural_verified_queries": 0,
+      "payload_bits": 3,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 2,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 0,
+      "completed": 0,
+      "engine": "f4-boolean",
+      "max_solver_stage_wall_s": null,
+      "median_solver_stage_wall_s": null,
+      "natural_verified_queries": 0,
+      "payload_bits": 4,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 1,
+      "timeout": 3
+    },
+    {
+      "algebraic_false_positives": 0,
+      "completed": 0,
+      "engine": "f5b-boolean",
+      "max_solver_stage_wall_s": null,
+      "median_solver_stage_wall_s": null,
+      "natural_verified_queries": 0,
+      "payload_bits": 4,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 1,
+      "timeout": 3
+    },
+    {
+      "algebraic_false_positives": 8,
+      "completed": 3,
+      "engine": "fes",
+      "max_solver_stage_wall_s": 0.44301500900019164,
+      "median_solver_stage_wall_s": 0.352475021999453,
+      "natural_verified_queries": 0,
+      "payload_bits": 4,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 1,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 8,
+      "completed": 3,
+      "engine": "sat-cms-xor",
+      "max_solver_stage_wall_s": 0.2747924420000345,
+      "median_solver_stage_wall_s": 0.2146959860001516,
+      "natural_verified_queries": 0,
+      "payload_bits": 4,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 1,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 0,
+      "completed": 0,
+      "engine": "sat-z3",
+      "max_solver_stage_wall_s": null,
+      "median_solver_stage_wall_s": null,
+      "natural_verified_queries": 0,
+      "payload_bits": 4,
+      "planned": 4,
+      "policy": "normal_subspace",
+      "setup_failed": 1,
+      "timeout": 3
+    }
+  ],
+  "fixed_phase_quotient": [
+    {
+      "algebraic_false_positives": 2,
+      "completed": 12,
+      "engine": "f4-boolean",
+      "max_solver_stage_wall_s": 0.19446876300025906,
+      "median_solver_stage_wall_s": 0.17104606499970032,
+      "natural_verified_queries": 0,
+      "payload_bits": 2,
+      "planned": 12,
+      "policy": "quotient",
+      "setup_failed": 0,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 2,
+      "completed": 12,
+      "engine": "f5b-boolean",
+      "max_solver_stage_wall_s": 0.15496145300039643,
+      "median_solver_stage_wall_s": 0.1497496625001986,
+      "natural_verified_queries": 0,
+      "payload_bits": 2,
+      "planned": 12,
+      "policy": "quotient",
+      "setup_failed": 0,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 2,
+      "completed": 12,
+      "engine": "fes",
+      "max_solver_stage_wall_s": 0.0009882369995466433,
+      "median_solver_stage_wall_s": 0.00033545399992362945,
+      "natural_verified_queries": 0,
+      "payload_bits": 2,
+      "planned": 12,
+      "policy": "quotient",
+      "setup_failed": 0,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 2,
+      "completed": 12,
+      "engine": "sat-z3",
+      "max_solver_stage_wall_s": 0.2546089750003375,
+      "median_solver_stage_wall_s": 0.212126729999909,
+      "natural_verified_queries": 0,
+      "payload_bits": 2,
+      "planned": 12,
+      "policy": "quotient",
+      "setup_failed": 0,
+      "timeout": 0
+    },
+    {
+      "algebraic_false_positives": 2,
+      "completed": 12,
+      "engine": "sat-cms-xor",
+      "max_solver_stage_wall_s": 0.038751993000005314,
+      "median_solver_stage_wall_s": 0.028128205499797332,
+      "natural_verified_queries": 0,
+      "payload_bits": 2,
+      "planned": 12,
+      "policy": "quotient",
+      "setup_failed": 0,
+      "timeout": 0
+    }
+  ],
+  "full_dlp_cost": null,
+  "full_orbit_relation_control": [
+    {
+      "group_additions": {
+        "orbit": 32536,
+        "pairs": 55278,
+        "search": 1992,
+        "setup": 1222,
+        "verify": 3564
+      },
+      "natural_rank": 0,
+      "natural_verified_queries": 0,
+      "pair_attempts": 55278,
+      "seed": 260938,
+      "signed_orbit_size": 332,
+      "wall_seconds": 6.210400068999661
+    },
+    {
+      "group_additions": {
+        "orbit": 48804,
+        "pairs": 124251,
+        "search": 2988,
+        "setup": 1404,
+        "verify": 3564
+      },
+      "natural_rank": 0,
+      "natural_verified_queries": 0,
+      "pair_attempts": 124251,
+      "seed": 260939,
+      "signed_orbit_size": 498,
+      "wall_seconds": 11.97767895600009
+    }
+  ],
+  "matched_rho_cost": null,
+  "phase_choice": [
+    {
+      "case": "phase-s260938-implicit",
+      "failed_at": "SAT_setup",
+      "returncode": 1,
+      "stages": [
+        {
+          "seconds": 0.12059973000032187,
+          "stage": "field"
+        },
+        {
+          "nvars": 347,
+          "peak_rss_bytes": 16384000,
+          "seconds": 0.0350130930000887,
+          "stage": "preparation"
+        },
+        {
+          "boolean_terms": 3489273,
+          "nvars": 347,
+          "peak_rss_bytes": 921587712,
+          "seconds": 22.392764119000276,
+          "stage": "equations"
+        }
+      ],
+      "total_wall_s": 48.89362872499987
+    },
+    {
+      "case": "phase-s260938-ternary_inline",
+      "failed_at": null,
+      "returncode": 0,
+      "stages": [
+        {
+          "seconds": 0.12264395900001546,
+          "stage": "field"
+        },
+        {
+          "nvars": 95,
+          "peak_rss_bytes": 16384000,
+          "seconds": 0.03331484000045748,
+          "stage": "preparation"
+        },
+        {
+          "boolean_terms": 195951,
+          "nvars": 95,
+          "peak_rss_bytes": 39211008,
+          "seconds": 0.36178325099990616,
+          "stage": "equations"
+        },
+        {
+          "peak_rss_bytes": 117288960,
+          "seconds": 6.943461688999378,
+          "stage": "sat_setup"
+        },
+        {
+          "peak_rss_bytes": 267239424,
+          "reason": "timeout",
+          "seconds": 5.060397338000257,
+          "stage": "solve",
+          "status": "unknown"
+        }
+      ],
+      "total_wall_s": 12.817018747000475
+    },
+    {
+      "case": "phase-s260939-implicit",
+      "failed_at": "SAT_setup",
+      "returncode": 1,
+      "stages": [
+        {
+          "seconds": 0.12915548999990278,
+          "stage": "field"
+        },
+        {
+          "nvars": 347,
+          "peak_rss_bytes": 16384000,
+          "seconds": 0.048769066000204475,
+          "stage": "preparation"
+        },
+        {
+          "boolean_terms": 3456008,
+          "nvars": 347,
+          "peak_rss_bytes": 924286976,
+          "seconds": 21.94329529800052,
+          "stage": "equations"
+        }
+      ],
+      "total_wall_s": 48.44785951099948
+    },
+    {
+      "case": "phase-s260939-ternary_inline",
+      "failed_at": null,
+      "returncode": 0,
+      "stages": [
+        {
+          "seconds": 0.16394280199983768,
+          "stage": "field"
+        },
+        {
+          "nvars": 95,
+          "peak_rss_bytes": 16384000,
+          "seconds": 0.04385347500010539,
+          "stage": "preparation"
+        },
+        {
+          "boolean_terms": 191889,
+          "nvars": 95,
+          "peak_rss_bytes": 38854656,
+          "seconds": 0.30019028700007766,
+          "stage": "equations"
+        },
+        {
+          "peak_rss_bytes": 117444608,
+          "seconds": 7.171068149000348,
+          "stage": "sat_setup"
+        },
+        {
+          "peak_rss_bytes": 268099584,
+          "reason": "timeout",
+          "seconds": 5.082623708999563,
+          "stage": "solve",
+          "status": "unknown"
+        }
+      ],
+      "total_wall_s": 13.091031046999888
+    }
+  ],
+  "quotient_size_preflight": [
+    {
+      "message": "s must properly divide p-1",
+      "payload_bits": 3,
+      "seed": 260938,
+      "status": "setup_failed",
+      "type": "ValueError"
+    },
+    {
+      "message": "s must properly divide p-1",
+      "payload_bits": 3,
+      "seed": 260939,
+      "status": "setup_failed",
+      "type": "ValueError"
+    },
+    {
+      "message": "s must properly divide p-1",
+      "payload_bits": 4,
+      "seed": 260938,
+      "status": "setup_failed",
+      "type": "ValueError"
+    },
+    {
+      "message": "s must properly divide p-1",
+      "payload_bits": 4,
+      "seed": 260939,
+      "status": "setup_failed",
+      "type": "ValueError"
+    }
+  ]
+}

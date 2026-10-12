@@ -1,38 +1,50 @@
 """
 GLV-HNP Phase 2, Thread 24: derive nu_hat from the Gram-Schmidt profile of L0.
 
-Pre-registered by the 2026-08-07 (Thread 23) log entry:
+Pre-registered in the 2026-08-07 (Thread 23) log entry.
 
-  H24: the argmax of  nu_i = 2|<e, b*_i>| / ||b*_i||^2  concentrates at the
-       tail indices i ~ 2m, and  ||b*_{2m}|| ~ det(L2)/mu = lambda_2(L2)
-       up to a constant.
-  Falsifier: if the argmax is spread across i rather than concentrated in the
-       tail, the GS-profile explanation fails and nu_hat stays empirical.
+Background.  Thread 23b established that Phase-2 recovery is a BDD condition,
+certified per-instance by
 
-Why it matters.  Thread 20c (2026-07-29) found that
-    nu_hat = lambda_1(L2)/sqrt(det L2),   L2 = <(n*S_K1,0), (-lam*S_K1,S_K2)>
-separates viable from non-viable Phase-2 instances with AUC 0.935, with a
-*negative* sign (skew L2 => easier), and could only motivate the sign by hand
-via lambda_1*lambda_2 ~ det.  Thread 23 replaced it with the exact, unfitted
-BDD certificate NU = max_i nu_i (AUC 0.978, zero false positives at NU <= 1).
-If H24 holds, NU and nu_hat are the same quantity and the sign is a theorem,
-not a fit.  Chaining the standard estimates,
+    nu_i := 2*|<e, b*_i>| / ||b*_i||^2 ,      NU := max_i nu_i ,
 
-    ||e||       ~ n*sqrt(2m/3)                     (k1*S_K1 ~ k2*S_K2 ~ n)
-    lambda_2(L2) = det(L2)/lambda_1(L2) = n^3/(K1*K2*mu)     (2D, up to 2/sqrt 3)
-    <e, b*_i>   ~ ||e||*||b*_i||/sqrt(dim)         (generic direction)
+on the LLL-reduced basis of the Kannan-free projected lattice
 
-gives the closed form tested in W3:
+    L0 = < n*S_K1*e_i , (B_i*S_K1 | 0) , (-lam*S_K1*e_j | S_K2*e_j) >  in Z^2m
+    e  = (k1_i*S_K1 | k2_i*S_K2)              (secret error)
 
-    NU  ~  C * mu * K1*K2 / n^2  =  C' * nu_hat * sqrt(eff),   eff = K1*K2/n.
+NU <= 1 was a SOUND certificate (0 FP in 110 instances, AUC 0.978) but loose by
+~1.9x against what Kannan-LLL actually achieves.  NU is a `max_i`, so its value
+is decided by ONE Gram-Schmidt index.  Thread 23 also showed the *unnormalised*
+lambda-block shortest vector
 
-That is: nu_hat is the *size-free* part of NU and sqrt(eff) is the part that
-moves with the bias strength.  Both signs then follow from lambda_1*lambda_2.
+    mu = lambda_1(L2),   L2 = < (n*S_K1, 0), (-lam*S_K1, S_K2) >  in Z^2
 
-Numerics.  All Gram-Schmidt here is EXACT (Fraction over the integer Gram
-matrix), not the float GS of glv_hnp_phase2_babai.py.  Entries of L0 are
-~n^2/K1, so squared norms reach ~2^68 at 17 bits and f64 GS is not obviously
-safe on dim 24; W0 quantifies the float error against the exact values.
+is exactly the object Thread 20b fitted as nu_hat = mu/sqrt(det L2), and that
+its correlation with recovery is NEGATIVE (bigger mu => more failures) — an
+empirical fit with no derivation.
+
+Hypothesis under test (H24, pre-registered verbatim):
+
+    H24: the argmax of nu_i concentrates at the tail indices i ~ 2m, and
+         ||b*_{2m}|| ~ det(L2)/mu = lambda_2(L2) up to a constant.
+
+If H24 holds, the negative sign of nu_hat is DERIVED rather than fitted:
+small mu => skew L2 => large lambda_2(L2) => large tail GS norms => small
+tail nu_i => small NU => BDD succeeds.
+
+Falsifier (pre-registered): if argmax_i is spread across i rather than
+concentrated in the tail, the GS-profile explanation fails and nu_hat stays
+empirical.
+
+Experiments
+    W1  full GS profile log2||b*_i|| and nu_i profile over the U2 grid;
+        histogram of argmax_i by relative position.
+    W2  ||b*_{2m}|| vs lambda_2(L2) = det(L2)/mu — the quantitative half of H24.
+    W3  is NU decided by the tail?  NU_tail (last quarter) vs NU, and how much
+        predictive power survives if only the tail is inspected.
+    W4  does the GS profile explain the SIGN of nu_hat?  mu vs tail GS norms
+        vs recovery, at matched K1.
 
 Run: python3 glv_hnp_phase2_gsprofile.py
 """
@@ -41,169 +53,83 @@ import math
 import os
 import random
 import sys
-import time
-from fractions import Fraction
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-import glv_hnp_common as C
-from glv_hnp_common import (
-    find_generator, lam_star, scales, gen_signatures, search_curves,
-)
-from glv_hnp_phase2_projected import SEEDS, HIST, run_new
+from glv_hnp_common import find_generator, scales, gen_signatures
+from glv_hnp_phase2_projected import run_new, SEEDS, HIST
 from glv_hnp_phase2_babai import (
-    build_L0, target_and_error, lll_rows, gram_schmidt, bdd_nu,
+    build_L0, target_and_error, gram_schmidt, lll_rows,
 )
 
 
 # ---------------------------------------------------------------------------
-# The 2D lambda-block sublattice: BOTH successive minima, exactly.
+# exact 2D reduction returning BOTH successive minima
 # ---------------------------------------------------------------------------
 
-def gauss_reduce_2d_full(u, v):
-    """Lagrange/Gauss reduction.  Returns (u, v) with |u| = lambda_1 and
-    |v| = lambda_2 (exact for rank 2)."""
-    def nrm2(w):
+def lagrange_2d(u, v):
+    """Lagrange-reduced basis of a rank-2 integer lattice.  For a reduced
+    basis |u| = lambda_1 and |v| = lambda_2 (Lagrange/Gauss is optimal in 2D)."""
+    def n2(w):
         return w[0] * w[0] + w[1] * w[1]
-
     def dot(w, z):
         return w[0] * z[0] + w[1] * z[1]
-
-    if nrm2(u) > nrm2(v):
+    if n2(u) > n2(v):
         u, v = v, u
     while True:
-        num, den = dot(v, u), nrm2(u)
+        num, den = dot(v, u), n2(u)
         if den == 0:
             break
         q = ((2 * num + den) // (2 * den) if num >= 0
              else -((-2 * num + den) // (2 * den)))
         v = (v[0] - q * u[0], v[1] - q * u[1])
-        if nrm2(v) >= nrm2(u):
+        if n2(v) >= n2(u):
             break
         u, v = v, u
     return u, v
 
 
 def l2_minima(n, lam, S_K1, S_K2):
-    """(lambda_1, lambda_2, det, nu_hat) of L2 = <(n*S_K1,0),(-lam*S_K1,S_K2)>."""
-    u, v = gauss_reduce_2d_full((n * S_K1, 0), (-(lam % n) * S_K1, S_K2))
-    l1 = math.sqrt(u[0] ** 2 + u[1] ** 2)
-    l2 = math.sqrt(v[0] ** 2 + v[1] ** 2)
-    det = float(n) * S_K1 * S_K2
-    return l1, l2, det, l1 / math.sqrt(det)
+    """(lambda_1, lambda_2, det) of the lambda-block sublattice L2."""
+    u, v = lagrange_2d((n * S_K1, 0), (-(lam % n) * S_K1, S_K2))
+    l1 = math.sqrt(u[0] * u[0] + u[1] * u[1])
+    l2 = math.sqrt(v[0] * v[0] + v[1] * v[1])
+    return l1, l2, float(n) * S_K1 * S_K2
 
 
 # ---------------------------------------------------------------------------
-# Exact Gram-Schmidt over the integer Gram matrix
+# per-instance GS + nu profile
 # ---------------------------------------------------------------------------
 
-def exact_gs(B, e):
-    """B: integer rows (LLL-reduced).  e: integer vector.
-
-    Returns (Bst, ge_star, nus) where
-        Bst[i]     = ||b*_i||^2                  (Fraction, exact)
-        ge_star[i] = <e, b*_i>                   (Fraction, exact)
-        nus[i]     = 2|<e,b*_i>| / ||b*_i||^2    (float)
-
-    Uses the Cholesky recursion on the Gram matrix, so the vector dimension
-    never enters the O(k^3) inner loop.
-    """
-    k = len(B)
-    G = [[sum(a * b for a, b in zip(B[i], B[j])) for j in range(k)]
-         for i in range(k)]
-    ge = [sum(a * b for a, b in zip(e, B[i])) for i in range(k)]
-
-    mu = [[Fraction(0)] * k for _ in range(k)]
-    Bst = [Fraction(0)] * k
-    for i in range(k):
-        for j in range(i):
-            s = Fraction(G[i][j])
-            for t in range(j):
-                s -= mu[i][t] * mu[j][t] * Bst[t]
-            mu[i][j] = s / Bst[j] if Bst[j] != 0 else Fraction(0)
-        s = Fraction(G[i][i])
-        for t in range(i):
-            s -= mu[i][t] * mu[i][t] * Bst[t]
-        Bst[i] = s
-
-    ge_star = [Fraction(0)] * k
-    for i in range(k):
-        s = Fraction(ge[i])
-        for j in range(i):
-            s -= mu[i][j] * ge_star[j]
-        ge_star[i] = s
-
-    nus = [(2.0 * abs(float(ge_star[i])) / float(Bst[i])) if Bst[i] != 0 else 0.0
-           for i in range(k)]
-    return Bst, ge_star, nus
-
-
-def instance(curve, m, d_secret, k1_bound, seed, exact=True):
-    """Build one L0 instance and return its full GS/nu anatomy."""
+def profile(curve, m, d_secret, k1_bound, seed):
     p, b, n, lam, G = curve
     k2_bound = math.isqrt(n) + 1
     sigs = gen_signatures(G, d_secret, m, n, lam, p, k1_bound, k2_bound, seed)
     if len(sigs) < m:
         return None
-    S_K1, _S_D, S_K2, _S_KAN = scales(n, k1_bound, k2_bound)
     B = lll_rows(build_L0(sigs, n, lam, k1_bound, k2_bound), 2 * m)
-    tau, e = target_and_error(sigs, n, k1_bound, k2_bound)
-    if exact:
-        Bst, _gs, nus = exact_gs(B, e)
-        prof = [math.sqrt(float(x)) if x > 0 else 0.0 for x in Bst]
-    else:
-        Bs, _ = gram_schmidt(B)
-        prof = [math.sqrt(sum(x * x for x in r)) for r in Bs]
-        nus = []
-        for i, r in enumerate(Bs):
-            ni = sum(x * x for x in r)
-            nus.append(2.0 * abs(sum(a * b for a, b in zip(e, r))) / ni
-                       if ni else 0.0)
+    _tau, e = target_and_error(sigs, n, k1_bound, k2_bound)
+    Bs, _ = gram_schmidt(B)
+    gs, nus = [], []
+    for i in range(len(Bs)):
+        ni = sum(x * x for x in Bs[i])
+        gs.append(math.sqrt(ni))
+        nus.append(0.0 if ni == 0.0
+                   else 2.0 * abs(sum(a * c for a, c in zip(e, Bs[i]))) / ni)
     NU = max(nus)
     arg = max(range(len(nus)), key=lambda i: nus[i])
-    l1, l2, det2, nuhat = l2_minima(n, lam, S_K1, S_K2)
-    return {
-        'k': len(B), 'prof': prof, 'nus': nus, 'NU': NU, 'argmax': arg,
-        'enorm': math.sqrt(sum(x * x for x in e)),
-        'mu': l1, 'l2': l2, 'det2': det2, 'nuhat': nuhat,
-        'S_K1': S_K1, 'S_K2': S_K2, 'K2': k2_bound,
-    }
+    return {'gs': gs, 'nus': nus, 'NU': NU, 'arg': arg, 'dim': len(Bs)}
 
 
-def auc(pos, neg):
-    """AUC of the score -x for separating pos (recovery) from neg."""
-    if not pos or not neg:
-        return float('nan')
-    conc = sum((1.0 if a < b else 0.5 if a == b else 0.0)
-               for a in pos for b in neg)
-    return conc / (len(pos) * len(neg))
-
-
-def spearman(xs, ys):
-    def rank(v):
-        order = sorted(range(len(v)), key=lambda i: v[i])
-        r = [0.0] * len(v)
-        i = 0
-        while i < len(order):
-            j = i
-            while j + 1 < len(order) and v[order[j + 1]] == v[order[i]]:
-                j += 1
-            avg = (i + j) / 2.0 + 1.0
-            for t in range(i, j + 1):
-                r[order[t]] = avg
-            i = j + 1
-        return r
-    rx, ry = rank(xs), rank(ys)
-    mx, my = sum(rx) / len(rx), sum(ry) / len(ry)
-    num = sum((a - mx) * (b - my) for a, b in zip(rx, ry))
-    dx = math.sqrt(sum((a - mx) ** 2 for a in rx))
-    dy = math.sqrt(sum((b - my) ** 2 for b in ry))
-    return num / (dx * dy) if dx and dy else float('nan')
+def bucket(arg, dim, nb=4):
+    """Which quarter of the GS index range the argmax sits in (0 = head)."""
+    return min(nb - 1, (arg * nb) // dim)
 
 
 if __name__ == "__main__":
     print("=" * 78)
-    print("Thread 24 — derive nu_hat from the GS profile of L0 (H24)")
+    print("Thread 24 — is NU decided by the tail of the GS profile, and is the")
+    print("            tail governed by lambda_2(L2) = det(L2)/mu?")
     print("=" * 78)
 
     hist = []
@@ -215,242 +141,371 @@ if __name__ == "__main__":
     U2 = [("12-bit/2557", hist[1][1], 8, 0.340),
           ("12-bit/2677", hist[2][1], 10, 0.070)]
     K1_GRID = [2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64]
+    U2_by_label = [(lab, cur) for lab, cur, _m, _ls in U2]
+
+    ALL = []   # (label, K1, seed, prof, recovered, mu, lam2, detL2, m)
 
     # -----------------------------------------------------------------------
-    # Collect the grid once; every experiment below reads this table.
-    # -----------------------------------------------------------------------
-    t0 = time.time()
-    rows = []
+    print("\n" + "-" * 78)
+    print("EXP W1: GS profile and argmax_i of nu_i over the U2 grid")
+    print("-" * 78)
+    print("dim(L0) = 2m.  'argmax' = index i (1-based) attaining NU.")
+    print("'q' = quarter of the index range holding the argmax (1=head, 4=tail).\n")
+
     for label, curve, m, ls in U2:
-        n = curve[2]
+        p, b, n, lam, G = curve
+        k2_bound = math.isqrt(n) + 1
+        S_K1, _S_D, S_K2, _S_KAN = scales(n, k1_bound=1, k2_bound=k2_bound)
+        print(f"\n{label}  (lam* = {ls:.3f}, m = {m}, dim = {2*m})")
+        print(f"  {'K1':>4} {'mu':>10} {'lam2(L2)':>10} {'argmax(1b)':>11} "
+              f"{'mean NU':>9} {'q-hist(1..4)':>14} {'recov':>6}")
         for k1 in K1_GRID:
+            S_K1, _S_D, S_K2, _S_KAN = scales(n, k1, k2_bound)
+            mu, lam2, detL2 = l2_minima(n, lam, S_K1, S_K2)
+            args, nus, qh, rec = [], [], [0] * 4, 0
             for seed in SEEDS:
                 d_trial = random.Random(seed + 7777).randint(1, n - 1)
-                r = instance(curve, m, d_trial, k1, seed, exact=True)
-                if r is None:
-                    continue
+                pr = profile(curve, m, d_trial, k1, seed)
                 rk = run_new(curve, m, d_trial, k1, seed)
-                r.update({'label': label, 'm': m, 'n': n, 'K1': k1,
-                          'seed': seed, 'ok': bool(rk['ok']),
-                          'eff': k1 * (math.isqrt(n) + 1) / n})
-                rows.append(r)
-    print(f"\ncollected {len(rows)} instances (exact GS) in {time.time()-t0:.1f}s")
+                if pr is None:
+                    continue
+                args.append(pr['arg'] + 1)
+                nus.append(pr['NU'])
+                qh[bucket(pr['arg'], pr['dim'])] += 1
+                rec += bool(rk['ok'])
+                ALL.append((label, k1, seed, pr, bool(rk['ok']),
+                            mu, lam2, detL2, m))
+            print(f"  {k1:>4} {mu:>10.0f} {lam2:>10.0f} "
+                  f"{str(args):>11} {sum(nus)/len(nus):>9.3f} "
+                  f"{str(qh):>14} {str(rec)+'/'+str(len(SEEDS)):>6}")
 
     # -----------------------------------------------------------------------
     print("\n" + "-" * 78)
-    print("EXP W0: is the float GS of Thread 23b safe?  (exact vs f64)")
+    print("EXP W1b: aggregate argmax position — the PRE-REGISTERED FALSIFIER")
     print("-" * 78)
-    worst_rel = 0.0
-    worst_row = None
-    for label, curve, m, ls in U2:
-        n = curve[2]
-        for k1 in K1_GRID:
-            d_trial = random.Random(42 + 7777).randint(1, n - 1)
-            re_ = instance(curve, m, d_trial, k1, 42, exact=True)
-            rf = instance(curve, m, d_trial, k1, 42, exact=False)
-            rel = abs(rf['NU'] - re_['NU']) / re_['NU']
-            if rel > worst_rel:
-                worst_rel, worst_row = rel, (label, k1, re_['NU'], rf['NU'])
-    print(f"max |NU_float - NU_exact| / NU_exact over the 22-cell grid "
-          f"(seed 42) = {worst_rel:.3e}")
-    if worst_row:
-        print(f"  worst cell: {worst_row[0]} K1={worst_row[1]}  "
-              f"exact {worst_row[2]:.6f}  float {worst_row[3]:.6f}")
-    print("(dim <= 20 here; W4 repeats the check at dim 24 / 17 bits.)")
+    qh = [0] * 4
+    tail_frac_num = 0
+    for (_l, _k, _s, pr, _r, _mu, _l2, _d, _m) in ALL:
+        qh[bucket(pr['arg'], pr['dim'])] += 1
+        if pr['arg'] >= pr['dim'] - 2:      # last three indices
+            tail_frac_num += 1
+    tot = len(ALL)
+    print(f"N = {tot} instances")
+    for q in range(4):
+        print(f"  quarter {q+1} ({'head' if q == 0 else 'tail' if q == 3 else '  '}): "
+              f"{qh[q]:>4}  ({100.0*qh[q]/tot:5.1f}%)")
+    print(f"  argmax in the LAST THREE indices: {tail_frac_num}/{tot} "
+          f"({100.0*tail_frac_num/tot:.1f}%)")
+    print("H24 predicts quarter 4 dominant.  If the mass is spread, H24 fails.")
 
     # -----------------------------------------------------------------------
     print("\n" + "-" * 78)
-    print("EXP W1: where is the argmax of nu_i?  (H24, clause 1)")
+    print("EXP W2: is ||b*_{2m}|| ~ det(L2)/mu = lambda_2(L2)?")
     print("-" * 78)
-    print("index reported as the 1-based position from the TAIL: 1 = b*_{2m}.\n")
-    from collections import Counter
-    for label, curve, m, ls in U2:
-        sub = [r for r in rows if r['label'] == label]
-        tail = Counter(r['k'] - r['argmax'] for r in sub)
-        k = sub[0]['k']
-        print(f"{label}  (m={m}, dim={k}, N={len(sub)})")
-        print("  tail-position of argmax : " +
-              "  ".join(f"{pos}:{cnt}" for pos, cnt in sorted(tail.items())))
-        frac = sum(r['argmax'] / (r['k'] - 1) for r in sub) / len(sub)
-        in_last_quarter = sum(1 for r in sub if r['argmax'] >= 0.75 * (r['k'] - 1))
-        print(f"  mean argmax/(dim-1) = {frac:.3f}   "
-              f"argmax in last quarter: {in_last_quarter}/{len(sub)}")
-    allsub = rows
-    print(f"\nOVERALL: argmax == last index in "
-          f"{sum(1 for r in allsub if r['argmax'] == r['k']-1)}/{len(allsub)}; "
-          f"in last two indices in "
-          f"{sum(1 for r in allsub if r['argmax'] >= r['k']-2)}/{len(allsub)}")
-    print("(uniform-null expectation for 'last index' = "
-          f"{100.0/rows[0]['k']:.1f}%)")
+    print("Ratios ||b*_last|| / lambda_2(L2) and ||b*_last|| / (det L2 / mu).")
+    print("H24 wants these ~constant across K1 and across curves.\n")
+    print(f"  {'curve':<12} {'K1':>4} {'||b*_last||':>12} {'lam2(L2)':>10} "
+          f"{'ratio':>8} {'detL2/mu':>10} {'ratio':>8}")
+    by_key = {}
+    for (l, k, s, pr, r, mu, lam2, detL2, m) in ALL:
+        by_key.setdefault((l, k), []).append((pr, mu, lam2, detL2))
+    ratios_l2, ratios_dm = [], []
+    for (l, k), v in sorted(by_key.items(), key=lambda t: (t[0][0], t[0][1])):
+        last = sum(pr['gs'][-1] for pr, _, _, _ in v) / len(v)
+        _pr, mu, lam2, detL2 = v[0]
+        r1 = last / lam2
+        r2 = last / (detL2 / mu)
+        ratios_l2.append(r1)
+        ratios_dm.append(r2)
+        print(f"  {l:<12} {k:>4} {last:>12.1f} {lam2:>10.1f} {r1:>8.3f} "
+              f"{detL2/mu:>10.1f} {r2:>8.3f}")
+    def spread(xs):
+        mn, mx = min(xs), max(xs)
+        return mn, mx, mx / mn if mn > 0 else float('inf')
+    a, b_, c = spread(ratios_l2)
+    print(f"\n  ||b*_last||/lambda_2 : min {a:.3f} max {b_:.3f} "
+          f"spread {c:.2f}x  over {len(ratios_l2)} cells")
+    a, b_, c = spread(ratios_dm)
+    print(f"  ||b*_last||/(detL2/mu): min {a:.3f} max {b_:.3f} spread {c:.2f}x")
 
     # -----------------------------------------------------------------------
     print("\n" + "-" * 78)
-    print("EXP W1b: the GS profile itself, log2 ||b*_i|| (seed 42)")
+    print("EXP W3: does a TAIL-ONLY certificate keep NU's predictive power?")
     print("-" * 78)
-    for label, curve, m, ls in U2:
-        n = curve[2]
-        for k1 in (4, 8, 16, 32):
-            d_trial = random.Random(42 + 7777).randint(1, n - 1)
-            r = instance(curve, m, d_trial, k1, 42, exact=True)
-            if r is None:
-                continue
-            prof = " ".join(f"{math.log2(x):5.1f}" if x > 0 else "  -inf"
-                            for x in r['prof'])
-            print(f"{label} K1={k1:<3} log2||b*_i||: {prof}")
-            print(f"{'':>{len(label)+8}} log2 lambda_1(L2)={math.log2(r['mu']):.1f}"
-                  f"  log2 lambda_2(L2)={math.log2(r['l2']):.1f}"
-                  f"  argmax i={r['argmax']} (tail pos {r['k']-r['argmax']})"
-                  f"  NU={r['NU']:.3f}")
+    for frac_name, lo in (("last quarter", 0.75), ("last half", 0.5),
+                          ("last index only", None)):
+        pos, neg, ident = [], [], 0
+        for (_l, _k, _s, pr, rec, _mu, _l2, _d, _m) in ALL:
+            d = pr['dim']
+            if lo is None:
+                sub = pr['nus'][-1:]
+            else:
+                sub = pr['nus'][int(lo * d):]
+            nt = max(sub)
+            if abs(nt - pr['NU']) < 1e-9:
+                ident += 1
+            (pos if rec else neg).append(nt)
+        conc = sum((1.0 if x < y else 0.5 if x == y else 0.0)
+                   for x in pos for y in neg)
+        auc = conc / (len(pos) * len(neg))
+        print(f"  {frac_name:<16}  NU_tail == NU in {ident:>3}/{tot} "
+              f"({100.0*ident/tot:5.1f}%)   AUC(-NU_tail) = {auc:.4f}")
+    pos = [pr['NU'] for (_l, _k, _s, pr, rec, *_x) in ALL if rec]
+    neg = [pr['NU'] for (_l, _k, _s, pr, rec, *_x) in ALL if not rec]
+    conc = sum((1.0 if x < y else 0.5 if x == y else 0.0)
+               for x in pos for y in neg)
+    print(f"  {'full NU (ref)':<16}  {'':<24}   "
+          f"AUC(-NU)      = {conc/(len(pos)*len(neg)):.4f}")
 
     # -----------------------------------------------------------------------
     print("\n" + "-" * 78)
-    print("EXP W2: is ||b*_last|| ~ lambda_2(L2)?  (H24, clause 2)")
+    print("EXP W4: does the GS profile explain the SIGN of nu_hat?")
     print("-" * 78)
-    print(f"{'curve':<14} {'K1':>4} {'lam_1(L2)':>11} {'lam_2(L2)':>11} "
-          f"{'||b*_last||':>12} {'ratio':>7} {'l1*l2/det':>10}")
-    ratios = []
-    for label, curve, m, ls in U2:
-        for k1 in K1_GRID:
-            sub = [r for r in rows if r['label'] == label and r['K1'] == k1]
-            if not sub:
-                continue
-            bl = sum(r['prof'][-1] for r in sub) / len(sub)
-            r0 = sub[0]
-            rat = bl / r0['l2']
-            ratios.append(rat)
-            print(f"{label:<14} {k1:>4} {r0['mu']:>11.4g} {r0['l2']:>11.4g} "
-                  f"{bl:>12.4g} {rat:>7.3f} "
-                  f"{r0['mu']*r0['l2']/r0['det2']:>10.4f}")
-    print(f"\nratio ||b*_last|| / lambda_2(L2): mean {sum(ratios)/len(ratios):.3f}  "
-          f"min {min(ratios):.3f}  max {max(ratios):.3f}  "
-          f"spread {max(ratios)/min(ratios):.2f}x")
+    print("nu_hat = mu/sqrt(det L2) correlated NEGATIVELY with recovery (Thread")
+    print("20b).  H24's mechanism: mu up => lambda_2 down => tail GS norms down")
+    print("=> nu_i up => NU up => BDD fails.  Check each link at matched K1.\n")
+    print(f"  {'K1':>4} | {'2557: mu':>9} {'lam2':>8} {'b*_last':>9} {'NU':>7} "
+          f"{'rec':>4} | {'2677: mu':>9} {'lam2':>8} {'b*_last':>9} {'NU':>7} {'rec':>4}")
+    for k in K1_GRID:
+        cells = []
+        for l in ("12-bit/2557", "12-bit/2677"):
+            v = by_key.get((l, k))
+            rec = sum(1 for (ll, kk, _s, _p, r, *_x) in ALL
+                      if ll == l and kk == k and r)
+            last = sum(pr['gs'][-1] for pr, _, _, _ in v) / len(v)
+            nu = sum(pr['NU'] for pr, _, _, _ in v) / len(v)
+            _pr, mu, lam2, _d = v[0]
+            cells.append((mu, lam2, last, nu, rec, len(v)))
+        (m1, l1, b1, n1, r1, t1), (m2, l2_, b2, n2, r2, t2) = cells
+        print(f"  {k:>4} | {m1:>9.0f} {l1:>8.0f} {b1:>9.1f} {n1:>7.3f} "
+              f"{str(r1)+'/'+str(t1):>4} | {m2:>9.0f} {l2_:>8.0f} {b2:>9.1f} "
+              f"{n2:>7.3f} {str(r2)+'/'+str(t2):>4}")
+
+    # rank correlations over all cells (Spearman via ranks, ties averaged)
+    def spearman(xs, ys):
+        def rank(a):
+            order = sorted(range(len(a)), key=lambda i: a[i])
+            r = [0.0] * len(a)
+            i = 0
+            while i < len(order):
+                j = i
+                while j + 1 < len(order) and a[order[j + 1]] == a[order[i]]:
+                    j += 1
+                avg = (i + j) / 2.0 + 1.0
+                for t in range(i, j + 1):
+                    r[order[t]] = avg
+                i = j + 1
+            return r
+        rx, ry = rank(xs), rank(ys)
+        mx = sum(rx) / len(rx); my = sum(ry) / len(ry)
+        num = sum((a - mx) * (b - my) for a, b in zip(rx, ry))
+        den = math.sqrt(sum((a - mx) ** 2 for a in rx)
+                        * sum((b - my) ** 2 for b in ry))
+        return num / den if den else float('nan')
+
+    mus = [x[5] for x in ALL]
+    lams = [x[6] for x in ALL]
+    lasts = [x[3]['gs'][-1] for x in ALL]
+    nusv = [x[3]['NU'] for x in ALL]
+    recs = [1.0 if x[4] else 0.0 for x in ALL]
+    print(f"\n  Spearman over all {tot} instances:")
+    print(f"    rho(mu, lambda_2)     = {spearman(mus, lams):+.3f}   "
+          f"(exact duality: mu*lambda_2 = det L2 up to <=2/sqrt3)")
+    print(f"    rho(lambda_2, b*_last)= {spearman(lams, lasts):+.3f}")
+    print(f"    rho(b*_last, NU)      = {spearman(lasts, nusv):+.3f}")
+    print(f"    rho(NU, recovery)     = {spearman(nusv, recs):+.3f}")
+    print(f"    rho(mu, recovery)     = {spearman(mus, recs):+.3f}   "
+          f"(Thread 20b's nu_hat sign)")
 
     # -----------------------------------------------------------------------
     print("\n" + "-" * 78)
-    print("EXP W3: the closed form  NU ~ C * nu_hat * sqrt(eff)")
+    print("EXP W4b: the nu_hat sign, WITHIN matched K1 (removes the K1 confound)")
     print("-" * 78)
-    print("From ||e|| ~ n*sqrt(2m/3), lambda_2 = det(L2)/mu, <e,b*> ~ "
-          "||e|| ||b*||/sqrt(dim):")
-    print("   NU ~ (2/sqrt 3) * mu * K1*K2 / n^2  =  (2/sqrt 3) * nu_hat "
-          "* sqrt(K1*K2/n)\n")
-    pred_raw, obs = [], []
-    for r in rows:
-        eff = r['K1'] * r['K2'] / r['n']
-        r['pred'] = r['nuhat'] * math.sqrt(eff)
-        pred_raw.append(r['pred'])
-        obs.append(r['NU'])
-    Cfit = (sum(o / p for o, p in zip(obs, pred_raw) if p > 0)
-            / sum(1 for p in pred_raw if p > 0))
-    resid = [o / (Cfit * p) for o, p in zip(obs, pred_raw) if p > 0]
-    print(f"fitted C = {Cfit:.4f}   (2/sqrt 3 = {2/math.sqrt(3):.4f})")
-    print(f"NU / (C * nu_hat * sqrt(eff)):  mean {sum(resid)/len(resid):.3f}  "
-          f"min {min(resid):.3f}  max {max(resid):.3f}  "
-          f"spread {max(resid)/min(resid):.2f}x")
-    print(f"Spearman(pred, NU) = {spearman(pred_raw, obs):.4f}   N={len(obs)}")
-
-    print("\nper-cell means:")
-    print(f"{'curve':<14} {'K1':>4} {'eff':>6} {'nu_hat':>8} {'pred':>9} "
-          f"{'C*pred':>9} {'NU obs':>8} {'obs/pred':>9} {'rec':>5}")
-    for label, curve, m, ls in U2:
-        for k1 in K1_GRID:
-            sub = [r for r in rows if r['label'] == label and r['K1'] == k1]
-            if not sub:
-                continue
-            nu_m = sum(r['NU'] for r in sub) / len(sub)
-            pr = sub[0]['pred']
-            wins = sum(1 for r in sub if r['ok'])
-            print(f"{label:<14} {k1:>4} {sub[0]['eff']:>6.3f} "
-                  f"{sub[0]['nuhat']:>8.4f} {pr:>9.4f} {Cfit*pr:>9.4f} "
-                  f"{nu_m:>8.4f} {nu_m/pr:>9.4f} "
-                  f"{str(wins)+'/'+str(len(sub)):>5}")
-
-    pos = [r['pred'] for r in rows if r['ok']]
-    neg = [r['pred'] for r in rows if not r['ok']]
-    posNU = [r['NU'] for r in rows if r['ok']]
-    negNU = [r['NU'] for r in rows if not r['ok']]
-    print(f"\nAUC(-pred -> recovery)  = {auc(pos, neg):.4f}   "
-          f"[closed form, NO per-instance lattice work]")
-    print(f"AUC(-NU   -> recovery)  = {auc(posNU, negNU):.4f}   "
-          f"[exact BDD certificate, Thread 23b]")
-    print("Thread 20b's fitted nu_hat separator reached AUC 0.935.")
+    print("Pooling over K1 confounds every correlation: K1 drives det(L2) and")
+    print("hence mu, lambda_2 and recovery simultaneously.  Thread 20b's nu_hat")
+    print("comparison was CROSS-CURVE AT MATCHED K1, so redo it that way: for")
+    print("each K1, sign of (mu_2677 - mu_2557) vs (rec_2677 - rec_2557).\n")
+    print(f"  {'K1':>4} {'d(mu)':>9} {'d(lam2)':>9} {'d(b*last)':>10} "
+          f"{'d(NU)':>8} {'d(rec)':>7}  {'nu_hat sign ok?':>16}")
+    agree_sign = ties = 0
+    for k in K1_GRID:
+        va = by_key[("12-bit/2557", k)]
+        vb = by_key[("12-bit/2677", k)]
+        ra = sum(1 for (ll, kk, _s, _p, r, *_x) in ALL
+                 if ll == "12-bit/2557" and kk == k and r)
+        rb = sum(1 for (ll, kk, _s, _p, r, *_x) in ALL
+                 if ll == "12-bit/2677" and kk == k and r)
+        dmu = vb[0][1] - va[0][1]
+        dl2 = vb[0][2] - va[0][2]
+        dbl = (sum(pr['gs'][-1] for pr, *_ in vb) / len(vb)
+               - sum(pr['gs'][-1] for pr, *_ in va) / len(va))
+        dnu = (sum(pr['NU'] for pr, *_ in vb) / len(vb)
+               - sum(pr['NU'] for pr, *_ in va) / len(va))
+        drec = rb - ra
+        if drec == 0:
+            ok = "tie"
+            ties += 1
+        else:
+            # nu_hat's claimed sign: larger mu => worse recovery
+            ok = "YES" if (dmu > 0) == (drec < 0) else "no"
+            agree_sign += (ok == "YES")
+        print(f"  {k:>4} {dmu:>9.0f} {dl2:>9.0f} {dbl:>10.1f} {dnu:>8.3f} "
+              f"{drec:>7} {ok:>16}")
+    print(f"\n  sign of nu_hat confirmed in {agree_sign}/{11-ties} "
+          f"non-tied K1 cells ({ties} ties).")
 
     # -----------------------------------------------------------------------
     print("\n" + "-" * 78)
-    print("EXP W4: is the NU bracket n-independent?  (17-bit re-measure)")
+    print("EXP W5: NU_half as a separator — sharpness, and is it still SOUND?")
     print("-" * 78)
-    t0 = time.time()
+    print("W3 found AUC(-NU_half) = 0.996 > AUC(-NU) = 0.978.  NU_half drops")
+    print("the head indices, so it can no longer be a nearest-plane certificate;")
+    print("check directly whether NU_half <= 1 still implies Babai success.\n")
+
+    from glv_hnp_phase2_babai import run_babai
+
+    rowsW5 = []
+    for (l, k, s, pr, rec, mu, lam2, detL2, m) in ALL:
+        d = pr['dim']
+        nh = max(pr['nus'][d // 2:])
+        rowsW5.append((l, k, s, pr['NU'], nh, rec))
+
+    for name, idx in (("NU (full)", 3), ("NU_half", 4)):
+        tp = fp = fn = tn = 0
+        for r in rowsW5:
+            pred, obs = r[idx] <= 1.0, r[5]
+            if pred and obs: tp += 1
+            elif pred and not obs: fp += 1
+            elif not pred and obs: fn += 1
+            else: tn += 1
+        pos = [r[idx] for r in rowsW5 if r[5]]
+        neg = [r[idx] for r in rowsW5 if not r[5]]
+        thr_suff, thr_nec = min(neg), max(pos)
+        band = sum(1 for r in rowsW5 if thr_suff <= r[idx] <= thr_nec)
+        print(f"  {name}  vs Kannan-LLL recovery   N = {len(rowsW5)}")
+        print(f"    TP {tp:>3}  FP {fp:>3}  FN {fn:>3}  TN {tn:>3}   "
+              f"accuracy {(tp+tn)/len(rowsW5):.3f}")
+        print(f"    sufficient below {thr_suff:.3f} | necessary above "
+              f"{thr_nec:.3f} | ambiguous band {band}/{len(rowsW5)} "
+              f"({100.0*band/len(rowsW5):.1f}%)")
+
+    # soundness check: NU_half <= 1 must NOT be claimed as a Babai certificate
+    sound_fp = sound_n = 0
+    for (l, k, s, pr, rec, mu, lam2, detL2, m) in ALL:
+        d = pr['dim']
+        nh = max(pr['nus'][d // 2:])
+        if nh <= 1.0:
+            curve = dict(U2_by_label)[l]
+            d_trial = random.Random(s + 7777).randint(1, curve[2] - 1)
+            rb = run_babai(curve, m, d_trial, k, s)
+            sound_n += 1
+            sound_fp += (not rb['ok'])
+    print(f"\n  soundness: of {sound_n} instances with NU_half <= 1, "
+          f"{sound_fp} FAIL Babai nearest-plane.")
+    print("  (NU <= 1 had 0 such failures by construction — it is the theorem.)")
+    print("  => NU_half is a sharper SCORE but not a certificate; the pair")
+    print("     (NU for soundness, NU_half for ranking) is the useful package.")
+
+    # -----------------------------------------------------------------------
+    print("\n" + "-" * 78)
+    print("EXP W6: where does the 0.47 constant come from?  det(L0) vs det(L2)^m")
+    print("-" * 78)
+    print("L0 contains L2^m (one copy of L2 on each coordinate pair (i, m+i))")
+    print("plus the B-row, so det(L0) = det(L2)^m / [L0 : L2^m], and the whole")
+    print("GS profile is pulled down by that index.  Measure the index.\n")
+    print(f"  {'curve':<12} {'K1':>4} {'log2 detL0':>11} {'m*log2 detL2':>13} "
+          f"{'index':>12} {'index<=n?':>10} {'I^(-1/2m)':>10} {'b*last/lam2':>12}")
+    for (l, k), v in sorted(by_key.items(), key=lambda t: (t[0][0], t[0][1])):
+        pr0, mu, lam2, detL2 = v[0]
+        mm = len(pr0['gs']) // 2
+        ld0 = sum(math.log2(x) for x in pr0['gs'])
+        ld2 = mm * math.log2(detL2)
+        idx = 2.0 ** (ld2 - ld0)
+        n_l = 2659 if l == "12-bit/2557" else 2647
+        last = sum(p['gs'][-1] for p, *_ in v) / len(v)
+        print(f"  {l:<12} {k:>4} {ld0:>11.2f} {ld2:>13.2f} {idx:>12.1f} "
+              f"{str(idx <= n_l * 1.001):>10} {idx**(-1.0/(2*mm)):>10.3f} "
+              f"{last/lam2:>12.3f}")
+
+    # -----------------------------------------------------------------------
+    print("\n" + "-" * 78)
+    print("EXP W7: OUT-OF-SAMPLE — do NU / NU_half transfer to 17-bit curves?")
+    print("-" * 78)
+    print("Everything above is fitted on two 12-bit curves.  The 12-bit brackets")
+    print("were NU in [1.188, 1.869] and NU_half in [1.068, 1.252].  Re-measure")
+    print("on the 20 independent 17-bit curves of Thread 23 exp U3 (m = 12,")
+    print("eff = K1*K2/n in {0.05, 0.15, 0.25}, 5 seeds) — 300 fresh instances.")
+    print("If the brackets are n-independent, NU gives a size-free viability")
+    print("test for Phase 2.\n")
+
+    import time as _time
+    from glv_hnp_common import search_curves
+
+    t0 = _time.time()
     curves17 = search_curves(1 << 16, 1 << 17, per_bin=2, nbins=10)
-    print(f"found {len(curves17)} 17-bit j=0 GLV curves in {time.time()-t0:.1f}s")
+    print(f"found {len(curves17)} 17-bit j=0 GLV curves in {_time.time()-t0:.1f}s")
+
     M17 = 12
     rows17 = []
-    t0 = time.time()
     for eff in (0.05, 0.15, 0.25):
         for (p, b, n, lam, G) in curves17:
             k2b = math.isqrt(n) + 1
             k1b = max(2, int(eff * n / k2b))
             for seed in SEEDS:
                 d_trial = random.Random(seed + 7777).randint(1, n - 1)
-                r = instance((p, b, n, lam, G), M17, d_trial, k1b, seed,
-                             exact=True)
-                if r is None:
+                pr = profile((p, b, n, lam, G), M17, d_trial, k1b, seed)
+                if pr is None:
                     continue
                 rk = run_new((p, b, n, lam, G), M17, d_trial, k1b, seed)
-                r.update({'n': n, 'K1': k1b, 'ok': bool(rk['ok']),
-                          'eff': k1b * k2b / n, 'effq': eff})
-                rows17.append(r)
-    print(f"{len(rows17)} 17-bit instances (dim {rows17[0]['k']}, exact GS) "
-          f"in {time.time()-t0:.1f}s")
+                nh = max(pr['nus'][pr['dim'] // 2:])
+                rows17.append((eff, n, k1b, seed, pr['NU'], nh,
+                               bool(rk['ok']), pr['arg'], pr['dim']))
+    print(f"{len(rows17)} instances in {_time.time()-t0:.1f}s")
 
-    p17 = [r['NU'] for r in rows17 if r['ok']]
-    n17 = [r['NU'] for r in rows17 if not r['ok']]
-    print(f"\nNU | success : min {min(p17):.3f}  median "
-          f"{sorted(p17)[len(p17)//2]:.3f}  max {max(p17):.3f}  (n={len(p17)})")
-    print(f"NU | failure : min {min(n17):.3f}  median "
-          f"{sorted(n17)[len(n17)//2]:.3f}  max {max(n17):.3f}  (n={len(n17)})")
-    tp = sum(1 for r in rows17 if r['NU'] <= 1.0 and r['ok'])
-    fp = sum(1 for r in rows17 if r['NU'] <= 1.0 and not r['ok'])
-    print(f"NU <= 1 certificate:  TP {tp}  FP {fp}   "
-          f"(FP must be 0 if nearest-plane theory holds)")
-    print(f"bracket at 17 bits : sufficient NU < {min(n17):.3f} , "
-          f"necessary NU > {max(p17):.3f}")
-    print("compare 12 bits (Thread 23b): sufficient NU < 1.188 , "
-          "necessary NU > 1.869")
-    print(f"AUC(-NU -> recovery) at 17 bits = {auc(p17, n17):.4f}")
-    pr17p = [r['nuhat'] * math.sqrt(r['eff']) for r in rows17 if r['ok']]
-    pr17n = [r['nuhat'] * math.sqrt(r['eff']) for r in rows17 if not r['ok']]
-    print(f"AUC(-nu_hat*sqrt(eff) -> recovery) at 17 bits = "
-          f"{auc(pr17p, pr17n):.4f}")
-    allp = [r['nuhat'] * math.sqrt(r['eff']) for r in rows17]
-    allo = [r['NU'] for r in rows17]
-    Cf17 = sum(o / p for o, p in zip(allo, allp) if p > 0) / len(allp)
-    print(f"fitted C at 17 bits = {Cf17:.4f}   (12 bits: {Cfit:.4f})")
+    # reproduction guard: Thread 23 exp U3 measured NEW-lattice wins
+    # 99/100, 21/100, 9/100 at eff = 0.05, 0.15, 0.25.
+    REF_U3 = {0.05: 99, 0.15: 21, 0.25: 9}
+    print("  reproduction check vs Thread 23 exp U3 (NEW-lattice wins):")
+    for eff in (0.05, 0.15, 0.25):
+        w = sum(1 for r in rows17 if r[0] == eff and r[6])
+        t = sum(1 for r in rows17 if r[0] == eff)
+        flag = "OK" if w == REF_U3[eff] else f"DRIFT (ref {REF_U3[eff]})"
+        print(f"    eff {eff:.2f}: {w}/{t}   {flag}")
+    print()
 
-    print(f"\nargmax at last index in "
-          f"{sum(1 for r in rows17 if r['argmax'] == r['k']-1)}/{len(rows17)}; "
-          f"last two in "
-          f"{sum(1 for r in rows17 if r['argmax'] >= r['k']-2)}/{len(rows17)}")
-    r17 = [r['prof'][-1] / r['l2'] for r in rows17]
-    print(f"||b*_last||/lambda_2(L2) at 17 bits: mean "
-          f"{sum(r17)/len(r17):.3f}  min {min(r17):.3f}  max {max(r17):.3f}")
+    for name, idx, band12 in (("NU (full)", 4, (1.188, 1.869)),
+                              ("NU_half", 5, (1.068, 1.252))):
+        tp = fp = fn = tn = 0
+        for r in rows17:
+            pred, obs = r[idx] <= 1.0, r[6]
+            if pred and obs: tp += 1
+            elif pred and not obs: fp += 1
+            elif not pred and obs: fn += 1
+            else: tn += 1
+        pos = [r[idx] for r in rows17 if r[6]]
+        neg = [r[idx] for r in rows17 if not r[6]]
+        conc = sum((1.0 if x < y else 0.5 if x == y else 0.0)
+                   for x in pos for y in neg)
+        auc = conc / (len(pos) * len(neg)) if pos and neg else float('nan')
+        ts, tn_ = (min(neg) if neg else float('nan')), (max(pos) if pos else float('nan'))
+        print(f"  {name}   N = {len(rows17)}   AUC = {auc:.4f}")
+        print(f"    TP {tp:>4}  FP {fp:>4}  FN {fn:>4}  TN {tn:>4}   "
+              f"accuracy {(tp+tn)/len(rows17):.3f}")
+        print(f"    17-bit bracket [{ts:.3f}, {tn_:.3f}]   "
+              f"12-bit bracket [{band12[0]:.3f}, {band12[1]:.3f}]")
+        # does the 12-bit bracket still hold out-of-sample?
+        v_lo = sum(1 for r in rows17 if r[idx] < band12[0] and not r[6])
+        v_hi = sum(1 for r in rows17 if r[idx] > band12[1] and r[6])
+        n_lo = sum(1 for r in rows17 if r[idx] < band12[0])
+        n_hi = sum(1 for r in rows17 if r[idx] > band12[1])
+        print(f"    transfer: {v_lo}/{n_lo} violations below the 12-bit lower "
+              f"threshold, {v_hi}/{n_hi} above the upper\n")
 
-    # float-vs-exact at dim 24
-    worst = 0.0
-    for r0 in rows17[:20]:
-        pass
-    chk = 0
-    worst24 = 0.0
-    for eff in (0.15,):
-        for (p, b, n, lam, G) in curves17[:6]:
-            k2b = math.isqrt(n) + 1
-            k1b = max(2, int(eff * n / k2b))
-            d_trial = random.Random(42 + 7777).randint(1, n - 1)
-            re_ = instance((p, b, n, lam, G), M17, d_trial, k1b, 42, exact=True)
-            rf = instance((p, b, n, lam, G), M17, d_trial, k1b, 42, exact=False)
-            if re_ and rf:
-                chk += 1
-                worst24 = max(worst24, abs(rf['NU'] - re_['NU']) / re_['NU'])
-    print(f"\nW0 repeat at dim {M17*2}: max relative NU error (float vs exact) "
-          f"over {chk} cells = {worst24:.3e}")
+    qh17 = [0] * 4
+    for r in rows17:
+        qh17[bucket(r[7], r[8])] += 1
+    print(f"  argmax quarter histogram at 17 bits: {qh17}  "
+          f"(tail = {100.0*qh17[3]/len(rows17):.1f}%)")
 
     print("\n" + "=" * 78)
     print("done")

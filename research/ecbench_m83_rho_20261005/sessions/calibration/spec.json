@@ -1,0 +1,13 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "escape-variant calibration on the three largest one-word Koblitz curves",
+  "description": "PROTOCOL.md part A. rho.signed_frobenius_strong_escape at dp_bits 4, 8 and 10 against the committed reference rho.signed_frobenius_strong (dp_bits 4) on the same public targets, before the m = 83 run uses the escape variant at dp_bits 12.",
+  "workloads": {"curves": [{"kind": "koblitz", "a": 0, "n": 53}, {"kind": "koblitz", "a": 1, "n": 59}, {"kind": "koblitz", "a": 0, "n": 61}], "targets_per_curve": 8, "target_seed": 20261005, "target_kind": "public"},
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "escape-dp4", "role": "candidate", "method": {"id": "rho.signed_frobenius_strong_escape", "params": {"dp_bits": "4"}}},
+    {"name": "escape-dp8", "role": "candidate", "method": {"id": "rho.signed_frobenius_strong_escape", "params": {"dp_bits": "8"}}},
+    {"name": "escape-dp10", "role": "candidate", "method": {"id": "rho.signed_frobenius_strong_escape", "params": {"dp_bits": "10"}}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 0, "order": "alternate", "seed": 20261005, "isolation_required": "L2", "timeout_seconds": 600}
+}

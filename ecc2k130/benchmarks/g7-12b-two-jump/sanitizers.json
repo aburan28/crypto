@@ -1,0 +1,53 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "variant": "indexed",
+      "tool": "memcheck",
+      "returncode": 0,
+      "error_summary_zero": true,
+      "log": "indexed-memcheck.log",
+      "log_sha256": "73e7729fdc68ba2eb48fabea93ef8ecd81ddb5b5f1c854aacbc04627791314fc"
+    },
+    {
+      "variant": "indexed",
+      "tool": "initcheck",
+      "returncode": 0,
+      "error_summary_zero": true,
+      "log": "indexed-initcheck.log",
+      "log_sha256": "9841a986788611f738b6ca6e503fc370fd9fda5607e40c1684cc56d3dc4c981c"
+    },
+    {
+      "variant": "indexed",
+      "tool": "synccheck",
+      "returncode": 0,
+      "error_summary_zero": true,
+      "log": "indexed-synccheck.log",
+      "log_sha256": "ada03d5b2a8d6d019745fca13593e0d445fc14821c3500bcdacd1ee53a5b2676"
+    },
+    {
+      "variant": "immediate",
+      "tool": "memcheck",
+      "returncode": 0,
+      "error_summary_zero": true,
+      "log": "immediate-memcheck.log",
+      "log_sha256": "4c64d45ea508e18c4e32a2f0bbe00d5da664af1fd504306416409e49ba1cff44"
+    },
+    {
+      "variant": "immediate",
+      "tool": "initcheck",
+      "returncode": 0,
+      "error_summary_zero": true,
+      "log": "immediate-initcheck.log",
+      "log_sha256": "afe2ffe7339f4be951947b7aaaf889487cde6a75f1649f8ef107fcc06202c89f"
+    },
+    {
+      "variant": "immediate",
+      "tool": "synccheck",
+      "returncode": 0,
+      "error_summary_zero": true,
+      "log": "immediate-synccheck.log",
+      "log_sha256": "770346fe0af310a5cafa49160a01fcd64b5d92c635808f69ff298cdefd0d6068"
+    }
+  ]
+}

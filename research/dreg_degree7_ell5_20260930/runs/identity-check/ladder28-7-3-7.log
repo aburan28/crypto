@@ -1,0 +1,8 @@
+n=7 ℓ=3: unsat draw 0 -> 6 (2.2s)
+n=7 ℓ=3: unsat draw 1 -> 6 (5.9s)
+n=7 ℓ=3: unsat draw 2 -> 6 (4.8s)
+n=7 ℓ=3: unsat draw 3 -> 6 (5.1s)
+
+| n | ℓ | S | vars | eqs | d_max | draws | sat | unsat outcomes | FFD | control |
+|--:|--:|--:|--:|--:|--:|--:|--:|:--|:--|:--|
+| 7 | 3 | -2 | 16 | 14 | 7 | 12 | 8 | 6 6 6 6 | 2 3 3 3 | - |

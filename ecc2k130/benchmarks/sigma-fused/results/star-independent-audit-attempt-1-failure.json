@@ -1,0 +1,10 @@
+{
+  "status": "AUDIT_TOOL_FAILURE_NO_EVIDENCE_DECISION",
+  "commandExitCode": 1,
+  "error": "read failure /private/tmp/ecc2k-sigma-fused-star-gpu-20261002/results/exit-code",
+  "cause": "The first independent reader treated eofbit as mandatory after streaming a whole file through rdbuf; that operation may complete without setting eofbit.",
+  "repair": "Fail only on badbit for the whole-file read. Recompile with warnings as errors and rerun the complete audit from the immutable archive.",
+  "gpuLaunchedByAudit": false,
+  "resultUsed": false,
+  "successfulAudit": "star-independent-audit.json"
+}

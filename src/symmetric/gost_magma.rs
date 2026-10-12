@@ -76,7 +76,7 @@ fn s_layer(x: u32) -> u32 {
 
 #[inline]
 fn rotl11(x: u32) -> u32 {
-    (x << 11) | (x >> 21)
+    x.rotate_left(11)
 }
 
 #[inline]

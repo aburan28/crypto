@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+"""Seal every dispatched disjoint-Q cell, including failures and preflights."""
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+import re
+import shutil
+import sys
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[3]
+sys.path.insert(0, str(ROOT / "research/notes/ecc2k130/compact_ir_ledger_20260930"))
+from archive import equivalent, pack  # noqa: E402
+from run_panel import sha  # noqa: E402
+sys.path.insert(0, str(ROOT / "research/notes/ecc2k130/disjoint_cold_q_20260930"))
+from prepare import CELLS, cell_name  # noqa: E402
+
+SOURCE_HEAD = "21836147f35044eb2f9583d35a3ba25b1bcfeaab"
+RUN_ID = 36794339148
+RUN_URL = f"https://github.com/aburan28/crypto/actions/runs/{RUN_ID}"
+INPUT_FREEZE = ROOT / "research/notes/ecc2k130/disjoint_cold_q_20260930/FROZEN.json"
+INPUT_RECEIPT = ROOT / "research/notes/ecc2k130/disjoint_cold_q_20260930/INPUT_RECEIPT.json"
+VERIFIER = ROOT / "research/notes/ecc2k130/disjoint_cold_q_20260930/verify_cold.py"
+
+
+def archive_runs(downloads: Path, second_host: Path, out: Path) -> dict:
+    assert downloads.is_dir() and second_host.is_dir() and not out.exists()
+    assert re.fullmatch(r"[0-9a-f]{40}", SOURCE_HEAD)
+    assert json.loads(INPUT_RECEIPT.read_text())["frozen_sha256"] == sha(INPUT_FREEZE)
+    host_file = second_host / "HOST.json"
+    host = json.loads(host_file.read_text())
+    assert host["schema"] == "ecc2k130-disjoint-cold-second-host-v1"
+    assert host["run_url"] == RUN_URL and host["source_head"] == SOURCE_HEAD
+    assert host["verifier_sha256"] == sha(VERIFIER)
+    out.mkdir(parents=True)
+    for directory in ("raw", "receipts", "second_host_replay", "diagnostics"):
+        (out / directory).mkdir()
+    cases = {}
+    for n, length, k, _prefilter, blocks in CELLS:
+        cell = cell_name(n, length)
+        artifact = downloads / f"disjoint-cold-{cell}"
+        if not artifact.is_dir():
+            cases[cell] = {"status": "MISSING_ARTIFACT", "reason": "no downloaded cell artifact"}
+            continue
+        run_dir = artifact / cell
+        report_path = run_dir / "cold_run.json"
+        receipt_path = run_dir / "receipt.json"
+        report = json.loads(report_path.read_text()) if report_path.is_file() else None
+        receipt = json.loads(receipt_path.read_text()) if receipt_path.is_file() else None
+        if report is not None:
+            assert report["schema"] == "ecc2k130-disjoint-cold-q-run-v1"
+            assert report["cell"] == cell and report["mode"] == "measure"
+            assert report["host"]["git_head"] == SOURCE_HEAD
+            assert report["frozen_sha256"] == sha(INPUT_FREEZE)
+            assert (report["spec"]["K"], report["spec"]["blocks"]) == (k, blocks)
+        if receipt is not None:
+            assert receipt["status"] in ("PASS", "PRODUCER_FAILURE", "PREFLIGHT_FAILURE", "FAIL")
+            if receipt["status"] == "PASS":
+                assert report is not None and report["status"] == "PASS"
+                assert (receipt["cell"], receipt["n"], receipt["L"],
+                        receipt["K"], receipt["blocks"]) == (cell, n, length, k, blocks)
+                assert len(receipt["checks"]) == 3 * blocks
+        status = receipt["status"] if receipt is not None else "UNVERIFIED"
+        raw_path = out / "raw" / f"{cell}.tar.gz"
+        members = pack(artifact, raw_path)
+        entry = {"status": status,
+                 "raw_path": str(raw_path.relative_to(out)),
+                 "raw_bytes": raw_path.stat().st_size,
+                 "raw_sha256": sha(raw_path),
+                 "member_sha256": members,
+                 "run_json_sha256": sha(report_path) if report is not None else None,
+                 "receipt_path": None, "receipt_sha256": None,
+                 "second_host_replay_path": None,
+                 "second_host_replay_sha256": None}
+        if receipt is not None:
+            copy = out / "receipts" / f"{cell}.json"
+            shutil.copyfile(receipt_path, copy)
+            entry["receipt_path"] = str(copy.relative_to(out))
+            entry["receipt_sha256"] = sha(copy)
+        replay_path = second_host / f"{cell}.json"
+        if replay_path.is_file():
+            replay = json.loads(replay_path.read_text())
+            if status == "PASS":
+                assert equivalent(receipt, replay), cell
+            copy = out / "second_host_replay" / f"{cell}.json"
+            shutil.copyfile(replay_path, copy)
+            entry["second_host_replay_path"] = str(copy.relative_to(out))
+            entry["second_host_replay_sha256"] = sha(copy)
+            assert host["receipts_sha256"][cell] == sha(copy)
+        elif status == "PASS":
+            raise AssertionError(f"missing second-host replay for PASS cell: {cell}")
+        cases[cell] = entry
+    host_copy = out / "second_host_replay" / "HOST.json"
+    shutil.copyfile(host_file, host_copy)
+    diagnostics = {}
+    for name in ("n37_L1024_pairing_addendum.json",
+                 "n37_L1024.stderr.txt",
+                 "preflight_sparse_checkout_n37_L1.json"):
+        source = second_host / name
+        assert source.is_file(), name
+        destination = out / "diagnostics" / name
+        shutil.copyfile(source, destination)
+        diagnostics[name] = {"path": str(destination.relative_to(out)),
+                             "sha256": sha(destination),
+                             "bytes": destination.stat().st_size}
+    assert host["pairing_addendum_sha256"] == diagnostics[
+        "n37_L1024_pairing_addendum.json"]["sha256"]
+    assert host["sparse_checkout_preflight_failure_sha256"] == diagnostics[
+        "preflight_sparse_checkout_n37_L1.json"]["sha256"]
+    manifest = {"schema": "ecc2k130-disjoint-cold-hosted-archive-v1",
+                "source_head": SOURCE_HEAD,
+                "source_head_kind": "PR #1095 merged main commit checked out by workflow_dispatch",
+                "github_run_url": RUN_URL,
+                "input_freeze_sha256": sha(INPUT_FREEZE),
+                "input_receipt_sha256": sha(INPUT_RECEIPT),
+                "verifier_sha256": sha(VERIFIER),
+                "cases": cases,
+                "second_host_path": str(host_copy.relative_to(out)),
+                "second_host_sha256": sha(host_copy),
+                "diagnostics": diagnostics,
+                "extraction": "tar -xzf raw/CELL.tar.gz -C DEST",
+                "independent_replay": (
+                    "python3 verify_cold.py --cell CELL --run-dir "
+                    "DEST/disjoint-cold-CELL/CELL --out DEST/CELL.replay.json --relocated"),
+                "wall_limitation": "0.2-second wait4 polling coarsens short-arm elapsed wall measurements"}
+    (out / "MANIFEST.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    return manifest
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--downloads", type=Path, required=True)
+    parser.add_argument("--second-host", type=Path, required=True)
+    parser.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args()
+    manifest = archive_runs(args.downloads.resolve(), args.second_host.resolve(),
+                            args.out.resolve())
+    print(json.dumps({cell: entry["status"] for cell, entry in
+                      manifest["cases"].items()}, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()

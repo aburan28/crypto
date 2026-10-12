@@ -1,0 +1,264 @@
+{
+  "valid": true,
+  "status": "Host-validated vector4 candidate with a conditional complete-helper modeled improvement; eligible for one bounded compiler-lowering assessment",
+  "goalBillionCompleteScalarUpdatesPerSecond": 26,
+  "sourceBinding": {
+    "valid": true,
+    "source": "/private/tmp/ecc2k-shared-sigma-walk-20260912/source",
+    "sourceFiles": 160,
+    "canonicalSha256": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868",
+    "filesRehashed": true,
+    "expectedFileSha256": "1e035c3f2883d778f55664f15fc56322a1334d64c92052f3309d6135b8a574b6",
+    "historyScope": "Narrow exact-keyword STATUS and retained sigma/tuning/state source/document search; no prior exact14x8x4maskgroup test found. Current planned-task mentions are excluded from prior evidence."
+  },
+  "layout": {
+    "shape": [
+      14,
+      8,
+      4
+    ],
+    "alignmentBytes": 16,
+    "cells": 448,
+    "bytes": 1792,
+    "equation": "U[g][j][c]=T[4g+c][j]",
+    "byteOffset": "128*g+16*j+4*c"
+  },
+  "schedule": "Load each group once at first demand; keep components until individual last use; no refetch.",
+  "model": {
+    "commonArithmetic": {
+      "activeWordNodes": 764,
+      "wordOperations": 748,
+      "operations": {
+        "mask": 56,
+        "shr": 98,
+        "xor": 366,
+        "and": 130,
+        "shl": 98
+      },
+      "stageOperations": {
+        "pairedSigma": 748
+      },
+      "sourceOrderClosedIntervalPeakWords": 25,
+      "peakNode": 401,
+      "nodeCount": 771
+    },
+    "scalarCoreOperations": 748,
+    "vectorCoreOperations": 706,
+    "scalarDistinctLoads": 56,
+    "vectorLoads": 14,
+    "logicalMaskBytesPerHelper": 224,
+    "componentSelection": "Constant SSA alias, zero arithmetic operations in this model; any emitted MOV/refetch must be charged by a compiler check.",
+    "scalarCommonAddressOperations": 2,
+    "vectorCommonAddressOperations": 2,
+    "scalarPeak": {
+      "words": 25,
+      "node": 401
+    },
+    "vectorComponentPeak": {
+      "words": 28,
+      "node": 358
+    },
+    "vectorConservativeAggregatePeak": {
+      "words": 38,
+      "node": 401
+    },
+    "scalarMaskOnlyPeak": 7,
+    "vectorMaskOnlyPeak": 10,
+    "aggregateMaskOnlyPeak": 20
+  },
+  "completeModeledHelper": {
+    "control": 750,
+    "candidate": 708,
+    "reduction": 42,
+    "reductionPercent": 5.6,
+    "logicalMaskBytesUnchanged": 224,
+    "refetches": 0,
+    "allFourComponentsChargedAtDefinition": true,
+    "perCtaExtraCopyIndexOperations": 3136,
+    "extraCopyIndexOperationsPerScalarAt256xB16x1024": 0.0007476806640625,
+    "sharedPayloadBytesUnchanged": 1792,
+    "barriersPerCtaLaunchUnchanged": 1,
+    "retainedOriginalGlobalMaskBytes": 1792,
+    "additionalGlobalMaskInitializerRequired": false
+  },
+  "hostValidation": {
+    "valid": true,
+    "compilerCommand": [
+      "clang++",
+      "-O2",
+      "-std=c++17",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=all",
+      "/private/tmp/ecc2k-vector4-sigma-assessment-20260912/probe.cpp",
+      "-o",
+      "/private/tmp/ecc2k-vector4-sigma-assessment-20260912/probe"
+    ],
+    "compilerExitCode": 0,
+    "probeExitCode": 0,
+    "compilerVersionSha256": "8b9ffbbb441d63746c134ceca11585f336632283b11435cd06f92c82a86497e7",
+    "compilerLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "probeLogSha256": "436c03ee9b801d135309f981e9af3ace525df9306fb1161a05956bd20c3a31ee",
+    "headerSha256": "d1119490225ca4b1765eaf7fd68b89bb502b777ba10d82f1cf6585816463c9ac",
+    "probeSourceSha256": "ce2f4547bbd03af35798630a85af3cfc9851209945e2265a2bc284a8bb534ea4",
+    "probeBinarySha256": "11d0451a4667139b0ef005182d2b7acb0a7998aa287dc07d5c27e30936790532",
+    "modelSha256": "1767eef375622993cdf8e074e55ab0e35b85ba38b40598d6efcaf379336381dc",
+    "modelResultSha256": "b0b396ca1efd7cb8429323c94df9f636a4ddf81fb868cf6efe1dd434eb78148b",
+    "layoutCells": 448,
+    "pairedCases": 3120,
+    "coordinateOutputs": 6240,
+    "instrumentedLoad4Invocations": 43680,
+    "load4InvocationsPerPair": 14,
+    "limitations": [
+      "HostC++/UBSan value/alignment/canary checks only. Instrumented load4calls do not prove host orGPUvectorinstructions.",
+      "One candidate header andonehostcompile/probe; noCUDAcompilerorGPUjob."
+    ]
+  },
+  "copyModel": {
+    "sourceWords": 448,
+    "destinationWords": 448,
+    "bytesEachDirection": 1792,
+    "barriersPerCtaLaunch": 1,
+    "extraDestinationPermutation": "For originalflat copy i: keep highbits i&~31, place low3bits atbits2..4, bits3..4 atbits0..1. This adds three masks,two shifts andtwo ORs in a literal32-bit implementation; common address steps are unchanged. Count is source-model only.",
+    "extraLiteralWordOperationsPerCopiedWord": 7,
+    "extraLiteralWordOperationsPerCtaLaunch": 3136
+  },
+  "bankModel": {
+    "banks": 32,
+    "bankWidthBytes": 4,
+    "candidateBanksByIndex": {
+      "0": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "1": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "2": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "3": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "4": [
+        16,
+        17,
+        18,
+        19
+      ],
+      "5": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "6": [
+        24,
+        25,
+        26,
+        27
+      ],
+      "7": [
+        28,
+        29,
+        30,
+        31
+      ]
+    },
+    "claim": "Differentj/components occupy distinct modeled banks; equalj lanes repeat the same four addresses. Originalscalarrow isalso conflict-free. No transaction,wavefront,latencyor performanceclaim."
+  },
+  "compilerRecommendation": {
+    "recommendOneFixedComparison": true,
+    "runtimeSpeedupClaim": false,
+    "requiredChecks": [
+      "Actual native128-bit shared loads, with all scalar/refetch/packing instructions counted.",
+      "Strict complete paired-helper improvement including component moves/address/return code; fewer load mnemonics alone is insufficient.",
+      "Complete caller/helper registers, stack/local/shared and spill evidence at unchangedB16/T256/min2 flags; report component-wise versus aggregate lifetime outcome.",
+      "Bind existing controlnativecode and unchanged scalar/global/inverse helpers/table values.",
+      "Count actual448-word cooperative-copy destination permutation and barrier; no duplicate shared/global allocation."
+    ],
+    "failureConditions": [
+      "Scalarization/refetch/extraction erases complete-helper reduction.",
+      "Resource/spill or allocation effects undermine the claimed controlled tradeoff.",
+      "Any table, canonical output, arithmetic order or mode/source binding mismatch."
+    ],
+    "nextDeviceStep": "Only after a separately reviewed compiler result, direct storage/copy/partial-block correctness and full walk gates could be considered. This receipt performs or authorizes noGPUrun."
+  },
+  "preserved": [
+    "all448 mask values",
+    "actual64paired operation-group order",
+    "normal basis and true normalX/hamming/j selection",
+    "scalar/global/inverse helpers",
+    "canonical field outputs",
+    "complete scalar iteration accounting"
+  ],
+  "novelty": "No exact previous14x8x4maskgroup test was found in the bounded retained-history/source search; this is not an exhaustive prior-art claim.",
+  "artifacts": {
+    "model.py": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-assessment-20260912/model.py",
+      "sha256": "1767eef375622993cdf8e074e55ab0e35b85ba38b40598d6efcaf379336381dc"
+    },
+    "model-result.json": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-assessment-20260912/model-result.json",
+      "sha256": "b0b396ca1efd7cb8429323c94df9f636a4ddf81fb868cf6efe1dd434eb78148b"
+    },
+    "candidate.h": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-assessment-20260912/candidate.h",
+      "sha256": "d1119490225ca4b1765eaf7fd68b89bb502b777ba10d82f1cf6585816463c9ac"
+    },
+    "probe.cpp": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-assessment-20260912/probe.cpp",
+      "sha256": "ce2f4547bbd03af35798630a85af3cfc9851209945e2265a2bc284a8bb534ea4"
+    },
+    "host-validation.json": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-assessment-20260912/host-validation.json",
+      "sha256": "e74cbd112109a193374110c36168f788101a76870f9e3b8790fc8d3957ed7199"
+    },
+    "host-compile.log": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-assessment-20260912/host-compile.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "host-probe.log": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-assessment-20260912/host-probe.log",
+      "sha256": "436c03ee9b801d135309f981e9af3ace525df9306fb1161a05956bd20c3a31ee"
+    },
+    "source-binding.json": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-assessment-20260912/source-binding.json",
+      "sha256": "3eafb957035cc08fe89774fbf8b23f258a95ecd911aa351eb86ea741ac613b2e"
+    },
+    "ASSESSMENT.md": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-assessment-20260912/ASSESSMENT.md",
+      "sha256": "c52ab6783ccb00936c297fca3d765400e2fb3eb3a664ecd587a9fc6221824ed9"
+    },
+    "assessment-freeze.json": {
+      "path": "/private/tmp/ecc2k-vector4-sigma-assessment-20260912/assessment-freeze.json",
+      "sha256": "78688a913a6806222c2d1accb5ddc948bdf0e3c37e39698fcfb946eab47d088c"
+    }
+  },
+  "hostCompilerInvocations": 1,
+  "hostProbeInvocations": 1,
+  "cudaCompilerInvocations": 0,
+  "gpuJobs": 0,
+  "productionEdits": 0,
+  "performanceGainEstablished": false,
+  "limitations": [
+    "One deterministic grouping and first-demand schedule only; no CUDA compilation or GPU run.",
+    "The model requires four simultaneously defined scalar components, and reports both component-wise and whole-aggregate liveness.",
+    "14vector instructions require actual128-bit native lowering; a C++ vector access may scalarize.",
+    "Mask payload bytes are unchanged. The original global table remains for scalar helpers, while shared table stores the permutation; the host probe has a staging copy solely for validation.",
+    "Call conventions,pointerregisters,whole-kernel liveness,shared reservation andcache carveout are outside this isolated helper model.",
+    "The positive reduction uses an explicit source/SSA model; component aliases costzero inthat model butactualmoves/refetches are a compiler falsifier.",
+    "The original scalar-row bank model isalso conflict-free. Vector4 isnot aclaimedbank-conflict fix.",
+    "The conservative38-word aggregate-retention peak is retained alongside the28-word component-wise peak; neither is aphysicalregisterprediction."
+  ]
+}

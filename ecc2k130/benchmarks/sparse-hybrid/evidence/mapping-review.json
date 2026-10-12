@@ -1,0 +1,137 @@
+{
+  "valid": true,
+  "status": "independent hybrid matrix and sparse metadata source review passed",
+  "producerHashes": {
+    "check.py": "6a43700536309ff881f789befdf7a800a3f3cca354b2f510620c79a6567ae19e",
+    "result.json": "c0c5f80db44c7f5c44f9dbbedf5e3d05e5dd28b131b2061e0c57453a70820907"
+  },
+  "reviewScriptSha256": "3f4f2154a7f51b4e6ebd0b2a7012993f290da4f8b8fba8a10ab2f0dca561e6f5",
+  "cudaFixtureSha256": "6836bfef024c2f635e5f25018c19bea842ad0bdd80a2466190c7883aa2e441a9",
+  "symbolicCoefficientMaps": 128,
+  "symbolicIntegerProductTerms": 4096,
+  "alwaysActiveZeroPairs": 17,
+  "complementaryPairs": 15,
+  "metadataDependsOnInputData": false,
+  "independentDenseEdgePairs": 38,
+  "producerDenseEdgePairs": 128,
+  "accumulatorBound": 1065024,
+  "overflowPossibleWithInitialCZero": false,
+  "carryProof": "Radix128 digits L,H<=64 and M<=128; M=128 is possible only for central coefficient63 with both raw128 inputs allones. The sole extra carry is removed by XOR at raw bit128; all coefficient maps and correction are unchanged.",
+  "payloadBytes": {
+    "A": 1024,
+    "B": 768,
+    "metadata": 128,
+    "total": 1920
+  },
+  "payloadScope": "Expanded operand matrix storage only; excludes C/D materialization, preparation/reconstruction and actual transfer behavior.",
+  "mmaCountsAt15B": {
+    "assumedFieldProductsPerScalarUpdate": 5.15625,
+    "rawProductsPerSecond": 77343750000.0,
+    "denseMmaInstructionsPerSecond": 77343750000.0,
+    "sparseMmaInstructionsPerSecond": 77343750000.0,
+    "totalWarpMmaInstructionsPerSecond": 154687500000.0
+  },
+  "fragmentFormulas": {
+    "lane": "g=lane>>2,t=lane&3",
+    "A": "regq byteb: row=g+8*(q&1), compressedcolumn=4*t+b+16*(q>>1)",
+    "B": "regq byteb: sparseKrow=16*q+4*t+b, column=g",
+    "C_D": "regq: row=g+8*(q>>1), column=2*t+(q&1)",
+    "E": "nibblej: row=g+8*(t&1), group=8*(t>>1)+j; low2bits first ordered index,high2bits second",
+    "selector": 0,
+    "A_b32Registers": 4,
+    "B_b32Registers": 4,
+    "C_D_s32Registers": 4,
+    "E_b32Registers": 1
+  },
+  "metadataRegistersHex": [
+    "0x88888888",
+    "0x88888888",
+    "0x88888888",
+    "0x8889dddc",
+    "0x88888888",
+    "0x88888888",
+    "0x8888888c",
+    "0x888ddddc",
+    "0x88888888",
+    "0x88888888",
+    "0x8888889c",
+    "0x889ddddc",
+    "0x88888888",
+    "0x88888888",
+    "0x888888dc",
+    "0x88dddddc",
+    "0x88888888",
+    "0x88888888",
+    "0x888889dc",
+    "0x89dddddc",
+    "0x88888888",
+    "0x88888888",
+    "0x88888ddc",
+    "0x8ddddddc",
+    "0x88888888",
+    "0x88888888",
+    "0x88889ddc",
+    "0x9ddddddc",
+    "0x88888888",
+    "0x88888888",
+    "0x8888dddc",
+    "0xdddddddc"
+  ],
+  "metadataOwnershipDerivation": "CUTLASS uint32 metadata\u2192reorder_meta row interweave and2x2 swizzle\u2192ColumnMajorInterleaved2 physicalword4*g+2*half+rowHalf\u2192ldmatrix.x1 lane word. All32 uniquely labelled metadata words and256nibbles checked.",
+  "orderedMetadataCompatibility": "Current CUTLASS emits ordered_metadata for CUDA12.5+ with this unchanged layout; PTX documents common fragment layout for both variants. Ascending indices inthismapping satisfy ordered values and selector0.",
+  "cudaFixtureSourceReview": {
+    "noSourceBlocker": true,
+    "oneFullWarpPerCase": true,
+    "warpUniformMmaCalls": true,
+    "all128CoefficientsDrained": true,
+    "all16384BitBasisPairs": true,
+    "edgePairs": 64,
+    "densePairs": 64,
+    "bothCoefficientAndRawProductChecks": true,
+    "timed": false
+  },
+  "primarySources": {
+    "host_reorder.h": {
+      "url": "https://raw.githubusercontent.com/NVIDIA/cutlass/main/tools/util/include/cutlass/util/host_reorder.h",
+      "sha256": "fcdf7fff3d54cd50558d3ca45413520b12cba386e519c0e3e731c15a31dfb1be",
+      "bytes": 4821
+    },
+    "mma_sparse_tensor_op.h": {
+      "url": "https://raw.githubusercontent.com/NVIDIA/cutlass/main/include/cutlass/gemm/warp/mma_sparse_tensor_op.h",
+      "sha256": "77b66fe684ee269ba88eacbd588b29f1e7655568fcf16b44a2f1d7ac9d0ae948",
+      "bytes": 13497
+    },
+    "mma_tensor_op_tile_iterator_sparse.h": {
+      "url": "https://raw.githubusercontent.com/NVIDIA/cutlass/main/include/cutlass/gemm/warp/mma_tensor_op_tile_iterator_sparse.h",
+      "sha256": "53eecf4009f3405827b78f4d7f70b898f81ff38f5949d8039020b4cf24b539b9",
+      "bytes": 13151
+    },
+    "default_mma_core_sparse_sm80.h": {
+      "url": "https://raw.githubusercontent.com/NVIDIA/cutlass/main/include/cutlass/gemm/threadblock/default_mma_core_sparse_sm80.h",
+      "sha256": "a65f6a6996d370ed3e1f34a9b82f7b70e6644b16941bac6a570c1136227f33b2",
+      "bytes": 34012
+    },
+    "memory_sm75.h": {
+      "url": "https://raw.githubusercontent.com/NVIDIA/cutlass/main/include/cutlass/arch/memory_sm75.h",
+      "sha256": "6ab69e1c324a9db12d5992afd3d0c70f98ba47d238a9f54f209f7b11233496be",
+      "bytes": 8282
+    },
+    "mma_sparse_sm80.h": {
+      "url": "https://raw.githubusercontent.com/NVIDIA/cutlass/main/include/cutlass/arch/mma_sparse_sm80.h",
+      "sha256": "c47e6474637ee0f34e5ae6bdfabad602dd2efca3f23671335955c7e26c32e14d",
+      "bytes": 37424
+    }
+  },
+  "ptxSources": [
+    "https://docs.nvidia.com/cuda/parallel-thread-execution/index.html",
+    "https://docs.nvidia.com/cuda/archive/12.0.0/pdf/ptx_isa_8.0.pdf"
+  ],
+  "findings": [],
+  "limits": [
+    "Source/finite arithmetic review only; no compiler or GPU job run byreview. Actual sparse lowering and runtime correctness still requirethe frozen fixture.",
+    "A andB byte layouts followthe PTX sparse fragment specification; E ownership isderivedfromNVIDIA CUTLASS metadata transport, not assumedto followApart ownership.",
+    "The top-level producer sparseInstructionsPerSecondAt15B field describes the two-sparse precursor. The hybrid has one dense andone sparse instruction perrawproduct; their issue costs cannotbe assumed equal.",
+    "Raw128 product mapping excludes field high3terms,reduction,inversion,basis transforms,preparation/reconstruction,paired reuse andcompletewalk costs. No15Bfull-walk performance claim follows.",
+    "Documentation web images/PDF screenshots were unavailable; E derivation uses retained primary CUTLASS code instead. No GPU test result is invented."
+  ]
+}

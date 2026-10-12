@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "operation": "koblitz_n59_l15_collector_tuning",
+  "date": "2026-09-21",
+  "claim_boundary": "Finite single-target tuning on the selected n59 ell15 cofactor-projected base. Equal-scan window arms and a source-pinned scratch-reuse candidate were charged; window 1024 remains selected and scratch reuse is rejected. No SOTA claim.",
+  "instance": {
+    "curve": "K_1 over GF(2^59)",
+    "ell": 15,
+    "m": 3,
+    "public_target_seed": 59001,
+    "factor_base_kind": "cofactor_projected",
+    "target_scalar_constructed_or_supplied": false
+  },
+  "selected_predecessor": {
+    "path": "docs/ic/runs/koblitz-n59-cofactor-projected-l15-optimization-20260921.json",
+    "sha256": "71ef16b1b78f7fae48e85b778f28a83487782acde8579f88eb8626b9c1e018da",
+    "window": 1024
+  },
+  "equal_scan_window_sweep": {
+    "summands_scanned_per_arm": 102400000,
+    "arms": [
+      {
+        "name": "ic-n59-projected-l15-window512-pilot",
+        "collection_window": 512,
+        "trials": 200000,
+        "summands_scanned": 102400000,
+        "relations": 2137,
+        "relation_unit_wall_seconds": 3.152399208,
+        "relation_unit_core_seconds": 38.34394100000003,
+        "relations_per_relation_unit_wall_second": 677.8963763779756,
+        "pair_table_build_wall_seconds": 18.790464792,
+        "whole_wall_seconds": 25.088887042,
+        "whole_core_seconds": 270.02095,
+        "peak_rss_bytes": 4372054016,
+        "canonical_relations_sha256": "e54d2ab7b0c0616c14b668de4ea7fb8a5d8bb5790f4a8ada2c757ccafdd98216",
+        "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16"
+      },
+      {
+        "name": "ic-n59-projected-l15-pilot",
+        "collection_window": 1024,
+        "trials": 100000,
+        "summands_scanned": 102400000,
+        "relations": 2157,
+        "relation_unit_wall_seconds": 3.039272334,
+        "relation_unit_core_seconds": 36.50245799999999,
+        "relations_per_relation_unit_wall_second": 709.709352422908,
+        "pair_table_build_wall_seconds": 18.904693083,
+        "whole_wall_seconds": 25.080593833000002,
+        "whole_core_seconds": 265.100201,
+        "peak_rss_bytes": 4372676608,
+        "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16"
+      },
+      {
+        "name": "ic-n59-projected-l15-window2048-pilot",
+        "collection_window": 2048,
+        "trials": 50000,
+        "summands_scanned": 102400000,
+        "relations": 2009,
+        "relation_unit_wall_seconds": 3.094597333,
+        "relation_unit_core_seconds": 35.965655,
+        "relations_per_relation_unit_wall_second": 649.1959320770216,
+        "pair_table_build_wall_seconds": 19.641564584,
+        "whole_wall_seconds": 25.915713917,
+        "whole_core_seconds": 266.144855,
+        "peak_rss_bytes": 4372250624,
+        "canonical_relations_sha256": "e841d0804a536032b9ef5c123628f462dbdd6d0ea483877f52d778fa05ee1bde",
+        "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16"
+      }
+    ],
+    "selected_window": 1024,
+    "throughput_ratios_vs_selected": {
+      "window512": 0.9551746416524952,
+      "window2048": 0.9147349261506883
+    },
+    "conclusion": "window 512 loses to probe overhead; window 2048 loses relation yield per equal scan; window 1024 remains the finite local selection"
+  },
+  "rejected_scratch_reuse": {
+    "source_patch": "research/ic_candidate_tournament_20260921/n59-public-59001/rejected-window-scratch-reuse.patch",
+    "source_patch_sha256": "13ea058f3cfe92e8f5624c72e51de575a1daa5d49204f9f9161282e24f78743a",
+    "candidate_binary_blake3": "db029141a9439d5edacf1bce6aef43f0fbfa24bfe843543f875aa6f095f7f679",
+    "baseline": {
+      "name": "ic-n59-projected-l15-pilot",
+      "collection_window": 1024,
+      "trials": 100000,
+      "summands_scanned": 102400000,
+      "relations": 2157,
+      "relation_unit_wall_seconds": 3.039272334,
+      "relation_unit_core_seconds": 36.50245799999999,
+      "relations_per_relation_unit_wall_second": 709.709352422908,
+      "pair_table_build_wall_seconds": 18.904693083,
+      "whole_wall_seconds": 25.080593833000002,
+      "whole_core_seconds": 265.100201,
+      "peak_rss_bytes": 4372676608,
+      "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+      "binary_blake3": "b8d94d9c47be26820ccc605e8a2e538f73ec330b0f7610bb6b1d8ef209638a16"
+    },
+    "candidate_repetitions": [
+      {
+        "name": "ic-n59-projected-l15-scratch-pilot",
+        "collection_window": 1024,
+        "trials": 100000,
+        "summands_scanned": 102400000,
+        "relations": 2157,
+        "relation_unit_wall_seconds": 3.414503417,
+        "relation_unit_core_seconds": 38.39871500000001,
+        "relations_per_relation_unit_wall_second": 631.7170424433639,
+        "pair_table_build_wall_seconds": 29.512040917,
+        "whole_wall_seconds": 36.125548667,
+        "whole_core_seconds": 274.28287,
+        "peak_rss_bytes": 4377919488,
+        "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "binary_blake3": "db029141a9439d5edacf1bce6aef43f0fbfa24bfe843543f875aa6f095f7f679"
+      },
+      {
+        "name": "ic-n59-projected-l15-scratch-pilot-b",
+        "collection_window": 1024,
+        "trials": 100000,
+        "summands_scanned": 102400000,
+        "relations": 2157,
+        "relation_unit_wall_seconds": 3.5634866670000003,
+        "relation_unit_core_seconds": 36.88055799999995,
+        "relations_per_relation_unit_wall_second": 605.306039159652,
+        "pair_table_build_wall_seconds": 21.437286666,
+        "whole_wall_seconds": 28.203724917,
+        "whole_core_seconds": 267.723015,
+        "peak_rss_bytes": 4378951680,
+        "canonical_relations_sha256": "5d486165d6e822e83795c876b7eb8bf62d2f1a8e281276d18aa0fd0667468054",
+        "binary_blake3": "db029141a9439d5edacf1bce6aef43f0fbfa24bfe843543f875aa6f095f7f679"
+      }
+    ],
+    "relation_hash_preserved": true,
+    "relation_unit_wall_ratios_vs_baseline": [
+      1.1234608293578472,
+      1.1724802108503647
+    ],
+    "decision": "rejected_wall_regression",
+    "conclusion": "buffer reuse preserved every relation but increased relation-unit wall by 12.35% and 17.25% in the two candidate pilots"
+  },
+  "new_process_accounting": {
+    "processes": 4,
+    "sequential_wall_seconds": 115.333874543,
+    "total_core_seconds": 1078.1716900000001,
+    "peak_rss_bytes": 4378951680,
+    "scope": "two fresh equal-scan window arms and two fresh scratch-reuse candidate repetitions; the selected window1024 baseline remains charged in the pinned Stage132 evidence and is not double-counted"
+  },
+  "gates": {
+    "factor_base_boundary_preserved": true,
+    "full_cost_vs_rho": "unchanged_failed",
+    "independent_external_reproduction": "missing"
+  }
+}

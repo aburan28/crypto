@@ -88,7 +88,7 @@
 
 use super::canonical_lift::{ZpCurve, ZpInt};
 use num_bigint::{BigInt, BigUint};
-use num_traits::{One, Zero};
+use num_traits::Zero;
 
 // ── Projective points over Z_p ──────────────────────────────────────────────
 //
@@ -509,6 +509,7 @@ fn mod_inv_i64(a: i64, p: i64) -> Option<i64> {
 
 // ── Brute-force order computation in E(F_p) ────────────────────────────────
 
+#[allow(dead_code)]
 fn count_points_fp(a: u64, b: u64, p: u64) -> u64 {
     let mut count: u64 = 1; // O
     for x in 0..p {
@@ -526,6 +527,7 @@ fn count_points_fp(a: u64, b: u64, p: u64) -> u64 {
     count
 }
 
+#[allow(dead_code)]
 fn mod_pow_u64(base: u64, mut exp: u64, modulus: u64) -> u64 {
     let mut result: u128 = 1;
     let mut base = base as u128 % modulus as u128;
@@ -542,12 +544,13 @@ fn mod_pow_u64(base: u64, mut exp: u64, modulus: u64) -> u64 {
 
 /// Compute the multiplicative order of `(p_x, p_y)` in `E(F_p)` by
 /// repeated addition.
+#[allow(dead_code)]
 fn point_order(x: u64, y: u64, a: u64, b: u64, p: u64) -> u64 {
     let n = count_points_fp(a, b, p);
     // Order must divide #E.  Try divisors in increasing order.
     let mut divisors: Vec<u64> = Vec::new();
     for d in 1..=n {
-        if n % d == 0 {
+        if n.is_multiple_of(d) {
             divisors.push(d);
         }
     }

@@ -1,0 +1,11 @@
+{
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.39",
+  "cpu_affinity": [
+    0
+  ],
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "rust": "1.90.0",
+  "profile": "release, redis-cache feature, no RUSTFLAGS",
+  "cache": "off",
+  "rayon_threads": 1
+}

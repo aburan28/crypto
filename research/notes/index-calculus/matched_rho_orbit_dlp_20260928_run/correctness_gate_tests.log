@@ -1,0 +1,11 @@
+    Finished `release` profile [optimized] target(s) in 1.71s
+     Running unittests examples/koblitz_rho_batch_ks_matched_arith.rs (target/release/examples/koblitz_rho_batch_ks_matched_arith-2c1e2d9c7bd718fe)
+
+running 4 tests
+test tests::normal_basis_rotation_matches_repeated_squaring ... ok
+test tests::raw_inverse_is_a_correct_multiplicative_inverse ... ok
+test tests::canonicalization_output_unchanged_by_the_matched_arithmetic ... ok
+test tests::gf2_matches_raw_field_arithmetic ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+

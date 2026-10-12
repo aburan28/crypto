@@ -1,0 +1,88 @@
+{
+  "schema": "ecc2k130-no-fruitless-cycle-v1",
+  "iteration": "R <- sigma^j(R) + R, j = 3 + ((HW(x_R) / 2) mod 8)",
+  "step_exponents": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "max_length": 8,
+  "curves": [
+    {
+      "m": 23,
+      "verdict": "clean",
+      "skip_reason": null,
+      "group_order": "8383412",
+      "ell": "2095853",
+      "lambda": "93194",
+      "multisets_checked": 12869,
+      "orbit_scalars": 46,
+      "hits": [],
+      "expected_by_chance": 0.2824501527540338,
+      "degenerate": [],
+      "matches_challenge_constants": null
+    },
+    {
+      "m": 41,
+      "verdict": "clean",
+      "skip_reason": null,
+      "group_order": "2199025563772",
+      "ell": "549756390943",
+      "lambda": "256851699273",
+      "multisets_checked": 12869,
+      "orbit_scalars": 82,
+      "hits": [],
+      "expected_by_chance": 1.9195011051893556e-6,
+      "degenerate": [],
+      "matches_challenge_constants": null
+    },
+    {
+      "m": 83,
+      "verdict": "clean",
+      "skip_reason": null,
+      "group_order": "9671406556923184866742756",
+      "ell": "2417851639230796216685689",
+      "lambda": "254512724090651164922414",
+      "multisets_checked": 12869,
+      "orbit_scalars": 166,
+      "hits": [],
+      "expected_by_chance": 8.835339461438658e-19,
+      "degenerate": [],
+      "matches_challenge_constants": null
+    },
+    {
+      "m": 97,
+      "verdict": "clean",
+      "skip_reason": null,
+      "group_order": "158456325028528296935114828764",
+      "ell": "39614081257132074233778707191",
+      "lambda": "23986389105595106179003010550",
+      "multisets_checked": 12869,
+      "orbit_scalars": 194,
+      "hits": [],
+      "expected_by_chance": 6.302269094150751e-23,
+      "degenerate": [],
+      "matches_challenge_constants": null
+    },
+    {
+      "m": 131,
+      "verdict": "clean",
+      "skip_reason": null,
+      "group_order": "2722258935367507707729280517973639940516",
+      "ell": "680564733841876926932320129493409985129",
+      "lambda": "196511074115861092422032515080945363956",
+      "multisets_checked": 12869,
+      "orbit_scalars": 262,
+      "hits": [],
+      "expected_by_chance": 4.954235552239736e-33,
+      "degenerate": [],
+      "matches_challenge_constants": true
+    }
+  ],
+  "passed": true
+}

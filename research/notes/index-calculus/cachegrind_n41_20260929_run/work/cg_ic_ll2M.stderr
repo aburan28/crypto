@@ -1,0 +1,28 @@
+==2457== Cachegrind, a high-precision tracing profiler
+==2457== Copyright (C) 2002-2017, and GNU GPL'd, by Nicholas Nethercote et al.
+==2457== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==2457== Command: /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/target/release/examples/koblitz_orbit_dlp_fast construct:41:0:255 /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/cachegrind_n41_20260929_run/work/scalars.txt 7 /home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/cachegrind_n41_20260929_run/work/cg_ic_ll2M.stdout.jsonl
+==2457== 
+--2457-- warning: L3 cache found, using its data for the LL simulation.
+--2457-- warning: specified LL cache: line_size 64  assoc 11  total_size 34,603,008
+--2457-- warning: simulated LL cache: line_size 64  assoc 17  total_size 35,651,584
+==2457== 
+==2457== I refs:        12,442,739,904
+==2457== I1  misses:           307,846
+==2457== LLi misses:             5,246
+==2457== I1  miss rate:           0.00%
+==2457== LLi miss rate:           0.00%
+==2457== 
+==2457== D refs:         2,306,778,789  (2,056,430,544 rd   + 250,348,245 wr)
+==2457== D1  misses:       151,138,402  (  145,801,643 rd   +   5,336,759 wr)
+==2457== LLd misses:        15,002,704  (    9,754,699 rd   +   5,248,005 wr)
+==2457== D1  miss rate:            6.6% (          7.1%     +         2.1%  )
+==2457== LLd miss rate:            0.7% (          0.5%     +         2.1%  )
+==2457== 
+==2457== LL refs:          151,446,248  (  146,109,489 rd   +   5,336,759 wr)
+==2457== LL misses:         15,007,950  (    9,759,945 rd   +   5,248,005 wr)
+==2457== LL miss rate:             0.1% (          0.1%     +         2.1%  )
+==2457== 
+==2457== Branches:       1,344,839,932  (1,264,963,454 cond +  79,876,478 ind)
+==2457== Mispredicts:       36,282,873  (   36,241,529 cond +      41,344 ind)
+==2457== Mispred rate:             2.7% (          2.9%     +         0.1%   )

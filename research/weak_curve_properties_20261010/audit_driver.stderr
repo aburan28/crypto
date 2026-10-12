@@ -1,0 +1,6 @@
+
+thread 'main' (3955111) panicked at ../../weak_curve_properties_20261010/main.rs:486:5:
+assertion `left == right` failed
+  left: String("PROCESS_ERROR")
+ right: "PROCESS_COMPLETE"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

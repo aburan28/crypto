@@ -1,0 +1,544 @@
+{
+  "attempt_totals": {
+    "attempts": 437,
+    "conflicts": 28422672,
+    "models": 252,
+    "relation_found": 252,
+    "solver_calls": 437,
+    "unknown": 185
+  },
+  "check_count": 1251,
+  "check_count_breakdown": {
+    "field_curve_factor_target_checks": 18,
+    "relation_attempt_target_checks": 437,
+    "relation_witness_row_and_coefficient_checks": 756,
+    "row_rank_scalar_point_match_and_rho_ledger_checks": 30,
+    "row_target_binding_and_relation_count_checks": 10
+  },
+  "claim_boundary": {
+    "external_portable_verification_satisfied": false,
+    "full_cost_gate_passed": false,
+    "independent_external_reproduction_satisfied": false,
+    "independent_mathematical_payload_replay_completed": false,
+    "koblitz_index_calculus_sota": false,
+    "retained_mathematical_witness_replay_completed": true,
+    "scientific_measurement_admitted": false
+  },
+  "curve_a0": {
+    "g": [
+      7502454,
+      6195881
+    ],
+    "h": 4,
+    "lambda": 93194,
+    "order": 8383412,
+    "r": 2095853
+  },
+  "curve_a1": {
+    "g": [
+      2796197,
+      1282171
+    ],
+    "h": 2,
+    "lambda": 368914,
+    "order": 8393806,
+    "r": 4196903
+  },
+  "discovery": [
+    {
+      "a": 0,
+      "candidate_counts": [
+        {
+          "indices": [
+            0,
+            1
+          ],
+          "points": 4235,
+          "projected_orbits": 92,
+          "projected_points": 4233,
+          "signed_orbits": 94
+        },
+        {
+          "indices": [
+            0,
+            2
+          ],
+          "points": 4281,
+          "projected_orbits": 93,
+          "projected_points": 4279,
+          "signed_orbits": 95
+        }
+      ],
+      "cofactor": 4,
+      "group_order": 8383412,
+      "selected": [
+        0,
+        2
+      ],
+      "subgroup_order": 2095853
+    },
+    {
+      "a": 1,
+      "candidate_counts": [
+        {
+          "indices": [
+            0,
+            1
+          ],
+          "points": 3957,
+          "projected_orbits": 86,
+          "projected_points": 3957,
+          "signed_orbits": 87
+        },
+        {
+          "indices": [
+            0,
+            2
+          ],
+          "points": 3911,
+          "projected_orbits": 85,
+          "projected_points": 3911,
+          "signed_orbits": 86
+        }
+      ],
+      "cofactor": 2,
+      "group_order": 8393806,
+      "selected": [
+        0,
+        1
+      ],
+      "subgroup_order": 4196903
+    }
+  ],
+  "external_portable_verification_satisfied": false,
+  "factor_base": {
+    "abscissae": 4096,
+    "dimension": 12,
+    "divisor": 5279,
+    "factors": [
+      3,
+      2787,
+      3189
+    ],
+    "identity_blake3": "47e048405e8dd0ecf8f5bae60805e601f9d18c960b081d072ea0f1f25a76f320",
+    "projected_distinct_points": 4279,
+    "projected_signed_orbits": 93,
+    "projection_location_identities_replayed": 4281,
+    "rational_points": 4281,
+    "signed_orbits": 95
+  },
+  "field": {
+    "irreducible_polynomial": 8388641,
+    "low_terms": [
+      0,
+      5
+    ],
+    "n": 23
+  },
+  "full_cost_gate_passed": false,
+  "independent_external_reproduction_satisfied": false,
+  "independent_mathematical_payload_replay_completed": false,
+  "input_identities": {
+    "bundle_manifest": {
+      "bytes": 1138966,
+      "sha256": "9a317f260e29ecccb5f45467bb5f6a4769bbb9efd8f77de872402fa4b8fa6dec"
+    },
+    "bundle_seal": {
+      "bytes": 727164,
+      "sha256": "db6d22811de297587e3810ba504596e81d182a2c7b1eadfbaa7ef95e7913ebcd"
+    },
+    "execution_source_commit": "4f0bcbd87dc3e4d7c9a26f5e8bec290d3430c04e",
+    "execution_source_tree": "2b3c28f86e2717c720f18779eb1b23a5478cc2f7",
+    "original_run_inventory_sha256": "b71e5c6772e3eec488355ec14b0da7a1f89cedb8f57a99c4765145128c98ce2c",
+    "original_run_seal": {
+      "bytes": 150740,
+      "sha256": "21a317423826f0f209ae976d43c91509fb8c6216d6f7c2e3304ac50dc94a73e7"
+    }
+  },
+  "koblitz_index_calculus_sota": false,
+  "non_replayable": [
+    "SAT solver UNSAT/refutation and conflict provenance (no proof traces; all 185 nonsolutions are capped Unknown)",
+    "the hidden step-by-step signed-Frobenius rho trajectory (only milestones and aggregate counters were retained)",
+    "timing non-overlap as an observed trace rather than source-and-ledger consistency"
+  ],
+  "ratios": {
+    "online_ic_over_rho_core": 1662.0427635477158,
+    "setup_charged_ic_over_rho_core": 1664.4430270813234,
+    "verdict": "finite_complete_panel"
+  },
+  "recorded_at": "2026-09-10",
+  "replay_implementation": {
+    "blake3_crate": {
+      "name": "blake3",
+      "version": "1.8.7"
+    },
+    "blake3_helper_binary": {
+      "bytes": 498208,
+      "sha256": "ec21c30b4d859cbcb4bbcc5d9606136ff04e72daf3bb6ff91703b30dee4b3243"
+    },
+    "blake3_helper_sources": {
+      "Cargo.lock": {
+        "bytes": 2096,
+        "sha256": "ed0b99cb0e167df661f419204b3f527760ea746d2cae6b23e80d94cc45731263"
+      },
+      "Cargo.toml": {
+        "bytes": 115,
+        "sha256": "549cae7bed8187e5be896384cc82393d20ab138b32159355a152e73e8781de0a"
+      },
+      "src/main.rs": {
+        "bytes": 565,
+        "sha256": "6ee2ac22f677b4a758458df02cc136db33a6e873a353a7a7da04999b11a90830"
+      }
+    },
+    "python_script": {
+      "bytes": 41421,
+      "sha256": "932c587a940454ddd963ce70335d779b7b3522659683c80ae5452987668616af"
+    }
+  },
+  "resources": {
+    "aggregate_parallel_rss_bytes": null,
+    "peak_process_rss_bytes": 1339957248,
+    "processes": 14,
+    "single_core_elapsed_seconds": null,
+    "single_core_seconds_legacy_alias": "total_core_seconds",
+    "summed_process_wall_seconds": 737.4102493440001,
+    "summed_system_seconds": 2.7869460000000004,
+    "summed_user_seconds": 721.808987,
+    "total_core_seconds": 724.5959330000001
+  },
+  "retained_mathematical_witness_replay_completed": true,
+  "rho_charge_totals": {
+    "candidate_verification_scalar_multiplications": 5,
+    "canonicalizations": 8254,
+    "coefficient_draws": 442,
+    "collisions": 13,
+    "failed_collisions": 8,
+    "frobenius_maps": 189842,
+    "negations_examined": 189842,
+    "partition_hashes": 8241,
+    "setup_group_additions": 221,
+    "setup_scalar_multiplications": 442,
+    "walk_group_additions": 8241
+  },
+  "rho_timing_totals_ns": {
+    "candidate_verification": 1512360,
+    "end_to_end": 351277419,
+    "rho_setup": 127632197,
+    "rho_walk": 214539931,
+    "target_and_subgroup_validation": 7131225
+  },
+  "rho_totals": {
+    "collisions": 13,
+    "failed_collisions": 8,
+    "iterations": 2747,
+    "restarts": 13,
+    "walk_additions": 8241
+  },
+  "rows": [
+    {
+      "attempts": 79,
+      "conflicts": 5225971,
+      "ic_scalar_point_replayed": true,
+      "ic_seed": 4683119321296053311,
+      "matrix_blake3": "805208bfdc642b84eaa863c92dcf2083bb1ed705286c8f4a9cdd22703c65f330",
+      "nullity": 51,
+      "point": [
+        1885398,
+        5393464
+      ],
+      "rank": 43,
+      "relations": 43,
+      "rho": {
+        "charges": {
+          "candidate_verification_scalar_multiplications": 1,
+          "canonicalizations": 3918,
+          "coefficient_draws": 204,
+          "collisions": 6,
+          "failed_collisions": 5,
+          "frobenius_maps": 90114,
+          "negations_examined": 90114,
+          "partition_hashes": 3912,
+          "setup_group_additions": 102,
+          "setup_scalar_multiplications": 204,
+          "walk_group_additions": 3912
+        },
+        "collisions": 6,
+        "failed_collisions": 5,
+        "iterations": 1304,
+        "restarts": 6,
+        "timing_ns": {
+          "candidate_verification": 381377,
+          "end_to_end": 173521503,
+          "rho_setup": 63461005,
+          "rho_walk": 108075104,
+          "target_and_subgroup_validation": 1454946
+        },
+        "walk_additions": 3912
+      },
+      "rho_scalar_point_replayed": true,
+      "rho_seed": 15161383483049228692,
+      "row": 1,
+      "scalar": 1411444,
+      "target_id": "09340a19ba52d5b00e6aefce98b5a4e93cbfcc95f2774621490239e2b66fce84",
+      "unknown": 36
+    },
+    {
+      "attempts": 103,
+      "conflicts": 6634582,
+      "ic_scalar_point_replayed": true,
+      "ic_seed": 1620815326269526617,
+      "matrix_blake3": "7873f0d43667ebc884a0a333116868cdcb6483cf9d8e90c5027ee0eb4f86b6ad",
+      "nullity": 34,
+      "point": [
+        3229622,
+        8259389
+      ],
+      "rank": 60,
+      "relations": 60,
+      "rho": {
+        "charges": {
+          "candidate_verification_scalar_multiplications": 1,
+          "canonicalizations": 1189,
+          "coefficient_draws": 34,
+          "collisions": 1,
+          "failed_collisions": 0,
+          "frobenius_maps": 27347,
+          "negations_examined": 27347,
+          "partition_hashes": 1188,
+          "setup_group_additions": 17,
+          "setup_scalar_multiplications": 34,
+          "walk_group_additions": 1188
+        },
+        "collisions": 1,
+        "failed_collisions": 0,
+        "iterations": 396,
+        "restarts": 1,
+        "timing_ns": {
+          "candidate_verification": 324727,
+          "end_to_end": 40246074,
+          "rho_setup": 8849610,
+          "rho_walk": 29604032,
+          "target_and_subgroup_validation": 1397959
+        },
+        "walk_additions": 1188
+      },
+      "rho_scalar_point_replayed": true,
+      "rho_seed": 16245391147071081286,
+      "row": 2,
+      "scalar": 785405,
+      "target_id": "522066fcd091ee2b77a311267bafececcbe0ea2326d0e03ad179e1299a512eb7",
+      "unknown": 43
+    },
+    {
+      "attempts": 62,
+      "conflicts": 3941519,
+      "ic_scalar_point_replayed": true,
+      "ic_seed": 2905152658302948179,
+      "matrix_blake3": "e4d598b4a62b0b87e15e9319fe038110cd0f69b61852190f60f30a02dae8927f",
+      "nullity": 54,
+      "point": [
+        7300722,
+        5060417
+      ],
+      "rank": 40,
+      "relations": 40,
+      "rho": {
+        "charges": {
+          "candidate_verification_scalar_multiplications": 1,
+          "canonicalizations": 1157,
+          "coefficient_draws": 68,
+          "collisions": 2,
+          "failed_collisions": 1,
+          "frobenius_maps": 26611,
+          "negations_examined": 26611,
+          "partition_hashes": 1155,
+          "setup_group_additions": 34,
+          "setup_scalar_multiplications": 68,
+          "walk_group_additions": 1155
+        },
+        "collisions": 2,
+        "failed_collisions": 1,
+        "iterations": 385,
+        "restarts": 2,
+        "timing_ns": {
+          "candidate_verification": 270350,
+          "end_to_end": 48590064,
+          "rho_setup": 18186959,
+          "rho_walk": 28731932,
+          "target_and_subgroup_validation": 1321111
+        },
+        "walk_additions": 1155
+      },
+      "rho_scalar_point_replayed": true,
+      "rho_seed": 5342667305116464321,
+      "row": 3,
+      "scalar": 1336591,
+      "target_id": "49a9376307924b4ef222dbba7750ee6617a673aafb3e69e7afcc7d3149af9a31",
+      "unknown": 22
+    },
+    {
+      "attempts": 120,
+      "conflicts": 7980608,
+      "ic_scalar_point_replayed": true,
+      "ic_seed": 10297604926406953080,
+      "matrix_blake3": "40bcc6dafed864f12bafcd22856ca370f3a74985d79baaea1c6b6d0ab9c84692",
+      "nullity": 26,
+      "point": [
+        1884480,
+        4110082
+      ],
+      "rank": 68,
+      "relations": 68,
+      "rho": {
+        "charges": {
+          "candidate_verification_scalar_multiplications": 1,
+          "canonicalizations": 1485,
+          "coefficient_draws": 102,
+          "collisions": 3,
+          "failed_collisions": 2,
+          "frobenius_maps": 34155,
+          "negations_examined": 34155,
+          "partition_hashes": 1482,
+          "setup_group_additions": 51,
+          "setup_scalar_multiplications": 102,
+          "walk_group_additions": 1482
+        },
+        "collisions": 3,
+        "failed_collisions": 2,
+        "iterations": 494,
+        "restarts": 3,
+        "timing_ns": {
+          "candidate_verification": 280336,
+          "end_to_end": 64948161,
+          "rho_setup": 27747740,
+          "rho_walk": 35359631,
+          "target_and_subgroup_validation": 1463085
+        },
+        "walk_additions": 1482
+      },
+      "rho_scalar_point_replayed": true,
+      "rho_seed": 12015459947305417849,
+      "row": 4,
+      "scalar": 1331121,
+      "target_id": "2744c699e6af05cf4abd82def616a6d54cd93ca0f231d3e5dfb41fb3a3d7b58b",
+      "unknown": 52
+    },
+    {
+      "attempts": 73,
+      "conflicts": 4639992,
+      "ic_scalar_point_replayed": true,
+      "ic_seed": 5031350938967679650,
+      "matrix_blake3": "14685f5f626bd34c687a32238c312d9569f427dfb3a201f5df27843c894d8108",
+      "nullity": 53,
+      "point": [
+        995444,
+        2646432
+      ],
+      "rank": 41,
+      "relations": 41,
+      "rho": {
+        "charges": {
+          "candidate_verification_scalar_multiplications": 1,
+          "canonicalizations": 505,
+          "coefficient_draws": 34,
+          "collisions": 1,
+          "failed_collisions": 0,
+          "frobenius_maps": 11615,
+          "negations_examined": 11615,
+          "partition_hashes": 504,
+          "setup_group_additions": 17,
+          "setup_scalar_multiplications": 34,
+          "walk_group_additions": 504
+        },
+        "collisions": 1,
+        "failed_collisions": 0,
+        "iterations": 168,
+        "restarts": 1,
+        "timing_ns": {
+          "candidate_verification": 255570,
+          "end_to_end": 23971617,
+          "rho_setup": 9386883,
+          "rho_walk": 12769232,
+          "target_and_subgroup_validation": 1494124
+        },
+        "walk_additions": 504
+      },
+      "rho_scalar_point_replayed": true,
+      "rho_seed": 16467523183750131884,
+      "row": 5,
+      "scalar": 179888,
+      "target_id": "e4a428e098bfd3b16f659d7bd081227aeacd01eddcac50cf5771d6ddc5da2767",
+      "unknown": 32
+    }
+  ],
+  "schema": "koblitz_stage24_independent_math_replay.v1",
+  "scientific_measurement_admitted": false,
+  "status": "PASS",
+  "targets": [
+    {
+      "candidate_attempts": 2,
+      "draw_counter": 1,
+      "ic_seed": 4683119321296053311,
+      "ordinal": 0,
+      "packed_point": 15815870139449,
+      "point": {
+        "x": "1885398",
+        "y": "5393464"
+      },
+      "rho_seed": 15161383483049228692,
+      "target_id": "09340a19ba52d5b00e6aefce98b5a4e93cbfcc95f2774621490239e2b66fce84"
+    },
+    {
+      "candidate_attempts": 1,
+      "draw_counter": 2,
+      "ic_seed": 1620815326269526617,
+      "ordinal": 1,
+      "packed_point": 27092041205566,
+      "point": {
+        "x": "3229622",
+        "y": "8259389"
+      },
+      "rho_seed": 16245391147071081286,
+      "target_id": "522066fcd091ee2b77a311267bafececcbe0ea2326d0e03ad179e1299a512eb7"
+    },
+    {
+      "candidate_attempts": 1,
+      "draw_counter": 3,
+      "ic_seed": 2905152658302948179,
+      "ordinal": 2,
+      "packed_point": 61242900035394,
+      "point": {
+        "x": "7300722",
+        "y": "5060417"
+      },
+      "rho_seed": 5342667305116464321,
+      "target_id": "49a9376307924b4ef222dbba7750ee6617a673aafb3e69e7afcc7d3149af9a31"
+    },
+    {
+      "candidate_attempts": 1,
+      "draw_counter": 4,
+      "ic_seed": 10297604926406953080,
+      "ordinal": 3,
+      "packed_point": 15808168113923,
+      "point": {
+        "x": "1884480",
+        "y": "4110082"
+      },
+      "rho_seed": 12015459947305417849,
+      "target_id": "2744c699e6af05cf4abd82def616a6d54cd93ca0f231d3e5dfb41fb3a3d7b58b"
+    },
+    {
+      "candidate_attempts": 3,
+      "draw_counter": 7,
+      "ic_seed": 5031350938967679650,
+      "ordinal": 4,
+      "packed_point": 8350392148385,
+      "point": {
+        "x": "995444",
+        "y": "2646432"
+      },
+      "rho_seed": 16467523183750131884,
+      "target_id": "e4a428e098bfd3b16f659d7bd081227aeacd01eddcac50cf5771d6ddc5da2767"
+    }
+  ]
+}

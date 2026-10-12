@@ -1,0 +1,29 @@
+{
+  "schema": "koblitz_native_process_meter.v1",
+  "meter": "fresh child process wait4/getrusage; all child threads included",
+  "command": [
+    "/usr/bin/env",
+    "RAYON_NUM_THREADS=1",
+    "VECLIB_MAXIMUM_THREADS=1",
+    "OPENBLAS_NUM_THREADS=1",
+    "OMP_NUM_THREADS=1",
+    "MKL_NUM_THREADS=1",
+    "BLIS_NUM_THREADS=1",
+    "NUMEXPR_NUM_THREADS=1",
+    "/usr/bin/make",
+    "-C",
+    "/Volumes/SSD990/wdsat-stage193-55d55b2/src",
+    "clean"
+  ],
+  "environment": {},
+  "pid": 83455,
+  "returncode": 0,
+  "timed_out": false,
+  "watchdog_seconds": 60,
+  "wall_seconds": 0.020718875,
+  "user_seconds": 0.0044,
+  "system_seconds": 0.005804,
+  "total_core_seconds": 0.010204000000000001,
+  "single_core_seconds": null,
+  "peak_rss_bytes": 1785856
+}

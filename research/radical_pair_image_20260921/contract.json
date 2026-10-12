@@ -1,0 +1,82 @@
+{
+  "version": "2026-09-21.1",
+  "parent_contract": "../index_calculus_baseline_20260914/ec_index_calculus_contract.json",
+  "status": "frozen_solver_stage_equivalent_suite",
+  "scope": "Public synthetic radical unordered-pair membership and sparse chained-S3 polynomial solving. No unknown scalar and no complete ECDLP recovery.",
+  "classification": "engineering solver-stage diagnostic",
+  "algebraic_boundary": {
+    "set": "P_W={(x+y,xy):x,y in W}, |W|=b",
+    "ordered_membership_regularity": "2b-1 for <h(x),h(y)>",
+    "radical_image_regularity_floor": "b",
+    "reason": "The b(b+1)/2 monomials s^i t^j with i+j<=b-1 are an interpolation basis on P_W.",
+    "success_condition": "The radical image basis reaches ratio d_reg/b=1 while exact roots and recovery are preserved."
+  },
+  "reference": "Direct sparse pair tree S3(x1,x2,u)=S3(x3,x4,v)=S3(u,v,z)=0 on identical curves, factor bases, targets, solver version, thread count and resources.",
+  "variants": [
+    "direct",
+    "norm_symmetric",
+    "radical_symmetric"
+  ],
+  "primary_end_to_end_metrics": {
+    "total_common_operations": null,
+    "S": null,
+    "rho_ratio": null,
+    "generic_floor_ratio": null,
+    "reason": "This suite measures the polynomial-solver stage and does not include relation collection, relation-matrix work, individual logarithm extraction or a common-operation conversion."
+  },
+  "stage_metrics": [
+    "max_f4_degree",
+    "peak_round_matrix_area",
+    "max_matrix_rows",
+    "max_matrix_columns",
+    "cold_process_wall_seconds",
+    "radical_preprocessing_seconds",
+    "root_set_sha256"
+  ],
+  "acceptance": {
+    "correctness": [
+      "Direct and symmetric finite root sets agree after quotient and recovery.",
+      "Recovered roots lie in the identical factor base.",
+      "Finite chain roots equal all nondegenerate elliptic-curve group relations.",
+      "Timeout, OOM and errors remain explicit."
+    ],
+    "stage_candidate": [
+      "Radical max F4 degree is no larger than direct on every matched target.",
+      "Producing-target paired radical/direct wall ratio has a 95% bootstrap interval below 1 in the main and holdout b>=5 cells.",
+      "One-time preprocessing is included in cold batch ratios."
+    ],
+    "falsification": [
+      "Any root-set, recovery or group-law mismatch rejects the candidate.",
+      "A larger F4 degree on a matched target rejects the algebraic solver-stage claim for that cell.",
+      "A cold batch ratio >=1 is retained as a negative result.",
+      "Failure to finish within 120 seconds is TIMEOUT, never UNSAT."
+    ]
+  },
+  "prime_cells": [
+    {"split": "main", "p": 17, "curve_a": 2, "curve_b": 2, "b": [3, 5, 7, 9], "target_indices": [0, 1, 3]},
+    {"split": "holdout", "p": 29, "curve_a": 1, "curve_b": 1, "b": [5, 7, 9, 11], "target_indices": [0, 1, 6]}
+  ],
+  "binary_cells": [
+    {"split": "main", "ambient": "GF(2^4)", "subfield": "GF(2^2)", "factor_base": "nonzero subfield", "targets": "all 3 factor-base x coordinates"},
+    {"split": "holdout", "ambient": "GF(2^6)", "subfield": "GF(2^3)", "factor_base": "nonzero subfield", "targets": "all 7 factor-base x coordinates"},
+    {"split": "feasibility", "ambient": "GF(2^8)", "subfield": "GF(2^4)", "status": "prior bounded run censored after 90 seconds; not rerun or promoted"}
+  ],
+  "runner": {
+    "sage": "10.9",
+    "msolve": "0.9.5",
+    "threads": 1,
+    "random_seed": 0,
+    "repetitions": 3,
+    "process_timeout_seconds": 120,
+    "raw_log_mode": "msolve -g 1 -v 2; leading ideal plus F4 protocol, without the expanded reduced basis body",
+    "pair_order": "rotated by cell, target and repetition"
+  },
+  "equivalent_suite_exception": "The repository WDSat regression exercises the Rust Boolean Semaev solver and cannot execute Sage/msolve prime-field or radical image systems. This suite freezes matched direct/norm/radical systems under the parent accounting fields and reports only solver-stage diagnostics.",
+  "prohibited_claims": [
+    "No whole-index-calculus speedup.",
+    "No Pollard-rho crossover.",
+    "No exponent improvement.",
+    "No deployed-curve security impact.",
+    "No private-key or unknown-scalar recovery."
+  ]
+}

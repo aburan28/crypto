@@ -1,0 +1,19 @@
+{
+  "phase": "callgrind_ic",
+  "n": 37,
+  "L": 1024,
+  "K": 42,
+  "corpus": "n37-strong-sweep-L1024-v1",
+  "batch_seed": "531310",
+  "load_before": "17:37:22 up  1:02,  0 user,  load average: 2.03, 2.92, 3.73",
+  "ic": {
+    "rc": 0,
+    "wall_s": 3.5960453790003157,
+    "ir": 560613246,
+    "gates_G1": true,
+    "targets_solved": 1024,
+    "targets_failed": 0,
+    "peak_rss_bytes": 44208128
+  },
+  "load_after": "17:37:26 up  1:02,  0 user,  load average: 2.02, 2.91, 3.72"
+}

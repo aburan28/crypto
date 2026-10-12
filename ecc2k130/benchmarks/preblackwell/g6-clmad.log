@@ -1,0 +1,14 @@
+make bench-g6-modal ADA_CLMAD=1
+modal app: https://modal.com/apps/a-buran28/main/ap-s7RCepUzZVm45ZLupgf3xm
+device: NVIDIA L4, 58 SMs, 2 block(s) of 256 packed threads resident per SM
+packed kernel: 94 registers/thread, 0 local bytes/thread
+packed native carryless multiply: 1
+backend cuda-packed131: 29696 threads x 16 slots x 1 lanes
+  finished: 2496.854 M it/s, 0 distinguished points
+  finished: 2490.035 M it/s, 0 distinguished points
+  finished: 2485.352 M it/s, 0 distinguished points
+sourceSha256: 7e230da07324777f38a2ad7a85712ebc1eb74e47a6d91db661581a63e6b65c19
+binarySha256: 1c4e04bb34906c4180956ca3254374030f23b5f220b2b6ef2653b384f1232c22
+gpuUuid: GPU-abd8ff2d-b9e9-61bf-8a4e-29e61909e5bc
+cudaImageVersion: 13.3.1
+note: Modal spinner wrapped the JSON; this log is the recovered finished: lines and identity. The wrapped raw stream is not stored.

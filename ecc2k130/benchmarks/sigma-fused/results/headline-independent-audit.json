@@ -1,0 +1,286 @@
+{
+  "artifact": {
+    "archive_bytes": 70795287,
+    "archive_path": "/tmp/ecc2k-sigma-fused-headline-gpu-20261001/results.tgz",
+    "archive_sha256": "408810363d65b8fa565497f8917e127e8afc1262b74a7cc8e0f1461c225797e1",
+    "artifact_manifest_sha256": "cecc6893c702ce4c6ab32c729632cd3dc270955c2a49378a55eeb20285e9be17",
+    "downloaded_results_match_tar_extraction": true,
+    "exit_code_file": "0",
+    "launch_path": "/tmp/ecc2k-sigma-fused-headline-gpu-20261001/launch.json",
+    "launch_sha256": "409f1460400c6d5c03bdb641dee4332fd1b8facf588baeab220713afad36b1e3",
+    "result_sha256": "d31f2d758d2e787abe8f043b1b2ae69d337ebad9a30403afe74d50d4a003dd8c",
+    "samples_sha256": "a9958a7a4a4de9163268873cc55d32c59e3f4d9df35925b14cba53e234878be8",
+    "source_manifest_sha256": "3fb7e9074d3b53c229cb3ebc23049e94d8082ae2eb01362af76cc3c027ca3a6a",
+    "summary_sha256": "4d3604e411408ed07d5362d84e443ebd09b8025695a5b635d51da3c16d260b4e",
+    "tar_members_including_root": 46,
+    "tar_paths_safe": true
+  },
+  "audit_status": "PASS_WITH_NONMATERIAL_LABEL_AND_PACKAGING_NOTES",
+  "audit_subject": "counter-free fused sigma headline composition with WITNESS=0",
+  "auditor_scope": "Offline independent audit of supplied archive, extracted results, launch metadata, source revision and code. No GPU was launched.",
+  "benchmark": {
+    "aa_max_absolute_drift": 0.000860533914968098,
+    "aa_pair_ratios_control_b_over_control_a": [
+      1.0002935738032823,
+      0.9998300374790001,
+      0.9996440329211252,
+      1.000860533914968,
+      0.9999122036523548
+    ],
+    "aa_samples": 10,
+    "ab_median_ratio": 1.0282565359289948,
+    "ab_min_ratio": 1.0278895707743778,
+    "ab_pair_ratios_candidate_over_control": [
+      1.028139682710649,
+      1.0282565359289948,
+      1.0288643772420571,
+      1.0283285364406356,
+      1.0278895707743778
+    ],
+    "ab_ratio_mean": 1.028295740619343,
+    "ab_ratio_sample_stdev": 0.0003589178862066794,
+    "ab_samples": 10,
+    "all_sample_logs_match_fixed_markers_and_exact_work": true,
+    "benchmark_threads": 385024,
+    "candidate_median_billion_per_second": 15.436677,
+    "candidate_median_million_per_second": 15436.677,
+    "candidate_rates_million_per_second": [
+      15425.594,
+      15439.276,
+      15434.867,
+      15442.423,
+      15436.677
+    ],
+    "complete_scalar_updates_per_sample": 403726925824,
+    "control_median_million_per_second": 15015.004,
+    "control_rates_million_per_second": [
+      15003.403,
+      15015.004,
+      15001.848,
+      15017.013,
+      15017.836
+    ],
+    "decision": "PROMOTE_ENGINEERING",
+    "dp_weight": 0,
+    "excluded_warmup_samples": 4,
+    "goal_26b_met": false,
+    "launches_per_sample": 64,
+    "native_result_recomputed_exactly": true,
+    "steps_per_launch": 1024,
+    "walks": 6160384
+  },
+  "correctness": {
+    "corpus": {
+      "candidate_file_sha256": "fae965106c20208e279c817911c75258f1c40f5d30da7df1ea51f1b17801b1e9",
+      "canonical_sorted_payload_sha256": "7e0e8c90a7a1256c4f2c7f5ad4f23d5334de025a82590639f25516c0be25de92",
+      "control_file_sha256": "cefd5172886f0eb6e5279f3dc2df828f48ece17edada50ce3cbd987aae1b025c",
+      "framing": "v1_headerless",
+      "raw_files_differ_only_in_record_order": true,
+      "record_bytes": 32,
+      "records_per_arm": 1709477,
+      "sorted_identity": true
+    },
+    "dp_weight": 48,
+    "dropped_per_arm": 0,
+    "lanes": 1,
+    "launches": 7,
+    "potential_updates_per_arm": 1024163840,
+    "replayed_per_arm": 300,
+    "slots": 16,
+    "steps_per_launch": 95,
+    "verify_checks": {
+      "candidate": {
+        "backend_marker": true,
+        "exact_final_potential_updates": true,
+        "fused_marker": true,
+        "no_mismatch_or_overflow": true,
+        "replay_300_zero_dropped": true,
+        "resource_marker": true,
+        "witness_marker": true
+      },
+      "control": {
+        "backend_marker": true,
+        "exact_final_potential_updates": true,
+        "fused_marker": true,
+        "no_mismatch_or_overflow": true,
+        "replay_300_zero_dropped": true,
+        "resource_marker": true,
+        "witness_marker": true
+      }
+    },
+    "verify_threads": 96256,
+    "walks": 1540096
+  },
+  "hardware": {
+    "compute_capability": "12.0",
+    "cuda_compiler": "13.3 V13.3.73 build 38244171_0",
+    "driver": "580.95.05",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "gpu_uuid": "GPU-abbd2190-3e97-d745-1982-f21d70b107b4",
+    "max_sm_clock_mhz": 2430,
+    "memory_mib": 97887,
+    "native_arch": "sm_120",
+    "power_limit_w": 600.0
+  },
+  "integrity": {
+    "all_sample_log_sha256_match_tsv": true,
+    "artifact_manifest_entries": 43,
+    "artifact_manifest_matches": 42,
+    "artifact_manifest_mismatches": [
+      {
+        "actual_sha256": "ad8ed56c74792728e0f88977d31e92fc6480ad5492fb97699749ee707aad002b",
+        "expected_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "match": false,
+        "path": "job.log"
+      }
+    ],
+    "sample_log_check_problems": [],
+    "unlisted_files": [
+      "exit-code"
+    ]
+  },
+  "issues": [
+    {
+      "detail": "preflight.txt says sorted v2 corpus identity, but the protocol, comparator output and independent framing check all establish headerless v1 records. This is a label typo; identity is unaffected.",
+      "id": "preflight-label-v2",
+      "severity": "low"
+    },
+    {
+      "detail": "artifact-files.sha256 captured job.log while empty; the wrapper later populated job.log. exit-code was added after the manifest and is unlisted. The archive itself hashes and extracts consistently.",
+      "id": "artifact-manifest-wrapper-race",
+      "severity": "low"
+    },
+    {
+      "detail": "The archive records binary SHA-256 values but does not contain the binaries, so executable bytes cannot be rehashed or independently rebuilt bit-for-bit from this artifact.",
+      "id": "binary-not-embedded",
+      "severity": "info"
+    },
+    {
+      "detail": "launch.json is adjacent to, rather than embedded in, results.tgz; its independent SHA-256 is recorded by this audit.",
+      "id": "launch-metadata-external",
+      "severity": "info"
+    }
+  ],
+  "launch": {
+    "cudaImage": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+    "deviceLine": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05",
+    "env": {
+      "SOURCE_REV": "9bfe4ef05bf8f2b8a37ed8ae10941d92ededa41d"
+    },
+    "exitCode": 0,
+    "finishedAt": "2026-10-02T02:11:44Z",
+    "functionCallId": "fc-01M3X479FJGG7R99820E7XWV1M",
+    "gitDirty": false,
+    "gitRev": "9bfe4ef05bf8f2b8a37ed8ae10941d92ededa41d",
+    "gpu": "RTX-PRO-6000",
+    "job": "benchmarks/sigma-fused/gpujob-headline.sh",
+    "provider": "modal",
+    "seconds": 1176.474450826645,
+    "startedAt": "2026-10-02T01:38:52Z",
+    "token": "cf29bcc4c41147c3bf792ace8b2c197d",
+    "volume": "ecc2k130-jobs"
+  },
+  "schema": "ecc2k130-independent-gpu-evidence-audit-v1",
+  "scope": {
+    "benchmark_only": true,
+    "collision_recovery_run": false,
+    "multi_gpu_aggregation": false,
+    "rate_claim": "DP-weight-zero complete scalar updates in the frozen counter-free sigma benchmark.",
+    "search_run": false,
+    "single_gpu": true,
+    "solver_run": false
+  },
+  "source_and_binary_provenance": {
+    "binary_bytes_in_archive": false,
+    "code_cross_check": {
+      "alternating_prefix_reverse_order": true,
+      "last_step_skips_unused_next_selection": true,
+      "observed_semantic_equivalence": "Full sorted headerless-v1 corpus identity after seven odd-length launches.",
+      "prologue_then_exact_steps": true,
+      "supported_mode_guards_present": true
+    },
+    "harness_fails_closed_on_gpu_sm_compiler_workers_witness_dp_weight_and_steps": true,
+    "launch_reports_git_dirty": false,
+    "recorded_binary_sha256": {
+      "candidate": "4a91e3aba48b77f81915244a0b992622bf3e15afe279a4864846c41f1aa9a17b",
+      "control": "4dbd8316bf12a0316b2e3ad6abe1cc303e9f76d21308cce6cf6cae183b5b52b1"
+    },
+    "runtime_resources": {
+      "candidate": {
+        "local_bytes_per_thread": 0,
+        "registers_per_thread": 126,
+        "shared_bytes_per_block": 1792
+      },
+      "control": {
+        "local_bytes_per_thread": 0,
+        "registers_per_thread": 91,
+        "shared_bytes_per_block": 1792
+      }
+    },
+    "source_entries": [
+      {
+        "expected_sha256": "26bf6b0c6035a01731786eafdebee926052802f8ce1be6c2cb7f1cfca7942296",
+        "git_object_sha256": "26bf6b0c6035a01731786eafdebee926052802f8ce1be6c2cb7f1cfca7942296",
+        "match": true,
+        "path": "Makefile"
+      },
+      {
+        "expected_sha256": "ef60227c8dd7dca5022c000cfa3cc33eefcae78983fe49ea36140aa8539bba22",
+        "git_object_sha256": "ef60227c8dd7dca5022c000cfa3cc33eefcae78983fe49ea36140aa8539bba22",
+        "match": true,
+        "path": "include/packedkernels.cuh"
+      },
+      {
+        "expected_sha256": "fc692657dbb000b24c357e07f6b4e3c1db37d469c330e6449a6d0658927179d1",
+        "git_object_sha256": "fc692657dbb000b24c357e07f6b4e3c1db37d469c330e6449a6d0658927179d1",
+        "match": true,
+        "path": "include/packedengine.cuh"
+      },
+      {
+        "expected_sha256": "e7a8a71bb2c1a86a03ad2fe57ead03f8acceac55e9d2d3c0653c1e14b63a6df9",
+        "git_object_sha256": "e7a8a71bb2c1a86a03ad2fe57ead03f8acceac55e9d2d3c0653c1e14b63a6df9",
+        "match": true,
+        "path": "include/packed131.h"
+      },
+      {
+        "expected_sha256": "a3276bbd3c1cd1467b5dba3afad1dcbd29813b390f5847b032c5b3a91e03a623",
+        "git_object_sha256": "a3276bbd3c1cd1467b5dba3afad1dcbd29813b390f5847b032c5b3a91e03a623",
+        "match": true,
+        "path": "include/packedsigma131.h"
+      },
+      {
+        "expected_sha256": "3f0e857eceb915285b4e419d1632abc3ff49c24fb5fc2614705ab260de8d2147",
+        "git_object_sha256": "3f0e857eceb915285b4e419d1632abc3ff49c24fb5fc2614705ab260de8d2147",
+        "match": true,
+        "path": "src/main.cu"
+      },
+      {
+        "expected_sha256": "b2b8c9fc6582e9824de2934b92191226605073b205eb74e031344afb5bb25728",
+        "git_object_sha256": "b2b8c9fc6582e9824de2934b92191226605073b205eb74e031344afb5bb25728",
+        "match": true,
+        "path": "benchmarks/sigma-fused/HEADLINE-PROTOCOL.md"
+      },
+      {
+        "expected_sha256": "dcbd7ba670090cc25c0695f038b95d5c3f53ec4a0cc7fcdf8de74217a3cddd0f",
+        "git_object_sha256": "dcbd7ba670090cc25c0695f038b95d5c3f53ec4a0cc7fcdf8de74217a3cddd0f",
+        "match": true,
+        "path": "benchmarks/sigma-fused/gpujob-headline.sh"
+      },
+      {
+        "expected_sha256": "a0017567fe3ed579da3bb4f860bf1254f97f3135cdb05261ab049b4aae926a88",
+        "git_object_sha256": "a0017567fe3ed579da3bb4f860bf1254f97f3135cdb05261ab049b4aae926a88",
+        "match": true,
+        "path": "benchmarks/sigma-fused/corpus_identity.cpp"
+      },
+      {
+        "expected_sha256": "eb13d918c6d02014347bb5ba66191da71bf4a6f0369558103e4861e317297f25",
+        "git_object_sha256": "eb13d918c6d02014347bb5ba66191da71bf4a6f0369558103e4861e317297f25",
+        "match": true,
+        "path": "benchmarks/sigma-fused/summarize.cpp"
+      }
+    ],
+    "source_manifest_entries": 10,
+    "source_manifest_matches_revision": true,
+    "source_revision": "9bfe4ef05bf8f2b8a37ed8ae10941d92ededa41d"
+  }
+}

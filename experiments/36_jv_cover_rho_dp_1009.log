@@ -1,0 +1,12 @@
+  [rho-dp p=1009 seed=1000] steps 6.711e7 (0.13 sqrt l) dps 4319 22 s
+  [rho-dp p=1009 seed=1000] steps 1.342e8 (0.26 sqrt l) dps 8332 45 s
+p= 1009 seed=1 run=0 l=2^57.9 c_add E 331 | rho-dp dp_bits 14 threads 4 steps 6.4425e8 (1.254 sqrt l) group ops 6.4427e8 S 1.2544 correct true | 212 s
+  [rho-dp p=1009 seed=1001] steps 6.711e7 (0.13 sqrt l) dps 4099 22 s
+  [rho-dp p=1009 seed=1001] steps 7.382e8 (1.44 sqrt l) dps 45266 240 s
+  [rho-dp p=1009 seed=1001] steps 8.724e8 (1.70 sqrt l) dps 53407 283 s
+  [rho-dp p=1009 seed=1001] steps 1.074e9 (2.09 sqrt l) dps 65721 347 s
+p= 1009 seed=1 run=1 l=2^57.9 c_add E 331 | rho-dp dp_bits 14 threads 4 steps 1.0979e9 (2.138 sqrt l) group ops 1.0979e9 S 2.1376 correct true | 354 s
+  [rho-dp p=1009 seed=1002] steps 2.013e8 (0.39 sqrt l) dps 12488 64 s
+  [rho-dp p=1009 seed=1002] steps 4.698e8 (0.91 sqrt l) dps 28802 153 s
+p= 1009 seed=1 run=2 l=2^57.9 c_add E 331 | rho-dp dp_bits 14 threads 4 steps 5.3298e8 (1.038 sqrt l) group ops 5.3301e8 S 1.0377 correct true | 173 s
+p= 1009 seed=1 run=3 l=2^57.9 c_add E 331 | rho-dp dp_bits 14 threads 4 steps 6.5633e8 (1.278 sqrt l) group ops 6.5636e8 S 1.2779 correct true | 207 s

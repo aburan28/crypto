@@ -1,0 +1,858 @@
+{
+  "schema": "ecc2k130_endo_ring_263_certificate_v1",
+  "status": "PASS",
+  "source_sha256": "6dfe2aaa15b3b819bbee66e4be9afd8d7d737ab71a9cb6fcc13c44cb8f79776f",
+  "input_sha256": {
+    "twist_torsion_results.json": "6f1e7b22f3471214d38ec0d3196c88fe9edaf45791e9c05ea67764831fd75368",
+    "redteam_velu_replay.py": "c08fbb8de9d54906d783be967a36a6073b2a1d1a3583292badd3adcdd7126790",
+    "oriented_velu.py": "a1a656cc32efd612250b1ecf50dff18af79a8f62f970ee79841bfd390603423b",
+    "fastfield.py": "b5990fda51700bbfba363251c41f02febfd0fc92edfea4f5ddd647bab472789e",
+    "relations.py": "0180501ef8fe00f5c54f910822a28cd86dc3c2c1af164348976c1c2e25cc763f"
+  },
+  "host": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3",
+    "research/ecc2k130_endo_ring_263_20260925/certificate.py",
+    "--out",
+    "research/ecc2k130_endo_ring_263_20260925/receipt.json"
+  ],
+  "PDP_cost": null,
+  "full_ECDLP_cost": null,
+  "end_to_end_speedup": null,
+  "exact": {
+    "source_points_over_F2": 4,
+    "twist_points_over_F2": 2,
+    "source_trace_over_F2": -1,
+    "source_tau_polynomial": "X^2+X+2",
+    "source_endomorphism_order": "Z[tau]=O_K, K=Q(sqrt(-7))",
+    "source_endomorphism_conductor": 1,
+    "source_endomorphism_discriminant": -7,
+    "tau131_A": 8123678690673902378,
+    "tau131_B": 38531015900842053623,
+    "Z_pi_conductor": 38531015900842053623,
+    "q": 2722258935367507707706996859454145691648,
+    "source_order": 2722258935367507707729280517973639940516,
+    "twist_order": 2722258935367507707684713200934651442782,
+    "twist_263_primary_structure": "(Z/263Z)^2",
+    "r": 680564733841876926932320129493409985129,
+    "source_prime_subgroup_tau_scalar": 196511074115861092422032515080945363956,
+    "descending_endomorphism_conductor": 263,
+    "descending_endomorphism_discriminant": -484183,
+    "least_non_scalar_leaf_endomorphism_degree": 121046,
+    "least_non_scalar_leaf_endomorphism_witnesses": [
+      "131+263*tau",
+      "132+263*tau"
+    ],
+    "runs": [
+      {
+        "seed": 20260924,
+        "twist_tau_matrix_columns": [
+          [
+            186,
+            51
+          ],
+          [
+            73,
+            78
+          ]
+        ],
+        "twist_tau_characteristic_polynomial": "X^2-X+2",
+        "fixed_lines": [
+          [
+            1,
+            39
+          ],
+          [
+            1,
+            64
+          ]
+        ],
+        "all_line_orbit_lengths": [
+          1,
+          1,
+          131,
+          131
+        ],
+        "representatives": [
+          {
+            "line": [
+              1,
+              0
+            ],
+            "generator_x": "0x5fd49668df5174ff0602020e66e0b8c67",
+            "matrix_fixed": false,
+            "direct_full_point_twist_tau_eigenvalue": null,
+            "direction": "descending",
+            "codomain_b": "0x3aad5ebb6187af0a2c53cbc9010d36552",
+            "codomain_endomorphism_conductor": 263,
+            "codomain_endomorphism_discriminant": -484183
+          },
+          {
+            "line": [
+              1,
+              4
+            ],
+            "generator_x": "0x733d47414329a3c82f7630defa385fe1e",
+            "matrix_fixed": false,
+            "direct_full_point_twist_tau_eigenvalue": null,
+            "direction": "descending",
+            "codomain_b": "0x3248ef31f25d6830126239dd3fd7c593a",
+            "codomain_endomorphism_conductor": 263,
+            "codomain_endomorphism_discriminant": -484183
+          },
+          {
+            "line": [
+              1,
+              39
+            ],
+            "generator_x": "0x29c434a0026bf39ecb2dae3eea56f681e",
+            "matrix_fixed": true,
+            "direct_full_point_twist_tau_eigenvalue": 140,
+            "direction": "horizontal",
+            "codomain_b": "0x1",
+            "codomain_endomorphism_conductor": 1,
+            "codomain_endomorphism_discriminant": -7
+          },
+          {
+            "line": [
+              1,
+              64
+            ],
+            "generator_x": "0x6d6ef38656d03cf1fb1bb726e84fd4b8a",
+            "matrix_fixed": true,
+            "direct_full_point_twist_tau_eigenvalue": 124,
+            "direction": "horizontal",
+            "codomain_b": "0x1",
+            "codomain_endomorphism_conductor": 1,
+            "codomain_endomorphism_discriminant": -7
+          }
+        ]
+      },
+      {
+        "seed": 20260925,
+        "twist_tau_matrix_columns": [
+          [
+            7,
+            218
+          ],
+          [
+            188,
+            257
+          ]
+        ],
+        "twist_tau_characteristic_polynomial": "X^2-X+2",
+        "fixed_lines": [
+          [
+            1,
+            30
+          ],
+          [
+            1,
+            142
+          ]
+        ],
+        "all_line_orbit_lengths": [
+          1,
+          1,
+          131,
+          131
+        ],
+        "representatives": [
+          {
+            "line": [
+              1,
+              0
+            ],
+            "generator_x": "0x4ed36bb5e27137121b53c022be736d879",
+            "matrix_fixed": false,
+            "direct_full_point_twist_tau_eigenvalue": null,
+            "direction": "descending",
+            "codomain_b": "0x33804ac2d6f98bb4947ddda6f5532523e",
+            "codomain_endomorphism_conductor": 263,
+            "codomain_endomorphism_discriminant": -484183
+          },
+          {
+            "line": [
+              1,
+              2
+            ],
+            "generator_x": "0x40f4e074e2dd0c3ddbf4710325f4410c3",
+            "matrix_fixed": false,
+            "direct_full_point_twist_tau_eigenvalue": null,
+            "direction": "descending",
+            "codomain_b": "0x1cec9f43ce245075b0ea308b7973cd86d",
+            "codomain_endomorphism_conductor": 263,
+            "codomain_endomorphism_discriminant": -484183
+          },
+          {
+            "line": [
+              1,
+              30
+            ],
+            "generator_x": "0x5723c7c43b228713539cec8210c46ba9",
+            "matrix_fixed": true,
+            "direct_full_point_twist_tau_eigenvalue": 124,
+            "direction": "horizontal",
+            "codomain_b": "0x1",
+            "codomain_endomorphism_conductor": 1,
+            "codomain_endomorphism_discriminant": -7
+          },
+          {
+            "line": [
+              1,
+              142
+            ],
+            "generator_x": "0x219da229d22ffaef5cd258ff2af3a91b6",
+            "matrix_fixed": true,
+            "direct_full_point_twist_tau_eigenvalue": 140,
+            "direction": "horizontal",
+            "codomain_b": "0x1",
+            "codomain_endomorphism_conductor": 1,
+            "codomain_endomorphism_discriminant": -7
+          }
+        ]
+      }
+    ]
+  },
+  "orbit_action_cost": {
+    "shared_field_initialization_seconds": 0.2705641250067856,
+    "rows": [
+      {
+        "seed": 20260924,
+        "line": [
+          1,
+          0
+        ],
+        "direction": "descending",
+        "setup_seconds": 0.1132807079993654,
+        "setup_field_counts": {
+          "mul": 18747,
+          "sqr": 18758,
+          "inv": 142,
+          "mul_inside_inv": 18460,
+          "sqr_inside_inv": 18602
+        },
+        "map_field_counts": {
+          "mul": 1053,
+          "sqr": 400,
+          "inv": 1,
+          "mul_inside_inv": 130,
+          "sqr_inside_inv": 131
+        },
+        "map_seconds_11": [
+          0.00511674999142997,
+          0.0059187499864492565,
+          0.004314041027100757,
+          0.004691167006967589,
+          0.0043101669871248305,
+          0.005193041986785829,
+          0.005636916990624741,
+          0.0049305840220768005,
+          0.005061166011728346,
+          0.005451083998195827,
+          0.004731291992357001
+        ],
+        "map_seconds_median": 0.005061166011728346,
+        "source_tau_field_counts": {
+          "mul": 0,
+          "sqr": 2,
+          "inv": 0,
+          "mul_inside_inv": 0,
+          "sqr_inside_inv": 0
+        },
+        "source_tau_seconds_per_action_11": [
+          2.9526367200105597e-06,
+          3.733927741222942e-06,
+          2.989542963405256e-06,
+          2.691813449473557e-06,
+          3.7423095875510626e-06,
+          2.729817367708165e-06,
+          2.4005126988413394e-06,
+          2.752523414528696e-06,
+          3.1315517503571755e-06,
+          2.996989252324056e-06,
+          3.1729326224194665e-06
+        ],
+        "source_tau_seconds_median": 2.989542963405256e-06,
+        "leaf_generic_lambda_field_counts": {
+          "mul": 25476,
+          "sqr": 25604,
+          "inv": 193,
+          "mul_inside_inv": 25090,
+          "sqr_inside_inv": 25283
+        },
+        "leaf_generic_lambda_seconds_11": [
+          0.14335475000552833,
+          0.1443946249783039,
+          0.16182120802113786,
+          0.15013162497780286,
+          0.1479975420224946,
+          0.15061758301453665,
+          0.15324250000412576,
+          0.1349183330021333,
+          0.1429375000006985,
+          0.13912520799203776,
+          0.1396937919780612
+        ],
+        "leaf_generic_lambda_seconds_median": 0.1443946249783039
+      },
+      {
+        "seed": 20260924,
+        "line": [
+          1,
+          4
+        ],
+        "direction": "descending",
+        "setup_seconds": 0.10410975001286715,
+        "setup_field_counts": {
+          "mul": 18747,
+          "sqr": 18758,
+          "inv": 142,
+          "mul_inside_inv": 18460,
+          "sqr_inside_inv": 18602
+        },
+        "map_field_counts": {
+          "mul": 1053,
+          "sqr": 400,
+          "inv": 1,
+          "mul_inside_inv": 130,
+          "sqr_inside_inv": 131
+        },
+        "map_seconds_11": [
+          0.00474999999278225,
+          0.005199208011617884,
+          0.004336416022852063,
+          0.004551457997877151,
+          0.004310124990297481,
+          0.005689125013304874,
+          0.00488570801098831,
+          0.004763834003824741,
+          0.0049382090219296515,
+          0.004649082984542474,
+          0.004814957996131852
+        ],
+        "map_seconds_median": 0.004763834003824741,
+        "source_tau_field_counts": {
+          "mul": 0,
+          "sqr": 2,
+          "inv": 0,
+          "mul_inside_inv": 0,
+          "sqr_inside_inv": 0
+        },
+        "source_tau_seconds_per_action_11": [
+          2.530802731826043e-06,
+          2.421345698166988e-06,
+          2.59460446727644e-06,
+          2.9041337654689414e-06,
+          2.5351972681164625e-06,
+          3.166219727290809e-06,
+          2.4093017714221787e-06,
+          2.3809003835140174e-06,
+          2.3817548822080425e-06,
+          3.17858888365663e-06,
+          3.6977538968585577e-06
+        ],
+        "source_tau_seconds_median": 2.5351972681164625e-06,
+        "leaf_generic_lambda_field_counts": {
+          "mul": 25476,
+          "sqr": 25604,
+          "inv": 193,
+          "mul_inside_inv": 25090,
+          "sqr_inside_inv": 25283
+        },
+        "leaf_generic_lambda_seconds_11": [
+          0.14182449999498203,
+          0.14390141700278036,
+          0.14209725000546314,
+          0.15014645899645984,
+          0.14845254199462943,
+          0.15091820899397135,
+          0.1488448750169482,
+          0.13833691700710915,
+          0.14708420800161548,
+          0.140314666001359,
+          0.1403287909924984
+        ],
+        "leaf_generic_lambda_seconds_median": 0.14390141700278036
+      },
+      {
+        "seed": 20260924,
+        "line": [
+          1,
+          39
+        ],
+        "direction": "horizontal",
+        "setup_seconds": 0.11022779199993238,
+        "setup_field_counts": {
+          "mul": 18747,
+          "sqr": 18758,
+          "inv": 142,
+          "mul_inside_inv": 18460,
+          "sqr_inside_inv": 18602
+        },
+        "map_field_counts": {
+          "mul": 1053,
+          "sqr": 400,
+          "inv": 1,
+          "mul_inside_inv": 130,
+          "sqr_inside_inv": 131
+        },
+        "map_seconds_11": [
+          0.005148041993379593,
+          0.004310416989028454,
+          0.005271083995467052,
+          0.0053667920001316816,
+          0.004415292001795024,
+          0.004910165996989235,
+          0.0045179169974289834,
+          0.005527750006876886,
+          0.006212625012267381,
+          0.004564959002891555,
+          0.0051622090104501694
+        ],
+        "map_seconds_median": 0.005148041993379593,
+        "source_tau_field_counts": {
+          "mul": 0,
+          "sqr": 2,
+          "inv": 0,
+          "mul_inside_inv": 0,
+          "sqr_inside_inv": 0
+        },
+        "source_tau_seconds_per_action_11": [
+          2.397216803728952e-06,
+          2.861287100586196e-06,
+          2.424397450795368e-06,
+          2.4418544910531637e-06,
+          2.9618730366109958e-06,
+          2.8621826118069293e-06,
+          2.451497067568198e-06,
+          2.738973648774845e-06,
+          2.4457187635107402e-06,
+          2.7887373050816677e-06,
+          2.8222255821219733e-06
+        ],
+        "source_tau_seconds_median": 2.738973648774845e-06,
+        "leaf_generic_lambda_field_counts": {
+          "mul": 25476,
+          "sqr": 25604,
+          "inv": 193,
+          "mul_inside_inv": 25090,
+          "sqr_inside_inv": 25283
+        },
+        "leaf_generic_lambda_seconds_11": [
+          0.14613204199122265,
+          0.1400548749952577,
+          0.14149395801359788,
+          0.14526708298944868,
+          0.14999600002192892,
+          0.13883508302387781,
+          0.14221062502474524,
+          0.1435138749948237,
+          0.14065824999124743,
+          0.14255245801177807,
+          0.14293012500274926
+        ],
+        "leaf_generic_lambda_seconds_median": 0.14255245801177807
+      },
+      {
+        "seed": 20260924,
+        "line": [
+          1,
+          64
+        ],
+        "direction": "horizontal",
+        "setup_seconds": 0.10696158299106173,
+        "setup_field_counts": {
+          "mul": 18747,
+          "sqr": 18758,
+          "inv": 142,
+          "mul_inside_inv": 18460,
+          "sqr_inside_inv": 18602
+        },
+        "map_field_counts": {
+          "mul": 1053,
+          "sqr": 400,
+          "inv": 1,
+          "mul_inside_inv": 130,
+          "sqr_inside_inv": 131
+        },
+        "map_seconds_11": [
+          0.005130833014845848,
+          0.004331375006586313,
+          0.004861209017690271,
+          0.005862958001671359,
+          0.004324041015934199,
+          0.004598167026415467,
+          0.004314041987527162,
+          0.004597000021021813,
+          0.004297999985283241,
+          0.0046569579862989485,
+          0.004315583995776251
+        ],
+        "map_seconds_median": 0.004597000021021813,
+        "source_tau_field_counts": {
+          "mul": 0,
+          "sqr": 2,
+          "inv": 0,
+          "mul_inside_inv": 0,
+          "sqr_inside_inv": 0
+        },
+        "source_tau_seconds_per_action_11": [
+          2.3878984336533904e-06,
+          2.3926591836698208e-06,
+          2.5987138485561445e-06,
+          2.408975575463046e-06,
+          2.3970127074335323e-06,
+          3.0202636480680667e-06,
+          2.6781416124777024e-06,
+          3.566528334886243e-06,
+          2.7617187470241333e-06,
+          2.3673505893384572e-06,
+          2.3726396705114894e-06
+        ],
+        "source_tau_seconds_median": 2.408975575463046e-06,
+        "leaf_generic_lambda_field_counts": {
+          "mul": 25476,
+          "sqr": 25604,
+          "inv": 193,
+          "mul_inside_inv": 25090,
+          "sqr_inside_inv": 25283
+        },
+        "leaf_generic_lambda_seconds_11": [
+          0.14106812499812804,
+          0.13923645799513906,
+          0.1378713330195751,
+          0.14063191699096933,
+          0.14727379201212898,
+          0.13967204201617278,
+          0.14735658300924115,
+          0.14245595800457522,
+          0.1404359170119278,
+          0.14392912498442456,
+          0.14373433298896998
+        ],
+        "leaf_generic_lambda_seconds_median": 0.14106812499812804
+      },
+      {
+        "seed": 20260925,
+        "line": [
+          1,
+          0
+        ],
+        "direction": "descending",
+        "setup_seconds": 0.10538616598933004,
+        "setup_field_counts": {
+          "mul": 18747,
+          "sqr": 18758,
+          "inv": 142,
+          "mul_inside_inv": 18460,
+          "sqr_inside_inv": 18602
+        },
+        "map_field_counts": {
+          "mul": 1053,
+          "sqr": 400,
+          "inv": 1,
+          "mul_inside_inv": 130,
+          "sqr_inside_inv": 131
+        },
+        "map_seconds_11": [
+          0.0052349999896250665,
+          0.00582333400961943,
+          0.006436458003008738,
+          0.005802416009828448,
+          0.005002665973734111,
+          0.0049287919828202575,
+          0.004546374984784052,
+          0.004856125015066937,
+          0.004467375023523346,
+          0.007694665982853621,
+          0.00726687497808598
+        ],
+        "map_seconds_median": 0.0052349999896250665,
+        "source_tau_field_counts": {
+          "mul": 0,
+          "sqr": 2,
+          "inv": 0,
+          "mul_inside_inv": 0,
+          "sqr_inside_inv": 0
+        },
+        "source_tau_seconds_per_action_11": [
+          2.745158212746901e-06,
+          2.766967782008578e-06,
+          3.66451072864038e-06,
+          3.238077141531903e-06,
+          4.055989251128267e-06,
+          4.117919900181732e-06,
+          4.10668945960424e-06,
+          2.760579093319393e-06,
+          2.3617353406280017e-06,
+          2.377522463348214e-06,
+          3.1103915887342737e-06
+        ],
+        "source_tau_seconds_median": 3.1103915887342737e-06,
+        "leaf_generic_lambda_field_counts": {
+          "mul": 25476,
+          "sqr": 25604,
+          "inv": 193,
+          "mul_inside_inv": 25090,
+          "sqr_inside_inv": 25283
+        },
+        "leaf_generic_lambda_seconds_11": [
+          0.15636645900667645,
+          0.14350445798481815,
+          0.14786029100650921,
+          0.14545908299623989,
+          0.1564292499970179,
+          0.15953508400707506,
+          0.16922875001910143,
+          0.1537633330153767,
+          0.15348995800013654,
+          0.16033966600662097,
+          0.14590800000587478
+        ],
+        "leaf_generic_lambda_seconds_median": 0.1537633330153767
+      },
+      {
+        "seed": 20260925,
+        "line": [
+          1,
+          2
+        ],
+        "direction": "descending",
+        "setup_seconds": 0.10712624998996034,
+        "setup_field_counts": {
+          "mul": 18747,
+          "sqr": 18758,
+          "inv": 142,
+          "mul_inside_inv": 18460,
+          "sqr_inside_inv": 18602
+        },
+        "map_field_counts": {
+          "mul": 1053,
+          "sqr": 400,
+          "inv": 1,
+          "mul_inside_inv": 130,
+          "sqr_inside_inv": 131
+        },
+        "map_seconds_11": [
+          0.004656292003346607,
+          0.00470029198913835,
+          0.004884792026132345,
+          0.006089417001930997,
+          0.00683754199417308,
+          0.004722040990600362,
+          0.0053186249861028045,
+          0.006674540985841304,
+          0.00488608397427015,
+          0.0046374169760383666,
+          0.004289457981940359
+        ],
+        "map_seconds_median": 0.004884792026132345,
+        "source_tau_field_counts": {
+          "mul": 0,
+          "sqr": 2,
+          "inv": 0,
+          "mul_inside_inv": 0,
+          "sqr_inside_inv": 0
+        },
+        "source_tau_seconds_per_action_11": [
+          2.421630853177703e-06,
+          2.4337158208709297e-06,
+          2.4180498030546005e-06,
+          2.470092766770904e-06,
+          2.3808593709873094e-06,
+          2.394856437604176e-06,
+          2.7190351659100997e-06,
+          2.3559159956221265e-06,
+          2.362264638122724e-06,
+          2.6389560616735253e-06,
+          2.4458828136175725e-06
+        ],
+        "source_tau_seconds_median": 2.421630853177703e-06,
+        "leaf_generic_lambda_field_counts": {
+          "mul": 25476,
+          "sqr": 25604,
+          "inv": 193,
+          "mul_inside_inv": 25090,
+          "sqr_inside_inv": 25283
+        },
+        "leaf_generic_lambda_seconds_11": [
+          0.15572100001736544,
+          0.14616245799697936,
+          0.15445720800198615,
+          0.1526759169937577,
+          0.16341887498856522,
+          0.15165495898691006,
+          0.15851058400585316,
+          0.16301820901571773,
+          0.1537360409856774,
+          0.15191908300039358,
+          0.1599218340124935
+        ],
+        "leaf_generic_lambda_seconds_median": 0.15445720800198615
+      },
+      {
+        "seed": 20260925,
+        "line": [
+          1,
+          30
+        ],
+        "direction": "horizontal",
+        "setup_seconds": 0.11606025000219233,
+        "setup_field_counts": {
+          "mul": 18747,
+          "sqr": 18758,
+          "inv": 142,
+          "mul_inside_inv": 18460,
+          "sqr_inside_inv": 18602
+        },
+        "map_field_counts": {
+          "mul": 1053,
+          "sqr": 400,
+          "inv": 1,
+          "mul_inside_inv": 130,
+          "sqr_inside_inv": 131
+        },
+        "map_seconds_11": [
+          0.005035666981711984,
+          0.0055339999962598085,
+          0.008800834009889513,
+          0.0070871250063646585,
+          0.004329957999289036,
+          0.005110958009026945,
+          0.005071292020147666,
+          0.004915625002468005,
+          0.00433487500413321,
+          0.005249375011771917,
+          0.00567283300915733
+        ],
+        "map_seconds_median": 0.005110958009026945,
+        "source_tau_field_counts": {
+          "mul": 0,
+          "sqr": 2,
+          "inv": 0,
+          "mul_inside_inv": 0,
+          "sqr_inside_inv": 0
+        },
+        "source_tau_seconds_per_action_11": [
+          2.369628901988108e-06,
+          3.7511396442369005e-06,
+          3.3373212886544934e-06,
+          2.419026372990629e-06,
+          3.2187089971102978e-06,
+          4.839721668759012e-06,
+          3.751831059162214e-06,
+          4.078613272895382e-06,
+          2.790771475247311e-06,
+          2.4057206928773667e-06,
+          2.4126377127231535e-06
+        ],
+        "source_tau_seconds_median": 3.2187089971102978e-06,
+        "leaf_generic_lambda_field_counts": {
+          "mul": 25476,
+          "sqr": 25604,
+          "inv": 193,
+          "mul_inside_inv": 25090,
+          "sqr_inside_inv": 25283
+        },
+        "leaf_generic_lambda_seconds_11": [
+          0.16344391700113192,
+          0.16296454099938273,
+          0.1564871669979766,
+          0.1474469160020817,
+          0.15665604200330563,
+          0.1616875419858843,
+          0.16029958400758915,
+          0.1519985830236692,
+          0.157883584004594,
+          0.16646166698774323,
+          0.16396666600485332
+        ],
+        "leaf_generic_lambda_seconds_median": 0.16029958400758915
+      },
+      {
+        "seed": 20260925,
+        "line": [
+          1,
+          142
+        ],
+        "direction": "horizontal",
+        "setup_seconds": 0.11482725001405925,
+        "setup_field_counts": {
+          "mul": 18747,
+          "sqr": 18758,
+          "inv": 142,
+          "mul_inside_inv": 18460,
+          "sqr_inside_inv": 18602
+        },
+        "map_field_counts": {
+          "mul": 1053,
+          "sqr": 400,
+          "inv": 1,
+          "mul_inside_inv": 130,
+          "sqr_inside_inv": 131
+        },
+        "map_seconds_11": [
+          0.004339375009294599,
+          0.005013040994526818,
+          0.006831750011770055,
+          0.004335041012382135,
+          0.004723624995676801,
+          0.007227791997138411,
+          0.004501166986301541,
+          0.006675042008282617,
+          0.0073473749798722565,
+          0.00445579199003987,
+          0.004698333010310307
+        ],
+        "map_seconds_median": 0.004723624995676801,
+        "source_tau_field_counts": {
+          "mul": 0,
+          "sqr": 2,
+          "inv": 0,
+          "mul_inside_inv": 0,
+          "sqr_inside_inv": 0
+        },
+        "source_tau_seconds_per_action_11": [
+          5.579467767802271e-06,
+          3.981527328278389e-06,
+          2.5874023208416475e-06,
+          2.5265703129662143e-06,
+          2.3798427548626933e-06,
+          2.854167007626529e-06,
+          2.355061525349811e-06,
+          2.6952314442496572e-06,
+          2.816609367073397e-06,
+          2.3261308683686366e-06,
+          2.3277187324310944e-06
+        ],
+        "source_tau_seconds_median": 2.5874023208416475e-06,
+        "leaf_generic_lambda_field_counts": {
+          "mul": 25476,
+          "sqr": 25604,
+          "inv": 193,
+          "mul_inside_inv": 25090,
+          "sqr_inside_inv": 25283
+        },
+        "leaf_generic_lambda_seconds_11": [
+          0.1552186659828294,
+          0.15082420900580473,
+          0.15789470801246352,
+          0.14994545798981562,
+          0.1479849170136731,
+          0.152537707996089,
+          0.1765058340097312,
+          0.16175454098265618,
+          0.1671408340043854,
+          0.16624445799971,
+          0.16590237501077354
+        ],
+        "leaf_generic_lambda_seconds_median": 0.15789470801246352
+      }
+    ],
+    "scope": "Python implementation stage diagnostic; 11 timed map calls, 11 generic scalar calls, and 11 batches of 1024 tau actions per row, not matched ECDLP work"
+  },
+  "deterministic_sha256": "c6129bc8c883244825be7fcfb68a04cfac2c577daf2cd8c39d5063a03c94af0a",
+  "elapsed_seconds": 32.73833720802213
+}

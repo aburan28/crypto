@@ -54,7 +54,7 @@ use crate::ecc::field::FieldElement;
 use crate::ecc::point::Point;
 use crate::hash::sha256::sha256;
 use num_bigint::{BigUint, RandBigInt};
-use num_traits::{One, Zero};
+use num_traits::One;
 use rand::rngs::OsRng;
 
 /// Parameters for a Pedersen commitment scheme over a chosen curve:
@@ -161,7 +161,7 @@ fn tonelli_shanks_exponent(p: &BigUint) -> BigUint {
 fn push_be32(out: &mut Vec<u8>, v: &BigUint) {
     let bytes = v.to_bytes_be();
     if bytes.len() < 32 {
-        out.extend(std::iter::repeat(0).take(32 - bytes.len()));
+        out.extend(std::iter::repeat_n(0, 32 - bytes.len()));
     }
     out.extend_from_slice(&bytes);
 }

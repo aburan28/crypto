@@ -110,10 +110,7 @@ pub fn simulate_single_byte_timing(
 /// nibble.
 ///
 /// Returns an array of 16 recovered high nibbles (each in `[0, 16)`).
-pub fn bernstein_attack_high_nibble(
-    plaintexts: &[[u8; 16]],
-    timings: &[f64],
-) -> [u8; 16] {
+pub fn bernstein_attack_high_nibble(plaintexts: &[[u8; 16]], timings: &[f64]) -> [u8; 16] {
     let mut out = [0u8; 16];
     let n = timings.len();
     assert_eq!(plaintexts.len(), n);
@@ -243,7 +240,10 @@ pub fn format_cache_attack_report(
         } else if report.bytes_correct >= 12 {
             paint("≈ mostly recovered", FG_BRIGHT_YELLOW)
         } else {
-            paint("✗ attack fails at this noise level / trace count", FG_BRIGHT_RED)
+            paint(
+                "✗ attack fails at this noise level / trace count",
+                FG_BRIGHT_RED,
+            )
         }
     ));
     s.push_str("## Per-byte breakdown\n\n");

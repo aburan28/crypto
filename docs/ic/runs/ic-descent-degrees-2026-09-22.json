@@ -1,0 +1,1472 @@
+{
+  "boundary": {
+    "what": "the semi-regular degree: the index of the first non-positive coefficient of (1+t)^v / prod_i (1 + t^{d_i}), for v boolean variables and equation degrees d_i (Bardet-Faugere-Salvy)",
+    "why": "it is what a system with no exploitable structure reaches, so a measured degree below it is structure the solver found"
+  },
+  "cells": [
+    {
+      "basis_len_mean": 5.125,
+      "brute_force_ops": 18304.0,
+      "curve": "K_1 / GF(2^7)",
+      "d_av": 3.0,
+      "d_av_over_semireg": 1.0,
+      "d_max": 3,
+      "d_pair_av": 3.0,
+      "d_pair_max": 3,
+      "d_poly_av": 3.0,
+      "d_poly_max": 3,
+      "d_semireg_max": 3,
+      "d_semireg_min": 3,
+      "d_semireg_unbounded": 0,
+      "equations": 7,
+      "family": "K",
+      "inconsistent": 3,
+      "mono_ops_max": 23464,
+      "mono_ops_mean": 11587.125,
+      "ms_max": 0.786191,
+      "ms_mean": 0.42782349999999997,
+      "n": 7,
+      "n_prime": 4,
+      "n_vars": 8,
+      "ops_over_brute_force": 0.6330378605769231,
+      "peak_kib_max": 3.015625,
+      "per_target": [
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 7,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 12313,
+            "new_generators": 32,
+            "pairs_chain_skipped": 297,
+            "pairs_considered": 741,
+            "pairs_coprime_skipped": 389,
+            "peak_basis_monomials": 275,
+            "reduction_steps": 489,
+            "solving_degree": 3,
+            "spolys": 55,
+            "wall_ns": 549627
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 7,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 10579,
+            "new_generators": 31,
+            "pairs_chain_skipped": 297,
+            "pairs_considered": 703,
+            "pairs_coprime_skipped": 353,
+            "peak_basis_monomials": 259,
+            "reduction_steps": 453,
+            "solving_degree": 3,
+            "spolys": 53,
+            "wall_ns": 524776
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 8,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 23464,
+            "new_generators": 33,
+            "pairs_chain_skipped": 312,
+            "pairs_considered": 780,
+            "pairs_coprime_skipped": 403,
+            "peak_basis_monomials": 386,
+            "reduction_steps": 752,
+            "solving_degree": 3,
+            "spolys": 65,
+            "wall_ns": 742007
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 9812,
+            "new_generators": 21,
+            "pairs_chain_skipped": 123,
+            "pairs_considered": 378,
+            "pairs_coprime_skipped": 223,
+            "peak_basis_monomials": 232,
+            "reduction_steps": 339,
+            "solving_degree": 3,
+            "spolys": 32,
+            "wall_ns": 215804
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 14927,
+            "new_generators": 37,
+            "pairs_chain_skipped": 362,
+            "pairs_considered": 946,
+            "pairs_coprime_skipped": 539,
+            "peak_basis_monomials": 373,
+            "reduction_steps": 460,
+            "solving_degree": 3,
+            "spolys": 45,
+            "wall_ns": 786191
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 8,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 7507,
+            "new_generators": 16,
+            "pairs_chain_skipped": 71,
+            "pairs_considered": 253,
+            "pairs_coprime_skipped": 154,
+            "peak_basis_monomials": 128,
+            "reduction_steps": 303,
+            "solving_degree": 3,
+            "spolys": 28,
+            "wall_ns": 159522
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 9801,
+            "new_generators": 25,
+            "pairs_chain_skipped": 176,
+            "pairs_considered": 496,
+            "pairs_coprime_skipped": 289,
+            "peak_basis_monomials": 210,
+            "reduction_steps": 382,
+            "solving_degree": 3,
+            "spolys": 31,
+            "wall_ns": 284279
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 8,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 4294,
+            "new_generators": 14,
+            "pairs_chain_skipped": 48,
+            "pairs_considered": 210,
+            "pairs_coprime_skipped": 132,
+            "peak_basis_monomials": 112,
+            "reduction_steps": 218,
+            "solving_degree": 3,
+            "spolys": 30,
+            "wall_ns": 160382
+          }
+        }
+      ],
+      "spolys_mean": 42.375,
+      "summands": 2,
+      "targets": 8
+    },
+    {
+      "basis_len_mean": 7.25,
+      "brute_force_ops": 162688.0,
+      "curve": "K_1 / GF(2^9)",
+      "d_av": 3.0,
+      "d_av_over_semireg": 0.75,
+      "d_max": 3,
+      "d_pair_av": 3.0,
+      "d_pair_max": 3,
+      "d_poly_av": 3.0,
+      "d_poly_max": 3,
+      "d_semireg_max": 4,
+      "d_semireg_min": 4,
+      "d_semireg_unbounded": 0,
+      "equations": 9,
+      "family": "K",
+      "inconsistent": 2,
+      "mono_ops_max": 155071,
+      "mono_ops_mean": 81977.0,
+      "ms_max": 6.838187,
+      "ms_mean": 3.5919783749999996,
+      "n": 9,
+      "n_prime": 5,
+      "n_vars": 10,
+      "ops_over_brute_force": 0.5038908831628639,
+      "peak_kib_max": 8.5234375,
+      "per_target": [
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 4414,
+            "new_generators": 14,
+            "pairs_chain_skipped": 68,
+            "pairs_considered": 253,
+            "pairs_coprime_skipped": 169,
+            "peak_basis_monomials": 200,
+            "reduction_steps": 137,
+            "solving_degree": 3,
+            "spolys": 16,
+            "wall_ns": 98162
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 10,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 65966,
+            "new_generators": 48,
+            "pairs_chain_skipped": 624,
+            "pairs_considered": 1596,
+            "pairs_coprime_skipped": 878,
+            "peak_basis_monomials": 638,
+            "reduction_steps": 1690,
+            "solving_degree": 3,
+            "spolys": 94,
+            "wall_ns": 2388465
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 10,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 155071,
+            "new_generators": 64,
+            "pairs_chain_skipped": 1055,
+            "pairs_considered": 2628,
+            "pairs_coprime_skipped": 1438,
+            "peak_basis_monomials": 1091,
+            "reduction_steps": 3195,
+            "solving_degree": 3,
+            "spolys": 135,
+            "wall_ns": 6218541
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 9,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 76474,
+            "new_generators": 50,
+            "pairs_chain_skipped": 624,
+            "pairs_considered": 1711,
+            "pairs_coprime_skipped": 990,
+            "peak_basis_monomials": 695,
+            "reduction_steps": 1845,
+            "solving_degree": 3,
+            "spolys": 97,
+            "wall_ns": 2630464
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 9,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 110795,
+            "new_generators": 61,
+            "pairs_chain_skipped": 914,
+            "pairs_considered": 2415,
+            "pairs_coprime_skipped": 1394,
+            "peak_basis_monomials": 1005,
+            "reduction_steps": 2285,
+            "solving_degree": 3,
+            "spolys": 107,
+            "wall_ns": 4729235
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 9,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 124108,
+            "new_generators": 67,
+            "pairs_chain_skipped": 1182,
+            "pairs_considered": 2850,
+            "pairs_coprime_skipped": 1538,
+            "peak_basis_monomials": 1058,
+            "reduction_steps": 2753,
+            "solving_degree": 3,
+            "spolys": 130,
+            "wall_ns": 6838187
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 52909,
+            "new_generators": 55,
+            "pairs_chain_skipped": 760,
+            "pairs_considered": 2016,
+            "pairs_coprime_skipped": 1177,
+            "peak_basis_monomials": 728,
+            "reduction_steps": 1370,
+            "solving_degree": 3,
+            "spolys": 79,
+            "wall_ns": 2839261
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 9,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 66079,
+            "new_generators": 56,
+            "pairs_chain_skipped": 837,
+            "pairs_considered": 2080,
+            "pairs_coprime_skipped": 1147,
+            "peak_basis_monomials": 763,
+            "reduction_steps": 1638,
+            "solving_degree": 3,
+            "spolys": 96,
+            "wall_ns": 2993512
+          }
+        }
+      ],
+      "spolys_mean": 94.25,
+      "summands": 2,
+      "targets": 8
+    },
+    {
+      "basis_len_mean": 8.0,
+      "brute_force_ops": 956416.0,
+      "curve": "K_1 / GF(2^11)",
+      "d_av": 3.0,
+      "d_av_over_semireg": 0.75,
+      "d_max": 3,
+      "d_pair_av": 3.0,
+      "d_pair_max": 3,
+      "d_poly_av": 3.0,
+      "d_poly_max": 3,
+      "d_semireg_max": 4,
+      "d_semireg_min": 4,
+      "d_semireg_unbounded": 0,
+      "equations": 11,
+      "family": "K",
+      "inconsistent": 3,
+      "mono_ops_max": 718089,
+      "mono_ops_mean": 499453.75,
+      "ms_max": 55.640797,
+      "ms_mean": 36.765080875,
+      "n": 11,
+      "n_prime": 6,
+      "n_vars": 12,
+      "ops_over_brute_force": 0.5222139215571466,
+      "peak_kib_max": 24.234375,
+      "per_target": [
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 17,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 718089,
+            "new_generators": 113,
+            "pairs_chain_skipped": 3092,
+            "pairs_considered": 7626,
+            "pairs_coprime_skipped": 4279,
+            "peak_basis_monomials": 3020,
+            "reduction_steps": 9443,
+            "solving_degree": 3,
+            "spolys": 255,
+            "wall_ns": 46157600
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 552233,
+            "new_generators": 111,
+            "pairs_chain_skipped": 2924,
+            "pairs_considered": 7381,
+            "pairs_coprime_skipped": 4274,
+            "peak_basis_monomials": 2534,
+            "reduction_steps": 7475,
+            "solving_degree": 3,
+            "spolys": 183,
+            "wall_ns": 44187758
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 11,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 646453,
+            "new_generators": 120,
+            "pairs_chain_skipped": 3502,
+            "pairs_considered": 8515,
+            "pairs_coprime_skipped": 4770,
+            "peak_basis_monomials": 3102,
+            "reduction_steps": 8725,
+            "solving_degree": 3,
+            "spolys": 243,
+            "wall_ns": 55640797
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 11,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 602691,
+            "new_generators": 109,
+            "pairs_chain_skipped": 2859,
+            "pairs_considered": 7140,
+            "pairs_coprime_skipped": 4065,
+            "peak_basis_monomials": 2629,
+            "reduction_steps": 8221,
+            "solving_degree": 3,
+            "spolys": 216,
+            "wall_ns": 39629781
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 434120,
+            "new_generators": 97,
+            "pairs_chain_skipped": 2257,
+            "pairs_considered": 5778,
+            "pairs_coprime_skipped": 3371,
+            "peak_basis_monomials": 2229,
+            "reduction_steps": 6073,
+            "solving_degree": 3,
+            "spolys": 150,
+            "wall_ns": 25400960
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 360150,
+            "new_generators": 105,
+            "pairs_chain_skipped": 2719,
+            "pairs_considered": 6670,
+            "pairs_coprime_skipped": 3783,
+            "peak_basis_monomials": 2414,
+            "reduction_steps": 5424,
+            "solving_degree": 3,
+            "spolys": 168,
+            "wall_ns": 33940654
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 11,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 303225,
+            "new_generators": 91,
+            "pairs_chain_skipped": 2082,
+            "pairs_considered": 5151,
+            "pairs_coprime_skipped": 2894,
+            "peak_basis_monomials": 1802,
+            "reduction_steps": 5136,
+            "solving_degree": 3,
+            "spolys": 175,
+            "wall_ns": 21900250
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 11,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 378669,
+            "new_generators": 98,
+            "pairs_chain_skipped": 2387,
+            "pairs_considered": 5886,
+            "pairs_coprime_skipped": 3315,
+            "peak_basis_monomials": 2105,
+            "reduction_steps": 5762,
+            "solving_degree": 3,
+            "spolys": 184,
+            "wall_ns": 27262847
+          }
+        }
+      ],
+      "spolys_mean": 196.75,
+      "summands": 2,
+      "targets": 8
+    },
+    {
+      "basis_len_mean": 7.875,
+      "brute_force_ops": 6641664.0,
+      "curve": "K_0 / GF(2^13)",
+      "d_av": 3.25,
+      "d_av_over_semireg": 0.8125,
+      "d_max": 4,
+      "d_pair_av": 3.25,
+      "d_pair_max": 4,
+      "d_poly_av": 3.25,
+      "d_poly_max": 4,
+      "d_semireg_max": 4,
+      "d_semireg_min": 4,
+      "d_semireg_unbounded": 0,
+      "equations": 13,
+      "family": "K",
+      "inconsistent": 4,
+      "mono_ops_max": 3522855,
+      "mono_ops_mean": 2778248.625,
+      "ms_max": 428.360957,
+      "ms_mean": 303.04327087499996,
+      "n": 13,
+      "n_prime": 7,
+      "n_vars": 14,
+      "ops_over_brute_force": 0.4183061089811228,
+      "peak_kib_max": 64.921875,
+      "per_target": [
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 1825957,
+            "new_generators": 169,
+            "pairs_chain_skipped": 6580,
+            "pairs_considered": 16471,
+            "pairs_coprime_skipped": 9607,
+            "peak_basis_monomials": 5772,
+            "reduction_steps": 16850,
+            "solving_degree": 3,
+            "spolys": 284,
+            "wall_ns": 198754146
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 13,
+            "max_pair_degree": 4,
+            "max_poly_degree": 4,
+            "mono_ops": 3522855,
+            "new_generators": 191,
+            "pairs_chain_skipped": 9194,
+            "pairs_considered": 20706,
+            "pairs_coprime_skipped": 11112,
+            "peak_basis_monomials": 7595,
+            "reduction_steps": 27507,
+            "solving_degree": 4,
+            "spolys": 400,
+            "wall_ns": 336482380
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 2706789,
+            "new_generators": 192,
+            "pairs_chain_skipped": 8256,
+            "pairs_considered": 20910,
+            "pairs_coprime_skipped": 12330,
+            "peak_basis_monomials": 7641,
+            "reduction_steps": 21510,
+            "solving_degree": 3,
+            "spolys": 324,
+            "wall_ns": 319520562
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 13,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 2979289,
+            "new_generators": 192,
+            "pairs_chain_skipped": 8271,
+            "pairs_considered": 20910,
+            "pairs_coprime_skipped": 12242,
+            "peak_basis_monomials": 7562,
+            "reduction_steps": 24391,
+            "solving_degree": 3,
+            "spolys": 397,
+            "wall_ns": 335856856
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 4,
+            "max_poly_degree": 4,
+            "mono_ops": 3170709,
+            "new_generators": 207,
+            "pairs_chain_skipped": 9631,
+            "pairs_considered": 24090,
+            "pairs_coprime_skipped": 14102,
+            "peak_basis_monomials": 8310,
+            "reduction_steps": 24790,
+            "solving_degree": 4,
+            "spolys": 357,
+            "wall_ns": 428360957
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 19,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 3221452,
+            "new_generators": 192,
+            "pairs_chain_skipped": 8394,
+            "pairs_considered": 20910,
+            "pairs_coprime_skipped": 12101,
+            "peak_basis_monomials": 7801,
+            "reduction_steps": 26535,
+            "solving_degree": 3,
+            "spolys": 415,
+            "wall_ns": 330312650
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 14,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 3003822,
+            "new_generators": 187,
+            "pairs_chain_skipped": 7790,
+            "pairs_considered": 19900,
+            "pairs_coprime_skipped": 11706,
+            "peak_basis_monomials": 7547,
+            "reduction_steps": 25272,
+            "solving_degree": 3,
+            "spolys": 404,
+            "wall_ns": 289234657
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 1795116,
+            "new_generators": 165,
+            "pairs_chain_skipped": 6314,
+            "pairs_considered": 15753,
+            "pairs_coprime_skipped": 9148,
+            "peak_basis_monomials": 5655,
+            "reduction_steps": 17200,
+            "solving_degree": 3,
+            "spolys": 291,
+            "wall_ns": 185823959
+          }
+        }
+      ],
+      "spolys_mean": 359.0,
+      "summands": 2,
+      "targets": 8
+    },
+    {
+      "basis_len_mean": 5.0,
+      "brute_force_ops": 19072.0,
+      "curve": "random-binary-n7-b56",
+      "d_av": 3.0,
+      "d_av_over_semireg": 1.0,
+      "d_max": 3,
+      "d_pair_av": 3.0,
+      "d_pair_max": 3,
+      "d_poly_av": 3.0,
+      "d_poly_max": 3,
+      "d_semireg_max": 3,
+      "d_semireg_min": 3,
+      "d_semireg_unbounded": 0,
+      "equations": 7,
+      "family": "R",
+      "inconsistent": 3,
+      "mono_ops_max": 21023,
+      "mono_ops_mean": 10978.875,
+      "ms_max": 0.838514,
+      "ms_mean": 0.39174600000000004,
+      "n": 7,
+      "n_prime": 4,
+      "n_vars": 8,
+      "ops_over_brute_force": 0.5756541002516778,
+      "peak_kib_max": 3.09375,
+      "per_target": [
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 7,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 11052,
+            "new_generators": 31,
+            "pairs_chain_skipped": 276,
+            "pairs_considered": 703,
+            "pairs_coprime_skipped": 368,
+            "peak_basis_monomials": 251,
+            "reduction_steps": 495,
+            "solving_degree": 3,
+            "spolys": 59,
+            "wall_ns": 512677
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 10427,
+            "new_generators": 30,
+            "pairs_chain_skipped": 243,
+            "pairs_considered": 666,
+            "pairs_coprime_skipped": 381,
+            "peak_basis_monomials": 249,
+            "reduction_steps": 409,
+            "solving_degree": 3,
+            "spolys": 42,
+            "wall_ns": 435361
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 8,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 21023,
+            "new_generators": 33,
+            "pairs_chain_skipped": 317,
+            "pairs_considered": 780,
+            "pairs_coprime_skipped": 403,
+            "peak_basis_monomials": 396,
+            "reduction_steps": 663,
+            "solving_degree": 3,
+            "spolys": 60,
+            "wall_ns": 692308
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 8355,
+            "new_generators": 16,
+            "pairs_chain_skipped": 96,
+            "pairs_considered": 253,
+            "pairs_coprime_skipped": 137,
+            "peak_basis_monomials": 228,
+            "reduction_steps": 257,
+            "solving_degree": 3,
+            "spolys": 20,
+            "wall_ns": 149001
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 15954,
+            "new_generators": 38,
+            "pairs_chain_skipped": 384,
+            "pairs_considered": 990,
+            "pairs_coprime_skipped": 557,
+            "peak_basis_monomials": 388,
+            "reduction_steps": 501,
+            "solving_degree": 3,
+            "spolys": 49,
+            "wall_ns": 838514
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 7,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 7254,
+            "new_generators": 18,
+            "pairs_chain_skipped": 81,
+            "pairs_considered": 300,
+            "pairs_coprime_skipped": 191,
+            "peak_basis_monomials": 142,
+            "reduction_steps": 295,
+            "solving_degree": 3,
+            "spolys": 28,
+            "wall_ns": 151946
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 8,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 9745,
+            "new_generators": 22,
+            "pairs_chain_skipped": 153,
+            "pairs_considered": 406,
+            "pairs_coprime_skipped": 214,
+            "peak_basis_monomials": 204,
+            "reduction_steps": 387,
+            "solving_degree": 3,
+            "spolys": 39,
+            "wall_ns": 262735
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 7,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 4021,
+            "new_generators": 14,
+            "pairs_chain_skipped": 43,
+            "pairs_considered": 210,
+            "pairs_coprime_skipped": 143,
+            "peak_basis_monomials": 102,
+            "reduction_steps": 192,
+            "solving_degree": 3,
+            "spolys": 24,
+            "wall_ns": 91426
+          }
+        }
+      ],
+      "spolys_mean": 40.125,
+      "summands": 2,
+      "targets": 8
+    },
+    {
+      "basis_len_mean": 7.625,
+      "brute_force_ops": 164736.0,
+      "curve": "random-binary-n9-b32",
+      "d_av": 3.0,
+      "d_av_over_semireg": 0.75,
+      "d_max": 3,
+      "d_pair_av": 3.0,
+      "d_pair_max": 3,
+      "d_poly_av": 3.0,
+      "d_poly_max": 3,
+      "d_semireg_max": 4,
+      "d_semireg_min": 4,
+      "d_semireg_unbounded": 0,
+      "equations": 9,
+      "family": "R",
+      "inconsistent": 3,
+      "mono_ops_max": 168598,
+      "mono_ops_mean": 85474.625,
+      "ms_max": 6.49112,
+      "ms_mean": 3.876628125,
+      "n": 9,
+      "n_prime": 5,
+      "n_vars": 10,
+      "ops_over_brute_force": 0.518858203428516,
+      "peak_kib_max": 8.328125,
+      "per_target": [
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 46044,
+            "new_generators": 54,
+            "pairs_chain_skipped": 791,
+            "pairs_considered": 1953,
+            "pairs_coprime_skipped": 1084,
+            "peak_basis_monomials": 678,
+            "reduction_steps": 1207,
+            "solving_degree": 3,
+            "spolys": 78,
+            "wall_ns": 3061634
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 9,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 65971,
+            "new_generators": 49,
+            "pairs_chain_skipped": 645,
+            "pairs_considered": 1653,
+            "pairs_coprime_skipped": 918,
+            "peak_basis_monomials": 656,
+            "reduction_steps": 1604,
+            "solving_degree": 3,
+            "spolys": 90,
+            "wall_ns": 2481740
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 105927,
+            "new_generators": 66,
+            "pairs_chain_skipped": 1106,
+            "pairs_considered": 2775,
+            "pairs_coprime_skipped": 1576,
+            "peak_basis_monomials": 1066,
+            "reduction_steps": 2152,
+            "solving_degree": 3,
+            "spolys": 93,
+            "wall_ns": 6050819
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 10,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 54097,
+            "new_generators": 43,
+            "pairs_chain_skipped": 507,
+            "pairs_considered": 1326,
+            "pairs_coprime_skipped": 745,
+            "peak_basis_monomials": 652,
+            "reduction_steps": 1256,
+            "solving_degree": 3,
+            "spolys": 74,
+            "wall_ns": 1676084
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 9,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 104306,
+            "new_generators": 61,
+            "pairs_chain_skipped": 911,
+            "pairs_considered": 2415,
+            "pairs_coprime_skipped": 1392,
+            "peak_basis_monomials": 993,
+            "reduction_steps": 2178,
+            "solving_degree": 3,
+            "spolys": 112,
+            "wall_ns": 5131408
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 15,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 168598,
+            "new_generators": 62,
+            "pairs_chain_skipped": 1066,
+            "pairs_considered": 2485,
+            "pairs_coprime_skipped": 1266,
+            "peak_basis_monomials": 1043,
+            "reduction_steps": 3665,
+            "solving_degree": 3,
+            "spolys": 153,
+            "wall_ns": 6491120
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 15,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 79264,
+            "new_generators": 49,
+            "pairs_chain_skipped": 646,
+            "pairs_considered": 1653,
+            "pairs_coprime_skipped": 885,
+            "peak_basis_monomials": 683,
+            "reduction_steps": 2273,
+            "solving_degree": 3,
+            "spolys": 122,
+            "wall_ns": 2580241
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 59590,
+            "new_generators": 57,
+            "pairs_chain_skipped": 826,
+            "pairs_considered": 2145,
+            "pairs_coprime_skipped": 1238,
+            "peak_basis_monomials": 773,
+            "reduction_steps": 1424,
+            "solving_degree": 3,
+            "spolys": 81,
+            "wall_ns": 3539979
+          }
+        }
+      ],
+      "spolys_mean": 100.375,
+      "summands": 2,
+      "targets": 8
+    },
+    {
+      "basis_len_mean": 8.75,
+      "brute_force_ops": 972800.0,
+      "curve": "random-binary-n11-b44b",
+      "d_av": 3.0,
+      "d_av_over_semireg": 0.75,
+      "d_max": 3,
+      "d_pair_av": 3.0,
+      "d_pair_max": 3,
+      "d_poly_av": 3.0,
+      "d_poly_max": 3,
+      "d_semireg_max": 4,
+      "d_semireg_min": 4,
+      "d_semireg_unbounded": 0,
+      "equations": 11,
+      "family": "R",
+      "inconsistent": 2,
+      "mono_ops_max": 676040,
+      "mono_ops_mean": 438743.75,
+      "ms_max": 55.120398,
+      "ms_mean": 31.3530625,
+      "n": 11,
+      "n_prime": 6,
+      "n_vars": 12,
+      "ops_over_brute_force": 0.45101125616776316,
+      "peak_kib_max": 24.4140625,
+      "per_target": [
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 12,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 676040,
+            "new_generators": 115,
+            "pairs_chain_skipped": 3162,
+            "pairs_considered": 7875,
+            "pairs_coprime_skipped": 4460,
+            "peak_basis_monomials": 3001,
+            "reduction_steps": 9018,
+            "solving_degree": 3,
+            "spolys": 253,
+            "wall_ns": 46303873
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 63848,
+            "new_generators": 63,
+            "pairs_chain_skipped": 853,
+            "pairs_considered": 2701,
+            "pairs_coprime_skipped": 1756,
+            "peak_basis_monomials": 953,
+            "reduction_steps": 1570,
+            "solving_degree": 3,
+            "spolys": 92,
+            "wall_ns": 4849957
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 11,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 579912,
+            "new_generators": 121,
+            "pairs_chain_skipped": 3593,
+            "pairs_considered": 8646,
+            "pairs_coprime_skipped": 4813,
+            "peak_basis_monomials": 3125,
+            "reduction_steps": 7955,
+            "solving_degree": 3,
+            "spolys": 240,
+            "wall_ns": 55120398
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 11,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 647357,
+            "new_generators": 111,
+            "pairs_chain_skipped": 2961,
+            "pairs_considered": 7381,
+            "pairs_coprime_skipped": 4193,
+            "peak_basis_monomials": 2716,
+            "reduction_steps": 8712,
+            "solving_degree": 3,
+            "spolys": 227,
+            "wall_ns": 40187958
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 445385,
+            "new_generators": 98,
+            "pairs_chain_skipped": 2275,
+            "pairs_considered": 5886,
+            "pairs_coprime_skipped": 3453,
+            "peak_basis_monomials": 2232,
+            "reduction_steps": 6239,
+            "solving_degree": 3,
+            "spolys": 158,
+            "wall_ns": 25267813
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 12,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 375610,
+            "new_generators": 102,
+            "pairs_chain_skipped": 2646,
+            "pairs_considered": 6328,
+            "pairs_coprime_skipped": 3470,
+            "peak_basis_monomials": 2426,
+            "reduction_steps": 5994,
+            "solving_degree": 3,
+            "spolys": 212,
+            "wall_ns": 28088523
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 11,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 305953,
+            "new_generators": 91,
+            "pairs_chain_skipped": 2083,
+            "pairs_considered": 5151,
+            "pairs_coprime_skipped": 2896,
+            "peak_basis_monomials": 1820,
+            "reduction_steps": 5152,
+            "solving_degree": 3,
+            "spolys": 172,
+            "wall_ns": 22120224
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 11,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 415845,
+            "new_generators": 99,
+            "pairs_chain_skipped": 2477,
+            "pairs_considered": 5995,
+            "pairs_coprime_skipped": 3326,
+            "peak_basis_monomials": 2282,
+            "reduction_steps": 6066,
+            "solving_degree": 3,
+            "spolys": 192,
+            "wall_ns": 28885754
+          }
+        }
+      ],
+      "spolys_mean": 193.25,
+      "summands": 2,
+      "targets": 8
+    },
+    {
+      "basis_len_mean": 9.25,
+      "brute_force_ops": 6789120.0,
+      "curve": "random-binary-n13-b1cfe",
+      "d_av": 3.25,
+      "d_av_over_semireg": 0.8125,
+      "d_max": 4,
+      "d_pair_av": 3.25,
+      "d_pair_max": 4,
+      "d_poly_av": 3.25,
+      "d_poly_max": 4,
+      "d_semireg_max": 4,
+      "d_semireg_min": 4,
+      "d_semireg_unbounded": 0,
+      "equations": 13,
+      "family": "R",
+      "inconsistent": 3,
+      "mono_ops_max": 3479056,
+      "mono_ops_mean": 2683250.875,
+      "ms_max": 397.316773,
+      "ms_mean": 298.00412575,
+      "n": 13,
+      "n_prime": 7,
+      "n_vars": 14,
+      "ops_over_brute_force": 0.395228081842713,
+      "peak_kib_max": 65.3203125,
+      "per_target": [
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 13,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 1741992,
+            "new_generators": 167,
+            "pairs_chain_skipped": 6502,
+            "pairs_considered": 16110,
+            "pairs_coprime_skipped": 9288,
+            "peak_basis_monomials": 5850,
+            "reduction_steps": 16378,
+            "solving_degree": 3,
+            "spolys": 320,
+            "wall_ns": 190750499
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 4,
+            "max_poly_degree": 4,
+            "mono_ops": 3479056,
+            "new_generators": 194,
+            "pairs_chain_skipped": 9352,
+            "pairs_considered": 21321,
+            "pairs_coprime_skipped": 11617,
+            "peak_basis_monomials": 7653,
+            "reduction_steps": 26855,
+            "solving_degree": 4,
+            "spolys": 352,
+            "wall_ns": 343562089
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 13,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 2980598,
+            "new_generators": 193,
+            "pairs_chain_skipped": 8339,
+            "pairs_considered": 21115,
+            "pairs_coprime_skipped": 12384,
+            "peak_basis_monomials": 7879,
+            "reduction_steps": 24110,
+            "solving_degree": 3,
+            "spolys": 392,
+            "wall_ns": 324578988
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 13,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 2862551,
+            "new_generators": 192,
+            "pairs_chain_skipped": 8283,
+            "pairs_considered": 20910,
+            "pairs_coprime_skipped": 12242,
+            "peak_basis_monomials": 7546,
+            "reduction_steps": 23351,
+            "solving_degree": 3,
+            "spolys": 385,
+            "wall_ns": 316582983
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 19,
+            "max_pair_degree": 4,
+            "max_poly_degree": 4,
+            "mono_ops": 3469505,
+            "new_generators": 203,
+            "pairs_chain_skipped": 9400,
+            "pairs_considered": 23220,
+            "pairs_coprime_skipped": 13381,
+            "peak_basis_monomials": 8361,
+            "reduction_steps": 27875,
+            "solving_degree": 4,
+            "spolys": 439,
+            "wall_ns": 397316773
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 2677360,
+            "new_generators": 196,
+            "pairs_chain_skipped": 8567,
+            "pairs_considered": 21736,
+            "pairs_coprime_skipped": 12844,
+            "peak_basis_monomials": 7748,
+            "reduction_steps": 21605,
+            "solving_degree": 3,
+            "spolys": 325,
+            "wall_ns": 341612067
+          }
+        },
+        {
+          "inconsistent": false,
+          "stats": {
+            "basis_len": 13,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 2567772,
+            "new_generators": 187,
+            "pairs_chain_skipped": 7745,
+            "pairs_considered": 19900,
+            "pairs_coprime_skipped": 11787,
+            "peak_basis_monomials": 7469,
+            "reduction_steps": 21605,
+            "solving_degree": 3,
+            "spolys": 368,
+            "wall_ns": 288590902
+          }
+        },
+        {
+          "inconsistent": true,
+          "stats": {
+            "basis_len": 1,
+            "max_pair_degree": 3,
+            "max_poly_degree": 3,
+            "mono_ops": 1687173,
+            "new_generators": 165,
+            "pairs_chain_skipped": 6387,
+            "pairs_considered": 15753,
+            "pairs_coprime_skipped": 9085,
+            "peak_basis_monomials": 5608,
+            "reduction_steps": 16242,
+            "solving_degree": 3,
+            "spolys": 281,
+            "wall_ns": 181038705
+          }
+        }
+      ],
+      "spolys_mean": 357.75,
+      "summands": 2,
+      "targets": 8
+    }
+  ],
+  "cells_below_the_semi_regular_degree": 6,
+  "cells_measured": 8,
+  "cells_skipped": [],
+  "cells_with_a_bound": 8,
+  "config": {
+    "cells": [
+      {
+        "m": 2,
+        "n": 7,
+        "n_prime": 4
+      },
+      {
+        "m": 2,
+        "n": 9,
+        "n_prime": 5
+      },
+      {
+        "m": 2,
+        "n": 11,
+        "n_prime": 6
+      },
+      {
+        "m": 2,
+        "n": 13,
+        "n_prime": 7
+      }
+    ],
+    "families": [
+      "K",
+      "R"
+    ],
+    "seed": 233164359,
+    "targets": 8
+  },
+  "elapsed_seconds": 6.091203459,
+  "markdown": "| E | n | n' | m | vars | eqs | D_av | D_pair | D_sr | D_av/D_sr | ops | enumerate | ops/enum | ms | KiB | no decomp |\n|:--|--:|--:|--:|--:|--:|--:|--:|:--|--:|--:|--:|--:|--:|--:|--:|\n| K | 7 | 4 | 2 | 8 | 7 | 3.0 | 3.0 | 3 | 1.00 | 1.159e4 | 1.830e4 | 0.6x | 0.4 | 3 | 3/8 |\n| K | 9 | 5 | 2 | 10 | 9 | 3.0 | 3.0 | 4 | 0.75 | 8.198e4 | 1.627e5 | 0.5x | 3.6 | 9 | 2/8 |\n| K | 11 | 6 | 2 | 12 | 11 | 3.0 | 3.0 | 4 | 0.75 | 4.995e5 | 9.564e5 | 0.5x | 36.8 | 24 | 3/8 |\n| K | 13 | 7 | 2 | 14 | 13 | 3.2 | 3.2 | 4 | 0.81 | 2.778e6 | 6.642e6 | 0.4x | 303.0 | 65 | 4/8 |\n| R | 7 | 4 | 2 | 8 | 7 | 3.0 | 3.0 | 3 | 1.00 | 1.098e4 | 1.907e4 | 0.6x | 0.4 | 3 | 3/8 |\n| R | 9 | 5 | 2 | 10 | 9 | 3.0 | 3.0 | 4 | 0.75 | 8.547e4 | 1.647e5 | 0.5x | 3.9 | 8 | 3/8 |\n| R | 11 | 6 | 2 | 12 | 11 | 3.0 | 3.0 | 4 | 0.75 | 4.387e5 | 9.728e5 | 0.5x | 31.4 | 24 | 2/8 |\n| R | 13 | 7 | 2 | 14 | 13 | 3.2 | 3.2 | 4 | 0.81 | 2.683e6 | 6.789e6 | 0.4x | 298.0 | 65 | 3/8 |\n",
+  "operation": "descent-degrees",
+  "schema_version": 1,
+  "semi_regular_degree_check": {
+    "quadratic_16_vars_16_eqs": 5,
+    "quadratic_16_vars_32_eqs": 4
+  },
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "ae8f3cbe489eacf7581fa2a317571012f2e2cb13fee19f9391e448083321f101",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "status": "complete",
+  "what_this_is": "For each (curve family, field degree n, subspace dimension n', summands m): the Weil descent of the Semaev polynomial over a random target, solved by a boolean-ring Buchberger, reporting the maximal degree the run reached against the degree a semi-regular system of the same equation degrees would reach, with the monomial-operation count as the metric and wall time and the engine's peak footprint beside it.",
+  "what_this_is_not": [
+    "not a speed: this prices one decomposition oracle call on one target, which AGENTS.md section 2 calls a stage diagnostic and never a speed",
+    "not a reproduction of Petit-Quisquater Table 2: their system is symmetrised to m^2+1 variables, this descent is the plain one in m*n' variables, so the degrees are not comparable row by row",
+    "not a wall-clock benchmark: ms is a practicality note, the metric is the monomial-operation count",
+    "not a claim about any deployed curve: the largest field here is GF(2^15)"
+  ]
+}

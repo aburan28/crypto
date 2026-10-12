@@ -1,0 +1,629 @@
+{
+  "stage": "seeds",
+  "runs": [
+    {
+      "tag": "s_P0",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 5.679119935000017,
+      "user_s": 5.595658,
+      "sys_s": 0.019984,
+      "cpu_s": 5.615642,
+      "maxrss_kb": 34540,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P0.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P0.stderr",
+      "seed": 16969290756857938023,
+      "index": 0,
+      "gate": true,
+      "extra": {
+        "walk_steps": 369507,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 369507
+      }
+    },
+    {
+      "tag": "s_P1",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 18.06792266700006,
+      "user_s": 17.795564,
+      "sys_s": 0.091945,
+      "cpu_s": 17.887508999999998,
+      "maxrss_kb": 129012,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P1.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P1.stderr",
+      "seed": 5567778600053157210,
+      "index": 1,
+      "gate": true,
+      "extra": {
+        "walk_steps": 1173039,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 1173039
+      }
+    },
+    {
+      "tag": "s_P2",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 9.46452572499993,
+      "user_s": 9.300725,
+      "sys_s": 0.039996,
+      "cpu_s": 9.340721,
+      "maxrss_kb": 66080,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P2.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P2.stderr",
+      "seed": 7693919603490995450,
+      "index": 2,
+      "gate": true,
+      "extra": {
+        "walk_steps": 616623,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 616623
+      }
+    },
+    {
+      "tag": "s_P3",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 14.43587074300001,
+      "user_s": 14.268086,
+      "sys_s": 0.09193699999999999,
+      "cpu_s": 14.360023,
+      "maxrss_kb": 129104,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P3.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P3.stderr",
+      "seed": 10517721398230031158,
+      "index": 3,
+      "gate": true,
+      "extra": {
+        "walk_steps": 940243,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 940243
+      }
+    },
+    {
+      "tag": "s_P4",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 6.820638420999899,
+      "user_s": 6.675324,
+      "sys_s": 0.027975,
+      "cpu_s": 6.7032989999999995,
+      "maxrss_kb": 34580,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P4.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P4.stderr",
+      "seed": 4147359183548094040,
+      "index": 4,
+      "gate": true,
+      "extra": {
+        "walk_steps": 448138,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 448138
+      }
+    },
+    {
+      "tag": "s_P5",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 8.665541147999988,
+      "user_s": 8.523985,
+      "sys_s": 0.047903999999999995,
+      "cpu_s": 8.571889,
+      "maxrss_kb": 66008,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P5.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P5.stderr",
+      "seed": 12704886117830702995,
+      "index": 5,
+      "gate": true,
+      "extra": {
+        "walk_steps": 580791,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 580791
+      }
+    },
+    {
+      "tag": "s_P6",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 6.6717486400000325,
+      "user_s": 6.60299,
+      "sys_s": 0.011973,
+      "cpu_s": 6.614963,
+      "maxrss_kb": 34544,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P6.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P6.stderr",
+      "seed": 5861245770921951894,
+      "index": 6,
+      "gate": true,
+      "extra": {
+        "walk_steps": 434654,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 434654
+      }
+    },
+    {
+      "tag": "s_P7",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 2.4022201509999377,
+      "user_s": 2.339608,
+      "sys_s": 0.015453,
+      "cpu_s": 2.355061,
+      "maxrss_kb": 20728,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P7.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P7.stderr",
+      "seed": 16284390181885920129,
+      "index": 7,
+      "gate": true,
+      "extra": {
+        "walk_steps": 155717,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 155717
+      }
+    },
+    {
+      "tag": "s_P8",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 12.718102040999952,
+      "user_s": 12.544007,
+      "sys_s": 0.035854,
+      "cpu_s": 12.579861000000001,
+      "maxrss_kb": 66124,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P8.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P8.stderr",
+      "seed": 2284244301173055916,
+      "index": 8,
+      "gate": true,
+      "extra": {
+        "walk_steps": 830833,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 830833
+      }
+    },
+    {
+      "tag": "s_P9",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 5.046473176999939,
+      "user_s": 4.999424,
+      "sys_s": 0.016005,
+      "cpu_s": 5.015429,
+      "maxrss_kb": 34640,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P9.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P9.stderr",
+      "seed": 210409248246577443,
+      "index": 9,
+      "gate": true,
+      "extra": {
+        "walk_steps": 328297,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 328297
+      }
+    },
+    {
+      "tag": "s_P10",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 5.763837112999909,
+      "user_s": 5.652617,
+      "sys_s": 0.023722,
+      "cpu_s": 5.6763390000000005,
+      "maxrss_kb": 34616,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P10.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P10.stderr",
+      "seed": 8455295724877556124,
+      "index": 10,
+      "gate": true,
+      "extra": {
+        "walk_steps": 369430,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 369430
+      }
+    },
+    {
+      "tag": "s_P11",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 10.95194278100007,
+      "user_s": 10.803974,
+      "sys_s": 0.035966,
+      "cpu_s": 10.83994,
+      "maxrss_kb": 66072,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P11.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P11.stderr",
+      "seed": 8608113270922167188,
+      "index": 11,
+      "gate": true,
+      "extra": {
+        "walk_steps": 711360,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 711360
+      }
+    },
+    {
+      "tag": "s_P12",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 5.035246046999987,
+      "user_s": 4.978695,
+      "sys_s": 0.019993,
+      "cpu_s": 4.9986880000000005,
+      "maxrss_kb": 34536,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P12.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P12.stderr",
+      "seed": 17243369419996148838,
+      "index": 12,
+      "gate": true,
+      "extra": {
+        "walk_steps": 334698,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 334698
+      }
+    },
+    {
+      "tag": "s_P13",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 1.3588345609999806,
+      "user_s": 1.348846,
+      "sys_s": 0.003993,
+      "cpu_s": 1.352839,
+      "maxrss_kb": 20728,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P13.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P13.stderr",
+      "seed": 10239667102188979369,
+      "index": 13,
+      "gate": true,
+      "extra": {
+        "walk_steps": 88898,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 88898
+      }
+    },
+    {
+      "tag": "s_P14",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 11.353293576000056,
+      "user_s": 11.152569,
+      "sys_s": 0.035805,
+      "cpu_s": 11.188374,
+      "maxrss_kb": 66112,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P14.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P14.stderr",
+      "seed": 14534900565377003071,
+      "index": 14,
+      "gate": true,
+      "extra": {
+        "walk_steps": 728978,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 728978
+      }
+    },
+    {
+      "tag": "s_P15",
+      "arm": "P",
+      "rc": 0,
+      "wall_s": 15.595346016000008,
+      "user_s": 15.426113,
+      "sys_s": 0.059958,
+      "cpu_s": 15.486071,
+      "maxrss_kb": 129044,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P15.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_P15.stderr",
+      "seed": 12127713901442625455,
+      "index": 15,
+      "gate": true,
+      "extra": {
+        "walk_steps": 1027346,
+        "ideal_steps": 558444.48690292,
+        "table_entries": 1027346
+      }
+    },
+    {
+      "tag": "s_S0",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.12707145799993214,
+      "user_s": 0.117174,
+      "sys_s": 0.008146,
+      "cpu_s": 0.12532,
+      "maxrss_kb": 20728,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S0.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S0.stderr",
+      "seed": 531310,
+      "index": 0,
+      "gate": true,
+      "extra": {
+        "walk_steps": 470279,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S1",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.25362613600009354,
+      "user_s": 0.235945,
+      "sys_s": 0.011838,
+      "cpu_s": 0.24778299999999998,
+      "maxrss_kb": 20728,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S1.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S1.stderr",
+      "seed": 9195500311811427281,
+      "index": 1,
+      "gate": true,
+      "extra": {
+        "walk_steps": 859167,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S2",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.026215232000026845,
+      "user_s": 0.021318999999999998,
+      "sys_s": 0.004262999999999999,
+      "cpu_s": 0.025581999999999997,
+      "maxrss_kb": 20728,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S2.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S2.stderr",
+      "seed": 16090026824951262146,
+      "index": 2,
+      "gate": true,
+      "extra": {
+        "walk_steps": 82111,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S3",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.06850625399999899,
+      "user_s": 0.063516,
+      "sys_s": 0.0039889999999999995,
+      "cpu_s": 0.06750500000000001,
+      "maxrss_kb": 20728,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S3.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S3.stderr",
+      "seed": 14463625035320605579,
+      "index": 3,
+      "gate": true,
+      "extra": {
+        "walk_steps": 243428,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S4",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.05991826500007846,
+      "user_s": 0.055331,
+      "sys_s": 0.003952,
+      "cpu_s": 0.059282999999999995,
+      "maxrss_kb": 20856,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S4.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S4.stderr",
+      "seed": 13446970406051546851,
+      "index": 4,
+      "gate": true,
+      "extra": {
+        "walk_steps": 214152,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S5",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.09373257400000057,
+      "user_s": 0.093067,
+      "sys_s": 0.0,
+      "cpu_s": 0.093067,
+      "maxrss_kb": 20856,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S5.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S5.stderr",
+      "seed": 1209032235516117042,
+      "index": 5,
+      "gate": true,
+      "extra": {
+        "walk_steps": 348699,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S6",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.316373174999967,
+      "user_s": 0.31257999999999997,
+      "sys_s": 0.0,
+      "cpu_s": 0.31257999999999997,
+      "maxrss_kb": 20856,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S6.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S6.stderr",
+      "seed": 2297265164216736251,
+      "index": 6,
+      "gate": true,
+      "extra": {
+        "walk_steps": 1137128,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S7",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.09546641800000089,
+      "user_s": 0.094022,
+      "sys_s": 0.0,
+      "cpu_s": 0.094022,
+      "maxrss_kb": 20856,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S7.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S7.stderr",
+      "seed": 3417771419741621241,
+      "index": 7,
+      "gate": true,
+      "extra": {
+        "walk_steps": 317902,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S8",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.13308670499998243,
+      "user_s": 0.12243,
+      "sys_s": 0.007958,
+      "cpu_s": 0.130388,
+      "maxrss_kb": 20856,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S8.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S8.stderr",
+      "seed": 13946338098001019770,
+      "index": 8,
+      "gate": true,
+      "extra": {
+        "walk_steps": 460644,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S9",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.16346357500003705,
+      "user_s": 0.156477,
+      "sys_s": 0.003971,
+      "cpu_s": 0.160448,
+      "maxrss_kb": 20856,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S9.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S9.stderr",
+      "seed": 5893533853997021145,
+      "index": 9,
+      "gate": true,
+      "extra": {
+        "walk_steps": 602811,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S10",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.2877015310000388,
+      "user_s": 0.282749,
+      "sys_s": 0.003987,
+      "cpu_s": 0.286736,
+      "maxrss_kb": 20856,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S10.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S10.stderr",
+      "seed": 11061722895494931766,
+      "index": 10,
+      "gate": true,
+      "extra": {
+        "walk_steps": 1082495,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S11",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.06341545800000858,
+      "user_s": 0.062498,
+      "sys_s": 0.0,
+      "cpu_s": 0.062498,
+      "maxrss_kb": 20856,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S11.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S11.stderr",
+      "seed": 6501063436470094596,
+      "index": 11,
+      "gate": true,
+      "extra": {
+        "walk_steps": 221401,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S12",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.2430545230000689,
+      "user_s": 0.23403,
+      "sys_s": 0.0039429999999999995,
+      "cpu_s": 0.237973,
+      "maxrss_kb": 20856,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S12.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S12.stderr",
+      "seed": 15136275507479327856,
+      "index": 12,
+      "gate": true,
+      "extra": {
+        "walk_steps": 869281,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S13",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.1750897540000551,
+      "user_s": 0.164729,
+      "sys_s": 0.007932999999999999,
+      "cpu_s": 0.17266199999999998,
+      "maxrss_kb": 20856,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S13.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S13.stderr",
+      "seed": 3030800210457115110,
+      "index": 13,
+      "gate": true,
+      "extra": {
+        "walk_steps": 646553,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S14",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.1939483639999935,
+      "user_s": 0.184077,
+      "sys_s": 0.004020999999999999,
+      "cpu_s": 0.188098,
+      "maxrss_kb": 20856,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S14.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S14.stderr",
+      "seed": 8254383180996596796,
+      "index": 14,
+      "gate": true,
+      "extra": {
+        "walk_steps": 638369,
+        "ideal_steps": 558444.48690292
+      }
+    },
+    {
+      "tag": "s_S15",
+      "arm": "S",
+      "rc": 0,
+      "wall_s": 0.05542537399992398,
+      "user_s": 0.046873,
+      "sys_s": 0.007819999999999999,
+      "cpu_s": 0.054693,
+      "maxrss_kb": 20856,
+      "stdout": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S15.stdout",
+      "stderr": "/home/user/crypto/.claude/worktrees/agent-ad3193aadcbaae86d/research/notes/index-calculus/single_target_rho_n53_20260930_run/work/s_S15.stderr",
+      "seed": 540469041145785738,
+      "index": 15,
+      "gate": true,
+      "extra": {
+        "walk_steps": 180502,
+        "ideal_steps": 558444.48690292
+      }
+    }
+  ]
+}

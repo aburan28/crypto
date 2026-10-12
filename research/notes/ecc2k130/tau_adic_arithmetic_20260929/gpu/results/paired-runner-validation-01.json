@@ -1,0 +1,76 @@
+{
+  "status": "passed",
+  "created_utc": "2026-09-29T21:08:11.247402+00:00",
+  "gpu_executed": false,
+  "scope": "CPU-stub orchestration tests and local process cleanup; no GPU timing measurement",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "checks": [
+    {
+      "command": [
+        "python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_readiness",
+        "test_paired_unroll"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "test_device_mismatch_aborts_benchmark_and_preserves_launch_evidence (test_readiness.ReadinessTests.test_device_mismatch_aborts_benchmark_and_preserves_launch_evidence) ... ok\ntest_existing_receipt_cannot_be_overwritten (test_readiness.ReadinessTests.test_existing_receipt_cannot_be_overwritten) ... ok\ntest_interrupted_replace_preserves_previous_valid_checkpoint (test_readiness.ReadinessTests.test_interrupted_replace_preserves_previous_valid_checkpoint) ... ok\ntest_missing_or_malformed_partial_is_unknown_execution (test_readiness.ReadinessTests.test_missing_or_malformed_partial_is_unknown_execution) ... ok\ntest_smoke_checks_four_arms_and_produces_no_timing_summary (test_readiness.ReadinessTests.test_smoke_checks_four_arms_and_produces_no_timing_summary) ... ok\ntest_candidate_is_in_device_smoke_without_timing (test_paired_unroll.PairedTests.test_candidate_is_in_device_smoke_without_timing) ... ok\ntest_compiler_cache_keeps_default_and_candidate_separate (test_paired_unroll.PairedTests.test_compiler_cache_keeps_default_and_candidate_separate) ... ok\ntest_contended_and_incomplete_conditions_are_ineligible (test_paired_unroll.PairedTests.test_contended_and_incomplete_conditions_are_ineligible) ... ok\ntest_each_recoding_uses_its_own_control (test_paired_unroll.PairedTests.test_each_recoding_uses_its_own_control) ... ok\ntest_full_loop_retains_two_controls_and_alternates_round_order (test_paired_unroll.PairedTests.test_full_loop_retains_two_controls_and_alternates_round_order) ... ok\ntest_isolation_requires_full_siblings_and_spare_cpu (test_paired_unroll.PairedTests.test_isolation_requires_full_siblings_and_spare_cpu) ... ok\ntest_noise_and_short_samples_block_screen (test_paired_unroll.PairedTests.test_noise_and_short_samples_block_screen) ... ok\ntest_timed_launch_is_wrapped_and_smoke_is_not (test_paired_unroll.PairedTests.test_timed_launch_is_wrapped_and_smoke_is_not) ... ok\ntest_timeout_terminates_child_group_and_unwinds_finally (test_paired_unroll.PairedTests.test_timeout_terminates_child_group_and_unwinds_finally) ... ok\n\n----------------------------------------------------------------------\nRan 14 tests in 0.583s\n\nOK\n"
+    },
+    {
+      "command": [
+        "python",
+        "-m",
+        "py_compile",
+        "check_host.py",
+        "check_nvrtc.py",
+        "cloud_modal.py",
+        "compare_resources.py",
+        "fixtures.py",
+        "isolated_entry.py",
+        "launch_gpu.py",
+        "receipt_io.py",
+        "run_gpu.py",
+        "test_paired_unroll.py",
+        "test_readiness.py"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "-c",
+        "import cloud_modal; print(\"Modal definition import passed; no cloud call\")"
+      ],
+      "returncode": 0,
+      "stdout": "Modal definition import passed; no cloud call\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python",
+        "../verify_receipt.py"
+      ],
+      "returncode": 0,
+      "stdout": "PASS: six panels, all paired digests/counters, source hashes, retained failure; end-to-end fields null\n",
+      "stderr": ""
+    }
+  ],
+  "sources": {
+    "check_host.py": "adee994939c412a06067b4fd479cdcbac3fc2edd648cfe01519b7f0c7203912e",
+    "check_nvrtc.py": "85f9fa565af3ee4c6a2ea617e99620dd0d937e229443abff2a982a059e013dbe",
+    "cloud_modal.py": "437fd65e8d62e17a036d74f3ea52b8d1f71b036698a0da6b357981799886fdd7",
+    "compare_resources.py": "4bc660e7ad663d7dd4d0cf0e048b1e619e6a5026e75afe242b292644513d278f",
+    "fixtures.py": "ebc415821e5c3e2870328af9dff45fe52b01ec3fbbbc85d55f6bc335fb1425cf",
+    "isolated_entry.py": "6780e8bc0c33cb4a50c7225862bdbdc2b357b23233a5d1785ee5037b53f8c08e",
+    "launch_gpu.py": "bd451da3fba67b50a121cddb2ea71119db6b4285833855eb4a4758d8e291ead3",
+    "receipt_io.py": "08d256fed7b2f56eb4509d246d00ee2cb8f18d13fd355f91c1deb0a215fc203a",
+    "run_gpu.py": "9ac4fb31c391e6cdfe84c97b78f596430b8629b500624ba715d8f59c6b8b6115",
+    "test_paired_unroll.py": "e09ff79d48977f3f675a6cf0e300c3e55fb7e0846f042f63d821e4c8472a4457",
+    "test_readiness.py": "6236e891c6820f989ec84a0809fdd486a1233d75ec3a98cc5839c8ffd9644131"
+  },
+  "isolated_bench_sha256": "4575860a5da9a6a6e997b91fc173ac515a2497290c0e830301c83fa3b712c05c"
+}

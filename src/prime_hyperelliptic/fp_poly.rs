@@ -236,6 +236,27 @@ impl FpPoly {
         self.divrem(divisor).1
     }
 
+    /// Binary exponentiation in `F_p[x] / (modulus)`.
+    ///
+    /// The exponent is public and this routine is variable-time. It is used by
+    /// finite-field factorisation and Frobenius root extraction, not protocol
+    /// code handling secrets.
+    pub fn pow_mod(&self, exponent: &BigUint, modulus: &Self) -> Self {
+        assert!(!modulus.is_zero(), "polynomial modulus must be non-zero");
+        debug_assert_eq!(self.p, modulus.p);
+        let mut accumulator = Self::one(self.p.clone());
+        let mut base = self.rem(modulus);
+        for bit in 0..exponent.bits() {
+            if exponent.bit(bit) {
+                accumulator = accumulator.mul(&base).rem(modulus);
+            }
+            if bit + 1 < exponent.bits() {
+                base = base.mul(&base).rem(modulus);
+            }
+        }
+        accumulator
+    }
+
     /// Euclidean GCD, returned monic.
     pub fn gcd(&self, other: &Self) -> Self {
         let mut a = self.clone();
@@ -295,6 +316,9 @@ impl FpPoly {
 
     /// Equality (canonical after trim).
     pub fn eq_poly(&self, other: &Self) -> bool {
+        if self.p != other.p {
+            return false;
+        }
         let d1 = self.degree();
         let d2 = other.degree();
         if d1 != d2 {
@@ -391,6 +415,20 @@ mod tests {
     }
 
     #[test]
+    fn pow_mod_matches_small_field() {
+        let p = BigUint::from(7u32);
+        let modulus = FpPoly::from_coeffs(
+            vec![BigUint::one(), BigUint::zero(), BigUint::one()],
+            p.clone(),
+        );
+        let x = FpPoly::x(p);
+        assert_eq!(
+            x.pow_mod(&BigUint::from(5u32), &modulus),
+            FpPoly::from_coeffs(vec![BigUint::zero(), BigUint::one()], modulus.p.clone())
+        );
+    }
+
+    #[test]
     fn fp_inv_roundtrip() {
         let p = BigUint::from(101u32);
         for a in 1u64..101 {
@@ -398,5 +436,18 @@ mod tests {
             let inv = fp_inv(&av, &p).unwrap();
             assert_eq!((&av * &inv) % &p, BigUint::one());
         }
+    }
+
+    #[test]
+    fn equality_includes_the_coefficient_field() {
+        let over_f5 = FpPoly::from_coeffs(
+            vec![BigUint::one(), BigUint::from(2u32)],
+            BigUint::from(5u32),
+        );
+        let over_f7 = FpPoly::from_coeffs(
+            vec![BigUint::one(), BigUint::from(2u32)],
+            BigUint::from(7u32),
+        );
+        assert_ne!(over_f5, over_f7);
     }
 }

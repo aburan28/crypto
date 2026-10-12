@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "task_id": "TASK-KIC-GROEBNER-FUSED-HASH-20260922",
+  "base_commit": "9c52030802fe01a3a02274115aa9a51d439415f2",
+  "objective": "Fuse shifted-row formation directly into verified flat packing on exact layout hits and replace general-purpose hashing for trusted u64 monomial keys.",
+  "fixture": {
+    "curve": "K_0/F_2^31",
+    "summands": 2,
+    "dimension": 16,
+    "paired_prng_seed": 24301,
+    "targets": 2,
+    "node_budget": 50000,
+    "threads": 1
+  },
+  "selected_policy": {
+    "fused_pack": "form, cancel, verify, and pack each shifted row directly into the cached flat layout",
+    "support_guard": "every product monomial must map and every cached column must be observed; otherwise discard and rebuild materialized support",
+    "column_hash": "SplitMix-style deterministic u64 hasher for trusted internal monomial masks",
+    "controls": {
+      "KIC_F4_DISABLE_FUSED_PACK": "1 restores materialized support rows",
+      "KIC_F4_STD_COLUMN_HASH": "1 restores std HashMap hashing"
+    }
+  },
+  "acceptance": [
+    "same executable and public targets in selected and merged-policy controls",
+    "identical verdicts, effort, built degree, first-fall degree, and gates",
+    "fused and materialized flat matrices agree byte-for-byte",
+    "missing and extra cached support force fallback",
+    "fast and standard maps return identical indices",
+    "frozen and holdout ladder digests and operation counts match"
+  ],
+  "claim_boundary": "Public-synthetic n=31 decomposition-construction evidence only. This is not relation-yield evidence, an end-to-end index-calculus crossover, an asymptotic improvement, a sub-rho result, an external-target capability, or a key-recovery claim."
+}

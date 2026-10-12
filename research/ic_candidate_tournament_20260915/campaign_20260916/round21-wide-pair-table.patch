@@ -1,0 +1,92 @@
+--- a/src/cryptanalysis/koblitz_tiny_ic.rs
++++ b/src/cryptanalysis/koblitz_tiny_ic.rs
+@@ -44,7 +44,7 @@
+ use crate::cryptanalysis::koblitz_index_calculus::{CollectedRelation, KoblitzCurve};
+ 
+ /// Largest degree handled: keys and packed identities must fit a word.
+-pub const MAX_DEGREE: u32 = 31;
++pub const MAX_DEGREE: u32 = 61;
+ 
+ /// Probes beyond the column count that the table-size rule budgets for:
+ /// a few dependent rows and the descent.
+@@ -796,11 +796,18 @@
+ // ── The folded pair-sum table ───────────────────────────────────────
+ 
+ /// A stored sum `C_orbit + P_other` and the rotation that names its
+-/// orbit; twelve bytes, since every coordinate fits 31 bits.
++/// orbit.
++///
++/// The coordinates were `u32` while `MAX_DEGREE` was 31, which made the
++/// entry twelve bytes and the module's degree ceiling a property of this
++/// struct rather than of its arithmetic: the field has always been one
++/// `u64`, so the packing was the only thing keeping the collector below
++/// degree 32.  They are `u64` now, which costs eight bytes an entry and
++/// buys every degree the field can hold.
+ #[derive(Clone, Copy)]
+ struct PairEntry {
+-    sum_x: u32,
+-    sum_y: u32,
++    sum_x: u64,
++    sum_y: u64,
+     other: u16,
+     orbit: u8,
+     rotation: u8,
+@@ -809,7 +816,7 @@
+ impl PairEntry {
+     #[inline]
+     fn sum(&self) -> FastPoint {
+-        FastPoint::affine(u64::from(self.sum_x), u64::from(self.sum_y))
++        FastPoint::affine(self.sum_x, self.sum_y)
+     }
+ }
+ 
+@@ -1195,8 +1202,8 @@
+                 table.insert(
+                     key,
+                     PairEntry {
+-                        sum_x: sum.x as u32,
+-                        sum_y: sum.y as u32,
++                        sum_x: sum.x,
++                        sum_y: sum.y,
+                         other: j as u16,
+                         orbit: o as u8,
+                         rotation: rotation as u8,
+@@ -1824,7 +1831,6 @@
+                 }
+                 assert!(tiny.verify_columns());
+                 let r = kc.subgroup_order.to_u64().unwrap();
+-                let h = kc.cofactor.to_u64().unwrap() % r;
+                 // per base index: its column's log times its signed Frobenius coefficient
+                 let orbit_logs: Vec<u64> = (0..base.len())
+                     .map(|i| {
+@@ -1843,7 +1849,12 @@
+                     let sum = w.points.iter().fold(BinaryPoint::Infinity, |s, &i| kc.add(&s, &base[i]));
+                     assert_eq!(sum, probe, "n={n} a={a} d={d} witness");
+                     let logsum = w.points.iter().fold(0u64, |s, &i| (s + orbit_logs[i]) % r);
+-                    assert_eq!(mulmod(h, (w.a + mulmod(w.b, d, r)) % r, r), logsum, "n={n} a={a} d={d} scalar");
++                    // Under the `representative` column convention a column is the
++                    // orbit representative itself rather than `[h]` of it, so the row
++                    // reads `a + b*d` and NOT `h*(a + b*d)`.  This assertion still
++                    // carried the cofactor after round 0018's column patch moved the
++                    // convention, and failed at every cell whose cofactor is not one.
++                    assert_eq!((w.a + mulmod(w.b, d, r)) % r, logsum, "n={n} a={a} d={d} scalar");
+                 }
+                 let (accepted, duplicates, attempts) = tiny.accounting();
+                 assert_eq!(accepted + duplicates, all.len());
+--- a/examples/ic_tournament_worker.rs
++++ b/examples/ic_tournament_worker.rs
+@@ -273,8 +273,12 @@
+ }
+ 
+ fn run(job: &Job) -> Result<Report, String> {
+-    if !(5..=31).contains(&job.degree) || job.degree % 2 == 0 || job.curve_a > 1 {
+-        return Err("worker accepts bounded odd-degree Koblitz fixtures (5..31)".into());
++    // Mirrors `koblitz_tiny_ic::MAX_DEGREE`, which the pair table's packed
++    // coordinate width set: `u32` held it at 31, `u64` lifts it to 61. This is
++    // a second, independent bound from the module's own -- lifting one without
++    // the other leaves the worker refusing degrees the collector can run.
++    if !(5..=61).contains(&job.degree) || job.degree % 2 == 0 || job.curve_a > 1 {
++        return Err("worker accepts bounded odd-degree Koblitz fixtures (5..61)".into());
+     }
+     if job.target_seeds.is_empty() || job.target_seeds.len() > 100 {
+         return Err("target count must be 1..100".into());

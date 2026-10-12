@@ -1,0 +1,35 @@
+{
+  "status": "failed",
+  "stage": "initializing",
+  "mode": "smoke",
+  "gpu_executed": false,
+  "gpu_launch_submitted": false,
+  "classification": "known-scalar GPU arithmetic stage diagnostic",
+  "smoke": {
+    "status": "pending",
+    "verified_outputs": 0,
+    "panels": []
+  },
+  "sources": {
+    "check_nvrtc.py": "85f9fa565af3ee4c6a2ea617e99620dd0d937e229443abff2a982a059e013dbe",
+    "fixtures.py": "ebc415821e5c3e2870328af9dff45fe52b01ec3fbbbc85d55f6bc335fb1425cf",
+    "run_gpu.py": "c96af3009d98e315a124acc4fe3804430f3ec0936f1e153f9c973ad5e1325659",
+    "PROTOCOL.md": "a12f445883880e4817295490d8f0470275cc19594ef7dd71931c941ab17eeedb",
+    "README.md": "11172a7defe0fa5993064dd1e08ad841c0031b0f0249d9d7279ad36b2574fa5e",
+    "check_host.py": "adee994939c412a06067b4fd479cdcbac3fc2edd648cfe01519b7f0c7203912e",
+    "test_readiness.py": "b62b23d5751d06e938adb2baee47591c89d1afaba06fe16e09c9126b904d0189",
+    "READINESS_PROTOCOL.md": "146ca2b21f1419db573b1a5064a22fdb1b69d928735449ef05caee494505be07",
+    "arithmetic.cuh": "6d86069b3c28a09e83d341b68836d015e03e3759ee372378932fb677c87982a7",
+    "cloud_modal.py": "740092ad4dcab18e860665b76549dbf8037148978da478393c56c30dd8a01a24",
+    "receipt_io.py": "08d256fed7b2f56eb4509d246d00ee2cb8f18d13fd355f91c1deb0a215fc203a"
+  },
+  "dependency_sources": {
+    "parent_benchmark.py": "aa18d7ef9d1edba856343137dfcc13c3a1a930bcd721199127f54b2bc4697366",
+    "curve_identity.py": "39aeb32829ab7b5aec7c8fa0448f324ed755248bc3dd25df1b47e74cac067a9e",
+    "parent_run-02.json": "f108dfa628f141b7da5c2885472aa960a25403a8f157e84a74cac2e58be8b797"
+  },
+  "rho_speedup": null,
+  "walk_iterations_per_second": null,
+  "panels": [],
+  "error": "Traceback (most recent call last):\n  File \"/workspace/scratch/7eaf0df2f835/tau-adic-study/research/notes/ecc2k130/tau_adic_arithmetic_20260929/gpu/run_gpu.py\", line 79, in run\n    import cupy as cp\nModuleNotFoundError: No module named 'cupy'\n"
+}

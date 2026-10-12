@@ -1,0 +1,52 @@
+{
+  "archived_cadical_sat_output_sha256": "40701dc84e0650c0afd94728314b0090e6aae31321317cd30e9bd37f16625cc0",
+  "attempt1_freeze_sha256": "7514910d5111f76bd50c6ccf5a70a2b25043c55d7cb515218a63a7f6c16fdd57",
+  "attempt1_manifest_sha256": "ae39923e93f6c908d7b2bd32568463d606a13f375dbb8406407f9f1acc9bc755",
+  "attempt1_receipt_sha256": "ec34b6a01e729a7f2a1815373e9b17450c30d2472b808c88792a6f22dedecd17",
+  "attempt1_record_head": "d4ba43e4f7751637a4c932e3414efe79759dbd04",
+  "attempt1_runner_head": "fc953ea13458abaaf56a21ed3af953031ece09a5",
+  "base_pr": 804,
+  "cadical": {
+    "build_command": [
+      "make",
+      "-j2",
+      "cadical"
+    ],
+    "commit": "c60730422e758ef1cebe7aeddf2dda31c996bf04",
+    "configure_command": [
+      "./configure"
+    ],
+    "linux_binary_sha256": null,
+    "linux_build_receipt_sha256": null,
+    "source_date_epoch": 1784475655,
+    "source_manifest_sha256": "d6b6be954a455b1ea8bd0d75d00f52b3fef5ff7d41ecb65e53a80a9fc47f51c2",
+    "source_repository": "https://github.com/arminbiere/cadical.git",
+    "tag": "rel-3.0.1",
+    "tracked_files": 468,
+    "tree": "9630ba7aaccee77f6fec916e5babd6d1ccedd404"
+  },
+  "input_sha256": "e36aad434c29e0b4c756575111d1a4289b5f21c2cfbc66d9745cd336d10b4b4b",
+  "measured_attempt2_admitted": false,
+  "parent_freeze_sha256": "16065b7dd0bb45ac942bc2622adf8451464b6457c35282a40f7b4c07ba0655a9",
+  "parent_rows_sha256": "a2b760b72e477cb9ab4d8409e71102cd6a2a09db0b8a5e8f5ad170d1a1102da9",
+  "schema": "k0-dag-dimacs-linux-attempt2-prepare-v1",
+  "semantic_source_sha256": {
+    "bounded.py": "4aec662e171996654383f9364ace3240bf3164927ff97cab96234a9da1c050ba",
+    "export.py": "77159083a897f65b91d0f762ef425eda2df73460a91b997e754351c7c331e8fe",
+    "produce.py": "1224b1a27af2a142d6a90182ffa10b63163a02a94f28925758edd9ceeda49060",
+    "third_party/LICENSE": "71ab2a9dc5a294ad8fba4ccb8c45aaa8a439596d314a2a046ac9b62266872a18",
+    "third_party/drat-trim.c": "d834b649f437e091597f5347f259b9f681087f89ca0844d0cee250a1a1a0c2ee",
+    "verify.py": "b87fa827308c964679c8c5d7e6d457406a9edfd3cfef15952017f0056aae5d7c"
+  },
+  "status": "DESIGN_ONLY_NO_TARGET_PREFLIGHT_OR_MEASURED_CHILD",
+  "target": {
+    "architecture": "x86_64",
+    "hard_rlimit_as_caps_bytes": [
+      536870912,
+      1073741824,
+      2147483648
+    ],
+    "python": "3.12",
+    "runner": "ubuntu-24.04"
+  }
+}

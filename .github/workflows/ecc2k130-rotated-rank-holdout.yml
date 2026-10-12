@@ -1,0 +1,21 @@
+name: ECC2K-130 rotated row rank and point-only holdout replay
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and replay frozen split, rank and point-only scalars
+        run: |
+          python3 -m py_compile research/notes/ecc2k130/rotated_rank_holdout_20260925/{select_inputs,rank_train,oracle,recover,verify,run,ci_replay}.py
+          python3 research/notes/ecc2k130/rotated_rank_holdout_20260925/ci_replay.py

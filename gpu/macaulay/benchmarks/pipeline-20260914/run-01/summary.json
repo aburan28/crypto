@@ -1,0 +1,44 @@
+{
+  "classification": "engineering_stage_diagnostic",
+  "complete": true,
+  "runs": 36,
+  "failed_runs": 0,
+  "primary_total_common_operations": null,
+  "rho_ratio": null,
+  "floor_ratio": null,
+  "full_dlp_speedup": null,
+  "rows": [
+    {
+      "split": "training",
+      "variant": "serialized",
+      "runs": 9,
+      "median_total_s": 0.323408501,
+      "median_paired_time_ratio": 1.0,
+      "verified_matrices": 585
+    },
+    {
+      "split": "training",
+      "variant": "overlap",
+      "runs": 9,
+      "median_total_s": 0.306742446,
+      "median_paired_time_ratio": 0.9401325746319432,
+      "verified_matrices": 585
+    },
+    {
+      "split": "holdout",
+      "variant": "serialized",
+      "runs": 9,
+      "median_total_s": 0.321892382,
+      "median_paired_time_ratio": 1.0,
+      "verified_matrices": 585
+    },
+    {
+      "split": "holdout",
+      "variant": "overlap",
+      "runs": 9,
+      "median_total_s": 0.307123766,
+      "median_paired_time_ratio": 0.9493464805543904,
+      "verified_matrices": 585
+    }
+  ]
+}

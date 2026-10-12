@@ -1,0 +1,22 @@
+{
+  "command": [
+    "/opt/homebrew/Cellar/llvm@21/21.1.8/bin/llvm-profdata",
+    "merge",
+    "-o",
+    "/Volumes/SSD990/kic-stage174-f4-pgo-dev/merged-llvm21.profdata",
+    "/Volumes/SSD990/kic-stage174-f4-pgo-dev/training-profiles/training-84500-16713436162408484227_0.profraw"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 120.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 0.6488324160018237,
+    "user_seconds": 0.017573,
+    "system_seconds": 0.029286,
+    "total_core_seconds": 0.046859,
+    "single_core_seconds": 0.046859,
+    "peak_rss_bytes": 30343168,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

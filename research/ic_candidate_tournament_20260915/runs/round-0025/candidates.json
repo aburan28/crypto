@@ -1,0 +1,39 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 65536,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "2a66ec4ce19a2b39a458bad77b14976dd75011dca8c3665dbdd137832aaf4896",
+    "hypothesis": "Round 0024's incumbent pair arm, unchanged on the IC side, built with the lean rho: the matched rho's exact walk in the IC arm's own single-word arithmetic. Its rho mode is this round's rho.",
+    "id": "incumbent",
+    "parent": "round 0024's incumbent (round 0023's scaled + rho-normal-basis.patch) plus round25-rho-lean.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0024",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "da441e865d16921fa6eabe1bc14a500b96287ab683794c23e999f7fef046a112"
+  },
+  {
+    "binary_relative": "source_candidates/switch/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 65536,
+      "solver": "pair_or_triple",
+      "summands": 4
+    },
+    "configuration_sha256": "31edad3974c7e9e8057bcf2700ca926cad8dd58b9a127620adf1f4cee6430def",
+    "falsification": "Any bad, missing or unmatched certificate under evaluator-r25; any logarithm different from the incumbent's or rho's on the same fixture; a choice other than pair on the eight panel cells or triple on the four crossover cells; switch/incumbent above 1.02 on a panel cell.",
+    "hypothesis": "Prices the pair collector (W2) and the counted triple table (W3) by their own sizing models before drawing a base point and runs the triple table iff W3 < W2, reporting the relation length it used. Expected: the pair collector on the eight panel cells and the triple table at n37a0, n43a1, n59a0 and n61a1, at most ~1% over the collector it runs.",
+    "id": "switch",
+    "parent": "round 0024's counted tree plus round25-switch.patch and round25-rho-lean.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0024",
+    "source_directory": "source_candidates/switch/source",
+    "source_manifest_relative": "source_candidates/switch/source-manifest.json",
+    "source_manifest_sha256": "875c73aa62664484cc07a067df9634d1d67f847a3cb2571453e6cb8a426bb2f2"
+  }
+]

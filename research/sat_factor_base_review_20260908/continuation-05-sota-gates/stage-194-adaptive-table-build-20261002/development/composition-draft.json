@@ -1,0 +1,73 @@
+{
+  "schema": "koblitz_stage194_final.v1",
+  "candidate_commit": "8007e42a140640c4768dd51c0fdf6bf41826bada",
+  "finalizer_commit": "c1e6d3acaa08402dec95c09be0e111b8fc98d76a",
+  "decision_status": "REJECTED_SCREEN",
+  "candidate_selected": false,
+  "runtime_default": "selected build-serial inner phases, unconditional Rayon BlockTables add scheduling, parallel BlockTables row reduction, and the twelve-worker fixed-X1 outer batch",
+  "claim_boundary": "One opened n=59 decomposition target and a solver-scheduling experiment. Direct MITM and full automorphism-aware rho boundaries are unchanged; no relation-yield, full-DLP, external-reproduction, novelty, or SOTA claim.",
+  "conflicts": null,
+  "screen": {
+    "all_correct": true,
+    "pair_ratios": [
+      {
+        "repeat": 1,
+        "adaptive_over_current": {
+          "wall": 0.9983076878351544,
+          "core": 1.0145464842447445,
+          "rss": 0.9737262404857964
+        }
+      }
+    ],
+    "median_paired_ratios": {
+      "wall": 0.9983076878351544,
+      "core": 1.0145464842447445,
+      "rss": 0.9737262404857964
+    },
+    "passed_performance_gate": false,
+    "status": "REJECTED_SCREEN"
+  },
+  "measured_stage_charge": {
+    "components": 14,
+    "wall_seconds_sum": 216.61651058399997,
+    "total_core_seconds_sum": 1203.5765079999999,
+    "peak_rss_bytes_max": 5264408576,
+    "single_core_seconds": null
+  },
+  "cumulative_measured_lower_bound": {
+    "components": 628,
+    "wall_seconds_sum": 24379.779705331002,
+    "total_core_seconds_sum": 63014.48035,
+    "peak_rss_bytes_max": 6310576128,
+    "single_core_seconds": null
+  },
+  "complete_campaign_cost": null,
+  "unmetered_components": [
+    "development compilation and tests before the exact native build",
+    "final result write and final verification after a charged composition control"
+  ],
+  "artifacts": {
+    "candidate_patch": {
+      "path": "candidate-adaptive-table-build.patch",
+      "bytes": 11589,
+      "sha256": "83d65bc5099d479aa4400f98698f3747156c34cfef52bf7fc9ec04057f497fc7"
+    },
+    "protocol": {
+      "path": "PROTOCOL.md",
+      "bytes": 4939,
+      "sha256": "c2e8427a327439d2b511305acc83586fe7a148818a4aba7b21374497fe668802"
+    },
+    "screen_result": {
+      "path": "development/screen/result.json",
+      "bytes": 21289,
+      "sha256": "179864f53f0adf262e01ccc0ddaa213c553daab429652867a0995277b86f49b9"
+    },
+    "screen_verification": {
+      "path": "development/screen/verification.json",
+      "bytes": 190,
+      "sha256": "c3ea6477c6c35485eee94f9c20b6a9d1813ce1125b1ea1b8e9f401ddeae556d4"
+    }
+  },
+  "all_seven_gates_passed": false,
+  "koblitz_index_calculus_sota": false
+}

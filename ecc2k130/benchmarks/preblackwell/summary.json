@@ -1,0 +1,158 @@
+{
+  "unit": "B scalar updates / s",
+  "class": "engineering",
+  "driver": "580.95.05",
+  "cudaImageVersion": "13.3.1",
+  "preset": "make bench-g6-modal / bench-g6e-modal / bench-g4dn-modal; ADA_CLMAD=1 is the Ada default after this receipt",
+  "geometry": {
+    "batch": 16,
+    "threads": 256,
+    "minBlocks": 2,
+    "steps": 1024,
+    "launches": 32,
+    "repeats": 3,
+    "workers": "automatic"
+  },
+  "reference": {
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "medianB": 15.115792,
+    "sms": 188,
+    "perSmM": 80.40314893617023,
+    "receipt": "ecc2k130/benchmarks/top-clmad/summary.json"
+  },
+  "arms": {
+    "g6e_software": {
+      "gpu": "NVIDIA L40S",
+      "family": "g6e",
+      "packedClmad": false,
+      "sms": 142,
+      "ratesB": [
+        4.907918,
+        4.879118,
+        4.852027
+      ],
+      "medianB": 4.879118,
+      "gpuUuid": "GPU-979763e6-0942-b88c-bacf-c1353c1f2203",
+      "registers": 128,
+      "localBytes": 56,
+      "automaticThreads": 72704,
+      "ratioToPrior": 0.8871123636363637,
+      "ratioTo6000": 0.32278282209757847,
+      "perSmM": 34.35998591549296
+    },
+    "g6e_clmad": {
+      "gpu": "NVIDIA L40S",
+      "family": "g6e",
+      "packedClmad": true,
+      "sms": 142,
+      "ratesB": [
+        8.872941,
+        8.838415999999999,
+        8.727022999999999
+      ],
+      "medianB": 8.838415999999999,
+      "gpuUuid": "GPU-83fc27ff-fb4a-d3cf-e01e-8ede2f94b798",
+      "registers": 94,
+      "localBytes": 0,
+      "automaticThreads": 72704,
+      "ratioToPrior": 1.6069847272727271,
+      "ratioTo6000": 0.5847140526940301,
+      "perSmM": 62.242366197183095,
+      "ratioToMatchedSoftware": 1.8114782220885002
+    },
+    "g6_software": {
+      "gpu": "NVIDIA L4",
+      "family": "g6",
+      "packedClmad": false,
+      "sms": 58,
+      "ratesB": [
+        1.331262,
+        1.323708,
+        1.3158599999999998
+      ],
+      "medianB": 1.323708,
+      "gpuUuid": "GPU-2259f8c1-fd64-796e-004d-c1eadcb56901",
+      "registers": 128,
+      "localBytes": 56,
+      "automaticThreads": 29696,
+      "ratioToPrior": 0.5755252173913045,
+      "ratioTo6000": 0.08757119706330968,
+      "perSmM": 22.82255172413793
+    },
+    "g6_clmad": {
+      "gpu": "NVIDIA L4",
+      "family": "g6",
+      "packedClmad": true,
+      "sms": 58,
+      "ratesB": [
+        2.496854,
+        2.4900349999999998,
+        2.485352
+      ],
+      "medianB": 2.4900349999999998,
+      "gpuUuid": "GPU-abd8ff2d-b9e9-61bf-8a4e-29e61909e5bc",
+      "registers": 94,
+      "localBytes": 0,
+      "automaticThreads": 29696,
+      "ratioToPrior": 1.0826239130434783,
+      "ratioTo6000": 0.16473070018428407,
+      "perSmM": 42.93163793103448,
+      "ratioToMatchedSoftware": 1.881105953881067
+    },
+    "g4dn_software": {
+      "gpu": "Tesla T4",
+      "family": "g4dn",
+      "packedClmad": false,
+      "sms": 40,
+      "ratesB": [
+        0.54011,
+        0.533211,
+        0.529717
+      ],
+      "medianB": 0.533211,
+      "gpuUuid": "GPU-114f13d1-aa33-6d14-a1d7-1940e61bb66d",
+      "registers": 128,
+      "localBytes": 64,
+      "automaticThreads": 20480,
+      "ratioToPrior": 0.2666055,
+      "ratioTo6000": 0.035275095079371294,
+      "perSmM": 13.330275
+    }
+  },
+  "promoteAdaClmad": true,
+  "promoteAdaClmadReason": "L40S 8.838416 / 4.879118 = 1.811; L4 2.490035 / 1.323708 = 1.881. T4 has no clmad (sm_75).",
+  "everySampleValid": true,
+  "fieldProductsPerUpdate": 5.3125,
+  "receipts": {
+    "g6e-software": {
+      "json": "g6e-software.json",
+      "log": "g6e-software.log",
+      "logSha256": "84f97fe15064e3b09180cce2dad6eca62519f93fff576c4c03e1f64bdc11d187",
+      "binarySha256": "36e85d8598e61e3720c50e96b36b456d3aee00104954144eef336a19a1121374"
+    },
+    "g6e-clmad": {
+      "json": "g6e-clmad.json",
+      "log": "g6e-clmad.log",
+      "logSha256": "27b9fb922f4503c7984a2d394ef79c6525f9d0df84bdb4af0412e9f778915247",
+      "binarySha256": "7c21df6f9eeeebebd0ae9a52e768529d7a7c782ea6c456fa6044c3696701f0aa"
+    },
+    "g6-software": {
+      "json": "g6-software.json",
+      "log": "g6-software.log",
+      "logSha256": "c48143fe37e784ca9262b23e19d152a79dde101e03ccb4f2f9e3e75fd995eb9e",
+      "binarySha256": "a7c3a9ab30a0e6fc89cf9414b42fe22313b53b8e6f56351d3d1c99c4a2d6ea20"
+    },
+    "g6-clmad": {
+      "json": "g6-clmad.json",
+      "log": "g6-clmad.log",
+      "logSha256": "86f01cf53d2690db928090f2b3c0acf3926e03999a6ee51464d04abea1c78928",
+      "binarySha256": "1c4e04bb34906c4180956ca3254374030f23b5f220b2b6ef2653b384f1232c22"
+    },
+    "g4dn-software": {
+      "json": "g4dn-software.json",
+      "log": "g4dn-software.log",
+      "logSha256": "549682ed07655d02de751cbdccaf9ecd5a6b35df410f5db8a0ee3047bca20dae",
+      "binarySha256": "f08e088876fc5fbc745fcc2e8e6fb7a029f2cd4ca995e25d1be1e4738d2b0637"
+    }
+  }
+}

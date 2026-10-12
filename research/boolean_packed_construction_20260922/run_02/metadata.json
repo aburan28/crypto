@@ -1,0 +1,25 @@
+{
+  "campaign_seconds": 15.960108332998061,
+  "complete": true,
+  "ended_utc": "2026-09-23T03:40:26.379161+00:00",
+  "git_base": "cd7b1db4368c6fd7eef808697a94e748e9cb17e6",
+  "git_status": "?? ./\n",
+  "host": {
+    "cpus": 14,
+    "machine": "arm64",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "system": "Darwin"
+  },
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "schema_version": 1,
+  "scope": "Standalone generic Boolean matrix construction, at most 12 variables. No production solver integration, external inputs, curves, targets, scalar recovery, relation collection or rho runs.",
+  "source_hashes": {
+    "analyze.py": "1580a8de4352989c392800c80af6b9e87f55523b8c5fac3f2a39e005f6b4358c",
+    "protocol.json": "40f5c392880948cc022cd6b4dddd6993e083193e1eaa6b51ac669eb39467201e",
+    "run.py": "08108112e5fea20d790a5ffc54fa3ccdff66183825561d92ef71696f50d8d082",
+    "worker.rs": "db04d1ae9d9b7fdb8939cd822d48a9a82d637a963d6e3e9d7e1a32631f26061f"
+  },
+  "started_utc": "2026-09-23T03:40:07.145530+00:00",
+  "test_executable_sha256": "aa1f63a2d629a43c13458fb91a916b249e87b4628152a2495b96a47308fdbe71",
+  "worker_sha256": "f8f78fe4c14d2af731cc9795f8a9856e0d13ab8dda1209275ce53c4f635a0add"
+}

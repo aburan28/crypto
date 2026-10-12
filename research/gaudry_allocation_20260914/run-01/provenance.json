@@ -1,0 +1,25 @@
+{
+  "cpu_affinity": [
+    0
+  ],
+  "contract_sha256": "b08ecc4e72696bddb753c99ff568f51874d0eabf1645a710b497300bf92fc3f9",
+  "baseline_source_sha256": "7128bb5d9022bf7903e06dd2d22b12959dd172b4fb2e4b78ab7f91b3292ab69f",
+  "candidate_source_sha256": "6a934c5f6c28a239e8fcfe3f06cb1618302ab76fe2fd6e2833a215d44b78d470",
+  "runner_sha256": "9f859dee8ccf2d929318a94762a536569c2c6789b8b5e6e4e1a436556cfa3871",
+  "stage_harness_sha256": "6552190cc28e5c27621f665bd1370c4f367fc4e13b09e6bb7e696ff089b38a14",
+  "full_harness_sha256": "71befe440db3cd5e537ecb7d66db31d458b2698728f73b44f35d3add53431be1",
+  "binaries": {
+    "baseline": {
+      "gaudry_allocation_stage": "1f42de7e9dae62302bd2097cdc62a01bbd0fc4eeb06e0af2baddf66ea8af7c0d",
+      "gaudry_cubic_bench": "95acefe37b129f9be2ddd20c72fb919bfb40d642398d9667c316ecda2b409b18"
+    },
+    "candidate": {
+      "gaudry_allocation_stage": "d4a2bd8c9ce0a7c5275a4a061d37075fe21e753d866d4b0d91735640d8bd5f20",
+      "gaudry_cubic_bench": "951c925ecb51693899ce250878a088b105d15c65c35317b1db1302a6ff988e1c"
+    }
+  },
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "host": "x86_64",
+  "cargo_lock_sha256": "231c8cacf4818d64566cf61357480b6f0ca71408614b2d99a15e1e5afdbe9461",
+  "cargo_manifest_sha256": "43611c79a8692d99fc3146caf339ec72b4b93bf0ee1e2a8d50656558fa8beaa5"
+}

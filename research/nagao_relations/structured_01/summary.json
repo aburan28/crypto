@@ -1,0 +1,2122 @@
+{
+  "groups": [
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "chained-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.020574164998834,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "chained-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.053397241998027,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "hybrid-filtered",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 3,
+      "all_phase_seconds": 6.000061695998738,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "hybrid-filtered",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 1,
+      "verified_relations": 1,
+      "all_phase_seconds": 4.074386927997693,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "hybrid-reference",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 1,
+      "all_phase_seconds": 6.000237965999986,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "hybrid-reference",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 1,
+      "verified_relations": 1,
+      "all_phase_seconds": 5.1207100880019425,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "pair-invariants-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 2,
+      "verified_relations": 4,
+      "all_phase_seconds": 0.40914276499825064,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "pair-invariants-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 2,
+      "verified_relations": 2,
+      "all_phase_seconds": 0.35764022399962414,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "s4-symmetric",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.016360435995011,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "s4-symmetric",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.0079555610027455,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "chained-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.023862994003139,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "chained-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.020166299000266,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "hybrid-filtered",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 50,
+      "all_phase_seconds": 6.000070845999289,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "hybrid-filtered",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 2,
+      "verified_relations": 2,
+      "all_phase_seconds": 0.4659624060004717,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "hybrid-reference",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 22,
+      "all_phase_seconds": 6.0013609179986815,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "hybrid-reference",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 2,
+      "verified_relations": 2,
+      "all_phase_seconds": 0.3876818409989937,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "pair-invariants-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.0204022509969946,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "pair-invariants-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.018116339997505,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "s4-symmetric",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.132623543999216,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "s4-symmetric",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.0803181849987595,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "chained-s3",
+      "mode": "enumerate",
+      "attempts": 4,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 12.060629613999481,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "chained-s3",
+      "mode": "first",
+      "attempts": 4,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 12.122746578996157,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "hybrid-filtered",
+      "mode": "enumerate",
+      "attempts": 4,
+      "resolved": 0,
+      "verified_relations": 32,
+      "all_phase_seconds": 12.000165920995641,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "hybrid-filtered",
+      "mode": "first",
+      "attempts": 4,
+      "resolved": 4,
+      "verified_relations": 4,
+      "all_phase_seconds": 0.5919944530069188,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "hybrid-reference",
+      "mode": "enumerate",
+      "attempts": 4,
+      "resolved": 0,
+      "verified_relations": 16,
+      "all_phase_seconds": 12.000231301997701,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "hybrid-reference",
+      "mode": "first",
+      "attempts": 4,
+      "resolved": 4,
+      "verified_relations": 4,
+      "all_phase_seconds": 1.291301648998342,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "pair-invariants-s3",
+      "mode": "enumerate",
+      "attempts": 4,
+      "resolved": 4,
+      "verified_relations": 44,
+      "all_phase_seconds": 2.1281384769972647,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "pair-invariants-s3",
+      "mode": "first",
+      "attempts": 4,
+      "resolved": 4,
+      "verified_relations": 4,
+      "all_phase_seconds": 1.8927579460032575,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "s4-symmetric",
+      "mode": "enumerate",
+      "attempts": 4,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 12.007990163998329,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "s4-symmetric",
+      "mode": "first",
+      "attempts": 4,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 12.10180582799876,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "chained-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.017183707001095,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "chained-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.021287533003488,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "hybrid-filtered",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 31,
+      "all_phase_seconds": 6.000080078996689,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "hybrid-filtered",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 2,
+      "verified_relations": 2,
+      "all_phase_seconds": 0.9091991889981728,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "hybrid-reference",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 12,
+      "all_phase_seconds": 6.000346279997757,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "hybrid-reference",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 2,
+      "verified_relations": 2,
+      "all_phase_seconds": 2.2487949679998565,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "pair-invariants-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 2,
+      "verified_relations": 173,
+      "all_phase_seconds": 4.359775976998208,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "pair-invariants-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 2,
+      "verified_relations": 2,
+      "all_phase_seconds": 4.0470348540002306,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "s4-symmetric",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.040836413001671,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "s4-symmetric",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.00735668100242,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "chained-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.010193808997428,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "chained-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.02314980400115,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "hybrid-filtered",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 57,
+      "all_phase_seconds": 6.000067261004006,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "hybrid-filtered",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 2,
+      "verified_relations": 2,
+      "all_phase_seconds": 0.5400965259977966,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "hybrid-reference",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 20,
+      "all_phase_seconds": 6.000444000001153,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "hybrid-reference",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 2,
+      "verified_relations": 2,
+      "all_phase_seconds": 0.7401854370000365,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "pair-invariants-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.026195398000709,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "pair-invariants-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.019332807001774,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "s4-symmetric",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.096609446001821,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 18,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "s4-symmetric",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.0982126999988395,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "chained-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.033193462000781,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "chained-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.038646064000204,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "hybrid-filtered",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.002784159001749,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "hybrid-filtered",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.000071841001045,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "hybrid-reference",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.001060651000444,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "hybrid-reference",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.000290526000754,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "pair-invariants-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 2,
+      "verified_relations": 1,
+      "all_phase_seconds": 2.891692797002179,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "pair-invariants-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 2,
+      "verified_relations": 1,
+      "all_phase_seconds": 2.70292778199655,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "s4-symmetric",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.030665481997858,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 8,
+      "variant": "s4-symmetric",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.06327551099821,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "chained-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.0219106180011295,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "chained-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.0237561499998264,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "hybrid-filtered",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.000138021998282,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "hybrid-filtered",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.00016685099763,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "hybrid-reference",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.000383943999623,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "hybrid-reference",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.000978739000857,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "pair-invariants-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.010452902006364,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "pair-invariants-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.010391353003797,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "s4-symmetric",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.087462242998299,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "f4-stable",
+      "d": 10,
+      "variant": "s4-symmetric",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.197299193998333,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "chained-s3",
+      "mode": "enumerate",
+      "attempts": 4,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 12.030135878001602,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "chained-s3",
+      "mode": "first",
+      "attempts": 4,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 12.04947077500401,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "hybrid-filtered",
+      "mode": "enumerate",
+      "attempts": 4,
+      "resolved": 0,
+      "verified_relations": 2,
+      "all_phase_seconds": 12.000328368001647,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "hybrid-filtered",
+      "mode": "first",
+      "attempts": 4,
+      "resolved": 2,
+      "verified_relations": 2,
+      "all_phase_seconds": 6.705929371997627,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "hybrid-reference",
+      "mode": "enumerate",
+      "attempts": 4,
+      "resolved": 0,
+      "verified_relations": 2,
+      "all_phase_seconds": 12.001027253001666,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "hybrid-reference",
+      "mode": "first",
+      "attempts": 4,
+      "resolved": 2,
+      "verified_relations": 2,
+      "all_phase_seconds": 7.627726629998506,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "pair-invariants-s3",
+      "mode": "enumerate",
+      "attempts": 4,
+      "resolved": 4,
+      "verified_relations": 2,
+      "all_phase_seconds": 4.769319069004268,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "pair-invariants-s3",
+      "mode": "first",
+      "attempts": 4,
+      "resolved": 4,
+      "verified_relations": 2,
+      "all_phase_seconds": 4.580635266000172,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "s4-symmetric",
+      "mode": "enumerate",
+      "attempts": 4,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 12.285134787005518,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 8,
+      "variant": "s4-symmetric",
+      "mode": "first",
+      "attempts": 4,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 12.225804846999381,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "chained-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.0229970939981285,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "chained-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.033661307999864,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "hybrid-filtered",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.000080171997979,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "hybrid-filtered",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.000225657000556,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "hybrid-reference",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.001005277001241,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "hybrid-reference",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.000344797997968,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "pair-invariants-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.011561981998966,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "pair-invariants-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.011854394997499,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "s4-symmetric",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.190467798998725,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 9,
+      "variant": "s4-symmetric",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.006112545001088,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "chained-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.041241230999731,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "chained-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.0223606690015,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "hybrid-filtered",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.000171948002389,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "hybrid-filtered",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.000151121003,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "hybrid-reference",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.000204425999982,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "hybrid-reference",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.001295378002396,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "pair-invariants-s3",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.012254435001523,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "pair-invariants-s3",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.011070467000536,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "s4-symmetric",
+      "mode": "enumerate",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.29731524700037,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    },
+    {
+      "n": 30,
+      "base_kind": "prefix",
+      "d": 10,
+      "variant": "s4-symmetric",
+      "mode": "first",
+      "attempts": 2,
+      "resolved": 0,
+      "verified_relations": 0,
+      "all_phase_seconds": 6.181694233000599,
+      "common_operations": null,
+      "full_dlp_S": null,
+      "rho_ratio": null
+    }
+  ],
+  "batches": [
+    {
+      "n": 18,
+      "d": 8,
+      "base_kind": "prefix",
+      "batch_targets": 8,
+      "setup_seconds": 0.46463166499961517,
+      "all_phase_seconds": 1.3697838109983422,
+      "table": {
+        "signed_base_size": 254,
+        "unordered_pairs": 8001,
+        "table_keys": 15131,
+        "table_entries": 16002
+      },
+      "counters": {
+        "field_api": {
+          "phases": {
+            "setup": {
+              "additions": 165352,
+              "multiplications": 57570,
+              "squarings": 24530,
+              "inversionCalls": 1,
+              "curveAdditionCalls": 0,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 247452
+            },
+            "queries": {
+              "additions": 22949,
+              "multiplications": 88670,
+              "squarings": 2834,
+              "inversionCalls": 2378,
+              "curveAdditionCalls": 2454,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 114453
+            }
+          },
+          "totals": {
+            "additions": 188301,
+            "multiplications": 146240,
+            "squarings": 27364,
+            "inversionCalls": 2379,
+            "curveAdditionCalls": 2454,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 361905
+          }
+        },
+        "binary_word_operations": {}
+      },
+      "query_seconds": 0.4815194389993849,
+      "verified_relations": 76,
+      "strata": {
+        "uniform": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 34
+        },
+        "known_decomposable": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 42
+        }
+      },
+      "setup_plus_queries_seconds": 0.946151103999,
+      "external_validation_and_orchestration_seconds": 0.4236327069993422
+    },
+    {
+      "n": 18,
+      "d": 9,
+      "base_kind": "prefix",
+      "batch_targets": 8,
+      "setup_seconds": 2.0732940630005032,
+      "all_phase_seconds": 4.600267531001009,
+      "table": {
+        "signed_base_size": 512,
+        "unordered_pairs": 32640,
+        "table_keys": 51671,
+        "table_entries": 65280
+      },
+      "counters": {
+        "field_api": {
+          "phases": {
+            "setup": {
+              "additions": 664331,
+              "multiplications": 231583,
+              "squarings": 98961,
+              "inversionCalls": 1,
+              "curveAdditionCalls": 0,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 994875
+            },
+            "queries": {
+              "additions": 70976,
+              "multiplications": 269707,
+              "squarings": 11227,
+              "inversionCalls": 7123,
+              "curveAdditionCalls": 7807,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 351910
+            }
+          },
+          "totals": {
+            "additions": 735307,
+            "multiplications": 501290,
+            "squarings": 110188,
+            "inversionCalls": 7124,
+            "curveAdditionCalls": 7807,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 1346785
+          }
+        },
+        "binary_word_operations": {}
+      },
+      "query_seconds": 1.4365363510041789,
+      "verified_relations": 684,
+      "strata": {
+        "uniform": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 320
+        },
+        "known_decomposable": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 364
+        }
+      },
+      "setup_plus_queries_seconds": 3.509830414004682,
+      "external_validation_and_orchestration_seconds": 1.090437116996327
+    },
+    {
+      "n": 18,
+      "d": 10,
+      "base_kind": "prefix",
+      "batch_targets": 8,
+      "setup_seconds": 9.049292261999653,
+      "all_phase_seconds": 20.082770111999707,
+      "table": {
+        "signed_base_size": 1068,
+        "unordered_pairs": 142311,
+        "table_keys": 116362,
+        "table_entries": 284622
+      },
+      "counters": {
+        "field_api": {
+          "phases": {
+            "setup": {
+              "additions": 2869352,
+              "multiplications": 1002440,
+              "squarings": 429042,
+              "inversionCalls": 1,
+              "curveAdditionCalls": 0,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 4300834
+            },
+            "queries": {
+              "additions": 364574,
+              "multiplications": 1363476,
+              "squarings": 71184,
+              "inversionCalls": 35400,
+              "curveAdditionCalls": 41364,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 1799234
+            }
+          },
+          "totals": {
+            "additions": 3233926,
+            "multiplications": 2365916,
+            "squarings": 500226,
+            "inversionCalls": 35401,
+            "curveAdditionCalls": 41364,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 6100068
+          }
+        },
+        "binary_word_operations": {}
+      },
+      "query_seconds": 6.907297280995408,
+      "verified_relations": 5964,
+      "strata": {
+        "uniform": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 2943
+        },
+        "known_decomposable": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 3021
+        }
+      },
+      "setup_plus_queries_seconds": 15.956589542995061,
+      "external_validation_and_orchestration_seconds": 4.126180569004646
+    },
+    {
+      "n": 18,
+      "d": 8,
+      "base_kind": "f4-stable",
+      "batch_targets": 8,
+      "setup_seconds": 0.17294996999771683,
+      "all_phase_seconds": 0.6898123799983296,
+      "table": {
+        "signed_base_size": 148,
+        "unordered_pairs": 2701,
+        "table_keys": 5132,
+        "table_entries": 5402
+      },
+      "counters": {
+        "field_api": {
+          "phases": {
+            "setup": {
+              "additions": 59866,
+              "multiplications": 20258,
+              "squarings": 8524,
+              "inversionCalls": 1,
+              "curveAdditionCalls": 0,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 88648
+            },
+            "queries": {
+              "additions": 12491,
+              "multiplications": 48408,
+              "squarings": 1458,
+              "inversionCalls": 1302,
+              "curveAdditionCalls": 1328,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 62357
+            }
+          },
+          "totals": {
+            "additions": 72357,
+            "multiplications": 68666,
+            "squarings": 9982,
+            "inversionCalls": 1303,
+            "curveAdditionCalls": 1328,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 151005
+          }
+        },
+        "binary_word_operations": {}
+      },
+      "query_seconds": 0.2754803770003491,
+      "verified_relations": 26,
+      "strata": {
+        "uniform": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 9
+        },
+        "known_decomposable": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 17
+        }
+      },
+      "setup_plus_queries_seconds": 0.44843034699806594,
+      "external_validation_and_orchestration_seconds": 0.24138203300026362
+    },
+    {
+      "n": 18,
+      "d": 10,
+      "base_kind": "f4-stable",
+      "batch_targets": 8,
+      "setup_seconds": 7.687548327998229,
+      "all_phase_seconds": 18.008563816998503,
+      "table": {
+        "signed_base_size": 976,
+        "unordered_pairs": 118828,
+        "table_keys": 110279,
+        "table_entries": 237656
+      },
+      "counters": {
+        "field_api": {
+          "phases": {
+            "setup": {
+              "additions": 2402367,
+              "multiplications": 837875,
+              "squarings": 358501,
+              "inversionCalls": 1,
+              "curveAdditionCalls": 0,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 3598743
+            },
+            "queries": {
+              "additions": 297444,
+              "multiplications": 1113708,
+              "squarings": 57180,
+              "inversionCalls": 28956,
+              "curveAdditionCalls": 33660,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 1468332
+            }
+          },
+          "totals": {
+            "additions": 2699811,
+            "multiplications": 1951583,
+            "squarings": 415681,
+            "inversionCalls": 28957,
+            "curveAdditionCalls": 33660,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 5067075
+          }
+        },
+        "binary_word_operations": {}
+      },
+      "query_seconds": 6.60885293600586,
+      "verified_relations": 4704,
+      "strata": {
+        "uniform": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 2338
+        },
+        "known_decomposable": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 2366
+        }
+      },
+      "setup_plus_queries_seconds": 14.29640126400409,
+      "external_validation_and_orchestration_seconds": 3.712162552994414
+    },
+    {
+      "n": 30,
+      "d": 8,
+      "base_kind": "prefix",
+      "batch_targets": 8,
+      "setup_seconds": 1.0240821299994423,
+      "all_phase_seconds": 3.5867608769985964,
+      "table": {
+        "signed_base_size": 280,
+        "unordered_pairs": 9730,
+        "table_keys": 19460,
+        "table_entries": 19460
+      },
+      "counters": {
+        "field_api": {
+          "phases": {
+            "setup": {
+              "additions": 319801,
+              "multiplications": 69749,
+              "squarings": 29755,
+              "inversionCalls": 1,
+              "curveAdditionCalls": 0,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 419305
+            },
+            "queries": {
+              "additions": 21470,
+              "multiplications": 137774,
+              "squarings": 2282,
+              "inversionCalls": 2258,
+              "curveAdditionCalls": 2262,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 161526
+            }
+          },
+          "totals": {
+            "additions": 341271,
+            "multiplications": 207523,
+            "squarings": 32037,
+            "inversionCalls": 2259,
+            "curveAdditionCalls": 2262,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 580831
+          }
+        },
+        "binary_word_operations": {}
+      },
+      "query_seconds": 1.3052157450001687,
+      "verified_relations": 4,
+      "strata": {
+        "uniform": {
+          "targets": 4,
+          "targets_with_relations": 0,
+          "verified_relations": 0
+        },
+        "known_decomposable": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 4
+        }
+      },
+      "setup_plus_queries_seconds": 2.329297874999611,
+      "external_validation_and_orchestration_seconds": 1.2574630019989854
+    },
+    {
+      "n": 30,
+      "d": 9,
+      "base_kind": "prefix",
+      "batch_targets": 8,
+      "setup_seconds": 3.5396802839968586,
+      "all_phase_seconds": 8.320221991998551,
+      "table": {
+        "signed_base_size": 526,
+        "unordered_pairs": 34453,
+        "table_keys": 68894,
+        "table_entries": 68906
+      },
+      "counters": {
+        "field_api": {
+          "phases": {
+            "setup": {
+              "additions": 1119924,
+              "multiplications": 244326,
+              "squarings": 104426,
+              "inversionCalls": 1,
+              "curveAdditionCalls": 0,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 1468676
+            },
+            "queries": {
+              "additions": 40141,
+              "multiplications": 257639,
+              "squarings": 4247,
+              "inversionCalls": 4223,
+              "curveAdditionCalls": 4227,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 302027
+            }
+          },
+          "totals": {
+            "additions": 1160065,
+            "multiplications": 501965,
+            "squarings": 108673,
+            "inversionCalls": 4224,
+            "curveAdditionCalls": 4227,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 1770703
+          }
+        },
+        "binary_word_operations": {}
+      },
+      "query_seconds": 2.43372954899678,
+      "verified_relations": 4,
+      "strata": {
+        "uniform": {
+          "targets": 4,
+          "targets_with_relations": 0,
+          "verified_relations": 0
+        },
+        "known_decomposable": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 4
+        }
+      },
+      "setup_plus_queries_seconds": 5.973409832993639,
+      "external_validation_and_orchestration_seconds": 2.3468121590049122
+    },
+    {
+      "n": 30,
+      "d": 10,
+      "base_kind": "prefix",
+      "batch_targets": 8,
+      "setup_seconds": 12.962271363998298,
+      "all_phase_seconds": 22.089241829999082,
+      "table": {
+        "signed_base_size": 1010,
+        "unordered_pairs": 127260,
+        "table_keys": 254463,
+        "table_entries": 254520
+      },
+      "counters": {
+        "field_api": {
+          "phases": {
+            "setup": {
+              "additions": 4106535,
+              "multiplications": 896991,
+              "squarings": 383843,
+              "inversionCalls": 1,
+              "curveAdditionCalls": 0,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 5387369
+            },
+            "queries": {
+              "additions": 77009,
+              "multiplications": 494389,
+              "squarings": 8134,
+              "inversionCalls": 8104,
+              "curveAdditionCalls": 8109,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 579532
+            }
+          },
+          "totals": {
+            "additions": 4183544,
+            "multiplications": 1391380,
+            "squarings": 391977,
+            "inversionCalls": 8105,
+            "curveAdditionCalls": 8109,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 5966901
+          }
+        },
+        "binary_word_operations": {}
+      },
+      "query_seconds": 4.644640779002657,
+      "verified_relations": 5,
+      "strata": {
+        "uniform": {
+          "targets": 4,
+          "targets_with_relations": 0,
+          "verified_relations": 0
+        },
+        "known_decomposable": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 5
+        }
+      },
+      "setup_plus_queries_seconds": 17.606912143000955,
+      "external_validation_and_orchestration_seconds": 4.482329686998128
+    },
+    {
+      "n": 30,
+      "d": 8,
+      "base_kind": "f4-stable",
+      "batch_targets": 8,
+      "setup_seconds": 1.246660045999306,
+      "all_phase_seconds": 4.059960485999909,
+      "table": {
+        "signed_base_size": 304,
+        "unordered_pairs": 11476,
+        "table_keys": 22952,
+        "table_entries": 22952
+      },
+      "counters": {
+        "field_api": {
+          "phases": {
+            "setup": {
+              "additions": 375869,
+              "multiplications": 82019,
+              "squarings": 35017,
+              "inversionCalls": 1,
+              "curveAdditionCalls": 0,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 492905
+            },
+            "queries": {
+              "additions": 23303,
+              "multiplications": 149547,
+              "squarings": 2475,
+              "inversionCalls": 2451,
+              "curveAdditionCalls": 2455,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 175325
+            }
+          },
+          "totals": {
+            "additions": 399172,
+            "multiplications": 231566,
+            "squarings": 37492,
+            "inversionCalls": 2452,
+            "curveAdditionCalls": 2455,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 668230
+          }
+        },
+        "binary_word_operations": {}
+      },
+      "query_seconds": 1.446716253998602,
+      "verified_relations": 4,
+      "strata": {
+        "uniform": {
+          "targets": 4,
+          "targets_with_relations": 0,
+          "verified_relations": 0
+        },
+        "known_decomposable": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 4
+        }
+      },
+      "setup_plus_queries_seconds": 2.693376299997908,
+      "external_validation_and_orchestration_seconds": 1.366584186002001
+    },
+    {
+      "n": 30,
+      "d": 10,
+      "base_kind": "f4-stable",
+      "batch_targets": 8,
+      "setup_seconds": 13.710484238999925,
+      "all_phase_seconds": 22.595443646001513,
+      "table": {
+        "signed_base_size": 1012,
+        "unordered_pairs": 127765,
+        "table_keys": 254817,
+        "table_entries": 255530
+      },
+      "counters": {
+        "field_api": {
+          "phases": {
+            "setup": {
+              "additions": 4121360,
+              "multiplications": 900530,
+              "squarings": 385360,
+              "inversionCalls": 1,
+              "curveAdditionCalls": 0,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 5407250
+            },
+            "queries": {
+              "additions": 77112,
+              "multiplications": 494999,
+              "squarings": 8144,
+              "inversionCalls": 8114,
+              "curveAdditionCalls": 8119,
+              "curveDoublingCalls": 0,
+              "fieldOperations": 580255
+            }
+          },
+          "totals": {
+            "additions": 4198472,
+            "multiplications": 1395529,
+            "squarings": 393504,
+            "inversionCalls": 8115,
+            "curveAdditionCalls": 8119,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 5987505
+          }
+        },
+        "binary_word_operations": {}
+      },
+      "query_seconds": 4.5403835700053605,
+      "verified_relations": 5,
+      "strata": {
+        "uniform": {
+          "targets": 4,
+          "targets_with_relations": 1,
+          "verified_relations": 1
+        },
+        "known_decomposable": {
+          "targets": 4,
+          "targets_with_relations": 4,
+          "verified_relations": 4
+        }
+      },
+      "setup_plus_queries_seconds": 18.250867809005285,
+      "external_validation_and_orchestration_seconds": 4.344575836996228
+    }
+  ],
+  "audit": {
+    "matched_trials": 240,
+    "instances": 24,
+    "batches": 10,
+    "batch_queries": 80,
+    "certificates_replayed": 11985,
+    "source_hashes_match": true,
+    "frozen_targets_replayed": 8,
+    "validation_failures": 0,
+    "frobenius_counterexample": {
+      "n": 18,
+      "d": 8,
+      "basis": [
+        36685,
+        225458,
+        4625,
+        10624,
+        16454,
+        33184,
+        65610,
+        132113
+      ],
+      "target": [
+        246887,
+        233930
+      ],
+      "original_points": [
+        [
+          91826,
+          253290
+        ],
+        [
+          31236,
+          96739
+        ],
+        [
+          203124,
+          19102
+        ]
+      ],
+      "conjugate_target": [
+        15338,
+        50099
+      ],
+      "conjugated_points": [
+        [
+          209140,
+          63459
+        ],
+        [
+          158724,
+          161209
+        ],
+        [
+          89379,
+          109716
+        ]
+      ],
+      "conjugated_relation_is_for_original_target": false
+    },
+    "raw_sha256": "55e77809a6ba6856a98f414a6575fee5585e34349e1a9816da9fabc08ab274fc"
+  },
+  "prior_profile": {
+    "18": {
+      "setup_fraction": 0.0024454868827007404,
+      "support_verification_fraction": 0.7145272844143412
+    },
+    "30": {
+      "setup_fraction": 0.0020975456547686145,
+      "support_verification_fraction": 0.73440548714927
+    }
+  },
+  "classification": "engineering diagnostic",
+  "common_operation_speedup": null,
+  "full_dlp_S": null,
+  "rho_ratio": null
+}

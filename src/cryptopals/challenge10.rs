@@ -29,7 +29,7 @@ pub fn cbc_encrypt_no_iv_prefix(pt: &[u8], key: &AesKey, iv: &[u8; 16]) -> Vec<u
 }
 
 pub fn cbc_decrypt_no_iv_prefix(ct: &[u8], key: &AesKey, iv: &[u8; 16]) -> Option<Vec<u8>> {
-    if ct.len() % 16 != 0 {
+    if !ct.len().is_multiple_of(16) {
         return None;
     }
     let mut out = Vec::with_capacity(ct.len());
@@ -51,7 +51,10 @@ pub fn run() -> Report {
     let key = AesKey::new(KEY).unwrap();
     let iv = [0u8; 16];
     let pt = cbc_decrypt_no_iv_prefix(&ct, &key, &iv).expect("CBC decrypt");
-    r.line(format!("plaintext head: {:?}", &String::from_utf8_lossy(&pt)[..40]));
+    r.line(format!(
+        "plaintext head: {:?}",
+        &String::from_utf8_lossy(&pt)[..40]
+    ));
     // Round-trip sanity.
     let re_ct = cbc_encrypt_no_iv_prefix(&pt, &key, &iv);
     assert_eq!(re_ct, ct);

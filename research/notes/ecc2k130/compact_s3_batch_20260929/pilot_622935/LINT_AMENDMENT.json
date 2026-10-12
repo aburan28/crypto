@@ -1,0 +1,17 @@
+{
+  "change": "Private RootTable::get helper, used only by an exhaustive unit test, is compiled only under cfg(test). No production root or query path changed.",
+  "claim_policy": "Seed-622935 timings and ratios excluded from confirmatory inference; only seed-622936 v2 post-source-commit points will be used.",
+  "confirmatory_seed": 622936,
+  "failed_clippy_url": "https://github.com/aburan28/crypto/actions/runs/36596627590",
+  "local_new_release_binary_sha256": "0b84debd3002f46e4527ab5e64544f05e714122ce8d6da9336932edf156294db",
+  "local_old_release_binary_sha256": "e2b14dc8cb7f18e3e0e05ea492b5e1d1584468071baa91cd16666b35912615a5",
+  "new_source_sha256": "e998120842faf393910a6b4a9740b3af9880eb626578fa88c575a32e5254f2c7",
+  "old_evaluation_freeze_commit": "4434df75af94454db72a17d5cc1378a647968a5d",
+  "old_source_commit": "5be69f20ec406bea30ce2b4e11464466c01ff18e",
+  "old_source_sha256": "73223899b4a81b54e0edb3dd4025953f1c5443c1fe451b0c82b1eaf2e9135ca7",
+  "pilot_final_status": "cancelled after n41 PASS; n53 raw measurement censored and excluded",
+  "pilot_run_url": "https://github.com/aburan28/crypto/actions/runs/36596627584",
+  "pilot_seed": 622935,
+  "schema": "compact-s3-batch-lint-amendment-v1",
+  "source_only_v2_run_status": "cancelled because FROZEN.json was deliberately absent before v2 point generation"
+}

@@ -31,9 +31,7 @@
 //! small-order, and non-prime-subgroup public/R points, but this module should
 //! not be treated as a constant-time production Ed25519 implementation.
 
-use super::curve25519::{
-    fe_add, fe_from_bytes, fe_inv, fe_mul, fe_pow_p58, fe_sq, fe_sub, fe_to_bytes, p,
-};
+use super::curve25519::{fe_add, fe_from_bytes, fe_inv, fe_mul, fe_sq, fe_sub, fe_to_bytes, p};
 use crate::hash::sha512::sha512;
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
@@ -175,6 +173,7 @@ impl EdPoint {
         }
     }
 
+    #[allow(dead_code)]
     fn neg(&self) -> Self {
         EdPoint {
             x: fe_sub(&BigUint::zero(), &self.x),
@@ -394,6 +393,7 @@ mod tests {
         out
     }
 
+    #[allow(dead_code)]
     fn hex(bytes: &[u8]) -> String {
         bytes.iter().map(|b| format!("{:02x}", b)).collect()
     }

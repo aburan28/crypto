@@ -1,0 +1,115 @@
+{
+  "valid": true,
+  "kind": "Independent retained-artifact review of the public B16 Make audit",
+  "rawSha256": "cf91f9ae23742aaff5bd5505bb3b0fbf1712e0ea336460eb77a0068788555587",
+  "sourceFreezeSha256": "21e7e44cd7be54c002adafd485130b59f70754b92e470a376324044777b5c3d4",
+  "measuredSourceCommit": "8ff25658aef2c213624ce14b8838d8a8a40f7be8",
+  "localCommittedFilesVerified": 188,
+  "remoteAggregateFilesVerified": 68,
+  "remoteAggregateSha256": "b0480f07e9358f8289818f51170f4cadd786b75575fb117d948a7c9cadbfef18",
+  "rootPackedAuditIncludedInRemoteAggregate": false,
+  "publicCommand": [
+    "make",
+    "audit-rtx-pro6000",
+    "MODAL=/private/tmp/ecc2k-modal-1.5.5-20260909/bin/modal"
+  ],
+  "compiler": "13.3.73",
+  "cudaImageVersion": "13.3.1",
+  "reportedBinarySha256": "3f593545161082b8726169891f49a5c412df074d27fab8307e366a1387b16c63",
+  "gpuSnapshot": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-4f844343-cb0d-f475-87e9-6482327eb1c8",
+    "driverVersion": "580.95.05"
+  },
+  "batch": 16,
+  "workers": 385024,
+  "scalarWalks": 6160384,
+  "scalarUpdatesEverySample": 201863462912,
+  "sampleCount": 6,
+  "arithmeticChecksExact": true,
+  "integrationChecksExact": true,
+  "summaries": {
+    "benchmark": {
+      "medianB": 13.283755999999999,
+      "minB": 13.151468999999999,
+      "maxB": 13.434216000000001,
+      "ratesB": [
+        13.434216000000001,
+        13.283755999999999,
+        13.151468999999999
+      ]
+    },
+    "collectionSummary": {
+      "medianB": 12.813626000000001,
+      "minB": 12.800253000000001,
+      "maxB": 12.815682,
+      "ratesB": [
+        12.815682,
+        12.813626000000001,
+        12.800253000000001
+      ]
+    }
+  },
+  "samples": [
+    {
+      "phase": "benchmark",
+      "index": 0,
+      "rateB": 13.434216000000001,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "benchmark",
+      "index": 1,
+      "rateB": 13.283755999999999,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "benchmark",
+      "index": 2,
+      "rateB": 13.151468999999999,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "collectionSummary",
+      "index": 0,
+      "rateB": 12.815682,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "collectionSummary",
+      "index": 1,
+      "rateB": 12.813626000000001,
+      "updates": 201863462912,
+      "dropped": 0
+    },
+    {
+      "phase": "collectionSummary",
+      "index": 2,
+      "rateB": 12.800253000000001,
+      "updates": 201863462912,
+      "dropped": 0
+    }
+  ],
+  "collectionCountsAndSizes": {
+    "samples": 3,
+    "recordsEach": 5149,
+    "bytesEach": 164768,
+    "dropsEach": 0
+  },
+  "ownerAuditorSha256": "d2e69af28c5ed150f15879c92801702e4bfcf1d616004deed461282d5758cdf9",
+  "ownerReviewSha256": "42dd769667e491a1540cf825c30e6f9bd1d226a85169178f449800ec1057c9c9",
+  "independentScriptSha256": "77d7b726f8fe5374ec122286e3865748fe1e8ef3a609e9fcd35a15a908fa3817",
+  "findings": [],
+  "limits": [
+    "This is a separate public-command allocation; it is not a paired gain estimate against the previous benchmark.",
+    "The188 local files were verified against the exact Git commit. The recorded remote aggregate covers68 Make/modal/CUDA/header/codegen files and excludes root packed_audit.py.",
+    "The binary/source identities are pre-validation reports. This artifact has no post-run binary/source hash or complete SASS/native-code binding.",
+    "The three collection records prove matching reported counts and sizes with zero drops; no corpus content hash or retained payload is present, so multiset equality is not independently established here.",
+    "There is one pre-validation GPU telemetry snapshot, not continuous monitoring or an end-to-end GPU identity proof.",
+    "No compiler, numerical client or remote job was invoked by this review. The15B full-walk target remains above both reported medians."
+  ]
+}

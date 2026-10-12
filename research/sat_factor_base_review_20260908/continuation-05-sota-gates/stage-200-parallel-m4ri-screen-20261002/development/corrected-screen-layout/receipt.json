@@ -1,0 +1,38 @@
+{
+  "metrics": {
+    "bytes": 653,
+    "path": "metrics.json",
+    "sha256": "09d90fd47c132f49bc491cff4b883cf9af82c1516b23b36f416b447b8e21a085"
+  },
+  "process": {
+    "command": [
+      "/bin/mkdir",
+      "-p",
+      "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-200-parallel-m4ri-screen-20261002/development/corrected-screen"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 1228800,
+    "pid": 60973,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.001117,
+    "timed_out": false,
+    "total_core_seconds": 0.001719,
+    "user_seconds": 0.000602,
+    "wall_seconds": 0.022861959,
+    "watchdog_seconds": 30
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 0,
+    "path": "stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 0,
+    "path": "stdout.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "schema": "ecbench.audit/v1",
+  "session_id": "ECBS1hc6d15a12b9b6",
+  "ok": false,
+  "problems": [
+    "session_complete: session status is `interrupted`"
+  ],
+  "checks": {
+    "arms": true,
+    "env_class": true,
+    "executions": true,
+    "host_hash": true,
+    "plan_hash": true,
+    "record_count": true,
+    "records": true,
+    "records_hash": true,
+    "session_complete": false,
+    "spec_id": true,
+    "workloads": true
+  },
+  "records": 36,
+  "verified_records": 35,
+  "regraded": true,
+  "replays": [],
+  "files": {
+    "host.json": "3c9b60f29b38871be09f31c301d606a56bb36855260c905bd1e79e466fe08212",
+    "plan.json": "0291adcbf47a58affe9cb39db7b483115d4d24ddc513bcc90d95f404fce90a12",
+    "records.jsonl": "a68ffa3bfef32b38c45113ae6a345d54e0493c890fc574b8b821e7f5a9bc499b",
+    "session.json": "071930faa8040a43d0763ad3f3e3675122176672e00c5d7cae305603f11c56bb",
+    "spec.json": "cbbd35530e5031313dafe614246f308ce037f7a7314ecc3c641665e157662ccd"
+  },
+  "auditor_binary_sha256": "5111ebc20d5471ec1188e93e1a0541b6c1cba36b0538eeafd0817ce49df10291",
+  "audited_unix_ms": 1790991183239
+}

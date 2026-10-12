@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "source_sha256": "27a28eab8bf15d0f69747089b3921e4db0a1b6c3a0668ec57b88c2a5719f700c",
+  "python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "cpu_count": 14,
+  "trials_per_split_and_size": 128,
+  "arithmetic_pairs_per_split": 24,
+  "arithmetic_count": 4096,
+  "coverage_budget": 8192,
+  "child_timeout_s": 15,
+  "scope": "32/128-state ring coverage and degree-24 polynomials modulo 257",
+  "transfer_scope": "host encode/decode and subprocess IPC only; no GPU transfers measured",
+  "selection": "fixed variants; discovery never changes holdout configuration",
+  "censoring": "fixed operation budget; report E[min(T,budget)], not mean completion time",
+  "timing": "fresh child per arithmetic variant; randomized within-pair order",
+  "memory": "separate traced passes; process RSS includes interpreter; no timing claims from traced passes",
+  "novelty": "known positive controls; no new cryptanalytic algorithm or solver speedup"
+}

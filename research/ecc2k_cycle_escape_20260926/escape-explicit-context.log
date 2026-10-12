@@ -1,0 +1,9 @@
+make: Entering directory '/workspace/scratch/7d06a41a6de1/crypto/ecc2k130'
+mkdir -p build
+g++ -O2 -std=c++17 -Wno-unknown-pragmas src/testcycleescape.cpp -o build/test-cycle-escape
+./build/test-cycle-escape
+PASS: graph entry phases; F131 exits 6; packed/reference comparisons 15; pivot bytes 0; hybrid 0
+g++ -O2 -std=c++17 -Wno-unknown-pragmas -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_ADDEND_GLOBAL=1 src/testcycleescape.cpp -o build/test-cycle-escape-hybrid
+./build/test-cycle-escape-hybrid
+PASS: graph entry phases; F131 exits 6; packed/reference comparisons 15; pivot bytes 1; hybrid 1
+make: Leaving directory '/workspace/scratch/7d06a41a6de1/crypto/ecc2k130'

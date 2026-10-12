@@ -1,0 +1,170 @@
+{
+  "valid": true,
+  "status": "Completed matched compact batch-panel receipt passed independent offline audit",
+  "rawSha256": "c82330a66bd32f8978d4bdba0e5173d6ae5cd4cffefc503ea0ffe992e0665208",
+  "auditorSha256": "1e1aa584e656fc902c59b871380ad3018cce4208e3e28605f55ef53e158ac358",
+  "weightedPrefixModes": {
+    "control": 2,
+    "b12_m2": 2,
+    "b10_m2": 2
+  },
+  "compactStateModes": {
+    "control": 1,
+    "b12_m2": 1,
+    "b10_m2": 1
+  },
+  "canonicalInputsOnly": true,
+  "rootPredispatchReviewSha256": "9f8ff8127a1459b0b45cf9d2d0c459cf1847e7839c26401b845e1c9bc28aa2e8",
+  "predispatchReviewSha256": "65c8199dee1a7bbb1d86f92842fbe3baf76bfe43f6ca1175b3c250a5eafe642d",
+  "driverFreezeSha256": "ccc1c3a94f5876a8bc98a1742e052697a936dff5b2ec4c698ca574d678f9979d",
+  "prebuildSha256": "db0659755dde198de93ee2d6b46f9bfb7a711a154fcc2a46971e4987c9326a66",
+  "sourceManifestHashes": {
+    "control": "2fff64bb2a2f252886923aa65a7f3fc649939bba03ff545e3e7ae37c1833d40c",
+    "b12_m2": "2fff64bb2a2f252886923aa65a7f3fc649939bba03ff545e3e7ae37c1833d40c",
+    "b10_m2": "2fff64bb2a2f252886923aa65a7f3fc649939bba03ff545e3e7ae37c1833d40c"
+  },
+  "sourceFilesPerMode": 159,
+  "binaries": {
+    "control": "bc4914a093e3d03ac8890551f16215494b427fb4d54793f033b500e234ba6e12",
+    "b12_m2": "624a5673170ce5bb7fe4bbfa0c6040c763a8fe892c9f1015b894d0cbc8c69e15",
+    "b10_m2": "f37199c5afc224b5687e2a311c5adbfa2d61c467095b7dd78e1cd26f43c19fd2"
+  },
+  "arithmeticBinaries": {
+    "control": "b4180889904d35f554639accde51f3fe3b2c47ec9e7376153351221244434c5d",
+    "b12_m2": "704d9551f2b94b1ebda0ea9d049127d587aae8d421ddc0f23722f7a0269e7d08",
+    "b10_m2": "c74181915cf524f495cf96b797c666e2a329bcb3a00362e0b64270dadfe0c039"
+  },
+  "storageBinaries": {
+    "control": "26b60cd1827b48c95932326deeab2c1b554bd86eb5a693b018748c6e059b53b2",
+    "b12_m2": "4f51c1ca860df14e2e5e29a278e2afac9ceaa1a008911f7b3010067788eea483",
+    "b10_m2": "e776c552b32474aa349ec161712be7396a3148b8adc3757ffae3283ed8920011"
+  },
+  "gpuBefore": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-ab973186-94b1-4645-c145-389dea66aac2",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-ab973186-94b1-4645-c145-389dea66aac2",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "180 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "48"
+    }
+  },
+  "gpuAfter": {
+    "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "uuid": "GPU-ab973186-94b1-4645-c145-389dea66aac2",
+    "driverVersion": "580.95.05",
+    "fields": {
+      "name": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "uuid": "GPU-ab973186-94b1-4645-c145-389dea66aac2",
+      "driver_version": "580.95.05",
+      "pstate": "P0",
+      "clocks.current.sm [MHz]": "2340 MHz",
+      "clocks.current.memory [MHz]": "12481 MHz",
+      "power.limit [W]": "600.00 W",
+      "temperature.gpu": "67"
+    }
+  },
+  "jitEnvironment": {
+    "CUDA_DISABLE_PTX_JIT": "1",
+    "CUDA_FORCE_PTX_JIT": null,
+    "CUDA_FORCE_JIT": null
+  },
+  "sourceAndNativeCodeBindingsPassed": true,
+  "allCorrectnessGatesPassed": true,
+  "allRequiredCommandsCompletedWithExpectedStatus": true,
+  "gpuPairedFrobeniusPairsPerMode": 6240,
+  "gpuPairedFrobeniusOutputsPerMode": 12480,
+  "arithmeticModeLineAndAllSixPassLinesRequired": true,
+  "checkpointChildren": 39,
+  "successfulCheckpointChildren": 30,
+  "expectedCheckpointRejections": 9,
+  "expectedCrossBatchRejections": 6,
+  "expectedWorkerRejections": 3,
+  "checkpointComparisons": 9,
+  "storageCasesPerMode": 128,
+  "storageRecordsByMode": {
+    "control": 297344,
+    "b12_m2": 223008,
+    "b10_m2": 185840
+  },
+  "normalizedPopulations": [
+    240,
+    61440
+  ],
+  "warmupsExcluded": 3,
+  "timedRows": 7,
+  "scalarUpdatesEveryTimedRow": 201326592000,
+  "scalarWalks": 6144000,
+  "stepsPerWalk": 32768,
+  "batches": {
+    "control": 16,
+    "b12_m2": 12,
+    "b10_m2": 10
+  },
+  "workers": {
+    "control": 384000,
+    "b12_m2": 512000,
+    "b10_m2": 614400
+  },
+  "screenQualified": false,
+  "screenWinner": null,
+  "screenRatesM": [
+    {
+      "mode": "control",
+      "rate": 14263.307
+    },
+    {
+      "mode": "b12_m2",
+      "rate": 13754.58
+    },
+    {
+      "mode": "b10_m2",
+      "rate": 13697.268
+    },
+    {
+      "mode": "control",
+      "rate": 14246.895
+    }
+  ],
+  "controlDriftPercent": -0.11506447978719692,
+  "qualificationThresholdM": 14334.623534999999,
+  "statistics": {},
+  "pairedComparisons": {},
+  "corpusIdentity": null,
+  "goalEvaluation": {
+    "targetBillionScalarUpdatesPerSecond": 15,
+    "repeatedConfirmationAvailable": false,
+    "benchmarkMedianAtLeast15B": false,
+    "allThreeBenchmarkSamplesAtLeast15B": false,
+    "collectionMedianAtLeast15B": false,
+    "benchmarkAndCollectionMediansAtLeast15B": false
+  },
+  "findings": [],
+  "limits": [
+    "No job, compiler or numerical test rerun by this audit; it inspects only the owner-supplied terminal artifact.",
+    "Complete scalar rates apply to this fixed oneGPU public walk workload. Warmups/screen peaks are excluded from repeated goal evaluation; benchmark and DP34 medians remain separate.",
+    "Batch16/12/10 and matched-population worker counts vary. Compact1, WP2, minBlocks2, T256, TILE256 and CLMAD1 stay fixed. New corpus counts/hashes must agree within this panel; no prior different-population corpus or rate is used as control.",
+    "Weighted-prefix equivalence is validated for canonical131-bit fields with denominator tags cleared before arithmetic, including the existing whole-batch zero-denominator convention. Arbitrary noncanonical field inputs are outside this proof.",
+    "Checkpoint v2 rejects six directed different-batch imports at equal240-slot payload size and three worker-geometry mismatches. Nine same-geometry split/uninterrupted comparisons are required. Cross-batch logical equivalence is checked through normalized240/61440-slot states; this panel performs no same-batch cross-mode import.",
+    "Temporary checkpoint and DP payload bytes are not retained; this audit verifies their recorded hashes, sizes, counts and bound executable helpers rather than independently rehashing those transient payloads.",
+    "API occupancy predictions and endpoint GPU telemetry do not prove achieved occupancy, cache hits, continuous clocks or a universal hardware ceiling."
+  ],
+  "ownerTerminalConfirmation": {
+    "session": 22971,
+    "app": "ap-UC1wNaky2vAeSUgov4gzjT",
+    "exitCode": 0,
+    "artifact": "/private/tmp/ecc2k-compact-batch-panel-20260912/result.json",
+    "sha256": "c82330a66bd32f8978d4bdba0e5173d6ae5cd4cffefc503ea0ffe992e0665208"
+  },
+  "rawArtifactPreserved": true,
+  "auditorLineage": {
+    "adaptedFromAuditorSha256": "d2c85c8c5d8501f17c13a6d2848aafda7a971ae6917095b0ba456300d6337eb7",
+    "scope": "Three distinct batches,159same-source files,6144000matched walks,201326592000updates per timed sample,240/61440normalized states,39checkpoint children. Cumulative reports2 validation derives its prior count from current-panel verified report history; fresh invocations retain no-reload and stored<=current-DPs.",
+    "priorPopulationCorpusReused": false
+  }
+}

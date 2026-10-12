@@ -179,7 +179,7 @@ fn theta(state: &mut [u8; 16]) {
         let b = state[4 * c + 1];
         let cc = state[4 * c + 2];
         let d = state[4 * c + 3];
-        new[4 * c]     = gmul(2, a) ^ gmul(3, b) ^ gmul(1, cc) ^ gmul(1, d);
+        new[4 * c] = gmul(2, a) ^ gmul(3, b) ^ gmul(1, cc) ^ gmul(1, d);
         new[4 * c + 1] = gmul(1, a) ^ gmul(2, b) ^ gmul(3, cc) ^ gmul(1, d);
         new[4 * c + 2] = gmul(1, a) ^ gmul(1, b) ^ gmul(2, cc) ^ gmul(3, d);
         new[4 * c + 3] = gmul(3, a) ^ gmul(1, b) ^ gmul(1, cc) ^ gmul(2, d);
@@ -200,7 +200,7 @@ fn theta_inv(state: &mut [u8; 16]) {
         let b = state[4 * c + 1];
         let cc = state[4 * c + 2];
         let d = state[4 * c + 3];
-        new[4 * c]     = gmul(0x0E, a) ^ gmul(0x0B, b) ^ gmul(0x0D, cc) ^ gmul(0x09, d);
+        new[4 * c] = gmul(0x0E, a) ^ gmul(0x0B, b) ^ gmul(0x0D, cc) ^ gmul(0x09, d);
         new[4 * c + 1] = gmul(0x09, a) ^ gmul(0x0E, b) ^ gmul(0x0B, cc) ^ gmul(0x0D, d);
         new[4 * c + 2] = gmul(0x0D, a) ^ gmul(0x09, b) ^ gmul(0x0E, cc) ^ gmul(0x0B, d);
         new[4 * c + 3] = gmul(0x0B, a) ^ gmul(0x0D, b) ^ gmul(0x09, cc) ^ gmul(0x0E, d);

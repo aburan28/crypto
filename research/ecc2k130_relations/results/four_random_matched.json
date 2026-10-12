@@ -1,0 +1,23 @@
+{
+  "name": "four_random_matched",
+  "description": "uniform random abscissae, size matched",
+  "abscissae_supplied": 4262,
+  "representatives": 4262,
+  "signed_pairs_total": 18160382,
+  "signed_pairs_consumed": 18160382,
+  "complete": true,
+  "elapsed_seconds": 374.407,
+  "pair_rate_per_second": 48504.4,
+  "keys_stored": 18160382,
+  "key_bytes": 145283056,
+  "digest_bits": 38,
+  "digest_collision_groups": 576,
+  "candidates_checked": 576,
+  "degenerate_candidates": 0,
+  "false_positive_candidates": 576,
+  "four_point_relations": 0,
+  "relations": [],
+  "log2_predicted_digest_collisions": 9.229,
+  "log2_predicted_genuine_collisions": -82.771,
+  "log2_expected_relations_by_counting": -81.356
+}

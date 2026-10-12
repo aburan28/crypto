@@ -1,0 +1,249 @@
+{
+  "note": "TWO-CHAINS.md",
+  "unit": "billions of complete scalar updates per second, `finished:` line",
+  "command": "--curve 131 --packed --bench --steps 1024 --launches 64 --verify 0, automatic worker count, alternating binaries",
+  "verifyCommand": "--curve 131 --packed --threads <forced common count> --dp-weight 48 --dp-cap 262144 --steps 96 --launches 6 --verify 300 --run-id 7 --dp-file",
+  "repetitions": 5,
+  "host": "NVIDIA B200, 580.95.05, 1965 MHz, 1000.00 W, 183359 MiB, 10.0\nCuda compilation tools, release 13.3, V13.3.73\nBuild cuda_13.3.r13.3/compiler.38244171_0\nsource: aed9d688888e0519f363a482d034253e5e86a879\narch: PRO6000_ARCH=-gencode arch=compute_100,code=sm_100\nsms: 148, verify threads 75776",
+  "launch": {
+    "provider": "modal",
+    "gpu": "B200",
+    "cudaImage": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+    "gitRev": "aed9d688888e0519f363a482d034253e5e86a879",
+    "gitDirty": false,
+    "startedAt": "2026-09-22T17:39:29Z",
+    "finishedAt": "2026-09-22T17:53:24Z",
+    "exitCode": 0,
+    "seconds": 782.1981642246246,
+    "deviceLine": "NVIDIA B200, 580.95.05"
+  },
+  "floorBps": {
+    "carrylessUnit33p1Clmad": 22.3,
+    "carrylessUnit31p85Clmad": 23.1,
+    "fiveProductsOnly": 24.6,
+    "basis": "1.62 lane-CLMADs per SM-clock, 188 SMs, 2.42 GHz (ONE-BLOCK-GEOMETRY.md section 1)"
+  },
+  "referenceBps": {
+    "oneBlockGeometry": 20.078,
+    "thisSession": 11.05825
+  },
+  "variants": {
+    "ref": {
+      "samplesBps": [
+        11.062327,
+        11.05825,
+        11.055978999999999,
+        11.054145,
+        11.064729999999999
+      ],
+      "medianBps": 11.05825,
+      "smClockMHz": [
+        1965,
+        1965,
+        1965,
+        1965,
+        1965
+      ],
+      "powerW": [
+        466.99,
+        465.33,
+        492.67,
+        498.95,
+        478.59
+      ],
+      "tempC": [
+        36,
+        37,
+        39,
+        38,
+        39
+      ],
+      "verify": {
+        "distinguishedPoints": 1165426,
+        "verified": 300,
+        "dropped": 0,
+        "mismatches": 0,
+        "registers": 117,
+        "residentBlocks": null,
+        "blockThreads": null
+      },
+      "dpIdentity": {
+        "records": 1165426,
+        "sha256_16": "626a6fcef0ef40ba",
+        "identicalToRef": true
+      },
+      "build": "0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 117 registers, used 1 barriers"
+    },
+    "clsq": {
+      "samplesBps": [
+        12.032669,
+        12.033967,
+        12.032142,
+        12.033233000000001,
+        12.03245
+      ],
+      "medianBps": 12.032669,
+      "smClockMHz": [
+        1965,
+        1965,
+        1965,
+        1965,
+        1965
+      ],
+      "powerW": [
+        474.94,
+        488.45,
+        490.38,
+        495.78,
+        486.52
+      ],
+      "tempC": [
+        36,
+        37,
+        38,
+        39,
+        39
+      ],
+      "verify": {
+        "distinguishedPoints": 1165426,
+        "verified": 300,
+        "dropped": 0,
+        "mismatches": 0,
+        "registers": 117,
+        "residentBlocks": null,
+        "blockThreads": null
+      },
+      "dpIdentity": {
+        "records": 1165426,
+        "sha256_16": "626a6fcef0ef40ba",
+        "identicalToRef": true
+      },
+      "build": "0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 117 registers, used 1 barriers",
+      "pairedRatioToRef": [
+        1.0877159028114067,
+        1.0882343047046323,
+        1.0882927690076114,
+        1.088572024340191,
+        1.087459883792917
+      ],
+      "pairedRatioMedian": 1.0882343047046323,
+      "pairedRatioMin": 1.087459883792917,
+      "pairedRatioMax": 1.088572024340191
+    },
+    "topclmad": {
+      "samplesBps": [
+        12.593971,
+        12.595925999999999,
+        12.595046,
+        12.590539000000001,
+        12.596227
+      ],
+      "medianBps": 12.595046,
+      "smClockMHz": [
+        1965,
+        1965,
+        1965,
+        1965,
+        1965
+      ],
+      "powerW": [
+        510.39,
+        520.84,
+        509.64,
+        511.26,
+        509.95
+      ],
+      "tempC": [
+        37,
+        38,
+        38,
+        39,
+        39
+      ],
+      "verify": {
+        "distinguishedPoints": 1165426,
+        "verified": 300,
+        "dropped": 0,
+        "mismatches": 0,
+        "registers": 116,
+        "residentBlocks": null,
+        "blockThreads": null
+      },
+      "dpIdentity": {
+        "records": 1165426,
+        "sha256_16": "626a6fcef0ef40ba",
+        "identicalToRef": true
+      },
+      "build": "0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 116 registers, used 1 barriers",
+      "pairedRatioToRef": [
+        1.1384558601458807,
+        1.1390523817059661,
+        1.1392067586235468,
+        1.1389880447560623,
+        1.1384125053209615
+      ],
+      "pairedRatioMedian": 1.1389880447560623,
+      "pairedRatioMin": 1.1384125053209615,
+      "pairedRatioMax": 1.1392067586235468
+    },
+    "topclmad-clsq": {
+      "samplesBps": [
+        13.871326999999999,
+        13.879163,
+        13.875726,
+        13.879588,
+        13.867037
+      ],
+      "medianBps": 13.875726,
+      "smClockMHz": [
+        1965,
+        1965,
+        1965,
+        1965,
+        1965
+      ],
+      "powerW": [
+        512.64,
+        513.79,
+        530.76,
+        537.53,
+        541.93
+      ],
+      "tempC": [
+        37,
+        38,
+        38,
+        39,
+        40
+      ],
+      "verify": {
+        "distinguishedPoints": 1165426,
+        "verified": 300,
+        "dropped": 0,
+        "mismatches": 0,
+        "registers": 116,
+        "residentBlocks": null,
+        "blockThreads": null
+      },
+      "dpIdentity": {
+        "records": 1165426,
+        "sha256_16": "626a6fcef0ef40ba",
+        "identicalToRef": true
+      },
+      "build": "0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 116 registers, used 1 barriers",
+      "pairedRatioToRef": [
+        1.253924874938157,
+        1.2550957882124207,
+        1.2550427239414983,
+        1.2556003200609365,
+        1.2532648333940368
+      ],
+      "pairedRatioMedian": 1.2550427239414983,
+      "pairedRatioMin": 1.2532648333940368,
+      "pairedRatioMax": 1.2556003200609365
+    }
+  },
+  "phaseProfile": {
+    "none": null
+  }
+}

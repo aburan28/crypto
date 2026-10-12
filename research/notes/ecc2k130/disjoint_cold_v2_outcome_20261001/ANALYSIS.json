@@ -1,0 +1,233 @@
+{
+  "all_cells_fixed_policy_no_go": true,
+  "all_cells_timing_eligible": true,
+  "cells": {
+    "n37_L1": {
+      "K": 7,
+      "L": 1,
+      "aa_valid": true,
+      "blocks": 20,
+      "children": 60,
+      "decision": "QUANTITATIVE_NO_GO_AT_THIS_CELL",
+      "full_rank_compact_traces": 40,
+      "ic_b_over_a": {
+        "interval_95pct": [
+          0.9907337230438973,
+          1.0077502882058238
+        ],
+        "median": 0.9960564783086732
+      },
+      "ic_cpu_seconds_median": 0.01275371004901293,
+      "ic_over_rho_cpu": {
+        "interval_95pct": [
+          2.7179443327417414,
+          2.8738005646665785
+        ],
+        "median": 2.809638061067929
+      },
+      "independent_correctness_replay": true,
+      "max_ic_rss_mib": 13.59375,
+      "max_rho_rss_mib": 13.5703125,
+      "n": 37,
+      "prefilter": "off",
+      "raw_sha256": "6b0215d7b332b4f449457a0335669f7d4e000f225d307aae973b6b0a6172f0c2",
+      "required_complete_cpu_reduction_to_parity": 0.6440822702907487,
+      "rho_cpu_seconds_median": 0.0045544999999999995,
+      "status": "PASS",
+      "timing_eligible": true,
+      "uncontended": true,
+      "verified_target_logs": 60
+    },
+    "n37_L1024": {
+      "K": 42,
+      "L": 1024,
+      "aa_valid": true,
+      "blocks": 5,
+      "children": 15,
+      "decision": "QUANTITATIVE_NO_GO_AT_THIS_CELL",
+      "full_rank_compact_traces": 10,
+      "ic_b_over_a": {
+        "interval_95pct": [
+          0.9912287317109949,
+          1.006964295803544
+        ],
+        "median": 0.9989350846510388
+      },
+      "ic_cpu_seconds_median": 0.359168573121313,
+      "ic_over_rho_cpu": {
+        "interval_95pct": [
+          2.9977585741912307,
+          3.0466147060738087
+        ],
+        "median": 3.0308978068112995
+      },
+      "independent_correctness_replay": true,
+      "max_ic_rss_mib": 13.56640625,
+      "max_rho_rss_mib": 13.03125,
+      "n": 37,
+      "prefilter": "off",
+      "raw_sha256": "d0b20298f95cd93a892a7994cd6262548dfbb6b18bf269147de08677b11992ed",
+      "required_complete_cpu_reduction_to_parity": 0.6700647584512047,
+      "rho_cpu_seconds_median": 0.118599,
+      "status": "PASS",
+      "timing_eligible": true,
+      "uncontended": true,
+      "verified_target_logs": 15360
+    },
+    "n41_L1": {
+      "K": 85,
+      "L": 1,
+      "aa_valid": true,
+      "blocks": 5,
+      "children": 15,
+      "decision": "QUANTITATIVE_NO_GO_AT_THIS_CELL",
+      "full_rank_compact_traces": 10,
+      "ic_b_over_a": {
+        "interval_95pct": [
+          0.954744317143125,
+          1.028022221988679
+        ],
+        "median": 0.9958129139715572
+      },
+      "ic_cpu_seconds_median": 0.5424014943065699,
+      "ic_over_rho_cpu": {
+        "interval_95pct": [
+          9.366660728364861,
+          18.490722790910077
+        ],
+        "median": 13.37757781463515
+      },
+      "independent_correctness_replay": true,
+      "max_ic_rss_mib": 27.12890625,
+      "max_rho_rss_mib": 13.32421875,
+      "n": 41,
+      "prefilter": "off",
+      "raw_sha256": "b467a82e7e6665c34a0eba77723ffa24545e87504ed80266349b8ee0505d1a2f",
+      "required_complete_cpu_reduction_to_parity": 0.9252480520871279,
+      "rho_cpu_seconds_median": 0.039262,
+      "status": "PASS",
+      "timing_eligible": true,
+      "uncontended": true,
+      "verified_target_logs": 15
+    },
+    "n41_L1024": {
+      "K": 255,
+      "L": 1024,
+      "aa_valid": true,
+      "blocks": 5,
+      "children": 15,
+      "decision": "QUANTITATIVE_NO_GO_AT_THIS_CELL",
+      "full_rank_compact_traces": 10,
+      "ic_b_over_a": {
+        "interval_95pct": [
+          0.9949941554129548,
+          1.0044548014498464
+        ],
+        "median": 1.0000168379223688
+      },
+      "ic_cpu_seconds_median": 1.4221714963684935,
+      "ic_over_rho_cpu": {
+        "interval_95pct": [
+          1.287829230135008,
+          1.3593203557419038
+        ],
+        "median": 1.3137047795866301
+      },
+      "independent_correctness_replay": true,
+      "max_ic_rss_mib": 175.83203125,
+      "max_rho_rss_mib": 39.73046875,
+      "n": 41,
+      "prefilter": "blocked",
+      "raw_sha256": "261b5f3e7b209c2163d807dc78554b96b80873eda052405156b1178b29dce4a4",
+      "required_complete_cpu_reduction_to_parity": 0.238793969894317,
+      "rho_cpu_seconds_median": 1.082178,
+      "status": "PASS",
+      "timing_eligible": true,
+      "uncontended": true,
+      "verified_target_logs": 15360
+    },
+    "n53_L1": {
+      "K": 220,
+      "L": 1,
+      "aa_valid": true,
+      "blocks": 5,
+      "children": 15,
+      "decision": "QUANTITATIVE_NO_GO_AT_THIS_CELL",
+      "full_rank_compact_traces": 10,
+      "ic_b_over_a": {
+        "interval_95pct": [
+          0.9975829050507636,
+          1.009528735286356
+        ],
+        "median": 1.005622328213417
+      },
+      "ic_cpu_seconds_median": 5.717557469276544,
+      "ic_over_rho_cpu": {
+        "interval_95pct": [
+          17.904391687307502,
+          31.595096547769575
+        ],
+        "median": 22.67464639974716
+      },
+      "independent_correctness_replay": true,
+      "max_ic_rss_mib": 171.47265625,
+      "max_rho_rss_mib": 13.01171875,
+      "n": 53,
+      "prefilter": "off",
+      "raw_sha256": "17850577b938651e39d8117dcfb89e03292417d65dc3ac5b125e57ed6608f2a2",
+      "required_complete_cpu_reduction_to_parity": 0.9558978789626836,
+      "rho_cpu_seconds_median": 0.254509,
+      "status": "PASS",
+      "timing_eligible": true,
+      "uncontended": true,
+      "verified_target_logs": 15
+    },
+    "n53_L1024": {
+      "K": 440,
+      "L": 1024,
+      "aa_valid": true,
+      "blocks": 5,
+      "children": 15,
+      "decision": "QUANTITATIVE_NO_GO_AT_THIS_CELL",
+      "full_rank_compact_traces": 10,
+      "ic_b_over_a": {
+        "interval_95pct": [
+          0.9745420946047818,
+          1.0176859620062986
+        ],
+        "median": 0.9918516884616434
+      },
+      "ic_cpu_seconds_median": 8.802848402687621,
+      "ic_over_rho_cpu": {
+        "interval_95pct": [
+          1.5661003671101077,
+          1.6658307538675299
+        ],
+        "median": 1.6053597659195684
+      },
+      "independent_correctness_replay": true,
+      "max_ic_rss_mib": 669.51953125,
+      "max_rho_rss_mib": 150.36328125,
+      "n": 53,
+      "prefilter": "blocked",
+      "raw_sha256": "018925d6e805aa61a68b749b511d0524a5f02aaf350c7356fd03af23316a03af",
+      "required_complete_cpu_reduction_to_parity": 0.3770866685280426,
+      "rho_cpu_seconds_median": 5.478498,
+      "status": "PASS",
+      "timing_eligible": true,
+      "uncontended": true,
+      "verified_target_logs": 15360
+    }
+  },
+  "common_group_operation_S": null,
+  "github_run_url": "https://github.com/aburan28/crypto/actions/runs/36803331080",
+  "input_freeze_sha256": "da958a3f1117dd1b88703fed2055c5c9f64255516e1e920f35d193bf53c6a88d",
+  "manifest_sha256": "350779eb61b5c9b14f065f4f2b3563166de0aaa6ed1da91f3d5308a8fc6fac97",
+  "method_crossover": null,
+  "n83_or_n131_transfer": null,
+  "schema": "ecc2k130-disjoint-cold-v2-analysis-v1",
+  "source_head": "38c173072e16f580237447c93b085634275ba048",
+  "total_full_rank_compact_traces": 90,
+  "total_verified_target_logs": 46170,
+  "unit": "wait4 complete-process child user+system CPU seconds"
+}

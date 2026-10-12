@@ -3,10 +3,10 @@
 # One-time campaign infrastructure, idempotent: S3 bucket (corpus,
 # checkpoints, binaries and the slot registry), IAM role + instance profile,
 # security group, and the launch template that fleet.sh scales.  Also uploads
-# worker.py and campaign.json.
+# worker.py, build.sh, rollout.sh and campaign.json.
 #
 #   ./infra.sh                 create or update everything
-#   ./infra.sh sync            re-upload worker.py / campaign.json only
+#   ./infra.sh sync            re-upload worker.py / build.sh / rollout.sh / campaign.json only
 #   ./infra.sh destroy         delete the launch template, SG, role (and the
 #                              DynamoDB table if one was used); the bucket
 #                              and its corpus are kept
@@ -18,7 +18,10 @@
 #           the bucket as S3 objects with conditional writes
 #   KEY_NAME  EC2 key pair for ssh (none = SSM only)
 #   SSH_CIDR  open port 22 from this CIDR (none = no ingress at all)
-#   ROOT_GB   root volume size, >= the AMI's 75 GB (default 100)
+#   ROOT_GB   root volume size, >= the AMI's 75 GB (default 150: the AMI takes
+#             75, and each GPU holds up to restartHours of points (~1 GB/day
+#             at 14 B iterations/s) plus a ~370 MB checkpoint and its copies,
+#             which is ~22 GB on the eight-GPU sizes)
 #   AMI       override the automatic Deep Learning Base AMI lookup
 #   SYNC      1 (default) uploads worker.py/merge.py; 0 leaves the copies in
 #             the bucket alone, which is what a live campaign wants
@@ -30,6 +33,10 @@
 #             The key ends up readable by anyone who can read the launch
 #             template or ec2:DescribeInstanceAttribute, so scope it to the
 #             campaign bucket and rotate it when the campaign ends.
+#   SKIP_IAM  if set to 1, do not create or update the worker role / instance
+#             profile (for callers like `adam` that lack iam:CreateRole). The
+#             role must already exist — run `AWS_PROFILE=admin ./iam_role.sh`
+#             once beforehand.
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -52,12 +59,23 @@ if [ -n "$WORKER_KEY_ID" ] && [ -z "$WORKER_KEY_SECRET" ]; then
     echo "WORKER_KEY_ID is set but WORKER_KEY_SECRET is not" >&2
     exit 1
 fi
+ROOT_GB=${ROOT_GB:-150}
 
 cmd=${1:-create}
 
 sync() {
     aws s3 cp worker.py "s3://$BUCKET/aws/worker.py" --only-show-errors
+    aws s3 cp protocol.py "s3://$BUCKET/aws/protocol.py" --only-show-errors
+    aws s3 cp seed_registry.py "s3://$BUCKET/aws/seed_registry.py" --only-show-errors
+    seedGuardSha=$(python3 -c 'import hashlib; print(hashlib.sha256(open("seed_registry.py", "rb").read()).hexdigest())')
+    aws s3 cp seed_registry.py "s3://$BUCKET/aws/seed-guard/$seedGuardSha/seed_registry.py" --only-show-errors
     aws s3 cp merge.py "s3://$BUCKET/aws/merge.py" --only-show-errors
+    aws s3 cp build.sh "s3://$BUCKET/aws/build.sh" --only-show-errors
+    aws s3 cp bootstrap.sh "s3://$BUCKET/aws/bootstrap.sh" --only-show-errors
+    aws s3 cp bootstrap-cpu.sh "s3://$BUCKET/aws/bootstrap-cpu.sh" --only-show-errors
+    aws s3 cp enable-host-cpu.sh "s3://$BUCKET/aws/enable-host-cpu.sh" --only-show-errors
+    aws s3 cp rollout.sh "s3://$BUCKET/aws/rollout.sh" --only-show-errors
+    aws s3 cp rollout.py "s3://$BUCKET/aws/rollout.py" --only-show-errors
     if ! aws s3api head-object --bucket "$BUCKET" --key campaign.json >/dev/null 2>&1; then
         aws s3 cp campaign.json "s3://$BUCKET/campaign.json" --only-show-errors
         echo "uploaded the initial campaign.json (binaryKey empty until build.sh runs)"
@@ -121,6 +139,37 @@ if [ -n "$WORKER_KEY_ID" ]; then
     echo "credentials mode: no instance profile, key $WORKER_KEY_ID in the user-data"
     PROFILE=
 else
+PROFILE_OK=0
+if [ "${SKIP_IAM:-0}" = 1 ]; then
+    echo "SKIP_IAM=1: leaving role $ROLE / profile $PROFILE untouched"
+    if aws iam get-instance-profile --instance-profile-name "$PROFILE" >/dev/null 2>&1; then
+        PROFILE_OK=1
+        echo "instance profile $PROFILE is visible"
+    elif [ -n "${WORKER_AWS_ACCESS_KEY_ID:-}" ] && [ -n "${WORKER_AWS_SECRET_ACCESS_KEY:-}" ]; then
+        # This fallback is how a long-lived key for an IAM user with
+        # AdministratorAccess ended up in 38 launch-template versions across
+        # three regions, readable through IMDS by every process on every worker
+        # and by any principal holding ec2:DescribeLaunchTemplateVersions. It
+        # now needs saying out loud, because the reason it was reached -- a
+        # caller without iam:CreateRole -- is a one-line fix by comparison.
+        if [ "${ALLOW_USERDATA_CREDENTIALS:-0}" != 1 ]; then
+            echo "instance profile $PROFILE is missing and WORKER_AWS_* keys were provided." >&2
+            echo "Writing them into user-data publishes them to every worker; prefer the profile:" >&2
+            echo "  AWS_PROFILE=admin ./iam_role.sh \${USER:-adam}" >&2
+            echo "If you really mean to, set ALLOW_USERDATA_CREDENTIALS=1, use a key scoped to" >&2
+            echo "this bucket alone, and run ./audit_userdata.py afterwards to see what you left." >&2
+            exit 1
+        fi
+        echo "ALLOW_USERDATA_CREDENTIALS=1: embedding WORKER_AWS_* keys in user-data"
+        echo "  these are readable on every instance and by ec2:DescribeLaunchTemplateVersions" >&2
+    else
+        echo "instance profile $PROFILE is not usable and WORKER_AWS_* keys were not provided." >&2
+        echo "run: AWS_PROFILE=admin ./iam_role.sh adam" >&2
+        echo "or set WORKER_AWS_ACCESS_KEY_ID / WORKER_AWS_SECRET_ACCESS_KEY for a temporary fallback" >&2
+        exit 1
+    fi
+else
+    PROFILE_OK=1
     if aws iam get-role --role-name "$ROLE" >/dev/null 2>&1; then
         echo "role $ROLE exists"
     else
@@ -130,11 +179,17 @@ else
         }' >/dev/null
         echo "created role $ROLE"
     fi
+    # bin/.building is the build lock bootstrap.sh claims with if-none-match and
+    # releases on exit. Without the delete it cannot be released, every later
+    # worker waits the full 20 minutes for a publish that never comes and then
+    # builds anyway, so the one object it may delete is that lock and nothing else.
     aws iam put-role-policy --role-name "$ROLE" --policy-name campaign --policy-document "{
       \"Version\": \"2012-10-17\",
       \"Statement\": [
         {\"Effect\": \"Allow\", \"Action\": [\"s3:ListBucket\"], \"Resource\": \"arn:aws:s3:::$BUCKET\"},
         {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"}$TABLE_STATEMENT
+        {\"Effect\": \"Allow\", \"Action\": [\"s3:GetObject\", \"s3:PutObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/*\"},
+        {\"Effect\": \"Allow\", \"Action\": [\"s3:DeleteObject\"], \"Resource\": \"arn:aws:s3:::$BUCKET/bin/.building\"}$TABLE_STATEMENT
       ]
     }"
     aws iam attach-role-policy --role-name "$ROLE" --policy-arn arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
@@ -206,8 +261,48 @@ if [ -n "$WORKER_KEY_ID" ]; then
     mv "$UD.creds" "$UD"
 fi
 LTDATA=$(python3 - "$AMI" "$PROFILE" "$SGID" "$ROOT_GB" "$KEY_NAME" "$UD" "$STACK" <<'EOF'
+# Optional static worker credentials when SKIP_IAM and the instance profile
+# does not exist yet (adam cannot iam:CreateRole). Prefer the instance profile.
+USERDATA_FILE="${TMPDIR:-/tmp}/ecc-userdata.sh"
+if [ "$PROFILE_OK" -eq 0 ] && [ -n "${WORKER_AWS_ACCESS_KEY_ID:-}" ]; then
+    python3 - "$USERDATA_FILE" bootstrap.sh "$BUCKET" "$TABLE" "$AWS_DEFAULT_REGION" \
+        "$WORKER_AWS_ACCESS_KEY_ID" "$WORKER_AWS_SECRET_ACCESS_KEY" <<'PY'
+import pathlib, sys
+out, bootstrap, bucket, table, region, key, secret = sys.argv[1:]
+body = pathlib.Path(bootstrap).read_text()
+body = (body
+        .replace("__BUCKET__", bucket)
+        .replace("__TABLE__", table)
+        .replace("__REGION__", region))
+if body.startswith("#!"):
+    body = body.split("\n", 1)[1]
+preamble = f"""#!/bin/bash
+install -d -m 700 /root/.aws /var/lib/ecc2k130
+cat > /root/.aws/credentials <<'AWSCREDS'
+[default]
+aws_access_key_id={key}
+aws_secret_access_key={secret}
+AWSCREDS
+chmod 600 /root/.aws/credentials
+cat > /root/.aws/config <<'AWSCONFIG'
+[default]
+region={region}
+AWSCONFIG
+cat > /var/lib/ecc2k130/aws-creds.env <<'AWSCREDSENV'
+AWS_ACCESS_KEY_ID={key}
+AWS_SECRET_ACCESS_KEY={secret}
+AWSCREDSENV
+chmod 600 /var/lib/ecc2k130/aws-creds.env
+"""
+pathlib.Path(out).write_text(preamble + body)
+PY
+else
+    sed -e "s/__BUCKET__/$BUCKET/g" -e "s/__TABLE__/$TABLE/g" \
+        -e "s/__REGION__/$AWS_DEFAULT_REGION/g" bootstrap.sh > "$USERDATA_FILE"
+fi
+LTDATA=$(python3 - "$AMI" "$PROFILE" "$SGID" "$ROOT_GB" "$KEY_NAME" "$USERDATA_FILE" "$STACK" "$PROFILE_OK" <<'EOF'
 import base64, json, sys
-ami, profile, sg, rootGb, key, userdata, stack = sys.argv[1:]
+ami, profile, sg, rootGb, key, userdata, stack, profile_ok = sys.argv[1:]
 data = {
     "ImageId": ami,
     "SecurityGroupIds": [sg],
@@ -222,6 +317,7 @@ data = {
     "InstanceInitiatedShutdownBehavior": "terminate",
 }
 if profile:
+if profile_ok == "1":
     data["IamInstanceProfile"] = {"Name": profile}
 if key:
     data["KeyName"] = key

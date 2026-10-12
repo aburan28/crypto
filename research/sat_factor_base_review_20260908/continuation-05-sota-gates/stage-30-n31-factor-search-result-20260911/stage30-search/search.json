@@ -1,0 +1,6183 @@
+{
+  "best_census": {
+    "kind": "two_torsion_saturated",
+    "parent": {
+      "indices": [
+        0,
+        1,
+        5
+      ],
+      "kind": "divisor"
+    }
+  },
+  "candidate_count": 56,
+  "candidates": [
+    {
+      "abscissae": 1986,
+      "build_ms": 161.129531,
+      "census_ms": 61429.483045,
+      "cofactor_admissible": true,
+      "coverage": 0.796875,
+      "covered": 204,
+      "dimension": 31,
+      "domain": "two_torsion_saturation",
+      "enumeration_ops_per_trial": 15768841.0,
+      "expected_trials": 43.92156862745098,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": 5.8125,
+      "pair_table_lookups_per_trial": 3971.0,
+      "points": 3971,
+      "projected_columns": 32,
+      "prune_steps": [],
+      "sat_variables": 124,
+      "signed_orbits": 66,
+      "skipped": null,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            1,
+            5
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 32
+    },
+    {
+      "abscissae": 1986,
+      "build_ms": 161.160525,
+      "census_ms": 61152.007030999994,
+      "cofactor_admissible": true,
+      "coverage": 0.7421875,
+      "covered": 190,
+      "dimension": 31,
+      "domain": "two_torsion_saturation",
+      "enumeration_ops_per_trial": 15768841.0,
+      "expected_trials": 47.1578947368421,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": 5.22265625,
+      "pair_table_lookups_per_trial": 3971.0,
+      "points": 3971,
+      "projected_columns": 32,
+      "prune_steps": [],
+      "sat_variables": 124,
+      "signed_orbits": 66,
+      "skipped": null,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            1,
+            3
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 32
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 164.991924,
+      "census_ms": 64797.057446,
+      "cofactor_admissible": true,
+      "coverage": 0.7421875,
+      "covered": 190,
+      "dimension": 31,
+      "domain": "two_torsion_saturation",
+      "enumeration_ops_per_trial": 16769025.0,
+      "expected_trials": 48.50526315789474,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": 5.3125,
+      "pair_table_lookups_per_trial": 4095.0,
+      "points": 4095,
+      "projected_columns": 33,
+      "prune_steps": [],
+      "sat_variables": 124,
+      "signed_orbits": 68,
+      "skipped": null,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            3,
+            5
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 33
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 166.075537,
+      "census_ms": 64731.857687,
+      "cofactor_admissible": true,
+      "coverage": 0.734375,
+      "covered": 188,
+      "dimension": 31,
+      "domain": "two_torsion_saturation",
+      "enumeration_ops_per_trial": 16769025.0,
+      "expected_trials": 49.02127659574468,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": 5.46875,
+      "pair_table_lookups_per_trial": 4095.0,
+      "points": 4095,
+      "projected_columns": 33,
+      "prune_steps": [],
+      "sat_variables": 124,
+      "signed_orbits": 68,
+      "skipped": null,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            3,
+            4
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 33
+    },
+    {
+      "abscissae": 1862,
+      "build_ms": 156.407149,
+      "census_ms": 55142.344678999994,
+      "cofactor_admissible": true,
+      "coverage": 0.671875,
+      "covered": 172,
+      "dimension": 31,
+      "domain": "two_torsion_saturation",
+      "enumeration_ops_per_trial": 13860729.0,
+      "expected_trials": 49.116279069767444,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": 4.19921875,
+      "pair_table_lookups_per_trial": 3723.0,
+      "points": 3723,
+      "projected_columns": 30,
+      "prune_steps": [],
+      "sat_variables": 124,
+      "signed_orbits": 62,
+      "skipped": null,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            2,
+            3
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 30
+    },
+    {
+      "abscissae": 1085,
+      "build_ms": 209.686194,
+      "census_ms": 22224.69159,
+      "cofactor_admissible": true,
+      "coverage": 0.7109375,
+      "covered": 182,
+      "dimension": 31,
+      "domain": "explicit_orbits(35)",
+      "enumeration_ops_per_trial": 4708900.0,
+      "expected_trials": 49.23076923076923,
+      "family": "pruned",
+      "mean_witnesses": 1.04296875,
+      "pair_table_lookups_per_trial": 2170.0,
+      "points": 2170,
+      "projected_columns": 32,
+      "prune_steps": [
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 85.33333333333333,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 65
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 84.07843137254902,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 64
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 82.82352941176471,
+          "removed_abscissa": 2,
+          "removed_orbit": 2,
+          "unknowns_after": 63
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 81.56862745098039,
+          "removed_abscissa": 3941475,
+          "removed_orbit": 4,
+          "unknowns_after": 62
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 80.31372549019608,
+          "removed_abscissa": 3941476,
+          "removed_orbit": 5,
+          "unknowns_after": 61
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 79.05882352941177,
+          "removed_abscissa": 3941488,
+          "removed_orbit": 6,
+          "unknowns_after": 60
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 77.80392156862744,
+          "removed_abscissa": 3941489,
+          "removed_orbit": 7,
+          "unknowns_after": 59
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 76.54901960784314,
+          "removed_abscissa": 3941493,
+          "removed_orbit": 8,
+          "unknowns_after": 58
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 75.29411764705883,
+          "removed_abscissa": 3941729,
+          "removed_orbit": 9,
+          "unknowns_after": 57
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 74.03921568627452,
+          "removed_abscissa": 3941731,
+          "removed_orbit": 10,
+          "unknowns_after": 56
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 72.7843137254902,
+          "removed_abscissa": 3941744,
+          "removed_orbit": 12,
+          "unknowns_after": 55
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 71.52941176470588,
+          "removed_abscissa": 3941748,
+          "removed_orbit": 15,
+          "unknowns_after": 54
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 70.27450980392157,
+          "removed_abscissa": 3941749,
+          "removed_orbit": 16,
+          "unknowns_after": 53
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 69.01960784313725,
+          "removed_abscissa": 4007009,
+          "removed_orbit": 18,
+          "unknowns_after": 52
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 67.76470588235294,
+          "removed_abscissa": 4007011,
+          "removed_orbit": 20,
+          "unknowns_after": 51
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 66.50980392156863,
+          "removed_abscissa": 4007013,
+          "removed_orbit": 21,
+          "unknowns_after": 50
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 65.25490196078431,
+          "removed_abscissa": 4007014,
+          "removed_orbit": 22,
+          "unknowns_after": 49
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 64.0,
+          "removed_abscissa": 4007025,
+          "removed_orbit": 24,
+          "unknowns_after": 48
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 62.745098039215684,
+          "removed_abscissa": 4007268,
+          "removed_orbit": 29,
+          "unknowns_after": 47
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 61.490196078431374,
+          "removed_abscissa": 18383039,
+          "removed_orbit": 40,
+          "unknowns_after": 46
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 60.23529411764706,
+          "removed_abscissa": 35058117,
+          "removed_orbit": 46,
+          "unknowns_after": 45
+        },
+        {
+          "covered_after": 204,
+          "covered_before": 204,
+          "expected_trials_after": 58.98039215686274,
+          "removed_abscissa": 56616202,
+          "removed_orbit": 53,
+          "unknowns_after": 44
+        },
+        {
+          "covered_after": 203,
+          "covered_before": 204,
+          "expected_trials_after": 58.00985221674877,
+          "removed_abscissa": 4007010,
+          "removed_orbit": 19,
+          "unknowns_after": 43
+        },
+        {
+          "covered_after": 202,
+          "covered_before": 203,
+          "expected_trials_after": 57.02970297029703,
+          "removed_abscissa": 93556490,
+          "removed_orbit": 60,
+          "unknowns_after": 42
+        },
+        {
+          "covered_after": 201,
+          "covered_before": 202,
+          "expected_trials_after": 56.039800995024876,
+          "removed_abscissa": 201766724,
+          "removed_orbit": 64,
+          "unknowns_after": 41
+        },
+        {
+          "covered_after": 199,
+          "covered_before": 201,
+          "expected_trials_after": 55.31658291457286,
+          "removed_abscissa": 66893271,
+          "removed_orbit": 54,
+          "unknowns_after": 40
+        },
+        {
+          "covered_after": 197,
+          "covered_before": 199,
+          "expected_trials_after": 54.578680203045685,
+          "removed_abscissa": 81023321,
+          "removed_orbit": 56,
+          "unknowns_after": 39
+        },
+        {
+          "covered_after": 194,
+          "covered_before": 197,
+          "expected_trials_after": 54.103092783505154,
+          "removed_abscissa": 4007015,
+          "removed_orbit": 23,
+          "unknowns_after": 38
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 194,
+          "expected_trials_after": 53.89473684210526,
+          "removed_abscissa": 3941747,
+          "removed_orbit": 14,
+          "unknowns_after": 37
+        },
+        {
+          "covered_after": 186,
+          "covered_before": 190,
+          "expected_trials_after": 53.67741935483871,
+          "removed_abscissa": 4007280,
+          "removed_orbit": 32,
+          "unknowns_after": 36
+        },
+        {
+          "covered_after": 182,
+          "covered_before": 186,
+          "expected_trials_after": 53.45054945054945,
+          "removed_abscissa": 21689121,
+          "removed_orbit": 42,
+          "unknowns_after": 35
+        }
+      ],
+      "sat_variables": 124,
+      "signed_orbits": 35,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "indices": [
+              0,
+              1,
+              5
+            ],
+            "kind": "divisor"
+          }
+        },
+        "retained_abscissa_orbits": [
+          32770,
+          3941732,
+          3941746,
+          3941751,
+          4007030,
+          4007031,
+          4007266,
+          4007267,
+          4007269,
+          4007271,
+          4007284,
+          4007285,
+          5354398,
+          9849643,
+          15502916,
+          16680829,
+          17585569,
+          18451232,
+          25975259,
+          28570156,
+          34923917,
+          38395386,
+          41846021,
+          47551297,
+          50199335,
+          53527791,
+          53922425,
+          78497680,
+          82858815,
+          91139268,
+          93214868,
+          96305318,
+          120097375,
+          134212308,
+          219259001
+        ]
+      },
+      "unknowns": 32
+    },
+    {
+      "abscissae": 1862,
+      "build_ms": 155.098434,
+      "census_ms": 54628.497268,
+      "cofactor_admissible": true,
+      "coverage": 0.66015625,
+      "covered": 169,
+      "dimension": 31,
+      "domain": "two_torsion_saturation",
+      "enumeration_ops_per_trial": 13860729.0,
+      "expected_trials": 49.98816568047337,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": 3.9453125,
+      "pair_table_lookups_per_trial": 3723.0,
+      "points": 3723,
+      "projected_columns": 30,
+      "prune_steps": [],
+      "sat_variables": 124,
+      "signed_orbits": 62,
+      "skipped": null,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            3,
+            6
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 30
+    },
+    {
+      "abscissae": 1116,
+      "build_ms": 202.631293,
+      "census_ms": 23100.965439,
+      "cofactor_admissible": true,
+      "coverage": 0.67578125,
+      "covered": 173,
+      "dimension": 31,
+      "domain": "explicit_orbits(36)",
+      "enumeration_ops_per_trial": 4981824.0,
+      "expected_trials": 50.3121387283237,
+      "family": "pruned",
+      "mean_witnesses": 1.0625,
+      "pair_table_lookups_per_trial": 2232.0,
+      "points": 2232,
+      "projected_columns": 31,
+      "prune_steps": [
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 91.62105263157895,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 65
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 90.27368421052631,
+          "removed_abscissa": 2,
+          "removed_orbit": 2,
+          "unknowns_after": 64
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 88.92631578947369,
+          "removed_abscissa": 1722957,
+          "removed_orbit": 4,
+          "unknowns_after": 63
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 87.57894736842105,
+          "removed_abscissa": 2989394,
+          "removed_orbit": 5,
+          "unknowns_after": 62
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 86.23157894736842,
+          "removed_abscissa": 7184180,
+          "removed_orbit": 6,
+          "unknowns_after": 61
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 84.88421052631578,
+          "removed_abscissa": 7218312,
+          "removed_orbit": 7,
+          "unknowns_after": 60
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 83.53684210526316,
+          "removed_abscissa": 7218317,
+          "removed_orbit": 8,
+          "unknowns_after": 59
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 82.18947368421053,
+          "removed_abscissa": 7218319,
+          "removed_orbit": 10,
+          "unknowns_after": 58
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 80.84210526315789,
+          "removed_abscissa": 7218328,
+          "removed_orbit": 11,
+          "unknowns_after": 57
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 79.49473684210527,
+          "removed_abscissa": 7218329,
+          "removed_orbit": 12,
+          "unknowns_after": 56
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 78.14736842105263,
+          "removed_abscissa": 7218335,
+          "removed_orbit": 15,
+          "unknowns_after": 55
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 76.8,
+          "removed_abscissa": 7218569,
+          "removed_orbit": 16,
+          "unknowns_after": 54
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 75.45263157894736,
+          "removed_abscissa": 7218588,
+          "removed_orbit": 20,
+          "unknowns_after": 53
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 74.10526315789474,
+          "removed_abscissa": 7283852,
+          "removed_orbit": 23,
+          "unknowns_after": 52
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 72.7578947368421,
+          "removed_abscissa": 7283864,
+          "removed_orbit": 25,
+          "unknowns_after": 51
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 71.41052631578947,
+          "removed_abscissa": 7283868,
+          "removed_orbit": 29,
+          "unknowns_after": 50
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 70.06315789473685,
+          "removed_abscissa": 7284122,
+          "removed_orbit": 35,
+          "unknowns_after": 49
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 68.71578947368421,
+          "removed_abscissa": 39181640,
+          "removed_orbit": 41,
+          "unknowns_after": 48
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 67.36842105263158,
+          "removed_abscissa": 45375927,
+          "removed_orbit": 44,
+          "unknowns_after": 47
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 66.02105263157895,
+          "removed_abscissa": 62667864,
+          "removed_orbit": 51,
+          "unknowns_after": 46
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 64.67368421052632,
+          "removed_abscissa": 65855941,
+          "removed_orbit": 52,
+          "unknowns_after": 45
+        },
+        {
+          "covered_after": 189,
+          "covered_before": 190,
+          "expected_trials_after": 63.66137566137566,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 44
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 189,
+          "expected_trials_after": 62.638297872340424,
+          "removed_abscissa": 7218573,
+          "removed_orbit": 19,
+          "unknowns_after": 43
+        },
+        {
+          "covered_after": 187,
+          "covered_before": 188,
+          "expected_trials_after": 61.60427807486631,
+          "removed_abscissa": 54769591,
+          "removed_orbit": 50,
+          "unknowns_after": 42
+        },
+        {
+          "covered_after": 186,
+          "covered_before": 187,
+          "expected_trials_after": 60.55913978494624,
+          "removed_abscissa": 235505353,
+          "removed_orbit": 65,
+          "unknowns_after": 41
+        },
+        {
+          "covered_after": 184,
+          "covered_before": 186,
+          "expected_trials_after": 59.82608695652174,
+          "removed_abscissa": 7283855,
+          "removed_orbit": 24,
+          "unknowns_after": 40
+        },
+        {
+          "covered_after": 182,
+          "covered_before": 184,
+          "expected_trials_after": 59.07692307692308,
+          "removed_abscissa": 7284109,
+          "removed_orbit": 33,
+          "unknowns_after": 39
+        },
+        {
+          "covered_after": 179,
+          "covered_before": 182,
+          "expected_trials_after": 58.63687150837989,
+          "removed_abscissa": 7284127,
+          "removed_orbit": 37,
+          "unknowns_after": 38
+        },
+        {
+          "covered_after": 176,
+          "covered_before": 179,
+          "expected_trials_after": 58.18181818181818,
+          "removed_abscissa": 105369476,
+          "removed_orbit": 59,
+          "unknowns_after": 37
+        },
+        {
+          "covered_after": 173,
+          "covered_before": 176,
+          "expected_trials_after": 57.71098265895954,
+          "removed_abscissa": 7218318,
+          "removed_orbit": 9,
+          "unknowns_after": 36
+        }
+      ],
+      "sat_variables": 124,
+      "signed_orbits": 36,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "indices": [
+              0,
+              1,
+              3
+            ],
+            "kind": "divisor"
+          }
+        },
+        "retained_abscissa_orbits": [
+          32770,
+          7218332,
+          7218333,
+          7218570,
+          7218572,
+          7218589,
+          7283851,
+          7283865,
+          7283866,
+          7283867,
+          7283871,
+          7284106,
+          7284107,
+          7284120,
+          7284124,
+          14968723,
+          15316128,
+          34777105,
+          40759351,
+          44917166,
+          45396159,
+          46546743,
+          46704388,
+          46998904,
+          49412860,
+          73959771,
+          80005290,
+          80036578,
+          81100437,
+          83591089,
+          93382330,
+          112768397,
+          127288780,
+          137423755,
+          143151092,
+          151773919
+        ]
+      },
+      "unknowns": 31
+    },
+    {
+      "abscissae": 1147,
+      "build_ms": 208.23341100000002,
+      "census_ms": 24207.080686,
+      "cofactor_admissible": true,
+      "coverage": 0.671875,
+      "covered": 172,
+      "dimension": 31,
+      "domain": "explicit_orbits(37)",
+      "enumeration_ops_per_trial": 5262436.0,
+      "expected_trials": 52.093023255813954,
+      "family": "pruned",
+      "mean_witnesses": 1.04296875,
+      "pair_table_lookups_per_trial": 2294.0,
+      "points": 2294,
+      "projected_columns": 32,
+      "prune_steps": [
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 95.31914893617021,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 67
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 93.95744680851064,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 66
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 92.59574468085107,
+          "removed_abscissa": 609067,
+          "removed_orbit": 2,
+          "unknowns_after": 65
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 91.23404255319149,
+          "removed_abscissa": 745336,
+          "removed_orbit": 3,
+          "unknowns_after": 64
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 89.87234042553192,
+          "removed_abscissa": 745337,
+          "removed_orbit": 4,
+          "unknowns_after": 63
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 88.51063829787235,
+          "removed_abscissa": 805127,
+          "removed_orbit": 5,
+          "unknowns_after": 62
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 87.14893617021276,
+          "removed_abscissa": 872008,
+          "removed_orbit": 6,
+          "unknowns_after": 61
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 85.7872340425532,
+          "removed_abscissa": 872009,
+          "removed_orbit": 7,
+          "unknowns_after": 60
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 84.42553191489361,
+          "removed_abscissa": 1006107,
+          "removed_orbit": 8,
+          "unknowns_after": 59
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 83.06382978723404,
+          "removed_abscissa": 1661248,
+          "removed_orbit": 9,
+          "unknowns_after": 58
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 81.70212765957447,
+          "removed_abscissa": 1722973,
+          "removed_orbit": 11,
+          "unknowns_after": 57
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 80.34042553191489,
+          "removed_abscissa": 1789202,
+          "removed_orbit": 12,
+          "unknowns_after": 56
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 78.97872340425532,
+          "removed_abscissa": 1924130,
+          "removed_orbit": 15,
+          "unknowns_after": 55
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 77.61702127659575,
+          "removed_abscissa": 1924131,
+          "removed_orbit": 16,
+          "unknowns_after": 54
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 76.25531914893617,
+          "removed_abscissa": 2050160,
+          "removed_orbit": 17,
+          "unknowns_after": 53
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 74.8936170212766,
+          "removed_abscissa": 2050161,
+          "removed_orbit": 18,
+          "unknowns_after": 52
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 73.53191489361703,
+          "removed_abscissa": 6711802,
+          "removed_orbit": 21,
+          "unknowns_after": 51
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 72.17021276595744,
+          "removed_abscissa": 6778549,
+          "removed_orbit": 22,
+          "unknowns_after": 50
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 70.80851063829788,
+          "removed_abscissa": 6894560,
+          "removed_orbit": 23,
+          "unknowns_after": 49
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 69.44680851063829,
+          "removed_abscissa": 7764880,
+          "removed_orbit": 28,
+          "unknowns_after": 48
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 68.08510638297872,
+          "removed_abscissa": 42481339,
+          "removed_orbit": 45,
+          "unknowns_after": 47
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 66.72340425531915,
+          "removed_abscissa": 59102165,
+          "removed_orbit": 48,
+          "unknowns_after": 46
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 188,
+          "expected_trials_after": 65.36170212765957,
+          "removed_abscissa": 92630541,
+          "removed_orbit": 59,
+          "unknowns_after": 45
+        },
+        {
+          "covered_after": 187,
+          "covered_before": 188,
+          "expected_trials_after": 64.34224598930481,
+          "removed_abscissa": 6894561,
+          "removed_orbit": 24,
+          "unknowns_after": 44
+        },
+        {
+          "covered_after": 186,
+          "covered_before": 187,
+          "expected_trials_after": 63.31182795698925,
+          "removed_abscissa": 9986595,
+          "removed_orbit": 32,
+          "unknowns_after": 43
+        },
+        {
+          "covered_after": 185,
+          "covered_before": 186,
+          "expected_trials_after": 62.270270270270274,
+          "removed_abscissa": 66935436,
+          "removed_orbit": 51,
+          "unknowns_after": 42
+        },
+        {
+          "covered_after": 184,
+          "covered_before": 185,
+          "expected_trials_after": 61.21739130434783,
+          "removed_abscissa": 77244046,
+          "removed_orbit": 55,
+          "unknowns_after": 41
+        },
+        {
+          "covered_after": 181,
+          "covered_before": 184,
+          "expected_trials_after": 60.81767955801105,
+          "removed_abscissa": 8135590,
+          "removed_orbit": 30,
+          "unknowns_after": 40
+        },
+        {
+          "covered_after": 178,
+          "covered_before": 181,
+          "expected_trials_after": 60.40449438202247,
+          "removed_abscissa": 13794191,
+          "removed_orbit": 33,
+          "unknowns_after": 39
+        },
+        {
+          "covered_after": 175,
+          "covered_before": 178,
+          "expected_trials_after": 59.97714285714286,
+          "removed_abscissa": 136565339,
+          "removed_orbit": 65,
+          "unknowns_after": 38
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 175,
+          "expected_trials_after": 59.53488372093023,
+          "removed_abscissa": 7630787,
+          "removed_orbit": 26,
+          "unknowns_after": 37
+        }
+      ],
+      "sat_variables": 124,
+      "signed_orbits": 37,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "indices": [
+              0,
+              3,
+              4
+            ],
+            "kind": "divisor"
+          }
+        },
+        "retained_abscissa_orbits": [
+          1661249,
+          1858412,
+          1858413,
+          3748865,
+          6585769,
+          7630786,
+          7694477,
+          7764881,
+          9712166,
+          16288473,
+          17385485,
+          17455889,
+          18373929,
+          18566708,
+          18566709,
+          25737403,
+          26172798,
+          32559450,
+          40088847,
+          41599765,
+          49833523,
+          50111482,
+          66014687,
+          66057243,
+          73578152,
+          74233377,
+          76722995,
+          79657048,
+          80895213,
+          90615776,
+          94688667,
+          96099564,
+          98758555,
+          113482164,
+          126241415,
+          137682300,
+          161242514
+        ]
+      },
+      "unknowns": 32
+    },
+    {
+      "abscissae": 1862,
+      "build_ms": 156.42742900000002,
+      "census_ms": 54856.873055000004,
+      "cofactor_admissible": true,
+      "coverage": 0.62109375,
+      "covered": 159,
+      "dimension": 31,
+      "domain": "two_torsion_saturation",
+      "enumeration_ops_per_trial": 13860729.0,
+      "expected_trials": 53.132075471698116,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": 3.93359375,
+      "pair_table_lookups_per_trial": 3723.0,
+      "points": 3723,
+      "projected_columns": 30,
+      "prune_steps": [],
+      "sat_variables": 124,
+      "signed_orbits": 62,
+      "skipped": null,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            2,
+            4
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 30
+    },
+    {
+      "abscissae": 1800,
+      "build_ms": 152.02616799999998,
+      "census_ms": 51414.153706,
+      "cofactor_admissible": true,
+      "coverage": 0.59765625,
+      "covered": 153,
+      "dimension": 31,
+      "domain": "two_torsion_saturation",
+      "enumeration_ops_per_trial": 12952801.0,
+      "expected_trials": 53.54248366013072,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": 3.66796875,
+      "pair_table_lookups_per_trial": 3599.0,
+      "points": 3599,
+      "projected_columns": 29,
+      "prune_steps": [],
+      "sat_variables": 124,
+      "signed_orbits": 60,
+      "skipped": null,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            4,
+            5
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 29
+    },
+    {
+      "abscissae": 1738,
+      "build_ms": 147.33020399999998,
+      "census_ms": 48492.122144,
+      "cofactor_admissible": true,
+      "coverage": 0.578125,
+      "covered": 148,
+      "dimension": 31,
+      "domain": "two_torsion_saturation",
+      "enumeration_ops_per_trial": 12075625.0,
+      "expected_trials": 53.62162162162162,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": 3.296875,
+      "pair_table_lookups_per_trial": 3475.0,
+      "points": 3475,
+      "projected_columns": 28,
+      "prune_steps": [],
+      "sat_variables": 124,
+      "signed_orbits": 58,
+      "skipped": null,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            5,
+            6
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 28
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 165.47875000000002,
+      "census_ms": 64322.970466,
+      "cofactor_admissible": true,
+      "coverage": 0.66796875,
+      "covered": 171,
+      "dimension": 31,
+      "domain": "two_torsion_saturation",
+      "enumeration_ops_per_trial": 16769025.0,
+      "expected_trials": 53.89473684210526,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": 4.86328125,
+      "pair_table_lookups_per_trial": 4095.0,
+      "points": 4095,
+      "projected_columns": 33,
+      "prune_steps": [],
+      "sat_variables": 124,
+      "signed_orbits": 68,
+      "skipped": null,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            1,
+            2
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 33
+    },
+    {
+      "abscissae": 1738,
+      "build_ms": 149.24521499999997,
+      "census_ms": 48551.344935,
+      "cofactor_admissible": true,
+      "coverage": 0.57421875,
+      "covered": 147,
+      "dimension": 31,
+      "domain": "two_torsion_saturation",
+      "enumeration_ops_per_trial": 12075625.0,
+      "expected_trials": 53.98639455782313,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": 3.578125,
+      "pair_table_lookups_per_trial": 3475.0,
+      "points": 3475,
+      "projected_columns": 28,
+      "prune_steps": [],
+      "sat_variables": 124,
+      "signed_orbits": 58,
+      "skipped": null,
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            2,
+            5
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 28
+    },
+    {
+      "abscissae": 1054,
+      "build_ms": 196.86444,
+      "census_ms": 21176.173079,
+      "cofactor_admissible": true,
+      "coverage": 0.60546875,
+      "covered": 155,
+      "dimension": 31,
+      "domain": "explicit_orbits(34)",
+      "enumeration_ops_per_trial": 4443664.0,
+      "expected_trials": 54.50322580645161,
+      "family": "pruned",
+      "mean_witnesses": 0.859375,
+      "pair_table_lookups_per_trial": 2108.0,
+      "points": 2108,
+      "projected_columns": 30,
+      "prune_steps": [
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 95.25581395348837,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 61
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 93.76744186046511,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 60
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 92.27906976744185,
+          "removed_abscissa": 10622,
+          "removed_orbit": 2,
+          "unknowns_after": 59
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 90.79069767441861,
+          "removed_abscissa": 3238269,
+          "removed_orbit": 3,
+          "unknowns_after": 58
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 89.30232558139535,
+          "removed_abscissa": 3339852,
+          "removed_orbit": 4,
+          "unknowns_after": 57
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 87.81395348837209,
+          "removed_abscissa": 3339853,
+          "removed_orbit": 5,
+          "unknowns_after": 56
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 86.32558139534883,
+          "removed_abscissa": 9482942,
+          "removed_orbit": 7,
+          "unknowns_after": 55
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 84.83720930232558,
+          "removed_abscissa": 9482943,
+          "removed_orbit": 8,
+          "unknowns_after": 54
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 83.34883720930233,
+          "removed_abscissa": 13394285,
+          "removed_orbit": 11,
+          "unknowns_after": 53
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 81.86046511627907,
+          "removed_abscissa": 16684832,
+          "removed_orbit": 12,
+          "unknowns_after": 52
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 80.37209302325581,
+          "removed_abscissa": 27192524,
+          "removed_orbit": 15,
+          "unknowns_after": 51
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 78.88372093023256,
+          "removed_abscissa": 30102234,
+          "removed_orbit": 17,
+          "unknowns_after": 50
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 77.3953488372093,
+          "removed_abscissa": 31507736,
+          "removed_orbit": 19,
+          "unknowns_after": 49
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 75.90697674418605,
+          "removed_abscissa": 44771667,
+          "removed_orbit": 26,
+          "unknowns_after": 48
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 74.4186046511628,
+          "removed_abscissa": 44823284,
+          "removed_orbit": 27,
+          "unknowns_after": 47
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 72.93023255813954,
+          "removed_abscissa": 46520171,
+          "removed_orbit": 28,
+          "unknowns_after": 46
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 71.44186046511628,
+          "removed_abscissa": 73970995,
+          "removed_orbit": 42,
+          "unknowns_after": 45
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 69.95348837209302,
+          "removed_abscissa": 81546704,
+          "removed_orbit": 45,
+          "unknowns_after": 44
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 172,
+          "expected_trials_after": 68.46511627906976,
+          "removed_abscissa": 81546705,
+          "removed_orbit": 46,
+          "unknowns_after": 43
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 172,
+          "expected_trials_after": 67.36842105263158,
+          "removed_abscissa": 60250827,
+          "removed_orbit": 34,
+          "unknowns_after": 42
+        },
+        {
+          "covered_after": 170,
+          "covered_before": 171,
+          "expected_trials_after": 66.25882352941177,
+          "removed_abscissa": 63670553,
+          "removed_orbit": 35,
+          "unknowns_after": 41
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 170,
+          "expected_trials_after": 65.13609467455622,
+          "removed_abscissa": 76610231,
+          "removed_orbit": 43,
+          "unknowns_after": 40
+        },
+        {
+          "covered_after": 168,
+          "covered_before": 169,
+          "expected_trials_after": 64.0,
+          "removed_abscissa": 137817564,
+          "removed_orbit": 54,
+          "unknowns_after": 39
+        },
+        {
+          "covered_after": 167,
+          "covered_before": 168,
+          "expected_trials_after": 62.8502994011976,
+          "removed_abscissa": 142435273,
+          "removed_orbit": 56,
+          "unknowns_after": 38
+        },
+        {
+          "covered_after": 165,
+          "covered_before": 167,
+          "expected_trials_after": 62.06060606060606,
+          "removed_abscissa": 66682708,
+          "removed_orbit": 39,
+          "unknowns_after": 37
+        },
+        {
+          "covered_after": 162,
+          "covered_before": 165,
+          "expected_trials_after": 61.629629629629626,
+          "removed_abscissa": 3924393,
+          "removed_orbit": 6,
+          "unknowns_after": 36
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 162,
+          "expected_trials_after": 61.18238993710692,
+          "removed_abscissa": 132731881,
+          "removed_orbit": 53,
+          "unknowns_after": 35
+        },
+        {
+          "covered_after": 155,
+          "covered_before": 159,
+          "expected_trials_after": 61.10967741935484,
+          "removed_abscissa": 177046662,
+          "removed_orbit": 60,
+          "unknowns_after": 34
+        }
+      ],
+      "sat_variables": 124,
+      "signed_orbits": 34,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "indices": [
+              0,
+              2,
+              3
+            ],
+            "kind": "divisor"
+          }
+        },
+        "retained_abscissa_orbits": [
+          10634482,
+          12317841,
+          20752446,
+          22187425,
+          29485995,
+          31384135,
+          31937029,
+          32557395,
+          32585246,
+          34190854,
+          34190855,
+          41540042,
+          50849908,
+          50849909,
+          53122032,
+          57265643,
+          58998945,
+          64566632,
+          65225425,
+          66553123,
+          66682709,
+          69393136,
+          81285250,
+          87745880,
+          93285543,
+          97010299,
+          100429569,
+          116307441,
+          116385784,
+          142435272,
+          151060060,
+          154136168,
+          154136169,
+          191066604
+        ]
+      },
+      "unknowns": 30
+    },
+    {
+      "abscissae": 1054,
+      "build_ms": 194.278433,
+      "census_ms": 20909.950227,
+      "cofactor_admissible": true,
+      "coverage": 0.5859375,
+      "covered": 150,
+      "dimension": 31,
+      "domain": "explicit_orbits(34)",
+      "enumeration_ops_per_trial": 4443664.0,
+      "expected_trials": 54.61333333333334,
+      "family": "pruned",
+      "mean_witnesses": 0.859375,
+      "pair_table_lookups_per_trial": 2108.0,
+      "points": 2108,
+      "projected_columns": 29,
+      "prune_steps": [
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 96.94674556213018,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 61
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 95.4319526627219,
+          "removed_abscissa": 7139,
+          "removed_orbit": 2,
+          "unknowns_after": 60
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 93.9171597633136,
+          "removed_abscissa": 70938,
+          "removed_orbit": 3,
+          "unknowns_after": 59
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 92.40236686390533,
+          "removed_abscissa": 453021,
+          "removed_orbit": 4,
+          "unknowns_after": 58
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 90.88757396449704,
+          "removed_abscissa": 609901,
+          "removed_orbit": 5,
+          "unknowns_after": 57
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 89.37278106508876,
+          "removed_abscissa": 743950,
+          "removed_orbit": 6,
+          "unknowns_after": 56
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 87.85798816568047,
+          "removed_abscissa": 936001,
+          "removed_orbit": 8,
+          "unknowns_after": 55
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 86.34319526627219,
+          "removed_abscissa": 1006938,
+          "removed_orbit": 9,
+          "unknowns_after": 54
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 84.82840236686391,
+          "removed_abscissa": 1006939,
+          "removed_orbit": 10,
+          "unknowns_after": 53
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 83.31360946745562,
+          "removed_abscissa": 1723755,
+          "removed_orbit": 12,
+          "unknowns_after": 52
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 81.79881656804734,
+          "removed_abscissa": 1792113,
+          "removed_orbit": 13,
+          "unknowns_after": 51
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 80.28402366863905,
+          "removed_abscissa": 1919814,
+          "removed_orbit": 16,
+          "unknowns_after": 50
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 78.76923076923077,
+          "removed_abscissa": 6890418,
+          "removed_orbit": 20,
+          "unknowns_after": 49
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 77.25443786982248,
+          "removed_abscissa": 6890419,
+          "removed_orbit": 21,
+          "unknowns_after": 48
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 75.7396449704142,
+          "removed_abscissa": 7090684,
+          "removed_orbit": 24,
+          "unknowns_after": 47
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 74.22485207100591,
+          "removed_abscissa": 7565016,
+          "removed_orbit": 27,
+          "unknowns_after": 46
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 72.71005917159763,
+          "removed_abscissa": 7629044,
+          "removed_orbit": 29,
+          "unknowns_after": 45
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 71.19526627218934,
+          "removed_abscissa": 18504537,
+          "removed_orbit": 35,
+          "unknowns_after": 44
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 69.68047337278107,
+          "removed_abscissa": 83371346,
+          "removed_orbit": 51,
+          "unknowns_after": 43
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 169,
+          "expected_trials_after": 68.16568047337279,
+          "removed_abscissa": 253662925,
+          "removed_orbit": 61,
+          "unknowns_after": 42
+        },
+        {
+          "covered_after": 168,
+          "covered_before": 169,
+          "expected_trials_after": 67.04761904761905,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 41
+        },
+        {
+          "covered_after": 167,
+          "covered_before": 168,
+          "expected_trials_after": 65.91616766467065,
+          "removed_abscissa": 10202143,
+          "removed_orbit": 32,
+          "unknowns_after": 40
+        },
+        {
+          "covered_after": 166,
+          "covered_before": 167,
+          "expected_trials_after": 64.7710843373494,
+          "removed_abscissa": 113266053,
+          "removed_orbit": 56,
+          "unknowns_after": 39
+        },
+        {
+          "covered_after": 164,
+          "covered_before": 166,
+          "expected_trials_after": 64.0,
+          "removed_abscissa": 743951,
+          "removed_orbit": 7,
+          "unknowns_after": 38
+        },
+        {
+          "covered_after": 161,
+          "covered_before": 164,
+          "expected_trials_after": 63.60248447204969,
+          "removed_abscissa": 6955722,
+          "removed_orbit": 22,
+          "unknowns_after": 37
+        },
+        {
+          "covered_after": 158,
+          "covered_before": 161,
+          "expected_trials_after": 63.18987341772152,
+          "removed_abscissa": 7565017,
+          "removed_orbit": 28,
+          "unknowns_after": 36
+        },
+        {
+          "covered_after": 154,
+          "covered_before": 158,
+          "expected_trials_after": 63.16883116883117,
+          "removed_abscissa": 6955723,
+          "removed_orbit": 23,
+          "unknowns_after": 35
+        },
+        {
+          "covered_after": 150,
+          "covered_before": 154,
+          "expected_trials_after": 63.14666666666667,
+          "removed_abscissa": 128626211,
+          "removed_orbit": 57,
+          "unknowns_after": 34
+        }
+      ],
+      "sat_variables": 124,
+      "signed_orbits": 34,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "indices": [
+              0,
+              3,
+              6
+            ],
+            "kind": "divisor"
+          }
+        },
+        "retained_abscissa_orbits": [
+          1657874,
+          1859164,
+          1859165,
+          1919815,
+          2055972,
+          2380451,
+          7152871,
+          7368608,
+          7825804,
+          7825805,
+          17321285,
+          17779561,
+          19388726,
+          25681471,
+          29402838,
+          32345660,
+          38386005,
+          40037230,
+          47032515,
+          47674729,
+          49512428,
+          51877813,
+          64781032,
+          66365511,
+          70358594,
+          70969158,
+          81895388,
+          87682237,
+          95112464,
+          100297795,
+          104786660,
+          131450238,
+          142641360,
+          186185227
+        ]
+      },
+      "unknowns": 29
+    },
+    {
+      "abscissae": 1116,
+      "build_ms": 206.470136,
+      "census_ms": 22999.957395999998,
+      "cofactor_admissible": true,
+      "coverage": 0.640625,
+      "covered": 164,
+      "dimension": 31,
+      "domain": "explicit_orbits(36)",
+      "enumeration_ops_per_trial": 4981824.0,
+      "expected_trials": 56.19512195121951,
+      "family": "pruned",
+      "mean_witnesses": 0.91015625,
+      "pair_table_lookups_per_trial": 2232.0,
+      "points": 2232,
+      "projected_columns": 33,
+      "prune_steps": [
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 94.3157894736842,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 67
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 92.96842105263158,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 66
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 91.62105263157895,
+          "removed_abscissa": 12360,
+          "removed_orbit": 2,
+          "unknowns_after": 65
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 90.27368421052631,
+          "removed_abscissa": 12361,
+          "removed_orbit": 3,
+          "unknowns_after": 64
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 88.92631578947369,
+          "removed_abscissa": 22096,
+          "removed_orbit": 4,
+          "unknowns_after": 63
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 87.57894736842105,
+          "removed_abscissa": 22097,
+          "removed_orbit": 5,
+          "unknowns_after": 62
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 86.23157894736842,
+          "removed_abscissa": 26137,
+          "removed_orbit": 7,
+          "unknowns_after": 61
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 84.88421052631578,
+          "removed_abscissa": 930930,
+          "removed_orbit": 8,
+          "unknowns_after": 60
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 83.53684210526316,
+          "removed_abscissa": 930931,
+          "removed_orbit": 9,
+          "unknowns_after": 59
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 82.18947368421053,
+          "removed_abscissa": 938602,
+          "removed_orbit": 10,
+          "unknowns_after": 58
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 80.84210526315789,
+          "removed_abscissa": 938603,
+          "removed_orbit": 11,
+          "unknowns_after": 57
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 79.49473684210527,
+          "removed_abscissa": 1061093,
+          "removed_orbit": 13,
+          "unknowns_after": 56
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 78.14736842105263,
+          "removed_abscissa": 2888855,
+          "removed_orbit": 15,
+          "unknowns_after": 55
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 76.8,
+          "removed_abscissa": 2893023,
+          "removed_orbit": 17,
+          "unknowns_after": 54
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 75.45263157894736,
+          "removed_abscissa": 2912910,
+          "removed_orbit": 18,
+          "unknowns_after": 53
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 74.10526315789474,
+          "removed_abscissa": 4351832,
+          "removed_orbit": 20,
+          "unknowns_after": 52
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 72.7578947368421,
+          "removed_abscissa": 6054862,
+          "removed_orbit": 24,
+          "unknowns_after": 51
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 71.41052631578947,
+          "removed_abscissa": 6300069,
+          "removed_orbit": 26,
+          "unknowns_after": 50
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 70.06315789473685,
+          "removed_abscissa": 6309821,
+          "removed_orbit": 27,
+          "unknowns_after": 49
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 68.71578947368421,
+          "removed_abscissa": 7226247,
+          "removed_orbit": 28,
+          "unknowns_after": 48
+        },
+        {
+          "covered_after": 190,
+          "covered_before": 190,
+          "expected_trials_after": 67.36842105263158,
+          "removed_abscissa": 21118224,
+          "removed_orbit": 37,
+          "unknowns_after": 47
+        },
+        {
+          "covered_after": 189,
+          "covered_before": 190,
+          "expected_trials_after": 66.37037037037037,
+          "removed_abscissa": 1991311,
+          "removed_orbit": 14,
+          "unknowns_after": 46
+        },
+        {
+          "covered_after": 188,
+          "covered_before": 189,
+          "expected_trials_after": 65.36170212765957,
+          "removed_abscissa": 2893022,
+          "removed_orbit": 16,
+          "unknowns_after": 45
+        },
+        {
+          "covered_after": 187,
+          "covered_before": 188,
+          "expected_trials_after": 64.34224598930481,
+          "removed_abscissa": 5002027,
+          "removed_orbit": 22,
+          "unknowns_after": 44
+        },
+        {
+          "covered_after": 185,
+          "covered_before": 187,
+          "expected_trials_after": 63.65405405405406,
+          "removed_abscissa": 5386661,
+          "removed_orbit": 23,
+          "unknowns_after": 43
+        },
+        {
+          "covered_after": 183,
+          "covered_before": 185,
+          "expected_trials_after": 62.950819672131146,
+          "removed_abscissa": 7238606,
+          "removed_orbit": 29,
+          "unknowns_after": 42
+        },
+        {
+          "covered_after": 181,
+          "covered_before": 183,
+          "expected_trials_after": 62.232044198895025,
+          "removed_abscissa": 7238607,
+          "removed_orbit": 30,
+          "unknowns_after": 41
+        },
+        {
+          "covered_after": 178,
+          "covered_before": 181,
+          "expected_trials_after": 61.842696629213485,
+          "removed_abscissa": 942627,
+          "removed_orbit": 12,
+          "unknowns_after": 40
+        },
+        {
+          "covered_after": 175,
+          "covered_before": 178,
+          "expected_trials_after": 61.44,
+          "removed_abscissa": 40157428,
+          "removed_orbit": 39,
+          "unknowns_after": 39
+        },
+        {
+          "covered_after": 172,
+          "covered_before": 175,
+          "expected_trials_after": 61.02325581395349,
+          "removed_abscissa": 242578608,
+          "removed_orbit": 67,
+          "unknowns_after": 38
+        },
+        {
+          "covered_after": 168,
+          "covered_before": 172,
+          "expected_trials_after": 60.95238095238095,
+          "removed_abscissa": 18757830,
+          "removed_orbit": 32,
+          "unknowns_after": 37
+        },
+        {
+          "covered_after": 164,
+          "covered_before": 168,
+          "expected_trials_after": 60.8780487804878,
+          "removed_abscissa": 126718581,
+          "removed_orbit": 61,
+          "unknowns_after": 36
+        }
+      ],
+      "sat_variables": 124,
+      "signed_orbits": 36,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "indices": [
+              0,
+              3,
+              5
+            ],
+            "kind": "divisor"
+          }
+        },
+        "retained_abscissa_orbits": [
+          26136,
+          3949163,
+          4896480,
+          6300068,
+          15164312,
+          19024612,
+          19036844,
+          19036845,
+          19547911,
+          29642613,
+          44123096,
+          44399997,
+          44710332,
+          48911164,
+          51548092,
+          52223911,
+          54187889,
+          55754967,
+          55941591,
+          60877237,
+          63794177,
+          65702213,
+          79457463,
+          80037707,
+          80327517,
+          81418648,
+          81770580,
+          90685007,
+          94156117,
+          96818418,
+          121300042,
+          126718664,
+          143481278,
+          177761425,
+          214548971,
+          222005484
+        ]
+      },
+      "unknowns": 33
+    },
+    {
+      "abscissae": 1054,
+      "build_ms": 196.528756,
+      "census_ms": 21099.259121,
+      "cofactor_admissible": true,
+      "coverage": 0.5859375,
+      "covered": 150,
+      "dimension": 31,
+      "domain": "explicit_orbits(34)",
+      "enumeration_ops_per_trial": 4443664.0,
+      "expected_trials": 56.32,
+      "family": "pruned",
+      "mean_witnesses": 0.83203125,
+      "pair_table_lookups_per_trial": 2108.0,
+      "points": 2108,
+      "projected_columns": 30,
+      "prune_steps": [
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 103.04402515723271,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 61
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 101.43396226415095,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 60
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 99.82389937106919,
+          "removed_abscissa": 3366710,
+          "removed_orbit": 2,
+          "unknowns_after": 59
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 98.21383647798743,
+          "removed_abscissa": 6804115,
+          "removed_orbit": 3,
+          "unknowns_after": 58
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 96.60377358490567,
+          "removed_abscissa": 6932288,
+          "removed_orbit": 4,
+          "unknowns_after": 57
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 94.99371069182389,
+          "removed_abscissa": 8295187,
+          "removed_orbit": 5,
+          "unknowns_after": 56
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 93.38364779874213,
+          "removed_abscissa": 10506400,
+          "removed_orbit": 6,
+          "unknowns_after": 55
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 91.77358490566037,
+          "removed_abscissa": 10573806,
+          "removed_orbit": 7,
+          "unknowns_after": 54
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 90.16352201257861,
+          "removed_abscissa": 10634482,
+          "removed_orbit": 8,
+          "unknowns_after": 53
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 88.55345911949685,
+          "removed_abscissa": 10895760,
+          "removed_orbit": 12,
+          "unknowns_after": 52
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 86.94339622641509,
+          "removed_abscissa": 11687577,
+          "removed_orbit": 15,
+          "unknowns_after": 51
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 85.33333333333333,
+          "removed_abscissa": 11814824,
+          "removed_orbit": 18,
+          "unknowns_after": 50
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 83.72327044025157,
+          "removed_abscissa": 11878631,
+          "removed_orbit": 19,
+          "unknowns_after": 49
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 82.11320754716981,
+          "removed_abscissa": 12014772,
+          "removed_orbit": 20,
+          "unknowns_after": 48
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 80.50314465408805,
+          "removed_abscissa": 12014773,
+          "removed_orbit": 21,
+          "unknowns_after": 47
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 78.89308176100629,
+          "removed_abscissa": 15157494,
+          "removed_orbit": 23,
+          "unknowns_after": 46
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 77.28301886792453,
+          "removed_abscissa": 27476123,
+          "removed_orbit": 31,
+          "unknowns_after": 45
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 75.67295597484276,
+          "removed_abscissa": 27673271,
+          "removed_orbit": 33,
+          "unknowns_after": 44
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 74.062893081761,
+          "removed_abscissa": 29332491,
+          "removed_orbit": 42,
+          "unknowns_after": 43
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 72.45283018867924,
+          "removed_abscissa": 54253440,
+          "removed_orbit": 46,
+          "unknowns_after": 42
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 70.84276729559748,
+          "removed_abscissa": 58558922,
+          "removed_orbit": 48,
+          "unknowns_after": 41
+        },
+        {
+          "covered_after": 159,
+          "covered_before": 159,
+          "expected_trials_after": 69.23270440251572,
+          "removed_abscissa": 58808493,
+          "removed_orbit": 49,
+          "unknowns_after": 40
+        },
+        {
+          "covered_after": 158,
+          "covered_before": 159,
+          "expected_trials_after": 68.0506329113924,
+          "removed_abscissa": 12581870,
+          "removed_orbit": 22,
+          "unknowns_after": 39
+        },
+        {
+          "covered_after": 157,
+          "covered_before": 158,
+          "expected_trials_after": 66.85350318471338,
+          "removed_abscissa": 21484179,
+          "removed_orbit": 24,
+          "unknowns_after": 38
+        },
+        {
+          "covered_after": 156,
+          "covered_before": 157,
+          "expected_trials_after": 65.64102564102564,
+          "removed_abscissa": 28328428,
+          "removed_orbit": 34,
+          "unknowns_after": 37
+        },
+        {
+          "covered_after": 154,
+          "covered_before": 156,
+          "expected_trials_after": 64.83116883116882,
+          "removed_abscissa": 24232192,
+          "removed_orbit": 25,
+          "unknowns_after": 36
+        },
+        {
+          "covered_after": 152,
+          "covered_before": 154,
+          "expected_trials_after": 64.0,
+          "removed_abscissa": 133361336,
+          "removed_orbit": 55,
+          "unknowns_after": 35
+        },
+        {
+          "covered_after": 150,
+          "covered_before": 152,
+          "expected_trials_after": 63.14666666666667,
+          "removed_abscissa": 175922352,
+          "removed_orbit": 58,
+          "unknowns_after": 34
+        }
+      ],
+      "sat_variables": 124,
+      "signed_orbits": 34,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "indices": [
+              0,
+              2,
+              4
+            ],
+            "kind": "divisor"
+          }
+        },
+        "retained_abscissa_orbits": [
+          10710772,
+          10769859,
+          10834572,
+          10895761,
+          10962655,
+          11751894,
+          11751895,
+          24560347,
+          27350216,
+          27350217,
+          27412436,
+          27476122,
+          27547364,
+          28395170,
+          28464574,
+          28529392,
+          28529393,
+          28591246,
+          28656576,
+          28725469,
+          30102234,
+          43006856,
+          53052333,
+          55742830,
+          63678810,
+          74815053,
+          79536773,
+          122809811,
+          127813438,
+          144468268,
+          159009748,
+          195656018,
+          231654379,
+          253073175
+        ]
+      },
+      "unknowns": 30
+    },
+    {
+      "abscissae": 1085,
+      "build_ms": 192.209827,
+      "census_ms": 22002.803348,
+      "cofactor_admissible": true,
+      "coverage": 0.5625,
+      "covered": 144,
+      "dimension": 31,
+      "domain": "explicit_orbits(35)",
+      "enumeration_ops_per_trial": 4708900.0,
+      "expected_trials": 56.888888888888886,
+      "family": "pruned",
+      "mean_witnesses": 0.859375,
+      "pair_table_lookups_per_trial": 2170.0,
+      "points": 2170,
+      "projected_columns": 29,
+      "prune_steps": [
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 103.73856209150327,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 59
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 102.06535947712419,
+          "removed_abscissa": 51002,
+          "removed_orbit": 2,
+          "unknowns_after": 58
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 100.3921568627451,
+          "removed_abscissa": 2762537,
+          "removed_orbit": 3,
+          "unknowns_after": 57
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 98.71895424836602,
+          "removed_abscissa": 2826342,
+          "removed_orbit": 4,
+          "unknowns_after": 56
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 97.04575163398692,
+          "removed_abscissa": 2883427,
+          "removed_orbit": 5,
+          "unknowns_after": 55
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 95.37254901960785,
+          "removed_abscissa": 2897432,
+          "removed_orbit": 6,
+          "unknowns_after": 54
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 93.69934640522875,
+          "removed_abscissa": 2961750,
+          "removed_orbit": 8,
+          "unknowns_after": 53
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 92.02614379084967,
+          "removed_abscissa": 3678480,
+          "removed_orbit": 9,
+          "unknowns_after": 52
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 90.3529411764706,
+          "removed_abscissa": 3727368,
+          "removed_orbit": 11,
+          "unknowns_after": 51
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 88.6797385620915,
+          "removed_abscissa": 3745374,
+          "removed_orbit": 12,
+          "unknowns_after": 50
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 87.00653594771242,
+          "removed_abscissa": 3814723,
+          "removed_orbit": 14,
+          "unknowns_after": 49
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 85.33333333333333,
+          "removed_abscissa": 3879436,
+          "removed_orbit": 15,
+          "unknowns_after": 48
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 83.66013071895425,
+          "removed_abscissa": 3879437,
+          "removed_orbit": 16,
+          "unknowns_after": 47
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 81.98692810457516,
+          "removed_abscissa": 4142959,
+          "removed_orbit": 18,
+          "unknowns_after": 46
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 80.31372549019608,
+          "removed_abscissa": 7215849,
+          "removed_orbit": 28,
+          "unknowns_after": 45
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 78.640522875817,
+          "removed_abscissa": 7282086,
+          "removed_orbit": 29,
+          "unknowns_after": 44
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 76.9673202614379,
+          "removed_abscissa": 17301489,
+          "removed_orbit": 37,
+          "unknowns_after": 43
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 75.29411764705883,
+          "removed_abscissa": 20592228,
+          "removed_orbit": 39,
+          "unknowns_after": 42
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 73.62091503267973,
+          "removed_abscissa": 27188855,
+          "removed_orbit": 40,
+          "unknowns_after": 41
+        },
+        {
+          "covered_after": 153,
+          "covered_before": 153,
+          "expected_trials_after": 71.94771241830065,
+          "removed_abscissa": 41741601,
+          "removed_orbit": 44,
+          "unknowns_after": 40
+        },
+        {
+          "covered_after": 152,
+          "covered_before": 153,
+          "expected_trials_after": 70.73684210526316,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 39
+        },
+        {
+          "covered_after": 151,
+          "covered_before": 152,
+          "expected_trials_after": 69.50993377483444,
+          "removed_abscissa": 114875629,
+          "removed_orbit": 56,
+          "unknowns_after": 38
+        },
+        {
+          "covered_after": 150,
+          "covered_before": 151,
+          "expected_trials_after": 68.26666666666667,
+          "removed_abscissa": 204115091,
+          "removed_orbit": 58,
+          "unknowns_after": 37
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 150,
+          "expected_trials_after": 67.91836734693878,
+          "removed_abscissa": 4075553,
+          "removed_orbit": 17,
+          "unknowns_after": 36
+        },
+        {
+          "covered_after": 144,
+          "covered_before": 147,
+          "expected_trials_after": 67.55555555555556,
+          "removed_abscissa": 4402110,
+          "removed_orbit": 20,
+          "unknowns_after": 35
+        }
+      ],
+      "sat_variables": 124,
+      "signed_orbits": 35,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "indices": [
+              0,
+              4,
+              5
+            ],
+            "kind": "divisor"
+          }
+        },
+        "retained_abscissa_orbits": [
+          2897433,
+          3678481,
+          3745375,
+          4336881,
+          4402111,
+          4472257,
+          5320071,
+          5651448,
+          5685660,
+          5717175,
+          7215848,
+          7282087,
+          8133840,
+          8199070,
+          8199071,
+          9236040,
+          9343839,
+          10994073,
+          17999475,
+          29310731,
+          32279666,
+          37799479,
+          42487896,
+          44613302,
+          45098041,
+          55957942,
+          56342055,
+          56548638,
+          70814652,
+          80691401,
+          82234496,
+          83131652,
+          104498484,
+          128099479,
+          250902809
+        ]
+      },
+      "unknowns": 29
+    },
+    {
+      "abscissae": 1023,
+      "build_ms": 185.360592,
+      "census_ms": 19914.228375,
+      "cofactor_admissible": true,
+      "coverage": 0.5390625,
+      "covered": 138,
+      "dimension": 31,
+      "domain": "explicit_orbits(33)",
+      "enumeration_ops_per_trial": 4186116.0,
+      "expected_trials": 57.507246376811594,
+      "family": "pruned",
+      "mean_witnesses": 0.77734375,
+      "pair_table_lookups_per_trial": 2046.0,
+      "points": 2046,
+      "projected_columns": 28,
+      "prune_steps": [
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 103.78378378378379,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 57
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 102.05405405405405,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 56
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 100.32432432432432,
+          "removed_abscissa": 70938,
+          "removed_orbit": 2,
+          "unknowns_after": 55
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 98.5945945945946,
+          "removed_abscissa": 400259,
+          "removed_orbit": 3,
+          "unknowns_after": 54
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 96.86486486486487,
+          "removed_abscissa": 2538127,
+          "removed_orbit": 4,
+          "unknowns_after": 53
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 95.13513513513513,
+          "removed_abscissa": 2629976,
+          "removed_orbit": 5,
+          "unknowns_after": 52
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 93.4054054054054,
+          "removed_abscissa": 2629977,
+          "removed_orbit": 6,
+          "unknowns_after": 51
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 91.67567567567568,
+          "removed_abscissa": 2700355,
+          "removed_orbit": 7,
+          "unknowns_after": 50
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 89.94594594594595,
+          "removed_abscissa": 2826273,
+          "removed_orbit": 10,
+          "unknowns_after": 49
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 88.21621621621621,
+          "removed_abscissa": 2893324,
+          "removed_orbit": 11,
+          "unknowns_after": 48
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 86.48648648648648,
+          "removed_abscissa": 2962199,
+          "removed_orbit": 13,
+          "unknowns_after": 47
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 84.75675675675676,
+          "removed_abscissa": 3027567,
+          "removed_orbit": 15,
+          "unknowns_after": 46
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 83.02702702702703,
+          "removed_abscissa": 3090293,
+          "removed_orbit": 16,
+          "unknowns_after": 45
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 81.29729729729729,
+          "removed_abscissa": 3749436,
+          "removed_orbit": 18,
+          "unknowns_after": 44
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 79.56756756756756,
+          "removed_abscissa": 4336113,
+          "removed_orbit": 22,
+          "unknowns_after": 43
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 77.83783783783784,
+          "removed_abscissa": 5519544,
+          "removed_orbit": 26,
+          "unknowns_after": 42
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 76.10810810810811,
+          "removed_abscissa": 7281382,
+          "removed_orbit": 28,
+          "unknowns_after": 41
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 74.37837837837837,
+          "removed_abscissa": 13490091,
+          "removed_orbit": 33,
+          "unknowns_after": 40
+        },
+        {
+          "covered_after": 148,
+          "covered_before": 148,
+          "expected_trials_after": 72.64864864864865,
+          "removed_abscissa": 44549790,
+          "removed_orbit": 43,
+          "unknowns_after": 39
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 148,
+          "expected_trials_after": 71.40136054421768,
+          "removed_abscissa": 5825122,
+          "removed_orbit": 27,
+          "unknowns_after": 38
+        },
+        {
+          "covered_after": 146,
+          "covered_before": 147,
+          "expected_trials_after": 70.13698630136986,
+          "removed_abscissa": 8069068,
+          "removed_orbit": 30,
+          "unknowns_after": 37
+        },
+        {
+          "covered_after": 145,
+          "covered_before": 146,
+          "expected_trials_after": 68.8551724137931,
+          "removed_abscissa": 266763856,
+          "removed_orbit": 56,
+          "unknowns_after": 36
+        },
+        {
+          "covered_after": 143,
+          "covered_before": 145,
+          "expected_trials_after": 68.02797202797203,
+          "removed_abscissa": 111298082,
+          "removed_orbit": 50,
+          "unknowns_after": 35
+        },
+        {
+          "covered_after": 141,
+          "covered_before": 143,
+          "expected_trials_after": 67.177304964539,
+          "removed_abscissa": 145191746,
+          "removed_orbit": 53,
+          "unknowns_after": 34
+        },
+        {
+          "covered_after": 138,
+          "covered_before": 141,
+          "expected_trials_after": 66.78260869565217,
+          "removed_abscissa": 20919097,
+          "removed_orbit": 39,
+          "unknowns_after": 33
+        }
+      ],
+      "sat_variables": 124,
+      "signed_orbits": 33,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "indices": [
+              0,
+              5,
+              6
+            ],
+            "kind": "divisor"
+          }
+        },
+        "retained_abscissa_orbits": [
+          2766139,
+          2826272,
+          2962198,
+          3027566,
+          3738487,
+          3815236,
+          4138250,
+          4336112,
+          4438837,
+          4534237,
+          5319415,
+          7281383,
+          10628773,
+          10704253,
+          15701992,
+          18978092,
+          19801181,
+          20657261,
+          20919096,
+          22719711,
+          32984271,
+          42916173,
+          57469947,
+          59016768,
+          65254299,
+          81895388,
+          83042618,
+          109596380,
+          121413331,
+          142233518,
+          151702093,
+          179471166,
+          268205942
+        ]
+      },
+      "unknowns": 28
+    },
+    {
+      "abscissae": 1116,
+      "build_ms": 207.521414,
+      "census_ms": 23110.900038,
+      "cofactor_admissible": true,
+      "coverage": 0.59375,
+      "covered": 152,
+      "dimension": 31,
+      "domain": "explicit_orbits(36)",
+      "enumeration_ops_per_trial": 4981824.0,
+      "expected_trials": 58.94736842105263,
+      "family": "pruned",
+      "mean_witnesses": 0.875,
+      "pair_table_lookups_per_trial": 2232.0,
+      "points": 2232,
+      "projected_columns": 32,
+      "prune_steps": [
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 104.7953216374269,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 67
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 103.29824561403508,
+          "removed_abscissa": 2,
+          "removed_orbit": 2,
+          "unknowns_after": 66
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 101.80116959064327,
+          "removed_abscissa": 202826,
+          "removed_orbit": 4,
+          "unknowns_after": 65
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 100.30409356725146,
+          "removed_abscissa": 203415,
+          "removed_orbit": 5,
+          "unknowns_after": 64
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 98.80701754385964,
+          "removed_abscissa": 565876,
+          "removed_orbit": 6,
+          "unknowns_after": 63
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 97.30994152046783,
+          "removed_abscissa": 3265312,
+          "removed_orbit": 8,
+          "unknowns_after": 62
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 95.81286549707602,
+          "removed_abscissa": 6482353,
+          "removed_orbit": 9,
+          "unknowns_after": 61
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 94.3157894736842,
+          "removed_abscissa": 7185782,
+          "removed_orbit": 10,
+          "unknowns_after": 60
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 92.81871345029239,
+          "removed_abscissa": 10634465,
+          "removed_orbit": 11,
+          "unknowns_after": 59
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 91.32163742690058,
+          "removed_abscissa": 10634466,
+          "removed_orbit": 12,
+          "unknowns_after": 58
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 89.82456140350877,
+          "removed_abscissa": 10634470,
+          "removed_orbit": 13,
+          "unknowns_after": 57
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 88.32748538011695,
+          "removed_abscissa": 10634480,
+          "removed_orbit": 14,
+          "unknowns_after": 56
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 86.83040935672514,
+          "removed_abscissa": 10634482,
+          "removed_orbit": 15,
+          "unknowns_after": 55
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 85.33333333333333,
+          "removed_abscissa": 10634738,
+          "removed_orbit": 23,
+          "unknowns_after": 54
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 83.83625730994152,
+          "removed_abscissa": 10700003,
+          "removed_orbit": 28,
+          "unknowns_after": 53
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 82.3391812865497,
+          "removed_abscissa": 10700016,
+          "removed_orbit": 31,
+          "unknowns_after": 52
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 80.84210526315789,
+          "removed_abscissa": 10700021,
+          "removed_orbit": 35,
+          "unknowns_after": 51
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 79.34502923976608,
+          "removed_abscissa": 10700023,
+          "removed_orbit": 36,
+          "unknowns_after": 50
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 77.84795321637426,
+          "removed_abscissa": 10700274,
+          "removed_orbit": 41,
+          "unknowns_after": 49
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 76.35087719298245,
+          "removed_abscissa": 46975009,
+          "removed_orbit": 51,
+          "unknowns_after": 48
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 74.85380116959064,
+          "removed_abscissa": 259156965,
+          "removed_orbit": 65,
+          "unknowns_after": 47
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 73.35672514619883,
+          "removed_abscissa": 266565254,
+          "removed_orbit": 66,
+          "unknowns_after": 46
+        },
+        {
+          "covered_after": 170,
+          "covered_before": 171,
+          "expected_trials_after": 72.28235294117647,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 45
+        },
+        {
+          "covered_after": 169,
+          "covered_before": 170,
+          "expected_trials_after": 71.19526627218934,
+          "removed_abscissa": 10700000,
+          "removed_orbit": 26,
+          "unknowns_after": 44
+        },
+        {
+          "covered_after": 168,
+          "covered_before": 169,
+          "expected_trials_after": 70.0952380952381,
+          "removed_abscissa": 37941200,
+          "removed_orbit": 48,
+          "unknowns_after": 43
+        },
+        {
+          "covered_after": 166,
+          "covered_before": 168,
+          "expected_trials_after": 69.39759036144578,
+          "removed_abscissa": 10634485,
+          "removed_orbit": 16,
+          "unknowns_after": 42
+        },
+        {
+          "covered_after": 164,
+          "covered_before": 166,
+          "expected_trials_after": 68.6829268292683,
+          "removed_abscissa": 10634725,
+          "removed_orbit": 19,
+          "unknowns_after": 41
+        },
+        {
+          "covered_after": 162,
+          "covered_before": 164,
+          "expected_trials_after": 67.95061728395062,
+          "removed_abscissa": 10634736,
+          "removed_orbit": 22,
+          "unknowns_after": 40
+        },
+        {
+          "covered_after": 160,
+          "covered_before": 162,
+          "expected_trials_after": 67.2,
+          "removed_abscissa": 36233117,
+          "removed_orbit": 47,
+          "unknowns_after": 39
+        },
+        {
+          "covered_after": 158,
+          "covered_before": 160,
+          "expected_trials_after": 66.43037974683544,
+          "removed_abscissa": 46736492,
+          "removed_orbit": 50,
+          "unknowns_after": 38
+        },
+        {
+          "covered_after": 155,
+          "covered_before": 158,
+          "expected_trials_after": 66.06451612903226,
+          "removed_abscissa": 59056663,
+          "removed_orbit": 53,
+          "unknowns_after": 37
+        },
+        {
+          "covered_after": 152,
+          "covered_before": 155,
+          "expected_trials_after": 65.6842105263158,
+          "removed_abscissa": 97302798,
+          "removed_orbit": 59,
+          "unknowns_after": 36
+        }
+      ],
+      "sat_variables": 124,
+      "signed_orbits": 36,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "indices": [
+              0,
+              1,
+              2
+            ],
+            "kind": "divisor"
+          }
+        },
+        "retained_abscissa_orbits": [
+          32770,
+          3213518,
+          10634721,
+          10634724,
+          10634726,
+          10634727,
+          10634741,
+          10634742,
+          10700002,
+          10700004,
+          10700005,
+          10700017,
+          10700018,
+          10700019,
+          10700258,
+          10700259,
+          10700261,
+          10700272,
+          10700278,
+          13586935,
+          30037228,
+          30102234,
+          31350403,
+          44587038,
+          54708665,
+          61792263,
+          62763321,
+          77481631,
+          82739178,
+          96314018,
+          116280014,
+          133095715,
+          133126944,
+          153342542,
+          225594870,
+          266594125
+        ]
+      },
+      "unknowns": 32
+    },
+    {
+      "abscissae": 1023,
+      "build_ms": 187.61502,
+      "census_ms": 20040.547555,
+      "cofactor_admissible": true,
+      "coverage": 0.5234375,
+      "covered": 134,
+      "dimension": 31,
+      "domain": "explicit_orbits(33)",
+      "enumeration_ops_per_trial": 4186116.0,
+      "expected_trials": 59.223880597014926,
+      "family": "pruned",
+      "mean_witnesses": 0.7734375,
+      "pair_table_lookups_per_trial": 2046.0,
+      "points": 2046,
+      "projected_columns": 28,
+      "prune_steps": [
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 104.48979591836735,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 57
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 102.74829931972789,
+          "removed_abscissa": 79629,
+          "removed_orbit": 2,
+          "unknowns_after": 56
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 101.00680272108843,
+          "removed_abscissa": 981539,
+          "removed_orbit": 3,
+          "unknowns_after": 55
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 99.26530612244898,
+          "removed_abscissa": 2291424,
+          "removed_orbit": 4,
+          "unknowns_after": 54
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 97.52380952380952,
+          "removed_abscissa": 2291425,
+          "removed_orbit": 5,
+          "unknowns_after": 53
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 95.78231292517007,
+          "removed_abscissa": 4397258,
+          "removed_orbit": 6,
+          "unknowns_after": 52
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 94.04081632653062,
+          "removed_abscissa": 6713052,
+          "removed_orbit": 7,
+          "unknowns_after": 51
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 92.29931972789116,
+          "removed_abscissa": 8434194,
+          "removed_orbit": 8,
+          "unknowns_after": 50
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 90.5578231292517,
+          "removed_abscissa": 8434195,
+          "removed_orbit": 9,
+          "unknowns_after": 49
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 88.81632653061224,
+          "removed_abscissa": 12359265,
+          "removed_orbit": 13,
+          "unknowns_after": 48
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 87.07482993197279,
+          "removed_abscissa": 25786357,
+          "removed_orbit": 17,
+          "unknowns_after": 47
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 85.33333333333333,
+          "removed_abscissa": 32418780,
+          "removed_orbit": 20,
+          "unknowns_after": 46
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 83.59183673469387,
+          "removed_abscissa": 33407013,
+          "removed_orbit": 23,
+          "unknowns_after": 45
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 81.85034013605443,
+          "removed_abscissa": 36277896,
+          "removed_orbit": 25,
+          "unknowns_after": 44
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 80.10884353741497,
+          "removed_abscissa": 38504206,
+          "removed_orbit": 26,
+          "unknowns_after": 43
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 78.36734693877551,
+          "removed_abscissa": 41215897,
+          "removed_orbit": 27,
+          "unknowns_after": 42
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 147,
+          "expected_trials_after": 76.62585034013605,
+          "removed_abscissa": 76425764,
+          "removed_orbit": 41,
+          "unknowns_after": 41
+        },
+        {
+          "covered_after": 146,
+          "covered_before": 147,
+          "expected_trials_after": 75.3972602739726,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 40
+        },
+        {
+          "covered_after": 145,
+          "covered_before": 146,
+          "expected_trials_after": 74.15172413793104,
+          "removed_abscissa": 30170429,
+          "removed_orbit": 19,
+          "unknowns_after": 39
+        },
+        {
+          "covered_after": 144,
+          "covered_before": 145,
+          "expected_trials_after": 72.88888888888889,
+          "removed_abscissa": 49233063,
+          "removed_orbit": 34,
+          "unknowns_after": 38
+        },
+        {
+          "covered_after": 143,
+          "covered_before": 144,
+          "expected_trials_after": 71.60839160839161,
+          "removed_abscissa": 160783520,
+          "removed_orbit": 52,
+          "unknowns_after": 37
+        },
+        {
+          "covered_after": 141,
+          "covered_before": 143,
+          "expected_trials_after": 70.80851063829788,
+          "removed_abscissa": 10634482,
+          "removed_orbit": 10,
+          "unknowns_after": 36
+        },
+        {
+          "covered_after": 139,
+          "covered_before": 141,
+          "expected_trials_after": 69.98561151079137,
+          "removed_abscissa": 42505115,
+          "removed_orbit": 30,
+          "unknowns_after": 35
+        },
+        {
+          "covered_after": 137,
+          "covered_before": 139,
+          "expected_trials_after": 69.13868613138686,
+          "removed_abscissa": 76609718,
+          "removed_orbit": 42,
+          "unknowns_after": 34
+        },
+        {
+          "covered_after": 134,
+          "covered_before": 137,
+          "expected_trials_after": 68.77611940298507,
+          "removed_abscissa": 171499772,
+          "removed_orbit": 54,
+          "unknowns_after": 33
+        }
+      ],
+      "sat_variables": 124,
+      "signed_orbits": 33,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "indices": [
+              0,
+              2,
+              5
+            ],
+            "kind": "divisor"
+          }
+        },
+        "retained_abscissa_orbits": [
+          10821583,
+          12359264,
+          21819182,
+          21819183,
+          25221198,
+          30102234,
+          32418781,
+          32721795,
+          35379872,
+          41395069,
+          42397272,
+          43679116,
+          46516398,
+          46871837,
+          49425745,
+          52017842,
+          52797120,
+          52797121,
+          59360067,
+          60396641,
+          93884700,
+          100589945,
+          103670944,
+          126435844,
+          126435845,
+          127373462,
+          141780979,
+          146191629,
+          146360843,
+          170587826,
+          236228139,
+          241401492,
+          266663781
+        ]
+      },
+      "unknowns": 28
+    },
+    {
+      "abscissae": 1147,
+      "build_ms": 106.195379,
+      "census_ms": 23695.002445,
+      "cofactor_admissible": true,
+      "coverage": 0.63671875,
+      "covered": 163,
+      "dimension": 11,
+      "domain": "subspace_subset(37 orbits)",
+      "enumeration_ops_per_trial": 5262436.0,
+      "expected_trials": 62.82208588957055,
+      "family": "pruned",
+      "mean_witnesses": 0.9140625,
+      "pair_table_lookups_per_trial": 2294.0,
+      "points": 2294,
+      "projected_columns": 37,
+      "prune_steps": [
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 64.37426900584795,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 40
+        },
+        {
+          "covered_after": 171,
+          "covered_before": 171,
+          "expected_trials_after": 62.87719298245614,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 39
+        },
+        {
+          "covered_after": 167,
+          "covered_before": 171,
+          "expected_trials_after": 62.8502994011976,
+          "removed_abscissa": 5128,
+          "removed_orbit": 3,
+          "unknowns_after": 38
+        },
+        {
+          "covered_after": 163,
+          "covered_before": 167,
+          "expected_trials_after": 62.82208588957055,
+          "removed_abscissa": 5146,
+          "removed_orbit": 10,
+          "unknowns_after": 37
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 37,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            1,
+            6
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          2,
+          5129,
+          5130,
+          5133,
+          5134,
+          5144,
+          5145,
+          5149,
+          5384,
+          5385,
+          5387,
+          5388,
+          5390,
+          5400,
+          5403,
+          5404,
+          5405,
+          5406,
+          70664,
+          70665,
+          70667,
+          70669,
+          70671,
+          70680,
+          70681,
+          70682,
+          70685,
+          70920,
+          70922,
+          70924,
+          70925,
+          70926,
+          70936,
+          70938,
+          70940,
+          70941,
+          70942
+        ]
+      },
+      "unknowns": 37
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 65.151142,
+      "census_ms": 25931.977874,
+      "cofactor_admissible": true,
+      "coverage": 0.66796875,
+      "covered": 171,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 5861241.0,
+      "expected_trials": 62.87719298245614,
+      "family": "divisor",
+      "mean_witnesses": 1.0625,
+      "pair_table_lookups_per_trial": 2421.0,
+      "points": 2421,
+      "projected_columns": 39,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 41,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          1,
+          6
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 39
+    },
+    {
+      "abscissae": 1023,
+      "build_ms": 100.351454,
+      "census_ms": 19486.924101,
+      "cofactor_admissible": true,
+      "coverage": 0.5546875,
+      "covered": 142,
+      "dimension": 11,
+      "domain": "subspace_subset(33 orbits)",
+      "enumeration_ops_per_trial": 4186116.0,
+      "expected_trials": 64.90140845070422,
+      "family": "pruned",
+      "mean_witnesses": 0.78515625,
+      "pair_table_lookups_per_trial": 2046.0,
+      "points": 2046,
+      "projected_columns": 33,
+      "prune_steps": [
+        {
+          "covered_after": 150,
+          "covered_before": 150,
+          "expected_trials_after": 68.26666666666667,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 37
+        },
+        {
+          "covered_after": 149,
+          "covered_before": 150,
+          "expected_trials_after": 67.00671140939598,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 36
+        },
+        {
+          "covered_after": 147,
+          "covered_before": 149,
+          "expected_trials_after": 66.17687074829932,
+          "removed_abscissa": 1625,
+          "removed_orbit": 8,
+          "unknowns_after": 35
+        },
+        {
+          "covered_after": 145,
+          "covered_before": 147,
+          "expected_trials_after": 65.32413793103449,
+          "removed_abscissa": 67165,
+          "removed_orbit": 28,
+          "unknowns_after": 34
+        },
+        {
+          "covered_after": 142,
+          "covered_before": 145,
+          "expected_trials_after": 64.90140845070422,
+          "removed_abscissa": 1868,
+          "removed_orbit": 14,
+          "unknowns_after": 33
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 33,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            1,
+            4
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          2,
+          1609,
+          1611,
+          1612,
+          1615,
+          1624,
+          1626,
+          1627,
+          1631,
+          1866,
+          1867,
+          1869,
+          1870,
+          1871,
+          1881,
+          1882,
+          1887,
+          67144,
+          67145,
+          67146,
+          67149,
+          67162,
+          67163,
+          67164,
+          67166,
+          67400,
+          67401,
+          67402,
+          67404,
+          67417,
+          67418,
+          67420,
+          67423
+        ]
+      },
+      "unknowns": 33
+    },
+    {
+      "abscissae": 992,
+      "build_ms": 98.992528,
+      "census_ms": 18731.731957,
+      "cofactor_admissible": true,
+      "coverage": 0.5390625,
+      "covered": 138,
+      "dimension": 11,
+      "domain": "subspace_subset(32 orbits)",
+      "enumeration_ops_per_trial": 3936256.0,
+      "expected_trials": 64.92753623188406,
+      "family": "pruned",
+      "mean_witnesses": 0.703125,
+      "pair_table_lookups_per_trial": 1984.0,
+      "points": 1984,
+      "projected_columns": 32,
+      "prune_steps": [
+        {
+          "covered_after": 138,
+          "covered_before": 138,
+          "expected_trials_after": 66.78260869565217,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 33
+        },
+        {
+          "covered_after": 138,
+          "covered_before": 138,
+          "expected_trials_after": 64.92753623188406,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 32
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 32,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            1,
+            5
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          2,
+          3941475,
+          3941476,
+          3941488,
+          3941489,
+          3941493,
+          3941729,
+          3941731,
+          3941732,
+          3941744,
+          3941746,
+          3941747,
+          3941748,
+          3941749,
+          3941751,
+          4007009,
+          4007010,
+          4007011,
+          4007013,
+          4007014,
+          4007015,
+          4007025,
+          4007030,
+          4007031,
+          4007266,
+          4007267,
+          4007268,
+          4007269,
+          4007271,
+          4007280,
+          4007284,
+          4007285
+        ]
+      },
+      "unknowns": 32
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 62.708655,
+      "census_ms": 18963.306541,
+      "cofactor_admissible": true,
+      "coverage": 0.5390625,
+      "covered": 138,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 3948169.0,
+      "expected_trials": 64.92753623188406,
+      "family": "divisor",
+      "mean_witnesses": 0.7109375,
+      "pair_table_lookups_per_trial": 1987.0,
+      "points": 1987,
+      "projected_columns": 32,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 34,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          1,
+          5
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 32
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 63.586883,
+      "census_ms": 20920.249714,
+      "cofactor_admissible": true,
+      "coverage": 0.5625,
+      "covered": 144,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 4456321.0,
+      "expected_trials": 65.77777777777777,
+      "family": "divisor",
+      "mean_witnesses": 0.77734375,
+      "pair_table_lookups_per_trial": 2111.0,
+      "points": 2111,
+      "projected_columns": 34,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 36,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          4,
+          6
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 34
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 63.393239,
+      "census_ms": 22553.119981000003,
+      "cofactor_admissible": true,
+      "coverage": 0.5859375,
+      "covered": 150,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 4995225.0,
+      "expected_trials": 66.56,
+      "family": "divisor",
+      "mean_witnesses": 0.9140625,
+      "pair_table_lookups_per_trial": 2235.0,
+      "points": 2235,
+      "projected_columns": 36,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 38,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          1,
+          4
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 36
+    },
+    {
+      "abscissae": 1054,
+      "build_ms": 100.86225999999999,
+      "census_ms": 20566.199987,
+      "cofactor_admissible": true,
+      "coverage": 0.5546875,
+      "covered": 142,
+      "dimension": 11,
+      "domain": "subspace_subset(34 orbits)",
+      "enumeration_ops_per_trial": 4443664.0,
+      "expected_trials": 66.70422535211267,
+      "family": "pruned",
+      "mean_witnesses": 0.765625,
+      "pair_table_lookups_per_trial": 2108.0,
+      "points": 2108,
+      "projected_columns": 34,
+      "prune_steps": [
+        {
+          "covered_after": 144,
+          "covered_before": 144,
+          "expected_trials_after": 67.55555555555556,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 35
+        },
+        {
+          "covered_after": 142,
+          "covered_before": 144,
+          "expected_trials_after": 66.70422535211267,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 34
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 34,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            4,
+            6
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          49,
+          70,
+          119,
+          566,
+          567,
+          577,
+          625,
+          1328,
+          1399,
+          1846,
+          1847,
+          1856,
+          4132,
+          4708,
+          4709,
+          5412,
+          5474,
+          5922,
+          5923,
+          5972,
+          66126,
+          66174,
+          66879,
+          67384,
+          67385,
+          69658,
+          69724,
+          69740,
+          69741,
+          70172,
+          70173,
+          70188,
+          70938,
+          71453
+        ]
+      },
+      "unknowns": 34
+    },
+    {
+      "abscissae": 1023,
+      "build_ms": 101.000514,
+      "census_ms": 19816.719043999998,
+      "cofactor_admissible": true,
+      "coverage": 0.52734375,
+      "covered": 135,
+      "dimension": 11,
+      "domain": "subspace_subset(33 orbits)",
+      "enumeration_ops_per_trial": 4186116.0,
+      "expected_trials": 68.26666666666667,
+      "family": "pruned",
+      "mean_witnesses": 0.7578125,
+      "pair_table_lookups_per_trial": 2046.0,
+      "points": 2046,
+      "projected_columns": 33,
+      "prune_steps": [
+        {
+          "covered_after": 135,
+          "covered_before": 135,
+          "expected_trials_after": 70.16296296296296,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 34
+        },
+        {
+          "covered_after": 135,
+          "covered_before": 135,
+          "expected_trials_after": 68.26666666666667,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 33
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 33,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            3,
+            4
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          609067,
+          745336,
+          745337,
+          805127,
+          872008,
+          872009,
+          1006107,
+          1661248,
+          1661249,
+          1722973,
+          1789202,
+          1858412,
+          1858413,
+          1924130,
+          1924131,
+          2050160,
+          2050161,
+          6585769,
+          6711802,
+          6778549,
+          6894560,
+          6894561,
+          7630786,
+          7630787,
+          7694477,
+          7764880,
+          7764881,
+          8135590,
+          17385485,
+          17455889,
+          18373929,
+          18566708,
+          18566709
+        ]
+      },
+      "unknowns": 33
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 63.42070700000001,
+      "census_ms": 19732.98517,
+      "cofactor_admissible": true,
+      "coverage": 0.52734375,
+      "covered": 135,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 4198401.0,
+      "expected_trials": 68.26666666666667,
+      "family": "divisor",
+      "mean_witnesses": 0.76171875,
+      "pair_table_lookups_per_trial": 2049.0,
+      "points": 2049,
+      "projected_columns": 33,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 35,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          3,
+          4
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 33
+    },
+    {
+      "abscissae": 1023,
+      "build_ms": 102.292203,
+      "census_ms": 19933.263771,
+      "cofactor_admissible": true,
+      "coverage": 0.5234375,
+      "covered": 134,
+      "dimension": 11,
+      "domain": "subspace_subset(33 orbits)",
+      "enumeration_ops_per_trial": 4186116.0,
+      "expected_trials": 68.77611940298507,
+      "family": "pruned",
+      "mean_witnesses": 0.671875,
+      "pair_table_lookups_per_trial": 2046.0,
+      "points": 2046,
+      "projected_columns": 33,
+      "prune_steps": [
+        {
+          "covered_after": 138,
+          "covered_before": 138,
+          "expected_trials_after": 72.34782608695652,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 36
+        },
+        {
+          "covered_after": 138,
+          "covered_before": 138,
+          "expected_trials_after": 70.4927536231884,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 35
+        },
+        {
+          "covered_after": 136,
+          "covered_before": 138,
+          "expected_trials_after": 69.6470588235294,
+          "removed_abscissa": 10506384,
+          "removed_orbit": 3,
+          "unknowns_after": 34
+        },
+        {
+          "covered_after": 134,
+          "covered_before": 136,
+          "expected_trials_after": 68.77611940298507,
+          "removed_abscissa": 28525989,
+          "removed_orbit": 32,
+          "unknowns_after": 33
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 33,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            2,
+            6
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          70938,
+          10634482,
+          10703336,
+          10703337,
+          10770373,
+          10830559,
+          10896294,
+          10896295,
+          11618292,
+          11683468,
+          11752343,
+          11818426,
+          11878560,
+          11878561,
+          11944408,
+          12014787,
+          27281058,
+          27281059,
+          27349945,
+          27415232,
+          27415233,
+          27477978,
+          27477979,
+          27612396,
+          27612397,
+          27678101,
+          27738255,
+          28329180,
+          28463294,
+          28590984,
+          28590985,
+          28727274,
+          28787440
+        ]
+      },
+      "unknowns": 33
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 62.758953000000005,
+      "census_ms": 18768.23332,
+      "cofactor_admissible": true,
+      "coverage": 0.5078125,
+      "covered": 130,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 3948169.0,
+      "expected_trials": 68.92307692307692,
+      "family": "divisor",
+      "mean_witnesses": 0.68359375,
+      "pair_table_lookups_per_trial": 1987.0,
+      "points": 1987,
+      "projected_columns": 32,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 34,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          1,
+          3
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 32
+    },
+    {
+      "abscissae": 992,
+      "build_ms": 99.424956,
+      "census_ms": 18943.19488,
+      "cofactor_admissible": true,
+      "coverage": 0.50390625,
+      "covered": 129,
+      "dimension": 11,
+      "domain": "subspace_subset(32 orbits)",
+      "enumeration_ops_per_trial": 3936256.0,
+      "expected_trials": 69.45736434108527,
+      "family": "pruned",
+      "mean_witnesses": 0.671875,
+      "pair_table_lookups_per_trial": 1984.0,
+      "points": 1984,
+      "projected_columns": 32,
+      "prune_steps": [
+        {
+          "covered_after": 130,
+          "covered_before": 130,
+          "expected_trials_after": 70.8923076923077,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 33
+        },
+        {
+          "covered_after": 129,
+          "covered_before": 130,
+          "expected_trials_after": 69.45736434108527,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 32
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 32,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            1,
+            3
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          2,
+          7218312,
+          7218317,
+          7218318,
+          7218319,
+          7218328,
+          7218329,
+          7218332,
+          7218333,
+          7218335,
+          7218569,
+          7218570,
+          7218572,
+          7218573,
+          7218588,
+          7218589,
+          7283851,
+          7283852,
+          7283855,
+          7283864,
+          7283865,
+          7283866,
+          7283867,
+          7283868,
+          7283871,
+          7284106,
+          7284107,
+          7284109,
+          7284120,
+          7284122,
+          7284124,
+          7284127
+        ]
+      },
+      "unknowns": 32
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 64.54817899999999,
+      "census_ms": 22008.016949999997,
+      "cofactor_admissible": true,
+      "coverage": 0.5390625,
+      "covered": 138,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 4721929.0,
+      "expected_trials": 70.4927536231884,
+      "family": "divisor",
+      "mean_witnesses": 0.76953125,
+      "pair_table_lookups_per_trial": 2173.0,
+      "points": 2173,
+      "projected_columns": 35,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 37,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          2,
+          6
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 35
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 62.382293,
+      "census_ms": 17153.822743,
+      "cofactor_admissible": true,
+      "coverage": 0.4609375,
+      "covered": 118,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 3470769.0,
+      "expected_trials": 71.59322033898304,
+      "family": "divisor",
+      "mean_witnesses": 0.54296875,
+      "pair_table_lookups_per_trial": 1863.0,
+      "points": 1863,
+      "projected_columns": 30,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 32,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          3,
+          6
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 30
+    },
+    {
+      "abscissae": 930,
+      "build_ms": 96.43637700000001,
+      "census_ms": 17180.083338,
+      "cofactor_admissible": true,
+      "coverage": 0.453125,
+      "covered": 116,
+      "dimension": 11,
+      "domain": "subspace_subset(30 orbits)",
+      "enumeration_ops_per_trial": 3459600.0,
+      "expected_trials": 72.82758620689656,
+      "family": "pruned",
+      "mean_witnesses": 0.53515625,
+      "pair_table_lookups_per_trial": 1860.0,
+      "points": 1860,
+      "projected_columns": 30,
+      "prune_steps": [
+        {
+          "covered_after": 118,
+          "covered_before": 118,
+          "expected_trials_after": 73.76271186440678,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 31
+        },
+        {
+          "covered_after": 116,
+          "covered_before": 118,
+          "expected_trials_after": 72.82758620689656,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 30
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 30,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            3,
+            6
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          70938,
+          609901,
+          743950,
+          743951,
+          936001,
+          1006938,
+          1006939,
+          1657874,
+          1723755,
+          1792113,
+          1859164,
+          1859165,
+          1919814,
+          1919815,
+          2055972,
+          6890418,
+          6890419,
+          6955722,
+          6955723,
+          7090684,
+          7152871,
+          7368608,
+          7565016,
+          7565017,
+          7629044,
+          7825804,
+          7825805,
+          17321285,
+          17779561,
+          18504537
+        ]
+      },
+      "unknowns": 30
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 62.370127999999994,
+      "census_ms": 19821.713721,
+      "cofactor_admissible": true,
+      "coverage": 0.48046875,
+      "covered": 123,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 4198401.0,
+      "expected_trials": 74.92682926829268,
+      "family": "divisor",
+      "mean_witnesses": 0.6796875,
+      "pair_table_lookups_per_trial": 2049.0,
+      "points": 2049,
+      "projected_columns": 33,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 35,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          1,
+          2
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 33
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 63.06217899999999,
+      "census_ms": 19761.916166,
+      "cofactor_admissible": true,
+      "coverage": 0.48046875,
+      "covered": 123,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 4198401.0,
+      "expected_trials": 74.92682926829268,
+      "family": "divisor",
+      "mean_witnesses": 0.6953125,
+      "pair_table_lookups_per_trial": 2049.0,
+      "points": 2049,
+      "projected_columns": 33,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 35,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          3,
+          5
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 33
+    },
+    {
+      "abscissae": 961,
+      "build_ms": 98.279063,
+      "census_ms": 18163.289818999998,
+      "cofactor_admissible": true,
+      "coverage": 0.453125,
+      "covered": 116,
+      "dimension": 11,
+      "domain": "subspace_subset(31 orbits)",
+      "enumeration_ops_per_trial": 3694084.0,
+      "expected_trials": 75.03448275862068,
+      "family": "pruned",
+      "mean_witnesses": 0.609375,
+      "pair_table_lookups_per_trial": 1922.0,
+      "points": 1922,
+      "projected_columns": 31,
+      "prune_steps": [
+        {
+          "covered_after": 123,
+          "covered_before": 123,
+          "expected_trials_after": 77.00813008130082,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 34
+        },
+        {
+          "covered_after": 122,
+          "covered_before": 123,
+          "expected_trials_after": 75.54098360655738,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 33
+        },
+        {
+          "covered_after": 119,
+          "covered_before": 122,
+          "expected_trials_after": 75.29411764705883,
+          "removed_abscissa": 1061093,
+          "removed_orbit": 13,
+          "unknowns_after": 32
+        },
+        {
+          "covered_after": 116,
+          "covered_before": 119,
+          "expected_trials_after": 75.03448275862068,
+          "removed_abscissa": 21118224,
+          "removed_orbit": 34,
+          "unknowns_after": 31
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 31,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            3,
+            5
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          12360,
+          12361,
+          22096,
+          22097,
+          26136,
+          26137,
+          930930,
+          930931,
+          938602,
+          938603,
+          942627,
+          1991311,
+          2888855,
+          2893022,
+          2893023,
+          2912910,
+          3949163,
+          4351832,
+          5002027,
+          5386661,
+          6054862,
+          6300068,
+          6300069,
+          6309821,
+          7226247,
+          7238606,
+          7238607,
+          18757830,
+          19024612,
+          19036844,
+          19036845
+        ]
+      },
+      "unknowns": 31
+    },
+    {
+      "abscissae": 992,
+      "build_ms": 99.996368,
+      "census_ms": 18684.275238000002,
+      "cofactor_admissible": true,
+      "coverage": 0.46484375,
+      "covered": 119,
+      "dimension": 11,
+      "domain": "subspace_subset(32 orbits)",
+      "enumeration_ops_per_trial": 3936256.0,
+      "expected_trials": 75.29411764705883,
+      "family": "pruned",
+      "mean_witnesses": 0.62109375,
+      "pair_table_lookups_per_trial": 1984.0,
+      "points": 1984,
+      "projected_columns": 32,
+      "prune_steps": [
+        {
+          "covered_after": 123,
+          "covered_before": 123,
+          "expected_trials_after": 77.00813008130082,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 34
+        },
+        {
+          "covered_after": 122,
+          "covered_before": 123,
+          "expected_trials_after": 75.54098360655738,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 33
+        },
+        {
+          "covered_after": 119,
+          "covered_before": 122,
+          "expected_trials_after": 75.29411764705883,
+          "removed_abscissa": 10700000,
+          "removed_orbit": 18,
+          "unknowns_after": 32
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 32,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            1,
+            2
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          2,
+          10634465,
+          10634466,
+          10634470,
+          10634480,
+          10634482,
+          10634485,
+          10634721,
+          10634724,
+          10634725,
+          10634726,
+          10634727,
+          10634736,
+          10634738,
+          10634741,
+          10634742,
+          10700002,
+          10700003,
+          10700004,
+          10700005,
+          10700016,
+          10700017,
+          10700018,
+          10700019,
+          10700021,
+          10700023,
+          10700258,
+          10700259,
+          10700261,
+          10700272,
+          10700274,
+          10700278
+        ]
+      },
+      "unknowns": 32
+    },
+    {
+      "abscissae": 899,
+      "build_ms": 96.184462,
+      "census_ms": 16089.812235,
+      "cofactor_admissible": true,
+      "coverage": 0.390625,
+      "covered": 100,
+      "dimension": 11,
+      "domain": "subspace_subset(29 orbits)",
+      "enumeration_ops_per_trial": 3232804.0,
+      "expected_trials": 81.92,
+      "family": "pruned",
+      "mean_witnesses": 0.47265625,
+      "pair_table_lookups_per_trial": 1798.0,
+      "points": 1798,
+      "projected_columns": 29,
+      "prune_steps": [
+        {
+          "covered_after": 103,
+          "covered_before": 103,
+          "expected_trials_after": 84.50485436893204,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 31
+        },
+        {
+          "covered_after": 103,
+          "covered_before": 103,
+          "expected_trials_after": 82.01941747572816,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 30
+        },
+        {
+          "covered_after": 100,
+          "covered_before": 103,
+          "expected_trials_after": 81.92,
+          "removed_abscissa": 10506400,
+          "removed_orbit": 2,
+          "unknowns_after": 29
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 29,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            2,
+            4
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          10573806,
+          10634482,
+          10769859,
+          10834572,
+          10895760,
+          10895761,
+          10962655,
+          11687577,
+          11751894,
+          11751895,
+          11814824,
+          11878631,
+          12014772,
+          12014773,
+          27350216,
+          27350217,
+          27412436,
+          27476122,
+          27476123,
+          27547364,
+          27673271,
+          28328428,
+          28395170,
+          28464574,
+          28529392,
+          28529393,
+          28591246,
+          28656576,
+          28725469
+        ]
+      },
+      "unknowns": 29
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 62.745438,
+      "census_ms": 17145.355349999998,
+      "cofactor_admissible": true,
+      "coverage": 0.40234375,
+      "covered": 103,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 3470769.0,
+      "expected_trials": 82.01941747572816,
+      "family": "divisor",
+      "mean_witnesses": 0.5,
+      "pair_table_lookups_per_trial": 1863.0,
+      "points": 1863,
+      "projected_columns": 30,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 32,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          2,
+          4
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 30
+    },
+    {
+      "abscissae": 899,
+      "build_ms": 95.613177,
+      "census_ms": 16024.581918,
+      "cofactor_admissible": true,
+      "coverage": 0.38671875,
+      "covered": 99,
+      "dimension": 11,
+      "domain": "subspace_subset(29 orbits)",
+      "enumeration_ops_per_trial": 3232804.0,
+      "expected_trials": 82.74747474747475,
+      "family": "pruned",
+      "mean_witnesses": 0.44921875,
+      "pair_table_lookups_per_trial": 1798.0,
+      "points": 1798,
+      "projected_columns": 29,
+      "prune_steps": [
+        {
+          "covered_after": 101,
+          "covered_before": 101,
+          "expected_trials_after": 86.17821782178218,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 31
+        },
+        {
+          "covered_after": 101,
+          "covered_before": 101,
+          "expected_trials_after": 83.64356435643565,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 30
+        },
+        {
+          "covered_after": 99,
+          "covered_before": 101,
+          "expected_trials_after": 82.74747474747475,
+          "removed_abscissa": 13394285,
+          "removed_orbit": 7,
+          "unknowns_after": 29
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 29,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            2,
+            3
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          3339852,
+          3339853,
+          9482942,
+          9482943,
+          10634482,
+          16684832,
+          20752446,
+          22187425,
+          27192524,
+          32557395,
+          34190854,
+          34190855,
+          44823284,
+          46520171,
+          50849908,
+          50849909,
+          57265643,
+          60250827,
+          63670553,
+          66682708,
+          66682709,
+          69393136,
+          81546704,
+          81546705,
+          132731881,
+          142435272,
+          142435273,
+          154136168,
+          154136169
+        ]
+      },
+      "unknowns": 29
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 62.61942500000001,
+      "census_ms": 16985.819136,
+      "cofactor_admissible": true,
+      "coverage": 0.39453125,
+      "covered": 101,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 3470769.0,
+      "expected_trials": 83.64356435643565,
+      "family": "divisor",
+      "mean_witnesses": 0.4765625,
+      "pair_table_lookups_per_trial": 1863.0,
+      "points": 1863,
+      "projected_columns": 30,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 32,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          2,
+          3
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 30
+    },
+    {
+      "abscissae": 868,
+      "build_ms": 94.17204799999999,
+      "census_ms": 15400.535623,
+      "cofactor_admissible": true,
+      "coverage": 0.36328125,
+      "covered": 93,
+      "dimension": 11,
+      "domain": "subspace_subset(28 orbits)",
+      "enumeration_ops_per_trial": 3013696.0,
+      "expected_trials": 85.33333333333333,
+      "family": "pruned",
+      "mean_witnesses": 0.41015625,
+      "pair_table_lookups_per_trial": 1736.0,
+      "points": 1736,
+      "projected_columns": 28,
+      "prune_steps": [
+        {
+          "covered_after": 96,
+          "covered_before": 96,
+          "expected_trials_after": 88.0,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 30
+        },
+        {
+          "covered_after": 95,
+          "covered_before": 96,
+          "expected_trials_after": 86.23157894736842,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 29
+        },
+        {
+          "covered_after": 93,
+          "covered_before": 95,
+          "expected_trials_after": 85.33333333333333,
+          "removed_abscissa": 4075553,
+          "removed_orbit": 14,
+          "unknowns_after": 28
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 28,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            4,
+            5
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          2762537,
+          2826342,
+          2897432,
+          2897433,
+          2961750,
+          3678480,
+          3678481,
+          3745374,
+          3745375,
+          3814723,
+          3879436,
+          3879437,
+          4142959,
+          4336881,
+          4402110,
+          4402111,
+          4472257,
+          5320071,
+          5651448,
+          5717175,
+          7215848,
+          7215849,
+          7282086,
+          7282087,
+          8133840,
+          8199070,
+          8199071,
+          20592228
+        ]
+      },
+      "unknowns": 28
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 62.944871,
+      "census_ms": 16494.433571999998,
+      "cofactor_admissible": true,
+      "coverage": 0.375,
+      "covered": 96,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 3243601.0,
+      "expected_trials": 85.33333333333333,
+      "family": "divisor",
+      "mean_witnesses": 0.4375,
+      "pair_table_lookups_per_trial": 1801.0,
+      "points": 1801,
+      "projected_columns": 29,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 31,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          4,
+          5
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 29
+    },
+    {
+      "abscissae": 868,
+      "build_ms": 93.147979,
+      "census_ms": 15238.744561000001,
+      "cofactor_admissible": true,
+      "coverage": 0.359375,
+      "covered": 92,
+      "dimension": 11,
+      "domain": "subspace_subset(28 orbits)",
+      "enumeration_ops_per_trial": 3013696.0,
+      "expected_trials": 86.26086956521739,
+      "family": "pruned",
+      "mean_witnesses": 0.43359375,
+      "pair_table_lookups_per_trial": 1736.0,
+      "points": 1736,
+      "projected_columns": 28,
+      "prune_steps": [
+        {
+          "covered_after": 92,
+          "covered_before": 92,
+          "expected_trials_after": 89.04347826086956,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 29
+        },
+        {
+          "covered_after": 92,
+          "covered_before": 92,
+          "expected_trials_after": 86.26086956521739,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 28
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 28,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            5,
+            6
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          70938,
+          2629976,
+          2629977,
+          2700355,
+          2766139,
+          2826272,
+          2826273,
+          2893324,
+          2962198,
+          2962199,
+          3027566,
+          3027567,
+          3090293,
+          3749436,
+          3815236,
+          4138250,
+          4336112,
+          4336113,
+          4534237,
+          5319415,
+          5519544,
+          7281382,
+          7281383,
+          8069068,
+          19801181,
+          20657261,
+          20919096,
+          20919097
+        ]
+      },
+      "unknowns": 28
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 61.545735,
+      "census_ms": 15161.197926,
+      "cofactor_admissible": true,
+      "coverage": 0.359375,
+      "covered": 92,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 3024121.0,
+      "expected_trials": 86.26086956521739,
+      "family": "divisor",
+      "mean_witnesses": 0.43359375,
+      "pair_table_lookups_per_trial": 1739.0,
+      "points": 1739,
+      "projected_columns": 28,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 30,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          5,
+          6
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 28
+    },
+    {
+      "abscissae": 2048,
+      "build_ms": 61.860587,
+      "census_ms": 15243.288873,
+      "cofactor_admissible": true,
+      "coverage": 0.34765625,
+      "covered": 89,
+      "dimension": 11,
+      "domain": "linear_subspace",
+      "enumeration_ops_per_trial": 3024121.0,
+      "expected_trials": 89.1685393258427,
+      "family": "divisor",
+      "mean_witnesses": 0.421875,
+      "pair_table_lookups_per_trial": 1739.0,
+      "points": 1739,
+      "projected_columns": 28,
+      "prune_steps": [],
+      "sat_variables": 64,
+      "signed_orbits": 30,
+      "skipped": null,
+      "spec": {
+        "indices": [
+          0,
+          2,
+          5
+        ],
+        "kind": "divisor"
+      },
+      "unknowns": 28
+    },
+    {
+      "abscissae": 868,
+      "build_ms": 93.648801,
+      "census_ms": 15209.670126,
+      "cofactor_admissible": true,
+      "coverage": 0.34375,
+      "covered": 88,
+      "dimension": 11,
+      "domain": "subspace_subset(28 orbits)",
+      "enumeration_ops_per_trial": 3013696.0,
+      "expected_trials": 90.18181818181819,
+      "family": "pruned",
+      "mean_witnesses": 0.4140625,
+      "pair_table_lookups_per_trial": 1736.0,
+      "points": 1736,
+      "projected_columns": 28,
+      "prune_steps": [
+        {
+          "covered_after": 89,
+          "covered_before": 89,
+          "expected_trials_after": 92.04494382022472,
+          "removed_abscissa": 0,
+          "removed_orbit": 0,
+          "unknowns_after": 29
+        },
+        {
+          "covered_after": 88,
+          "covered_before": 89,
+          "expected_trials_after": 90.18181818181819,
+          "removed_abscissa": 1,
+          "removed_orbit": 1,
+          "unknowns_after": 28
+        }
+      ],
+      "sat_variables": 64,
+      "signed_orbits": 28,
+      "skipped": null,
+      "spec": {
+        "kind": "pruned",
+        "parent": {
+          "indices": [
+            0,
+            2,
+            5
+          ],
+          "kind": "divisor"
+        },
+        "retained_abscissa_orbits": [
+          2291424,
+          2291425,
+          8434194,
+          8434195,
+          10634482,
+          12359264,
+          12359265,
+          21819182,
+          21819183,
+          30170429,
+          32418780,
+          32418781,
+          38504206,
+          41395069,
+          46871837,
+          52017842,
+          52797120,
+          52797121,
+          76425764,
+          76609718,
+          100589945,
+          126435844,
+          126435845,
+          127373462,
+          141780979,
+          171499772,
+          236228139,
+          266663781
+        ]
+      },
+      "unknowns": 28
+    },
+    {
+      "abscissae": 0,
+      "build_ms": 0.0,
+      "census_ms": null,
+      "cofactor_admissible": false,
+      "coverage": null,
+      "covered": null,
+      "dimension": 0,
+      "domain": "",
+      "enumeration_ops_per_trial": 0.0,
+      "expected_trials": null,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": null,
+      "pair_table_lookups_per_trial": 0.0,
+      "points": 0,
+      "projected_columns": 0,
+      "prune_steps": [],
+      "sat_variables": 31,
+      "signed_orbits": 0,
+      "skipped": "2234 abscissae exceed the cap 2048",
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            1,
+            4
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 0
+    },
+    {
+      "abscissae": 0,
+      "build_ms": 0.0,
+      "census_ms": null,
+      "cofactor_admissible": false,
+      "coverage": null,
+      "covered": null,
+      "dimension": 0,
+      "domain": "",
+      "enumeration_ops_per_trial": 0.0,
+      "expected_trials": null,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": null,
+      "pair_table_lookups_per_trial": 0.0,
+      "points": 0,
+      "projected_columns": 0,
+      "prune_steps": [],
+      "sat_variables": 31,
+      "signed_orbits": 0,
+      "skipped": "2420 abscissae exceed the cap 2048",
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            1,
+            6
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 0
+    },
+    {
+      "abscissae": 0,
+      "build_ms": 0.0,
+      "census_ms": null,
+      "cofactor_admissible": false,
+      "coverage": null,
+      "covered": null,
+      "dimension": 0,
+      "domain": "",
+      "enumeration_ops_per_trial": 0.0,
+      "expected_trials": null,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": null,
+      "pair_table_lookups_per_trial": 0.0,
+      "points": 0,
+      "projected_columns": 0,
+      "prune_steps": [],
+      "sat_variables": 31,
+      "signed_orbits": 0,
+      "skipped": "2172 abscissae exceed the cap 2048",
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            2,
+            6
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 0
+    },
+    {
+      "abscissae": 0,
+      "build_ms": 0.0,
+      "census_ms": null,
+      "cofactor_admissible": false,
+      "coverage": null,
+      "covered": null,
+      "dimension": 0,
+      "domain": "",
+      "enumeration_ops_per_trial": 0.0,
+      "expected_trials": null,
+      "family": "two_torsion_saturated",
+      "mean_witnesses": null,
+      "pair_table_lookups_per_trial": 0.0,
+      "points": 0,
+      "projected_columns": 0,
+      "prune_steps": [],
+      "sat_variables": 31,
+      "signed_orbits": 0,
+      "skipped": "2110 abscissae exceed the cap 2048",
+      "spec": {
+        "kind": "two_torsion_saturated",
+        "parent": {
+          "indices": [
+            0,
+            4,
+            6
+          ],
+          "kind": "divisor"
+        }
+      },
+      "unknowns": 0
+    }
+  ],
+  "census_ms": 1465848.873471,
+  "cofactor": "1492",
+  "curve_a": 0,
+  "degree": 31,
+  "elapsed_seconds": 1560.196196302,
+  "evidence_scope": "exact_yield_census_with_synthetic_validation",
+  "exhaustive_targets": false,
+  "limitations": [
+    "Coverage is exact on the target set, which is the whole subgroup only when exhaustive_targets is true.",
+    "Expected trials ignore per-trial oracle cost; the validation runs measure wall time with the chosen oracle.",
+    "Selected means fastest validated on these holdout fixtures, not a global optimum.",
+    "No imported target was used."
+  ],
+  "operation": "search",
+  "options": {
+    "exhaustive_cap": 4096,
+    "extra_relations": 2,
+    "families": [
+      "divisor"
+    ],
+    "m": 3,
+    "max_abscissae": 2048,
+    "max_dimension": 11,
+    "min_dimension": 11,
+    "projected_columns": true,
+    "prune": true,
+    "sample_targets": 256,
+    "saturate": true,
+    "seed": 29031,
+    "union_samples": 3,
+    "union_seed_dimensions": [
+      2,
+      5
+    ]
+  },
+  "resources": {
+    "cpu_seconds": 3959.287684,
+    "peak_rss_bytes": 315174912,
+    "scope": "process counters sampled before report emission; peak resident memory, not allocated bytes"
+  },
+  "schema_version": 1,
+  "scoring": "expected_trials = (columns + 1 + extra) / coverage, coverage measured exactly on the shared target set by enumerating every m-summand witness through a pair-sum table",
+  "selected": {
+    "curve_a": 0,
+    "degree": 31,
+    "schema_version": 1,
+    "spec": {
+      "kind": "two_torsion_saturated",
+      "parent": {
+        "indices": [
+          0,
+          1,
+          5
+        ],
+        "kind": "divisor"
+      }
+    }
+  },
+  "selected_summary": {
+    "abscissae": 1986,
+    "build_ms": 161.129531,
+    "census_ms": 61429.483045,
+    "cofactor_admissible": true,
+    "coverage": 0.796875,
+    "covered": 204,
+    "dimension": 31,
+    "domain": "two_torsion_saturation",
+    "enumeration_ops_per_trial": 15768841.0,
+    "expected_trials": 43.92156862745098,
+    "family": "two_torsion_saturated",
+    "mean_witnesses": 5.8125,
+    "pair_table_lookups_per_trial": 3971.0,
+    "points": 3971,
+    "projected_columns": 32,
+    "prune_steps": [],
+    "sat_variables": 124,
+    "signed_orbits": 66,
+    "skipped": null,
+    "spec": {
+      "kind": "two_torsion_saturated",
+      "parent": {
+        "indices": [
+          0,
+          1,
+          5
+        ],
+        "kind": "divisor"
+      }
+    },
+    "unknowns": 32
+  },
+  "software": {
+    "arch": "x86_64",
+    "binary_blake3": "d3c031f4609dd2396ecc3b8ebdbbc8436df6d6800a8b64a03d6c97ef25c751cf",
+    "os": "linux",
+    "version": "0.1.0"
+  },
+  "spec_out": "/home/runner/work/_temp/stage30-search/factor-base.json",
+  "status": "complete",
+  "subgroup_order": "1439393",
+  "summands": 3,
+  "targets": 256,
+  "validation": {
+    "holdout_samples": 2,
+    "max_trials": 10000,
+    "runs": [
+      {
+        "eligible": true,
+        "holdout": [
+          {
+            "arguments": {
+              "batch": 0,
+              "control": false,
+              "curve_a": 0,
+              "curve_b": 1,
+              "degree": 31,
+              "factor_base": "/tmp/ic-search-3600-31-0.json",
+              "factor_index": 0,
+              "known_log": null,
+              "max_trials": 10000,
+              "random_target": true,
+              "seed": 6000273900112985650,
+              "solver": "pair_table",
+              "subfield": 1,
+              "summands": 3
+            },
+            "counts": {
+              "batches": 10,
+              "cofactor_admissible": true,
+              "columns": 32,
+              "dependent_relations": 1,
+              "f4_reductions": 0,
+              "factor_base_points": 3971,
+              "inconsistent_relations": 0,
+              "independent_relations": 30,
+              "linear_solve_attempts": 1,
+              "pair_table_entries": 7886406,
+              "relations": 31,
+              "sat_calls": 0,
+              "sat_conflicts": 0,
+              "sat_invalid_models": 0,
+              "sat_unknowns": 0,
+              "trials": 40,
+              "verification_failures": 0
+            },
+            "elapsed_seconds": 47.1463563,
+            "evidence_scope": "synthetic_known_answer",
+            "factor_base": {
+              "abscissae": 1986,
+              "columns": 32,
+              "dimension": 31,
+              "domain": "two_torsion_saturation",
+              "family": "two_torsion_saturated",
+              "points": 3971,
+              "signed_orbits": 66,
+              "spec": {
+                "kind": "two_torsion_saturated",
+                "parent": {
+                  "indices": [
+                    0,
+                    1,
+                    5
+                  ],
+                  "kind": "divisor"
+                }
+              }
+            },
+            "limitations": [
+              "No imported target was used.",
+              "This run does not establish scaling or challenge readiness."
+            ],
+            "mode": {
+              "batch": 4,
+              "collapse_negation": true,
+              "collapse_projected_orbits": true,
+              "control": false,
+              "early_solve": true
+            },
+            "operation": "run",
+            "parameters": {
+              "a": "0",
+              "b": "1",
+              "cofactor": "1492",
+              "field": {
+                "degree": 31,
+                "kind": "binary",
+                "polynomial_terms": [
+                  0,
+                  3,
+                  31
+                ]
+              },
+              "fixture": {
+                "known_log": "446382",
+                "seed": 6000273900112985650
+              },
+              "generator": {
+                "x": "0xd058876",
+                "y": "0x32d9bf79"
+              },
+              "name": "synthetic-k0-n31",
+              "point": {
+                "x": "0x39bae6b2",
+                "y": "0x197c691c"
+              },
+              "schema_version": 1,
+              "subgroup_order": "1439393"
+            },
+            "process_elapsed_seconds": 47.15506329,
+            "resources": {
+              "cpu_seconds": 168.19333600000002,
+              "peak_rss_bytes": 315174912,
+              "scope": "process counters sampled before report emission; peak resident memory, not allocated bytes"
+            },
+            "result": {
+              "expected": "446382",
+              "recovered": "446382",
+              "verified": true
+            },
+            "schema_version": 1,
+            "software": {
+              "arch": "x86_64",
+              "binary_blake3": "d3c031f4609dd2396ecc3b8ebdbbc8436df6d6800a8b64a03d6c97ef25c751cf",
+              "os": "linux",
+              "version": "0.1.0"
+            },
+            "stages": [
+              {
+                "details": {},
+                "elapsed_seconds": 5e-8,
+                "stage": "factor_base",
+                "status": "started"
+              },
+              {
+                "details": {
+                  "columns": 32,
+                  "points": 3971
+                },
+                "elapsed_seconds": 1.564264234,
+                "stage": "factor_base",
+                "status": "complete"
+              },
+              {
+                "details": {
+                  "entries": 7886406
+                },
+                "elapsed_seconds": 46.317285476,
+                "stage": "pair_table",
+                "status": "complete"
+              },
+              {
+                "details": {
+                  "wanted": 36
+                },
+                "elapsed_seconds": 4.9e-8,
+                "stage": "relation_collection",
+                "status": "started"
+              },
+              {
+                "details": {
+                  "collected": 31,
+                  "trials": 40
+                },
+                "elapsed_seconds": 0.823968934,
+                "stage": "relation_collection",
+                "status": "stopped"
+              },
+              {
+                "details": {
+                  "columns": 33,
+                  "rows": 31
+                },
+                "elapsed_seconds": 3e-8,
+                "stage": "linear_algebra",
+                "status": "started"
+              },
+              {
+                "details": {
+                  "candidate_produced": true,
+                  "columns": 33,
+                  "rank": 30,
+                  "rows": 31
+                },
+                "elapsed_seconds": 2.094e-6,
+                "stage": "linear_algebra",
+                "status": "rank"
+              },
+              {
+                "details": {},
+                "elapsed_seconds": 3.717e-6,
+                "stage": "linear_algebra",
+                "status": "complete"
+              },
+              {
+                "details": {},
+                "elapsed_seconds": 3e-8,
+                "stage": "verification",
+                "status": "started"
+              },
+              {
+                "details": {},
+                "elapsed_seconds": 0.000496364,
+                "stage": "verification",
+                "status": "pass"
+              }
+            ],
+            "status": "complete",
+            "timing_seconds": {
+              "linear_algebra": 0.000615436,
+              "pair_table": 44.753016153,
+              "relation_collection": 0.823876252
+            }
+          },
+          {
+            "arguments": {
+              "batch": 0,
+              "control": false,
+              "curve_a": 0,
+              "curve_b": 1,
+              "degree": 31,
+              "factor_base": "/tmp/ic-search-3600-31-0.json",
+              "factor_index": 0,
+              "known_log": null,
+              "max_trials": 10000,
+              "random_target": true,
+              "seed": 6000273900112985651,
+              "solver": "pair_table",
+              "subfield": 1,
+              "summands": 3
+            },
+            "counts": {
+              "batches": 10,
+              "cofactor_admissible": true,
+              "columns": 32,
+              "dependent_relations": 1,
+              "f4_reductions": 0,
+              "factor_base_points": 3971,
+              "inconsistent_relations": 0,
+              "independent_relations": 32,
+              "linear_solve_attempts": 1,
+              "pair_table_entries": 7886406,
+              "relations": 33,
+              "sat_calls": 0,
+              "sat_conflicts": 0,
+              "sat_invalid_models": 0,
+              "sat_unknowns": 0,
+              "trials": 40,
+              "verification_failures": 0
+            },
+            "elapsed_seconds": 47.181196752,
+            "evidence_scope": "synthetic_known_answer",
+            "factor_base": {
+              "abscissae": 1986,
+              "columns": 32,
+              "dimension": 31,
+              "domain": "two_torsion_saturation",
+              "family": "two_torsion_saturated",
+              "points": 3971,
+              "signed_orbits": 66,
+              "spec": {
+                "kind": "two_torsion_saturated",
+                "parent": {
+                  "indices": [
+                    0,
+                    1,
+                    5
+                  ],
+                  "kind": "divisor"
+                }
+              }
+            },
+            "limitations": [
+              "No imported target was used.",
+              "This run does not establish scaling or challenge readiness."
+            ],
+            "mode": {
+              "batch": 4,
+              "collapse_negation": true,
+              "collapse_projected_orbits": true,
+              "control": false,
+              "early_solve": true
+            },
+            "operation": "run",
+            "parameters": {
+              "a": "0",
+              "b": "1",
+              "cofactor": "1492",
+              "field": {
+                "degree": 31,
+                "kind": "binary",
+                "polynomial_terms": [
+                  0,
+                  3,
+                  31
+                ]
+              },
+              "fixture": {
+                "known_log": "336044",
+                "seed": 6000273900112985651
+              },
+              "generator": {
+                "x": "0xd058876",
+                "y": "0x32d9bf79"
+              },
+              "name": "synthetic-k0-n31",
+              "point": {
+                "x": "0x4338c6c2",
+                "y": "0x5e8ae402"
+              },
+              "schema_version": 1,
+              "subgroup_order": "1439393"
+            },
+            "process_elapsed_seconds": 47.189611901,
+            "resources": {
+              "cpu_seconds": 168.392026,
+              "peak_rss_bytes": 315174912,
+              "scope": "process counters sampled before report emission; peak resident memory, not allocated bytes"
+            },
+            "result": {
+              "expected": "336044",
+              "recovered": "336044",
+              "verified": true
+            },
+            "schema_version": 1,
+            "software": {
+              "arch": "x86_64",
+              "binary_blake3": "d3c031f4609dd2396ecc3b8ebdbbc8436df6d6800a8b64a03d6c97ef25c751cf",
+              "os": "linux",
+              "version": "0.1.0"
+            },
+            "stages": [
+              {
+                "details": {},
+                "elapsed_seconds": 4e-8,
+                "stage": "factor_base",
+                "status": "started"
+              },
+              {
+                "details": {
+                  "columns": 32,
+                  "points": 3971
+                },
+                "elapsed_seconds": 1.559976378,
+                "stage": "factor_base",
+                "status": "complete"
+              },
+              {
+                "details": {
+                  "entries": 7886406
+                },
+                "elapsed_seconds": 46.395101331,
+                "stage": "pair_table",
+                "status": "complete"
+              },
+              {
+                "details": {
+                  "wanted": 36
+                },
+                "elapsed_seconds": 4e-8,
+                "stage": "relation_collection",
+                "status": "started"
+              },
+              {
+                "details": {
+                  "collected": 33,
+                  "trials": 40
+                },
+                "elapsed_seconds": 0.781783683,
+                "stage": "relation_collection",
+                "status": "stopped"
+              },
+              {
+                "details": {
+                  "columns": 33,
+                  "rows": 33
+                },
+                "elapsed_seconds": 3e-8,
+                "stage": "linear_algebra",
+                "status": "started"
+              },
+              {
+                "details": {
+                  "candidate_produced": true,
+                  "columns": 33,
+                  "rank": 32,
+                  "rows": 33
+                },
+                "elapsed_seconds": 2.515e-6,
+                "stage": "linear_algebra",
+                "status": "rank"
+              },
+              {
+                "details": {},
+                "elapsed_seconds": 3.557e-6,
+                "stage": "linear_algebra",
+                "status": "complete"
+              },
+              {
+                "details": {},
+                "elapsed_seconds": 3e-8,
+                "stage": "verification",
+                "status": "started"
+              },
+              {
+                "details": {},
+                "elapsed_seconds": 0.000390307,
+                "stage": "verification",
+                "status": "pass"
+              }
+            ],
+            "status": "complete",
+            "timing_seconds": {
+              "linear_algebra": 0.000497298,
+              "pair_table": 44.835119944,
+              "relation_collection": 0.781703432
+            }
+          }
+        ],
+        "median_process_seconds": 47.1723375955,
+        "rank": 1,
+        "spec": {
+          "kind": "two_torsion_saturated",
+          "parent": {
+            "indices": [
+              0,
+              1,
+              5
+            ],
+            "kind": "divisor"
+          }
+        }
+      }
+    ],
+    "solver": "pair_table",
+    "timeout_seconds": 300,
+    "validated_top": 1
+  }
+}

@@ -1,0 +1,83 @@
++ cd /work
++ curl -sf -o src.tgz 'https://ecc2k130-590183823895.s3.amazonaws.com/bench/iterfn-20260916-g7e/src.tgz?AWSAccessKeyId=REDACTED&Signature=REDACTED&Expires=1789645007'
++ curl -sf -o probe.cu 'https://ecc2k130-590183823895.s3.amazonaws.com/bench/iterfn-20260916-g7e/probe.cu?AWSAccessKeyId=REDACTED&Signature=REDACTED&Expires=1789645007'
++ rm -rf ecc
++ mkdir ecc
++ tar xzf src.tgz -C ecc
++ cp probe.cu ecc/benchmarks/clmad-price/probe.cu
++ cp /work/ecc/benchmarks/table-walk/gpujob.sh /work/ecc/gpujob.sh
++ cat
++ docker run --rm --gpus all -v /work/ecc:/src -w /src nvidia/cuda:13.3.1-devel-ubuntu24.04 bash /src/probejob.sh
++ grep -v '^==$\|^== CUDA\|Copyright\|license\|LICENSE\|NGC\|^$\|CUDA Version'
+==========
+==========
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+=== instruction-rate probe
+{"gpu":"NVIDIA RTX PRO 6000 Blackwell Server Edition","sms":188,"clockMaxKHz":2430000,"blocks":1504,"threads":256,"chains":16,"rounds":20000}
+clmad verified against host carryless multiply
+{"stream":"LOP3","laneOpsPerSecond":2.803743e+13,"tLaneOpsPerSecond":28.037,"lop3Equivalents":1.000}
+{"stream":"CLMAD.lo","laneOpsPerSecond":7.375335e+11,"tLaneOpsPerSecond":0.738,"lop3Equivalents":38.015}
+{"stream":"CLMAD product (lo+hi)","laneOpsPerSecond":8.743149e+11,"tLaneOpsPerSecond":0.874,"lop3Equivalents":32.068}
+{"stream":"CLMAD.lo + LOP3 mix","laneOpsPerSecond":1.472926e+12,"tLaneOpsPerSecond":1.473,"lop3Equivalents":19.035}
+{"stream":"IMAD.WIDE","laneOpsPerSecond":1.378078e+13,"tLaneOpsPerSecond":13.781,"lop3Equivalents":2.035}
+{"stream":"POPC","laneOpsPerSecond":7.013315e+12,"tLaneOpsPerSecond":7.013,"lop3Equivalents":3.998}
+{"stream":"FLO","laneOpsPerSecond":7.000614e+12,"tLaneOpsPerSecond":7.001,"lop3Equivalents":4.005}
+{"stream":"SHF","laneOpsPerSecond":2.784319e+13,"tLaneOpsPerSecond":27.843,"lop3Equivalents":1.007}
+{"stream":"ISETP + SEL","laneOpsPerSecond":4.170605e+13,"tLaneOpsPerSecond":41.706,"lop3Equivalents":0.672}
+{"stream":"PRMT","laneOpsPerSecond":2.813125e+13,"tLaneOpsPerSecond":28.131,"lop3Equivalents":0.997}
+{"stream":"IMNMX","laneOpsPerSecond":1.557030e+13,"tLaneOpsPerSecond":15.570,"lop3Equivalents":1.801}
+{"stream":"LDS.U8 random","laneOpsPerSecond":4.041016e+12,"tLaneOpsPerSecond":4.041,"lop3Equivalents":6.938}
+one clmad costs 38.02 LOP3 slots; one 64x64 carryless product (lo+hi) costs 64.14
+2347 MHz, 172.41 W
++ docker run --rm --gpus all -v /work/ecc:/src -w /src nvidia/cuda:13.3.1-devel-ubuntu24.04 bash /src/gpujob.sh
++ grep -v '^==$\|^== CUDA\|Copyright\|license\|LICENSE\|NGC\|^$\|CUDA Version'
+==========
+==========
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+NVIDIA RTX PRO 6000 Blackwell Server Edition, 2430 MHz, 600.00 W
+=== unit test: device table-walk primitives (LUT selection)
+table walk device probe: 4096 points, cycle rule fired on 1536
+  phase mismatches 0, pivot 0, sign 0, tag 0, addend words 0
+  branches 8, shared bytes 48508
+PASS
+=== build legacy
+=== build table
+=== build table-alusq
+=== verify table: 300 device reports re-walked by the host reference
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM
+packed table walk: 1 (8 branches, 48508 shared bytes)
+=== verify alusq: 300 device reports re-walked by the host reference
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM
+packed table walk: 1 (8 branches, 48508 shared bytes)
+=== verify legacy: 300 device reports re-walked by the host reference
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM
+packed table walk: 0 (0 branches, 0 shared bytes)
+=== bench legacy rep 1
+  finished: 14211.277 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2415 MHz, 517.71 W, 37
+=== bench table rep 1
+  finished: 16611.204 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2392 MHz, 544.57 W, 42
+=== bench alusq rep 1
+  finished: 16513.992 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2400 MHz, 549.44 W, 42
+=== bench legacy rep 2
+  finished: 14425.870 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2422 MHz, 524.63 W, 44
+=== bench table rep 2
+  finished: 16570.409 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2400 MHz, 553.94 W, 45
+=== bench alusq rep 2
+  finished: 16455.514 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2385 MHz, 548.80 W, 49
+=== bench legacy rep 3
+  finished: 14417.013 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2422 MHz, 528.38 W, 51
+=== bench table rep 3
+  finished: 16516.444 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2385 MHz, 561.04 W, 48
+=== bench alusq rep 3
+  finished: 16393.116 M it/s, 0 distinguished points (0 verified against the reference, 0 dropped)
+2385 MHz, 553.08 W, 49
++ echo JOB_DONE
+JOB_DONE

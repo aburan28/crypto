@@ -1,0 +1,59 @@
+[
+  {
+    "binary_relative": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0004/worker",
+    "binary_sha256": "6c7d512f057e61c9f7d35d14cd7550db2ccd9b366e6d8f7c01b5b388b00d5778",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "9a5d83fbbb556d1a344cc58e1df321771031ec878f060b231eb47fbd46e9bd81",
+    "hypothesis": "Previous selected implementation, admitted only after parent promotion.",
+    "id": "incumbent",
+    "parent": "combined_batch8",
+    "parent_round": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0003b",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "57525c45130ca71ddfff7df7b617bdd2dcd2ba1523c695e47b074b333e62750d"
+  },
+  {
+    "binary_relative": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0004/source_candidates/folded_lift/worker",
+    "binary_sha256": "d6009e86907d140f8d141169a9e596f0f240f39cde7fa8e8723d4f3f15ac3b4b",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "9a5d83fbbb556d1a344cc58e1df321771031ec878f060b231eb47fbd46e9bd81",
+    "falsification": "Any bad or unmatched certificate; or failure of both-metric confirmation/replay gate.",
+    "hypothesis": "Measure both independently validated mechanisms together.",
+    "id": "folded_lift",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/folded_lift/source",
+    "source_manifest_relative": "source_candidates/folded_lift/source-manifest.json",
+    "source_manifest_sha256": "d1f968a924273701a5e4869448e2ffa35140527cb8464ff28360a00afbdca9ad"
+  },
+  {
+    "binary_relative": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0004/worker",
+    "binary_sha256": "6c7d512f057e61c9f7d35d14cd7550db2ccd9b366e6d8f7c01b5b388b00d5778",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "9a5d83fbbb556d1a344cc58e1df321771031ec878f060b231eb47fbd46e9bd81",
+    "hypothesis": "Previous selected implementation, admitted only after parent promotion.",
+    "id": "rho",
+    "parent": "combined_batch8",
+    "parent_round": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0003b",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "57525c45130ca71ddfff7df7b617bdd2dcd2ba1523c695e47b074b333e62750d"
+  }
+]

@@ -1,0 +1,61 @@
+{
+  "rule": "A candidate needs every smoke trial VERIFIED before development; incomplete arms have null costs.",
+  "stage": "smoke",
+  "tables": [
+    {
+      "S_Ir": 5658.138224918056,
+      "candidate_over_floor": 203549.59920376618,
+      "candidate_over_incumbent": 1,
+      "candidate_over_rho": 0.4666327887729569,
+      "class": "reference",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "incumbent",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": 5402.669151112842,
+      "candidate_over_floor": 194359.18611823893,
+      "candidate_over_incumbent": 0.9548492695565218,
+      "candidate_over_rho": 0.4455639775109806,
+      "class": "engineering experiment",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "arena_fastio",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": 5990.317021046579,
+      "candidate_over_floor": 215499.61847303415,
+      "candidate_over_incumbent": 1.058708144432674,
+      "candidate_over_rho": 0.4940279339332611,
+      "class": "engineering experiment",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "arena_glibc",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": 8512.109050204877,
+      "candidate_over_floor": 306220.22945949616,
+      "candidate_over_incumbent": 1.5044010435655546,
+      "candidate_over_rho": 0.7020028543919413,
+      "class": "engineering experiment",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "musl_sysalloc",
+      "verified_runs": 12
+    },
+    {
+      "S_Ir": 12125.462164363811,
+      "candidate_over_floor": null,
+      "candidate_over_incumbent": 2.143012715907875,
+      "candidate_over_rho": 1.0,
+      "class": "reference",
+      "scheduled_runs": 12,
+      "stage": "smoke",
+      "variant": "rho",
+      "verified_runs": 12
+    }
+  ]
+}

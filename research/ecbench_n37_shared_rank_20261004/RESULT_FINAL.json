@@ -1,0 +1,193 @@
+{
+  "all_measured_verified": true,
+  "candidate_id": "IC1N37Ckb0fb3108PDP3mitmfrobeniuscountedRCsampleLAgaussTDpdpISO0ha48bfcf857fa",
+  "candidate_manifest_sha256": "a48bfcf857fac9eed2d8aa3dfac771001f645ccb59b20905cd0c3be4c323db4b",
+  "cold_counted_ic_over_rho_bounded": 13.590881825669284,
+  "cold_counted_ic_over_rho_ci95_bounded": [
+    10.55312075368819,
+    18.718544322585263
+  ],
+  "comparison_sha256": "28f375249d4277b44ebc1920691acd0b242dbf8a1c4dd8a69ec352b31d4fe810",
+  "control_online_ns": {
+    "max_ns": 101416,
+    "median_ns": 60542,
+    "min_ns": 54500
+  },
+  "control_over_ic_online_ratio_descriptive_median": 0.9777928517208521,
+  "control_over_ic_online_ratio_descriptive_range": [
+    0.8332483621810396,
+    1.287135749822317
+  ],
+  "diagnostic_claim_sha256": "17ef3c59f491ab1268375cc8bad722e1b3656774d1cc1fdd6108214254b190de",
+  "ecbench_workload_id": "W157bda94ea05",
+  "ic_cold_s_lower_bound": [
+    5.748204761975246,
+    5.748204761975246,
+    5.748204761975246,
+    5.748204761975246,
+    5.748204761975246
+  ],
+  "ic_online_gae_lower_bound": [
+    132.043676,
+    132.043676,
+    132.043676,
+    132.043676,
+    132.043676
+  ],
+  "ic_online_ns": {
+    "max_ns": 78792,
+    "median_ns": 61917,
+    "min_ns": 57667
+  },
+  "ic_online_phase_ns": {
+    "target_PDP": {
+      "max_ns": 29875,
+      "median_ns": 23083,
+      "min_ns": 19250
+    },
+    "target_descent": {
+      "max_ns": 334,
+      "median_ns": 292,
+      "min_ns": 291
+    },
+    "target_query": {
+      "max_ns": 32209,
+      "median_ns": 22377,
+      "min_ns": 21792
+    },
+    "target_recovery_check": {
+      "max_ns": 15208,
+      "median_ns": 15084,
+      "min_ns": 15083
+    },
+    "target_relation_check": {
+      "max_ns": 2291,
+      "median_ns": 1167,
+      "min_ns": 958
+    }
+  },
+  "ic_rank_trials": [
+    55,
+    55,
+    55,
+    55,
+    55
+  ],
+  "ic_setup_gae_lower_bound": [
+    87158.03076000001,
+    87158.03076000001,
+    87158.03076000001,
+    87158.03076000001,
+    87158.03076000001
+  ],
+  "ic_target_attempts": [
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "limits": [
+    "L0 macOS: no CPU isolation",
+    "one target: no target-population interval",
+    "native field, hash, allocation and modular work incompletely priced",
+    "other-host replay receipt not yet attached"
+  ],
+  "measured_rounds": 5,
+  "online_speedup": null,
+  "online_speedup_admissible": false,
+  "public_target": [
+    "0x100e90da4",
+    "0x124043682f"
+  ],
+  "rho_cold_s_lower_bound": [
+    0.40199165142506377,
+    0.5220394042628039,
+    0.3196111035369601,
+    0.6272705117969284,
+    0.2438157313393523
+  ],
+  "rho_online_ns": {
+    "max_ns": 921042,
+    "median_ns": 743750,
+    "min_ns": 283583
+  },
+  "rho_over_ic_online_ratio_descriptive_median": 11.739300007647405,
+  "rho_over_ic_online_ratio_descriptive_range": [
+    3.5991344298913597,
+    12.271174330995064
+  ],
+  "rounds": [
+    {
+      "control_online_ns": 54500,
+      "control_over_ic_online_descriptive": 0.8849701221096389,
+      "control_record": "ECR1h690f5329e2ea",
+      "ic_online_ns": 61584,
+      "ic_record": "ECR1h89f96a1207b6",
+      "ic_target_attempts": 1,
+      "rank_trials": 55,
+      "rho_online_ns": 755708,
+      "rho_over_ic_online_descriptive": 12.271174330995064,
+      "rho_record": "ECR1hd7f1010269af",
+      "round": 1
+    },
+    {
+      "control_online_ns": 60542,
+      "control_over_ic_online_descriptive": 0.9777928517208521,
+      "control_record": "ECR1ha26cc28a1c05",
+      "ic_online_ns": 61917,
+      "ic_record": "ECR1h8f3e736b7937",
+      "ic_target_attempts": 1,
+      "rank_trials": 55,
+      "rho_online_ns": 743750,
+      "rho_over_ic_online_descriptive": 12.012048387357268,
+      "rho_record": "ECR1h39a3a44913ce",
+      "round": 2
+    },
+    {
+      "control_online_ns": 58708,
+      "control_over_ic_online_descriptive": 1.018051918775036,
+      "control_record": "ECR1ha8fbb964f68d",
+      "ic_online_ns": 57667,
+      "ic_record": "ECR1hef80180c8dd4",
+      "ic_target_attempts": 1,
+      "rank_trials": 55,
+      "rho_online_ns": 664417,
+      "rho_over_ic_online_descriptive": 11.521615481991434,
+      "rho_record": "ECR1he6789b2ff7a4",
+      "round": 3
+    },
+    {
+      "control_online_ns": 65375,
+      "control_over_ic_online_descriptive": 0.8332483621810396,
+      "control_record": "ECR1h65618d7b6d51",
+      "ic_online_ns": 78458,
+      "ic_record": "ECR1h5034eed39660",
+      "ic_target_attempts": 1,
+      "rank_trials": 55,
+      "rho_online_ns": 921042,
+      "rho_over_ic_online_descriptive": 11.739300007647405,
+      "rho_record": "ECR1hf1182a4bd129",
+      "round": 4
+    },
+    {
+      "control_online_ns": 101416,
+      "control_over_ic_online_descriptive": 1.287135749822317,
+      "control_record": "ECR1hd2177bde32c6",
+      "ic_online_ns": 78792,
+      "ic_record": "ECR1h4c91ebba2ffc",
+      "ic_target_attempts": 1,
+      "rank_trials": 55,
+      "rho_online_ns": 283583,
+      "rho_over_ic_online_descriptive": 3.5991344298913597,
+      "rho_record": "ECR1hfa421ad78e72",
+      "round": 5
+    }
+  ],
+  "schema": "n37-shared-rank-ecbench-analysis/v1",
+  "session_id": "ECBS1h33c3e5e4f75d",
+  "session_records_sha256": "8046061f5078f254627a343998b810c7e570fc9fe575f403466114e70a0b1693",
+  "status": "verified_bounded_l0_diagnostic",
+  "target_count": 1,
+  "workload_id": "bad0afc30d3a"
+}

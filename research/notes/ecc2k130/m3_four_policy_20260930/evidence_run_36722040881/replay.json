@@ -1,0 +1,8 @@
+{
+  "elapsed_seconds": 0.4208646770000044,
+  "error": "'FastGF2m' object has no attribute 'meter'",
+  "error_type": "AttributeError",
+  "peak_rss_bytes": 23949312,
+  "status": "FAIL",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/crypto/crypto/research/notes/ecc2k130/m3_four_policy_20260930/verify.py\", line 518, in main\n    receipt = replay(args.evidence.resolve())\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/crypto/crypto/research/notes/ecc2k130/m3_four_policy_20260930/verify.py\", line 299, in replay\n    phi = pilot.BinaryVeluMap.from_generator(E0, twist, kernel[\"generator\"], 7)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/crypto/crypto/research/ecc2k130_oriented_transport_20260924/oriented_velu.py\", line 67, in from_generator\n    source, kernel_curve = _curve(source), _curve(kernel_curve)\n                           ^^^^^^^^^^^^^^\n  File \"/home/runner/work/crypto/crypto/research/ecc2k130_oriented_transport_20260924/oriented_velu.py\", line 30, in _curve\n    return Koblitz(curve.F, a=curve.a, b=curve.b)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/crypto/crypto/research/ecc2k130_factor_base_pilot_20260924/run.py\", line 105, in __init__\n    self.meter = field.meter\n                 ^^^^^^^^^^^\nAttributeError: 'FastGF2m' object has no attribute 'meter'\n"
+}

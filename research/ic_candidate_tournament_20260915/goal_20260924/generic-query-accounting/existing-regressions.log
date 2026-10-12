@@ -1,0 +1,317 @@
+$ cargo test --locked --release --lib descent_ -- --test-threads=1
+    Blocking waiting for file lock on artifact directory
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2058:13
+     |
+2058 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:432:9
+    |
+432 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:407:5
+    |
+407 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+   --> src/cryptanalysis/f4_fp_tower.rs:916:5
+    |
+914 | enum Lanes {
+    |      ----- variants in this enum
+915 |     Scalar,
+916 |     Avx2,
+    |     ^^^^
+917 |     Avx512,
+    |     ^^^^^^
+    |
+    = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+   --> src/cryptanalysis/koblitz_fast.rs:889:5
+    |
+885 | pub struct BatchScratch {
+    |            ------------ fields in this struct
+...
+889 |     qx: Vec<u64>,
+    |     ^^
+890 |     qy: Vec<u64>,
+    |     ^^
+    |
+    = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `crypto` (lib test) generated 5 warnings (run `cargo fix --lib -p crypto --tests` to apply 3 suggestions)
+    Finished `release` profile [optimized] target(s) in 1m 04s
+     Running unittests src/lib.rs (/Volumes/SSD990/crypto/worktrees/ic-autolab-goal/target/release/deps/crypto_lib-f69e5e4543fb81b0)
+
+running 63 tests
+test cryptanalysis::descent_algebraic::tests::defect_aggregation ... ok
+test cryptanalysis::descent_algebraic::tests::profile_shape_and_nonneg_defect ... ok
+test cryptanalysis::descent_algebraic::tests::subfield_has_larger_early_defect_than_random ... ok
+test cryptanalysis::descent_expansion::tests::boundary_expansion_matching ... ok
+test cryptanalysis::descent_expansion::tests::enumerated_are_irreducible ... ok
+test cryptanalysis::descent_expansion::tests::irreducibility_known_cases ... ok
+test cryptanalysis::descent_expansion::tests::irreducible_counts ... ok
+test cryptanalysis::descent_expansion::tests::report_runs_at_larger_n ... ok
+test cryptanalysis::descent_expansion::tests::report_runs_on_real_field ... ok
+test cryptanalysis::descent_expansion::tests::spearman_monotone ... ok
+test cryptanalysis::descent_expansion::tests::spectral_gap_complete_bipartite ... ok
+test cryptanalysis::descent_expansion::tests::spectral_gap_matching ... ok
+test cryptanalysis::descent_expansion::tests::system_expansion_varies_across_bases ... ok
+test cryptanalysis::descent_expansion::tests::system_incidence_shape ... ok
+test cryptanalysis::descent_expansion::tests::tensor_expansion_is_basis_independent_in_refutable_regime ... ok
+test cryptanalysis::descent_expansion::tests::tensor_incidence_shape ... ok
+test cryptanalysis::descent_expansion::tests::tensor_reproduces_field_identities ... ok
+test cryptanalysis::descent_lowgamma::tests::all_families_measure ... ok
+test cryptanalysis::descent_lowgamma::tests::cell_runner_basic ... ok
+test cryptanalysis::descent_lowgamma::tests::coordinate_matches_restrict_to_subspace ... ok
+test cryptanalysis::descent_lowgamma::tests::random_basis_fullrank_and_shape ... ok
+test cryptanalysis::descent_lowgamma::tests::refutation_iff_nondecomposable_on_subspace ... ok
+test cryptanalysis::descent_lowgamma::tests::subfield_basis_is_independent ... ok
+test cryptanalysis::descent_lowgamma::tests::subfield_lower_dstar_but_not_lower_gamma ... ok
+test cryptanalysis::descent_lowgamma::tests::subfield_requires_divisibility ... ok
+test cryptanalysis::descent_treewidth::tests::descended_primal_graph_is_complete ... ok
+test cryptanalysis::descent_treewidth::tests::primal_graph_cliques_per_equation ... ok
+test cryptanalysis::descent_treewidth::tests::treewidth_complete_is_n_minus_1 ... ok
+test cryptanalysis::descent_treewidth::tests::treewidth_cycle_is_two ... ok
+test cryptanalysis::descent_treewidth::tests::treewidth_edgeless_is_zero ... ok
+test cryptanalysis::descent_treewidth::tests::treewidth_path_is_one ... ok
+test cryptanalysis::descent_treewidth::tests::treewidth_two_triangles ... ok
+test cryptanalysis::descent_treewidth::tests::vertex_cap_returns_none ... ok
+test cryptanalysis::ffd_harness::tests::subspace_descent_matches_field_evaluation ... ok
+test cryptanalysis::fght_snfs::tests::descent_recovers_arbitrary_log_degree_2 ... ok
+test cryptanalysis::fght_snfs::tests::descent_works_on_multiple_targets ... ok
+test cryptanalysis::ghs_descent::tests::m1_descent_round_trip ... ok
+test cryptanalysis::ic_descent_degrees::tests::a_descent_cell_reports_a_degree_and_a_cost ... ok
+test cryptanalysis::ic_descent_degrees::tests::a_paired_engine_cell_is_the_frozen_cell_checked_against_its_reference ... ok
+test cryptanalysis::ic_descent_degrees::tests::both_curve_families_descend_at_the_same_degree ... ok
+test cryptanalysis::ic_descent_degrees::tests::the_pruned_basis_has_exactly_the_solutions_the_system_has ... ok
+test cryptanalysis::ic_descent_degrees::tests::the_semi_regular_degree_is_the_first_non_positive_coefficient ... ok
+test cryptanalysis::ic_descent_degrees::tests::the_subspace_dimension_cap_is_the_monomial_mask ... ok
+test cryptanalysis::ic_framework::solvers::tests::every_engine_agrees_on_descent_systems ... ok
+test cryptanalysis::koblitz_index_calculus::tests::descent_certificates_bind_actual_probes_and_trial_caps ... ok
+test cryptanalysis::koblitz_index_calculus::tests::descent_solver_reuses_its_setup_across_targets ... ok
+test cryptanalysis::koblitz_index_calculus::tests::descent_summands_may_differ_from_the_collection_summands ... ok
+test cryptanalysis::koblitz_index_calculus::tests::query_accounting_descent_preserves_success_and_terminal_failures ... ok
+test cryptanalysis::petit_quisquater::tests::descent_decomposition_matches_shortcut ... ok
+test cryptanalysis::pq_descent::tests::descent_basic_round_trip ... ok
+test cryptanalysis::pq_descent::tests::descent_evaluates_correctly_at_every_point ... ok
+test cryptanalysis::pq_descent::tests::descent_n3_evaluates_correctly_at_every_point ... ok
+test cryptanalysis::pq_descent::tests::descent_n3_pipeline_recovers_constructed_triple ... ok
+test cryptanalysis::pq_descent::tests::descent_n3_xl_matches_direct ... ok
+test cryptanalysis::pq_descent::tests::descent_pipeline_recovers_constructed_pair ... ok
+test cryptanalysis::pq_descent_symbolic::tests::the_cap_is_the_monomial_mask ... ok
+test cryptanalysis::pq_descent_symbolic::tests::the_descent_evaluates_correctly_past_the_old_cap ... ok
+test cryptanalysis::pq_descent_symbolic::tests::the_symbolic_descent_is_the_truth_table_descent ... ok
+test cryptanalysis::pq_descent_symbolic::tests::the_word_formulas_are_the_repository_formulas ... ok
+test ecc_safety::tests::weil_descent_fails_for_composite_extension ... ok
+test ecc_safety::tests::weil_descent_failure_appears_in_report ... ok
+test ecc_safety::tests::weil_descent_inconclusive_for_prime_extension ... ok
+test ecc_safety::tests::weil_descent_passes_for_prime_field ... ok
+
+test result: ok. 63 passed; 0 failed; 0 ignored; 0 measured; 2964 filtered out; finished in 6.06s
+
+$ cargo test --locked --release --lib pdp_admission_ -- --test-threads=1
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2058:13
+     |
+2058 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:432:9
+    |
+432 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:407:5
+    |
+407 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+   --> src/cryptanalysis/f4_fp_tower.rs:916:5
+    |
+914 | enum Lanes {
+    |      ----- variants in this enum
+915 |     Scalar,
+916 |     Avx2,
+    |     ^^^^
+917 |     Avx512,
+    |     ^^^^^^
+    |
+    = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+   --> src/cryptanalysis/koblitz_fast.rs:889:5
+    |
+885 | pub struct BatchScratch {
+    |            ------------ fields in this struct
+...
+889 |     qx: Vec<u64>,
+    |     ^^
+890 |     qy: Vec<u64>,
+    |     ^^
+    |
+    = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `crypto` (lib test) generated 5 warnings (run `cargo fix --lib -p crypto --tests` to apply 3 suggestions)
+    Finished `release` profile [optimized] target(s) in 0.24s
+     Running unittests src/lib.rs (/Volumes/SSD990/crypto/worktrees/ic-autolab-goal/target/release/deps/crypto_lib-f69e5e4543fb81b0)
+
+running 3 tests
+test cryptanalysis::koblitz_index_calculus::tests::pdp_admission_attempt_ledger_retains_unsupported ... ok
+test cryptanalysis::koblitz_index_calculus::tests::pdp_admission_budget_exhaustion_is_not_unsupported ... ok
+test cryptanalysis::koblitz_index_calculus::tests::pdp_admission_unsupported_is_not_a_refutation ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 3024 filtered out; finished in 0.01s
+
+$ cargo test --locked --release --lib la_accounting_ -- --test-threads=1
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2058:13
+     |
+2058 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:432:9
+    |
+432 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:407:5
+    |
+407 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+   --> src/cryptanalysis/f4_fp_tower.rs:916:5
+    |
+914 | enum Lanes {
+    |      ----- variants in this enum
+915 |     Scalar,
+916 |     Avx2,
+    |     ^^^^
+917 |     Avx512,
+    |     ^^^^^^
+    |
+    = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+   --> src/cryptanalysis/koblitz_fast.rs:889:5
+    |
+885 | pub struct BatchScratch {
+    |            ------------ fields in this struct
+...
+889 |     qx: Vec<u64>,
+    |     ^^
+890 |     qy: Vec<u64>,
+    |     ^^
+    |
+    = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `crypto` (lib test) generated 5 warnings (run `cargo fix --lib -p crypto --tests` to apply 3 suggestions)
+    Finished `release` profile [optimized] target(s) in 0.06s
+     Running unittests src/lib.rs (/Volumes/SSD990/crypto/worktrees/ic-autolab-goal/target/release/deps/crypto_lib-f69e5e4543fb81b0)
+
+running 2 tests
+test cryptanalysis::koblitz_index_calculus::tests::la_accounting_persists_success_report ... ok
+test cryptanalysis::koblitz_index_calculus::tests::la_accounting_retains_failed_attempts ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 3025 filtered out; finished in 0.06s
+
+$ cargo test --locked --release --lib collected_relations_solve_the_same_logs_as_precompute -- --test-threads=1
+warning: variable does not need to be mutable
+    --> src/cryptanalysis/f4_fp_tower.rs:2058:13
+     |
+2058 |         let mut lanes = vec![Lanes::Scalar];
+     |             ----^^^^^
+     |             |
+     |             help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/cryptanalysis/mq_fes.rs:432:9
+    |
+432 |     let mut out = Vec::new();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `max_solutions`
+   --> src/cryptanalysis/mq_fes.rs:407:5
+    |
+407 |     max_solutions: usize,
+    |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_max_solutions`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Avx2` and `Avx512` are never constructed
+   --> src/cryptanalysis/f4_fp_tower.rs:916:5
+    |
+914 | enum Lanes {
+    |      ----- variants in this enum
+915 |     Scalar,
+916 |     Avx2,
+    |     ^^^^
+917 |     Avx512,
+    |     ^^^^^^
+    |
+    = note: `Lanes` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `qx` and `qy` are never read
+   --> src/cryptanalysis/koblitz_fast.rs:889:5
+    |
+885 | pub struct BatchScratch {
+    |            ------------ fields in this struct
+...
+889 |     qx: Vec<u64>,
+    |     ^^
+890 |     qy: Vec<u64>,
+    |     ^^
+    |
+    = note: `BatchScratch` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: `crypto` (lib test) generated 5 warnings (run `cargo fix --lib -p crypto --tests` to apply 3 suggestions)
+    Finished `release` profile [optimized] target(s) in 0.06s
+     Running unittests src/lib.rs (/Volumes/SSD990/crypto/worktrees/ic-autolab-goal/target/release/deps/crypto_lib-f69e5e4543fb81b0)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3027 filtered out; finished in 0.00s
+

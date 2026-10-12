@@ -217,7 +217,7 @@ pub fn audit_ecdsa_transcript(
     // Brute-force sweep over k_bits.  Coarse step first to find the
     // approximate level, then refine.
     let mut suspected_k_bits = max_k_bits;
-    let mut best_attempted = max_k_bits;
+    let mut best_attempted;
     let step = opts.k_bits_step.max(1);
     let mut k_bits = max_k_bits;
     while k_bits >= min_k_bits {
@@ -357,7 +357,7 @@ mod tests {
 
     fn biased_nonce<R: RngCore>(rng: &mut R, k_bits: u32) -> BigUint {
         loop {
-            let bytes = ((k_bits + 7) / 8) as usize;
+            let bytes = k_bits.div_ceil(8) as usize;
             let mut buf = vec![0u8; bytes];
             rng.fill_bytes(&mut buf);
             let extra = (bytes as u32) * 8 - k_bits;

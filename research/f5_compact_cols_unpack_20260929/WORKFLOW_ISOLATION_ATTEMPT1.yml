@@ -1,0 +1,92 @@
+name: Matrix-F5 compact columns isolated comparison
+
+on:
+  pull_request:
+    paths:
+      - 'src/cryptanalysis/matrix_f5_f2.rs'
+      - 'research/f5_compact_cols_unpack_20260929/PROTOCOL.md'
+      - 'research/f5_compact_cols_unpack_20260929/confirm_compact.py'
+      - 'research/f5_compact_cols_unpack_20260929/choose_isolated_cpus.py'
+      - '.github/workflows/f5-compact-cols-isolated.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  paired-f5:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        threads: [1, 2]
+    env:
+      CARGO_BUILD_JOBS: '2'
+      KIC_GF2_FORCE_AVX2: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: Check exact F5 output and compact-column invariant
+        run: |
+          python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-compact-cols-bench.lock" -- cargo test --release --lib cryptanalysis::matrix_f5_f2::tests -- --test-threads=1
+      - name: Build F5 stage benchmark
+        run: python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-compact-cols-bench.lock" -- cargo build --release --example f4_f2_bench
+      - name: Choose reservable CPUs
+        id: cpus
+        run: |
+          python3 research/f5_compact_cols_unpack_20260929/choose_isolated_cpus.py \
+            ${{ matrix.threads }} \
+            research/f5_compact_cols_unpack_20260929/cpu-choice-t${{ matrix.threads }}.json \
+            >> "$GITHUB_OUTPUT"
+      - name: Isolated paired repeat
+        run: |
+          # Redirect in the runner shell so failures remain runner-owned.
+          # shellcheck disable=SC2024
+          sudo -n env PATH="$PATH" HOME="$HOME" \
+            RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}" CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}" \
+            GITHUB_SHA="$GITHUB_SHA" GITHUB_HEAD_REF="${GITHUB_HEAD_REF:-}" \
+            python3 tools/isolated_bench.py reserve \
+            --lock "$RUNNER_TEMP/f5-compact-cols-bench.lock" \
+            --cpus '${{ steps.cpus.outputs.reserve }}' \
+            --out research/f5_compact_cols_unpack_20260929/isolation-t${{ matrix.threads }}.jsonl \
+            --settle 10 --period 0.25 \
+            --label 'f5-compact-cols-t${{ matrix.threads }}' \
+            -- taskset -c '${{ steps.cpus.outputs.pin }}' \
+            python3 research/f5_compact_cols_unpack_20260929/confirm_compact.py \
+              target/release/examples/f4_f2_bench \
+              research/f5_compact_cols_unpack_20260929/ci-isolated-t${{ matrix.threads }}.json \
+              --pairs 5 --threads ${{ matrix.threads }} \
+            2> research/f5_compact_cols_unpack_20260929/isolation-t${{ matrix.threads }}.stderr
+      - name: Check reservation and complete exact output
+        run: |
+          python3 - <<'PY'
+          import json, pathlib
+          root = pathlib.Path('research/f5_compact_cols_unpack_20260929')
+          threads = ${{ matrix.threads }}
+          iso = json.loads((root / f'isolation-t{threads}.jsonl').read_text().splitlines()[-1])
+          run = json.loads((root / f'ci-isolated-t{threads}.json').read_text())
+          assert iso['exit_status'] == 0
+          assert not iso['left_on_reserved']['user_threads'], iso['left_on_reserved']['user_threads']
+          assert iso['contended_samples'] == 0, iso['contended_samples']
+          assert run['status'] == 'complete' and len(run['runs']) == 88
+          assert all(record['status'] == 'ok' for record in run['runs'])
+          PY
+      - name: Preserve complete runs and isolation failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f5-compact-cols-isolated-t${{ matrix.threads }}-${{ github.sha }}
+          path: |
+            research/f5_compact_cols_unpack_20260929/cpu-choice-t${{ matrix.threads }}.json
+            research/f5_compact_cols_unpack_20260929/ci-isolated-t${{ matrix.threads }}.json
+            research/f5_compact_cols_unpack_20260929/isolation-t${{ matrix.threads }}.jsonl
+            research/f5_compact_cols_unpack_20260929/isolation-t${{ matrix.threads }}.stderr
+          if-no-files-found: warn

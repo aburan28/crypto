@@ -56,9 +56,15 @@ pub static UVTABLE: &[(u64, u64, u128, u128)] = &[
 /// Look up the (exp, u, v) triple for a given chunk size n. Returns None
 /// if n is even or out of range.
 pub fn lookup(n: u64) -> Option<(u64, u128, u128)> {
-    UVTABLE.iter().find_map(|(nn, exp, u, v)| {
-        if *nn == n { Some((*exp, *u, *v)) } else { None }
-    })
+    UVTABLE.iter().find_map(
+        |(nn, exp, u, v)| {
+            if *nn == n {
+                Some((*exp, *u, *v))
+            } else {
+                None
+            }
+        },
+    )
 }
 
 /// Find the largest n ≤ n_max with an exp ≤ a_max entry. This is the
@@ -66,8 +72,12 @@ pub fn lookup(n: u64) -> Option<(u64, u128, u128)> {
 /// digits to grab in one Groebner-system shot.
 pub fn largest_usable(n_max: u64, a_max: u64) -> Option<(u64, u64, u128, u128)> {
     UVTABLE.iter().rev().find_map(|(n, exp, u, v)| {
-        if *n <= n_max && *exp <= a_max { Some((*n, *exp, *u, *v)) } else { None }
-    }).map(|(n, exp, u, v)| (n, exp, u, v))
+        if *n <= n_max && *exp <= a_max {
+            Some((*n, *exp, *u, *v))
+        } else {
+            None
+        }
+    })
 }
 
 #[cfg(test)]
@@ -102,11 +112,18 @@ mod tests {
                 panic!("uvtable[{n}]: 2^exp < 3^n, can't be a sum of squares");
             }
             let lhs = two_exp - three_n;
-            let u_sq = match u.checked_mul(u) { Some(v) => v, None => continue };
-            let v_sq_4 = match v.checked_mul(v).and_then(|x| x.checked_mul(4)) {
-                Some(v) => v, None => continue,
+            let u_sq = match u.checked_mul(u) {
+                Some(v) => v,
+                None => continue,
             };
-            let rhs = match u_sq.checked_add(v_sq_4) { Some(v) => v, None => continue };
+            let v_sq_4 = match v.checked_mul(v).and_then(|x| x.checked_mul(4)) {
+                Some(v) => v,
+                None => continue,
+            };
+            let rhs = match u_sq.checked_add(v_sq_4) {
+                Some(v) => v,
+                None => continue,
+            };
             assert_eq!(
                 lhs, rhs,
                 "uvtable[n={n}]: 2^{exp} − 3^{n} = {lhs} ≠ u² + 4v² = {rhs}"

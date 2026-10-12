@@ -63,7 +63,7 @@ and solve.
 ~n^2 clauses. For 80-bit n = 2^80, that's 2^80 variables — way
 beyond SAT solver capacity.
 
-**Cross-reference:** `RESEARCH_SAT_SEMAEV.md` in this repo (already
+**Cross-reference:** `research/notes/index-calculus/RESEARCH_SAT_SEMAEV.md` in this repo (already
 exists). Likely confirms this direction is closed.
 
 **Worth recording?** Yes, as the cleanest negative for the

@@ -1,0 +1,53 @@
+[
+  {
+    "accepted": true,
+    "attempt": 1,
+    "preflight": {
+      "conditions": {
+        "loadavg": [
+          1.49,
+          0.7,
+          0.27
+        ],
+        "psi_cpu": {
+          "full": {
+            "avg10": 0.0,
+            "avg300": 0.0,
+            "avg60": 0.0,
+            "total": 0.0
+          },
+          "some": {
+            "avg10": 0.34,
+            "avg300": 0.69,
+            "avg60": 1.42,
+            "total": 9763060.0
+          }
+        },
+        "psi_memory": {
+          "full": {
+            "avg10": 0.0,
+            "avg300": 0.0,
+            "avg60": 0.0,
+            "total": 0.0
+          },
+          "some": {
+            "avg10": 0.0,
+            "avg300": 0.0,
+            "avg60": 0.0,
+            "total": 0.0
+          }
+        },
+        "unix_time": 1790896445.59038
+      },
+      "settle": {
+        "other_cpu_seconds": 0.02,
+        "seconds": 2.0,
+        "top": {
+          "Runner.Worker[2224]": 0.01,
+          "containerd[1127]": 0.01
+        }
+      }
+    },
+    "recorded_utc": "2026-10-01T23:14:03.582590+00:00"
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "child_system_ms": 1089.1100000000001,
+  "child_user_ms": 165735.249,
+  "command": [
+    "target/release/examples/symmetrised_oracle_bench",
+    "--only",
+    "0",
+    "31",
+    "2",
+    "--targets",
+    "1",
+    "--no-sat",
+    "--node-budget",
+    "50000"
+  ],
+  "ended_unix_ns": 1790029941002851000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/symmetrised_oracle_bench",
+  "executable_sha256": "e2f9a7685aeca70542a2deb742078cf62cdf3cf7780d80a60bbe654c34227b0d",
+  "exit_code": 0,
+  "peak_rss_bytes": 455589888,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790029767160001000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 608,
+  "stdout_sha256": "57896bc4277cb1b418901b9b5cc20eecb1e1bcf4d84863c15f2eba49fe053b90",
+  "task_id": "TASK-KIC-GROEBNER-M4RI-PAIRED-SUFFIX-N31-20260921",
+  "wall_ms": 173840.925375
+}

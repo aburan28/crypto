@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "status": "REGISTERED_BEFORE_ANALYSIS",
+  "audit": "exact-three-summand-natural-query-yield-20260929",
+  "parent_pr": 965,
+  "parent_evidence_file": "goal_20260924/generic-backend-recovery-pilot/evidence.tar.gz",
+  "parent_evidence_sha256": "e0ce19fc28c58e2dc1cae9649a16af74099016fff8183e5ce69f65b39c804f02",
+  "parent_panel_sha256": "bf586fa75f9b5a00c6de95793c73502a2fb064898f1d4eb09c84685082b7b03d",
+  "source_commit": "765c3c5f19032bd852163805f257c56babef2040",
+  "cells": ["n17a1", "n19a0", "n23a0", "n23a1", "n31a0"],
+  "solvers": ["f4", "f5", "sat_xor", "sat_cnf"],
+  "summands": 3,
+  "query_scope": "all recorded ordinary collection queries with b=0 from the twenty frozen jobs; no generated or repeated worker queries",
+  "base_scope": "independently verified geometric worker base, before cofactor projection and orbit folding",
+  "oracle": "enumerate all unordered base-point pairs, index their exact group sum, then subtract each third base point from the query; independently re-add a found triple",
+  "timeout_policy": "no report implies unknown query count and unknown oracle yield, never zero",
+  "decision": "count exact relation existence, observed witness, and solvable-but-bounded-incomplete queries for every report; retain all timeouts; do not rank complete IC pipelines or infer speedup",
+  "stop": "analyze every frozen report once; fail closed on any source, fixture, query, group, worker, or audit mismatch; no worker dispatch or new target"
+}

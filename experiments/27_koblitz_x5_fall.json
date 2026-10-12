@@ -1,0 +1,936 @@
+{
+  "rungs": [
+    {
+      "n": 9,
+      "ell": 4,
+      "v_basis": [
+        1,
+        271,
+        99,
+        168
+      ],
+      "v_frobenius_stable": false,
+      "draws": 16,
+      "d_max": 4,
+      "seed": 1592590341,
+      "arms": [
+        {
+          "arm": "symmetrised chain",
+          "n_vars": 31,
+          "n_eqs": 27,
+          "degree": 3,
+          "falls": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "profiled_to": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "fall_min": 4,
+          "fall_max": 4,
+          "no_fall": 0,
+          "censored": 0,
+          "mean_deficit": [
+            [
+              2,
+              0.0
+            ],
+            [
+              3,
+              0.0
+            ]
+          ],
+          "ms": 522.299804
+        },
+        {
+          "arm": "x-chained",
+          "n_vars": 34,
+          "n_eqs": 27,
+          "degree": 3,
+          "falls": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            2,
+            3,
+            3
+          ],
+          "profiled_to": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "fall_min": 2,
+          "fall_max": 3,
+          "no_fall": 0,
+          "censored": 0,
+          "mean_deficit": [
+            [
+              2,
+              0.0625
+            ],
+            [
+              3,
+              3.5625
+            ]
+          ],
+          "ms": 1116.583716
+        }
+      ]
+    },
+    {
+      "n": 11,
+      "ell": 4,
+      "v_basis": [
+        1,
+        1111,
+        1740,
+        137
+      ],
+      "v_frobenius_stable": false,
+      "draws": 16,
+      "d_max": 4,
+      "seed": 1592590341,
+      "arms": [
+        {
+          "arm": "symmetrised chain",
+          "n_vars": 35,
+          "n_eqs": 33,
+          "degree": 3,
+          "falls": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "profiled_to": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "fall_min": 4,
+          "fall_max": 4,
+          "no_fall": 0,
+          "censored": 0,
+          "mean_deficit": [
+            [
+              2,
+              0.0
+            ],
+            [
+              3,
+              0.0
+            ]
+          ],
+          "ms": 1392.616863
+        },
+        {
+          "arm": "x-chained",
+          "n_vars": 38,
+          "n_eqs": 33,
+          "degree": 3,
+          "falls": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "profiled_to": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "fall_min": 3,
+          "fall_max": 3,
+          "no_fall": 0,
+          "censored": 0,
+          "mean_deficit": [
+            [
+              2,
+              0.0
+            ],
+            [
+              3,
+              1.0
+            ]
+          ],
+          "ms": 300.973478
+        }
+      ]
+    },
+    {
+      "n": 13,
+      "ell": 5,
+      "v_basis": [
+        1,
+        4998,
+        1741,
+        4901,
+        7934
+      ],
+      "v_frobenius_stable": false,
+      "draws": 16,
+      "d_max": 4,
+      "seed": 1592590341,
+      "arms": [
+        {
+          "arm": "symmetrised chain",
+          "n_vars": 43,
+          "n_eqs": 39,
+          "degree": 3,
+          "falls": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "profiled_to": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "fall_min": null,
+          "fall_max": null,
+          "no_fall": 16,
+          "censored": 16,
+          "mean_deficit": [
+            [
+              2,
+              0.0
+            ],
+            [
+              3,
+              0.0
+            ]
+          ],
+          "ms": 490.939645
+        },
+        {
+          "arm": "x-chained",
+          "n_vars": 46,
+          "n_eqs": 39,
+          "degree": 3,
+          "falls": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "profiled_to": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "fall_min": 3,
+          "fall_max": 3,
+          "no_fall": 0,
+          "censored": 0,
+          "mean_deficit": [
+            [
+              2,
+              0.0
+            ],
+            [
+              3,
+              1.0
+            ]
+          ],
+          "ms": 892.0775279999999
+        }
+      ]
+    },
+    {
+      "n": 15,
+      "ell": 5,
+      "v_basis": [
+        1,
+        28821,
+        450,
+        7297,
+        23358
+      ],
+      "v_frobenius_stable": false,
+      "draws": 16,
+      "d_max": 4,
+      "seed": 1592590341,
+      "arms": [
+        {
+          "arm": "symmetrised chain",
+          "n_vars": 47,
+          "n_eqs": 45,
+          "degree": 3,
+          "falls": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "profiled_to": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "fall_min": null,
+          "fall_max": null,
+          "no_fall": 16,
+          "censored": 16,
+          "mean_deficit": [
+            [
+              2,
+              0.0
+            ],
+            [
+              3,
+              0.0
+            ]
+          ],
+          "ms": 739.067998
+        },
+        {
+          "arm": "x-chained",
+          "n_vars": 50,
+          "n_eqs": 45,
+          "degree": 3,
+          "falls": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "profiled_to": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "fall_min": 3,
+          "fall_max": 3,
+          "no_fall": 0,
+          "censored": 0,
+          "mean_deficit": [
+            [
+              2,
+              0.0
+            ],
+            [
+              3,
+              1.0
+            ]
+          ],
+          "ms": 505.506177
+        }
+      ]
+    },
+    {
+      "n": 17,
+      "ell": 6,
+      "v_basis": [
+        1,
+        31528,
+        28209,
+        4251,
+        35664,
+        97814
+      ],
+      "v_frobenius_stable": false,
+      "draws": 16,
+      "d_max": 4,
+      "seed": 1592590341,
+      "arms": [
+        {
+          "arm": "symmetrised chain",
+          "n_vars": 55,
+          "n_eqs": 51,
+          "degree": 3,
+          "falls": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "profiled_to": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "fall_min": null,
+          "fall_max": null,
+          "no_fall": 16,
+          "censored": 16,
+          "mean_deficit": [
+            [
+              2,
+              0.0
+            ],
+            [
+              3,
+              0.0
+            ]
+          ],
+          "ms": 694.365834
+        },
+        {
+          "arm": "x-chained",
+          "n_vars": 58,
+          "n_eqs": 51,
+          "degree": 3,
+          "falls": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "profiled_to": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "fall_min": 3,
+          "fall_max": 3,
+          "no_fall": 0,
+          "censored": 0,
+          "mean_deficit": [
+            [
+              2,
+              0.0
+            ],
+            [
+              3,
+              1.0
+            ]
+          ],
+          "ms": 889.774757
+        }
+      ]
+    },
+    {
+      "n": 19,
+      "ell": 6,
+      "v_basis": [
+        1,
+        41460,
+        19132,
+        471825,
+        521278,
+        284508
+      ],
+      "v_frobenius_stable": false,
+      "draws": 16,
+      "d_max": 4,
+      "seed": 1592590341,
+      "arms": [
+        {
+          "arm": "symmetrised chain",
+          "n_vars": 59,
+          "n_eqs": 57,
+          "degree": 3,
+          "falls": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "profiled_to": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "fall_min": null,
+          "fall_max": null,
+          "no_fall": 16,
+          "censored": 16,
+          "mean_deficit": [
+            [
+              2,
+              0.0
+            ],
+            [
+              3,
+              0.0
+            ]
+          ],
+          "ms": 1016.570771
+        },
+        {
+          "arm": "x-chained",
+          "n_vars": 62,
+          "n_eqs": 57,
+          "degree": 3,
+          "falls": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "profiled_to": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "fall_min": 3,
+          "fall_max": 3,
+          "no_fall": 0,
+          "censored": 0,
+          "mean_deficit": [
+            [
+              2,
+              0.0
+            ],
+            [
+              3,
+              1.0
+            ]
+          ],
+          "ms": 1353.302569
+        }
+      ]
+    }
+  ],
+  "cross_check": {
+    "n": 15,
+    "ell": 5,
+    "v_basis": [
+      1,
+      2,
+      4,
+      16,
+      256
+    ],
+    "v_frobenius_stable": true,
+    "draws": 16,
+    "d_max": 4,
+    "seed": 1592590341,
+    "arms": [
+      {
+        "arm": "symmetrised chain",
+        "n_vars": 47,
+        "n_eqs": 45,
+        "degree": 3,
+        "falls": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "profiled_to": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "fall_min": null,
+        "fall_max": null,
+        "no_fall": 16,
+        "censored": 16,
+        "mean_deficit": [
+          [
+            2,
+            0.0
+          ],
+          [
+            3,
+            0.0
+          ]
+        ],
+        "ms": 699.191253
+      },
+      {
+        "arm": "x-chained",
+        "n_vars": 50,
+        "n_eqs": 45,
+        "degree": 3,
+        "falls": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "profiled_to": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "fall_min": 3,
+        "fall_max": 3,
+        "no_fall": 0,
+        "censored": 0,
+        "mean_deficit": [
+          [
+            2,
+            0.0
+          ],
+          [
+            3,
+            1.0
+          ]
+        ],
+        "ms": 411.25244399999997
+      }
+    ]
+  },
+  "solve": {
+    "a": 1,
+    "n": 11,
+    "ell": 4,
+    "points": 21,
+    "targets": 16,
+    "found": 6,
+    "refuted": 10,
+    "budget": 0,
+    "decomposable": 6,
+    "gate_failures": 0,
+    "mean_splits": 486.0625,
+    "mean_word_xors": 4370137.3125,
+    "mean_ms": 156.7361091875
+  }
+}

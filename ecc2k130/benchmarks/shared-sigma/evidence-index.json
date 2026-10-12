@@ -1,0 +1,78 @@
+{
+  "valid": true,
+  "kind": "Immutable finite shared-sigma comparison evidence",
+  "files": {
+    "comparison.json": {
+      "sha256": "ce331c88a096637a23f9f5a4d632a535f1c5d89e2d112d31e41599f7446df406",
+      "bytes": 4614229
+    },
+    "comparison-review.json": {
+      "sha256": "3073c6ee74924851293bc410e8cd05892743bbe51a59453d8549d5f269f5bc7c",
+      "bytes": 17948
+    },
+    "comparison-return.json": {
+      "sha256": "ad9bf0567c09a067a99f86693a4ca7113430a771945d4aa83519509a0aa9d1c2",
+      "bytes": 220
+    },
+    "predispatch-review.json": {
+      "sha256": "17e9806465392b81667557ef22674590399446788d8b893ba03774efab99af65",
+      "bytes": 7110
+    },
+    "prebuild-review.json": {
+      "sha256": "e16182856b78355c699912f8113b8c9f3719af487a5f1bf2ded3b2ef280df852",
+      "bytes": 5740
+    },
+    "prebuild-return.json": {
+      "sha256": "f1b6a72ac69855828cc394e119ca380db47f79f864422981311a0a97741bb396",
+      "bytes": 258
+    },
+    "prebuild-handoff.json": {
+      "sha256": "cafb56d5045fc4700c082d04bee0a5d130aebccfdd67236825925c8fb6f6e458",
+      "bytes": 3201
+    },
+    "comparison-driver-freeze.json": {
+      "sha256": "da0457aea44201d89425d9c8edaa6e28b395bcfd5abf1029e720b17b38716c6d",
+      "bytes": 446
+    },
+    "comparison-layout-gate.py": {
+      "sha256": "5b8edbf0346c9d48f89680ca030b8b1d38ef90d2cbdd86959f8db2c818c937f7",
+      "bytes": 16588
+    },
+    "comparison-driver/run.py": {
+      "sha256": "9069cc089710d455ff7546c09fe95de6415eb76b9b0b02639ebe3e46ef16a718",
+      "bytes": 26882
+    },
+    "comparison-driver/plan/expected.json": {
+      "sha256": "1e035c3f2883d778f55664f15fc56322a1334d64c92052f3309d6135b8a574b6",
+      "bytes": 57623
+    },
+    "comparison-driver/plan/gates.py": {
+      "sha256": "6dd4241fc3a1a013c0bdb46211ba756b1986c6d6c058b792f68f83c73cb132b6",
+      "bytes": 18767
+    },
+    "comparison-driver/plan/build.py": {
+      "sha256": "538aa273effa2ff0bab1a94267b40808fc379d40532fc6f0394add1405361d42",
+      "bytes": 6446
+    },
+    "comparison-driver/plan/checkpoint_gate.py": {
+      "sha256": "e2409782aa9fa773648e928f73b2ee05dc9442d479e45147122594fcf5a9ba7f",
+      "bytes": 11571
+    },
+    "runtime-calibration.json": {
+      "sha256": "96b593c7198204bb1f3401ee48402d93fa16ce809592ef7bfc23d236d67c34ed",
+      "bytes": 7927
+    }
+  },
+  "embeddedPrebuild": {
+    "container": "comparison.json",
+    "key": "build",
+    "serializedSha256": "dbd875ce652415c4b192d61db00606e5924b605f53ebf0ac028d1379751a0a6d",
+    "serializedBytes": 3890900,
+    "serialization": "json.dumps(build, indent=2) + '\\n'"
+  },
+  "measuredSourceCanonicalSha256": "4be651daa55a44d97aff609d5c22b21464f684d8fdef5139ef946f16d8fa3868",
+  "measurementStatus": "Complete frozen-runner GPU panel and independent raw readback passed",
+  "publicCommandAuditStatus": "Pending; the new public Make/Modal integration has not yet run on a GPU",
+  "goalBillionCompleteScalarUpdatesPerSecond": 26,
+  "goalAchieved": false
+}

@@ -1,0 +1,6 @@
+{"group":"twopow","algo":"fp2_mul","p_bits":"434","median_ns":259,"verified":true,"note":"Karatsuba over FpM<7>"}
+{"group":"twopow","algo":"montgomery_4_isogeny_chain_optimal","p_bits":"434","e":"216","pushed":"3","median_ns":2666305,"min_ns":2521165,"reps":200,"doublings":662,"evals":732,"verified":true,"note":"j equals the 2-isogeny chain and the Weierstrass Velu chain"}
+{"group":"twopow","algo":"montgomery_4_isogeny_chain_multiply_only","p_bits":"434","e":"216","pushed":"3","median_ns":18595137,"min_ns":17844109,"reps":49,"doublings":11556,"evals":431,"verified":true,"note":"multiply down to the 4-torsion before every step (split 1)"}
+{"group":"twopow","algo":"montgomery_4_isogeny_chain_push_only","p_bits":"434","e":"216","pushed":"3","median_ns":13136176,"min_ns":12791817,"reps":71,"doublings":214,"evals":6102,"verified":true,"note":"push the generator through every step (split m - 1)"}
+{"group":"twopow","algo":"montgomery_2_isogeny_chain_optimal","p_bits":"434","e":"216","pushed":"3","median_ns":3127918,"min_ns":3070208,"reps":200,"doublings":756,"evals":1590,"verified":true,"note":""}
+{"group":"twopow","algo":"weierstrass_velu_chain_balanced","p_bits":"434","e":"216","pushed":"0","ns":20846531,"l_mults":884,"evals":804,"verified":true,"note":"kernel/chain.rs, affine Velu per 2-isogeny; one run"}

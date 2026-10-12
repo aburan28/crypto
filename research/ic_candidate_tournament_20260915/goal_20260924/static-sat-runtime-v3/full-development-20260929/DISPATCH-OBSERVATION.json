@@ -1,0 +1,28 @@
+{
+  "command": [
+    "python3.12",
+    "research/ic_candidate_tournament_20260915/static_sat_pipeline_v3.py",
+    "--registration",
+    "/Volumes/SSD990/llm/tmp/ic-static-sat-v3-full-development-20260930-registration0",
+    "--expected-execution-sha256",
+    "4e6547c03cfe1fa54ae9a994c160e5d4afa987659dc72880c651885a0e9e8fa9",
+    "--out",
+    "/Volumes/SSD990/llm/tmp/ic-static-sat-v3-full-development-20260930-execution0"
+  ],
+  "complete_ic_source_bound": null,
+  "execution_directory": "/Volumes/SSD990/llm/tmp/ic-static-sat-v3-full-development-20260930-execution0",
+  "execution_sha256": "4e6547c03cfe1fa54ae9a994c160e5d4afa987659dc72880c651885a0e9e8fa9",
+  "executions": 1,
+  "local_exec_session_id": 8833,
+  "observed_at_utc": "2026-09-30T09:00:31.091885+00:00",
+  "online_speedup": null,
+  "online_wall_ns": null,
+  "preexecution_commit": "c8b721db620e042ab2173ea2f77d321257910581",
+  "promotion_eligible": false,
+  "retry_permitted": false,
+  "schema_version": 3,
+  "status": "RUNNING_AS_OF_OBSERVATION",
+  "terminal_process_receipt_present": false,
+  "verified_target_count": null,
+  "watchdog_seconds": 7200
+}

@@ -1,0 +1,81 @@
+{
+  "schema": "n83-rotated-m10-manifest-v1",
+  "source_commit": "422753df47b3420031dbe78b3e84fdf964745c21",
+  "preregistered_head": "2428ae0ceac3fc1bdb6920e4db295892de522ce5",
+  "pr": "https://github.com/aburan28/crypto/pull/1343",
+  "host": {
+    "os": "Linux 6.18.44 x86_64",
+    "logical_cpus_visible": 5,
+    "memory_total_kib": 18440136
+  },
+  "files": [
+    {
+      "path": "evidence/identity.json",
+      "bytes": 905,
+      "sha256": "cfb55bcc9127500799f89a28c187c4ce213e41fc8e75793d3d0aa88fefd5280a",
+      "committed": true
+    },
+    {
+      "path": "evidence/planted.cnf",
+      "bytes": 83368485,
+      "sha256": "f9b74f794cfc3f496ed6859e0a2f300e7e1ef5d9f2a9cdbdabc9254f8295af8d",
+      "blake3": "4ba3444090efdf211e01e32a990a95aca8c42465d5eeda523cad30067fdcf389",
+      "committed": false,
+      "reason": "deterministic large generated file; digest retained"
+    },
+    {
+      "path": "evidence/planted.json",
+      "bytes": 4555,
+      "sha256": "da5583c13790d33cef3fc69fd56ddd0a272e1a8186dabccce80c8ebf56bb22ef",
+      "committed": true
+    },
+    {
+      "path": "evidence/planted.model",
+      "bytes": 7689872,
+      "sha256": "f6956638c2bb75d3befa58ba29a1d356dca2ebc2e5c76b29092861ef1ec05a1a",
+      "committed": false,
+      "reason": "deterministic large generated file; decoded replay committed"
+    },
+    {
+      "path": "evidence/planted_replay.json",
+      "bytes": 2525,
+      "sha256": "c13ad7afd24a79c3a631e698206c15db7e3083496ce35d149f8cf15772af15f2",
+      "committed": true
+    },
+    {
+      "path": "evidence/public/instance.cnf",
+      "bytes": 83446635,
+      "sha256": "22db3390b0f398f3f68e80ea3186be36b8cb17ee7722c967dafa541daf935176",
+      "blake3": "bd4c5148fa97d7af749c5736bd389b77fe938a2b978aed901d893b8bd463b892",
+      "committed": false,
+      "reason": "deterministic large generated file; digests and full solver log retained"
+    },
+    {
+      "path": "evidence/public/model.txt",
+      "bytes": 10,
+      "sha256": "8fba55cea0f98be36fab7b65349dda867a58aabfcf974a46098f5123830ac5cb",
+      "committed": true
+    },
+    {
+      "path": "evidence/public/result.json",
+      "bytes": 3248,
+      "sha256": "a2a09c66d696d8d058bf6b5a5628d567852e97286c9f5b1410289719b7e234fa",
+      "committed": true
+    },
+    {
+      "path": "evidence/public/solver.stdout.txt",
+      "bytes": 11601,
+      "sha256": "7bf253783de5a01b1ca363dfd9a24219e00e7513c5d46faed4b0323fac4c2a49",
+      "committed": true
+    },
+    {
+      "path": "evidence/public/solver.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committed": true
+    }
+  ],
+  "decision": "BOUNDED_NATURAL_TARGET_TIMEOUT",
+  "speed_claim": null,
+  "full_dlp": false
+}

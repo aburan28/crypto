@@ -1,0 +1,74 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "hypothesis": "The round-0011 incumbent on a baseline whose executable is linked statically against musl without relocations (the C runtime's start-up is a few thousand instructions instead of the relocation, tunables and cache probing of the static-pie glibc image) and whose worker serves every heap request from a bump-pointer arena in zero pages of the executable (the whole job allocates under 330 KB); both arms share both changes. Every report byte is unchanged.",
+    "id": "incumbent",
+    "parent": "tiny2 + certificate, general arithmetic in words (round-0011)",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0011",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "1ba4b4c1aba04e85aa48318c9b8794e3335db853d391f0b0ec0a1df72a92efba"
+  },
+  {
+    "binary_relative": "source_candidates/arena_fastio/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "falsification": "Any bad, missing or unmatched certificate; any report byte different from the incumbent's beyond elapsed_seconds; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "IC-only: the report's decimal numbers written two digits at a time from a table and appended without a UTF-8 validation pass (the same characters); round 0011 measured it at 0.965 of the incumbent's instructions but could not resolve it on the native clock (upper limit 1.0086) under the glibc start-up floor, which the baseline has now removed.",
+    "id": "arena_fastio",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/arena_fastio/source",
+    "source_manifest_relative": "source_candidates/arena_fastio/source-manifest.json",
+    "source_manifest_sha256": "1eb15d17ee97f851447bb6f58382b2ac6186ea301aecfe45e8f168f2a58dbb49"
+  },
+  {
+    "binary_relative": "source_candidates/arena_glibc/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "falsification": "Any bad, missing or unmatched certificate; any report byte different from the incumbent's beyond elapsed_seconds; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "Ablation control, expected eliminated: the same worker with the arena allocator but the round-0011 link (static-pie glibc). Isolates the link mode: expected about 1.09 of the incumbent's instructions and the round-0011 start-up on the native clock.",
+    "id": "arena_glibc",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/arena_glibc/source",
+    "source_manifest_relative": "source_candidates/arena_glibc/source-manifest.json",
+    "source_manifest_sha256": "22865c9080d57d1b66f95cafc4547684dfa1c39707bfbe5f735913ca1d11bd0d"
+  },
+  {
+    "binary_relative": "source_candidates/musl_sysalloc/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "616d79f2ecffe9f0cf9ff08d3d177dc72fbd66299623142fd3ce44d70d2b5213",
+    "falsification": "Any bad, missing or unmatched certificate; any report byte different from the incumbent's beyond elapsed_seconds; failure of the no-regression gate against the incumbent; or failure of the strict rho gate.",
+    "hypothesis": "Ablation control, expected eliminated: the musl static executable without relocations on the C library's own allocator. Isolates the arena: expected 1.5-1.6 of the incumbent's instructions (musl's allocator is dearer per call than glibc's) and a slower native clock than the incumbent.",
+    "id": "musl_sysalloc",
+    "parent": "incumbent",
+    "source_directory": "source_candidates/musl_sysalloc/source",
+    "source_manifest_relative": "source_candidates/musl_sysalloc/source-manifest.json",
+    "source_manifest_sha256": "2c5977a49a928922af5eb7f5dacf1667d53f8b4ccf4f325ea30250de85e84bc2"
+  }
+]

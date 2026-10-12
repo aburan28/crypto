@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "runs": [
+    {
+      "run": "run_01",
+      "cells": 48,
+      "samples": 768,
+      "all_results_completed_and_verified": true,
+      "full_solve_gates": {
+        "bucket": "REJECTED",
+        "hybrid": "REJECTED",
+        "search": "REJECTED"
+      },
+      "word_solve_gate": null,
+      "merge_search_gate": null,
+      "manifest_sha256": "d8cda19d86a7cc659a01a0cc83835c61f19991cf0d2297b6cef0b3ac060b8498",
+      "runtime_seconds": 105.4692229160064
+    },
+    {
+      "run": "run_02",
+      "cells": 48,
+      "samples": 1728,
+      "all_results_completed_and_verified": true,
+      "full_solve_gates": {
+        "bucket": "REJECTED",
+        "hybrid": "REJECTED",
+        "search": "REJECTED",
+        "small_flat": "REJECTED",
+        "word_tail": "REJECTED"
+      },
+      "word_solve_gate": "REJECTED",
+      "merge_search_gate": null,
+      "manifest_sha256": "4aefc0577361f6c46d89c042ae864778bc51d899b8731d43becb81614a7a0b50",
+      "runtime_seconds": 175.95147779200488
+    },
+    {
+      "run": "run_03",
+      "cells": 48,
+      "samples": 2352,
+      "all_results_completed_and_verified": true,
+      "full_solve_gates": {
+        "bucket": "REJECTED",
+        "hybrid": "REJECTED",
+        "merge_search": "REJECTED",
+        "search": "REJECTED",
+        "small_flat": "REJECTED",
+        "word_tail": "REJECTED"
+      },
+      "word_solve_gate": "REJECTED",
+      "merge_search_gate": "REJECTED",
+      "manifest_sha256": "616c7ab889d9dbaa848c91657e2b27530c98a15f3703386a0a1bf4de0383b567",
+      "runtime_seconds": 240.95060470899625
+    }
+  ],
+  "classification": "Complete generated Boolean solves only; no accepted universal dramatic gate, no production or cryptanalytic claim."
+}

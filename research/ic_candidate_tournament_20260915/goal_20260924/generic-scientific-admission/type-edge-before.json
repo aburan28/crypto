@@ -1,0 +1,22 @@
+[
+  {
+    "before": "ACCEPTED",
+    "control": "collector_pair_table_integer",
+    "source_case": "a0-pair_table-dense"
+  },
+  {
+    "before": "ACCEPTED",
+    "control": "descent_collision_integer",
+    "source_case": "a0-pair_table-dense"
+  },
+  {
+    "before": "ACCEPTED",
+    "control": "sparse_attempt_boolean",
+    "source_case": "a0-pair_table-sparse"
+  },
+  {
+    "before": "ACCEPTED",
+    "control": "matrix_column_boolean",
+    "source_case": "a0-pair_table-dense"
+  }
+]

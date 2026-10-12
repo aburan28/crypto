@@ -1,0 +1,36 @@
+{
+ "schema_version": 2,
+ "name": "C039: a generic binary curve over GF(2^37), paired",
+ "field": {
+  "kind": "binary",
+  "degree": 37,
+  "modulus": "0x2000000053"
+ },
+ "curve": {
+  "form": "binary_weierstrass",
+  "a": "0x0",
+  "b": "0x1bc4d21b11"
+ },
+ "subgroup": {
+  "order": "34359888149",
+  "cofactor": "4",
+  "generator": {
+   "x": "0x1bd6bbe1cc",
+   "y": "0xd85a2fb27"
+  }
+ },
+ "target": {
+  "known_log": "17969559080"
+ },
+ "method": {
+  "solve": "paired",
+  "index_calculus": {
+   "pipeline": "auto",
+   "recipe": "auto"
+  },
+  "rho": {
+   "pipeline": "auto",
+   "seed": 7
+  }
+ }
+}

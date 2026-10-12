@@ -1,0 +1,38 @@
+name: IC generic reference evidence replay
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  strict-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 45 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install archive decoder
+        run: sudo apt-get update && sudo apt-get install -y zstd
+      - name: Check note and canonical scoreboard against the frozen export
+        run: python research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification/render_report.py --check
+      - name: Fresh archive, all exported rows and eleven frozen audits
+        run: |
+          python -m unittest discover \
+            -s research/ic_candidate_tournament_20260915/goal_20260924/generic-reference-qualification \
+            -p test_archive.py -v 2>&1 | tee "$RUNNER_TEMP/ic-generic-reference-replay.log"
+      - name: Retain replay log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ic-generic-reference-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/ic-generic-reference-replay.log
+          if-no-files-found: warn
+          retention-days: 30

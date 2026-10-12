@@ -16,7 +16,8 @@ use num_traits::{One, Zero};
 /// Parse a base-10 string as a `BigUint`.  Panics on garbage input —
 /// the only callers pass embedded string literals.
 pub fn parse_big(s: &str) -> BigUint {
-    s.parse().expect("set8_util::parse_big: invalid decimal literal")
+    s.parse()
+        .expect("set8_util::parse_big: invalid decimal literal")
 }
 
 /// Compute modular inverse via the extended Euclidean algorithm.
@@ -162,8 +163,10 @@ mod tests {
     fn small_factors_basic() {
         let n = BigUint::from(2u32 * 3 * 7 * 11 * 13);
         let f = small_factors(&n, 100);
-        let expected: Vec<BigUint> =
-            [2u32, 3, 7, 11, 13].iter().map(|x| BigUint::from(*x)).collect();
+        let expected: Vec<BigUint> = [2u32, 3, 7, 11, 13]
+            .iter()
+            .map(|x| BigUint::from(*x))
+            .collect();
         assert_eq!(f, expected);
     }
 
@@ -173,10 +176,9 @@ mod tests {
         let key = vec![0x0bu8; 20];
         let msg = b"Hi There";
         let mac = hmac_sha256(&key, msg);
-        let expected = hex::decode(
-            "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7",
-        )
-        .unwrap();
+        let expected =
+            hex::decode("b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7")
+                .unwrap();
         assert_eq!(mac.as_slice(), expected.as_slice());
     }
 }

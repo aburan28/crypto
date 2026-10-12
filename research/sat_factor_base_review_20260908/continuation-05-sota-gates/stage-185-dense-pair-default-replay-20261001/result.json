@@ -1,0 +1,594 @@
+{
+  "build": {
+    "artifacts": {
+      "metrics": {
+        "bytes": 621,
+        "path": "development/build/metrics.json",
+        "sha256": "9711a1e19203c8aecacec42cb3463986674a36b4da7c9a2cf4abb449a679d6be"
+      },
+      "stderr": {
+        "bytes": 3514,
+        "path": "development/build/stderr.txt",
+        "sha256": "1dc598d6d241c745e20a8368653f0913d7faab3a16198aa32d5098f20f4381ab"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "development/build/stdout.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "process": {
+      "command": [
+        "/usr/bin/env",
+        "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage185-default-target-8014149a2",
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "--example",
+        "koblitz_pdp_backend"
+      ],
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 3293069312,
+        "single_core_seconds": 495.543814,
+        "system_seconds": 20.074063,
+        "total_core_seconds": 495.543814,
+        "user_seconds": 475.469751,
+        "wall_seconds": 294.5434132500013
+      },
+      "orphan_group_terminated": false,
+      "returncode": 0,
+      "timed_out": false,
+      "watchdog_seconds": 1200.0
+    }
+  },
+  "campaign_charge": {
+    "components": 8,
+    "peak_rss_bytes_max": 3966713856,
+    "total_core_seconds_sum": 1452.597108,
+    "wall_seconds_sum": 786.1608289159958
+  },
+  "claim_boundary": "Exact selected-default implementation replay on one opened n=59 target; not a full index-calculus run or SOTA.",
+  "conflicts": null,
+  "decision": {
+    "dense_default_verified": true,
+    "lockfile_restore_required": true,
+    "quadratic_control_verified": true,
+    "reason": "Default routing, control routing, tests, and exact target replay all passed; restore the supplied lockfile to make clean --locked builds self-contained.",
+    "status": "SELECTED_DEFAULT_REPLAY_PASS"
+  },
+  "failed_locked_build": {
+    "artifacts": {
+      "metrics": {
+        "bytes": 648,
+        "path": "development/failed-build-locked/metrics.json",
+        "sha256": "85f507d8aabc5fd303f7081f868bb33df4f654fd8344db9e6650993a01b52933"
+      },
+      "stderr": {
+        "bytes": 277,
+        "path": "development/failed-build-locked/stderr.txt",
+        "sha256": "b7fe9eedc05d4a2a101164e98422b52371d4241127a10406e81578aa815bf182"
+      },
+      "stdout": {
+        "bytes": 0,
+        "path": "development/failed-build-locked/stdout.txt",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "process": {
+      "command": [
+        "/usr/bin/env",
+        "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage185-default-target-8014149a2",
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "--example",
+        "koblitz_pdp_backend"
+      ],
+      "metrics": {
+        "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+        "peak_rss_bytes": 57655296,
+        "single_core_seconds": 0.23376899999999998,
+        "system_seconds": 0.09598799999999999,
+        "total_core_seconds": 0.23376899999999998,
+        "user_seconds": 0.137781,
+        "wall_seconds": 10.827963791001821
+      },
+      "orphan_group_terminated": false,
+      "returncode": 101,
+      "timed_out": false,
+      "watchdog_seconds": 1200.0
+    }
+  },
+  "replay": {
+    "default_native_correct": true,
+    "default_native_f4": {
+      "artifacts": {
+        "metrics": {
+          "bytes": 971,
+          "path": "development/replay/native-f4/metrics.json",
+          "sha256": "7f21fb79c2309a29465f9c7632e5dce9bdc720433bd3f2e911684244fcc5af6f"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "development/replay/native-f4/stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 6233,
+          "path": "development/replay/native-f4/stdout.json",
+          "sha256": "9e8c3a3281df0469dfe6e883c0f721313dafa6e8f68573855d9dcf21c6a075e9"
+        }
+      },
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "RAYON_NUM_THREADS=12",
+          "PQ_F4_X1_BATCH=512",
+          "VECLIB_MAXIMUM_THREADS=1",
+          "OPENBLAS_NUM_THREADS=1",
+          "OMP_NUM_THREADS=1",
+          "MKL_NUM_THREADS=1",
+          "BLIS_NUM_THREADS=1",
+          "NUMEXPR_NUM_THREADS=1",
+          "/Volumes/SSD990/kic-stage185-default-target-8014149a2/release/examples/koblitz_pdp_backend",
+          "native-f4",
+          "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json",
+          "300"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 3335372800,
+          "single_core_seconds": 348.51006,
+          "system_seconds": 16.648569,
+          "total_core_seconds": 348.51006,
+          "user_seconds": 331.861491,
+          "wall_seconds": 179.68032433400003
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 360.0
+      },
+      "report": {
+        "algebraic_roots": 0,
+        "backend": "native-f4",
+        "budget_seconds": 300,
+        "conflicts": null,
+        "cost": {
+          "degree_reached": 5,
+          "extra": {
+            "basis_len": 1,
+            "build_ns": 615755526090,
+            "divisor_tests": 4190633182,
+            "eliminate_ns": 1105219238403,
+            "extraction_tests": 0,
+            "f4_calls": 242,
+            "f4_wall_ns": 1995709388168,
+            "field_pairs_reduced": 633185,
+            "full_m4ri_blocks": 0,
+            "full_m4ri_matrices": 0,
+            "full_m4ri_table_word_xors": 0,
+            "matrix_cols_max": 12348,
+            "matrix_rows_max": 12000,
+            "matrix_rows_sum": 4764760,
+            "max_poly_degree": 5,
+            "new_elements": 997056,
+            "oversize": 0,
+            "pair_candidate_visits": 1137001812,
+            "pair_cover_lookups": 698657372,
+            "pair_dense_scratch_bytes_max": 4472832,
+            "pair_dense_select_calls": 1011275,
+            "pair_lcm_groups": 594604504,
+            "pair_quadratic_select_calls": 0,
+            "pairs_chain_skipped": 865909122,
+            "pairs_left": 0,
+            "pairs_product_skipped": 267427242,
+            "pairs_reduced": 1543629,
+            "peak_matrix_bytes": 18528000,
+            "peak_table_bytes": 53070336,
+            "reducer_rows": 1732933,
+            "steps": 1204,
+            "word_xors_performed": 147794583858
+          },
+          "op_unit": "row-by-row-equivalent 64-bit XORs (elimination only; actual table-assisted XORs are cost.extra.word_xors_performed)",
+          "ops": 319313687585,
+          "peak_bytes": 76071168,
+          "solving_degree": 5,
+          "timed_out": false,
+          "wall_ns": 1998301111837
+        },
+        "exhaustive": true,
+        "factor_base_contract": {
+          "discrete_log_labels_used": false,
+          "target_subgroup_enumerated": false
+        },
+        "fixed_x1_masks_visited": 512,
+        "fixed_x1_nonrational_skipped": 270,
+        "fixed_x1_systems_completed": 242,
+        "fixed_x1_systems_constructed": 242,
+        "fixed_x1_values": 512,
+        "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+        "regenerated_source_exact": true,
+        "same_instance_fields": [
+          "n",
+          "ell",
+          "m",
+          "curve",
+          "algebraic_factor_base",
+          "affine_target"
+        ],
+        "schema": "koblitz_pdp_isolated_backend.v1",
+        "single_thread_requested": false,
+        "solver": "f4-f2",
+        "solver_block_table_build": "automatic for sufficiently large leading and remainder blocks; table construction is included in cost.extra.word_xors_performed",
+        "solver_block_table_columns": 5,
+        "solver_column_index": "dense exact mask index through 22 spanned variables; exact hash map above 22",
+        "solver_constructor": "fixed_x1_constant_linear_specialisation",
+        "solver_description": "F4 over F_2[v]/(v\u00b2\u2212v): normal strategy, dense exact-LCM Gebauer\u2013M\u00f6ller selection on bounded domains, field pairs, bitmap/hash symbolic sets, adaptive leading-block tables, tiled bit-packed elimination, reduced basis",
+        "solver_echelon_policy": "segmented bit-packed rows; tiled and batched parallel reduction; adaptive leading-block BlockTables",
+        "solver_engine": "repository_current_block_tables_f4",
+        "solver_equations_blake3": "02341a5f51fd237b6a3fab8a82517047b974cd75664e6d9b02e4895e33252beb",
+        "solver_equations_total": 14278,
+        "solver_full_m4ri_control": "F4_F2_FULL_M4RI=1",
+        "solver_internal_mask_maps": "repository FxMap/FxSet with exact u64 key equality",
+        "solver_max_degree": 4,
+        "solver_monomial_multiply": "canonical square-free monomial multiplication with duplicate cancellation in F2BoolPoly",
+        "solver_new_pair_selector": "reused dense exact LCM groups and submask cover lookup through 20 variables",
+        "solver_new_pair_selector_control": "F4_F2_DENSE_PAIR_SELECT=0; unset or 1 selects dense",
+        "solver_pair_installer": "order-preserving batch update; F4_F2_BATCH_INSERTS=0 selects the serial control",
+        "solver_pair_selector": "all minimum-degree pairs after Gebauer-Moeller chain and product criteria",
+        "solver_parallel_construction": true,
+        "solver_parallel_construction_control": "PQ_F4_DISABLE_PARALLEL_CONSTRUCTION=1",
+        "solver_rayon_threads_requested": 12,
+        "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+        "solver_schedule": "enumerate x1 coefficients in hamming_weight_then_mask; construct rational systems in deterministic batches of 512 with ordered parallel collection=true; solve each batch in parallel; inspect completed results in schedule order",
+        "solver_symbolic_monomial_set_control": "F4_F2_BITMAP_SEEN=0",
+        "solver_symbolic_monomial_sets": "bitmap through 22 variables with exact overflow hash set; hash sets above 22 variables",
+        "solver_symbolic_reducer_selector": "shortest active exact divisor by deterministic linear scan, processed in parallel levels when large",
+        "solver_terms_max_per_system": 62087,
+        "solver_terms_total": 14515915,
+        "solver_variables": 18,
+        "solver_x1_batch_cap": 512,
+        "solver_x1_batch_control": "PQ_F4_X1_BATCH=1",
+        "solver_x1_batch_size": 512,
+        "solver_x1_batches_completed": 1,
+        "solver_x1_order": "hamming_weight_then_mask",
+        "solver_x1_order_control": "PQ_F4_X1_ORDER=ascending",
+        "solver_x1_order_target_independent": true,
+        "solver_x1_speculative_systems_completed": 0,
+        "source_artifacts": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+            "bytes": 208168,
+            "path": "instance.xor.cnf",
+            "valid": true
+          },
+          "magma_boolean_f4": {
+            "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+            "bytes": 373254,
+            "path": "instance.magma",
+            "valid": true
+          },
+          "wdsat_anf": {
+            "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+            "bytes": 236183,
+            "path": "instance.anf",
+            "valid": true
+          }
+        },
+        "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+        "source_instance_verified": true,
+        "source_model_valid": null,
+        "source_representation": "symmetrised_s4",
+        "source_variables": 78,
+        "source_witness_valid": null,
+        "status": "unsat",
+        "timing_ns": {
+          "factor_base_x1_membership": 6947860,
+          "fixed_x1_s4_construction": 9981866333,
+          "native_f4_whole": 174830990833,
+          "source_verification": 107162333
+        },
+        "witness_points": null
+      }
+    },
+    "direct_correct": true,
+    "direct_mitm": {
+      "artifacts": {
+        "metrics": {
+          "bytes": 899,
+          "path": "development/replay/direct-mitm/metrics.json",
+          "sha256": "8e586fc0240123c2e8da08345ce742b9a08a3eb00cb956509227f97ec4c08486"
+        },
+        "stderr": {
+          "bytes": 0,
+          "path": "development/replay/direct-mitm/stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stdout": {
+          "bytes": 1262,
+          "path": "development/replay/direct-mitm/stdout.json",
+          "sha256": "922df60627bd469dfc9762cb54d53c44e2a286e772439677c4b958c1305b4250"
+        }
+      },
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "VECLIB_MAXIMUM_THREADS=1",
+          "OPENBLAS_NUM_THREADS=1",
+          "OMP_NUM_THREADS=1",
+          "MKL_NUM_THREADS=1",
+          "BLIS_NUM_THREADS=1",
+          "NUMEXPR_NUM_THREADS=1",
+          "/Volumes/SSD990/kic-stage185-default-target-8014149a2/release/examples/koblitz_pdp_backend",
+          "direct-mitm",
+          "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-175-current-f4-single-target-20261001/input/manifest.json"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 45367296,
+          "single_core_seconds": 0.689407,
+          "system_seconds": 0.032825,
+          "total_core_seconds": 0.689407,
+          "user_seconds": 0.656582,
+          "wall_seconds": 2.343043957996997
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 60.0
+      },
+      "report": {
+        "backend": "direct-mitm",
+        "exhaustive": true,
+        "factor_points": 483,
+        "group_additions": 117369,
+        "interpretation": "SAT is accepted only after the factor-point sum equals the exact manifest target",
+        "pair_entries": 116635,
+        "regenerated_source_exact": true,
+        "schema": "koblitz_pdp_isolated_backend.v1",
+        "source_artifacts": {
+          "cryptominisat_xor_dimacs": {
+            "blake3": "8f391678ebf0291096560a3253d07235fc614c593e73e553a25dd8bf87009f5c",
+            "bytes": 208168,
+            "path": "instance.xor.cnf",
+            "valid": true
+          },
+          "magma_boolean_f4": {
+            "blake3": "e783df23d28382b2e8b8147d511c8e09cdebc26171b04e419271d19e311759ef",
+            "bytes": 373254,
+            "path": "instance.magma",
+            "valid": true
+          },
+          "wdsat_anf": {
+            "blake3": "f58e8ae099c65ffbc3083c1fdf1929079b6e7fcf31b8658ff85b950cec92eb08",
+            "bytes": 236183,
+            "path": "instance.anf",
+            "valid": true
+          }
+        },
+        "source_instance_id": "954e10f8bf0280094fed195280b203d7cd613150b17339716eb469b88ffa9ac7",
+        "source_instance_verified": true,
+        "source_witness_valid": null,
+        "status": "unsat",
+        "timing_ns": {
+          "factor_base_materialisation": 21800292,
+          "search": 1885519166,
+          "source_verification": 288857209
+        },
+        "witness_indices": null
+      }
+    },
+    "single_core_reason": "The backend requested 12 Rayon workers; process-meter single_core_seconds is not a valid single-core row for this replay.",
+    "valid_single_core_seconds": null
+  },
+  "same_binary_native_over_direct": {
+    "core": 505.5214989113833,
+    "rss": 73.51932105453233,
+    "wall": 76.68670650447537
+  },
+  "schema": "koblitz_stage185_dense_pair_default_replay.v1",
+  "source": {
+    "binary_sha256": "3aefd5cd0daf73602bf8a38e7fdcb363e630ffd57bfebe47a37123b1d03429b1",
+    "lock_tracked_at_selection_commit": false,
+    "selection_commit": "8014149a2b55cd2cca202237a302643e39a50f6e",
+    "source_checkout": "/Volumes/SSD990/crypto-kic-stage185-source",
+    "supplied_lock_sha256": "4f17b356fa7bac392b6d801d1c74fb9e36b6517f9465c8ebc19bb9a2792a84c5"
+  },
+  "tests": {
+    "default_backend": {
+      "artifacts": {
+        "metrics": {
+          "bytes": 656,
+          "path": "development/test-default-backend/metrics.json",
+          "sha256": "42a35af3247ccf932256c31096a988e30f9dfe48db27c82d6f20fdc4b6a5c198"
+        },
+        "stderr": {
+          "bytes": 1895,
+          "path": "development/test-default-backend/stderr.txt",
+          "sha256": "a165067fc9a017f427e8242f907745b525ad239cba4482f864abc87f567b25b3"
+        },
+        "stdout": {
+          "bytes": 353,
+          "path": "development/test-default-backend/stdout.txt",
+          "sha256": "2c2719c661c3311b131689d0ca84442490ae3a860549a5a1abad19ae5c76589c"
+        }
+      },
+      "passed": true,
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage185-default-target-8014149a2",
+          "cargo",
+          "test",
+          "--release",
+          "--locked",
+          "--example",
+          "koblitz_pdp_backend",
+          "--",
+          "--test-threads=1"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 254050304,
+          "single_core_seconds": 5.856728,
+          "system_seconds": 0.8058409999999999,
+          "total_core_seconds": 5.856728,
+          "user_seconds": 5.050887,
+          "wall_seconds": 6.150308457999927
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 1200.0
+      }
+    },
+    "default_f4": {
+      "artifacts": {
+        "metrics": {
+          "bytes": 662,
+          "path": "development/test-default-f4/metrics.json",
+          "sha256": "4bcb3bd3517488afed764f3ffbefc3419797869c3b624e0c99fa3e9efc2a4de2"
+        },
+        "stderr": {
+          "bytes": 2125,
+          "path": "development/test-default-f4/stderr.txt",
+          "sha256": "f7e496fea5493914e48e152c152012d93d3e9b54f9e95a0fd0bd9ee0a920b681"
+        },
+        "stdout": {
+          "bytes": 997,
+          "path": "development/test-default-f4/stdout.txt",
+          "sha256": "2feeff18d0c2a4e0eade5eacc8910743d397e87b4d9c69fc6e54635ca6ce358d"
+        }
+      },
+      "passed": true,
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage185-default-target-8014149a2",
+          "cargo",
+          "test",
+          "--release",
+          "--locked",
+          "--lib",
+          "cryptanalysis::pq_f4_f2::tests",
+          "--",
+          "--test-threads=1"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 3966713856,
+          "single_core_seconds": 601.325642,
+          "system_seconds": 16.064901,
+          "total_core_seconds": 601.325642,
+          "user_seconds": 585.260741,
+          "wall_seconds": 292.06808395799817
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 1200.0
+      }
+    },
+    "quadratic_backend": {
+      "artifacts": {
+        "metrics": {
+          "bytes": 725,
+          "path": "development/test-quadratic-backend/metrics.json",
+          "sha256": "cc48f70ecaf7cf78eb62adaf8b554e4fc7e2828bd31644735bf7e7a7134d4ca8"
+        },
+        "stderr": {
+          "bytes": 1823,
+          "path": "development/test-quadratic-backend/stderr.txt",
+          "sha256": "4e65f52ed230d27c372e437656390776726c4d1d50e3dcba4f7f7930eab8551b"
+        },
+        "stdout": {
+          "bytes": 353,
+          "path": "development/test-quadratic-backend/stdout.txt",
+          "sha256": "2c2719c661c3311b131689d0ca84442490ae3a860549a5a1abad19ae5c76589c"
+        }
+      },
+      "passed": true,
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage185-default-target-8014149a2",
+          "F4_F2_DENSE_PAIR_SELECT=0",
+          "cargo",
+          "test",
+          "--release",
+          "--locked",
+          "--example",
+          "koblitz_pdp_backend",
+          "--",
+          "--test-threads=1"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 48168960,
+          "single_core_seconds": 0.11344499999999999,
+          "system_seconds": 0.059692999999999996,
+          "total_core_seconds": 0.11344499999999999,
+          "user_seconds": 0.053751999999999994,
+          "wall_seconds": 0.1649452499987092
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 1200.0
+      }
+    },
+    "quadratic_f4": {
+      "artifacts": {
+        "metrics": {
+          "bytes": 687,
+          "path": "development/test-quadratic-f4/metrics.json",
+          "sha256": "ba0b79cbff0808085f9e7490090877b6fd75fe5eebb64116f87ebb0c9102d83d"
+        },
+        "stderr": {
+          "bytes": 2052,
+          "path": "development/test-quadratic-f4/stderr.txt",
+          "sha256": "48aa7f2aa2025419444edea87d86026ec5bccf08ac4159554cc08b0e1babfa74"
+        },
+        "stdout": {
+          "bytes": 997,
+          "path": "development/test-quadratic-f4/stdout.txt",
+          "sha256": "01f26392c1b5abe9862620011fc52557ff9c9081251470bce2923d7d5e2b5bd0"
+        }
+      },
+      "passed": true,
+      "process": {
+        "command": [
+          "/usr/bin/env",
+          "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage185-default-target-8014149a2",
+          "F4_F2_DENSE_PAIR_SELECT=0",
+          "cargo",
+          "test",
+          "--release",
+          "--locked",
+          "--lib",
+          "cryptanalysis::pq_f4_f2::tests",
+          "--",
+          "--test-threads=1"
+        ],
+        "metrics": {
+          "meter": "fresh-process getrusage(RUSAGE_CHILDREN)",
+          "peak_rss_bytes": 48250880,
+          "single_core_seconds": 0.324243,
+          "system_seconds": 0.080274,
+          "total_core_seconds": 0.324243,
+          "user_seconds": 0.243969,
+          "wall_seconds": 0.38274591699882876
+        },
+        "orphan_group_terminated": false,
+        "returncode": 0,
+        "timed_out": false,
+        "watchdog_seconds": 1200.0
+      }
+    }
+  },
+  "wall_interpretation": "The host was heavily descheduled during the replay; this run validates routing and correctness, while Stage 184 supplies paired performance evidence."
+}

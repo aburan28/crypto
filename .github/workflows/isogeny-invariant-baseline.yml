@@ -1,0 +1,36 @@
+name: isogeny-invariant-baseline
+on:
+  pull_request:
+    paths:
+      - 'research/isogeny_invariant_baseline_20260926/**'
+      - '.github/workflows/isogeny-invariant-baseline.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/isogeny_invariant_baseline_20260926/**'
+      - '.github/workflows/isogeny-invariant-baseline.yml'
+permissions:
+  contents: read
+jobs:
+  exact-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Fresh replay, independent verification, corruption controls and receipt
+        run: |
+          python3 research/isogeny_invariant_baseline_20260926/replay_with_receipt.py \
+            --require-clean --output "$RUNNER_TEMP/isogeny-evidence"
+      - name: Retain evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: isogeny-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/isogeny-evidence/
+          if-no-files-found: error
+          retention-days: 90

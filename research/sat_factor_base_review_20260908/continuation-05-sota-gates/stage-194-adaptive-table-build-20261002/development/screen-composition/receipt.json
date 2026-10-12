@@ -1,0 +1,40 @@
+{
+  "metrics": {
+    "bytes": 1123,
+    "path": "metrics.json",
+    "sha256": "771583db85f9bc4a6696720c4108f3cc4be89ba650bc967a9e1df540ca108fb4"
+  },
+  "process": {
+    "command": [
+      "/Volumes/SSD990/kic-stage194-target-8007e42a1/release/examples/koblitz_f4_stage194",
+      "screen",
+      "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-194-adaptive-table-build-20261002/development/screen",
+      "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-194-adaptive-table-build-20261002/development/screen/result.json",
+      "/Volumes/SSD990/crypto-kic-pr660-main-20261001/research/sat_factor_base_review_20260908/continuation-05-sota-gates/stage-194-adaptive-table-build-20261002/development/screen/verification.json"
+    ],
+    "environment": {},
+    "meter": "fresh child process wait4/getrusage; all child threads included",
+    "peak_rss_bytes": 2572288,
+    "pid": 14450,
+    "returncode": 0,
+    "schema": "koblitz_native_process_meter.v1",
+    "single_core_seconds": null,
+    "system_seconds": 0.007241,
+    "timed_out": false,
+    "total_core_seconds": 0.008886999999999999,
+    "user_seconds": 0.001646,
+    "wall_seconds": 0.408093208,
+    "watchdog_seconds": 60
+  },
+  "schema": "koblitz_native_meter_receipt.v1",
+  "stderr": {
+    "bytes": 0,
+    "path": "stderr.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 312,
+    "path": "stdout.txt",
+    "sha256": "b76d63ab19f0807881b819faa4674fabeee812f912cdc9d7d9b4ebff4a426182"
+  }
+}

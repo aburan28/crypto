@@ -1,0 +1,592 @@
+{
+  "schema": "ecc2k130_extension_field_boundary/v1",
+  "question": "does base-changing ECC2K-130 to F_2^(131e) admit an attack cheaper than rho on E(F_2^131)?",
+  "verdict": "KILLED",
+  "unit": "log2 group operations; S = ops / sqrt(r)",
+  "target": {
+    "curve": "K_0 : y^2 + x y = x^3 + 1 over F_2, used over F_2^131",
+    "trace_over_F2": -1,
+    "order": "2722258935367507707729280517973639940516",
+    "cofactor": 4,
+    "r": "680564733841876926932320129493409985129",
+    "r_is_prime": true,
+    "log2_r": 129.0,
+    "rho_automorphism_order": 262,
+    "log2_rho_plain": 64.8257,
+    "log2_rho_reference": 60.809,
+    "S_rho_reference": 0.07743
+  },
+  "boundary_A_invariant_target": {
+    "statement": "base change fixes both the group <G> and its automorphism group",
+    "curve_is_ordinary": true,
+    "frobenius_orbit_length_on_subgroup": 131,
+    "automorphisms_available_at_every_N": 262,
+    "log2_rho_at_every_N": 60.809
+  },
+  "boundary_B_subspace_dichotomy": {
+    "statement": "for N = 131e every Frobenius-stable F_2-subspace of F_2^N has dim <= e and lies in F_2^e, or has dim >= 130",
+    "checked_for_e_up_to": 16,
+    "cells": [
+      {
+        "e": 1,
+        "N": 131,
+        "small_factor_degrees": {
+          "1": 1
+        },
+        "other_factor_degrees": {
+          "130": 1
+        },
+        "max_dim_inside_F2e": 1,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 2,
+        "N": 262,
+        "small_factor_degrees": {
+          "1": 2
+        },
+        "other_factor_degrees": {
+          "130": 2
+        },
+        "max_dim_inside_F2e": 2,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 3,
+        "N": 393,
+        "small_factor_degrees": {
+          "1": 1,
+          "2": 1
+        },
+        "other_factor_degrees": {
+          "130": 3
+        },
+        "max_dim_inside_F2e": 3,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 4,
+        "N": 524,
+        "small_factor_degrees": {
+          "1": 4
+        },
+        "other_factor_degrees": {
+          "130": 4
+        },
+        "max_dim_inside_F2e": 4,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 5,
+        "N": 655,
+        "small_factor_degrees": {
+          "1": 1,
+          "4": 1
+        },
+        "other_factor_degrees": {
+          "130": 1,
+          "260": 2
+        },
+        "max_dim_inside_F2e": 5,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 6,
+        "N": 786,
+        "small_factor_degrees": {
+          "1": 2,
+          "2": 2
+        },
+        "other_factor_degrees": {
+          "130": 6
+        },
+        "max_dim_inside_F2e": 6,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 7,
+        "N": 917,
+        "small_factor_degrees": {
+          "1": 1,
+          "3": 2
+        },
+        "other_factor_degrees": {
+          "130": 1,
+          "390": 2
+        },
+        "max_dim_inside_F2e": 7,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 8,
+        "N": 1048,
+        "small_factor_degrees": {
+          "1": 8
+        },
+        "other_factor_degrees": {
+          "130": 8
+        },
+        "max_dim_inside_F2e": 8,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 9,
+        "N": 1179,
+        "small_factor_degrees": {
+          "1": 1,
+          "2": 1,
+          "6": 1
+        },
+        "other_factor_degrees": {
+          "130": 3,
+          "390": 2
+        },
+        "max_dim_inside_F2e": 9,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 10,
+        "N": 1310,
+        "small_factor_degrees": {
+          "1": 2,
+          "4": 2
+        },
+        "other_factor_degrees": {
+          "130": 2,
+          "260": 4
+        },
+        "max_dim_inside_F2e": 10,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 11,
+        "N": 1441,
+        "small_factor_degrees": {
+          "1": 1,
+          "10": 1
+        },
+        "other_factor_degrees": {
+          "130": 11
+        },
+        "max_dim_inside_F2e": 11,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 12,
+        "N": 1572,
+        "small_factor_degrees": {
+          "1": 4,
+          "2": 4
+        },
+        "other_factor_degrees": {
+          "130": 12
+        },
+        "max_dim_inside_F2e": 12,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 13,
+        "N": 1703,
+        "small_factor_degrees": {
+          "1": 1,
+          "12": 1
+        },
+        "other_factor_degrees": {
+          "130": 1,
+          "780": 2
+        },
+        "max_dim_inside_F2e": 13,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 14,
+        "N": 1834,
+        "small_factor_degrees": {
+          "1": 2,
+          "3": 4
+        },
+        "other_factor_degrees": {
+          "130": 2,
+          "390": 4
+        },
+        "max_dim_inside_F2e": 14,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 15,
+        "N": 1965,
+        "small_factor_degrees": {
+          "1": 1,
+          "2": 1,
+          "4": 3
+        },
+        "other_factor_degrees": {
+          "130": 3,
+          "260": 6
+        },
+        "max_dim_inside_F2e": 15,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 16,
+        "N": 2096,
+        "small_factor_degrees": {
+          "1": 16
+        },
+        "other_factor_degrees": {
+          "130": 16
+        },
+        "max_dim_inside_F2e": 16,
+        "min_dim_outside_F2e": 130
+      },
+      {
+        "e": 131,
+        "N": 17161,
+        "small_factor_degrees": {
+          "1": 1,
+          "130": 1
+        },
+        "other_factor_degrees": {
+          "17030": 1
+        },
+        "max_dim_inside_F2e": 131,
+        "min_dim_outside_F2e": 17030
+      },
+      {
+        "e": 262,
+        "N": 34322,
+        "small_factor_degrees": {
+          "1": 2,
+          "130": 2
+        },
+        "other_factor_degrees": {
+          "17030": 2
+        },
+        "max_dim_inside_F2e": 262,
+        "min_dim_outside_F2e": 17030
+      }
+    ]
+  },
+  "boundary_C_large_horn_cost": {
+    "statement": "when 131 | d the decomposition attack costs at least q = 2^131",
+    "reference_complexity": "Gaudry/Diem: Otilde(q^(2-2/n)) for fixed n >= 2, constant exponential in n",
+    "cheapest_cell": {
+      "e": 2,
+      "N": 262,
+      "subfield_degree_d": 131,
+      "extension_degree_n": 2,
+      "log2_factor_base": 131,
+      "log2_cost_q_pow_2_minus_2_over_n": 131.0,
+      "log2_ratio_to_rho": 70.19
+    },
+    "cells": [
+      {
+        "e": 2,
+        "N": 262,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 2,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 131.0,
+        "log2_ratio_to_rho": 70.19
+      },
+      {
+        "e": 3,
+        "N": 393,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 3,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 174.67,
+        "log2_ratio_to_rho": 113.86
+      },
+      {
+        "e": 4,
+        "N": 524,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 4,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 196.5,
+        "log2_ratio_to_rho": 135.69
+      },
+      {
+        "e": 5,
+        "N": 655,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 5,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 209.6,
+        "log2_ratio_to_rho": 148.79
+      },
+      {
+        "e": 6,
+        "N": 786,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 6,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 218.33,
+        "log2_ratio_to_rho": 157.52
+      },
+      {
+        "e": 7,
+        "N": 917,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 7,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 224.57,
+        "log2_ratio_to_rho": 163.76
+      },
+      {
+        "e": 8,
+        "N": 1048,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 8,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 229.25,
+        "log2_ratio_to_rho": 168.44
+      },
+      {
+        "e": 9,
+        "N": 1179,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 9,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 232.89,
+        "log2_ratio_to_rho": 172.08
+      },
+      {
+        "e": 10,
+        "N": 1310,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 10,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 235.8,
+        "log2_ratio_to_rho": 174.99
+      },
+      {
+        "e": 11,
+        "N": 1441,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 11,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 238.18,
+        "log2_ratio_to_rho": 177.37
+      },
+      {
+        "e": 12,
+        "N": 1572,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 12,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 240.17,
+        "log2_ratio_to_rho": 179.36
+      },
+      {
+        "e": 13,
+        "N": 1703,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 13,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 241.85,
+        "log2_ratio_to_rho": 181.04
+      },
+      {
+        "e": 14,
+        "N": 1834,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 14,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 243.29,
+        "log2_ratio_to_rho": 182.48
+      },
+      {
+        "e": 15,
+        "N": 1965,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 15,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 244.53,
+        "log2_ratio_to_rho": 183.72
+      },
+      {
+        "e": 16,
+        "N": 2096,
+        "subfield_degree_d": 131,
+        "extension_degree_n": 16,
+        "log2_factor_base": 131,
+        "log2_cost_q_pow_2_minus_2_over_n": 245.62,
+        "log2_ratio_to_rho": 184.82
+      }
+    ]
+  },
+  "boundary_D_small_horn_empty": {
+    "statement": "when the invariant subspace lies in F_2^e the factor base is contained in E(F_2^e), a subgroup of order ~2^e, so no decomposition of a target in <G> exists at any cost",
+    "log2_target_subgroup": 129.0,
+    "cells": [
+      {
+        "e": 1,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "4",
+        "log2_factor_base_subgroup": 2.0,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 2,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "8",
+        "log2_factor_base_subgroup": 3.0,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 3,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "4",
+        "log2_factor_base_subgroup": 2.0,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 4,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "16",
+        "log2_factor_base_subgroup": 4.0,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 5,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "44",
+        "log2_factor_base_subgroup": 5.46,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 6,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "56",
+        "log2_factor_base_subgroup": 5.81,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 7,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "116",
+        "log2_factor_base_subgroup": 6.86,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 8,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "288",
+        "log2_factor_base_subgroup": 8.17,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 9,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "508",
+        "log2_factor_base_subgroup": 8.99,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 10,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "968",
+        "log2_factor_base_subgroup": 9.92,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 11,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "2116",
+        "log2_factor_base_subgroup": 11.05,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 12,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "4144",
+        "log2_factor_base_subgroup": 12.02,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 13,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "8012",
+        "log2_factor_base_subgroup": 12.97,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 14,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "16472",
+        "log2_factor_base_subgroup": 14.01,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 15,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "33044",
+        "log2_factor_base_subgroup": 15.01,
+        "target_subgroup_in_it": false
+      },
+      {
+        "e": 16,
+        "two_e_divides_N": false,
+        "factor_base_subgroup_order": "65088",
+        "log2_factor_base_subgroup": 15.99,
+        "target_subgroup_in_it": false
+      }
+    ]
+  },
+  "boundary_E_transfer": {
+    "statement": "MOV/Frey-Ruck transfer lands in F_2^(131k) with k the embedding degree",
+    "embedding_degree_exhausted_to": 10000000,
+    "embedding_degree": null,
+    "log2_min_target_field_bits": 30.29,
+    "min_target_field_bits": 1310000000
+  },
+  "representation_gain": {
+    "statement": "F_2^131 embeds in the ring F_2[x]/(x^263 - 1); Frobenius becomes a cyclic shift.  This is the type-II optimal normal basis the client already uses, and it is an engineering gain, not an exponent gain",
+    "rings": [
+      {
+        "p": 263,
+        "factors_of_degree_131": 2,
+        "bits": 263,
+        "overhead_vs_131": 2.008
+      }
+    ],
+    "ecc2k95_contrast": {
+      "m": 97,
+      "two_m_plus_1": 195,
+      "prime": false,
+      "note": "no type-II ONB, which is why that backend is polynomial basis"
+    }
+  },
+  "counterfactual_composite_degree": [
+    {
+      "hypothetical_field_degree": 130,
+      "subfield_degree_d": 65,
+      "extension_degree_n": 2,
+      "log2_cost_q_pow_2_minus_2_over_n": 65.0,
+      "log2_rho_on_that_group": 60.31
+    },
+    {
+      "hypothetical_field_degree": 130,
+      "subfield_degree_d": 26,
+      "extension_degree_n": 5,
+      "log2_cost_q_pow_2_minus_2_over_n": 41.6,
+      "log2_rho_on_that_group": 60.31
+    },
+    {
+      "hypothetical_field_degree": 130,
+      "subfield_degree_d": 13,
+      "extension_degree_n": 10,
+      "log2_cost_q_pow_2_minus_2_over_n": 23.4,
+      "log2_rho_on_that_group": 60.31
+    },
+    {
+      "hypothetical_field_degree": 130,
+      "subfield_degree_d": 10,
+      "extension_degree_n": 13,
+      "log2_cost_q_pow_2_minus_2_over_n": 18.46,
+      "log2_rho_on_that_group": 60.31
+    }
+  ]
+}

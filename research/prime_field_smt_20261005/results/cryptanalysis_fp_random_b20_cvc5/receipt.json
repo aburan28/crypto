@@ -1,0 +1,73 @@
+{
+  "schema": "prime-field-smt.run/v1",
+  "input_path": "research/prime_field_smt_20261005/instances/cryptanalysis_fp_random_b20.json",
+  "input": {
+    "bytes": 581,
+    "blake3": "14e9e04df5ca8e4e92d966059c2eff8a0de22c9a2af8ee5ad1b68753d57336e4"
+  },
+  "validation": {
+    "schema": "prime-field-smt.validation/v1",
+    "field_bits": 20,
+    "multiplication_bits": 40,
+    "primality_assurance": "deterministic-u64-miller-rabin",
+    "nonsingular": true,
+    "target_on_curve": true,
+    "valid": true
+  },
+  "encoding": {
+    "schema": "prime-field-smt.encoding/v1",
+    "logic": "QF_BV",
+    "relation": "finite P1 + P2 = target; x1,x2 < x_bound",
+    "field_bits": 20,
+    "multiplication_bits": 40,
+    "declared_variables": 5,
+    "field_helpers": 3,
+    "addition_branches": 2,
+    "assertion_count": 10,
+    "canonical_range_constraints": true,
+    "widened_arithmetic": true,
+    "symmetry_breaking": "x1 < x2 for ordinary addition; x1 = x2 for doubling",
+    "canonical_instance_blake3": "73dd66449fd6d55673e2f55e69086ebc4b8848c12e27b0c331d08ae4ce175cd6",
+    "query_bytes": 1976,
+    "query_blake3": "caec841cdba4fb8f20dd5b89034d5a96d2ebeca3a5b17067f9736ca63c41b34b"
+  },
+  "harness_binary_blake3": "a3a9c350667cd86d80c623d47000e0efa2986ffc1f085e5635b9d6065ca92385",
+  "solver": {
+    "executable": "/workspace/.tools/cvc5-1.4.1/cvc5-Linux-x86_64-static/bin/cvc5",
+    "blake3_before": "2a0070ebcd28a71fabd6686a1c7200282b427a6e18e49925eff17a655456f2a4",
+    "blake3_after": "2a0070ebcd28a71fabd6686a1c7200282b427a6e18e49925eff17a655456f2a4",
+    "unchanged_during_run": true,
+    "arguments": [
+      "--lang=smt2",
+      "--tlimit-per=120000",
+      "research/prime_field_smt_20261005/results/cryptanalysis_fp_random_b20_cvc5/query.smt2"
+    ],
+    "requested_timeout_ms": 120000,
+    "harness_grace_ms": 5000,
+    "elapsed_ms": 120018,
+    "timed_out": false,
+    "success": true,
+    "exit_code": 0,
+    "stdout": {
+      "bytes": 154,
+      "blake3": "e53f7f9e10bbc243a7efc8e403bbe8bbc98478628320c0d94df86a781927ed41"
+    },
+    "stderr": {
+      "bytes": 0,
+      "blake3": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262"
+    }
+  },
+  "outcome": "unknown",
+  "parsed": {
+    "status": "unknown"
+  },
+  "parse_error": null,
+  "verification": null,
+  "accepted_sat": false,
+  "claim_scope": {
+    "end_to_end_s": null,
+    "kind": "decomposition_stage_diagnostic",
+    "pollard_rho_ratio": null,
+    "speedup": null
+  }
+}

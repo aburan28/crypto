@@ -1,0 +1,19 @@
+# AVX2 accumulation for deferred prime-field F4
+
+## Frozen hypothesis and reference
+
+The current `F4_FP_NARROW=2` path brought the frozen `quad_n8_p65521` complete F4 call to 1.640× the original wide arithmetic, but its row-oriented residual RREF still updates the 64-bit lazy accumulator one coefficient at a time. For `p ≤ 65536`, both the pivot entry and update factor fit 32 bits and their product fits 64 bits. An AVX2 `vpmuludq` plus `vpaddq` can update four accumulator entries per iteration, preserving the existing 256-update normalization bound, row order, field arithmetic, operation counts and output. Apply AVX2 only to the existing `add_lazy` loop, with a scalar tail; keep all other algorithms fixed.
+
+The unmodified reference is commit `021feecd406ef8b04be5a84bd6403c709e595573`, after the independent mainline CI repair. Its `src/cryptanalysis/f4_fp.rs` SHA-256 is `ebf80475e9d5ed64e63d9c6087b5aaa6b8faba8b6d81b7ebbf1026b6701cfd16`; `examples/f4_fp_bench.rs` is `9a8b3db32520c21d6eefa3506c338a6cc39c45bdf6f134b59dd6563192bde883`. Build and retain that binary and the candidate with identical release flags. The host must report AVX2; otherwise record an unsupported-host result and do not interpret timing. The AVX2 path is selected only with `F4_FP_LAZY_AVX2=1` and remains opt-in until the gates below are reviewed.
+
+## Frozen paired workload and accounting
+
+Use the standard plus `large` cases from `examples/f4_fp_bench.rs`, one repetition per process, including all 13 emitted cases and the primary `quad_n8_p65521`. Freeze seed XOR zero, the original holdouts `badc0de1` and `5eed2026`, and fresh holdout `a28cf401`. On each seed, warm all three arms once. Pin one Linux CPU and `RAYON_NUM_THREADS=1`, then take five A/A pairs of the reference binary in current mode `F4_FP_NARROW=2`, five alternating current/candidate pairs, and five alternating original-wide/candidate pairs. The original-wide arm uses the same unmodified reference binary with `F4_FP_NARROW=0`; the current arm uses `=2`; the candidate uses its own binary with `=2` and `F4_FP_LAZY_AVX2=1`. Run all three arms on the same pinned host and retain their binary and source digests. Pair ratios only within a seed and runner; preserve complete per-process output, exit and timeout statuses, CPU/features, memory, load, affinity, timings and exact five-pair bootstrap 95% intervals.
+
+`f4_ms` is the complete degree-bounded F4 call inside the example, including symbolic preprocessing, both elimination phases and final interreduction; process launch and fixture construction are excluded. This is a solver-stage measure. The original-wide/candidate ratio measures progress against the user's 2× complete-call goal without multiplying results from separate runs. Current/candidate measures the incremental effect of AVX2.
+
+## Correctness, decision and stop rule
+
+First, direct AVX2 accumulator tests must match scalar accumulation for random row widths, alignments, factors and normalization boundaries. Every frozen benchmark case must match the unmodified reference's basis and solve fingerprints, step count, matrix shape, basis size and verdict across all three arms and all seeds. Counted field operations must be preserved where recorded. For engineering promotion, require the frozen primary current/candidate median ratio ≥1.15 with its 95% lower bound >1, both original holdouts and the fresh holdout above their A/A maxima, and no smaller complete-call median below its own A/A lower bound. If that passes, repeat on four pinned CPUs before any default change. Claim the 2× complete-call target only if the frozen original-wide/candidate median and 95% lower bound both exceed 2.00 in the same paired run, with consistent holdout direction. A missed gate leaves AVX2 opt-in or removes it, with the raw result preserved; do not rerun timing to seek a passing sample.
+
+No one-target IC online time, rho pairing or DLP speedup is inferred from this F4 stage experiment.

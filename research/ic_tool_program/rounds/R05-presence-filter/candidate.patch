@@ -1,0 +1,574 @@
+diff --git a/examples/load_fold_table.rs b/examples/load_fold_table.rs
+index 22d64e2e..c07581f2 100644
+--- a/examples/load_fold_table.rs
++++ b/examples/load_fold_table.rs
+@@ -34,7 +34,7 @@ use std::process::ExitCode;
+ use crypto_lib::cryptanalysis::koblitz_fast::{BatchScratch, FastCurve, FastPoint};
+ use crypto_lib::cryptanalysis::koblitz_index_calculus::{
+     build_subgroup_orbit_factor_base, FoldedParts, FoldedStorage, FrobeniusFactorBase,
+-    KoblitzCurve, PairSumTable,
++    KoblitzCurve, PairSumTable, FILTER_PROBES,
+ };
+ 
+ struct TableFile {
+@@ -82,9 +82,13 @@ fn read_table(path: &str) -> Result<TableFile, String> {
+         bytes: &bytes,
+         at: 0,
+     };
+-    if c.take(8)? != b"PTFOLD1\0" {
+-        return Err(format!("{path}: not a folded-table file"));
+-    }
++    // The version names the presence filter's bits a key: one before
++    // R05, this module's [`FILTER_PROBES`] since.
++    let filter_probes = match c.take(8)? {
++        b"PTFOLD2\0" => FILTER_PROBES,
++        b"PTFOLD1\0" => 1,
++        _ => return Err(format!("{path}: not a folded-table file")),
++    };
+     let degree = c.u32()?;
+     let base_request = c.u32()? as usize;
+     let seed = c.u64()?;
+@@ -116,6 +120,7 @@ fn read_table(path: &str) -> Result<TableFile, String> {
+             words,
+             present,
+             present_mask,
++            filter_probes,
+             canon_tables,
+         },
+     })
+@@ -136,7 +141,10 @@ struct Tally {
+ /// some bucket.  Order within a bucket is whatever a build's parallel
+ /// cursors made it, on either side, so each bucket is compared sorted.
+ fn stored_difference(a: &FoldedStorage<'_>, b: &FoldedStorage<'_>) -> Option<String> {
+-    if a.bucket_shift != b.bucket_shift || a.present_mask != b.present_mask {
++    if a.bucket_shift != b.bucket_shift
++        || a.present_mask != b.present_mask
++        || a.filter_probes != b.filter_probes
++    {
+         return Some("bucket or filter geometry".into());
+     }
+     if a.bucket_start != b.bucket_start {
+diff --git a/gpu/ecc2k/README.md b/gpu/ecc2k/README.md
+index 65f97f69..2539c5de 100644
+--- a/gpu/ecc2k/README.md
++++ b/gpu/ecc2k/README.md
+@@ -496,7 +496,7 @@ as the tag, which is what lets the CPU recover a hit's summands by
+ walking `2n` points instead of the base. `pt_fold_count` and
+ `pt_fold_fill` then store it in the CPU's own layout: the bucket from the
+ top of `pt_filter_hash(key)`, the word `(orbit << 16) | (hash & 0xffff)`,
+-and a presence bit.
++and three presence bits in one filter word (`pt_filter_bits_of`).
+ 
+ The row plan (sorted base, representatives, suffix starts) is host data
+ from `PairSumTable::folded_rows`, uploaded the way the basis is, so
+@@ -514,8 +514,8 @@ bucket's count with `atomicAdd`. The host then scans the counts into
+ offsets, which also gives the total the presence filter is sized from,
+ so the build is two launches. The fill pass takes a slot from its
+ bucket's cursor with `atomicAdd`, writes the tagged word there and sets
+-the presence bit with `atomicOr`. Both passes recompute every row, as
+-`build_folded_within` does on the CPU. That is twice the curve
++the key's presence bits with one `atomicOr`. Both passes recompute
++every row, as `build_folded_within` does on the CPU. That is twice the curve
+ arithmetic, with nothing on the device but the table. Keeping the first
+ pass's keys would halve the arithmetic for three times the table's
+ memory; which is faster is a question for a device.
+@@ -643,6 +643,7 @@ the rest:
+ 
+ - bucket offsets that do not partition the words;
+ - a presence filter that is not a whole power of two;
++- a presence filter of other than one or three bits a key;
+ - a tag naming no orbit of the base;
+ - keys named in a basis other than the one this side would use.
+ 
+diff --git a/gpu/ecc2k/fold_io.hpp b/gpu/ecc2k/fold_io.hpp
+index 98e4e94d..cfea7ceb 100644
+--- a/gpu/ecc2k/fold_io.hpp
++++ b/gpu/ecc2k/fold_io.hpp
+@@ -32,7 +32,10 @@
+  *              u32 rep_orbit[n_reps]
+  *              u64 rep_x[n_reps], u64 rep_y[n_reps]
+  *
+- *   table  0   "PTFOLD1\0"
++ *   table  0   "PTFOLD2\0": each key sets three bits of one presence
++ *              word (`pt_filter_bits_of`).  "PTFOLD1\0" is the same layout
++ *              with one bit a key, as this file was written before; the
++ *              loader still reads it as that.
+  *          8   u32 degree, u32 base_request, u64 seed
+  *          24  u32 bucket_shift, u32 buckets, u32 words, u32 present_words
+  *          40  u64 present_mask
+@@ -168,7 +171,7 @@ inline bool pt_write_table(const char *path, const PtFoldPlan &plan, const PtFol
+                                (uint32_t)t.words.size(), (uint32_t)t.present.size()};
+     const uint32_t canon[2] = {(uint32_t)plan.canon_bytes, 0};
+     const size_t tables = (size_t)plan.canon_bytes * 256;
+-    bool ok = fwrite("PTFOLD1", 1, 8, f) == 8 && fwrite(head, 4, 2, f) == 2 &&
++    bool ok = fwrite("PTFOLD2", 1, 8, f) == 8 && fwrite(head, 4, 2, f) == 2 &&
+               fwrite(&plan.seed, 8, 1, f) == 1 && fwrite(sizes, 4, 4, f) == 4 &&
+               fwrite(&t.present_mask, 8, 1, f) == 1 && fwrite(canon, 4, 2, f) == 2 &&
+               fwrite(plan.canon_tables.data(), 8, tables, f) == tables &&
+diff --git a/gpu/ecc2k/pairtable.cuh b/gpu/ecc2k/pairtable.cuh
+index 37831e0a..fee83324 100644
+--- a/gpu/ecc2k/pairtable.cuh
++++ b/gpu/ecc2k/pairtable.cuh
+@@ -230,7 +230,8 @@ G2_HD uint64_t pt_canon(const pt2k &P, const uint64_t *tables, int canon_bytes,
+  *
+  *     bucket  = pt_filter_hash(key) >> bucket_shift
+  *     word    = (orbit << 16) | (pt_filter_hash(key) & 0xffff)
+- *     present : bit  pt_filter_hash(key) & present_mask
++ *     present : bits pt_filter_bits_of(h) of word (h & present_mask) >> 6,
++ *               h = pt_filter_hash(key)
+  *
+  * `orbit` is the row's signed orbit, which a summand of the sum really
+  * lies in; it is what lets the CPU recover a hit's summands by walking
+@@ -286,13 +287,21 @@ G2_HD int pt_folded_bucket_bits(uint64_t pairs, int degree) {
+     return bits;
+ }
+ 
+-/* Presence-filter width from the *actual* stored count, about four bits
+- * per word, clamped to `[6, 32]` as the CPU clamps it. */
++/* Presence-filter width from the *actual* stored count, eight bits per
++ * word before rounding up, clamped to `[6, 32]`: `filter_bits_for` in
++ * `koblitz_index_calculus.rs`. */
+ G2_HD int pt_filter_bits(uint64_t total) {
+-    int bits = pt_bitlen((total ? total : 1) * 4);
++    int bits = pt_bitlen((total ? total : 1) * 8);
+     return bits < 6 ? 6 : (bits > 32 ? 32 : bits);
+ }
+ 
++/* A key's filter bits, all in word `(h & present_mask) >> 6`: the bit
++ * the hash's low six bits name and two from its top twelve, which the
++ * word index never reaches.  `filter_slot` with three probes. */
++G2_HD uint64_t pt_filter_bits_of(uint64_t h) {
++    return (1ull << (h & 63)) | (1ull << ((h >> 52) & 63)) | (1ull << (h >> 58));
++}
++
+ struct PtFoldGeometry {
+     int bucket_bits;
+     int bucket_shift;
+@@ -390,8 +399,7 @@ inline void pt_fold_fill(const uint64_t *keys, const uint32_t *tags, uint64_t en
+     for (uint64_t e = 0; e < entries; e++) {
+         const uint64_t h = pt_filter_hash(keys[e]);
+         words[cursor[h >> g.bucket_shift]++] = pt_tagged_word(keys[e], tags[e]);
+-        const uint64_t bit = h & present_mask;
+-        present[bit >> 6] |= 1ull << (bit & 63);
++        present[(h & present_mask) >> 6] |= pt_filter_bits_of(h);
+     }
+ }
+ 
+@@ -514,8 +522,7 @@ struct PtFoldFill {
+         const uint64_t h = pt_filter_hash(key);
+         const uint32_t slot = pt_atomic_add(&cursor[h >> bucket_shift], 1u);
+         words[slot] = pt_tagged_word(key, orbit);
+-        const uint64_t bit = h & present_mask;
+-        pt_atomic_or(&present[bit >> 6], 1ull << (bit & 63));
++        pt_atomic_or(&present[(h & present_mask) >> 6], pt_filter_bits_of(h));
+     }
+ };
+ 
+diff --git a/gpu/ecc2k/test_pairtable_emu.cpp b/gpu/ecc2k/test_pairtable_emu.cpp
+index 97ad6bdb..3e015bc4 100644
+--- a/gpu/ecc2k/test_pairtable_emu.cpp
++++ b/gpu/ecc2k/test_pairtable_emu.cpp
+@@ -400,17 +400,17 @@ static int differences(const Stored &s, const FoldVectors &v, bool report) {
+ }
+ 
+ /* The bucket width against the CPU's over a grid, through
+- * `folded_byte_size = 4 pairs + 4 buckets + pairs / 2`: the one table
+- * below agrees at one point, and at that point the estimate's `+ |F|`
+- * term happens not to move the width, so on its own it would pass a
+- * port that dropped the term. */
++ * `folded_byte_size = 4 pairs + 4 buckets + pairs` (the filter's eight
++ * bits a pair): the one table below agrees at one point, and at that
++ * point the estimate's `+ |F|` term happens not to move the width, so on
++ * its own it would pass a port that dropped the term. */
+ static void test_fold_geometry() {
+     int bad = 0;
+     for (int i = 0; i < fold_geometry_vectors_count; i++) {
+         const FoldGeometryVector &g = fold_geometry_vectors[i];
+         const uint64_t pairs = pt_folded_pair_count(g.orbits, g.points);
+         const uint64_t buckets = 1ull << pt_folded_bucket_bits(pairs, (int)g.degree);
+-        const uint64_t bytes = pairs * 4 + buckets * 4 + pairs / 2;
++        const uint64_t bytes = pairs * 4 + buckets * 4 + pairs;
+         if (bytes != g.bytes) {
+             if (bad++ < 4) {
+                 printf("  orbits %u, points %u, degree %u: %llu bytes, the CPU says %llu\n",
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index e9fb86be..55114ca9 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -2944,6 +2944,52 @@ fn pair_filter_hash(key: u64) -> u64 {
+     h.wrapping_mul(0xc4ce_b9fe_1a85_ec53)
+ }
+ 
++/// Bits a key sets in its presence-filter word, in this module's builds
++/// and `gpu/ecc2k/pairtable.cuh`'s: three, all in the one word its hash
++/// names, so a probe still reads one word.  A table built elsewhere says
++/// how many its builder set ([`FoldedParts::filter_probes`]).
++pub const FILTER_PROBES: u8 = 3;
++
++/// Filter bits per stored key, before the filter is rounded up to a power
++/// of two.
++const FILTER_BITS_PER_KEY: usize = 8;
++
++/// The filter's width in bits, as a power of two: `FILTER_BITS_PER_KEY` a
++/// stored key, rounded up, within `2^6..=2^32`.
++pub(crate) fn filter_bits_for(keys: usize) -> u32 {
++    (usize::BITS
++        - keys
++            .max(1)
++            .saturating_mul(FILTER_BITS_PER_KEY)
++            .leading_zeros())
++    .clamp(6, 32)
++}
++
++/// `extra` for [`filter_slot`]: every bit for three probes, none for one.
++pub(crate) const fn filter_extra(probes: u8) -> u64 {
++    if probes >= 3 {
++        u64::MAX
++    } else {
++        0
++    }
++}
++
++/// A key's filter word and the bits it sets there, from its hash `h`.  The
++/// word is `(h & mask) / 64` and the first bit `h`'s low six bits, as with
++/// one probe; with three (`extra` all ones) the other two come from `h`'s
++/// top twelve bits, which the word index (at most 32 bits) never reaches.
++#[inline(always)]
++pub(crate) fn filter_slot(h: u64, mask: u64, extra: u64) -> (usize, u64) {
++    let more = (1u64 << ((h >> 52) & 63)) | (1u64 << (h >> 58));
++    (
++        ((h & mask) >> 6) as usize,
++        (1u64 << (h & 63)) | (more & extra),
++    )
++}
++
++/// [`filter_extra`] for this module's own builds.
++const FILTER_EXTRA: u64 = filter_extra(FILTER_PROBES);
++
+ /// **Every pair sum of a factor base**, `P_i + P_j` for `i ≤ j`, sorted
+ /// by packed point identity so a sum can be looked up by binary search.
+ ///
+@@ -3042,6 +3088,8 @@ pub struct FoldedStorage<'a> {
+     pub words: &'a [u32],
+     pub present: &'a [u64],
+     pub present_mask: u64,
++    /// Bits each key set in its filter word: 1 or [`FILTER_PROBES`].
++    pub filter_probes: u8,
+     pub tagged: bool,
+     /// The normal basis the keys were named in; empty if the build fell
+     /// back to the squaring chain.
+@@ -3058,6 +3106,7 @@ impl FoldedStorage<'_> {
+             words: self.words.to_vec(),
+             present: self.present.to_vec(),
+             present_mask: self.present_mask,
++            filter_probes: self.filter_probes,
+             canon_tables: self.canon_tables.to_vec(),
+         }
+     }
+@@ -3076,9 +3125,15 @@ pub struct FoldedParts {
+     /// `(orbit << 16) | hash16` on a tagged table, the hash's low word
+     /// otherwise.
+     pub words: Vec<u32>,
+-    /// One bit per `pair_filter_hash(key) & present_mask`.
++    /// The presence filter: each key sets `filter_probes` bits of word
++    /// `(pair_filter_hash(key) & present_mask) / 64` ([`filter_slot`]).
+     pub present: Vec<u64>,
+     pub present_mask: u64,
++    /// Bits each key set in its filter word: [`FILTER_PROBES`] for this
++    /// module's builds and `gpu/ecc2k/pairtable.cuh`'s, 1 for a table
++    /// built with one bit a key, as both built them before (a `PTFOLD1`
++    /// file).  The probe reads as many as were set.
++    pub filter_probes: u8,
+     /// The normal basis the keys were named in, as
+     /// [`FrobeniusCanon::tables`] gives it.
+     pub canon_tables: Vec<[u64; 256]>,
+@@ -3133,14 +3188,17 @@ pub struct PairSumTable {
+     /// walking a binary search across the whole table.
+     bucket_start: Vec<u32>,
+     bucket_shift: u32,
+-    /// One bit per hashed key, about four per stored sum: a lookup that
+-    /// finds its bit clear is certainly absent and never touches the
+-    /// entries.  Most lookups of a decomposition search miss, and the
++    /// [`FILTER_PROBES`] bits per hashed key, all in one word, in a filter
++    /// of eight to sixteen bits per stored sum: a lookup that finds any of
++    /// its bits clear is certainly absent and never touches the entries.
++    /// Most lookups of a decomposition search miss, and the
+     /// entries are far too large to cache, so this turns the hot path
+     /// from a miss in a table of hundreds of megabytes into one in a
+     /// few.  No false negatives, so the answer is unchanged.
+     present: Vec<u64>,
+     present_mask: u64,
++    /// [`filter_extra`] of the probes the filter was built with.
++    filter_extra: u64,
+     /// Whether the stored keys are folded by the signed Frobenius group
+     /// `G = ⟨π, −1⟩`.
+     ///
+@@ -3508,7 +3566,7 @@ impl PairSumTable {
+     pub fn compact_byte_size(points: usize, degree: u32) -> u128 {
+         let pairs = Self::pair_count(points);
+         let buckets = 1u128 << Self::compact_bucket_bits(pairs, degree);
+-        pairs * 4 + buckets * 4 + pairs / 2
++        pairs * 4 + buckets * 4 + pairs * FILTER_BITS_PER_KEY as u128 / 8
+     }
+ 
+     /// [`Self::compact_byte_size`] plus one packed pair witness per
+@@ -3552,7 +3610,7 @@ impl PairSumTable {
+     pub fn folded_byte_size(orbits: usize, points: usize, degree: u32) -> u128 {
+         let pairs = Self::folded_pair_count(orbits, points);
+         let buckets = 1u128 << Self::folded_bucket_bits(pairs, degree);
+-        pairs * 4 + buckets * 4 + pairs / 2
++        pairs * 4 + buckets * 4 + pairs * FILTER_BITS_PER_KEY as u128 / 8
+     }
+ 
+     /// Bucket bits for the compact table: about one bucket per sixteen
+@@ -3758,13 +3816,13 @@ impl PairSumTable {
+         for b in 0..buckets {
+             bucket_start[b + 1] += bucket_start[b];
+         }
+-        // Four bits per entry, rounded up to a power of two.
+-        let filter_bits = (usize::BITS - (entries.len().max(1) * 4).leading_zeros()).clamp(6, 32);
++        // Eight bits per entry, rounded up to a power of two.
++        let filter_bits = filter_bits_for(entries.len());
+         let present_mask = (1u64 << filter_bits) - 1;
+         let mut present = vec![0u64; (1usize << filter_bits) / 64];
+         for &(key, _, _) in &entries {
+-            let h = (pair_filter_hash(key) & present_mask) as usize;
+-            present[h >> 6] |= 1u64 << (h & 63);
++            let (word, bits) = filter_slot(pair_filter_hash(key), present_mask, FILTER_EXTRA);
++            present[word] |= bits;
+         }
+         Some(Self {
+             entries,
+@@ -3778,6 +3836,7 @@ impl PairSumTable {
+             bucket_shift,
+             present,
+             present_mask,
++            filter_extra: FILTER_EXTRA,
+             fold: false,
+             canon: None,
+             orbit_start: Vec::new(),
+@@ -3854,7 +3913,7 @@ impl PairSumTable {
+         let total = bucket_start[buckets] as usize;
+         let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
+         let mut rests = vec![0u32; total];
+-        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
++        let filter_bits = filter_bits_for(total);
+         let present_mask = (1u64 << filter_bits) - 1;
+         let words = (1usize << filter_bits) / 64;
+         let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
+@@ -3873,8 +3932,8 @@ impl PairSumTable {
+                 unsafe {
+                     *(slots as *mut u32).add(slot) = Self::compact_rest(key);
+                 }
+-                let h = (pair_filter_hash(key) & present_mask) as usize;
+-                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
++                let (word, bits) = filter_slot(pair_filter_hash(key), present_mask, FILTER_EXTRA);
++                present_atomic[word].fetch_or(bits, Ordering::Relaxed);
+             });
+         });
+         let present: Vec<u64> = present_atomic
+@@ -3894,6 +3953,7 @@ impl PairSumTable {
+             bucket_shift,
+             present,
+             present_mask,
++            filter_extra: FILTER_EXTRA,
+             fold: false,
+             canon: None,
+             orbit_start: Vec::new(),
+@@ -3972,7 +4032,7 @@ impl PairSumTable {
+         let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
+         let mut rests = vec![0u32; total];
+         let mut compact_witnesses = vec![0u32; total];
+-        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
++        let filter_bits = filter_bits_for(total);
+         let present_mask = (1u64 << filter_bits) - 1;
+         let words = (1usize << filter_bits) / 64;
+         let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
+@@ -3992,8 +4052,8 @@ impl PairSumTable {
+                     *(rest_slots as *mut u32).add(slot) = Self::compact_rest(key);
+                     *(witness_slots as *mut u32).add(slot) = ((i as u32) << 16) | j;
+                 }
+-                let h = (pair_filter_hash(key) & present_mask) as usize;
+-                present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
++                let (word, bits) = filter_slot(pair_filter_hash(key), present_mask, FILTER_EXTRA);
++                present_atomic[word].fetch_or(bits, Ordering::Relaxed);
+             }
+         });
+         drop(cached_keys);
+@@ -4013,6 +4073,7 @@ impl PairSumTable {
+             bucket_shift,
+             present,
+             present_mask,
++            filter_extra: FILTER_EXTRA,
+             fold: false,
+             canon: None,
+             orbit_start: Vec::new(),
+@@ -4124,7 +4185,7 @@ impl PairSumTable {
+             });
+         drop(keyed);
+         // 4. Each partition counting-sorted into its own bucket range.
+-        let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
++        let filter_bits = filter_bits_for(total);
+         let present_mask = (1u64 << filter_bits) - 1;
+         let present_atomic: Vec<AtomicU64> = (0..(1usize << filter_bits) / 64)
+             .map(|_| AtomicU64::new(0))
+@@ -4156,8 +4217,8 @@ impl PairSumTable {
+                     // bucket cursors stay inside it.
+                     unsafe { *(rp as *mut u32).add(at[b]) = w };
+                     at[b] += 1;
+-                    let f = (h & present_mask) as usize;
+-                    present_atomic[f >> 6].fetch_or(1u64 << (f & 63), Ordering::Relaxed);
++                    let (word, bits) = filter_slot(h, present_mask, FILTER_EXTRA);
++                    present_atomic[word].fetch_or(bits, Ordering::Relaxed);
+                 }
+             });
+         bucket_start[buckets] = total as u32;
+@@ -4303,7 +4364,7 @@ impl PairSumTable {
+             let total = bucket_start[buckets] as usize;
+             let cursor: Vec<AtomicU32> = bucket_start.iter().map(|&c| AtomicU32::new(c)).collect();
+             let mut rests = vec![0u32; total];
+-            let filter_bits = (usize::BITS - (total.max(1) * 4).leading_zeros()).clamp(6, 32);
++            let filter_bits = filter_bits_for(total);
+             let present_mask = (1u64 << filter_bits) - 1;
+             let words = (1usize << filter_bits) / 64;
+             let present_atomic: Vec<AtomicU64> = (0..words).map(|_| AtomicU64::new(0)).collect();
+@@ -4322,8 +4383,9 @@ impl PairSumTable {
+                             Self::compact_rest(key)
+                         };
+                     }
+-                    let h = (pair_filter_hash(key) & present_mask) as usize;
+-                    present_atomic[h >> 6].fetch_or(1u64 << (h & 63), Ordering::Relaxed);
++                    let (word, bits) =
++                        filter_slot(pair_filter_hash(key), present_mask, FILTER_EXTRA);
++                    present_atomic[word].fetch_or(bits, Ordering::Relaxed);
+                 });
+             });
+             let present: Vec<u64> = present_atomic
+@@ -4343,6 +4405,7 @@ impl PairSumTable {
+                 words: rests,
+                 present,
+                 present_mask,
++                filter_probes: FILTER_PROBES,
+                 canon_tables: Vec::new(),
+             },
+             tagged,
+@@ -4384,6 +4447,7 @@ impl PairSumTable {
+             bucket_shift: parts.bucket_shift,
+             present: parts.present,
+             present_mask: parts.present_mask,
++            filter_extra: filter_extra(parts.filter_probes),
+             fold: true,
+             canon,
+             orbit_start,
+@@ -4465,6 +4529,12 @@ impl PairSumTable {
+                 parts.present_mask
+             ));
+         }
++        if parts.filter_probes != 1 && parts.filter_probes != FILTER_PROBES {
++            return Err(format!(
++                "a presence filter of {} probes a key, not 1 or {FILTER_PROBES}",
++                parts.filter_probes
++            ));
++        }
+         let tagged = fb.signed_orbits.len() <= Self::MAX_TAGGED_ORBITS;
+         if tagged {
+             let orbits = fb.signed_orbits.len() as u32;
+@@ -4543,6 +4613,11 @@ impl PairSumTable {
+             words: &self.rests,
+             present: &self.present,
+             present_mask: self.present_mask,
++            filter_probes: if self.filter_extra != 0 {
++                FILTER_PROBES
++            } else {
++                1
++            },
+             tagged: self.tagged,
+             canon_tables: self.canon.as_ref().map_or(&[], |c| c.tables()),
+         })
+@@ -4775,18 +4850,19 @@ impl PairSumTable {
+         }
+     }
+ 
+-    /// Index of the filter word holding this key's bit.
++    /// Index of the filter word holding this key's bits.
+     #[inline]
+     fn filter_word(&self, key: u64) -> usize {
+         ((pair_filter_hash(key) & self.present_mask) as usize) >> 6
+     }
+ 
+-    /// Whether the filter admits this key.  A `false` is certain; a
+-    /// `true` still has to be checked against the entries.
++    /// Whether the filter admits this key: every bit it would have set is
++    /// set.  A `false` is certain; a `true` still has to be checked
++    /// against the entries.
+     #[inline]
+     fn admitted(&self, key: u64) -> bool {
+-        let h = (pair_filter_hash(key) & self.present_mask) as usize;
+-        self.present[h >> 6] >> (h & 63) & 1 == 1
++        let (word, bits) = filter_slot(pair_filter_hash(key), self.present_mask, self.filter_extra);
++        self.present[word] & bits == bits
+     }
+ 
+     /// All `(i, j)` with `P_i + P_j` equal to the packed point.
+@@ -11980,6 +12056,26 @@ mod tests {
+         assert!(!is_irreducible_f2(0b1001));
+     }
+ 
++    #[test]
++    fn the_filter_sets_its_probes_in_one_word_and_one_probe_is_the_old_bit() {
++        let mask = (1u64 << 20) - 1;
++        for key in [0u64, 1, 0xdead_beef, u64::MAX, 0x1234_5678_9abc_def0] {
++            let h = pair_filter_hash(key);
++            let (w1, b1) = filter_slot(h, mask, filter_extra(1));
++            let (w3, b3) = filter_slot(h, mask, filter_extra(FILTER_PROBES));
++            // One probe is the filter as it was: bit `h & mask` of the array.
++            let old = (h & mask) as usize;
++            assert_eq!((w1, b1), (old >> 6, 1u64 << (old & 63)));
++            // Three probes stay in that word and include its bit.
++            assert_eq!(w3, w1);
++            assert_eq!(b3 & b1, b1);
++            assert!((1..=3).contains(&b3.count_ones()));
++        }
++        assert_eq!(filter_bits_for(0), 6);
++        assert_eq!(filter_bits_for(1000), 13);
++        assert_eq!(filter_bits_for(usize::MAX >> 8), 32);
++    }
++
+     #[test]
+     fn find_irreducible_returns_degree_n_irreducible() {
+         for n in 3..=16u32 {
+@@ -13700,6 +13796,23 @@ mod tests {
+         assert_same_answers(&kc, &fb, &built, &loaded);
+     }
+ 
++    #[test]
++    fn a_folded_table_read_as_one_bit_a_key_gives_the_same_answers() {
++        // A `PTFOLD1` table set one bit a key: bit `h & 63` of the word
++        // `filter_slot` names.  A three-bit filter sets that bit too, so
++        // its words read as one bit a key are such a filter, and a table
++        // loaded that way must miss nothing.
++        let kc = KoblitzCurve::new(0, 31).unwrap();
++        let fb = build_subgroup_orbit_factor_base(&kc, 5, 400).unwrap();
++        let built = PairSumTable::build_folded_within(&kc, &fb, u128::MAX).unwrap();
++        let mut parts = built.folded_storage().unwrap().to_parts();
++        assert_eq!(parts.filter_probes, FILTER_PROBES);
++        parts.filter_probes = 1;
++        let loaded = PairSumTable::from_folded_parts(&kc, &fb, parts).unwrap();
++        assert_eq!(loaded.folded_storage().unwrap().filter_probes, 1);
++        assert_same_answers(&kc, &fb, &built, &loaded);
++    }
++
+     #[test]
+     fn a_folded_table_is_refused_when_a_lookup_could_not_trust_it() {
+         let kc = KoblitzCurve::new(0, 23).unwrap();
+@@ -13740,6 +13853,10 @@ mod tests {
+                     p.present.pop();
+                 }),
+             ),
++            (
++                "a filter of two probes a key",
++                Box::new(|p| p.filter_probes = 2),
++            ),
+             (
+                 "a tag naming no orbit",
+                 Box::new(move |p| {

@@ -73,6 +73,18 @@ package gf131_pkg is
   constant DSP_LEAF_LAT   : natural := 4;
   constant LEAF_LAT       : natural := 1 + (DSP_LEAF_LAT - 1) * minimum(MUL_DSP_LEAVES, 1);
   constant MUL_LATENCY    : natural := 2 * MUL_KARATSUBA + 3 + LEAF_LAT;   -- 10, or 13 with DSP leaves
+  -- (gf2_dsp_leaf: six DSPs of 9 x 6 coefficients cover a 17-bit leaf, and
+  -- ~22 LUTs XOR their parities into place, against ~140 LUTs), four
+  -- clocks instead of one, so every LUT leaf waits three.  The VU47P has
+  -- 9 024 DSPs the design otherwise leaves empty, 7 992 of them in the
+  -- CL's region: 11 leaves per engine is 66 DSPs (120 engines), 10 is 60
+  -- (128), 9 is 54 (136, 144), and the engine loses ~1 000 of its ~8 100
+  -- LUTs.  0 keeps the all-LUT multiplier.
+  constant MUL_DSP_LEAVES : natural := 11;
+  constant DSP_LEAF_LAT   : natural := 4;
+  constant LEAF_LAT       : natural := 1 + (DSP_LEAF_LAT - 1) * minimum(MUL_DSP_LEAVES, 1);
+  -- latch, prep, the tree, a copy of its top register, to_onb (gf131_mul)
+  constant MUL_LATENCY    : natural := 2 * MUL_KARATSUBA + 4 + LEAF_LAT;   -- 11, or 14 with DSP leaves
 
   -- A point whose x has weight 1 sits on no walk but has d = x + sigma^3(x)
   -- = gamma_1 + gamma_8 /= 0, so it can pad a batch without zeroing the

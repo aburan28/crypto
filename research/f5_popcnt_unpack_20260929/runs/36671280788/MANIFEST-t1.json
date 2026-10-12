@@ -1,0 +1,687 @@
+{
+  "all_selected_exact": true,
+  "archive_bytes": 68278,
+  "archive_sha256": "f6eaf3bcb8bbdf10c0724fc39139a525379862acdbb5fef00ee893f21435c177",
+  "artifact_name": "f5-popcnt-unpack-segments-t1-8a37bd7c68d28f621b129f78f226a11013ce84fa",
+  "binary_sha256": "055d3fd9e09e8b4b5827b23ec2d4677ef4b9bc496241ee6db09815b65cb2d343",
+  "f5_source_sha256": "1ba6d597e31a374cd0fe0591e7fa8f2ca8a8b4045aa3838dfc01873bc5c2d405",
+  "files": [
+    {
+      "bytes": 140,
+      "path": "segment-cpu-choice-t1.json",
+      "sha256": "4801b0c22b34be378aa48c6fea5c0fea2aa8c475696a815738ae49af92cbf239"
+    },
+    {
+      "bytes": 3264,
+      "path": "segments-t1/INDEX.json",
+      "sha256": "041a90acc9ef3a32fe986b88bf101cca329b36cdef16b5604bbd6b901a0552c2"
+    },
+    {
+      "bytes": 219,
+      "path": "segments-t1/frozen/attempt1/STATUS.json",
+      "sha256": "2242ef8f022f354f238100e6130abc567f695b7f30b7501b510af4b23d6ecbaf"
+    },
+    {
+      "bytes": 2571,
+      "path": "segments-t1/frozen/attempt1/isolation.jsonl",
+      "sha256": "bd68cdc79180848de0babd2705b724546150177ee09f4cd498882fdd3935aa3d"
+    },
+    {
+      "bytes": 213333,
+      "path": "segments-t1/frozen/attempt1/paired.json",
+      "sha256": "b9f5116243cf04a3a460efeb0af84cf825984b5549a5d055f698cf1e88f36166"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/frozen/attempt1/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2458,
+      "path": "segments-t1/frozen/attempt1/stdout.txt",
+      "sha256": "d531d2a953d46194dd45773791d80007c97e79f69fd5a99801b5819d254bf6d7"
+    },
+    {
+      "bytes": 224,
+      "path": "segments-t1/holdout_a/attempt1/STATUS.json",
+      "sha256": "5af4b79a949a0de64a6d59712240dd01a5c66f7fe1bd0ede7258cef3a3cf6f6c"
+    },
+    {
+      "bytes": 277,
+      "path": "segments-t1/holdout_a/attempt1/stderr.txt",
+      "sha256": "e7d7d931bd4afb86e726dc8f4f003df1900b19dbd6c4fc40d0cf207b0b8128e7"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_a/attempt1/stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 222,
+      "path": "segments-t1/holdout_a/attempt2/STATUS.json",
+      "sha256": "d6674831e40145b6df4258ac18ae1ca4e9ab90c090c34c2726ee4ace838fd353"
+    },
+    {
+      "bytes": 2494,
+      "path": "segments-t1/holdout_a/attempt2/isolation.jsonl",
+      "sha256": "ba0d00446022a97f87899471ae03df60c36ceaa6c08e2481d70c8624012fbf7b"
+    },
+    {
+      "bytes": 212938,
+      "path": "segments-t1/holdout_a/attempt2/paired.json",
+      "sha256": "d77e840edd20f2d632f9df836e50f603489f2338de2bd1eef2a3af6a5b1126bb"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_a/attempt2/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2459,
+      "path": "segments-t1/holdout_a/attempt2/stdout.txt",
+      "sha256": "8ad1f4fa2b056444c9f79ce904794021d18f187031d9b5ff6ba82e1a452a020e"
+    },
+    {
+      "bytes": 224,
+      "path": "segments-t1/holdout_b/attempt1/STATUS.json",
+      "sha256": "33409bd22a49ca7eb638d21d39290288d5d29e04c3581106d74481fd16c32cb1"
+    },
+    {
+      "bytes": 285,
+      "path": "segments-t1/holdout_b/attempt1/stderr.txt",
+      "sha256": "df257c4e21fbf122467ba9815dd2c1d6971ac7b63804b44c5e6f4733324a7c09"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_b/attempt1/stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 224,
+      "path": "segments-t1/holdout_b/attempt2/STATUS.json",
+      "sha256": "b4d8dd79be612e2f2c7ff52d714304b13bbbeecc072501c32d0e907eb8310499"
+    },
+    {
+      "bytes": 211,
+      "path": "segments-t1/holdout_b/attempt2/stderr.txt",
+      "sha256": "3f2e1da16d20ea0b981d766696604215a198bd6b077d5ae2b3e9c6c92fc12b0a"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_b/attempt2/stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 222,
+      "path": "segments-t1/holdout_b/attempt3/STATUS.json",
+      "sha256": "d038f160edeabd28a8df23b684130bb83871eec8a816de1ae81a4dfbab000354"
+    },
+    {
+      "bytes": 2564,
+      "path": "segments-t1/holdout_b/attempt3/isolation.jsonl",
+      "sha256": "69d89c4159657913b0014ae6640ddf34c6531843ef14cdde9a03b537c2c3a46e"
+    },
+    {
+      "bytes": 212903,
+      "path": "segments-t1/holdout_b/attempt3/paired.json",
+      "sha256": "2ca65acee98b96a719fcdfe70e216c329329402b7bba8d70e9f0162b8ec8defc"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_b/attempt3/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2465,
+      "path": "segments-t1/holdout_b/attempt3/stdout.txt",
+      "sha256": "2964c31e0f03714111c2e8e17a508343465be8fa2585c9616dd438d117aa6233"
+    },
+    {
+      "bytes": 224,
+      "path": "segments-t1/holdout_c/attempt1/STATUS.json",
+      "sha256": "7ad68d99a906250a05dd5bd6cbc9f707e331830f5054667b216516a1b610570b"
+    },
+    {
+      "bytes": 303,
+      "path": "segments-t1/holdout_c/attempt1/stderr.txt",
+      "sha256": "2b1ee06a832f7cae394cab4af0db9e0c3932394717085914c3a784393a92ff14"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_c/attempt1/stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 224,
+      "path": "segments-t1/holdout_c/attempt2/STATUS.json",
+      "sha256": "8a7a81ee93d9dc99dce33eb92d4e635e5f9d19e7fc025d330a4b8b9d5c12d796"
+    },
+    {
+      "bytes": 281,
+      "path": "segments-t1/holdout_c/attempt2/stderr.txt",
+      "sha256": "a331aaafd986ef9158e47509f9034ae6262f4a1ac1ca1b8c0fbef81173421e34"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_c/attempt2/stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 222,
+      "path": "segments-t1/holdout_c/attempt3/STATUS.json",
+      "sha256": "ac556375aa8ca25964b00d9089f40d52a3386ba196c59428db33c6f10aa66d2f"
+    },
+    {
+      "bytes": 2645,
+      "path": "segments-t1/holdout_c/attempt3/isolation.jsonl",
+      "sha256": "09417138c89cdbbc1c8d56ee0bb9d7d1f3dce77339cf50df9af3fbf3a23379cb"
+    },
+    {
+      "bytes": 212934,
+      "path": "segments-t1/holdout_c/attempt3/paired.json",
+      "sha256": "54de5ba9e2c91a75412c56d253c0ae6fe48923553746184260e21d973cdcd9a6"
+    },
+    {
+      "bytes": 0,
+      "path": "segments-t1/holdout_c/attempt3/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2461,
+      "path": "segments-t1/holdout_c/attempt3/stdout.txt",
+      "sha256": "5f574b90d135250dda8aeb77ff7f8cc8b2d193a767c4ed7c2aa77fc47b304f35"
+    }
+  ],
+  "index": {
+    "seeds": {
+      "frozen": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "frozen",
+            "threads": 1
+          }
+        ],
+        "selected_attempt": 1
+      },
+      "holdout_a": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 0,
+            "command_exit": 1,
+            "contended_samples": null,
+            "isolation_exit": null,
+            "left_user_threads": null,
+            "paired_status": null,
+            "qualified": false,
+            "seed": "holdout_a",
+            "threads": 1
+          },
+          {
+            "attempt": 2,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "holdout_a",
+            "threads": 1
+          }
+        ],
+        "selected_attempt": 2
+      },
+      "holdout_b": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 0,
+            "command_exit": 1,
+            "contended_samples": null,
+            "isolation_exit": null,
+            "left_user_threads": null,
+            "paired_status": null,
+            "qualified": false,
+            "seed": "holdout_b",
+            "threads": 1
+          },
+          {
+            "attempt": 2,
+            "calls": 0,
+            "command_exit": 1,
+            "contended_samples": null,
+            "isolation_exit": null,
+            "left_user_threads": null,
+            "paired_status": null,
+            "qualified": false,
+            "seed": "holdout_b",
+            "threads": 1
+          },
+          {
+            "attempt": 3,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "holdout_b",
+            "threads": 1
+          }
+        ],
+        "selected_attempt": 3
+      },
+      "holdout_c": {
+        "attempts": [
+          {
+            "attempt": 1,
+            "calls": 0,
+            "command_exit": 1,
+            "contended_samples": null,
+            "isolation_exit": null,
+            "left_user_threads": null,
+            "paired_status": null,
+            "qualified": false,
+            "seed": "holdout_c",
+            "threads": 1
+          },
+          {
+            "attempt": 2,
+            "calls": 0,
+            "command_exit": 1,
+            "contended_samples": null,
+            "isolation_exit": null,
+            "left_user_threads": null,
+            "paired_status": null,
+            "qualified": false,
+            "seed": "holdout_c",
+            "threads": 1
+          },
+          {
+            "attempt": 3,
+            "calls": 22,
+            "command_exit": 0,
+            "contended_samples": 0,
+            "isolation_exit": 0,
+            "left_user_threads": [],
+            "paired_status": "complete",
+            "qualified": true,
+            "seed": "holdout_c",
+            "threads": 1
+          }
+        ],
+        "selected_attempt": 3
+      }
+    },
+    "status": "qualified",
+    "threads": 1
+  },
+  "pr_head_sha": "422327c75dbec2e30c0b36a1d1fb5f0812ea5492",
+  "run_id": 36671280788,
+  "selected": {
+    "frozen": {
+      "attempt": 1,
+      "benchmark_source_sha256": "0769da3389b0ea2853c7099cbed18ef2c9fb58dd44d8704283837b6b63ca0380",
+      "binary_sha256": "055d3fd9e09e8b4b5827b23ec2d4677ef4b9bc496241ee6db09815b65cb2d343",
+      "calls": 22,
+      "f5_source_sha256": "1ba6d597e31a374cd0fe0591e7fa8f2ca8a8b4045aa3838dfc01873bc5c2d405",
+      "gf2_source_sha256": "6fd3f10ef8e681490784c624e703eeb8fa887c5817ec9bdf34844e3f943c7f5c",
+      "github_merge_sha": "8a37bd7c68d28f621b129f78f226a11013ce84fa",
+      "host": {
+        "cpu_count": 4,
+        "cpu_features": [
+          "avx2",
+          "avx512f",
+          "bmi2",
+          "pclmulqdq",
+          "popcnt"
+        ],
+        "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+        "load_end": [
+          1.611328125,
+          1.32861328125,
+          0.6494140625
+        ],
+        "load_start": [
+          1.68212890625,
+          1.328125,
+          0.63818359375
+        ],
+        "machine": "x86_64",
+        "mem_total": "MemTotal:       16373452 kB",
+        "pinned_cpus": [
+          0
+        ],
+        "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      "primary_unpack": {
+        "aa_max": 1.006761058668094,
+        "aa_min": 0.9687807316907948,
+        "aa_ratios": [
+          0.9687807316907948,
+          0.9988629390283966,
+          0.9922942719506562,
+          1.006761058668094,
+          0.9969880189366812
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            1.0018108411119417,
+            1.0138428664180463
+          ],
+          "median": 1.0073101716591593,
+          "ratios": [
+            1.0018108411119417,
+            1.0116522622762671,
+            1.0052166634553903,
+            1.0073101716591593,
+            1.0138428664180463
+          ]
+        }
+      },
+      "primary_wall": {
+        "aa_max": 1.0097574046991087,
+        "aa_min": 0.9791976128470062,
+        "aa_ratios": [
+          0.9791976128470062,
+          0.9948888107331088,
+          0.9953110526491723,
+          1.0097574046991087,
+          0.9894936044769239
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            0.9944353495017882,
+            1.0067496503827889
+          ],
+          "median": 1.0005428607282871,
+          "ratios": [
+            1.0003615578898817,
+            1.0067496503827889,
+            1.0005428607282871,
+            0.9944353495017882,
+            1.0062084381584833
+          ]
+        }
+      },
+      "smaller_case_regressions": []
+    },
+    "holdout_a": {
+      "attempt": 2,
+      "benchmark_source_sha256": "0769da3389b0ea2853c7099cbed18ef2c9fb58dd44d8704283837b6b63ca0380",
+      "binary_sha256": "055d3fd9e09e8b4b5827b23ec2d4677ef4b9bc496241ee6db09815b65cb2d343",
+      "calls": 22,
+      "f5_source_sha256": "1ba6d597e31a374cd0fe0591e7fa8f2ca8a8b4045aa3838dfc01873bc5c2d405",
+      "gf2_source_sha256": "6fd3f10ef8e681490784c624e703eeb8fa887c5817ec9bdf34844e3f943c7f5c",
+      "github_merge_sha": "8a37bd7c68d28f621b129f78f226a11013ce84fa",
+      "host": {
+        "cpu_count": 4,
+        "cpu_features": [
+          "avx2",
+          "avx512f",
+          "bmi2",
+          "pclmulqdq",
+          "popcnt"
+        ],
+        "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+        "load_end": [
+          1.2666015625,
+          1.2626953125,
+          0.65087890625
+        ],
+        "load_start": [
+          1.15283203125,
+          1.24169921875,
+          0.6337890625
+        ],
+        "machine": "x86_64",
+        "mem_total": "MemTotal:       16373452 kB",
+        "pinned_cpus": [
+          0
+        ],
+        "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      "primary_unpack": {
+        "aa_max": 1.0152073511046404,
+        "aa_min": 0.9862545717710697,
+        "aa_ratios": [
+          0.9911692230505957,
+          0.9993825192433089,
+          1.0152073511046404,
+          1.0020237718247995,
+          0.9862545717710697
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            0.9989731386503645,
+            1.0171391654008382
+          ],
+          "median": 1.0078448783264087,
+          "ratios": [
+            1.0168539379660964,
+            1.0078448783264087,
+            1.0171391654008382,
+            1.0014426400855603,
+            0.9989731386503645
+          ]
+        }
+      },
+      "primary_wall": {
+        "aa_max": 1.007913448771367,
+        "aa_min": 0.9912940592306567,
+        "aa_ratios": [
+          0.9991757146132141,
+          1.0025833209285702,
+          1.007913448771367,
+          0.9997960766753557,
+          0.9912940592306567
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            0.9968448830434323,
+            1.0112509384201072
+          ],
+          "median": 0.998200442229772,
+          "ratios": [
+            1.0053903655004246,
+            0.9977994561771796,
+            1.0112509384201072,
+            0.998200442229772,
+            0.9968448830434323
+          ]
+        }
+      },
+      "smaller_case_regressions": []
+    },
+    "holdout_b": {
+      "attempt": 3,
+      "benchmark_source_sha256": "0769da3389b0ea2853c7099cbed18ef2c9fb58dd44d8704283837b6b63ca0380",
+      "binary_sha256": "055d3fd9e09e8b4b5827b23ec2d4677ef4b9bc496241ee6db09815b65cb2d343",
+      "calls": 22,
+      "f5_source_sha256": "1ba6d597e31a374cd0fe0591e7fa8f2ca8a8b4045aa3838dfc01873bc5c2d405",
+      "gf2_source_sha256": "6fd3f10ef8e681490784c624e703eeb8fa887c5817ec9bdf34844e3f943c7f5c",
+      "github_merge_sha": "8a37bd7c68d28f621b129f78f226a11013ce84fa",
+      "host": {
+        "cpu_count": 4,
+        "cpu_features": [
+          "avx2",
+          "avx512f",
+          "bmi2",
+          "pclmulqdq",
+          "popcnt"
+        ],
+        "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+        "load_end": [
+          0.9609375,
+          1.16650390625,
+          0.64599609375
+        ],
+        "load_start": [
+          0.7666015625,
+          1.140625,
+          0.62841796875
+        ],
+        "machine": "x86_64",
+        "mem_total": "MemTotal:       16373452 kB",
+        "pinned_cpus": [
+          0
+        ],
+        "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      "primary_unpack": {
+        "aa_max": 1.0031023521592421,
+        "aa_min": 0.9868061021752924,
+        "aa_ratios": [
+          0.9868061021752924,
+          0.989774716601845,
+          1.002446183317168,
+          0.9931738349054088,
+          1.0031023521592421
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            1.008591941845306,
+            1.0238849716320255
+          ],
+          "median": 1.0127117105365528,
+          "ratios": [
+            1.0127117105365528,
+            1.0238849716320255,
+            1.0121630814796991,
+            1.0237712297422426,
+            1.008591941845306
+          ]
+        }
+      },
+      "primary_wall": {
+        "aa_max": 1.0012876358336924,
+        "aa_min": 0.9919118730294452,
+        "aa_ratios": [
+          0.9919118730294452,
+          0.9947494366633188,
+          1.0012876358336924,
+          0.9950087025582347,
+          0.999681246318315
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            0.9948866544628315,
+            1.0172010524553354
+          ],
+          "median": 1.0093722381335422,
+          "ratios": [
+            1.0093722381335422,
+            1.0172010524553354,
+            1.0027076945924547,
+            1.0142296039471648,
+            0.9948866544628315
+          ]
+        }
+      },
+      "smaller_case_regressions": []
+    },
+    "holdout_c": {
+      "attempt": 3,
+      "benchmark_source_sha256": "0769da3389b0ea2853c7099cbed18ef2c9fb58dd44d8704283837b6b63ca0380",
+      "binary_sha256": "055d3fd9e09e8b4b5827b23ec2d4677ef4b9bc496241ee6db09815b65cb2d343",
+      "calls": 22,
+      "f5_source_sha256": "1ba6d597e31a374cd0fe0591e7fa8f2ca8a8b4045aa3838dfc01873bc5c2d405",
+      "gf2_source_sha256": "6fd3f10ef8e681490784c624e703eeb8fa887c5817ec9bdf34844e3f943c7f5c",
+      "github_merge_sha": "8a37bd7c68d28f621b129f78f226a11013ce84fa",
+      "host": {
+        "cpu_count": 4,
+        "cpu_features": [
+          "avx2",
+          "avx512f",
+          "bmi2",
+          "pclmulqdq",
+          "popcnt"
+        ],
+        "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+        "load_end": [
+          0.89013671875,
+          1.1005859375,
+          0.646484375
+        ],
+        "load_start": [
+          0.58154296875,
+          1.0537109375,
+          0.6240234375
+        ],
+        "machine": "x86_64",
+        "mem_total": "MemTotal:       16373452 kB",
+        "pinned_cpus": [
+          0
+        ],
+        "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      "primary_unpack": {
+        "aa_max": 1.0056226611079546,
+        "aa_min": 0.9874501048936628,
+        "aa_ratios": [
+          0.9874501048936628,
+          0.9963245693678502,
+          0.9958405123320719,
+          1.0026601349578899,
+          1.0056226611079546
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            0.9873504041982545,
+            1.0250589473442315
+          ],
+          "median": 1.0068435004779952,
+          "ratios": [
+            0.9873504041982545,
+            1.006340248827923,
+            1.012027834937327,
+            1.0250589473442315,
+            1.0068435004779952
+          ]
+        }
+      },
+      "primary_wall": {
+        "aa_max": 1.0053087507541048,
+        "aa_min": 0.997893867309001,
+        "aa_ratios": [
+          0.998085724290656,
+          0.997893867309001,
+          0.9984269145142862,
+          1.0037335650443042,
+          1.0053087507541048
+        ],
+        "prior_new": {
+          "bootstrap_95pct": [
+            0.8854686457882003,
+            1.012681491762995
+          ],
+          "median": 0.9949581007553091,
+          "ratios": [
+            0.8854686457882003,
+            1.0034382368297068,
+            0.9665480228433894,
+            1.012681491762995,
+            0.9949581007553091
+          ]
+        }
+      },
+      "smaller_case_regressions": []
+    }
+  },
+  "selected_calls": 88,
+  "threads": 1
+}

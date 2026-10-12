@@ -1,0 +1,29 @@
+{
+  "archive_sha256": "93808969fe84a1a3eaf169908f8295b1f763d09b32abb4bc3389d544845621be",
+  "fresh_restore_audits": [
+    {
+      "directory": "native-v3",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 12,
+        "promotion_eligible": false
+      }
+    },
+    {
+      "directory": "native-v4",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 12,
+        "promotion_eligible": false
+      }
+    },
+    {
+      "directory": "native-failure-v1",
+      "audit": {
+        "status": "VERIFIED",
+        "trial_receipts": 6,
+        "promotion_eligible": false
+      }
+    }
+  ]
+}

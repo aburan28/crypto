@@ -1,0 +1,160 @@
+{
+  "classification": "compiler-resource diagnostic; not a runtime measurement",
+  "gpu_executed": false,
+  "gpu_speedup": null,
+  "rho_speedup": null,
+  "inputs": {
+    "ptxas-control-02.json": "36bfbaf0552fc9f32fbdfc5e68d3f07478cfa1fa57a9bb816b8c2f40ab249a03",
+    "ptxas-nounroll-01.stdout.json": "60ccddbb8a8f9bbd906fb0044bd6dfdebdc98d176f2fc573943d5f66c42753a0"
+  },
+  "source_sha256": "6d86069b3c28a09e83d341b68836d015e03e3759ee372378932fb677c87982a7",
+  "rows": [
+    {
+      "arch": "compute_120",
+      "m": 83,
+      "fast_square": 0,
+      "control": {
+        "registers_per_thread": 56,
+        "stack_bytes": 16,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "candidate": {
+        "registers_per_thread": 56,
+        "stack_bytes": 16,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "register_ratio": 1.0
+    },
+    {
+      "arch": "compute_120",
+      "m": 83,
+      "fast_square": 1,
+      "control": {
+        "registers_per_thread": 255,
+        "stack_bytes": 1560,
+        "spill_store_bytes": 5680,
+        "spill_load_bytes": 5908
+      },
+      "candidate": {
+        "registers_per_thread": 48,
+        "stack_bytes": 16,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "register_ratio": 0.18823529411764706
+    },
+    {
+      "arch": "compute_120",
+      "m": 131,
+      "fast_square": 0,
+      "control": {
+        "registers_per_thread": 80,
+        "stack_bytes": 24,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "candidate": {
+        "registers_per_thread": 80,
+        "stack_bytes": 24,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "register_ratio": 1.0
+    },
+    {
+      "arch": "compute_120",
+      "m": 131,
+      "fast_square": 1,
+      "control": {
+        "registers_per_thread": 96,
+        "stack_bytes": 24,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "candidate": {
+        "registers_per_thread": 70,
+        "stack_bytes": 24,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "register_ratio": 0.7291666666666666
+    },
+    {
+      "arch": "compute_89",
+      "m": 83,
+      "fast_square": 0,
+      "control": {
+        "registers_per_thread": 56,
+        "stack_bytes": 16,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "candidate": {
+        "registers_per_thread": 56,
+        "stack_bytes": 16,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "register_ratio": 1.0
+    },
+    {
+      "arch": "compute_89",
+      "m": 83,
+      "fast_square": 1,
+      "control": {
+        "registers_per_thread": 255,
+        "stack_bytes": 584,
+        "spill_store_bytes": 1840,
+        "spill_load_bytes": 1852
+      },
+      "candidate": {
+        "registers_per_thread": 48,
+        "stack_bytes": 16,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "register_ratio": 0.18823529411764706
+    },
+    {
+      "arch": "compute_89",
+      "m": 131,
+      "fast_square": 0,
+      "control": {
+        "registers_per_thread": 66,
+        "stack_bytes": 24,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "candidate": {
+        "registers_per_thread": 66,
+        "stack_bytes": 24,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "register_ratio": 1.0
+    },
+    {
+      "arch": "compute_89",
+      "m": 131,
+      "fast_square": 1,
+      "control": {
+        "registers_per_thread": 96,
+        "stack_bytes": 24,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "candidate": {
+        "registers_per_thread": 56,
+        "stack_bytes": 24,
+        "spill_store_bytes": 0,
+        "spill_load_bytes": 0
+      },
+      "register_ratio": 0.5833333333333334
+    }
+  ],
+  "static_screen_passed": true,
+  "device_correctness": "pending",
+  "runtime_comparison": "pending"
+}

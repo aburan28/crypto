@@ -1,0 +1,1012 @@
+{
+  "classification": "accounting correction; no new execution or promotion",
+  "corrected_RESULTS_sha256": "3b7bcc2ce3d49b544fffd9f28591520fbcba7eb51a3642af814a0e4eb6678c7a",
+  "original_RESULTS_sha256": "55c54876f997c5cb643fa6dc3ff6ad36290e94289536318ec53026cd7c490be7",
+  "original_export_commit": "c746a990",
+  "rows": [
+    {
+      "alias": "incumbent",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        }
+      },
+      "stage": "aa"
+    },
+    {
+      "alias": "aa_control",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        }
+      },
+      "stage": "aa"
+    },
+    {
+      "alias": "incumbent",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        }
+      },
+      "stage": "confirmation"
+    },
+    {
+      "alias": "ic_online",
+      "fields": {
+        "cold_Ir_over_cold_rho": {
+          "after": 0.7180249979943876,
+          "before": null
+        },
+        "cold_Ir_over_ic": {
+          "after": 1.0157103529285647,
+          "before": null
+        },
+        "cold_time_over_ic": {
+          "after": 1.0117326662414394,
+          "before": null
+        },
+        "comparison": {
+          "after": {
+            "candidate": "ic_online",
+            "candidate_over_baseline": 1.0157103529285647,
+            "ci95": [
+              1.0070835993423146,
+              1.0247952980907908
+            ],
+            "eligible": true,
+            "independent_curve_blocks": 6,
+            "native_wall_candidate_over_baseline": 1.0117326662414394,
+            "native_wall_ci95": [
+              0.9785189282336912,
+              1.0468596209860985
+            ],
+            "native_wall_per_cell": {
+              "n17a1": 0.9859325119514335,
+              "n19a0": 1.0027893770619607,
+              "n23a0": 1.0427824448133671,
+              "n23a1": 1.0014319687542124,
+              "n29a1": 1.0546941891872854,
+              "n31a0": 0.9849087738521574
+            },
+            "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+            "online": {
+              "boundary": "one supplied public point after reusable preparation through scalar replay",
+              "candidate_over_baseline": 1.0073656368311839,
+              "ci95": [
+                0.9952376058854902,
+                1.0189931382338986
+              ],
+              "per_cell": {
+                "n17a1": 1.0044870969119903,
+                "n19a0": 0.9845874078796925,
+                "n23a0": 1.0147168000054747,
+                "n23a1": 1.0059497519569136,
+                "n29a1": 1.0197908605704527,
+                "n31a0": 1.0150604327873656
+              }
+            },
+            "paired_cases": 72,
+            "per_cell": {
+              "n17a1": 1.0047590604279906,
+              "n19a0": 1.0071094147195934,
+              "n23a0": 1.0258658530484894,
+              "n23a1": 1.0329096621488965,
+              "n29a1": 1.0028405301254568,
+              "n31a0": 1.0211649408696415
+            },
+            "speedup": 0.9845326446823471
+          },
+          "before": null
+        },
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        },
+        "online_over_ic": {
+          "after": 1.0073656368311839,
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.492256066224663,
+          "before": null
+        }
+      },
+      "stage": "confirmation"
+    },
+    {
+      "alias": "rho",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 0.7374678934995811,
+          "before": 0.7374678934995812
+        }
+      },
+      "stage": "confirmation"
+    },
+    {
+      "alias": "rho_online",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        }
+      },
+      "stage": "confirmation"
+    },
+    {
+      "alias": "stop5_word",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.0219292766882875,
+          "before": 5.058918983932264
+        }
+      },
+      "stage": "confirmation"
+    },
+    {
+      "alias": "incumbent",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.441898744350396,
+          "before": 5.441898744350395
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "batch4_stop6_word",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.529523794566452,
+          "before": 5.503667444953698
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "compatibility",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.467796742674418,
+          "before": 5.442229032064511
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "cover_table",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.718913919303352,
+          "before": 5.692171971317154
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "half_table",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.742168224365234,
+          "before": 5.715317538002276
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "ic_online",
+      "fields": {
+        "cold_Ir_over_cold_rho": {
+          "after": 0.7084539941210951,
+          "before": null
+        },
+        "cold_Ir_over_ic": {
+          "after": 1.018432259758905,
+          "before": null
+        },
+        "cold_time_over_ic": {
+          "after": 1.0273851343186278,
+          "before": null
+        },
+        "comparison": {
+          "after": {
+            "candidate": "ic_online",
+            "candidate_over_baseline": 1.018432259758905,
+            "ci95": [
+              1.0080314598372697,
+              1.0297300388825172
+            ],
+            "eligible": true,
+            "independent_curve_blocks": 5,
+            "native_wall_candidate_over_baseline": 1.0273851343186278,
+            "native_wall_ci95": [
+              0.9579027926673169,
+              1.0958911060132996
+            ],
+            "native_wall_per_cell": {
+              "n17a1": 1.0646520518106595,
+              "n19a0": 0.9282157300915741,
+              "n23a0": 1.0738130519087792,
+              "n23a1": 1.0252404529110857,
+              "n31a0": 1.052095966527045
+            },
+            "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+            "online": {
+              "boundary": "one supplied public point after reusable preparation through scalar replay",
+              "candidate_over_baseline": 0.9953239464059888,
+              "ci95": [
+                0.9507998892338083,
+                1.0337531730892622
+              ],
+              "per_cell": {
+                "n17a1": 0.9171371192247767,
+                "n19a0": 0.9939193902718155,
+                "n23a0": 1.0447621569496381,
+                "n23a1": 1.008052091861332,
+                "n31a0": 1.0175046940753418
+              }
+            },
+            "paired_cases": 15,
+            "per_cell": {
+              "n17a1": 1.0058769061044885,
+              "n19a0": 1.0070087530483263,
+              "n23a0": 1.027482437896698,
+              "n23a1": 1.037555163141307,
+              "n31a0": 1.014605124389551
+            },
+            "speedup": 0.9819013394535749
+          },
+          "before": null
+        },
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        },
+        "online_over_ic": {
+          "after": 0.9953239464059888,
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.46746490326142,
+          "before": null
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "rho",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 0.7346681310183675,
+          "before": 0.7346681310183676
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "rho_online",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "stop5_word",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 4.78475370963941,
+          "before": 4.762379944858992
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "stop6_half",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.135701831136775,
+          "before": 5.111687014131519
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "stop6_word",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.0653389336344095,
+          "before": 5.041653137308903
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "stop6_word_half",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.0560150998586,
+          "before": 5.032372902279532
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "stop7_half",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.406870328959333,
+          "before": 5.38158751352525
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "word_half",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.689861278879729,
+          "before": 5.663255182597199
+        }
+      },
+      "stage": "development"
+    },
+    {
+      "alias": "incumbent",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.603639674768151,
+          "before": 5.603639674768153
+        }
+      },
+      "stage": "replay"
+    },
+    {
+      "alias": "ic_online",
+      "fields": {
+        "cold_Ir_over_cold_rho": {
+          "after": 0.7180266824710175,
+          "before": null
+        },
+        "cold_Ir_over_ic": {
+          "after": 1.0157107450809526,
+          "before": null
+        },
+        "cold_time_over_ic": {
+          "after": 1.0314896655544792,
+          "before": null
+        },
+        "comparison": {
+          "after": {
+            "candidate": "ic_online",
+            "candidate_over_baseline": 1.0157107450809526,
+            "ci95": [
+              1.0070819301241347,
+              1.0247954319641603
+            ],
+            "eligible": true,
+            "independent_curve_blocks": 6,
+            "native_wall_candidate_over_baseline": 1.0314896655544792,
+            "native_wall_ci95": [
+              0.9940544033797325,
+              1.0648904912968944
+            ],
+            "native_wall_per_cell": {
+              "n17a1": 0.9678334336792914,
+              "n19a0": 1.0398153824283507,
+              "n23a0": 1.0750851508071466,
+              "n23a1": 1.0302184837696031,
+              "n29a1": 1.049196000284219,
+              "n31a0": 1.0299202593810264
+            },
+            "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+            "online": {
+              "boundary": "one supplied public point after reusable preparation through scalar replay",
+              "candidate_over_baseline": 1.0088003346759713,
+              "ci95": [
+                0.9946494685680963,
+                1.020802343628757
+              ],
+              "per_cell": {
+                "n17a1": 1.0097132328226468,
+                "n19a0": 0.9778357105028127,
+                "n23a0": 1.0207096505258753,
+                "n23a1": 1.0136172143563449,
+                "n29a1": 1.0199356577410605,
+                "n31a0": 1.0116222910629338
+              }
+            },
+            "paired_cases": 72,
+            "per_cell": {
+              "n17a1": 1.004756715313895,
+              "n19a0": 1.0071179954155505,
+              "n23a0": 1.0258660750134885,
+              "n23a1": 1.0329094431623862,
+              "n29a1": 1.0028382574841275,
+              "n31a0": 1.021163299134607
+            },
+            "speedup": 0.9845322645674085
+          },
+          "before": null
+        },
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        },
+        "online_over_ic": {
+          "after": 1.0088003346759713,
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.554755963248219,
+          "before": null
+        }
+      },
+      "stage": "replay"
+    },
+    {
+      "alias": "rho",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        }
+      },
+      "stage": "replay"
+    },
+    {
+      "alias": "rho_online",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        }
+      },
+      "stage": "replay"
+    },
+    {
+      "alias": "stop5_word",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.130908564435435,
+          "before": 5.1760622769942755
+        }
+      },
+      "stage": "replay"
+    },
+    {
+      "alias": "incumbent",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.55285525205107,
+          "before": 5.552855252051069
+        }
+      },
+      "stage": "selection"
+    },
+    {
+      "alias": "batch4_stop6_word",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.628167019299275,
+          "before": 5.657139469721138
+        }
+      },
+      "stage": "selection"
+    },
+    {
+      "alias": "half_table",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.739506784579454,
+          "before": 5.769052385339341
+        }
+      },
+      "stage": "selection"
+    },
+    {
+      "alias": "ic_online",
+      "fields": {
+        "cold_Ir_over_cold_rho": {
+          "after": 0.6612478458200496,
+          "before": null
+        },
+        "cold_Ir_over_ic": {
+          "after": 1.015567934258134,
+          "before": null
+        },
+        "cold_time_over_ic": {
+          "after": 1.0426948740714812,
+          "before": null
+        },
+        "comparison": {
+          "after": {
+            "candidate": "ic_online",
+            "candidate_over_baseline": 1.015567934258134,
+            "ci95": [
+              1.0074815991004045,
+              1.024729365096295
+            ],
+            "eligible": true,
+            "independent_curve_blocks": 5,
+            "native_wall_candidate_over_baseline": 1.0426948740714812,
+            "native_wall_ci95": [
+              0.9942761533418988,
+              1.0939834199177907
+            ],
+            "native_wall_per_cell": {
+              "n17a1": 1.0336804713264864,
+              "n19a0": 0.9955691284456093,
+              "n23a0": 1.0608493114146837,
+              "n23a1": 0.9966054376586632,
+              "n31a0": 1.1327954835185905
+            },
+            "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+            "online": {
+              "boundary": "one supplied public point after reusable preparation through scalar replay",
+              "candidate_over_baseline": 1.0051477595321026,
+              "ci95": [
+                0.9935085214262788,
+                1.0177592735703036
+              ],
+              "per_cell": {
+                "n17a1": 0.9957387438399942,
+                "n19a0": 0.9998476511516626,
+                "n23a0": 1.0072080216559494,
+                "n23a1": 1.0197557495189808,
+                "n31a0": 1.0033558099828541
+              }
+            },
+            "paired_cases": 15,
+            "per_cell": {
+              "n17a1": 1.0043817322415127,
+              "n19a0": 1.0074452570240673,
+              "n23a0": 1.0190535851129736,
+              "n23a1": 1.0307550822799758,
+              "n31a0": 1.0164174953299263
+            },
+            "speedup": 0.9846707111036286
+          },
+          "before": null
+        },
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        },
+        "online_over_ic": {
+          "after": 1.0051477595321026,
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.524416882385461,
+          "before": null
+        }
+      },
+      "stage": "selection"
+    },
+    {
+      "alias": "rho",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 0.7370490764380837,
+          "before": 0.7370490764380836
+        }
+      },
+      "stage": "selection"
+    },
+    {
+      "alias": "rho_online",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        }
+      },
+      "stage": "selection"
+    },
+    {
+      "alias": "stop5_word",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.40316343985228,
+          "before": 5.430977625953286
+        }
+      },
+      "stage": "selection"
+    },
+    {
+      "alias": "stop6_half",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.47233560922288,
+          "before": 5.500505877018121
+        }
+      },
+      "stage": "selection"
+    },
+    {
+      "alias": "stop6_word",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.469876877449086,
+          "before": 5.498034488284402
+        }
+      },
+      "stage": "selection"
+    },
+    {
+      "alias": "word_half",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.706395087238908,
+          "before": 5.735770236943185
+        }
+      },
+      "stage": "selection"
+    },
+    {
+      "alias": "incumbent",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.779612856108023,
+          "before": 5.779612856108024
+        }
+      },
+      "stage": "smoke"
+    },
+    {
+      "alias": "batch4_stop6_word",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.833255978810513,
+          "before": 5.962674355467519
+        }
+      },
+      "stage": "smoke"
+    },
+    {
+      "alias": "compatibility",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.824901270581856,
+          "before": 5.954134287162034
+        }
+      },
+      "stage": "smoke"
+    },
+    {
+      "alias": "cover_table",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.897845528766395,
+          "before": 6.028696908661158
+        }
+      },
+      "stage": "smoke"
+    },
+    {
+      "alias": "half_table",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.94078744124738,
+          "before": 6.072591543365208
+        }
+      },
+      "stage": "smoke"
+    },
+    {
+      "alias": "ic_online",
+      "fields": {
+        "cold_Ir_over_cold_rho": {
+          "after": 0.6830145906634825,
+          "before": null
+        },
+        "cold_Ir_over_ic": {
+          "after": 1.0213205906332639,
+          "before": null
+        },
+        "cold_time_over_ic": {
+          "after": 0.9440230771039504,
+          "before": null
+        },
+        "comparison": {
+          "after": {
+            "candidate": "ic_online",
+            "candidate_over_baseline": 1.0213205906332639,
+            "ci95": [
+              1.0099414237489173,
+              1.033587114824026
+            ],
+            "eligible": true,
+            "independent_curve_blocks": 5,
+            "native_wall_candidate_over_baseline": 0.9440230771039504,
+            "native_wall_ci95": [
+              0.8677517672148573,
+              1.0269982773589132
+            ],
+            "native_wall_per_cell": {
+              "n17a1": 0.8141817201401995,
+              "n19a0": 0.9778942281744412,
+              "n23a0": 1.0248770034044714,
+              "n23a1": 1.0546457285831534,
+              "n31a0": 0.8712072445645055
+            },
+            "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+            "online": {
+              "boundary": "one supplied public point after reusable preparation through scalar replay",
+              "candidate_over_baseline": 1.022186301634477,
+              "ci95": [
+                0.9784038710396035,
+                1.0805944515481474
+              ],
+              "per_cell": {
+                "n17a1": 0.9539359774511778,
+                "n19a0": 0.9838064466497423,
+                "n23a0": 1.0179654229066193,
+                "n23a1": 1.0270652583930593,
+                "n31a0": 1.137340030794861
+              }
+            },
+            "paired_cases": 5,
+            "per_cell": {
+              "n17a1": 1.0040259681902508,
+              "n19a0": 1.010207391950576,
+              "n23a0": 1.0338195898107425,
+              "n23a1": 1.0376245557563415,
+              "n31a0": 1.0213390867189214
+            },
+            "speedup": 0.9791244876204404
+          },
+          "before": null
+        },
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        },
+        "online_over_ic": {
+          "after": 1.022186301634477,
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.65416778415678,
+          "before": null
+        }
+      },
+      "stage": "smoke"
+    },
+    {
+      "alias": "rho",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        }
+      },
+      "stage": "smoke"
+    },
+    {
+      "alias": "rho_online",
+      "fields": {
+        "online_ic_reference": {
+          "after": "incumbent",
+          "before": null
+        }
+      },
+      "stage": "smoke"
+    },
+    {
+      "alias": "stop5_word",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.441601381051939,
+          "before": 5.562330390666545
+        }
+      },
+      "stage": "smoke"
+    },
+    {
+      "alias": "stop6_half",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.996260062372677,
+          "before": 6.129294896795244
+        }
+      },
+      "stage": "smoke"
+    },
+    {
+      "alias": "stop6_word",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.754006015580367,
+          "before": 5.881666128648627
+        }
+      },
+      "stage": "smoke"
+    },
+    {
+      "alias": "stop6_word_half",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.877707802909945,
+          "before": 6.008112401144623
+        }
+      },
+      "stage": "smoke"
+    },
+    {
+      "alias": "stop7_half",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 6.056305889960945,
+          "before": 6.190672919226278
+        }
+      },
+      "stage": "smoke"
+    },
+    {
+      "alias": "word_half",
+      "fields": {
+        "online_ic_reference": {
+          "after": "ic_online",
+          "before": null
+        },
+        "rho_online_over_IC_online": {
+          "after": 5.7535924252931805,
+          "before": 5.881243362322576
+        }
+      },
+      "stage": "smoke"
+    }
+  ],
+  "schema_version": 1,
+  "unchanged": [
+    "raw evidence archive",
+    "frozen evaluator and decision",
+    "RUNS.csv",
+    "paired per-target online rows",
+    "measured costs and phase ledgers"
+  ]
+}

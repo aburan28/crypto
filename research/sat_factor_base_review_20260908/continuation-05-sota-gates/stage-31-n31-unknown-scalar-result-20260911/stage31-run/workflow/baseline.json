@@ -1,0 +1,131 @@
+{
+  "automorphism_discount": {
+    "family": "signed Frobenius classes, A = 2n",
+    "n": 31,
+    "sqrt_2n": 7.874007874011811
+  },
+  "claim_boundary": "public_hash_unknown_scalar",
+  "elapsed_seconds": 0.297816427,
+  "ic": {
+    "amortised_seconds_per_target": 49.489658460799994,
+    "descent_seconds_per_target": 0.7633473812,
+    "descent_seconds_total": 3.816736906,
+    "descent_trials_total": 6,
+    "pair_table_seconds": 0.0,
+    "precompute_seconds": 243.631555398,
+    "verified": 5
+  },
+  "n": 31,
+  "ratio": {
+    "amortised": 0.0011841628094164196,
+    "charged": 0.07677214128628232
+  },
+  "rho": {
+    "iterations_total": 1444,
+    "max_iterations_per_restart": 268435456,
+    "seconds_per_target": 0.058603813000000005,
+    "seconds_total": 0.293019065,
+    "seed": 5931241263826122831,
+    "verified": 5
+  },
+  "subgroup_order": "1439393",
+  "targets": 5,
+  "targets_detail": [
+    {
+      "index": 0,
+      "iterations": 844,
+      "recovered": "387577",
+      "restarts": 6,
+      "seconds": 0.161167545,
+      "target": {
+        "kind": "public_hash_to_curve_cofactor",
+        "public_hash_counter": 0,
+        "public_hash_seed": 31001,
+        "target_scalar_constructed": false,
+        "x": "2120207720",
+        "y": "1880876365"
+      },
+      "verified": true,
+      "walk_group_additions": 2532
+    },
+    {
+      "index": 1,
+      "iterations": 69,
+      "recovered": "157369",
+      "restarts": 1,
+      "seconds": 0.020674619,
+      "target": {
+        "kind": "public_hash_to_curve_cofactor",
+        "public_hash_counter": 0,
+        "public_hash_seed": 31002,
+        "target_scalar_constructed": false,
+        "x": "111379212",
+        "y": "555577684"
+      },
+      "verified": true,
+      "walk_group_additions": 207
+    },
+    {
+      "index": 2,
+      "iterations": 101,
+      "recovered": "88334",
+      "restarts": 1,
+      "seconds": 0.024586252,
+      "target": {
+        "kind": "public_hash_to_curve_cofactor",
+        "public_hash_counter": 1,
+        "public_hash_seed": 31003,
+        "target_scalar_constructed": false,
+        "x": "673639366",
+        "y": "1091840695"
+      },
+      "verified": true,
+      "walk_group_additions": 303
+    },
+    {
+      "index": 3,
+      "iterations": 162,
+      "recovered": "1049842",
+      "restarts": 2,
+      "seconds": 0.042827913,
+      "target": {
+        "kind": "public_hash_to_curve_cofactor",
+        "public_hash_counter": 0,
+        "public_hash_seed": 31004,
+        "target_scalar_constructed": false,
+        "x": "985859144",
+        "y": "1812606916"
+      },
+      "verified": true,
+      "walk_group_additions": 486
+    },
+    {
+      "index": 4,
+      "iterations": 268,
+      "recovered": "1409351",
+      "restarts": 1,
+      "seconds": 0.043762736,
+      "target": {
+        "kind": "public_hash_to_curve_cofactor",
+        "public_hash_counter": 0,
+        "public_hash_seed": 31005,
+        "target_scalar_constructed": false,
+        "x": "2048889642",
+        "y": "1570827429"
+      },
+      "verified": true,
+      "walk_group_additions": 804
+    }
+  ],
+  "timing_class": {
+    "amortised": "select + collect + logs + pair-table wall divided over the targets, plus descent",
+    "charged": "algorithmic_charged: per-target descent wall (one decomposition and a lookup) against the ρ walk on the same target in the same process",
+    "whole_process": "the same precompute counted once against the ρ total"
+  },
+  "verdict": {
+    "amortised_crossover": false,
+    "charged_crossover": false,
+    "charged_margin": -12.025558272121303,
+    "whole_process_crossover": false
+  }
+}

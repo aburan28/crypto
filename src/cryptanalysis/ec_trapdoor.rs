@@ -105,6 +105,8 @@
 //!   `2^{m−1}` and a `type_i_genus` boolean is reported separately.
 
 use crate::binary_ecc::{F2mElement, IrreduciblePoly};
+use num_bigint::BigUint;
+use num_traits::{One, Zero};
 
 /// A field tower `F_2 ⊂ F_{2^l} ⊂ F_{2^N}` with `N = n·l`.
 ///
@@ -155,7 +157,7 @@ impl FieldTower {
     /// `true` iff `x ∈ F_{2^{sub_l}}`, where `sub_l` must divide
     /// `big_n`.  Equivalent to `x^{2^{sub_l}} = x`.
     pub fn is_in_subfield(&self, x: &F2mElement, sub_l: u32) -> bool {
-        assert!(self.big_n % sub_l == 0, "sub_l must divide N");
+        assert!(self.big_n.is_multiple_of(sub_l), "sub_l must divide N");
         x.square_k_times(sub_l, &self.irr) == *x
     }
 
@@ -164,7 +166,7 @@ impl FieldTower {
     /// that `x ∈ F_{2^{i·l}}`.  Always divides `n`.
     pub fn frobenius_orbit_length(&self, x: &F2mElement) -> u32 {
         // Generate divisors of n in ascending order and test.
-        let mut divisors: Vec<u32> = (1..=self.n).filter(|d| self.n % d == 0).collect();
+        let mut divisors: Vec<u32> = (1..=self.n).filter(|d| self.n.is_multiple_of(*d)).collect();
         divisors.sort_unstable();
         for d in divisors {
             // σ^d(x) = x  ⇔  x ∈ F_{2^{d·l}}.
@@ -185,7 +187,7 @@ pub fn f2_dim(elements: &[F2mElement], m: u32) -> u32 {
     if elements.is_empty() {
         return 0;
     }
-    let n_words = ((m + 63) / 64) as usize;
+    let n_words = m.div_ceil(64) as usize;
     // Copy bit-vectors into a mutable matrix.
     let mut rows: Vec<Vec<u64>> = elements
         .iter()
@@ -279,11 +281,27 @@ pub fn magic_number_full(tower: &FieldTower, a: &F2mElement, b: &F2mElement) -> 
 /// `2^{m−1} − 1` (type I).  Distinguishing the two requires
 /// checking whether `σ^m(√b) = √b` (orbit length divides `m`); see
 /// [`ghs_genus_with_type`] for the refined version.
-pub fn ghs_genus(magic_m: u32) -> u32 {
+pub fn ghs_genus(magic_m: u32) -> BigUint {
     if magic_m == 0 {
-        0
+        BigUint::zero()
     } else {
-        1u32 << (magic_m - 1)
+        BigUint::one() << (magic_m - 1)
+    }
+}
+
+/// GHS genus for a known type branch, without fixed-width truncation.
+///
+/// This is the common exact-arithmetic primitive used by
+/// [`ghs_genus_with_type`] and [`audit_curve`].  Keeping the power of two as a
+/// [`BigUint`] matters for ordinary cryptographic field degrees: a perfectly
+/// ordinary screen can have `magic_m >= 33`, where the former `u32` shift
+/// overflowed before the result could be reported.
+pub fn ghs_genus_for_type(magic_m: u32, type_i: bool) -> BigUint {
+    let generic = ghs_genus(magic_m);
+    if type_i && magic_m != 0 {
+        generic - BigUint::one()
+    } else {
+        generic
     }
 }
 
@@ -291,19 +309,15 @@ pub fn ghs_genus(magic_m: u32) -> u32 {
 /// occurs when the `σ`-orbit of `√b` has length exactly `m`
 /// (closed orbit, no `F_2`-linear surprises), which is the *most
 /// favourable* trapdoor case.
-pub fn ghs_genus_with_type(tower: &FieldTower, b: &F2mElement) -> (u32, bool) {
+pub fn ghs_genus_with_type(tower: &FieldTower, b: &F2mElement) -> (BigUint, bool) {
     let m = magic_number(tower, &F2mElement::zero(tower.big_n), b);
     if m == 0 {
-        return (0, false);
+        return (BigUint::zero(), false);
     }
     let sqrt_b = tower.sqrt(b);
     let orbit_len = tower.frobenius_orbit_length(&sqrt_b);
     let type_i = orbit_len == m;
-    let g = if type_i {
-        (1u32 << (m - 1)).saturating_sub(1)
-    } else {
-        1u32 << (m - 1)
-    };
+    let g = ghs_genus_for_type(m, type_i);
     (g, type_i)
 }
 
@@ -319,7 +333,7 @@ pub fn audit_curve(
 ) -> Vec<DescentRow> {
     let mut rows = Vec::new();
     for l in 1..big_n {
-        if big_n % l != 0 {
+        if !big_n.is_multiple_of(l) {
             continue;
         }
         let n = big_n / l;
@@ -328,7 +342,13 @@ pub fn audit_curve(
         }
         let tower = FieldTower::new(big_n, n, l, big_irr.clone());
         let m = magic_number_full(&tower, a, b);
-        let (g, type_i) = ghs_genus_with_type(&tower, b);
+        // The full audit magic number may include generators contributed by
+        // `a`, whereas `ghs_genus_with_type` intentionally exposes the
+        // historical b-only helper.  Derive the type from b's orbit, then
+        // apply it to the same full magic number stored in this row.
+        let sqrt_b = tower.sqrt(b);
+        let type_i = tower.frobenius_orbit_length(&sqrt_b) == m;
+        let g = ghs_genus_for_type(m, type_i);
         rows.push(DescentRow {
             n,
             l,
@@ -344,7 +364,7 @@ pub fn audit_curve(
 }
 
 /// One row of an [`audit_curve`] report.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DescentRow {
     /// `[K : k]` for this factorisation.
     pub n: u32,
@@ -353,7 +373,7 @@ pub struct DescentRow {
     /// Hess magic number `m_E(σ)` for this factorisation.
     pub magic_m: u32,
     /// GHS genus `2^{m−1}` or `2^{m−1} − 1`.
-    pub genus: u32,
+    pub genus: BigUint,
     /// Type-I (closed σ-orbit on `√b`)?
     pub type_i: bool,
 }
@@ -393,7 +413,7 @@ pub fn construct_trapdoor_curve(
     // over small bit-patterns suffices for the toy parameters this
     // module targets.
     let sub_l = m_target * l;
-    let strictly_below_l = (m_target - 1) * l;
+    let _strictly_below_l = (m_target - 1) * l;
 
     let mut tried = 0u32;
     let mut candidate_bits = 1u64;
@@ -430,7 +450,7 @@ pub fn construct_trapdoor_curve(
             continue;
         }
         // Recover b = (√b)².
-        let b = sqrt_b.square(&big_irr);
+        let b = sqrt_b.square(big_irr);
         if b.is_zero() {
             continue;
         }
@@ -612,7 +632,18 @@ mod tests {
         let a = F2mElement::zero(8);
         let m = magic_number(&tower, &a, &b);
         assert_eq!(m, 1);
-        assert_eq!(ghs_genus(m), 1);
+        assert_eq!(ghs_genus(m), BigUint::one());
+    }
+
+    #[test]
+    fn genus_is_exact_beyond_u32_shift_width() {
+        assert_eq!(ghs_genus(32), BigUint::from(1u32) << 31usize);
+        assert_eq!(ghs_genus(33), BigUint::from(1u32) << 32usize);
+        assert_eq!(ghs_genus(131), BigUint::from(1u32) << 130usize);
+        assert_eq!(
+            ghs_genus_for_type(131, true),
+            (BigUint::from(1u32) << 130usize) - BigUint::from(1u32)
+        );
     }
 
     #[test]
@@ -624,7 +655,7 @@ mod tests {
         let tc = constructed.expect("found b with m=2");
         assert_eq!(tc.row.magic_m, 2);
         // Genus should be 2 (or 1 if type-I).  Either way ≤ 2.
-        assert!(tc.row.genus <= 2);
+        assert!(tc.row.genus <= BigUint::from(2u32));
     }
 
     #[test]

@@ -89,7 +89,10 @@ pub fn cpa_recover_byte(
     assert_eq!(plaintexts.len(), traces.len());
     let n = traces.len() as f64;
     let mean_trace: f64 = traces.iter().sum::<f64>() / n;
-    let var_trace: f64 = traces.iter().map(|&t| (t - mean_trace).powi(2)).sum::<f64>();
+    let var_trace: f64 = traces
+        .iter()
+        .map(|&t| (t - mean_trace).powi(2))
+        .sum::<f64>();
     let mut corrs = [0.0f64; 256];
     for k_guess in 0u32..256 {
         let k = k_guess as u8;
@@ -98,7 +101,10 @@ pub fn cpa_recover_byte(
             .map(|p| hw(SBOX[(p[byte_pos] ^ k) as usize]) as f64)
             .collect();
         let mean_pred: f64 = predicted.iter().sum::<f64>() / n;
-        let var_pred: f64 = predicted.iter().map(|&v| (v - mean_pred).powi(2)).sum::<f64>();
+        let var_pred: f64 = predicted
+            .iter()
+            .map(|&v| (v - mean_pred).powi(2))
+            .sum::<f64>();
         let cov: f64 = predicted
             .iter()
             .zip(traces.iter())
@@ -199,7 +205,10 @@ pub fn format_cpa_report(report: &CpaReport, recovered: &[u8; 16], true_key: &[u
         if report.bytes_correct == 16 {
             paint("✓ FULL KEY RECOVERED", FG_BRIGHT_GREEN)
         } else if report.bytes_correct >= 12 {
-            paint("≈ mostly recovered", crate::visualize::color::FG_BRIGHT_YELLOW)
+            paint(
+                "≈ mostly recovered",
+                crate::visualize::color::FG_BRIGHT_YELLOW,
+            )
         } else {
             paint("✗ attack fails at this noise level", FG_BRIGHT_RED)
         }

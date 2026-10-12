@@ -1,0 +1,77 @@
+n=9 incidence target 0
+   wdsat_xg       error:rc=-11 conflicts None       0.00s
+   wdsat_plain    error:rc=-11 conflicts None       0.00s
+   cryptominisat  SAT      conflicts None       2.58s witness ok
+n=9 incidence target 1
+   wdsat_xg       error:rc=-11 conflicts None       0.00s
+   wdsat_plain    error:rc=-11 conflicts None       0.00s
+   cryptominisat  SAT      conflicts None       1.52s witness ok
+n=9 incidence target 2
+   wdsat_xg       error:rc=-11 conflicts None       0.00s
+   wdsat_plain    error:rc=-11 conflicts None       0.00s
+   cryptominisat  SAT      conflicts None       0.40s witness ok
+n=9 incidence target 3
+   wdsat_xg       error:rc=-11 conflicts None       0.00s
+   wdsat_plain    error:rc=-11 conflicts None       0.00s
+   cryptominisat  SAT      conflicts None       0.41s witness ok
+n=9 incidence target 4
+   wdsat_xg       error:rc=-11 conflicts None       0.00s
+   wdsat_plain    error:rc=-11 conflicts None       0.00s
+   cryptominisat  SAT      conflicts None       2.05s witness ok
+n=9 incidence target 5
+   wdsat_xg       error:rc=-11 conflicts None       0.00s
+   wdsat_plain    error:rc=-11 conflicts None       0.00s
+   cryptominisat  SAT      conflicts None       0.62s witness ok
+n=9 incidence target 6
+   wdsat_xg       error:rc=-11 conflicts None       0.00s
+   wdsat_plain    error:rc=-11 conflicts None       0.00s
+   cryptominisat  timeout  conflicts None       4.96s
+n=9 incidence target 7
+   wdsat_xg       error:rc=-11 conflicts None       0.00s
+   wdsat_plain    error:rc=-11 conflicts None       0.00s
+   cryptominisat  SAT      conflicts None       1.15s witness ok
+n=9 norm target 0
+   wdsat_xg       SAT      conflicts 62         4.21s witness ok
+   wdsat_plain    SAT      conflicts 79299      1.49s witness ok
+   cryptominisat  SAT      conflicts None       0.19s witness ok
+n=9 norm target 1
+   wdsat_xg       SAT      conflicts 43         2.40s witness ok
+   wdsat_plain    SAT      conflicts 38540      0.65s witness ok
+   cryptominisat  SAT      conflicts None       0.73s witness ok
+n=9 norm target 2
+   wdsat_xg       SAT      conflicts 100        2.00s witness ok
+   wdsat_plain    SAT      conflicts 156016     1.13s witness ok
+   cryptominisat  SAT      conflicts None       0.23s witness ok
+n=9 norm target 3
+   wdsat_xg       SAT      conflicts 62         1.96s witness ok
+   wdsat_plain    SAT      conflicts 79004      0.87s witness ok
+   cryptominisat  SAT      conflicts None       0.29s witness ok
+n=9 norm target 4
+   wdsat_xg       SAT      conflicts 50         1.64s witness ok
+   wdsat_plain    SAT      conflicts 54007      0.74s witness ok
+   cryptominisat  SAT      conflicts None       0.09s witness ok
+n=9 norm target 5
+   wdsat_xg       SAT      conflicts 42         2.08s witness ok
+   wdsat_plain    SAT      conflicts 34930      0.60s witness ok
+   cryptominisat  SAT      conflicts None       0.47s witness ok
+n=9 norm target 6
+   wdsat_xg       SAT      conflicts 69         1.66s witness ok
+   wdsat_plain    SAT      conflicts 93661      0.84s witness ok
+   cryptominisat  SAT      conflicts None       1.16s witness ok
+n=9 norm target 7
+   wdsat_xg       SAT      conflicts 165        2.07s witness ok
+   wdsat_plain    SAT      conflicts 290260     1.64s witness ok
+   cryptominisat  SAT      conflicts None       0.41s witness ok
+
+=== decided / attempted, by arm and formulation ===
+
+| formulation | arm | decided | of | witnesses verified | bad witnesses |
+|---|---|---:|---:|---:|---:|
+| incidence | wdsat_xg | 0 | 8 | 0 | 0 |
+| incidence | wdsat_plain | 0 | 8 | 0 | 0 |
+| incidence | cryptominisat | 7 | 8 | 7 | 0 |
+| norm | wdsat_xg | 8 | 8 | 8 | 0 |
+| norm | wdsat_plain | 8 | 8 | 8 | 0 |
+| norm | cryptominisat | 8 | 8 | 8 | 0 |
+
+A timeout is neither a model nor a refutation and is not counted as either.

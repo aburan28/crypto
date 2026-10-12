@@ -1,0 +1,63 @@
+{
+  "valid": true,
+  "scope": "Supplemental read-only host-receipt and complete call-path binding checks",
+  "rawSha256": "7a8b014039f649ccb16639be7c02fb4a537570f346f4b30449462ec38c60a71a",
+  "mainReviewSha256": "a703f24ad8623a8020733f62849560a20dbbcf3a8edf652b165fd0477c47e12c",
+  "hostReceiptSha256": "305100f75bb3b63f60c34261bf3cf8591904dd99666d7b9011dde69a11b657cd",
+  "hostValidationAggregateSha256": "d870cbdf019d14e329bd8bc61d1beead5529caf561cb326afe96d06eafdcb512",
+  "actualRetainedHostBinariesRehashed": 6,
+  "retainedHostBranchCoverage": {
+    "vectorModes": [
+      0,
+      1
+    ],
+    "branches": [
+      0,
+      1,
+      2
+    ],
+    "selectedPairs": 37440,
+    "selectedCoordinateChecks": 74880,
+    "globalOriginalControlPairs": 37440
+  },
+  "guardCasesVerified": 10,
+  "makeDryRunsVerified": 2,
+  "callSitesInCompleteCallerEach": 18,
+  "resolvedCalleesEach": 9,
+  "completeCallerCallRoleSequenceIdentical": true,
+  "callRoleSequence": [
+    "29sigmaWalkNetworkPairShared131ENS0_4P131ES1_i",
+    "20mulPolynomialPair131ENS0_4P131ES1_S1_",
+    "6mul131ENS0_4P131ES1_",
+    "6mul131ENS0_4P131ES1_",
+    "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_2",
+    "6mul131ENS0_4P131ES1_",
+    "19sigmaWalkNetwork131ENS0_4P131Ei_$_specialized_$_1",
+    "6mul131ENS0_4P131ES1_",
+    "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_5",
+    "6mul131ENS0_4P131ES1_",
+    "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_4",
+    "6mul131ENS0_4P131ES1_",
+    "6mul131ENS0_4P131ES1_",
+    "18sigmaInvNetwork131ENS0_4P131Ei_$_specialized_$_3",
+    "6mul131ENS0_4P131ES1_",
+    "20mulPolynomialPair131ENS0_4P131ES1_S1_",
+    "16mulPolynomial131ENS0_4P131ES1_",
+    "16mulPolynomial131ENS0_4P131ES1_"
+  ],
+  "nonSharedCalleeNonNopAndNonNopOpcodeCountsIdentical": true,
+  "nonSharedCalleePaddingChanges": {
+    "6mul131ENS0_4P131ES1_": {
+      "control": 25,
+      "candidate": 20
+    }
+  },
+  "completeNativeInitBytesIdentical": true,
+  "sourceLayoutAndPtxWidthsAgree": true,
+  "selectedPathScope": "Every caller call target and complete selected callee is bound to ELF and raw code. This is complete syntactic call-path coverage, not a dynamic execution-frequency or per-iteration timing count.",
+  "limits": [
+    "Host binaries were rehashed but not rerun; no new host/CUDA compiler or GPU execution.",
+    "Same aggregate register count/opcode counts do not establish helper register live-range equivalence.",
+    "Existing scalar-name device probe still needs adaptation before any later runtime admission."
+  ]
+}

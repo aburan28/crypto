@@ -1,0 +1,50 @@
+{
+  "schema": "ecc2k130-sparse-table-microprobe-attempt-v1",
+  "status": "PRODUCER_FAILURE",
+  "scientificDecision": null,
+  "timingSuppressed": true,
+  "sourceCommit": "c8bb2c72f2e714aba826bfbda6acfe5308da81e1",
+  "reason": "SASS, source, binary, table, GPU one-map correctness, key-coverage and runtime-resource gates passed. The first five excluded warmups completed, then joint_uniform_key tripped the minimum-interval guard. Its table key ignores the evolving lane input, and the final state overwrote every prior mapped value, so ptxas correctly eliminated all but the last repeated map. No ranked row or scientific decision exists.",
+  "repair": "Fold every mapped output through a dependency-carrying rotate/add accumulator that is stored with the final state, in every arm and in the native full-round replay. This preserves all map layouts, keys, loads, rounds, tables, arms and decision thresholds while preventing dead-map elimination. Rebuild and rerun from a new clean commit.",
+  "launch": {
+    "provider": "modal",
+    "appId": "ap-ryV4YvrRwU5GhvT6PeybYV",
+    "functionCallId": "fc-01M3YK5VPC13T23JX8AS57C263",
+    "token": "a91e741af70a45dba2b51f3cc07c9124",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "gpuUuid": "GPU-297b206a-a5f1-f340-96c6-daec0f77c842",
+    "driver": "580.95.05",
+    "cuda": "13.3.73",
+    "exitCode": 1,
+    "gpuOneMapOutputsChecked": 16908,
+    "excludedWarmupRows": 5,
+    "rankedTimingRows": 0
+  },
+  "passedBeforeFailure": {
+    "sassKernels": 7,
+    "lds128PerKernel": 44,
+    "ldsScalarPerKernel": 44,
+    "localInstructionsPerKernel": 0,
+    "callsPerKernel": 0,
+    "all64JointKeysObserved": true,
+    "gpuOneMapCorrectness": true
+  },
+  "excludedWarmupBillionMapApplicationsPerSecond": {
+    "joint_varying": 27.152111879,
+    "fixed_normal": 63.280373000,
+    "fixed_to_beta": 64.394707420,
+    "fixed_from_beta": 64.376998832,
+    "joint_fixed_j": 64.393759573
+  },
+  "artifact": {
+    "archiveSha256": "d520947a109b323d112e5341a131a5d6c9702a88a3f48c5a5c59ee9bfd0e4146",
+    "archiveBytes": 653058,
+    "binarySha256": "b64a7938599a265fb81b935e285cf11afbf92c45fa8ad03b66a7f00652f6f1bf",
+    "cubinSha256": "affeb8ec0b247c657c9e64674c7976a17f04cab61e8b7ff5a381e224762d9ab8",
+    "sassSha256": "d2570ecb3eb05bcaf488eaac7f8b2c741b5c6184352ac30d49d9f26ba6ca67e5",
+    "tablesSha256": "0d8662afe5b454c028c6fb38125fadaf1ab836a22414e27b6babe3fc7ec9d8f2",
+    "samplesSha256": "8504a2776f69094ed95557ce280e168fe4918bb50a077927e659480c0951d6fa",
+    "launchSha256": "c3b76e0912b74bd0ab4179a1b4452cafde2a36f1b7de4cb185c0ecd96be89e54"
+  },
+  "scope": "Preserved optimized-away-control failure before ranked timing; warmups remain excluded diagnostics. No sparse walk, search, distinguished-point collection, collision recovery or key recovery."
+}

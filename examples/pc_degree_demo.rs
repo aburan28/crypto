@@ -8,7 +8,7 @@
 //!
 //! `D*` is — up to `O(1)` — the Huang–Kosters–Yeo last fall degree and
 //! the Gröbner solving degree (Clegg–Edmonds–Impagliazzo). The proposal's
-//! prediction #1 (`RESEARCH_FFD_PROOF_COMPLEXITY.md` §6) is that `D*`
+//! prediction #1 (`research/notes/index-calculus/RESEARCH_FFD_PROOF_COMPLEXITY.md` §6) is that `D*`
 //! climbs with `n` while the first fall degree stays roughly flat.
 //!
 //! ```bash
@@ -22,7 +22,10 @@ fn main() {
     let rows = run_pc_sweep(4..=8, 12, 0x_FFD_DEC0);
     print_pc_sweep(&rows);
 
-    let refuted = rows.iter().filter(|r| r.refutation_degree.is_some()).count();
+    let refuted = rows
+        .iter()
+        .filter(|r| r.refutation_degree.is_some())
+        .count();
     println!(
         "Summary: {} of {} non-decomposable instances produced a refutation\n\
          within the degree budget.",

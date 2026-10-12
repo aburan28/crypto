@@ -137,9 +137,10 @@ pub struct BiasedSignature {
 /// but reduces the threshold by an amount that grows with `β`.  In
 /// practice, BKZ-10 or BKZ-15 recovers HNP at signature counts
 /// where LLL alone fails — at the cost of much higher CPU per call.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub enum HnpReduction {
     /// Plain LLL with Lovász parameter δ = 0.75.  Default; fast.
+    #[default]
     Lll,
     /// BKZ-`β` (block Korkine-Zolotarev with block size `β`).  Use
     /// `β = 8`–`20` for HNP at sub-LLL-threshold parameters.  Cost
@@ -150,12 +151,6 @@ pub enum HnpReduction {
     /// produces catastrophic cancellation (entries spanning > 2^500 dynamic
     /// range).  Slower than `Lll` (~10–100× per GS call) but correct.
     LllHp,
-}
-
-impl Default for HnpReduction {
-    fn default() -> Self {
-        HnpReduction::Lll
-    }
 }
 
 /// Default HNP recovery (LLL).  See [`hnp_recover_key_with_reduction`]
@@ -356,7 +351,7 @@ mod tests {
     /// Sample a biased nonce: uniform in `[1, 2^k_bits)`.
     fn biased_nonce<R: RngCore>(rng: &mut R, k_bits: u32) -> BigUint {
         loop {
-            let bytes = ((k_bits + 7) / 8) as usize;
+            let bytes = k_bits.div_ceil(8) as usize;
             let mut buf = vec![0u8; bytes];
             rng.fill_bytes(&mut buf);
             // Mask off any extra bits.

@@ -1,0 +1,2033 @@
+{
+  "runs": [
+    {
+      "panel": {
+        "n": 5,
+        "d": 3,
+        "curve_order": 44,
+        "subgroup_order": 11
+      },
+      "seed": 91,
+      "variant": "coefficient-pullback",
+      "status": "verified",
+      "generator": [
+        27,
+        3
+      ],
+      "target": [
+        23,
+        6
+      ],
+      "subgroup_order": 11,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "columns": 4,
+      "rank": 4,
+      "recovered_scalar": 8,
+      "planted_scalar": 8,
+      "cold_wall_seconds": 0.02102872099931119,
+      "phase_seconds": {
+        "setup": 0.0022027029990567826,
+        "factor_base": 0.0005453599987959024,
+        "relation_collection": 0.014388843002961949,
+        "matrix": 5.882700133952312e-05,
+        "individual": 0.003695739000249887,
+        "rho_walk": 0.0,
+        "final_verification": 0.00010386599751655012
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 505,
+            "multiplications": 960,
+            "squarings": 239,
+            "inversionCalls": 60,
+            "curveAdditionCalls": 18,
+            "curveDoublingCalls": 36,
+            "fieldOperations": 1704
+          },
+          "factor_base": {
+            "additions": 127,
+            "multiplications": 290,
+            "squarings": 55,
+            "inversionCalls": 22,
+            "curveAdditionCalls": 5,
+            "curveDoublingCalls": 15,
+            "fieldOperations": 472
+          },
+          "relation_generation": {
+            "additions": 226,
+            "multiplications": 584,
+            "squarings": 0,
+            "inversionCalls": 46,
+            "curveAdditionCalls": 21,
+            "curveDoublingCalls": 32,
+            "fieldOperations": 810
+          },
+          "relations_verification": {
+            "additions": 544,
+            "multiplications": 849,
+            "squarings": 135,
+            "inversionCalls": 67,
+            "curveAdditionCalls": 78,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 1528
+          },
+          "individual_generation": {
+            "additions": 59,
+            "multiplications": 138,
+            "squarings": 0,
+            "inversionCalls": 11,
+            "curveAdditionCalls": 7,
+            "curveDoublingCalls": 6,
+            "fieldOperations": 197
+          },
+          "individual_verification": {
+            "additions": 44,
+            "multiplications": 69,
+            "squarings": 27,
+            "inversionCalls": 5,
+            "curveAdditionCalls": 3,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 140
+          },
+          "final_verification": {
+            "additions": 16,
+            "multiplications": 52,
+            "squarings": 0,
+            "inversionCalls": 4,
+            "curveAdditionCalls": 1,
+            "curveDoublingCalls": 4,
+            "fieldOperations": 68
+          }
+        },
+        "totals": {
+          "additions": 1521,
+          "multiplications": 2942,
+          "squarings": 456,
+          "inversionCalls": 215,
+          "curveAdditionCalls": 133,
+          "curveDoublingCalls": 93,
+          "fieldOperations": 4919
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 54,
+        "multiplications": 56,
+        "inversions": 5
+      },
+      "all_phase_field_api_counts": {
+        "additions": 6340,
+        "multiplications": 8758,
+        "squarings": 1820,
+        "fieldOperations": 16918
+      }
+    },
+    {
+      "panel": {
+        "n": 5,
+        "d": 3,
+        "curve_order": 44,
+        "subgroup_order": 11
+      },
+      "seed": 91,
+      "variant": "rho",
+      "status": "verified",
+      "generator": [
+        27,
+        3
+      ],
+      "target": [
+        23,
+        6
+      ],
+      "subgroup_order": 11,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "rho_iterations": 12,
+      "recovered_scalar": 8,
+      "planted_scalar": 8,
+      "cold_wall_seconds": 0.003129778000584338,
+      "phase_seconds": {
+        "setup": 0.0024734610015002545,
+        "factor_base": 0.0,
+        "relation_collection": 0.0,
+        "matrix": 0.0,
+        "individual": 0.0,
+        "rho_walk": 0.0005480450017785188,
+        "final_verification": 0.00010087199916597456
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 505,
+            "multiplications": 960,
+            "squarings": 239,
+            "inversionCalls": 60,
+            "curveAdditionCalls": 18,
+            "curveDoublingCalls": 36,
+            "fieldOperations": 1704
+          },
+          "rho_walk": {
+            "additions": 125,
+            "multiplications": 288,
+            "squarings": 0,
+            "inversionCalls": 23,
+            "curveAdditionCalls": 17,
+            "curveDoublingCalls": 12,
+            "fieldOperations": 413
+          },
+          "final_verification": {
+            "additions": 16,
+            "multiplications": 52,
+            "squarings": 0,
+            "inversionCalls": 4,
+            "curveAdditionCalls": 1,
+            "curveDoublingCalls": 4,
+            "fieldOperations": 68
+          }
+        },
+        "totals": {
+          "additions": 646,
+          "multiplications": 1300,
+          "squarings": 239,
+          "inversionCalls": 87,
+          "curveAdditionCalls": 36,
+          "curveDoublingCalls": 52,
+          "fieldOperations": 2185
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 14,
+        "multiplications": 1,
+        "inversions": 1
+      },
+      "all_phase_field_api_counts": {
+        "additions": 646,
+        "multiplications": 1300,
+        "squarings": 239,
+        "fieldOperations": 2185
+      }
+    },
+    {
+      "panel": {
+        "n": 5,
+        "d": 3,
+        "curve_order": 44,
+        "subgroup_order": 11
+      },
+      "seed": 91,
+      "variant": "quadratic-image",
+      "status": "verified",
+      "generator": [
+        27,
+        3
+      ],
+      "target": [
+        23,
+        6
+      ],
+      "subgroup_order": 11,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "columns": 4,
+      "rank": 4,
+      "recovered_scalar": 8,
+      "planted_scalar": 8,
+      "cold_wall_seconds": 0.02787229499881505,
+      "phase_seconds": {
+        "setup": 0.0020315660003689118,
+        "factor_base": 0.0005985499992675614,
+        "relation_collection": 0.01994284999818774,
+        "matrix": 3.599299816414714e-05,
+        "individual": 0.005131017998792231,
+        "rho_walk": 0.0,
+        "final_verification": 0.00010355600170441903
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 505,
+            "multiplications": 960,
+            "squarings": 239,
+            "inversionCalls": 60,
+            "curveAdditionCalls": 18,
+            "curveDoublingCalls": 36,
+            "fieldOperations": 1704
+          },
+          "factor_base": {
+            "additions": 127,
+            "multiplications": 290,
+            "squarings": 55,
+            "inversionCalls": 22,
+            "curveAdditionCalls": 5,
+            "curveDoublingCalls": 15,
+            "fieldOperations": 472
+          },
+          "relation_generation": {
+            "additions": 226,
+            "multiplications": 584,
+            "squarings": 0,
+            "inversionCalls": 46,
+            "curveAdditionCalls": 21,
+            "curveDoublingCalls": 32,
+            "fieldOperations": 810
+          },
+          "relations_verification": {
+            "additions": 544,
+            "multiplications": 849,
+            "squarings": 135,
+            "inversionCalls": 67,
+            "curveAdditionCalls": 78,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 1528
+          },
+          "individual_generation": {
+            "additions": 59,
+            "multiplications": 138,
+            "squarings": 0,
+            "inversionCalls": 11,
+            "curveAdditionCalls": 7,
+            "curveDoublingCalls": 6,
+            "fieldOperations": 197
+          },
+          "individual_verification": {
+            "additions": 44,
+            "multiplications": 69,
+            "squarings": 27,
+            "inversionCalls": 5,
+            "curveAdditionCalls": 3,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 140
+          },
+          "final_verification": {
+            "additions": 16,
+            "multiplications": 52,
+            "squarings": 0,
+            "inversionCalls": 4,
+            "curveAdditionCalls": 1,
+            "curveDoublingCalls": 4,
+            "fieldOperations": 68
+          }
+        },
+        "totals": {
+          "additions": 1521,
+          "multiplications": 2942,
+          "squarings": 456,
+          "inversionCalls": 215,
+          "curveAdditionCalls": 133,
+          "curveDoublingCalls": 93,
+          "fieldOperations": 4919
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 54,
+        "multiplications": 56,
+        "inversions": 5
+      },
+      "all_phase_field_api_counts": {
+        "additions": 10987,
+        "multiplications": 10880,
+        "squarings": 3907,
+        "fieldOperations": 25774
+      }
+    },
+    {
+      "panel": {
+        "n": 5,
+        "d": 3,
+        "curve_order": 44,
+        "subgroup_order": 11
+      },
+      "seed": 137,
+      "variant": "coefficient-pullback",
+      "status": "verified",
+      "generator": [
+        27,
+        3
+      ],
+      "target": [
+        27,
+        3
+      ],
+      "subgroup_order": 11,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "columns": 4,
+      "rank": 4,
+      "recovered_scalar": 1,
+      "planted_scalar": 1,
+      "cold_wall_seconds": 0.016250032997049857,
+      "phase_seconds": {
+        "setup": 0.001979887998459162,
+        "factor_base": 0.0005389709986047819,
+        "relation_collection": 0.011722783998266095,
+        "matrix": 3.73250077245757e-05,
+        "individual": 0.001918116002343595,
+        "rho_walk": 0.0,
+        "final_verification": 2.7140999009134248e-05
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 493,
+            "multiplications": 921,
+            "squarings": 239,
+            "inversionCalls": 57,
+            "curveAdditionCalls": 18,
+            "curveDoublingCalls": 33,
+            "fieldOperations": 1653
+          },
+          "factor_base": {
+            "additions": 127,
+            "multiplications": 290,
+            "squarings": 55,
+            "inversionCalls": 22,
+            "curveAdditionCalls": 5,
+            "curveDoublingCalls": 15,
+            "fieldOperations": 472
+          },
+          "relation_generation": {
+            "additions": 147,
+            "multiplications": 381,
+            "squarings": 0,
+            "inversionCalls": 30,
+            "curveAdditionCalls": 14,
+            "curveDoublingCalls": 21,
+            "fieldOperations": 528
+          },
+          "relations_verification": {
+            "additions": 526,
+            "multiplications": 825,
+            "squarings": 135,
+            "inversionCalls": 65,
+            "curveAdditionCalls": 75,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 1486
+          },
+          "individual_generation": {
+            "additions": 48,
+            "multiplications": 113,
+            "squarings": 0,
+            "inversionCalls": 9,
+            "curveAdditionCalls": 5,
+            "curveDoublingCalls": 5,
+            "fieldOperations": 161
+          },
+          "individual_verification": {
+            "additions": 90,
+            "multiplications": 141,
+            "squarings": 27,
+            "inversionCalls": 11,
+            "curveAdditionCalls": 12,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 258
+          },
+          "final_verification": {
+            "additions": 4,
+            "multiplications": 13,
+            "squarings": 0,
+            "inversionCalls": 1,
+            "curveAdditionCalls": 1,
+            "curveDoublingCalls": 1,
+            "fieldOperations": 17
+          }
+        },
+        "totals": {
+          "additions": 1435,
+          "multiplications": 2684,
+          "squarings": 456,
+          "inversionCalls": 195,
+          "curveAdditionCalls": 130,
+          "curveDoublingCalls": 75,
+          "fieldOperations": 4575
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 64,
+        "multiplications": 66,
+        "inversions": 5
+      },
+      "all_phase_field_api_counts": {
+        "additions": 4663,
+        "multiplications": 6590,
+        "squarings": 1335,
+        "fieldOperations": 12588
+      }
+    },
+    {
+      "panel": {
+        "n": 5,
+        "d": 3,
+        "curve_order": 44,
+        "subgroup_order": 11
+      },
+      "seed": 137,
+      "variant": "rho",
+      "status": "verified",
+      "generator": [
+        27,
+        3
+      ],
+      "target": [
+        27,
+        3
+      ],
+      "subgroup_order": 11,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "rho_iterations": 33,
+      "recovered_scalar": 1,
+      "planted_scalar": 1,
+      "cold_wall_seconds": 0.002708314001210965,
+      "phase_seconds": {
+        "setup": 0.0018517060016165487,
+        "factor_base": 0.0,
+        "relation_collection": 0.0,
+        "matrix": 0.0,
+        "individual": 0.0,
+        "rho_walk": 0.0008239590024459176,
+        "final_verification": 2.61390014202334e-05
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 493,
+            "multiplications": 921,
+            "squarings": 239,
+            "inversionCalls": 57,
+            "curveAdditionCalls": 18,
+            "curveDoublingCalls": 33,
+            "fieldOperations": 1653
+          },
+          "rho_walk": {
+            "additions": 203,
+            "multiplications": 391,
+            "squarings": 0,
+            "inversionCalls": 32,
+            "curveAdditionCalls": 37,
+            "curveDoublingCalls": 7,
+            "fieldOperations": 594
+          },
+          "final_verification": {
+            "additions": 4,
+            "multiplications": 13,
+            "squarings": 0,
+            "inversionCalls": 1,
+            "curveAdditionCalls": 1,
+            "curveDoublingCalls": 1,
+            "fieldOperations": 17
+          }
+        },
+        "totals": {
+          "additions": 700,
+          "multiplications": 1325,
+          "squarings": 239,
+          "inversionCalls": 90,
+          "curveAdditionCalls": 56,
+          "curveDoublingCalls": 41,
+          "fieldOperations": 2264
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 35,
+        "multiplications": 1,
+        "inversions": 1
+      },
+      "all_phase_field_api_counts": {
+        "additions": 700,
+        "multiplications": 1325,
+        "squarings": 239,
+        "fieldOperations": 2264
+      }
+    },
+    {
+      "panel": {
+        "n": 5,
+        "d": 3,
+        "curve_order": 44,
+        "subgroup_order": 11
+      },
+      "seed": 137,
+      "variant": "quadratic-image",
+      "status": "verified",
+      "generator": [
+        27,
+        3
+      ],
+      "target": [
+        27,
+        3
+      ],
+      "subgroup_order": 11,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "columns": 4,
+      "rank": 4,
+      "recovered_scalar": 1,
+      "planted_scalar": 1,
+      "cold_wall_seconds": 0.019129514002997894,
+      "phase_seconds": {
+        "setup": 0.0018410390002827626,
+        "factor_base": 0.0005229369999142364,
+        "relation_collection": 0.014379780001036124,
+        "matrix": 4.030200216220692e-05,
+        "individual": 0.0022942109972063918,
+        "rho_walk": 0.0,
+        "final_verification": 2.8853999538114294e-05
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 493,
+            "multiplications": 921,
+            "squarings": 239,
+            "inversionCalls": 57,
+            "curveAdditionCalls": 18,
+            "curveDoublingCalls": 33,
+            "fieldOperations": 1653
+          },
+          "factor_base": {
+            "additions": 127,
+            "multiplications": 290,
+            "squarings": 55,
+            "inversionCalls": 22,
+            "curveAdditionCalls": 5,
+            "curveDoublingCalls": 15,
+            "fieldOperations": 472
+          },
+          "relation_generation": {
+            "additions": 147,
+            "multiplications": 381,
+            "squarings": 0,
+            "inversionCalls": 30,
+            "curveAdditionCalls": 14,
+            "curveDoublingCalls": 21,
+            "fieldOperations": 528
+          },
+          "relations_verification": {
+            "additions": 526,
+            "multiplications": 825,
+            "squarings": 135,
+            "inversionCalls": 65,
+            "curveAdditionCalls": 75,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 1486
+          },
+          "individual_generation": {
+            "additions": 48,
+            "multiplications": 113,
+            "squarings": 0,
+            "inversionCalls": 9,
+            "curveAdditionCalls": 5,
+            "curveDoublingCalls": 5,
+            "fieldOperations": 161
+          },
+          "individual_verification": {
+            "additions": 90,
+            "multiplications": 141,
+            "squarings": 27,
+            "inversionCalls": 11,
+            "curveAdditionCalls": 12,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 258
+          },
+          "final_verification": {
+            "additions": 4,
+            "multiplications": 13,
+            "squarings": 0,
+            "inversionCalls": 1,
+            "curveAdditionCalls": 1,
+            "curveDoublingCalls": 1,
+            "fieldOperations": 17
+          }
+        },
+        "totals": {
+          "additions": 1435,
+          "multiplications": 2684,
+          "squarings": 456,
+          "inversionCalls": 195,
+          "curveAdditionCalls": 130,
+          "curveDoublingCalls": 75,
+          "fieldOperations": 4575
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 64,
+        "multiplications": 66,
+        "inversions": 5
+      },
+      "all_phase_field_api_counts": {
+        "additions": 7679,
+        "multiplications": 7971,
+        "squarings": 2675,
+        "fieldOperations": 18325
+      }
+    },
+    {
+      "panel": {
+        "n": 5,
+        "d": 3,
+        "curve_order": 44,
+        "subgroup_order": 11
+      },
+      "seed": 211,
+      "variant": "quadratic-image",
+      "status": "verified",
+      "generator": [
+        27,
+        3
+      ],
+      "target": [
+        29,
+        9
+      ],
+      "subgroup_order": 11,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "columns": 4,
+      "rank": 4,
+      "recovered_scalar": 2,
+      "planted_scalar": 2,
+      "cold_wall_seconds": 0.021097925000503892,
+      "phase_seconds": {
+        "setup": 0.002213249001215445,
+        "factor_base": 0.0005696660009562038,
+        "relation_collection": 0.016363304002879886,
+        "matrix": 2.9905004339525476e-05,
+        "individual": 0.0018420609994791448,
+        "rho_walk": 0.0,
+        "final_verification": 5.341999712982215e-05
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 497,
+            "multiplications": 934,
+            "squarings": 239,
+            "inversionCalls": 58,
+            "curveAdditionCalls": 18,
+            "curveDoublingCalls": 34,
+            "fieldOperations": 1670
+          },
+          "factor_base": {
+            "additions": 127,
+            "multiplications": 290,
+            "squarings": 55,
+            "inversionCalls": 22,
+            "curveAdditionCalls": 5,
+            "curveDoublingCalls": 15,
+            "fieldOperations": 472
+          },
+          "relation_generation": {
+            "additions": 179,
+            "multiplications": 485,
+            "squarings": 0,
+            "inversionCalls": 38,
+            "curveAdditionCalls": 15,
+            "curveDoublingCalls": 29,
+            "fieldOperations": 664
+          },
+          "relations_verification": {
+            "additions": 543,
+            "multiplications": 849,
+            "squarings": 135,
+            "inversionCalls": 67,
+            "curveAdditionCalls": 78,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 1527
+          },
+          "individual_generation": {
+            "additions": 0,
+            "multiplications": 0,
+            "squarings": 0,
+            "inversionCalls": 0,
+            "curveAdditionCalls": 1,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 0
+          },
+          "individual_verification": {
+            "additions": 154,
+            "multiplications": 237,
+            "squarings": 27,
+            "inversionCalls": 19,
+            "curveAdditionCalls": 24,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 418
+          },
+          "final_verification": {
+            "additions": 8,
+            "multiplications": 26,
+            "squarings": 0,
+            "inversionCalls": 2,
+            "curveAdditionCalls": 1,
+            "curveDoublingCalls": 2,
+            "fieldOperations": 34
+          }
+        },
+        "totals": {
+          "additions": 1508,
+          "multiplications": 2821,
+          "squarings": 456,
+          "inversionCalls": 206,
+          "curveAdditionCalls": 142,
+          "curveDoublingCalls": 80,
+          "fieldOperations": 4785
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 44,
+        "multiplications": 46,
+        "inversions": 5
+      },
+      "all_phase_field_api_counts": {
+        "additions": 8540,
+        "multiplications": 8755,
+        "squarings": 2957,
+        "fieldOperations": 20252
+      }
+    },
+    {
+      "panel": {
+        "n": 5,
+        "d": 3,
+        "curve_order": 44,
+        "subgroup_order": 11
+      },
+      "seed": 211,
+      "variant": "coefficient-pullback",
+      "status": "verified",
+      "generator": [
+        27,
+        3
+      ],
+      "target": [
+        29,
+        9
+      ],
+      "subgroup_order": 11,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "columns": 4,
+      "rank": 4,
+      "recovered_scalar": 2,
+      "planted_scalar": 2,
+      "cold_wall_seconds": 0.015021754999906989,
+      "phase_seconds": {
+        "setup": 0.0019521460017131176,
+        "factor_base": 0.0005597119998128619,
+        "relation_collection": 0.011217813003895571,
+        "matrix": 2.8310998459346592e-05,
+        "individual": 0.0011878270015586168,
+        "rho_walk": 0.0,
+        "final_verification": 5.1957998948637396e-05
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 497,
+            "multiplications": 934,
+            "squarings": 239,
+            "inversionCalls": 58,
+            "curveAdditionCalls": 18,
+            "curveDoublingCalls": 34,
+            "fieldOperations": 1670
+          },
+          "factor_base": {
+            "additions": 127,
+            "multiplications": 290,
+            "squarings": 55,
+            "inversionCalls": 22,
+            "curveAdditionCalls": 5,
+            "curveDoublingCalls": 15,
+            "fieldOperations": 472
+          },
+          "relation_generation": {
+            "additions": 179,
+            "multiplications": 485,
+            "squarings": 0,
+            "inversionCalls": 38,
+            "curveAdditionCalls": 15,
+            "curveDoublingCalls": 29,
+            "fieldOperations": 664
+          },
+          "relations_verification": {
+            "additions": 543,
+            "multiplications": 849,
+            "squarings": 135,
+            "inversionCalls": 67,
+            "curveAdditionCalls": 78,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 1527
+          },
+          "individual_generation": {
+            "additions": 0,
+            "multiplications": 0,
+            "squarings": 0,
+            "inversionCalls": 0,
+            "curveAdditionCalls": 1,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 0
+          },
+          "individual_verification": {
+            "additions": 154,
+            "multiplications": 237,
+            "squarings": 27,
+            "inversionCalls": 19,
+            "curveAdditionCalls": 24,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 418
+          },
+          "final_verification": {
+            "additions": 8,
+            "multiplications": 26,
+            "squarings": 0,
+            "inversionCalls": 2,
+            "curveAdditionCalls": 1,
+            "curveDoublingCalls": 2,
+            "fieldOperations": 34
+          }
+        },
+        "totals": {
+          "additions": 1508,
+          "multiplications": 2821,
+          "squarings": 456,
+          "inversionCalls": 206,
+          "curveAdditionCalls": 142,
+          "curveDoublingCalls": 80,
+          "fieldOperations": 4785
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 44,
+        "multiplications": 46,
+        "inversions": 5
+      },
+      "all_phase_field_api_counts": {
+        "additions": 5063,
+        "multiplications": 7128,
+        "squarings": 1440,
+        "fieldOperations": 13631
+      }
+    },
+    {
+      "panel": {
+        "n": 5,
+        "d": 3,
+        "curve_order": 44,
+        "subgroup_order": 11
+      },
+      "seed": 211,
+      "variant": "rho",
+      "status": "verified",
+      "generator": [
+        27,
+        3
+      ],
+      "target": [
+        29,
+        9
+      ],
+      "subgroup_order": 11,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "rho_iterations": 27,
+      "recovered_scalar": 2,
+      "planted_scalar": 2,
+      "cold_wall_seconds": 0.0029654910031240433,
+      "phase_seconds": {
+        "setup": 0.002128262000042014,
+        "factor_base": 0.0,
+        "relation_collection": 0.0,
+        "matrix": 0.0,
+        "individual": 0.0,
+        "rho_walk": 0.0007765580012346618,
+        "final_verification": 5.4352000006474555e-05
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 497,
+            "multiplications": 934,
+            "squarings": 239,
+            "inversionCalls": 58,
+            "curveAdditionCalls": 18,
+            "curveDoublingCalls": 34,
+            "fieldOperations": 1670
+          },
+          "rho_walk": {
+            "additions": 186,
+            "multiplications": 411,
+            "squarings": 0,
+            "inversionCalls": 33,
+            "curveAdditionCalls": 33,
+            "curveDoublingCalls": 15,
+            "fieldOperations": 597
+          },
+          "final_verification": {
+            "additions": 8,
+            "multiplications": 26,
+            "squarings": 0,
+            "inversionCalls": 2,
+            "curveAdditionCalls": 1,
+            "curveDoublingCalls": 2,
+            "fieldOperations": 34
+          }
+        },
+        "totals": {
+          "additions": 691,
+          "multiplications": 1371,
+          "squarings": 239,
+          "inversionCalls": 93,
+          "curveAdditionCalls": 52,
+          "curveDoublingCalls": 51,
+          "fieldOperations": 2301
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 29,
+        "multiplications": 1,
+        "inversions": 1
+      },
+      "all_phase_field_api_counts": {
+        "additions": 691,
+        "multiplications": 1371,
+        "squarings": 239,
+        "fieldOperations": 2301
+      }
+    },
+    {
+      "panel": {
+        "n": 9,
+        "d": 4,
+        "curve_order": 508,
+        "subgroup_order": 127
+      },
+      "seed": 91,
+      "variant": "coefficient-pullback",
+      "status": "verified",
+      "generator": [
+        116,
+        306
+      ],
+      "target": [
+        57,
+        257
+      ],
+      "subgroup_order": 127,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "columns": 10,
+      "rank": 10,
+      "recovered_scalar": 58,
+      "planted_scalar": 58,
+      "cold_wall_seconds": 0.12190221499986365,
+      "phase_seconds": {
+        "setup": 0.04892983000172535,
+        "factor_base": 0.002555092996772146,
+        "relation_collection": 0.06359784599408158,
+        "matrix": 0.00014949700198485516,
+        "individual": 0.0061334359997999854,
+        "rho_walk": 0.0,
+        "final_verification": 0.0004982889986422379
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 8172,
+            "multiplications": 13627,
+            "squarings": 6623,
+            "inversionCalls": 566,
+            "curveAdditionCalls": 41,
+            "curveDoublingCalls": 53,
+            "fieldOperations": 28422
+          },
+          "factor_base": {
+            "additions": 359,
+            "multiplications": 1018,
+            "squarings": 223,
+            "inversionCalls": 48,
+            "curveAdditionCalls": 11,
+            "curveDoublingCalls": 33,
+            "fieldOperations": 1600
+          },
+          "relation_generation": {
+            "additions": 618,
+            "multiplications": 2541,
+            "squarings": 0,
+            "inversionCalls": 123,
+            "curveAdditionCalls": 52,
+            "curveDoublingCalls": 81,
+            "fieldOperations": 3159
+          },
+          "relations_verification": {
+            "additions": 1192,
+            "multiplications": 2570,
+            "squarings": 510,
+            "inversionCalls": 124,
+            "curveAdditionCalls": 141,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 4272
+          },
+          "individual_generation": {
+            "additions": 74,
+            "multiplications": 288,
+            "squarings": 0,
+            "inversionCalls": 14,
+            "curveAdditionCalls": 7,
+            "curveDoublingCalls": 8,
+            "fieldOperations": 362
+          },
+          "individual_verification": {
+            "additions": 77,
+            "multiplications": 149,
+            "squarings": 51,
+            "inversionCalls": 7,
+            "curveAdditionCalls": 6,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 277
+          },
+          "final_verification": {
+            "additions": 45,
+            "multiplications": 186,
+            "squarings": 0,
+            "inversionCalls": 9,
+            "curveAdditionCalls": 4,
+            "curveDoublingCalls": 6,
+            "fieldOperations": 231
+          }
+        },
+        "totals": {
+          "additions": 10537,
+          "multiplications": 20379,
+          "squarings": 7407,
+          "inversionCalls": 891,
+          "curveAdditionCalls": 262,
+          "curveDoublingCalls": 181,
+          "fieldOperations": 38323
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 232,
+        "multiplications": 309,
+        "inversions": 11
+      },
+      "all_phase_field_api_counts": {
+        "additions": 25241,
+        "multiplications": 36635,
+        "squarings": 10832,
+        "fieldOperations": 72708
+      }
+    },
+    {
+      "panel": {
+        "n": 9,
+        "d": 4,
+        "curve_order": 508,
+        "subgroup_order": 127
+      },
+      "seed": 91,
+      "variant": "rho",
+      "status": "verified",
+      "generator": [
+        116,
+        306
+      ],
+      "target": [
+        57,
+        257
+      ],
+      "subgroup_order": 127,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "rho_iterations": 39,
+      "recovered_scalar": 58,
+      "planted_scalar": 58,
+      "cold_wall_seconds": 0.052587000998755684,
+      "phase_seconds": {
+        "setup": 0.048670349999156315,
+        "factor_base": 0.0,
+        "relation_collection": 0.0,
+        "matrix": 0.0,
+        "individual": 0.0,
+        "rho_walk": 0.003449677999014966,
+        "final_verification": 0.0004566470015561208
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 8172,
+            "multiplications": 13627,
+            "squarings": 6623,
+            "inversionCalls": 566,
+            "curveAdditionCalls": 41,
+            "curveDoublingCalls": 53,
+            "fieldOperations": 28422
+          },
+          "rho_walk": {
+            "additions": 379,
+            "multiplications": 1303,
+            "squarings": 0,
+            "inversionCalls": 64,
+            "curveAdditionCalls": 44,
+            "curveDoublingCalls": 23,
+            "fieldOperations": 1682
+          },
+          "final_verification": {
+            "additions": 45,
+            "multiplications": 186,
+            "squarings": 0,
+            "inversionCalls": 9,
+            "curveAdditionCalls": 4,
+            "curveDoublingCalls": 6,
+            "fieldOperations": 231
+          }
+        },
+        "totals": {
+          "additions": 8596,
+          "multiplications": 15116,
+          "squarings": 6623,
+          "inversionCalls": 639,
+          "curveAdditionCalls": 89,
+          "curveDoublingCalls": 82,
+          "fieldOperations": 30335
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 35,
+        "multiplications": 13,
+        "inversions": 1
+      },
+      "all_phase_field_api_counts": {
+        "additions": 8596,
+        "multiplications": 15116,
+        "squarings": 6623,
+        "fieldOperations": 30335
+      }
+    },
+    {
+      "panel": {
+        "n": 9,
+        "d": 4,
+        "curve_order": 508,
+        "subgroup_order": 127
+      },
+      "seed": 91,
+      "variant": "quadratic-image",
+      "status": "verified",
+      "generator": [
+        116,
+        306
+      ],
+      "target": [
+        57,
+        257
+      ],
+      "subgroup_order": 127,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "columns": 10,
+      "rank": 10,
+      "recovered_scalar": 58,
+      "planted_scalar": 58,
+      "cold_wall_seconds": 0.16101826199883362,
+      "phase_seconds": {
+        "setup": 0.04911522900147247,
+        "factor_base": 0.002576705999672413,
+        "relation_collection": 0.09924678599418257,
+        "matrix": 0.00011939999967580661,
+        "individual": 0.009437846001674188,
+        "rho_walk": 0.0,
+        "final_verification": 0.0004805629978363868
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 8172,
+            "multiplications": 13627,
+            "squarings": 6623,
+            "inversionCalls": 566,
+            "curveAdditionCalls": 41,
+            "curveDoublingCalls": 53,
+            "fieldOperations": 28422
+          },
+          "factor_base": {
+            "additions": 359,
+            "multiplications": 1018,
+            "squarings": 223,
+            "inversionCalls": 48,
+            "curveAdditionCalls": 11,
+            "curveDoublingCalls": 33,
+            "fieldOperations": 1600
+          },
+          "relation_generation": {
+            "additions": 618,
+            "multiplications": 2541,
+            "squarings": 0,
+            "inversionCalls": 123,
+            "curveAdditionCalls": 52,
+            "curveDoublingCalls": 81,
+            "fieldOperations": 3159
+          },
+          "relations_verification": {
+            "additions": 1192,
+            "multiplications": 2570,
+            "squarings": 510,
+            "inversionCalls": 124,
+            "curveAdditionCalls": 141,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 4272
+          },
+          "individual_generation": {
+            "additions": 74,
+            "multiplications": 288,
+            "squarings": 0,
+            "inversionCalls": 14,
+            "curveAdditionCalls": 7,
+            "curveDoublingCalls": 8,
+            "fieldOperations": 362
+          },
+          "individual_verification": {
+            "additions": 77,
+            "multiplications": 149,
+            "squarings": 51,
+            "inversionCalls": 7,
+            "curveAdditionCalls": 6,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 277
+          },
+          "final_verification": {
+            "additions": 45,
+            "multiplications": 186,
+            "squarings": 0,
+            "inversionCalls": 9,
+            "curveAdditionCalls": 4,
+            "curveDoublingCalls": 6,
+            "fieldOperations": 231
+          }
+        },
+        "totals": {
+          "additions": 10537,
+          "multiplications": 20379,
+          "squarings": 7407,
+          "inversionCalls": 891,
+          "curveAdditionCalls": 262,
+          "curveDoublingCalls": 181,
+          "fieldOperations": 38323
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 232,
+        "multiplications": 309,
+        "inversions": 11
+      },
+      "all_phase_field_api_counts": {
+        "additions": 43069,
+        "multiplications": 43835,
+        "squarings": 21247,
+        "fieldOperations": 108151
+      }
+    },
+    {
+      "panel": {
+        "n": 9,
+        "d": 4,
+        "curve_order": 508,
+        "subgroup_order": 127
+      },
+      "seed": 137,
+      "variant": "coefficient-pullback",
+      "status": "verified",
+      "generator": [
+        116,
+        306
+      ],
+      "target": [
+        29,
+        10
+      ],
+      "subgroup_order": 127,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "columns": 10,
+      "rank": 10,
+      "recovered_scalar": 5,
+      "planted_scalar": 5,
+      "cold_wall_seconds": 0.1768830959990737,
+      "phase_seconds": {
+        "setup": 0.04889696099780849,
+        "factor_base": 0.0027961259984294884,
+        "relation_collection": 0.11970095400465652,
+        "matrix": 0.0002570750039012637,
+        "individual": 0.004998027001420269,
+        "rho_walk": 0.0,
+        "final_verification": 0.0001919189999171067
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 8146,
+            "multiplications": 13524,
+            "squarings": 6623,
+            "inversionCalls": 561,
+            "curveAdditionCalls": 39,
+            "curveDoublingCalls": 50,
+            "fieldOperations": 28293
+          },
+          "factor_base": {
+            "additions": 359,
+            "multiplications": 1018,
+            "squarings": 223,
+            "inversionCalls": 48,
+            "curveAdditionCalls": 11,
+            "curveDoublingCalls": 33,
+            "fieldOperations": 1600
+          },
+          "relation_generation": {
+            "additions": 724,
+            "multiplications": 2997,
+            "squarings": 0,
+            "inversionCalls": 145,
+            "curveAdditionCalls": 61,
+            "curveDoublingCalls": 97,
+            "fieldOperations": 3721
+          },
+          "relations_verification": {
+            "additions": 1098,
+            "multiplications": 2330,
+            "squarings": 510,
+            "inversionCalls": 112,
+            "curveAdditionCalls": 123,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 3938
+          },
+          "individual_generation": {
+            "additions": 67,
+            "multiplications": 268,
+            "squarings": 0,
+            "inversionCalls": 13,
+            "curveAdditionCalls": 6,
+            "curveDoublingCalls": 8,
+            "fieldOperations": 335
+          },
+          "individual_verification": {
+            "additions": 139,
+            "multiplications": 309,
+            "squarings": 51,
+            "inversionCalls": 15,
+            "curveAdditionCalls": 18,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 499
+          },
+          "final_verification": {
+            "additions": 19,
+            "multiplications": 83,
+            "squarings": 0,
+            "inversionCalls": 4,
+            "curveAdditionCalls": 2,
+            "curveDoublingCalls": 3,
+            "fieldOperations": 102
+          }
+        },
+        "totals": {
+          "additions": 10552,
+          "multiplications": 20529,
+          "squarings": 7407,
+          "inversionCalls": 898,
+          "curveAdditionCalls": 260,
+          "curveDoublingCalls": 191,
+          "fieldOperations": 38488
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 276,
+        "multiplications": 353,
+        "inversions": 11
+      },
+      "all_phase_field_api_counts": {
+        "additions": 41736,
+        "multiplications": 54227,
+        "squarings": 13671,
+        "fieldOperations": 109634
+      }
+    },
+    {
+      "panel": {
+        "n": 9,
+        "d": 4,
+        "curve_order": 508,
+        "subgroup_order": 127
+      },
+      "seed": 137,
+      "variant": "rho",
+      "status": "verified",
+      "generator": [
+        116,
+        306
+      ],
+      "target": [
+        29,
+        10
+      ],
+      "subgroup_order": 127,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "rho_iterations": 57,
+      "recovered_scalar": 5,
+      "planted_scalar": 5,
+      "cold_wall_seconds": 0.051289209000970004,
+      "phase_seconds": {
+        "setup": 0.04675809400214348,
+        "factor_base": 0.0,
+        "relation_collection": 0.0,
+        "matrix": 0.0,
+        "individual": 0.0,
+        "rho_walk": 0.004328511000494473,
+        "final_verification": 0.00019163899924024008
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 8146,
+            "multiplications": 13524,
+            "squarings": 6623,
+            "inversionCalls": 561,
+            "curveAdditionCalls": 39,
+            "curveDoublingCalls": 50,
+            "fieldOperations": 28293
+          },
+          "rho_walk": {
+            "additions": 474,
+            "multiplications": 1517,
+            "squarings": 0,
+            "inversionCalls": 75,
+            "curveAdditionCalls": 63,
+            "curveDoublingCalls": 17,
+            "fieldOperations": 1991
+          },
+          "final_verification": {
+            "additions": 19,
+            "multiplications": 83,
+            "squarings": 0,
+            "inversionCalls": 4,
+            "curveAdditionCalls": 2,
+            "curveDoublingCalls": 3,
+            "fieldOperations": 102
+          }
+        },
+        "totals": {
+          "additions": 8639,
+          "multiplications": 15124,
+          "squarings": 6623,
+          "inversionCalls": 640,
+          "curveAdditionCalls": 104,
+          "curveDoublingCalls": 70,
+          "fieldOperations": 30386
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 56,
+        "multiplications": 7,
+        "inversions": 1
+      },
+      "all_phase_field_api_counts": {
+        "additions": 8639,
+        "multiplications": 15124,
+        "squarings": 6623,
+        "fieldOperations": 30386
+      }
+    },
+    {
+      "panel": {
+        "n": 9,
+        "d": 4,
+        "curve_order": 508,
+        "subgroup_order": 127
+      },
+      "seed": 137,
+      "variant": "quadratic-image",
+      "status": "verified",
+      "generator": [
+        116,
+        306
+      ],
+      "target": [
+        29,
+        10
+      ],
+      "subgroup_order": 127,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "columns": 10,
+      "rank": 10,
+      "recovered_scalar": 5,
+      "planted_scalar": 5,
+      "cold_wall_seconds": 0.2720479420022457,
+      "phase_seconds": {
+        "setup": 0.04861568800333771,
+        "factor_base": 0.002645939999638358,
+        "relation_collection": 0.21299005799664883,
+        "matrix": 0.0001650300073379185,
+        "individual": 0.007379800001217518,
+        "rho_walk": 0.0,
+        "final_verification": 0.00020481799947447143
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 8146,
+            "multiplications": 13524,
+            "squarings": 6623,
+            "inversionCalls": 561,
+            "curveAdditionCalls": 39,
+            "curveDoublingCalls": 50,
+            "fieldOperations": 28293
+          },
+          "factor_base": {
+            "additions": 359,
+            "multiplications": 1018,
+            "squarings": 223,
+            "inversionCalls": 48,
+            "curveAdditionCalls": 11,
+            "curveDoublingCalls": 33,
+            "fieldOperations": 1600
+          },
+          "relation_generation": {
+            "additions": 724,
+            "multiplications": 2997,
+            "squarings": 0,
+            "inversionCalls": 145,
+            "curveAdditionCalls": 61,
+            "curveDoublingCalls": 97,
+            "fieldOperations": 3721
+          },
+          "relations_verification": {
+            "additions": 1098,
+            "multiplications": 2330,
+            "squarings": 510,
+            "inversionCalls": 112,
+            "curveAdditionCalls": 123,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 3938
+          },
+          "individual_generation": {
+            "additions": 67,
+            "multiplications": 268,
+            "squarings": 0,
+            "inversionCalls": 13,
+            "curveAdditionCalls": 6,
+            "curveDoublingCalls": 8,
+            "fieldOperations": 335
+          },
+          "individual_verification": {
+            "additions": 139,
+            "multiplications": 309,
+            "squarings": 51,
+            "inversionCalls": 15,
+            "curveAdditionCalls": 18,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 499
+          },
+          "final_verification": {
+            "additions": 19,
+            "multiplications": 83,
+            "squarings": 0,
+            "inversionCalls": 4,
+            "curveAdditionCalls": 2,
+            "curveDoublingCalls": 3,
+            "fieldOperations": 102
+          }
+        },
+        "totals": {
+          "additions": 10552,
+          "multiplications": 20529,
+          "squarings": 7407,
+          "inversionCalls": 898,
+          "curveAdditionCalls": 260,
+          "curveDoublingCalls": 191,
+          "fieldOperations": 38488
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 276,
+        "multiplications": 353,
+        "inversions": 11
+      },
+      "all_phase_field_api_counts": {
+        "additions": 83227,
+        "multiplications": 71494,
+        "squarings": 38349,
+        "fieldOperations": 193070
+      }
+    },
+    {
+      "panel": {
+        "n": 9,
+        "d": 4,
+        "curve_order": 508,
+        "subgroup_order": 127
+      },
+      "seed": 211,
+      "variant": "quadratic-image",
+      "status": "verified",
+      "generator": [
+        116,
+        306
+      ],
+      "target": [
+        504,
+        295
+      ],
+      "subgroup_order": 127,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "columns": 10,
+      "rank": 10,
+      "recovered_scalar": 10,
+      "planted_scalar": 10,
+      "cold_wall_seconds": 0.33248159200229566,
+      "phase_seconds": {
+        "setup": 0.05241402100000414,
+        "factor_base": 0.002749997001956217,
+        "relation_collection": 0.24041945599674364,
+        "matrix": 0.00013954200039734133,
+        "individual": 0.036461034000240033,
+        "rho_walk": 0.0,
+        "final_verification": 0.0002521189999242779
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 8150,
+            "multiplications": 13545,
+            "squarings": 6623,
+            "inversionCalls": 562,
+            "curveAdditionCalls": 39,
+            "curveDoublingCalls": 51,
+            "fieldOperations": 28318
+          },
+          "factor_base": {
+            "additions": 359,
+            "multiplications": 1018,
+            "squarings": 223,
+            "inversionCalls": 48,
+            "curveAdditionCalls": 11,
+            "curveDoublingCalls": 33,
+            "fieldOperations": 1600
+          },
+          "relation_generation": {
+            "additions": 825,
+            "multiplications": 3477,
+            "squarings": 0,
+            "inversionCalls": 168,
+            "curveAdditionCalls": 65,
+            "curveDoublingCalls": 117,
+            "fieldOperations": 4302
+          },
+          "relations_verification": {
+            "additions": 1177,
+            "multiplications": 2530,
+            "squarings": 510,
+            "inversionCalls": 122,
+            "curveAdditionCalls": 138,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 4217
+          },
+          "individual_generation": {
+            "additions": 104,
+            "multiplications": 412,
+            "squarings": 0,
+            "inversionCalls": 20,
+            "curveAdditionCalls": 10,
+            "curveDoublingCalls": 12,
+            "fieldOperations": 516
+          },
+          "individual_verification": {
+            "additions": 155,
+            "multiplications": 349,
+            "squarings": 51,
+            "inversionCalls": 17,
+            "curveAdditionCalls": 21,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 555
+          },
+          "final_verification": {
+            "additions": 23,
+            "multiplications": 104,
+            "squarings": 0,
+            "inversionCalls": 5,
+            "curveAdditionCalls": 2,
+            "curveDoublingCalls": 4,
+            "fieldOperations": 127
+          }
+        },
+        "totals": {
+          "additions": 10793,
+          "multiplications": 21435,
+          "squarings": 7407,
+          "inversionCalls": 942,
+          "curveAdditionCalls": 286,
+          "curveDoublingCalls": 217,
+          "fieldOperations": 39635
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 254,
+        "multiplications": 331,
+        "inversions": 11
+      },
+      "all_phase_field_api_counts": {
+        "additions": 100578,
+        "multiplications": 84067,
+        "squarings": 45595,
+        "fieldOperations": 230240
+      }
+    },
+    {
+      "panel": {
+        "n": 9,
+        "d": 4,
+        "curve_order": 508,
+        "subgroup_order": 127
+      },
+      "seed": 211,
+      "variant": "coefficient-pullback",
+      "status": "verified",
+      "generator": [
+        116,
+        306
+      ],
+      "target": [
+        504,
+        295
+      ],
+      "subgroup_order": 127,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "columns": 10,
+      "rank": 10,
+      "recovered_scalar": 10,
+      "planted_scalar": 10,
+      "cold_wall_seconds": 0.20821424500172725,
+      "phase_seconds": {
+        "setup": 0.05111043000215432,
+        "factor_base": 0.0026747030024125706,
+        "relation_collection": 0.13323968699842226,
+        "matrix": 0.00018004099911195226,
+        "individual": 0.020711574998131255,
+        "rho_walk": 0.0,
+        "final_verification": 0.0002523689981899224
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 8150,
+            "multiplications": 13545,
+            "squarings": 6623,
+            "inversionCalls": 562,
+            "curveAdditionCalls": 39,
+            "curveDoublingCalls": 51,
+            "fieldOperations": 28318
+          },
+          "factor_base": {
+            "additions": 359,
+            "multiplications": 1018,
+            "squarings": 223,
+            "inversionCalls": 48,
+            "curveAdditionCalls": 11,
+            "curveDoublingCalls": 33,
+            "fieldOperations": 1600
+          },
+          "relation_generation": {
+            "additions": 825,
+            "multiplications": 3477,
+            "squarings": 0,
+            "inversionCalls": 168,
+            "curveAdditionCalls": 65,
+            "curveDoublingCalls": 117,
+            "fieldOperations": 4302
+          },
+          "relations_verification": {
+            "additions": 1177,
+            "multiplications": 2530,
+            "squarings": 510,
+            "inversionCalls": 122,
+            "curveAdditionCalls": 138,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 4217
+          },
+          "individual_generation": {
+            "additions": 104,
+            "multiplications": 412,
+            "squarings": 0,
+            "inversionCalls": 20,
+            "curveAdditionCalls": 10,
+            "curveDoublingCalls": 12,
+            "fieldOperations": 516
+          },
+          "individual_verification": {
+            "additions": 155,
+            "multiplications": 349,
+            "squarings": 51,
+            "inversionCalls": 17,
+            "curveAdditionCalls": 21,
+            "curveDoublingCalls": 0,
+            "fieldOperations": 555
+          },
+          "final_verification": {
+            "additions": 23,
+            "multiplications": 104,
+            "squarings": 0,
+            "inversionCalls": 5,
+            "curveAdditionCalls": 2,
+            "curveDoublingCalls": 4,
+            "fieldOperations": 127
+          }
+        },
+        "totals": {
+          "additions": 10793,
+          "multiplications": 21435,
+          "squarings": 7407,
+          "inversionCalls": 942,
+          "curveAdditionCalls": 286,
+          "curveDoublingCalls": 217,
+          "fieldOperations": 39635
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 254,
+        "multiplications": 331,
+        "inversions": 11
+      },
+      "all_phase_field_api_counts": {
+        "additions": 48853,
+        "multiplications": 62535,
+        "squarings": 14992,
+        "fieldOperations": 126380
+      }
+    },
+    {
+      "panel": {
+        "n": 9,
+        "d": 4,
+        "curve_order": 508,
+        "subgroup_order": 127
+      },
+      "seed": 211,
+      "variant": "rho",
+      "status": "verified",
+      "generator": [
+        116,
+        306
+      ],
+      "target": [
+        504,
+        295
+      ],
+      "subgroup_order": 127,
+      "full_dlp_S": null,
+      "rho_ratio": null,
+      "rho_iterations": 51,
+      "recovered_scalar": 10,
+      "planted_scalar": 10,
+      "cold_wall_seconds": 0.0553137719980441,
+      "phase_seconds": {
+        "setup": 0.050684427998930914,
+        "factor_base": 0.0,
+        "relation_collection": 0.0,
+        "matrix": 0.0,
+        "individual": 0.0,
+        "rho_walk": 0.004345957000623457,
+        "final_verification": 0.000271447999693919
+      },
+      "orchestration_field_api_counts": {
+        "phases": {
+          "setup": {
+            "additions": 8150,
+            "multiplications": 13545,
+            "squarings": 6623,
+            "inversionCalls": 562,
+            "curveAdditionCalls": 39,
+            "curveDoublingCalls": 51,
+            "fieldOperations": 28318
+          },
+          "rho_walk": {
+            "additions": 458,
+            "multiplications": 1500,
+            "squarings": 0,
+            "inversionCalls": 74,
+            "curveAdditionCalls": 57,
+            "curveDoublingCalls": 20,
+            "fieldOperations": 1958
+          },
+          "final_verification": {
+            "additions": 23,
+            "multiplications": 104,
+            "squarings": 0,
+            "inversionCalls": 5,
+            "curveAdditionCalls": 2,
+            "curveDoublingCalls": 4,
+            "fieldOperations": 127
+          }
+        },
+        "totals": {
+          "additions": 8631,
+          "multiplications": 15149,
+          "squarings": 6623,
+          "inversionCalls": 641,
+          "curveAdditionCalls": 98,
+          "curveDoublingCalls": 75,
+          "fieldOperations": 30403
+        }
+      },
+      "scalar_modular_counts": {
+        "additions": 50,
+        "multiplications": 7,
+        "inversions": 1
+      },
+      "all_phase_field_api_counts": {
+        "additions": 8631,
+        "multiplications": 15149,
+        "squarings": 6623,
+        "fieldOperations": 30403
+      }
+    }
+  ],
+  "contract": {
+    "id": "coefficient-pullback-cold-dlp-smoke-v1",
+    "scope": "Cold complete ECDLP correctness and cost-vector smoke test; tiny groups only; no calibrated normalized-operation speedup claim.",
+    "panels": [
+      {
+        "n": 5,
+        "d": 3,
+        "curve_order": 44,
+        "subgroup_order": 11
+      },
+      {
+        "n": 9,
+        "d": 4,
+        "curve_order": 508,
+        "subgroup_order": 127
+      }
+    ],
+    "seeds": [
+      91,
+      137,
+      211
+    ],
+    "variants": [
+      "quadratic-image",
+      "coefficient-pullback",
+      "rho"
+    ],
+    "target_attempt_cap": 128,
+    "decomposition_seconds": 3,
+    "run_seconds": 60,
+    "domain": "Same distinct nonzero raw x-subspace factor support as the stage experiment. Project whole verified relations by the cofactor into the prime subgroup. Equal/negated projected factor columns are identified; projected identity is known zero.",
+    "collection": "R=s*A for a verified full-order A; after cofactor projection, row rhs is s mod N relative to G=h*A. Secrets are never supplied to decomposition.",
+    "individual": "R=Q+t*A; projected relation gives L=h*k+t mod N, hence k=(L-t)/h mod N. Verify [k]G=Q.",
+    "accounting": "Cold wall timer includes field/curve setup, enumeration and generator checks, factor-base setup, unsuccessful attempts, both solver and adapter verification, scalar elimination, and final recovery. Field API operations are split from scalar modular add/multiply/invert calls; conversions and total normalized S remain unmeasured.",
+    "rho": "Independent three-partition Floyd walk on the identical prime subgroup; randomized restarts and final scalar check. No factor-base precomputation. Small-group measurements are smoke controls, not extrapolation.",
+    "acceptance": "Every completed scalar must match the planted test scalar and satisfy [k]G=Q. Preserve missing completions and exceptions. No end-to-end claim from timing or an incomplete operation vector."
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "authorizedBy": "root narrow reviewer-format repair",
+  "originalScriptSha256": "ceb51e0bb34d5c88953e8bd10523a04c9fe8bdf10673e857694a485993490180",
+  "successorScriptSha256": "812d79844569cf1c0162129577f943783b24f9e19f952f6979e5726c2ede6d6f",
+  "onlyChange": {
+    "before": "words=[[off,hex(lo),hex(hi)] for off,_,lo,hi in b[function]]",
+    "after": "words=[[off,f'0x{lo:016x}',f'0x{hi:016x}'] for off,_,lo,hi in b[function]]"
+  },
+  "replacementExactlyOnce": true,
+  "integerAndElfByteComparisonLogicUnchanged": true,
+  "expectedDigestsAndAcceptanceCriteriaUnchanged": true,
+  "failureReceiptSha256": "8d8e1d3afa82aa5c106aedb49eec2d740cc682b4480a65acb426154263599c8c"
+}

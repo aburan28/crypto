@@ -1,0 +1,36 @@
+{
+  "schema": "ecc2k130-sigma-square-table-compile-failure-v1",
+  "status": "PRODUCER_FAILURE",
+  "sourceHead": "4ef1db5f9f11e622555058afc817e46ce746a315",
+  "github": {
+    "runId": 37044212955,
+    "tableCudaJobId": 110961479494,
+    "sm120JobId": 110961479604,
+    "sm120ArtifactId": 11244087147,
+    "sm120ArtifactZipSha256": "17fc0723f3c5ac0446a951d5eb15671085fcf425bb0db5b13cfc12077b8588b6"
+  },
+  "failures": [
+    {
+      "job": "table-cuda-compile",
+      "toolchain": "CUDA 12.9",
+      "error": "ECC_PACKED_CLMAD requires CUDA 13.3 or newer (PTX 9.3)",
+      "cause": "The generic syntax-only job incorrectly enabled the selected CUDA-13.3 CLMAD spelling.",
+      "repair": "Keep this generic sm_90 syntax check on the software carryless spelling; the exact sm_120 job retains PACKED_CLMAD=1."
+    },
+    {
+      "job": "sigma-square-sm120-compile",
+      "toolchain": "CUDA 13.3.73, sm_120",
+      "error": "packedengine.cuh: identifier ECC_TABLE_TAG_DENOM is undefined",
+      "cause": "The manual nvcc command omitted a table-walk default normally supplied by Makefile DEFS.",
+      "repair": "Freeze and pass the complete table/control default set explicitly."
+    }
+  ],
+  "claimBoundary": {
+    "controlBinaryProduced": false,
+    "candidateBinaryProduced": false,
+    "resourceEvidenceProduced": false,
+    "sassEvidenceProduced": false,
+    "gpuUsed": false,
+    "performanceDecision": null
+  }
+}

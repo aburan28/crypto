@@ -1,0 +1,62 @@
+{
+  "autolab_protocol_sha256": "2d9a716d11e1def8c0b2e0f7711acc30fd712282f7bdf0bacff9e4d47b58a03e",
+  "factor_base_logs_known_by_construction": false,
+  "factor_base_selection_uses_scalar_labels": false,
+  "full_cost_gate_passed": false,
+  "gate_status_sha256": "3115ea9b37dc54fc37dcb5e6dd14d425f944c529575a3a6f53f7a67ee522487c",
+  "gates": {
+    "1_all_stage_resource_charging": "partial_missing_licensed_magma",
+    "2_same_instance_solver_panel": "partial_missing_licensed_magma_full_panel",
+    "3_single_core_core_memory_conflicts_wall": "partial_missing_magma_and_selected_single_core_refresh",
+    "4_n31_n41_larger_pdp_scaling": "satisfied_finite_execution_coverage",
+    "5_unknown_scalar_without_constructed_base_logs": "satisfied_finite_n23_n31_n41_n53",
+    "6_full_cost_vs_automorphism_rho": "partial_online_wall_pass_full_cost_core_memory_fail",
+    "7_external_reproduction_novelty": "missing"
+  },
+  "independent_external_reproduction_satisfied": false,
+  "koblitz_index_calculus_sota": false,
+  "ledger_sha256": "24c3fa49f0734dfcef05a7d3e6f7020c9265fe95dbcde1976a7d7eb0eec75d6d",
+  "licensed_magma_complete": false,
+  "next_targets": [
+    "reduce exact selected n=53 support below 512 MiB without changing the base or rank-95 solve",
+    "reduce selected direct/rho core ratio to at most one and retain the online wall crossover",
+    "refresh forced-single-core evidence for the selected four-shard route",
+    "execute the frozen 160-input panel under licensed Magma F4",
+    "obtain unaffiliated reproduction and novelty review"
+  ],
+  "predecessors": {
+    "stage108_status": "n53_routing_selection_archive_verified",
+    "stage108_verification_sha256": "f8bf909923e65d11fbaa93cabad9f593b47f67c79fe9f064fb9f40f99f4f3fde",
+    "stage109_audit_sha256": "5196fd73a26e5ee5602a0ab5334618a03754a70e7afe06a7c2e7138eb8fec7ac",
+    "stage109_status": "current_seven_gate_audit_verified",
+    "stage99_status": "n53_optimization_chain_verified",
+    "stage99_verification_sha256": "0cf375572da1dcb63bb9925f56301eb29820d47ed3330fd0643938a13f6901ce"
+  },
+  "schema": "koblitz_stage124_current_gate_audit.v1",
+  "scoreboard_sha256": "acdfe7d5cb8af22b9a3f07de6ec21d957113266c5c76e8066570c41cb52ad774",
+  "selected_n53": {
+    "base_hash": "f702d426b0ef2e8a06c7c4f902ca1d29852e6102bb155e153b9d54622d6daafa",
+    "fresh_build_ratio": 17.636691639458064,
+    "median_core_ratio": 2.2615649859983002,
+    "median_wall_ratio": 0.8391902594529497,
+    "paired_wall_ratios": [
+      0.8470950666326896,
+      0.8589372990417655,
+      0.8391902594529497,
+      0.8290808707265989,
+      0.8389296438435545
+    ],
+    "routing": "xor_low_and_high_x_windows",
+    "support_bytes": 738197504,
+    "support_entries": 24805379,
+    "support_table_shards": 4,
+    "unknown_scalar_ratio": 0.9874890990570423
+  },
+  "since_stage109": {
+    "reference": "research/notes/index-calculus/RESEARCH_IC_BOUNDARY_LEDGER.md",
+    "what_did_not": "every Koblitz gate fact Stage 109 sealed: the selected n=53 base hash, support entries and bytes, the five paired wall ratios, the core and fresh-build ratios, the unknown-scalar ratio, and the seven gate statuses",
+    "what_moved": "docs/ic/boundary_targets.json, docs/ic/BOUNDARY_TARGETS.md and GATE_STATUS.md: operation-counted relation_yield / rank / end_to_end_dlp / vs_rho rows for the prime and binary regimes, oracle pricing and the whole-process operation count on the Koblitz decomposition and vs_rho rows, agent priority 8, and the research-notes move of 2026-09-19"
+  },
+  "status": "current_seven_gate_audit_verified",
+  "target_subgroup_enumerated_for_factor_base": false
+}

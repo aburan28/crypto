@@ -1,0 +1,73 @@
+{
+  "comparisons": [
+    {
+      "candidate": "combined_descent",
+      "candidate_over_baseline": 0.7192561734566932,
+      "ci95": [
+        0.7076292905711455,
+        0.7348330148196759
+      ],
+      "eligible": true,
+      "independent_curve_blocks": 5,
+      "native_wall_candidate_over_baseline": 0.7709428514204208,
+      "native_wall_ci95": [
+        0.7427714253524114,
+        0.8053474247492254
+      ],
+      "native_wall_per_cell": {
+        "n13a0": 0.8383998304851422,
+        "n17a1": 0.7784785144752967,
+        "n19a0": 0.7657899556886991,
+        "n19a1": 0.7466988660965171,
+        "n23a0": 0.7297228720442474
+      },
+      "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+      "paired_cases": 60,
+      "per_cell": {
+        "n13a0": 0.7489171418859579,
+        "n17a1": 0.7125306757473583,
+        "n19a0": 0.7229960045788432,
+        "n19a1": 0.7069668907452992,
+        "n23a0": 0.705741540450247
+      },
+      "speedup": 1.3903252233402075
+    }
+  ],
+  "failures": [],
+  "process_wall_seconds_including_profiling": 438.09464690473396,
+  "rho_over_incumbent": {
+    "candidate": "rho",
+    "candidate_over_baseline": 0.9996703108474339,
+    "ci95": [
+      0.89350860516365,
+      1.1131588847325682
+    ],
+    "eligible": true,
+    "independent_curve_blocks": 5,
+    "native_wall_candidate_over_baseline": 0.98559438654633,
+    "native_wall_ci95": [
+      0.9217838625223173,
+      1.057614107084187
+    ],
+    "native_wall_per_cell": {
+      "n13a0": 0.8777136551238331,
+      "n17a1": 0.9611101606762271,
+      "n19a0": 0.9800755003634694,
+      "n19a1": 1.0145432308450992,
+      "n23a0": 1.1087534710876854
+    },
+    "native_wall_status": "paired cold-process timing; nested curve/target bootstrap",
+    "paired_cases": 60,
+    "per_cell": {
+      "n13a0": 0.8168011280951917,
+      "n17a1": 0.9688754651266795,
+      "n19a0": 1.0022920403660331,
+      "n19a1": 1.057646089855372,
+      "n23a0": 1.1900495218865665
+    },
+    "speedup": 1.0003297978833507
+  },
+  "runs": 540,
+  "stage": "replay",
+  "verified_runs": 540
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "ecc2k130_global_hints_checker_portability.v1",
+  "failedPrHead": "05619d3c1e5dd86c7bde1efc722763d71bf00999",
+  "failedCiJob": "https://github.com/aburan28/crypto/actions/runs/37036033989/job/110934359489",
+  "diagnostic": "GCC -Werror=range-loop-construct: const std::string reference binds to a temporary converted from a string literal in checkRuntimeLog",
+  "repair": "make the local std::string value construction explicit; no expected marker, predicate, arithmetic or measured source changes",
+  "originalCheckerSourceSha256": "310820514c4c5fcd0ca128ad72ffde9a6bc9d41cf030b405980a6060d792dc98",
+  "repairedCheckerSourceSha256": "e4bec19fe3f83399c7b6f5969c94067b878f52910a6b9574f415b809b8432a79",
+  "validation": {
+    "strictClangBuild": "PASS",
+    "selfTest": "PASS",
+    "fullSealedArchiveAudit": "PASS",
+    "allScientificFieldsMatchFrozenAudit": true,
+    "receiptDifference": "the root rerun binds the earlier explicit-fetch f4b48f receipt; the independent audit binds the later original-collector 3f3639 receipt; both immutable receipts identify the same measured call"
+  },
+  "newGpuRun": false,
+  "measuredSourceCommit": "7e5281e6b276b89428dbb74a1c05a50ca5b61a02",
+  "resultUnchanged": "DO_NOT_PROMOTE",
+  "linuxGccCiRerun": "pending"
+}

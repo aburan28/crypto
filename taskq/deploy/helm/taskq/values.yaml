@@ -1,0 +1,89 @@
+# Worker image: deploy/Dockerfile, or a derived image with a repo's toolchain
+# (for example cryptanalysis's cloud/taskq images). Pools may override it.
+image:
+  repository: ghcr.io/aburan28/taskq-worker
+  tag: latest
+  pullPolicy: IfNotPresent
+
+namespace: ""            # key prefix inside Redis (TASKQ_NAMESPACE); default "taskq"
+
+redis:
+  # true: run Redis here (AOF on a PVC). false: use externalUrlSecret.
+  enabled: true
+  image: redis:7.4
+  storage: 10Gi
+  storageClassName: ""
+  resources:
+    requests: {cpu: 250m, memory: 512Mi}
+    limits: {memory: 2Gi}
+  # Secret holding key `redis-password`. Created with a random password when empty.
+  existingSecret: ""
+  # When redis.enabled=false: Secret {name, key} whose value is the full redis:// URL.
+  externalUrlSecret: {name: "", key: url}
+
+# Worker repo allowlist: alias -> clone URL. Specs name the alias.
+repos:
+  crypto: https://github.com/aburan28/crypto.git
+  crypto-autoresearcher: https://github.com/aburan28/crypto-autoresearcher.git
+  cryptanalysis: https://github.com/aburan28/cryptanalysis.git
+
+# Shared ReadWriteMany volume for artifacts and mirrored results.
+results:
+  create: true
+  existingClaim: ""
+  storage: 100Gi
+  storageClassName: ""
+  accessMode: ReadWriteMany
+
+# One Deployment per pool. One task per pod: scale with replicas, never threads.
+# Guaranteed QoS (requests == limits, integer CPUs) + the static CPU manager
+# policy gives each pod exclusive cores, which makes its timings comparable.
+pools:
+  - name: cpu
+    queues: [cpu]
+    replicas: 2
+    labels: {pool: cpu}
+    resources:
+      requests: {cpu: "4", memory: 8Gi}
+      limits: {cpu: "4", memory: 8Gi}
+    cacheSize: 50Gi
+    nodeSelector: {}
+    tolerations: []
+    # image: {repository: ..., tag: ...}   # per-pool override
+    # keda: {minReplicas: 0, maxReplicas: 20, lagCount: 1}
+  # - name: gpu-sm120
+  #   queues: [gpu-sm120]
+  #   replicas: 1
+  #   labels: {gpu: sm120}
+  #   resources:
+  #     requests: {cpu: "8", memory: 60Gi, nvidia.com/gpu: 1}
+  #     limits: {cpu: "8", memory: 60Gi, nvidia.com/gpu: 1}
+  #   nodeSelector: {nvidia.com/gpu.product: NVIDIA-RTX-PRO-4500-Blackwell}
+  #   tolerations: [{key: nvidia.com/gpu, operator: Exists, effect: NoSchedule}]
+
+worker:
+  leaseSeconds: 60
+  maxTrees: 8
+  terminationGracePeriodSeconds: 30
+  extraArgs: []
+  extraEnv: []
+
+# Scale pools on unread stream entries with KEDA (must be installed).
+# Scale-down evicts idle pods only if they are idle: a busy pod gets SIGTERM and
+# hands its task back, so keep cooldownPeriod generous.
+keda:
+  enabled: false
+  pollingInterval: 30
+  cooldownPeriod: 600
+  # Only when redis.enabled=false: how KEDA reaches the external Redis.
+  external:
+    address: ""            # host:port, e.g. master.taskq.xxxx.usw2.cache.amazonaws.com:6379
+    enableTLS: false       # true for ElastiCache/MemoryDB in-transit encryption
+    passwordSecret: {name: "", key: password}
+
+# A shared MCP endpoint over streamable HTTP. It has NO authentication:
+# keep it cluster-internal (ClusterIP, NetworkPolicy) or leave it off and run
+# `taskq mcp` over stdio next to each agent.
+mcp:
+  enabled: false
+  port: 8000

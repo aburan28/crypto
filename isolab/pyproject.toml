@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "isolab"
+version = "0.1.0"
+description = "Standalone, peer-to-peer experiment execution environment with enforced measurement fidelity"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["nats-py>=2.9", "jsonschema>=4"]
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.2"]
+test = ["pytest>=7", "pytest-asyncio>=0.23"]
+
+[project.scripts]
+isolab = "isolab.cli:main"
+
+[tool.setuptools]
+packages = ["isolab", "isolab.schemas"]
+
+[tool.setuptools.package-data]
+"isolab.schemas" = ["*.json"]
+isolab = ["spin.c", "launcher.c", "nats.conf.tmpl", "images/*/Containerfile"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

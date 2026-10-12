@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/usr/bin/env",
+    "CARGO_TARGET_DIR=/Volumes/SSD990/kic-stage183-dense-pair-target-fdeb3155f",
+    "cargo",
+    "build",
+    "--release",
+    "--locked",
+    "--example",
+    "koblitz_pdp_backend"
+  ],
+  "returncode": 0,
+  "watchdog_seconds": 1200.0,
+  "timed_out": false,
+  "orphan_group_terminated": false,
+  "metrics": {
+    "wall_seconds": 135.25297649999993,
+    "user_seconds": 260.457112,
+    "system_seconds": 12.341377,
+    "total_core_seconds": 272.798489,
+    "single_core_seconds": 272.798489,
+    "peak_rss_bytes": 2987278336,
+    "meter": "fresh-process getrusage(RUSAGE_CHILDREN)"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "build_record_sha256": "4b569537f33046a8e5a7aad091f35f1013a37093e190d61a5fb7ae3fda9176ed",
+  "host": {
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "processor": "arm",
+    "release": "25.6.0",
+    "system": "Darwin",
+    "version": "Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041"
+  },
+  "resources": {
+    "cpu": null,
+    "memory_bytes": null,
+    "rayon_threads": 1,
+    "timeout_seconds": 60
+  },
+  "sources": {
+    "generic_admission.py": "56355fc848bd2b23d0101a9575a303bc7a82ba984efbe36e93a6c899cf29dfd9",
+    "generic_bases.py": "ad0d5ab360f0b490c260d013c6032dfda6367b62ea500097d5279abdfc5dddda",
+    "generic_build.py": "3985ac774bb063546de862d9d23a092245d8320f95044f73db33a8ad0288dd91",
+    "generic_phases.py": "4f37180ab4141faa98d79f733a96e2a7ad792f37c645932d559f1bb7355ed1b6",
+    "generic_queries.py": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea",
+    "generic_query_law.py": "eee5e070bc9aaf39a659a15c33bd57da8aa1833963a1552b5d40b96102577cc1",
+    "generic_stages.py": "92316e3d1a502932ae0060b65266ac103168a43b235cc9a04aa9b12375f8b3bd",
+    "goal_20260924/generic-query-law/run_controls.py": "8819eee98f2849c33a1512b038d99db4442c3ae64e788124b2e1a7f0d1f649b3",
+    "goal_20260924/generic-scientific-admission/PROTOCOL.md": "1ee5ae83286abe658b8d9afe32ba87c9fcd2fef513f9f9b9df9cbb911dbaedd0",
+    "goal_20260924/generic-scientific-admission/run_controls.py": "785e6ff3872efce4bba3e9e6742b464b8d54c08228d7c2e931e4a1e5479a8b5f",
+    "identity.py": "1fcb72308e6353c55c30c2184c1d99edef7c84ef8283db6615e5fb3075fb307f",
+    "measurement.py": "e47364ec547bfdf786ded93271af9703f10f61c2eac7c1fa8c236f8db1318aed",
+    "oracle.py": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+  },
+  "worker_sha256": "fefcc1bc9de9cc6314e2a36629a0b898685f24138962553813b65c5dd1bff215"
+}

@@ -1,0 +1,2919 @@
+{
+  "aa_observations": 2560,
+  "ab_observations": 8960,
+  "all_complete": true,
+  "calibrated_operation_ratio": null,
+  "cells": [
+    {
+      "cell": "n6-discovery-20261002-repeat-b1",
+      "medians_ns": {
+        "direct": 13128.5,
+        "envelope": 61250.0,
+        "envelope_degree": 65462.5,
+        "envelope_indexed": 87668.0,
+        "layout": 19812.5,
+        "matrix_cache": 14121.0,
+        "schedule": 15244.5
+      },
+      "noise_floor": 3.4895543587619104,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n6-discovery-20261002-repeat-b4",
+      "medians_ns": {
+        "direct": 51750.5,
+        "envelope": 100148.5,
+        "envelope_degree": 103480.5,
+        "envelope_indexed": 110740.5,
+        "layout": 53454.5,
+        "matrix_cache": 23293.0,
+        "schedule": 25377.0
+      },
+      "noise_floor": 1.6394858169883566,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n6-discovery-20261002-repeat-b16",
+      "medians_ns": {
+        "direct": 206753.0,
+        "envelope": 247835.0,
+        "envelope_degree": 243402.5,
+        "envelope_indexed": 206181.0,
+        "layout": 203160.5,
+        "matrix_cache": 63566.5,
+        "schedule": 72795.5
+      },
+      "noise_floor": 1.0795375722543352,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n6-discovery-20261002-repeat-b64",
+      "medians_ns": {
+        "direct": 861529.0,
+        "envelope": 831732.0,
+        "envelope_degree": 831604.0,
+        "envelope_indexed": 577620.5,
+        "layout": 812087.0,
+        "matrix_cache": 223106.0,
+        "schedule": 255663.0
+      },
+      "noise_floor": 1.0294319266285232,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n6-discovery-20261002-coefficients-b1",
+      "medians_ns": {
+        "direct": 18017.0,
+        "envelope": 57759.0,
+        "envelope_degree": 64459.0,
+        "envelope_indexed": 85644.0,
+        "layout": 20160.5,
+        "matrix_cache": 14877.0,
+        "schedule": 15688.0
+      },
+      "noise_floor": 1.538422903063787,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n6-discovery-20261002-coefficients-b4",
+      "medians_ns": {
+        "direct": 54514.5,
+        "envelope": 96940.0,
+        "envelope_degree": 103401.0,
+        "envelope_indexed": 117485.0,
+        "layout": 56250.5,
+        "matrix_cache": 49870.5,
+        "schedule": 51054.0
+      },
+      "noise_floor": 1.114442856863244,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n6-discovery-20261002-coefficients-b16",
+      "medians_ns": {
+        "direct": 207901.0,
+        "envelope": 257867.0,
+        "envelope_degree": 261059.0,
+        "envelope_indexed": 234194.0,
+        "layout": 209105.0,
+        "matrix_cache": 199888.5,
+        "schedule": 202812.5
+      },
+      "noise_floor": 1.0452855991599306,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n6-discovery-20261002-coefficients-b64",
+      "medians_ns": {
+        "direct": 844160.5,
+        "envelope": 898270.5,
+        "envelope_degree": 842496.0,
+        "envelope_indexed": 631835.0,
+        "layout": 838564.0,
+        "matrix_cache": 822331.0,
+        "schedule": 825911.5
+      },
+      "noise_floor": 1.0286685040365928,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n6-discovery-20261002-degree_cycle-b1",
+      "medians_ns": {
+        "direct": 18045.0,
+        "envelope": 57958.5,
+        "envelope_degree": 64962.5,
+        "envelope_indexed": 85675.5,
+        "layout": 20308.5,
+        "matrix_cache": 14893.0,
+        "schedule": 15656.0
+      },
+      "noise_floor": 1.513508466135458,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n6-discovery-20261002-degree_cycle-b4",
+      "medians_ns": {
+        "direct": 61542.5,
+        "envelope": 102408.5,
+        "envelope_degree": 109773.0,
+        "envelope_indexed": 126461.0,
+        "layout": 63750.5,
+        "matrix_cache": 56818.5,
+        "schedule": 57670.5
+      },
+      "noise_floor": 1.0966599363471476,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n6-discovery-20261002-degree_cycle-b16",
+      "medians_ns": {
+        "direct": 248055.0,
+        "envelope": 283404.5,
+        "envelope_degree": 286453.0,
+        "envelope_indexed": 257759.5,
+        "layout": 246774.5,
+        "matrix_cache": 238322.5,
+        "schedule": 237606.5
+      },
+      "noise_floor": 1.0559269033181393,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n6-discovery-20261002-degree_cycle-b64",
+      "medians_ns": {
+        "direct": 977474.5,
+        "envelope": 979966.5,
+        "envelope_degree": 954593.0,
+        "envelope_indexed": 760072.5,
+        "layout": 972246.0,
+        "matrix_cache": 950253.0,
+        "schedule": 949657.0
+      },
+      "noise_floor": 1.0512482394464988,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n6-discovery-20261002-escape-b1",
+      "medians_ns": {
+        "direct": 18049.0,
+        "envelope": 58087.0,
+        "envelope_degree": 64462.5,
+        "envelope_indexed": 85919.5,
+        "layout": 20260.5,
+        "matrix_cache": 14904.5,
+        "schedule": 15693.0
+      },
+      "noise_floor": 1.326223662884927,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n6-discovery-20261002-escape-b4",
+      "medians_ns": {
+        "direct": 52106.0,
+        "envelope": 95100.0,
+        "envelope_degree": 101504.0,
+        "envelope_indexed": 117357.0,
+        "layout": 54734.0,
+        "matrix_cache": 48466.0,
+        "schedule": 49486.5
+      },
+      "noise_floor": 1.1269237958751324,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n6-discovery-20261002-escape-b16",
+      "medians_ns": {
+        "direct": 197916.0,
+        "envelope": 253030.5,
+        "envelope_degree": 256087.0,
+        "envelope_indexed": 237398.5,
+        "layout": 200865.0,
+        "matrix_cache": 194161.0,
+        "schedule": 195185.0
+      },
+      "noise_floor": 1.0431759913989167,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n6-discovery-20261002-escape-b64",
+      "medians_ns": {
+        "direct": 810959.0,
+        "envelope": 880118.0,
+        "envelope_degree": 805287.0,
+        "envelope_indexed": 675361.0,
+        "layout": 812375.0,
+        "matrix_cache": 798990.5,
+        "schedule": 801594.5
+      },
+      "noise_floor": 1.0366517405981894,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n6-discovery-3407879-repeat-b1",
+      "medians_ns": {
+        "direct": 18132.5,
+        "envelope": 58362.0,
+        "envelope_degree": 65006.5,
+        "envelope_indexed": 85575.5,
+        "layout": 20333.0,
+        "matrix_cache": 14820.0,
+        "schedule": 15749.0
+      },
+      "noise_floor": 1.3155767099171938,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n6-discovery-3407879-repeat-b4",
+      "medians_ns": {
+        "direct": 58718.0,
+        "envelope": 95240.5,
+        "envelope_degree": 102544.0,
+        "envelope_indexed": 113493.0,
+        "layout": 57254.0,
+        "matrix_cache": 24801.0,
+        "schedule": 27265.0
+      },
+      "noise_floor": 1.1834604893860932,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n6-discovery-3407879-repeat-b16",
+      "medians_ns": {
+        "direct": 217706.0,
+        "envelope": 244934.5,
+        "envelope_degree": 251475.0,
+        "envelope_indexed": 207529.0,
+        "layout": 205517.0,
+        "matrix_cache": 64330.5,
+        "schedule": 72867.5
+      },
+      "noise_floor": 1.0815360255799296,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n6-discovery-3407879-repeat-b64",
+      "medians_ns": {
+        "direct": 863074.0,
+        "envelope": 828612.0,
+        "envelope_degree": 779205.5,
+        "envelope_indexed": 586013.0,
+        "layout": 809583.0,
+        "matrix_cache": 222681.0,
+        "schedule": 254123.0
+      },
+      "noise_floor": 1.0423285438926733,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n6-discovery-3407879-coefficients-b1",
+      "medians_ns": {
+        "direct": 18004.0,
+        "envelope": 57802.0,
+        "envelope_degree": 64890.5,
+        "envelope_indexed": 85027.0,
+        "layout": 20197.0,
+        "matrix_cache": 14848.5,
+        "schedule": 15721.0
+      },
+      "noise_floor": 1.3188273018781493,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n6-discovery-3407879-coefficients-b4",
+      "medians_ns": {
+        "direct": 53598.0,
+        "envelope": 96308.0,
+        "envelope_degree": 103060.5,
+        "envelope_indexed": 116493.5,
+        "layout": 54466.5,
+        "matrix_cache": 48470.5,
+        "schedule": 50070.0
+      },
+      "noise_floor": 1.126944520254201,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n6-discovery-3407879-coefficients-b16",
+      "medians_ns": {
+        "direct": 207604.5,
+        "envelope": 258931.5,
+        "envelope_degree": 263324.0,
+        "envelope_indexed": 236114.0,
+        "layout": 207569.0,
+        "matrix_cache": 200020.0,
+        "schedule": 202372.5
+      },
+      "noise_floor": 1.0299330727684146,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n6-discovery-3407879-coefficients-b64",
+      "medians_ns": {
+        "direct": 833816.0,
+        "envelope": 844608.5,
+        "envelope_degree": 830420.5,
+        "envelope_indexed": 629659.0,
+        "layout": 829384.0,
+        "matrix_cache": 811771.0,
+        "schedule": 816031.5
+      },
+      "noise_floor": 1.0250219793023823,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n6-discovery-3407879-degree_cycle-b1",
+      "medians_ns": {
+        "direct": 18176.5,
+        "envelope": 57946.5,
+        "envelope_degree": 65099.0,
+        "envelope_indexed": 86280.0,
+        "layout": 20493.0,
+        "matrix_cache": 14860.0,
+        "schedule": 15777.0
+      },
+      "noise_floor": 1.3522438611346317,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n6-discovery-3407879-degree_cycle-b4",
+      "medians_ns": {
+        "direct": 62555.0,
+        "envelope": 103660.0,
+        "envelope_degree": 110637.0,
+        "envelope_indexed": 123789.0,
+        "layout": 64423.0,
+        "matrix_cache": 57715.0,
+        "schedule": 58951.0
+      },
+      "noise_floor": 1.1025097811416174,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n6-discovery-3407879-degree_cycle-b16",
+      "medians_ns": {
+        "direct": 244818.0,
+        "envelope": 283640.0,
+        "envelope_degree": 286396.5,
+        "envelope_indexed": 257699.0,
+        "layout": 244715.0,
+        "matrix_cache": 234402.0,
+        "schedule": 236246.5
+      },
+      "noise_floor": 1.0479916115502501,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n6-discovery-3407879-degree_cycle-b64",
+      "medians_ns": {
+        "direct": 973486.0,
+        "envelope": 981775.0,
+        "envelope_degree": 962801.0,
+        "envelope_indexed": 748964.0,
+        "layout": 965885.5,
+        "matrix_cache": 940360.0,
+        "schedule": 942697.0
+      },
+      "noise_floor": 1.0286324037516223,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n6-discovery-3407879-escape-b1",
+      "medians_ns": {
+        "direct": 18096.5,
+        "envelope": 58010.5,
+        "envelope_degree": 64670.5,
+        "envelope_indexed": 85811.5,
+        "layout": 20320.5,
+        "matrix_cache": 14997.0,
+        "schedule": 15960.5
+      },
+      "noise_floor": 1.3610537190082646,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n6-discovery-3407879-escape-b4",
+      "medians_ns": {
+        "direct": 51606.5,
+        "envelope": 95040.0,
+        "envelope_degree": 101852.5,
+        "envelope_indexed": 117813.5,
+        "layout": 53254.5,
+        "matrix_cache": 47274.0,
+        "schedule": 48402.0
+      },
+      "noise_floor": 1.126007430114294,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n6-discovery-3407879-escape-b16",
+      "medians_ns": {
+        "direct": 197480.5,
+        "envelope": 251347.0,
+        "envelope_degree": 255499.0,
+        "envelope_indexed": 233930.0,
+        "layout": 200776.5,
+        "matrix_cache": 192680.0,
+        "schedule": 194764.5
+      },
+      "noise_floor": 1.0516374260138193,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n6-discovery-3407879-escape-b64",
+      "medians_ns": {
+        "direct": 800455.0,
+        "envelope": 826567.5,
+        "envelope_degree": 801634.0,
+        "envelope_indexed": 678801.0,
+        "layout": 803071.0,
+        "matrix_cache": 792162.0,
+        "schedule": 793926.0
+      },
+      "noise_floor": 1.0425772203920545,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n8-discovery-20261002-repeat-b1",
+      "medians_ns": {
+        "direct": 42697.5,
+        "envelope": 158135.0,
+        "envelope_degree": 172723.5,
+        "envelope_indexed": 240138.5,
+        "layout": 44826.0,
+        "matrix_cache": 32094.0,
+        "schedule": 33829.5
+      },
+      "noise_floor": 1.4155781616806116,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n8-discovery-20261002-repeat-b4",
+      "medians_ns": {
+        "direct": 131353.5,
+        "envelope": 243342.0,
+        "envelope_degree": 257115.5,
+        "envelope_indexed": 301725.0,
+        "layout": 125641.5,
+        "matrix_cache": 55354.5,
+        "schedule": 60378.5
+      },
+      "noise_floor": 1.3381352047113588,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n8-discovery-20261002-repeat-b16",
+      "medians_ns": {
+        "direct": 474841.0,
+        "envelope": 581065.0,
+        "envelope_degree": 585797.0,
+        "envelope_indexed": 510542.0,
+        "layout": 452679.5,
+        "matrix_cache": 149106.5,
+        "schedule": 166235.5
+      },
+      "noise_floor": 1.1321938038914423,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n8-discovery-20261002-repeat-b64",
+      "medians_ns": {
+        "direct": 1860276.0,
+        "envelope": 1832531.5,
+        "envelope_degree": 1842696.0,
+        "envelope_indexed": 1326977.0,
+        "layout": 1776648.5,
+        "matrix_cache": 532219.0,
+        "schedule": 599778.0
+      },
+      "noise_floor": 1.049856015885843,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n8-discovery-20261002-coefficients-b1",
+      "medians_ns": {
+        "direct": 42474.0,
+        "envelope": 156794.5,
+        "envelope_degree": 171987.5,
+        "envelope_indexed": 239678.0,
+        "layout": 44502.0,
+        "matrix_cache": 31885.0,
+        "schedule": 33557.5
+      },
+      "noise_floor": 1.4229377491567003,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n8-discovery-20261002-coefficients-b4",
+      "medians_ns": {
+        "direct": 128658.0,
+        "envelope": 251475.0,
+        "envelope_degree": 260883.0,
+        "envelope_indexed": 305329.5,
+        "layout": 129993.0,
+        "matrix_cache": 113993.0,
+        "schedule": 115809.0
+      },
+      "noise_floor": 1.12316871404936,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n8-discovery-20261002-coefficients-b16",
+      "medians_ns": {
+        "direct": 472832.5,
+        "envelope": 616791.0,
+        "envelope_degree": 613338.0,
+        "envelope_indexed": 548556.0,
+        "layout": 470708.5,
+        "matrix_cache": 450152.0,
+        "schedule": 454711.5
+      },
+      "noise_floor": 1.058168216430493,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n8-discovery-20261002-coefficients-b64",
+      "medians_ns": {
+        "direct": 1811610.0,
+        "envelope": 1983877.5,
+        "envelope_degree": 1974001.5,
+        "envelope_indexed": 1493532.5,
+        "layout": 1800342.0,
+        "matrix_cache": 1770312.5,
+        "schedule": 1777585.0
+      },
+      "noise_floor": 1.0357805002740974,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n8-discovery-20261002-degree_cycle-b1",
+      "medians_ns": {
+        "direct": 42398.0,
+        "envelope": 157919.0,
+        "envelope_degree": 172671.0,
+        "envelope_indexed": 239194.5,
+        "layout": 44642.0,
+        "matrix_cache": 32037.0,
+        "schedule": 33749.5
+      },
+      "noise_floor": 1.4010814058275758,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n8-discovery-20261002-degree_cycle-b4",
+      "medians_ns": {
+        "direct": 147890.5,
+        "envelope": 266587.0,
+        "envelope_degree": 276816.0,
+        "envelope_indexed": 323130.0,
+        "layout": 148122.5,
+        "matrix_cache": 133014.0,
+        "schedule": 135870.0
+      },
+      "noise_floor": 1.1368111799269494,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n8-discovery-20261002-degree_cycle-b16",
+      "medians_ns": {
+        "direct": 554548.0,
+        "envelope": 673745.0,
+        "envelope_degree": 669689.0,
+        "envelope_indexed": 610174.0,
+        "layout": 555456.0,
+        "matrix_cache": 529743.0,
+        "schedule": 533275.0
+      },
+      "noise_floor": 1.0453023351871247,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n8-discovery-20261002-degree_cycle-b64",
+      "medians_ns": {
+        "direct": 2145496.5,
+        "envelope": 2236180.0,
+        "envelope_degree": 2215655.5,
+        "envelope_indexed": 1757572.0,
+        "layout": 2132036.0,
+        "matrix_cache": 2071397.5,
+        "schedule": 2094530.5
+      },
+      "noise_floor": 1.037570837519205,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n8-discovery-20261002-escape-b1",
+      "medians_ns": {
+        "direct": 42206.0,
+        "envelope": 157814.5,
+        "envelope_degree": 172443.5,
+        "envelope_indexed": 242042.0,
+        "layout": 44846.0,
+        "matrix_cache": 32234.0,
+        "schedule": 33845.0
+      },
+      "noise_floor": 1.4166815822444963,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n8-discovery-20261002-escape-b4",
+      "medians_ns": {
+        "direct": 124917.0,
+        "envelope": 246338.0,
+        "envelope_degree": 258135.5,
+        "envelope_indexed": 310809.0,
+        "layout": 127402.0,
+        "matrix_cache": 110856.5,
+        "schedule": 113917.0
+      },
+      "noise_floor": 1.1717558922116909,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n8-discovery-20261002-escape-b16",
+      "medians_ns": {
+        "direct": 456567.0,
+        "envelope": 599258.0,
+        "envelope_degree": 600370.0,
+        "envelope_indexed": 571308.0,
+        "layout": 455355.5,
+        "matrix_cache": 435774.5,
+        "schedule": 440323.0
+      },
+      "noise_floor": 1.0571030989585113,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n8-discovery-20261002-escape-b64",
+      "medians_ns": {
+        "direct": 1763564.0,
+        "envelope": 1949944.5,
+        "envelope_degree": 1934263.5,
+        "envelope_indexed": 1636743.0,
+        "layout": 1763084.0,
+        "matrix_cache": 1732427.0,
+        "schedule": 1735923.0
+      },
+      "noise_floor": 1.0213527380962681,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n8-discovery-3407879-repeat-b1",
+      "medians_ns": {
+        "direct": 42498.0,
+        "envelope": 156639.0,
+        "envelope_degree": 171748.0,
+        "envelope_indexed": 238734.0,
+        "layout": 43930.0,
+        "matrix_cache": 31497.0,
+        "schedule": 33401.0
+      },
+      "noise_floor": 1.411695870415422,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n8-discovery-3407879-repeat-b4",
+      "medians_ns": {
+        "direct": 130125.0,
+        "envelope": 244279.0,
+        "envelope_degree": 256479.0,
+        "envelope_indexed": 296141.0,
+        "layout": 123473.0,
+        "matrix_cache": 54682.0,
+        "schedule": 59874.5
+      },
+      "noise_floor": 1.2773500160410651,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n8-discovery-3407879-repeat-b16",
+      "medians_ns": {
+        "direct": 471232.5,
+        "envelope": 574113.0,
+        "envelope_degree": 578005.0,
+        "envelope_indexed": 516290.0,
+        "layout": 447727.0,
+        "matrix_cache": 148782.0,
+        "schedule": 166683.0
+      },
+      "noise_floor": 1.1389989339159505,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n8-discovery-3407879-repeat-b64",
+      "medians_ns": {
+        "direct": 1834847.5,
+        "envelope": 1803026.0,
+        "envelope_degree": 1821866.5,
+        "envelope_indexed": 1305120.0,
+        "layout": 1749379.5,
+        "matrix_cache": 530895.0,
+        "schedule": 598522.0
+      },
+      "noise_floor": 1.0427281588841677,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n8-discovery-3407879-coefficients-b1",
+      "medians_ns": {
+        "direct": 41845.5,
+        "envelope": 154943.0,
+        "envelope_degree": 170735.0,
+        "envelope_indexed": 236138.5,
+        "layout": 44130.0,
+        "matrix_cache": 31337.5,
+        "schedule": 33013.5
+      },
+      "noise_floor": 1.4654626698938744,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n8-discovery-3407879-coefficients-b4",
+      "medians_ns": {
+        "direct": 124217.0,
+        "envelope": 246986.5,
+        "envelope_degree": 256595.0,
+        "envelope_indexed": 301289.0,
+        "layout": 124249.0,
+        "matrix_cache": 108716.5,
+        "schedule": 110885.0
+      },
+      "noise_floor": 1.1265731751168644,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n8-discovery-3407879-coefficients-b16",
+      "medians_ns": {
+        "direct": 462572.0,
+        "envelope": 605586.0,
+        "envelope_degree": 599142.0,
+        "envelope_indexed": 539255.5,
+        "layout": 460083.5,
+        "matrix_cache": 439575.0,
+        "schedule": 442763.0
+      },
+      "noise_floor": 1.045162647757312,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n8-discovery-3407879-coefficients-b64",
+      "medians_ns": {
+        "direct": 1788573.0,
+        "envelope": 1969333.0,
+        "envelope_degree": 1946716.0,
+        "envelope_indexed": 1516562.0,
+        "layout": 1778449.0,
+        "matrix_cache": 1744407.0,
+        "schedule": 1753292.0
+      },
+      "noise_floor": 1.037585218301972,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n8-discovery-3407879-degree_cycle-b1",
+      "medians_ns": {
+        "direct": 42278.0,
+        "envelope": 156379.0,
+        "envelope_degree": 171507.5,
+        "envelope_indexed": 238322.0,
+        "layout": 44022.0,
+        "matrix_cache": 31465.5,
+        "schedule": 33313.0
+      },
+      "noise_floor": 1.423141148252725,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n8-discovery-3407879-degree_cycle-b4",
+      "medians_ns": {
+        "direct": 145482.5,
+        "envelope": 265891.5,
+        "envelope_degree": 275727.5,
+        "envelope_indexed": 321150.0,
+        "layout": 146146.5,
+        "matrix_cache": 130293.5,
+        "schedule": 133169.5
+      },
+      "noise_floor": 1.1401418629949185,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n8-discovery-3407879-degree_cycle-b16",
+      "medians_ns": {
+        "direct": 543139.5,
+        "envelope": 666509.0,
+        "envelope_degree": 661540.5,
+        "envelope_indexed": 602258.0,
+        "layout": 539259.5,
+        "matrix_cache": 518694.0,
+        "schedule": 521871.0
+      },
+      "noise_floor": 1.0497959277131883,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n8-discovery-3407879-degree_cycle-b64",
+      "medians_ns": {
+        "direct": 2122266.5,
+        "envelope": 2221906.5,
+        "envelope_degree": 2192958.5,
+        "envelope_indexed": 1748592.0,
+        "layout": 2109311.0,
+        "matrix_cache": 2046904.0,
+        "schedule": 2056004.0
+      },
+      "noise_floor": 1.0463463803215318,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n8-discovery-3407879-escape-b1",
+      "medians_ns": {
+        "direct": 42313.5,
+        "envelope": 157230.0,
+        "envelope_degree": 171550.0,
+        "envelope_indexed": 238752.0,
+        "layout": 44369.0,
+        "matrix_cache": 31613.0,
+        "schedule": 33553.5
+      },
+      "noise_floor": 1.4069692208152325,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n8-discovery-3407879-escape-b4",
+      "medians_ns": {
+        "direct": 120124.0,
+        "envelope": 242261.0,
+        "envelope_degree": 254192.5,
+        "envelope_indexed": 305351.0,
+        "layout": 121280.5,
+        "matrix_cache": 106347.5,
+        "schedule": 108143.5
+      },
+      "noise_floor": 1.1356672575335527,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n8-discovery-3407879-escape-b16",
+      "medians_ns": {
+        "direct": 449872.0,
+        "envelope": 593740.5,
+        "envelope_degree": 590685.0,
+        "envelope_indexed": 568492.0,
+        "layout": 451456.0,
+        "matrix_cache": 432135.0,
+        "schedule": 434847.0
+      },
+      "noise_floor": 1.050007039994091,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n8-discovery-3407879-escape-b64",
+      "medians_ns": {
+        "direct": 1733689.0,
+        "envelope": 1932188.0,
+        "envelope_degree": 1917403.0,
+        "envelope_indexed": 1617753.0,
+        "layout": 1734940.5,
+        "matrix_cache": 1707959.5,
+        "schedule": 1712176.0
+      },
+      "noise_floor": 1.0181222362829243,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n10-discovery-20261002-repeat-b1",
+      "medians_ns": {
+        "direct": 83551.0,
+        "envelope": 348764.0,
+        "envelope_degree": 376681.0,
+        "envelope_indexed": 544043.0,
+        "layout": 80855.0,
+        "matrix_cache": 57602.0,
+        "schedule": 60542.0
+      },
+      "noise_floor": 1.5309513574286564,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n10-discovery-20261002-repeat-b4",
+      "medians_ns": {
+        "direct": 239256.0,
+        "envelope": 515130.0,
+        "envelope_degree": 535779.0,
+        "envelope_indexed": 652095.0,
+        "layout": 233372.0,
+        "matrix_cache": 100856.0,
+        "schedule": 108224.0
+      },
+      "noise_floor": 1.2986048604860485,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n10-discovery-20261002-repeat-b16",
+      "medians_ns": {
+        "direct": 889883.0,
+        "envelope": 1127915.5,
+        "envelope_degree": 1135828.0,
+        "envelope_indexed": 1030656.5,
+        "layout": 849081.5,
+        "matrix_cache": 274978.0,
+        "schedule": 301330.0
+      },
+      "noise_floor": 1.133163701093159,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n10-discovery-20261002-repeat-b64",
+      "medians_ns": {
+        "direct": 3394159.0,
+        "envelope": 3488942.0,
+        "envelope_degree": 3475150.0,
+        "envelope_indexed": 2511380.0,
+        "layout": 3292687.5,
+        "matrix_cache": 975738.0,
+        "schedule": 1081666.0
+      },
+      "noise_floor": 1.0479779678214234,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n10-discovery-20261002-coefficients-b1",
+      "medians_ns": {
+        "direct": 83859.0,
+        "envelope": 350805.0,
+        "envelope_degree": 378085.0,
+        "envelope_indexed": 546271.0,
+        "layout": 81095.0,
+        "matrix_cache": 57626.0,
+        "schedule": 60766.0
+      },
+      "noise_floor": 1.5240447406315931,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n10-discovery-20261002-coefficients-b4",
+      "medians_ns": {
+        "direct": 245700.5,
+        "envelope": 525874.5,
+        "envelope_degree": 544279.0,
+        "envelope_indexed": 656499.0,
+        "layout": 238200.0,
+        "matrix_cache": 211539.5,
+        "schedule": 215271.0
+      },
+      "noise_floor": 1.1531161112781259,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n10-discovery-20261002-coefficients-b16",
+      "medians_ns": {
+        "direct": 875659.0,
+        "envelope": 1189849.0,
+        "envelope_degree": 1187253.0,
+        "envelope_indexed": 1089454.0,
+        "layout": 859370.0,
+        "matrix_cache": 831165.5,
+        "schedule": 839297.5
+      },
+      "noise_floor": 1.0567856895037697,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n10-discovery-20261002-coefficients-b64",
+      "medians_ns": {
+        "direct": 3317060.0,
+        "envelope": 3795157.0,
+        "envelope_degree": 3764000.0,
+        "envelope_indexed": 2865172.0,
+        "layout": 3288551.5,
+        "matrix_cache": 3248634.0,
+        "schedule": 3262730.0
+      },
+      "noise_floor": 1.0266809985352439,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n10-discovery-20261002-degree_cycle-b1",
+      "medians_ns": {
+        "direct": 84903.0,
+        "envelope": 347876.5,
+        "envelope_degree": 378941.0,
+        "envelope_indexed": 549403.0,
+        "layout": 81647.0,
+        "matrix_cache": 57818.0,
+        "schedule": 60650.0
+      },
+      "noise_floor": 1.5614583685473784,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n10-discovery-20261002-degree_cycle-b4",
+      "medians_ns": {
+        "direct": 288014.5,
+        "envelope": 563759.0,
+        "envelope_degree": 582256.0,
+        "envelope_indexed": 693204.5,
+        "layout": 285058.0,
+        "matrix_cache": 255669.0,
+        "schedule": 259389.5
+      },
+      "noise_floor": 1.1427466519345437,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n10-discovery-20261002-degree_cycle-b16",
+      "medians_ns": {
+        "direct": 1047281.0,
+        "envelope": 1333535.0,
+        "envelope_degree": 1337779.0,
+        "envelope_indexed": 1234295.5,
+        "layout": 1035472.0,
+        "matrix_cache": 1000295.0,
+        "schedule": 1002807.0
+      },
+      "noise_floor": 1.0486281074980068,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n10-discovery-20261002-degree_cycle-b64",
+      "medians_ns": {
+        "direct": 4030253.5,
+        "envelope": 4372634.0,
+        "envelope_degree": 4318631.0,
+        "envelope_indexed": 3385698.5,
+        "layout": 3999088.5,
+        "matrix_cache": 3953342.5,
+        "schedule": 3962627.0
+      },
+      "noise_floor": 1.0193145504960182,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n10-discovery-20261002-escape-b1",
+      "medians_ns": {
+        "direct": 84591.0,
+        "envelope": 348988.0,
+        "envelope_degree": 376469.0,
+        "envelope_indexed": 547191.5,
+        "layout": 81019.0,
+        "matrix_cache": 57746.0,
+        "schedule": 60630.0
+      },
+      "noise_floor": 1.5563961951186487,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n10-discovery-20261002-escape-b4",
+      "medians_ns": {
+        "direct": 238204.0,
+        "envelope": 516258.0,
+        "envelope_degree": 537763.0,
+        "envelope_indexed": 668040.0,
+        "layout": 233132.0,
+        "matrix_cache": 207179.5,
+        "schedule": 210287.5
+      },
+      "noise_floor": 1.1661657302706003,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n10-discovery-20261002-escape-b16",
+      "medians_ns": {
+        "direct": 848762.0,
+        "envelope": 1159257.0,
+        "envelope_degree": 1166953.0,
+        "envelope_indexed": 1146180.0,
+        "layout": 840517.5,
+        "matrix_cache": 813792.0,
+        "schedule": 816892.5
+      },
+      "noise_floor": 1.0450300927703018,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n10-discovery-20261002-escape-b64",
+      "medians_ns": {
+        "direct": 3246178.0,
+        "envelope": 3689385.5,
+        "envelope_degree": 3679413.0,
+        "envelope_indexed": 3058979.0,
+        "layout": 3213736.5,
+        "matrix_cache": 3177719.5,
+        "schedule": 3181059.5
+      },
+      "noise_floor": 1.0181150233768672,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n10-discovery-3407879-repeat-b1",
+      "medians_ns": {
+        "direct": 85191.0,
+        "envelope": 349952.5,
+        "envelope_degree": 381121.0,
+        "envelope_indexed": 549407.0,
+        "layout": 81458.5,
+        "matrix_cache": 58242.0,
+        "schedule": 60698.0
+      },
+      "noise_floor": 1.557698147585788,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n10-discovery-3407879-repeat-b4",
+      "medians_ns": {
+        "direct": 248712.5,
+        "envelope": 518006.0,
+        "envelope_degree": 539911.0,
+        "envelope_indexed": 652783.0,
+        "layout": 234456.0,
+        "matrix_cache": 101379.5,
+        "schedule": 109500.0
+      },
+      "noise_floor": 1.3318756214582912,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n10-discovery-3407879-repeat-b16",
+      "medians_ns": {
+        "direct": 897023.5,
+        "envelope": 1137568.0,
+        "envelope_degree": 1149925.0,
+        "envelope_indexed": 1039540.5,
+        "layout": 859390.0,
+        "matrix_cache": 275754.0,
+        "schedule": 301530.5
+      },
+      "noise_floor": 1.1251854293720125,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n10-discovery-3407879-repeat-b64",
+      "medians_ns": {
+        "direct": 3427512.5,
+        "envelope": 3535444.0,
+        "envelope_degree": 3530052.0,
+        "envelope_indexed": 2502407.5,
+        "layout": 3315740.5,
+        "matrix_cache": 982927.0,
+        "schedule": 1085010.0
+      },
+      "noise_floor": 1.0530822525843115,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n10-discovery-3407879-coefficients-b1",
+      "medians_ns": {
+        "direct": 85103.0,
+        "envelope": 349952.0,
+        "envelope_degree": 380074.0,
+        "envelope_indexed": 553127.0,
+        "layout": 81578.5,
+        "matrix_cache": 58050.0,
+        "schedule": 60774.5
+      },
+      "noise_floor": 1.5519186255012551,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n10-discovery-3407879-coefficients-b4",
+      "medians_ns": {
+        "direct": 246413.0,
+        "envelope": 531654.5,
+        "envelope_degree": 545731.5,
+        "envelope_indexed": 663227.5,
+        "layout": 241001.0,
+        "matrix_cache": 213339.5,
+        "schedule": 217688.0
+      },
+      "noise_floor": 1.1456785608155988,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n10-discovery-3407879-coefficients-b16",
+      "medians_ns": {
+        "direct": 875622.0,
+        "envelope": 1198587.0,
+        "envelope_degree": 1196286.0,
+        "envelope_indexed": 1105902.0,
+        "layout": 860722.5,
+        "matrix_cache": 832529.0,
+        "schedule": 836465.0
+      },
+      "noise_floor": 1.055323774299664,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n10-discovery-3407879-coefficients-b64",
+      "medians_ns": {
+        "direct": 3362037.5,
+        "envelope": 3845598.5,
+        "envelope_degree": 3824138.0,
+        "envelope_indexed": 2861724.0,
+        "layout": 3346969.0,
+        "matrix_cache": 3302995.5,
+        "schedule": 3306883.5
+      },
+      "noise_floor": 1.0370169538332856,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n10-discovery-3407879-degree_cycle-b1",
+      "medians_ns": {
+        "direct": 84867.0,
+        "envelope": 352221.0,
+        "envelope_degree": 379133.0,
+        "envelope_indexed": 551307.5,
+        "layout": 81483.0,
+        "matrix_cache": 57858.0,
+        "schedule": 60658.0
+      },
+      "noise_floor": 1.533278227806249,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n10-discovery-3407879-degree_cycle-b4",
+      "medians_ns": {
+        "direct": 289506.0,
+        "envelope": 567164.0,
+        "envelope_degree": 588057.0,
+        "envelope_indexed": 692880.5,
+        "layout": 283370.0,
+        "matrix_cache": 258401.0,
+        "schedule": 260097.0
+      },
+      "noise_floor": 1.1242207095599324,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n10-discovery-3407879-degree_cycle-b16",
+      "medians_ns": {
+        "direct": 1059517.0,
+        "envelope": 1352472.0,
+        "envelope_degree": 1357455.0,
+        "envelope_indexed": 1244303.5,
+        "layout": 1046412.5,
+        "matrix_cache": 1012816.0,
+        "schedule": 1018176.0
+      },
+      "noise_floor": 1.044044284536743,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n10-discovery-3407879-degree_cycle-b64",
+      "medians_ns": {
+        "direct": 4087603.5,
+        "envelope": 4453768.0,
+        "envelope_degree": 4426007.0,
+        "envelope_indexed": 3428820.5,
+        "layout": 4068070.5,
+        "matrix_cache": 4017665.0,
+        "schedule": 4020497.0
+      },
+      "noise_floor": 1.0248922127526188,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n10-discovery-3407879-escape-b1",
+      "medians_ns": {
+        "direct": 86127.0,
+        "envelope": 351752.0,
+        "envelope_degree": 378622.0,
+        "envelope_indexed": 549987.5,
+        "layout": 81387.0,
+        "matrix_cache": 58254.0,
+        "schedule": 60858.0
+      },
+      "noise_floor": 1.541523397845237,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n10-discovery-3407879-escape-b4",
+      "medians_ns": {
+        "direct": 240452.0,
+        "envelope": 524490.5,
+        "envelope_degree": 540835.0,
+        "envelope_indexed": 675960.0,
+        "layout": 234072.5,
+        "matrix_cache": 208735.5,
+        "schedule": 211639.5
+      },
+      "noise_floor": 1.2006725826423024,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n10-discovery-3407879-escape-b16",
+      "medians_ns": {
+        "direct": 855198.0,
+        "envelope": 1174013.0,
+        "envelope_degree": 1177506.0,
+        "envelope_indexed": 1155928.5,
+        "layout": 844861.0,
+        "matrix_cache": 819184.5,
+        "schedule": 823401.0
+      },
+      "noise_floor": 1.0503043528195704,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n10-discovery-3407879-escape-b64",
+      "medians_ns": {
+        "direct": 3298647.0,
+        "envelope": 3754115.5,
+        "envelope_degree": 3753760.0,
+        "envelope_indexed": 3092876.0,
+        "layout": 3283523.0,
+        "matrix_cache": 3258234.0,
+        "schedule": 3266774.5
+      },
+      "noise_floor": 1.0211475800488725,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n12-discovery-20261002-repeat-b1",
+      "medians_ns": {
+        "direct": 124840.5,
+        "envelope": 732865.5,
+        "envelope_degree": 754887.0,
+        "envelope_indexed": 1121023.0,
+        "layout": 143249.0,
+        "matrix_cache": 101223.5,
+        "schedule": 106188.0
+      },
+      "noise_floor": 1.2641504051124044,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n12-discovery-20261002-repeat-b4",
+      "medians_ns": {
+        "direct": 419266.5,
+        "envelope": 1015251.5,
+        "envelope_degree": 1047597.0,
+        "envelope_indexed": 1344251.5,
+        "layout": 418038.5,
+        "matrix_cache": 182050.5,
+        "schedule": 197343.0
+      },
+      "noise_floor": 1.340965079838036,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n12-discovery-20261002-repeat-b16",
+      "medians_ns": {
+        "direct": 1576952.0,
+        "envelope": 2134151.0,
+        "envelope_degree": 2159871.5,
+        "envelope_indexed": 1972221.0,
+        "layout": 1518681.0,
+        "matrix_cache": 505182.0,
+        "schedule": 546563.0
+      },
+      "noise_floor": 1.1431352294647714,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n12-discovery-20261002-repeat-b64",
+      "medians_ns": {
+        "direct": 6024063.0,
+        "envelope": 6480303.5,
+        "envelope_degree": 6487851.5,
+        "envelope_indexed": 4497754.0,
+        "layout": 5932812.5,
+        "matrix_cache": 1809164.0,
+        "schedule": 1973853.5
+      },
+      "noise_floor": 1.0513364570385708,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n12-discovery-20261002-coefficients-b1",
+      "medians_ns": {
+        "direct": 157145.0,
+        "envelope": 701396.0,
+        "envelope_degree": 756178.5,
+        "envelope_indexed": 1119015.5,
+        "layout": 144125.0,
+        "matrix_cache": 101331.0,
+        "schedule": 106356.0
+      },
+      "noise_floor": 1.5565107221622636,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n12-discovery-20261002-coefficients-b4",
+      "medians_ns": {
+        "direct": 432971.0,
+        "envelope": 1026016.0,
+        "envelope_degree": 1056137.0,
+        "envelope_indexed": 1315914.0,
+        "layout": 426019.0,
+        "matrix_cache": 383669.5,
+        "schedule": 387205.5
+      },
+      "noise_floor": 1.1813562201708274,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n12-discovery-20261002-coefficients-b16",
+      "medians_ns": {
+        "direct": 1573279.0,
+        "envelope": 2206585.0,
+        "envelope_degree": 2225382.0,
+        "envelope_indexed": 2079641.0,
+        "layout": 1534426.0,
+        "matrix_cache": 1482856.0,
+        "schedule": 1490508.0
+      },
+      "noise_floor": 1.0532008371007338,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n12-discovery-20261002-coefficients-b64",
+      "medians_ns": {
+        "direct": 5918144.0,
+        "envelope": 6874644.5,
+        "envelope_degree": 6816578.5,
+        "envelope_indexed": 5072187.5,
+        "layout": 5856330.0,
+        "matrix_cache": 5805467.5,
+        "schedule": 5806704.0
+      },
+      "noise_floor": 1.0226956566097332,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n12-discovery-20261002-degree_cycle-b1",
+      "medians_ns": {
+        "direct": 160307.0,
+        "envelope": 705441.0,
+        "envelope_degree": 755636.0,
+        "envelope_indexed": 1119923.0,
+        "layout": 144690.0,
+        "matrix_cache": 101657.0,
+        "schedule": 106340.5
+      },
+      "noise_floor": 1.5816127812440914,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n12-discovery-20261002-degree_cycle-b4",
+      "medians_ns": {
+        "direct": 532638.5,
+        "envelope": 1099486.0,
+        "envelope_degree": 1134375.5,
+        "envelope_indexed": 1385562.0,
+        "layout": 512473.5,
+        "matrix_cache": 468868.0,
+        "schedule": 473724.0
+      },
+      "noise_floor": 1.119696224326651,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n12-discovery-20261002-degree_cycle-b16",
+      "medians_ns": {
+        "direct": 1921101.0,
+        "envelope": 2525570.0,
+        "envelope_degree": 2539190.5,
+        "envelope_indexed": 2363631.0,
+        "layout": 1883923.5,
+        "matrix_cache": 1834725.0,
+        "schedule": 1838053.5
+      },
+      "noise_floor": 1.0506554421809264,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n12-discovery-20261002-degree_cycle-b64",
+      "medians_ns": {
+        "direct": 7363501.5,
+        "envelope": 8183547.5,
+        "envelope_degree": 8092144.0,
+        "envelope_indexed": 6225333.5,
+        "layout": 7308723.0,
+        "matrix_cache": 7266469.0,
+        "schedule": 7274578.0
+      },
+      "noise_floor": 1.0213735142933085,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n12-discovery-20261002-escape-b1",
+      "medians_ns": {
+        "direct": 159559.0,
+        "envelope": 704922.0,
+        "envelope_degree": 754320.0,
+        "envelope_indexed": 1122135.0,
+        "layout": 144530.0,
+        "matrix_cache": 101585.0,
+        "schedule": 106745.0
+      },
+      "noise_floor": 1.6411647927566886,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n12-discovery-20261002-escape-b4",
+      "medians_ns": {
+        "direct": 404148.5,
+        "envelope": 1012002.5,
+        "envelope_degree": 1050200.0,
+        "envelope_indexed": 1375869.5,
+        "layout": 423326.0,
+        "matrix_cache": 377580.0,
+        "schedule": 381248.0
+      },
+      "noise_floor": 1.0953814213579267,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n12-discovery-20261002-escape-b16",
+      "medians_ns": {
+        "direct": 1552353.0,
+        "envelope": 2173535.0,
+        "envelope_degree": 2194692.0,
+        "envelope_indexed": 2188848.0,
+        "layout": 1512511.5,
+        "matrix_cache": 1467133.5,
+        "schedule": 1470098.0
+      },
+      "noise_floor": 1.0538979191943125,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n12-discovery-20261002-escape-b64",
+      "medians_ns": {
+        "direct": 5813044.5,
+        "envelope": 6718302.5,
+        "envelope_degree": 6652480.0,
+        "envelope_indexed": 5475054.0,
+        "layout": 5757838.0,
+        "matrix_cache": 5709719.5,
+        "schedule": 5722432.5
+      },
+      "noise_floor": 1.0255591311118597,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n12-discovery-3407879-repeat-b1",
+      "medians_ns": {
+        "direct": 126085.5,
+        "envelope": 710086.0,
+        "envelope_degree": 753619.0,
+        "envelope_indexed": 1151616.0,
+        "layout": 143846.0,
+        "matrix_cache": 101832.5,
+        "schedule": 106784.0
+      },
+      "noise_floor": 1.3440226294335023,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n12-discovery-3407879-repeat-b4",
+      "medians_ns": {
+        "direct": 419497.5,
+        "envelope": 1011362.5,
+        "envelope_degree": 1052916.0,
+        "envelope_indexed": 1320839.0,
+        "layout": 418622.0,
+        "matrix_cache": 181879.0,
+        "schedule": 193620.5
+      },
+      "noise_floor": 1.3348915960301573,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n12-discovery-3407879-repeat-b16",
+      "medians_ns": {
+        "direct": 1575258.0,
+        "envelope": 2150666.5,
+        "envelope_degree": 2141241.5,
+        "envelope_indexed": 1988719.5,
+        "layout": 1522612.0,
+        "matrix_cache": 506009.0,
+        "schedule": 549495.0
+      },
+      "noise_floor": 1.1036244685601133,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n12-discovery-3407879-repeat-b64",
+      "medians_ns": {
+        "direct": 5998708.0,
+        "envelope": 6374735.5,
+        "envelope_degree": 6433030.0,
+        "envelope_indexed": 4481808.0,
+        "layout": 5917276.5,
+        "matrix_cache": 1803095.5,
+        "schedule": 1975143.0
+      },
+      "noise_floor": 1.0458680591757192,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n12-discovery-3407879-coefficients-b1",
+      "medians_ns": {
+        "direct": 145142.0,
+        "envelope": 707402.0,
+        "envelope_degree": 752987.5,
+        "envelope_indexed": 1126091.0,
+        "layout": 143562.0,
+        "matrix_cache": 101148.0,
+        "schedule": 105680.5
+      },
+      "noise_floor": 1.582934044021056,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n12-discovery-3407879-coefficients-b4",
+      "medians_ns": {
+        "direct": 411045.5,
+        "envelope": 1012650.5,
+        "envelope_degree": 1049209.0,
+        "envelope_indexed": 1345460.5,
+        "layout": 418842.0,
+        "matrix_cache": 378200.0,
+        "schedule": 384120.5
+      },
+      "noise_floor": 1.094044594679712,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n12-discovery-3407879-coefficients-b16",
+      "medians_ns": {
+        "direct": 1527852.0,
+        "envelope": 2181852.0,
+        "envelope_degree": 2193352.5,
+        "envelope_indexed": 2070354.5,
+        "layout": 1494470.5,
+        "matrix_cache": 1444168.5,
+        "schedule": 1448908.5
+      },
+      "noise_floor": 1.0663484736147368,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n12-discovery-3407879-coefficients-b64",
+      "medians_ns": {
+        "direct": 5863475.5,
+        "envelope": 6843449.0,
+        "envelope_degree": 6757953.5,
+        "envelope_indexed": 5036110.0,
+        "layout": 5812205.0,
+        "matrix_cache": 5772869.0,
+        "schedule": 5784373.0
+      },
+      "noise_floor": 1.028981437888879,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n12-discovery-3407879-degree_cycle-b1",
+      "medians_ns": {
+        "direct": 124736.0,
+        "envelope": 706901.5,
+        "envelope_degree": 753651.5,
+        "envelope_indexed": 1152087.0,
+        "layout": 143552.5,
+        "matrix_cache": 101767.0,
+        "schedule": 106259.0
+      },
+      "noise_floor": 1.3622614896367982,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n12-discovery-3407879-degree_cycle-b4",
+      "medians_ns": {
+        "direct": 532548.0,
+        "envelope": 1091645.0,
+        "envelope_degree": 1132990.5,
+        "envelope_indexed": 1378950.5,
+        "layout": 511263.5,
+        "matrix_cache": 465926.0,
+        "schedule": 471843.0
+      },
+      "noise_floor": 1.1156802910712713,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n12-discovery-3407879-degree_cycle-b16",
+      "medians_ns": {
+        "direct": 1893590.0,
+        "envelope": 2505484.5,
+        "envelope_degree": 2520157.0,
+        "envelope_indexed": 2353616.0,
+        "layout": 1857097.0,
+        "matrix_cache": 1799103.0,
+        "schedule": 1806747.5
+      },
+      "noise_floor": 1.0520263470005966,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n12-discovery-3407879-degree_cycle-b64",
+      "medians_ns": {
+        "direct": 7345364.5,
+        "envelope": 8201451.0,
+        "envelope_degree": 8090531.0,
+        "envelope_indexed": 6237982.5,
+        "layout": 7313888.0,
+        "matrix_cache": 7237001.0,
+        "schedule": 7257353.5
+      },
+      "noise_floor": 1.0199116384969886,
+      "verified_outputs": 5760
+    },
+    {
+      "cell": "n12-discovery-3407879-escape-b1",
+      "medians_ns": {
+        "direct": 157753.0,
+        "envelope": 703973.0,
+        "envelope_degree": 755399.0,
+        "envelope_indexed": 1121506.0,
+        "layout": 144348.5,
+        "matrix_cache": 102384.0,
+        "schedule": 106460.0
+      },
+      "noise_floor": 1.6334218901082396,
+      "verified_outputs": 90
+    },
+    {
+      "cell": "n12-discovery-3407879-escape-b4",
+      "medians_ns": {
+        "direct": 396336.0,
+        "envelope": 1001955.0,
+        "envelope_degree": 1032659.0,
+        "envelope_indexed": 1367662.0,
+        "layout": 413352.5,
+        "matrix_cache": 370155.5,
+        "schedule": 373391.5
+      },
+      "noise_floor": 1.1212477724066545,
+      "verified_outputs": 360
+    },
+    {
+      "cell": "n12-discovery-3407879-escape-b16",
+      "medians_ns": {
+        "direct": 1493274.0,
+        "envelope": 2129105.0,
+        "envelope_degree": 2150041.5,
+        "envelope_indexed": 2156390.0,
+        "layout": 1462068.5,
+        "matrix_cache": 1417447.5,
+        "schedule": 1427271.5
+      },
+      "noise_floor": 1.0576934418909014,
+      "verified_outputs": 1440
+    },
+    {
+      "cell": "n12-discovery-3407879-escape-b64",
+      "medians_ns": {
+        "direct": 5790481.0,
+        "envelope": 6665275.5,
+        "envelope_degree": 6628922.0,
+        "envelope_indexed": 5423790.0,
+        "layout": 5735623.0,
+        "matrix_cache": 5694930.0,
+        "schedule": 5700226.5
+      },
+      "noise_floor": 1.037769909401644,
+      "verified_outputs": 5760
+    }
+  ],
+  "conditions_sha256": "13d8c5663baaceed4abff1ffb6b217d565b40724590dad01c7dc296ad0bafbd6",
+  "decisions": {
+    "envelope_degree": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 32,
+      "incremental_groups": 0
+    },
+    "envelope_indexed": {
+      "dramatic_groups": 0,
+      "dramatic_pass": false,
+      "groups": 32,
+      "incremental_groups": 16
+    }
+  },
+  "discovery_binding": null,
+  "full_ic_cost": null,
+  "gates": [
+    {
+      "candidate": "envelope_degree",
+      "cell": "n6-discovery-20261002-coefficients-b16",
+      "ci95": [
+        0.7604658362115977,
+        0.771593407196932
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7647741920234282,
+      "noise_floor": 1.0452855991599306,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n6-discovery-20261002-coefficients-b16",
+      "ci95": [
+        0.8406785476561502,
+        0.8838369200305978
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8503555574411314,
+      "noise_floor": 1.0452855991599306,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n6-discovery-20261002-coefficients-b64",
+      "ci95": [
+        0.9662901704206777,
+        0.9856851121357337
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.9731240274680719,
+      "noise_floor": 1.0286685040365928,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n6-discovery-20261002-coefficients-b64",
+      "ci95": [
+        1.2838103053411296,
+        1.3092113058980872
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.3010964489317756,
+      "noise_floor": 1.0286685040365928,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n6-discovery-20261002-degree_cycle-b16",
+      "ci95": [
+        0.8206638776489953,
+        0.8286894509981539
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8248731709835369,
+      "noise_floor": 1.0559269033181393,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n6-discovery-20261002-degree_cycle-b16",
+      "ci95": [
+        0.90130214844877,
+        0.9265831876914257
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.919988933759681,
+      "noise_floor": 1.0559269033181393,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n6-discovery-20261002-degree_cycle-b64",
+      "ci95": [
+        0.9782672343584087,
+        0.9996285602572456
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.9911004729288084,
+      "noise_floor": 1.0512482394464988,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n6-discovery-20261002-degree_cycle-b64",
+      "ci95": [
+        1.231187342404938,
+        1.2692707109753754
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.2442676447322603,
+      "noise_floor": 1.0512482394464988,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n6-discovery-3407879-coefficients-b16",
+      "ci95": [
+        0.7525784613270285,
+        0.7638708101278385
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7571309155110102,
+      "noise_floor": 1.0299330727684146,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n6-discovery-3407879-coefficients-b16",
+      "ci95": [
+        0.8352538558508253,
+        0.8758618179005708
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.843315241432534,
+      "noise_floor": 1.0299330727684146,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n6-discovery-3407879-coefficients-b64",
+      "ci95": [
+        0.9634257158488175,
+        0.9937459798935877
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.9776962378645419,
+      "noise_floor": 1.0250219793023823,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n6-discovery-3407879-coefficients-b64",
+      "ci95": [
+        1.2712928037330617,
+        1.299094894136113
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.2877913975607325,
+      "noise_floor": 1.0250219793023823,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n6-discovery-3407879-degree_cycle-b16",
+      "ci95": [
+        0.8143404141168855,
+        0.8267146127551928
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8186574018293742,
+      "noise_floor": 1.0479916115502501,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n6-discovery-3407879-degree_cycle-b16",
+      "ci95": [
+        0.8939514976137404,
+        0.9240397916077583
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.9067862971695685,
+      "noise_floor": 1.0479916115502501,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n6-discovery-3407879-degree_cycle-b64",
+      "ci95": [
+        0.9645986190147875,
+        0.9833625376075424
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.9758662640569835,
+      "noise_floor": 1.0286324037516223,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n6-discovery-3407879-degree_cycle-b64",
+      "ci95": [
+        1.2500103027721368,
+        1.2614237055774165
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.2521577797921224,
+      "noise_floor": 1.0286324037516223,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n8-discovery-20261002-coefficients-b16",
+      "ci95": [
+        0.7295252093714415,
+        0.7376884625933486
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7325943878481682,
+      "noise_floor": 1.058168216430493,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n8-discovery-20261002-coefficients-b16",
+      "ci95": [
+        0.8130548463837071,
+        0.8259221787454072
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8193225971712554,
+      "noise_floor": 1.058168216430493,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n8-discovery-20261002-coefficients-b64",
+      "ci95": [
+        0.8848219772094859,
+        0.8987756436803945
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.895046876165436,
+      "noise_floor": 1.0357805002740974,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n8-discovery-20261002-coefficients-b64",
+      "ci95": [
+        1.1743309542525597,
+        1.1966799084298412
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.1832747779760924,
+      "noise_floor": 1.0357805002740974,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n8-discovery-20261002-degree_cycle-b16",
+      "ci95": [
+        0.7880136233063528,
+        0.7934173449868517
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7908809425439569,
+      "noise_floor": 1.0453023351871247,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n8-discovery-20261002-degree_cycle-b16",
+      "ci95": [
+        0.8626362177139192,
+        0.8794712647493237
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8685929812810937,
+      "noise_floor": 1.0453023351871247,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n8-discovery-20261002-degree_cycle-b64",
+      "ci95": [
+        0.9231383421858065,
+        0.9434627794297772
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.9320229229117081,
+      "noise_floor": 1.037570837519205,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n8-discovery-20261002-degree_cycle-b64",
+      "ci95": [
+        1.167725769962991,
+        1.1885367307391532
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.1829075695024693,
+      "noise_floor": 1.037570837519205,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n8-discovery-3407879-coefficients-b16",
+      "ci95": [
+        0.7300410418152614,
+        0.7394726387094405
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7334156430876944,
+      "noise_floor": 1.045162647757312,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n8-discovery-3407879-coefficients-b16",
+      "ci95": [
+        0.8061820460714657,
+        0.8226165591838839
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8136530676936629,
+      "noise_floor": 1.045162647757312,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n8-discovery-3407879-coefficients-b64",
+      "ci95": [
+        0.8903556366287189,
+        0.9007510610052962
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8961999250043611,
+      "noise_floor": 1.037585218301972,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n8-discovery-3407879-coefficients-b64",
+      "ci95": [
+        1.1476231013947853,
+        1.160326716626708
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.1526852022689147,
+      "noise_floor": 1.037585218301972,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n8-discovery-3407879-degree_cycle-b16",
+      "ci95": [
+        0.7797182680081625,
+        0.7865973052643471
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7839877354664024,
+      "noise_floor": 1.0497959277131883,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n8-discovery-3407879-degree_cycle-b16",
+      "ci95": [
+        0.8559056764732242,
+        0.8682484356586831
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8588547001829208,
+      "noise_floor": 1.0497959277131883,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n8-discovery-3407879-degree_cycle-b64",
+      "ci95": [
+        0.922237109458876,
+        0.9390437316294397
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.9343320827634911,
+      "noise_floor": 1.0463463803215318,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n8-discovery-3407879-degree_cycle-b64",
+      "ci95": [
+        1.1615249423276452,
+        1.1789661391418629
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.1707613114117963,
+      "noise_floor": 1.0463463803215318,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n10-discovery-20261002-coefficients-b16",
+      "ci95": [
+        0.693390166607361,
+        0.7049786302718365
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.700422522066676,
+      "noise_floor": 1.0567856895037697,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n10-discovery-20261002-coefficients-b16",
+      "ci95": [
+        0.7540637576590589,
+        0.7689327018276059
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7610719708153341,
+      "noise_floor": 1.0567856895037697,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n10-discovery-20261002-coefficients-b64",
+      "ci95": [
+        0.8553785004661608,
+        0.8680257872085884
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8628965475942472,
+      "noise_floor": 1.0266809985352439,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n10-discovery-20261002-coefficients-b64",
+      "ci95": [
+        1.1291385601507566,
+        1.1448019118901405
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.1340280238682536,
+      "noise_floor": 1.0266809985352439,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n10-discovery-20261002-degree_cycle-b16",
+      "ci95": [
+        0.7452811402089008,
+        0.7487909217212314
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7469374745762367,
+      "noise_floor": 1.0486281074980068,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n10-discovery-20261002-degree_cycle-b16",
+      "ci95": [
+        0.8077068052324546,
+        0.8161787399839173
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8105834686746516,
+      "noise_floor": 1.0486281074980068,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n10-discovery-20261002-degree_cycle-b64",
+      "ci95": [
+        0.907594786599155,
+        0.9176275588596068
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.9156170645389867,
+      "noise_floor": 1.0193145504960182,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n10-discovery-20261002-degree_cycle-b64",
+      "ci95": [
+        1.1583540131425618,
+        1.1756036554922251
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.1695230935781462,
+      "noise_floor": 1.0193145504960182,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n10-discovery-3407879-coefficients-b16",
+      "ci95": [
+        0.69308929082931,
+        0.6979656629219504
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.6948825921147656,
+      "noise_floor": 1.055323774299664,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n10-discovery-3407879-coefficients-b16",
+      "ci95": [
+        0.7471596205315989,
+        0.7560594495088968
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7509766886281188,
+      "noise_floor": 1.055323774299664,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n10-discovery-3407879-coefficients-b64",
+      "ci95": [
+        0.8593764920437379,
+        0.8652840784180422
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8619762550365989,
+      "noise_floor": 1.0370169538332856,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n10-discovery-3407879-coefficients-b64",
+      "ci95": [
+        1.147159377985022,
+        1.1542720228811327
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.1512209762546013,
+      "noise_floor": 1.0370169538332856,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n10-discovery-3407879-degree_cycle-b16",
+      "ci95": [
+        0.7429815352603483,
+        0.7502027102302449
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7454231632127571,
+      "noise_floor": 1.044044284536743,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n10-discovery-3407879-degree_cycle-b16",
+      "ci95": [
+        0.8115443374704463,
+        0.8164197406734698
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8146528865931131,
+      "noise_floor": 1.044044284536743,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n10-discovery-3407879-degree_cycle-b64",
+      "ci95": [
+        0.8988721872721216,
+        0.9215033455088731
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.9071328006069335,
+      "noise_floor": 1.0248922127526188,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n10-discovery-3407879-degree_cycle-b64",
+      "ci95": [
+        1.160271359405585,
+        1.1830873177941905
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.1739773319679792,
+      "noise_floor": 1.0248922127526188,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n12-discovery-20261002-coefficients-b16",
+      "ci95": [
+        0.6648325236328612,
+        0.6700532868367245
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.6664443841471555,
+      "noise_floor": 1.0532008371007338,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n12-discovery-20261002-coefficients-b16",
+      "ci95": [
+        0.7117450114735987,
+        0.7174147017521992
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7124180253736063,
+      "noise_floor": 1.0532008371007338,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n12-discovery-20261002-coefficients-b64",
+      "ci95": [
+        0.8469888167725066,
+        0.8538189324671134
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8513639124149115,
+      "noise_floor": 1.0226956566097332,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n12-discovery-20261002-coefficients-b64",
+      "ci95": [
+        1.140986502241746,
+        1.1504550114753924
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.1440446802388846,
+      "noise_floor": 1.0226956566097332,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n12-discovery-20261002-degree_cycle-b16",
+      "ci95": [
+        0.7184131616818807,
+        0.7264875154016796
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7235587667766422,
+      "noise_floor": 1.0506554421809264,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n12-discovery-20261002-degree_cycle-b16",
+      "ci95": [
+        0.7747676194306321,
+        0.7787056717384006
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7760121151413276,
+      "noise_floor": 1.0506554421809264,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n12-discovery-20261002-degree_cycle-b64",
+      "ci95": [
+        0.8865921786652714,
+        0.8982836577534695
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8960374150074174,
+      "noise_floor": 1.0213735142933085,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n12-discovery-20261002-degree_cycle-b64",
+      "ci95": [
+        1.1573066327211599,
+        1.1722277288109773
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.1672409547901705,
+      "noise_floor": 1.0213735142933085,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n12-discovery-3407879-coefficients-b16",
+      "ci95": [
+        0.6550657014475115,
+        0.6643715526378876
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.6568449349102174,
+      "noise_floor": 1.0663484736147368,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n12-discovery-3407879-coefficients-b16",
+      "ci95": [
+        0.692725600455719,
+        0.7019357880657414
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.6975917831940229,
+      "noise_floor": 1.0663484736147368,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n12-discovery-3407879-coefficients-b64",
+      "ci95": [
+        0.8477371141727588,
+        0.8561395498725956
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8535994926231723,
+      "noise_floor": 1.028981437888879,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n12-discovery-3407879-coefficients-b64",
+      "ci95": [
+        1.137719749286188,
+        1.1523985720330658
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.14570704209014,
+      "noise_floor": 1.028981437888879,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n12-discovery-3407879-degree_cycle-b16",
+      "ci95": [
+        0.7062321179060347,
+        0.7214399059072598
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.7144053260048104,
+      "noise_floor": 1.0520263470005966,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n12-discovery-3407879-degree_cycle-b16",
+      "ci95": [
+        0.762408295735009,
+        0.7716409795359191
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.765935946173348,
+      "noise_floor": 1.0520263470005966,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_degree",
+      "cell": "n12-discovery-3407879-degree_cycle-b64",
+      "ci95": [
+        0.8909368648340387,
+        0.8972793609921885
+      ],
+      "dramatic": false,
+      "incremental": false,
+      "median": 0.8962824578079573,
+      "noise_floor": 1.0199116384969886,
+      "observations": 10
+    },
+    {
+      "candidate": "envelope_indexed",
+      "cell": "n12-discovery-3407879-degree_cycle-b64",
+      "ci95": [
+        1.155088546508884,
+        1.1693662604256723
+      ],
+      "dramatic": false,
+      "incremental": true,
+      "median": 1.1599784887365896,
+      "noise_floor": 1.0199116384969886,
+      "observations": 10
+    }
+  ],
+  "phase": "discovery",
+  "protocol_sha256": "d054dc2597c379ada88abb528b49c7f76b0382a33a2e3ba97964f23b4375fcde",
+  "qualified": true,
+  "raw_sha256": "5204a64ed790d7fd9346ee8ade8f63bb8eb9b717cf5856968c279812a7eafadf",
+  "readiness": [
+    {
+      "accepted": true,
+      "attempt": 1,
+      "cpu_psi": 3.12,
+      "elapsed_ms": 2000,
+      "memory_psi": 0.0
+    }
+  ],
+  "resource": {
+    "host": {
+      "cpu_model": "",
+      "kernel": "6.17.0-1022-azure",
+      "logical_cpus": 4,
+      "machine": "aarch64",
+      "python": "3.12.3"
+    },
+    "label": "envelope-indexed/discovery",
+    "left_on_reserved": {
+      "kernel_threads": 95,
+      "user_threads": [
+        "systemd[1]",
+        "systemd-journal[156]",
+        "multipathd[225]",
+        "multipathd[232]",
+        "multipathd[234]",
+        "multipathd[235]",
+        "multipathd[236]",
+        "multipathd[237]",
+        "multipathd[238]",
+        "systemd-udevd[233]",
+        "hv_kvp_daemon[436]",
+        "systemd-resolve[572]",
+        "haveged[578]",
+        "systemd-network[728]",
+        "dbus-daemon[982]",
+        "networkd-dispat[987]",
+        "php-fpm8.3[990]",
+        "polkitd[994]",
+        "gmain[1145]",
+        "pool-spawner[1146]",
+        "gdbus[1149]",
+        "systemd-logind[1023]",
+        "udisksd[1027]",
+        "gmain[1042]",
+        "pool-spawner[1043]",
+        "gdbus[1045]",
+        "probing-thread[1163]",
+        "cleanup[1177]",
+        "python3[1036]",
+        "rsyslogd[1067]",
+        "in:imuxsock[1179]",
+        "in:imklog[1180]",
+        "rs:main Q:Reg[1181]",
+        "cron[1110]",
+        "chronyd[1122]",
+        "chronyd[1144]",
+        "containerd[1155]",
+        "containerd[1191]",
+        "containerd[1192]",
+        "containerd[1194]",
+        "containerd[1195]",
+        "containerd[1197]",
+        "containerd[1217]",
+        "containerd[1223]",
+        "containerd[1226]",
+        "containerd[1504]",
+        "ModemManager[1218]",
+        "gmain[1227]",
+        "pool-spawner[1229]",
+        "gdbus[1231]",
+        "php-fpm8.3[1220]",
+        "php-fpm8.3[1222]",
+        "dockerd[1283]",
+        "dockerd[1358]",
+        "dockerd[1360]",
+        "dockerd[1361]",
+        "dockerd[1362]",
+        "dockerd[1364]",
+        "dockerd[1366]",
+        "dockerd[1443]",
+        "dockerd[1466]",
+        "dockerd[1603]",
+        "agetty[1290]",
+        "agetty[1386]",
+        "systemd[1416]",
+        "python3[1425]",
+        "python3[2000]",
+        "python3[2001]",
+        "python3[2002]",
+        "python3[2003]",
+        "python3[2004]",
+        "sudo[2011]",
+        "provjobd2915515[2017]",
+        "provjobd2915515[2018]",
+        "provjobd2915515[2019]",
+        "provjobd2915515[2021]",
+        "provjobd2915515[2022]",
+        "provjobd2915515[2024]",
+        "provjobd2915515[2026]",
+        "provjobd2915515[2027]",
+        "provjobd2915515[2028]",
+        "provjobd2915515[2076]"
+      ]
+    },
+    "mode": "run",
+    "preflight": {
+      "conditions": {
+        "loadavg": [
+          1.42,
+          0.5,
+          0.18
+        ],
+        "psi_cpu": {
+          "full": {
+            "avg10": 0.0,
+            "avg300": 0.0,
+            "avg60": 0.0,
+            "total": 0.0
+          },
+          "some": {
+            "avg10": 2.55,
+            "avg300": 0.47,
+            "avg60": 1.18,
+            "total": 2264097.0
+          }
+        },
+        "psi_memory": {
+          "full": {
+            "avg10": 0.0,
+            "avg300": 0.0,
+            "avg60": 0.0,
+            "total": 0.0
+          },
+          "some": {
+            "avg10": 0.0,
+            "avg300": 0.0,
+            "avg60": 0.0,
+            "total": 0.0
+          }
+        },
+        "unix_time": 1790905797.214084
+      },
+      "settle": {
+        "other_cpu_seconds": 0.01,
+        "seconds": 2.0,
+        "top": {
+          "chronyd[1122]": 0.01
+        }
+      }
+    },
+    "reserved_cpus": [
+      3
+    ],
+    "run": {
+      "after": {
+        "loadavg": [
+          1.35,
+          0.52,
+          0.19
+        ],
+        "psi_cpu": {
+          "full": {
+            "avg10": 0.0,
+            "avg300": 0.0,
+            "avg60": 0.0,
+            "total": 0.0
+          },
+          "some": {
+            "avg10": 0.76,
+            "avg300": 0.45,
+            "avg60": 0.97,
+            "total": 2272304.0
+          }
+        },
+        "psi_memory": {
+          "full": {
+            "avg10": 0.0,
+            "avg300": 0.0,
+            "avg60": 0.0,
+            "total": 0.0
+          },
+          "some": {
+            "avg10": 0.0,
+            "avg300": 0.0,
+            "avg60": 0.0,
+            "total": 0.0
+          }
+        },
+        "unix_time": 1790905809.891237
+      },
+      "before": {
+        "loadavg": [
+          1.42,
+          0.5,
+          0.18
+        ],
+        "psi_cpu": {
+          "full": {
+            "avg10": 0.0,
+            "avg300": 0.0,
+            "avg60": 0.0,
+            "total": 0.0
+          },
+          "some": {
+            "avg10": 2.55,
+            "avg300": 0.47,
+            "avg60": 1.18,
+            "total": 2264097.0
+          }
+        },
+        "psi_memory": {
+          "full": {
+            "avg10": 0.0,
+            "avg300": 0.0,
+            "avg60": 0.0,
+            "total": 0.0
+          },
+          "some": {
+            "avg10": 0.0,
+            "avg300": 0.0,
+            "avg60": 0.0,
+            "total": 0.0
+          }
+        },
+        "unix_time": 1790905797.2458255
+      },
+      "command": [
+        "/home/runner/work/crypto/crypto/research/boolean_envelope_indexed_20261002/ci_discovery_36952544952_1/boolean-envelope-indexed",
+        "--campaign",
+        "discovery",
+        "/home/runner/work/crypto/crypto/research/boolean_envelope_indexed_20261002/ci_discovery_36952544952_1/protocol.json"
+      ],
+      "contended": false,
+      "cpus": [
+        3
+      ],
+      "exit_status": 0,
+      "involuntary_switches": 94,
+      "major_faults": 0,
+      "max_rss_kib": 13848,
+      "minor_faults": 1129,
+      "other_cpu_seconds": 0.22,
+      "other_top": {
+        "Runner.Worker[2098]": 0.06,
+        "chronyd[1122]": 0.01,
+        "containerd[1155]": 0.02,
+        "hv_kvp_daemon[436]": 0.01,
+        "kworker/1:3-events[200]": 0.01,
+        "kworker/u16:2-flush-8:0[73]": 0.02,
+        "kworker/u16:3-mlx5_fc[82]": 0.01,
+        "provjobd2915515[2017]": 0.06
+      },
+      "system_seconds": 0.036989,
+      "user_seconds": 12.542445,
+      "voluntary_switches": 2,
+      "wall_seconds": 12.645281899999986
+    },
+    "schema": "isolated-bench/1",
+    "threads_moved": 45
+  },
+  "rho_ratio": null,
+  "schema_version": 1,
+  "verified_outputs": 244800
+}

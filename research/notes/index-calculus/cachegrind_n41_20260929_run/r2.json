@@ -1,0 +1,798 @@
+{
+  "stage": "r2",
+  "seed": 20260930,
+  "load_before": "00:44:32 up 2 min,  0 user,  load average: 0.70, 0.35, 0.13",
+  "chase_pre": [
+    {
+      "k4": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 172.6916,
+        "ns_per_step_median": 202.4543,
+        "ns_per_load_median": 202.4543,
+        "sink": 165510592
+      },
+      "thp": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 128.5883,
+        "ns_per_step_median": 160.2525,
+        "ns_per_load_median": 160.2525,
+        "sink": 526220736
+      }
+    },
+    {
+      "k4": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 148.9211,
+        "ns_per_step_median": 154.4227,
+        "ns_per_load_median": 154.4227,
+        "sink": 987594176
+      },
+      "thp": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 158.6381,
+        "ns_per_step_median": 174.8214,
+        "ns_per_load_median": 174.8214,
+        "sink": 920264128
+      }
+    },
+    {
+      "k4": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 200.874,
+        "ns_per_step_median": 201.5828,
+        "ns_per_load_median": 201.5828,
+        "sink": 182287808
+      },
+      "thp": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 144.3177,
+        "ns_per_step_median": 165.3641,
+        "ns_per_load_median": 165.3641,
+        "sink": 2002615744
+      }
+    }
+  ],
+  "blocks": [
+    {
+      "order": [
+        "ic/k4",
+        "rho/k4",
+        "rho/thp",
+        "ic/thp"
+      ],
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 3.780177653999999,
+        "user_s": 3.266472,
+        "sys_s": 0.192099,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338325504
+      },
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.2540940330000012,
+        "user_s": 1.042775,
+        "sys_s": 0.032038,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      },
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.2534735109999815,
+        "user_s": 1.040084,
+        "sys_s": 0.106857,
+        "max_anon_huge_kb": 24576,
+        "gates_G1": true
+      },
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 5.022320364000024,
+        "user_s": 3.104363,
+        "sys_s": 1.684033,
+        "max_anon_huge_kb": 272384,
+        "gates_G1": true,
+        "peak_rss_bytes": 338534400
+      }
+    },
+    {
+      "order": [
+        "rho/k4",
+        "rho/thp",
+        "ic/thp",
+        "ic/k4"
+      ],
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.2534241689999988,
+        "user_s": 1.033585,
+        "sys_s": 0.027995,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      },
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.2531600050000122,
+        "user_s": 0.941353,
+        "sys_s": 0.09891599999999999,
+        "max_anon_huge_kb": 22528,
+        "gates_G1": true
+      },
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 4.016748753000002,
+        "user_s": 2.616518,
+        "sys_s": 1.233371,
+        "max_anon_huge_kb": 272384,
+        "gates_G1": true,
+        "peak_rss_bytes": 339320832
+      },
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 3.7822396660000095,
+        "user_s": 3.409693,
+        "sys_s": 0.203129,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338223104
+      }
+    },
+    {
+      "order": [
+        "ic/k4",
+        "rho/thp",
+        "ic/thp",
+        "rho/k4"
+      ],
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 3.5332584129999987,
+        "user_s": 3.20999,
+        "sys_s": 0.17435,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338284544
+      },
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.25301792099998,
+        "user_s": 0.975931,
+        "sys_s": 0.020047,
+        "max_anon_huge_kb": 24576,
+        "gates_G1": true
+      },
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 3.5162579539999967,
+        "user_s": 2.82789,
+        "sys_s": 0.5151399999999999,
+        "max_anon_huge_kb": 274432,
+        "gates_G1": true,
+        "peak_rss_bytes": 340090880
+      },
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.2545320589999847,
+        "user_s": 0.9726969999999999,
+        "sys_s": 0.026934999999999997,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      }
+    },
+    {
+      "order": [
+        "rho/k4",
+        "rho/thp",
+        "ic/k4",
+        "ic/thp"
+      ],
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.2536710029999938,
+        "user_s": 1.042513,
+        "sys_s": 0.019976999999999998,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      },
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.2549641690000044,
+        "user_s": 0.950507,
+        "sys_s": 0.15170999999999998,
+        "max_anon_huge_kb": 28672,
+        "gates_G1": true
+      },
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 5.053919166000014,
+        "user_s": 3.433066,
+        "sys_s": 1.464757,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338325504
+      },
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 3.767900310000016,
+        "user_s": 2.965262,
+        "sys_s": 0.5714389999999999,
+        "max_anon_huge_kb": 272384,
+        "gates_G1": true,
+        "peak_rss_bytes": 339300352
+      }
+    },
+    {
+      "order": [
+        "ic/k4",
+        "rho/thp",
+        "ic/thp",
+        "rho/k4"
+      ],
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 3.7871662390000154,
+        "user_s": 3.375873,
+        "sys_s": 0.212363,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338329600
+      },
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.2533837569999946,
+        "user_s": 0.977212,
+        "sys_s": 0.020007999999999998,
+        "max_anon_huge_kb": 22528,
+        "gates_G1": true
+      },
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 4.267483803999994,
+        "user_s": 2.64422,
+        "sys_s": 1.464487,
+        "max_anon_huge_kb": 276480,
+        "gates_G1": true,
+        "peak_rss_bytes": 339845120
+      },
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.2548864080000044,
+        "user_s": 0.9741559999999999,
+        "sys_s": 0.035734999999999996,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      }
+    },
+    {
+      "order": [
+        "ic/k4",
+        "rho/thp",
+        "ic/thp",
+        "rho/k4"
+      ],
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 4.5476395860000025,
+        "user_s": 3.4122339999999998,
+        "sys_s": 0.885235,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338333696
+      },
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.0029764469999805,
+        "user_s": 0.916025,
+        "sys_s": 0.012,
+        "max_anon_huge_kb": 10240,
+        "gates_G1": true
+      },
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 3.7670022279999955,
+        "user_s": 2.962579,
+        "sys_s": 0.588139,
+        "max_anon_huge_kb": 274432,
+        "gates_G1": true,
+        "peak_rss_bytes": 340037632
+      },
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.0028277799999898,
+        "user_s": 0.944951,
+        "sys_s": 0.03146,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      }
+    },
+    {
+      "order": [
+        "ic/thp",
+        "ic/k4",
+        "rho/thp",
+        "rho/k4"
+      ],
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 3.0150947319999943,
+        "user_s": 2.829385,
+        "sys_s": 0.142819,
+        "max_anon_huge_kb": 276480,
+        "gates_G1": true,
+        "peak_rss_bytes": 341762048
+      },
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 3.7908191349999925,
+        "user_s": 3.413196,
+        "sys_s": 0.19325799999999999,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338292736
+      },
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.0032635610000114,
+        "user_s": 0.964822,
+        "sys_s": 0.011968,
+        "max_anon_huge_kb": 10240,
+        "gates_G1": true
+      },
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.253656927999998,
+        "user_s": 0.991514,
+        "sys_s": 0.02395,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      }
+    },
+    {
+      "order": [
+        "ic/k4",
+        "ic/thp",
+        "rho/thp",
+        "rho/k4"
+      ],
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 4.536793012999993,
+        "user_s": 3.001652,
+        "sys_s": 1.358203,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338329600
+      },
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 3.7637615860000153,
+        "user_s": 2.81501,
+        "sys_s": 0.7381789999999999,
+        "max_anon_huge_kb": 272384,
+        "gates_G1": true,
+        "peak_rss_bytes": 339230720
+      },
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.0028131440000152,
+        "user_s": 0.925874,
+        "sys_s": 0.024010999999999998,
+        "max_anon_huge_kb": 10240,
+        "gates_G1": true
+      },
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.003293855999999,
+        "user_s": 0.945008,
+        "sys_s": 0.019957,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      }
+    },
+    {
+      "order": [
+        "ic/k4",
+        "ic/thp",
+        "rho/k4",
+        "rho/thp"
+      ],
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 3.7847695799999883,
+        "user_s": 2.912528,
+        "sys_s": 0.725417,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338305024
+      },
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 3.763923556000009,
+        "user_s": 2.914863,
+        "sys_s": 0.7274729999999999,
+        "max_anon_huge_kb": 272384,
+        "gates_G1": true,
+        "peak_rss_bytes": 339349504
+      },
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.255395084000014,
+        "user_s": 0.983367,
+        "sys_s": 0.028038,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      },
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.2542528170000082,
+        "user_s": 0.93065,
+        "sys_s": 0.103807,
+        "max_anon_huge_kb": 22528,
+        "gates_G1": true
+      }
+    },
+    {
+      "order": [
+        "rho/thp",
+        "rho/k4",
+        "ic/k4",
+        "ic/thp"
+      ],
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.2538191440000048,
+        "user_s": 1.046752,
+        "sys_s": 0.06312899999999999,
+        "max_anon_huge_kb": 30720,
+        "gates_G1": true
+      },
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.2540339120000112,
+        "user_s": 1.004049,
+        "sys_s": 0.029723999999999997,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      },
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 5.049752368999975,
+        "user_s": 3.486738,
+        "sys_s": 1.301863,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338362368
+      },
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 3.5138365410000176,
+        "user_s": 2.638595,
+        "sys_s": 0.716777,
+        "max_anon_huge_kb": 276480,
+        "gates_G1": true,
+        "peak_rss_bytes": 339898368
+      }
+    },
+    {
+      "order": [
+        "ic/thp",
+        "rho/k4",
+        "ic/k4",
+        "rho/thp"
+      ],
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 2.761130081999994,
+        "user_s": 2.5568239999999998,
+        "sys_s": 0.104876,
+        "max_anon_huge_kb": 272384,
+        "gates_G1": true,
+        "peak_rss_bytes": 339353600
+      },
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.0032575589999908,
+        "user_s": 0.9542039999999999,
+        "sys_s": 0.016062,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      },
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 3.539147868999976,
+        "user_s": 3.220074,
+        "sys_s": 0.22886299999999998,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338255872
+      },
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.0029638070000146,
+        "user_s": 0.902925,
+        "sys_s": 0.023974,
+        "max_anon_huge_kb": 10240,
+        "gates_G1": true
+      }
+    },
+    {
+      "order": [
+        "rho/k4",
+        "ic/thp",
+        "rho/thp",
+        "ic/k4"
+      ],
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.2553133050000156,
+        "user_s": 1.026467,
+        "sys_s": 0.0035329999999999997,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      },
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 4.77135067100005,
+        "user_s": 2.892596,
+        "sys_s": 1.67611,
+        "max_anon_huge_kb": 276480,
+        "gates_G1": true,
+        "peak_rss_bytes": 341893120
+      },
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.2535625520000053,
+        "user_s": 1.00693,
+        "sys_s": 0.011984999999999999,
+        "max_anon_huge_kb": 22528,
+        "gates_G1": true
+      },
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 4.5483567279999875,
+        "user_s": 3.108309,
+        "sys_s": 1.272913,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338337792
+      }
+    },
+    {
+      "order": [
+        "rho/thp",
+        "ic/thp",
+        "rho/k4",
+        "ic/k4"
+      ],
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.002414935000047,
+        "user_s": 0.933726,
+        "sys_s": 0.023964,
+        "max_anon_huge_kb": 10240,
+        "gates_G1": true
+      },
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 3.766696151999952,
+        "user_s": 2.883677,
+        "sys_s": 0.741279,
+        "max_anon_huge_kb": 274432,
+        "gates_G1": true,
+        "peak_rss_bytes": 339857408
+      },
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.004073362999975,
+        "user_s": 0.9312849999999999,
+        "sys_s": 0.01599,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      },
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 3.5356846750000273,
+        "user_s": 3.222746,
+        "sys_s": 0.24251599999999998,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338259968
+      }
+    },
+    {
+      "order": [
+        "ic/k4",
+        "ic/thp",
+        "rho/thp",
+        "rho/k4"
+      ],
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 3.5299316419999514,
+        "user_s": 3.240739,
+        "sys_s": 0.21387199999999998,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338251776
+      },
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 3.765732430000014,
+        "user_s": 2.795026,
+        "sys_s": 0.727163,
+        "max_anon_huge_kb": 274432,
+        "gates_G1": true,
+        "peak_rss_bytes": 339918848
+      },
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.253779412999961,
+        "user_s": 1.02948,
+        "sys_s": 0.012013,
+        "max_anon_huge_kb": 22528,
+        "gates_G1": true
+      },
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.2547932909999986,
+        "user_s": 1.016006,
+        "sys_s": 0.031749,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      }
+    },
+    {
+      "order": [
+        "rho/k4",
+        "rho/thp",
+        "ic/k4",
+        "ic/thp"
+      ],
+      "rho/k4": {
+        "rc": 0,
+        "wall_s": 1.00282271399999,
+        "user_s": 0.9246759999999999,
+        "sys_s": 0.051578,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true
+      },
+      "rho/thp": {
+        "rc": 0,
+        "wall_s": 1.2538016320000338,
+        "user_s": 0.94714,
+        "sys_s": 0.123613,
+        "max_anon_huge_kb": 22528,
+        "gates_G1": true
+      },
+      "ic/k4": {
+        "rc": 0,
+        "wall_s": 4.803365189999965,
+        "user_s": 3.477126,
+        "sys_s": 1.06727,
+        "max_anon_huge_kb": 0,
+        "gates_G1": true,
+        "peak_rss_bytes": 338219008
+      },
+      "ic/thp": {
+        "rc": 0,
+        "wall_s": 3.7641888989999757,
+        "user_s": 2.774888,
+        "sys_s": 0.844349,
+        "max_anon_huge_kb": 272384,
+        "gates_G1": true,
+        "peak_rss_bytes": 339324928
+      }
+    }
+  ],
+  "chase_post": [
+    {
+      "k4": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 203.4914,
+        "ns_per_step_median": 203.6591,
+        "ns_per_load_median": 203.6591,
+        "sink": 165510592
+      },
+      "thp": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 160.3024,
+        "ns_per_step_median": 173.189,
+        "ns_per_load_median": 173.189,
+        "sink": 34248424896
+      }
+    },
+    {
+      "k4": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 199.905,
+        "ns_per_step_median": 203.8238,
+        "ns_per_load_median": 203.8238,
+        "sink": 182287808
+      },
+      "thp": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 131.2229,
+        "ns_per_step_median": 150.3915,
+        "ns_per_load_median": 150.3915,
+        "sink": 199065024
+      }
+    },
+    {
+      "k4": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 181.0076,
+        "ns_per_step_median": 190.742,
+        "ns_per_load_median": 190.742,
+        "sink": 157121984
+      },
+      "thp": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 143.345,
+        "ns_per_step_median": 144.5861,
+        "ns_per_load_median": 144.5861,
+        "sink": 182287808
+      }
+    }
+  ],
+  "load_after": "00:47:40 up 5 min,  0 user,  load average: 0.93, 0.60, 0.27"
+}

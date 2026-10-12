@@ -1,0 +1,12 @@
+arm	registers	localBytesPerThread	staticSharedBytesPerBlock	l2WindowBytes	l2FieldBytes	l2CapBytes
+baseline	126	0	1792	0	0	0
+pair-ilp	126	0	1792	0	0	0
+pair-clmul	121	0	1792	0	0	0
+l2-persist	126	0	1792	83886080	104726528	83886080
+unroll2	110	0	1792	0	0	0
+from-reduced	126	0	1792	0	0	0
+inv-poly1	126	0	1792	0	0	0
+inv-poly2	126	0	1792	0	0	0
+clmul-flat	117	0	1792	0	0	0
+alu-square	126	0	1792	0	0	0
+late-y	126	0	1792	0	0	0

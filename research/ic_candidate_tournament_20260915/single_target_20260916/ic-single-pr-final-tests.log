@@ -1,0 +1,26 @@
+test_instruction_gain_without_time_gain_does_not_promote (test_native_metrics.NativeMetricsTests.test_instruction_gain_without_time_gain_does_not_promote) ... ok
+test_two_metric_gain_passes_and_time_regression_blocks (test_native_metrics.NativeMetricsTests.test_two_metric_gain_passes_and_time_regression_blocks) ... ok
+test_watchdog_still_retains_timeout (test_native_metrics.NativeMetricsTests.test_watchdog_still_retains_timeout) ... ok
+test_changed_target_and_duplicate_output_rejected (test_operation.CertificateTests.test_changed_target_and_duplicate_output_rejected) ... ok
+test_real_public_fixture_recovers_and_wrong_scalar_fails (test_operation.CertificateTests.test_real_public_fixture_recovers_and_wrong_scalar_fails) ... ok
+test_incomplete_incumbent_is_not_retained_as_a_verified_winner (test_operation.OperationTests.test_incomplete_incumbent_is_not_retained_as_a_verified_winner) ... ok
+test_literal_native_dependencies_are_frozen (test_operation.OperationTests.test_literal_native_dependencies_are_frozen) ... ok
+test_successor_keeps_selected_baseline_and_avoids_previous_configs (test_operation.OperationTests.test_successor_keeps_selected_baseline_and_avoids_previous_configs) ... ok
+test_policy_still_rejects_changed_public_targets (test_policy.PolicyComparisonTests.test_policy_still_rejects_changed_public_targets) ... ok
+test_policy_still_rejects_changed_support_within_an_arm (test_policy.PolicyComparisonTests.test_policy_still_rejects_changed_support_within_an_arm) ... ok
+test_support_change_requires_explicit_policy_mode (test_policy.PolicyComparisonTests.test_support_change_requires_explicit_policy_mode) ... ok
+test_field_and_group_laws_exhaustively (test_tournament.ArithmeticTests.test_field_and_group_laws_exhaustively) ... ok
+test_rank_uses_subgroup_field_and_rejects_dependence (test_tournament.ArithmeticTests.test_rank_uses_subgroup_field_and_rejects_dependence) ... ok
+test_aa_control_cannot_promote (test_tournament.DecisionTests.test_aa_control_cannot_promote) ... ok
+test_changed_factor_base_is_not_a_matched_implementation_gain (test_tournament.DecisionTests.test_changed_factor_base_is_not_a_matched_implementation_gain) ... ok
+test_changed_target_rejected (test_tournament.DecisionTests.test_changed_target_rejected) ... ok
+test_per_cell_regression_blocks_aggregate_win (test_tournament.DecisionTests.test_per_cell_regression_blocks_aggregate_win) ... ok
+test_qualified_cost_reduction (test_tournament.DecisionTests.test_qualified_cost_reduction) ... ok
+test_timeout_and_missing_cost_block_promotion (test_tournament.DecisionTests.test_timeout_and_missing_cost_block_promotion) ... ok
+test_intervals_include_startup_and_cleanup_exactly_once (test_tournament.ProfilingTests.test_intervals_include_startup_and_cleanup_exactly_once) ... ok
+test_missing_final_interval_never_becomes_a_low_cost_win (test_tournament.ProfilingTests.test_missing_final_interval_never_becomes_a_low_cost_win) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.143s
+
+OK

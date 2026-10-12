@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Conditional CM Jacobian certificate envelope v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "input_blake3", "registry_blake3", "checker_source_blake3", "algorithm", "work_budget", "records"],
+  "properties": {
+    "schema_version": {"const": "jacobian-certificates/v1"},
+    "input_blake3": {"$ref": "#/$defs/digest"},
+    "registry_blake3": {"anyOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]},
+    "checker_source_blake3": {"$ref": "#/$defs/digest"},
+    "algorithm": {"const": "maximal-order-minimum-gap/v1"},
+    "work_budget": {"type": "integer", "minimum": 1, "maximum": 50000000},
+    "records": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"$ref": "#/$defs/record"}}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "record": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "certificate_uid", "candidate", "binding", "lattice", "status", "exists_over_base_field", "required_hypotheses", "hypotheses_verification", "curve_equation", "cover_maps", "dlp_advantage", "provenance"],
+      "properties": {
+        "schema_version": {"const": "jacobian-certificate/v1"},
+        "certificate_uid": {"type": "string", "pattern": "^urn:jacobian-certificate:1:blake3:[0-9a-f]{64}$"},
+        "candidate": {"type": "object", "required": ["label", "discriminant", "a", "d", "b", "binding", "evidence_refs"]},
+        "binding": {"type": ["object", "null"]},
+        "lattice": {
+          "type": "object", "required": ["status", "principal", "minimum", "minimum_witness", "geometrically_indecomposable", "reduced_forms", "decomposable_minimum_upper_bound", "work_units"],
+          "properties": {
+            "status": {"enum": ["unsupported", "not_principal_candidate", "indecomposable_lattice", "decomposable_lattice", "inconclusive", "inconclusive_budget"]},
+            "principal": {"type": ["boolean", "null"]},
+            "minimum": {"type": ["integer", "null"], "minimum": 1},
+            "geometrically_indecomposable": {"type": ["boolean", "null"]},
+            "work_units": {"type": "integer", "minimum": 0}
+          }
+        },
+        "status": {"enum": ["conditional_existence", "unresolved"]},
+        "exists_over_base_field": {"type": "null"},
+        "required_hypotheses": {"type": "array", "minItems": 3, "items": {"type": "string"}},
+        "hypotheses_verification": {"const": "not_performed"},
+        "curve_equation": {"type": "null"}, "cover_maps": {"type": "null"}, "dlp_advantage": {"type": "null"},
+        "provenance": {"type": "object", "required": ["input_blake3", "registry_blake3", "checker_source_blake3", "algorithm", "work_budget"]}
+      },
+      "allOf": [{"if": {"properties": {"status": {"const": "conditional_existence"}}}, "then": {"properties": {"lattice": {"properties": {"status": {"const": "indecomposable_lattice"}, "geometrically_indecomposable": {"const": true}, "principal": {"const": true}}}}}}]
+    }
+  }
+}

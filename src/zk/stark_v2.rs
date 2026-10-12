@@ -42,7 +42,7 @@
 //! - [`prove`] / [`verify`] — production-soundness STARK.
 
 use super::merkle::{merkle_verify, MerkleProof, MerkleTree};
-use super::polynomial::{fr_add, fr_mul, fr_neg, fr_pow, fr_sub, Poly};
+use super::polynomial::{fr_mul, fr_neg, fr_sub, Poly};
 use super::stark::{fri_commit, fri_query, fri_verify, FriCommitment, FriQueryOpening};
 use crate::bls12_381::fq::scalar_modulus;
 use crate::hash::sha256::sha256;
@@ -62,6 +62,7 @@ pub struct StarkConfig {
 impl StarkConfig {
     /// Default: `blow_up = 8`, `query_count = 80`.  Conjectured
     /// soundness: `(1/8)^80 = 2^{-240}`.
+    #[allow(clippy::should_implement_trait)]
     pub fn default() -> Self {
         Self {
             blow_up: 8,
@@ -179,7 +180,7 @@ fn interpolate_from_subgroup(dom: &[BigUint], evals: &[BigUint]) -> Poly {
 /// - `B(X) = (f(X) − boundary) / (X − boundary_point)`
 fn compose(air: &AirV2, f: &Poly, h_trace: &[BigUint], alpha1: &BigUint, alpha2: &BigUint) -> Poly {
     let n = air.n;
-    let omega = &h_trace[1]; // ω = g_n^1
+    let _omega = &h_trace[1]; // ω = g_n^1
 
     // Transition constraint as a polynomial:
     // C(X) = transition(f(X), f(ω·X)).

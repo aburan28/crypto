@@ -1,0 +1,34 @@
+{
+  "status": "VERIFIED",
+  "archives": [
+    {
+      "archive": "round-autolab-20260915.evidence.tar.xz",
+      "files": 32462,
+      "status": "VERIFIED"
+    },
+    {
+      "archive": "round-20260915t205319z.evidence.tar.xz",
+      "files": 33284,
+      "status": "VERIFIED"
+    },
+    {
+      "archive": "round-20260915t224645z.evidence.tar.xz",
+      "files": 46778,
+      "status": "VERIFIED"
+    },
+    {
+      "archive": "development.evidence.tar.xz",
+      "files": 21572,
+      "status": "VERIFIED",
+      "parts": 2
+    }
+  ],
+  "total_files": 134096,
+  "bundles_manifest_sha256": "090c5ed7589577d74243496ea91f37994cbc78f6b66a154c9e9fef0f2726c636",
+  "restored_final_audit": {
+    "status": "VERIFIED",
+    "trial_receipts": 1356,
+    "source_files": 450
+  },
+  "final_audit_seconds": 54.72970583999995
+}

@@ -1,0 +1,63 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "F6-IC vs inherited F4 vs strong rho, E_0 m=31, d=11",
+  "description": "Preregistered size-ladder round (PROTOCOL.md). Eight independent public one-target workloads; IC S is a counted lower bound (Boolean reductions uncharged).",
+  "workloads": {
+    "curves": [
+      {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 31
+      }
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 202610053101,
+    "target_kind": "public"
+  },
+  "arms": [
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "params": {
+          "lanes": "32",
+          "dp_bits": "4",
+          "step_cap_factor": "2000"
+        }
+      }
+    },
+    {
+      "name": "ic-f4",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=11",
+          "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+          "max_trials": "200000"
+        }
+      }
+    },
+    {
+      "name": "ic-f6",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=11",
+          "oracle": "pdp3-koblitz:m=3,engine=f6-ic,degree=3,node_budget=8192",
+          "max_trials": "200000"
+        }
+      }
+    }
+  ],
+  "measurement": {
+    "rounds": 1,
+    "warmup": 0,
+    "order": "alternate",
+    "seed": 202610053102,
+    "isolation_required": "L2",
+    "timeout_seconds": 3600
+  }
+}

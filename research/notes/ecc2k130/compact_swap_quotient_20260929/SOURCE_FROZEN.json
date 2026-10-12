@@ -1,0 +1,74 @@
+{
+  "S_base": null,
+  "S_rho_normal": null,
+  "S_swap": null,
+  "arm_order_offsets": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "evaluation_repetitions": 9,
+  "hypothesis": "swap/Frobenius quotient preserves every S3 root orbit and four-sum witness while reducing eager construction and query work",
+  "k_grid": {
+    "41": [
+      128,
+      192,
+      255,
+      320
+    ],
+    "53": [
+      220,
+      330,
+      440,
+      550
+    ]
+  },
+  "per_arm_address_space_limit_bytes": 5368709120,
+  "per_arm_timeout_seconds": 900,
+  "previous_selected_k": {
+    "41": 255,
+    "53": 440
+  },
+  "prior_panels": [
+    "compact_orbit_point_panel_20260929",
+    "compact_orbit_strong_rho_20260929",
+    "compact_k_boundary_20260929"
+  ],
+  "rho_canonicalization_backend": "normal_basis",
+  "rho_dp_bits": 4,
+  "rho_jump_count": 32,
+  "rho_mode": "signed_frobenius",
+  "rho_parallel_walks": 32,
+  "schema": "compact-swap-quotient-source-freeze-v1",
+  "seed": 622934,
+  "source_base_main": "acc83e5323f0f0fc0910b5cb9c20daedd1a6921a",
+  "source_sha256": {
+    ".github/workflows/compact-swap-quotient.yml": "4e3094a6037e696b2d57230ca5eedd6d7e0178b502801501c71fe7e77c6de216",
+    "Cargo.toml": "f1b3abc246c4971b48b377d5696bc96594deb729320348c4277307e42ed61721",
+    "docs/ic/calibration.json": "425078627bbc38b3f9cb97351b405f52509431c080ed996bfeab72d12d78acfd",
+    "examples/koblitz_orbit_dlp_fast.rs": "8dea682ac4b12413c7b43a8849d6972b682dd0aa605d0ee4f41b7a4c1881ab75",
+    "examples/koblitz_orbit_dlp_swap.rs": "b008bfbdbc008ac8919af1160da6c3cd2cf414250beb7f01ec7bb58de4eed608",
+    "examples/koblitz_rho_batch_ks_v2_n61.rs": "019b2e2da563ad5212e46a24ed6c0f2f6e90aab083b3769260d6b056bd4095cf",
+    "examples/koblitz_rho_batch_ks_v3.rs": "98b6e8a27d821ebfc7ae716410184dffe89aadf27dfe36bcac8ce834c39cf04c",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/run_panel.py": "2ba997abbd5e9f17756c101b8ca26567219adf103308701f0c237ae495f23222",
+    "research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py": "649459a53b979b9eaf150ca1973c80b1bde29baf3f5567443c668978d3c06e6d",
+    "research/notes/ecc2k130/compact_orbit_rank_evidence_20260929/verify_rank.py": "254869e52bdbd417e14d74c87940293490160faaa7fbb45f4edcb6b773a4b0f6",
+    "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+    "research/notes/ecc2k130/compact_swap_quotient_20260929/PROTOCOL.md": "5a7f3a24d286b59416490889f7ed4488abf73a58ab10b37de1e5d409a2951006",
+    "research/notes/ecc2k130/compact_swap_quotient_20260929/archive.py": "3c1f1e5ba8da46791756b1bb91ab07d7faa6de9361c6f7bb4e7940088f7d232c",
+    "research/notes/ecc2k130/compact_swap_quotient_20260929/prepare.py": "0aef93f11bb0879064b059c83017a4ce6a0a709521981d4ea95d679c4d65d645",
+    "research/notes/ecc2k130/compact_swap_quotient_20260929/run_panel.py": "b582ccfc2fb371bc6eec6a8c315df28cb7393b7f9993853e174caf74594f9202",
+    "research/notes/ecc2k130/compact_swap_quotient_20260929/verify_panel.py": "f2d2c4a2476c49ebd42d75977fe26d1ac5d567d4754dfa55e9a651f69a251ee7",
+    "research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py": "1df6fc9295cf525be198a19842dfdca7391ac985bfa79ffa1acf8e546cc05ce1",
+    "src/cryptanalysis/koblitz_fast.rs": "1d5ceb6374e455ba40e079328efbf7a62b5cfe0e7fd42ab4e562b3c8b2f183fa",
+    "src/cryptanalysis/koblitz_index_calculus.rs": "747596aa01a360ca4b010457a739ea12c829a81e845100b4cc7d8f6cb226cd20",
+    "src/cryptanalysis/semaev_decomp.rs": "c6e9263b66f4a0892d9b46bfa23e7dd36e93c787a79a1e37181f2449ab33e8b2",
+    "src/lib.rs": "f1e13bc7fa51ff57dd4cd056036669577d1f07a0cb06502b4b839b9af50ffba6"
+  }
+}

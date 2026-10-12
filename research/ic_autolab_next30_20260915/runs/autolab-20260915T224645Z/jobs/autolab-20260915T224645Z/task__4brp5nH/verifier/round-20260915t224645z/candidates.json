@@ -1,0 +1,36 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 1,
+      "collection_window": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "4649efc297d9601905aff58acae809fc1daad90d60a8e9e38ac7b14e0860005c",
+    "hypothesis": "Verified fast-lifting batch1/window8 winner",
+    "id": "incumbent",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "28bec3455867ad5598779e9a91cf6bd7692d9029690941886f34faed3224dc1c"
+  },
+  {
+    "binary_relative": "source_candidates/autolab/worker",
+    "config": {
+      "batch_trials": 1,
+      "collection_window": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "4649efc297d9601905aff58acae809fc1daad90d60a8e9e38ac7b14e0860005c",
+    "hypothesis": "Agent-selected development checkpoint; see NOTES.md",
+    "id": "autolab",
+    "source_directory": "source_candidates/autolab/source",
+    "source_manifest_relative": "source_candidates/autolab/source-manifest.json",
+    "source_manifest_sha256": "7f4a1dd819949bf8742adb1edc56ffb7f2c06b3822a0eaf5b4cef115f9e7573b"
+  }
+]

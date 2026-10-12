@@ -1,0 +1,576 @@
+{
+  "L": 1,
+  "S_ic": null,
+  "S_rho_normal": null,
+  "S_rho_poly": null,
+  "S_rho_v2": null,
+  "checks": [
+    {
+      "arm": "ic",
+      "block": 0,
+      "counting_floor_attempt_ratio": 1.0,
+      "rank_attempts": 7,
+      "rank_probes_mean": 1753.5714285714287,
+      "rank_receipt": {
+        "a": 0,
+        "attempts": 7,
+        "base_sha256": "07ee3d3e3b52523310eaec911194e19c64d7e671ee67f9055d360206042cbc5e",
+        "failed_searches": 0,
+        "miss_nonexistence_proved": false,
+        "n": 37,
+        "orbit_columns": 7,
+        "rank": 7,
+        "relations": 7,
+        "representative_logs_verified": 7,
+        "rows_without_gain": 0,
+        "schema": "compact-orbit-rank-independent-replay-v1",
+        "status": "PASS",
+        "subgroup_order": 230603167,
+        "summary_sha256": "803bbb90b4dd001436a0debf973d57582832fd91707239c996c9c5e0d75bd890",
+        "trace_sha256": "696eede3f42782560885818376b45d30ec57d3bbe69e249127cc8fe368b7f14b",
+        "used_base_points_verified": 28
+      },
+      "targets_verified": 1
+    },
+    {
+      "arm": "rho_v2",
+      "block": 0,
+      "charges": {
+        "canonicalizations": 1092,
+        "failed_collisions": 0,
+        "group_additions": 1093,
+        "partition_hashes": 1040,
+        "scalar_multiplications": 35,
+        "table_inserts": 51,
+        "table_queries": 52
+      },
+      "targets_verified": 1,
+      "walk_steps": 1040
+    },
+    {
+      "arm": "rho_poly",
+      "block": 0,
+      "charges": {
+        "batch_fallback_additions": 0,
+        "batch_inversion_calls": 40,
+        "batch_inversion_inputs": 1215,
+        "canonical_rotation_steps": 0,
+        "canonicalizations": 1315,
+        "failed_collisions": 0,
+        "group_additions": 1316,
+        "normal_basis_transforms": 0,
+        "partition_hashes": 1215,
+        "scalar_multiplications": 35,
+        "table_inserts": 66,
+        "table_queries": 67
+      },
+      "targets_verified": 1,
+      "walk_steps": 1215
+    },
+    {
+      "arm": "rho_normal",
+      "block": 0,
+      "charges": {
+        "batch_fallback_additions": 0,
+        "batch_inversion_calls": 36,
+        "batch_inversion_inputs": 1059,
+        "canonical_rotation_steps": 85248,
+        "canonicalizations": 1184,
+        "failed_collisions": 0,
+        "group_additions": 1185,
+        "normal_basis_transforms": 4736,
+        "partition_hashes": 1059,
+        "scalar_multiplications": 35,
+        "table_inserts": 93,
+        "table_queries": 94
+      },
+      "targets_verified": 1,
+      "walk_steps": 1059
+    },
+    {
+      "arm": "rho_v2",
+      "block": 1,
+      "charges": {
+        "canonicalizations": 1092,
+        "failed_collisions": 0,
+        "group_additions": 1093,
+        "partition_hashes": 1040,
+        "scalar_multiplications": 35,
+        "table_inserts": 51,
+        "table_queries": 52
+      },
+      "targets_verified": 1,
+      "walk_steps": 1040
+    },
+    {
+      "arm": "rho_poly",
+      "block": 1,
+      "charges": {
+        "batch_fallback_additions": 0,
+        "batch_inversion_calls": 40,
+        "batch_inversion_inputs": 1215,
+        "canonical_rotation_steps": 0,
+        "canonicalizations": 1315,
+        "failed_collisions": 0,
+        "group_additions": 1316,
+        "normal_basis_transforms": 0,
+        "partition_hashes": 1215,
+        "scalar_multiplications": 35,
+        "table_inserts": 66,
+        "table_queries": 67
+      },
+      "targets_verified": 1,
+      "walk_steps": 1215
+    },
+    {
+      "arm": "rho_normal",
+      "block": 1,
+      "charges": {
+        "batch_fallback_additions": 0,
+        "batch_inversion_calls": 36,
+        "batch_inversion_inputs": 1059,
+        "canonical_rotation_steps": 85248,
+        "canonicalizations": 1184,
+        "failed_collisions": 0,
+        "group_additions": 1185,
+        "normal_basis_transforms": 4736,
+        "partition_hashes": 1059,
+        "scalar_multiplications": 35,
+        "table_inserts": 93,
+        "table_queries": 94
+      },
+      "targets_verified": 1,
+      "walk_steps": 1059
+    },
+    {
+      "arm": "ic",
+      "block": 1,
+      "counting_floor_attempt_ratio": 1.0,
+      "rank_attempts": 7,
+      "rank_probes_mean": 1753.5714285714287,
+      "rank_receipt": {
+        "a": 0,
+        "attempts": 7,
+        "base_sha256": "07ee3d3e3b52523310eaec911194e19c64d7e671ee67f9055d360206042cbc5e",
+        "failed_searches": 0,
+        "miss_nonexistence_proved": false,
+        "n": 37,
+        "orbit_columns": 7,
+        "rank": 7,
+        "relations": 7,
+        "representative_logs_verified": 7,
+        "rows_without_gain": 0,
+        "schema": "compact-orbit-rank-independent-replay-v1",
+        "status": "PASS",
+        "subgroup_order": 230603167,
+        "summary_sha256": "d7b6da2356df84bb446ff0381e7d6822b2c7c1879d6b5a2074b07576178ce210",
+        "trace_sha256": "696eede3f42782560885818376b45d30ec57d3bbe69e249127cc8fe368b7f14b",
+        "used_base_points_verified": 28
+      },
+      "targets_verified": 1
+    },
+    {
+      "arm": "rho_poly",
+      "block": 2,
+      "charges": {
+        "batch_fallback_additions": 0,
+        "batch_inversion_calls": 40,
+        "batch_inversion_inputs": 1215,
+        "canonical_rotation_steps": 0,
+        "canonicalizations": 1315,
+        "failed_collisions": 0,
+        "group_additions": 1316,
+        "normal_basis_transforms": 0,
+        "partition_hashes": 1215,
+        "scalar_multiplications": 35,
+        "table_inserts": 66,
+        "table_queries": 67
+      },
+      "targets_verified": 1,
+      "walk_steps": 1215
+    },
+    {
+      "arm": "rho_normal",
+      "block": 2,
+      "charges": {
+        "batch_fallback_additions": 0,
+        "batch_inversion_calls": 36,
+        "batch_inversion_inputs": 1059,
+        "canonical_rotation_steps": 85248,
+        "canonicalizations": 1184,
+        "failed_collisions": 0,
+        "group_additions": 1185,
+        "normal_basis_transforms": 4736,
+        "partition_hashes": 1059,
+        "scalar_multiplications": 35,
+        "table_inserts": 93,
+        "table_queries": 94
+      },
+      "targets_verified": 1,
+      "walk_steps": 1059
+    },
+    {
+      "arm": "ic",
+      "block": 2,
+      "counting_floor_attempt_ratio": 1.0,
+      "rank_attempts": 7,
+      "rank_probes_mean": 1753.5714285714287,
+      "rank_receipt": {
+        "a": 0,
+        "attempts": 7,
+        "base_sha256": "07ee3d3e3b52523310eaec911194e19c64d7e671ee67f9055d360206042cbc5e",
+        "failed_searches": 0,
+        "miss_nonexistence_proved": false,
+        "n": 37,
+        "orbit_columns": 7,
+        "rank": 7,
+        "relations": 7,
+        "representative_logs_verified": 7,
+        "rows_without_gain": 0,
+        "schema": "compact-orbit-rank-independent-replay-v1",
+        "status": "PASS",
+        "subgroup_order": 230603167,
+        "summary_sha256": "c658a026112ba5ae823244c98e67f249e0108401bdb1dd66ed9a7d97c09b724a",
+        "trace_sha256": "696eede3f42782560885818376b45d30ec57d3bbe69e249127cc8fe368b7f14b",
+        "used_base_points_verified": 28
+      },
+      "targets_verified": 1
+    },
+    {
+      "arm": "rho_v2",
+      "block": 2,
+      "charges": {
+        "canonicalizations": 1092,
+        "failed_collisions": 0,
+        "group_additions": 1093,
+        "partition_hashes": 1040,
+        "scalar_multiplications": 35,
+        "table_inserts": 51,
+        "table_queries": 52
+      },
+      "targets_verified": 1,
+      "walk_steps": 1040
+    },
+    {
+      "arm": "rho_normal",
+      "block": 3,
+      "charges": {
+        "batch_fallback_additions": 0,
+        "batch_inversion_calls": 36,
+        "batch_inversion_inputs": 1059,
+        "canonical_rotation_steps": 85248,
+        "canonicalizations": 1184,
+        "failed_collisions": 0,
+        "group_additions": 1185,
+        "normal_basis_transforms": 4736,
+        "partition_hashes": 1059,
+        "scalar_multiplications": 35,
+        "table_inserts": 93,
+        "table_queries": 94
+      },
+      "targets_verified": 1,
+      "walk_steps": 1059
+    },
+    {
+      "arm": "ic",
+      "block": 3,
+      "counting_floor_attempt_ratio": 1.0,
+      "rank_attempts": 7,
+      "rank_probes_mean": 1753.5714285714287,
+      "rank_receipt": {
+        "a": 0,
+        "attempts": 7,
+        "base_sha256": "07ee3d3e3b52523310eaec911194e19c64d7e671ee67f9055d360206042cbc5e",
+        "failed_searches": 0,
+        "miss_nonexistence_proved": false,
+        "n": 37,
+        "orbit_columns": 7,
+        "rank": 7,
+        "relations": 7,
+        "representative_logs_verified": 7,
+        "rows_without_gain": 0,
+        "schema": "compact-orbit-rank-independent-replay-v1",
+        "status": "PASS",
+        "subgroup_order": 230603167,
+        "summary_sha256": "f94cbdc6a90fd2d70c00636b696eb2a9b3a5fed6514eef7aaefc10db19332fc6",
+        "trace_sha256": "696eede3f42782560885818376b45d30ec57d3bbe69e249127cc8fe368b7f14b",
+        "used_base_points_verified": 28
+      },
+      "targets_verified": 1
+    },
+    {
+      "arm": "rho_v2",
+      "block": 3,
+      "charges": {
+        "canonicalizations": 1092,
+        "failed_collisions": 0,
+        "group_additions": 1093,
+        "partition_hashes": 1040,
+        "scalar_multiplications": 35,
+        "table_inserts": 51,
+        "table_queries": 52
+      },
+      "targets_verified": 1,
+      "walk_steps": 1040
+    },
+    {
+      "arm": "rho_poly",
+      "block": 3,
+      "charges": {
+        "batch_fallback_additions": 0,
+        "batch_inversion_calls": 40,
+        "batch_inversion_inputs": 1215,
+        "canonical_rotation_steps": 0,
+        "canonicalizations": 1315,
+        "failed_collisions": 0,
+        "group_additions": 1316,
+        "normal_basis_transforms": 0,
+        "partition_hashes": 1215,
+        "scalar_multiplications": 35,
+        "table_inserts": 66,
+        "table_queries": 67
+      },
+      "targets_verified": 1,
+      "walk_steps": 1215
+    },
+    {
+      "arm": "ic",
+      "block": 4,
+      "counting_floor_attempt_ratio": 1.0,
+      "rank_attempts": 7,
+      "rank_probes_mean": 1753.5714285714287,
+      "rank_receipt": {
+        "a": 0,
+        "attempts": 7,
+        "base_sha256": "07ee3d3e3b52523310eaec911194e19c64d7e671ee67f9055d360206042cbc5e",
+        "failed_searches": 0,
+        "miss_nonexistence_proved": false,
+        "n": 37,
+        "orbit_columns": 7,
+        "rank": 7,
+        "relations": 7,
+        "representative_logs_verified": 7,
+        "rows_without_gain": 0,
+        "schema": "compact-orbit-rank-independent-replay-v1",
+        "status": "PASS",
+        "subgroup_order": 230603167,
+        "summary_sha256": "593ecdeaecfa9b04c1d827ad4cfa59ae375a4e69b5d806a90f741d2ad7d5d6c7",
+        "trace_sha256": "696eede3f42782560885818376b45d30ec57d3bbe69e249127cc8fe368b7f14b",
+        "used_base_points_verified": 28
+      },
+      "targets_verified": 1
+    },
+    {
+      "arm": "rho_normal",
+      "block": 4,
+      "charges": {
+        "batch_fallback_additions": 0,
+        "batch_inversion_calls": 36,
+        "batch_inversion_inputs": 1059,
+        "canonical_rotation_steps": 85248,
+        "canonicalizations": 1184,
+        "failed_collisions": 0,
+        "group_additions": 1185,
+        "normal_basis_transforms": 4736,
+        "partition_hashes": 1059,
+        "scalar_multiplications": 35,
+        "table_inserts": 93,
+        "table_queries": 94
+      },
+      "targets_verified": 1,
+      "walk_steps": 1059
+    },
+    {
+      "arm": "rho_poly",
+      "block": 4,
+      "charges": {
+        "batch_fallback_additions": 0,
+        "batch_inversion_calls": 40,
+        "batch_inversion_inputs": 1215,
+        "canonical_rotation_steps": 0,
+        "canonicalizations": 1315,
+        "failed_collisions": 0,
+        "group_additions": 1316,
+        "normal_basis_transforms": 0,
+        "partition_hashes": 1215,
+        "scalar_multiplications": 35,
+        "table_inserts": 66,
+        "table_queries": 67
+      },
+      "targets_verified": 1,
+      "walk_steps": 1215
+    },
+    {
+      "arm": "rho_v2",
+      "block": 4,
+      "charges": {
+        "canonicalizations": 1092,
+        "failed_collisions": 0,
+        "group_additions": 1093,
+        "partition_hashes": 1040,
+        "scalar_multiplications": 35,
+        "table_inserts": 51,
+        "table_queries": 52
+      },
+      "targets_verified": 1,
+      "walk_steps": 1040
+    }
+  ],
+  "evidence_class": "cold_wall_and_cpu_diagnostic_no_common_operation_unit",
+  "k": 7,
+  "measurements": {
+    "0": {
+      "ic": {
+        "cpu_seconds": 0.010121,
+        "rss_kib": 12036,
+        "wall_seconds": 0.031685568999989755
+      },
+      "rho_normal": {
+        "cpu_seconds": 0.002484,
+        "rss_kib": 12040,
+        "wall_seconds": 0.006165221999992809
+      },
+      "rho_poly": {
+        "cpu_seconds": 0.0028770000000000002,
+        "rss_kib": 12040,
+        "wall_seconds": 0.006182985999998891
+      },
+      "rho_v2": {
+        "cpu_seconds": 0.0045179999999999994,
+        "rss_kib": 12036,
+        "wall_seconds": 0.006272572999989734
+      }
+    },
+    "1": {
+      "ic": {
+        "cpu_seconds": 0.009748,
+        "rss_kib": 12048,
+        "wall_seconds": 0.011232358000000886
+      },
+      "rho_normal": {
+        "cpu_seconds": 0.0024779999999999997,
+        "rss_kib": 12048,
+        "wall_seconds": 0.006170214000007945
+      },
+      "rho_poly": {
+        "cpu_seconds": 0.002802,
+        "rss_kib": 12044,
+        "wall_seconds": 0.0061833510000042224
+      },
+      "rho_v2": {
+        "cpu_seconds": 0.0043820000000000005,
+        "rss_kib": 12040,
+        "wall_seconds": 0.006143188999999438
+      }
+    },
+    "2": {
+      "ic": {
+        "cpu_seconds": 0.009600999999999998,
+        "rss_kib": 12060,
+        "wall_seconds": 0.01122754500002543
+      },
+      "rho_normal": {
+        "cpu_seconds": 0.002449,
+        "rss_kib": 12056,
+        "wall_seconds": 0.006150028999996948
+      },
+      "rho_poly": {
+        "cpu_seconds": 0.002796,
+        "rss_kib": 12052,
+        "wall_seconds": 0.006137259000013273
+      },
+      "rho_v2": {
+        "cpu_seconds": 0.004333,
+        "rss_kib": 12064,
+        "wall_seconds": 0.006155540999998266
+      }
+    },
+    "3": {
+      "ic": {
+        "cpu_seconds": 0.009385,
+        "rss_kib": 12080,
+        "wall_seconds": 0.011177271999997629
+      },
+      "rho_normal": {
+        "cpu_seconds": 0.002538,
+        "rss_kib": 12068,
+        "wall_seconds": 0.006237884999990229
+      },
+      "rho_poly": {
+        "cpu_seconds": 0.0027029999999999997,
+        "rss_kib": 12100,
+        "wall_seconds": 0.006097291000003224
+      },
+      "rho_v2": {
+        "cpu_seconds": 0.004386,
+        "rss_kib": 12092,
+        "wall_seconds": 0.0061988369999994575
+      }
+    },
+    "4": {
+      "ic": {
+        "cpu_seconds": 0.009406,
+        "rss_kib": 12104,
+        "wall_seconds": 0.011160611999997627
+      },
+      "rho_normal": {
+        "cpu_seconds": 0.002398,
+        "rss_kib": 12132,
+        "wall_seconds": 0.006073560000004363
+      },
+      "rho_poly": {
+        "cpu_seconds": 0.002714,
+        "rss_kib": 12136,
+        "wall_seconds": 0.006102991000005886
+      },
+      "rho_v2": {
+        "cpu_seconds": 0.004222,
+        "rss_kib": 12144,
+        "wall_seconds": 0.006078344000002289
+      }
+    }
+  },
+  "miss_nonexistence_proved": false,
+  "n": 37,
+  "paired_to_normal_rho": {
+    "ic": {
+      "cpu_ratio_95pct_log_t_interval": [
+        3.742294466837334,
+        4.080815114049902
+      ],
+      "cpu_ratio_median": 3.922435362802335,
+      "wall_ratio_95pct_log_t_interval": [
+        1.2573268024064983,
+        3.9862592413099898
+      ],
+      "wall_ratio_median": 1.8256084646155328
+    },
+    "rho_poly": {
+      "cpu_ratio_95pct_log_t_interval": [
+        1.081035928496932,
+        1.1708123677807762
+      ],
+      "cpu_ratio_median": 1.1317764804003336,
+      "wall_ratio_95pct_log_t_interval": [
+        0.9830496090138527,
+        1.011142469760418
+      ],
+      "wall_ratio_median": 1.0021290995735739
+    },
+    "rho_v2": {
+      "cpu_ratio_95pct_log_t_interval": [
+        1.7290567673692954,
+        1.8094867860492125
+      ],
+      "cpu_ratio_median": 1.7683615819209044,
+      "wall_ratio_95pct_log_t_interval": [
+        0.9901821827082605,
+        1.0132642055209424
+      ],
+      "wall_ratio_median": 1.000787676420077
+    }
+  },
+  "rank_runs_verified": 5,
+  "status": "PASS",
+  "targets_verified_per_arm": 5
+}

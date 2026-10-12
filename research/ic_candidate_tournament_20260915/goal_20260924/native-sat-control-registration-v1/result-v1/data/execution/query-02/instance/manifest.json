@@ -1,0 +1,140 @@
+{
+  "blind_instance_id": "native-control-02",
+  "curve": "y^2 + xy = x^3 + x^2 + 1",
+  "curve_a": 1,
+  "direct_meet_in_the_middle": {
+    "reason": "run koblitz_pdp_backend direct-mitm under a separate process meter",
+    "status": "not_run_in_export_process"
+  },
+  "ell": 6,
+  "exports": {
+    "cryptominisat_xor_dimacs": {
+      "blake3": "eddc83193713ad65dce861fdfd305fa257fc8c4858df9fb9d0087e34b25cb9a3",
+      "bytes": 42824,
+      "cnf_clauses": 2364,
+      "path": "instance.xor.cnf",
+      "variables": 767,
+      "xor_rows": 50
+    },
+    "magma_boolean_f4": {
+      "blake3": "08f2003f5efb1d2acbcf96ff228a1edd99cc11f46554875b2eb61a25177628dc",
+      "bytes": 58011,
+      "path": "instance.magma"
+    },
+    "wdsat_anf": {
+      "blake3": "f42be37c8362c55804938e53e1fa5aa72273ad68b9fcb1fcd751010c476718bd",
+      "bytes": 36012,
+      "path": "instance.anf"
+    }
+  },
+  "factor_base_basis_bitmasks": [
+    "1",
+    "2",
+    "4",
+    "8",
+    "16",
+    "32"
+  ],
+  "factor_base_geometry": {
+    "curve_points": 63,
+    "distinct_curve_points": 63,
+    "minimum_required": 3
+  },
+  "factor_base_predicate": {
+    "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+    "enumerates_target_subgroup": false,
+    "kind": "polynomial_subspace",
+    "uses_discrete_log_labels": false
+  },
+  "interpretation": "SAT is a witness only after source-system validation; Unknown is inconclusive and is never counted as UNSAT",
+  "irreducible_low_terms": [
+    0,
+    3
+  ],
+  "kind": "binary_koblitz_pdp_cross_solver_instance",
+  "m": 3,
+  "n": 17,
+  "native_sat": {
+    "conflict_budget": 1000000,
+    "reason": "run koblitz_pdp_backend native-sat under a separate process meter",
+    "status": "not_run_in_export_process"
+  },
+  "representation": "symmetrised_s4",
+  "scope": "standalone blinded explicit-target point-decomposition problem; not a completed index-calculus attack",
+  "seed": 2026100303,
+  "source_equations": 50,
+  "source_instance": {
+    "id_blake3": "9eb7702c1fe87801b5b084bf10114ca42c3920efe4cc1052c9c3f7d7331aedba",
+    "identity": {
+      "blind_instance_id": "native-control-02",
+      "curve_a": 1,
+      "ell": 6,
+      "exports": {
+        "cryptominisat_xor_dimacs": {
+          "blake3": "eddc83193713ad65dce861fdfd305fa257fc8c4858df9fb9d0087e34b25cb9a3",
+          "bytes": 42824,
+          "cnf_clauses": 2364,
+          "path": "instance.xor.cnf",
+          "variables": 767,
+          "xor_rows": 50
+        },
+        "magma_boolean_f4": {
+          "blake3": "08f2003f5efb1d2acbcf96ff228a1edd99cc11f46554875b2eb61a25177628dc",
+          "bytes": 58011,
+          "path": "instance.magma"
+        },
+        "wdsat_anf": {
+          "blake3": "f42be37c8362c55804938e53e1fa5aa72273ad68b9fcb1fcd751010c476718bd",
+          "bytes": 36012,
+          "path": "instance.anf"
+        }
+      },
+      "factor_base_basis_bitmasks": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "32"
+      ],
+      "factor_base_predicate": {
+        "definition": "x = sum(c_i z^i), c_i in F_2, 0 <= i < ell",
+        "enumerates_target_subgroup": false,
+        "kind": "polynomial_subspace",
+        "uses_discrete_log_labels": false
+      },
+      "irreducible_low_terms": [
+        0,
+        3
+      ],
+      "m": 3,
+      "n": 17,
+      "representation": "symmetrised_s4",
+      "schema": "koblitz_pdp_source_identity.v2",
+      "seed": 2026100303,
+      "source_equations": 50,
+      "source_variables": 51,
+      "target": {
+        "x": "59775",
+        "y": "2910"
+      },
+      "target_mode": "explicit_affine"
+    },
+    "schema": "koblitz_pdp_source_instance.v2"
+  },
+  "source_max_degree": 3,
+  "source_max_monomials_per_equation": 253,
+  "source_variables": 51,
+  "target": {
+    "x": "59775",
+    "y": "2910"
+  },
+  "target_mode": "explicit_affine",
+  "timing_ns": {
+    "explicit_target_validation": 69291,
+    "factor_base_predicate_construction": 58000,
+    "native_encoding_and_solve": null,
+    "source_system_construction": 5620167,
+    "whole_process_internal": 8918584
+  }
+}

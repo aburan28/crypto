@@ -1,0 +1,18 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "n37 fresh-target native online wall screen for K8 and K16",
+  "description": "Sixteen new public one-target workloads, five paired measured rounds and one warmup on Linux. Hosted results are exploratory unless every pair earns L2; the one-target online wall interval excludes reusable IC setup.",
+  "workloads": {
+    "curves": [{"kind": "koblitz", "a": 0, "n": 37}],
+    "targets_per_curve": 16,
+    "target_seed": 202610046101,
+    "target_kind": "public"
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong", "params": {"lanes": "32", "dp_bits": "8", "step_cap_factor": "2000"}}},
+    {"name": "ic-k8", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=8,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}},
+    {"name": "ic-k16", "role": "candidate", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=16,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}},
+    {"name": "ic-k16-control", "role": "control", "method": {"id": "ic.shared_rank", "params": {"factor_base": "compact-orbit-scan:columns=16,raw_x_cap=1000000", "rank_seed": "202610042032", "rank_max_trials": "100000", "target_max_attempts": "512"}}}
+  ],
+  "measurement": {"rounds": 5, "warmup": 1, "order": "alternate", "seed": 202610046102, "isolation_required": "L2", "timeout_seconds": 120}
+}

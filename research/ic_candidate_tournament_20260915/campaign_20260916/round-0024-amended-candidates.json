@@ -1,0 +1,30 @@
+[
+  {
+    "id": "incumbent",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 65536,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "round 0023's scaled arm plus research/ic_triple_counted_20260923/rho-normal-basis.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0023",
+    "hypothesis": "The best pair-table arm the campaign has measured (round 0023's scaled: 0.7982 of that round's incumbent, identical on the panel), built with a rho that names Frobenius classes by the IC arm's own normal-basis rotation. Its rho mode is this round's rho. The IC path is unchanged by the rho patch."
+  },
+  {
+    "id": "counted",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 65536,
+      "solver": "triple_counted",
+      "summands": 4
+    },
+    "source_root": "/home/user/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round24-sources/counted",
+    "parent": "incumbent's scaled tree plus research/ic_triple_table_20260923/triple-table.patch and research/ic_triple_counted_20260923/counted-sizing.patch (and the same rho patch)",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0023",
+    "hypothesis": "Triple-sum table under the same Frobenius orbit names: four-term relations, cost r^(3/5) against the pair table's r^(2/3), base sized by counting the four-sums a target can be. Cheaper than the pair arm past the crossing, dearer below it; above a matched rho at every cell (research/ic_triple_counted_20260923 \u00a73: 1.19-2.88x).",
+    "falsification": "Any bad, missing or unmatched certificate at four summands; any recovered logarithm different from the incumbent's or rho's on the same fixture; counted/incumbent above one at n43a1 or n61a1."
+  }
+]

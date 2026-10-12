@@ -1,0 +1,28 @@
+{
+  "task_id": "EVAL-CAP-CURVE-ORDER",
+  "summary": "Compute a curve order that is checkable against a known value.",
+  "passed": true,
+  "verdicts": [
+    {
+      "grader": "file_exists",
+      "passed": true,
+      "detail": "work/order.json exists",
+      "critical": true
+    },
+    {
+      "grader": "field_equals",
+      "passed": true,
+      "detail": "order=19, expected 19",
+      "critical": true
+    },
+    {
+      "grader": "stopped_cleanly",
+      "passed": true,
+      "detail": "stop_reason=completed",
+      "critical": false
+    }
+  ],
+  "answer": {
+    "order": 19
+  }
+}

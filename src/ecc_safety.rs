@@ -761,6 +761,59 @@ fn trial_factor(n: &BigUint, bound: u64) -> FactorResult {
     }
 }
 
+// We touch `mod_pow` only through doc-link sanity; pull it in to keep
+// re-exports tidy if/when we extend with multiplicative-order checks.
+#[allow(dead_code)]
+fn _link_mod_pow() {
+    let _ = mod_pow;
+}
+
+/// Trial-division primality test for small `u64` values — used by
+/// the trace-zero check on the (small) extension degree, not on
+/// the curve modulus.  At u64 scale this completes in microseconds.
+fn is_prime_small(n: u64) -> bool {
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n.is_multiple_of(2) {
+        return false;
+    }
+    let mut d = 3u64;
+    while d.saturating_mul(d) <= n {
+        if n.is_multiple_of(d) {
+            return false;
+        }
+        d += 2;
+    }
+    true
+}
+
+/// Miller-Rabin-style probabilistic primality test for `BigUint` —
+/// used for the prime-order check in
+/// [`CurveParams::check_cl_o_orbit_brittleness`].  Delegates to the
+/// existing RSA `is_prime` which already handles cryptographic-size
+/// inputs.
+fn is_prime_big(n: &BigUint) -> bool {
+    crate::asymmetric::rsa::is_prime(n)
+}
+
+fn smallest_prime_factor(n: u64) -> u64 {
+    if n.is_multiple_of(2) {
+        return 2;
+    }
+    let mut d = 3u64;
+    while d.saturating_mul(d) <= n {
+        if n.is_multiple_of(d) {
+            return d;
+        }
+        d += 2;
+    }
+    n
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1297,57 +1350,4 @@ mod tests {
             assert!(!is_prime_small(c), "expected {} composite", c);
         }
     }
-}
-
-// We touch `mod_pow` only through doc-link sanity; pull it in to keep
-// re-exports tidy if/when we extend with multiplicative-order checks.
-#[allow(dead_code)]
-fn _link_mod_pow() {
-    let _ = mod_pow;
-}
-
-/// Trial-division primality test for small `u64` values — used by
-/// the trace-zero check on the (small) extension degree, not on
-/// the curve modulus.  At u64 scale this completes in microseconds.
-fn is_prime_small(n: u64) -> bool {
-    if n < 2 {
-        return false;
-    }
-    if n < 4 {
-        return true;
-    }
-    if n % 2 == 0 {
-        return false;
-    }
-    let mut d = 3u64;
-    while d.saturating_mul(d) <= n {
-        if n % d == 0 {
-            return false;
-        }
-        d += 2;
-    }
-    true
-}
-
-/// Miller-Rabin-style probabilistic primality test for `BigUint` —
-/// used for the prime-order check in
-/// [`CurveParams::check_cl_o_orbit_brittleness`].  Delegates to the
-/// existing RSA `is_prime` which already handles cryptographic-size
-/// inputs.
-fn is_prime_big(n: &BigUint) -> bool {
-    crate::asymmetric::rsa::is_prime(n)
-}
-
-fn smallest_prime_factor(n: u64) -> u64 {
-    if n % 2 == 0 {
-        return 2;
-    }
-    let mut d = 3u64;
-    while d.saturating_mul(d) <= n {
-        if n % d == 0 {
-            return d;
-        }
-        d += 2;
-    }
-    n
 }

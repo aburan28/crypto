@@ -1,0 +1,313 @@
+{
+  "artifact": {
+    "archive_bytes": 106911169,
+    "archive_path": "/tmp/ecc2k-sigma-fused-gpu-20261001/results.tgz",
+    "archive_sha256": "abb4574443ed4b7eaee2ee17960019eea5137c6946ecc8c2f33869061b8669ac",
+    "artifact_manifest_sha256": "1a90461123d8f9dd4d7d57074d9a822ab76c60504d7c21dfe71fd557ebd949f7",
+    "downloaded_results_match_tar_extraction": true,
+    "exit_code_file": "0",
+    "launch_path": "/tmp/ecc2k-sigma-fused-gpu-20261001/launch.json",
+    "launch_sha256": "b64479754f562a6beba1f6448ea6f206967bd342e575f15d0148fa376cf9e25c",
+    "result_sha256": "3639eb4bba8c0ba5c714e1594e4619dfcbe49c0574dbb4d38ff21be4bbe8b1e2",
+    "samples_sha256": "2df938dcf3b7d70d73ff73db9b09322af5d4dbd1dc3c2c2799537d4b42e249c4",
+    "source_manifest_sha256": "62a6048db0466a157f171b90fd3332f69ff9b6a4088551bb6567a97b673add6a",
+    "summary_sha256": "5cac5af07c9fe6b5dc1d5ae76db73617355d367d3ee5a81deb26ebca42b556bb",
+    "tar_members_including_root": 46,
+    "tar_paths_safe": true
+  },
+  "audit_status": "PASS_WITH_PROVENANCE_AND_PACKAGING_NOTES",
+  "audit_subject": "fused sigma schedule with WITNESS=1",
+  "auditor_scope": "Offline independent audit of supplied archive, extracted results, launch metadata, source revision and code. No GPU was launched.",
+  "benchmark": {
+    "aa_max_absolute_drift": 0.0005738236294665633,
+    "aa_pair_ratios_control_b_over_control_a": [
+      0.99980185196235,
+      1.0005738236294666,
+      0.999864597670588,
+      1.00002973358706,
+      0.9999621495869708
+    ],
+    "aa_samples": 10,
+    "ab_median_ratio": 1.2622912148480092,
+    "ab_min_ratio": 1.2617678178556824,
+    "ab_pair_ratios_candidate_over_control": [
+      1.2622912148480092,
+      1.2624380513757842,
+      1.2621445917713188,
+      1.262538076518503,
+      1.2617678178556824
+    ],
+    "ab_ratio_mean": 1.2622359504738596,
+    "ab_ratio_sample_stdev": 0.0003011119530972638,
+    "ab_samples": 10,
+    "all_sample_logs_match_fixed_markers_and_exact_work": true,
+    "benchmark_threads": 385024,
+    "candidate_median_billion_per_second": 11.800903,
+    "candidate_median_million_per_second": 11800.903,
+    "candidate_rates_million_per_second": [
+      11799.151,
+      11801.103,
+      11800.903,
+      11800.903,
+      11799.958
+    ],
+    "complete_scalar_updates_per_sample": 403726925824,
+    "control_median_million_per_second": 9347.867,
+    "control_rates_million_per_second": [
+      9347.408,
+      9347.867,
+      9349.882,
+      9346.968,
+      9351.925
+    ],
+    "decision": "PROMOTE_ENGINEERING",
+    "dp_weight": 0,
+    "excluded_warmup_samples": 4,
+    "goal_26b_met": false,
+    "launches_per_sample": 64,
+    "native_result_recomputed_exactly": true,
+    "steps_per_launch": 1024,
+    "walks": 6160384
+  },
+  "correctness": {
+    "corpus": {
+      "candidate_file_sha256": "7d48c9749521ec1b5210612c0840ecd3e0c68d2412b55378cfded5ce9e8c98ab",
+      "canonical_sorted_payload_sha256": "9da10fbdd66dc175482e4e100fea68f541020881fbdea9bbc1bf7a4c9087e5c7",
+      "control_file_sha256": "d0693cbb4d415e8e9382b382616f8eae7d8235d1c9453650a6b011bcc6fb6663",
+      "framing": "ECC2KDP2",
+      "header_bytes": 16,
+      "raw_files_differ_only_in_record_order": true,
+      "record_bytes": 72,
+      "records_per_arm": 1709477,
+      "sorted_identity": true,
+      "version": 2,
+      "witness_sum_scan": {
+        "branch_maxima": [
+          127,
+          129,
+          125,
+          111,
+          105,
+          101,
+          107,
+          122
+        ],
+        "branch_totals": [
+          55467568,
+          57126405,
+          53829496,
+          47975730,
+          43011693,
+          41833516,
+          45108584,
+          50851482
+        ],
+        "max_iters": 664,
+        "min_iters": 0,
+        "records_scanned": 1709477,
+        "sum_counts_equals_iters_failures": 0,
+        "total_reported_trail_steps": 395204474,
+        "zero_step_records": 5300
+      }
+    },
+    "dp_weight": 48,
+    "dropped_per_arm": 0,
+    "lanes": 1,
+    "launches": 7,
+    "potential_updates_per_arm": 1024163840,
+    "replayed_per_arm": 300,
+    "slots": 16,
+    "steps_per_launch": 95,
+    "verify_checks": {
+      "candidate": {
+        "backend_marker": true,
+        "exact_final_potential_updates": true,
+        "fused_marker": true,
+        "no_mismatch_or_overflow": true,
+        "replay_300_zero_dropped": true,
+        "resource_marker": true
+      },
+      "control": {
+        "backend_marker": true,
+        "exact_final_potential_updates": true,
+        "fused_marker": true,
+        "no_mismatch_or_overflow": true,
+        "replay_300_zero_dropped": true,
+        "resource_marker": true
+      }
+    },
+    "verify_threads": 96256,
+    "walks": 1540096
+  },
+  "hardware": {
+    "compute_capability": "12.0",
+    "cuda_compiler": "13.3 V13.3.73 build 38244171_0",
+    "driver": "580.95.05",
+    "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "gpu_uuid": "GPU-1a7bdfbd-4c2f-a734-a032-a90d56ed98ab",
+    "max_sm_clock_mhz": 2430,
+    "memory_mib": 97887,
+    "native_arch": "sm_120",
+    "power_limit_w": 600.0
+  },
+  "integrity": {
+    "all_sample_log_sha256_match_tsv": true,
+    "artifact_manifest_entries": 43,
+    "artifact_manifest_matches": 42,
+    "artifact_manifest_mismatches": [
+      {
+        "actual_sha256": "135533074a1ea153aa79804d9f2458c501e403c5edfa951f9bd0b0d52676259e",
+        "expected_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "match": false,
+        "path": "job.log"
+      }
+    ],
+    "sample_log_check_problems": [],
+    "unlisted_files": [
+      "exit-code"
+    ]
+  },
+  "issues": [
+    {
+      "detail": "artifact-files.sha256 captured job.log while empty; the wrapper later populated job.log. exit-code was added after the manifest and is unlisted. The archive itself hashes and extracts consistently.",
+      "id": "artifact-manifest-wrapper-race",
+      "severity": "low"
+    },
+    {
+      "detail": "Revision f825 records but does not fail closed on exact GPU/compiler and has no WITNESS runtime marker. The launch/host logs show the intended GPU and CUDA; source hashes match the clean revision; the build script fixes WITNESS=1; v2 records contain nonzero branch counts and all 1,709,477 records satisfy sum(counts)=iters.",
+      "id": "older-harness-runtime-identity",
+      "severity": "low"
+    },
+    {
+      "detail": "The archive records binary SHA-256 values but does not contain the binaries, so executable bytes cannot be rehashed or independently rebuilt bit-for-bit from this artifact.",
+      "id": "binary-not-embedded",
+      "severity": "info"
+    },
+    {
+      "detail": "launch.json is adjacent to, rather than embedded in, results.tgz; its independent SHA-256 is recorded by this audit.",
+      "id": "launch-metadata-external",
+      "severity": "info"
+    }
+  ],
+  "launch": {
+    "cudaImage": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+    "deviceLine": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05",
+    "env": {
+      "SOURCE_REV": "f825af425be2f96bbfc7663990b0c53e690d4684"
+    },
+    "exitCode": 0,
+    "finishedAt": "2026-10-02T01:50:59Z",
+    "functionCallId": "fc-01M3X2TR00SGFC930TQZCB6DAT",
+    "gitDirty": false,
+    "gitRev": "f825af425be2f96bbfc7663990b0c53e690d4684",
+    "gpu": "RTX-PRO-6000",
+    "job": "benchmarks/sigma-fused/gpujob.sh",
+    "provider": "modal",
+    "seconds": 1580.247172832489,
+    "startedAt": "2026-10-02T01:14:32Z",
+    "token": "7ac29581928e466c9d23c07a0f71705e",
+    "volume": "ecc2k130-jobs"
+  },
+  "schema": "ecc2k130-independent-gpu-evidence-audit-v1",
+  "scope": {
+    "benchmark_only": true,
+    "collision_recovery_run": false,
+    "multi_gpu_aggregation": false,
+    "rate_claim": "DP-weight-zero complete scalar updates in the frozen sigma benchmark.",
+    "search_run": false,
+    "single_gpu": true,
+    "solver_run": false
+  },
+  "source_and_binary_provenance": {
+    "binary_bytes_in_archive": false,
+    "code_cross_check": {
+      "alternating_prefix_reverse_order": true,
+      "last_step_skips_unused_next_selection": true,
+      "observed_semantic_equivalence": "Full sorted witness corpus identity after seven odd-length launches.",
+      "prologue_then_exact_steps": true,
+      "supported_mode_guards_present": true
+    },
+    "launch_reports_git_dirty": false,
+    "recorded_binary_sha256": {
+      "candidate": "cf54c47d9f5f00bb7173abd18b9eac648cba8e49cd0c9fd446361a3914bdc05b",
+      "control": "db7b6c2eec86586d1e96ad46c5035771119d8baa6cdc948acc3c554180945db2"
+    },
+    "runtime_resources": {
+      "candidate": {
+        "local_bytes_per_thread": 0,
+        "registers_per_thread": 120,
+        "shared_bytes_per_block": 1792
+      },
+      "control": {
+        "local_bytes_per_thread": 0,
+        "registers_per_thread": 91,
+        "shared_bytes_per_block": 1792
+      }
+    },
+    "source_entries": [
+      {
+        "expected_sha256": "26bf6b0c6035a01731786eafdebee926052802f8ce1be6c2cb7f1cfca7942296",
+        "git_object_sha256": "26bf6b0c6035a01731786eafdebee926052802f8ce1be6c2cb7f1cfca7942296",
+        "match": true,
+        "path": "Makefile"
+      },
+      {
+        "expected_sha256": "d02e8bf7dc6f96eb20e8dbee7ca69d8beadd2781891ccb581497119438bdc08a",
+        "git_object_sha256": "d02e8bf7dc6f96eb20e8dbee7ca69d8beadd2781891ccb581497119438bdc08a",
+        "match": true,
+        "path": "include/packedkernels.cuh"
+      },
+      {
+        "expected_sha256": "3b9b92a4c46aa216ba6565b7203ab9562b0ffe890c9490534d9da787742006dd",
+        "git_object_sha256": "3b9b92a4c46aa216ba6565b7203ab9562b0ffe890c9490534d9da787742006dd",
+        "match": true,
+        "path": "include/packedengine.cuh"
+      },
+      {
+        "expected_sha256": "e7a8a71bb2c1a86a03ad2fe57ead03f8acceac55e9d2d3c0653c1e14b63a6df9",
+        "git_object_sha256": "e7a8a71bb2c1a86a03ad2fe57ead03f8acceac55e9d2d3c0653c1e14b63a6df9",
+        "match": true,
+        "path": "include/packed131.h"
+      },
+      {
+        "expected_sha256": "a3276bbd3c1cd1467b5dba3afad1dcbd29813b390f5847b032c5b3a91e03a623",
+        "git_object_sha256": "a3276bbd3c1cd1467b5dba3afad1dcbd29813b390f5847b032c5b3a91e03a623",
+        "match": true,
+        "path": "include/packedsigma131.h"
+      },
+      {
+        "expected_sha256": "3f0e857eceb915285b4e419d1632abc3ff49c24fb5fc2614705ab260de8d2147",
+        "git_object_sha256": "3f0e857eceb915285b4e419d1632abc3ff49c24fb5fc2614705ab260de8d2147",
+        "match": true,
+        "path": "src/main.cu"
+      },
+      {
+        "expected_sha256": "b3ae4c04dfd025fc5c7481a6a0aadd4d9991acfec16e50160fb2b23b9ed9ffdc",
+        "git_object_sha256": "b3ae4c04dfd025fc5c7481a6a0aadd4d9991acfec16e50160fb2b23b9ed9ffdc",
+        "match": true,
+        "path": "benchmarks/sigma-fused/PROTOCOL.md"
+      },
+      {
+        "expected_sha256": "66b003d7b9847a8d344a8c27d3961d7cc3936a62abe93d3a36f32184718e010c",
+        "git_object_sha256": "66b003d7b9847a8d344a8c27d3961d7cc3936a62abe93d3a36f32184718e010c",
+        "match": true,
+        "path": "benchmarks/sigma-fused/gpujob.sh"
+      },
+      {
+        "expected_sha256": "566c07d7908aae6bba6a58061fb48e8de6672f2e0e0f4ce028694e419de4f842",
+        "git_object_sha256": "566c07d7908aae6bba6a58061fb48e8de6672f2e0e0f4ce028694e419de4f842",
+        "match": true,
+        "path": "benchmarks/sigma-fused/corpus_identity.cpp"
+      },
+      {
+        "expected_sha256": "eb13d918c6d02014347bb5ba66191da71bf4a6f0369558103e4861e317297f25",
+        "git_object_sha256": "eb13d918c6d02014347bb5ba66191da71bf4a6f0369558103e4861e317297f25",
+        "match": true,
+        "path": "benchmarks/sigma-fused/summarize.cpp"
+      }
+    ],
+    "source_manifest_entries": 10,
+    "source_manifest_matches_revision": true,
+    "source_revision": "f825af425be2f96bbfc7663990b0c53e690d4684"
+  }
+}

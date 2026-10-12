@@ -1,0 +1,59 @@
+{
+  "schema": "ecc2k130-sparse-table-microprobe-external-audit-v1",
+  "auditStatus": "PASS",
+  "scope": "Independent read-only audit of the r4 source, raw archive, native code, samples, arithmetic and claim boundary. No GPU was launched by the audit.",
+  "sourceRevision": "9603d7653b216fd09d0e3bdc914e494cf40bb19c",
+  "integrity": {
+    "sourceManifestEntries": 13,
+    "scientificManifestEntries": 30,
+    "allManifestEntriesVerified": true,
+    "tarPathsAndTypesSafe": true,
+    "freshExtractionByteIdentical": true,
+    "resultSha256": "897abfbcb97d5c70e5fc4ecca1c7e534d406d0496e8350c46335b2e5a9e25ad8",
+    "sassAuditSha256": "31b6fb4aa6124cd3f454ce688da390ac63713a85374535a64947387791704803",
+    "nativeSummarizerReproducedResultByteForByte": true,
+    "nativeSassAuditorReproducedReportByteForByte": true
+  },
+  "samples": {
+    "warmupsExcluded": 7,
+    "rankedRows": 35,
+    "applicationsPerRow": 6308233216,
+    "ldsInstructionsPerRow": 555124523008,
+    "allRowsValid": true,
+    "allOutputDigestsStable": true,
+    "aaMaximumAbsoluteDrift": 0.000554057907
+  },
+  "recomputedBillionMapApplicationsPerSecond": {
+    "jointVarying": 28.638982584931,
+    "fixedNormal": 64.225526141236,
+    "fixedToBeta": 64.237371779930,
+    "fixedFromBeta": 64.245682301486,
+    "jointFixedJ": 64.250689617549,
+    "jointUniformKey": 82.976896454549
+  },
+  "recomputedAccounting": {
+    "lookupOnlyBillionUpdatesPerSecond": 11.448092294734,
+    "lookupRatioToReference": 0.741616365668,
+    "uniformJointCounterfactualBillionUpdatesPerSecond": 24.027481712242,
+    "jointRateNeededFor26BillionUpdatesPerSecond": 95.485341740203,
+    "requiredJointRateOverMeasuredVarying": 3.334103837559,
+    "requiredJointRateOverUniformControl": 1.150746121151,
+    "controlClmadPerUpdate": 38.125,
+    "sparseAluSquareClmadPerUpdate": 33.125,
+    "sparseAluSquareIdealClmadCeilingBillionPerSecond": 27.582792452830,
+    "sparseAluSquareChargedSourceOpsPerUpdate": 1542.25
+  },
+  "resourcesAndCode": {
+    "maximumRegistersPerThread": 121,
+    "localBytesPerThread": 0,
+    "dynamicSharedBytesPerBlock": 77440,
+    "activeBlocksPerSm": 1,
+    "sassKernels": 7,
+    "lds128PerKernel": 44,
+    "ldsScalarPerKernel": 44,
+    "localInstructionsPerKernel": 0,
+    "callsPerKernel": 0,
+    "manualControlFlowConfirmsLoadsInside65536RoundLoop": true
+  },
+  "conclusion": "The exact three-bit lookup route fails before arithmetic. Even substituting the measured warp-uniform multicast rate for both joint maps yields only 24.027482 B updates/s; reaching 26 would require a joint-map rate above the uniform control. Sparse ALU squaring cannot rescue this layout. This does not rule out a materially different synthesized or fused linear map."
+}

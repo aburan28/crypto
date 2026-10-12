@@ -1,0 +1,23 @@
+{
+  "schema": "ecbench.spec/v1",
+  "label": "follow-up: index calculus on the two Koblitz curves where koblitz-orbit:divisor=0;1 has no invariant subspace, with the polynomial-basis subspace base",
+  "description": "PROTOCOL-2. On icv1-f2m19-t797-b6cf2467 (ord_19(2) = 18, so divisor 0;1 spans the whole field) and icv1-f2m29-tm40309-30c52b96 (ord_29(2) = 28 > 24, so no non-trivial factor is enumerated) every ic.pipeline arm of the first session errored before any work. This session measures index calculus there with the binary-subspace base, which needs no Frobenius-invariant factor, under the oracles that accept it: the unfolded meet-in-the-middle and subtract. Same targets, seeds, rounds and reference as the first session; the generic arms are re-run so every comparison is within one session.",
+  "workloads": {
+    "curves": [
+      {"kind": "koblitz", "a": 0, "n": 19},
+      {"kind": "koblitz", "a": 1, "n": 29}
+    ],
+    "targets_per_curve": 8,
+    "target_seed": 20261003
+  },
+  "arms": [
+    {"name": "rho-strong", "role": "reference", "method": {"id": "rho.signed_frobenius_strong"}},
+    {"name": "rho-frob", "role": "baseline", "method": {"id": "rho.signed_frobenius"}},
+    {"name": "ic-sub6-mitm", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=6", "oracle": "mitm:m=2"}}},
+    {"name": "ic-sub6-subtract", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=6", "oracle": "subtract"}}},
+    {"name": "ic-sub8-mitm", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=8", "oracle": "mitm:m=2"}}},
+    {"name": "ic-sub8-subtract", "role": "candidate", "method": {"id": "ic.pipeline", "params": {"factor_base": "binary-subspace:dimension=8", "oracle": "subtract"}}},
+    {"name": "rho-strong-aa", "role": "control", "method": {"id": "rho.signed_frobenius_strong"}}
+  ],
+  "measurement": {"rounds": 3, "warmup": 1, "order": "alternate", "seed": 20261003, "isolation_required": "L2", "timeout_seconds": 300}
+}

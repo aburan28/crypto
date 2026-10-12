@@ -1,0 +1,4420 @@
+[
+  {
+    "name": "kernel",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/crypto-reuse/target/release/deps/crypto_lib-826b700dda3d6423",
+      "cryptanalysis::koblitz_groebner::rref_tests::paired_kernel_benchmark",
+      "--exact",
+      "--ignored",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 1.2117734950006707
+  },
+  {
+    "name": "stage-n3-l1-m2-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0036891830022796057
+  },
+  {
+    "name": "stage-n3-l1-m2-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0032652029985911213
+  },
+  {
+    "name": "stage-n3-l1-m2-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0031718829995952547
+  },
+  {
+    "name": "stage-n3-l1-m2-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004105270993022714
+  },
+  {
+    "name": "stage-n3-l1-m2-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0034619409998413175
+  },
+  {
+    "name": "stage-n3-l1-m2-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003566699000657536
+  },
+  {
+    "name": "stage-n3-l1-m2-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003321608994156122
+  },
+  {
+    "name": "stage-n3-l1-m2-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0034466479992261156
+  },
+  {
+    "name": "stage-n3-l1-m2-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0030438190005952492
+  },
+  {
+    "name": "stage-n3-l1-m2-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003464214001724031
+  },
+  {
+    "name": "stage-n3-l1-m2-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0034550499985925853
+  },
+  {
+    "name": "stage-n3-l1-m2-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0034195869957329705
+  },
+  {
+    "name": "stage-n3-l2-m2-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "2",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0035423719964455813
+  },
+  {
+    "name": "stage-n3-l2-m2-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "2",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0023337189995800145
+  },
+  {
+    "name": "stage-n3-l2-m2-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "2",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00376618900190806
+  },
+  {
+    "name": "stage-n3-l2-m2-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "2",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003511374998197425
+  },
+  {
+    "name": "stage-n3-l2-m2-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "2",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003589423002267722
+  },
+  {
+    "name": "stage-n3-l2-m2-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "2",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003396380998310633
+  },
+  {
+    "name": "stage-n3-l2-m2-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "2",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003527849999954924
+  },
+  {
+    "name": "stage-n3-l2-m2-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "2",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0037158539998927154
+  },
+  {
+    "name": "stage-n3-l2-m2-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "2",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0033817189978435636
+  },
+  {
+    "name": "stage-n3-l2-m2-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "2",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0023172040018835105
+  },
+  {
+    "name": "stage-n3-l2-m2-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "2",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0033436219964642078
+  },
+  {
+    "name": "stage-n3-l2-m2-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "2",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0036582069951691665
+  },
+  {
+    "name": "stage-n5-l2-m2-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004557151994958986
+  },
+  {
+    "name": "stage-n5-l2-m2-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00455064199923072
+  },
+  {
+    "name": "stage-n5-l2-m2-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004539957000815775
+  },
+  {
+    "name": "stage-n5-l2-m2-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004748821003886405
+  },
+  {
+    "name": "stage-n5-l2-m2-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004551514000922907
+  },
+  {
+    "name": "stage-n5-l2-m2-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004915362995234318
+  },
+  {
+    "name": "stage-n5-l2-m2-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004472163993341383
+  },
+  {
+    "name": "stage-n5-l2-m2-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004484452998440247
+  },
+  {
+    "name": "stage-n5-l2-m2-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004615420002664905
+  },
+  {
+    "name": "stage-n5-l2-m2-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004623191998689435
+  },
+  {
+    "name": "stage-n5-l2-m2-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004554086997814011
+  },
+  {
+    "name": "stage-n5-l2-m2-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00473589199827984
+  },
+  {
+    "name": "stage-n7-l3-m2-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "7",
+      "3",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008075147001363803
+  },
+  {
+    "name": "stage-n7-l3-m2-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "7",
+      "3",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009911216999171302
+  },
+  {
+    "name": "stage-n7-l3-m2-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "7",
+      "3",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007212937001895625
+  },
+  {
+    "name": "stage-n7-l3-m2-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "7",
+      "3",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007548303001385648
+  },
+  {
+    "name": "stage-n7-l3-m2-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "7",
+      "3",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007194079000328202
+  },
+  {
+    "name": "stage-n7-l3-m2-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "7",
+      "3",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00736555799812777
+  },
+  {
+    "name": "stage-n7-l3-m2-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "7",
+      "3",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007140927998989355
+  },
+  {
+    "name": "stage-n7-l3-m2-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "7",
+      "3",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007482804001483601
+  },
+  {
+    "name": "stage-n7-l3-m2-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "7",
+      "3",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007567791995825246
+  },
+  {
+    "name": "stage-n7-l3-m2-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "7",
+      "3",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007332927998504601
+  },
+  {
+    "name": "stage-n7-l3-m2-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "7",
+      "3",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007324215002881829
+  },
+  {
+    "name": "stage-n7-l3-m2-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "7",
+      "3",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.006914306999533437
+  },
+  {
+    "name": "stage-n9-l3-m2-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "9",
+      "3",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.005468365998240188
+  },
+  {
+    "name": "stage-n9-l3-m2-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "9",
+      "3",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.006167571002151817
+  },
+  {
+    "name": "stage-n9-l3-m2-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "9",
+      "3",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.006632311000430491
+  },
+  {
+    "name": "stage-n9-l3-m2-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "9",
+      "3",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.006464158002927434
+  },
+  {
+    "name": "stage-n9-l3-m2-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "9",
+      "3",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008305914998345543
+  },
+  {
+    "name": "stage-n9-l3-m2-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "9",
+      "3",
+      "2",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.006912192999152467
+  },
+  {
+    "name": "stage-n9-l3-m2-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "9",
+      "3",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007278966004378162
+  },
+  {
+    "name": "stage-n9-l3-m2-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "9",
+      "3",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007218396000098437
+  },
+  {
+    "name": "stage-n9-l3-m2-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "9",
+      "3",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007174619000579696
+  },
+  {
+    "name": "stage-n9-l3-m2-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "9",
+      "3",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007051925000268966
+  },
+  {
+    "name": "stage-n9-l3-m2-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "9",
+      "3",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0070048519992269576
+  },
+  {
+    "name": "stage-n9-l3-m2-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "9",
+      "3",
+      "2",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007070493003993761
+  },
+  {
+    "name": "stage-n3-l1-m3-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "3",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004018239997094497
+  },
+  {
+    "name": "stage-n3-l1-m3-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "3",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003769995004404336
+  },
+  {
+    "name": "stage-n3-l1-m3-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "3",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003973432001657784
+  },
+  {
+    "name": "stage-n3-l1-m3-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "3",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.002812469996570144
+  },
+  {
+    "name": "stage-n3-l1-m3-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "3",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0038970460009295493
+  },
+  {
+    "name": "stage-n3-l1-m3-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "3",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0035922780007240362
+  },
+  {
+    "name": "stage-n3-l1-m3-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "3",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0031542770011583343
+  },
+  {
+    "name": "stage-n3-l1-m3-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "3",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004111260001081973
+  },
+  {
+    "name": "stage-n3-l1-m3-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "3",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0037847170024178922
+  },
+  {
+    "name": "stage-n3-l1-m3-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "3",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.003829684996162541
+  },
+  {
+    "name": "stage-n3-l1-m3-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "3",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.004131869995035231
+  },
+  {
+    "name": "stage-n3-l1-m3-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "3",
+      "1",
+      "3",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0042269340046914294
+  },
+  {
+    "name": "stage-n5-l2-m3-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "3",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.07722125000145752
+  },
+  {
+    "name": "stage-n5-l2-m3-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "3",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.07728204200248001
+  },
+  {
+    "name": "stage-n5-l2-m3-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "3",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.07780084300611634
+  },
+  {
+    "name": "stage-n5-l2-m3-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "3",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.08000326400360791
+  },
+  {
+    "name": "stage-n5-l2-m3-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "3",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0807536659995094
+  },
+  {
+    "name": "stage-n5-l2-m3-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "3",
+      "frozen"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.08956803799810586
+  },
+  {
+    "name": "stage-n5-l2-m3-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "3",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0785178049991373
+  },
+  {
+    "name": "stage-n5-l2-m3-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "3",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0807694699979038
+  },
+  {
+    "name": "stage-n5-l2-m3-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "3",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.07788699399679899
+  },
+  {
+    "name": "stage-n5-l2-m3-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "3",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.07697526900301455
+  },
+  {
+    "name": "stage-n5-l2-m3-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "3",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.07868348900228739
+  },
+  {
+    "name": "stage-n5-l2-m3-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/f4_linear_algebra_bench",
+      "5",
+      "2",
+      "3",
+      "fresh"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.07583177500055172
+  },
+  {
+    "name": "dlp-n7-groebner-s101-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.042054938996443525
+  },
+  {
+    "name": "dlp-n7-groebner-s101-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.042239226000674535
+  },
+  {
+    "name": "dlp-n7-groebner-s101-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04150062300323043
+  },
+  {
+    "name": "dlp-n7-groebner-s101-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.042453930000192486
+  },
+  {
+    "name": "dlp-n7-groebner-s101-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04243747599684866
+  },
+  {
+    "name": "dlp-n7-groebner-s101-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04268940600013593
+  },
+  {
+    "name": "dlp-n7-groebner-s202-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0418592039932264
+  },
+  {
+    "name": "dlp-n7-groebner-s202-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04080090799834579
+  },
+  {
+    "name": "dlp-n7-groebner-s202-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04220242099836469
+  },
+  {
+    "name": "dlp-n7-groebner-s202-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04139455199765507
+  },
+  {
+    "name": "dlp-n7-groebner-s202-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04108573799749138
+  },
+  {
+    "name": "dlp-n7-groebner-s202-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.041445219998422544
+  },
+  {
+    "name": "dlp-n7-groebner-s307-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.040513845000532456
+  },
+  {
+    "name": "dlp-n7-groebner-s307-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.042283212998881936
+  },
+  {
+    "name": "dlp-n7-groebner-s307-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03988515699893469
+  },
+  {
+    "name": "dlp-n7-groebner-s307-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04235263799637323
+  },
+  {
+    "name": "dlp-n7-groebner-s307-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04240582900092704
+  },
+  {
+    "name": "dlp-n7-groebner-s307-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.040876282000681385
+  },
+  {
+    "name": "dlp-n7-groebner-s409-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04217503999825567
+  },
+  {
+    "name": "dlp-n7-groebner-s409-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.039888341998448595
+  },
+  {
+    "name": "dlp-n7-groebner-s409-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04181288900144864
+  },
+  {
+    "name": "dlp-n7-groebner-s409-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03981193600338884
+  },
+  {
+    "name": "dlp-n7-groebner-s409-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04256784199969843
+  },
+  {
+    "name": "dlp-n7-groebner-s409-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.041811542003415525
+  },
+  {
+    "name": "dlp-n7-groebner-s503-k7-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04163076899567386
+  },
+  {
+    "name": "dlp-n7-groebner-s503-k7-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04147059800015995
+  },
+  {
+    "name": "dlp-n7-groebner-s503-k7-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04089318699698197
+  },
+  {
+    "name": "dlp-n7-groebner-s503-k7-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04193044100247789
+  },
+  {
+    "name": "dlp-n7-groebner-s503-k7-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.042691267997724935
+  },
+  {
+    "name": "dlp-n7-groebner-s503-k7-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.043845740001415834
+  },
+  {
+    "name": "dlp-n7-groebner-s607-k11-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04289905100449687
+  },
+  {
+    "name": "dlp-n7-groebner-s607-k11-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04245610300131375
+  },
+  {
+    "name": "dlp-n7-groebner-s607-k11-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.042106316999706905
+  },
+  {
+    "name": "dlp-n7-groebner-s607-k11-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04128400599438464
+  },
+  {
+    "name": "dlp-n7-groebner-s607-k11-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0420267059962498
+  },
+  {
+    "name": "dlp-n7-groebner-s607-k11-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "groebner",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04145740799867781
+  },
+  {
+    "name": "dlp-n7-sat-s101-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.033747961999324616
+  },
+  {
+    "name": "dlp-n7-sat-s101-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03397485399909783
+  },
+  {
+    "name": "dlp-n7-sat-s101-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03414320799492998
+  },
+  {
+    "name": "dlp-n7-sat-s101-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.034318512996833306
+  },
+  {
+    "name": "dlp-n7-sat-s101-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.034849182004109025
+  },
+  {
+    "name": "dlp-n7-sat-s101-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0367691079954966
+  },
+  {
+    "name": "dlp-n7-sat-s202-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.034739827999146655
+  },
+  {
+    "name": "dlp-n7-sat-s202-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03438494199508568
+  },
+  {
+    "name": "dlp-n7-sat-s202-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03329926600417821
+  },
+  {
+    "name": "dlp-n7-sat-s202-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.033571886000572704
+  },
+  {
+    "name": "dlp-n7-sat-s202-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.034739337002974935
+  },
+  {
+    "name": "dlp-n7-sat-s202-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0372222200021497
+  },
+  {
+    "name": "dlp-n7-sat-s307-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04384651099826442
+  },
+  {
+    "name": "dlp-n7-sat-s307-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.04133213900058763
+  },
+  {
+    "name": "dlp-n7-sat-s307-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.038195308996364474
+  },
+  {
+    "name": "dlp-n7-sat-s307-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03782307799701812
+  },
+  {
+    "name": "dlp-n7-sat-s307-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0345374320022529
+  },
+  {
+    "name": "dlp-n7-sat-s307-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03406434899807209
+  },
+  {
+    "name": "dlp-n7-sat-s409-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03411582599801477
+  },
+  {
+    "name": "dlp-n7-sat-s409-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.033981783999479376
+  },
+  {
+    "name": "dlp-n7-sat-s409-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03456965099758236
+  },
+  {
+    "name": "dlp-n7-sat-s409-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03389419200539123
+  },
+  {
+    "name": "dlp-n7-sat-s409-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03717350700026145
+  },
+  {
+    "name": "dlp-n7-sat-s409-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03390537900122581
+  },
+  {
+    "name": "dlp-n7-sat-s503-k7-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.037756828001874965
+  },
+  {
+    "name": "dlp-n7-sat-s503-k7-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.034697423994657584
+  },
+  {
+    "name": "dlp-n7-sat-s503-k7-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.034501679001550656
+  },
+  {
+    "name": "dlp-n7-sat-s503-k7-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03814853799849516
+  },
+  {
+    "name": "dlp-n7-sat-s503-k7-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03676225799426902
+  },
+  {
+    "name": "dlp-n7-sat-s503-k7-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.0368166799962637
+  },
+  {
+    "name": "dlp-n7-sat-s607-k11-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03904472900467226
+  },
+  {
+    "name": "dlp-n7-sat-s607-k11-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03745320899906801
+  },
+  {
+    "name": "dlp-n7-sat-s607-k11-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03525781800271943
+  },
+  {
+    "name": "dlp-n7-sat-s607-k11-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03535393399943132
+  },
+  {
+    "name": "dlp-n7-sat-s607-k11-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.036530417994072195
+  },
+  {
+    "name": "dlp-n7-sat-s607-k11-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "7",
+      "--solver",
+      "sat",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 1,
+    "wall_seconds": 0.03708536399790319
+  },
+  {
+    "name": "dlp-n9-groebner-s101-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01104994400520809
+  },
+  {
+    "name": "dlp-n9-groebner-s101-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011061250996135641
+  },
+  {
+    "name": "dlp-n9-groebner-s101-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010376887999882456
+  },
+  {
+    "name": "dlp-n9-groebner-s101-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010726064996561036
+  },
+  {
+    "name": "dlp-n9-groebner-s101-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010641377004503738
+  },
+  {
+    "name": "dlp-n9-groebner-s101-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012467300999560393
+  },
+  {
+    "name": "dlp-n9-groebner-s202-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011196793995623011
+  },
+  {
+    "name": "dlp-n9-groebner-s202-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012437796998710837
+  },
+  {
+    "name": "dlp-n9-groebner-s202-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011763128997699823
+  },
+  {
+    "name": "dlp-n9-groebner-s202-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012398076003591996
+  },
+  {
+    "name": "dlp-n9-groebner-s202-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011522745997353923
+  },
+  {
+    "name": "dlp-n9-groebner-s202-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010854738997295499
+  },
+  {
+    "name": "dlp-n9-groebner-s307-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012489663997257594
+  },
+  {
+    "name": "dlp-n9-groebner-s307-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012407991001964547
+  },
+  {
+    "name": "dlp-n9-groebner-s307-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012246927995875012
+  },
+  {
+    "name": "dlp-n9-groebner-s307-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012427640001988038
+  },
+  {
+    "name": "dlp-n9-groebner-s307-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012055920000420883
+  },
+  {
+    "name": "dlp-n9-groebner-s307-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012301991002459545
+  },
+  {
+    "name": "dlp-n9-groebner-s409-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.015457601002708543
+  },
+  {
+    "name": "dlp-n9-groebner-s409-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012568632999318652
+  },
+  {
+    "name": "dlp-n9-groebner-s409-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011294641997665167
+  },
+  {
+    "name": "dlp-n9-groebner-s409-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.014331702004710678
+  },
+  {
+    "name": "dlp-n9-groebner-s409-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01160402900131885
+  },
+  {
+    "name": "dlp-n9-groebner-s409-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012580280999827664
+  },
+  {
+    "name": "dlp-n9-groebner-s503-k7-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008917437997297384
+  },
+  {
+    "name": "dlp-n9-groebner-s503-k7-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009399353999469895
+  },
+  {
+    "name": "dlp-n9-groebner-s503-k7-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010536168003454804
+  },
+  {
+    "name": "dlp-n9-groebner-s503-k7-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011046977997466456
+  },
+  {
+    "name": "dlp-n9-groebner-s503-k7-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00901267200242728
+  },
+  {
+    "name": "dlp-n9-groebner-s503-k7-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.010453523995238356
+  },
+  {
+    "name": "dlp-n9-groebner-s607-k11-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011684078999678604
+  },
+  {
+    "name": "dlp-n9-groebner-s607-k11-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.013181187998270616
+  },
+  {
+    "name": "dlp-n9-groebner-s607-k11-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.011835908000648487
+  },
+  {
+    "name": "dlp-n9-groebner-s607-k11-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.013059965000138618
+  },
+  {
+    "name": "dlp-n9-groebner-s607-k11-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.012008919002255425
+  },
+  {
+    "name": "dlp-n9-groebner-s607-k11-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "groebner",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.01341836599749513
+  },
+  {
+    "name": "dlp-n9-sat-s101-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008405105007113889
+  },
+  {
+    "name": "dlp-n9-sat-s101-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008067185997788329
+  },
+  {
+    "name": "dlp-n9-sat-s101-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007473320001736283
+  },
+  {
+    "name": "dlp-n9-sat-s101-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008013162994757295
+  },
+  {
+    "name": "dlp-n9-sat-s101-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007674473999941256
+  },
+  {
+    "name": "dlp-n9-sat-s101-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "101",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007225225999718532
+  },
+  {
+    "name": "dlp-n9-sat-s202-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007484727000701241
+  },
+  {
+    "name": "dlp-n9-sat-s202-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007676326000364497
+  },
+  {
+    "name": "dlp-n9-sat-s202-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.0074532200014800765
+  },
+  {
+    "name": "dlp-n9-sat-s202-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008696353004779667
+  },
+  {
+    "name": "dlp-n9-sat-s202-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008012352998775896
+  },
+  {
+    "name": "dlp-n9-sat-s202-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "202",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007946523001010064
+  },
+  {
+    "name": "dlp-n9-sat-s307-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007910058004199527
+  },
+  {
+    "name": "dlp-n9-sat-s307-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007589245004055556
+  },
+  {
+    "name": "dlp-n9-sat-s307-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007204023000667803
+  },
+  {
+    "name": "dlp-n9-sat-s307-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007775364996632561
+  },
+  {
+    "name": "dlp-n9-sat-s307-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00751706599839963
+  },
+  {
+    "name": "dlp-n9-sat-s307-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "307",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007513661003031302
+  },
+  {
+    "name": "dlp-n9-sat-s409-k5-frozen-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008240938004746567
+  },
+  {
+    "name": "dlp-n9-sat-s409-k5-frozen-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.009228927003277931
+  },
+  {
+    "name": "dlp-n9-sat-s409-k5-frozen-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008672407995618414
+  },
+  {
+    "name": "dlp-n9-sat-s409-k5-frozen-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00811301499925321
+  },
+  {
+    "name": "dlp-n9-sat-s409-k5-frozen-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008274507999885827
+  },
+  {
+    "name": "dlp-n9-sat-s409-k5-frozen-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "409",
+      "--known-log",
+      "5",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008960091996414121
+  },
+  {
+    "name": "dlp-n9-sat-s503-k7-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007288451000931673
+  },
+  {
+    "name": "dlp-n9-sat-s503-k7-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007348211001954041
+  },
+  {
+    "name": "dlp-n9-sat-s503-k7-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007018545002210885
+  },
+  {
+    "name": "dlp-n9-sat-s503-k7-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007549164998636115
+  },
+  {
+    "name": "dlp-n9-sat-s503-k7-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.00691173200175399
+  },
+  {
+    "name": "dlp-n9-sat-s503-k7-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "503",
+      "--known-log",
+      "7",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007568774002720602
+  },
+  {
+    "name": "dlp-n9-sat-s607-k11-fresh-r0-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007950398998218589
+  },
+  {
+    "name": "dlp-n9-sat-s607-k11-fresh-r0-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007914034002169501
+  },
+  {
+    "name": "dlp-n9-sat-s607-k11-fresh-r1-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007181880995631218
+  },
+  {
+    "name": "dlp-n9-sat-s607-k11-fresh-r1-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007161009001720231
+  },
+  {
+    "name": "dlp-n9-sat-s607-k11-fresh-r2-reference",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/reference/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.008589633005612995
+  },
+  {
+    "name": "dlp-n9-sat-s607-k11-fresh-r2-candidate",
+    "command": [
+      "/workspace/scratch/1b5e041dd49b/la-binaries/candidate/ic",
+      "run",
+      "--degree",
+      "9",
+      "--solver",
+      "sat",
+      "--seed",
+      "607",
+      "--known-log",
+      "11",
+      "--batch",
+      "1",
+      "--max-trials",
+      "500",
+      "--json"
+    ],
+    "status": "finished",
+    "returncode": 0,
+    "wall_seconds": 0.007561653997981921
+  }
+]

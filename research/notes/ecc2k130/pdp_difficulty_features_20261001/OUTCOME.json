@@ -1,0 +1,56 @@
+{
+  "chosen_feature": "signed_y_weight",
+  "classification": "diagnostic_only_no_speed_or_n131_claim",
+  "cohorts": {
+    "n41_holdout": {
+      "feature_evaluations": 2048,
+      "median_probes_all": 1639.5,
+      "median_probes_selected": 1661.0,
+      "n": 2048,
+      "observed_spearman": -0.01623388189548811,
+      "passes_gate": false,
+      "permutation_p": 0.769615192403798,
+      "permutation_scores_sha256": "40733f78c5368a769a9cf79261cb70ea1ee5debbe33fda647f7672bc41ba124c",
+      "selected_n": 512,
+      "selected_quartile_median_probes_ratio": 1.0131137541933517,
+      "signed_spearman": -0.01623388189548811
+    },
+    "n53_holdout": {
+      "feature_evaluations": 5120,
+      "median_probes_all": 13390.0,
+      "median_probes_selected": 13735.5,
+      "n": 5120,
+      "observed_spearman": -0.005156678549466277,
+      "passes_gate": false,
+      "permutation_p": 0.6471764117941029,
+      "permutation_scores_sha256": "efc5dba20545d9978277ff35d5f50343e72eb6dc5adc5d515c087a3655688fea",
+      "selected_n": 1280,
+      "selected_quartile_median_probes_ratio": 1.0258028379387603,
+      "signed_spearman": -0.005156678549466277
+    }
+  },
+  "config_sha256": "5a9d3951976482146b268fddf46ea78ddbf12b305129a62f2df6bc23021bbc52",
+  "decision": "NEGATIVE",
+  "feature_evaluations": 16384,
+  "host": {
+    "cpu_seconds": 12.885518794,
+    "elapsed_seconds": 12.886850003007567,
+    "machine": "x86_64",
+    "python": "3.12.8",
+    "system": "Linux"
+  },
+  "median_definition": "statistics.median: average of the two central values when the count is even",
+  "permutation_algorithm": "Python random.Random(seed).shuffle, 2000 successive Fisher-Yates shuffles of the archive-order probe list; average-tie Spearman",
+  "predictor_status": "CHOSEN",
+  "schema": "ecc2k130-pdp-difficulty-outcome-v1",
+  "source_head": "38c173072e16f580237447c93b085634275ba048",
+  "status": "PASS",
+  "tie_break": "predicted ease, then ascending public (x, y)",
+  "training_correlations": {
+    "frobenius_x_min_weight": -0.002242890351345753,
+    "signed_y_weight": 0.01054714743356203,
+    "x_weight": -0.006680109605771484
+  },
+  "training_sign": 1,
+  "zero_variance_spearman": 0.0
+}

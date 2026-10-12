@@ -1,0 +1,117 @@
+{
+  "targetB": 25,
+  "class": "engineering",
+  "unit": "B complete scalar updates/s",
+  "verification": {
+    "0-0": true,
+    "0-1937": true,
+    "1-0": true,
+    "1-1937": true
+  },
+  "runs": {
+    "verify-0-0": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-0",
+        "--curve",
+        "131",
+        "--packed",
+        "--dp-weight",
+        "50",
+        "--steps",
+        "16",
+        "--launches",
+        "6",
+        "--dp-cap",
+        "262144",
+        "--threads",
+        "1024",
+        "--verify",
+        "300",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "verify-0-1937": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-0",
+        "--curve",
+        "131",
+        "--packed",
+        "--dp-weight",
+        "50",
+        "--steps",
+        "16",
+        "--launches",
+        "6",
+        "--dp-cap",
+        "262144",
+        "--threads",
+        "1024",
+        "--verify",
+        "300",
+        "--run-id",
+        "1937"
+      ],
+      "returncode": 0
+    },
+    "verify-1-0": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-1",
+        "--curve",
+        "131",
+        "--packed",
+        "--dp-weight",
+        "50",
+        "--steps",
+        "16",
+        "--launches",
+        "6",
+        "--dp-cap",
+        "262144",
+        "--threads",
+        "1024",
+        "--verify",
+        "300",
+        "--run-id",
+        "0"
+      ],
+      "returncode": 0
+    },
+    "verify-1-1937": {
+      "args": [
+        "/home/ubuntu/Documents/Codex/2026-09-18/work-on-optimizing-ecc2k-130-rho/ecc2k130/benchmarks/throughput-25b-inline/client-1",
+        "--curve",
+        "131",
+        "--packed",
+        "--dp-weight",
+        "50",
+        "--steps",
+        "16",
+        "--launches",
+        "6",
+        "--dp-cap",
+        "262144",
+        "--threads",
+        "1024",
+        "--verify",
+        "300",
+        "--run-id",
+        "1937"
+      ],
+      "returncode": 0
+    }
+  },
+  "sourceHashes": {
+    "include/packed131.h": "6286ffc02961bddf9779e35afacb7abeee944f49c655461642e4a4e97aab8589",
+    "include/packedkernels.cuh": "cb52c964ea1d5ca14e90c4efcba5ddf4496a733e22fdecb9d5b43333b45c9925",
+    "Makefile": "bd7dbd157996b9c4f5f43876dfa0b094e8604a46c6688faf7d03b46eba0a4645"
+  },
+  "gpu": "name, uuid, clocks.current.sm [MHz], power.limit [W]\nNVIDIA RTX PRO 6000 Blackwell Server Edition, GPU-c2cb23e6-a474-1d96-06a6-a5cac9511ca2, 2347 MHz, 600.00 W\n",
+  "binaryHashes": {
+    "0": "7dcdd0e9c0d02fd51e1c2e0c06da6da4ac216e04b2e8f8e6d92a1242ed0d2b03",
+    "1": "688557cf629b46a6484492f70ef9ff71c6d3a7808bbc892a1f12bee57d7ff91d",
+    "2": "59c729d443c6d91857b5b889752535ca2dee7e2c10527188dab642a0f5da03ca"
+  },
+  "contention": "verify-2-0"
+}

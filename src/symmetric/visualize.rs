@@ -25,7 +25,7 @@ pub fn demo_ecb_penguin(width: usize, height: usize) -> String {
     );
     // Build the bitmap.
     let mut pixels = vec![0u8; width * height];
-    let block_size = 4;
+    let _block_size = 4;
     for r in (height / 4)..(3 * height / 4) {
         for c in (width / 4)..(3 * width / 4) {
             pixels[r * width + c] = 0xFF;
@@ -42,7 +42,7 @@ pub fn demo_ecb_penguin(width: usize, height: usize) -> String {
     let key = AesKey::new(&[0x42u8; 16]).unwrap();
     let mut ecb = pixels.clone();
     // Pad to multiple of 16
-    while ecb.len() % 16 != 0 {
+    while !ecb.len().is_multiple_of(16) {
         ecb.push(0);
     }
     let mut ecb_ct = Vec::with_capacity(ecb.len());

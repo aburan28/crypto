@@ -338,14 +338,7 @@ fn init_256(key: &[u8; 32], nonce: &[u8; 32]) -> State256 {
     let n1: [u8; 16] = nonce[16..32].try_into().unwrap();
     let k0n0 = xor128(&k0, &n0);
     let k1n1 = xor128(&k1, &n1);
-    let mut s: State256 = [
-        k0n0,
-        k1n1,
-        C1,
-        C0,
-        xor128(&k0, &C0),
-        xor128(&k1, &C1),
-    ];
+    let mut s: State256 = [k0n0, k1n1, C1, C0, xor128(&k0, &C0), xor128(&k1, &C1)];
     for _ in 0..4 {
         update_256(&mut s, &k0);
         update_256(&mut s, &k1);
@@ -436,12 +429,7 @@ fn finalize_256(s: &mut State256, ad_len_bits: u64, msg_len_bits: u64) -> [u8; 1
 
 /// **AEGIS-256 encrypt** — 256-bit key, 256-bit nonce, 16-byte tag.
 /// Returns `ciphertext || tag`.
-pub fn aegis256_encrypt(
-    key: &[u8; 32],
-    nonce: &[u8; 32],
-    aad: &[u8],
-    plaintext: &[u8],
-) -> Vec<u8> {
+pub fn aegis256_encrypt(key: &[u8; 32], nonce: &[u8; 32], aad: &[u8], plaintext: &[u8]) -> Vec<u8> {
     let mut s = init_256(key, nonce);
     absorb_aad_256(&mut s, aad);
     let mut out = Vec::with_capacity(plaintext.len() + 16);
@@ -514,7 +502,9 @@ mod tests {
         let nonce = k16("000102030405060708090a0b0c0d0e0f");
         let ct = aegis128l_encrypt(&key, &nonce, b"", b"");
         assert_eq!(ct, h("c3f43996b947d95391c1e453e9a7b8f3"));
-        assert!(aegis128l_decrypt(&key, &nonce, b"", &ct).unwrap().is_empty());
+        assert!(aegis128l_decrypt(&key, &nonce, b"", &ct)
+            .unwrap()
+            .is_empty());
     }
 
     /// pyaegis cross-check: 16-byte AAD + 32-byte plaintext (two state blocks).
@@ -527,8 +517,10 @@ mod tests {
         let ct = aegis128l_encrypt(&key, &nonce, &aad, &pt);
         assert_eq!(
             ct,
-            h("1d5b2ecb7f8c45dbe9b67a923e70500b37566ee1d458687249617258a6bb22eb\
-               41881e8230c745b2345fac5155faa240")
+            h(
+                "1d5b2ecb7f8c45dbe9b67a923e70500b37566ee1d458687249617258a6bb22eb\
+               41881e8230c745b2345fac5155faa240"
+            )
         );
         let pt2 = aegis128l_decrypt(&key, &nonce, &aad, &ct).expect("tag verifies");
         assert_eq!(pt2, pt);
@@ -567,8 +559,10 @@ mod tests {
         let ct = aegis256_encrypt(&key, &nonce, &aad, &pt);
         assert_eq!(
             ct,
-            h("3af6da22c6231f0bd4740df43a5668166287a3eaa983aa83021530922aa33efd\
-               b16be5c34b6032881e50325c28ed34de")
+            h(
+                "3af6da22c6231f0bd4740df43a5668166287a3eaa983aa83021530922aa33efd\
+               b16be5c34b6032881e50325c28ed34de"
+            )
         );
         let pt2 = aegis256_decrypt(&key, &nonce, &aad, &ct).expect("tag verifies");
         assert_eq!(pt2, pt);
@@ -583,8 +577,10 @@ mod tests {
         let ct = aegis256_encrypt(&key, &nonce, b"associated", pt);
         assert_eq!(
             ct,
-            h("6282a45dbd1a295d892a5ebc0b79433f3407d6a738aed16bf5f95afa6c824033\
-               f74b0d77adc2c7848dc1d35a9fe6dba0888445b2bea6eaf3")
+            h(
+                "6282a45dbd1a295d892a5ebc0b79433f3407d6a738aed16bf5f95afa6c824033\
+               f74b0d77adc2c7848dc1d35a9fe6dba0888445b2bea6eaf3"
+            )
         );
         let recovered = aegis256_decrypt(&key, &nonce, b"associated", &ct).unwrap();
         assert_eq!(recovered, pt);
@@ -598,7 +594,9 @@ mod tests {
         let nonce = [0x07u8; 16];
         for len in [0usize, 1, 15, 16, 17, 31, 32, 33, 63, 64, 65, 200] {
             let pt: Vec<u8> = (0..len).map(|i| (i as u8).wrapping_mul(31)).collect();
-            let aad: Vec<u8> = (0..(len % 23)).map(|i| (i as u8).wrapping_mul(17)).collect();
+            let aad: Vec<u8> = (0..(len % 23))
+                .map(|i| (i as u8).wrapping_mul(17))
+                .collect();
             let ct = aegis128l_encrypt(&key, &nonce, &aad, &pt);
             assert_eq!(ct.len(), pt.len() + 16);
             let dec = aegis128l_decrypt(&key, &nonce, &aad, &ct).expect("roundtrip");
@@ -612,7 +610,9 @@ mod tests {
         let nonce = [0x07u8; 32];
         for len in [0usize, 1, 15, 16, 17, 31, 32, 33, 63, 64, 65, 200] {
             let pt: Vec<u8> = (0..len).map(|i| (i as u8).wrapping_mul(31)).collect();
-            let aad: Vec<u8> = (0..(len % 23)).map(|i| (i as u8).wrapping_mul(17)).collect();
+            let aad: Vec<u8> = (0..(len % 23))
+                .map(|i| (i as u8).wrapping_mul(17))
+                .collect();
             let ct = aegis256_encrypt(&key, &nonce, &aad, &pt);
             assert_eq!(ct.len(), pt.len() + 16);
             let dec = aegis256_decrypt(&key, &nonce, &aad, &ct).expect("roundtrip");

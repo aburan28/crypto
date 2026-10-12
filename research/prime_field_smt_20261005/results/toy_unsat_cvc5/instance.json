@@ -1,0 +1,17 @@
+{
+  "schema": "prime-field-smt.instance/v1",
+  "curve": {
+    "p": "17",
+    "a": "2",
+    "b": "2"
+  },
+  "target": {
+    "x": "3",
+    "y": "1"
+  },
+  "x_bound": "1",
+  "source": {
+    "kind": "complete-unsat-control",
+    "factor_points": ["(0,6)", "(0,11)"]
+  }
+}

@@ -1,0 +1,402 @@
+{
+  "what": "What 'a probe' costs on a folded pair table, in the three shapes the code probes in: one target at a time, in a block of BLOCK = 1024, and inside the descent's own m = 3 scan.",
+  "why": "RESEARCH_KOBLITZ_INDEX_CALCULUS.md reported the fold multiplying a probe by 3.1x, measured with contains_pair one target at a time. The m = 3 scan does not probe that way - it computes keys a block of 1024 at a time and then probes them - so the reported factor is not the one the pipeline pays.",
+  "harness": "examples/koblitz_orbit_fold_width.rs 61 4 16000, run three times",
+  "setup": {
+    "degree": 61,
+    "equal_memory": "0.64 GiB each",
+    "compact_base": 16592,
+    "folded_base": 183488,
+    "compact_pairs": 137655528,
+    "folded_pairs": 138074720,
+    "host": "4 cores, 15 GiB; the same host for all three runs, and different from the one the 374 -> 285 bucket-hash figures come from",
+    "block": "1024, which is BLOCK in witnesses_fast_inner - the sweep measures that size rather than reporting the best size it happened to try"
+  },
+  "ns_a_probe": {
+    "one_at_a_time": {
+      "compact": {
+        "median": 94.5,
+        "runs": [
+          83.9,
+          94.5,
+          103.4
+        ]
+      },
+      "folded": {
+        "median": 264.9,
+        "runs": [
+          257.7,
+          264.9,
+          273.2
+        ]
+      },
+      "fold_costs": 2.8,
+      "note": "the noisiest row: the compact figure moved 84-103 across runs, so the 2.8 is worth less than the per-table gains below"
+    },
+    "blocked_1024_prefetched": {
+      "compact": {
+        "median": 70.8,
+        "runs": [
+          59.9,
+          70.8,
+          76.8
+        ]
+      },
+      "folded": {
+        "median": 144.9,
+        "runs": [
+          142.5,
+          144.9,
+          148.4
+        ]
+      },
+      "fold_costs": 2.0
+    },
+    "descent_loop_per_base_point": {
+      "compact": {
+        "median": 148.4,
+        "runs": [
+          147.7,
+          148.4,
+          149.5
+        ]
+      },
+      "folded": {
+        "median": 222.5,
+        "runs": [
+          222.1,
+          222.5,
+          231.9
+        ]
+      },
+      "fold_costs": 1.51,
+      "fold_costs_range": [
+        1.5,
+        1.55
+      ],
+      "note": "witnesses_fast with m = 3 and a sink that never stops, so the whole base is walked. It sits 77.6 ns a base point above the blocked row on BOTH tables (to within a tenth) - that is add_many's batched inversion plus the recovery an admitted key pays, and it is a different quantity from the 74 ns that separates this row's two columns. The steadiest row, because it averages over the whole base rather than 200000 sampled probes."
+    }
+  },
+  "what_blocking_buys_each_table": {
+    "folded": {
+      "median": 1.83,
+      "runs": [
+        1.81,
+        1.83,
+        1.84
+      ]
+    },
+    "compact": {
+      "median": 1.35,
+      "runs": [
+        1.33,
+        1.35,
+        1.4
+      ]
+    },
+    "why_this_and_not_the_cross_table_ratio": "The per-table gain is measured within one run on one table and is what the control argument needs; the cross-table ratio at each shape carries the noise of both columns."
+  },
+  "the_conclusion": "The fold's cost in the descent is 74 ns a base point, and the canonicalisation measured alone is 76. There is no unexplained remainder: the ~144 ns a lone probe pays over the canon is the memory round trip the block overlaps and the fused loop does not.",
+  "why_blocking_pays": {
+    "what_is_established": "The key is ~76 ns of dependent work before the address it will load is known, and that length is what stops consecutive probes' round trips overlapping when fused. The control is the compact table, whose key is a pack: it gains 1.35x where the folded table gains 1.83x.",
+    "chunk_1_control": "1.00x on the folded table, so the figure is the blocking and not the buffer the chunked loop uses.",
+    "not_lane_interleaving": "A separate thing, measured elsewhere and worth nothing here: interleaving fills one dependency chain's latency with another chain's work, and a rotation has no chain to fill. Blocking lets the memory accesses overlap.",
+    "prefetch": "The descent also prefetches 32 keys ahead. Measured on top of the blocking it is worth a few per cent, not the effect."
+  },
+  "chunk_sweep_per_run": [
+    [
+      {
+        "sweep": [
+          {
+            "chunk": 1,
+            "chunked_ns": 136.8982125,
+            "chunked_prefetch_ns": 143.48240750000002,
+            "fused_ns": 100.9164
+          },
+          {
+            "chunk": 4,
+            "chunked_ns": 119.312035,
+            "chunked_prefetch_ns": 117.96866750000001,
+            "fused_ns": 102.23032
+          },
+          {
+            "chunk": 16,
+            "chunked_ns": 93.9378825,
+            "chunked_prefetch_ns": 85.7982825,
+            "fused_ns": 103.031615
+          },
+          {
+            "chunk": 64,
+            "chunked_ns": 89.42005,
+            "chunked_prefetch_ns": 80.421345,
+            "fused_ns": 103.89528000000001
+          },
+          {
+            "chunk": 256,
+            "chunked_ns": 85.92517749999999,
+            "chunked_prefetch_ns": 76.43182,
+            "fused_ns": 105.3496625
+          },
+          {
+            "chunk": 1024,
+            "chunked_ns": 85.367425,
+            "chunked_prefetch_ns": 76.8488325,
+            "fused_ns": 103.38265
+          },
+          {
+            "chunk": 4096,
+            "chunked_ns": 86.90439,
+            "chunked_prefetch_ns": 83.9638175,
+            "fused_ns": 111.12052249999999
+          }
+        ],
+        "table": "compact"
+      },
+      {
+        "sweep": [
+          {
+            "chunk": 1,
+            "chunked_ns": 288.565675,
+            "chunked_prefetch_ns": 290.2399075,
+            "fused_ns": 284.68478
+          },
+          {
+            "chunk": 4,
+            "chunked_ns": 194.00565,
+            "chunked_prefetch_ns": 189.0178325,
+            "fused_ns": 279.781115
+          },
+          {
+            "chunk": 16,
+            "chunked_ns": 166.46316,
+            "chunked_prefetch_ns": 162.01160749999997,
+            "fused_ns": 280.61482750000005
+          },
+          {
+            "chunk": 64,
+            "chunked_ns": 157.3924675,
+            "chunked_prefetch_ns": 156.77567250000004,
+            "fused_ns": 275.5951575
+          },
+          {
+            "chunk": 256,
+            "chunked_ns": 156.3950175,
+            "chunked_prefetch_ns": 154.070305,
+            "fused_ns": 278.45227750000004
+          },
+          {
+            "chunk": 1024,
+            "chunked_ns": 151.8254225,
+            "chunked_prefetch_ns": 148.424195,
+            "fused_ns": 273.2115675
+          },
+          {
+            "chunk": 4096,
+            "chunked_ns": 154.00446,
+            "chunked_prefetch_ns": 162.4666075,
+            "fused_ns": 274.6370025
+          }
+        ],
+        "table": "folded"
+      }
+    ],
+    [
+      {
+        "sweep": [
+          {
+            "chunk": 1,
+            "chunked_ns": 114.2195825,
+            "chunked_prefetch_ns": 118.6459475,
+            "fused_ns": 93.4308625
+          },
+          {
+            "chunk": 4,
+            "chunked_ns": 108.951235,
+            "chunked_prefetch_ns": 107.94116500000001,
+            "fused_ns": 90.9734025
+          },
+          {
+            "chunk": 16,
+            "chunked_ns": 83.0296275,
+            "chunked_prefetch_ns": 76.3494975,
+            "fused_ns": 89.8642775
+          },
+          {
+            "chunk": 64,
+            "chunked_ns": 74.6542375,
+            "chunked_prefetch_ns": 67.1305075,
+            "fused_ns": 86.3354775
+          },
+          {
+            "chunk": 256,
+            "chunked_ns": 70.2753675,
+            "chunked_prefetch_ns": 62.71595,
+            "fused_ns": 90.25618750000001
+          },
+          {
+            "chunk": 1024,
+            "chunked_ns": 68.98080999999999,
+            "chunked_prefetch_ns": 59.8745875,
+            "fused_ns": 83.86973
+          },
+          {
+            "chunk": 4096,
+            "chunked_ns": 74.78256999999999,
+            "chunked_prefetch_ns": 64.12445,
+            "fused_ns": 86.3318275
+          }
+        ],
+        "table": "compact"
+      },
+      {
+        "sweep": [
+          {
+            "chunk": 1,
+            "chunked_ns": 261.4838075,
+            "chunked_prefetch_ns": 256.829705,
+            "fused_ns": 260.413685
+          },
+          {
+            "chunk": 4,
+            "chunked_ns": 178.79778,
+            "chunked_prefetch_ns": 173.9444325,
+            "fused_ns": 261.992525
+          },
+          {
+            "chunk": 16,
+            "chunked_ns": 153.3149775,
+            "chunked_prefetch_ns": 150.63016,
+            "fused_ns": 261.5680175
+          },
+          {
+            "chunk": 64,
+            "chunked_ns": 148.7775325,
+            "chunked_prefetch_ns": 145.28938499999998,
+            "fused_ns": 262.86797
+          },
+          {
+            "chunk": 256,
+            "chunked_ns": 148.3144925,
+            "chunked_prefetch_ns": 152.2400075,
+            "fused_ns": 264.53288499999996
+          },
+          {
+            "chunk": 1024,
+            "chunked_ns": 147.6449925,
+            "chunked_prefetch_ns": 144.8505375,
+            "fused_ns": 264.8573625
+          },
+          {
+            "chunk": 4096,
+            "chunked_ns": 147.5878425,
+            "chunked_prefetch_ns": 142.84582,
+            "fused_ns": 263.5992425
+          }
+        ],
+        "table": "folded"
+      }
+    ],
+    [
+      {
+        "sweep": [
+          {
+            "chunk": 1,
+            "chunked_ns": 129.440905,
+            "chunked_prefetch_ns": 132.4808625,
+            "fused_ns": 98.08981499999999
+          },
+          {
+            "chunk": 4,
+            "chunked_ns": 112.8960375,
+            "chunked_prefetch_ns": 113.0848675,
+            "fused_ns": 96.9444025
+          },
+          {
+            "chunk": 16,
+            "chunked_ns": 88.04400000000001,
+            "chunked_prefetch_ns": 81.64753,
+            "fused_ns": 94.3949225
+          },
+          {
+            "chunk": 64,
+            "chunked_ns": 81.727645,
+            "chunked_prefetch_ns": 75.05912749999999,
+            "fused_ns": 93.90624
+          },
+          {
+            "chunk": 256,
+            "chunked_ns": 80.551545,
+            "chunked_prefetch_ns": 73.7108,
+            "fused_ns": 95.73886250000001
+          },
+          {
+            "chunk": 1024,
+            "chunked_ns": 77.873275,
+            "chunked_prefetch_ns": 70.805295,
+            "fused_ns": 94.4509725
+          },
+          {
+            "chunk": 4096,
+            "chunked_ns": 80.566935,
+            "chunked_prefetch_ns": 73.477375,
+            "fused_ns": 97.04073
+          }
+        ],
+        "table": "compact"
+      },
+      {
+        "sweep": [
+          {
+            "chunk": 1,
+            "chunked_ns": 263.701375,
+            "chunked_prefetch_ns": 266.55357000000004,
+            "fused_ns": 260.77549999999997
+          },
+          {
+            "chunk": 4,
+            "chunked_ns": 186.05746499999998,
+            "chunked_prefetch_ns": 175.064215,
+            "fused_ns": 262.0896125
+          },
+          {
+            "chunk": 16,
+            "chunked_ns": 156.488325,
+            "chunked_prefetch_ns": 151.68041,
+            "fused_ns": 265.92717500000003
+          },
+          {
+            "chunk": 64,
+            "chunked_ns": 146.2141825,
+            "chunked_prefetch_ns": 142.38425999999998,
+            "fused_ns": 258.98667750000004
+          },
+          {
+            "chunk": 256,
+            "chunked_ns": 141.4330025,
+            "chunked_prefetch_ns": 138.5685,
+            "fused_ns": 257.3035725
+          },
+          {
+            "chunk": 1024,
+            "chunked_ns": 146.76545750000002,
+            "chunked_prefetch_ns": 142.52324499999997,
+            "fused_ns": 257.6841725
+          },
+          {
+            "chunk": 4096,
+            "chunked_ns": 149.3682725,
+            "chunked_prefetch_ns": 146.69365,
+            "fused_ns": 272.43317
+          }
+        ],
+        "table": "folded"
+      }
+    ]
+  ],
+  "still_one_at_a_time": "The m = 4 arm of witnesses_fast_inner walks every second half R - (P_k + P_l) and calls pairs_for on each, so it pays the 265 rather than the 145. Quadratic in the base and the least used; not changed here.",
+  "not_claimed": [
+    "Which microarchitectural resource the long key exhausts. Reorder-buffer capacity fits; so would the data-dependent branch in the rotation's x < best; and a 128 MiB filter walked at random misses the TLB on most probes. Nothing measured here separates them. The compact control speaks to the key's LENGTH being the cause, not to the mechanism by which length costs.",
+    "That the mechanism is L1 eviction between the canon's 16 KiB tables and the table's random lines. Three random lines a probe out of a 768-line L1 does not account for the gap, and the shape of the chunk sweep - most of the gain already at c = 16 - does not fit a re-warming story.",
+    "That these absolute numbers combine with any other run's. Same host across these three, different from the bucket-hash run."
+  ]
+}

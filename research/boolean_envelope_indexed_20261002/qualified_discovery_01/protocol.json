@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "classification": "bounded generic Boolean matrix-construction diagnostic",
+  "scope": "At most 12 Boolean variables; no curves, keys, imported targets, relation collection, scalar recovery, or production solver.",
+  "source_lineage": {
+    "worker_sha256": "93866fab0eb27ecf2917c3d2ffde9807bd11afd45e6badb7a2d9d420aab7eedb",
+    "protocol_sha256": "2827b95642088d6d3b9a14e3576643474967aa0268f2a8fd2f082754c7b435a8",
+    "completed_manifest_sha256": "b5abc49b0537fc00578a3beafce1a4ae5e445c694d4e1e45bcff2029819448ab"
+  },
+  "variables": [6, 8, 10, 12],
+  "matrix_degree": 3,
+  "families": ["repeat", "coefficients", "degree_cycle", "escape"],
+  "batches": [1, 4, 16, 64],
+  "repetitions": 10,
+  "development_seeds": [17, 937, 20260924, 87139],
+  "discovery_seeds": [20261002, 3407879],
+  "holdout_seeds": [20261009, 3932159],
+  "reference_arms": ["direct", "layout", "schedule", "matrix_cache", "envelope"],
+  "candidate_arms": ["envelope_degree", "envelope_indexed"],
+  "limits": {
+    "variables": 12,
+    "generators": 12,
+    "terms_per_generator": 32,
+    "rows": 512,
+    "columns": 512,
+    "plan_rows": 8192,
+    "plan_groups": 131072,
+    "plan_retained_bytes": 2097152,
+    "batch": 64,
+    "worker_seconds": 900,
+    "campaign_seconds": 1200
+  },
+  "resource": {
+    "platform": "Linux ARM64",
+    "scope": "whole campaign worker, with separate cold-solve and A/A timers per cell",
+    "reserved_cores": 1,
+    "settle_seconds": 2,
+    "maximum_other_cpu_fraction": 0.1,
+    "maximum_psi_some_avg10": 5.0,
+    "startup_quiet": {
+      "max_samples": 30,
+      "sample_seconds": 2,
+      "max_psi": 5.0
+    },
+    "partial_samples_admitted": false
+  },
+  "noise": {
+    "aa_arm": "matrix_cache",
+    "aa_calls_per_repetition": 2,
+    "floor_quantile": 0.975
+  },
+  "bootstrap": {
+    "resamples": 4000,
+    "seed": 20261002,
+    "statistic": "paired median of pointwise fastest old-control total_ns / candidate total_ns",
+    "confidence": 0.95
+  },
+  "dramatic_gate": {
+    "splits": ["holdout"],
+    "variables": [6, 8, 10, 12],
+    "batches": [16, 64],
+    "families": ["coefficients", "degree_cycle"],
+    "seeds": [20261009, 3932159],
+    "groups": 32,
+    "lower_bound_greater_than": 2.0,
+    "also_above_aa_floor": true,
+    "all_groups_required": true,
+    "positive_result_requires_unused_seed_confirmation": true
+  },
+  "correctness": "Exact ordered compact matrix or matching cap error against an independent set-parity oracle on every arm and input; 8192 exhaustive small cases plus focused cancellation, degree-drop, zero, constant and support-escape tests.",
+  "accounting": "Every cold batch charges compilation, all applications and fallbacks, exact validation, output allocation and destruction. Common fixture and oracle generation are outside arm clocks and inside the campaign resource receipt. No time subtraction or per-target division.",
+  "full_ic_cost": null,
+  "calibrated_operation_ratio": null,
+  "rho_ratio": null
+}

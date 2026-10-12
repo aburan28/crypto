@@ -1,0 +1,31 @@
+cell       draws rr-sat x4-sat  rr degrees       x4 degrees       ctrl degrees      med rr  med x4  med ctrl
+K0n13l2        4      0      0  4 5 4 4          6 6 6 6          5 5 >=8 >=8       4       6       5
+K0n13l3        4      0      0  6 5 6 6          8 8 8 8          6 6 >=8 >=8       6       8       6
+K0n13l4        4      0      0  7 7 7 7          9 9 9 9          >=8 >=8 7 7       7       9       7
+K0n13l5        7      3      3  >=8 >=8 >=8 >=8  >=10 >=10 >=10 >=10 >=8 >=7           >=8     >=10    None
+K1n17l2        4      0      0  4 4 4 4          6 6 6 6          5 5 >=8 5         4       6       5
+K1n17l3        4      0      0  5 5 5 5          8 8 8 8          >=8 6 >=8 6       5       8       6
+K1n17l4        4      0      0  6 6 6 6          9 9 9 9          >=8 7 >=8 >=8     6       9       >=8
+K1n17l5        4      0      0  >=8 4 >=8 >=8    >=10 >=10 >=10 >=10 >=7               >=8     >=10    None
+K1n17l6        5      1      1  >=7 >=7 >=7      >=10 >=10 >=10 >=9 >=7 >=7 >=7       >=7     >=9     >=7
+K1n19l2        4      0      0  4 4 4 4          6 6 6 6          >=8 >=8 >=8 5     4       6       >=8
+K1n19l3        4      0      0  5 5 5 5          8 8 8 8          >=8 >=8 >=8 6     5       8       >=8
+K1n19l4        4      0      0  6 6 6 6          9 9 9 9          7 7 >=8 >=8       6       9       7
+K1n19l5        4      0      0  4 7 7 7          >=10 >=10 >=10 >=10 7 >=7             7       >=10    None
+K1n19l6        3      0      0  >=7 >=7          >=10 >=10 >=9    >=7 >=7           None    >=9     None
+
+rr   K_0/2^13: s_n = 1.500 over l = [2, 3, 4]
+rr   K_1/2^17: s_n = 1.000 over l = [2, 3, 4]
+rr   K_1/2^19: s_n = 1.000 over l = [2, 3, 4, 5]
+x4   K_0/2^13: s_n = 1.500 over l = [2, 3, 4]
+x4   K_1/2^17: s_n = 1.500 over l = [2, 3, 4]
+x4   K_1/2^19: s_n = 1.500 over l = [2, 3, 4]
+ctrl K_0/2^13: s_n = 1.000 over l = [2, 3, 4]
+ctrl K_1/2^17: not fitted (fewer than 3 retained l)
+ctrl K_1/2^19: not fitted (fewer than 3 retained l)
+
+paired rr - x4 over 36 draws resolved on both: mean -2.44, min -3, max -1; rr below x4 on 36, equal 0, above 0
+
+rr: s_bar = 1.167; lower-bound cells: {(0, 13): [5], (1, 17): [5, 6]}
+REGISTERED VERDICT: CONSTANT LEVER (the norm form does not flatten the degree in l)
+x4: s_bar = 1.500; lower-bound cells: {(0, 13): [5], (1, 17): [5], (1, 19): [5]}

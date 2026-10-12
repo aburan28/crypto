@@ -1,0 +1,29 @@
+{
+  "child_system_ms": 202.626,
+  "child_user_ms": 104557.833,
+  "command": [
+    "target/release/examples/symmetrised_oracle_bench",
+    "--only",
+    "0",
+    "31",
+    "2",
+    "--targets",
+    "2",
+    "--no-sat",
+    "--node-budget",
+    "50000"
+  ],
+  "ended_unix_ns": 1790046671366779000,
+  "executable": "/Volumes/SSD990/crypto-groebner-m4ri-pr-20260921/target/release/examples/symmetrised_oracle_bench",
+  "executable_sha256": "faa551ea8fb04d67aefff624a188e8192d17ef3929b781130a11e9c524881cf6",
+  "exit_code": 0,
+  "peak_rss_bytes": 480067584,
+  "schema_version": "1.0",
+  "started_unix_ns": 1790046566375273000,
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 608,
+  "stdout_sha256": "21da9d3a33876b0166014d376f43ab2c4cda80f42d37c94d31c52deaf971ddf6",
+  "task_id": "TASK-KIC-GROEBNER-FLAT-MATRIX-PAIRED-FLAT-N31-T2-20260921",
+  "wall_ms": 105112.490333
+}

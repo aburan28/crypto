@@ -1,0 +1,89 @@
+{
+  "accepted": [
+    {
+      "corpus": "reference",
+      "native_comparison": "iteration-1",
+      "native_revision": "reference",
+      "matched_processes": 200,
+      "matched_fields": 5280,
+      "matched_oracle_inputs": 9963,
+      "native_sha256": "827295ec3bae1d6348739a4590f1c6ec43a1c0a50e23f399bb5c8ce262864976",
+      "profiles_sha256": "7ee530254bfdb8e3cfd86130efc689758990ac64ecef6d914d60eba6a7573914"
+    },
+    {
+      "corpus": "confirmation-reference",
+      "native_comparison": "confirmation",
+      "native_revision": "reference",
+      "matched_processes": 200,
+      "matched_fields": 5280,
+      "matched_oracle_inputs": 9884,
+      "native_sha256": "3598707c2cfa95089321abae90557aa0a4c28b4f47745d3e2731e4176040c492",
+      "profiles_sha256": "13c7cc8b25bd6310d1a5186e63f90266ff2e7108fe0aec42b21fb60f25302203"
+    },
+    {
+      "corpus": "confirmation-candidate",
+      "native_comparison": "confirmation",
+      "native_revision": "candidate",
+      "matched_processes": 200,
+      "matched_fields": 5280,
+      "matched_oracle_inputs": 9884,
+      "native_sha256": "3598707c2cfa95089321abae90557aa0a4c28b4f47745d3e2731e4176040c492",
+      "profiles_sha256": "677343c27cbc5c4321ecf8420bcaedf90f44ed579cc7ce7e3270cf3fe6bb16f4"
+    },
+    {
+      "corpus": "iteration-1",
+      "native_comparison": "iteration-1",
+      "native_revision": "candidate",
+      "matched_processes": 200,
+      "matched_fields": 5280,
+      "matched_oracle_inputs": 9963,
+      "native_sha256": "827295ec3bae1d6348739a4590f1c6ec43a1c0a50e23f399bb5c8ce262864976",
+      "profiles_sha256": "355fd675337826041e4c09aad4107926bd15c47cc00e274d492449382054d2fb"
+    },
+    {
+      "corpus": "iteration-2",
+      "native_comparison": "iteration-2",
+      "native_revision": "candidate",
+      "matched_processes": 200,
+      "matched_fields": 5280,
+      "matched_oracle_inputs": 9963,
+      "native_sha256": "286a70116ffd0b4dc06f995e3397a04e9469e4bb163f50bfe2071baa7c30f4e4",
+      "profiles_sha256": "ec4ee192ec1b4ae1308dc89b6d13d9dfbe137eeaea7b27198ffb34e815eff9d2"
+    },
+    {
+      "corpus": "iteration-3",
+      "native_comparison": "iteration-3",
+      "native_revision": "candidate",
+      "matched_processes": 200,
+      "matched_fields": 5280,
+      "matched_oracle_inputs": 9963,
+      "native_sha256": "6b712ea13988e17855da0b9711207f3cfc1c0139b1e2ff07e5379d2e7d27e431",
+      "profiles_sha256": "e7412ec09eb734e7d06aa50813d139a69b717eadac12334c60eebeaa9b0fa74f"
+    },
+    {
+      "corpus": "iteration-4",
+      "native_comparison": "iteration-4",
+      "native_revision": "candidate",
+      "matched_processes": 200,
+      "matched_fields": 5280,
+      "matched_oracle_inputs": 9963,
+      "native_sha256": "328c4576aabedc7ba2fa8857961161c9e34bfd74b0dfbb9028cf45c0013c60fa",
+      "profiles_sha256": "4e5acce76865eddb64fce09625e8d47debbc9fa1e1dc7eb5b9ec30768c2a55e8"
+    },
+    {
+      "corpus": "iteration-5",
+      "native_comparison": "iteration-5",
+      "native_revision": "candidate",
+      "matched_processes": 200,
+      "matched_fields": 5280,
+      "matched_oracle_inputs": 9963,
+      "native_sha256": "f74a2f205d4b38d9e055b0447fdc18c7d1aa385cf5779644a84eb820159fe85b",
+      "profiles_sha256": "18d22196dccd974d359a0f59e0f4c5aea98e0f5b132e273d9c11635a487a2397"
+    }
+  ],
+  "rejected_excluded": [
+    "rejected-shared-target-reference",
+    "rejected-truncated-iteration-5-archive",
+    "rejected-truncated-reference-archive"
+  ]
+}

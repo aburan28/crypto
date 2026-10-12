@@ -1,0 +1,18 @@
+{
+ "schema_version": 2,
+ "name": "C047: secp256k1 by name, a target point, rho alone",
+ "named": "secp256k1",
+ "target": {
+  "point": {
+   "x": "0x3cd037f32414d983a406eb565c58aa8fc1d700eb2c9f35641665ec9ed6712d7c",
+   "y": "0xcf03ed75afb0ec9173436af4d1c1b62cb87c0a32ec64ce7e65302ecc188dd733"
+  }
+ },
+ "method": {
+  "solve": "rho",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 7
+  }
+ }
+}

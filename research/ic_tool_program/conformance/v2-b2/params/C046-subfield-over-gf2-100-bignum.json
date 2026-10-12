@@ -1,0 +1,32 @@
+{
+ "schema_version": 2,
+ "name": "C046: a curve over GF(2^4) taken over GF(2^100), rho alone",
+ "field": {
+  "kind": "binary",
+  "degree": 100,
+  "modulus": "0x10000000000000000000000065"
+ },
+ "curve": {
+  "form": "binary_weierstrass",
+  "a": "0xcb0ac22188fa7a2fa2e632cac",
+  "b": "0x67efe9fc7facfa8e69749888c"
+ },
+ "subgroup": {
+  "order": "1020401",
+  "cofactor": "1242306309213955513964178",
+  "generator": {
+   "x": "0x2cca5f09d93f24a15592b2459",
+   "y": "0x76d6cfbf8d6ebf5d859e56c5c"
+  }
+ },
+ "target": {
+  "known_log": "699950"
+ },
+ "method": {
+  "solve": "rho",
+  "rho": {
+   "pipeline": "auto",
+   "seed": 7
+  }
+ }
+}

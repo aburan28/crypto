@@ -1,0 +1,14 @@
+name n15l5-2-S
+curve y^2 + x*y = x^3 + 1*x^2 + 1 over GF(2^15)
+modulus z^15 + z^1 + 1
+factor_base subspace <1, z, ..., z^4> (dimension 5)
+x_R 0x5f61
+satisfiable true
+label_certified_by planted sum of three factor-base points, S4 checked
+witness X1 0x13 X2 0x10 X3 0x12
+witness_true_sat_variables 1 2 5 10 12 15
+variables x_(i,j) = bit j of X_(i+1) -> DIMACS 1 + i*l + j ; e-variables from 16 ; CNF auxiliaries after 42
+dimacs_xor variables 502 clauses 1505 xor_rows 42
+dimacs_cnf variables 1542 clauses 12667
+anf equations 42 monomials 2192
+generator crypto_lib::cryptanalysis::ic_corpus seed 1

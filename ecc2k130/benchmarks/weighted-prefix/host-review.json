@@ -1,0 +1,193 @@
+{
+  "algebra": {
+    "additionalAllocatedFieldArrays": 0,
+    "allPrefixSlotsWritten": true,
+    "checkpointLimit": "Serialization was not rerun: main.cu and transfer/layout methods are unchanged, and existing checkpoint payload excludes prefix and denominator scratch.",
+    "checkpointMainExact": true,
+    "coordinateUpdateUnchanged": true,
+    "definitions": "P_i = product_{k<i}(D_k); W_i=E_i*P_i. Forward slot0 copies D0 and E0. Later slots pair(P_i,E_i,D_i), saving W_i and advancing P. Reverse inverse starts at inverse(total product); pair(inv,W_i,D_i) gives lambda_i and next inverse. Slot0 computes lambda0=inv*W0.",
+    "denominatorTags": "Forward products use canonical D; jump bits are added only for the existing cache store and masked away before reverse arithmetic.",
+    "initializerExact": true,
+    "reportGuardOrderUnchanged": true,
+    "zeroConvention": "Any D=0 makes the batch product and its defined inverse zero, so all slopes are zero, including live/dead mixtures. This deliberately preserves the existing batch-poisoning behavior."
+  },
+  "flags": {
+    "default": 0,
+    "hostFlags": {
+      "ECC_MINBLOCKS": 2,
+      "ECC_PACKED_BY_VALUE": 1,
+      "ECC_PACKED_CACHE_DENOM": 1,
+      "ECC_PACKED_CLMAD": 1,
+      "ECC_PACKED_DIRECT_REDUCE": 1,
+      "ECC_PACKED_GENERATED_PRODUCT": 1,
+      "ECC_PACKED_PAIR_PRODUCTS": 1,
+      "ECC_PACKED_PERM_SIGMA": 3,
+      "ECC_PACKED_POLY_CHAIN": 1,
+      "ECC_PACKED_POLY_STATE": 1,
+      "ECC_PACKED_SINGLE_PRODUCT": 1,
+      "ECC_PACKED_STATE_TILE": 256,
+      "ECC_PACKED_UNROLL_INV": 1,
+      "ECC_THREADS": 256
+    },
+    "macro": "ECC_PACKED_WEIGHTED_PREFIX",
+    "mode2AlsoRequires": "PERM_SIGMA bit 0",
+    "privateMakeVariable": "PACKED_WEIGHTED_PREFIX",
+    "range": [
+      0,
+      1,
+      2
+    ],
+    "requiresNonzero": [
+      "POLY_STATE",
+      "POLY_CHAIN",
+      "CACHE_DENOM",
+      "PAIR_PRODUCTS"
+    ],
+    "runtimeMarker": "packed weighted prefix: <mode>"
+  },
+  "hostKernelValidation": {
+    "actualKernelRuns": 45,
+    "additionalB16Workers": [
+      8,
+      255,
+      256
+    ],
+    "batches": [
+      1,
+      4,
+      16,
+      32
+    ],
+    "canaries": "Front/back guards on all arrays and report buffers, plus every padded field word in X/Y/D/prefix remain unchanged.",
+    "crossModeComparisons": 15,
+    "cudaShim": "blockDim=256; blockIdx=id/256; threadIdx=id%256; full padded grid plus one extra block; sequential atomicAdd. Physical tiled arrays use ceil(N/256)*256; logical seed/dead/start IDs remain slot*N+tid.",
+    "driverSha256": "363226d53b03505a440804c16dcc59f83d6970e005bfd33a3fffe5263ae84cec",
+    "fixturePath": "/private/tmp/ecc2k-weighted-prefix-host-20260912/kernel_check.cpp",
+    "fixtureSha256": "c6c3176b96c29040ec190bb9a76e67a87cae18980996b4a258a75a527a90c2c5",
+    "hostCompiler": "Apple clang version 17.0.0 (clang-1700.0.13.5)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+    "hostCompiles": 12,
+    "hostSanitizer": "undefined; fno-sanitize-recover=all",
+    "independentReference": "Small full rows use ScalarOnb cyclic-convolution normal-basis multiplication and independent Frobenius/index routing, per-slot affine update with original batch-zero convention. It shares the already-bound boundary basis conversions, not packed multiplication/reduction.",
+    "nativeInstructionLimit": "CLMAD=1 is selected, but ordinary host compilation executes its software fallback. CUDA calling convention, CLMAD hardware, GPU concurrency and device memory behavior are not exercised.",
+    "persistentCompared": "All normalized X/Y coordinates, seed/start/dead arrays, report and guard counters, stored reports are byte-identical across modes at every recorded stage. Scratch prefix contents differ intentionally.",
+    "positiveReportTrails": 546,
+    "receiptPath": "/private/tmp/ecc2k-weighted-prefix-host-20260912/host-results.json",
+    "receiptSha256": "0f383c15b29cad017383af22c265767e5b92acc347ddf853bf013418c025e254",
+    "referenceScalarSteps": 14385,
+    "reportReplayLimit": "Seed/replay control flow is separate scalar code but uses existing packed field operations. Independent cyclic-convolution reference separately checks the resulting initialized walk transitions.",
+    "reportReplays": 948,
+    "weightedPrefixChecks": "Exact independent normal-basis weighted product for all B prefix slots on one-step launches; canonical writes on other nonempty launches; slot0 copy and final slot covered at B1/B4/B16/B32.",
+    "workersAllBatches": [
+      1,
+      3,
+      257
+    ],
+    "zeroBatchSteps": 195,
+    "zeroCoverage": "Each slot is independently made zero-D at every batch size, with noncanonical dead value 2 retained. All-zero X/Y with zero DP capacity is also checked. Dead slots still contribute to poisoning.",
+    "zeroStepAndOverflowGuardReseed": true
+  },
+  "independentReview": {
+    "findings": [],
+    "path": "/private/tmp/ecc2k-weighted-kernel-independent-review/review.json",
+    "scope": "Read-only algebra, tags, dead/DP/guard order, all-prefix writes, mode guards, Make and allocation/checkpoint source review.",
+    "sha256": "c9ed3fccf727112f3494e507c248078088feb9253c99bd16e2f406a01fb567e1"
+  },
+  "ledger": {
+    "B16": {
+      "newFieldHelperCallBoundariesIncludingInverseProducts": 55,
+      "newOrdinary": 17,
+      "newPaired": 30,
+      "normalInverseProducts": 8,
+      "oldFieldHelperCallBoundariesIncludingInverseProducts": 70,
+      "oldOrdinary": 47,
+      "oldPaired": 15,
+      "totalFieldProducts": 85
+    },
+    "CLMADPairLimit": "The unchanged CLMAD pair helper still calls product131 and reduction twice. No native product-count reduction or explicit multiplication-mask reuse is established by the paired call.",
+    "additionalCommonPathLogicalStateBytesPerScalar": "20+40/B; 22.5 at B16, from extra forward Y read and last prefix store/load. Not DRAM bytes or measured cache traffic.",
+    "old": {
+      "normalInverseProducts": 8,
+      "ordinaryPolynomial": "3B-1",
+      "pairedPolynomial": "B-1",
+      "totalFieldProducts": "5B+5"
+    },
+    "scope": "Observed kernel call boundaries are asserted for every actual host walk launch, including zero steps, zero batches, DP/guard paths and padded invocations. The unrolled inverse body separately contains exactly eight normal mul131 calls.",
+    "weighted": {
+      "normalInverseProducts": 8,
+      "ordinaryPolynomial": "B+1",
+      "pairedPolynomial": "2(B-1)",
+      "totalFieldProducts": "5B+5"
+    }
+  },
+  "modes": {
+    "0": "Original product prefixes, separate sigma calls, control.",
+    "1": "Weighted prefixes; separate forward X/Y sigma calls.",
+    "2": "Weighted prefixes; forward paired X/Y walk sigma network using one loaded mask on both coordinates."
+  },
+  "nextBoundary": "Parent review first. Any future compiler screen must keep all three modes, bind unchanged mode0 native walk/init encodings to the baseline, inspect complete caller/helper code and resources, and account actual paths. No CUDA compile or GPU is authorized by this receipt itself.",
+  "pairedSigmaValidation": {
+    "branches": [
+      "normal host network",
+      "emulated NVCC host fallback",
+      "host execution of emulated __CUDA_ARCH__ branch with instrumented __ldg"
+    ],
+    "coordinateChecks": 37440,
+    "disabledHeaderPreprocessingComparisons": 9,
+    "generatorCheck": true,
+    "hostPairCalls": 18720,
+    "maskTrafficLimit": "Instrumented source loads, not native instruction counts, GPU loads, cache misses or memory traffic. Repeated masks may be coalesced by the device compiler.",
+    "oldScalarInverseSectionsExact": true,
+    "perBranch": "All 131 basis bits in each input for each j3..10; 512 dense pairs and six edge pairs per j.",
+    "receiptPath": "/private/tmp/ecc2k-weighted-sigma-host/review.json",
+    "receiptSha256": "c86ad5321831d85e4849307d9423b1d98a1fd98e89a9c34044d839585a512e07",
+    "sourceMaskLoadsPerPair": 64,
+    "uniqueExistingTableRows": 56
+  },
+  "resourceRisks": [
+    "Forward pass now retains original X, original Y, E and the running product around a paired field call; register lifetime and spill costs are unmeasured.",
+    "Paired sigma returns a 40-byte aggregate instead of a 20-byte scalar result and can change register arguments, return moves, scheduling and helper stack use.",
+    "Paired product returns still perform two native raw field products. Fewer helper boundaries need not improve a target already using native CLMAD.",
+    "Additional common-path Y/prefix logical traffic can outweigh fewer calls or shared source mask loads. Cache/TLB/memory bottlenecks have not been measured.",
+    "Source expansion and a new noinline paired-sigma helper can increase instruction-cache footprint.",
+    "Host execution does not validate CUDA branch compilation, resource residency, atomic concurrency or throughput."
+  ],
+  "schema": 1,
+  "scope": "Fixed finite arithmetic/walk implementation and host correctness. No CUDA compiler, GPU, cloud job, performance result or production/public repository change.",
+  "source": {
+    "baselineCanonicalSha256": "42a13c3ed022b6a53e4f49f83cd3d0fdd55c16f3d119d33c83bb98cda077a9a3",
+    "baselineCommit": "087ac51",
+    "baselineManifestFileSha256": "73f1be34b1564b9ee4020cb07a17a243218189eadb4fcdf2cbc9e816fcc51319",
+    "baselinePath": "/private/tmp/ecc2k-clmad-batch-panel-20260911/source",
+    "boundFiles": 157,
+    "changedFiles": {
+      "Makefile": "267a67e7eba0b02ef5f617e14039aeca6d299e6534f82e44ab8c517109f264ac",
+      "codegen/gensigma.py": "7e85e7a0b0ffe7eb2544e0aac9b5321e9f0f961d3304d8a6afce6d6aac651fce",
+      "include/packed131.h": "17ca3b08d05dd7458a9eefffe8992c2fe17a7e1e1f74e3660fb9ae64fb7a3bf3",
+      "include/packedengine.cuh": "49bd45beff150a2f25689330ce9a17e9c00eae3418a30d14515b9e5921ec9297",
+      "include/packedkernels.cuh": "4b377843513b192e316ddc2f8b4d41adde4ac98d631e248b2e24921d6ecc56da",
+      "include/packedsigma131.h": "318567aa80945fc342265ca9e621f10f2da9b4efe4b48d4924576b197fdc9caa"
+    },
+    "excludedFile": "build/.gitkeep, unchanged; same omission as original manifest",
+    "manifestCanonicalSha256": "47fbe39da63c1b3630e0d34252c3937a5bb442283360e47977fb6e63d07110f0",
+    "manifestFileSha256": "d83af92454f0453d62d36ac3376a928c7ed0b5c5159074ddf13fec67d8f073eb",
+    "manifestPath": "/private/tmp/ecc2k-weighted-prefix-host-20260912/source-manifest.json",
+    "patchSha256": "5b76dc7fab2c20ab563ca98cfe89aa14875abe8b9f33e4d4391c58fab80006df",
+    "path": "/private/tmp/ecc2k-weighted-prefix-src-20260912",
+    "physicalFiles": 158
+  },
+  "sourceChecks": {
+    "defaultLimit": "The kernel and arithmetic preprocessed tokens match. Engine setup intentionally adds the mode0 identity print; complete stdout equivalence is not claimed.",
+    "invalidGuardCases": 8,
+    "makeDefineExactlyOnceModes": [
+      0,
+      1,
+      2
+    ],
+    "mode0PreprocessedFullKernelComparisons": 16,
+    "receiptPath": "/private/tmp/ecc2k-weighted-prefix-host-20260912/source-checks.json",
+    "receiptSha256": "24cb9f99869c17a0cb39a189e412945fa4d47fd539bd8b9997c1ee034db9e1f3",
+    "validBranchCases": 4
+  },
+  "status": "host_validated_prototype",
+  "valid": true
+}

@@ -1,0 +1,31 @@
+{
+  "schema": "ecc2k130-leaf-m10-support-v1",
+  "source_main_head": "deff96e212a22d75fe4615d63d8baa084817ead1",
+  "field_degree": 131,
+  "field_modulus_hex": "0x800000000000000000000000000002007",
+  "normal_beta": 3,
+  "subgroup_order": "680564733841876926932320129493409985129",
+  "curves": [
+    {"id": "source", "line": null, "a2_hex": "0x0", "b_hex": "0x1"},
+    {"id": "leaf_1_0", "line": [1, 0], "a2_hex": "0x0", "b_hex": "0x3aad5ebb6187af0a2c53cbc9010d36552"},
+    {"id": "leaf_1_4", "line": [1, 4], "a2_hex": "0x0", "b_hex": "0x3248ef31f25d6830126239dd3fd7c593a"}
+  ],
+  "arms": [
+    {"id": "balanced", "slot_dimensions": [13, 13, 13, 13, 13, 13, 13, 13, 13, 13]},
+    {"id": "unequal", "slot_dimensions": [14, 13, 13, 13, 13, 13, 13, 13, 13, 13]}
+  ],
+  "unique_scans": "ten dimension-13 slots and the dimension-14 slot zero per curve",
+  "gray_checkpoint_rows": 1024,
+  "sample_lift_rule": "first and last two liftable nonzero masks in each unique scan",
+  "producer_wall_cap_seconds": 600,
+  "verifier_wall_cap_seconds": 1200,
+  "process_rss_cap_bytes": 1073741824,
+  "inputs_sha256": {
+    "research/notes/ecc2k130/m10_export_capacity_20260925/INPUT.json": "2f27dd1b5af73811bcaddb1c125ddca209f26bf6656c93d83e9cadc4e386f70a",
+    "research/notes/ecc2k130/dual_all_lines_20260930/RESULT.json": "0506e506ddf4cc1580bca18821f872a65508f9ced7c53f5a648301af5e86262a",
+    "research/notes/ecc2k130/rotated_subspace_support_20260925/gate.py": "d3f0f6e1515282a25efb4eb6a5f68ad754f1d9be68e4a741f17a748d9a58d782",
+    "research/notes/ecc2k130/rotated_unequal_arity_20260925/verify.py": "3211cf65e69b57254846b12a37e4f582af3ab63a66e6dc2882d4b5d8bb871396",
+    "research/ecc2k130_relations/fastfield.py": "b5990fda51700bbfba363251c41f02febfd0fc92edfea4f5ddd647bab472789e",
+    "research/ecc2k130_relations/relations.py": "0180501ef8fe00f5c54f910822a28cd86dc3c2c1af164348976c1c2e25cc763f"
+  }
+}

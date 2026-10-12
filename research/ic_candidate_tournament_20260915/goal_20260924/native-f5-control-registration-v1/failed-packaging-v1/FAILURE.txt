@@ -1,0 +1,19 @@
+First archive packaging attempt; no scientific producer invocation.
+Source: 3eb99b4d2d934059834174a4d75789bf410b916a
+Registration: 5a50e01c02fa7e14f227dea413cb9e569f73d68d684a68541e49fd357660f060
+
+Original native publication command failed after retaining the sidecars and
+PUBLICATION.json, before creating a passing custody receipt:
+icprog: invalid gzip header
+
+Packing used macOS bsdtar --format ustar -czf - with stdout redirected to a new
+archive file. The file begins with a gzip header and ends with zero padding.
+The system gzip integrity diagnostic returned exit 2:
+gzip: .../capsule.tar.gz: trailing garbage ignored
+
+The exact first compressed archive and publication sidecars remain in this
+directory, including their original byte/hash inventory. This failed publication
+cannot establish accepted custody or execution admission. No source, input,
+registration, query seed or live invocation claim was changed. The correction
+packs into a new named archive in a separate publication directory and reruns
+the unchanged native custody verifier. It does not relax gzip/trailer checks.

@@ -1,0 +1,100 @@
+{
+  "algebraic_roots": 0,
+  "backend": "native-f4",
+  "budget_seconds": 30,
+  "conflicts": null,
+  "cost": {
+    "degree_reached": 5,
+    "extra": {
+      "basis_len": 438,
+      "build_ns": 10304465833,
+      "divisor_tests": 390421804,
+      "eliminate_ns": 8463491661,
+      "extraction_tests": 0,
+      "f4_calls": 25,
+      "field_pairs_reduced": 59972,
+      "matrix_cols_max": 12334,
+      "matrix_rows_max": 9359,
+      "matrix_rows_sum": 451929,
+      "new_elements": 92001,
+      "oversize": 0,
+      "pairs_chain_skipped": 79017760,
+      "pairs_left": 80,
+      "pairs_product_skipped": 24406044,
+      "pairs_reduced": 145033,
+      "reducer_rows": 166295,
+      "steps": 116,
+      "symbolic_bytes_estimate_max": 135516240,
+      "symbolic_cap_hit": 0
+    },
+    "op_unit": "word XORs (elimination only)",
+    "ops": 30140391006,
+    "peak_bytes": 14450296,
+    "solving_degree": 5,
+    "timed_out": true,
+    "wall_ns": 24283295706
+  },
+  "exhaustive": false,
+  "factor_base_contract": {
+    "discrete_log_labels_used": false,
+    "target_subgroup_enumerated": false
+  },
+  "fixed_x1_systems_completed": 24,
+  "fixed_x1_systems_constructed": 25,
+  "fixed_x1_values": 512,
+  "interpretation": "Budget and size caps are inconclusive; SAT requires an exact curve-group lift; UNSAT requires every fixed-X1 F4 system and root lift to complete",
+  "regenerated_source_exact": true,
+  "same_instance_fields": [
+    "n",
+    "ell",
+    "m",
+    "curve",
+    "algebraic_factor_base",
+    "affine_target"
+  ],
+  "schema": "koblitz_pdp_isolated_backend.v1",
+  "single_thread_requested": true,
+  "solver": "f4-f2",
+  "solver_description": "F4 over F_2[v]/(v²−v): normal strategy, Gebauer–Möller, field pairs, bit-packed elimination, reduced basis",
+  "solver_equations_blake3": "69d0ebd0dc57365a4be8c29d3207ba8b92a2da06b53a89d455384933b32757b2",
+  "solver_equations_total": 1475,
+  "solver_max_degree": 4,
+  "solver_representation": "fixed_x1_direct_symmetrised_s4_boolean",
+  "solver_schedule": "enumerate x1 coefficients in ascending bitmask order; run full f4-f2 on x2,x3",
+  "solver_terms_max_per_system": 61922,
+  "solver_terms_total": 1445939,
+  "solver_variables": 18,
+  "source_artifacts": {
+    "cryptominisat_xor_dimacs": {
+      "blake3": "7949b7fb8f7304d0ffd055be4b24e6147a16be2b5e377de55cc6a9717fab5e39",
+      "bytes": 219207,
+      "path": "instance.xor.cnf",
+      "valid": true
+    },
+    "magma_boolean_f4": {
+      "blake3": "7f6662aa2d4be2cf7c5f0022f37494e60414441d50809723365dece0aaf26de8",
+      "bytes": 404158,
+      "path": "instance.magma",
+      "valid": true
+    },
+    "wdsat_anf": {
+      "blake3": "3ecc08e6dfe9c612b220bf9ae5f58d8f4605d6b3febf3db53bb6450f9d1174ab",
+      "bytes": 255940,
+      "path": "instance.anf",
+      "valid": true
+    }
+  },
+  "source_instance_id": "fb0ea6bb30be3dea841c609a2668939128b4b799d4c0e051b0b52dc6da05f0fa",
+  "source_instance_verified": true,
+  "source_model_valid": null,
+  "source_representation": "symmetrised_s4",
+  "source_variables": 78,
+  "source_witness_valid": null,
+  "status": "unknown_inconclusive",
+  "timing_ns": {
+    "fixed_x1_s4_construction": 5691697501,
+    "native_f4_whole": 30001968000,
+    "source_verification": 39369833
+  },
+  "witness_points": null
+}

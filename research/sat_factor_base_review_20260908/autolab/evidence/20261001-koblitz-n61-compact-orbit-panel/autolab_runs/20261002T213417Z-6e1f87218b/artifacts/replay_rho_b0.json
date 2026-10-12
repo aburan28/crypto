@@ -1,0 +1,16 @@
+{
+  "schema": "n61-L65536-ks-v2-rho-independent-replay-v1",
+  "inputs": {
+    "base_sha256": "bdf752cc0d3f2907544cfbef895c4bf08aa26ef65e8679870467ccba4ba2dba5",
+    "scalars_sha256": "e9d4a883bd0a80b6386bb27e2936da1b5fb38b11ec5bf65389b507fffbe3b65e",
+    "ic_records_sha256": "6ca6e9c2e1cf4c70a49a1189ffb7f29c7a7c7fe7f351791822140e94ad9771fd",
+    "rho_records_sha256": "39e7e1a3ac8fe92e4504df96ad4cc27f7ee3997a99886da936cf7e2b70fe3604"
+  },
+  "records": 16384,
+  "pass": 16384,
+  "fail": 0,
+  "fixture_indices_complete": true,
+  "summary_lines": 1,
+  "failures": [],
+  "all_pass": true
+}

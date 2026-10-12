@@ -1,0 +1,33 @@
+{
+  "schema": "nagao-relation-contract-v1",
+  "date": "2026-09-13",
+  "base_commit": "a729acc73799148df87d37352f94d6e889acd5df",
+  "stage": "implementation and exhaustive toy correctness; no attack performance claim",
+  "curve": "y^2 + x*y = x^3 + 1 over GF(2^n), existing type-II ONB",
+  "decomposition_points": 3,
+  "domain": "finite target; nonzero factor abscissas; factor abscissas pairwise distinct and different from target abscissa",
+  "sat_variants": ["chained-s3", "rr-incidence", "rr-norm"],
+  "sat_panel": [
+    {"n": 5, "weight": 1, "targets": "all 43 affine curve points"},
+    {"n": 5, "weight": 2, "targets": "all 43 affine curve points"},
+    {"n": 9, "weight": 1, "targets": "24 uniformly sampled affine curve points", "seed": 20260913}
+  ],
+  "sat_solver": "pycryptosat; one thread; exact version captured at execution",
+  "sat_watchdog": {"seconds_per_instance": 10, "maximum_projected_models": 10000},
+  "sat_comparison": "enumerate and block projected x-tuples; independently lift all signs and sum points; compare complete sets with brute-force oracle",
+  "annihilator_panel": {"n": 5, "subspace_dimensions": [2, 3], "targets": "all 43 affine curve points", "search": "all a and all nonzero b; c fixed by f(-R)=0"},
+  "annihilator_domain": "same distinct nonzero factor abscissas; V is span of the first d ONB vectors; H divides L_V; H(0) and H(x_R) nonzero",
+  "correctness_target": "zero missing or invalid projected decompositions in every completed comparison; independent curve/group verification of every admitted RR certificate",
+  "failure_policy": "any RR false acceptance or missing decomposition fails implementation validation; watchdog/exception is incomplete infrastructure evidence, not mathematical UNSAT",
+  "boundary": {
+    "counting": "with B signed affine factor-base points, at most binomial(B,3) distinct-point unordered triples, hence at most that many supported targets; uniform target success probability <= min(1, binomial(B,3)/group_order)",
+    "fixed_domain": "a representation change cannot increase the exact supported-target set",
+    "reference": "exhaustive group-law oracle for correctness; matched chained S3 for representation diagnostics",
+    "full_dlp_reference": "Pollard rho; not run in this implementation-only stage",
+    "normalization": "S=all attack operations/sqrt(subgroup_order) and ratios to rho remain null until relation collection, verification, rank, linear algebra and descent are all priced"
+  },
+  "metrics": ["complete projected solution sets", "false and missing solutions", "timeouts", "construction circuit bit operations", "CNF variables and clauses", "diagnostic wall time", "annihilator phase field-operation categories"],
+  "metric_limits": "IR circuit evaluation count and clause count are not SAT search work; field-operation categories have no unmeasured conversion to curve additions; no exponent fit or rho ratio",
+  "next_performance_gate": "on a separately frozen matched workload, total verified-relation cost including setup and unsuccessful targets <= 0.8 times the best Semaev baseline on at least three increasing sizes; this is an engineering target, not a generic-group lower-bound claim",
+  "required_artifacts": ["source code", "tests", "this contract", "raw JSON outputs with source hashes and environment", "research note", "scoreboard status"]
+}

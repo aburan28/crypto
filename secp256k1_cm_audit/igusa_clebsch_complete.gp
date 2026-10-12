@@ -313,6 +313,6 @@ print("  y^2 = (x^3+7)(x^3+189), NOT the Howe-glued curve.");
 print("");
 print("BLOCKED: Igusa invariants of the actual (E × E^t)/Γ_α quotient");
 print("  surface require Mestre reconstruction (not available in PARI).");
-print("  See RESEARCH_MESTRE_HOWE.md §7 for algorithm outline.");
+print("  See research/notes/cm-isogeny/RESEARCH_MESTRE_HOWE.md §7 for algorithm outline.");
 print("  Reference: SageMath hyperelliptic_curves/mestre.py (implemented).");
 print("================================================================");

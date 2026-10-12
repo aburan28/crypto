@@ -1,0 +1,65 @@
+{
+  "cells": {
+    "n41_L1024": {
+      "K": 255,
+      "evaluation_blocks": [
+        3,
+        4
+      ],
+      "field_modulus_low_terms": [
+        0,
+        3
+      ],
+      "n": 41,
+      "permutation_seed": 2026100141,
+      "raw_sha256": "261b5f3e7b209c2163d807dc78554b96b80873eda052405156b1178b29dce4a4",
+      "subgroup_order": 549756390943,
+      "train_blocks": [
+        0,
+        1,
+        2
+      ]
+    },
+    "n53_L1024": {
+      "K": 440,
+      "evaluation_blocks": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "field_modulus_low_terms": [
+        0,
+        1,
+        2,
+        6
+      ],
+      "n": 53,
+      "permutation_seed": 2026100153,
+      "raw_sha256": "018925d6e805aa61a68b749b511d0524a5f02aaf350c7356fd03af23316a03af",
+      "subgroup_order": 21044858204113,
+      "train_blocks": []
+    }
+  },
+  "checker_limit_seconds": 120,
+  "classification": "diagnostic_only_no_speed_or_n131_claim",
+  "feature_tie_order": [
+    "x_weight",
+    "signed_y_weight",
+    "frobenius_x_min_weight"
+  ],
+  "manifest_sha256": "350779eb61b5c9b14f065f4f2b3563166de0aaa6ed1da91f3d5308a8fc6fac97",
+  "memory_limit_bytes": 536870912,
+  "permutations": 2000,
+  "positive_gate": {
+    "maximum_permutation_p": 0.01,
+    "maximum_selected_quartile_median_probes_ratio": 0.8,
+    "minimum_signed_spearman": 0.1
+  },
+  "producer_limit_seconds": 120,
+  "schema": "ecc2k130-pdp-difficulty-features-protocol-v1",
+  "selected_fraction_denominator": 4,
+  "selected_fraction_numerator": 1,
+  "source_head": "38c173072e16f580237447c93b085634275ba048"
+}

@@ -1,0 +1,156 @@
+{
+  "active_stage": null,
+  "arm_wall_cap_s": 240,
+  "attack_speed_crossover": null,
+  "audit_sha256": "857a3885341f6be72174b10dd8c9b3d6a9ea4fc8c03892bd26fb6ea3740271d4",
+  "audit_wall_cap_s": 600,
+  "binary_sha256": "c86cc9532b432e158d76e239d09f2222e3a4cb9776fe11cdcba6b22ca49abea4",
+  "cargo_lock_sha256": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+  "certified_base_gzip_sha256": "23397af2ef668aed0775bcb409e1ae19555357ded635452818c9a3812f679d08",
+  "certified_base_materialization_ms": 9.833386,
+  "certified_base_materialized_sha256": "fedbf03991ef30cb78bf2e074ee044bc71a1e80b240f567184cb0aefc77ab143",
+  "checkout_head": "9759251e79797478386e0dad503da4286574a0b8",
+  "classification": "RANK_STAGE_REPLAYED",
+  "common_operation_unit": null,
+  "dispatch_main_head": "8bc8841509b26661662283bc7d4624471552f1b0",
+  "elapsed_wall_s": 771.083334921,
+  "github_run_attempt": "1",
+  "github_run_id": "36218672105",
+  "global_wall_cap_s": 1800,
+  "host": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "measured_arm_wall_ms": {
+    "certified_cyclic": 132300.787813,
+    "certified_lex": 129057.203186,
+    "native_cyclic": 126981.020969,
+    "native_lex": 133226.580139
+  },
+  "process_group_rss_cap_bytes": 2147483648,
+  "protocol_sha256": "b092f47e0abb235ebbc9912f96a370db34e76eaf415fb5ea20a858a5f549128c",
+  "rayon_num_threads": 1,
+  "schema": "n53_target_cyclic_rank_factorial_panel_v1",
+  "source_sha256": "99f0b31149691dc551ad563a7be20e3490fee4498f50cde677c3b7969e61e071",
+  "stage_receipts": {
+    "audit": {
+      "load_average_after": [
+        1.228515625,
+        1.25146484375,
+        0.98388671875
+      ],
+      "load_average_before": [
+        1.12890625,
+        1.2265625,
+        0.8759765625
+      ],
+      "manifest_sha256": "28149a29542b1c92d46fab6004c549738bdfb741817af54e80bca6d3db66425f",
+      "observed_group_peak_rss_bytes": 59961344,
+      "peak_rss_bytes": 64335872,
+      "returncode": 0,
+      "rss_gate": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "33f93025e6c4d7600aae9357a801a780fd63fe8558e584c7f7680399cd6c754f",
+      "system_cpu_s": 0.065994,
+      "timed_out": false,
+      "user_cpu_s": 249.354664,
+      "wall_ms": 249457.648197
+    },
+    "certified_cyclic": {
+      "load_average_after": [
+        1.26904296875,
+        1.3349609375,
+        0.7705078125
+      ],
+      "load_average_before": [
+        1.3984375,
+        1.365234375,
+        0.681640625
+      ],
+      "manifest_sha256": "22e3965c26589fd68bccf4ca3d4eb3f6d6dd511c57ca4be094aa9067d533ef4d",
+      "observed_group_peak_rss_bytes": 412610560,
+      "peak_rss_bytes": 412475392,
+      "rayon_num_threads": 1,
+      "returncode": 0,
+      "rss_gate": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d7022c23167e61b3f2079903818b8317aab7f803417531beb771189078818d1b",
+      "system_cpu_s": 0.079993,
+      "timed_out": false,
+      "user_cpu_s": 132.194856,
+      "wall_ms": 132300.787813
+    },
+    "certified_lex": {
+      "load_average_after": [
+        1.15673828125,
+        1.28759765625,
+        0.83544921875
+      ],
+      "load_average_before": [
+        1.26904296875,
+        1.3349609375,
+        0.7705078125
+      ],
+      "manifest_sha256": "b468cefeb48cd8bea0935abbc636e2cb0a732f0462f1062e7cfac405104ffba8",
+      "observed_group_peak_rss_bytes": 412626944,
+      "peak_rss_bytes": 412442624,
+      "rayon_num_threads": 1,
+      "returncode": 0,
+      "rss_gate": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "6aa39cf865df1d33f41c9b415a9442ce1e3b1431bcc602c690543993bcd25e5e",
+      "system_cpu_s": 0.079992,
+      "timed_out": false,
+      "user_cpu_s": 128.952243,
+      "wall_ms": 129057.203186
+    },
+    "native_cyclic": {
+      "load_average_after": [
+        1.12890625,
+        1.2265625,
+        0.8759765625
+      ],
+      "load_average_before": [
+        1.15673828125,
+        1.28759765625,
+        0.83544921875
+      ],
+      "manifest_sha256": "bc15cc25e3c464f895d190baa1d5daee4779a974de61f361aae803546d6ca513",
+      "observed_group_peak_rss_bytes": 412643328,
+      "peak_rss_bytes": 412520448,
+      "rayon_num_threads": 1,
+      "returncode": 0,
+      "rss_gate": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "bd4cbc0052c2afef891e052552ab6d7ce7c74358ce6f1d70524c751b10eb6403",
+      "system_cpu_s": 0.067995,
+      "timed_out": false,
+      "user_cpu_s": 126.880031,
+      "wall_ms": 126981.020969
+    },
+    "native_lex": {
+      "load_average_after": [
+        1.3984375,
+        1.365234375,
+        0.681640625
+      ],
+      "load_average_before": [
+        2.275390625,
+        1.41650390625,
+        0.58642578125
+      ],
+      "manifest_sha256": "9d90e239787c0527f9aab668745dae80b1450ea9200299800e42f2b29b6d5c9d",
+      "observed_group_peak_rss_bytes": 412565504,
+      "peak_rss_bytes": 412250112,
+      "rayon_num_threads": 1,
+      "returncode": 0,
+      "rss_gate": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c4d2bfa7e6e3ebaac4cd0ff774c118f5df64d3be460f754a88e788d1752a44d0",
+      "system_cpu_s": 0.07399399999999999,
+      "timed_out": false,
+      "user_cpu_s": 133.138425,
+      "wall_ms": 133226.580139
+    }
+  },
+  "target_points_sha256": "7cd3c97b6d0f966d59b261c1caf2a147b0656d3d5d8ef7784e04d0ba6b440fa7",
+  "target_scalars_sha256": "e15a976e8c5ed5ae0ba6e3cd01af40a2e5b86b267b524d7181e7cd7682720779"
+}

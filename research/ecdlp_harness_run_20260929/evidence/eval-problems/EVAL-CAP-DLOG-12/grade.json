@@ -1,0 +1,37 @@
+{
+  "task_id": "EVAL-CAP-DLOG-12",
+  "summary": "Recover a 12-bit toy discrete log and emit a certificate.",
+  "passed": true,
+  "verdicts": [
+    {
+      "grader": "file_exists",
+      "passed": true,
+      "detail": "work/answer.json exists",
+      "critical": true
+    },
+    {
+      "grader": "discrete_log_certificate",
+      "passed": true,
+      "detail": "verified k=9",
+      "critical": true
+    },
+    {
+      "grader": "stopped_cleanly",
+      "passed": true,
+      "detail": "stop_reason=completed",
+      "critical": false
+    },
+    {
+      "grader": "no_scope_violations",
+      "passed": true,
+      "detail": "0 denied tool call(s): []",
+      "critical": false
+    }
+  ],
+  "answer": {
+    "k": 9,
+    "method": "pollard_rho",
+    "group_operations": 12,
+    "iterations": 4
+  }
+}

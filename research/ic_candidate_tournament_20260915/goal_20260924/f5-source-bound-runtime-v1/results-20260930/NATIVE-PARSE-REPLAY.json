@@ -1,0 +1,118 @@
+{
+  "complete_ic_admitted": false,
+  "final_rank": null,
+  "native": {
+    "after_sha256": "2995a176a2504c2e4d7b7b10dfa1ae3db51946445efabee5156c4457d17ca559",
+    "before_sha256": "2995a176a2504c2e4d7b7b10dfa1ae3db51946445efabee5156c4457d17ca559",
+    "command": [
+      "/Volumes/SSD990/llm/tmp/ic-f5-source-bound-v1-20260930-execution0/asset-files/bin/worker"
+    ],
+    "controller_group": 99028,
+    "environment_threads": {
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "RAYON_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1"
+    },
+    "executable_sha256": "94caf3d67e57dde09488763ec19e791aca54bbb35f1968c73e42d37a210b436a",
+    "execution_sha256": "5969837ddc69d25a3e44954f203077c0e6d682bbce2d1ac8eb0f9c3a10bb826b",
+    "invocation_sha256": "c724046264eaa734b4f6930599f6b0760e39f4c12d1323ba1e573feb2c727b55",
+    "metrics": {
+      "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+      "peak_rss_bytes": 2129920,
+      "single_core_seconds": 0.002156,
+      "system_seconds": 0.00112,
+      "total_core_seconds": 0.002156,
+      "user_seconds": 0.001036,
+      "wall_seconds": 0.006275834
+    },
+    "native_group_observed": 99028,
+    "native_pid": 99074,
+    "native_wall_ns": 6275834,
+    "process_group_policy": "inherit-controller-group; no native fork or setsid",
+    "returncode": 2,
+    "schema_version": 3,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdin_argument": "job",
+    "stdin_bytes": 366,
+    "stdin_sha256": "75e18aefd5fb17f1d5b73a254024e58968f762c86c5c5c1f5e0e6352e355c391",
+    "stdout_sha256": "39e7a7db5af51d3b473fe13c02e783edaa275aa901cc6272bd81aeb2713d40d0",
+    "timed_out": false,
+    "watchdog_seconds": 7170
+  },
+  "native_error": {
+    "reason": "invalid type: null, expected u64 at line 1 column 364",
+    "schema_version": 1,
+    "status": "error"
+  },
+  "online_speedup": null,
+  "online_wall_ns": null,
+  "preflight": {
+    "after_sha256": "4a6a5f65694f0b511759141f2487243969dad878e0db09c8add93b0e3b28c5ec",
+    "before_sha256": "4a6a5f65694f0b511759141f2487243969dad878e0db09c8add93b0e3b28c5ec",
+    "command": [
+      "/Volumes/SSD990/llm/tmp/ic-f5-source-bound-v1-20260930-execution0/asset-files/bin/worker",
+      "--build-identity"
+    ],
+    "controller_group": 99028,
+    "environment_threads": {
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "RAYON_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1"
+    },
+    "executable_sha256": "94caf3d67e57dde09488763ec19e791aca54bbb35f1968c73e42d37a210b436a",
+    "execution_sha256": "5969837ddc69d25a3e44954f203077c0e6d682bbce2d1ac8eb0f9c3a10bb826b",
+    "invocation_sha256": "166a33d4764f40334a501b639596f69487c985105847d1bbb9be73bba606f093",
+    "metrics": {
+      "meter": "fresh isolated wrapper RUSAGE_CHILDREN; native process only",
+      "peak_rss_bytes": 1900544,
+      "single_core_seconds": 0.002673,
+      "system_seconds": 0.001648,
+      "total_core_seconds": 0.002673,
+      "user_seconds": 0.0010249999999999999,
+      "wall_seconds": 0.502647417
+    },
+    "native_group_observed": 99028,
+    "native_pid": 99069,
+    "native_wall_ns": 502647417,
+    "process_group_policy": "inherit-controller-group; no native fork or setsid",
+    "returncode": 0,
+    "schema_version": 3,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "32367c12ef1c901d5143d1b3271f72b648d1024aacb9a4d783b03f9487aee96f",
+    "timed_out": false,
+    "watchdog_seconds": 10
+  },
+  "promotion_eligible": false,
+  "python_source_audit": {
+    "binding": {
+      "asset_archive_sha256": "9a062a02b41a20ea55b2392058b5942062fade117a3c2e0f316a2a4de0adf822",
+      "asset_manifest_sha256": "a32f5bd249615724971fc022ec2950515daf9afb3ee860d7f46b088531978dfe",
+      "callable": "run",
+      "interpreter_sha256": "ec11021561db6edca6d1a8a796ddb94ffa0d0074b68e25f093b4bc117f06a70e",
+      "module": "f5_runtime_pipeline_v1",
+      "python_archive_sha256": "ab6ac29a7fc9fcaf9db68f61913e4cbefbbacede5c32df455eea01ee8b184186",
+      "python_manifest_sha256": "6db3c73420ec56f9592dca240f8afd2effd8c5e79e9310b83a2c690eec104a33"
+    },
+    "claim_scope": "Python binding only; mathematical admission required separately",
+    "complete_source_gates": true,
+    "entrypoint_succeeded": false,
+    "loaded_module_count": 37,
+    "online_speedup": null,
+    "promotion_eligible": false,
+    "schema_version": 3,
+    "status": "AUDITED_PYTHON_EXECUTION_BINDING"
+  },
+  "schema_version": 1,
+  "scope": "source/invocation/parse failure replay only; no IC query or mathematical result",
+  "status": "AUDITED_NATIVE_INPUT_SCHEMA_FAILURE",
+  "submitted_target_seeds": [
+    null
+  ],
+  "verified_target_count": null
+}

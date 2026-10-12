@@ -1,0 +1,7 @@
+# Second-host verifier portability correction
+
+The frozen hosted verifier in `verify_panel.py` compares the runner's absolute Q-file path to the verifier checkout's absolute path. The hosted Linux checkout passes this provenance guard. On a macOS checkout, the first replay stopped at that guard before any mathematical check; its failure receipt is retained with the evidence.
+
+`portable_replay.py` is an exact copy of the frozen verifier except for one line: it compares the Q-file basename instead. The fixture and public-point file SHA-256 checks, every independently recomputed `[d]G=Q`, the full rank-equation and transition replay, four-point witness checks, recovered log checks, and rho output replay are unchanged. The path correction does not alter the producer, frozen input, hosted measurements, or decision rule. The frozen verifier remains the one used by Actions, so this file is supplemental second-host evidence and is not a substitute for hosted PASS.
+
+For n41 the macOS replay passed and produced a receipt byte-for-byte identical to the Linux receipt, SHA-256 `d23e8ca0ab09c084416e7b8d59bc3085149b90fb15e16d76410950920b7a01e6`. The n53 macOS replay also passed and was byte-for-byte identical to Linux, SHA-256 `948ed4ba272ec6e9c3394fdbd5355b1f655a6024538109d312ba49050147bae4`. The [archive manifest](evidence/s3_batch_ded946/MANIFEST.json) records both hosts, the supplemental verifier SHA-256, both receipts, and the [original n41 path-guard failure](evidence/s3_batch_ded946/second_host_replay/n41_nonportable_fail.json).

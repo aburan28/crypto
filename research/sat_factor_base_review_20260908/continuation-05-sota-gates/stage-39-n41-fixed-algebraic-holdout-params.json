@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "name": "k0n41-fixed-algebraic-holdout-retry-stage39",
+  "curve": {
+    "degree": 41,
+    "curve_a": 0
+  },
+  "summands": 3,
+  "descent_summands": 2,
+  "collection_window": 149,
+  "solver": "pair_table",
+  "seed": 41331,
+  "max_trials": 100000000,
+  "linear_algebra": {
+    "mode": "sparse",
+    "sparse": {
+      "wiedemann": {
+        "block_m": 4,
+        "block_n": 4
+      },
+      "filter": {
+        "target_excess": 32,
+        "merge_max_weight": 8
+      }
+    }
+  },
+  "collection": {
+    "unit_trials": 8192,
+    "units": 4,
+    "max_units": 64
+  },
+  "baseline": {
+    "rho": true,
+    "rho_seed": 5929075965221491791,
+    "rho_max_iterations": 268435456
+  },
+  "factor_base": {
+    "mode": "spec",
+    "spec": {
+      "kind": "two_torsion_saturated",
+      "parent": {
+        "kind": "frobenius_union",
+        "seed_masks": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32
+        ]
+      }
+    }
+  },
+  "targets": [
+    {
+      "public_hash_seed": 41301
+    },
+    {
+      "public_hash_seed": 41302
+    },
+    {
+      "public_hash_seed": 41303
+    },
+    {
+      "public_hash_seed": 41304
+    },
+    {
+      "public_hash_seed": 41305
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+chase_512K_k1 4000000 2 11045469
+chase_512K_k1 1000 2 1048545
+chase_512K_k1 4000000 8 11045523
+chase_512K_k1 1000 8 1048968
+chase_8M_k1 4000000 2 23088492
+chase_8M_k1 1000 2 13090761
+chase_8M_k1 4000000 8 23088324
+chase_8M_k1 1000 8 13090935
+chase_256M_k1 4000000 2 421285277
+chase_256M_k1 1000 2 411288010
+chase_256M_k1 4000000 8 421285322
+chase_256M_k1 1000 8 411288184
+chase_256M_k10 4000000 2 463285592
+chase_256M_k10 1000 2 411298600
+chase_256M_k10 4000000 8 463285602
+chase_256M_k10 1000 8 411298588
+seq_256M 2 2 235120464
+seq_256M 1 2 201565897
+seq_256M 2 8 235120384
+seq_256M 1 8 201565945
+native chase_512K_k1 {'label': 'chase_512K_k1', 'mode': 'chase', 'bytes': 524288, 'k': 1, 'steps': 4000000, 'reps': 5, 'warm': 400000, 'ns_per_step_min': 5.707, 'ns_per_step_median': 5.7811, 'ns_per_load_median': 5.7811, 'sink': 19008}
+native chase_8M_k1 {'label': 'chase_8M_k1', 'mode': 'chase', 'bytes': 8388608, 'k': 1, 'steps': 4000000, 'reps': 5, 'warm': 400000, 'ns_per_step_min': 136.198, 'ns_per_step_median': 139.3658, 'ns_per_load_median': 139.3658, 'sink': 30450880}
+native chase_256M_k1 {'label': 'chase_256M_k1', 'mode': 'chase', 'bytes': 268435456, 'k': 1, 'steps': 4000000, 'reps': 5, 'warm': 400000, 'ns_per_step_min': 220.994, 'ns_per_step_median': 248.7142, 'ns_per_load_median': 248.7142, 'sink': 195335744}
+native chase_256M_k10 {'label': 'chase_256M_k10', 'mode': 'chase', 'bytes': 268435456, 'k': 10, 'steps': 4000000, 'reps': 5, 'warm': 400000, 'ns_per_step_min': 240.413, 'ns_per_step_median': 248.2305, 'ns_per_load_median': 24.823, 'sink': 212359616}
+native seq_256M {'label': 'seq_256M', 'mode': 'seq', 'bytes': 268435456, 'passes': 2, 'reps': 5, 'ns_per_line_min': 7.4977, 'ns_per_line_median': 7.6439, 'sink': 8262723398384222208}
+native base_k1 {'label': 'base_k1', 'mode': 'chase', 'bytes': 16384, 'k': 1, 'steps': 4000000, 'reps': 5, 'warm': 400000, 'ns_per_step_min': 1.2215, 'ns_per_step_median': 1.2335, 'ns_per_load_median': 1.2335, 'sink': 0}
+native base_k10 {'label': 'base_k10', 'mode': 'chase', 'bytes': 16384, 'k': 10, 'steps': 4000000, 'reps': 5, 'warm': 400000, 'ns_per_step_min': 1.5427, 'ns_per_step_median': 1.5884, 'ns_per_load_median': 0.1588, 'sink': 0}

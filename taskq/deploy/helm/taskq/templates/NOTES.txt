@@ -1,0 +1,8 @@
+taskq {{ .Chart.AppVersion }} installed as {{ include "taskq.name" . }}.
+
+Pools: {{ range .Values.pools }}{{ .name }} ({{ join "," .queues }}) {{ end }}
+
+Submit from inside the cluster (or port-forward svc/{{ include "taskq.name" . }}-redis 6379):
+  export TASKQ_REDIS_URL=redis://:$(kubectl get secret {{ include "taskq.redisSecret" . }} -o jsonpath='{.data.redis-password}' | base64 -d)@localhost:6379/0
+  taskq submit --repo crypto --commit <sha> --queue {{ (index .Values.pools 0).queues | first }} -- <argv>
+  taskq stats ; taskq workers

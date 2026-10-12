@@ -1,0 +1,29 @@
+
+=== Relations per second, whole pipeline, strategy the only variable ===
+
+| strategy  |  n | m | relations | trials | wall (ms) |   relations/s | solved |
+|-----------|----|---|-----------|--------|-----------|---------------|--------|
+| crossbred |  7 | 2 |         0 |  20000 |     668.6 |           0.0 |     NO |
+| groebner  |  7 | 2 |         0 |  20000 |    1499.5 |           0.0 |     NO |
+| sat       |  7 | 2 |         0 |  20000 |    1224.6 |           0.0 |     NO |
+| enumerate |  7 | 2 |         0 |  20000 |     195.6 |           0.0 |     NO |
+| crossbred |  7 | 2 |         3 |      3 |       0.3 |       14137.7 |    yes |
+| groebner  |  7 | 2 |         3 |      3 |       0.7 |        5433.3 |    yes |
+| sat       |  7 | 2 |         3 |      3 |       0.4 |       10120.5 |    yes |
+| enumerate |  7 | 2 |         3 |      3 |       0.2 |       41845.7 |    yes |
+| crossbred |  9 | 2 |         3 |      3 |       1.0 |        4443.0 |    yes |
+| groebner  |  9 | 2 |         3 |      3 |       5.1 |         617.8 |    yes |
+| sat       |  9 | 2 |         3 |      3 |       2.0 |        1686.3 |    yes |
+| enumerate |  9 | 2 |         3 |      3 |       0.3 |       53055.1 |    yes |
+| crossbred |  9 | 2 |         2 |      2 |       0.8 |        4010.9 |    yes |
+| groebner  |  9 | 2 |         2 |      2 |       3.8 |         573.5 |    yes |
+| sat       |  9 | 2 |         2 |      2 |       1.0 |        2997.0 |    yes |
+| enumerate |  9 | 2 |         2 |      2 |       0.3 |       49353.5 |    yes |
+| crossbred |  9 | 3 |         5 |      5 |     429.4 |          11.7 |    yes |
+| groebner  |  9 | 3 |         5 |      5 |     150.7 |          33.2 |    yes |
+| sat       |  9 | 3 |         5 |      5 |      97.0 |          51.7 |    yes |
+| enumerate |  9 | 3 |         5 |      5 |       0.5 |       19696.3 |    yes |
+
+A row whose `solved` is not `yes` is not a result.
+Relation collection stays Theta(2^n) with any oracle polynomial in the
+factor base; this prices the constant, not the exponent.

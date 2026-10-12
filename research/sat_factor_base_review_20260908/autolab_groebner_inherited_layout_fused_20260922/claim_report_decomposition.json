@@ -1,0 +1,56 @@
+{
+  "claim_boundary": "Public-synthetic decomposition-stage engineering evidence only. This changes root construction overhead, not the factor base, Macaulay row space, solver tree, relation yield, asymptotic complexity, Pollard-rho comparison, external-target capability, or any key-recovery result.",
+  "claim_boundary_non_claims": [
+    "not relation-yield evidence",
+    "not an end-to-end index-calculus crossover",
+    "not an asymptotic or sub-rho result",
+    "not external or private targets",
+    "not a key-recovery claim"
+  ],
+  "dimension_l_or_dim": 16,
+  "eq_var_ratio": 0.96875,
+  "executable_or_source_hash": {
+    "sources": {
+      "f4_rref_tests.rs": "89c513cd13e5a9ff55f0937820bdb2de92b8554e1fa39b32cdcabe1985cf254a",
+      "groebner_stage_bench.rs": "89bc1135ed079c5cc344b3e8ef3696d6b2b36596ac988766b1b01cdeee76b307",
+      "inherited_f4.rs": "7a95ce5d016703470482f08e94fb85cc7e14b07324a814772eb23d5ba08f3fac",
+      "koblitz_groebner.rs": "5c5e11bdf4f8e6724b95fb1c8aabae6cc4753fae4e4fe2884441d8ccb83dafb3"
+    },
+    "stage_executable": "6798e8da8246aac972a2278cd5ea3b142bfeeee90508f928f67c3f38b4db6163"
+  },
+  "ffd_or_degree_of_regularity": 3,
+  "fixture_hash": "ca3154fbf82be2da500e00bab718996b3bf1b88e8037b7216c3b1d7c81f11095",
+  "host_id": {
+    "hostname": "Adams-MacBook-Pro.local",
+    "machine": "arm64",
+    "system": "Darwin"
+  },
+  "largest_solvable": {
+    "m": 2,
+    "n": 31,
+    "root_rows": 1023,
+    "unknowns": 32
+  },
+  "m_summands": 2,
+  "median_ms_per_target": {
+    "n31_fused_root_pack_ms": 0.6446665
+  },
+  "n_or_bits": 31,
+  "oracle_class": "inherited matrix-F4 with exact quadratic root-layout reuse and fused nested packing",
+  "resource_caps": {
+    "root_repetitions": 100,
+    "stage_repetitions_per_policy": 10,
+    "threads": 1
+  },
+  "schema_version": 2,
+  "seeds": [
+    17,
+    937,
+    20260914,
+    66142
+  ],
+  "stage": "decomposition",
+  "system_degree": "quadratic generators, degree-3 Macaulay root",
+  "task_id": "TASK-KIC-INHERITED-LAYOUT-FUSED-20260922",
+  "unknowns": 32
+}

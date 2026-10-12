@@ -36,7 +36,7 @@
 //! - [`render_trail_diagram`] — Markdown / ASCII visualization of
 //!   a trail across rounds.
 
-use super::visualize::{format_active_pattern, format_round_bars, format_trail};
+use super::visualize::{format_round_bars, format_trail};
 
 /// Active-byte pattern in a 4×4 AES state.  Bit `4·c + r` is set iff
 /// byte (column `c`, row `r`) is active.
@@ -206,6 +206,7 @@ pub fn render_trail_diagram(steps: &[TruncatedRoundStep]) -> String {
 
 #[cfg(test)]
 mod tests {
+    use super::super::visualize::format_active_pattern;
     use super::*;
 
     /// `TruncatedPattern::active_bytes` counts set bits.

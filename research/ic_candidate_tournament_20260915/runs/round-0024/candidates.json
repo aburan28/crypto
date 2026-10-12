@@ -1,0 +1,39 @@
+[
+  {
+    "binary_relative": "worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 65536,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "configuration_sha256": "2a66ec4ce19a2b39a458bad77b14976dd75011dca8c3665dbdd137832aaf4896",
+    "hypothesis": "The best pair-table arm the campaign has measured (round 0023's scaled: 0.7982 of that round's incumbent, identical on the panel), built with a rho that names Frobenius classes by the IC arm's own normal-basis rotation. Its rho mode is this round's rho. The IC path is unchanged by the rho patch.",
+    "id": "incumbent",
+    "parent": "round 0023's scaled arm plus research/ic_triple_counted_20260923/rho-normal-basis.patch",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0023",
+    "source_directory": "source",
+    "source_manifest_relative": "source-manifest.json",
+    "source_manifest_sha256": "d235d0446b12a9c8efa7c014b2bc2aaff109a263f149ce907f147a4d07e9c76d"
+  },
+  {
+    "binary_relative": "source_candidates/counted/worker",
+    "config": {
+      "batch_trials": 1,
+      "linear_algebra": "sparse",
+      "max_trials": 65536,
+      "solver": "triple_counted",
+      "summands": 4
+    },
+    "configuration_sha256": "014d97de2b16ba3c79e9ae086f5828b15260ef3e5846a35dad60cefd8444c057",
+    "falsification": "Any bad, missing or unmatched certificate at four summands; any recovered logarithm different from the incumbent's or rho's on the same fixture; counted/incumbent above one at n43a1 or n61a1.",
+    "hypothesis": "Triple-sum table under the same Frobenius orbit names: four-term relations, cost r^(3/5) against the pair table's r^(2/3), base sized by counting the four-sums a target can be. Cheaper than the pair arm past the crossing, dearer below it; above a matched rho at every cell (research/ic_triple_counted_20260923 \u00a73: 1.19-2.88x).",
+    "id": "counted",
+    "parent": "incumbent's scaled tree plus research/ic_triple_table_20260923/triple-table.patch and research/ic_triple_counted_20260923/counted-sizing.patch (and the same rho patch)",
+    "parent_round": "/home/user/crypto/research/ic_candidate_tournament_20260915/runs/round-0023",
+    "source_directory": "source_candidates/counted/source",
+    "source_manifest_relative": "source_candidates/counted/source-manifest.json",
+    "source_manifest_sha256": "46763c4a1d4e5e005d4f5fb7d7b34bccf2da19cd7bf1fe67a61ec5d7271e3b64"
+  }
+]

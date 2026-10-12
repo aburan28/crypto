@@ -1,0 +1,134 @@
+{
+  "base_commit": "8b1e2d3734c1f30c14ce253b33094f894ab5005d",
+  "classification": "accounting",
+  "cold_ms": null,
+  "dependency_lock_sha256": "7d671f48c2da93f133d98802e80f858d1d9ea3b86996f7037f758990e1566627",
+  "files": {
+    ".github/workflows/ic-autolab.yml": {
+      "bytes": 2925,
+      "sha256": "8fdff95bbf290a3dcf07fe3c36d621e6398cc31e4ff05aa36aa2eb6815beac10"
+    },
+    "docs/index-calculus-scoreboard.html": {
+      "bytes": 802619,
+      "sha256": "3806807738622daaae7c4171d28b0ff4c073b16c7fb3b2ed21d90784f955fc89"
+    },
+    "examples/ic_tournament_worker.rs": {
+      "bytes": 15320,
+      "sha256": "a69572773443104018078ebdef5ba615a6433c1afebf4b9fb8afc7415a490e4f"
+    },
+    "research/ic_candidate_tournament_20260915/AUTOLAB.md": {
+      "bytes": 19248,
+      "sha256": "2bc86945f4210533750bf14cb1290155e11d972ab1522bb60f9aeb58afccec1c"
+    },
+    "research/ic_candidate_tournament_20260915/ci_smoke.py": {
+      "bytes": 9891,
+      "sha256": "15bed16e63bb8c60d411d08f05294233b0e12946875296ef0084412d47085d89"
+    },
+    "research/ic_candidate_tournament_20260915/generic_queries.py": {
+      "bytes": 7073,
+      "sha256": "ed9a56e881c74eb212274556a1aa0993a23f87078ffb898beb94a9f64e70e1ea"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/STATUS.md": {
+      "bytes": 12055,
+      "sha256": "ac70a40943ab67c99d84438c1328c619e7acf5225ca7aa21513016cfa1aed293"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/PROTOCOL.md": {
+      "bytes": 2305,
+      "sha256": "3cf2d84a396a055347eaadc2f6005e391d7d38d1158e7dcc07d5edac7ffc9013"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/RESULTS.md": {
+      "bytes": 4244,
+      "sha256": "ddbc875ca07ad9b409d7592f70e8855fa3e1dde1e5ff0391d2b76c9db42ed23f"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/clippy.log": {
+      "bytes": 3009,
+      "sha256": "0a785ec540d0f9843810375bc5d444fac4910ca019790815dea705d74e585c3a"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/equivalence.log": {
+      "bytes": 2280,
+      "sha256": "f11fca95899c24a9947d70366193189b09b414cfac8d7e2d196ec25c5370e405"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/existing-regressions.log": {
+      "bytes": 15045,
+      "sha256": "b0865e765bc2017c9cdd084a2b74b8179d728e15327a78d198cc2b43fc8c9379"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/python-tests.log": {
+      "bytes": 20081,
+      "sha256": "e3beca6ff0511b9e7a092839e5bb9d3bd6b811cc389af74a0b7d0b3843ebdd59"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/run_controls.py": {
+      "bytes": 2889,
+      "sha256": "6f2b939357d0ee8b1dc66506ddbb54f910cb4a5cd5b83115c819e90f14dc3ff5"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/rust-controls.log": {
+      "bytes": 2740,
+      "sha256": "785a83cb18d59a2ce5f7a8b19854c16b5d7fa3d68a8ccedbd3fcd80494cff875"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/site-tests.log": {
+      "bytes": 138,
+      "sha256": "0150d2d8825134df58a7c54b25340d53fee5fceafd8b2289d546c708b2f3d200"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/worker-build.log": {
+      "bytes": 1732,
+      "sha256": "66823b92aace14b366b3d9b41feebe29cfd5d364cbd095d2487e8fdb5437b86e"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/worker-controls.log": {
+      "bytes": 798,
+      "sha256": "f6fb3669b4794bf20913d07790d0b4273ebc0521062f2c842453fb6d9495d618"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/worker-inputs.json": {
+      "bytes": 16558,
+      "sha256": "909da61aeba919257ebf691b9a9002009017ae37429b69f77d8bd38eaf42f339"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/worker-raw.jsonl": {
+      "bytes": 156995,
+      "sha256": "e66b72092ba3c1961bf7574d6a49af1a93d1bfd338607114174d5c40be89586b"
+    },
+    "research/ic_candidate_tournament_20260915/goal_20260924/generic-query-accounting/worker-summary.json": {
+      "bytes": 51085,
+      "sha256": "3b90d640cf69c843d9464058d95b1ec0bcfe6986df996742d8a6917a98aa9ef5"
+    },
+    "research/ic_candidate_tournament_20260915/test_generic_queries.py": {
+      "bytes": 4506,
+      "sha256": "b881bc237c6b77293eac0c7b7ebb6e1a4e3cc590da0e38c92da104126dbe765a"
+    },
+    "src/cryptanalysis/crossbred.rs": {
+      "bytes": 44627,
+      "sha256": "b80163a2fd332d3aacf11eb2541dd3cf85b6f89df5692ce6f8d0dca29a3b4e85"
+    },
+    "src/cryptanalysis/koblitz_groebner.rs": {
+      "bytes": 220658,
+      "sha256": "b463e7599bdc8fb50eea5038ab0d814872410d9da3e02d500cc85f5af06219fd"
+    },
+    "src/cryptanalysis/koblitz_index_calculus.rs": {
+      "bytes": 572180,
+      "sha256": "2d02632434ff69ad67e548d7dbe081829343080dd6099277c0df6676ff4a874e"
+    },
+    "src/cryptanalysis/weil_charts.rs": {
+      "bytes": 23100,
+      "sha256": "32511979bc58ae4f3cde92352ef05571d7082708a07d57f205fc71ba5e261732"
+    }
+  },
+  "host": {
+    "machine": "arm64",
+    "node": "Adams-MacBook-Pro.local",
+    "processor": "arm",
+    "release": "25.6.0",
+    "system": "Darwin",
+    "version": "Darwin Kernel Version 25.6.0: Sat Jul 11 15:27:27 PDT 2026; root:xnu-12377.161.13~4/RELEASE_ARM64_T6041"
+  },
+  "online_ms": null,
+  "operations": null,
+  "promotion_eligible": false,
+  "python": "3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)]",
+  "python_tests_passed": 126,
+  "python_tests_skipped": 2,
+  "rust_test_executions_passed": 73,
+  "rust_tests_passed": 72,
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)",
+  "schema_version": 1,
+  "scope": "synthetic degree-9 controls; no performance qualification",
+  "site_tests_passed": 39,
+  "speedup": null,
+  "worker_controls_passed": 35
+}

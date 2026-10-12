@@ -1,0 +1,141 @@
+{
+  "schema": "koblitz_stage188_final.v1",
+  "candidate_commit": "a52376ba628944c1feba19b2ac2b4d20e3d1149d",
+  "verifier_commit": "65d649c53ae5c695a6d57f0223648c371cf8eb71",
+  "finalizer_commit": "1b6f839952cd338ea9611ca871a2c36bbb488144",
+  "decision_status": "REJECTED_CONFIRMATION",
+  "candidate_selected": false,
+  "runtime_default": "dense exact pair selection plus linear symbolic-reducer scan plus five-column BlockTables",
+  "claim_boundary": "One opened n=59 decomposition target and a solver-stage engineering experiment. Direct MITM and full automorphism-aware rho boundaries are unchanged; no relation-yield, full-DLP, external-reproduction, novelty, or SOTA claim.",
+  "conflicts": null,
+  "screen": {
+    "all_correct": true,
+    "pair_ratios": [
+      {
+        "repeat": 1,
+        "indexed_over_linear": {
+          "wall": 0.7556404386091228,
+          "core": 0.9824563666357468,
+          "rss": 1.0193955513641353
+        }
+      }
+    ],
+    "median_paired_ratios": {
+      "wall": 0.7556404386091228,
+      "core": 0.9824563666357468,
+      "rss": 1.0193955513641353
+    },
+    "passed_performance_gate": true,
+    "status": "CONTINUE_TO_CONFIRMATION"
+  },
+  "confirmation": {
+    "all_correct": true,
+    "pair_ratios": [
+      {
+        "repeat": 1,
+        "indexed_over_linear": {
+          "wall": 0.9753647998052224,
+          "core": 0.9668145166775114,
+          "rss": 1.1435836215972326
+        }
+      },
+      {
+        "repeat": 2,
+        "indexed_over_linear": {
+          "wall": 1.0764021256159175,
+          "core": 0.97253054954151,
+          "rss": 0.8638790304311712
+        }
+      },
+      {
+        "repeat": 3,
+        "indexed_over_linear": {
+          "wall": 1.1647014386923682,
+          "core": 1.0275222431854736,
+          "rss": 0.9794834605305062
+        }
+      }
+    ],
+    "median_paired_ratios": {
+      "wall": 1.0764021256159175,
+      "core": 0.97253054954151,
+      "rss": 0.9794834605305062
+    },
+    "passed_performance_gate": false,
+    "status": "REJECTED_CONFIRMATION"
+  },
+  "mechanism": {
+    "indexed_divisor_tests": 103532494,
+    "indexed_linear_tests": 0,
+    "indexed_submask_lookups": 103532494,
+    "linear_divisor_tests": 4190633182,
+    "lookup_reduction_percent": 97.52943076848858,
+    "reducer_index_bytes_max": 1062392,
+    "structural_f4_counts_identical": true
+  },
+  "measured_stage_charge": {
+    "components": 20,
+    "wall_seconds_sum": 898.7045557500002,
+    "total_core_seconds_sum": 3270.695651,
+    "peak_rss_bytes_max": 4965466112,
+    "single_core_seconds": null
+  },
+  "cumulative_measured_lower_bound": {
+    "components": 528,
+    "wall_seconds_sum": 22707.58584575,
+    "total_core_seconds_sum": 55657.957869000005,
+    "peak_rss_bytes_max": 6310576128,
+    "single_core_seconds": null
+  },
+  "complete_campaign_cost": null,
+  "unmetered_components": [
+    "initial development compilation and tests before the native meter existed",
+    "failed attempt to invoke the cargo-test-only hashed runner as a normal example binary",
+    "one bootstrap build of the native meter",
+    "final result write and final verification after their charged dry-run controls"
+  ],
+  "artifacts": {
+    "confirmation_result": {
+      "path": "development/confirmation/result.json",
+      "bytes": 60326,
+      "sha256": "73d900058ba1fd0ded0751ad0575e8b98b9246dbeafac48a80c8c3ddd1853954"
+    },
+    "confirmation_verification": {
+      "path": "development/confirmation/verification.json",
+      "bytes": 193,
+      "sha256": "54a273af6632af6724a673f4d5d7af7a20ad4845f6ce4496ea5bc9a9cd7c0cd7"
+    },
+    "protocol": {
+      "path": "PROTOCOL.md",
+      "bytes": 6760,
+      "sha256": "41166fe6ba3cbd76a2430a53ad5d93a2ffeb5f93108c26eaf4d69687c41da3f1"
+    },
+    "rejected_patch": {
+      "path": "rejected-stacked-dense-reducer.patch",
+      "bytes": 17945,
+      "sha256": "629a876825479a32835c767e72bdc4fff1682812d5f1660ec9f9a5285fbfab6b"
+    },
+    "screen_corrected_verification": {
+      "path": "development/screen/verification-correction.json",
+      "bytes": 193,
+      "sha256": "a2816113c66c2165bc86dd6488b1ba05055fd80aae2c3bcb91d3d213e5e99407"
+    },
+    "screen_original_verification": {
+      "path": "development/screen/verification.json",
+      "bytes": 227,
+      "sha256": "4a8fa51b1c6a3404f3d3f8604ec76d00bd91bb8da9b7a1fddbd34ea416e0aaf1"
+    },
+    "screen_result": {
+      "path": "development/screen/result.json",
+      "bytes": 22302,
+      "sha256": "87cc51b5743918b2922399d67e954a6a6d6f24728951fadd8c6991d657f06371"
+    },
+    "verifier_correction_note": {
+      "path": "VERIFIER_CORRECTION.md",
+      "bytes": 1270,
+      "sha256": "c8535d24039ddbe96f2d60fca444d3b3861d2ea9f3ad8b1e99ab1a38b50152ce"
+    }
+  },
+  "all_seven_gates_passed": false,
+  "koblitz_index_calculus_sota": false
+}

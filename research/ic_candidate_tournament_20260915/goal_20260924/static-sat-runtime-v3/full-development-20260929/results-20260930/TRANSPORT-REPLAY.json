@@ -1,0 +1,51 @@
+{
+  "archive_sha256": "86e84fa1a31d152ef93a88837103ca578862269f333c89f44df26c472030ed84",
+  "execution_sha256": "4e6547c03cfe1fa54ae9a994c160e5d4afa987659dc72880c651885a0e9e8fa9",
+  "native_producer_rerun": false,
+  "result": {
+    "attempts": 149,
+    "candidate_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h0ef1e080d97e",
+    "columns": 29,
+    "complete_source_bound": true,
+    "exact_feasible": 37,
+    "final_rank": 29,
+    "fresh_target_qualified": false,
+    "headline_online_admissible": false,
+    "online_attempt_wall_ns": 708643292,
+    "online_endpoint_admissible": true,
+    "online_phases_ns": {
+      "target_descent": 12375,
+      "target_pdp": 706185958,
+      "target_query": 333000,
+      "target_recovery_check": 126667,
+      "target_relation_check": 1985292
+    },
+    "online_speedup": null,
+    "online_wall_ns": 708643292,
+    "promotion_eligible": false,
+    "recovered_scalar": "24886",
+    "run_id": "IC1N17Ckb1fb62PDP3satRCsampleLAgaussTDpdpISO0h0ef1e080d97eWdf5c09464bedR0",
+    "same_point_rho_audited": false,
+    "schema_version": 3,
+    "scientific_control_only": true,
+    "solved_targets": 1,
+    "status": "AUDITED_COMPLETE_SINGLE_ARM",
+    "statuses": {
+      "CONFLICT_BUDGET_INCONCLUSIVE": 6,
+      "SOURCE_UNSAT": 106,
+      "VALID_POINT_WITNESS": 37
+    },
+    "target_attempts": 1,
+    "target_statuses": {
+      "VALID_POINT_WITNESS": 1
+    },
+    "verified_relations": 37,
+    "witness_rate_wilson95": [
+      "0.185862",
+      "0.323433"
+    ],
+    "workload_id": "df5c09464bed"
+  },
+  "schema_version": 3,
+  "status": "PASS"
+}

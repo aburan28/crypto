@@ -1,0 +1,85 @@
+[
+  {
+    "id": "incumbent",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "combined_batch8",
+    "parent_round": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0003b",
+    "hypothesis": "Previous selected implementation, admitted only after parent promotion."
+  },
+  {
+    "id": "fast_lift",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round4-sources/fast_lift",
+    "parent": "incumbent",
+    "hypothesis": "Preserve exact factor-base points while avoiding allocating half-trace arithmetic.",
+    "falsification": "Any bad or unmatched certificate; or failure of both-metric confirmation/replay gate."
+  },
+  {
+    "id": "folded",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round4-sources/folded",
+    "parent": "incumbent",
+    "hypothesis": "Build the same pair-sum coverage from signed Frobenius orbit representatives.",
+    "falsification": "Any bad or unmatched certificate; or failure of both-metric confirmation/replay gate."
+  },
+  {
+    "id": "folded_lift",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round4-sources/folded_lift",
+    "parent": "incumbent",
+    "hypothesis": "Measure both independently validated mechanisms together.",
+    "falsification": "Any bad or unmatched certificate; or failure of both-metric confirmation/replay gate."
+  },
+  {
+    "id": "folded_lift_dense",
+    "config": {
+      "batch_trials": 8,
+      "linear_algebra": "dense",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round4-sources/folded_lift",
+    "parent": "folded_lift",
+    "hypothesis": "Test one residual scheduling/linear-algebra cost on the combined source.",
+    "falsification": "Any bad or unmatched certificate; or failure of both-metric confirmation/replay gate."
+  },
+  {
+    "id": "folded_lift_batch4",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round4-sources/folded_lift",
+    "parent": "folded_lift",
+    "hypothesis": "Test one residual scheduling/linear-algebra cost on the combined source.",
+    "falsification": "Any bad or unmatched certificate; or failure of both-metric confirmation/replay gate."
+  }
+]

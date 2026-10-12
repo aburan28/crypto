@@ -1,0 +1,25 @@
+{
+  "classification": "engineering",
+  "full_ic_cost": null,
+  "production_solver_cost": null,
+  "rho_ratio": null,
+  "runs": [
+    {
+      "gate": "PASS",
+      "manifest_sha256": "3cb42aced22f096d5258441ea0a28b77e94c84be3958181a931cfd618386ba9d",
+      "path": "run_01",
+      "results_sha256": "b2f91ca04598a23ef5e399d20c183e79e6c08465d7af21d4f5270989707e51f3"
+    },
+    {
+      "gate": "REJECTED",
+      "manifest_sha256": "4407ea44a5e57eaef699dc47637a61dc43ddc51af651fad2d24b9af17b2349a3",
+      "path": "run_02",
+      "results_sha256": "7860117d74ca0802c846e8f77ff326d68959bdd1b0fafda411d6d31e116f71a9"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "Complete standalone generated Boolean search; fixed-quadratic representation, identical logical search. No production or cryptanalytic claim.",
+  "source_lineage_sha256": "d2e172cb96634e4f93d607c60354438b9dc5f69027ba33d797153c181a8d8f7a",
+  "summary_sha256": "33902fbb582c408226f748ad650dff417f73422bc630beaa3238e404f25a120f",
+  "universal_two_run_gate": "REJECTED"
+}

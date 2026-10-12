@@ -1,0 +1,66 @@
+{
+  "status": "PASS",
+  "python": "3.12.14",
+  "source_sha256": "5ac97ca9ef09e2cee1473b2d0e0eecd7cd3f65ee01e8fedb9abe21ad159e730b",
+  "checks": {
+    "counts": {
+      "n6_d3": 42,
+      "n8_d4": 163,
+      "n30_d4": 31931,
+      "n31_d4": 36457
+    },
+    "compared_rows": 180,
+    "independent_rows": 93,
+    "dependent_rows": 87,
+    "budget_rejections": 3,
+    "wide_index_columns": 8140616224
+  },
+  "measurements": [
+    {
+      "variables": 30,
+      "max_degree": 4,
+      "indexable_columns": 31931,
+      "rows": 256,
+      "input_terms_per_row": 64,
+      "rank": 256,
+      "stored_pivot_terms": 18544,
+      "peak_row_terms": 312,
+      "xor_steps": 36,
+      "index_width_bytes": 4,
+      "packed_pivot_payload_bytes": 74176,
+      "measured_python_heap_peak_bytes": 122292,
+      "unbounded_dense_row_bytes": 134217728,
+      "bounded_dense_row_bytes": 3992,
+      "elapsed_seconds": 0.150831
+    },
+    {
+      "variables": 31,
+      "max_degree": 4,
+      "indexable_columns": 36457,
+      "rows": 256,
+      "input_terms_per_row": 64,
+      "rank": 256,
+      "stored_pivot_terms": 18352,
+      "peak_row_terms": 248,
+      "xor_steps": 32,
+      "index_width_bytes": 4,
+      "packed_pivot_payload_bytes": 73408,
+      "measured_python_heap_peak_bytes": 121460,
+      "unbounded_dense_row_bytes": 268435456,
+      "bounded_dense_row_bytes": 4558,
+      "elapsed_seconds": 0.136097
+    }
+  ],
+  "storage_only": {
+    "variables": 30,
+    "max_degree": 4,
+    "rows": 39001,
+    "terms_per_row": 64,
+    "packed_payload_bytes": 9984256,
+    "measured_python_heap_peak_bytes": 13621168,
+    "unbounded_dense_row_bytes": 134217728,
+    "elapsed_seconds": 11.451251,
+    "elimination": "not run"
+  },
+  "interpretation": "Synthetic matrices; 39,001 rows held without elimination; no full solver or cryptographic workload."
+}

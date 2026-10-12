@@ -175,7 +175,7 @@ pub fn naive_point_count(p: &BigUint, a: &BigUint, b: &BigUint) -> BigUint {
 /// `p ~ 2²⁰`.  Returns `None` if `p ≢ 1 mod 6` (no rational order-6
 /// automorphism, no sextic twist family).
 pub fn enumerate_twists(p: &BigUint, b: &BigUint) -> Option<Vec<TwistInfo>> {
-    if &(p % 6u32) != &BigUint::one() {
+    if (p % 6u32) != BigUint::one() {
         return None;
     }
     let twist_bs = twist_coefficients(p, b)?;
@@ -203,8 +203,8 @@ pub fn enumerate_twists(p: &BigUint, b: &BigUint) -> Option<Vec<TwistInfo>> {
 /// **Trial-division factorisation** of small `BigUint`.  Stops if a
 /// prime factor exceeds `sqrt(n)`; if the cofactor at that point is
 /// > 1, it is treated as a single prime factor (correct because any
-/// remaining composite would have a prime factor ≤ sqrt(n) we'd have
-/// already found).
+/// > remaining composite would have a prime factor ≤ sqrt(n) we'd have
+/// > already found).
 pub fn factorise_small(n: &BigUint) -> Vec<(BigUint, u32)> {
     if n.is_zero() || n == &BigUint::one() {
         return Vec::new();

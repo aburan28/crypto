@@ -1,0 +1,439 @@
+diff --git a/src/cryptanalysis/inherited_f4.rs b/src/cryptanalysis/inherited_f4.rs
+index 9ddccf5b9..6ebcd44fb 100644
+--- a/src/cryptanalysis/inherited_f4.rs
++++ b/src/cryptanalysis/inherited_f4.rs
+@@ -146,11 +146,209 @@ const DELETED: u32 = u32::MAX;
+ /// `m ∖ v`), and a materialisation XORs them together.
+ #[derive(Debug)]
+ struct LayoutStep {
+-    map: Rc<Vec<u32>>,
++    map: Rc<ColMap>,
+     /// Composed maps from earlier epochs to the epoch this step maps *to*,
+     /// built on demand.  Shared with every basis below this step, so a
+     /// child composes one step on top of what its parent already built.
+-    to_here: RefCell<HashMap<u32, Rc<Vec<u32>>>>,
++    to_here: RefCell<HashMap<u32, Rc<ColMap>>>,
++}
++
++/// No single output offset: the chunk's live columns do not land on
++/// consecutive columns.
++const SCATTERED: u32 = u32::MAX;
++
++/// A column map (old column → new column or [`DELETED`]) with what a
++/// rewrite needs to move a row a 64-column word at a time.  For each word
++/// of the source layout: `live`, the columns the map keeps, and `out`, the
++/// first target when the kept columns land on consecutive targets in order
++/// ([`SCATTERED`] otherwise).  A deletion step, and any composition of
++/// deletions, is consecutive on every word, so the word's image is its
++/// kept bits compressed together (`pext`) and shifted into place; a fold or
++/// a layout extension is not, and goes bit by bit, without visiting the
++/// deleted bits.
++#[derive(Debug)]
++struct ColMap {
++    map: Vec<u32>,
++    live: Vec<u64>,
++    out: Vec<u32>,
++}
++
++impl ColMap {
++    /// A map whose per-word masks its builder already knows.
++    fn from_parts(map: Vec<u32>, live: Vec<u64>, out: Vec<u32>) -> Self {
++        debug_assert_eq!(live.len(), map.len().div_ceil(64));
++        debug_assert_eq!(out.len(), live.len());
++        Self { map, live, out }
++    }
++
++    /// A map that deletes nothing and is not known to be consecutive (a
++    /// fold, or a layout extension): every column live, every word
++    /// scattered.
++    fn without_deletions(map: Vec<u32>) -> Self {
++        debug_assert!(map.iter().all(|&c| c != DELETED));
++        let words = map.len().div_ceil(64);
++        let mut live = vec![u64::MAX; words];
++        if !map.len().is_multiple_of(64) {
++            live[words - 1] = (1u64 << (map.len() % 64)) - 1;
++        }
++        Self {
++            map,
++            live,
++            out: vec![SCATTERED; words],
++        }
++    }
++
++    /// The masks of any map, read off it, consecutive words included; the
++    /// tests' reference for the masks the builders above take on the way.
++    #[cfg(test)]
++    fn new(map: Vec<u32>) -> Self {
++        let words = map.len().div_ceil(64);
++        let mut live = Vec::with_capacity(words);
++        let mut out = Vec::with_capacity(words);
++        for chunk in map.chunks(64) {
++            let (mask, first) = chunk_masks(chunk.iter().copied());
++            live.push(mask);
++            out.push(first);
++        }
++        Self { map, live, out }
++    }
++
++    /// `step ∘ prev`, with its live masks taken in the same pass as the
++    /// gather.  `DELETED` is `u32::MAX`, out of range of every map, so
++    /// `get` sends it (and only it) to `DELETED` without a separate test.
++    /// Every word is marked scattered: testing composed words for
++    /// consecutive targets cost more than `pext` saved on them.
++    fn compose(step: &[u32], prev: &[u32]) -> Self {
++        let words = prev.len().div_ceil(64);
++        let mut map = Vec::with_capacity(prev.len());
++        let mut live = Vec::with_capacity(words);
++        let mut out = Vec::with_capacity(words);
++        for chunk in prev.chunks(64) {
++            let start = map.len();
++            map.extend(
++                chunk
++                    .iter()
++                    .map(|&c| step.get(c as usize).copied().unwrap_or(DELETED)),
++            );
++            let mask = map[start..]
++                .iter()
++                .enumerate()
++                .fold(0u64, |m, (b, &c)| m | (u64::from(c != DELETED) << b));
++            live.push(mask);
++            out.push(SCATTERED);
++        }
++        Self { map, live, out }
++    }
++}
++
++/// One word of a map: the live columns as a mask, and the first target if
++/// the live columns land on consecutive targets in order (`SCATTERED`
++/// otherwise).
++#[cfg(test)]
++fn chunk_masks(chunk: impl Iterator<Item = u32>) -> (u64, u32) {
++    let mut mask = 0u64;
++    let mut first = SCATTERED;
++    let mut consecutive = true;
++    let mut next = 0u32;
++    for (b, c) in chunk.enumerate() {
++        if c == DELETED {
++            continue;
++        }
++        mask |= 1u64 << b;
++        if first == SCATTERED {
++            first = c;
++            next = c;
++        }
++        consecutive &= c == next;
++        next = c.wrapping_add(1);
++    }
++    (mask, if consecutive { first } else { SCATTERED })
++}
++
++/// Scatter a row's words `live` (source layout words `lead ..`) through
++/// `map`, XORing each kept bit into `staging` at its target; returns the
++/// lowest word a kept bit was written to (`usize::MAX` if none).  Uses
++/// `pext` on a consecutive word where the CPU has BMI2 and goes bit by
++/// bit otherwise; both write the same bits and return the same word.
++fn remap_row(staging: &mut [u64], live: &[u64], lead: usize, map: &ColMap) -> usize {
++    #[cfg(target_arch = "x86_64")]
++    {
++        static BMI2: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
++        if *BMI2.get_or_init(|| std::arch::is_x86_feature_detected!("bmi2")) {
++            // SAFETY: reached only when the CPU reports BMI2.
++            return unsafe { remap_row_bmi2(staging, live, lead, map) };
++        }
++    }
++    remap_row_body::<false>(staging, live, lead, map)
++}
++
++#[cfg(target_arch = "x86_64")]
++#[target_feature(enable = "bmi2")]
++unsafe fn remap_row_bmi2(staging: &mut [u64], live: &[u64], lead: usize, map: &ColMap) -> usize {
++    remap_row_body::<true>(staging, live, lead, map)
++}
++
++#[inline(always)]
++fn remap_row_body<const PEXT: bool>(
++    staging: &mut [u64],
++    live: &[u64],
++    lead: usize,
++    map: &ColMap,
++) -> usize {
++    let mut lo = usize::MAX;
++    for (i, &word) in live.iter().enumerate() {
++        let k = lead + i;
++        let keep = map.live[k];
++        let mut bits = word & keep;
++        if bits == 0 {
++            continue;
++        }
++        #[cfg(target_arch = "x86_64")]
++        if PEXT && map.out[k] != SCATTERED {
++            // SAFETY: `PEXT` is set only in `remap_row_bmi2`, which is
++            // compiled for and called on a CPU with BMI2.
++            let packed = unsafe { std::arch::x86_64::_pext_u64(bits, keep) };
++            let out = map.out[k] as usize;
++            let (w, shift) = (out / 64, out % 64);
++            staging[w] ^= packed << shift;
++            if shift != 0 && packed >> (64 - shift) != 0 {
++                staging[w + 1] ^= packed >> (64 - shift);
++            }
++            lo = lo.min((out + packed.trailing_zeros() as usize) / 64);
++            continue;
++        }
++        let base = k * 64;
++        let mut scatter = |c: u32| {
++            let w = c as usize / 64;
++            staging[w] ^= 1u64 << (c % 64);
++            lo = lo.min(w);
++        };
++        // A whole word of the map at once, so the lookups below need no
++        // bounds check; only a layout's last word is short.  Deleted
++        // columns were masked off above.
++        if let Some(chunk) = map.get(base..base + 64) {
++            let chunk: &[u32; 64] = chunk.try_into().expect("64 entries");
++            while bits != 0 {
++                let b = bits.trailing_zeros() as usize & 63;
++                bits &= bits - 1;
++                scatter(chunk[b]);
++            }
++        } else {
++            while bits != 0 {
++                let b = bits.trailing_zeros() as usize;
++                bits &= bits - 1;
++                scatter(map[base + b]);
++            }
++        }
++    }
++    lo
++}
++
++impl std::ops::Deref for ColMap {
++    type Target = [u32];
++    fn deref(&self) -> &[u32] {
++        &self.map
++    }
+ }
+ 
+ /// A child's generator system, computed once per node and shared by every
+@@ -910,7 +1108,7 @@ impl ReducedBasis {
+     /// below that step shares, so a node composes at most one step on top
+     /// of what its ancestors already built.  Index bookkeeping, not
+     /// charged, as the from-scratch path's column indexing never was.
+-    fn composite_to(&self, to: u32, from: u32) -> Rc<Vec<u32>> {
++    fn composite_to(&self, to: u32, from: u32) -> Rc<ColMap> {
+         debug_assert!(from < to);
+         let step = &self.history[(to - 1) as usize];
+         if from + 1 == to {
+@@ -920,23 +1118,14 @@ impl ReducedBasis {
+             return c.clone();
+         }
+         let prev = self.composite_to(to - 1, from);
+-        // `DELETED` is `u32::MAX`, out of range of every map, so `get`
+-        // sends it (and only it) to `DELETED` without a separate test
+-        let map = &step.map[..];
+-        // an `Rc<Vec>` takes the collected buffer as it is; an `Rc<[_]>`
+-        // would copy it into a fresh allocation
+-        let composed: Rc<Vec<u32>> = Rc::new(
+-            prev.iter()
+-                .map(|&c| map.get(c as usize).copied().unwrap_or(DELETED))
+-                .collect(),
+-        );
++        let composed = Rc::new(ColMap::compose(&step.map, &prev));
+         step.to_here.borrow_mut().insert(from, composed.clone());
+         composed
+     }
+ 
+     /// The composed map from the columns of epoch `from` to the current
+     /// layout.
+-    fn composite(&self, from: u32) -> Rc<Vec<u32>> {
++    fn composite(&self, from: u32) -> Rc<ColMap> {
+         self.composite_to(self.epoch(), from)
+     }
+ 
+@@ -978,34 +1167,7 @@ impl ReducedBasis {
+                 staging.resize(words, 0);
+             }
+             let staging = &mut staging[..words];
+-            let mut lo = usize::MAX;
+-            let mut scatter = |c: u32| {
+-                if c != DELETED {
+-                    let w = c as usize / 64;
+-                    staging[w] ^= 1u64 << (c % 64);
+-                    lo = lo.min(w);
+-                }
+-            };
+-            for (i, &word) in live.iter().enumerate() {
+-                let base = (lead + i) * 64;
+-                let mut bits = word;
+-                // A whole word of the map at once, so the lookups below
+-                // need no bounds check; only a layout's last word is short.
+-                if let Some(chunk) = map.get(base..base + 64) {
+-                    let chunk: &[u32; 64] = chunk.try_into().expect("64 entries");
+-                    while bits != 0 {
+-                        let b = bits.trailing_zeros() as usize & 63;
+-                        bits &= bits - 1;
+-                        scatter(chunk[b]);
+-                    }
+-                } else {
+-                    while bits != 0 {
+-                        let b = bits.trailing_zeros() as usize;
+-                        bits &= bits - 1;
+-                        scatter(map[base + b]);
+-                    }
+-                }
+-            }
++            let lo = remap_row(staging, live, lead, &map);
+             if lo == usize::MAX {
+                 return None;
+             }
+@@ -1176,7 +1338,7 @@ impl ReducedBasis {
+ 
+     /// Adopt a new column layout: record the step, remap every pivot
+     /// column and rebuild the pivot index.  Rows are left where they are.
+-    fn adopt_layout(&mut self, columns: Vec<u64>, map: Vec<u32>) {
++    fn adopt_layout(&mut self, columns: Vec<u64>, map: ColMap) {
+         let step = LayoutStep {
+             map: Rc::new(map),
+             to_here: RefCell::new(HashMap::default()),
+@@ -1276,16 +1438,28 @@ impl ReducedBasis {
+         let n_old = self.columns.len();
+         let mut map: Vec<u32> = vec![DELETED; n_old];
+         let mut new_columns: Vec<u64> = Vec::with_capacity(n_old);
+-        if value {
++        let map = if value {
+             fold_layout(&self.columns, bit, &mut new_columns, &mut map);
++            ColMap::without_deletions(map)
+         } else {
+-            for (k, &m) in self.columns.iter().enumerate() {
+-                if m & bit == 0 {
+-                    map[k] = new_columns.len() as u32;
+-                    new_columns.push(m);
++            // A deletion keeps the surviving columns in order, so every
++            // word of the map lands on consecutive targets.
++            let mut live = Vec::with_capacity(n_old.div_ceil(64));
++            let mut first = Vec::with_capacity(n_old.div_ceil(64));
++            for (w, chunk) in self.columns.chunks(64).enumerate() {
++                let mut mask = 0u64;
++                first.push(new_columns.len() as u32);
++                for (b, &m) in chunk.iter().enumerate() {
++                    if m & bit == 0 {
++                        map[w * 64 + b] = new_columns.len() as u32;
++                        new_columns.push(m);
++                        mask |= 1u64 << b;
++                    }
+                 }
++                live.push(mask);
+             }
+-        }
++            ColMap::from_parts(map, live, first)
++        };
+         debug_assert!(new_columns.windows(2).all(|w| {
+             cmp_mono(F2BoolMono::from_mask(w[0]), F2BoolMono::from_mask(w[1]))
+                 == std::cmp::Ordering::Greater
+@@ -1633,7 +1807,7 @@ impl ReducedBasis {
+                 j += 1;
+             }
+         }
+-        self.adopt_layout(columns, map);
++        self.adopt_layout(columns, ColMap::without_deletions(map));
+         placed
+     }
+ 
+@@ -1763,6 +1937,98 @@ mod tests {
+         }
+     }
+ 
++    /// Every way of moving a row through a column map writes the same bits
++    /// and reports the same lowest word as the plain bit-by-bit scatter.
++    #[test]
++    fn remap_row_matches_the_bitwise_scatter() {
++        let mut seed = 0x0dd_b1a5_e5c0_ffeeu64;
++        for round in 0..300u32 {
++            let n_old = 1 + (xorshift(&mut seed) % 400) as usize;
++            // deletion-like (monotone), fold-like (collisions) or shuffled
++            let mut next = 0u32;
++            let map: Vec<u32> = (0..n_old)
++                .map(|_| {
++                    let r = xorshift(&mut seed);
++                    match round % 3 {
++                        0 if r.is_multiple_of(5) => DELETED,
++                        0 => {
++                            next += 1 + (r.is_multiple_of(2) && round.is_multiple_of(2)) as u32;
++                            next - 1
++                        }
++                        1 if r.is_multiple_of(7) => DELETED,
++                        1 => (r % (n_old as u64)) as u32 / 2,
++                        _ => (r % (2 * n_old as u64)) as u32,
++                    }
++                })
++                .collect();
++            let n_new = map
++                .iter()
++                .filter(|&&c| c != DELETED)
++                .max()
++                .map_or(1, |&c| c as usize + 1);
++            let words = n_new.div_ceil(64);
++            let cm = ColMap::new(map.clone());
++            let row_words = n_old.div_ceil(64);
++            let lead = (xorshift(&mut seed) as usize) % row_words;
++            let mut live: Vec<u64> = (lead..row_words).map(|_| xorshift(&mut seed)).collect();
++            if let Some(last) = live.last_mut() {
++                if !n_old.is_multiple_of(64) {
++                    *last &= (1u64 << (n_old % 64)) - 1;
++                }
++            }
++            // reference
++            let mut want = vec![0u64; words];
++            let mut want_lo = usize::MAX;
++            for (i, &w) in live.iter().enumerate() {
++                for b in 0..64 {
++                    if w >> b & 1 == 1 {
++                        let c = map[(lead + i) * 64 + b];
++                        if c != DELETED {
++                            want[c as usize / 64] ^= 1u64 << (c % 64);
++                            want_lo = want_lo.min(c as usize / 64);
++                        }
++                    }
++                }
++            }
++            let mut got = vec![0u64; words];
++            assert_eq!(remap_row_body::<false>(&mut got, &live, lead, &cm), want_lo);
++            assert_eq!(got, want, "portable, round {round}");
++            let mut got = vec![0u64; words];
++            assert_eq!(remap_row(&mut got, &live, lead, &cm), want_lo);
++            assert_eq!(got, want, "dispatched, round {round}");
++        }
++    }
++
++    /// The masks a step builds while it lays out a child agree with the
++    /// ones read off its map: live columns exactly, and a consecutive
++    /// word's offset wherever it has a live column.
++    #[test]
++    fn step_masks_match_masks_read_off_the_map() {
++        let mut seed = 0x6a09_e667_f3bc_c908u64;
++        for _ in 0..40 {
++            let n_vars = 10;
++            let system = vec![random_poly(n_vars, 3, 12, &mut seed)];
++            let Some((basis, _)) = ReducedBasis::from_system(&system, n_vars, 3) else {
++                continue;
++            };
++            let var = (xorshift(&mut seed) % n_vars as u64) as u32;
++            for value in [false, true] {
++                let (child, _) = basis.specialise(var, value);
++                if child.refuted || child.history.len() <= basis.history.len() {
++                    continue;
++                }
++                let step = &child.history[basis.history.len()].map;
++                let read = ColMap::new(step.map.clone());
++                assert_eq!(step.live, read.live);
++                for w in 0..read.live.len() {
++                    if step.out[w] != SCATTERED && read.live[w] != 0 {
++                        assert_eq!(step.out[w], read.out[w], "word {w}");
++                    }
++                }
++            }
++        }
++    }
++
+     #[test]
+     fn xor_words_is_wordwise_xor_over_the_common_length() {
+         let mut seed = 0x9e37_79b9_7f4a_7c15u64;

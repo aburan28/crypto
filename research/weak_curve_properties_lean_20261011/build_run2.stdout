@@ -1,0 +1,43 @@
+⚠ [1143/1168] Replayed WeakCurveProperties.Conductor
+warning: WeakCurveProperties/Conductor.lean:44:2: Try this: 
+  letI̵
+
+The goal is a proposition, so `let` is preferred over `letI`.
+The difference between `let` and `letI` is that `letI` inlines the value.
+But this is not relevant for proofs because of proof irrelevance.
+
+Note: This linter can be disabled with `set_option linter.style.haveILetI false`
+warning: WeakCurveProperties/Conductor.lean:56:2: Try this: 
+  letI̵
+
+The goal is a proposition, so `let` is preferred over `letI`.
+The difference between `let` and `letI` is that `letI` inlines the value.
+But this is not relevant for proofs because of proof irrelevance.
+
+Note: This linter can be disabled with `set_option linter.style.haveILetI false`
+✖ [1499/1503] Building WeakCurveProperties.Torsion (19s)
+trace: .> LEAN_PATH=/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/Cli/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/batteries/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/Qq/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/aesop/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/proofwidgets/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/importGraph/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/plausible/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/mathlib/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/lib/lean /Users/adamburan/.elan/toolchains/leanprover--lean4---v4.34.1/bin/lean /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/WeakCurveProperties/Torsion.lean -o /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/lib/lean/WeakCurveProperties/Torsion.olean -i /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/lib/lean/WeakCurveProperties/Torsion.ilean -c /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/ir/WeakCurveProperties/Torsion.c --setup /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/ir/WeakCurveProperties/Torsion.setup.json --json
+error: WeakCurveProperties/Torsion.lean:13:14: failed to synthesize instance of type class
+  AddCommMonoid ℕ
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+error: WeakCurveProperties/Torsion.lean:33:10: typeclass instance problem is stuck
+  AddGroup ?m.103
+
+Note: Lean will not try to resolve this typeclass instance problem because the type argument to `AddGroup` is a metavariable. This argument must be fully determined before Lean will try to resolve the typeclass.
+
+Hint: Adding type annotations and supplying implicit arguments to functions can give Lean more information for typeclass resolution. For example, if you have a variable `x` that you intend to be a `Nat`, but Lean reports it as having an unresolved type like `?m`, replacing `x` with `(x : Nat)` can get typeclass resolution un-stuck.
+✖ [1500/1503] Building WeakCurveProperties.Algebra (20s)
+trace: .> LEAN_PATH=/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/Cli/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/batteries/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/Qq/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/aesop/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/proofwidgets/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/importGraph/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/plausible/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/packages/mathlib/.lake/build/lib/lean:/Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/lib/lean /Users/adamburan/.elan/toolchains/leanprover--lean4---v4.34.1/bin/lean /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/WeakCurveProperties/Algebra.lean -o /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/lib/lean/WeakCurveProperties/Algebra.olean -i /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/lib/lean/WeakCurveProperties/Algebra.ilean -c /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/ir/WeakCurveProperties/Algebra.c --setup /Volumes/SSD990/crypto/worktrees/iso1-theorem-20261009/research/weak_curve_properties_lean_20261011/.lake/build/ir/WeakCurveProperties/Algebra.setup.json --json
+error: WeakCurveProperties/Algebra.lean:48:35: unexpected token ':='; expected ':'
+error: WeakCurveProperties/Algebra.lean:49:35: unexpected token ':='; expected ':'
+error: WeakCurveProperties/Algebra.lean:50:35: unexpected token ':='; expected ':'
+error: WeakCurveProperties/Algebra.lean:51:35: unexpected token ':='; expected ':'
+error: WeakCurveProperties/Algebra.lean:52:35: unexpected token ':='; expected ':'
+error: WeakCurveProperties/Algebra.lean:53:35: unexpected token ':='; expected ':'
+error: WeakCurveProperties/Algebra.lean:54:36: unexpected token ':='; expected ':'
+error: WeakCurveProperties/Algebra.lean:55:36: unexpected token ':='; expected ':'
+✔ [1501/1503] Built WeakCurveProperties.CyclicTwists (23s)
+Some required targets logged failures:
+- WeakCurveProperties.Torsion
+- WeakCurveProperties.Algebra

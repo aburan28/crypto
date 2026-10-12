@@ -1,0 +1,158 @@
+# Generic scientific admission — 2026-09-25
+
+The generic bounded worker now exports the actual collection/descent dispatch,
+stored relation matrix and per-batch LA history. Independent Python arithmetic
+reconstructs each declared factor base and every matrix row, and reuses the
+existing query-law, group-certificate and exclusive-clock checkers. A controlled
+build binds source and dependency contents, literal include inputs, compiler,
+flags and executable. Undeclared algorithm/cache environment overrides fail
+before measurement. Ordinary unbound builds remain diagnostic-only.
+
+This is **accounting/correctness admission**, not a performance qualification.
+It neither promotes a candidate nor consumes an improvement round. The qualified
+optimized incumbent and sealed round-one result remain unchanged; one of three
+rounds has completed without a qualifying challenger, and two remain.
+
+## Retained evidence
+
+The [protocol](PROTOCOL.md) fixes the resource limits, original panel, supplementary
+controls and accounting mapping. [Final replay](replay-summary.json) independently
+passes **69/69** controls: **44 complete IC solves, two complete rho solves, nine
+intentional preparation failures, and fourteen inventory-only jobs**. Inventory
+controls cover factor, divisor, Frobenius union, sampled subgroup orbits, torsion
+saturation and pruning, including nested constructions. The two supplementary
+sparse-core controls actually execute block Wiedemann; a sparse pipeline whose
+filter eliminates all columns is not reported as having executed that core.
+Four supplementary cases retain paid failed LA attempts, both at terminal
+failure and before later recovery. Eleven distinct environment-override controls
+are rejected before measurement.
+
+Local validation runs 165 Python tests (163 pass; two existing platform skips), eight
+distinct release Rust controls and 39 site tests. The two worker controls ignored
+by the first Rust test filter were executed explicitly in the subsequent command.
+Adversarial tests keep the original group certificate valid while changing the
+claimed solver or stored matrix, and require the stricter adapter to reject it.
+A [fresh archive extraction](fresh-restore-receipt.json) verifies all 1,170 file
+hashes and replays all 69 controls, reproducing 53 canonical IC run records.
+Only the separately measured external audit time changes on replay.
+The subsequent [type-edge review](type-edge-before.json) found four malformed
+boolean/integer substitutions accepted by Python's ordinary equality. Canonical
+typed comparisons and strict counter checks now reject them; the strengthened
+checker replays the same retained worker outputs without rerunning the workers.
+
+A subsequent [run-key audit](run-key-audit-before.json) found only 49 unique keys
+among those 53 records: inactive window settings correctly normalized to the
+same candidate, but the caller silently assigned every execution R0. The
+[corrected exports](run-records-v2.json.gz) supersede those run keys, with
+53 unique keys. Their [replay receipt](run-key-correction.json) checks all 69
+controls and proves that only run IDs changed; all measured values, original
+audit times, candidate/workload identities and the original archive are retained.
+The admission API now requires an explicit run number. Both runners freeze
+number allocations before execution and reject duplicate canonical keys.
+CI allocates disjoint blocks by workflow run, retry attempt and runner; native
+and profiler executions have distinct numbers. Unused reserved numbers remain
+unused. Manual runs must reserve a fresh nonoverlapping block explicitly.
+
+The [first Linux CI failure](ci-initial-failure.log) occurred at offline Cargo
+metadata resolution, before the source-bound worker build. CI now fetches the
+complete pinned dependency resolution before the offline build (host-only test
+builds need not populate every platform dependency). The command wrapper also
+retains the failing command's output; the initial exception hid Cargo's message,
+and Linux integration workflow `36215166278` subsequently passed the 69 controls
+and existing native/profile panel, validating the setup correction. The run-key
+fix requires a further CI pass on its own commit.
+
+The corrected head `a9f12793` passed Linux integration `36216884613`, candidate
+controls `36216884670` and sealed evidence replay `36216884742`. Its downloaded
+CI exports contain 53 unique control-run keys and 53 distinct integration keys
+(42 native and 11 profiler), with 106 unique keys in their union. Site validation
+`36216884626` was cancelled before creating any jobs on both attempts: PR checks
+shared the publication concurrency group. The [CI scheduling correction](site-ci-concurrency.json)
+gives PRs separate groups while retaining the existing serialized publication
+group and all jobs/triggers/permissions. GitHub's default concurrency queue can
+replace pending runs even with `cancel-in-progress: false`. YAML parsing passes;
+local actionlint reports the identical pre-existing schedule-frequency warning
+before and after the change. The changed CI configuration must pass on its own
+head; none of these validation runs is a new improvement round.
+
+The final build has source-manifest SHA-256
+`215f4c7fa338b1053481563a717c867f1b75b25d936eb3b8cafa7fd2af31e134`
+and executable SHA-256
+`fefcc1bc9de9cc6314e2a36629a0b898685f24138962553813b65c5dd1bff215`.
+Its [build receipt](final/build-record.json) describes the local macOS/arm64
+toolchain; it does not claim a hermetic build or cross-host binary identity.
+The native control [reports](final/worker-raw.jsonl.gz), [failed LA cases](failed-la/worker-raw.jsonl.gz)
+and [nonempty sparse cores](sparse-core/worker-raw.jsonl.gz) retain failures and
+raw counters. [Initial controls](initial/summary.json) are superseded provenance
+controls: review subsequently expanded the runtime override guard and included
+literal source inputs outside `src` in the build manifest. The
+[runner editing failure](runner-edit-failure.txt) occurred before any worker ran.
+
+The base builder audit also found two details that must remain explicit in
+candidate recipes: subgroup-orbit construction cofactor-projects a sampled lift
+and tests its size after batches of eight distinct projected abscissae; the
+production polynomial-factor scan omits irreducible degrees above 24. The checker
+factors the whole polynomial independently and then applies that declared cutoff.
+It does not describe the truncated scan as a complete factorization.
+
+## Reproduction
+
+From the repository root with Python 3.12 and the pinned dependency lockfile:
+
+```sh
+cp research/ic_candidate_tournament_20260915/ci/Cargo.lock Cargo.lock
+python3 research/ic_candidate_tournament_20260915/generic_build.py --out /tmp/ic-generic-build
+python3 research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/run_controls.py \
+  --build /tmp/ic-generic-build --out /tmp/ic-generic-controls --run-number-start 1000
+python3 -m unittest discover -s research/ic_candidate_tournament_20260915 -p 'test_generic_admission.py' -v
+```
+
+Every output directory must be new. The builder uses Cargo's offline cache;
+fetch the pinned dependencies first when starting with an empty cache. Linux
+controls use one CPU, one Rayon worker, an 8-GiB address-space limit and a
+60-second child deadline. macOS controls record the unavailable affinity/memory
+caps as null. CI additionally runs the existing paired native/Callgrind panel,
+requiring source-bound admission and an independently closed instruction ledger
+for every profiled IC job. It does not redispatch the sealed improvement round.
+The example reserves numbers 1000 through 1068; use a different reserved block
+for a subsequent execution. The checked-in corrected historical export uses
+numbers 0 through 68, including reserved slots for inventory and rho controls.
+
+To reproduce the run-key correction without launching any worker, extract the
+original archive as described in EVIDENCE.json, then run:
+
+```sh
+python3 research/ic_candidate_tournament_20260915/goal_20260924/generic-scientific-admission/replay_run_ids.py \
+  --bundle /tmp/ic-generic-admission-restore/ic-generic-scientific-admission \
+  --out /tmp/ic-generic-run-keys-v2
+```
+
+The compressed corrected export reproduces byte-for-byte. Only the correction
+receipt's separately measured external replay-audit time varies.
+
+The raw full bundle, exact sources, executable, build logs, independent replay
+records and test logs are described by [EVIDENCE.json](EVIDENCE.json). Each
+admitted IC execution has immutable `candidate.json`, `workload.json`, `run.json`
+and `receipt.json` records under its replay directory in that bundle. Use the
+version-two export above for unique run keys; the bundle retains the original
+colliding R0 keys as historical evidence. Compact
+IDs use `pair`, `enum`, `f4`, `f5`, `if4`, `satxor` or `satcnf` for the executed PDP
+variant, and `gauss` or `bw` for the final relation-LA policy. The manifest binds
+the conditional filtering/core/reconstruction path and its exact parameters.
+
+## Claim boundary
+
+The primary metric is the five-phase one-target online interval, including the
+worker's general-group scalar replay. External Python audit time is reported
+separately and excluded from that interval. Supplementary cold accounting folds
+the four target-work phases into target descent once, charges the external
+process remainder to setup once, and records absent isogeny transport explicitly.
+Unentered phases remain unknown. Failed jobs keep their observed costs and
+canonical run key, but have no verified speedup or complete cold result.
+
+All comparative online/cold costs, normalized S and speedup remain unset for
+this control study. Source/dispatch admission does not establish an optimized
+reference, calibrated instrumentation overhead, or a speed advantage. Generic
+backend qualification against the strong archived IC and rho references is the
+next gate before generic candidates can enter the remaining improvement rounds.
+No claim extends beyond these public synthetic toy instances.

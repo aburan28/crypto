@@ -1,0 +1,39 @@
+{
+  "R": 12,
+  "base_file": "research/notes/ecc2k130/four_sum_membership_20260925/base_n41_R12.json",
+  "base_file_sha256": "36045f9fd85e69591cdd51a83722fc224866def4da1747319bc8f6bd5901811b",
+  "budget_amendment_commit": "4d1b48634d559e38369e85936f5c7a2190e24323",
+  "checkout_commit": "5fc7a64375a5c4b7f300a830e5e6144f02d1876b",
+  "command": [
+    "/private/tmp/four-sum-oracle-20260925/target/release/examples/koblitz_four_sum_membership",
+    "/private/tmp/four-sum-oracle-20260925/research/notes/ecc2k130/four_sum_membership_20260925/base_n41_R12.json",
+    "/private/tmp/four-sum-oracle-20260925/research/notes/ecc2k130/four_sum_membership_20260925/target_points_n41_R12.jsonl",
+    "128"
+  ],
+  "count": 128,
+  "environment": {
+    "RAYON_NUM_THREADS": "1"
+  },
+  "executable_sha256": "4120ef964a128e9c12537e3f2361dcd0ee0b0375bc5fd04c4b5c0a63cb92d4e4",
+  "full_target_stream_sha256": "e04f2892b85817d34d8be54134ae6cb38ec3c6393dc5131355d290cba4c46a44",
+  "host": "Adams-MacBook-Pro.local",
+  "input_amendment_sha256": "419a9c51e03d4429f2f51b8b78534ea40af4b2c964d04444aaa5d11c1db1c91f",
+  "input_manifest_sha256": "de605d359df5ee0b35df422e93f2bd65d064878a24d03c1e7e165e4554f95285",
+  "mode": "oracle",
+  "n": 41,
+  "platform": "macOS-26.6-arm64-arm-64bit",
+  "point_set_sha256": "a3856771a5ea1ad3a1e2e262eebcc1b2ccde8293e53af4360268cdcf72ab7fa8",
+  "protocol_sha256": "f5dc53b3ec75b5a8d3aa6382344b9d38351ef59c74ab54f07cd03d612de973f7",
+  "psutil_version": "7.2.2",
+  "rss_poll_interval_ms": 50,
+  "runner_sha256": "8c0a9b211358cb09ca9863851627d1b5405a63cd1e5ec6499c1e6fa80cf03560",
+  "sampled_rss_stop_bytes": 2147483648,
+  "schema_version": "1.0",
+  "source_input_freeze_commit": "12d2e489de77dc633f02df47de2debf865a3f301",
+  "source_path": "examples/koblitz_four_sum_membership.rs",
+  "source_pr747_commit": "fc27150df3238b6863ed5618c721e7fd8b6ce403",
+  "source_sha256": "6185018d17e9541245456ffbfec2df36630fe5a4d7e47e8f638ff59f072bdd8a",
+  "targets_file": "research/notes/ecc2k130/four_sum_membership_20260925/target_points_n41_R12.jsonl",
+  "targets_sha256": "1b154bdd8aa9dabdb37d2dd5a7bfee69a1fa8284ac5db678ef73eaf2c2f297a5",
+  "timeout_seconds": 900
+}

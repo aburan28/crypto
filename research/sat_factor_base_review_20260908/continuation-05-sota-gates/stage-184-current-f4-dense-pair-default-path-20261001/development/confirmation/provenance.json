@@ -1,0 +1,16 @@
+{
+  "schema": "koblitz_stage184_confirmation_provenance.v1",
+  "source_commit": "fdeb3155fe2c9757d30464bae15584524a0554c8",
+  "runner_commit": "5a40e35403001d2a7d94eb30b77c24fc45818f15",
+  "binary": "/Volumes/SSD990/kic-stage183-dense-pair-target-fdeb3155f/release/examples/koblitz_pdp_backend",
+  "binary_sha256": "205856a1923448f43a0c51e5c1527aa0141d8437493bab2d80676158524bf6e4",
+  "sequence": [
+    "quadratic",
+    "dense",
+    "dense",
+    "quadratic",
+    "quadratic",
+    "dense"
+  ],
+  "full_m4ri": false
+}

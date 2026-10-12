@@ -1,0 +1,554 @@
+{
+  "schema": "ecbench.plan/v1",
+  "spec_id": "ECS1h3db22ab8c242",
+  "arms": [
+    {
+      "name": "rho-strong",
+      "role": "reference",
+      "method": {
+        "id": "rho.signed_frobenius_strong",
+        "family": "rho",
+        "params": {
+          "dp_bits": "4",
+          "lanes": "32",
+          "step_cap_factor": "2000"
+        },
+        "method_id": "ECM1hb6123afffc07",
+        "method_sha256": "b6123afffc07ac34d98ef18a4c1a3ec1e0f14583933b9329680417044aa15707",
+        "entry": "koblitz_strong_rho::StrongRho::solve"
+      }
+    },
+    {
+      "name": "ic-f4",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=11",
+          "linalg": "incremental-gauss",
+          "max_trials": "200000",
+          "oracle": "pdp3-koblitz:m=3,engine=inherited-f4,degree=3,node_budget=8192",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1h71099aa08c45",
+        "method_sha256": "71099aa08c458fe58cdee4acf8ba5401435c93a768b1e86b1569dcc7949ae30e",
+        "entry": "ic_framework::run_pipeline"
+      }
+    },
+    {
+      "name": "ic-f6",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=11",
+          "linalg": "incremental-gauss",
+          "max_trials": "200000",
+          "oracle": "pdp3-koblitz:m=3,engine=f6-ic,degree=3,node_budget=8192",
+          "solver": "",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1h052d65eaf81e",
+        "method_sha256": "052d65eaf81e488badd5b304c0bc4d640d4475a9b35cc4a1b580492a9f731cfb",
+        "entry": "ic_framework::run_pipeline"
+      }
+    }
+  ],
+  "workloads": [
+    {
+      "workload_id": "W5317b2ca0ece",
+      "workload_sha256": "5317b2ca0eceba416bb91d2a4f09c09a4475daad5ce68fd70e1d69bd6c9607b2",
+      "curve_spec": {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 31
+      },
+      "curve": {
+        "slug": "icv1-f2m31-tm90707-c95f16f5",
+        "icv1": "ICV1:f2m-31-200700ef:-90707:2147574356:0x1:-7:unk:r:c95f16f54aa9",
+        "family": "koblitz",
+        "construction": "KoblitzCurve::new(0, 31)",
+        "field_degree": 31,
+        "field_bits": null,
+        "group_order": 2147574356,
+        "r": 1439393,
+        "cofactor": 1492,
+        "generator": [
+          "0xd058876",
+          "0x32d9bf79"
+        ],
+        "automorphisms_available": 62,
+        "registered": true,
+        "ec1": "EC1N31Ce0h3e9d0f84f702",
+        "curve_uid": "urn:ec-record:1:sha256:3e9d0f84f7022675b42e1e786f4db812b88388ad6d68d4aafcd32f9654a87855"
+      },
+      "target_law": "hash_to_subgroup_v1",
+      "target_seed": 202610053101,
+      "target_index": 0,
+      "target": [
+        "0x1ff999ee",
+        "0x7483fe2e"
+      ],
+      "planted": null,
+      "target_counter": 2
+    },
+    {
+      "workload_id": "Wc0e4519b763c",
+      "workload_sha256": "c0e4519b763c6b0de8645a409fe119cce9ffb992d22ff9b2f5f30aa0ef41d11f",
+      "curve_spec": {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 31
+      },
+      "curve": {
+        "slug": "icv1-f2m31-tm90707-c95f16f5",
+        "icv1": "ICV1:f2m-31-200700ef:-90707:2147574356:0x1:-7:unk:r:c95f16f54aa9",
+        "family": "koblitz",
+        "construction": "KoblitzCurve::new(0, 31)",
+        "field_degree": 31,
+        "field_bits": null,
+        "group_order": 2147574356,
+        "r": 1439393,
+        "cofactor": 1492,
+        "generator": [
+          "0xd058876",
+          "0x32d9bf79"
+        ],
+        "automorphisms_available": 62,
+        "registered": true,
+        "ec1": "EC1N31Ce0h3e9d0f84f702",
+        "curve_uid": "urn:ec-record:1:sha256:3e9d0f84f7022675b42e1e786f4db812b88388ad6d68d4aafcd32f9654a87855"
+      },
+      "target_law": "hash_to_subgroup_v1",
+      "target_seed": 202610053101,
+      "target_index": 1,
+      "target": [
+        "0xc5cf88c",
+        "0x485b9f8f"
+      ],
+      "planted": null,
+      "target_counter": 5
+    },
+    {
+      "workload_id": "W3b68e131112d",
+      "workload_sha256": "3b68e131112ddeb6e681b23dc536e8a4f0f1437ec2b763c1d95935b02168a7c5",
+      "curve_spec": {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 31
+      },
+      "curve": {
+        "slug": "icv1-f2m31-tm90707-c95f16f5",
+        "icv1": "ICV1:f2m-31-200700ef:-90707:2147574356:0x1:-7:unk:r:c95f16f54aa9",
+        "family": "koblitz",
+        "construction": "KoblitzCurve::new(0, 31)",
+        "field_degree": 31,
+        "field_bits": null,
+        "group_order": 2147574356,
+        "r": 1439393,
+        "cofactor": 1492,
+        "generator": [
+          "0xd058876",
+          "0x32d9bf79"
+        ],
+        "automorphisms_available": 62,
+        "registered": true,
+        "ec1": "EC1N31Ce0h3e9d0f84f702",
+        "curve_uid": "urn:ec-record:1:sha256:3e9d0f84f7022675b42e1e786f4db812b88388ad6d68d4aafcd32f9654a87855"
+      },
+      "target_law": "hash_to_subgroup_v1",
+      "target_seed": 202610053101,
+      "target_index": 2,
+      "target": [
+        "0x6bb27e0c",
+        "0x7bdf01d"
+      ],
+      "planted": null,
+      "target_counter": 0
+    },
+    {
+      "workload_id": "Wbad25405eb62",
+      "workload_sha256": "bad25405eb62c9c157f9ec6415bce9b4457e78cb4bbfc13730da9f268a7c3f6f",
+      "curve_spec": {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 31
+      },
+      "curve": {
+        "slug": "icv1-f2m31-tm90707-c95f16f5",
+        "icv1": "ICV1:f2m-31-200700ef:-90707:2147574356:0x1:-7:unk:r:c95f16f54aa9",
+        "family": "koblitz",
+        "construction": "KoblitzCurve::new(0, 31)",
+        "field_degree": 31,
+        "field_bits": null,
+        "group_order": 2147574356,
+        "r": 1439393,
+        "cofactor": 1492,
+        "generator": [
+          "0xd058876",
+          "0x32d9bf79"
+        ],
+        "automorphisms_available": 62,
+        "registered": true,
+        "ec1": "EC1N31Ce0h3e9d0f84f702",
+        "curve_uid": "urn:ec-record:1:sha256:3e9d0f84f7022675b42e1e786f4db812b88388ad6d68d4aafcd32f9654a87855"
+      },
+      "target_law": "hash_to_subgroup_v1",
+      "target_seed": 202610053101,
+      "target_index": 3,
+      "target": [
+        "0x30d28e0c",
+        "0x7c7301a8"
+      ],
+      "planted": null,
+      "target_counter": 2
+    },
+    {
+      "workload_id": "W8fed66454c62",
+      "workload_sha256": "8fed66454c624c5916f9a27338ced42f11cd0d9b4fbed452bfb96b9dea09bc5f",
+      "curve_spec": {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 31
+      },
+      "curve": {
+        "slug": "icv1-f2m31-tm90707-c95f16f5",
+        "icv1": "ICV1:f2m-31-200700ef:-90707:2147574356:0x1:-7:unk:r:c95f16f54aa9",
+        "family": "koblitz",
+        "construction": "KoblitzCurve::new(0, 31)",
+        "field_degree": 31,
+        "field_bits": null,
+        "group_order": 2147574356,
+        "r": 1439393,
+        "cofactor": 1492,
+        "generator": [
+          "0xd058876",
+          "0x32d9bf79"
+        ],
+        "automorphisms_available": 62,
+        "registered": true,
+        "ec1": "EC1N31Ce0h3e9d0f84f702",
+        "curve_uid": "urn:ec-record:1:sha256:3e9d0f84f7022675b42e1e786f4db812b88388ad6d68d4aafcd32f9654a87855"
+      },
+      "target_law": "hash_to_subgroup_v1",
+      "target_seed": 202610053101,
+      "target_index": 4,
+      "target": [
+        "0x63dce9bc",
+        "0x203199e8"
+      ],
+      "planted": null,
+      "target_counter": 3
+    },
+    {
+      "workload_id": "W985c012b8469",
+      "workload_sha256": "985c012b84695da7295e8c02d750c004b2756d978204907538daef3290f938d7",
+      "curve_spec": {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 31
+      },
+      "curve": {
+        "slug": "icv1-f2m31-tm90707-c95f16f5",
+        "icv1": "ICV1:f2m-31-200700ef:-90707:2147574356:0x1:-7:unk:r:c95f16f54aa9",
+        "family": "koblitz",
+        "construction": "KoblitzCurve::new(0, 31)",
+        "field_degree": 31,
+        "field_bits": null,
+        "group_order": 2147574356,
+        "r": 1439393,
+        "cofactor": 1492,
+        "generator": [
+          "0xd058876",
+          "0x32d9bf79"
+        ],
+        "automorphisms_available": 62,
+        "registered": true,
+        "ec1": "EC1N31Ce0h3e9d0f84f702",
+        "curve_uid": "urn:ec-record:1:sha256:3e9d0f84f7022675b42e1e786f4db812b88388ad6d68d4aafcd32f9654a87855"
+      },
+      "target_law": "hash_to_subgroup_v1",
+      "target_seed": 202610053101,
+      "target_index": 5,
+      "target": [
+        "0xa18bf16",
+        "0x6ccff82d"
+      ],
+      "planted": null,
+      "target_counter": 0
+    },
+    {
+      "workload_id": "Waba28eb2f825",
+      "workload_sha256": "aba28eb2f825a9fcc9ebc5db0ac988a8eb68d55b508784a9a5662c4a2bebd05e",
+      "curve_spec": {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 31
+      },
+      "curve": {
+        "slug": "icv1-f2m31-tm90707-c95f16f5",
+        "icv1": "ICV1:f2m-31-200700ef:-90707:2147574356:0x1:-7:unk:r:c95f16f54aa9",
+        "family": "koblitz",
+        "construction": "KoblitzCurve::new(0, 31)",
+        "field_degree": 31,
+        "field_bits": null,
+        "group_order": 2147574356,
+        "r": 1439393,
+        "cofactor": 1492,
+        "generator": [
+          "0xd058876",
+          "0x32d9bf79"
+        ],
+        "automorphisms_available": 62,
+        "registered": true,
+        "ec1": "EC1N31Ce0h3e9d0f84f702",
+        "curve_uid": "urn:ec-record:1:sha256:3e9d0f84f7022675b42e1e786f4db812b88388ad6d68d4aafcd32f9654a87855"
+      },
+      "target_law": "hash_to_subgroup_v1",
+      "target_seed": 202610053101,
+      "target_index": 6,
+      "target": [
+        "0x4c43fcf8",
+        "0x38ca95b6"
+      ],
+      "planted": null,
+      "target_counter": 2
+    },
+    {
+      "workload_id": "W99580a2bdd95",
+      "workload_sha256": "99580a2bdd9562887652cd68d76a3f6c4a29375fc480be5a57fb20b12bebb541",
+      "curve_spec": {
+        "kind": "koblitz",
+        "a": 0,
+        "n": 31
+      },
+      "curve": {
+        "slug": "icv1-f2m31-tm90707-c95f16f5",
+        "icv1": "ICV1:f2m-31-200700ef:-90707:2147574356:0x1:-7:unk:r:c95f16f54aa9",
+        "family": "koblitz",
+        "construction": "KoblitzCurve::new(0, 31)",
+        "field_degree": 31,
+        "field_bits": null,
+        "group_order": 2147574356,
+        "r": 1439393,
+        "cofactor": 1492,
+        "generator": [
+          "0xd058876",
+          "0x32d9bf79"
+        ],
+        "automorphisms_available": 62,
+        "registered": true,
+        "ec1": "EC1N31Ce0h3e9d0f84f702",
+        "curve_uid": "urn:ec-record:1:sha256:3e9d0f84f7022675b42e1e786f4db812b88388ad6d68d4aafcd32f9654a87855"
+      },
+      "target_law": "hash_to_subgroup_v1",
+      "target_seed": 202610053101,
+      "target_index": 7,
+      "target": [
+        "0xe198d58",
+        "0x641e6bf4"
+      ],
+      "planted": null,
+      "target_counter": 4
+    }
+  ],
+  "executions": [
+    {
+      "seq": 0,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 2931627365882996643
+    },
+    {
+      "seq": 1,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 2931627365882996643
+    },
+    {
+      "seq": 2,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 0,
+      "algorithm_seed": 2931627365882996643
+    },
+    {
+      "seq": 3,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 1,
+      "algorithm_seed": 2336119671949086743
+    },
+    {
+      "seq": 4,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 1,
+      "algorithm_seed": 2336119671949086743
+    },
+    {
+      "seq": 5,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 1,
+      "algorithm_seed": 2336119671949086743
+    },
+    {
+      "seq": 6,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 2,
+      "algorithm_seed": 14517311982710290643
+    },
+    {
+      "seq": 7,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 2,
+      "algorithm_seed": 14517311982710290643
+    },
+    {
+      "seq": 8,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 2,
+      "algorithm_seed": 14517311982710290643
+    },
+    {
+      "seq": 9,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 3,
+      "algorithm_seed": 5182632706465932515
+    },
+    {
+      "seq": 10,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 3,
+      "algorithm_seed": 5182632706465932515
+    },
+    {
+      "seq": 11,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 3,
+      "algorithm_seed": 5182632706465932515
+    },
+    {
+      "seq": 12,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 4,
+      "algorithm_seed": 7514782185770215033
+    },
+    {
+      "seq": 13,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 4,
+      "algorithm_seed": 7514782185770215033
+    },
+    {
+      "seq": 14,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 4,
+      "algorithm_seed": 7514782185770215033
+    },
+    {
+      "seq": 15,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 5,
+      "algorithm_seed": 1624531490275495075
+    },
+    {
+      "seq": 16,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 5,
+      "algorithm_seed": 1624531490275495075
+    },
+    {
+      "seq": 17,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 5,
+      "algorithm_seed": 1624531490275495075
+    },
+    {
+      "seq": 18,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 6,
+      "algorithm_seed": 1587160797226754573
+    },
+    {
+      "seq": 19,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 6,
+      "algorithm_seed": 1587160797226754573
+    },
+    {
+      "seq": 20,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 6,
+      "algorithm_seed": 1587160797226754573
+    },
+    {
+      "seq": 21,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 7,
+      "algorithm_seed": 6301549006797413091
+    },
+    {
+      "seq": 22,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 7,
+      "algorithm_seed": 6301549006797413091
+    },
+    {
+      "seq": 23,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 7,
+      "algorithm_seed": 6301549006797413091
+    }
+  ]
+}

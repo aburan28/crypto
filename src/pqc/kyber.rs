@@ -96,10 +96,7 @@ impl Poly {
         let two_d = 1i64 << d;
         self.0
             .iter()
-            .map(|&c| {
-                let compressed = ((c * two_d + Q / 2) / Q).rem_euclid(two_d) as u16;
-                compressed
-            })
+            .map(|&c| ((c * two_d + Q / 2) / Q).rem_euclid(two_d) as u16)
             .collect()
     }
 
@@ -146,7 +143,7 @@ fn matrix_transpose_vec_mul(a: &[PolyVec; K], v: &PolyVec) -> PolyVec {
 /// Sample a polynomial from a centred binomial distribution CBD(η):
 /// each coefficient = Σ(aᵢ - bᵢ) for i=1..η where aᵢ,bᵢ are random bits.
 fn sample_cbd() -> Poly {
-    let bytes = random_bytes_vec((N * 2 * ETA as usize + 7) / 8 + 8);
+    let bytes = random_bytes_vec((N * 2 * ETA as usize).div_ceil(8) + 8);
     let mut p = Poly::zero();
     let mut bit_idx = 0usize;
 
@@ -511,7 +508,7 @@ mod tests {
         for _ in 0..4 {
             let p = sample_cbd();
             for &c in &p.0 {
-                assert!(c >= 0 && c < Q, "out-of-range coeff {c}");
+                assert!((0..Q).contains(&c), "out-of-range coeff {c}");
                 // Modulo Q, valid representatives are {0, 1, 2, 3} ∪ {Q-3, Q-2, Q-1}.
                 let small = c <= ETA || c >= Q - ETA;
                 assert!(small, "coeff {c} not in CBD range");

@@ -1,0 +1,122 @@
+name: Matrix-F5 byte-subset frozen baseline
+
+on:
+  pull_request:
+    paths:
+      - 'research/f5_byte_table_unpack_20260929/PROTOCOL.md'
+      - '.github/workflows/f5-byte-table-baseline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frozen-baseline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      CARGO_BUILD_JOBS: '2'
+      RAYON_NUM_THREADS: '1'
+      KIC_GF2_DEFER_ABOVE: '0'
+      KIC_GF2_WORD_BATCH: '0'
+      KIC_F5_ECHELON: '2'
+      KIC_F5_FUSED_BUILD: '1'
+      KIC_GF2_FORCE_AVX2: '1'
+      KIC_F5_AVX512_UNPACK: '0'
+      KIC_F5_DIRECT_PACK: '1'
+      KIC_GF2_REUSE_TABLE: '1'
+      KIC_GF2_SIMD: '1'
+      KIC_F5_UNPACK_DIRECT: '1'
+      KIC_GF2_AVX2_TABLE_BUILD: '0'
+      KIC_F5_UNPACK_BYTE_TABLE: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.98'
+      - uses: Swatinem/rust-cache@v2
+      - name: Build and preserve unmodified release binary
+        run: python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-byte-table-bench.lock" -- cargo build --release --example f4_f2_bench
+      - name: Choose reservable CPU
+        id: cpus
+        run: |
+          python3 research/f5_byte_table_unpack_20260929/choose_isolated_cpus.py \
+            1 research/f5_byte_table_unpack_20260929/baseline-cpu-choice.json \
+            >> "$GITHUB_OUTPUT"
+      - name: Isolated frozen reference call
+        run: |
+          # Redirect in the runner shell so the archived output stays runner-owned.
+          # shellcheck disable=SC2024
+          sudo -n env PATH="$PATH" python3 tools/isolated_bench.py reserve \
+            --lock "$RUNNER_TEMP/f5-byte-table-bench.lock" \
+            --cpus '${{ steps.cpus.outputs.reserve }}' \
+            --out research/f5_byte_table_unpack_20260929/baseline-isolation.jsonl \
+            --settle 10 --period 0.25 --label f5-byte-table-baseline \
+            -- taskset -c '${{ steps.cpus.outputs.pin }}' \
+            env RAYON_NUM_THREADS=1 KIC_GF2_DEFER_ABOVE=0 KIC_GF2_WORD_BATCH=0 \
+              KIC_F5_ECHELON=2 KIC_F5_FUSED_BUILD=1 KIC_GF2_FORCE_AVX2=1 \
+              KIC_F5_AVX512_UNPACK=0 KIC_F5_DIRECT_PACK=1 KIC_GF2_REUSE_TABLE=1 \
+              KIC_GF2_SIMD=1 KIC_F5_UNPACK_DIRECT=1 KIC_GF2_AVX2_TABLE_BUILD=0 \
+              KIC_F5_UNPACK_BYTE_TABLE=0 \
+            target/release/examples/f4_f2_bench 1 24 f5 0000000000000000 \
+            > research/f5_byte_table_unpack_20260929/baseline-cases.jsonl \
+            2> research/f5_byte_table_unpack_20260929/baseline.stderr
+      - name: Freeze source, binary and output manifest
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, platform, subprocess
+          p = pathlib.Path('research/f5_byte_table_unpack_20260929')
+          def sha(path):
+              q = pathlib.Path(path)
+              return hashlib.sha256(q.read_bytes()).hexdigest() if q.exists() else None
+          binary = pathlib.Path('target/release/examples/f4_f2_bench')
+          lines = (p / 'baseline-cases.jsonl').read_text().splitlines() if (p / 'baseline-cases.jsonl').exists() else []
+          cases = [json.loads(line) for line in lines if line.strip() and line.lstrip().startswith('{')]
+          iso_lines = (p / 'baseline-isolation.jsonl').read_text().splitlines() if (p / 'baseline-isolation.jsonl').exists() else []
+          iso = json.loads(iso_lines[-1]) if iso_lines else None
+          isolated = bool(iso and iso['exit_status'] == 0 and not iso['left_on_reserved']['user_threads'] and iso['contended_samples'] == 0)
+          cpuinfo = pathlib.Path('/proc/cpuinfo').read_text().splitlines()
+          first = {}
+          for line in cpuinfo:
+              if ':' in line:
+                  key, value = line.split(':', 1)
+                  first.setdefault(key.strip(), value.strip())
+          manifest = {
+              'git_sha': os.environ.get('GITHUB_SHA'),
+              'source': {path: sha(path) for path in ('src/cryptanalysis/matrix_f5_f2.rs', 'src/cryptanalysis/gf2_elim.rs', 'examples/f4_f2_bench.rs')},
+              'binary_sha256': sha(binary),
+              'binary_bytes': binary.stat().st_size if binary.exists() else None,
+              'rustc': subprocess.check_output(['rustc', '--version'], text=True).strip(),
+              'platform': platform.platform(),
+              'cpu_model': first.get('model name'),
+              'cpu_features': sorted(set(first.get('flags', '').split()) & {'avx2', 'bmi2', 'avx512f', 'popcnt'}),
+              'cpu_count': os.cpu_count(),
+              'memory': next((line for line in pathlib.Path('/proc/meminfo').read_text().splitlines() if line.startswith('MemTotal:')), None),
+              'cases': len(cases),
+              'primary': next((case for case in cases if case.get('case') == 'f5_n24_m24_d4'), None),
+              'isolation_qualified': isolated,
+              'left_user_threads': len(iso['left_on_reserved']['user_threads']) if iso else None,
+              'contended_samples': iso['contended_samples'] if iso else None,
+          }
+          (p / 'baseline-manifest.json').write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n')
+          if len(cases) != 7 or manifest['primary'] is None or not isolated:
+              raise SystemExit('baseline missing exact output or compliant isolation')
+          PY
+      - name: Preserve unmodified binary and all failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f5-byte-table-baseline-${{ github.sha }}
+          path: |
+            target/release/examples/f4_f2_bench
+            research/f5_byte_table_unpack_20260929/baseline-cpu-choice.json
+            research/f5_byte_table_unpack_20260929/baseline-isolation.jsonl
+            research/f5_byte_table_unpack_20260929/baseline-cases.jsonl
+            research/f5_byte_table_unpack_20260929/baseline-manifest.json
+            research/f5_byte_table_unpack_20260929/baseline.stderr
+          if-no-files-found: warn

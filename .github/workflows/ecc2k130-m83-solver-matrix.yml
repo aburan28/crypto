@@ -1,0 +1,23 @@
+name: ECC2K-130 m83 solver evidence replay
+
+on:
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
+  workflow_dispatch:
+
+jobs:
+  verify-receipts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode raw receipts and check source hashes
+        run: |
+          cd research/notes/ecc2k130/m83_solver_matrix_20260927/results
+          base64 -d raw_receipts.tar.gz.base64 | tar -xz -C .
+          python3 ../verify_archive.py
+      - name: Cross-check all completed solvers and orbit targets
+        run: |
+          python3 research/notes/ecc2k130/m83_solver_matrix_20260927/summarize.py >/dev/null
+          git diff --exit-code -- research/notes/ecc2k130/m83_solver_matrix_20260927/results/validated_summary.json

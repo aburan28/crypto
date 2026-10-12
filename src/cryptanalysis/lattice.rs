@@ -102,9 +102,7 @@ fn gram_schmidt_hp(basis: &[Vec<BigInt>]) -> (Vec<BigInt>, Vec<Vec<BigInt>>) {
                 continue;
             }
             // dot = b_i · b*_j  (HP scale)
-            let dot: BigInt = (0..dim)
-                .map(|k| hp_mul(&bstar[i][k], &bstar[j][k]))
-                .sum();
+            let dot: BigInt = (0..dim).map(|k| hp_mul(&bstar[i][k], &bstar[j][k])).sum();
             // μ_{i,j} = dot / ||b*_j||²  (HP ÷ HP → HP)
             mu[i][j] = hp_div(&dot, &bstar_sq[j]);
 
@@ -117,9 +115,7 @@ fn gram_schmidt_hp(basis: &[Vec<BigInt>]) -> (Vec<BigInt>, Vec<Vec<BigInt>>) {
         }
 
         // ||b*_i||² = Σ_k (b*_i[k])² in HP scale
-        bstar_sq[i] = (0..dim)
-            .map(|k| hp_mul(&bstar[i][k], &bstar[i][k]))
-            .sum();
+        bstar_sq[i] = (0..dim).map(|k| hp_mul(&bstar[i][k], &bstar[i][k])).sum();
     }
 
     (bstar_sq, mu)
@@ -136,7 +132,7 @@ fn gram_schmidt_hp(basis: &[Vec<BigInt>]) -> (Vec<BigInt>, Vec<Vec<BigInt>>) {
 /// Cost is higher than `lll_reduce` (~10-100× per GS call due to
 /// BigInt arithmetic), but for cryptanalytic dimensions (≤ 30) this
 /// is still milliseconds to seconds.
-pub fn lll_reduce_hp(basis: &mut Vec<Vec<BigInt>>, delta: f64) -> Result<(), &'static str> {
+pub fn lll_reduce_hp(basis: &mut [Vec<BigInt>], delta: f64) -> Result<(), &'static str> {
     if !(0.25 < delta && delta < 1.0) {
         return Err("delta must be in (1/4, 1)");
     }
@@ -284,7 +280,7 @@ pub fn lll_reduce_hp(basis: &mut Vec<Vec<BigInt>>, delta: f64) -> Result<(), &'s
 ///
 /// Returns `Err` if the input is malformed or the algorithm fails
 /// to terminate within a generous iteration cap.
-pub fn lll_reduce(basis: &mut Vec<Vec<BigInt>>, delta: f64) -> Result<(), &'static str> {
+pub fn lll_reduce(basis: &mut [Vec<BigInt>], delta: f64) -> Result<(), &'static str> {
     if !(0.25 < delta && delta < 1.0) {
         return Err("delta must be in (1/4, 1)");
     }
@@ -438,7 +434,11 @@ fn big_to_f64_scaled(x: &BigInt, scale_shift: u32) -> f64 {
     }
     let sign: f64 = if x.is_negative() { -1.0 } else { 1.0 };
     // Work with the absolute value as a BigInt for bit operations.
-    let abs: BigInt = if x.is_negative() { -x.clone() } else { x.clone() };
+    let abs: BigInt = if x.is_negative() {
+        -x.clone()
+    } else {
+        x.clone()
+    };
     let nbits = abs.bits() as u32;
 
     if nbits + scale_shift <= 1020 {
@@ -563,9 +563,8 @@ mod tests {
         lll_reduce(&mut a, 0.75).unwrap();
         lll_reduce_hp(&mut b, 0.75).unwrap();
         // Both should produce a first vector of the same squared norm.
-        let norm_sq = |v: &Vec<BigInt>| -> i64 {
-            v.iter().map(|x| x.to_i64().unwrap().pow(2)).sum()
-        };
+        let norm_sq =
+            |v: &Vec<BigInt>| -> i64 { v.iter().map(|x| x.to_i64().unwrap().pow(2)).sum() };
         assert_eq!(
             norm_sq(&a[0]),
             norm_sq(&b[0]),
@@ -586,7 +585,10 @@ mod tests {
         // order, but the first vector should be the same short vector).
         let norm_a0: i64 = a[0].iter().map(|x| x.to_i64().unwrap().pow(2)).sum();
         let norm_b0: i64 = b[0].iter().map(|x| x.to_i64().unwrap().pow(2)).sum();
-        assert_eq!(norm_a0, norm_b0, "HP and f64 LLL should find same-length first vector");
+        assert_eq!(
+            norm_a0, norm_b0,
+            "HP and f64 LLL should find same-length first vector"
+        );
     }
 
     /// lll_reduce_hp should recover key on P-384 (a larger-entry case that
@@ -616,7 +618,7 @@ mod tests {
         let mut z_seed: u64 = 0xDEAD_BEEF;
         let mut sigs: Vec<BiasedSignature> = Vec::new();
         while sigs.len() < 8 {
-            let bytes = ((k_bits + 7) / 8) as usize;
+            let bytes = k_bits.div_ceil(8) as usize;
             let mut buf = vec![0u8; bytes];
             k_rng.fill_bytes(&mut buf);
             let extra = bytes as u32 * 8 - k_bits;
@@ -654,8 +656,7 @@ mod tests {
         }
 
         let recovered =
-            hnp_recover_key_with_reduction(&curve, &kp.public, &sigs, HnpReduction::LllHp)
-                .unwrap();
+            hnp_recover_key_with_reduction(&curve, &kp.public, &sigs, HnpReduction::LllHp).unwrap();
         assert_eq!(recovered, d, "HP LLL should recover P-384 private key");
     }
 }
@@ -936,8 +937,9 @@ mod bkz_tests {
         lll_reduce(&mut a, 0.99).unwrap();
         bkz_reduce(&mut b, 8, 0.99).unwrap();
 
-        let norm_sq =
-            |row: &Vec<BigInt>| -> f64 { row.iter().map(|x| big_to_f64_scaled(x, 0).powi(2)).sum() };
+        let norm_sq = |row: &Vec<BigInt>| -> f64 {
+            row.iter().map(|x| big_to_f64_scaled(x, 0).powi(2)).sum()
+        };
         let na = norm_sq(&a[0]);
         let nb = norm_sq(&b[0]);
         assert!(

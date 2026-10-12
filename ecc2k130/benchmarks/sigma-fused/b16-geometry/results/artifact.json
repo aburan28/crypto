@@ -1,0 +1,41 @@
+{
+  "schema": "ecc2k130-fused-b16-geometry-artifact-v1",
+  "measuredSourceCommit": "7abbae77afabd910e558ceeec813dbde8c409b24",
+  "sourceParent": "60fb2ae47fcca9352d8bae2b280fce77371e57f0",
+  "auditRepairCommit": "22f22158",
+  "sourceDirty": false,
+  "provider": "modal",
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+  "cuda": "13.3.73",
+  "modal": {
+    "appId": "ap-JA7KLGdxCrZ7yJOaUYwb4g",
+    "functionCallId": "fc-01M3YJ2XY4JRQ05HV4MMWBCV0A",
+    "volumeToken": "09896a8aa82944f6b37136b298332766",
+    "exitCode": 1,
+    "seconds": 1359.2841274738312
+  },
+  "archive": {
+    "externalPath": "/private/tmp/ecc2k-b16-geometry-fiveaa-gpu-20261002/results.tgz",
+    "bytes": 35306167,
+    "members": 66,
+    "sha256": "0bc85581ac549932472d584d218f8900e3a50acdf0eda5001f47ecd3037d9487"
+  },
+  "committedFiles": {
+    "launchSha256": "fc7b7a65069423c9925c81b7150c49fb03486e23654c97977a7f6139da9d24b8",
+    "resultSha256": "785af54f06be2453566fb41c576a86ee11f5b32681055f08cb9adb82058829c6",
+    "samplesSha256": "f8c913ee6b96e7dab6fc1e1827cdf4b9a7621f0a144aad868ded0ac28be7d2d6",
+    "correctedNativeAuditSha256": "863962ba9635b9e7e997f80ba9cfc53c209fc33a3dbb617ff5021b65f6acc9c3"
+  },
+  "rawEvidence": {
+    "sourceManifestSha256": "3c9697fd0d76a0f0e31ea65aa3c589539cc0362aa57e6dd737a430a183e24038",
+    "binaryManifestSha256": "05cd84376a0a0db1859a05da457a9557da06196abe00de765c22920a85de207a",
+    "sampleManifestSha256": "fa083843448394321104ed2dd68b4771813e14c9eafb5e6aba6adf12150c303b",
+    "checkpointManifestSha256": "24cc06ce60bd69bdfe982a74a547d179d836dadf8b08807401a06ba61220c177",
+    "t256BinarySha256": "275f2e7013e66e2d89f7f19bc8a920946ad343e89d15e78aef72b026a0932659",
+    "t512BinarySha256": "ba511997a44762cd172301daedcf9462d5e2aa96f6f22356978a6a88c6dc6532",
+    "canonicalSortedCorpusSha256": "b1b3f7bae95d1d672ef6a11fd8d6741b708035095b156535813cf21fb770f6b3",
+    "canonicalSortedCorpusBytes": 54781312,
+    "recordCountPerArm": 1711916
+  },
+  "packagingNote": "The measured process exited after result generation because its post-run checker did not compile under GCC -Werror. The wrapper still archived every raw scientific file. The additive repaired checker reopened that immutable archive successfully; no measurement was rerun or rewritten."
+}

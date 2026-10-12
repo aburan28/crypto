@@ -1,0 +1,26 @@
+{
+  "valid": true,
+  "reviewer": "/root/polystate_checkpoints/weighted_sigma",
+  "scope": "Independent read-only review of frozen vector4 source/model/schedule; no additional numerical tests, searches, variants, compiler orGPU activity.",
+  "assessmentSha256": "a3b62cbc6d6b211138baae568e1c9ed85469d88d33c73005e16d6c6c09afd8bc",
+  "modelSha256": "1767eef375622993cdf8e074e55ab0e35b85ba38b40598d6efcaf379336381dc",
+  "modelResultSha256": "b0b396ca1efd7cb8429323c94df9f636a4ddf81fb868cf6efe1dd434eb78148b",
+  "candidateHeaderSha256": "d1119490225ca4b1765eaf7fd68b89bb502b777ba10d82f1cf6585816463c9ac",
+  "hostValidationSha256": "e74cbd112109a193374110c36168f788101a76870f9e3b8790fc8d3957ed7199",
+  "freezeSha256": "78688a913a6806222c2d1accb5ddc948bdf0e3c37e39698fcfb946eab47d088c",
+  "verdict": "No remaining accounting blocker within the declared abstraction after the7/3136 copy correction.",
+  "checks": [
+    "The candidate has exactly one first-demand load4 for each group0..13 and reuses constant component aliases without source refetch.",
+    "Liveness defines allfour components at the vector fetch and retains each to its own last use; core25to28, aggregate38 and mask-only7to10/20 are separate outcomes.",
+    "748to706 assumes a128-bit fetch is one modeled operation and component selection is an SSA alias. The224logicalbytes perhelper remainunchanged.",
+    "The destination copy permutation uses3masks+2shifts+2ORs:7extra literaloperations/cell,3136/CTAlaunch.",
+    "The host43680instrumentedload4calls establish the source inventory, not native memory width, move/refetch absence orGPUregisterallocation."
+  ],
+  "requiredCompilerFalsifiers": [
+    "Verifyactualnativevectorwidth andcompletefetchinventory.",
+    "Chargeallcomponentmoves,refetches,addressing,copyprologueandreturns.",
+    "Inspectfullcaller/helperresourcesandspills, includingwhethercomponentsareindividuallyreleased."
+  ],
+  "nativeSpeedupEstablished": false,
+  "gpuAdmissionGranted": false
+}

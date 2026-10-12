@@ -1,0 +1,25 @@
+{
+  "campaign_seconds": 14.767499000001408,
+  "complete": true,
+  "ended_utc": "2026-09-23T02:07:59.854916+00:00",
+  "git_base": "ae41c010a8fff88146c83f224860af6c25408a5a",
+  "git_status": " M protocol.json\n M worker.rs\n?? run_02/\n",
+  "host": {
+    "cpus": 14,
+    "machine": "arm64",
+    "platform": "macOS-26.6-arm64-arm-64bit-Mach-O",
+    "system": "Darwin"
+  },
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11) (Homebrew)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "schema_version": 1,
+  "scope": "Standalone small Boolean-polynomial matrix construction; no curve inputs, solving, or production solver integration",
+  "source_hashes": {
+    "analyze.py": "b61423ee023363e142ceeea5b1ecd9703648fdd6d1524a338946187907dbb8b3",
+    "protocol.json": "e0e0c6e04d45f8a5c85642cfccb8e64dcac61612d4c42a1c91b41feb61044ac2",
+    "run.py": "6bf64f3fe5d5f03318b6a78e3bc294f836776bdf1c4f22cff6362b001798f402",
+    "worker.rs": "591330f1d9537ff78678a96a74297b652fa418bcab0151e65aa64971fafe88fe"
+  },
+  "started_utc": "2026-09-23T02:07:43.519136+00:00",
+  "test_executable_sha256": "67a9e6b30acbe07874a3c2d3b137b93b68baba5e7ee5e76e3e98f5ef45cf5295",
+  "worker_sha256": "94e3fd35811d26e6e5d9fbb31e859004ab4df49a575e52a816e573360064c497"
+}

@@ -1,0 +1,96 @@
+{
+  "kind": "cross-tree comparison: same instances, same verified answers, splitting tree may differ",
+  "unit": "64-bit word operations",
+  "scope": "decomposition-oracle stage only; not an end-to-end ECDLP cost",
+  "identity_checked": [
+    "curve",
+    "m",
+    "ell",
+    "factor_base_points",
+    "targets",
+    "decomposed",
+    "oversize",
+    "exhausted"
+  ],
+  "repetitions": {
+    "reference": 3,
+    "candidate": 3
+  },
+  "rows": [
+    {
+      "curve": "K_0/2^9",
+      "m": 3,
+      "ell": 6,
+      "targets": 16,
+      "decomposed": 15,
+      "same_tree": false,
+      "reference": {
+        "word_ops": 1142867,
+        "reductions": 382,
+        "splits": 196,
+        "infeasible_branches": 67,
+        "wall_ns": 44154225
+      },
+      "candidate": {
+        "word_ops": 889385,
+        "reductions": 356,
+        "splits": 196,
+        "infeasible_branches": 67,
+        "wall_ns": 37144144
+      },
+      "word_op_ratio": 1.2850081798096438,
+      "wall_ratio": 1.1887264113557174
+    },
+    {
+      "curve": "K_0/2^13",
+      "m": 3,
+      "ell": 12,
+      "targets": 8,
+      "decomposed": 8,
+      "same_tree": true,
+      "reference": {
+        "word_ops": 9743787,
+        "reductions": 200,
+        "splits": 168,
+        "infeasible_branches": 0,
+        "wall_ns": 129806709
+      },
+      "candidate": {
+        "word_ops": 8408962,
+        "reductions": 200,
+        "splits": 168,
+        "infeasible_branches": 0,
+        "wall_ns": 100479288
+      },
+      "word_op_ratio": 1.1587383793623993,
+      "wall_ratio": 1.2918752867755194
+    },
+    {
+      "curve": "K_0/2^9",
+      "m": 4,
+      "ell": 6,
+      "targets": 8,
+      "decomposed": 7,
+      "same_tree": false,
+      "reference": {
+        "word_ops": 2868312,
+        "reductions": 758,
+        "splits": 292,
+        "infeasible_branches": 78,
+        "wall_ns": 77962746
+      },
+      "candidate": {
+        "word_ops": 1477037,
+        "reductions": 558,
+        "splits": 292,
+        "infeasible_branches": 78,
+        "wall_ns": 48106671
+      },
+      "word_op_ratio": 1.941936457922178,
+      "wall_ratio": 1.6206223457033642
+    }
+  ],
+  "total_word_op_ratio": 1.2765174772425745,
+  "total_wall_ratio": 1.356396598778605,
+  "min_word_op_ratio": 1.1587383793623993
+}

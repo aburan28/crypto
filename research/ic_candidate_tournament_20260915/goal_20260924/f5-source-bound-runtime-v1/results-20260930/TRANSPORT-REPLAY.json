@@ -1,0 +1,82 @@
+{
+  "archive_sha256": "9d166ca332e22d90738e62fbdcefd67ef2daa8d16425f162ad8ae3d0ff28962f",
+  "assessment": {
+    "binding": {
+      "asset_archive_sha256": "9a062a02b41a20ea55b2392058b5942062fade117a3c2e0f316a2a4de0adf822",
+      "asset_manifest_sha256": "a32f5bd249615724971fc022ec2950515daf9afb3ee860d7f46b088531978dfe",
+      "callable": "run",
+      "interpreter_sha256": "ec11021561db6edca6d1a8a796ddb94ffa0d0074b68e25f093b4bc117f06a70e",
+      "module": "f5_runtime_pipeline_v1",
+      "python_archive_sha256": "ab6ac29a7fc9fcaf9db68f61913e4cbefbbacede5c32df455eea01ee8b184186",
+      "python_manifest_sha256": "6db3c73420ec56f9592dca240f8afd2effd8c5e79e9310b83a2c690eec104a33"
+    },
+    "candidate_id": "IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0he2ed5ed7bb97",
+    "claim_scope": "raw failed/partial execution transport; no mathematical or timing admission",
+    "complete_ic_source_bound": false,
+    "execution_sha256": "5969837ddc69d25a3e44954f203077c0e6d682bbce2d1ac8eb0f9c3a10bb826b",
+    "final_rank": null,
+    "headline_online_admissible": false,
+    "mathematical_audit": null,
+    "online_phases_ns": null,
+    "online_speedup": null,
+    "online_wall_ns": null,
+    "process": {
+      "binding": {
+        "asset_archive_sha256": "9a062a02b41a20ea55b2392058b5942062fade117a3c2e0f316a2a4de0adf822",
+        "asset_manifest_sha256": "a32f5bd249615724971fc022ec2950515daf9afb3ee860d7f46b088531978dfe",
+        "callable": "run",
+        "interpreter_sha256": "ec11021561db6edca6d1a8a796ddb94ffa0d0074b68e25f093b4bc117f06a70e",
+        "module": "f5_runtime_pipeline_v1",
+        "python_archive_sha256": "ab6ac29a7fc9fcaf9db68f61913e4cbefbbacede5c32df455eea01ee8b184186",
+        "python_manifest_sha256": "6db3c73420ec56f9592dca240f8afd2effd8c5e79e9310b83a2c690eec104a33"
+      },
+      "execution_sha256": "5969837ddc69d25a3e44954f203077c0e6d682bbce2d1ac8eb0f9c3a10bb826b",
+      "exit_code": 1,
+      "online_speedup": null,
+      "process_wall_ns": 1863702917,
+      "promotion_eligible": false,
+      "python_flags": [
+        "-I",
+        "-S",
+        "-B"
+      ],
+      "schema_version": 3,
+      "scope": "whole runtime process; outside single-target online interval",
+      "status": "EXECUTED_SOURCE_CONTROL",
+      "stderr_sha256": "eaf7eee6b3f67f13ba9018f2eb475e429ab36abdd6fe943fe04f61647e28c56a",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timed_out": false,
+      "watchdog_seconds": 7200
+    },
+    "promotion_eligible": false,
+    "python_source_audit": {
+      "binding": {
+        "asset_archive_sha256": "9a062a02b41a20ea55b2392058b5942062fade117a3c2e0f316a2a4de0adf822",
+        "asset_manifest_sha256": "a32f5bd249615724971fc022ec2950515daf9afb3ee860d7f46b088531978dfe",
+        "callable": "run",
+        "interpreter_sha256": "ec11021561db6edca6d1a8a796ddb94ffa0d0074b68e25f093b4bc117f06a70e",
+        "module": "f5_runtime_pipeline_v1",
+        "python_archive_sha256": "ab6ac29a7fc9fcaf9db68f61913e4cbefbbacede5c32df455eea01ee8b184186",
+        "python_manifest_sha256": "6db3c73420ec56f9592dca240f8afd2effd8c5e79e9310b83a2c690eec104a33"
+      },
+      "claim_scope": "Python binding only; mathematical admission required separately",
+      "complete_source_gates": true,
+      "entrypoint_succeeded": false,
+      "loaded_module_count": 37,
+      "online_speedup": null,
+      "promotion_eligible": false,
+      "schema_version": 3,
+      "status": "AUDITED_PYTHON_EXECUTION_BINDING"
+    },
+    "run_id": "IC1N17Ckb1fb62PDP3f5RCsampleLAgaussTDpdpISO0he2ed5ed7bb97W1d07932114f4R0",
+    "schema_version": 3,
+    "source_audit_error_type": null,
+    "status": "EXECUTION_FAILURE",
+    "verified_target_count": null,
+    "workload_id": "1d07932114f4"
+  },
+  "execution_sha256": "5969837ddc69d25a3e44954f203077c0e6d682bbce2d1ac8eb0f9c3a10bb826b",
+  "native_worker_rerun": false,
+  "schema_version": 1,
+  "status": "PASS"
+}

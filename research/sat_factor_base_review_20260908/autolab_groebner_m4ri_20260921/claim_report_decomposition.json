@@ -1,0 +1,64 @@
+{
+  "claim_boundary": "Public-synthetic n=31 decomposition-kernel evidence only. The result is not a relation-yield improvement, an end-to-end index-calculus crossover, an asymptotic improvement, a sub-rho result, an external-target capability, or a key-recovery claim.",
+  "claim_boundary_non_claims": [
+    "not relation-yield evidence",
+    "not end-to-end index calculus",
+    "not asymptotic or sub-rho evidence",
+    "not external or private targets",
+    "not a key-recovery claim"
+  ],
+  "dimension_l_or_dim": 16,
+  "eq_var_ratio": 0.96875,
+  "executable_or_source_hash": {
+    "kernel_bench_executable_receipt": "69aff375783d2345f9f93793d8d958461170a9a747b71ea9c2c698c62fb9aa38",
+    "kernel_bench_source": "9213ef372a3408ba13dadfc960d65725cf7a0be0c8e3264be176b8e35365397e",
+    "koblitz_groebner_source": "fc9dfea334a1492cf55a76e024f9c905afcb088edf3be476cec3a13cdf83b5a1",
+    "paired_bench_executable_receipt": "e2f9a7685aeca70542a2deb742078cf62cdf3cf7780d80a60bbe654c34227b0d"
+  },
+  "f4_splits": {
+    "sym": 4095,
+    "x": 7056
+  },
+  "ffd_or_degree_of_regularity": {
+    "symmetrised": 4,
+    "x_chained": 3
+  },
+  "fixture_hash": "e918e5661942d70c8f16bafd58e1da139d79f60329c689fae9aef8d91ab0f175",
+  "host_id": {
+    "hostname": "Adams-MacBook-Pro.local",
+    "machine": "arm64",
+    "system": "Darwin"
+  },
+  "largest_solvable": {
+    "m": 2,
+    "n": 31,
+    "node_budget": 50000,
+    "unknowns": 32
+  },
+  "m_summands": 2,
+  "macaulay_degree_max": 3,
+  "median_ms_per_target": {
+    "sym_refuted_selected_paired": 29201.0,
+    "x_found_selected_paired": 55675.0
+  },
+  "n_or_bits": 31,
+  "oracle_class": "Boolean matrix-F4 with shape-selected block-4 M4RI",
+  "resource_caps": {
+    "node_budget": 50000,
+    "targets_per_arm": 1,
+    "threads": 1
+  },
+  "schema_version": 2,
+  "seeds": [
+    24301
+  ],
+  "stage": "decomposition",
+  "system_degree": "quadratic",
+  "task_id": "TASK-KIC-GROEBNER-M4RI-20260921",
+  "unknowns": 32,
+  "verdict_mix": {
+    "inconclusive": 0,
+    "sym_refuted": 1,
+    "x_found": 1
+  }
+}

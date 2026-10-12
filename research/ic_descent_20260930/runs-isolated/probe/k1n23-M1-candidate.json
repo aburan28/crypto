@@ -1,0 +1,76 @@
+{
+  "a": 1,
+  "columns": 8,
+  "logs": "/home/user/crypto/research/ic_descent_20260930/probe/k1n23-M1.logs.json",
+  "n": 23,
+  "one_scalar_multiplication_units": 22.457774828825794,
+  "params": "/home/user/crypto/research/ic_exponent_20260926/runs/k1n23/measure/M1.params.json",
+  "phases": [
+    {
+      "mean_units_per_target": 311.2052987164192,
+      "median_units_per_target": 245.3639088094365,
+      "phase": "target_query"
+    },
+    {
+      "mean_units_per_target": 172.56578707592737,
+      "median_units_per_target": 132.8206585750134,
+      "phase": "target_pdp"
+    },
+    {
+      "mean_units_per_target": 12.190747005837625,
+      "median_units_per_target": 11.66496071206,
+      "phase": "target_descent"
+    },
+    {
+      "mean_units_per_target": 69.0835494506871,
+      "median_units_per_target": 68.1364527573598,
+      "phase": "recovery_check"
+    }
+  ],
+  "points": 368,
+  "recovery_check_general_units": 144.12222487236747,
+  "recovery_check_single_word_units": 66.64653565706554,
+  "rounds": 5,
+  "sixty_three_additions_batched_units": 81.72740386736118,
+  "sixty_three_additions_sequential_units": 612.3559282209441,
+  "solve_mean_units_per_target": 697.8967022276253,
+  "solve_median_units_per_target": 603.6708017094726,
+  "tier": "folded",
+  "trials_per_target": [
+    48,
+    857,
+    6,
+    2,
+    117,
+    139,
+    8,
+    255,
+    178,
+    59,
+    51,
+    38,
+    180,
+    63,
+    152,
+    6,
+    401,
+    64,
+    6,
+    43,
+    81,
+    91,
+    29,
+    97,
+    25,
+    80,
+    157,
+    35,
+    7,
+    57,
+    41,
+    2
+  ],
+  "trials_total": 3375,
+  "unit_ns": 27.5183095703125,
+  "walk_start_units": 701.4238992653649
+}

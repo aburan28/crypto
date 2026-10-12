@@ -1,0 +1,301 @@
+{
+  "note": "POWER-BOUND.md",
+  "host": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05, 2430 MHz, 600.00 W, 300.00 W, 600.00 W, 12.0\nCuda compilation tools, release 13.3, V13.3.73\nBuild cuda_13.3.r13.3/compiler.38244171_0\nsource: 340a837937faedee3daf600ee2fbf5e6d76515b7 (uncommitted changes)",
+  "powercap": null,
+  "launch": {
+    "job": "benchmarks/power-bound/gpujob.sh",
+    "gpu": "RTX-PRO-6000",
+    "cudaImage": "nvidia/cuda:13.3.1-devel-ubuntu24.04",
+    "gitRev": "340a837937faedee3daf600ee2fbf5e6d76515b7",
+    "gitDirty": true,
+    "env": {
+      "SOURCE_REV": "340a837937faedee3daf600ee2fbf5e6d76515b7 (uncommitted changes)",
+      "SET": "fused",
+      "REPS": "5",
+      "SKIP_CAP": "1"
+    },
+    "provider": "modal",
+    "token": "7a93f1ae6c7e49eeacd9cbd1e46118b9",
+    "volume": "ecc2k130-jobs",
+    "startedAt": "2026-09-22T23:15:35Z",
+    "functionCallId": "fc-01M35PEEQYV0BDGJM29R57FRR8",
+    "exitCode": 0,
+    "seconds": 1714.3321924209595,
+    "deviceLine": "NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.95.05",
+    "finishedAt": "2026-09-22T23:46:31Z"
+  },
+  "passes": {
+    "uncapped": {
+      "ref20b": {
+        "reps": [
+          {
+            "rep": 1,
+            "rateBps": 20.056867999999998,
+            "samples": 39,
+            "meanPowerW": 583.5833333333334,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 55.0,
+            "updatesPerJouleM": 34.368472940168495
+          },
+          {
+            "rep": 2,
+            "rateBps": 20.066106,
+            "samples": 44,
+            "meanPowerW": 580.6165909090909,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 64.0,
+            "updatesPerJouleM": 34.55999417547098
+          },
+          {
+            "rep": 3,
+            "rateBps": 19.985449,
+            "samples": 44,
+            "meanPowerW": 579.0811363636363,
+            "meanClockMHz": 2414.840909090909,
+            "maxTempC": 66.0,
+            "updatesPerJouleM": 34.512346793921566
+          },
+          {
+            "rep": 4,
+            "rateBps": 19.978227,
+            "samples": 43,
+            "meanPowerW": 590.0967441860465,
+            "meanClockMHz": 2415.6046511627906,
+            "maxTempC": 67.0,
+            "updatesPerJouleM": 33.8558502429243
+          },
+          {
+            "rep": 5,
+            "rateBps": 20.044935000000002,
+            "samples": 44,
+            "meanPowerW": 583.3593181818181,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 68.0,
+            "updatesPerJouleM": 34.36121507834132
+          }
+        ],
+        "medianBps": 20.044935000000002,
+        "medianPowerW": 583.3593181818181,
+        "medianClockMHz": 2422.0,
+        "medianUpdatesPerJouleM": 34.368472940168495,
+        "verify": "packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked chains: 1\npacked alu square: 1\npacked alu onb square: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\n  finished: 3.679 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)"
+      },
+      "ref20b-fused": {
+        "reps": [
+          {
+            "rep": 1,
+            "rateBps": 20.124357,
+            "samples": 45,
+            "meanPowerW": 526.9291111111111,
+            "meanClockMHz": 2420.0,
+            "maxTempC": 57.0,
+            "updatesPerJouleM": 38.191773002567075
+          },
+          {
+            "rep": 2,
+            "rateBps": 20.126300999999998,
+            "samples": 44,
+            "meanPowerW": 543.2125,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 64.0,
+            "updatesPerJouleM": 37.050511540143134
+          },
+          {
+            "rep": 3,
+            "rateBps": 20.13531,
+            "samples": 46,
+            "meanPowerW": 546.8330434782608,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 66.0,
+            "updatesPerJouleM": 36.82167754882661
+          },
+          {
+            "rep": 4,
+            "rateBps": 20.115756,
+            "samples": 45,
+            "meanPowerW": 543.5571111111111,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 67.0,
+            "updatesPerJouleM": 37.00762180974952
+          },
+          {
+            "rep": 5,
+            "rateBps": 20.12014,
+            "samples": 44,
+            "meanPowerW": 551.0993181818181,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 68.0,
+            "updatesPerJouleM": 36.50909978691352
+          }
+        ],
+        "medianBps": 20.124357,
+        "medianPowerW": 543.5571111111111,
+        "medianClockMHz": 2422.0,
+        "medianUpdatesPerJouleM": 37.00762180974952,
+        "verify": "packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked chains: 1\npacked alu square: 1\npacked alu onb square: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\n  finished: 3.687 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)"
+      },
+      "ref20b-fused-pipe": {
+        "reps": [
+          {
+            "rep": 1,
+            "rateBps": 19.693072,
+            "samples": 46,
+            "meanPowerW": 532.3076086956522,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 60.0,
+            "updatesPerJouleM": 36.99566130240973
+          },
+          {
+            "rep": 2,
+            "rateBps": 19.693765,
+            "samples": 44,
+            "meanPowerW": 548.8261363636364,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 65.0,
+            "updatesPerJouleM": 35.883431373158
+          },
+          {
+            "rep": 3,
+            "rateBps": 19.705611,
+            "samples": 44,
+            "meanPowerW": 563.3920454545455,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 67.0,
+            "updatesPerJouleM": 34.9767291870468
+          },
+          {
+            "rep": 4,
+            "rateBps": 19.672723,
+            "samples": 47,
+            "meanPowerW": 542.1146808510638,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 67.0,
+            "updatesPerJouleM": 36.28885860297284
+          },
+          {
+            "rep": 5,
+            "rateBps": 19.667561000000003,
+            "samples": 46,
+            "meanPowerW": 536.528695652174,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 67.0,
+            "updatesPerJouleM": 36.657053312112645
+          }
+        ],
+        "medianBps": 19.693072,
+        "medianPowerW": 542.1146808510638,
+        "medianClockMHz": 2422.0,
+        "medianUpdatesPerJouleM": 36.28885860297284,
+        "verify": "packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked chains: 1\npacked alu square: 1\npacked alu onb square: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\n  finished: 3.664 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)"
+      },
+      "ref20b-fused-384x1": {
+        "reps": [
+          {
+            "rep": 1,
+            "rateBps": 18.804187000000002,
+            "samples": 35,
+            "meanPowerW": 489.148,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 59.0,
+            "updatesPerJouleM": 38.44273512311202
+          },
+          {
+            "rep": 2,
+            "rateBps": 18.806392,
+            "samples": 33,
+            "meanPowerW": 502.48727272727274,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 64.0,
+            "updatesPerJouleM": 37.4266036588896
+          },
+          {
+            "rep": 3,
+            "rateBps": 18.789147,
+            "samples": 34,
+            "meanPowerW": 498.13676470588234,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 65.0,
+            "updatesPerJouleM": 37.71885219332041
+          },
+          {
+            "rep": 4,
+            "rateBps": 18.788975999999998,
+            "samples": 35,
+            "meanPowerW": 494.00314285714285,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 66.0,
+            "updatesPerJouleM": 38.03412239713917
+          },
+          {
+            "rep": 5,
+            "rateBps": 18.787501,
+            "samples": 34,
+            "meanPowerW": 499.5338235294118,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 66.0,
+            "updatesPerJouleM": 37.61006785738468
+          }
+        ],
+        "medianBps": 18.789147,
+        "medianPowerW": 498.13676470588234,
+        "medianClockMHz": 2422.0,
+        "medianUpdatesPerJouleM": 37.71885219332041,
+        "verify": "packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked chains: 1\npacked alu square: 1\npacked alu onb square: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\n  finished: 3.731 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)"
+      },
+      "ref20b-fused-sqclmad": {
+        "reps": [
+          {
+            "rep": 1,
+            "rateBps": 19.10793,
+            "samples": 47,
+            "meanPowerW": 493.25340425531914,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 61.0,
+            "updatesPerJouleM": 38.73856690122163
+          },
+          {
+            "rep": 2,
+            "rateBps": 19.100237,
+            "samples": 48,
+            "meanPowerW": 493.80645833333335,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 64.0,
+            "updatesPerJouleM": 38.67960144641689
+          },
+          {
+            "rep": 3,
+            "rateBps": 19.097126,
+            "samples": 49,
+            "meanPowerW": 500.6475510204082,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 65.0,
+            "updatesPerJouleM": 38.14485052623684
+          },
+          {
+            "rep": 4,
+            "rateBps": 19.089005,
+            "samples": 48,
+            "meanPowerW": 496.84270833333335,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 65.0,
+            "updatesPerJouleM": 38.42062020802191
+          },
+          {
+            "rep": 5,
+            "rateBps": 19.08776,
+            "samples": 49,
+            "meanPowerW": 497.4142857142857,
+            "meanClockMHz": 2422.0,
+            "maxTempC": 66.0,
+            "updatesPerJouleM": 38.37396823573336
+          }
+        ],
+        "medianBps": 19.097126,
+        "medianPowerW": 496.84270833333335,
+        "medianClockMHz": 2422.0,
+        "medianUpdatesPerJouleM": 38.42062020802191,
+        "verify": "packed kernel: 116 registers/thread, 0 local bytes/thread, 0 shared bytes/block, single-product multiplier\npacked chains: 1\npacked alu square: 0\npacked alu onb square: 0\npacked table walk: 1 (8 branches, 48732 shared bytes)\n  finished: 3.668 M it/s, 1480482 distinguished points (300 verified against the reference, 0 dropped)"
+      }
+    }
+  }
+}

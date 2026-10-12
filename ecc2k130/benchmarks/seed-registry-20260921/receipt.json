@@ -1,0 +1,133 @@
+{
+  "active_run_ids_are_distinct": true,
+  "classification": "operational identity and duplicate-work prevention",
+  "historical_conflicting_ids": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "imported_run_ids": 225,
+  "limitations": [
+    "Already-running processes retain their existing code; their identities are imported and locked against new guarded launches.",
+    "Imported legacy owners require verified process shutdown before release; locks do not expire automatically.",
+    "Manually invoking a client or using an older image that bypasses the guard is outside the enforced launcher protocol.",
+    "Unique seed identity does not imply unique curve points or prevent legitimate walk meetings."
+  ],
+  "live_refusal_checks": [
+    {
+      "refused": "run 12000 is permanently assigned to another stream",
+      "run_id": 12000
+    },
+    {
+      "refused": "run 12000 already has an owner; confirm it stopped before recovery",
+      "run_id": 12000
+    },
+    {
+      "refused": "run 8000 was already used; refusing to restart its seeds from zero",
+      "run_id": 8000
+    },
+    {
+      "refused": "run 5000 is permanently assigned to another stream",
+      "run_id": 5000
+    }
+  ],
+  "live_s3_concurrency_control": {
+    "conditional_release_and_resume": true,
+    "conflicting_claims_refused": 7,
+    "contenders": 8,
+    "gpu_clients_started": 0,
+    "namespace": "checks/seed-registry/ba045e017dc0404c894ef4419270ce12/",
+    "production_run_ids_allocated": 0,
+    "successful_first_claims": 1
+  },
+  "modal_deployments": [
+    {
+      "app": "ecc2k130",
+      "base_gpu_binary_sha256": "58dfd1844971dac8f7b0bb09f2d0e43c8e5963d464a7f3101668c1983532e48d",
+      "base_image": "im-cIn76THcw2RiSo6aYSB2gv",
+      "gpu_range": [
+        8000,
+        8999
+      ],
+      "live_next_id": 8004,
+      "new_gpu_campaign_started": false
+    },
+    {
+      "app": "cryptanalysis-ecc2k130-worker",
+      "base_image": "im-LEaik53IOCmWvHm1O2UUPQ",
+      "deployed_probe": {
+        "binary_sha256": "108f48480710c14d4368ec924d0101293993afac66b5b7c3b27f935d781c7846",
+        "conflicting_seed_refused": true,
+        "ready": true,
+        "seed_registry_sha256": "2488a983bf57c4e284363a1f01b9e7c08fccf06c459bcb56509979c26da4bd70"
+      },
+      "new_gpu_campaign_started": false
+    }
+  ],
+  "observed_active_owner_count": 11,
+  "observed_active_run_ids": [
+    3,
+    16,
+    26,
+    41,
+    43,
+    44,
+    197,
+    12000,
+    12001,
+    12002,
+    12003
+  ],
+  "quarantined_or_retired_ids": 18,
+  "s3_worker_publication": {
+    "backup_key": "aws/seed-guard/2488a983bf57c4e284363a1f01b9e7c08fccf06c459bcb56509979c26da4bd70/previous-worker-53cadd4d72d2a2439405c56eb4369d95281867c3234d4f607a9eb829a063bf64.py",
+    "change": "seed guard wrapper only; original client and upload methods retained",
+    "guard_sha256": "2488a983bf57c4e284363a1f01b9e7c08fccf06c459bcb56509979c26da4bd70",
+    "previous_worker_sha256": "53cadd4d72d2a2439405c56eb4369d95281867c3234d4f607a9eb829a063bf64",
+    "published": true,
+    "worker_sha256": "c323d84f8ef910efd427cdcb9d776b4b1ab012d102505112229620ccc200383b"
+  },
+  "source_sha256": {
+    "aws/seed_audit.py": "3b2a98909f50eb5525c68eeb304ae3a805486e3bf25e5a359b6c3ddf2e84482d",
+    "aws/seed_registry.py": "2488a983bf57c4e284363a1f01b9e7c08fccf06c459bcb56509979c26da4bd70",
+    "aws/worker.py": "5c754438b823c6aec70277aadb1c2094226708b0b994d809b8b9677f2a35929e",
+    "modal_app.py": "4fe27cd4aff182f6dd6eb4b2d8125a60776119ecc48b0a377f9c281e665d20b2",
+    "modal_campaign.py": "9f0e7c5f6f01b369efb785edc59e28069bff71497a216af2211faecac8c7da79"
+  },
+  "tests": {
+    "companion_cloud": 17,
+    "companion_registry": 18,
+    "modal_launcher_driver_and_uploader": 78,
+    "note": "The companion registry runs the same shared guard tests in its packaging context.",
+    "passed": true,
+    "worker_storage_and_controlplane": 148
+  },
+  "unmapped_corpora_full_audit": {
+    "bytes": 880795168,
+    "directories": 9,
+    "objects": 5274,
+    "records": 27524849
+  },
+  "validation_commands": [
+    {
+      "command": "python3 -m unittest test_seed_registry test_seed_audit test_worker_family test_worker_spool test_certification test_controlplane",
+      "passed": true,
+      "tests": 148
+    },
+    {
+      "command": "python3 -m unittest test_modal_app test_modal_sync test_modal_campaign",
+      "passed": true,
+      "tests": 78
+    },
+    {
+      "command": "make check-cloud (companion runner)",
+      "passed": true
+    },
+    {
+      "command": "make test-production OMPFLAGS=",
+      "environment": "macOS host CPU build without OpenMP; isolated Python environment with CI numpy pin and boto3",
+      "passed": true
+    }
+  ]
+}

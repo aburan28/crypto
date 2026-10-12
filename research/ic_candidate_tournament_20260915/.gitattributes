@@ -1,0 +1,4 @@
+# Preserve exact unified-diff context and captured compiler/test output.
+*.patch -whitespace
+*.log -whitespace
+*.tar.zst -diff

@@ -1,0 +1,42 @@
+[
+  {
+    "name": "n9-s2",
+    "params": "research/ic_solver_selection_20260915/fixtures/n9-s2.json",
+    "queries": 48,
+    "seed": 1793,
+    "repetitions": 1,
+    "controls": 4,
+    "pair_budget": 100000,
+    "query_seconds": 0.25
+  },
+  {
+    "name": "n9-s3",
+    "params": "research/ic_solver_selection_20260915/fixtures/n9-s3.json",
+    "queries": 48,
+    "seed": 1794,
+    "repetitions": 1,
+    "controls": 4,
+    "pair_budget": 100000,
+    "query_seconds": 0.25
+  },
+  {
+    "name": "n23-s2",
+    "params": "research/ic_solver_selection_20260915/fixtures/n23-s2.json",
+    "queries": 96,
+    "seed": 1933,
+    "repetitions": 1,
+    "controls": 4,
+    "pair_budget": 100000,
+    "query_seconds": 0.25
+  },
+  {
+    "name": "n23-s3",
+    "params": "research/ic_solver_selection_20260915/fixtures/n23-s3.json",
+    "queries": 96,
+    "seed": 1934,
+    "repetitions": 1,
+    "controls": 4,
+    "pair_budget": 100000,
+    "query_seconds": 0.25
+  }
+]

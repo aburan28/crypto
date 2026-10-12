@@ -1,0 +1,106 @@
+{
+  "attempted_online_diagnostic_ns": 11955969917,
+  "audited_attempts": [
+    {
+      "a": 18545,
+      "b": 3164,
+      "outcome": "proved_unsat",
+      "public_query": [
+        117235,
+        33918
+      ],
+      "trial": 0
+    },
+    {
+      "a": 21976,
+      "b": 13149,
+      "outcome": "proved_unsat",
+      "public_query": [
+        89585,
+        21540
+      ],
+      "trial": 1
+    },
+    {
+      "a": 3849,
+      "b": 2095,
+      "outcome": "witness",
+      "public_query": [
+        65357,
+        104539
+      ],
+      "trial": 2
+    }
+  ],
+  "checker_binary_byte_limit": 536870912,
+  "checker_binary_sha256": "90a8fd973fdde1409d4931d9db14f1757b85d12429dc3fe85eb5421f610f4f19",
+  "checker_binary_unchanged_before_after": true,
+  "checker_source_sha256": "c1bd8137f13487d2895ef172a034c447bcdc493d81be2800cd05bf837ecc7b6f",
+  "complete_online_diagnostic_ns": 11955969917,
+  "fresh_paired_qualification": false,
+  "fresh_targets_generated": 0,
+  "headline_eligible": false,
+  "historical_producer_build": {
+    "build_sha256": "6e35e4b3497310831fd235f8cc0df280f2c3cb812c401a11aa151cdb6fab4ed3",
+    "schema_version": 1,
+    "source_manifest_sha256": "08c759415b2346d0d41c49ce2e958bf0c147a32796d0ac44f907ea7118095b4c",
+    "target_arch": "aarch64",
+    "target_os": "macos"
+  },
+  "historical_provenance": {
+    "controller": "historical Python orchestration",
+    "producer": "retained native Rust worker",
+    "timings": "unchanged historical uncalibrated diagnostic; no new performance measurement"
+  },
+  "native_children_executed": 0,
+  "online_phases_ns": {
+    "recovery_check": 8917,
+    "rho_solve": null,
+    "target_descent": 11875,
+    "target_pdp": 11955937581,
+    "target_query": 11293,
+    "target_relation_check": 251
+  },
+  "online_speedup": null,
+  "ordinary_queries_executed": 0,
+  "original_registration_consumed_and_closed": true,
+  "preparation_admission": {
+    "accounting": "historical ordinary preparation; original Python provenance retained; no new native yield or timing",
+    "certificate_sha256": "d8c5d6679fe89561606154785fdfba763835bf261dceb08fae193eff9f5636ae",
+    "dependent_relations": 32,
+    "duplicate_relations": 0,
+    "folded_columns": 29,
+    "fresh_targets_generated": 0,
+    "geometric_points": 63,
+    "independently_proved_geometric_negatives": 155,
+    "mathematical_state_sha256": "edbff76da6442b9f2e5e8235682c9bf1052465f310c765ba8a37d018a60bf107",
+    "native_solvers_executed": 0,
+    "new_queries": 0,
+    "online_speedup": null,
+    "online_wall_ns": null,
+    "ordinary_queries": 216,
+    "original_outcome_mix": {
+      "proved_unsat": 155,
+      "witness": 61
+    },
+    "promotion_eligible": false,
+    "rank": 29,
+    "rank_trajectory_sha256": "fbe95ff756164f671a055258a7bfa050972707d615819c5600ed8aae7306599d",
+    "rows_sha256": "c75aa7a93efae8f699de1557f4d2d6100755f8aa14cd7843e3497cd9576332e2",
+    "status": "PASS_NATIVE_PREPARED_F5_MATHEMATICS",
+    "target_input_present": false,
+    "usable_points": 62,
+    "verified_column_logs": 29,
+    "verified_relations": 61
+  },
+  "producer_report_sha256": "57cb2e8e885c5da4912abd32b767b26ac6263175c5ec98f8f20b93fbc8d250ca",
+  "promotion_eligible": false,
+  "recovered_scalar": 24886,
+  "scalar_independently_verified": true,
+  "schema_version": 1,
+  "scope": "retained-disclosed-n17-f5-postexecution-mathematics-only",
+  "source_bound_execution_admitted": false,
+  "status": "PASS_NATIVE_PREPARED_F5_TARGET_MATHEMATICS",
+  "target_complete": true,
+  "unmeasured_phase_slots": []
+}

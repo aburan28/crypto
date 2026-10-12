@@ -1,0 +1,35 @@
+{
+  "schema": "ecc2k130-resolver-geometry-audit-portability-repair-v1",
+  "status": "REPAIRED",
+  "failureHead": "cb2b819e22261bebcaa5973687feb643d68b8207",
+  "repairCommit": "6569f927124ad51c68d730620af838209461344e",
+  "github": {
+    "runId": 37046503837,
+    "jobId": 110969146049,
+    "job": "table-cuda-compile"
+  },
+  "failure": {
+    "compiler": "Ubuntu g++",
+    "error": "-Werror=range-loop-construct: const std::string& bound to a temporary const char* conversion in self-test",
+    "scope": "audit self-test portability only",
+    "scientificEvidenceAffected": false
+  },
+  "completedBeforeFailure": {
+    "resolverWidthCudaCompiles": [
+      128,
+      256,
+      512
+    ],
+    "ownershipPhaseCases": 449820,
+    "baseSummarizerSelfTest": true,
+    "baseIndependentAuditSelfTest": true,
+    "geometrySummarizerSelfTest": true
+  },
+  "repair": {
+    "change": "copy the two negative-test strings by value",
+    "auditSourceSha256": "ff0d4b7ee8ab99642ba5734de28f2ba83f9936d0f118632f922b82f86cc33db0",
+    "auditOutputSha256": "35f5d10d6333fdbaf23b75cae02b34564f22430be81e14563c15bf97bf1b7b87",
+    "fullRawAuditReplayed": true,
+    "gpuRerun": false
+  }
+}

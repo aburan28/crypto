@@ -1,0 +1,339 @@
+{
+  "stage": "thp",
+  "load_before": "20:10:24 up 35 min,  0 user,  load average: 0.89, 1.28, 1.12",
+  "reps": [
+    {
+      "k4": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.5058042769996973,
+          "cpu_s": 1.278238,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 4.591258416000073,
+          "cpu_s": 4.285895,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0,
+          "peak_rss_bytes": 338419712
+        }
+      },
+      "thp": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.5047140530000434,
+          "cpu_s": 1.383081,
+          "gates_G1": true,
+          "max_anon_huge_kb": 28672
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 5.525975947000006,
+          "cpu_s": 5.253378,
+          "gates_G1": true,
+          "max_anon_huge_kb": 274432,
+          "peak_rss_bytes": 340238336
+        }
+      }
+    },
+    {
+      "k4": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.2541355309999744,
+          "cpu_s": 1.194574,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 4.357122271999742,
+          "cpu_s": 4.090083,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0,
+          "peak_rss_bytes": 338386944
+        }
+      },
+      "thp": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.5042360610000287,
+          "cpu_s": 1.331582,
+          "gates_G1": true,
+          "max_anon_huge_kb": 22528
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 5.778650234999986,
+          "cpu_s": 5.590379,
+          "gates_G1": true,
+          "max_anon_huge_kb": 276480,
+          "peak_rss_bytes": 341782528
+        }
+      }
+    },
+    {
+      "k4": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.2551195480000388,
+          "cpu_s": 1.1839220000000001,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 4.875303352999708,
+          "cpu_s": 4.6425,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0,
+          "peak_rss_bytes": 338366464
+        }
+      },
+      "thp": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 2.007328758999847,
+          "cpu_s": 1.752897,
+          "gates_G1": true,
+          "max_anon_huge_kb": 22528
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 6.283336935000079,
+          "cpu_s": 5.935370000000001,
+          "gates_G1": true,
+          "max_anon_huge_kb": 272384,
+          "peak_rss_bytes": 338681856
+        }
+      }
+    },
+    {
+      "k4": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.2551739119999183,
+          "cpu_s": 1.190141,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 4.6126145180001,
+          "cpu_s": 4.539864,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0,
+          "peak_rss_bytes": 338419712
+        }
+      },
+      "thp": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.7564050840001073,
+          "cpu_s": 1.605257,
+          "gates_G1": true,
+          "max_anon_huge_kb": 22528
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 5.778960169000129,
+          "cpu_s": 5.59109,
+          "gates_G1": true,
+          "max_anon_huge_kb": 274432,
+          "peak_rss_bytes": 340238336
+        }
+      }
+    },
+    {
+      "k4": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.255056625999714,
+          "cpu_s": 1.187294,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 4.870664542000213,
+          "cpu_s": 4.697382,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0,
+          "peak_rss_bytes": 338415616
+        }
+      },
+      "thp": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.5046083359998192,
+          "cpu_s": 1.362167,
+          "gates_G1": true,
+          "max_anon_huge_kb": 22528
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 5.5280083509996985,
+          "cpu_s": 5.271837,
+          "gates_G1": true,
+          "max_anon_huge_kb": 274432,
+          "peak_rss_bytes": 339980288
+        }
+      }
+    },
+    {
+      "k4": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.2552781200001846,
+          "cpu_s": 1.185214,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 4.364727142999982,
+          "cpu_s": 4.274457,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0,
+          "peak_rss_bytes": 338325504
+        }
+      },
+      "thp": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.5042295389998799,
+          "cpu_s": 1.3537460000000001,
+          "gates_G1": true,
+          "max_anon_huge_kb": 32768
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 5.2783367489996635,
+          "cpu_s": 5.076428,
+          "gates_G1": true,
+          "max_anon_huge_kb": 274432,
+          "peak_rss_bytes": 339963904
+        }
+      }
+    },
+    {
+      "k4": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.256037980000201,
+          "cpu_s": 1.1102619999999999,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 4.339387390999946,
+          "cpu_s": 4.173119,
+          "gates_G1": true,
+          "max_anon_huge_kb": 0,
+          "peak_rss_bytes": 338309120
+        }
+      },
+      "thp": {
+        "rho": {
+          "rc": 0,
+          "wall_s": 1.5057639219999146,
+          "cpu_s": 1.444626,
+          "gates_G1": true,
+          "max_anon_huge_kb": 20480
+        },
+        "ic": {
+          "rc": 0,
+          "wall_s": 6.783329062000121,
+          "cpu_s": 6.488023,
+          "gates_G1": true,
+          "max_anon_huge_kb": 276480,
+          "peak_rss_bytes": 339947520
+        }
+      }
+    }
+  ],
+  "chase_control": [
+    {
+      "k4": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 213.1319,
+        "ns_per_step_median": 221.7853,
+        "ns_per_load_median": 221.7853,
+        "sink": 4208819648
+      },
+      "thp": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 153.5373,
+        "ns_per_step_median": 156.375,
+        "ns_per_load_median": 156.375,
+        "sink": 4183653824
+      }
+    },
+    {
+      "k4": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 201.8889,
+        "ns_per_step_median": 226.3982,
+        "ns_per_load_median": 226.3982,
+        "sink": 1004371392
+      },
+      "thp": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 161.6411,
+        "ns_per_step_median": 170.3208,
+        "ns_per_load_median": 170.3208,
+        "sink": 425557440
+      }
+    },
+    {
+      "k4": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 214.1299,
+        "ns_per_step_median": 219.8343,
+        "ns_per_load_median": 219.8343,
+        "sink": 2044558784
+      },
+      "thp": {
+        "mode": "chase",
+        "bytes": 268435456,
+        "k": 1,
+        "steps": 4000000,
+        "reps": 3,
+        "warm": 400000,
+        "ns_per_step_min": 141.5352,
+        "ns_per_step_median": 143.3714,
+        "ns_per_load_median": 143.3714,
+        "sink": 182287808
+      }
+    }
+  ],
+  "load_after": "20:12:19 up 37 min,  0 user,  load average: 0.97, 1.18, 1.10"
+}

@@ -202,7 +202,7 @@ impl Present128 {
         rk[0] = (k >> 64) as u64;
         for i in 1..=ROUNDS {
             // Step 1: rotate the 128-bit key register left by 61.
-            k = (k << 61) | (k >> 67);
+            k = k.rotate_left(61);
             // Step 2: S-box on the top two nibbles (bits 127..120).
             let top1 = ((k >> 124) & 0xF) as usize;
             let top2 = ((k >> 120) & 0xF) as usize;

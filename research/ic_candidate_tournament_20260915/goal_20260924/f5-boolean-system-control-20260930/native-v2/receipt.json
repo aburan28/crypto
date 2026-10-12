@@ -1,0 +1,116 @@
+{
+  "archive_bytes": 11966417,
+  "archive_file": "evidence.tar.gz",
+  "archive_sha256": "79f60c5b969a374c5595735498dddbb5677436085ce643a36a43d9886e3384ef",
+  "compile_exit": 0,
+  "inventory": {
+    "RESULT.json": {
+      "bytes": 6624,
+      "sha256": "c8d9f207cbd50ade1a269a57d193edd27a779c81425df6ffb26f3c38d097ac08"
+    },
+    "analysis-src/research/ic_candidate_tournament_20260915/f5_boolean_control.py": {
+      "bytes": 9555,
+      "sha256": "6c6bbd96355039d782a59e23ca6db0eb66e59f2c63873b8485b68e95bc42d81b"
+    },
+    "analysis-src/research/ic_candidate_tournament_20260915/generic_build.py": {
+      "bytes": 9401,
+      "sha256": "abdcee4c4de822d2ce2131b75921644f8b2339b4915fbca5e6039588e42a73b5"
+    },
+    "analysis-src/research/ic_candidate_tournament_20260915/goal_20260924/f5-boolean-system-control-20260930/PREFLIGHT-CORRECTION.md": {
+      "bytes": 2307,
+      "sha256": "e1609ba7b92ba0653ec983edbf8f0c8a00258df682c238ae57d1f54c04f115aa"
+    },
+    "analysis-src/research/ic_candidate_tournament_20260915/goal_20260924/f5-boolean-system-control-20260930/PROTOCOL.md": {
+      "bytes": 4821,
+      "sha256": "3989e92226eae2fb601f2bda57e793690b13c271cc86ef57ce8f6cf6bc7f31c8"
+    },
+    "analysis-src/research/ic_candidate_tournament_20260915/goal_20260924/f5-boolean-system-control-20260930/export.rs": {
+      "bytes": 3849,
+      "sha256": "1b7517f3317e8624e8a6d3631da2315b36781d3173554d017815d653bd2fe405"
+    },
+    "analysis-src/research/ic_candidate_tournament_20260915/goal_20260924/f5-boolean-system-control-20260930/inputs.json": {
+      "bytes": 1317,
+      "sha256": "98c12b3e8fdc99fa9585d7ce0f0da4c6b772e1c770efc592b24242c149775047"
+    },
+    "analysis-src/research/ic_candidate_tournament_20260915/goal_20260924/f5-boolean-system-control-20260930/protocol-v2.json": {
+      "bytes": 1121,
+      "sha256": "742f789e8d1b5452f4e9b545cebe343871fa9fbaa943ccd4cf27bbdaa6747ed6"
+    },
+    "analysis-src/research/ic_candidate_tournament_20260915/goal_20260924/f5-boolean-system-control-20260930/run_control.py": {
+      "bytes": 8707,
+      "sha256": "f9df7b0e15febaa22f73d81469fa9dfc6ec6e94e81a962a5d7a064f4dd3797fa"
+    },
+    "analysis-src/research/ic_candidate_tournament_20260915/identity.py": {
+      "bytes": 14455,
+      "sha256": "1fcb72308e6353c55c30c2184c1d99edef7c84ef8283db6615e5fb3075fb307f"
+    },
+    "analysis-src/research/ic_candidate_tournament_20260915/oracle.py": {
+      "bytes": 14024,
+      "sha256": "0919460479a4aaa35056a380b5cd7feded85bff20c9fc6a0fd006a42615c3dbf"
+    },
+    "build-process.json": {
+      "bytes": 366,
+      "sha256": "02df9c9b2811b6640de704c0f4bfde77b69815d6c1d9a959dbcb8db65775ecaa"
+    },
+    "build.stderr": {
+      "bytes": 3548,
+      "sha256": "3782d11da444e66fa233cb880b594bf950ad89b9fed1fe0ff3ca96106f97dbae"
+    },
+    "build.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "dependency-source.tar.gz": {
+      "bytes": 7384275,
+      "sha256": "bfd6ba8f45db73b26999db3c276b5c441c963c31e7d3481ecbab83fd4b0f1a88"
+    },
+    "diagnostic": {
+      "bytes": 1661440,
+      "sha256": "20db7e68e19f49a5c2ac47d3020d17d282ac7a61511601d1555e704169245671"
+    },
+    "native-process.json": {
+      "bytes": 516,
+      "sha256": "fe473890bbb861ed562bb9636ed9c9249006465fbd90a64a76f811afeffa5315"
+    },
+    "native-registration.json": {
+      "bytes": 546,
+      "sha256": "861aad624cd2d0c51867dfdd13b9ea79ccd4518571a582d45585ad21840e82a9"
+    },
+    "native.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native.stdout": {
+      "bytes": 3455392,
+      "sha256": "f49bc49b794d1663848b6c736f43a36d390c6426c4191a115716a41bce9a36f9"
+    },
+    "preexecution.json": {
+      "bytes": 6556,
+      "sha256": "11334e5272c5dedfe364ddb9f92026989a9970e913d5398a756371b55eb2ec44"
+    },
+    "root-source.tar.gz": {
+      "bytes": 3343760,
+      "sha256": "130f340e34260ad5bf05d286fd810f37c9305e39cc324b9e35ffcca0086396ec"
+    },
+    "runner.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "runner.stdout": {
+      "bytes": 6957,
+      "sha256": "3ee603f51eb4230ef57d51f7a675aad63c326d8de803a49d0c0667b80555048b"
+    },
+    "source-manifest.json": {
+      "bytes": 345325,
+      "sha256": "0a07fa2c2d5165bef4802cefceb3332be05b2e162c1f401af8733f62999f0a03"
+    }
+  },
+  "native_executed_once": true,
+  "native_exit": 0,
+  "online_speedup": null,
+  "promotion_eligible": false,
+  "registration_commit": "1bf6582e0b5489a8900cad8d8ea4f642fc17ffcd",
+  "result_sha256": "c8d9f207cbd50ade1a269a57d193edd27a779c81425df6ffb26f3c38d097ac08",
+  "schema_version": 1,
+  "status": "AUDITED_DISCLOSED_BOOLEAN_SYSTEM_CONTROL"
+}

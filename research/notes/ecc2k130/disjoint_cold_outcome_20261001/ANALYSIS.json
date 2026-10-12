@@ -1,0 +1,215 @@
+{
+  "all_cells_fixed_policy_no_go": false,
+  "all_cells_timing_eligible": false,
+  "cells": {
+    "n37_L1": {
+      "K": 7,
+      "L": 1,
+      "aa_valid": true,
+      "blocks": 20,
+      "children": 60,
+      "decision": "CENSORED",
+      "full_rank_compact_traces": 40,
+      "ic_b_over_a": {
+        "interval_95pct": [
+          0.9980312032264952,
+          1.0223334817320466
+        ],
+        "median": 1.0047083188469674
+      },
+      "ic_cpu_seconds_median": 0.013570936499996644,
+      "ic_over_rho_cpu": {
+        "interval_95pct": [
+          3.335723040621701,
+          3.556920704262511
+        ],
+        "median": 3.4239946327921813
+      },
+      "max_ic_rss_mib": 13.55078125,
+      "max_rho_rss_mib": 13.5234375,
+      "n": 37,
+      "prefilter": "off",
+      "raw_sha256": "dec433e570a28750d29ab344f7b5405cc97c16f9159f4202f149e46a20b3321f",
+      "required_complete_cpu_reduction_to_parity": null,
+      "rho_cpu_seconds_median": 0.003981,
+      "status": "PASS",
+      "timing_eligible": false,
+      "uncontended": false,
+      "verified_target_logs": 60
+    },
+    "n37_L1024": {
+      "K": 42,
+      "L": 1024,
+      "blocks": 5,
+      "completed_children": 15,
+      "decision": "CENSORED",
+      "failure": {
+        "error": "",
+        "error_type": "AssertionError",
+        "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/crypto/crypto/research/notes/ecc2k130/disjoint_cold_q_20260930/verify_cold.py\", line 265, in main\n    receipt = verify(args.cell, args.run_dir.resolve(), args.relocated)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/runner/work/crypto/crypto/research/notes/ecc2k130/disjoint_cold_q_20260930/verify_cold.py\", line 188, in verify\n    check_target(record, label, base, logs, curve, generator, checked_labels)\n  File \"/home/runner/work/crypto/crypto/research/notes/ecc2k130/compact_orbit_point_panel_20260929/verify_panel.py\", line 100, in check_target\n    assert set(record[\"pinned_intermediates\"]) == {left[0], right[0]}\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+      },
+      "n": 37,
+      "post_run_diagnostic": {
+        "pairing_mismatches": 6,
+        "status": "CORRECTED_REPLAY_PASS_NOT_TIMING_ELIGIBLE",
+        "verified_children": 15,
+        "verified_target_logs": 15360
+      },
+      "raw_sha256": "f70d48bc110eec0514e1913c2657d8ed8221d4a83b70635c69da546659abca5d",
+      "status": "FAIL",
+      "timing_eligible": false
+    },
+    "n41_L1": {
+      "K": 85,
+      "L": 1,
+      "aa_valid": true,
+      "blocks": 5,
+      "children": 15,
+      "decision": "CENSORED",
+      "full_rank_compact_traces": 10,
+      "ic_b_over_a": {
+        "interval_95pct": [
+          0.9053237443359224,
+          1.1031623608523273
+        ],
+        "median": 0.9908225252074226
+      },
+      "ic_cpu_seconds_median": 0.47736561336568845,
+      "ic_over_rho_cpu": {
+        "interval_95pct": [
+          8.819132943846919,
+          15.011222802814258
+        ],
+        "median": 11.24377269091974
+      },
+      "max_ic_rss_mib": 27.01171875,
+      "max_rho_rss_mib": 13.23828125,
+      "n": 41,
+      "prefilter": "off",
+      "raw_sha256": "4099acf2927617698e67595181507de4d6e75dc802ad8408b2e3d882a44d4a36",
+      "required_complete_cpu_reduction_to_parity": null,
+      "rho_cpu_seconds_median": 0.042455999999999994,
+      "status": "PASS",
+      "timing_eligible": false,
+      "uncontended": false,
+      "verified_target_logs": 15
+    },
+    "n41_L1024": {
+      "K": 255,
+      "L": 1024,
+      "aa_valid": true,
+      "blocks": 5,
+      "children": 15,
+      "decision": "CENSORED",
+      "full_rank_compact_traces": 10,
+      "ic_b_over_a": {
+        "interval_95pct": [
+          0.973531931138613,
+          1.0075078299648197
+        ],
+        "median": 0.9897685448681465
+      },
+      "ic_cpu_seconds_median": 1.5852179917270053,
+      "ic_over_rho_cpu": {
+        "interval_95pct": [
+          1.415153993111799,
+          1.4575303605018521
+        ],
+        "median": 1.433159742995213
+      },
+      "max_ic_rss_mib": 175.80078125,
+      "max_rho_rss_mib": 39.76171875,
+      "n": 41,
+      "prefilter": "blocked",
+      "raw_sha256": "5bd8bc8903b45e54e7668c48d880f4a751c5e38a1c0ef2193055369606974948",
+      "required_complete_cpu_reduction_to_parity": null,
+      "rho_cpu_seconds_median": 1.101851,
+      "status": "PASS",
+      "timing_eligible": false,
+      "uncontended": false,
+      "verified_target_logs": 15360
+    },
+    "n53_L1": {
+      "K": 220,
+      "L": 1,
+      "aa_valid": true,
+      "blocks": 5,
+      "children": 15,
+      "decision": "CENSORED",
+      "full_rank_compact_traces": 10,
+      "ic_b_over_a": {
+        "interval_95pct": [
+          0.98994549911328,
+          1.027427974667094
+        ],
+        "median": 1.0066971614928044
+      },
+      "ic_cpu_seconds_median": 4.879979179108862,
+      "ic_over_rho_cpu": {
+        "interval_95pct": [
+          16.42040866432602,
+          72.02484102742528
+        ],
+        "median": 33.165325633975996
+      },
+      "max_ic_rss_mib": 171.6640625,
+      "max_rho_rss_mib": 13.09765625,
+      "n": 53,
+      "prefilter": "off",
+      "raw_sha256": "df5e930ebc24cf279d443ce664a36f700db12e8033e84a2eb8c5b2f0c44c84c9",
+      "required_complete_cpu_reduction_to_parity": null,
+      "rho_cpu_seconds_median": 0.147141,
+      "status": "PASS",
+      "timing_eligible": false,
+      "uncontended": false,
+      "verified_target_logs": 15
+    },
+    "n53_L1024": {
+      "K": 440,
+      "L": 1024,
+      "aa_valid": true,
+      "blocks": 5,
+      "children": 15,
+      "decision": "CENSORED",
+      "full_rank_compact_traces": 10,
+      "ic_b_over_a": {
+        "interval_95pct": [
+          0.986053564724027,
+          1.0179361114449486
+        ],
+        "median": 0.9959580628942003
+      },
+      "ic_cpu_seconds_median": 8.119542126100583,
+      "ic_over_rho_cpu": {
+        "interval_95pct": [
+          1.4748651951963176,
+          1.5507223515062312
+        ],
+        "median": 1.5123657073158827
+      },
+      "max_ic_rss_mib": 669.54296875,
+      "max_rho_rss_mib": 150.3359375,
+      "n": 53,
+      "prefilter": "blocked",
+      "raw_sha256": "4d8056434ea4c2d960c2fce71acf419d0748e73e81f227a53935fd599602e82a",
+      "required_complete_cpu_reduction_to_parity": null,
+      "rho_cpu_seconds_median": 5.388134,
+      "status": "PASS",
+      "timing_eligible": false,
+      "uncontended": false,
+      "verified_target_logs": 15360
+    }
+  },
+  "common_group_operation_S": null,
+  "github_run_url": "https://github.com/aburan28/crypto/actions/runs/36794339148",
+  "input_freeze_sha256": "8a3d4bbcb3bf894f522f1395b99b09eed6a3266af6cf5109b472bb4079963601",
+  "manifest_sha256": "d211b25722e0ac8fac0facdb28644e750fa1816fd6f8e5526167e75e6b2e655b",
+  "method_crossover": null,
+  "n83_or_n131_transfer": null,
+  "orbit_overlap_note": "two distinct n37/L1024 Q pairs share a signed-Frobenius orbit across preselected blocks; all Q retained",
+  "schema": "ecc2k130-disjoint-cold-analysis-v1",
+  "source_head": "21836147f35044eb2f9583d35a3ba25b1bcfeaab",
+  "total_full_rank_compact_traces": 80,
+  "total_verified_target_logs": 30810,
+  "unit": "wait4 complete-process child user+system CPU seconds"
+}

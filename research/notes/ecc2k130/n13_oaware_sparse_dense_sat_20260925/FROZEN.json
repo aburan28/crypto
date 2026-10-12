@@ -1,0 +1,74 @@
+{
+  "aggregate_wall_cap_seconds": 3900.0,
+  "analyze_sha256": "abbc119deacf8d6bef4901eab4ce4e852fdbec40f5babb073cb2ea5e42d0570e",
+  "base_main_commit": "86d3e9dc18674b736036ba4bd8b4c2a6e8872076",
+  "binaries": {
+    "cadical": {
+      "path": "/opt/homebrew/bin/cadical",
+      "sha256": "601c9fa8ba5d09fd81bb00c89b3e54832f138bccc3422bd8652e8cda4d74d1fa",
+      "version": "3.0.1"
+    },
+    "cryptominisat5": {
+      "path": "/opt/homebrew/bin/cryptominisat5",
+      "sha256": "a3f85c3709b5e2a040bf82a4a604d1c7b9f10219bbf180a9e0f72319a2e892ac",
+      "version": "5.14.7"
+    },
+    "kissat": {
+      "path": "/opt/homebrew/bin/kissat",
+      "sha256": "05d6f3e9c402a1fe8853b0746e384e1b3d1c4a550e255f11daa2461d279aa848",
+      "version": "4.0.4"
+    }
+  },
+  "ci_replay_sha256": "42609af1b00f990dc885ccde35ed5b23b6b31c3dcdbc3f9cef8e41a17a86de6b",
+  "dense_base_sha256": "ac6fb610d38023c392308826c88dd5b0c2bbe1347057bd3f29c6a3b9e05d468b",
+  "dense_export_sha256": "7ba8ec7d490c4d0c02d13fc2da052c0ce587610200416adba1e3131a8dce4a4f",
+  "dense_schema_sha256": "44d07f780a4fb5ebca75ca6d256311ec942ad8f30fa9255264ba4f2f1627ce4a",
+  "domain": "ecc2k130-n13-m5-paired-dense-sparse-cnf-v1",
+  "export_order": [
+    "dense",
+    "sparse",
+    "sparse",
+    "dense"
+  ],
+  "export_rss_cap_bytes": 536870912,
+  "export_wall_cap_seconds": 180.0,
+  "merged_prerequisites": {
+    "785": "91eb1567ab6d02f4af4e090ff091c7b6e0d1adff",
+    "786": "d1c320a1cb176e416f5aab22c625ce65184fea49",
+    "787": "cade2aaf6ab1d08d97ec44c0e718e2c7c6448cc0"
+  },
+  "poll_interval_seconds": 0.02,
+  "prior_frozen_sha256": "b3b9bbc130e743eb8a803abaa494057909b10cdfc529007d393f1d00c6d7fd82",
+  "prior_input_sha256": "6f1fb7f1e6580b41ab06044f03f8db05d256d0e4137357e5d5c95ee6aa2f267d",
+  "prior_verify_sha256": "0ba1e4c89416fcdaf341d94fa1cc72018509eb558fe6d15d3a05f426bc7a33b7",
+  "protocol_sha256": "073ef446ce0034998637394358c9c9b1b4911e84f8428349f6a1144c5acdc056",
+  "psutil_module_path": "/Users/adamburan/.local/lib/python3.12/site-packages/psutil/__init__.py",
+  "psutil_module_sha256": "d138a5786b163b56ba86ea0b2d5589dfca37e1bcdf8de1057fe1e933d6ab808a",
+  "psutil_native_module_path": "/Users/adamburan/.local/lib/python3.12/site-packages/psutil/_psutil_osx.abi3.so",
+  "psutil_native_module_sha256": "ff4568b9187ca7b37c5134aaf614ffb061e7fedccebd84158343afb05991b8e2",
+  "psutil_version": "7.2.2",
+  "python_executable": "/Users/adamburan/.local/share/uv/python/cpython-3.12.8-macos-aarch64-none/bin/python3.12",
+  "python_executable_sha256": "d6b64f766d3b08326aa10cdb37c9d922e3af38b57ec07caa28b894e5fccf6e69",
+  "python_version": "3.12.8",
+  "rss_policy": "sampled-process-tree-20ms-kill-on-observation",
+  "run_sha256": "173c570911567bf1e7f261b60ac2aaba3f879bf4532a19718cfa862efa2a3763",
+  "runtime_controls_sha256": "e0459dfcd388a0ed2e3ee6ce67d9dc8592e118c72a80583b62c177bdb60fa0c5",
+  "selftest_sha256": "ee180000d7a684dffa1665d5662cd81f94095aa9bf7f06acb56661ff69c29738",
+  "solver_order": [
+    "cryptominisat5",
+    "kissat",
+    "cadical"
+  ],
+  "solver_rss_cap_bytes": 2147483648,
+  "solver_wall_cap_seconds": 15.0,
+  "sparse_base_sha256": "61b8e05e6e995e745f919df848127bcf0f57052db35f34711a0bbc4877f6dedc",
+  "sparse_evidence_receipt_sha256": "130d5cd274c97ae5a0fa8cfdc121ac93bc13b711a383bb06204df8c377cc5971",
+  "sparse_export_sha256": "9512492bc4be2a844171f49f6e4bfd39f4dac0a9c957ad83ec69b29eb333923e",
+  "sparse_frozen_sha256": "d748bc12bc67d94b8a578cd8707e8154c1b7bbe4d7dc02d943b59073bdcfabe9",
+  "sparse_schema_sha256": "9d27fe31819e010db786463cd1789f09233cc0b851e561de71789b5babba4a0a",
+  "sparse_summary_sha256": "89b516b64b1f8820e125a12e2cc1babfa0eb5795bee0c4f676a628e81d4d6ac4",
+  "sparse_verify_sha256": "acdd5e0cfc67e0408383e295686ec0b411c7f1f8722c79a7a83a4af891696fbc",
+  "status": "HELD_NO_MEASURED_PANEL",
+  "verify_sha256": "2ca0314149f2634f0d648762542a7e02bd2d337e854da566a8786857fa7f82cf",
+  "workflow_sha256": "7f01256c2b12fcbad6507749e890cdf51a0da2b8c1ef73d354c6fa8c3cf955c1"
+}

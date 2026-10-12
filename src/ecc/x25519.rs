@@ -13,8 +13,8 @@
 //!   - `byte[0] &= 248` (clear bottom 3 bits)
 //!   - `byte[31] &= 127` (clear top bit)
 //!   - `byte[31] |= 64` (set bit 254)
-//!   This forces the scalar into the prime-order subgroup and
-//!   prevents small-subgroup attacks.
+//!     This forces the scalar into the prime-order subgroup and
+//!     prevents small-subgroup attacks.
 //! - **Shared secret**: 32 bytes, little-endian x-coordinate of
 //!   `[scalar] · public`
 //!
@@ -78,7 +78,7 @@ pub fn x25519_base(scalar: &[u8; 32]) -> [u8; 32] {
 /// Montgomery ladder.  Takes a scalar (already-clamped as a
 /// `BigUint`) and a u-coordinate; returns `[scalar] · u`.x.
 fn ladder(scalar: &BigUint, u: &BigUint) -> BigUint {
-    let mut x1 = u.clone();
+    let x1 = u.clone();
     let mut x2 = BigUint::from(1u32);
     let mut z2 = BigUint::from(0u32);
     let mut x3 = u.clone();

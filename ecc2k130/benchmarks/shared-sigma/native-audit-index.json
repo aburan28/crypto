@@ -1,0 +1,75 @@
+{
+  "valid": true,
+  "evidenceClass": "Finite public complete-scalar engineering benchmark and independent offline validation",
+  "measurementSourceCommit": "6a48e3ec6dbd51a54e22cace4c24b27e0022b3d0",
+  "measurementSourceFiles": 251,
+  "remoteSourceAggregateFiles": 71,
+  "measuredSourceMatches": 42,
+  "ownerTerminal": {
+    "session": 18140,
+    "exitCode": 0,
+    "app": "ap-c014IGzibQVWFI33wQEAp5"
+  },
+  "files": {
+    "native-audit-checker-binding.json": {
+      "sha256": "32399eb9d7f901b7536b401dd880a62425702e882b662e894142e0222dde7575",
+      "bytes": 615
+    },
+    "native-audit-checker-initial-findings.json": {
+      "sha256": "8837efc91aff6317999d5e6fa098d9bf420eb5c9714b038636e70bb3f5a9bdea",
+      "bytes": 23536
+    },
+    "native-audit-checker-resolution.json": {
+      "sha256": "b0384485ccb43027932865b81d3f6d382ec8d1c075035f09c96c99564adabbea",
+      "bytes": 2979
+    },
+    "native-audit-checker-tests.json": {
+      "sha256": "2525a69762e66ca18bb627d3c4ae70470372047854e3632d49cd553150bc866b",
+      "bytes": 22976
+    },
+    "native-audit-checker.py": {
+      "sha256": "38dac271b379ebb3a2e3ffe8627a2c10e749ca41c91424c7b1dcf26c9e22455b",
+      "bytes": 23855
+    },
+    "native-audit-dispatch.json": {
+      "sha256": "28b6e62252c037484d83c7554906c3a62b67c5482d5f6bfa9789a490b60c69b9",
+      "bytes": 1286
+    },
+    "native-audit-independent-review.json": {
+      "sha256": "6ba2739ed4521581449d1a200a44c236f4a3d440b2bb79543e91da9e92e1188e",
+      "bytes": 16171
+    },
+    "native-audit-review.json": {
+      "sha256": "3c76517e6eb3558074111c904f2d623c9cbe83df631288763c4ea08cd6355523",
+      "bytes": 12356
+    },
+    "native-audit-source.json": {
+      "sha256": "bbb3029be60601874e31acbdf9d12a7e94b6436da5253ae3ae4a088f6dd74ee1",
+      "bytes": 27964
+    },
+    "native-audit-terminal.json": {
+      "sha256": "2305fc58b50e4316a73fb43ac61e17824686cb5f5395c50f6d577be1f66c8b94",
+      "bytes": 215
+    },
+    "native-audit.json": {
+      "sha256": "64a93a1f7ee2d7a0ed90dedaa1b921e03b4e1d3dbde5cc970d26a380f30511c4",
+      "bytes": 87016
+    }
+  },
+  "benchmarkMedianBillionPerSecond": 14.63753,
+  "collectionMedianBillionPerSecond": 14.106673,
+  "samplesPerPhase": 3,
+  "completeUpdatesPerSample": 201863462912,
+  "zeroDrops": true,
+  "collectionRecordsEach": 5149,
+  "collectionBytesEach": 164768,
+  "publicCorpusContentHashesRetained": false,
+  "fullPublicNativeCodeOrPostRunBinaryBinding": false,
+  "pairedGainClaim": false,
+  "comparisonEvidenceIndexSha256": "e2fa2e26bb6813e00245d4e3088a99e605db557249af0081d587bee0f7ba96ce",
+  "statusUpdate": "Completes the first public-command audit that the immutable comparison/integration records marked pending. Those records remain unchanged.",
+  "checkerSyntheticCases": 106,
+  "checkerTestDataAreMeasurements": false,
+  "goalBillionCompleteScalarUpdatesPerSecond": 26,
+  "goalAchieved": false
+}

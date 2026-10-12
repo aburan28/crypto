@@ -1,0 +1,24 @@
+{
+  "classification": "PRODUCER_FAILURE_NO_TIMING",
+  "sourceCommit": "69b9df8f556d80111776346f4cc5607632079d8a",
+  "archiveBytes": 210270661,
+  "archiveSha256": "739ca8fe8d703dae61a17b03e9cb2a5c8a6e1581d6d055302aee6365b9bec38e",
+  "launchSha256": "f29353153ca236259f34cab2b7eead3d974be3f4b83ba63aea664f15df8f069b",
+  "provider": "modal",
+  "volume": "ecc2k130-jobs",
+  "token": "93efb5f7a0cf4fc1afa9b34d0b8e1a59",
+  "functionCallId": "fc-01M3X5G7YQZ9T13DTFKSGDBC7X",
+  "exitCode": 1,
+  "timingRows": 0,
+  "correctness": {
+    "arms": 5,
+    "replayedPerArm": 300,
+    "droppedPerArm": 0,
+    "recordsPerArm": 1710327,
+    "sortedCorporaIdentical": true,
+    "canonicalSortedBytes": 54730464,
+    "canonicalSortedSha256": "d93e276e7f92e6114a00df9e250f8bc299a47768eda4c34c50148a24aec60a85"
+  },
+  "failure": "The harness required a runtime device/occupancy line that is printed only when worker count is automatic. All five arms intentionally supplied an equal-work explicit worker count, so no such line existed. The repaired harness binds compile-time block threads and minimum blocks through a new binary runtime marker instead.",
+  "scientificDisposition": "No geometry rate or relative-performance conclusion; rerun required"
+}

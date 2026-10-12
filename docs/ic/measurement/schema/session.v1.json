@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "icms.session/v1",
+  "title": "ICMS session, version 1",
+  "description": "One host, one CPU reservation, one interleaved plan over every arm. A session directory holds session.json (this object), capsule.json, records.jsonl, specs/ (byte copies, hashed here), exec/<nnnn>/ (raw producer output, hashed in each record) and comparisons/ (frozen icms.comparison/v1 objects). `icms audit-sessions` re-derives every hash, identifier and isolation level from these files.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "standard", "session_id", "label", "started_unix", "finished_unix", "capsule_sha256",
+               "env_class_id", "implementation", "spec_files", "arms", "plan", "affinity_widened_from", "preflight",
+               "reservation", "volatile_start", "volatile_end", "records_sha256"],
+  "properties": {
+    "schema": {"const": "icms.session/v1"},
+    "standard": {"const": "icms/v1"},
+    "session_id": {"type": "string", "pattern": "^ICSESS1h[0-9a-f]{12}$"},
+    "label": {"type": "string"},
+    "started_unix": {"type": "number"},
+    "finished_unix": {"type": "number"},
+    "capsule_sha256": {"$ref": "#/$defs/sha256"},
+    "env_class_id": {"type": "string", "pattern": "^ENV1h[0-9a-f]{12}$"},
+    "records_sha256": {"$ref": "#/$defs/sha256"},
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo", "registry_sha256", "isolated_bench_sha256", "isolation_mode", "icms_sources", "schemas_sha256"],
+      "properties": {
+        "repo": {
+          "type": ["object", "null"],
+          "required": ["commit", "dirty"],
+          "properties": {
+            "commit": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$"},
+            "dirty": {"type": ["boolean", "null"]},
+            "dirty_paths": {"type": ["array", "null"], "items": {"type": "string"}},
+            "diff_sha256": {"type": ["string", "null"]},
+            "remote": {"type": ["string", "null"]}
+          }
+        },
+        "registry_sha256": {"$ref": "#/$defs/sha256"},
+        "isolated_bench_sha256": {"$ref": "#/$defs/sha256"},
+        "isolation_mode": {"type": "string"},
+        "icms_sources": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"}},
+        "schemas_sha256": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"},
+                           "description": "the schema files the session was written under; the audit re-derives a session only under the same build"}
+      }
+    },
+    "spec_files": {
+      "type": "object",
+      "description": "basename -> sha256 of the byte copy under specs/",
+      "patternProperties": {"^[^/]+\\.(ya?ml|json)$": {"$ref": "#/$defs/sha256"}},
+      "additionalProperties": false
+    },
+    "arms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["index", "spec_path", "spec_id", "label", "role", "workload_id", "adapter"],
+        "properties": {
+          "index": {"type": "integer", "minimum": 0},
+          "spec_path": {"type": "string"},
+          "spec_id": {"type": "string", "pattern": "^ICS1h[0-9a-f]{12}$"},
+          "label": {"type": ["string", "null"]},
+          "role": {"enum": ["candidate", "baseline", "reference", null]},
+          "workload_id": {"type": "string", "pattern": "^W[0-9a-f]{12}$"},
+          "adapter": {"type": "string"}
+        }
+      }
+    },
+    "plan": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["arm", "round", "warmup"],
+        "properties": {
+          "arm": {"type": "integer", "minimum": 0},
+          "round": {"type": "integer"},
+          "warmup": {"type": "boolean"}
+        }
+      }
+    },
+    "affinity_widened_from": {},
+    "preflight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["quiet", "detail", "other_cpu_seconds", "psi_some_avg10_max", "limits"],
+      "properties": {
+        "quiet": {"type": "boolean"},
+        "detail": {"type": ["object", "null"]},
+        "other_cpu_seconds": {"type": ["number", "null"]},
+        "psi_some_avg10_max": {"type": ["number", "null"]},
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["settle_s", "max_other_cpu", "max_psi"],
+          "properties": {
+            "settle_s": {"type": "number"}, "max_other_cpu": {"type": "number"}, "max_psi": {"type": "number"}
+          }
+        }
+      }
+    },
+    "reservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cpus", "evicted", "threads_moved", "left_on_reserved"],
+      "properties": {
+        "cpus": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 0}},
+        "evicted": {"type": "boolean"},
+        "threads_moved": {"type": "integer", "minimum": 0},
+        "left_on_reserved": {"type": ["object", "null"]}
+      }
+    },
+    "volatile_start": {"$ref": "#/$defs/volatile"},
+    "volatile_end": {"$ref": "#/$defs/volatile"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "volatile": {
+      "type": "object",
+      "description": "Host state that changes between runs: clocks, load, PSI, /proc/stat, current frequency, thermal.",
+      "required": ["t_unix", "t_monotonic_ns", "loadavg", "psi", "proc_stat"],
+      "properties": {
+        "t_unix": {"type": "number"},
+        "t_monotonic_ns": {"type": "integer"},
+        "loadavg": {},
+        "psi": {},
+        "proc_stat": {},
+        "cur_khz": {},
+        "thermal_mC": {}
+      }
+    }
+  }
+}

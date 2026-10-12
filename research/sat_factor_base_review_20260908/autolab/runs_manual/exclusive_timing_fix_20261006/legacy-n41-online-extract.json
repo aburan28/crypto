@@ -1,0 +1,33 @@
+{
+  "collection_ms": 2.306333,
+  "fixture_setup_ms": 0.000292,
+  "kind": "relation_rank_summary",
+  "linear_solution_verified": true,
+  "linear_solve_ms": 0.006292,
+  "online_target_count": 1,
+  "published_fixture_scalar": 65456581202,
+  "published_q": [
+    967695341360,
+    557165945635
+  ],
+  "recovered_fixture_scalar": 65456581202,
+  "reference_validation_ms": 2.3072079999999997,
+  "solution_validation_ms": 1.923875,
+  "status": "SHARED_FACTOR_LOG_ONE_RELATION",
+  "target_online_phase_ms": {
+    "target_descent": 0.0,
+    "target_pdp": 2.306333,
+    "target_query": 0.000292,
+    "target_recovery_check": 1.930167,
+    "target_relation_check": 2.3072079999999997
+  },
+  "target_online_wall_ms": 6.544,
+  "timing_breakdown_ms": {
+    "packed_verification": 0.004459,
+    "query": 0.045208,
+    "rank_and_diagnostics": 0.01425,
+    "receipt_construction": 0.174041,
+    "target_generation": 0.136208
+  },
+  "uses_retained_factor_logs": true
+}

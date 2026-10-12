@@ -1,0 +1,13 @@
+diff --git a/src/cryptanalysis/koblitz_index_calculus.rs b/src/cryptanalysis/koblitz_index_calculus.rs
+index cd730af6..f0d974f0 100644
+--- a/src/cryptanalysis/koblitz_index_calculus.rs
++++ b/src/cryptanalysis/koblitz_index_calculus.rs
+@@ -4003,7 +4003,7 @@ impl PairSumTable {
+         // [`Self::witnesses_fast_inner`].  Little enough that a search
+         // stopping at its first witness has not paid for the rest.
+         const BLOCK: usize = 1024;
+-        const LOOKAHEAD: usize = 32;
++        const LOOKAHEAD: usize = 64;
+         let mut keys = Vec::with_capacity(BLOCK);
+         let mut pairs = Vec::new();
+         for (b, block) in rests.chunks(BLOCK).enumerate() {

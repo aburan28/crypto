@@ -1,0 +1,71 @@
+{
+  "files": {
+    "codegen/testdirectbuild.py": "56b056f3c7fb8bd2040aa4de6ffc02a26c304868e071595a5b5389e64a80c061",
+    "packed_audit.py": "6ac005b39d5894e02a47b972d8f582e16e784e9b567cf644358ed67ca5775808"
+  },
+  "findings": [],
+  "limits": [
+    "This is a narrow additive resolution review, not new GPU correctness/performance evidence.",
+    "The preset assessment binds the listed dirty Makefile snapshot; later changes require their own readback.",
+    "Owner-reported test execution was not repeated; both focused test implementations were reviewed."
+  ],
+  "originalReview": {
+    "path": "/Users/adamburan/Documents/Codex/2026-09-08/pl/outputs/compact-state-public-integration-review.json",
+    "preserved": true,
+    "sha256": "f12cfed74bf6c10e5ddcd2829ff480bb0568b1166584266c3602da7a5c64d4f0"
+  },
+  "pendingPreset": {
+    "assessment": "Both benchmark and audit recipes pass the selected mode to ECC_PACKED_COMPACT_STATE and retain B16/T256/min2/WP2/TILE256/385024worker settings. No invocation issue found.",
+    "default": 1,
+    "dryRuns": [
+      {
+        "bothRecipesCompactMode": 1,
+        "command": "make --no-print-directory -n bench-rtx-pro6000 audit-rtx-pro6000",
+        "exitCode": 0,
+        "outputSha256": "f60f2d1269487308eda1a2094561794126e82bd20859af365de8b5125b1a2045"
+      },
+      {
+        "bothRecipesCompactMode": 0,
+        "command": "make --no-print-directory -n bench-rtx-pro6000 audit-rtx-pro6000 RTX_PRO6000_COMPACT_STATE=0",
+        "exitCode": 0,
+        "outputSha256": "eb3c127bca27913b6539f1e5ef6223c4cce0880a475045a889384805f428f8de"
+      }
+    ],
+    "globalPackedDefaultRemains": 0,
+    "override": 0,
+    "path": "/private/tmp/ecc2k-compact-state-implementation-pr-20260912/ecc2k130/Makefile",
+    "sha256": "938a737be4611a7ad2407f16b73e9b199721f8acecf69cbdb35c4103c6eee66f",
+    "sourceStatus": "working-tree snapshot reviewed separately from commit bea9041",
+    "variable": "RTX_PRO6000_COMPACT_STATE"
+  },
+  "priorReviewedHead": "1362a7e772d4e4fb86fdfa8dc296cdb36a7888ba",
+  "resolutions": [
+    {
+      "detail": "Existing positivity guard plus the new TILE256 batch>64 check enforce1..64 before buildFor. Tests cover valid1/64 for both compact modes, reject65/128 before any build/command/identity, and preserve untiled compact0 batch128.",
+      "originalPriority": 2,
+      "status": "resolved"
+    },
+    {
+      "detail": "Cache regression uses identical batch32/threads256 geometry for a matching no-rebuild success control and the compact-only mismatch. It asserts the mismatch causes no second measurement.",
+      "originalPriority": 3,
+      "status": "resolved"
+    }
+  ],
+  "reviewedHead": "bea90417300ef93c1880cd1e03d95e5955176fbb",
+  "status": "both reviewed findings resolved; no new findings in narrow readback",
+  "valid": true,
+  "validation": {
+    "cudaCompiles": 0,
+    "focusedMethodsRead": [
+      "test_image_build_cache_and_rebuild_keep_the_selected_layout",
+      "test_tiled_storage_batch_limit_is_checked_before_any_build"
+    ],
+    "gpuJobs": 0,
+    "makeDryRuns": 2,
+    "ownerReportedDirectWrapperMethodsPassed": 39,
+    "prActions": 0,
+    "reviewerSuiteRerun": false,
+    "sourceEdits": 0,
+    "staticallyCountedDirectWrapperMethods": 39
+  }
+}

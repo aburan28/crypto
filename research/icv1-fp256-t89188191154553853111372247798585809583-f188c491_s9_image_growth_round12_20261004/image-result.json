@@ -1,0 +1,267 @@
+{
+  "schema": "p256.dickson_s9_image_growth/v1",
+  "curve": "icv1-fp256-t89188191154553853111372247798585809583-f188c491",
+  "prime": 1151,
+  "a": 1148,
+  "b": 241,
+  "round11_sha256": "7266c05093c815734db0a0319b946f76d003e836cce0911541be5ab4d50f2e60",
+  "local_maximum_degree": 2,
+  "terminal_results": [
+    {
+      "terminal": 0,
+      "target": [
+        507,
+        1031
+      ],
+      "nonempty_boundaries": 12,
+      "selected_boundaries": [
+        25,
+        41,
+        262,
+        342,
+        384,
+        433,
+        718,
+        767
+      ],
+      "cells": [
+        {
+          "kind": "planted-forward",
+          "boundaries": [
+            25,
+            41,
+            262,
+            342,
+            384,
+            433,
+            718,
+            767
+          ],
+          "expected_positive": true,
+          "candidate_positive": true,
+          "x_atoms": 2,
+          "signed_tuples": 512,
+          "quadratic_solves": 40,
+          "roots_returned": 80,
+          "final_index_lookups": 32,
+          "field_multiplications": 1800,
+          "maximum_two_leaf_affine_image": 2,
+          "maximum_four_leaf_affine_image": 8,
+          "four_leaf_identity_images": 0,
+          "false_negative": false,
+          "false_positive": false,
+          "image_stream_sha256": "105121267b8fd6cd47e1f763c5457e63b488b28b79403b078fd21962ba17feaf"
+        },
+        {
+          "kind": "planted-reverse",
+          "boundaries": [
+            767,
+            718,
+            433,
+            384,
+            342,
+            262,
+            41,
+            25
+          ],
+          "expected_positive": true,
+          "candidate_positive": true,
+          "x_atoms": 2,
+          "signed_tuples": 512,
+          "quadratic_solves": 40,
+          "roots_returned": 80,
+          "final_index_lookups": 32,
+          "field_multiplications": 1800,
+          "maximum_two_leaf_affine_image": 2,
+          "maximum_four_leaf_affine_image": 8,
+          "four_leaf_identity_images": 0,
+          "false_negative": false,
+          "false_positive": false,
+          "image_stream_sha256": "bf181a87a1c1456b6a02921a3ea83c076b4e31292eb18360f2c1b609a1fa3aaa"
+        },
+        {
+          "kind": "negative-0",
+          "boundaries": [
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25
+          ],
+          "expected_positive": false,
+          "candidate_positive": false,
+          "x_atoms": 1,
+          "signed_tuples": 256,
+          "quadratic_solves": 8,
+          "roots_returned": 10,
+          "final_index_lookups": 4,
+          "field_multiplications": 270,
+          "maximum_two_leaf_affine_image": 1,
+          "maximum_four_leaf_affine_image": 2,
+          "four_leaf_identity_images": 2,
+          "false_negative": false,
+          "false_positive": false,
+          "image_stream_sha256": "2645664f7e0c50460c0076d052ce1b5d05129e4fb864d4d05824fc6aee862f4e"
+        },
+        {
+          "kind": "negative-1",
+          "boundaries": [
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            41
+          ],
+          "expected_positive": false,
+          "candidate_positive": false,
+          "x_atoms": 1,
+          "signed_tuples": 256,
+          "quadratic_solves": 9,
+          "roots_returned": 14,
+          "final_index_lookups": 4,
+          "field_multiplications": 345,
+          "maximum_two_leaf_affine_image": 2,
+          "maximum_four_leaf_affine_image": 4,
+          "four_leaf_identity_images": 1,
+          "false_negative": false,
+          "false_positive": false,
+          "image_stream_sha256": "d6112cada13a3df34abb675f802e7a702ff192f828a257c51da0fa6a26eecaf1"
+        }
+      ]
+    },
+    {
+      "terminal": 369,
+      "target": [
+        696,
+        426
+      ],
+      "nonempty_boundaries": 12,
+      "selected_boundaries": [
+        94,
+        166,
+        288,
+        507,
+        539,
+        614,
+        626,
+        644
+      ],
+      "cells": [
+        {
+          "kind": "planted-forward",
+          "boundaries": [
+            94,
+            166,
+            288,
+            507,
+            539,
+            614,
+            626,
+            644
+          ],
+          "expected_positive": true,
+          "candidate_positive": true,
+          "x_atoms": 4,
+          "signed_tuples": 1024,
+          "quadratic_solves": 80,
+          "roots_returned": 160,
+          "final_index_lookups": 64,
+          "field_multiplications": 3600,
+          "maximum_two_leaf_affine_image": 2,
+          "maximum_four_leaf_affine_image": 8,
+          "four_leaf_identity_images": 0,
+          "false_negative": false,
+          "false_positive": false,
+          "image_stream_sha256": "3719760028e0c86be4d062e6018a4fec58321c69bcfbd9c67e3f7c1297dbd347"
+        },
+        {
+          "kind": "planted-reverse",
+          "boundaries": [
+            644,
+            626,
+            614,
+            539,
+            507,
+            288,
+            166,
+            94
+          ],
+          "expected_positive": true,
+          "candidate_positive": true,
+          "x_atoms": 4,
+          "signed_tuples": 1024,
+          "quadratic_solves": 80,
+          "roots_returned": 160,
+          "final_index_lookups": 64,
+          "field_multiplications": 3600,
+          "maximum_two_leaf_affine_image": 2,
+          "maximum_four_leaf_affine_image": 8,
+          "four_leaf_identity_images": 0,
+          "false_negative": false,
+          "false_positive": false,
+          "image_stream_sha256": "4661df631741b0eae73bce9e63be46e3a200d09ea78d9f82127bf406702b0fbd"
+        },
+        {
+          "kind": "negative-0",
+          "boundaries": [
+            94,
+            94,
+            94,
+            94,
+            94,
+            94,
+            94,
+            94
+          ],
+          "expected_positive": false,
+          "candidate_positive": false,
+          "x_atoms": 256,
+          "signed_tuples": 65536,
+          "quadratic_solves": 3136,
+          "roots_returned": 5440,
+          "final_index_lookups": 1920,
+          "field_multiplications": 128640,
+          "maximum_two_leaf_affine_image": 2,
+          "maximum_four_leaf_affine_image": 4,
+          "four_leaf_identity_images": 256,
+          "false_negative": false,
+          "false_positive": false,
+          "image_stream_sha256": "ce35a2357ccf373e92f07a850235ffc45daa7d1e28eaa76013695e387be1322a"
+        },
+        {
+          "kind": "negative-1",
+          "boundaries": [
+            94,
+            94,
+            94,
+            94,
+            94,
+            94,
+            94,
+            166
+          ],
+          "expected_positive": false,
+          "candidate_positive": false,
+          "x_atoms": 128,
+          "signed_tuples": 32768,
+          "quadratic_solves": 1664,
+          "roots_returned": 3056,
+          "final_index_lookups": 960,
+          "field_multiplications": 70800,
+          "maximum_two_leaf_affine_image": 2,
+          "maximum_four_leaf_affine_image": 6,
+          "four_leaf_identity_images": 64,
+          "false_negative": false,
+          "false_positive": false,
+          "image_stream_sha256": "f9565627961728ab68d3a89c334bdf5915039240ffd327b2c0830e0db126998b"
+        }
+      ]
+    }
+  ]
+}

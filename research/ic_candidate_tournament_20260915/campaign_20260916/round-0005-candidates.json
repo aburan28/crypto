@@ -1,0 +1,57 @@
+[
+  {
+    "id": "incumbent",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "folded_lift_batch4",
+    "parent_round": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/runs/round-0004",
+    "hypothesis": "Previous single-target winner, freshly measured on complete cold 16-target jobs."
+  },
+  {
+    "id": "lazy_descent",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round5-sources/lazy_descent",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "incumbent",
+    "hypothesis": "Try the first existing probe before initializing the other 63 walks, preserving probe order and checks.",
+    "falsification": "Any incorrect/missing target rejects; promotion and rho parity require both metric gates on confirmation and replay."
+  },
+  {
+    "id": "fast_descent_check",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round5-sources/fast_descent_check",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "incumbent",
+    "hypothesis": "Use the cached exact single-word curve for each recovered-log check; retain general final worker verification.",
+    "falsification": "Any incorrect/missing target rejects; promotion and rho parity require both metric gates on confirmation and replay."
+  },
+  {
+    "id": "combined_descent",
+    "source_root": "/home/ubuntu/crypto/research/ic_candidate_tournament_20260915/campaign_20260916/round5-sources/combined_descent",
+    "config": {
+      "batch_trials": 4,
+      "linear_algebra": "sparse",
+      "max_trials": 4096,
+      "solver": "pair_table",
+      "summands": 3
+    },
+    "parent": "incumbent",
+    "hypothesis": "Measure lazy walk initialization and the faster internal scalar check together.",
+    "falsification": "Any incorrect/missing target rejects; promotion and rho parity require both metric gates on confirmation and replay."
+  }
+]

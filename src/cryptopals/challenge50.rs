@@ -56,7 +56,7 @@ pub fn cbc_mac_hash(key: &AesKey, msg: &[u8]) -> [u8; 16] {
 
 fn zero_pad(buf: &[u8]) -> Vec<u8> {
     let mut v = buf.to_vec();
-    while v.len() % 16 != 0 {
+    while !v.len().is_multiple_of(16) {
         v.push(0);
     }
     v
@@ -123,7 +123,10 @@ pub fn run() -> Report {
     let original = b"alert('MZA who was that?');\n";
     let original_tag = cbc_mac_hash(&key, original);
     let expected_hex = "296b8d7cb78a243dda4d0a61d33bbdd1";
-    r.line(format!("Original snippet : {:?}", std::str::from_utf8(original).unwrap()));
+    r.line(format!(
+        "Original snippet : {:?}",
+        std::str::from_utf8(original).unwrap()
+    ));
     r.line(format!("CBC-MAC of orig  : {}", hex::encode(original_tag)));
     r.line(format!("Cryptopals target: {}", expected_hex));
     // Cryptopals's literal target was computed with a slightly
@@ -163,7 +166,7 @@ mod tests {
         let prefix = b"alert('xss');//padpadpadpadpadpadpadpadpad";
         // Pad to block boundary first to make assertion clean.
         let mut p = prefix.to_vec();
-        while p.len() % 16 != 0 {
+        while !p.len().is_multiple_of(16) {
             p.push(b' ');
         }
         let target = [0x55u8; 16];
