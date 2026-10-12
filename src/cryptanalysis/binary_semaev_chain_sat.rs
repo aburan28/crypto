@@ -236,6 +236,7 @@ pub struct ChainedS3Encoding {
     b: F2mElement,
     irr: IrreduciblePoly,
     domain_installed: bool,
+    first_pair_exchangeable: bool,
     first_pair_ordered: bool,
 }
 
@@ -328,6 +329,7 @@ impl ChainedS3Encoding {
             b: b.clone(),
             irr: irr.clone(),
             domain_installed: false,
+            first_pair_exchangeable: false,
             first_pair_ordered: false,
         })
     }
@@ -357,6 +359,7 @@ impl ChainedS3Encoding {
             add_coordinate_domain(&mut self.solver, block, &codes, self.n as usize);
         }
         self.domain_installed = true;
+        self.first_pair_exchangeable = true;
         Ok(required)
     }
 
@@ -400,6 +403,75 @@ impl ChainedS3Encoding {
             add_frobenius_orbit_domain(&mut self.solver, block, &sorted, &self.irr);
         }
         self.domain_installed = true;
+        self.first_pair_exchangeable = true;
+        Ok(required)
+    }
+
+    /// Give each summand its own exact signed-Frobenius x-domain. This is the
+    /// circuit prerequisite for small-base summands plus one or two residual
+    /// domains; a caller must still lift and verify any partial point equation.
+    /// Caps and every domain are checked before mutating the solver.
+    pub fn constrain_frobenius_orbit_domains(
+        &mut self,
+        representatives_by_summand: &[Vec<BigUint>],
+        max_variables: u32,
+        max_domain_clauses: usize,
+    ) -> Result<FrobeniusOrbitDomainSize, ChainBuildError> {
+        if self.domain_installed || representatives_by_summand.len() != self.m {
+            return Err(ChainBuildError::Unsupported);
+        }
+        let mut sorted_domains = Vec::with_capacity(self.m);
+        let mut required = FrobeniusOrbitDomainSize {
+            variables: 0,
+            clauses: 0,
+            xor_rows: 0,
+        };
+        for representatives in representatives_by_summand {
+            if representatives.iter().any(|x| x.bits() > u64::from(self.n)) {
+                return Err(ChainBuildError::Unsupported);
+            }
+            let mut sorted = representatives.clone();
+            sorted.sort_unstable();
+            sorted.dedup();
+            if sorted.len() != representatives.len() {
+                return Err(ChainBuildError::Unsupported);
+            }
+            let size = frobenius_orbit_domain_size(self.n, 1, sorted.len())
+                .ok_or(ChainBuildError::Unsupported)?;
+            required.variables = required
+                .variables
+                .checked_add(size.variables)
+                .ok_or(ChainBuildError::Unsupported)?;
+            required.clauses = required
+                .clauses
+                .checked_add(size.clauses)
+                .ok_or(ChainBuildError::Unsupported)?;
+            required.xor_rows = required
+                .xor_rows
+                .checked_add(size.xor_rows)
+                .ok_or(ChainBuildError::Unsupported)?;
+            sorted_domains.push(sorted);
+        }
+        let total = u64::from(self.solver.n_vars())
+            .checked_add(required.variables)
+            .ok_or(ChainBuildError::Unsupported)?;
+        if total > u64::from(max_variables) || total > i32::MAX as u64 {
+            return Err(ChainBuildError::VariableCap {
+                required: total,
+                maximum: max_variables,
+            });
+        }
+        if required.clauses > max_domain_clauses {
+            return Err(ChainBuildError::DomainClauseCap {
+                required: required.clauses,
+                maximum: max_domain_clauses,
+            });
+        }
+        self.first_pair_exchangeable = sorted_domains[0] == sorted_domains[1];
+        for (block, representatives) in self.blocks[..self.m].iter().zip(&sorted_domains) {
+            add_frobenius_orbit_domain(&mut self.solver, block, representatives, &self.irr);
+        }
+        self.domain_installed = true;
         Ok(required)
     }
 
@@ -408,7 +480,7 @@ impl ChainedS3Encoding {
     /// node depends only on its output. This is optional so ordered and
     /// unrestricted searches remain separate sweep arms.
     pub fn order_first_pair(&mut self, max_variables: u32) -> Result<(), ChainBuildError> {
-        if self.first_pair_ordered || !self.domain_installed {
+        if self.first_pair_ordered || !self.first_pair_exchangeable {
             return Err(ChainBuildError::Unsupported);
         }
         let extra = self.n - 1;
@@ -585,10 +657,17 @@ fn add_frobenius_orbit_domain(
 fn add_lex_leq(solver: &mut Solver, a: &[u32], b: &[u32]) {
     debug_assert_eq!(a.len(), b.len());
     let top = a.len() - 1;
-    let aux: Vec<Lit> = solver.add_vars(top as u32).map(|wire| wire as Lit).collect();
+    let aux: Vec<Lit> = solver
+        .add_vars(top as u32)
+        .map(|wire| wire as Lit)
+        .collect();
     solver.add_clause(vec![-(a[top] as Lit), b[top] as Lit]);
     for bit in (0..top).rev() {
-        let above = if bit + 1 < top { Some(aux[bit + 1]) } else { None };
+        let above = if bit + 1 < top {
+            Some(aux[bit + 1])
+        } else {
+            None
+        };
         for (left, right) in [
             (a[bit + 1] as Lit, b[bit + 1] as Lit),
             (-(a[bit + 1] as Lit), -(b[bit + 1] as Lit)),
@@ -658,7 +737,13 @@ mod tests {
                 solver.reset_search();
                 solver.add_clause(
                     (0..2 * width)
-                        .map(|bit| if model[bit] { -((bit + 1) as Lit) } else { (bit + 1) as Lit })
+                        .map(|bit| {
+                            if model[bit] {
+                                -((bit + 1) as Lit)
+                            } else {
+                                (bit + 1) as Lit
+                            }
+                        })
                         .collect(),
                 );
             }
@@ -669,11 +754,15 @@ mod tests {
 
     #[test]
     fn first_pair_order_cap_is_checked_before_mutation() {
-        let irr = IrreduciblePoly { degree: 7, low_terms: vec![0, 1] };
-        let mut encoding = ChainedS3Encoding::build(
-            5, &irr, &F2mElement::one(7), None, 0, 2_000,
-        ).unwrap();
-        encoding.constrain_summands(&[BigUint::from(1u8), BigUint::from(2u8)], 1_000).unwrap();
+        let irr = IrreduciblePoly {
+            degree: 7,
+            low_terms: vec![0, 1],
+        };
+        let mut encoding =
+            ChainedS3Encoding::build(5, &irr, &F2mElement::one(7), None, 0, 2_000).unwrap();
+        encoding
+            .constrain_summands(&[BigUint::from(1u8), BigUint::from(2u8)], 1_000)
+            .unwrap();
         let variables = encoding.solver.n_vars();
         let clauses = encoding.solver.n_clauses();
         assert!(matches!(
@@ -686,7 +775,10 @@ mod tests {
         assert_eq!(encoding.solver.n_vars(), variables + 6);
         // Root assignments from the finite domain may remove clauses.
         assert!((clauses + 1..=clauses + 19).contains(&encoding.solver.n_clauses()));
-        assert!(matches!(encoding.order_first_pair(variables + 12), Err(ChainBuildError::Unsupported)));
+        assert!(matches!(
+            encoding.order_first_pair(variables + 12),
+            Err(ChainBuildError::Unsupported)
+        ));
     }
 
     #[test]
@@ -991,5 +1083,105 @@ mod tests {
         assert_eq!(enc.solver.n_vars() as u64 - before.0 as u64, size.variables);
         assert_eq!(enc.solver.n_clauses() - before.1, size.clauses);
         assert_eq!(enc.solver.n_xors() - before.2, size.xor_rows);
+    }
+
+    #[test]
+    fn heterogeneous_orbit_domains_preflight_and_guard_pair_symmetry() {
+        let kc = KoblitzCurve::new(0, 7).unwrap();
+        let BinaryPoint::Affine { x, .. } = kc.generator() else {
+            panic!("generator is affine");
+        };
+        let point_x = x.to_biguint();
+        let alternatives: Vec<_> = (0u8..128)
+            .map(BigUint::from)
+            .filter(|candidate| candidate != &point_x)
+            .take(3)
+            .collect();
+        let domains = vec![
+            vec![point_x.clone(), alternatives[0].clone()],
+            vec![
+                point_x.clone(),
+                alternatives[1].clone(),
+                alternatives[2].clone(),
+            ],
+        ];
+        let small = frobenius_orbit_domain_size(7, 1, 2).unwrap();
+        let large = frobenius_orbit_domain_size(7, 1, 3).unwrap();
+        let size = FrobeniusOrbitDomainSize {
+            variables: small.variables + large.variables,
+            clauses: small.clauses + large.clauses,
+            xor_rows: small.xor_rows + large.xor_rows,
+        };
+        let mut enc =
+            ChainedS3Encoding::build(2, &kc.curve.irreducible, &kc.curve.b, None, 0, 2_000)
+                .unwrap();
+        let before = (
+            enc.solver.n_vars(),
+            enc.solver.n_clauses(),
+            enc.solver.n_xors(),
+        );
+        assert_eq!(
+            enc.constrain_frobenius_orbit_domains(&domains, before.0, size.clauses),
+            Err(ChainBuildError::VariableCap {
+                required: u64::from(before.0) + size.variables,
+                maximum: before.0,
+            })
+        );
+        assert_eq!(
+            enc.constrain_frobenius_orbit_domains(
+                &domains,
+                before.0 + size.variables as u32,
+                size.clauses - 1,
+            ),
+            Err(ChainBuildError::DomainClauseCap {
+                required: size.clauses,
+                maximum: size.clauses - 1,
+            })
+        );
+        assert_eq!(
+            (
+                enc.solver.n_vars(),
+                enc.solver.n_clauses(),
+                enc.solver.n_xors()
+            ),
+            before
+        );
+        assert_eq!(
+            enc.constrain_frobenius_orbit_domains(
+                &domains,
+                before.0 + size.variables as u32,
+                size.clauses,
+            ),
+            Ok(size)
+        );
+        assert_eq!(
+            enc.solver.n_vars() as u64 - u64::from(before.0),
+            size.variables
+        );
+        assert_eq!(enc.solver.n_clauses() - before.1, size.clauses);
+        assert_eq!(enc.solver.n_xors() - before.2, size.xor_rows);
+        assert_eq!(
+            enc.order_first_pair(2_000),
+            Err(ChainBuildError::Unsupported)
+        );
+        assert_eq!(enc.solver.solve(), SolveResult::Sat);
+        assert!(enc.verify_model());
+        let found = enc.decode_summands();
+        assert_eq!(found[0], found[1]);
+
+        let mut equal =
+            ChainedS3Encoding::build(2, &kc.curve.irreducible, &kc.curve.b, None, 0, 2_000)
+                .unwrap();
+        let equal_domains = vec![
+            domains[0].clone(),
+            domains[0].iter().rev().cloned().collect(),
+        ];
+        let equal_size = frobenius_orbit_domain_size(7, 2, 2).unwrap();
+        equal
+            .constrain_frobenius_orbit_domains(&equal_domains, 2_000, equal_size.clauses)
+            .unwrap();
+        equal.order_first_pair(2_000).unwrap();
+        assert_eq!(equal.solver.solve(), SolveResult::Sat);
+        assert!(equal.verify_model());
     }
 }
