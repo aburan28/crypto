@@ -6,7 +6,10 @@ makes a draft. This and the repository's other rules are in
 Every experiment run, every PR that lands a result, and every research search
 leaves a report, a graph, and a PDF: follow the `research-visuals` skill
 (`.claude/skills/research-visuals/SKILL.md`; AGENTS.md "Research searches must
-leave visual reports").
+leave visual reports"). Performance measurements and speedups also copy their
+PDFs, SVG graphs and PNG renders into `benchmarks/<YYYYMMDD>-<slug>/` with a row
+in `benchmarks/README.md`, in the same PR (AGENTS.md "Performance results also
+land in `benchmarks/`").
 
 <!-- conductor:begin -->
 Before making code changes, obtain or attach to a Conductor task. Run
