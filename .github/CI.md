@@ -21,11 +21,17 @@ the entire historical research corpus. Failures and timeouts remain failures.
   replays before replaying those sessions again in the corpus loop.
 
 The integration branch has 352 workflows. Its newer decision to retire
-99 completed-study gates from automatic events is preserved: those studies
-remain available through manual dispatch. The weak-curve conjecture gate keeps
-its census replay, tests, Lean proof and axiom checks. Its original 60-minute
-Lean budget remains bound to its frozen workflow digest, as does the separate
-60-minute `proofs` job in `weak-curve-lean.yml`.
+99 completed-study gates from automatic events is preserved. This does not
+retire the n53 target-cyclic rank hash-only custody check: it remains an active
+PR gate on its listed inputs, while only the separate outcome job requires the
+`run-n53-rotation-once` label. Its historical preflight uses an isolated view
+with the original nested lock bytes from the released commit and checks that
+the live nested lock still matches the current root lock before substitution.
+The labeled outcome retains its original exact-current-source and head guards;
+the historical view does not authorize a measurement. The weak-curve conjecture
+gate keeps its census replay, tests, Lean proof and axiom checks. Its original
+60-minute Lean budget remains bound to its frozen workflow digest, as does the
+separate 60-minute `proofs` job in `weak-curve-lean.yml`.
 
 ## Scope contract
 
@@ -89,9 +95,10 @@ exact frozen workflow revision. All other source and evidence comes from the
 current checkout, and native source tests still run there. Existing scientific
 source drift and a historical verifier syntax error remain visible failures.
 The rotated-admission custody command passes its historical replay, negative
-controls and current-interface check. The n53 custody check passes its
-workflow freeze, then retains the original preflight rejection of historical
-Cargo-lock digest drift.
+controls and current-interface check. The n53 hash-only custody command checks
+the original workflow and source freeze, historical lock-bound preflight,
+negative controls and optional archive. Its separate label-gated outcome still
+rejects changed released sources, including the current producer drift.
 
 The event-aware [budget checker](scripts/check-pr-budgets.py) rejects missing,
 unknown or over-budget timeouts on PR/merge-group jobs, accounting for job

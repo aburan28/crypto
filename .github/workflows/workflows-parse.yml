@@ -14,6 +14,7 @@ on:
       - 'scripts/test_workflows_parse.py'
       - '.github/scripts/*ci-scope*'
       - '.github/scripts/*frozen-workflow*'
+      - '.github/scripts/n53-historical-cargo-lock-view-v1.json'
       - '.github/scripts/check-pr-budgets.py'
       - '.github/scripts/test-pr-budgets.py'
       - 'research/weak_curve_properties_lean_20261011/EVIDENCE_SHA256.tsv'
