@@ -6,6 +6,7 @@ use crate::bskernel::{BsKernel, Dispatch};
 use crate::common::*;
 use crate::group::*;
 use crate::kernel::ScalarKernel;
+use crate::mitm::MitmTable;
 use crypto_lib::cryptanalysis::semaev_decomp::{decompose, subspace_poly, SubspaceOracle};
 
 /// A bit-sliced kernel of one lane width and field degree, behind a trait object.
@@ -73,6 +74,8 @@ pub enum Arm<'a> {
     GroupScalar(&'a Rung, ScalarKernel<'a>),
     /// The bit-sliced group-law kernel: `bs64`, `bs256` or `bs512`, `-tK` threads.
     BitSliced(&'a Rung, Box<dyn BsRunner>),
+    /// PS-8: the meet-in-the-middle pair table, probed once per signed base point.
+    Mitm(&'a Rung, MitmTable<'a>),
 }
 
 impl<'a> Arm<'a> {
@@ -113,6 +116,10 @@ impl<'a> Arm<'a> {
                     },
                 )
             }
+            "mitm" => {
+                let solver = ArtinSchreier::new(&rung.gf);
+                Arm::Mitm(rung, MitmTable::new(&rung.gf, &solver, rung.l))
+            }
             "group-scalar" => {
                 let solver = ArtinSchreier::new(&rung.gf);
                 Arm::GroupScalar(rung, ScalarKernel::new(&rung.gf, &solver, rung.l))
@@ -132,6 +139,16 @@ impl<'a> Arm<'a> {
             }
             Arm::GroupScalar(_, k) => k.pairs_total(),
             Arm::BitSliced(_, k) => k.pairs_total(),
+            // The table arm's unit is a probe, not a pair.
+            Arm::Mitm(_, t) => t.probes_per_target(),
+        }
+    }
+
+    /// Keys and bytes of a per-run table the arm built (zero for the arms without one).
+    pub fn aux(&self) -> (u64, u64) {
+        match self {
+            Arm::Mitm(_, t) => (t.entries, t.bytes()),
+            _ => (0, 0),
         }
     }
 
@@ -165,6 +182,14 @@ impl<'a> Arm<'a> {
                     k.run((xr, yr), false, &mut out).0
                 }
             }
+            Arm::Mitm(r, t) => {
+                if degenerate_target(&r.gf, r.l, xr) {
+                    decompose(xr, r.l, &r.gf).is_some()
+                } else {
+                    let mut out = Vec::new();
+                    t.run((xr, yr), false, &mut out).0
+                }
+            }
         }
     }
 
@@ -183,6 +208,9 @@ impl<'a> Arm<'a> {
             }),
             Arm::BitSliced(r, k) if !degenerate_target(&r.gf, r.l, xr) => list(&|o| {
                 k.run((xr, yr), true, o);
+            }),
+            Arm::Mitm(r, t) if !degenerate_target(&r.gf, r.l, xr) => list(&|o| {
+                t.run((xr, yr), true, o);
             }),
             _ => None,
         }
