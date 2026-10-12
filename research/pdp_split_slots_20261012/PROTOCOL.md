@@ -1,6 +1,6 @@
 # Protocol: orbit-union τ-slots for the split and hybrid PDP, measured in ecbench
 
-**DRAFT, not yet registered: the grid is fixed after the sizing runs. No measured run has started.** Only the smoke
+**Registered 2026-10-12, before any measured run below.** Only the smoke
 runs listed at the end preceded it. Conductor task `T-2`. This round
 follows `research/pdp_split_dreg_20261011` (round 1, PR #1709).
 
@@ -63,8 +63,18 @@ why n = 17 uses `ℓ = 5`.
 | `std-chain-g4` | `koblitz-standard-subspace:dimension=ℓ` × `pdp-split:plan=2+1,slots=one` |
 | `clo-chain-g4` | `koblitz-closure:dimension=ℓ` × `pdp-split:plan=2+1,slots=all` |
 
-The chain arms run only where the smoke timings below fit the budget;
-`SPECS.md` lists the arms frozen per curve.
+Frozen arms per curve, from the sizing runs below (a chain arm that would
+take hours per run is left out, and its absence is a stated gap, not a
+result):
+
+| curve | rho arms | unsplit (std, clo) | chain (std, clo) |
+|---|---|---|---|
+| n = 11, ℓ = 4 | both | both | both |
+| n = 13, ℓ = 4 | both | both | both |
+| n = 17, ℓ = 5 | both | both | neither (about 2.8 h per std run, 41 min per clo run) |
+| n = 19, ℓ = 4 | both | both | clo only (std is about 78 min per run) |
+
+Specs: `SPEC-A-n11.json`, `SPEC-A-n13.json`, `SPEC-A-n17.json`, `SPEC-A-n19.json`.
 
 **Sizes and isolation.** Eight public one-target workloads per curve, one
 round, no warm-up. The figures are operation counts and replay
@@ -111,6 +121,33 @@ measurement. Its projection stays labelled a projection.
 `m = 4` is not run on the closure: about 2.7 h per cell at four slot
 tuples.
 
+## Part C — step 2: `m = 2` on the 9-dimensional invariant base, n = 17
+
+On `icv1-f2m17-tm101-00378d4e` (`K_1`), the only Frobenius-invariant
+subspace of usable size has dimension 9 (`koblitz-orbit:divisor=0;1`). It is
+the base on which the repository's SAT oracle recorded a lower-bound S of
+0.854× strong rho (`research/ecbench_sat_pdp_20261009`).
+
+Spec `SPEC-C-n17.json`: eight public one-target workloads, one round,
+target seed `202610121301`, measurement seed `202610121302`, all IC arms
+with `linalg=incremental-gauss`, `targets=walk`, `max_trials=20000`. Arms:
+
+| arm | method |
+|---|---|
+| `rho-strong` (reference) | as in Part A |
+| `rho-frob` | as in Part A |
+| `ic-mitm-frob` | `mitm-frobenius:m=2`, the best complete IC recipe on this curve (4.27× strong rho) |
+| `ic-sat-xor` | `descent-algebraic:m=2`, `sat-cdcl:sat_conflict_budget=20000,sat_xor_encoding=native`, `solver_budget_seconds=0` (the earlier SAT arm) |
+| `pdp-m2-g0` | `pdp-split:m=2,plan=2,guess=0,slots=one,max_free=24` |
+| `pdp-m2-g4` | `pdp-split:m=2,plan=2,guess=4,slots=one,max_free=24` |
+
+The base is closed under Frobenius, so `slots=one` already covers every
+rotation.
+
+**Figures.** Recorded S, and priced S for the F4 arms as in Part A. The
+SAT arm's conflicts have no pinned price, so its S stays recorded only and
+labelled a lower bound.
+
 ## Predictions (written first)
 
 - **R1.** On every curve, `clo-unsplit-g4` solves fewer systems per run
@@ -125,6 +162,8 @@ tuples.
   its curve. **Falsification target:** any curve where one is.
 - **R6.** Every ecbench run verifies, and every Part B run is complete and
   exact.
+- **R7 (Part C).** No `pdp-m2` arm's median priced S is below `ic-mitm-frob`'s
+  median S.
 
 ## Inadmissible
 
@@ -145,4 +184,13 @@ The following are inadmissible after any measured run:
 - n = 13, ℓ = 4, 1 target, systems per run (standard → closure):
   - unsplit: 119 → 41, in 2.1 s → 0.6 s;
   - chain: 119 → 41, in 21.6 s → 7.7 s.
-- n = 17 (ℓ = 5) and n = 19 (ℓ = 4): see `SPECS.md`.
+- n = 19, ℓ = 4, 1 target, unsplit g = 4:
+  - standard base: 6,850 systems, 1.06e9 XORs, 80 s;
+  - closure: 811 systems, 2.21e8 XORs, 12.6 s.
+  - The standard-base chain at n = 19 was stopped after its unsplit arm.
+    At about 0.68 s per system it needs about 78 min per run.
+- n = 17, ℓ = 5, 1 target, unsplit g = 4:
+  - standard base: 477 systems, 4.87e10 XORs, 214 s;
+  - closure: 117 systems, 1.12e10 XORs, 50 s.
+- The chain at ℓ = 5 costs about 21 s per system at g = 4 (round 1), so
+  117–477 systems is 41 min to 2.8 h per run.
