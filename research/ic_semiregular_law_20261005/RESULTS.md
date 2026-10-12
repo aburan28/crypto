@@ -155,3 +155,11 @@ Round 2 can test the two findings separately, each on fresh draws:
 2. **`rr`'s structure.** Register the reduced-shape prediction minus one for `n ≥ 29`,
    and look for the extra top-form relations directly. They are the part of this round
    that points in the attacker's direction.
+
+## Run report and graphs
+
+The run report, with the per-draw table, the graph and its PDF, is
+[reports/run-20261005T1658Z](reports/run-20261005T1658Z/report.pdf) (source `report.typ`,
+graph `degrees.svg` drawn from the recorded values by `plot.py`). Canonical graphs checked
+and left unchanged, because a stage-degree diagnostic adds no scoreboard entry:
+`docs/index-calculus-scoreboard.html`, `docs/ic/progress-timeline.json`, `figures/`.
