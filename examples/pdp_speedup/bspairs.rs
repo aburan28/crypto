@@ -125,3 +125,27 @@ pub fn stage_c<L: Lane>(
     let m4 = f.in_subspace_mask(&t4, l);
     m1.or(m2).or(m3.or(m4))
 }
+
+/// A batch of `T` tasks: stage A for each, one Montgomery inversion per chain
+/// across the batch, stage C for each.  Returns per task the hit mask and the
+/// mask of exceptional lanes (zero denominator, to be recomputed exactly).
+pub fn batch<L: Lane>(
+    f: &BsField,
+    rows: &[RowPlanes<L>],
+    x2s: &[E<L>],
+    y2s: &[E<L>],
+    l: usize,
+) -> Vec<(L, L)> {
+    let t = rows.len();
+    let stages: Vec<StageA<L>> = (0..t).map(|k| stage_a(f, &rows[k], &x2s[k])).collect();
+    let dus: Vec<&E<L>> = stages.iter().map(|s| &s.du).collect();
+    let dvs: Vec<&E<L>> = stages.iter().map(|s| &s.dv).collect();
+    let ju = montgomery(f, &dus);
+    let jv = montgomery(f, &dvs);
+    (0..t)
+        .map(|k| {
+            let hit = stage_c(f, &rows[k], &x2s[k], &y2s[k], &stages[k], &ju[k], &jv[k], l);
+            (hit, stages[k].exceptional)
+        })
+        .collect()
+}

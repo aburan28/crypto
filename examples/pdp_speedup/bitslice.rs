@@ -170,6 +170,8 @@ impl Lane for Cnt {
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum TapeOp {
+    /// Program input number `k` (a plane supplied by the caller).
+    Input(u32),
     Zero,
     Ones,
     Xor(u32, u32),
@@ -201,6 +203,13 @@ fn emit(op: TapeOp) -> Tape {
         v.push(op);
         Tape((v.len() - 1) as u32)
     })
+}
+
+impl Tape {
+    /// A fresh program input.
+    pub fn input(k: u32) -> Self {
+        emit(TapeOp::Input(k))
+    }
 }
 
 impl Lane for Tape {
@@ -421,4 +430,119 @@ pub fn from_planes_u64(e: &E<u64>, n: usize) -> [u64; 64] {
         }
     }
     w
+}
+
+// ── exporting, hashing and interpreting a recorded program ──────────────
+
+/// Keep only the operations an output depends on, renumbering wires.  Returns
+/// the live program and the outputs in it.
+pub fn eliminate_dead(ops: &[TapeOp], outputs: &[Tape]) -> (Vec<TapeOp>, Vec<u32>) {
+    let mut live = vec![false; ops.len()];
+    let mut stack: Vec<u32> = outputs.iter().map(|t| t.0).collect();
+    while let Some(w) = stack.pop() {
+        if live[w as usize] {
+            continue;
+        }
+        live[w as usize] = true;
+        match ops[w as usize] {
+            TapeOp::Input(_) | TapeOp::Zero | TapeOp::Ones => {}
+            TapeOp::Not(a) => stack.push(a),
+            TapeOp::Xor(a, b) | TapeOp::And(a, b) | TapeOp::Or(a, b) => {
+                stack.push(a);
+                stack.push(b);
+            }
+            TapeOp::Xand(a, b, c) => {
+                stack.push(a);
+                stack.push(b);
+                stack.push(c);
+            }
+        }
+    }
+    let mut renum = vec![u32::MAX; ops.len()];
+    let mut out = Vec::new();
+    for (i, op) in ops.iter().enumerate() {
+        if !live[i] {
+            continue;
+        }
+        let r = |w: u32| renum[w as usize];
+        let n = match *op {
+            TapeOp::Input(k) => TapeOp::Input(k),
+            TapeOp::Zero => TapeOp::Zero,
+            TapeOp::Ones => TapeOp::Ones,
+            TapeOp::Not(a) => TapeOp::Not(r(a)),
+            TapeOp::Xor(a, b) => TapeOp::Xor(r(a), r(b)),
+            TapeOp::And(a, b) => TapeOp::And(r(a), r(b)),
+            TapeOp::Or(a, b) => TapeOp::Or(r(a), r(b)),
+            TapeOp::Xand(a, b, c) => TapeOp::Xand(r(a), r(b), r(c)),
+        };
+        renum[i] = out.len() as u32;
+        out.push(n);
+    }
+    let outs = outputs.iter().map(|t| renum[t.0 as usize]).collect();
+    (out, outs)
+}
+
+/// Canonical bytes of a program: per operation a tag byte and its operands
+/// as `u32` little-endian, then the output wires.
+pub fn program_bytes(ops: &[TapeOp], outputs: &[u32]) -> Vec<u8> {
+    let mut b = Vec::with_capacity(ops.len() * 13);
+    for op in ops {
+        match *op {
+            TapeOp::Input(k) => {
+                b.push(0);
+                b.extend_from_slice(&k.to_le_bytes());
+            }
+            TapeOp::Zero => b.push(1),
+            TapeOp::Ones => b.push(2),
+            TapeOp::Not(a) => {
+                b.push(3);
+                b.extend_from_slice(&a.to_le_bytes());
+            }
+            TapeOp::Xor(x, y) => {
+                b.push(4);
+                b.extend_from_slice(&x.to_le_bytes());
+                b.extend_from_slice(&y.to_le_bytes());
+            }
+            TapeOp::And(x, y) => {
+                b.push(5);
+                b.extend_from_slice(&x.to_le_bytes());
+                b.extend_from_slice(&y.to_le_bytes());
+            }
+            TapeOp::Or(x, y) => {
+                b.push(6);
+                b.extend_from_slice(&x.to_le_bytes());
+                b.extend_from_slice(&y.to_le_bytes());
+            }
+            TapeOp::Xand(x, y, z) => {
+                b.push(7);
+                b.extend_from_slice(&x.to_le_bytes());
+                b.extend_from_slice(&y.to_le_bytes());
+                b.extend_from_slice(&z.to_le_bytes());
+            }
+        }
+    }
+    b.push(255);
+    for o in outputs {
+        b.extend_from_slice(&o.to_le_bytes());
+    }
+    b
+}
+
+/// Run a recorded program on `u64` words (64 lanes): inputs by number.
+pub fn eval_program(ops: &[TapeOp], outputs: &[u32], inputs: &[u64]) -> Vec<u64> {
+    let mut v: Vec<u64> = Vec::with_capacity(ops.len());
+    for op in ops {
+        let x = match *op {
+            TapeOp::Input(k) => inputs[k as usize],
+            TapeOp::Zero => 0,
+            TapeOp::Ones => !0,
+            TapeOp::Not(a) => !v[a as usize],
+            TapeOp::Xor(a, b) => v[a as usize] ^ v[b as usize],
+            TapeOp::And(a, b) => v[a as usize] & v[b as usize],
+            TapeOp::Or(a, b) => v[a as usize] | v[b as usize],
+            TapeOp::Xand(a, b, c) => v[a as usize] ^ (v[b as usize] & v[c as usize]),
+        };
+        v.push(x);
+    }
+    outputs.iter().map(|&o| v[o as usize]).collect()
 }
