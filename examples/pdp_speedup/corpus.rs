@@ -155,7 +155,7 @@ fn sqr_mod(u: &[u64; 4], f: &P5, d: usize, gf: &Gf2) -> [u64; 4] {
 /// All sorted triples `(x₁ ≤ x₂ ≤ x₃)` in `V³` with `S₄ = 0` that arise from
 /// the pair `(x₁, x₂)`, `x₁ ≤ x₂`; `x₃` ranges over all of `V`, so triples
 /// are re-sorted on output and de-duplicated by the caller.
-fn pair_roots(rung: &Rung, lv: &[u64], xr: u64, x1: u64, x2: u64, out: &mut Vec<[u64; 3]>) {
+pub fn pair_roots(rung: &Rung, lv: &[u64], xr: u64, x1: u64, x2: u64, out: &mut Vec<[u64; 3]>) {
     let gf = &rung.gf;
     let q = quartic_in_x3(x1, x2, xr, gf);
     let Some(d) = q.deg() else {

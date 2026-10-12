@@ -13,8 +13,13 @@
 //! This is an oracle-stage measurement (`AGENTS.md` §8): it times the
 //! pairs-and-solve decision of one abscissa, never an end-to-end ECDLP.
 
+mod algebra;
+mod bitslice;
+mod bspairs;
 mod common;
 mod corpus;
+mod gatecount;
+mod group;
 
 use common::*;
 use corpus::*;
@@ -381,6 +386,13 @@ fn main() {
         Some("one") => cmd_one(&args),
         Some("count") => cmd_count(&args),
         Some("summarize") => cmd_summarize(&args),
+        Some("degrees") => algebra::cmd_degrees(&args),
+        Some("agree") => algebra::cmd_agree(&args),
+        Some("sample") => algebra::cmd_sample(&args),
+        Some("gates") => gatecount::cmd_gates(&args),
+        Some("torsion") => algebra::cmd_torsion(&args),
+        Some("corpus-check") => algebra::cmd_corpus_check(&args),
+        Some("bs-check") => gatecount::cmd_bscheck(&args),
         _ => {
             eprintln!("usage: pdp_speedup corpus|verify|brute|time|one|count|summarize ...");
             std::process::exit(2);
