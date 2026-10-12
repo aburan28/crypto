@@ -254,12 +254,12 @@ pub fn binary_explicit_instance(
             subgroup_order: order,
             cofactor: BigUint::from(group_order / r),
             lambda,
+            frobenius_is_endomorphism: true,
             k: 1,
             q: 2,
             a_index: a,
             b_index: 1,
             subfield_basis: vec![F2mElement::one(n)],
-            frobenius_is_endomorphism: true,
         })
     } else {
         None

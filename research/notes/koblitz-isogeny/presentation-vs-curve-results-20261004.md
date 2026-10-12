@@ -95,3 +95,34 @@ measured solve.
 
 To tighten H0 at n = 23 and reach n = 31 would need a faster S_{m+1}
 solver, or more compute than this session's 4 cores.
+
+## Addendum (2026-10-11): n = 23 extended to 128 curves
+
+This is an additive amendment; the sections above are unchanged. The n = 23 arm was
+extended from 32 to 128 curves with the same command, seeds and order rule
+(`koblitz_presentation_sweep 23 1 11 400 128 1,2,3,4`, cells in seeded shuffled
+order). The 96 new curves are the next members in the sweep's seeded hash order.
+
+- **Data:** `experiments/koblitz_presentation/pres_23_1_l11.jsonl`, now 512 cells
+  (the first 128 lines are the original 32-curve run, unchanged).
+- **Analysis:** `presentation_icc.py`, output in `icc_n23_128curves.json`.
+- **Soundness:** every cell's log matched BSGS, and there were 0 inconsistent relations.
+- **Timing caveat:** the 384 new cells ran over several days with container restarts
+  and 2–4 cores, so wall-clock metrics carry load noise. Yield and reductions are
+  load-independent.
+
+| metric | ICC_curve, 32 curves | ICC_curve, 128 curves | subspace share (128) |
+|---|---|---|---|
+| yield per \|F\|² | 0.086 [0, 0.260] | 0.078 [0, 0.162] | 0.003 |
+| reductions/call | 0.030 [0, 0.186] | 0.007 [0, 0.092] | 0.000 |
+| log µs/call | 0.000 [0, 0.075] | 0.000 [0, 0.052] | 0.005 |
+| log projected solve | 0.031 [0, 0.185] | 0.039 [0, 0.108] | 0.000 |
+
+**Verdict at n = 23, unchanged in kind.**
+- H1 is still not supported: no metric has ICC ≥ 0.10 with a lower bound above 0.
+- H0 is still not established by the strict rule: no upper bound is below 0.05.
+- The bounds are now 0.05–0.16, against 0.19–0.26 before. Yield is the widest, at
+  0.078 [0, 0.162]. That is consistent with the cofactor-balance yield spread found
+  earlier (`yield-spread-results-20261003.md`), but this run does not test that link.
+- Plainly: at 128 curves the curve contributes at most about 9 % of the variance in
+  per-call cost, and at most about 16 % of the variance in yield, at 95 % confidence.

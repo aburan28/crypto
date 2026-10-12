@@ -1,0 +1,23 @@
+{
+ "_comment": "Lead ladder baseline (LEAD_LADDER_METHODOLOGY_20261010.md section 2) with the L1 (folding) and L4 (invariant base) toggles. The degree is overridden per rung by run_baseline.sh; K_0 is selected with --koblitz-a 0 on the CLI, which the sweep inherits. A matrix rather than an explicit list because ic bench treats an empty matrix as one empty configuration and aborts; every configuration draws the same planted targets from the seed, so the arms are paired, and the counts are deterministic so no A/A arm is needed.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 17
+ },
+ "repeats": 8,
+ "seed": 20261010,
+ "max_trials": 4000000,
+ "matrix": {
+  "factor_base": [
+   "koblitz-orbit:divisor=1",
+   "koblitz-orbit:divisor=1,no_fold=1"
+  ],
+  "oracle": [
+   "mitm-frobenius",
+   "mitm:negation_folded=1"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

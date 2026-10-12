@@ -309,6 +309,7 @@ fn main() {
         sat_macaulay_degree: None,
         sat_options: SatDecompositionOptions {
             encoding: XorEncoding::Native,
+            factored_s4: false,
             branch_on_summands: true,
             restrict_to_factor_base: true,
             trace_constraint: true,
@@ -316,6 +317,7 @@ fn main() {
             wall_budget: None,
             symmetry_breaking: false,
         },
+        chain_s3_limits: KoblitzIcOptions::default().chain_s3_limits,
         collapse_negation: true,
         stop_on_verified_rank: true,
         relation_batch_size: 1,

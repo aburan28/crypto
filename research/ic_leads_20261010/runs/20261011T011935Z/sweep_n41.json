@@ -1,0 +1,23 @@
+{
+ "_comment": "Opportunity 1 at n=41 with three summands: orbit-union base at 20, 60, 200 columns.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 41
+ },
+ "repeats": 4,
+ "seed": 20261010,
+ "max_trials": 4000000,
+ "matrix": {
+  "factor_base": [
+   "compact-orbit-scan:columns=20,raw_x_cap=400000000",
+   "compact-orbit-scan:columns=60,raw_x_cap=400000000",
+   "compact-orbit-scan:columns=200,raw_x_cap=400000000"
+  ],
+  "oracle": [
+   "mitm-frobenius:m=3"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

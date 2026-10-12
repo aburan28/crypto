@@ -1,0 +1,23 @@
+{
+ "_comment": "A1 limit at n=41, three summands: push the multiplier norm up at near-constant points (3 columns norm 32, 2 columns norm 64, 1 column norm 160) against the 6-column norm-16 row. Prediction: relations needed fall with the columns until they reach 2-3, where the walk set-up and the base build dominate; the yield stays set by the point count.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 41
+ },
+ "repeats": 4,
+ "seed": 20261010,
+ "max_trials": 4000000,
+ "matrix": {
+  "factor_base": [
+   "compact-orbit-scan:columns=3,raw_x_cap=400000000,norm=32",
+   "compact-orbit-scan:columns=2,raw_x_cap=400000000,norm=64",
+   "compact-orbit-scan:columns=1,raw_x_cap=400000000,norm=160"
+  ],
+  "oracle": [
+   "mitm-frobenius:m=3"
+  ],
+  "targets": [
+   "walk"
+  ]
+ }
+}

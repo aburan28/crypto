@@ -1,14 +1,9 @@
 name: ecbench n37 native online wall screen
 
 on:
-  pull_request:
-    paths:
-      - 'research/ecbench_n37_native_online_wall_20261004/**'
-      - '.github/workflows/ecbench-n37-native-online-wall.yml'
-      - 'src/bin/ecbench.rs'
-      - 'src/cryptanalysis/ecbench/**'
-      - 'src/cryptanalysis/ic_framework/shared_rank.rs'
-      - 'examples/ecbench_n37_native_online_wall_analyze.rs'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 
 permissions:

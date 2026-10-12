@@ -1,0 +1,7 @@
+name = "tree_split"
+version = "0.1.0"
+defaultTargets = ["TreeSplit"]
+
+[[lean_lib]]
+name = "TreeSplit"
+roots = ["TreeSplit.Rule", "TreeSplit.Data", "TreeSplit.Verdict", "TreeSplit.Replay", "TreeSplit.Leak"]

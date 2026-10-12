@@ -1393,8 +1393,8 @@ pub fn point_order_hasse(curve: &FastCurve, g: Pt) -> Option<u64> {
 /// Deterministic `a = −3` prime-order bench curve at `bits` bits in the
 /// requested residue class of `p mod 4`: `p` the largest such prime
 /// below `2^bits`, `b` the smallest positive value giving prime order,
-/// `G` the smallest-x point.  Reproduces
-/// [`crate::cryptanalysis::research_bench::bench_curves_a_minus_3`].
+/// `G` the smallest-x point. Reproduces the curve and the generator's
+/// negation class in [`crate::cryptanalysis::research_bench::bench_curves_a_minus_3`].
 pub fn find_a3_curve(bits: u32, residue_mod_4: u64) -> Option<(FastCurve, Pt)> {
     assert!((8..=MAX_BITS).contains(&bits));
     let mut p = (1u64 << bits) - 1;
@@ -1619,6 +1619,18 @@ mod tests {
             let (gen, gg) = find_a3_curve(bits, 3).unwrap();
             // Preserve the frozen generator's identity. Square-root implementations
             // can select its negative, a different representation of the same model.
+            let found = gen.canonical(gg);
+            let frozen = fc.canonical(g);
+            assert_eq!(
+                (gen.f.p, gen.n, gen.f.from_mont(gen.b), found.0),
+                (fc.f.p, fc.n, fc.f.from_mont(fc.b), frozen.0),
+            );
+            assert!(
+                found.1 == frozen.1 || found.1 == (fc.f.p - frozen.1) % fc.f.p,
+                "generated point must match the frozen generator up to sign"
+            );;;;;
+            let (x, y) = gen.canonical(gg);
+            let (expected_x, expected_y) = fc.canonical(g);
             assert_eq!(
                 (
                     gen.f.p,
@@ -1627,6 +1639,15 @@ mod tests {
                     gen.f.from_mont(gen.b)
                 ),
                 (fc.f.p, fc.n, fc.f.from_mont(fc.a), fc.f.from_mont(fc.b))
+                (
+                    fc.f.p,
+                    fc.n,
+                    fc.f.from_mont(fc.a),
+                    fc.f.from_mont(fc.b),
+                    expected_x,
+                    expected_y.min(fc.f.p - expected_y),
+                ),
+                "bits={bits}"
             );
             let (x, y) = gen.canonical(gg);
             let (expected_x, expected_y) = fc.canonical(g);
@@ -1641,7 +1662,9 @@ mod tests {
         let (gen, gg) = find_a3_curve(28, 3).unwrap();
         assert_eq!(gen.f.p, 268_435_399);
         assert_eq!(gen.f.from_mont(gen.b), 3);
-        assert_eq!(gen.canonical(gg), (1, 1));
+        let found = gen.canonical(gg);
+        assert_eq!(found.0, 1);
+        assert!(found.1 == 1 || found.1 == gen.f.p - 1);
         assert_eq!(gen.n, 268_407_199);
     }
 

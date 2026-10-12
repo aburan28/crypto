@@ -966,6 +966,14 @@ fn simd_kind(enabled: bool) -> SimdKind {
             }
             if std::arch::is_x86_feature_detected!("avx512f") {
                 SimdKind::Avx512
+            } else if std::arch::is_x86_feature_detected!("avx2") {
+                // Hosts without AVX-512 previously ran the scalar table
+                // XORs; the AVX2 update is the same loop four words to an
+                // instruction (`gf2_elim_bench --quick`: 1.0–2.1× over
+                // scalar on the oracle's Macaulay cells, 3.5× over the
+                // scalar path at 4096² random on the host it was measured
+                // on).  `KIC_GF2_SIMD=0` is the scalar control.
+                SimdKind::Avx2
             } else {
                 SimdKind::Scalar
             }

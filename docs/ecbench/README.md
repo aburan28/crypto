@@ -317,7 +317,14 @@ rho's expectation `√(π/2)`; the curve's floor is `√(π/2A)` (§3).
 | `kangaroo.vow` | jump-table set-up, starts and restarts, every jump | table inserts and lookups |
 | `claw.pair_table` | the known-log base's seed scalar multiplications, every table addition `P_i + F_b`, both query additions `Q − (F_k + F_l)`, the addition that rebuilds a hit's table sum; phases `base`, `table`, `search`, `recover` | Frobenius maps, canonicalisations, table inserts and probes |
 | `ic.pipeline` | factor base, oracle set-up (pair tables), relation trials, linear algebra, verification, each a phase; native work (lookups, row operations, square roots, Artin–Schreier solves, …) at the pinned ratio where the repository has one | native work with no pinned ratio for this curve; algebraic-solver operations |
+| `ic.pipeline_counted` | the same pipeline with the relation phase charge rebuilt from counted work and pinned conversions for deterministic SAT/PDP replays | algebraic-solver operations without a pinned conversion, including SAT conflicts; these runs remain lower bounds |
 | `ic.large_prime` | cofactor projection, exact combination-table group additions, target probes, and relation witness checks; the external runner verifies the returned scalar | combination states, MITM lookups, large-prime merge operations, and modular row operations; the record is therefore a lower bound, not a speed claim |
+
+The counted IC method has its own method identity so frozen SAT/PDP sessions
+retain their exact parameter and accounting contract. It removes solver wall
+pricing from the reported group-addition equivalents. Solver conflicts and
+other work without a pinned conversion stay visible as unpriced counters;
+the recorded `S` is therefore a lower bound on the complete pipeline cost.
 
 `ic.pipeline` defaults to `linalg=incremental-gauss`, which stops when the
 target scalar is pinned; the factor-base logs can still be underdetermined.
@@ -354,7 +361,13 @@ entries), `lifts` probes or descends every lift (`h` calls), `combined`
 descends one system with the target abscissa free and the fiber polynomial
 adjoined, and `blind` is the landed oracle.  The fiber the oracle found is
 in `oracle_setup` (`fiber_size`, `fiber_complete`); with `h = 1` every mode
-is the blind oracle.
+is the blind oracle.  All three take `fiber_gen=legacy|coset` and
+`fiber_scale=d` (`research/isogeny_conductor_gap_round2_20261011/`).
+`legacy`, the default, is the round-1 subgroup closure, kept so that
+committed sessions replay.  It overcounts set-up when `E(F_q)[h]` needs
+several generators.  `coset` stops the closure at the first multiple already
+in the subgroup.  `fiber_scale=d` (coset only) uses the subgroup
+`[d]E(F_q)[h]` instead of the whole fiber.
 
 `koblitz-standard-subspace:dimension=d` with
 `pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N` runs
@@ -408,6 +421,21 @@ Two consequences to read every table with:
   anything is unpriced, and comparisons carry `bounded: true`. A rho with
   the negation map is a lower bound by this rule (its canonicalisations
   are counted, not charged), exactly as in the rest of the repository.
+  The ratio of two such lower bounds is **not** a bound on the ratio of
+  full costs. Read it as a counted-work diagnostic until both arms have
+  complete, calibrated costs; do not infer an end-to-end speedup from it.
+
+`ecbench resources --dir SESSION --out resources.json` reports, for every
+measured attempt including failures, the native integer counters by phase,
+charged GAE and clocks by phase, the target's exclusive online window,
+method counters, fork-to-reap and solve time, CPU time, peak resident memory,
+and solve-wide instructions and cycles when the host exposes a PMU. A PMU
+sum is null unless **every** measured run in that arm has the counter.
+These are separate units: a SAT conflict, table lookup and byte of memory
+do not have universal GAE prices. The resource vector shows where the
+counted `S` is incomplete. A full runtime comparison still requires
+matched L2/L3 runs and the A/A noise gate in §8; the Mac's L0 timings
+remain descriptive.
 
 ## 8. Statistics
 
@@ -515,6 +543,12 @@ defines for the primary IC question: one index-calculus run against one
 strong-rho run (`rho.signed_frobenius_strong`) on one public target,
 compared on their one-target online windows (§3), keyed by
 `(candidate_id, workload_id, run_id)` in the repository's IC1 convention.
+The ledger calls its one-run ratio `online_speedup`; a checker `PASS`
+certifies the report's pairing, timing fields and provenance conditions,
+not a statistically established runtime gain. That requires at least five
+admitted matched pairs, an A/A noise interval, and a paired 95% interval
+excluding no improvement (§8). The cold end-to-end operation comparison
+is a separate requirement.
 
 ```bash
 ./target/release/ecbench claim build --dir SESSION --ic ic --rho rho-strong --workload W... --out claim.json --exit-code
@@ -546,14 +580,27 @@ field the schema requires, from the session's own files:
   refused, as `identity.py` refuses it.
 - **The windows** are the records' online windows, the IC one split into
   the five exclusive phases, both arms' start and stop events named.
+- **Wall isolation.** A `vs_rho` wall comparison requires both runs to
+  earn at least L2, even if the session spec lowers `isolation_required`
+  for diagnostic runs. A stricter L3 spec still requires L3. The builder
+  writes the effective floor and the native checker validates it, so an
+  L0 session cannot become a passing wall claim by supplying a replay
+  receipt. Operation-count comparisons remain available at every level.
 - **The envelope** is the session's (binary, host class, CPU, NUMA node,
   one thread, timeout), identical for both arms by construction.
 - **Independence.** The schema requires `independent_validation` and a
   replay certificate for each arm. The certificate is the SHA-256 of an
-  `ecbench verify --replay-all` receipt made on a host of another class
-  that reproduced both runs; `--independent-receipt FILE --pointer WHERE`
-  supplies it, and a receipt from the session's own class, for other
-  bytes, or that did not reproduce both runs is refused. Without one the
+  `ecbench verify --replay-all` receipt that reproduced both runs;
+  `--independent-receipt FILE --pointer WHERE` supplies it. The auditor
+  must have a different measurement environment **and** a different
+  hardware profile class. The latter omits mutable compiler, kernel and
+  governor facts: changing `rustc` on `PATH` on one Mac was enough to
+  change `ECBENV2` while staying on the same machine. A receipt from the
+  session's own hardware class, one lacking the new auditor hardware
+  class, one for other bytes, or one that did not reproduce both runs is
+  refused. These self-reported fingerprints cannot by themselves attest
+  physical independence; retain the external runner's job and custody
+  receipt with the pointer. Without an admitted receipt the
   claim is built with null certificates, the checker fails it on exactly
   those fields, and the verdict says it is not yet a claim.
 - **Late receipt attachment.** If the measuring binary is no longer
@@ -638,7 +685,12 @@ FROM method_by_curve ORDER BY curve_slug, mean_s;
   The `ecbench-extend` skill walks through it.
 - **A curve construction:** a variant of `workload::CurveSpec` that calls
   an existing constructor. Register any new curve before citing its slug
-  (AGENTS.md §11).
+  (AGENTS.md §11). `conductor_gap` (`{"kind": "conductor_gap", "ell": 263,
+  "t": 241, "level": "crater" | "floor", "seed": 1}`) builds CM pairs over
+  `GF((t² + 19ℓ²)/4)` of prime order `q + 1 − t` whose endomorphism
+  conductor is 1 at the crater and the prime `ℓ` at the floor, certified
+  without computing an isogeny; it is the construction behind
+  `research/conductor_gap_cm_pairs_20261010/`.
 - **A factor base or oracle:** add it to `ic_framework` as a plug-in;
   `ic.pipeline` reaches it through its name. Dump it with `ecbench fb` to
   store its points.

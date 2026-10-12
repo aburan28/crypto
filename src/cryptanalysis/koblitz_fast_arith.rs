@@ -434,9 +434,8 @@ pub fn point_to_words(curve: &FastBinaryCurve, p: &BinaryPoint) -> Option<FastPo
 //
 // Twin of the `u64` fast path with identical group-law semantics; the
 // `u64` code above is deliberately untouched so every `n ≤ 63`
-// fixture stays byte-identical.  Subgroup scalars still fit `u64`
-// (every admitted `r < 2^64` through `n = 127`), so only field
-// elements move to the wider word.
+// fixture stays byte-identical. Subgroup scalars remain `BigUint`;
+// only field elements use the wider word.
 
 /// An affine point as two `u128` field words; `None` is infinity.
 pub type FastPoint128 = Option<(u128, u128)>;
@@ -562,6 +561,40 @@ impl FastBinaryCurve128 {
             }
         }
         result
+    }
+
+    /// Add a batch of affine pairs with one inversion for all ordinary
+    /// denominators. Infinity, doubling and opposite-point cases retain
+    /// the exact semantics of [`Self::add`].
+    pub fn batch_add(&self, pairs: &[(u128, u128, u128, u128, bool, bool)]) -> Vec<FastPoint128> {
+        let mut out = vec![None; pairs.len()];
+        let mut dxs = Vec::with_capacity(pairs.len());
+        let mut indices = Vec::with_capacity(pairs.len());
+        for (k, &(x1, y1, x2, y2, inf1, inf2)) in pairs.iter().enumerate() {
+            if inf1 {
+                out[k] = if inf2 { None } else { Some((x2, y2)) };
+            } else if inf2 {
+                out[k] = Some((x1, y1));
+            } else if x1 == x2 {
+                out[k] = self.add(Some((x1, y1)), Some((x2, y2)));
+            } else {
+                indices.push(k);
+                dxs.push(x1 ^ x2);
+            }
+        }
+        if dxs.is_empty() {
+            return out;
+        }
+        let mut scratch = Vec::new();
+        self.gf.batch_inv(&mut dxs, &mut scratch);
+        for (t, &k) in indices.iter().enumerate() {
+            let (x1, y1, x2, y2, _, _) = pairs[k];
+            let lambda = self.gf.mul(y1 ^ y2, dxs[t]);
+            let x3 = self.gf.sqr(lambda) ^ lambda ^ x1 ^ x2 ^ self.a;
+            let y3 = self.gf.mul(lambda, x1 ^ x3) ^ x3 ^ y1;
+            out[k] = Some((x3, y3));
+        }
+        out
     }
 }
 
@@ -923,7 +956,6 @@ mod tests {
 
     #[test]
     fn s3_roots_match_slow_reference_on_generic_pairs() {
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         // Generic pairs only (both sides nonzero and unequal): the fast
         // kernel must agree with the slow one bit for bit, including
         // verdict and root order.  Degenerate pairs are covered by
@@ -952,7 +984,6 @@ mod tests {
     #[test]
     fn s3_roots_degenerate_pairs_are_exact() {
         use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         // Diagonal (x, x): linear, single root.  Zero side: x_3^2 = C/A,
         // single root.  (0, 0): genuinely rootless.  Each returned root
         // must vanish under S3; single-root cases are complete by degree
@@ -998,11 +1029,6 @@ mod tests {
                 // The slow kernel is known-None on every degenerate pair
                 // (its combined inversion hits zero) — pin that, so a
                 // future reader sees the divergence is deliberate.
-                if x == 0 || true {
-                    assert!(slow_s3_x_roots(&irr, &b_fe, n, x, x).is_none());
-                    assert!(slow_s3_x_roots(&irr, &b_fe, n, x, 0).is_none());
-                    assert!(slow_s3_x_roots(&irr, &b_fe, n, 0, x).is_none());
-                }
                 assert!(slow_s3_x_roots(&irr, &b_fe, n, x, x).is_none());
                 assert!(slow_s3_x_roots(&irr, &b_fe, n, x, 0).is_none());
                 assert!(slow_s3_x_roots(&irr, &b_fe, n, 0, x).is_none());
@@ -1013,7 +1039,6 @@ mod tests {
     #[test]
     fn s3_roots_satisfy_semaev_independently() {
         use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         for n in [13u32, 41, 53] {
             let irr = find_irreducible_sparse(n).unwrap();
             let gf = Gf2::new(&irr);
@@ -1059,7 +1084,6 @@ mod tests {
     #[test]
     fn s3_roots_none_is_exact_on_tiny_field() {
         use crate::cryptanalysis::binary_semaev::binary_semaev_s3;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         // Exhaustive at n = 7: fast-None holds iff no x3 in F_{2^7}
         // zeroes S3, and fast-Some returns exactly the full root set.
         let n = 7u32;
@@ -1116,7 +1140,6 @@ mod tests {
     #[test]
     fn artin_schreier_root_matches_slow() {
         use crate::cryptanalysis::binary_semaev::solve_artin_schreier;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         for n in [7u32, 9, 13, 23, 41, 53] {
             let irr = find_irreducible_sparse(n).unwrap();
             let gf = Gf2::new(&irr);
@@ -1145,7 +1168,6 @@ mod tests {
     #[test]
     fn fast_points_with_x_matches_slow() {
         use crate::cryptanalysis::koblitz_index_calculus::points_with_x as slow_points_with_x;
-        use crate::cryptanalysis::semaev_decomp::Gf2;
         for (n, a) in [(7u32, 0u8), (9, 0), (13, 0), (23, 1), (41, 0), (53, 0)] {
             let (curve, fast) = toy_curve(n, a);
             let gf = Gf2::new(&curve.irreducible);
@@ -1256,6 +1278,38 @@ mod wide_tests {
         }
     }
 
+    #[test]
+    fn wide_batch_add_matches_general_curve_at_71() {
+        let (curve, fast, _) = setup71();
+        let g = curve.generator().clone();
+        let points: Vec<BinaryPoint> = (1u32..=24)
+            .map(|k| scalar_mul(&curve.curve, &g, &BigUint::from(k)))
+            .collect();
+        let mut inputs = Vec::new();
+        for i in 0..points.len() {
+            let j = (7 * i + 3) % points.len();
+            inputs.push((points[i].clone(), points[j].clone()));
+        }
+        inputs.push((BinaryPoint::Infinity, points[0].clone()));
+        inputs.push((points[0].clone(), BinaryPoint::Infinity));
+        inputs.push((points[0].clone(), points[0].clone()));
+        inputs.push((points[0].clone(), point_neg(&points[0])));
+        let pairs: Vec<_> = inputs
+            .iter()
+            .map(|(p, q)| {
+                let left = point_to_words_128(&fast, p).unwrap();
+                let right = point_to_words_128(&fast, q).unwrap();
+                let (x1, y1, inf1) = left.map_or((0, 0, true), |(x, y)| (x, y, false));
+                let (x2, y2, inf2) = right.map_or((0, 0, true), |(x, y)| (x, y, false));
+                (x1, y1, x2, y2, inf1, inf2)
+            })
+            .collect();
+        for ((p, q), actual) in inputs.iter().zip(fast.batch_add(&pairs)) {
+            let expected = point_add(&curve.curve, p, q);
+            assert_eq!(actual, point_to_words_128(&fast, &expected).unwrap());
+        }
+    }
+
     /// S3 roots from the twin zero the scalar Semaev polynomial and
     /// agree with the scalar Artin-Schreier solver's verdicts.
     #[test]
@@ -1363,7 +1417,6 @@ mod wide_tests {
         let mut state = 0x55AAu128;
         for _ in 0..40 {
             state = state.wrapping_mul(6364136223846793005).wrapping_add(1);
-            let x = (state & fast.gf.mask) as u128;
             let x = state & fast.gf.mask;
             let got: std::collections::HashSet<(u128, u128)> =
                 fast.points_with_x(b, x).into_iter().flatten().collect();

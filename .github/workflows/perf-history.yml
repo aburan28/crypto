@@ -1,0 +1,180 @@
+name: perf history
+
+# One snapshot per push to main: callgrind instruction counts (and a wall-time
+# reading) of every quick perfbench kernel and of the frozen ecbench children in
+# docs/perf/ecbench-children.json, appended to the `perf-history` branch together
+# with the rendered HISTORY.md, history.svg and history.json
+# (scripts/perf/perfhistory.py).  Pull requests that touch measured code are
+# compared against the latest snapshot and the comparison goes to the job
+# summary; it fails the check only when the repository variable
+# PERF_HISTORY_FAIL_ON_REGRESSION is "true".
+#
+# The snapshots live on their own branch so that a measurement never needs a
+# commit on main and never conflicts with one.  Read them with
+#   git fetch origin perf-history && git show origin/perf-history:docs/perf/HISTORY.md
+# or at https://github.com/aburan28/crypto/blob/perf-history/docs/perf/HISTORY.md
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'examples/perfbench/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'scripts/perf/perfhistory.py'
+      - 'scripts/perf/perfindex.py'
+      - 'docs/perf/ecbench-children.json'
+      - 'docs/perf/weights.json'
+      - '.github/workflows/perf-history.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'examples/perfbench/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'scripts/perf/perfhistory.py'
+      - 'scripts/perf/perfindex.py'
+      - 'docs/perf/ecbench-children.json'
+      - 'docs/perf/weights.json'
+      - '.github/workflows/perf-history.yml'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Revision to measure and append (default: the branch this runs on). Use it to back-fill history.'
+        required: false
+        default: ''
+      note:
+        description: 'A note stored in the snapshot'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: perf-history-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  HISTORY_BRANCH: perf-history
+
+jobs:
+  record:
+    # Append one snapshot for the pushed (or dispatched) revision.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          fetch-depth: 0
+      - name: Check out the history branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.HISTORY_BRANCH }}
+          path: perf-history
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install the frozen profiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          test "$(valgrind --version)" = valgrind-3.22.0
+      - name: Build perfbench and ecbench
+        run: cargo build --release --example perfbench --bin ecbench
+      - name: Record the snapshot
+        run: |
+          python3 scripts/perf/perfhistory.py record \
+            --binary target/release/examples/perfbench \
+            --ecbench target/release/ecbench \
+            --children docs/perf/ecbench-children.json \
+            --out perf-history/docs/perf/history \
+            --note "${{ inputs.note }}" 2> >(tee "$RUNNER_TEMP/record.log" >&2)
+      - name: Render the history
+        run: |
+          python3 scripts/perf/perfhistory.py render \
+            --history perf-history/docs/perf/history \
+            --md perf-history/docs/perf/HISTORY.md \
+            --svg perf-history/docs/perf/history.svg \
+            --json perf-history/docs/perf/history.json \
+            --weights docs/perf/weights.json | tee -a "$GITHUB_STEP_SUMMARY"
+          {
+            echo
+            echo '```'
+            sed -n '/^## Areas/,/^## Snapshots/p' perf-history/docs/perf/HISTORY.md | head -40
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Commit and push the snapshot
+        working-directory: perf-history
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add docs/perf/history docs/perf/HISTORY.md docs/perf/history.svg docs/perf/history.json
+          if git diff --cached --quiet; then echo "nothing new"; exit 0; fi
+          git commit -m "perf history: ${{ inputs.ref || github.sha }}"
+          # Another run may have pushed meanwhile: rebase onto it and retry.
+          for attempt in 1 2 3 4 5; do
+            if git push origin "HEAD:$HISTORY_BRANCH"; then exit 0; fi
+            git fetch origin "$HISTORY_BRANCH"
+            git rebase "origin/$HISTORY_BRANCH" || { git rebase --abort; exit 1; }
+            sleep $((attempt * 5))
+          done
+          exit 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perf-history-${{ github.run_id }}
+          path: |
+            perf-history/docs/perf/HISTORY.md
+            perf-history/docs/perf/history.svg
+            perf-history/docs/perf/history.json
+            ${{ runner.temp }}/record.log
+          if-no-files-found: warn
+
+  check:
+    # Compare a pull request's tree against the latest snapshot.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out the history branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.HISTORY_BRANCH }}
+          path: perf-history
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install the frozen profiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          test "$(valgrind --version)" = valgrind-3.22.0
+      - name: Build perfbench and ecbench
+        run: cargo build --release --example perfbench --bin ecbench
+      - name: Compare against the latest snapshot
+        env:
+          FAIL: ${{ vars.PERF_HISTORY_FAIL_ON_REGRESSION }}
+        run: |
+          flag=""
+          if [ "$FAIL" = "true" ]; then flag="--fail-on-regression"; fi
+          python3 scripts/perf/perfhistory.py check \
+            --binary target/release/examples/perfbench \
+            --ecbench target/release/ecbench \
+            --children docs/perf/ecbench-children.json \
+            --history perf-history/docs/perf/history \
+            --threshold 0.10 --md "$RUNNER_TEMP/check.md" $flag
+          cat "$RUNNER_TEMP/check.md" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: perf-history-check-${{ github.run_id }}
+          path: ${{ runner.temp }}/check.md
+          if-no-files-found: warn
