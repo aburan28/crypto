@@ -1,0 +1,919 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{url}
+
+\hypersetup{colorlinks=true, linkcolor=blue!50!black, citecolor=blue!50!black, urlcolor=blue!50!black}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\newcommand{\FF}{\mathbb{F}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\Fb}{\mathcal{F}}
+\newcommand{\Sem}[1]{S_{#1}}
+\newcommand{\abs}[1]{\lvert #1 \rvert}
+\newcommand{\code}[1]{\texttt{#1}}
+% Artefact paths; robust so they can appear inside \caption.
+\DeclareRobustCommand{\art}[1]{\texttt{\detokenize{#1}}}
+
+\title{Point Decomposition by Root Finding:\\
+       Replacing Gr\"obner-Basis Solvers\\
+       in Elliptic-Curve Index Calculus\\[4pt]
+       {\large with Measurements on Prime and Binary Curves up to NIST P-521}}
+\author{Anonymous}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The decomposition oracle at the heart of elliptic-curve index calculus
+asks, for a target point $R$ and a factor base $\Fb$, whether
+$R = P_1 + \cdots + P_m$ with every $P_i \in \Fb$. The textbook answer
+reduces the question to the roots of Semaev's summation polynomial and
+hands the resulting polynomial system to a Gr\"obner-basis engine
+(F4/F5). We observe that for the summation polynomial $\Sem{3}$ the
+roots are already known in closed form---they are the $x$-coordinates of
+$R \mp P_i$---so the polynomial solve can be replaced by direct
+evaluation of the group law followed by a table lookup, and for binary
+curves by a meet-in-the-middle table of pair sums. Both replacements are
+exact and complete for the decomposition sizes they address, and both
+admit a fail-closed verification in which every reported decomposition
+is re-added in the group. We implement them, make root finding the
+default decomposition strategy in an existing index-calculus codebase,
+and measure against the same codebase's Gr\"obner solvers on identical
+targets: $383$--$1535\times$ per decomposition on Koblitz curves over
+$\FF_{2^9}$ and $\FF_{2^{13}}$ (versus matrix-F4), $3\times 10^4$--$5\times 10^4\times$
+on small prime curves, and $3021$--$5802\times$ on the five NIST prime
+curves P-192, P-224, P-256, P-384 and P-521 with their standard
+parameters (versus Buchberger on the same decomposition ideal, in the
+same field). A dedicated P-256 field implementation gives a further
+$11$--$12\times$ over generic arbitrary-precision arithmetic.
+
+We are explicit about what this does and does not change. The result is
+an improvement in the \emph{constant} of a subroutine---in the evidence
+vocabulary of the companion repository, a \emph{stage} measurement
+classed as \emph{engineering}, not an end-to-end speedup. It leaves the
+asymptotic cost of index calculus unchanged, does not alter the
+exponential size of the Frobenius-invariant factor base on Koblitz
+curves, does not make prime-field index calculus competitive with
+Pollard rho, and makes no claim about the security of any deployed
+curve. All instances are public synthetic or standard-parameter
+known-answer instances; all code and raw measurements are released.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+Index calculus on elliptic curves, in the form proposed by
+Semaev~\cite{semaev2004} and developed by Gaudry~\cite{gaudry2009} and
+Diem~\cite{diem2011}, has two expensive stages. The first collects
+\emph{relations}: random multiples $R = [r]P + [s]Q$ are tested for
+membership in the $m$-fold sumset of a factor base $\Fb$, and each hit is
+a linear relation among the unknown discrete logarithms of $\Fb$. The
+second solves the resulting sparse linear system. The first stage is
+dominated by the \emph{decomposition oracle}: deciding whether a given $R$
+is a sum of $m$ factor-base points and, if so, finding the summands.
+
+The standard route to this oracle is algebraic. Semaev's summation
+polynomial $\Sem{m+1}(x_1, \ldots, x_m, x_R)$ vanishes exactly when
+there exist signs such that $\pm P_1 \pm \cdots \pm P_m = R$ for points
+with the given $x$-coordinates. One restricts the $x_i$ to the factor
+base---either by adjoining vanishing polynomials $\prod_{F\in\Fb}(x_i -
+x_F)$ over a prime field, or by Weil descent onto a subspace over an
+extension field---and solves the resulting zero-dimensional polynomial
+system. The solver of choice is a Gr\"obner-basis algorithm:
+Faug\`ere's F4~\cite{faugere1999} or F5~\cite{faugere2002}, often in a
+matrix formulation tuned to the system's shape. Substantial effort has
+gone into making this solve tractable, through symmetrization, the
+exploitation of Frobenius and sign symmetries, and careful degree
+analysis~\cite{fppr2012,petitquisquater2012,galbraithgebregiyorgis2014}.
+
+This paper starts from a simple observation that is well known but, in
+our experience, under-exploited in implementations: for $m = 2$ the
+polynomial system does not need to be solved, because its variety is
+already parametrized. The roots of $\Sem{3}(x_R, x_i, X)$ in $X$ are
+exactly the $x$-coordinates of $R + F_i$ and $R - F_i$, where $F_i$ is
+any factor-base point with $x$-coordinate $x_i$. One field inversion
+(amortized across the factor base by Montgomery's trick) and a hash
+lookup per factor-base element therefore decide the $2$-decomposition of
+$R$ exactly. Over binary fields the same idea takes the form of a
+meet-in-the-middle table of pair sums, which decides $2$-, $3$- and
+$4$-decompositions in $1$, $\abs{\Fb}$ and $\abs{\Fb}^2$ lookups
+respectively. Neither method approximates; both are complete for the
+sizes they address, and both report a witness that can be re-added in
+the group.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+\item We state the two root-finding decomposition procedures precisely
+  (\S\ref{sec:algorithms}), prove their exactness
+  (Proposition~\ref{prop:s3roots}), and give their cost in field
+  operations and lookups.
+\item We implement both in an existing Rust index-calculus codebase that
+  already contained matrix-F4 and Buchberger decomposition solvers, make
+  root finding the default strategy, and keep the Gr\"obner solvers as
+  selectable baselines (\S\ref{sec:impl}).
+\item We define a fail-closed verification protocol under which every
+  reported decomposition is re-added in the group, cross-checked against
+  the summation polynomial, and---where a Gr\"obner basis is also
+  computed---checked to lie in the variety of that basis
+  (\S\ref{sec:verification}).
+\item We measure root finding against the Gr\"obner solvers on identical
+  targets (\S\ref{sec:experiments}): on binary Koblitz curves, on small
+  prime curves, on prime fields from $40$ to $83$ bits, and on the five
+  NIST prime curves P-192 through P-521 with their standard parameters,
+  including a per-curve specialized field for P-256.
+\item We state precisely what the measurements do and do not imply
+  (\S\ref{sec:boundary}). In particular, the asymptotics of index
+  calculus are unchanged, the exponential factor-base wall on Koblitz
+  curves is untouched, and no security claim about any deployed curve
+  follows.
+\end{enumerate}
+
+\section{Background}
+\label{sec:background}
+
+\subsection{Summation polynomials and the decomposition problem}
+
+Let $E / \FF_q$ be an elliptic curve. Semaev~\cite{semaev2004} defined
+the summation polynomials $\Sem{m} \in \FF_q[x_1,\ldots,x_m]$ by the
+property that for $x_1,\ldots,x_m \in \overline{\FF}_q$,
+\[
+  \Sem{m}(x_1,\ldots,x_m) = 0
+  \iff
+  \exists\, P_1,\ldots,P_m \in E(\overline{\FF}_q):\;
+  x(P_i) = x_i,\;\; P_1 + \cdots + P_m = \mathcal{O}.
+\]
+For short Weierstrass $y^2 = x^3 + ax + b$ the third polynomial is
+\begin{equation}
+\label{eq:s3}
+\Sem{3}(x_1,x_2,x_3) =
+  (x_1 - x_2)^2 x_3^2
+  - 2\big[(x_1+x_2)(x_1 x_2 + a) + 2b\big] x_3
+  + \big[(x_1 x_2 - a)^2 - 4b(x_1+x_2)\big],
+\end{equation}
+and higher $\Sem{m}$ are obtained by resultants, with
+$\deg_{x_i} \Sem{m} = 2^{m-2}$.
+
+Given a factor base $\Fb \subset E(\FF_q)$ and a target $R$, the
+\emph{$m$-decomposition problem} is to decide whether there exist
+$F_1,\ldots,F_m \in \Fb$ and signs $\epsilon_i \in \{\pm 1\}$ with
+$R = \sum_i \epsilon_i F_i$, and to exhibit them. Since $\Sem{m+1}$ only
+sees $x$-coordinates, a solution of
+$\Sem{m+1}(x_1,\ldots,x_m,x(R)) = 0$ with each $x_i \in x(\Fb)$ gives a
+decomposition up to signs, which are then recovered by evaluating the
+group law.
+
+\subsection{The Gr\"obner route}
+
+Over a prime field $\FF_p$ the factor base is typically the set of points
+with $x$-coordinate in an interval, and the decomposition system is
+\begin{equation}
+\label{eq:ideal}
+  I_R = \big\langle\, \Sem{m+1}(x_1,\ldots,x_m,x_R),\;
+        V(x_1),\;\ldots,\;V(x_m) \,\big\rangle,
+  \qquad V(X) = \prod_{F \in \Fb}\big(X - x(F)\big).
+\end{equation}
+$I_R$ is zero-dimensional; $R$ is $m$-decomposable iff $I_R \neq
+\langle 1 \rangle$, and a Gr\"obner basis of $I_R$ in lexicographic
+order exposes the solutions. Over $\FF_{2^n}$ one instead restricts the
+$x_i$ to an $\FF_2$-subspace $V$ of dimension $\ell$, writes each $x_i$
+in a basis of $V$, and Weil-descends $\Sem{m+1}$ to a system of $n$
+Boolean equations in $m\ell$ Boolean unknowns, again solved by F4/F5
+with field equations adjoined~\cite{fppr2012,petitquisquater2012}.
+
+In both settings the Gr\"obner solve is the step that dominates the
+per-target cost, and in both settings the solve is doing real work: the
+variety of $I_R$ is not given to it, it has to be found. The point of
+this paper is that for small $m$ the variety is given, by the group law.
+
+\subsection{What index calculus does and does not achieve}
+
+Two facts frame everything that follows. Over prime fields, with
+$\abs{\Fb} \approx p^{1/m}$, the probability that a random $R$
+decomposes is about $1/m!$, and the number of relations needed is about
+$\abs{\Fb}$; the resulting cost is $\Omega(p^{1/m} \cdot m!)$ decompositions
+plus the cost of each decomposition, and Gaudry~\cite{gaudry2009} and
+Diem~\cite{diem2011} showed this does not beat Pollard
+rho~\cite{pollard1978} on prime-field curves for any $m$ once the
+decomposition cost is accounted for. Over $\FF_{2^n}$ with $n$ prime,
+the Frobenius-invariant factor base relevant to Koblitz curves has
+dimension $\ell = \operatorname{ord}_2(n)$ and size $2^\ell$, which for
+the cryptographic $n$ of interest is itself exponential. Faster
+decomposition changes neither fact. We return to this in
+\S\ref{sec:boundary}.
+
+\section{Root-Finding Decomposition}
+\label{sec:algorithms}
+
+\subsection{Prime curves: the $\Sem{3}$ roots are $x(R \mp F_i)$}
+
+\begin{proposition}
+\label{prop:s3roots}
+Let $E: y^2 = x^3 + ax + b$ over $\FF_p$, $p > 3$, let $R = (x_R, y_R)$
+and $F = (x_F, y_F)$ be affine points with $x_R \neq x_F$. Then the two
+roots of $X \mapsto \Sem{3}(x_R, x_F, X)$ in $\overline{\FF}_p$ are
+exactly $x(R + F)$ and $x(R - F)$, counted with multiplicity.
+\end{proposition}
+
+\begin{proof}
+By the defining property of $\Sem{3}$, $\Sem{3}(x_R, x_F, X) = 0$ iff
+there exist $P, Q, S \in E(\overline{\FF}_p)$ with $x(P) = x_R$,
+$x(Q) = x_F$, $x(S) = X$ and $P + Q + S = \mathcal{O}$. The points with
+$x$-coordinate $x_R$ are $\pm R$, those with $x$-coordinate $x_F$ are
+$\pm F$, so $S = -(\pm R \pm F)$ and $X \in \{x(R+F), x(R-F)\}$. The
+polynomial has degree $2$ in $X$ since $x_R \neq x_F$ makes the leading
+coefficient $(x_R - x_F)^2$ non-zero, so these are all the roots; if
+$x(R+F) = x(R-F)$ the root is double.
+\end{proof}
+
+\begin{remark}[Machine-checked form]
+\label{rem:lean}
+Proposition~\ref{prop:s3roots} is formalized in Lean~4 against Mathlib
+as the factorization identity
+$\Sem{3}(x_R, x_F, X) = (x_R - x_F)^2\,(X - x_+)(X - x_-)$ for every
+$X \in K$, where $x_\pm = \lambda_\pm^2 - x_R - x_F$ and
+$\lambda_\pm = (\pm y_F - y_R)/(x_F - x_R)$ are the affine chord formulas
+for $x(R \pm F)$, over an arbitrary field $K$ with the two curve equations
+as hypotheses (\code{SemaevS3.S3\_factor}); the root statement
+$\Sem{3}(x_R,x_F,X) = 0 \iff X \in \{x_+, x_-\}$ follows
+(\code{SemaevS3.S3\_root\_iff}). The proof clears the two chord
+denominators and closes a polynomial identity modulo the curve equations
+with explicit cofactors; it depends only on Lean's standard axioms. The
+source and a pinned Mathlib manifest are in
+\path{papers/rootfinding-decomposition/lean/} (\S\ref{sec:repro}).
+\end{remark}
+
+Proposition~\ref{prop:s3roots} says that the univariate root-finding
+problem one would solve for each factor-base element in a
+``root-finding'' index calculus is trivial: the roots are produced by
+one slope computation. Algorithm~\ref{alg:prime} makes this concrete,
+with Montgomery's batched-inversion trick~\cite{montgomery1987} so that
+a sweep over the whole factor base costs a single field inversion.
+
+\begin{algorithm}[t]
+\caption{Prime-curve $2$-decomposition by direct subtraction}
+\label{alg:prime}
+\begin{algorithmic}[1]
+\Require Curve $E: y^2 = x^3 + ax + b$ over $\FF_p$; factor base
+  $\Fb = \{F_1,\ldots,F_N\}$ with $F_i = (x_i, y_i)$; hash map
+  $\mathsf{idx}: x(\Fb) \to \{1,\ldots,N\}$; target $R = (x_R, y_R)$.
+\Ensure $(i, \epsilon, j, \tau)$ with $R = \epsilon F_i + \tau F_j$, or
+  $\bot$ if no such pair exists.
+\State $D \gets [\,x_R - x_i : x_R \neq x_i\,]$ \Comment{non-zero differences}
+\State $D^{-1} \gets \textsc{BatchInverse}(D)$ \Comment{one inversion, $3(N-1)$ mults}
+\For{each $i$ with $x_R \neq x_i$}
+  \For{$(\epsilon, \nu) \in \{(+1,\, y_R + y_i),\; (-1,\, y_R - y_i)\}$}
+    \State $\lambda \gets \nu \cdot (x_R - x_i)^{-1}$ \Comment{slope of the line through $R$ and $-\epsilon F_i$}
+    \State $x_3 \gets \lambda^2 - x_R - x_i$ \Comment{$= x(R - \epsilon F_i)$}
+    \If{$x_3 \in \operatorname{dom}\mathsf{idx}$}
+      \State $j \gets \mathsf{idx}(x_3)$;\;
+             $y_3 \gets \lambda (x_R - x_3) - y_R$
+      \State $\tau \gets +1$ if $y_3 = y_j$ else $-1$
+      \State \Return $(i, \epsilon, j, \tau)$
+    \EndIf
+  \EndFor
+\EndFor
+\State \Return $\bot$
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Correctness and completeness.} If $R = \epsilon F_i + \tau
+F_j$ with $x_i \neq x_R$, then $R - \epsilon F_i = \tau F_j$ has
+$x$-coordinate $x_j \in x(\Fb)$, so the lookup at iteration $(i,\epsilon)$
+succeeds and the recovered $y_3$ fixes $\tau$. Conversely every returned
+tuple satisfies $R - \epsilon F_i = \tau F_j$ by construction of
+$(x_3, y_3)$. The only excluded case $x_i = x_R$ means $R = \pm F_i$,
+which is a $1$-decomposition and is handled by a direct lookup before
+the sweep.
+
+\paragraph{Cost.} One field inversion, $3(N-1)$ multiplications for the
+batch inverse, and per factor-base element two slope evaluations
+(each one multiplication, one squaring, a handful of additions) and two
+hash lookups: $\Theta(N)$ field multiplications and $2N$ lookups, with
+$N = \abs{\Fb}$. No polynomial arithmetic, no square roots, no linear
+algebra. By contrast the Gr\"obner route computes a basis of the ideal
+\eqref{eq:ideal}, whose vanishing polynomials already have degree $N$.
+
+\paragraph{Larger $m$.} The same idea extends to $m = 3$ at cost
+$\Theta(N^2)$ by sweeping pairs $(F_i, F_j)$ and looking up
+$x(R - \epsilon F_i - \epsilon' F_j)$, and in general to $m$ at
+$\Theta(N^{m-1})$. This is a meet-in-the-middle search rather than an
+algebraic solve, and the trade-off is explicit: its cost is exponential
+in $m$ with base $N$, whereas Gr\"obner methods aim at a cost polynomial
+in $N$ for the structured systems that arise. In the regimes measured
+here, $m = 2$, the comparison is not close. We do not claim it stays
+one-sided for large $m$; see \S\ref{sec:boundary}.
+
+\subsection{Binary curves: a meet-in-the-middle pair-sum table}
+
+Over $\FF_{2^n}$ the factor base of interest in the Koblitz setting is a
+Frobenius-invariant set $\Fb$ of size $N$, and the targets are
+$m$-decomposed with $m$ up to $4$. Rather than Weil-descend $\Sem{m+1}$,
+we precompute the table
+\[
+  T = \big\{\, x(F_i + F_j) \mapsto (i, j) \,:\, 1 \le i \le j \le N \,\big\},
+\]
+of size $\binom{N+1}{2}$, once per factor base. Then
+(Algorithm~\ref{alg:binary}):
+\begin{itemize}
+\item $m = 2$: $R$ decomposes iff $x(R) \in \operatorname{dom} T$. One lookup.
+\item $m = 3$: $R$ decomposes iff $x(R - F_k) \in \operatorname{dom} T$
+  for some $k$. $N$ lookups.
+\item $m = 4$: $R$ decomposes iff $x(R - F_k - F_l) \in \operatorname{dom} T$
+  for some $k \le l$. $\binom{N+1}{2}$ lookups.
+\end{itemize}
+Signs are handled as in the prime case, by trying both $\pm F_k$ and
+checking the recovered $y$-coordinate against the table entry. The
+table is the ``left half'' of a birthday search; the right half is
+enumerated per target. The procedure is exact and complete for each $m$
+because it enumerates every way to write $R$ as (table entry) $+$ (at
+most $m - 2$ further summands).
+
+\begin{algorithm}[t]
+\caption{Binary-curve $m$-decomposition by pair-sum table ($m \in \{2,3,4\}$)}
+\label{alg:binary}
+\begin{algorithmic}[1]
+\Require Factor base $\Fb = \{F_1,\ldots,F_N\}$ over $\FF_{2^n}$;
+  pair table $T: x(F_i + F_j) \mapsto (i,j)$ for $i \le j$; target $R$; $m$.
+\Ensure Indices $(i_1,\ldots,i_m)$ and signs with $R = \sum \pm F_{i_k}$, or $\bot$.
+\State $\mathcal{S} \gets \{\mathcal{O}\}$ if $m = 2$;\;
+  $\{\pm F_k\}$ if $m = 3$;\;
+  $\{\pm F_k \pm F_l : k \le l\}$ if $m = 4$ \Comment{right half, enumerated lazily}
+\For{each $S \in \mathcal{S}$}
+  \State $R' \gets R - S$
+  \If{$x(R') \in \operatorname{dom} T$}
+    \State $(i, j) \gets T(x(R'))$
+    \State fix signs by comparing $y(R')$ with $y(F_i + F_j)$
+    \State \Return $(i, j)$ together with the indices of $S$
+  \EndIf
+\EndFor
+\State \Return $\bot$
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Cost.} Table construction is $\binom{N+1}{2}$ point
+additions, paid once per factor base and amortized over all targets.
+Per target the cost is $1$, $2N$ or $\sim 2N^2$ group operations and
+lookups for $m = 2, 3, 4$. The matrix-F4 route pays a Macaulay-matrix
+reduction per target whose size depends on the Weil-descended system,
+not on $N$ directly; the measured comparison is in
+\S\ref{sec:exp-binary}.
+
+\subsection{Relationship to the Gr\"obner basis}
+\label{sec:relationship}
+
+It is worth being precise about what is and is not being replaced. The
+ideal $I_R$ of \eqref{eq:ideal} is zero-dimensional and its variety
+$V(I_R)$ is the set of $x$-coordinate tuples of $m$-decompositions of
+$R$. A Gr\"obner basis of $I_R$ is a canonical generating set from which
+$V(I_R)$ can be read off. Algorithms~\ref{alg:prime} and
+\ref{alg:binary} compute $V(I_R)$ \emph{directly}, by enumeration
+guided by the group law, without computing a generating set of $I_R$ at
+all. Both approaches answer the same question and, on the same instance,
+must agree; \S\ref{sec:verification} turns this into a check. The
+Gr\"obner basis carries more information---it certifies
+non-decomposability as $I_R = \langle 1 \rangle$, and the degree data it
+exposes underlie the complexity analyses of
+\cite{fppr2012,petitquisquater2012}---which is why we keep it available
+as a baseline rather than deleting it.
+
+\section{Implementation}
+\label{sec:impl}
+
+The algorithms were implemented in an existing Rust codebase for
+elliptic-curve index calculus that already provided (i) a Koblitz-curve
+index-calculus pipeline with a matrix-F4 decomposition solver over the
+Weil-descended Semaev system and (ii) a generic Buchberger
+implementation over multivariate polynomials with arbitrary-precision
+coefficients. We added:
+
+\begin{itemize}
+\item \code{prime\_fast}: a prime-curve engine with a $64$-bit Montgomery
+  field ($p < 2^{62}$), affine points, factor-base construction by
+  lifting consecutive $x$-coordinates, batched inversion, and the
+  direct-subtraction decomposition of Algorithm~\ref{alg:prime}.
+\item \code{PairSumTable}: the table of Algorithm~\ref{alg:binary} and
+  its $m \in \{2,3,4\}$ decomposition, over the codebase's packed
+  $\FF_{2^n}$ representation ($n \le 63$).
+\item A \code{DecompositionStrategy} enumeration in the Koblitz
+  pipeline, with \code{PairTable} now the default and \code{Groebner}
+  retained as a selectable baseline.
+\item An arbitrary-precision (\code{BigUint}) instance of
+  Algorithm~\ref{alg:prime} for fields past the native word size, and a
+  P-256-specific instance over the codebase's constant-time Montgomery
+  field for that prime.
+\end{itemize}
+
+The last point is the ``specialization per curve'' that the NIST
+measurements call for. Each NIST prime has a Solinas form admitting a
+dedicated fast reduction; the codebase already contained such a field
+for P-256, and the oracle is generic over the field, so instantiating
+it there was a matter of supplying the field operations. We did not
+write new Solinas fields for P-192, P-224, P-384 or P-521; those curves
+are measured on the generic field, and their specialization is the same
+mechanical step. Nothing in the algorithm depends on the curve beyond
+$a = -3$, which all five share.
+
+\section{Fail-Closed Verification}
+\label{sec:verification}
+
+Every measurement in this paper runs under the following protocol. A
+decomposition that fails any check aborts the run; no row in any table
+below was produced by a run with a failing check.
+
+\begin{enumerate}
+\item \textbf{Group re-addition.} Every reported tuple
+  $(i, \epsilon, j, \tau)$ is re-evaluated as $\epsilon F_i + \tau F_j$
+  with an independent affine addition routine and compared to $R$ in
+  both coordinates.
+\item \textbf{Summation-polynomial check.} For every reported pair,
+  $\Sem{3}(x_R, x_i, x_j)$ is evaluated with the codebase's existing
+  $\Sem{3}$ routine and required to be zero.
+\item \textbf{Variety membership.} Where a Gr\"obner basis of $I_R$ is
+  also computed (the head-to-head experiments), every element of the
+  reduced basis is evaluated at $(x_i, x_j)$ and required to vanish, and
+  the basis is required not to be $\{1\}$.
+\item \textbf{Agreement on refutation.} Where the root finder reports
+  $\bot$ and a Gr\"obner basis is computed, the reduced basis is
+  required to be $\{1\}$. Where the root finder reports $\bot$ on a
+  target constructed as $F_i \pm F_j$, the run aborts.
+\item \textbf{Positive controls.} Each experiment includes targets
+  constructed as $F_i \pm F_j$ for random $i \neq j$ that must
+  decompose, and random on-curve targets whose verdicts are recorded.
+\end{enumerate}
+
+Checks 3 and 4 are what make the Gr\"obner baseline more than a timer:
+they establish on every target that the two methods compute the same
+variety.
+
+\section{Experiments}
+\label{sec:experiments}
+
+All timings are single-threaded wall-clock on a desktop machine, in
+release builds, with the Gr\"obner baselines taken from the same
+codebase as the root finders so that field arithmetic, data structures
+and allocator are shared. Every number below is read from a committed
+artefact in the companion repository, named in the table caption with
+the repository prefix \code{crypto:} (\S\ref{sec:repro}). Per-target
+ratios are \emph{stage} measurements of the decomposition oracle; the
+only end-to-end rows are the complete discrete-log computations in
+\S\ref{sec:exp-binary} and \S\ref{sec:exp-prime-small}, each of which
+recovered a verified logarithm. Ratios are stable
+to within about $2\times$ across runs; absolute times vary more on a
+shared machine, and we note the one place this is visible.
+
+\subsection{Binary Koblitz curves: pair table versus matrix-F4}
+\label{sec:exp-binary}
+
+Koblitz curves $K_0 : y^2 + xy = x^3 + 1$ over $\FF_{2^n}$ with
+Frobenius-invariant factor bases; $m = 2$; all targets constructed as
+$F_i + F_j$ so that every one is decomposable and both oracles must find
+it. Table~\ref{tab:binary} reports per-decomposition time.
+
+\begin{table}[h]
+\centering
+\caption{Binary Koblitz $m=2$ decomposition, per target. Both oracles
+agreed on every target. Artefact:
+\art{crypto:research/semaev_root_vs_groebner_20261012/results.json}
+(\code{kind=binary}; totals divided by target count).}
+\label{tab:binary}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+curve & $\abs{\Fb}$ & targets & pair table & matrix-F4 & factor \\
+\midrule
+$K_0/\FF_{2^{9}}$  & 55   & 254 & 2.9 $\mu$s  & 1.10 ms & $383\times$ \\
+$K_0/\FF_{2^{13}}$ & 4005 & 256 & 9.9 $\mu$s  & 15.3 ms & $1535\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{An honest end-to-end caveat.} On a complete discrete-log
+computation over $\FF_{2^9}$ with $\abs{\Fb} = 55$, the pair-table
+strategy took 23.3 ms and matrix-F4 took 4.1 ms. The reason is the
+one-time table build: with $\abs{\Fb} = 55$ only a few hundred
+decompositions are needed, too few to amortize $\binom{56}{2}$ point
+additions against a solver that is slow per target but needs no set-up.
+Both strategies recovered the same logarithm
+(artefact: same file, \code{kind=binary\_e2e}). The per-decomposition
+numbers in Table~\ref{tab:binary} isolate the oracle cost, which is the
+quantity the Gr\"obner solve dominated; the end-to-end run is a
+correctness cross-check, not a speed claim at that size.
+
+\subsection{Small prime curves: direct subtraction versus Buchberger}
+\label{sec:exp-prime-small}
+
+Curves $y^2 = x^3 - 3x + b$ over $16$-, $20$- and $24$-bit primes with
+prime group order; $\abs{\Fb} = 6$ (the Buchberger baseline is
+impractical much past this); $40$ targets $[k]G$, $k = 1,\ldots,40$,
+per size. The Gr\"obner baseline computes a reduced Gr\"obner basis of
+$I_R$ in graded reverse-lexicographic order. Table~\ref{tab:prime-small}
+reports per-target time. In each size exactly one of the $40$ targets
+was decomposable and the remaining $39$ produced the unit ideal from
+Buchberger, matching the root finder's $\bot$.
+
+\begin{table}[h]
+\centering
+\caption{Prime $m=2$ decomposition, $\abs{\Fb}=6$, per target. Artefact:
+\art{crypto:research/semaev_root_vs_groebner_20261012/results.json}
+(\code{kind=prime}; totals divided by 40).}
+\label{tab:prime-small}
+\begin{tabular}{@{}rrrrrr@{}}
+\toprule
+bits & targets & decomposed / refuted & direct subtraction & Buchberger & factor \\
+\midrule
+16 & 40 & 1 / 39 & 0.74 $\mu$s & 26.3 ms & $35592\times$ \\
+20 & 40 & 1 / 39 & 0.83 $\mu$s & 28.7 ms & $34602\times$ \\
+24 & 40 & 1 / 39 & 0.65 $\mu$s & 30.6 ms & $46911\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The root finder was also run at factor-base sizes where the Gr\"obner
+baseline is infeasible, as the decomposition oracle inside a full
+index-calculus discrete-log computation, recovering the correct
+logarithm at $20$ and $24$ bits with $\abs{\Fb} = 120$ (4\,438 and
+78\,159 targets in 9 ms and 163 ms) and at $28$ bits with
+$\abs{\Fb} = 160$ (1\,040\,671 targets in 2.83 s; artefact: same file,
+\code{kind=prime\_scaling}, \code{log\_ok=true}).
+
+\subsection{Scaling the prime root finder}
+\label{sec:exp-scaling}
+
+To separate the method from the word size, Algorithm~\ref{alg:prime}
+was run on the native $64$-bit Montgomery field at $40$, $48$, $56$ and
+$61$ bits with $\abs{\Fb} = 120$, and on the arbitrary-precision field
+at $p = 2^{83} - 55$ with $\abs{\Fb} = 80$. Table~\ref{tab:scaling}
+reports per-target time on $200$ random on-curve targets and the
+verification count on constructed positive controls.
+
+\begin{table}[h]
+\centering
+\caption{Prime root finder across field sizes. ``verified'' counts
+constructed $F_i + F_j$ controls that decomposed and re-added correctly.
+Artefact:
+\art{crypto:research/semaev_rootfind_scaling_20261012/results.json}.}
+\label{tab:scaling}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+field & bits & $\abs{\Fb}$ & per target & verified \\
+\midrule
+native $u64$ Montgomery & 40 & 120 & 2.95 $\mu$s & 200/200 \\
+                        & 48 & 120 & 3.87 $\mu$s & 200/200 \\
+                        & 56 & 120 & 3.35 $\mu$s & 200/200 \\
+                        & 61 & 120 & 8.82 $\mu$s & 200/200 \\
+\addlinespace
+arbitrary precision     & 83 & 80  & 5.99 ms     & 100/100 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The native path is flat to the $2^{62}$ ceiling. The $83$-bit row is
+three orders of magnitude slower because that first arbitrary-precision
+instance performed one un-batched modular inversion per factor-base
+element; the NIST instances below use the batched form and recover most
+of the gap. The point of the row is that the algorithm, not the word
+size, is what extends.
+
+On the binary side the pairs-and-solve root finder over a bounded
+subspace of $\FF_{2^{53}}$ was cross-checked against exhaustive $\Sem{4}$
+search on $200/200$ targets at subspace dimension $\ell = 6$, and its
+rejection cost measured at $\ell = 8, 10, 11$ (38 ms, 585 ms, 2.48 s per
+target, growing with $\abs{V} = 2^\ell$ as expected; artefact:
+\art{crypto:research/semaev_rootfind_scaling_20261012/console.txt}). The subspace is
+bounded on purpose; see \S\ref{sec:boundary}.
+
+\subsection{NIST prime curves P-192 through P-521}
+\label{sec:exp-nist}
+
+The five NIST prime curves~\cite{fips186-4} were instantiated with their
+standard $p$ and $b$ ($a = -3$ throughout); the factor base is the first
+$N$ points obtained by lifting $x = 1, 2, \ldots$. Three measurements
+were made per curve.
+
+\paragraph{A. Head-to-head against Buchberger.} $\abs{\Fb} = 6$; $10$
+targets per curve, $5$ constructed as $F_i + F_j$ and $5$ random
+on-curve points. Both methods run in the same arbitrary-precision field.
+All checks of \S\ref{sec:verification} passed on every target: all $5$
+constructed targets decomposed and verified on every curve, all $5$
+random targets were refuted by both methods on every curve, and the
+root finder's witnesses lay in the variety of the reduced Gr\"obner
+basis in every case.
+
+\begin{table}[h]
+\centering
+\caption{NIST P-curves, $m=2$, $\abs{\Fb}=6$, $10$ targets each, same
+field and ideal. All fail-closed checks passed. Artefact:
+\art{crypto:research/semaev_rootfind_nist_20261012/results.json}
+(\code{section=vs\_f4}).}
+\label{tab:nist-f4}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+curve & bits & direct subtraction & Buchberger & factor & decomposed / refuted \\
+\midrule
+P-192 & 192 & 120 $\mu$s & 414 ms & $3455\times$ & 5 / 5 \\
+P-224 & 224 & 218 $\mu$s & 1.27 s & $5802\times$ & 5 / 5 \\
+P-256 & 256 & 203 $\mu$s & 613 ms & $3021\times$ & 5 / 5 \\
+P-384 & 384 & 337 $\mu$s & 1.09 s & $3235\times$ & 5 / 5 \\
+P-521 & 521 & 747 $\mu$s & 2.54 s & $3395\times$ & 5 / 5 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The factor is roughly flat in the field size. Both methods pay the same
+arbitrary-precision arithmetic per operation; what separates them is
+that the root finder performs $\Theta(\abs{\Fb})$ field operations
+while the Gr\"obner solve performs a basis computation whose
+coefficient arithmetic is all in that field.
+
+\paragraph{B. Root-finder scaling at $\abs{\Fb} = 64$.} $200$ random
+on-curve targets (the rejection path, which dominates in practice) and
+$100$ constructed controls $F_i \pm F_j$, every control re-added in the
+group and checked against $\Sem{3}$.
+
+\begin{table}[h]
+\centering
+\caption{NIST P-curves, root finder only, $\abs{\Fb}=64$, generic
+arbitrary-precision field. Artefact: same file,
+\code{section=scale\_generic}.}
+\label{tab:nist-scale}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+curve & rejection / target & controls verified & control / target \\
+\midrule
+P-192 & 369 $\mu$s & 100/100 & 301 $\mu$s \\
+P-224 & 428 $\mu$s & 100/100 & 268 $\mu$s \\
+P-256 & 433 $\mu$s & 100/100 & 324 $\mu$s \\
+P-384 & 583 $\mu$s & 100/100 & 394 $\mu$s \\
+P-521 & 1.28 ms    & 100/100 & 3.66 ms$^{*}$ \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+{\footnotesize $^{*}$Run-to-run jitter on a shared machine; the
+preceding run measured 1.13 ms. The ratios in Table~\ref{tab:nist-f4}
+are stable to within $\sim 2\times$.}
+\end{table}
+
+\paragraph{C. Per-curve specialization on P-256.} The identical oracle,
+with the identical batched inversion, instantiated over the codebase's
+dedicated constant-time Montgomery field for P-256.
+
+\begin{table}[H]
+\centering
+\caption{P-256, $\abs{\Fb}=64$: generic field versus dedicated field.
+Both paths agreed on every target. Artefact: same file,
+\code{section=scale\_specialised}.}
+\label{tab:nist-special}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+ & generic & P-256 field & factor \\
+\midrule
+rejection / target & 433 $\mu$s & 41 $\mu$s & $11\times$ \\
+control / target   & 324 $\mu$s & 28 $\mu$s & $12\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Closing check.} The benchmark asserts that the root finder's
+total time is below Buchberger's on every one of the five curves with
+all verification checks passing, and exits non-zero otherwise. It
+passed.
+
+\section{What the Measurements Do and Do Not Show}
+\label{sec:boundary}
+
+We state the boundary of the result in the same place as the result.
+
+\paragraph{It is a constant-factor improvement to a subroutine.} In the
+companion repository's classification of changes (advance, engineering,
+relabelling, accounting) this is \emph{engineering}: a stage diagnostic,
+not an end-to-end speedup. The
+number of decompositions index calculus must attempt is unchanged, and
+so is the probability that a random target decomposes. Over prime
+fields the cost remains on the order of $p/\abs{\Fb}$ group operations
+per relation for $m = 2$, and the Gaudry--Diem analysis that
+prime-field index calculus does not beat Pollard rho for any $m$ is
+untouched~\cite{gaudry2009,diem2011}. The oracle was the slow step
+\emph{per target}; it was never the reason prime-field index calculus
+fails to be competitive.
+
+\paragraph{The exponential factor base on Koblitz curves is untouched.}
+The Frobenius-invariant factor base relevant to $K_0/\FF_{2^n}$ has
+dimension $\ell = \operatorname{ord}_2(n)$: $\ell = 52$ at $n = 53$,
+$\ell = 82$ at $n = 83$, so $\abs{V} = 2^{52}$ or $2^{82}$. No
+decomposition engine, Gr\"obner or root-finding, materializes such a
+factor base. The binary head-to-head of \S\ref{sec:exp-binary} lives
+where $\operatorname{ord}_2(n)$ is small; the $\FF_{2^{53}}$
+measurements of \S\ref{sec:exp-scaling} deliberately bound the subspace
+to isolate the oracle cost from this wall. Raising $n$ makes the factor
+base exponentially larger; it does not make decomposition harder, and
+faster decomposition does not help.
+
+\paragraph{The NIST measurements are not a security result.} On
+P-192 through P-521 only the per-target decomposition subroutine was
+measured, on a factor base of $6$ or $64$ points. The relation-collection
+and linear-algebra stages of index calculus remain exponentially out of
+reach at those sizes, and the asymptotics are unchanged. A fast
+decomposition oracle says nothing about the discrete-logarithm problem
+on these curves. We make no key-recovery, sub-rho, or deployed-curve
+claim, and we have written the benchmark output, the research note and
+this paper to prevent the result from being read as one.
+
+\paragraph{The meet-in-the-middle cost grows with $m$.} The direct
+method is $\Theta(\abs{\Fb}^{m-1})$; the Gr\"obner method is designed
+for regimes where $m$ is large enough that this is prohibitive. Our
+measurements are at $m = 2$ (and $m \le 4$ for the binary table), where
+the comparison is decisively in favour of root finding. We do not claim
+the ordering persists at the large $m$ that asymptotic index-calculus
+analyses contemplate, and at those $m$ neither method is practical for
+the reasons above.
+
+\paragraph{The Gr\"obner baselines are the codebase's own.} The binary
+baseline is the codebase's matrix-F4 on the identical Weil-descended
+system; the prime baseline is its Buchberger on the identical ideal. A
+state-of-the-art F4/F5 implementation would be faster than our
+Buchberger by a large constant. It would not be faster than $\Theta(N)$
+field operations, because it has to compute a basis of an ideal whose
+generators already have degree $N$; and where our baseline capped its
+step budget the measured time is a lower bound, so the stated ratios
+understate rather than inflate its cost.
+
+\section{Related Work}
+\label{sec:related}
+
+Semaev~\cite{semaev2004} introduced summation polynomials and proposed
+the index-calculus application; Gaudry~\cite{gaudry2009} and
+Diem~\cite{diem2011} gave the first rigorous and heuristic analyses for
+curves over extension fields and established the negative result for
+prime fields. Faug\`ere, Perret, Petit and Renault~\cite{fppr2012} and
+Petit and Quisquater~\cite{petitquisquater2012} analysed the
+Weil-descended systems over $\FF_{2^n}$ and the behaviour of F4/F5 on
+them; Galbraith and Gebregiyorgis~\cite{galbraithgebregiyorgis2014}
+studied symmetries that reduce the system size. Joux and
+Vitse~\cite{jouxvitse2013} developed decomposition over small-degree
+extension fields with a variant of F4 tuned to the summation-polynomial
+systems. The observation that summation-polynomial systems can be
+attacked by root finding rather than by Gr\"obner bases has appeared in
+the prime-field setting in the work of Amadori, Pintore and
+Sala~\cite{amadoripintoresala2018}, who propose a different polynomial
+model; our contribution is narrower and more concrete---for $m = 2$ the
+roots are given by the group law, so no polynomial model is needed at
+all---and is accompanied by an implementation, a fail-closed protocol,
+and measurements on standard curves. Montgomery's batched-inversion
+trick~\cite{montgomery1987} is what makes the sweep cost one inversion.
+Our stance on claim hygiene follows the tradition of
+Kosters--Yeo~\cite{kostersyeo2015} and others who have insisted that
+improvements to decomposition be reported together with their effect,
+or lack of effect, on the overall complexity.
+
+\section{Reproducibility}
+\label{sec:repro}
+
+All code and raw measurements are in the companion repository
+(\code{aburan28/crypto}) under the following paths; the \code{crypto:}
+prefix used in table captions denotes a path in that repository at the
+commit this paper was built from.
+
+\begin{description}
+\item[Algorithms.]
+  \path{src/cryptanalysis/prime_fast.rs}
+  (Algorithm~\ref{alg:prime}, native field);
+  \path{src/cryptanalysis/koblitz_index_calculus.rs}
+  (\code{PairSumTable}, Algorithm~\ref{alg:binary};
+  \code{DecompositionStrategy}).
+\item[Benchmarks.] \hfill\\
+  \path{examples/semaev_root_vs_groebner_bench.rs}
+  (\S\ref{sec:exp-binary}, \S\ref{sec:exp-prime-small}) \\
+  \path{examples/semaev_rootfind_scaling_bench.rs}
+  (\S\ref{sec:exp-scaling}) \\
+  \path{examples/semaev_rootfind_nist_bench.rs}
+  (\S\ref{sec:exp-nist})
+\item[Raw evidence] (console transcripts and JSON). \hfill\\
+  \path{research/semaev_root_vs_groebner_20261012/} \\
+  \path{research/semaev_rootfind_scaling_20261012/} \\
+  \path{research/semaev_rootfind_nist_20261012/}
+\item[Research note] with the same tables.
+  \path{RESEARCH_SEMAEV_ROOTFIND_VS_GROEBNER.md}.
+\item[Lean formalization] of Proposition~\ref{prop:s3roots}
+  (Remark~\ref{rem:lean}). \hfill\\
+  \path{papers/rootfinding-decomposition/lean/S3Roots.lean} \\
+  with \path{lakefile.toml}, \path{lean-toolchain} (Lean 4.34.1) and
+  \path{lake-manifest.json} pinning Mathlib \code{v4.34.1}; \\
+  check with \code{lake exe cache get \&\& lake build} there.
+\end{description}
+
+\noindent To reproduce:
+\begin{verbatim}
+cargo run --release --example semaev_root_vs_groebner_bench
+cargo run --release --example semaev_rootfind_scaling_bench
+F4_CONSTRUCTED=5 F4_RANDOM=5 \
+  cargo run --release --example semaev_rootfind_nist_bench
+\end{verbatim}
+The NIST benchmark exposes its knobs as environment variables
+(\code{F4\_FB}, \code{F4\_CONSTRUCTED}, \code{F4\_RANDOM},
+\code{SCALE\_FB}, \code{SCALE\_RANDOM}) and prints them at the top of
+its output. The library test suite (\code{cargo test --release --lib})
+passed with 2\,247 tests at the commit the measurements were taken from.
+
+\section{Conclusion}
+
+For the decomposition sizes at which elliptic-curve index calculus is
+actually run in practice, the Gr\"obner-basis solve is not the right
+tool for the decomposition oracle: the variety it would compute is
+already parametrized by the group law. Replacing the solve with root
+finding---direct subtraction over prime fields, a pair-sum table over
+binary fields---is exact, complete, cheap to verify, and three to four
+orders of magnitude faster per target on every instance we measured,
+including the five NIST prime curves at their standard parameters. We
+have made it the default in our codebase and kept the Gr\"obner solvers
+as baselines. We have also tried to say clearly what this is not: it is
+a better constant in a subroutine, not a change to what index calculus
+can reach.
+
+\begin{thebibliography}{99}
+
+\bibitem{semaev2004}
+I.~Semaev.
+Summation polynomials and the discrete logarithm problem on elliptic curves.
+IACR Cryptology ePrint Archive, Report 2004/031, 2004.
+
+\bibitem{gaudry2009}
+P.~Gaudry.
+Index calculus for abelian varieties of small dimension and the elliptic curve discrete logarithm problem.
+\emph{Journal of Symbolic Computation}, 44(12):1690--1702, 2009.
+
+\bibitem{diem2011}
+C.~Diem.
+On the discrete logarithm problem in elliptic curves.
+\emph{Compositio Mathematica}, 147(1):75--104, 2011.
+
+\bibitem{faugere1999}
+J.-C.~Faug\`ere.
+A new efficient algorithm for computing Gr\"obner bases ($F_4$).
+\emph{Journal of Pure and Applied Algebra}, 139(1--3):61--88, 1999.
+
+\bibitem{faugere2002}
+J.-C.~Faug\`ere.
+A new efficient algorithm for computing Gr\"obner bases without reduction to zero ($F_5$).
+In \emph{ISSAC 2002}, pages 75--83. ACM, 2002.
+
+\bibitem{fppr2012}
+J.-C.~Faug\`ere, L.~Perret, C.~Petit, and G.~Renault.
+Improving the complexity of index calculus algorithms in elliptic curves over binary fields.
+In \emph{EUROCRYPT 2012}, LNCS 7237, pages 27--44. Springer, 2012.
+
+\bibitem{petitquisquater2012}
+C.~Petit and J.-J.~Quisquater.
+On polynomial systems arising from a Weil descent.
+In \emph{ASIACRYPT 2012}, LNCS 7658, pages 451--466. Springer, 2012.
+
+\bibitem{galbraithgebregiyorgis2014}
+S.~D.~Galbraith and S.~W.~Gebregiyorgis.
+Summation polynomial algorithms for elliptic curves in characteristic two.
+In \emph{INDOCRYPT 2014}, LNCS 8885, pages 409--427. Springer, 2014.
+
+\bibitem{jouxvitse2013}
+A.~Joux and V.~Vitse.
+Elliptic curve discrete logarithm problem over small degree extension fields.
+\emph{Journal of Cryptology}, 26(1):119--143, 2013.
+
+\bibitem{amadoripintoresala2018}
+A.~Amadori, F.~Pintore, and M.~Sala.
+On the discrete logarithm problem for prime-field elliptic curves.
+\emph{Finite Fields and Their Applications}, 51:168--182, 2018.
+
+\bibitem{kostersyeo2015}
+M.~Kosters and S.~L.~Yeo.
+Notes on summation polynomials.
+arXiv:1503.08001, 2015.
+
+\bibitem{pollard1978}
+J.~M.~Pollard.
+Monte Carlo methods for index computation (mod $p$).
+\emph{Mathematics of Computation}, 32(143):918--924, 1978.
+
+\bibitem{montgomery1987}
+P.~L.~Montgomery.
+Speeding the Pollard and elliptic curve methods of factorization.
+\emph{Mathematics of Computation}, 48(177):243--264, 1987.
+
+\bibitem{fips186-4}
+National Institute of Standards and Technology.
+Digital Signature Standard (DSS).
+FIPS PUB 186-4, July 2013.
+
+\end{thebibliography}
+
+\end{document}
