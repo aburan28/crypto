@@ -195,6 +195,14 @@ The four n37 arms (strong signed-Frobenius rho, K8, K16 and an identical K16 con
 | `icv1-f2m53-tm56619371-dac20a85` | 44.26 | ic-k16-control | 0/80 | — | — | — | A/A control |
 | `icv1-f2m53-tm56619371-dac20a85` | 44.26 | K16 / K8 | — | — | — | — | unknown (0 verified pairs) |
 
+## Large-prime conductor-gap counted diagnostics
+
+Copied from native analysis: eight independent one-target workloads per fixed curve; no transported targets. Counted S has unpriced native work. These observations do not enter tables A–C or change a full-cost ranking.
+
+| ell | IC floor/crater | 99% interval |
+|---:|---:|---|
+| 8209 | 0.975242 | 0.603463 to 1.450934 |
+| 131101 | 1.127134 | 0.922471 to 1.341694 |
 
 ## Sources
 
@@ -219,6 +227,7 @@ The four n37 arms (strong signed-Frobenius rho, K8, K16 and an identical K16 con
 - `research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json` — sha256 `69ca54385c62a50e…`
 - `research/f4_f5_f6_cross_family_20261011/ANALYSIS.json` — sha256 `143247c6b81d3539…`
 - `research/ecbench_n41_n53_shared_rank_20261005/DECISION.json` — sha256 `fe55908f837840ee…`
-- `docs/curves/registry.json` — sha256 `0bdcfb2c7a497a35…`
+- `research/ecbench_conductor_gap_20261012/analysis.json` — sha256 `0ff9b20fd773ea67…`
+- `docs/curves/registry.json` — sha256 `89b580c52ecf1476…`
 - `docs/curves/ic/curves.schema.json` — sha256 `42cd9793dd299384…`
 - `docs/curves/ic/curves.yaml` — sha256 `566ed698a961aae8…`
