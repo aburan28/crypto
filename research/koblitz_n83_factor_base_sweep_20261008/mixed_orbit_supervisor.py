@@ -455,6 +455,7 @@ def replay_events(path: Path, small_object: Path, envelope_object: Path,
     if not any(event.get("candidate") is not None for event in events):
         return None
     points: dict[int, tuple[int, int]] = {}
+    small_labels: dict[int, tuple[int, int]] = {}
     try:
         with gzip.open(small_object, "rt", encoding="utf-8") as archive:
             header = json.loads(next(archive))
@@ -469,10 +470,17 @@ def replay_events(path: Path, small_object: Path, envelope_object: Path,
             for index, line in enumerate(archive):
                 count += 1
                 if index in needed_indices:
-                    point = parse_point(json.loads(line)["point"])
+                    row = json.loads(line)
+                    point = parse_point(row["point"])
                     if point is None:
                         return "small point is infinity"
+                    column, coefficient = row.get("column"), row.get("coefficient")
+                    if (type(column) is not int or not 0 <= column < 1182
+                            or not canonical_decimal(coefficient, PRIMARY_ORDER)
+                            or point_mul(representatives[column], int(coefficient)) != point):
+                        return "small point orbit label failed independent replay"
                     points[index] = point
+                    small_labels[index] = column, int(coefficient)
             if count != SMALL_POINTS:
                 return "small archive point count mismatch"
     except (OSError, EOFError, UnicodeError, ValueError, TypeError, KeyError,
@@ -495,20 +503,36 @@ def replay_events(path: Path, small_object: Path, envelope_object: Path,
         residual_by_trial[event["trial"]] = residual
         needed_residuals.update(residual)
     found_residuals: set[tuple[int, int]] = set()
+    residual_labels: dict[tuple[int, int], tuple[int, int]] = {}
     try:
         with gzip.open(envelope_object, "rt", encoding="utf-8") as archive:
             header = json.loads(next(archive))
             if not isinstance(header, dict) or header.get("point_count") != ENVELOPE_POINTS:
                 return "envelope archive point count mismatch"
+            envelope_representatives = [parse_point(value)
+                                        for value in header["representatives"]]
+            if len(envelope_representatives) != 2048 or any(
+                    point is None for point in envelope_representatives):
+                return "envelope orbit representatives malformed"
             count = 0
             for index, line in enumerate(archive):
                 count += 1
                 if index >= SMALL_POINTS:
-                    point = parse_point(json.loads(line)["point"])
+                    row = json.loads(line)
+                    point = parse_point(row["point"])
                     if point is None:
                         return "envelope suffix point is infinity"
                     if point in needed_residuals:
+                        column, coefficient = row.get("column"), row.get("coefficient")
+                        if (type(column) is not int or not 1182 <= column < 2048
+                                or not canonical_decimal(coefficient, PRIMARY_ORDER)
+                                or point_mul(envelope_representatives[column],
+                                             int(coefficient)) != point):
+                            return "residual point orbit label failed independent replay"
+                        if point in residual_labels:
+                            return "duplicate residual point in envelope suffix"
                         found_residuals.add(point)
+                        residual_labels[point] = column, int(coefficient)
             if count != ENVELOPE_POINTS:
                 return "envelope archive point count mismatch"
     except (OSError, EOFError, UnicodeError, ValueError, TypeError, KeyError,
@@ -517,6 +541,7 @@ def replay_events(path: Path, small_object: Path, envelope_object: Path,
     if found_residuals != needed_residuals:
         return "residual point outside pinned envelope suffix"
     sources: dict[int, tuple[int, int]] = {}
+    source_columns: dict[int, tuple[dict[int, int], dict[int, int]]] = {}
     for event in events:
         candidate = event.get("candidate")
         if candidate is None:
@@ -527,11 +552,28 @@ def replay_events(path: Path, small_object: Path, envelope_object: Path,
                                        residual, target):
             return "partial point equation failed independent replay"
         sources[candidate["source_id"]] = int(candidate["a"]), int(candidate["b"])
+        small_columns: dict[int, int] = {}
+        residual_columns: dict[int, int] = {}
+        for index in candidate["small_point_indices"]:
+            column, coefficient = small_labels[index]
+            value = (small_columns.get(column, 0) + coefficient) % PRIMARY_ORDER
+            if value:
+                small_columns[column] = value
+            else:
+                small_columns.pop(column, None)
+        for point in residual:
+            column, coefficient = residual_labels[point]
+            value = (residual_columns.get(column, 0) + coefficient) % PRIMARY_ORDER
+            if value:
+                residual_columns[column] = value
+            else:
+                residual_columns.pop(column, None)
+        source_columns[candidate["source_id"]] = small_columns, residual_columns
         graph = event["graph"]
         if graph["kind"] == "full":
             try:
                 source_terms = graph["source_coeffs"]
-                if (not isinstance(source_terms, list)
+                if (not isinstance(source_terms, list) or not source_terms
                         or any(not isinstance(item, list) or len(item) != 2
                                or not canonical_decimal(item[0], result["trials_attempted"] + 1)
                                or not canonical_decimal(item[1], PRIMARY_ORDER)
@@ -539,6 +581,8 @@ def replay_events(path: Path, small_object: Path, envelope_object: Path,
                     return "completed row source provenance malformed"
                 if len({item[0] for item in source_terms}) != len(source_terms):
                     return "completed row repeats a source coefficient"
+                if any(item[1] == "0" for item in source_terms):
+                    return "completed row has a zero source coefficient"
                 combined_a = sum(int(c) * sources[int(i)][0] for i, c in source_terms) % PRIMARY_ORDER
                 combined_b = sum(int(c) * sources[int(i)][1] for i, c in source_terms) % PRIMARY_ORDER
                 if (not canonical_decimal(graph["a"], PRIMARY_ORDER)
@@ -550,9 +594,27 @@ def replay_events(path: Path, small_object: Path, envelope_object: Path,
                        for k, v in graph["small"]):
                     return "completed row terms are not canonical"
                 small_terms = [(int(k), int(v)) for k, v in graph["small"]]
-                if any(not 0 <= i < 1182 or not 0 <= c < PRIMARY_ORDER
-                       for i, c in small_terms):
+                if (any(not 0 <= i < 1182 or not 0 < c < PRIMARY_ORDER
+                        for i, c in small_terms)
+                        or len({i for i, _ in small_terms}) != len(small_terms)):
                     return "completed row term outside signed orbit base"
+                expected_small: dict[int, int] = {}
+                expected_residual: dict[int, int] = {}
+                for source_id, scale in source_terms:
+                    for expected, component in zip(
+                            (expected_small, expected_residual),
+                            source_columns[int(source_id)]):
+                        for column, coefficient in component.items():
+                            value = (expected.get(column, 0)
+                                     + int(scale) * coefficient) % PRIMARY_ORDER
+                            if value:
+                                expected[column] = value
+                            else:
+                                expected.pop(column, None)
+                if expected_residual:
+                    return "completed row residual orbit coefficients did not cancel"
+                if expected_small != dict(small_terms):
+                    return "completed row small coefficients disagree with cited partials"
                 rhs = _group_sum([point_mul(representatives[i], c)
                                   for i, c in small_terms])
                 lhs = point_add(point_mul(PRIMARY_GENERATOR, int(graph["a"])),

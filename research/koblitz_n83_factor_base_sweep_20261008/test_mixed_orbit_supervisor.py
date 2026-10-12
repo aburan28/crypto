@@ -216,13 +216,14 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
 
     def test_independent_partial_and_completed_row_replay(self):
         generator = gate.PRIMARY_GENERATOR
-        negative = (generator[0], generator[0] ^ generator[1])
-        self.assertTrue(gate.replay_equation("1", "0", [generator] * 3,
-                                             [negative] * 2, generator))
-        self.assertFalse(gate.replay_equation("1", "0", [generator] * 3,
-                                              [negative, generator], generator))
+        residual_point = gate.point_mul(generator, 2)
+        negative_residual = (residual_point[0], residual_point[0] ^ residual_point[1])
+        self.assertTrue(gate.replay_equation("3", "0", [generator] * 3,
+                                             [residual_point, negative_residual], generator))
+        self.assertFalse(gate.replay_equation("3", "0", [generator] * 3,
+                                              [residual_point] * 2, generator))
         a, b = int(gate.FIRST_TRIAL_A), int(gate.FIRST_TRIAL_B)
-        target_scalar = ((1 - a) * pow(b, -1, gate.PRIMARY_ORDER)) % gate.PRIMARY_ORDER
+        target_scalar = ((3 - a) * pow(b, -1, gate.PRIMARY_ORDER)) % gate.PRIMARY_ORDER
         target = gate.point_mul(generator, target_scalar)
         self.assertIsNotNone(target)
         with tempfile.TemporaryDirectory(prefix="n83-mixed-replay-") as folder:
@@ -230,21 +231,24 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
             archive = root / "small.jsonl.gz"
             envelope = root / "envelope.jsonl.gz"
             point = [str(generator[0]), str(generator[1])]
-            negative_point = [str(negative[0]), str(negative[1])]
-            twice = gate.point_mul(generator, 2)
-            negative_twice = (twice[0], twice[0] ^ twice[1])
-            negative_twice_point = [str(negative_twice[0]), str(negative_twice[1])]
+            residual_json = [str(residual_point[0]), str(residual_point[1])]
+            negative_json = [str(negative_residual[0]), str(negative_residual[1])]
             with gzip.open(archive, "wt", encoding="utf-8") as stream:
                 stream.write(json.dumps({"representatives": [point] * 1182,
                                          "point_count": 3}) + "\n")
                 for _ in range(3):
-                    stream.write(json.dumps({"point": point}) + "\n")
+                    stream.write(json.dumps({"point": point, "column": 0,
+                                             "coefficient": "1"}) + "\n")
             with gzip.open(envelope, "wt", encoding="utf-8") as stream:
-                stream.write(json.dumps({"point_count": 5}) + "\n")
+                stream.write(json.dumps({"point_count": 5,
+                                         "representatives": [point] * 1182
+                                         + [residual_json] * 866}) + "\n")
                 for _ in range(3):
                     stream.write(json.dumps({"point": point}) + "\n")
-                stream.write(json.dumps({"point": negative_point}) + "\n")
-                stream.write(json.dumps({"point": negative_twice_point}) + "\n")
+                stream.write(json.dumps({"point": residual_json, "column": 1182,
+                                         "coefficient": "1"}) + "\n")
+                stream.write(json.dumps({"point": negative_json, "column": 1182,
+                                         "coefficient": str(gate.PRIMARY_ORDER - 1)}) + "\n")
             event = {
                 "trial": 0, "a": gate.FIRST_TRIAL_A,
                 "b": gate.FIRST_TRIAL_B, "elapsed_process_wall_ms": 1.0,
@@ -255,11 +259,11 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
                     "source_id": 1, "a": gate.FIRST_TRIAL_A,
                     "b": gate.FIRST_TRIAL_B,
                     "small_point_indices": [0, 1, 2],
-                    "residual_points": [negative_point] * 2,
+                    "residual_points": [residual_json, negative_json],
                 },
                 "graph": {"kind": "full", "a": gate.FIRST_TRIAL_A,
                           "b": gate.FIRST_TRIAL_B,
-                          "small": [["0", "1"]], "source_coeffs": [["1", "1"]],
+                          "small": [["0", "3"]], "source_coeffs": [["1", "1"]],
                           "merge_depth": 0},
             }
             events = root / "events.jsonl"
@@ -278,21 +282,26 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
                 self.assertIn("frozen first-trial", gate.replay_events(
                     events, archive, envelope, target, report))
                 event["a"] = gate.FIRST_TRIAL_A
-                event["candidate"]["residual_points"][0] = negative_twice_point
+                event["candidate"]["residual_points"] = [residual_json] * 2
                 events.write_text(json.dumps(event) + "\n")
                 self.assertIn("partial point equation", gate.replay_events(
                     events, archive, envelope, target, report))
                 triple = gate.point_mul(generator, 3)
                 negative_thrice = (triple[0], triple[0] ^ triple[1])
+                triple_json = [str(triple[0]), str(triple[1])]
                 outside = [str(negative_thrice[0]), str(negative_thrice[1])]
                 self.assertTrue(gate.replay_equation(
                     gate.FIRST_TRIAL_A, gate.FIRST_TRIAL_B,
-                    [generator] * 3, [generator, negative_thrice], target))
-                event["candidate"]["residual_points"] = [point, outside]
+                    [generator] * 3, [triple, negative_thrice], target))
+                event["candidate"]["residual_points"] = [triple_json, outside]
                 events.write_text(json.dumps(event) + "\n")
                 self.assertIn("outside pinned envelope suffix", gate.replay_events(
                     events, archive, envelope, target, report))
-                event["candidate"]["residual_points"] = [negative_point] * 2
+                event["candidate"]["residual_points"] = [residual_json, negative_json]
+                event["graph"]["source_coeffs"] = []
+                events.write_text(json.dumps(event) + "\n")
+                self.assertIn("source provenance malformed", gate.replay_events(
+                    events, archive, envelope, target, report))
                 event["graph"]["source_coeffs"] = [["1", "2"]]
                 events.write_text(json.dumps(event) + "\n")
                 self.assertIn("source combination", gate.replay_events(
@@ -300,8 +309,46 @@ class MixedOrbitSupervisorTests(unittest.TestCase):
                 event["graph"]["source_coeffs"] = [["1", "1"]]
                 event["graph"]["small"] = [["0", "2"]]
                 events.write_text(json.dumps(event) + "\n")
-                self.assertIn("completed row failed", gate.replay_events(
+                self.assertIn("small coefficients disagree", gate.replay_events(
                     events, archive, envelope, target, report))
+                event["candidate"]["residual_points"] = [residual_json] * 2
+                event["graph"]["small"] = [["0", "7"]]
+                forged_scalar = ((7 - a) * pow(b, -1, gate.PRIMARY_ORDER)) % gate.PRIMARY_ORDER
+                forged_target = gate.point_mul(generator, forged_scalar)
+                self.assertTrue(gate.replay_equation(
+                    gate.FIRST_TRIAL_A, gate.FIRST_TRIAL_B,
+                    [generator] * 3, [residual_point] * 2, forged_target))
+                events.write_text(json.dumps(event) + "\n")
+                self.assertIn("residual orbit coefficients did not cancel",
+                              gate.replay_events(events, archive, envelope,
+                                                 forged_target, report))
+                first = json.loads(json.dumps(event))
+                first["graph"] = {"kind": "pivot", "merge_depth": 0}
+                second = json.loads(json.dumps(event))
+                second["trial"] = 1
+                second["a"], second["b"] = str(gate.PRIMARY_ORDER - 1), "0"
+                second["candidate"]["source_id"] = 2
+                second["candidate"]["a"] = second["a"]
+                second["candidate"]["b"] = second["b"]
+                second["candidate"]["residual_points"] = [negative_json] * 2
+                second["graph"] = {
+                    "kind": "full", "a": str((a - 1) % gate.PRIMARY_ORDER),
+                    "b": str(b), "small": [["0", "6"]],
+                    "source_coeffs": [["1", "1"], ["2", "1"]], "merge_depth": 1,
+                }
+                self.assertTrue(gate.replay_equation(
+                    second["a"], second["b"], [generator] * 3,
+                    [negative_residual] * 2, forged_target))
+                cycle_report = dict(report)
+                cycle_report.update({
+                    "trials_attempted": 2, "solver_calls": 2,
+                    "solver_conflicts": 40, "solver_models": 2,
+                    "graph_accepted_candidates": 2, "graph_pivot_rows": 1,
+                    "graph_full_from_partials": 1, "graph_pivot_reductions": 1,
+                })
+                events.write_text(json.dumps(first) + "\n" + json.dumps(second) + "\n")
+                self.assertIsNone(gate.replay_events(
+                    events, archive, envelope, forged_target, cycle_report))
 
 
 if __name__ == "__main__":
