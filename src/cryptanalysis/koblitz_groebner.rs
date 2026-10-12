@@ -9255,3 +9255,171 @@ mod reference_equivalence_tests {
         }
     }
 }
+
+/// Collected on the calling thread while [`set_refutation_degree_trace`] is
+/// on; read and cleared with [`refutation_degree_trace_take`].  Every field
+/// counts nodes (attempts, for `root_first_refutation_degree`) and is
+/// exact.  The `*_first_degree` fields are a diagnostic the trace pays for:
+/// at every inherited-engine reduction the node's own system is also
+/// reduced from scratch, with the engine's multiplier policy, at degree 2
+/// and, unless that refutes, at the engine's top degree; the node is filed
+/// under the first degree whose row space holds `1` (refuted) or, failing
+/// that, a forced variable (forced), else as stalled.  The trace changes no
+/// decision of the solver.
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize)]
+pub struct RefutationDegreeTrace {
+    /// Inherited-engine reductions whose top basis was built from scratch
+    /// at this node (the root, or a node whose linear elimination dropped
+    /// its parent's bases), and those whose top basis was specialised from
+    /// the parent's.
+    pub reductions_fresh: u64,
+    pub reductions_inherited: u64,
+    /// The engine's own verdict at those reductions: `1` in the row space,
+    /// a forced variable and no `1`, or neither (the solver splits).
+    pub refuted_fresh: u64,
+    pub refuted_inherited: u64,
+    pub forced_fresh: u64,
+    pub forced_inherited: u64,
+    pub stalled_fresh: u64,
+    pub stalled_inherited: u64,
+    /// Diagnostic, indexed by degree (0 … 4): first degree of the node's
+    /// own from-scratch Macaulay space holding `1`, split by whether the
+    /// engine's basis at the node was fresh or inherited.
+    pub refuted_first_degree_fresh: [u64; 5],
+    pub refuted_first_degree_inherited: [u64; 5],
+    /// Diagnostic: the same for a forced variable, at nodes no degree up
+    /// to the top refutes; and the nodes neither decides.
+    pub forced_first_degree: [u64; 5],
+    pub stalled_from_scratch: u64,
+    /// Diagnostic: the from-scratch top-degree space refutes a node the
+    /// engine's basis did not, or the reverse (the inherited basis is a
+    /// documented subspace of it under the production policy).
+    pub scratch_refutes_engine_does_not: u64,
+    pub engine_refutes_scratch_does_not: u64,
+    /// Nodes refuted before any Macaulay matrix: the substituted system
+    /// holds `1` (degree 0), or linear elimination found a contradiction
+    /// (degree 1).
+    pub refuted_constant: u64,
+    pub refuted_linear: u64,
+    /// A forced value read off a reduction or an elimination contradicts
+    /// the assignment.
+    pub refuted_forced_conflict: u64,
+    /// Nodes the IC node oracle refuted.
+    pub refuted_oracle: u64,
+    /// Fully assigned points checked against the input, and how many were
+    /// solutions (each is certified by evaluation, degree 1).
+    pub leaves_checked: u64,
+    pub leaves_solutions: u64,
+    /// Early abort ([`early_abort_mode`]): degree-2 probes run, how many
+    /// refuted their node, and the probes' word operations (charged to the
+    /// stage unit like any reduction).
+    pub early_abort_probes: u64,
+    pub early_abort_refutations: u64,
+    pub early_abort_word_ops: u64,
+    /// Attempt-level diagnostic, once per inherited-engine solve: index `d`
+    /// in 2 … 4 counts root systems whose degree-`d` support-local Macaulay
+    /// space is the first to hold `1`; index 0 counts roots no degree ≤ 4
+    /// refutes; index 1 roots whose matrix exceeded the size caps before a
+    /// refutation.
+    pub root_first_refutation_degree: [u64; 5],
+    /// Where the stage unit goes: nodes that end refuted (any cause) and
+    /// nodes that end in a split, with the word operations each class spent
+    /// from node entry to its end (children excluded; with the trace on,
+    /// the trace's own from-scratch reductions are not charged).
+    pub nodes_refuted: u64,
+    pub word_ops_refuted_nodes: u64,
+    pub nodes_split: u64,
+    pub word_ops_split_nodes: u64,
+}
+
+thread_local! {
+    static REFUTATION_TRACE: std::cell::RefCell<Option<RefutationDegreeTrace>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// Turn the refutation-degree trace on or off on this thread (off drops it).
+pub fn set_refutation_degree_trace(enabled: bool) {
+    REFUTATION_TRACE.with(|t| *t.borrow_mut() = enabled.then(RefutationDegreeTrace::default));
+}
+
+/// The trace collected on this thread since the last take, leaving it
+/// running and cleared; `None` when the trace is off.
+pub fn refutation_degree_trace_take() -> Option<RefutationDegreeTrace> {
+    REFUTATION_TRACE.with(|t| t.borrow_mut().as_mut().map(std::mem::take))
+}
+
+fn trace_on() -> bool {
+    REFUTATION_TRACE.with(|t| t.borrow().is_some())
+}
+
+/// Charge the stage-unit word operations a node spent since `w0` (its
+/// entry, children excluded) to the refuted or the split nodes.
+fn trace_cost(w0: Option<u64>, refuted: bool) {
+    let Some(w0) = w0 else { return };
+    let spent = f4_word_ops_thread().wrapping_sub(w0);
+    trace(|t| {
+        if refuted {
+            t.nodes_refuted += 1;
+            t.word_ops_refuted_nodes += spent;
+        } else {
+            t.nodes_split += 1;
+            t.word_ops_split_nodes += spent;
+        }
+    });
+}
+
+fn trace(f: impl FnOnce(&mut RefutationDegreeTrace)) {
+    REFUTATION_TRACE.with(|t| {
+        if let Some(trace) = t.borrow_mut().as_mut() {
+            f(trace);
+        }
+    });
+}
+
+/// Early abort at the refutation degree (lit2026 W4), `KIC_F4_EARLY_ABORT`,
+/// read once per process:
+///
+/// - `0` or unset: off, the engine as it was.
+/// - `1`: before a node builds its top-degree basis from scratch, and only
+///   when its ladder skips degree 2 (wide systems run the top degree
+///   alone), reduce the node's degree-2 Macaulay space with the same
+///   multiplier policy; if it holds `1`, the node is refuted without the
+///   top-degree build.  Exact and tree-preserving: the degree-2 rows are
+///   rows of the degree-`D` matrix under either policy, so the top build
+///   refutes the same node; a probe that does not refute is dropped and
+///   the build runs as before.
+/// - `2`: a child about to specialise its parent's bases, whose first act
+///   would be that reduction, first reduces its own degree-2 Macaulay
+///   space; `1` there refutes it without the specialisation, and the probe
+///   is counted as the node's reduction.  Exact (`1` in a sub-ideal is `1`
+///   in the ideal).  The tree is the same wherever the inherited top basis
+///   refutes every node the degree-2 space does; the inherited basis is a
+///   documented subspace of the from-scratch one, so where it does not, the
+///   tree only loses refuted subtrees
+///   (`RefutationDegreeTrace::scratch_refutes_engine_does_not`).
+/// - `3`: both.
+///
+/// [`set_early_abort_mode`] overrides the environment on the calling thread.
+pub fn early_abort_mode() -> u8 {
+    if let Some(mode) = EARLY_ABORT_OVERRIDE.with(|m| m.get()) {
+        return mode;
+    }
+    static MODE: std::sync::OnceLock<u8> = std::sync::OnceLock::new();
+    *MODE.get_or_init(|| {
+        std::env::var("KIC_F4_EARLY_ABORT")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(0)
+    })
+}
+
+thread_local! {
+    static EARLY_ABORT_OVERRIDE: std::cell::Cell<Option<u8>> = const { std::cell::Cell::new(None) };
+}
+
+/// Set (`Some`) or clear (`None`) this thread's override of
+/// `KIC_F4_EARLY_ABORT`; a same-binary control for tests and harnesses.
+pub fn set_early_abort_mode(mode: Option<u8>) {
+    EARLY_ABORT_OVERRIDE.with(|m| m.set(mode));
+}
+

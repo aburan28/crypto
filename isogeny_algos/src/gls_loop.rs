@@ -783,7 +783,7 @@ mod tests {
             let (l, _, _, _) = cheapest_loop(d);
             assert_eq!(l.cost, cost, "D = {d}");
             assert_eq!(l.norm, norm, "D = {d}");
-            assert_eq!(((l.a * l.a) as i64 - d * l.b * l.b) / 4, norm as i64);
+            assert_eq!((l.a * l.a - d * l.b * l.b) / 4, norm as i64);
         }
     }
 

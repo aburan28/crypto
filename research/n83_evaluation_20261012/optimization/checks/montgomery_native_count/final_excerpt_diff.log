@@ -1,0 +1,8 @@
+--- source_excerpt.txt	2026-10-12 06:21:00.925522274 +0000
++++ final_source_matched_excerpt.txt	2026-10-12 06:26:35.099148455 +0000
+@@ -54,4 +54,4 @@
+         assert!(certify::check_order(&montgomery, &BigUint::from(101u64), &[]).is_err());
+ 
+         let (extension, _) = parse_model(
+-            r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","a":["1","0"],"b":["1","0"]}"#,
++            r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","modulus":["2","0"],"a":["1","0"],"b":["1","0"]}"#,

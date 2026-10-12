@@ -1,0 +1,9 @@
+Working directory: /workspace/crypto-integration
+source /workspace/integration-env.sh
+export CARGO_BUILD_JOBS=2
+export CARGO_TARGET_DIR=/tmp/crypto-groebner-validation-target
+nice -n 10 cargo fmt --manifest-path tools/groebner-history/Cargo.toml --all -- --check
+nice -n 10 cargo test --locked --offline --manifest-path tools/groebner-history/Cargo.toml
+nice -n 10 cargo clippy --locked --offline --manifest-path tools/groebner-history/Cargo.toml --all-targets -- -D warnings
+
+All checks are read-only for tracked files. No new benchmark or rendering was run.

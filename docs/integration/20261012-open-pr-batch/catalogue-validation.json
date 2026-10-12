@@ -1,0 +1,56 @@
+{
+  "registry_models": 2073,
+  "alias_targets": 5112,
+  "frozen_hundred_map_manifest": {
+    "bindings": 891,
+    "maps": 100,
+    "prime_degrees": 2,
+    "exit_status": 0,
+    "receipt": "receipts/crypto-hundred-audit.stdout"
+  },
+  "native_covers": {
+    "verified": 2073,
+    "invalid_input": 0,
+    "unsupported": 0
+  },
+  "traits": {
+    "models": 2073,
+    "previous_models_preserved_exactly": 2046,
+    "corrected_agm_models_exhaustively_proved": 2,
+    "final_source_native_check": {
+      "exit_status": 0,
+      "receipt": "receipts/crypto-final-traits-check2.stderr",
+      "models": 2073,
+      "registry_sha256": "adb8105bbefa21b76e5f288e4dc9ce80fa8024bad5d735e4b90ae8982e07f16a"
+    },
+    "binary_provenance": "Existing native build predates final unrelated FpF4/alias updates; trait math sources unchanged."
+  },
+  "standalone_cli": {
+    "existing_tests_after_style_fix": 66,
+    "new_native_normalization_tests": 4,
+    "strict_all_target_clippy_exit": 0
+  },
+  "standalone_algorithms": {
+    "full_tests_before_test_only_cast_fix": 129,
+    "existing_ignored": 1,
+    "GLS_tests_after_cast_fix": 2,
+    "strict_all_target_clippy_exit": 0
+  },
+  "metadata_regression_tests": 3,
+  "identity_metadata_tests": 5,
+  "full_site_tests": 48,
+  "cover_catalog_tests": 3,
+  "workflow_parse_tests": 4,
+  "all_text_browser_freshness": 0,
+  "curve_names_global": {
+    "exit_status": 0,
+    "retired_names": 0,
+    "unregistered_models": 0,
+    "receipt": "receipts/crypto-final-curve-names-check4.stdout"
+  },
+  "root_array_preservation_receipt": "receipts/crypto-final-browser-root-array-preservation.json",
+  "registry_sha256": "adb8105bbefa21b76e5f288e4dc9ce80fa8024bad5d735e4b90ae8982e07f16a",
+  "native_metadata_generator_freshness": 0,
+  "archived_label_regression_tests": 3,
+  "all_metadata_freshness_exit": 0
+}

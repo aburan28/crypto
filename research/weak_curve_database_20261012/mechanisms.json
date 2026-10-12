@@ -1,0 +1,113 @@
+{
+  "schema": "weak_curve.mechanism_recipes/v1",
+  "mechanisms": [
+    {
+      "id": "WCM1:anomalous", "family_id": "WCF1:anomalous-prime", "name": "Prime-field trace-one construction",
+      "construction": "Choose a prime p and a nonsingular curve E/F_p; use a trace-prescribed construction or bounded coefficient search, then certify #E(F_p)=p (t=1). Retain its exact Weierstrass model and point-count certificate.",
+      "recognition": "Exact trace t=1 over F_p, with a nonzero discriminant.",
+      "witness_requirements": "Certified field, model, order, selected generator and the hypotheses for the published p-adic reduction.",
+      "selected_subgroup_gate": "The selected group must be the characteristic-order group covered by the reduction.",
+      "measured_cost_status": "unmeasured_here", "validation_status": "published_recipe_not_locally_instantiated",
+      "source_ids": ["smart"]
+    },
+    {
+      "id": "WCM1:smooth-order", "family_id": "WCF1:smooth-selected-order", "name": "Factored selected subgroup",
+      "construction": "Fix a finite field and a chosen factor bound B; enumerate certified curve orders or use trace-prescribed construction until a selected cyclic subgroup has completely factored order r with each prime factor at most B.",
+      "recognition": "Verify generator order r and a complete certified factorization of r; record B and the sampling law.",
+      "witness_requirements": "Exact curve, generator, subgroup order, factorization, and component CRT maps.",
+      "selected_subgroup_gate": "The target point must lie in the certified cyclic group; an ambient-order factorization alone is insufficient.",
+      "measured_cost_status": "unmeasured_here", "validation_status": "published_recipe_not_locally_instantiated",
+      "source_ids": ["ph"]
+    },
+    {
+      "id": "WCM1:pairing", "family_id": "WCF1:pairing-transfer", "name": "Low embedding-degree selected subgroup",
+      "construction": "Choose Q, a prime r distinct from char(F_Q), and k with r dividing Q+1-t and Q^k-1, within the Hasse trace range; construct and count E/F_Q with trace t. Compute the exact order of Q modulo r and an explicit pairing witness.",
+      "recognition": "The embedding degree is the smallest k with Q^k congruent 1 mod r; certify a nondegenerate map on the selected r-subgroup.",
+      "witness_requirements": "Curve and subgroup identities, exact r and k, auxiliary pairing point, transfer output, and destination field representation.",
+      "selected_subgroup_gate": "The chosen pairing map must be injective on the target subgroup; compare the destination DLP cost under the same target contract.",
+      "measured_cost_status": "unmeasured_here", "validation_status": "published_recipe_not_locally_instantiated",
+      "source_ids": ["mov", "freeman2006"]
+    },
+    {
+      "id": "WCM1:supersingular-j1728", "family_id": "WCF1:supersingular", "name": "A j=1728 supersingular construction",
+      "construction": "For a prime p>3 with p congruent 3 mod 4, choose a nonzero a in F_p and E: y^2=x^3+a*x. Count E, specify a prime-to-p subgroup r, and compute its actual embedding degree and destination field.",
+      "recognition": "The CM reduction gives supersingularity under the stated congruence; certify nonsingularity and the exact selected subgroup separately.",
+      "witness_requirements": "Prime p, coefficient a, exact order/trace, selected r and generator, and pairing witness if a transfer claim is made.",
+      "selected_subgroup_gate": "Supersingularity is a structural property; the subgroup and finite-field DLP cost decide any comparative claim.",
+      "measured_cost_status": "unmeasured_here", "validation_status": "published_recipe_not_locally_instantiated",
+      "source_ids": ["freeman2006", "mov"]
+    },
+    {
+      "id": "WCM1:cubic-norm-one", "family_id": "WCF1:g3-cubic", "name": "Cubic norm-one covering over F_(p^6)",
+      "construction": "Choose p>3, q=p^2, L=F_(q^3). Choose lambda in L^x with lambda^(q^2+q+1)=1 and lambda not 1. Recover nonzero alpha with alpha^q=lambda*alpha (Hilbert 90), require alpha outside F_q, and form E: y^2=x(x-alpha)(x-alpha^q), including the documented twists. Count E, then build and verify the published genus-three cover over F_q and the induced map to Res_(L/F_q)(E).",
+      "recognition": "The model parameter passes the torus and nonsingularity checks; an ordinary class is screened by the proved v2(f_pi)>=2 condition and then decided by the exact selected CM-order intersection or finite exceptional oracle.",
+      "witness_requirements": "Exact field and alpha, model hash, point count, smooth genus-three source, cover/map and kernel checks, and independent class/model replay.",
+      "selected_subgroup_gate": "Give r and G, prove the induced map acts injectively on the selected r-subgroup, and account for construction, transport and destination solver costs.",
+      "measured_cost_status": "construction_components_only", "validation_status": "small_field_model_and_class_witnesses_present",
+      "source_ids": ["mc", "jv", "iso1"]
+    },
+    {
+      "id": "WCM1:quadratic-torus", "family_id": "WCF1:g3-quadratic", "name": "Nonsplit quadratic covering branch over F_(p^6)",
+      "construction": "Choose p>3, q=p^2, L=F_(q^3) and a base-field nonsquare d. Select an admissible nonidentity parameter in the quadratic torus of order q^2-q+1 in F_(q^6); use the published Cayley reconstruction to obtain alpha and E: y^2=(x^2-d)(x-alpha)(x-alpha^q). Count E and verify the genus-three cover and its map.",
+      "recognition": "Use the exact invariant/torus test on the model; for ordinary classes use the selected-floor CM intersection and handle exceptional units with the finite oracle.",
+      "witness_requirements": "The nonsquare and parameter witnesses, exact curve/field representation, point count, smooth cover, map, and independent replay.",
+      "selected_subgroup_gate": "Specify r and G and verify kernel avoidance and subgroup transport.",
+      "measured_cost_status": "construction_components_only", "validation_status": "small_field_model_and_class_witnesses_present",
+      "source_ids": ["mc", "jv", "iso1"]
+    },
+    {
+      "id": "WCM1:type-i", "family_id": "WCF1:g3-type-i", "name": "Published Type I cubic-extension coverings",
+      "construction": "Enumerate distinct admissible Type I Frobenius-root configurations alpha, alpha^q, beta, beta^q and the paper's leading-coefficient square classes, then construct the genus-three cover and verify the isogeny condition.",
+      "recognition": "Apply the published Type I quadratic-equation and hyperellipticity tests, with all root exclusions.",
+      "witness_requirements": "Field of every root, exact curve and covering equations, smoothness/genus, map, and normalized equivalence class.",
+      "selected_subgroup_gate": "Transfer is a separate map-and-kernel check for the chosen r-subgroup.",
+      "measured_cost_status": "unmeasured_here", "validation_status": "published_classification_import_pending",
+      "source_ids": ["mc", "imc2013"]
+    },
+    {
+      "id": "WCM1:type-ii", "family_id": "WCF1:g3-type-ii", "name": "Published Type II cubic-extension coverings",
+      "construction": "Enumerate the admissible Type II root configuration alpha, alpha^(q^3), alpha^q, alpha^(q^4) in the stated sixth-degree ambient field, retain the leading-coefficient square class and twists, then construct the genus-three cover and verify the isogeny condition.",
+      "recognition": "Apply the published Type II conjugate-root and Legendre-normalization tests, including the stated exclusions.",
+      "witness_requirements": "Root fields, exact curve and covering equations, smoothness/genus, map, square class and normalized equivalence class.",
+      "selected_subgroup_gate": "Transfer is a separate map-and-kernel check for the chosen r-subgroup.",
+      "measured_cost_status": "unmeasured_here", "validation_status": "published_classification_import_pending",
+      "source_ids": ["mc", "imc2013"]
+    },
+    {
+      "id": "WCM1:binary-ghs", "family_id": "WCF1:binary-ghs", "name": "Binary Weil-descent coefficient control",
+      "construction": "Fix F_(2^(mn))/F_(2^m), enumerate ordinary nonsingular binary elliptic models in a frozen coefficient space, and select coefficients with a prescribed Frobenius span. Construct the GHS cover and verify its actual genus and map.",
+      "recognition": "Check the coefficient span under Frobenius and the published descent hypotheses on the exact field representation.",
+      "witness_requirements": "Frozen coefficient law, source curve, cover equation, genus, induced map and exact field conversions.",
+      "selected_subgroup_gate": "The induced map must preserve and inject the selected subgroup; cost includes field conversion and destination arithmetic.",
+      "measured_cost_status": "unmeasured_here", "validation_status": "published_recipe_not_locally_instantiated",
+      "source_ids": ["hess"]
+    },
+    {
+      "id": "WCM1:odd-prime-polarization", "family_id": "WCF1:generalized-weil-descent", "name": "Odd-prime polarized cubic restriction",
+      "construction": "Choose a cubic extension and a source elliptic curve satisfying the published odd-prime isogeny and polarization hypotheses; construct a maximal isotropic kernel and a principally polarized quotient, then identify and verify its genus-three Jacobian model.",
+      "recognition": "Verify the kernel is isotropic and rational, the quotient polarization is principal, and the target is a Jacobian with an explicit transport map.",
+      "witness_requirements": "Source identity, prime degree, kernel generators, polarization certificate, target curve and map.",
+      "selected_subgroup_gate": "Check prime-to-kernel subgroup transport for the chosen r and charge map construction/evaluation.",
+      "measured_cost_status": "unmeasured_here", "validation_status": "published_geometry_backlog",
+      "source_ids": ["tian2020"]
+    },
+    {
+      "id": "WCM1:isogenous-representative", "family_id": "WCF1:isogenous-cover-support", "name": "Transport to a verified covering representative",
+      "construction": "Within a certified ordinary isogeny class, construct an ordered route to a model with a verified covering and preserve explicit maps, degrees, kernels and field definitions at every edge.",
+      "recognition": "A matching trace shows class membership; an executable route requires independently checked maps and a compatible selected subgroup.",
+      "witness_requirements": "Separate source/target curve IDs, ordered edge certificates, transported G and Q, and exact source/target subgroup orders.",
+      "selected_subgroup_gate": "Every edge must be injective on the chosen subgroup; include route and reverse-log costs in any comparison.",
+      "measured_cost_status": "unmeasured_here", "validation_status": "route_specific_witness_required",
+      "source_ids": ["volcano", "endo-rules"]
+    },
+    {
+      "id": "WCM1:proper-subfield", "family_id": "WCF1:proper-subfield-points", "name": "Selected points from a proper subfield",
+      "construction": "Choose E over a proper subfield F_(p^d) of F_(p^n), extend its coefficients, then choose and certify a selected subgroup whose generator and all intended targets are rational over F_(p^d).",
+      "recognition": "Verify coefficient/model descent, point coordinates and subgroup containment separately; j-invariant descent alone does not certify the point condition.",
+      "witness_requirements": "Exact subfield embedding, model isomorphism where needed, generator/target coordinates and order.",
+      "selected_subgroup_gate": "The actual selected points must lie in the smaller group before a smaller-field DLP comparison is relevant.",
+      "measured_cost_status": "unmeasured_here", "validation_status": "model_property_controls_present_point_gate_open",
+      "source_ids": ["endo-rules"]
+    }
+  ]
+}

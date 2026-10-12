@@ -1,0 +1,106 @@
+{
+  "scope": "Single read-only observation at 2026-10-12 04:07 UTC; not a current-status claim and no subsequent polling is recorded.",
+  "public_page": {
+    "url": "https://aburan28.github.io/crypto/status/",
+    "observed_at_utc": "2026-10-12T04:07:12Z",
+    "http_status": 200,
+    "last_modified_utc": "2026-10-11T16:00:39Z",
+    "latest_successful_publisher": {
+      "run_id": 38153472517,
+      "url": "https://github.com/aburan28/crypto/actions/runs/38153472517",
+      "started_at_utc": "2026-10-11T15:57:57Z",
+      "completed_at_utc": "2026-10-11T16:00:46Z"
+    }
+  },
+  "publisher_at_observation": {
+    "source_commit": "eb70862e4c69b63146508c96c153b4106caa045e",
+    "source_commit_url": "https://github.com/aburan28/crypto/commit/eb70862e4c69b63146508c96c153b4106caa045e",
+    "run_id": 38202491287,
+    "run_url": "https://github.com/aburan28/crypto/actions/runs/38202491287",
+    "event": "push",
+    "status_at_observation": "queued",
+    "job": "publish",
+    "job_url": "https://github.com/aburan28/crypto/actions/runs/38202491287/job/114658704232",
+    "job_status": "queued",
+    "runner_group_name": null,
+    "runner_name": null,
+    "steps_executed": false,
+    "check_annotations": [],
+    "deployment_id": 7006256667,
+    "deployment_url": "https://github.com/aburan28/crypto/deployments/activity_log?environment=github-pages",
+    "deployment_state": "queued",
+    "deployment_statuses_observed": [
+      "waiting",
+      "queued"
+    ]
+  },
+  "superseded_schedule": {
+    "run_id": 38201711114,
+    "run_url": "https://github.com/aburan28/crypto/actions/runs/38201711114",
+    "head_sha": "e5a8c7b8cb66cc1d3c332f6ac80c7492482fde41",
+    "cancelled_at_utc": "2026-10-12T04:07:17Z",
+    "steps_executed": false,
+    "deployment_state": "error",
+    "cancellation_annotation": "Canceling since a higher priority waiting request for ecc2k130-status-pages exists",
+    "relation": "The main push publisher run started at 04:07:15Z and entered the same non-PR concurrency group; the schedule was cancelled at 04:07:17Z."
+  },
+  "prior_03_45_in_progress_snapshot_followup": {
+    "scope": "The three runs reported in progress in the 03:45Z queue snapshot were checked once afterward; all had completed successfully by the API response.",
+    "runs": [
+      {
+        "run_id": 38200353248,
+        "workflow": "Copilot cloud agent",
+        "job_id": 114652158935,
+        "status": "completed",
+        "conclusion": "success",
+        "runner_group": "GitHub Actions",
+        "runner_name": "GitHub Actions 1000258361",
+        "started_at_utc": "2026-10-12T03:36:02Z",
+        "completed_at_utc": "2026-10-12T03:56:38Z"
+      },
+      {
+        "run_id": 38200272967,
+        "workflow": "perf history",
+        "job_id": 114651913514,
+        "status": "completed",
+        "conclusion": "success",
+        "runner_group": "GitHub Actions",
+        "runner_name": "GitHub Actions 1000258352",
+        "started_at_utc": "2026-10-12T03:34:43Z",
+        "completed_at_utc": "2026-10-12T03:47:12Z"
+      },
+      {
+        "run_id": 38200272982,
+        "workflow": "IC autolab integration",
+        "job_id": 114651913734,
+        "status": "completed",
+        "conclusion": "success",
+        "runner_group": "GitHub Actions",
+        "runner_name": "GitHub Actions 1000258355",
+        "started_at_utc": "2026-10-12T03:35:12Z",
+        "completed_at_utc": "2026-10-12T04:03:22Z"
+      }
+    ],
+    "publisher_queue_evidence": "At the follow-up snapshot, publish job 114658704232 still had status queued, blank runner group/name, and no steps. No runner-capacity cause was inferred from this metadata."
+  },
+  "workflow_configuration": {
+    "path": ".github/workflows/ecc2k130-status.yml",
+    "observed_at_commit": "eb70862e4c69b63146508c96c153b4106caa045e",
+    "observed_commit_url": "https://github.com/aburan28/crypto/commit/eb70862e4c69b63146508c96c153b4106caa045e",
+    "schedule": "*/10 * * * *",
+    "non_pr_concurrency_group": "ecc2k130-status-pages",
+    "cancel_in_progress": "${{ github.event_name != 'pull_request' }}",
+    "observed_effect": "A main push superseded and cancelled the scheduled publisher before either completed a Pages build. The replacement push remained queued before checkout/build steps at the observation time."
+  },
+  "planned_integration_change": {
+    "cancel_in_progress": false,
+    "schedule": "*/10 * * * *",
+    "status": "implemented locally; main merge and live publication verification pending",
+    "note": "The integration branch contains this setting. GitHub concurrency still retains at most one pending run per group, so post-merge success must be verified from a completed publish run and the updated public page."
+  },
+  "verification_required_after_integration": [
+    "A Pages publisher run on the integrated main commit completes successfully.",
+    "Its deployment status is success.",
+    "The public status page Last-Modified time advances beyond 2026-10-11T16:00:39Z."
+  ]
+}

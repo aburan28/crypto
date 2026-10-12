@@ -1,0 +1,24 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W10",
+  "slug": "s3-calibration",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1691",
+  "papers": ["ePrint 2024/1577", "ePrint 2026/1027"],
+  "kind": "diagnostic",
+  "workload": {
+    "id": "fp-s3-small-root-calibration",
+    "description": "S3(x1,x2,z) sanity case: asymptotic reach (box [0,2]^2) and finite JM lattices l = 1, 2 (dim 9, 25) on a3-fast-32bit-p256class (p = 4294967291, prime order n = 4294959973); also univariate and Boneh-Durfee known-bound reproduction",
+    "curve_ids": ["a3-fast-32bit-p256class"]
+  },
+  "metric": "asymptotic delta* and largest delta with all finite trials succeeding (>= 2 rows vanish over Z)",
+  "unit": "delta = log_p X",
+  "isolation": "L0",
+  "samples": 111,
+  "arms": [],
+  "ratio_original_over_candidate": {"value": null, "interval": null, "interval_kind": "none"},
+  "ratio_previous_over_candidate": {"value": null, "interval": null, "interval_kind": "none"},
+  "outputs_identical": null,
+  "run_report": "research/lit2026_w10_s5_coppersmith_20261011/reports/run-20261011T2118Z/report.pdf",
+  "note": "delta*(S3) = 1/6 (closure optimum = best box for l <= 12, 0.154789 at l = 12); finite 32-bit: l = 1 all trials to 0.10, l = 2 all trials to 0.12, matching repo probes B/C. Engine reproduces univariate l/(dl+d-1) (30/30) and Boneh-Durfee x+y lattice (0.28466 at l = 2000 vs 0.28475)."
+}

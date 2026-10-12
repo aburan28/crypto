@@ -1,0 +1,15 @@
+warning: fields `p` and `t` are never read
+  --> review.rs:12:5
+   |
+11 | struct Row {
+   |        --- fields in this struct
+12 |     p: i128,
+   |     ^
+13 |     t: i128,
+   |     ^
+   |
+   = note: `Row` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: 1 warning emitted
+

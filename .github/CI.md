@@ -20,12 +20,18 @@ the entire historical research corpus. Failures and timeouts remain failures.
   run, including 320 column-sweep solves. It also performs dedicated historical
   replays before replaying those sessions again in the corpus loop.
 
-The refreshed default branch has 350 workflows. Its newer decision to retire
-99 completed-study gates from automatic events is preserved: those studies
-remain available through manual dispatch. The new weak-curve conjecture gate
-retains its census replay, tests, Lean proof and axiom checks, with a 25-minute
-PR budget and its original 60-minute manual budget. Its sparse checkout includes
-the fixed census inputs and SHA-256 source that its standalone reviewer uses.
+The integration branch has 352 workflows. Its newer decision to retire
+99 completed-study gates from automatic events is preserved. This does not
+retire the n53 target-cyclic rank hash-only custody check: it remains an active
+PR gate on its listed inputs, while only the separate outcome job requires the
+`run-n53-rotation-once` label. Its historical preflight uses an isolated view
+with the original nested lock bytes from the released commit and checks that
+the live nested lock still matches the current root lock before substitution.
+The labeled outcome retains its original exact-current-source and head guards;
+the historical view does not authorize a measurement. The weak-curve conjecture
+gate keeps its census replay, tests, Lean proof and axiom checks. Its original
+60-minute Lean budget remains bound to its frozen workflow digest, as does the
+separate 60-minute `proofs` job in `weak-curve-lean.yml`.
 
 ## Scope contract
 
@@ -68,7 +74,8 @@ embedded-data changes cannot disappear behind an incomplete trigger allowlist.
 ## Budgets and evidence coverage
 
 Every job eligible for an ordinary PR or merge group has an explicit execution
-budget of at most 25 minutes. Longer scientific budgets remain available on
+budget of at most 25 minutes, except the two exact frozen Lean proof workflows
+described below. Longer scientific budgets remain available on
 manual dispatch, scheduled work and main-branch recording, and explicitly
 requested one-shot label experiments retain their existing limits. Historical
 campaigns disabled by their owners remain disabled.
@@ -86,19 +93,27 @@ Historical replay manifests that bind workflow metadata retain their original
 bytes and hashes. Their historical custody checks use an isolated view with the
 exact frozen workflow revision. All other source and evidence comes from the
 current checkout, and native source tests still run there. Existing scientific
-source drift and a historical verifier syntax
-error were observed in hosted checks and remain visible failures. Local CI
-metadata validation does not establish that every hosted scientific job passes.
-The rotated-admission custody command passes its historical replay, original
-negative controls and current-interface check. The n53 custody check now passes
-the workflow freeze, then retains the original preflight rejection of historical
-Cargo-lock digest drift.
+source drift and a historical verifier syntax error remain visible failures.
+The rotated-admission custody command passes its historical replay, negative
+controls and current-interface check. The n53 hash-only custody command checks
+the original workflow and source freeze, historical lock-bound preflight,
+negative controls and optional archive. Its separate label-gated outcome still
+rejects changed released sources, including the current producer drift.
 
 The event-aware [budget checker](scripts/check-pr-budgets.py) rejects missing,
 unknown or over-budget timeouts on PR/merge-group jobs, accounting for job
-conditions and dependencies. Its fixtures keep labeled/manual/disabled work
-separate from routine validation. This is a runtime contract, not a reason to
-silence errors or alter scientific workloads.
+conditions and dependencies. Its fixtures preserve the separate rules for labeled, manual and disabled work.
+
+The only exceptions are the `proofs` job in `weak-curve-lean.yml` and the
+`evidence` job in `weak-curve-conjectures.yml`, each with a 60-minute timeout
+included in its Lean proof evidence seal. These frozen jobs perform a cold
+dependency build and fresh kernel replay; their hosted cold runtimes have not
+been measured. The checker allows each only while its workflow bytes match the
+hash in its evidence seal and that seal retains its reviewed hash. Any change
+to those bytes or the job identity makes the exception fail closed. Updating
+either timeout requires new proof evidence and a separate review. These
+exceptions do not permit other long jobs or justify altering scientific
+workloads.
 
 | Lane | Execution budget |
 | --- | --- |

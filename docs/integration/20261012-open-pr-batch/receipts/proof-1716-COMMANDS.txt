@@ -1,0 +1,32 @@
+Proof directory: /workspace/crypto-integration/research/weak_curve_conjectures_20261012
+Revision captured in revision receipt before checks.
+source /workspace/integration-env.sh
+sha256sum -c EVIDENCE_SHA256SUMS
+jq -e -f validate.jq conjectures.json
+rustc --edition=2021 review.rs -o /tmp/crypto-weak-conjectures-validation/review
+rustc --edition=2021 --test review.rs -o /tmp/crypto-weak-conjectures-validation/review-tests
+/tmp/crypto-weak-conjectures-validation/review-tests
+
+Native replay working directory:
+/tmp/crypto-weak-conjectures-validation/replay/weak_curve_conjectures_20261012
+Its sibling iso1_weak_classes_20261007/two_branch_20261009 is a symlink to
+/workspace/crypto-integration/research/iso1_weak_classes_20261007/two_branch_20261009
+The unmodified native review reads its fixed input paths and writes all three
+outputs in the temporary working directory. Frozen outputs are not overwritten.
+/tmp/crypto-weak-conjectures-validation/review
+cmp each generated REVIEW.tsv, FALSIFIERS.tsv, INPUTS_SHA256.tsv against the
+corresponding existing proof-directory file. All generated outputs are retained.
+sha256sum each of the seven CSV paths from generated INPUTS_SHA256.tsv;
+reformat to identical TSV and compare independent-input-hashes.tsv byte-for-byte.
+
+Lean checks use ELAN_HOME=/workspace/lean-validation-tooling/elan and
+PATH=/workspace/lean-validation-tooling/elan/bin:$PATH with inherited TLS/proxy.
+lake build
+lake env leanchecker --fresh --verbose CensusCounting
+lake env lean AxiomAudit.lean
+Build completed before kernel replay and axiom audit began.
+No tracked proof, workflow, seal, census row, historical receipt, or result edit.
+
+Review validates imported labelled-table consistency/completeness and its finite
+counterexamples. Counting proofs establish aggregation semantics. Geometry label
+correctness retains parent evidence; seven research hypotheses remain open.

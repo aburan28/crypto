@@ -86,19 +86,19 @@
 | icv1-f2m27-t12543-569dca8b/mitm_m2_negfold | 24.41 | 2 | 2 | 526 | 0.001 | 0.037 | 26.795 | 3344 | 26.795 | 1.566 | 7.778e6 | 290286 |  |
 | icv1-f2m41-tm2308219-7f48b14a/koblitz_one_target | 39.00 | 82 | 3 | 6560 | — | 0.343 | 2.918 | 81880 | 2.918 | 0 | 8.281e6 | 2.838e6 |  |
 | icv1-f2m41-tm2308219-7f48b14a/koblitz_collection_m3_aimed | 39.00 | 82 | 3 | 6560 | 0.009 | 0.343 | 2.918 | 81880 | 2.918 | 0 | 5.713e6 | 1.958e6 |  |
-| K_1 / GF(2^17)/mitm_m2_signed_orbit_columns | 16.00 | 34 | 2 | 239 | — | 0.883 | 1.133 | 43.904 | 1.133 | 0 | 29594 | 26117 |  |
-| K_1 / GF(2^17)/mitm_m2_abscissa_columns_control | 16.00 | 34 | 2 | 239 | — | 0.883 | 1.133 | 43.904 | 1.133 | 0 | 38733 | 34183 |  |
-| K_1 / GF(2^17)/mitm_m2_signed_orbit_columns_negfold | 16.00 | 34 | 2 | 239 | — | 0.883 | 1.133 | 43.904 | 1.133 | 0 | 15444 | 13630 |  |
-| K_1 / GF(2^17)/mitm_m2_signed_orbit_columns_frobfold | 16.00 | 34 | 2 | 239 | — | 0.883 | 1.133 | 43.904 | 1.133 | 0 | 2524 | 2227 |  |
-| K_1 / GF(2^17)/mitm_m2_signed_orbit_columns_frobfold_walk | 16.00 | 34 | 2 | 239 | — | 0.883 | 1.133 | 43.904 | 1.133 | 0 | 2323 | 2050 |  |
-| K_1 / GF(2^19)/mitm_m2_signed_orbit_columns_frobfold_walk | 18.00 | 38 | 2 | 305 | — | 0.358 | 2.791 | 83.057 | 2.791 | 0 | 3063 | 1098 |  |
-| K_1 / GF(2^23)/mitm_m2_signed_orbit_columns_frobfold_walk | 22.00 | 46 | 2 | 875 | — | 0.183 | 5.460 | 302 | 5.460 | 0 | 12685 | 2324 |  |
-| K_0 / GF(2^41)/mitm_m3_signed_orbit_columns | 39.00 | 82 | 3 | 5003 | — | 0.152 | 6.577 | 81880 | 6.577 | 0 | 4.362e7 | 6.632e6 |  |
-| K_0 / GF(2^41)/mitm_m3_signed_orbit_columns_negfold | 39.00 | 82 | 3 | 5003 | — | 0.152 | 6.577 | 81880 | 6.577 | 0 | 3.736e7 | 5.680e6 |  |
-| K_0 / GF(2^41)/mitm_m3_signed_orbit_columns_frobfold | 39.00 | 82 | 3 | 5003 | — | 0.152 | 6.577 | 81880 | 6.577 | 0 | 3.348e7 | 5.091e6 |  |
-| K_0 / GF(2^41)/mitm_m3_signed_orbit_columns_frobfold_walk | 39.00 | 82 | 3 | 5003 | — | 0.152 | 6.577 | 81880 | 6.577 | 0 | 3.044e7 | 4.629e6 |  |
-| K_0 / GF(2^41)/mitm_m2_signed_orbit_columns_frobfold_walk | 39.00 | 82 | 2 | 5003 | — | 9.111e-5 | 10975 | 81880 | 10975 | 914 | 6.764e6 | 616 |  |
-| K_0 / GF(2^41)/mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 39.00 | 82 | 2 | 20501 | — | 0.002 | 654 | 81880 | 654 | 53.827 | 3.793e6 | 5800 |  |
+| icv1-f2m17-tm101-00378d4e/mitm_m2_signed_orbit_columns | 16.00 | 34 | 2 | 239 | — | 0.883 | 1.133 | 43.904 | 1.133 | 0 | 29594 | 26117 |  |
+| icv1-f2m17-tm101-00378d4e/mitm_m2_abscissa_columns_control | 16.00 | 34 | 2 | 239 | — | 0.883 | 1.133 | 43.904 | 1.133 | 0 | 38733 | 34183 |  |
+| icv1-f2m17-tm101-00378d4e/mitm_m2_signed_orbit_columns_negfold | 16.00 | 34 | 2 | 239 | — | 0.883 | 1.133 | 43.904 | 1.133 | 0 | 15444 | 13630 |  |
+| icv1-f2m17-tm101-00378d4e/mitm_m2_signed_orbit_columns_frobfold | 16.00 | 34 | 2 | 239 | — | 0.883 | 1.133 | 43.904 | 1.133 | 0 | 2524 | 2227 |  |
+| icv1-f2m17-tm101-00378d4e/mitm_m2_signed_orbit_columns_frobfold_walk | 16.00 | 34 | 2 | 239 | — | 0.883 | 1.133 | 43.904 | 1.133 | 0 | 2323 | 2050 |  |
+| icv1-f2m19-tm797-9c54981b/mitm_m2_signed_orbit_columns_frobfold_walk | 18.00 | 38 | 2 | 305 | — | 0.358 | 2.791 | 83.057 | 2.791 | 0 | 3063 | 1098 |  |
+| icv1-f2m23-tm5197-1f85e9e1/mitm_m2_signed_orbit_columns_frobfold_walk | 22.00 | 46 | 2 | 875 | — | 0.183 | 5.460 | 302 | 5.460 | 0 | 12685 | 2324 |  |
+| icv1-f2m41-tm2308219-7f48b14a/mitm_m3_signed_orbit_columns | 39.00 | 82 | 3 | 5003 | — | 0.152 | 6.577 | 81880 | 6.577 | 0 | 4.362e7 | 6.632e6 |  |
+| icv1-f2m41-tm2308219-7f48b14a/mitm_m3_signed_orbit_columns_negfold | 39.00 | 82 | 3 | 5003 | — | 0.152 | 6.577 | 81880 | 6.577 | 0 | 3.736e7 | 5.680e6 |  |
+| icv1-f2m41-tm2308219-7f48b14a/mitm_m3_signed_orbit_columns_frobfold | 39.00 | 82 | 3 | 5003 | — | 0.152 | 6.577 | 81880 | 6.577 | 0 | 3.348e7 | 5.091e6 |  |
+| icv1-f2m41-tm2308219-7f48b14a/mitm_m3_signed_orbit_columns_frobfold_walk | 39.00 | 82 | 3 | 5003 | — | 0.152 | 6.577 | 81880 | 6.577 | 0 | 3.044e7 | 4.629e6 |  |
+| icv1-f2m41-tm2308219-7f48b14a/mitm_m2_signed_orbit_columns_frobfold_walk | 39.00 | 82 | 2 | 5003 | — | 9.111e-5 | 10975 | 81880 | 10975 | 914 | 6.764e6 | 616 |  |
+| icv1-f2m41-tm2308219-7f48b14a/mitm_m2_signed_orbit_columns_frobfold_walk_balanced | 39.00 | 82 | 2 | 20501 | — | 0.002 | 654 | 81880 | 654 | 53.827 | 3.793e6 | 5800 |  |
 
 ### Compact-orbit ladder (4-sum relations; probes are S3 solve + root-table lookup, not group operations)
 
@@ -163,24 +163,24 @@ At the rank-stage mean probes per relation, S·T/(r/A) is: compact-n37 1.094, co
 
 | source | curve | log2 r | A | k | slope | 95% bootstrap | Kuhn–Struik law slope (same k) | all verified |
 |:--|:--|--:|--:|:--|--:|:--|--:|:--|
-| committed records | K_0 / GF(2^41) | 39.00 | 82 | [1, 4, 16, 32] | 0.547 | [0.487, 0.622] | 0.533 | true (ledger §19.3) |
-| committed records | K_0 / GF(2^53) | 44.26 | 106 | [1, 4, 16, 32] | 0.585 | [0.504, 0.671] | 0.533 | true (ledger §19.3) |
-| committed records | K_0 / GF(2^61) | 47.21 | 122 | [1, 32] | 0.521 | [0.416, 0.681] | 0.534 | true (ledger §19.3) |
+| committed records | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 82 | [1, 4, 16, 32] | 0.547 | [0.487, 0.622] | 0.533 | true (ledger §19.3) |
+| committed records | icv1-f2m53-tm56619371-dac20a85 | 44.26 | 106 | [1, 4, 16, 32] | 0.585 | [0.504, 0.671] | 0.533 | true (ledger §19.3) |
+| committed records | icv1-f2m61-t158598901-ab42b6c5 | 47.21 | 122 | [1, 32] | 0.521 | [0.416, 0.681] | 0.534 | true (ledger §19.3) |
 | fresh measurement | prime-floor q=68723001073 N=68723001023 (ell=120283, t=51) | 36.00 | 2 | [1, 2, 4, 8, 16] | 0.526 | [0.453, 0.608] | 0.539 | true |
 | fresh measurement | icv1-f2m41-tm2308219-7f48b14a | 39.00 | 82 | [1, 2, 4, 8, 16] | 0.561 | [0.500, 0.637] | 0.539 | true |
 
 | source | curve | k | batches | mean total gae | total / √(k r/A) | per target over k=1 | batch law |
 |:--|:--|--:|--:|--:|--:|--:|--:|
-| records | K_0 / GF(2^41) | 1 | 16 | 105937 | 1.294 | 1.000 | 1.000 |
-| records | K_0 / GF(2^41) | 4 | 16 | 219965 | 1.343 | 0.519 | 0.547 |
-| records | K_0 / GF(2^41) | 16 | 16 | 469266 | 1.433 | 0.277 | 0.280 |
-| records | K_0 / GF(2^41) | 32 | 16 | 710725 | 1.534 | 0.210 | 0.199 |
-| records | K_0 / GF(2^53) | 1 | 16 | 482740 | 1.083 | 1.000 | 1.000 |
-| records | K_0 / GF(2^53) | 4 | 16 | 1.149e6 | 1.290 | 0.595 | 0.547 |
-| records | K_0 / GF(2^53) | 16 | 16 | 2.496e6 | 1.400 | 0.323 | 0.280 |
-| records | K_0 / GF(2^53) | 32 | 16 | 3.693e6 | 1.465 | 0.239 | 0.199 |
-| records | K_0 / GF(2^61) | 1 | 8 | 1.469e6 | 1.271 | 1.000 | 1.000 |
-| records | K_0 / GF(2^61) | 32 | 8 | 8.941e6 | 1.368 | 0.190 | 0.199 |
+| records | icv1-f2m41-tm2308219-7f48b14a | 1 | 16 | 105937 | 1.294 | 1.000 | 1.000 |
+| records | icv1-f2m41-tm2308219-7f48b14a | 4 | 16 | 219965 | 1.343 | 0.519 | 0.547 |
+| records | icv1-f2m41-tm2308219-7f48b14a | 16 | 16 | 469266 | 1.433 | 0.277 | 0.280 |
+| records | icv1-f2m41-tm2308219-7f48b14a | 32 | 16 | 710725 | 1.534 | 0.210 | 0.199 |
+| records | icv1-f2m53-tm56619371-dac20a85 | 1 | 16 | 482740 | 1.083 | 1.000 | 1.000 |
+| records | icv1-f2m53-tm56619371-dac20a85 | 4 | 16 | 1.149e6 | 1.290 | 0.595 | 0.547 |
+| records | icv1-f2m53-tm56619371-dac20a85 | 16 | 16 | 2.496e6 | 1.400 | 0.323 | 0.280 |
+| records | icv1-f2m53-tm56619371-dac20a85 | 32 | 16 | 3.693e6 | 1.465 | 0.239 | 0.199 |
+| records | icv1-f2m61-t158598901-ab42b6c5 | 1 | 8 | 1.469e6 | 1.271 | 1.000 | 1.000 |
+| records | icv1-f2m61-t158598901-ab42b6c5 | 32 | 8 | 8.941e6 | 1.368 | 0.190 | 0.199 |
 | fresh | prime-floor q=68723001073 N=68723001023 (ell=120283, t=51) | 1 | 24 | 255072 | 1.376 | 1.000 | 1.000 |
 | fresh | prime-floor q=68723001073 N=68723001023 (ell=120283, t=51) | 2 | 24 | 383172 | 1.462 | 0.751 | 0.750 |
 | fresh | prime-floor q=68723001073 N=68723001023 (ell=120283, t=51) | 4 | 24 | 554337 | 1.495 | 0.543 | 0.547 |

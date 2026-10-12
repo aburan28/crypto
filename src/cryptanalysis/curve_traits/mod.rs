@@ -1286,41 +1286,32 @@ impl TraitFile {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn coordinate_models_keep_exact_fields_and_order_checks_without_certificates() {
+    fn coordinate_models_keep_exact_fields_and_available_order_certificates() {
         use super::*;
-        for (text, q, order, expected_status) in [
-            (
-                r#"{"field":"fp-101","form":"B*y^2=x^3+A*x^2+x","p":"101","A":"3","B":"1"}"#,
-                101u64,
-                96u64,
-                Status::Proved,
-            ),
-            (
-                r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","modulus":["2","0"],"a":["1","0"],"b":["1","0"]}"#,
-                1369u64,
-                1369u64,
-                Status::NotEvaluated,
-            ),
-        ] {
-            let (model, _) = parse_model(text).unwrap();
-            assert_eq!(model.q(), BigUint::from(q));
-            assert_eq!(
-                certify::check_order(&model, &BigUint::from(order), &[])
-                    .unwrap()
-                    .0,
-                expected_status
-            );
-            if expected_status == Status::Proved {
-                // Montgomery conversion is supported now: count its
-                // order without a generator certificate, and reject the
-                // old fixture's mistaken use of field size as order.
-                assert!(certify::check_order(&model, &BigUint::from(q), &[]).is_err());
-            } else {
-                let mut incomplete: Value = serde_json::from_str(text).unwrap();
-                incomplete.as_object_mut().unwrap().remove("modulus");
-                assert!(parse_model(&incomplete.to_string()).is_err());
-            }
-        }
+        let (montgomery, _) = parse_model(
+            r#"{"field":"fp-101","form":"B*y^2=x^3+A*x^2+x","p":"101","A":"3","B":"1"}"#,
+        )
+        .unwrap();
+        assert_eq!(montgomery.q(), BigUint::from(101u64));
+        // The prime-field Montgomery adapter now supports exact counting;
+        // field size and curve order are distinct quantities.
+        assert_eq!(
+            certify::check_order(&montgomery, &BigUint::from(96u64), &[]).unwrap(),
+            (Status::Proved, "exhaustive point count")
+        );
+        assert!(certify::check_order(&montgomery, &BigUint::from(101u64), &[]).is_err());
+
+        let (extension, _) = parse_model(
+            r#"{"field":"fpk-37-2-example","form":"y^2=x^3+a*x+b","p":"37","k":"2","modulus":["2","0"],"a":["1","0"],"b":["1","0"]}"#,
+        )
+        .unwrap();
+        assert_eq!(extension.q(), BigUint::from(1369u64));
+        assert_eq!(
+            certify::check_order(&extension, &BigUint::from(1369u64), &[])
+                .unwrap()
+                .0,
+            Status::NotEvaluated
+        );
     }
     use super::*;
 
