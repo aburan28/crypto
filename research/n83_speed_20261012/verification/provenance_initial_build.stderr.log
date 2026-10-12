@@ -1,0 +1,19 @@
+/workspace/repos/crypto/research/n83_speed_20261012/verification/verify_file_provenance.cpp: In function ‘int main(int, char**)’:
+/workspace/repos/crypto/research/n83_speed_20261012/verification/verify_file_provenance.cpp:10:2: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+   10 |  for(const auto&key:{"all_answer_count_gate","stage_count_gate","fixture_count_gate","recorded_arithmetic_match_gate"})require(truth(receipt.at(key)),"Independent answer completeness gate failed");require(num(receipt.at("independent_answer_replays"))==139&&num(receipt.at("observed_launches"))==139&&num(receipt.at("producer_receipts"))==139&&num(receipt.at("invalid_rows"))==0,"Independent answer receipt count failure");
+      |  ^~~
+/workspace/repos/crypto/research/n83_speed_20261012/verification/verify_file_provenance.cpp:10:198: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+   10 |  for(const auto&key:{"all_answer_count_gate","stage_count_gate","fixture_count_gate","recorded_arithmetic_match_gate"})require(truth(receipt.at(key)),"Independent answer completeness gate failed");require(num(receipt.at("independent_answer_replays"))==139&&num(receipt.at("observed_launches"))==139&&num(receipt.at("producer_receipts"))==139&&num(receipt.at("invalid_rows"))==0,"Independent answer receipt count failure");
+      |                                                                                                                                                                                                      ^~~~~~~
+/workspace/repos/crypto/research/n83_speed_20261012/verification/verify_file_provenance.cpp:38:3: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+   38 |   for(const auto&entry:manifest.at("selection_input_sha256").array)match(entry.at("path").scalar,entry.at("sha256").scalar);match(protocol.at("validation_sidecar").scalar,provenance.at("validation_sidecar_sha256").scalar);match(protocol.at("generator_receipt").scalar,provenance.at("generator_receipt_sha256").scalar);for(const auto&entry:provenance.at("fixtures_sha256").object)match(files::path(protocol.at("fixtures_dir").scalar)/(entry.first+".jsonl"),entry.second.scalar);++stage_checks;
+      |   ^~~
+/workspace/repos/crypto/research/n83_speed_20261012/verification/verify_file_provenance.cpp:38:125: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+   38 |   for(const auto&entry:manifest.at("selection_input_sha256").array)match(entry.at("path").scalar,entry.at("sha256").scalar);match(protocol.at("validation_sidecar").scalar,provenance.at("validation_sidecar_sha256").scalar);match(protocol.at("generator_receipt").scalar,provenance.at("generator_receipt_sha256").scalar);for(const auto&entry:provenance.at("fixtures_sha256").object)match(files::path(protocol.at("fixtures_dir").scalar)/(entry.first+".jsonl"),entry.second.scalar);++stage_checks;
+      |                                                                                                                             ^~~~~
+/workspace/repos/crypto/research/n83_speed_20261012/verification/verify_file_provenance.cpp:42:2: warning: this ‘for’ clause does not guard... [-Wmisleading-indentation]
+   42 |  for(const auto&entry:files::recursive_directory_iterator(panel))if(entry.is_regular_file())hash(entry.path());hash(replay);
+      |  ^~~
+/workspace/repos/crypto/research/n83_speed_20261012/verification/verify_file_provenance.cpp:42:112: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+   42 |  for(const auto&entry:files::recursive_directory_iterator(panel))if(entry.is_regular_file())hash(entry.path());hash(replay);
+      |                                                                                                                ^~~~

@@ -1,0 +1,15 @@
+Working directory: /workspace/repos/crypto
+
+Environment for Cargo invocations:
+PATH=/workspace/n83_evaluation/toolchain/rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin:/usr/bin:/bin
+RUSTUP_HOME=/workspace/n83_evaluation/toolchain/rustup
+CARGO_HOME=/workspace/n83_evaluation/toolchain/cargo
+CARGO_TARGET_DIR=/workspace/n83_speed/analysis/build
+
+cargo generate-lockfile --offline --manifest-path research/n83_speed_20261012/analysis/Cargo.toml
+cargo fmt --manifest-path research/n83_speed_20261012/analysis/Cargo.toml
+cargo test --release --offline --locked --manifest-path research/n83_speed_20261012/analysis/Cargo.toml > research/n83_speed_20261012/analysis/test.log 2>&1
+cargo build --release --offline --locked --manifest-path research/n83_speed_20261012/analysis/Cargo.toml > research/n83_speed_20261012/analysis/build.log 2>&1
+/workspace/n83_speed/analysis/build/release/n83-speed-descriptive /workspace/repos/crypto/research/n83_speed_20261012/records/panel/holdout/records.jsonl /workspace/repos/crypto/research/n83_speed_20261012/analysis/descriptive_summary.json > research/n83_speed_20261012/analysis/run.log 2>&1
+
+All commands completed with exit status 0.

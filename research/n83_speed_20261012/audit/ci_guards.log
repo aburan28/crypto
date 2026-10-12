@@ -1,0 +1,5 @@
+'N83ScalarArithmetic.limb_product_expansion' depends on axioms: [propext]
+'N83ScalarArithmetic.barrett_residual_bounds' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N83ScalarArithmetic.barrett_one_correction' depends on axioms: [propext, Classical.choice, Quot.sound]
+'N83ScalarArithmetic.canonical_add_one_subtraction' depends on axioms: [propext, Quot.sound]
+PASS: local CI source and transitive-axiom guards

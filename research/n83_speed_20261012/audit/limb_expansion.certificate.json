@@ -1,0 +1,150 @@
+{
+  "schema": "identity.certificate/v1",
+  "id": "IDC1hc23ae1d80fc5fefa",
+  "statement": {
+    "name": "two-limb exact product expansion",
+    "source": "research/n83_speed_20261012/audit/ARITHMETIC_PROOF.md Proposition 1; elementary distributivity",
+    "variables": [
+      "a0",
+      "a1",
+      "b0",
+      "b1",
+      "w"
+    ],
+    "degree_bound": 4,
+    "lhs": {
+      "op": "mul",
+      "args": [
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "var",
+              "args": "a0"
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "w"
+                },
+                {
+                  "op": "var",
+                  "args": "a1"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "args": [
+            {
+              "op": "var",
+              "args": "b0"
+            },
+            {
+              "op": "mul",
+              "args": [
+                {
+                  "op": "var",
+                  "args": "w"
+                },
+                {
+                  "op": "var",
+                  "args": "b1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "rhs": {
+      "op": "add",
+      "args": [
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "a0"
+            },
+            {
+              "op": "var",
+              "args": "b0"
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "w"
+            },
+            {
+              "op": "add",
+              "args": [
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "a0"
+                    },
+                    {
+                      "op": "var",
+                      "args": "b1"
+                    }
+                  ]
+                },
+                {
+                  "op": "mul",
+                  "args": [
+                    {
+                      "op": "var",
+                      "args": "a1"
+                    },
+                    {
+                      "op": "var",
+                      "args": "b0"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mul",
+          "args": [
+            {
+              "op": "var",
+              "args": "w"
+            },
+            {
+              "op": "var",
+              "args": "w"
+            },
+            {
+              "op": "var",
+              "args": "a1"
+            },
+            {
+              "op": "var",
+              "args": "b1"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "modulus": 2305843009213693951,
+  "points": 64,
+  "seed": 202610126282,
+  "value_digest": "b08fcdfe891f85eec471a684c0c879950c11d1dc410606384bb1e03527a62009",
+  "independence": "Issued by independent speed-audit task from elementary distributivity, not copied from worker implementation; replayed by repository native certificate checker with 64 additional seed-separated points. This evaluated finite-field certificate does not prove integer overflow, Barrett quotient bounds, or end-to-end solver correctness.",
+  "proof": null
+}

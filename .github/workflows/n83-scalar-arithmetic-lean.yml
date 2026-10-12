@@ -1,0 +1,56 @@
+name: N83 scalar arithmetic Lean proofs
+
+on:
+  pull_request:
+    paths:
+      - 'research/n83_speed_20261012/audit/**'
+      - '.github/workflows/n83-scalar-arithmetic-lean.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/n83_speed_20261012/audit/**'
+      - '.github/workflows/n83-scalar-arithmetic-lean.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proofs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: research/n83_speed_20261012/audit
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject incomplete or bypassed proof sources
+        run: |
+          command -v rg >/dev/null
+          if rg -n '\b(sorry|admit|sorryAx|axiom|native_decide)\b|^#eval' ScalarArithmetic.lean AxiomAudit.lean; then
+            echo 'Incomplete proof or unverified evaluation is not permitted.'
+            exit 1
+          fi
+      - name: Build proofs and replay in a fresh kernel
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: research/n83_speed_20261012/audit
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: '--fresh --verbose ScalarArithmetic'
+      - name: Audit every theorem's transitive axioms
+        run: |
+          set -euo pipefail
+          lake env lean AxiomAudit.lean | tee /tmp/n83-scalar-axioms.log
+          test "$(rg -c 'depends on axioms:' /tmp/n83-scalar-axioms.log)" -eq 4
+          unexpected=$(sed -n 's/.*depends on axioms: \[\(.*\)\]/\1/p' /tmp/n83-scalar-axioms.log |
+            tr ',' '\n' | sed 's/ //g' |
+            rg -v '^$|^(propext|Classical.choice|Quot.sound)$' || true)
+          if test -n "$unexpected"; then
+            echo 'Unexpected theorem axioms:'
+            printf '%s\n' "$unexpected"
+            exit 1
+          fi

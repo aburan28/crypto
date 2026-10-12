@@ -1,6 +1,10 @@
 checks/** -whitespace
 records/** -whitespace
 reports/**/*.log -whitespace
+audit/*.log -whitespace
+audit/*.stdout -whitespace
+audit/*.stderr -whitespace
+analysis/*.log -whitespace
 *.pdf binary
 *.png binary
 *.jpg binary

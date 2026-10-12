@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="670" viewBox="0 0 1100 670">
+  <rect width="1100" height="670" fill="#f5f7fa"/>
+  <style>text{font-family:DejaVu Sans,sans-serif;fill:#152638}.title{font-size:28px;font-weight:bold}.label{font-size:20px;font-weight:bold}.body{font-size:17px}.note{font-size:15px}.arrow{stroke:#44596d;stroke-width:3;fill:none}</style>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#44596d"/></marker></defs>
+  <text x="40" y="48" class="title">Exact scalar arithmetic: proof and implementation evidence</text>
+  <text x="40" y="78" class="body">Legacy degree-83 subgroup r = 8569786107849059 · canonical inputs 0 ≤ a,b &lt; r</text>
+  <rect x="40" y="112" width="470" height="174" rx="12" fill="#d9ede2" stroke="#2b6a4c" stroke-width="2"/>
+  <text x="62" y="145" class="label">Checked Lean 4.34.1 statements</text>
+  <text x="62" y="179" class="body">Distributive two-limb product expansion</text>
+  <text x="62" y="207" class="body">μ = floor(B/m), q = floor(xμ/B), x &lt; B</text>
+  <text x="62" y="235" class="body">0 ≤ x − qm &lt; 2m; one correction = x mod m</text>
+  <text x="62" y="263" class="body">Canonical addition needs one subtraction</text>
+  <rect x="590" y="112" width="470" height="174" rx="12" fill="#fff0cf" stroke="#a37723" stroke-width="2"/>
+  <text x="612" y="145" class="label">Written machine-arithmetic bridges</text>
+  <text x="612" y="179" class="body">Four 64-bit products reconstruct high128</text>
+  <text x="612" y="207" class="body">μ computed from 2¹²⁸ − 1 without overflow</text>
+  <text x="612" y="235" class="body">u128 products / residuals / final u64 casts</text>
+  <text x="612" y="263" class="body">Carry-aware wrapping subtraction</text>
+  <path d="M510 199 L585 199" class="arrow" marker-end="url(#arrow)"/>
+  <rect x="40" y="340" width="470" height="148" rx="12" fill="#e1ebf4" stroke="#4d7093" stroke-width="2"/>
+  <text x="62" y="375" class="label">Independent native arithmetic checks</text>
+  <text x="62" y="409" class="body">GMP high product and reciprocal oracle</text>
+  <text x="62" y="437" class="body">100,049 high128 checks; 1,023 moduli</text>
+  <text x="62" y="465" class="body">1,048,575 multiply/add checks; finite scope</text>
+  <rect x="590" y="340" width="470" height="148" rx="12" fill="#e1ebf4" stroke="#4d7093" stroke-width="2"/>
+  <text x="612" y="375" class="label">Worker and campaign checks</text>
+  <text x="612" y="409" class="body">UniformInt sampling-stream equality</text>
+  <text x="612" y="437" class="body">Answers, exported counters and charges</text>
+  <text x="612" y="465" class="body">Fresh one-target solves; external replay</text>
+  <path d="M825 288 L825 332" class="arrow" marker-end="url(#arrow)"/>
+  <path d="M510 415 L582 415" class="arrow" marker-end="url(#arrow)"/>
+  <rect x="40" y="535" width="1020" height="100" rx="10" fill="#ffffff" stroke="#ccd5df"/>
+  <text x="60" y="565" class="body">Green: checked mathematical statements. Amber: manual word-model bridges.</text>
+  <text x="60" y="591" class="body">Blue: finite native checks. No formal verification of the compiled Rust solver or timing claim.</text>
+  <text x="60" y="618" class="note">Sources: ARITHMETIC_PROOF.md · PROOF_MAP.md · ScalarArithmetic.lean · cpp_check.json · final replay receipt</text>
+</svg>

@@ -1,0 +1,458 @@
+{
+  "configs": {
+    "barrett-L64-DP6-E0": {
+      "backend": "fold",
+      "dp_bits": 6,
+      "escape_fruitless": false,
+      "lanes": 64,
+      "scalar_kernel": "barrett",
+      "step_cap_factor": 2000
+    },
+    "reference-L64-DP6-E0": {
+      "backend": "fold",
+      "dp_bits": 6,
+      "escape_fruitless": false,
+      "lanes": 64,
+      "scalar_kernel": "reference",
+      "step_cap_factor": 2000
+    }
+  },
+  "frozen_before_launch_epoch_ms": 1791819864901,
+  "full_block_only_no_adaptive_stopping": true,
+  "ordered_runs": [
+    {
+      "arm": "reference-L64-DP6-E0",
+      "candidate_id": "reference-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "reference",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/reference-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A01-reference-L64-DP6-E0",
+      "run_id": "A01-reference-L64-DP6-E0",
+      "seed": 202610126211,
+      "target_id": "training_1"
+    },
+    {
+      "arm": "barrett-L64-DP6-E0",
+      "candidate_id": "barrett-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "barrett",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/barrett-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A01-barrett-L64-DP6-E0",
+      "run_id": "A01-barrett-L64-DP6-E0",
+      "seed": 202610126211,
+      "target_id": "training_1"
+    },
+    {
+      "arm": "barrett-L64-DP6-E0",
+      "candidate_id": "barrett-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "barrett",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/barrett-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A02-barrett-L64-DP6-E0",
+      "run_id": "A02-barrett-L64-DP6-E0",
+      "seed": 202610126212,
+      "target_id": "training_1"
+    },
+    {
+      "arm": "reference-L64-DP6-E0",
+      "candidate_id": "reference-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "reference",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/reference-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A02-reference-L64-DP6-E0",
+      "run_id": "A02-reference-L64-DP6-E0",
+      "seed": 202610126212,
+      "target_id": "training_1"
+    },
+    {
+      "arm": "reference-L64-DP6-E0",
+      "candidate_id": "reference-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "reference",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/reference-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A03-reference-L64-DP6-E0",
+      "run_id": "A03-reference-L64-DP6-E0",
+      "seed": 202610126213,
+      "target_id": "training_1"
+    },
+    {
+      "arm": "barrett-L64-DP6-E0",
+      "candidate_id": "barrett-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "barrett",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/barrett-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A03-barrett-L64-DP6-E0",
+      "run_id": "A03-barrett-L64-DP6-E0",
+      "seed": 202610126213,
+      "target_id": "training_1"
+    },
+    {
+      "arm": "barrett-L64-DP6-E0",
+      "candidate_id": "barrett-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "barrett",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/barrett-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A04-barrett-L64-DP6-E0",
+      "run_id": "A04-barrett-L64-DP6-E0",
+      "seed": 202610126214,
+      "target_id": "training_2"
+    },
+    {
+      "arm": "reference-L64-DP6-E0",
+      "candidate_id": "reference-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "reference",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/reference-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A04-reference-L64-DP6-E0",
+      "run_id": "A04-reference-L64-DP6-E0",
+      "seed": 202610126214,
+      "target_id": "training_2"
+    },
+    {
+      "arm": "reference-L64-DP6-E0",
+      "candidate_id": "reference-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "reference",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/reference-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A05-reference-L64-DP6-E0",
+      "run_id": "A05-reference-L64-DP6-E0",
+      "seed": 202610126215,
+      "target_id": "training_2"
+    },
+    {
+      "arm": "barrett-L64-DP6-E0",
+      "candidate_id": "barrett-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "barrett",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/barrett-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A05-barrett-L64-DP6-E0",
+      "run_id": "A05-barrett-L64-DP6-E0",
+      "seed": 202610126215,
+      "target_id": "training_2"
+    },
+    {
+      "arm": "barrett-L64-DP6-E0",
+      "candidate_id": "barrett-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "barrett",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/barrett-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A06-barrett-L64-DP6-E0",
+      "run_id": "A06-barrett-L64-DP6-E0",
+      "seed": 202610126216,
+      "target_id": "training_2"
+    },
+    {
+      "arm": "reference-L64-DP6-E0",
+      "candidate_id": "reference-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "reference",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/reference-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A06-reference-L64-DP6-E0",
+      "run_id": "A06-reference-L64-DP6-E0",
+      "seed": 202610126216,
+      "target_id": "training_2"
+    },
+    {
+      "arm": "reference-L64-DP6-E0",
+      "candidate_id": "reference-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "reference",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/reference-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A07-reference-L64-DP6-E0",
+      "run_id": "A07-reference-L64-DP6-E0",
+      "seed": 202610126217,
+      "target_id": "training_3"
+    },
+    {
+      "arm": "barrett-L64-DP6-E0",
+      "candidate_id": "barrett-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "barrett",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/barrett-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A07-barrett-L64-DP6-E0",
+      "run_id": "A07-barrett-L64-DP6-E0",
+      "seed": 202610126217,
+      "target_id": "training_3"
+    },
+    {
+      "arm": "barrett-L64-DP6-E0",
+      "candidate_id": "barrett-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "barrett",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/barrett-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A08-barrett-L64-DP6-E0",
+      "run_id": "A08-barrett-L64-DP6-E0",
+      "seed": 202610126218,
+      "target_id": "training_3"
+    },
+    {
+      "arm": "reference-L64-DP6-E0",
+      "candidate_id": "reference-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "reference",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/reference-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A08-reference-L64-DP6-E0",
+      "run_id": "A08-reference-L64-DP6-E0",
+      "seed": 202610126218,
+      "target_id": "training_3"
+    },
+    {
+      "arm": "reference-L64-DP6-E0",
+      "candidate_id": "reference-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "reference",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/reference-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A09-reference-L64-DP6-E0",
+      "run_id": "A09-reference-L64-DP6-E0",
+      "seed": 202610126219,
+      "target_id": "training_3"
+    },
+    {
+      "arm": "barrett-L64-DP6-E0",
+      "candidate_id": "barrett-L64-DP6-E0",
+      "config": {
+        "backend": "fold",
+        "dp_bits": 6,
+        "escape_fruitless": false,
+        "lanes": 64,
+        "scalar_kernel": "barrett",
+        "step_cap_factor": 2000
+      },
+      "config_file": "/workspace/n83_speed/panel/arithmetic/configs/barrett-L64-DP6-E0.json",
+      "out_dir": "/workspace/n83_speed/panel/arithmetic/runs/A09-barrett-L64-DP6-E0",
+      "run_id": "A09-barrett-L64-DP6-E0",
+      "seed": 202610126219,
+      "target_id": "training_3"
+    }
+  ],
+  "planned_launches": 18,
+  "resource_envelope": {
+    "cpu": 3,
+    "memory_bytes": 12884901888,
+    "rho_timeout_s": 60
+  },
+  "schema": "n83.speed-stage/v1",
+  "selection_input_sha256": [],
+  "selection_rule": "all9verified uncapped completions; wronganswer rejects; arithmetic mean min(wall,60) primary; default wins if within2percent best; noeligible blocks nextstage",
+  "source_and_input_provenance": {
+    "compiled_source_sha256": {
+      "main": "52b08d3ba5b17e3f6fba644450be75d15e8bb01e654f8a7f2e12dd7eb993aa66",
+      "manifest": "5454a40d3031720dbe0ce50345c3654627ed7e2dd85c4ad5ee75c1ded91bcfff",
+      "monitor": "582caadc0c58170c159177014b4e153dc2abbe97245d2e3c9c0c09c350cb6158",
+      "statistics": "934d1d48dabdb1d95ba5d3ebc9df3bc541835909933c2c9d7b0c715ca90026c2"
+    },
+    "executable": "/workspace/n83_speed/frozen_binaries/runner",
+    "executable_sha256": "ad281db71f035d1e02a4dabbf023b3c2d77e23a99509d4d390b8fca3e8627227",
+    "fixture_points": [
+      {
+        "fixture_id": "training_1",
+        "point": [
+          "1563800431976168596679317",
+          "4800535333933919962178258"
+        ]
+      },
+      {
+        "fixture_id": "training_2",
+        "point": [
+          "5323029871610490893836245",
+          "2695261837233390436688162"
+        ]
+      },
+      {
+        "fixture_id": "training_3",
+        "point": [
+          "8904333729853189426324026",
+          "3957590849747353098536693"
+        ]
+      },
+      {
+        "fixture_id": "holdout_1",
+        "point": [
+          "2276293614448838520573184",
+          "278690618123076595657135"
+        ]
+      },
+      {
+        "fixture_id": "holdout_2",
+        "point": [
+          "8398981957426112200992979",
+          "6098614629622887843011800"
+        ]
+      },
+      {
+        "fixture_id": "holdout_3",
+        "point": [
+          "6759932551028364155812192",
+          "7561593030065598644097528"
+        ]
+      },
+      {
+        "fixture_id": "holdout_4",
+        "point": [
+          "6402116464022600190296435",
+          "1474536173002680095921696"
+        ]
+      },
+      {
+        "fixture_id": "holdout_5",
+        "point": [
+          "4664765639792684282339367",
+          "4811095748417114041312387"
+        ]
+      }
+    ],
+    "fixtures_dir": "/workspace/n83_speed/fixtures",
+    "fixtures_sha256": {
+      "holdout_1": "8cb893707f7eb480d1cd600436005d435f17687027eade3c39aa87ab459ae73d",
+      "holdout_2": "9435ef2c831fc45e84a6c3fa0896c81bdeea52ed87bf5ee4c229b896a67191d6",
+      "holdout_3": "1bb782d973d191738a568cb78d799390e3e41405ad1bc4744e7cfa25108076a1",
+      "holdout_4": "707a7312bb8c55466a9234cde36fa5e0eab478b3f2ba486545a9efd9b2afa795",
+      "holdout_5": "67f5d8d64bb4b12cb13d4d3f287f91283b7bd292258f84e83c01548c4ae2e0d3",
+      "training_1": "a0d1cb5c178dade9ec1ba1dd8b09733bcc20cbd684d0c9e618fd3dba33a67044",
+      "training_2": "2d4c6fd0aa29d7e7c2cbafc3ed207523d1586d1015e0a06335e4be8a4dc3d1c2",
+      "training_3": "881345d6ca022bf39819f7d1643119040a9353685f773bb7895d6266811ed993"
+    },
+    "fresh_host": {
+      "cpu_model": "model name\t: AMD EPYC 9V74 80-Core Processor",
+      "cpuinfo_sha256": "5940289b22354aafb7796b0fd748a2a712eb3e2c5ee4203a548efb2fa9dd5cdb",
+      "uname": "Linux 6fe2e0ea9fd7 6.18.44 #1 SMP Sat Sep 26 20:02:31 UTC 2026 x86_64 GNU/Linux",
+      "unix_epoch_ms": 1791819864931
+    },
+    "generator_receipt_sha256": "2b2a4987a5f93e751f5a28eb7856d31f8833a5b4d55f9baa92eb2c5ec427e0ae",
+    "monitor_delay": "Nominal0-5ms plus scheduling/poll-body; no strict bound under arbitrary scheduling",
+    "monitor_poll_ms": 5,
+    "previous_host_context": {
+      "address_space_limit_bytes": 12884901888,
+      "architecture": "x86_64",
+      "baseline_commit": "c62555b7a1746490dba707589d791669a20bb0d0",
+      "baseline_configuration": "fold-reference-L64-DP6-E0",
+      "cgroup_cpu_max": "400000 100000",
+      "cgroup_memory_max_bytes": 17179869184,
+      "common_operation_equivalent_S": null,
+      "compiler": "rustc 1.99.0 (b940084d7)",
+      "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+      "guest_hypervisor": "KVM",
+      "guest_logical_cpus": 5,
+      "hardware_kernel": "runtime pclmulqdq for both field backends and IC",
+      "independent_host_replication": false,
+      "lscpu_artifact": "/workspace/n83_speed/host_lscpu.json",
+      "physical_host_exclusivity": null,
+      "recorded_date_utc": "2026-10-12",
+      "reserved_cpu": 3,
+      "rho_release_profile": "Cargo default release, exact-scalar example only; no task-specific RUSTFLAGS",
+      "scalar_candidate": "exact integer reciprocal reduction and conditional modular addition",
+      "schema": "n83.speed-host-context/v1",
+      "worker_threads": 1
+    },
+    "previous_host_context_sha256": "4d181172bd4daa0877dea78145530ae44310c3f68e298a4e08305da2ee97d9ad",
+    "protocol_path": "/workspace/n83_speed/protocol.json",
+    "protocol_sha256": "f5aa7d7fe2e58ddcfb8177dcc9d9907f4c5aeb859cadea983448b872b1f05d7c",
+    "rho_binary": "/workspace/n83_speed/frozen_binaries/rho_speed",
+    "rho_binary_sha256": "997f6102564cd0ebc72ee46e17e834f3d5970ed129c86d9c56b9274d5405a2ec",
+    "scalar_sidecar_opened_by_parent_only": true,
+    "validation_sidecar_sha256": "2fda516c7c6277364a9a7adba84fdd58af1923e4138d1a80d62d2c40ca5cd17d"
+  },
+  "stage": "arithmetic"
+}

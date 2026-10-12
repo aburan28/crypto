@@ -1,0 +1,5 @@
+import ScalarArithmetic
+#print axioms N83ScalarArithmetic.limb_product_expansion
+#print axioms N83ScalarArithmetic.barrett_residual_bounds
+#print axioms N83ScalarArithmetic.barrett_one_correction
+#print axioms N83ScalarArithmetic.canonical_add_one_subtraction

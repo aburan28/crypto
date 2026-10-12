@@ -1,0 +1,18 @@
+   Compiling zmij v1.0.23
+   Compiling serde_core v1.0.229
+   Compiling serde_json v1.0.151
+   Compiling itoa v1.0.18
+   Compiling memchr v2.8.3
+   Compiling n83-speed-descriptive v0.1.0 (/workspace/repos/crypto/research/n83_speed_20261012/analysis)
+    Finished `release` profile [optimized] target(s) in 3.16s
+     Running unittests src/main.rs (/workspace/n83_speed/analysis/build/release/deps/n83_speed_descriptive-34871fc5164564c5)
+
+running 5 tests
+test tests::incomplete_panel_rejected ... ok
+test tests::even_median_averages_middle_pair ... ok
+test tests::odd_median_ignores_input_order ... ok
+test tests::absent_metric_rejected ... ok
+test tests::singleton_summary_retains_value ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

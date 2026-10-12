@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" viewBox="0 0 900 420">
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#40566b"/></marker></defs>
+  <rect width="900" height="420" fill="#ffffff"/>
+  <g font-family="DejaVu Sans,Arial,sans-serif" fill="#172b41">
+    <text x="30" y="36" font-size="23" font-weight="bold">All 139 public-target answers independently verified</text>
+    <text x="30" y="63" font-size="13">N83A1 exact-scalar-policy-20261012 · Exact legacy GF(2^83), a=1, r=8569786107849059</text>
+    <g fill="#e8f3fb" stroke="#49789c">
+      <rect x="30" y="92" width="195" height="80" rx="8"/>
+      <rect x="245" y="92" width="195" height="80" rx="8"/>
+      <rect x="460" y="92" width="195" height="80" rx="8"/>
+      <rect x="675" y="92" width="195" height="80" rx="8"/>
+    </g>
+    <text x="45" y="121" font-size="15" font-weight="bold">A/A noise floor</text>
+    <text x="45" y="148" font-size="18">10 of 10 answers</text>
+    <text x="260" y="121" font-size="15" font-weight="bold">Scalar arithmetic</text>
+    <text x="260" y="148" font-size="18">18 of 18 answers</text>
+    <text x="475" y="121" font-size="15" font-weight="bold">Training policies</text>
+    <text x="475" y="148" font-size="18">81 of 81 answers</text>
+    <text x="690" y="121" font-size="15" font-weight="bold">Fresh holdout</text>
+    <text x="690" y="148" font-size="18">30 of 30 answers</text>
+    <path d="M127,172 L127,196 L772,196 L772,172 M342,172 L342,196 M557,172 L557,196 M450,196 L450,210" fill="none" stroke="#40566b" stroke-width="2"/>
+    <path d="M450,210 L260,210 L260,217" fill="none" stroke="#40566b" stroke-width="2" marker-end="url(#arrow)"/>
+    <path d="M450,210 L660,210 L660,217" fill="none" stroke="#40566b" stroke-width="2" marker-end="url(#arrow)"/>
+    <rect x="70" y="222" width="380" height="109" rx="8" fill="#eaf5ed" stroke="#62866b"/>
+    <text x="85" y="250" font-size="16" font-weight="bold">Standalone C++ group replay</text>
+    <text x="85" y="276" font-size="14">Every returned d satisfies dG=Q</text>
+    <text x="85" y="300" font-size="13">0 invalid answers · 9 recorded kernel-pair matches</text>
+    <rect x="490" y="222" width="340" height="109" rx="8" fill="#fff5df" stroke="#a28c54"/>
+    <text x="505" y="250" font-size="16" font-weight="bold">File and metadata audit</text>
+    <text x="505" y="276" font-size="14">2,439 recorded hash comparisons</text>
+    <text x="505" y="300" font-size="13">455 bound files · 1,036 final file snapshots</text>
+    <text x="30" y="370" font-size="13">All count gates pass. Missing outputs, caps and wrong answers are retained and cannot satisfy these gates.</text>
+    <text x="30" y="395" font-size="12" fill="#506579">Sources: final_receipt.json and file_provenance_receipt.json. Correctness and byte binding; no independent timing replay.</text>
+  </g>
+</svg>

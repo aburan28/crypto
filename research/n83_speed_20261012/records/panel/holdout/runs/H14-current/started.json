@@ -1,0 +1,44 @@
+{
+  "argv": [
+    "/workspace/n83_speed/frozen_binaries/rho_speed",
+    "/workspace/n83_speed/fixtures/holdout_5.jsonl",
+    "202610126254",
+    "/workspace/n83_speed/panel/holdout/configs/reference-L64-DP6-E0.json",
+    "/workspace/n83_speed/panel/holdout/runs/H14-current/producer.json"
+  ],
+  "argv_existing_file_sha256": {
+    "/workspace/n83_speed/fixtures/holdout_5.jsonl": "67f5d8d64bb4b12cb13d4d3f287f91283b7bd292258f84e83c01548c4ae2e0d3",
+    "/workspace/n83_speed/panel/holdout/configs/reference-L64-DP6-E0.json": "b197d8f4ebd23ff8c41b82304b4f28a8f0ab73d627a3d82de545587aabea9c96"
+  },
+  "arm": "rho",
+  "binary_sha256": "997f6102564cd0ebc72ee46e17e834f3d5970ed129c86d9c56b9274d5405a2ec",
+  "cwd": "/workspace/repos/crypto",
+  "environment": {
+    "KIC_RANK_THREADS": "1",
+    "KIC_RHO_THREADS": "1",
+    "KIC_TARGET_THREADS": "1",
+    "KIC_THREADS": "1",
+    "LC_ALL": "C",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PATH": "/usr/bin:/bin",
+    "RAYON_NUM_THREADS": "1"
+  },
+  "resource_envelope": {
+    "address_space_limit_bytes": 12884901888,
+    "address_space_limit_mechanism": "RLIMIT_AS soft=hard",
+    "cpu_affinity": [
+      3
+    ],
+    "cpu_count": 1,
+    "online_target_threads": 1,
+    "rank_threads": 1,
+    "threads": 1,
+    "timeout_s": 60.0
+  },
+  "schema": "n83.process-start/v1",
+  "started_epoch_ms": 1791820283437,
+  "target_file": "/workspace/n83_speed/fixtures/holdout_5.jsonl",
+  "target_sha256": "67f5d8d64bb4b12cb13d4d3f287f91283b7bd292258f84e83c01548c4ae2e0d3"
+}
