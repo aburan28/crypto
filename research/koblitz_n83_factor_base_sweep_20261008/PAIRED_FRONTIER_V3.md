@@ -44,9 +44,12 @@ one or two residuals, SAT-CDCL, zero split bits, exact first-pair ordering,
 binary enumeration, one thread and full-width modular arithmetic. This is a
 source-availability classification. The worker produces at most a bounded
 partial-search observation; no tuple has a complete cold index-calculus
-runtime. K=600/K=2,048 has only archive/import and auditor-control evidence.
-K=1,182/K=2,048 has one capped natural public-target trial recorded as
-`UNKNOWN_search_cap`. Neither result ranks the bases.
+runtime. After this design was generated, K=600/K=2,048 gained one
+[audited natural public-target trial](verification/k600-mixed-orbit-first-2400-20261012/RESULT.md):
+it reached 5,000 conflicts with zero models or partials and
+`UNKNOWN_search_cap`. K=1,182/K=2,048 also has one capped natural public-target
+trial recorded as `UNKNOWN_search_cap`. These later receipts do not change the
+saved design's source-availability counts or rank the bases.
 
 For signed-Frobenius pairs only, a case also reports the conditional count
 `C(B+s-1,s) C(L+r-1,r)` of unordered point multisets, where `B=166K_small`,
@@ -77,7 +80,9 @@ source-available recipes, conditional support counts, null support for an
 incompatible closure and rejection of changed parent evidence. The saved
 design's SHA-256 is
 `f7b860c9a652154541c4e6cf7d52ad13bd5a7436a41d38855d206cde36d4b0ac`.
-No factor base was constructed or uploaded by this extension, and no SAT,
-rank, linear-algebra, individual-log, rho or total-runtime measurement was
-made. The stored K=600 and K=2,048 objects and their import receipts remain
-the exact inputs to the separately guarded empirical path.
+No factor base was constructed or uploaded by this design extension, and the
+generator made no SAT, rank, linear-algebra, individual-log, rho or
+total-runtime measurement. The separately authorized K=600 trial used the
+stored K=600 and K=2,048 objects and charged the cumulative local ledger to
+17,400 seconds. Its one capped solver call still leaves useful relation yield
+and the selected complete-runtime base unresolved.
