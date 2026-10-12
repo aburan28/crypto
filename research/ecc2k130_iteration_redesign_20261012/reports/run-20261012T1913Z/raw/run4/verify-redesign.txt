@@ -1,0 +1,4 @@
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, 2 block(s) of 256 packed threads resident per SM
+packed kernel: 128 registers/thread, 400 local bytes/thread, 0 shared bytes/block, single-product multiplier
+packed table walk: 1 (8 branches, 48732 shared bytes)
+DP OVERFLOW: 126368 reports, capacity 65536; checkpoint NOT advanced. Increase --dp-cap or lower --dp-weight.

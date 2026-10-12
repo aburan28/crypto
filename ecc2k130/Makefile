@@ -845,7 +845,7 @@ bench-rtx-pro6000-sigma-table:
 	$(MODAL) run --detach modal_job.py --job benchmarks/sigma-table/gpujob-headline.sh \
 	    --out $(TABLE_BENCH_OUT)
 TABLE_BENCH_OUT ?= /tmp/ecc2k-sigma-table-benchmark
-.PHONY: gpu-rtx-pro6000-sigma-table gpu-rtx-pro6000-dp32-sigma-table bench-rtx-pro6000-sigma-table
+.PHONY: gpu-rtx-pro6000-sigma-table gpu-rtx-pro6000-dp32-sigma-table gpu-rtx-pro6000-iteration-redesign bench-rtx-pro6000-sigma-table
 
 # Matched replay, A/A noise and five-pair confirmation; benchmark-only.
 bench-rtx-pro6000-sigma-fused:
@@ -880,6 +880,16 @@ PRO6000_20B_KNOBS = BATCH=16 THREADS=512 MINBLOCKS=1 \
 gpu-rtx-pro6000-20b: PACKED_ALU_SQUARE = 1
 gpu-rtx-pro6000-20b:
 	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_20B_KNOBS)
+
+# Major iteration-function redesign from ITERATION-FUNCTION.md: replace the
+# per-step sigma/Frobenius path with the class-covariant r-adding table walk.
+# This is the fully tuned v3 RTX PRO 6000 recipe, with a separate v3
+# walk/corpus. It is intentionally never a campaign default or a drop-in
+# DP32 worker.
+PRO6000_ITERATION_REDESIGN_KNOBS = $(PRO6000_20B_KNOBS)
+gpu-rtx-pro6000-iteration-redesign: PACKED_ALU_SQUARE = 1
+gpu-rtx-pro6000-iteration-redesign:
+	$(MAKE) -B ecc2k130 ARCH="$(PRO6000_ARCH)" $(PRO6000_ITERATION_REDESIGN_KNOBS)
 
 # The same knob set with overrides appended: on a make command line the last
 # assignment of a variable wins, so every knob and the geometry are reachable
