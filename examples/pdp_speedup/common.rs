@@ -128,7 +128,12 @@ pub struct Rung {
 
 impl Rung {
     pub fn new(l: u32) -> Self {
-        let n = 3 * l;
+        Self::with(3 * l, l)
+    }
+
+    /// A rung with `n` and `l` chosen independently (`l ≤ n`).
+    pub fn with(n: u32, l: u32) -> Self {
+        assert!(l <= n && n <= 63);
         let irr = IrreduciblePoly {
             degree: n,
             low_terms: find_irreducible(n),
