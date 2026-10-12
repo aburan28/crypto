@@ -132,9 +132,6 @@ fn to_normal_coords(coords: &[F2BoolPoly], pinv: &[u64], n_vars: usize) -> Vec<F
 /// Variable layout for one system.
 struct Layout {
     n: usize,
-    // Retained layout slot, kept for upcoming selector work.
-    #[allow(dead_code)]
-    l: usize,
     with_target_selector: bool,
     s0: usize,
     s1: usize,
@@ -167,7 +164,6 @@ impl Layout {
         off += n;
         Layout {
             n,
-            l,
             with_target_selector,
             s0,
             s1,

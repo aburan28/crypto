@@ -66,7 +66,8 @@ def receipt_error(worker: object, config: dict) -> str | None:
         "source_attestation_mode": "supervised_snapshot",
         "domain_encoding": config.get("domain_encoding", "coordinate_trie"),
         "domain_representatives": (
-            config["columns"] if config.get("domain_encoding") == "frobenius_orbit_phase" else None
+            config["columns"] if config.get("domain_encoding") in (
+                "frobenius_orbit_phase", "frobenius_orbit_phase_ordered_first_pair") else None
         ),
         "solver_search_executed": False, "relation_stage_executed": False,
         "rank_stage_executed": False, "total_index_calculus_runtime_ms": None,
@@ -95,12 +96,14 @@ def receipt_error(worker: object, config: dict) -> str | None:
         if type(value) is not int or value < 0:
             return f"worker {key} is not a nonnegative count"
     core_variables = {5: 84743, 6: 105908}[config["summands"]]
-    orbit_domain = config.get("domain_encoding") == "frobenius_orbit_phase"
+    encoding = config.get("domain_encoding")
+    orbit_domain = encoding in ("frobenius_orbit_phase", "frobenius_orbit_phase_ordered_first_pair")
+    ordered_first_pair = encoding == "frobenius_orbit_phase_ordered_first_pair"
     added_variables, expected_clauses = (
         orbit_domain_size(config["columns"], config["summands"])
         if orbit_domain else (0, None)
     )
-    if worker["required_max_variables"] != core_variables + added_variables:
+    if worker["required_max_variables"] != core_variables + added_variables + (82 if ordered_first_pair else 0):
         return "worker source variable count disagrees with the pinned arity"
     if orbit_domain and worker["required_domain_clauses"] != expected_clauses:
         return "worker orbit-domain clause count disagrees with the pinned size"
@@ -137,10 +140,12 @@ def run(
     identity_mask: int, max_variables: int, max_domain_clauses: int,
     wall_seconds: float, memory_mib: int, binary: Path, output_dir: Path,
     image: str = "python:3.11-slim", checkout: Path | None = None,
-    orbit_domain: bool = False,
+    orbit_domain: bool = False, ordered_first_pair: bool = False,
 ) -> dict:
     if columns not in (64, 256, 600, *V2_SIZES) or policy not in POLICIES or seed not in SEEDS:
         raise ValueError("chain selection is outside retained primary panel")
+    if ordered_first_pair and not orbit_domain:
+        raise ValueError("first-pair order requires the Frobenius-orbit domain")
     if summands not in (5, 6) or not 0 <= identity_mask < 1 << (summands - 2):
         raise ValueError("chain arity or identity pattern is unsupported")
     if not 0 < max_variables <= 2**31 - 1 or not 0 < max_domain_clauses <= 2**31 - 1:
@@ -185,7 +190,8 @@ def run(
         "schema": "n83.chain-s3-capacity-config/v1", "study": STUDY,
         "panel_dir": str(panel), "columns": columns, "policy": policy, "seed": seed,
         "summands": summands, "identity_mask": identity_mask,
-        "domain_encoding": "frobenius_orbit_phase" if orbit_domain else "coordinate_trie",
+        "domain_encoding": ("frobenius_orbit_phase_ordered_first_pair" if ordered_first_pair else
+                            "frobenius_orbit_phase" if orbit_domain else "coordinate_trie"),
         "max_variables": max_variables, "max_domain_clauses": max_domain_clauses,
         "wall_seconds": wall_seconds, "memory_cgroup_limit_bytes": memory_mib * 1024 * 1024,
         "memory_cgroup_swap_limit_bytes": 0, "cpu_limit": 1.0,
@@ -208,7 +214,8 @@ def run(
         "--mount", f"type=bind,src={source_dir},dst=/source,readonly",
         "--mount", f"type=bind,src={output_dir},dst=/out",
         "--env", "ICV1_FROZEN_SOURCE_DIR=/source", image_id,
-        "/worker", "primary-orbit-chain-build" if orbit_domain else "primary-chain-build",
+        "/worker", ("primary-ordered-orbit-chain-build" if ordered_first_pair else
+                    "primary-orbit-chain-build" if orbit_domain else "primary-chain-build"),
         "/panel", str(columns), policy, str(seed),
         str(summands), str(identity_mask), str(max_variables), str(max_domain_clauses),
         str(memory_mib), "/out/worker.json",
@@ -313,13 +320,14 @@ def main() -> int:
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--image", default="python:3.11-slim")
     parser.add_argument("--orbit-domain", action="store_true")
+    parser.add_argument("--ordered-first-pair", action="store_true")
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
     outer = run(
         args.panel, args.columns, args.policy, args.seed, args.summands,
         args.identity_mask, args.max_variables, args.max_domain_clauses,
         args.wall_seconds, args.memory_mib, args.binary, args.output_dir, args.image,
-        orbit_domain=args.orbit_domain,
+        orbit_domain=args.orbit_domain, ordered_first_pair=args.ordered_first_pair,
     )
     print(json.dumps(outer, sort_keys=True))
     return 1 if outer["status"].startswith("PRODUCER_FAILURE") else 0

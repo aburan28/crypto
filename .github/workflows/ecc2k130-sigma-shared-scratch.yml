@@ -1,21 +1,14 @@
 name: ECC2K fused sigma shared scratch
 
 on:
-  pull_request:
-    paths:
-      - 'ecc2k130/Makefile'
-      - 'ecc2k130/include/packedengine.cuh'
-      - 'ecc2k130/include/packedkernels.cuh'
-      - 'ecc2k130/include/packedsigmascratch.h'
-      - 'ecc2k130/src/testsigmasharedscratchcuda.cu'
-      - 'ecc2k130/benchmarks/sigma-fused/shared-scratch/**'
-      - '.github/workflows/ecc2k130-sigma-shared-scratch.yml'
+  # Retired 2026-10-11: this gate guards a study that has been quiet for 7+ days, and its
+  # push/pull_request triggers were fanning out across the account's shared runners. Run it
+  # on demand, or restore its push/pull_request triggers from git history to bring it back.
   workflow_dispatch:
 
 concurrency:
   group: ecc2k130-sigma-shared-scratch-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 permissions:
   contents: read
 
@@ -51,7 +44,7 @@ jobs:
 
   sm120-compile:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 60 }}
     container:
       image: nvidia/cuda:13.3.1-devel-ubuntu24.04
     steps:

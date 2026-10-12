@@ -1,0 +1,77 @@
+{
+  "bases": [
+    {
+      "absent_at_commit": [
+        "docs/ecbench/schema.sql",
+        "docs/curves/registry.json"
+      ],
+      "archive": "bases/2c207b41a3be.tar.gz",
+      "archive_bytes": 3423705,
+      "archive_sha256": "8baeac42ccf6b052356c8a57e2686966cdbf044d62232526da5abbb045ee1a3b",
+      "archived_paths": [
+        "src",
+        "docs/ic/boundary_targets.json",
+        "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock"
+      ],
+      "basis": "evaluation_source_commit",
+      "commit": "2c207b41a3be3552c1754ee78540f13be258a105",
+      "freezes": [
+        "research/notes/ecc2k130/compact_s3_prefilter_20260930/FROZEN.json"
+      ],
+      "git_oids": {
+        "docs/ic/boundary_targets.json": "724671cbb399e982ce4ab19814c93764963059d6",
+        "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock": "a3181ddde6d0a7460f0d9a1c6e87e3bead801980",
+        "src": "6e2773f45ef343805bb051f20f537ab263191290"
+      }
+    },
+    {
+      "absent_at_commit": [
+        "docs/ecbench/schema.sql",
+        "docs/curves/registry.json"
+      ],
+      "archive": "bases/3a4e9859eea2.tar.gz",
+      "archive_bytes": 3372635,
+      "archive_sha256": "724811c4b5e090056e632554ef9da007fd2cd364cd435e5485f2e51f7bf0295c",
+      "archived_paths": [
+        "src",
+        "docs/ic/boundary_targets.json",
+        "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock"
+      ],
+      "basis": "source_base_main",
+      "commit": "3a4e9859eea2505348efd85ce729304989291711",
+      "freezes": [
+        "research/notes/ecc2k130/compact_s3_batch_20260929/FROZEN.json"
+      ],
+      "git_oids": {
+        "docs/ic/boundary_targets.json": "571ef7ebe2262b797e04c790471604b03e983dd0",
+        "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock": "a3181ddde6d0a7460f0d9a1c6e87e3bead801980",
+        "src": "9aad60d4cf51185ee68a07b379bb06233ac1f861"
+      }
+    },
+    {
+      "absent_at_commit": [
+        "docs/ecbench/schema.sql",
+        "docs/curves/registry.json"
+      ],
+      "archive": "bases/acc83e5323f0.tar.gz",
+      "archive_bytes": 3372487,
+      "archive_sha256": "6ed450e6a5c587504865834db1f749b3f704edb307f123a530ed678f05bc89e1",
+      "archived_paths": [
+        "src",
+        "docs/ic/boundary_targets.json",
+        "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock"
+      ],
+      "basis": "source_base_main",
+      "commit": "acc83e5323f0f0fc0910b5cb9c20daedd1a6921a",
+      "freezes": [
+        "research/notes/ecc2k130/compact_swap_quotient_20260929/FROZEN.json"
+      ],
+      "git_oids": {
+        "docs/ic/boundary_targets.json": "571ef7ebe2262b797e04c790471604b03e983dd0",
+        "research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock": "a3181ddde6d0a7460f0d9a1c6e87e3bead801980",
+        "src": "9aad60d4cf51185ee68a07b379bb06233ac1f861"
+      }
+    }
+  ],
+  "schema": "compact-frozen-source-bases-v1"
+}
