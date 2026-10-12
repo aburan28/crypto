@@ -107,8 +107,9 @@ no automatic PR cancellation and uses the same scientific validation as before.
 The budgets are limits, not measured post-change completion times. Actual
 CodeQL, cross-platform packaging and ecbench sample times must be checked after
 deployment. The existing public queue data also indicates account-wide runner
-congestion, which local workflow changes cannot immediately clear. Required
-status settings and merge-queue policy still need authenticated inspection.
+congestion, which local workflow changes cannot immediately clear. Authenticated default-branch metadata currently reports no branch protection
+or required status contexts. This change preserves check names and changes no
+repository settings.
 
 ## Local validation
 

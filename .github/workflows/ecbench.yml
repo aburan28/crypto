@@ -118,7 +118,6 @@ jobs:
             /research/ghs_curve_comparison_20261009/
             /research/notes/ecc2k130/cold_compact_orbit_ic_20261003/
             /research/notes/ecc2k130/full_rank_compact_orbit_ic_20261003/
-            /research/sat_factor_base_review_20260908/autolab/
       - name: Materialize compile-time inputs without unrelated archives
         run: node .github/scripts/ci-scope.mjs --materialize
       - name: Committed sessions are evidence and are never edited
