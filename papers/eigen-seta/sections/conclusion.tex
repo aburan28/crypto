@@ -1,0 +1,22 @@
+\section{Open problems}\label{sec:conclusion}
+
+\begin{enumerate}
+\item \emph{Cryptanalysis of the hidden degree.} The scheme stands or falls
+  with the claim that the public key gives no handle on $f$ beyond
+  exhaustive search (\S\ref{sec:key}). In particular, the attacker knows the
+  action of $\tau$ on $\EA[2^E]$ up to the scalar $f\bmod 2^E$. Independent
+  analysis of this point is the most important next step.
+\item \emph{Mask entropy.} The binding attack guesses $b/a$ modulo about
+  $\sqrt d$. Any way to use fewer torsion bits, for example a dimension-4
+  variant of the torsion attack, or a lollipop built from another known
+  endomorphism, would lower the security level directly.
+\item \emph{Smaller primes.} Decrypting with two half-chains would shrink
+  $2^E$ from about $7d^2f^2$ to its square root and cut $p$ from about $d^5$ to
+  about $d^3$, by the derivation of \S\ref{sec:params} with $2^{2E}>\deg\gamma$.
+\item \emph{Speed.} Theta-coordinate $(2,2)$-chains~\cite{DMPR23} instead of
+  Mumford coordinates, stack-only buffers, and SIMD field arithmetic.
+\item \emph{Constant-time key generation}, in particular a constant-time
+  norm-equation solver.
+\item \emph{Compression} of public keys and ciphertexts, by encoding the
+  points relative to canonical bases as in compressed SIDH.
+\end{enumerate}
