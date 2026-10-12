@@ -319,10 +319,197 @@
       }
     ]
   },
-  "structural_fact_ecc2k130": "ord_131(2)=130 so x^131-1 = (x+1)*(irreducible deg 130); 131 prime so no proper subfield. Only Frobenius-stable subspace dims are 0,1,130,131.",
+  "structural_fact_ecc2k130": "ord_131(2)=130 so x^131-1 = (x+1)*(irreducible deg 130); 131 is prime so there is no proper subfield. The only Frobenius-stable F_2-SUBSPACE dimensions are 0,1,130,131, so the subfield and frobenius structures here do not exist at 131. Frobenius-invariant factor BASES (sets) do exist: the weight-2 ONB base (14 orbits) and Couveignes-Lercier sets (Galbraith-Granger-Merz-Petit, SAC 2020, ePrint 2020/1315). Their saving is ~n fewer relations and ~n^2 smaller linear algebra, not a lower D*.",
   "reproduce": [
     "sage factor_base_dor.sage --field 8 --dim 4 --selftest 8",
     "sage factor_base_dor.sage --field 7 --dim 3 --targets 127 --seed S --structures frobenius,random,standard   # S=1..6",
-    "sage factor_base_dor.sage --field 11 --dim 5 --targets 48 --seed S --structures standard,random   # S=1..3"
-  ]
+    "sage factor_base_dor.sage --field 11 --dim 5 --targets 48 --seed S --structures standard,random   # S=1..3",
+    "sage factor_base_dor.sage --field 11 --dim 5 --targets 160 --seed S --structures nb_window,nb_break   # S=1..5",
+    "sage factor_base_dor.sage --field 9 --dim 4 --targets 200 --seed S --structures nb_window,nb_break   # S=1..5"
+  ],
+  "symmetry_breaking_ggmp_3_1": {
+    "note": "nb_break: P1 in V1 = <theta^(2^j) : j < dim>, P2 in V2 = pi^dim(V1). Expected probability gain m! = 2. D* is measured on non-decomposable targets only; nb_break leaves fewer of them, which may bias the D* comparison.",
+    "results": {
+      "n9_dim4": {
+        "targets": 200,
+        "normal_elements": 5,
+        "probability_ratio_break_over_window": {
+          "mean": 1.952,
+          "min": 1.471,
+          "max": 2.529
+        },
+        "d_star_delta_break_minus_window": 0.741,
+        "nb_window": [
+          {
+            "seed": 1,
+            "decomposable_fraction": 0.22,
+            "d_star_mean": 3.0321,
+            "unsat_targets": 156,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 2,
+            "decomposable_fraction": 0.255,
+            "d_star_mean": 3.0403,
+            "unsat_targets": 149,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 3,
+            "decomposable_fraction": 0.265,
+            "d_star_mean": 3.0476,
+            "unsat_targets": 147,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 4,
+            "decomposable_fraction": 0.17,
+            "d_star_mean": 3.0602,
+            "unsat_targets": 166,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 5,
+            "decomposable_fraction": 0.18,
+            "d_star_mean": 3.0488,
+            "unsat_targets": 164,
+            "censored_above_dmax": 0
+          }
+        ],
+        "nb_break": [
+          {
+            "seed": 1,
+            "decomposable_fraction": 0.41,
+            "d_star_mean": 3.9831,
+            "unsat_targets": 118,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 2,
+            "decomposable_fraction": 0.375,
+            "d_star_mean": 3.888,
+            "unsat_targets": 125,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 3,
+            "decomposable_fraction": 0.495,
+            "d_star_mean": 3.6337,
+            "unsat_targets": 101,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 4,
+            "decomposable_fraction": 0.43,
+            "d_star_mean": 3.5789,
+            "unsat_targets": 114,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 5,
+            "decomposable_fraction": 0.365,
+            "d_star_mean": 3.8504,
+            "unsat_targets": 127,
+            "censored_above_dmax": 0
+          }
+        ]
+      },
+      "n11_dim5": {
+        "targets": 160,
+        "normal_elements": 5,
+        "probability_ratio_break_over_window": {
+          "mean": 1.753,
+          "min": 1.333,
+          "max": 2.5
+        },
+        "d_star_delta_break_minus_window": 0.039,
+        "nb_window": [
+          {
+            "seed": 1,
+            "decomposable_fraction": 0.25,
+            "d_star_mean": 3.9833,
+            "unsat_targets": 120,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 2,
+            "decomposable_fraction": 0.2437,
+            "d_star_mean": 3.9669,
+            "unsat_targets": 121,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 3,
+            "decomposable_fraction": 0.1625,
+            "d_star_mean": 3.9552,
+            "unsat_targets": 134,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 4,
+            "decomposable_fraction": 0.2625,
+            "d_star_mean": 3.9492,
+            "unsat_targets": 118,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 5,
+            "decomposable_fraction": 0.225,
+            "d_star_mean": 3.9516,
+            "unsat_targets": 124,
+            "censored_above_dmax": 0
+          }
+        ],
+        "nb_break": [
+          {
+            "seed": 1,
+            "decomposable_fraction": 0.4125,
+            "d_star_mean": 4.0,
+            "unsat_targets": 94,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 2,
+            "decomposable_fraction": 0.4,
+            "d_star_mean": 4.0,
+            "unsat_targets": 96,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 3,
+            "decomposable_fraction": 0.4062,
+            "d_star_mean": 4.0,
+            "unsat_targets": 95,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 4,
+            "decomposable_fraction": 0.35,
+            "d_star_mean": 4.0,
+            "unsat_targets": 104,
+            "censored_above_dmax": 0
+          },
+          {
+            "seed": 5,
+            "decomposable_fraction": 0.3688,
+            "d_star_mean": 4.0,
+            "unsat_targets": 101,
+            "censored_above_dmax": 0
+          }
+        ]
+      }
+    }
+  },
+  "symmetric_function_degree": {
+    "note": "Binary Koblitz summation polynomial with the target fixed, rewritten in elementary symmetric variables of the summands (FGHR).",
+    "S3_m2": {
+      "raw_total_degree": 4,
+      "symmetrised_degree": 2
+    },
+    "S4_m3": {
+      "raw_total_degree": 12,
+      "symmetrised_degree": 4
+    },
+    "status": "polynomial degree only; descended D* with a symmetric factor-base encoding is not yet measured"
+  }
 }

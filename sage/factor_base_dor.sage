@@ -15,6 +15,12 @@
 # subspace of the same dimension, an algebraic effect that no graph invariant
 # of the descent sees (RESEARCH_FFD_WORKFLOW.md, P2/P2'' killed, P3-alg live).
 #
+# Each summand may use its own subspace, which measures the symmetry
+# breaking of Galbraith-Granger-Merz-Petit (SAC 2020, section 3.1): the
+# nb_break structure takes P1 from a normal-basis window V1 and P2 from
+# V2 = pi^dim(V1). The report gives the decomposable fraction next to D*,
+# so the m! probability gain and its degree cost are compared directly.
+#
 # Scope. Over a binary field F_{2^n} the factor base is an F_2-subspace V of
 # x-coordinates, and the descent is over F_2 -- the ECC2K-130 setting at toy
 # size. Over a prime field there is no subfield to descend into, so DoR is a
@@ -29,6 +35,7 @@
 #   sage factor_base_dor.sage --field 7 --dim 3 --targets 24
 #   sage factor_base_dor.sage --field 9 --dim 3 --structures subfield,random,standard
 #   sage factor_base_dor.sage --field 7 --dim 3 --dmax 6 --out dor-n7.json
+#   sage factor_base_dor.sage --field 11 --dim 5 --targets 160 --structures nb_window,nb_break
 #
 # This file is preparsed: bitwise xor is ^^, and integer power stays **.
 
@@ -180,12 +187,13 @@ def fe_linear(field, basis_ints, var_offset):
 
 # ── the descended S_3 system for a factor base V ───────────────────────
 
-def descent_equations(field, basis_ints, target_int, b_int):
-    """The n GF(2) polynomials whose common zero is a 2-decomposition of
-    the target x-coordinate over V = span(basis_ints)."""
-    dim = len(basis_ints)
-    X1 = fe_linear(field, basis_ints, 0)
-    X2 = fe_linear(field, basis_ints, dim)
+def descent_equations(field, basis1, basis2, target_int, b_int):
+    """The n GF(2) polynomials whose common zero is a decomposition of the
+    target x-coordinate as x(P1), x(P2) with x(P1) in span(basis1) and
+    x(P2) in span(basis2). Equal bases give the symmetric decomposition;
+    distinct shifted bases give GGMP-style symmetry breaking."""
+    X1 = fe_linear(field, basis1, 0)
+    X2 = fe_linear(field, basis2, len(basis1))
     x3 = fe_const(field, target_int)
     bvec = fe_const(field, b_int)
     sum12 = fe_add(X1, X2)
@@ -278,6 +286,50 @@ def subspace_from_generators(field, generators):
     return [basis[p] for p in sorted(basis)]
 
 
+def normal_conjugates(field, seed, pool=64):
+    """theta, theta^2, theta^4, ... for a normal element theta chosen by
+    seed among the first `pool` normal elements. A normal basis exists for
+    every n, so this works at n = 131 too."""
+    n = field.n
+    found = []
+    for v in range(1, 2**n):
+        theta = field.from_int(v)
+        conj, cur = [], theta
+        for _ in range(n):
+            conj.append(cur)
+            cur = cur**2
+        if len(subspace_from_generators(field, conj)) == n:
+            found.append(conj)
+            if len(found) >= pool:
+                break
+    if not found:
+        raise RuntimeError("no normal element found")
+    return rng_for(seed).choice(found)
+
+
+def structure_bases(field, name, dim, seed):
+    """(basis1, basis2) for the two summands, or (None, reason).
+
+    nb_window puts both summands in V1 = <theta^(2^j) : j < dim>.
+    nb_break is GGMP section 3.1: P1 in F1 from V1, P2 in F2 = pi^dim(F1)
+    from V2 = <theta^(2^j) : dim <= j < 2 dim>. A relation P1 + P2 is
+    rewritten over F1 as P1 + [lambda^dim] P2' with P2 = pi^dim(P2'), which
+    recovers the 2! symmetry factor without enlarging F1."""
+    if name in ("nb_window", "nb_break"):
+        if 2 * dim > field.n:
+            return None, "nb windows need 2*dim <= n (%d > %d)" % (2 * dim, field.n)
+        conj = normal_conjugates(field, seed)
+        v1 = subspace_from_generators(field, conj[:dim])
+        if name == "nb_window":
+            return (v1, v1), None
+        v2 = subspace_from_generators(field, conj[dim:2 * dim])
+        return (v1, v2), None
+    basis, err = structure_basis(field, name, dim, seed)
+    if basis is None:
+        return None, err
+    return (basis, basis), None
+
+
 def structure_basis(field, name, dim, seed):
     K, z, n = field.K, field.z, field.n
     if name == "standard":
@@ -345,10 +397,7 @@ def koblitz_points_with_x_in(field, basis_ints):
     return E, points
 
 
-def label_targets(field, basis_ints, targets_int, b_int):
-    """For each target x-coordinate, True if it has no 2-decomposition over
-    V (unsatisfiable system), which is the case D* measures."""
-    K = field.K
+def span_members(basis_ints):
     members = []
     dim = len(basis_ints)
     for bits in range(1 << dim):
@@ -357,6 +406,15 @@ def label_targets(field, basis_ints, targets_int, b_int):
             if (bits >> i) & 1:
                 v ^^= basis_ints[i]
         members.append(v)
+    return members
+
+
+def label_targets(field, basis1, basis2, targets_int, b_int):
+    """For each target x-coordinate, True if it has no decomposition with
+    x(P1) in span(basis1) and x(P2) in span(basis2) (unsatisfiable system),
+    which is the case D* measures."""
+    members1 = [field.from_int(v) for v in span_members(basis1)]
+    members2 = [field.from_int(v) for v in span_members(basis2)]
     b = field.from_int(b_int)
     labels = {}
     # The descent ranges over all of V, including x = 0 (the 2-torsion point
@@ -365,10 +423,8 @@ def label_targets(field, basis_ints, targets_int, b_int):
         x3 = field.from_int(t_int)
         x3sq = x3 * x3
         unsat = True
-        for v1 in members:
-            X1 = field.from_int(v1)
-            for v2 in members:
-                X2 = field.from_int(v2)
+        for X1 in members1:
+            for X2 in members2:
                 s = (X1 + X2)**2 * x3sq + X1 * X2 * x3 + (X1 * X2)**2 + b
                 if s == 0:
                     unsat = False
@@ -397,18 +453,19 @@ def selftest(field, dim, dmax, seed, samples):
          2-decomposition over V (validates descent_equations);
       2. a satisfiable target never derives 1 (no false refutation)."""
     b_int = field.one_int
-    nvars = 2 * dim
     failures = 0
     checked = 0
     rng = rng_for(seed)
-    for name in ("standard", "random", "frobenius", "subfield"):
-        basis, err = structure_basis(field, name, dim, seed)
-        if basis is None:
+    for name in ("standard", "random", "frobenius", "subfield", "nb_window", "nb_break"):
+        pair, err = structure_bases(field, name, dim, seed)
+        if pair is None:
             continue
+        basis1, basis2 = pair
+        nvars = len(basis1) + len(basis2)
         targets = [rng.randrange(1, 2**field.n) for _ in range(samples)]
-        labels = label_targets(field, basis, targets, b_int)
+        labels = label_targets(field, basis1, basis2, targets, b_int)
         for t in targets:
-            eqs = descent_equations(field, basis, t, b_int)
+            eqs = descent_equations(field, basis1, basis2, t, b_int)
             has_zero = any(all(eval_poly(eq, a) == 0 for eq in eqs)
                            for a in range(1 << nvars))
             if has_zero == labels[t]:
@@ -429,18 +486,21 @@ def selftest(field, dim, dmax, seed, samples):
 # ── driver ─────────────────────────────────────────────────────────────
 
 def measure_structure(field, name, dim, dmax, targets_int, seed):
-    basis, err = structure_basis(field, name, dim, seed)
-    if basis is None:
+    pair, err = structure_bases(field, name, dim, seed)
+    if pair is None:
         return {"structure": name, "skipped": err}
+    basis1, basis2 = pair
+    nvars = len(basis1) + len(basis2)
     b_int = field.one_int
-    labels = label_targets(field, basis, targets_int, b_int)
-    E, points = koblitz_points_with_x_in(field, basis)
+    labels = label_targets(field, basis1, basis2, targets_int, b_int)
+    E, points = koblitz_points_with_x_in(field, basis1)
+    decomposable = sum(1 for t in targets_int if not labels[t])
     results = []
     for t_int in targets_int:
         if not labels[t_int]:
             continue  # satisfiable targets do not refute; D* is for UNSAT
-        eqs = descent_equations(field, basis, t_int, b_int)
-        dstar, profile = refutation_degree(eqs, 2 * dim, dmax)
+        eqs = descent_equations(field, basis1, basis2, t_int, b_int)
+        dstar, profile = refutation_degree(eqs, nvars, dmax)
         results.append({
             "target": "0x%x" % t_int,
             "d_star": dstar,
@@ -451,8 +511,10 @@ def measure_structure(field, name, dim, dmax, targets_int, seed):
     summary = {
         "structure": name,
         "dim": dim,
-        "basis": ["0x%x" % v for v in basis],
+        "basis": ["0x%x" % v for v in basis1],
+        "basis2": None if basis2 == basis1 else ["0x%x" % v for v in basis2],
         "factor_base_points": len(points),
+        "decomposable_fraction": decomposable / len(targets_int),
         "unsat_targets": len(results),
         "censored_above_dmax": censored,
     }
@@ -474,7 +536,7 @@ def main():
     parser.add_argument("--dmax", type=int, default=6, help="maximum Macaulay degree to search for D*")
     parser.add_argument("--targets", type=int, default=24, help="number of random target x-coordinates")
     parser.add_argument("--seed", type=int, default=1, help="seed for targets and random structures")
-    parser.add_argument("--structures", default="subfield,standard,frobenius,random",
+    parser.add_argument("--structures", default="subfield,standard,frobenius,random,nb_window,nb_break",
                         help="comma-separated factor-base structures to compare")
     parser.add_argument("--curve", help="p192/p224/p256 print the prime-field DoR note and exit")
     parser.add_argument("--out", help="write the JSON report here; default stdout")
@@ -525,6 +587,7 @@ def main():
     report["ranking_by_mean_d_star"] = [
         {"structure": r["structure"], "d_star_mean": r["d_star_mean"],
          "d_star_min": r["d_star_min"], "d_star_max": r["d_star_max"],
+         "decomposable_fraction": r["decomposable_fraction"],
          "unsat_targets": r["unsat_targets"]}
         for r in ranked
     ]
@@ -538,9 +601,9 @@ def main():
         sys.stdout.write(text + "\n")
 
     for row in report["ranking_by_mean_d_star"]:
-        sys.stderr.write("  %-10s mean D*=%.3f  [%d..%d] over %d unsat targets\n" % (
+        sys.stderr.write("  %-10s mean D*=%.3f  [%d..%d]  decomposable %.3f  over %d unsat targets\n" % (
             row["structure"], row["d_star_mean"], row["d_star_min"],
-            row["d_star_max"], row["unsat_targets"]))
+            row["d_star_max"], row["decomposable_fraction"], row["unsat_targets"]))
 
 
 if __name__ == "__main__":
