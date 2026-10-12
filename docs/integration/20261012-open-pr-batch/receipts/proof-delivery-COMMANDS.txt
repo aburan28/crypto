@@ -1,0 +1,12 @@
+Only seal verification repeated after final code/main reconciliation.
+Captured source revision is retained in the revision receipt.
+
+From research/weak_curve_properties_lean_20261011:
+/tmp/crypto-lean-integration-validation/proof-check --check
+
+From research/weak_curve_conjectures_20261012:
+sha256sum -c EVIDENCE_SHA256SUMS
+
+Completed proof builds/kernel replays/package tests were not repeated.
+Compare each package Git object at its original checked revision with final HEAD.
+Historical workflow and evidence seals remained unchanged.

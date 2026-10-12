@@ -310,7 +310,18 @@ def add_koblitz(reg: Registry, a: int, n: int, source: str, standard: str | None
 
 
 def harvest_json(reg: Registry, problems: list[str], fatal: list[str]) -> None:
+    # Explicit coordinate forms are normalized by the native registry_models
+    # tool. This harvester consumes its field results and checks source bytes;
+    # it must never reinterpret quadratic coefficients as a short model.
+    native_path = REPO / "docs/curves/sources/prime-models.json"
+    try:
+        native_doc = json.loads(native_path.read_text())
+        native_rows = native_doc["records"] if native_doc.get("schema") == "prime-models-normalization/v1" else []
+    except (OSError, ValueError, KeyError):
+        native_rows = []
     for path in tracked("*.json"):
+        if path == native_path:
+            continue
         try:
             if path.stat().st_size > MAX_JSON_BYTES:
                 continue
@@ -318,15 +329,17 @@ def harvest_json(reg: Registry, problems: list[str], fatal: list[str]) -> None:
         except (OSError, ValueError, UnicodeDecodeError):
             continue
         rel = str(path.relative_to(REPO))
-        stack = [doc]
+        stack = [(doc, "")]
         while stack:
-            o = stack.pop()
+            o, pointer = stack.pop()
             if isinstance(o, list):
-                stack.extend(x for x in o if isinstance(x, (dict, list)))
+                stack.extend((x, f"{pointer}/{index}") for index, x in enumerate(o)
+                             if isinstance(x, (dict, list)))
                 continue
             if not isinstance(o, dict):
                 continue
-            stack.extend(v for v in o.values() if isinstance(v, (dict, list)))
+            stack.extend((v, pointer + "/" + str(k).replace("~", "~0").replace("/", "~1"))
+                         for k, v in o.items() if isinstance(v, (dict, list)))
             order = _int(o.get("group_order", o.get("order")))
             name = o.get("name") if isinstance(o.get("name"), str) else None
             field = o.get("field")
@@ -363,6 +376,29 @@ def harvest_json(reg: Registry, problems: list[str], fatal: list[str]) -> None:
                     if g and rh:
                         reg.represent(ident, *binary_record(m, f, a, b, order, *rh, g), rel)
                 elif "p" in o and "a" in o and "b" in o and order:
+                    form = o.get("model", o.get("form"))
+                    form = "".join(form.split()) if isinstance(form, str) else None
+                    if form == "y^2=x^3+ax^2+bx":
+                        rows = [row for row in native_rows
+                                if row.get("source") == rel and row.get("pointer") == pointer
+                                and row.get("original") == o]
+                        if len(rows) != 1 or rows[0].get("source_sha256") != hashlib.sha256(path.read_bytes()).hexdigest():
+                            fatal.append(f"{rel}: native prime-model normalization is missing or stale; "
+                                         "run registry_models from tools/isogeny-cli")
+                            continue
+                        row = rows[0]
+                        ident, params = row["identity"], row["params"]
+                        check_rust(o, ident, rel, fatal)
+                        reg.add(ident, "prime", params, rel, [name] if name else [])
+                        # A future record with a generator must carry its
+                        # native coordinate conversion before an EC1 is added.
+                        if generator_of(o):
+                            fatal.append(f"{rel}: native normalization does not yet export generator coordinates")
+                        continue
+                    if form is not None and form not in {
+                            "shortWeierstrass", "y^2=x^3+ax+b", "y^2=x^3+a*x+b"}:
+                        fatal.append(f"{rel}: unsupported explicit prime model {form!r}")
+                        continue
                     p, a, b = _int(o["p"]), _int(o["a"]), _int(o["b"])
                     if p is None or a is None or b is None or p < 5:
                         continue

@@ -3213,27 +3213,13 @@ pub fn saturate_factor_base_two_torsion(
     if kc.mul(&t, &kc.cofactor) != BinaryPoint::Infinity {
         return None;
     }
-    // Translate every base point by T in one Montgomery batch (a single
-    // inversion for the whole base instead of one slow inversion per
-    // point).  Results are bit-identical to the per-point adds, so the
-    // collected abscissa set — and everything built from it — is
-    // unchanged.  The at-most-one doubling case (P = T itself) takes the
-    // exact slow path inside the batch.
-    let fast = kc.fast_binary_curve()?;
-    let (tx, ty) = match &t {
-        BinaryPoint::Affine { x, y } => (fast.word(x), fast.word(y)),
-        BinaryPoint::Infinity => return None,
-    };
-    let mut pairs = Vec::with_capacity(fb.points.len());
-    for p in &fb.points {
-        match p {
-            BinaryPoint::Infinity => pairs.push((0, 0, tx, ty, true, false)),
-            BinaryPoint::Affine { x, y } => {
-                pairs.push((fast.word(x), fast.word(y), tx, ty, false, false))
-            }
-        }
+    // Retain the single-word admission gate, and translate through the
+    // curve's actual field representation rather than computing an unused
+    // packed batch alongside the authoritative general-field additions.
+    kc.fast_binary_curve()?;
+    if t == BinaryPoint::Infinity {
+        return None;
     }
-    let sums = fast.batch_add(&pairs);
     let mut xs = std::collections::BTreeMap::new();
     for p in &fb.points {
         for q in [p.clone(), kc.add(p, &t)] {
@@ -17536,6 +17522,25 @@ mod tests {
             scalar_mul(&curve.curve, curve.generator(), &curve.subgroup_order),
             BinaryPoint::Infinity
         );
+    }
+
+    #[test]
+    fn wide_linearised_kernels_preserve_high_coordinates() {
+        let n = 71;
+        let irr = find_irreducible_sparse_wide(n).unwrap();
+        // X^2 + X has exactly the prime subfield as its kernel.
+        assert_eq!(
+            linearised_kernel_basis(&[0, 1], n, &irr),
+            vec![F2mElement::one(n)]
+        );
+        // The identity has no kernel; the zero map preserves every basis
+        // coordinate, including those beyond the first machine word.
+        assert!(linearised_kernel_basis(&[0], n, &irr).is_empty());
+        let zero = linearised_kernel_basis(&[], n, &irr);
+        assert_eq!(zero.len(), n as usize);
+        for (i, basis) in zero.iter().enumerate() {
+            assert_eq!(*basis, F2mElement::from_bit_positions(&[i as u32], n));
+        }
     }
 
     #[test]

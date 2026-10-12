@@ -1,0 +1,28 @@
+{
+  "schema": "prime-model-extraction-corrections/v1",
+  "what_this_is": "Deprecated erroneous extraction labels retained as provenance; these are not mathematical equivalence aliases. Original scientific source bytes are unchanged.",
+  "corrections": [
+    {
+      "deprecated_extraction_slug": "icv1-fp21-tm700-56b6783a",
+      "deprecated_extraction_icv1": "ICV1:fp-1048583:-700:1049284:60314:unk:unk:r:56b6783a1485",
+      "correct_record_slug": "icv1-fp21-tm700-d62ba3a6",
+      "correct_record_icv1": "ICV1:fp-1048583:-700:1049284:128:unk:unk:r:d62ba3a6bad8",
+      "source": "research/isogeny_fibers_20261010/round4/16_7_agm_isogeny_oracles/out_seed7.json",
+      "source_sha256": "c994098262295909d653bc3897dcaa17c8984f93689d84c15bc6c39e8667aab6",
+      "pointer": "/curve_E",
+      "status": "erroneous model extraction label; not a curve-equivalence alias",
+      "explanation": "The declared quadratic-Weierstrass source coefficients were incorrectly interpreted as short-Weierstrass coefficients. Native normalization restores the frozen producer identity."
+    },
+    {
+      "deprecated_extraction_slug": "icv1-fp21-tm700-7ee99c50",
+      "deprecated_extraction_icv1": "ICV1:fp-1048583:-700:1049284:188138:unk:unk:r:7ee99c50b352",
+      "correct_record_slug": "icv1-fp21-tm700-07d957b2",
+      "correct_record_icv1": "ICV1:fp-1048583:-700:1049284:10976:unk:unk:r:07d957b2581c",
+      "source": "research/isogeny_fibers_20261010/round4/16_7_agm_isogeny_oracles/out_seed7.json",
+      "source_sha256": "c994098262295909d653bc3897dcaa17c8984f93689d84c15bc6c39e8667aab6",
+      "pointer": "/curve_E2",
+      "status": "erroneous model extraction label; not a curve-equivalence alias",
+      "explanation": "The declared quadratic-Weierstrass source coefficients were incorrectly interpreted as short-Weierstrass coefficients. Native normalization restores the frozen producer identity."
+    }
+  ]
+}

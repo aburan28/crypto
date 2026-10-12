@@ -1,0 +1,29 @@
+
+running 24 tests
+test cryptanalysis::curve_traits::arith::tests::discriminant_split_matches_hand_cases ... ok
+test cryptanalysis::curve_traits::arith::tests::an_exhausted_budget_leaves_a_residue_not_a_fake_prime ... ok
+test cryptanalysis::curve_traits::arith::tests::an_unfactored_square_still_fixes_the_cm_discriminant ... ok
+test cryptanalysis::curve_traits::arith::tests::factor_finds_large_squares_without_rho ... ok
+test cryptanalysis::curve_traits::arith::tests::factor_is_complete_on_smooth_and_semiprime_inputs ... ok
+test cryptanalysis::curve_traits::certify::tests::counts_match_known_orders ... ok
+test cryptanalysis::curve_traits::arith::tests::multiplicative_order_and_lucas ... ok
+test cryptanalysis::curve_traits::query::tests::neighbours_of_ecc2k_130_share_its_cm_field_and_descent ... ok
+test cryptanalysis::curve_traits::query::tests::the_koblitz_family_is_one_group_across_sizes ... ok
+test cryptanalysis::curve_traits::subfield::tests::a_generic_curve_has_no_proper_subfield_of_definition ... ok
+test cryptanalysis::curve_traits::subfield::tests::a_gf4_curve_over_gf2_6_descends_to_gf4 ... ok
+test cryptanalysis::curve_traits::subfield::tests::an_inconsistent_trace_is_an_error ... ok
+test cryptanalysis::curve_traits::subfield::tests::koblitz_curves_descend_to_gf2 ... ok
+test cryptanalysis::curve_traits::subfield::tests::the_twist_of_a_koblitz_curve_over_an_even_degree_descends_only_to_gf4 ... ok
+test cryptanalysis::curve_traits::query::tests::unknown_values_never_match ... ok
+test cryptanalysis::curve_traits::tests::coordinate_models_keep_exact_fields_and_order_checks_without_certificates ... ok
+test cryptanalysis::curve_traits::tests::a_small_koblitz_curve ... ok
+test cryptanalysis::curve_traits::arith::tests::local_data_agrees_with_the_full_split ... ok
+test cryptanalysis::curve_traits::tests::ecc2k_130_conductor_is_exact ... ok
+test cryptanalysis::curve_traits::tests::every_registry_entry_parses_with_its_order_identity ... ok
+test cryptanalysis::curve_traits::tests::extension_registry_preserves_field_and_subgroup_records ... ok
+test cryptanalysis::curve_traits::tests::the_gf2_18_twist_groups_with_koblitz_by_cm_not_by_descent ... ok
+test cryptanalysis::curve_traits::tests::registered_montgomery_and_edwards_generators_certify ... ok
+test cryptanalysis::curve_traits::tests::endomorphism_rings_from_contained_orders ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
+

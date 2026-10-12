@@ -85,12 +85,20 @@ fn summarize(dir: &str) {
                 .entry(arm)
                 .or_insert_with(|| json!({"attempts": 0, "hits": 0, "witnesses": []}));
             slot["attempts"] = json!(slot["attempts"].as_u64().unwrap() + 1);
-            slot["hits"] = json!(slot["hits"].as_u64().unwrap() + line["hit"].as_bool().unwrap() as u64);
+            slot["hits"] =
+                json!(slot["hits"].as_u64().unwrap() + line["hit"].as_bool().unwrap() as u64);
             slot["witnesses"]
                 .as_array_mut()
                 .unwrap()
                 .push(line["witness"].clone());
-            for key in ["reductions", "splits", "propagations", "infeasible", "eliminated", "geo_refute"] {
+            for key in [
+                "reductions",
+                "splits",
+                "propagations",
+                "infeasible",
+                "eliminated",
+                "geo_refute",
+            ] {
                 let add = line[key].as_u64().unwrap_or(0);
                 slot[key] = json!(slot[key].as_u64().unwrap_or(0) + add);
             }
@@ -121,8 +129,10 @@ fn summarize(dir: &str) {
                 slot["refuted_share_of_node_word_ops"] = json!(r / (r + s));
             }
             let deg = |k: &str, d: usize| slot[k][d].as_u64().unwrap_or(0) as f64;
-            let at2 = deg("refuted_first_degree_fresh", 2) + deg("refuted_first_degree_inherited", 2);
-            let at3 = deg("refuted_first_degree_fresh", 3) + deg("refuted_first_degree_inherited", 3);
+            let at2 =
+                deg("refuted_first_degree_fresh", 2) + deg("refuted_first_degree_inherited", 2);
+            let at3 =
+                deg("refuted_first_degree_fresh", 3) + deg("refuted_first_degree_inherited", 3);
             if at2 + at3 > 0.0 {
                 slot["refuted_at_degree2_share"] = json!(at2 / (at2 + at3));
             }
@@ -134,10 +144,15 @@ fn summarize(dir: &str) {
         Default::default();
     for path in entries.iter() {
         let n = path.file_name().unwrap().to_string_lossy().to_string();
-        let Some(rest) = n.strip_prefix("time_").and_then(|r| r.strip_suffix(".jsonl")) else {
+        let Some(rest) = n
+            .strip_prefix("time_")
+            .and_then(|r| r.strip_suffix(".jsonl"))
+        else {
             continue;
         };
-        let (stem, round) = rest.split_once(".round").expect("time_<cell>_<arm>.round<r>");
+        let (stem, round) = rest
+            .split_once(".round")
+            .expect("time_<cell>_<arm>.round<r>");
         let (cell, arm) = stem.rsplit_once('_').expect("<cell>_<arm>");
         timing
             .entry((cell.to_string(), arm.to_string()))
@@ -183,7 +198,10 @@ fn summarize(dir: &str) {
                 if lines.is_empty() {
                     continue;
                 }
-                let ms: Vec<f64> = lines.iter().map(|(_, l)| l["total_ms"].as_f64().unwrap()).collect();
+                let ms: Vec<f64> = lines
+                    .iter()
+                    .map(|(_, l)| l["total_ms"].as_f64().unwrap())
+                    .collect();
                 let mut sorted = ms.clone();
                 let counters: Vec<Value> = lines
                     .iter()
@@ -199,7 +217,16 @@ fn summarize(dir: &str) {
                     .map(|(_, ls)| {
                         ls.iter()
                             .filter(|l| l["arm"] == engine && l.get("target").is_some())
-                            .map(|l| json!([l["target"], l["hit"], l["exhausted"], l["reductions"], l["splits"], l["infeasible"]]))
+                            .map(|l| {
+                                json!([
+                                    l["target"],
+                                    l["hit"],
+                                    l["exhausted"],
+                                    l["reductions"],
+                                    l["splits"],
+                                    l["infeasible"]
+                                ])
+                            })
                             .collect()
                     })
                     .collect();

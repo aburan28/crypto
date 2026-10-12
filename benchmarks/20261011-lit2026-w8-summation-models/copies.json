@@ -1,0 +1,56 @@
+{
+  "schema": "benchmark-browsing-copies/v1",
+  "measurement_date": "2026-10-11",
+  "copied_during_integration": "2026-10-12",
+  "study": "research/lit2026_w8_summation_models_20261011",
+  "run": "run-20261011T2017Z",
+  "files": [
+    {
+      "source": "research/lit2026_w8_summation_models_20261011/reports/run-20261011T2017Z/report.pdf",
+      "copy": "run-report.pdf",
+      "sha256": "0f1872bf8e10f1087206de2d009d7e27413d2ce5509fe5c94364ed9bb2b48a51",
+      "bytes": 119142
+    },
+    {
+      "source": "research/lit2026_w8_summation_models_20261011/W8_RESULTS.pdf",
+      "copy": "results-report.pdf",
+      "sha256": "c9d8e048183fe1a983ca6af3e875dcce71fffdc0f0db041582e90278076dab54",
+      "bytes": 135829
+    },
+    {
+      "source": "research/lit2026_w8_summation_models_20261011/reports/run-20261011T2017Z/eg_arms.svg",
+      "copy": "eg_arms.svg",
+      "sha256": "1a4cbb157211e400b049a054d779c51716263cddfd4bf7002c4423242c10c5b0",
+      "bytes": 55146
+    },
+    {
+      "source": "research/lit2026_w8_summation_models_20261011/reports/run-20261011T2017Z/frob_lucas.svg",
+      "copy": "frob_lucas.svg",
+      "sha256": "28995506c7e1217b8c1f637032ba05b58bdf572d59a8c50567e959c9dbc05918",
+      "bytes": 52110
+    },
+    {
+      "source": "research/lit2026_w8_summation_models_20261011/reports/run-20261011T2017Z/wu_models.svg",
+      "copy": "wu_models.svg",
+      "sha256": "41fb20172124ce5f7e8db001870edd8cffb97be6e6041fdfa50d03fad28d1c9a",
+      "bytes": 33403
+    }
+  ],
+  "pngs": [
+    {
+      "source": "eg_arms.svg",
+      "copy": "eg_arms.png",
+      "dpi": 150
+    },
+    {
+      "source": "frob_lucas.svg",
+      "copy": "frob_lucas.png",
+      "dpi": 150
+    },
+    {
+      "source": "wu_models.svg",
+      "copy": "wu_models.png",
+      "dpi": 150
+    }
+  ]
+}
