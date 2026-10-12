@@ -180,6 +180,7 @@ jobs:
             /experiments/koblitz-s3-pair-query-20261007-v4/baseline.rs
             /experiments/koblitz-s3-pair-query-20261007-v4/candidate.rs
             /cd_attack/
+            /scripts/clippy-maintained.sh
       - name: Materialize compile-time inputs without research archives
         if: needs.scope.outputs[matrix.scope] != 'false'
         run: node .github/scripts/ci-scope.mjs --materialize

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdtempSync, mkdirSync, writeFileSync, rmSync, renameSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync, renameSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
@@ -41,6 +41,7 @@ test('dependencies, workflow edits and frozen evidence remain applicable', () =>
   assert.equal(classify(['Cargo.lock']).rust_root, true);
   assert.equal(classify(['build.rs']).rust_root, true);
   assert.equal(classify(['build.rs']).rust_fmt, true);
+  assert.equal(classify(['scripts/clippy-maintained.sh']).rust_root, true);
   assert.equal(classify(['.cargo/config.toml']).rust_root, true);
   assert.equal(classify(['.cargo/config.toml']).rust_cd, true);
   assert.equal(classify(['.github/workflows/rust-all-targets.yml']).rust_root, true);
@@ -99,5 +100,72 @@ test('sparse compilation restores only embedded inputs, preserving archived file
     assert.equal(existsSync(path.join(cwd, 'research/fixture.json')), true);
     assert.equal(existsSync(path.join(cwd, 'research/build.json')), true);
     assert.equal(existsSync(path.join(cwd, 'research/archive/huge.json')), false);
+  } finally { rmSync(cwd, { recursive: true, force: true }); }
+});
+
+test('new Cargo targets and source modules survive sparse checkouts without loading archives', () => {
+  const cwd = mkdtempSync(path.join(os.tmpdir(), 'crypto-ci-targets-'));
+  const git = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
+  const write = (file, text) => { mkdirSync(path.dirname(path.join(cwd, file)), { recursive: true }); writeFileSync(path.join(cwd, file), text); };
+  try {
+    git('init', '-q'); git('config', 'user.email', 'ci@example.invalid'); git('config', 'user.name', 'CI scope test');
+    write('Cargo.toml', '[package]\nname="fixture"\nversion="0.1.0"\n[[example]]\nname="fresh"\npath = "experiments/fresh/native.rs" # target\n');
+    write('src/lib.rs', '// maintained\n');
+    write('experiments/fresh/native.rs', 'mod reference;\n');
+    write('experiments/fresh/reference.rs', 'const DATA: &str = include_str!("input.json");\n');
+    write('experiments/fresh/input.json', '{}\n');
+    write('experiments/fresh/archive/raw.jsonl', '{}\n');
+    git('add', '.'); git('commit', '-qm', 'base');
+    const base = git('rev-parse', 'HEAD');
+    write('experiments/fresh/reference.rs', 'const DATA: &str = include_str!("input.json");\n// revised\n');
+    git('add', '.'); git('commit', '-qm', 'module change');
+    // Scope-only jobs can read Cargo.toml from Git without its checkout.
+    git('sparse-checkout', 'set', '--no-cone', '/src/');
+    assert.equal(select({ event: 'pull_request', base, cwd }).rust_root, true);
+    assert.equal(existsSync(path.join(cwd, 'experiments/fresh/native.rs')), true);
+    assert.equal(existsSync(path.join(cwd, 'experiments/fresh/reference.rs')), true);
+    assert.equal(existsSync(path.join(cwd, 'experiments/fresh/input.json')), false);
+    materializeInputs(cwd);
+    assert.equal(existsSync(path.join(cwd, 'experiments/fresh/input.json')), true);
+    assert.equal(existsSync(path.join(cwd, 'experiments/fresh/archive/raw.jsonl')), false);
+  } finally { rmSync(cwd, { recursive: true, force: true }); }
+});
+
+test('external Rust path modules and includes are followed recursively', () => {
+  const cwd = mkdtempSync(path.join(os.tmpdir(), 'crypto-ci-modules-'));
+  const git = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
+  const write = (file, text) => { mkdirSync(path.dirname(path.join(cwd, file)), { recursive: true }); writeFileSync(path.join(cwd, file), text); };
+  try {
+    git('init', '-q'); git('config', 'user.email', 'ci@example.invalid'); git('config', 'user.name', 'CI scope test');
+    write('examples/check.rs', '#[path="../research/study/reference.rs"]\nmod reference;\n');
+    write('research/study/reference.rs', 'mod arithmetic;\ninclude!("render.inc");\n');
+    write('research/study/arithmetic.rs', 'const DATA: &str = include_str!("fixture.json");\n');
+    write('research/study/render.inc', '#[path="display.rs"]\nmod display;\n');
+    write('research/study/display.rs', '// display\n');
+    write('research/study/fixture.json', '{}\n');
+    write('research/study/archive/raw.jsonl', '{}\n');
+    git('add', '.'); git('commit', '-qm', 'base');
+    const base = git('rev-parse', 'HEAD');
+    write('research/study/display.rs', '// revised display\n');
+    git('add', '.'); git('commit', '-qm', 'external module change');
+    git('sparse-checkout', 'set', '--no-cone', '/examples/');
+    assert.equal(select({ event: 'pull_request', base, cwd }).rust_root, true);
+    for (const file of ['reference.rs', 'arithmetic.rs', 'render.inc', 'display.rs']) {
+      assert.equal(existsSync(path.join(cwd, 'research/study', file)), true, file);
+    }
+    materializeInputs(cwd);
+    assert.equal(existsSync(path.join(cwd, 'research/study/fixture.json')), true);
+    assert.equal(existsSync(path.join(cwd, 'research/study/archive/raw.jsonl')), false);
+    // Deleting an external path module, include! file or ordinary submodule
+    // must fail closed even when its declaring source remains unchanged.
+    for (const file of ['reference.rs', 'render.inc', 'arithmetic.rs']) {
+      const relative = `research/study/${file}`;
+      const saved = readFileSync(path.join(cwd, relative), 'utf8');
+      const deletionBase = git('rev-parse', 'HEAD');
+      rmSync(path.join(cwd, relative));
+      git('add', '.'); git('commit', '-qm', `delete ${file}`);
+      assert.deepEqual(select({ event: 'pull_request', base: deletionBase, cwd }), Object.fromEntries(scopes.map(key => [key, true])));
+      write(relative, saved); git('add', '.'); git('commit', '-qm', `restore ${file}`);
+    }
   } finally { rmSync(cwd, { recursive: true, force: true }); }
 });

@@ -46,7 +46,12 @@ irrelevant path cannot leave a required workflow permanently pending.
 
 Rust lint/compile and Rust packaging use sparse checkouts, then materialize the
 exact compile-time inputs discovered from maintained Rust source. This avoids
-checking out the multi-gigabyte research archives to compile the crate. The
+checking out the multi-gigabyte research archives to compile the crate. Cargo's
+declared target paths and their Rust source modules are discovered from the
+current manifest and explicit `#[path]`/`include!` source dependencies, so
+newly added frozen examples and external modules remain covered by the
+all-target gate. Root lint retains `scripts/clippy-maintained.sh`, which selects
+maintained examples while the all-target gate compiles frozen sources. The
 release builds the six binaries it ships or smoke-tests, while rust-all-targets
 continues to check every root target. Rust release builds and ecbench use caches.
 Main-branch rolling releases retain their existing full packaging behavior.
