@@ -50,6 +50,22 @@ const METRICS: [Metric; 4] = [
     }),
 ];
 
+/// Post-hoc diagnostics (`KOBLITZ_ICC_DIAG=1`), not pre-registered: the
+/// factor-base size, and the m = 3 work split into pins per call (`x₃`
+/// values tried, PinX3) and roots per pin.
+const DIAGNOSTICS: [Metric; 4] = [
+    ("diag_factor_base_points", |r| f(r, "factor_base_points")),
+    ("diag_pins_per_call", |r| {
+        f(r, "sym_e3_visited") / f(r, "groebner_calls")
+    }),
+    ("diag_roots_per_pin", |r| {
+        f(r, "sym_roots") / f(r, "sym_e3_visited").max(1.0)
+    }),
+    ("diag_work_per_call_per_F", |r| {
+        f(r, "sym_roots") / f(r, "groebner_calls") / f(r, "factor_base_points")
+    }),
+];
+
 /// `(ICC_E, σ²_u, σ²_w, σ²_e)` of a curves × subspaces grid.
 fn icc(grid: &[Vec<f64>]) -> (f64, f64, f64, f64) {
     let (a, b) = (grid.len() as f64, grid[0].len() as f64);
@@ -109,7 +125,13 @@ fn main() {
         let mut res = serde_json::Map::new();
         res.insert("curves".into(), json!(curves.len()));
         res.insert("subspaces".into(), json!(seeds.len()));
-        for (name, metric) in METRICS {
+        let diag = std::env::var("KOBLITZ_ICC_DIAG").is_ok_and(|v| v == "1");
+        let metrics: Vec<Metric> = METRICS
+            .iter()
+            .chain(if diag { DIAGNOSTICS.iter() } else { [].iter() })
+            .copied()
+            .collect();
+        for (name, metric) in metrics {
             let grid: Vec<Vec<f64>> = curves
                 .iter()
                 .map(|c| seeds.iter().map(|s| metric(by[c][s])).collect())

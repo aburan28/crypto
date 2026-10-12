@@ -70,12 +70,20 @@ fn main() {
     let geometric = std::env::var("KOBLITZ_PRES_GEOMETRIC").is_ok_and(|v| v == "1");
     // `KOBLITZ_PRES_M3=e3`: m = 3 through the symmetrised S₄ with exact e₃
     // enumeration (needs `KOBLITZ_PRES_GEOMETRIC=1`); written to `_m3e3`.
-    let m3 = std::env::var("KOBLITZ_PRES_M3").is_ok_and(|v| v == "e3");
-    let suffix = match (geometric, m3) {
-        (true, true) => "_geom_m3e3",
-        (false, true) => "_m3e3",
-        (true, false) => "_geom",
-        (false, false) => "",
+    // `KOBLITZ_PRES_M3=pin`: m = 3 by pinning x₃ (`M3Solver::PinX3`); `_m3pin`.
+    let m3_mode = std::env::var("KOBLITZ_PRES_M3").ok();
+    let (m3, m3_solver) = match m3_mode.as_deref() {
+        Some("e3") => (true, M3Solver::SymmetricE3),
+        Some("pin") => (true, M3Solver::PinX3),
+        _ => (false, M3Solver::Chain),
+    };
+    let suffix = match (geometric, m3_mode.as_deref()) {
+        (true, Some("e3")) => "_geom_m3e3",
+        (false, Some("e3")) => "_m3e3",
+        (true, Some("pin")) => "_geom_m3pin",
+        (false, Some("pin")) => "_m3pin",
+        (true, _) => "_geom",
+        (false, _) => "",
     };
     let path = std::path::PathBuf::from(dir).join(format!("pres_{n}_{a2}_l{l}{suffix}.jsonl"));
     let done: HashSet<(u64, u64)> = std::fs::read_to_string(&path)
@@ -126,7 +134,7 @@ fn main() {
         let opts = IcCostOptions {
             l,
             m: if m3 { 3 } else { 2 },
-            m3_solver: if m3 { M3Solver::SymmetricE3 } else { M3Solver::Chain },
+            m3_solver,
             yield_probes: probes,
             max_trials: 0,
             // `KOBLITZ_PRES_FFD_TARGETS=0` skips first fall: its decomposability
