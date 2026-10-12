@@ -29,6 +29,8 @@
 
 #[path = "ecbench/pdp3_koblitz.rs"]
 mod pdp3_koblitz;
+#[path = "ecbench/pdp_split_oracle.rs"]
+mod pdp_split_oracle;
 
 use std::io::Write as _;
 use std::path::{Path, PathBuf};
@@ -460,10 +462,26 @@ enum DbCmd {
     },
 }
 
+/// Every plug-in this binary links: `pdp3_koblitz`'s, then
+/// `pdp_split_oracle`'s (the `pdp-split` oracle and the `koblitz-closure`
+/// base).  Names do not overlap, so the order only fixes lookup.
+fn binary_plugins() -> crypto_lib::cryptanalysis::ecbench::methods::BinaryPlugins {
+    crypto_lib::cryptanalysis::ecbench::methods::BinaryPlugins {
+        base: |name, instance| {
+            (pdp3_koblitz::plugins().base)(name, instance)
+                .or_else(|| pdp_split_oracle::base(name, instance))
+        },
+        oracle: |name, summands, instance| {
+            (pdp3_koblitz::plugins().oracle)(name, summands, instance)
+                .or_else(|| pdp_split_oracle::oracle(name, summands, instance))
+        },
+    }
+}
+
 fn main() -> ExitCode {
     // Oracles this binary links that the library cannot name (see
     // `pdp3_koblitz`); registered before any run, child or replay.
-    crypto_lib::cryptanalysis::ecbench::methods::register_binary_plugins(pdp3_koblitz::plugins());
+    crypto_lib::cryptanalysis::ecbench::methods::register_binary_plugins(binary_plugins());
     match run(Cli::parse()) {
         Ok(code) => code,
         Err(e) => {
