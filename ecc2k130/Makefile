@@ -669,6 +669,21 @@ test-table-walk-host:
 	./build/test-table-walk-host-nibble-popc
 	./build/test-table-walk-host-bytes-popc
 
+# The full RTX PRO 6000 redesign arithmetic path on the same host/reference
+# probe. Keep this separate from the broad layout test: the polynomial cold
+# probe is intentionally expensive on a CPU, while this small fixture catches
+# basis, square-table and reduced-conversion regressions before a GPU launch.
+TABLE_REDESIGN_PROBE_POINTS ?= 64
+test-table-walk-host-redesign:
+	mkdir -p build
+	$(CXX) -O2 -std=c++17 -DECC_WALK_TABLE=1 -DECC_TABLE_BRANCHES=8 -DECC_TABLE_PIVOT_BYTES=1 -DECC_TABLE_PHASE_POPC=0 -DECC_CYCLE_FAST2=1 \
+	    -DECC_PACKED_INV_POLY=2 -DECC_PACKED_SQUARE_TABLE=1 -DECC_PACKED_FROM_REDUCED=1 \
+	    -DECC_PACKED_ALU_SQUARE=1 -DECC_PACKED_DIRECT_REDUCE=1 -DECC_PACKED_GENERATED_PRODUCT=1 \
+	    -DECC_PACKED_INLINE_POLY=3 -Wno-unknown-pragmas -Wno-unused-function \
+	    -DECC_TABLE_PROBE_POINTS=$(TABLE_REDESIGN_PROBE_POINTS) src/testtablewalkhost.cpp -o build/test-table-walk-host-redesign
+	./build/test-table-walk-host-redesign
+.PHONY: test-table-walk-host-redesign
+
 # Host static price of twPhase byte-table vs popc planes (CHEAPER-SELECTION.md).
 test-phase-cost:
 	mkdir -p build

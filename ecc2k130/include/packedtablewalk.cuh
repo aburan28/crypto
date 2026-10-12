@@ -319,7 +319,12 @@ TW_FN void twDenominator(unsigned tag, const P131 &xp, const uint32_t *shared, P
 }
 
 // Keep the full-point probe cold. It is deliberately independent of the
-// history hint and uses the same control flow as the host reference.
+// history hint and uses the same control flow as the host reference. Probe
+// points are held in polynomial coordinates: the hot walk already stores
+// them that way, and the polynomial multiply/inverse path avoids converting
+// the table addend and every affine intermediate into the normal basis. The
+// tag path still converts x when it needs the normal-basis selector, so this
+// is an arithmetic representation change, not a walk-rule change.
 struct TwCyclePoint { P131 x, y; };
 #ifdef __CUDACC__
 #define TW_METHOD __device__ inline
@@ -358,26 +363,27 @@ TW_FN P131 twCanonical(P131 x) {
 struct TwCycleOps {
     const uint32_t *sel, *tab;
     int dpWeight;
-    TW_METHOD bool distinguished(const TwCyclePoint &p) const { return twWeight(p.x) <= dpWeight; }
+    TW_METHOD bool distinguished(const TwCyclePoint &p) const {
+        return twWeight(fromPolynomial131(p.x)) <= dpWeight;
+    }
     TW_METHOD unsigned tag(const TwCyclePoint &p) const {
-        return twRawTag(p.x, toPolynomial131(p.y), twWeight(p.x), sel);
+        const P131 x = fromPolynomial131(p.x);
+        return twRawTag(x, p.y, twWeight(x), sel);
     }
     TW_METHOD bool next(const TwCyclePoint &p, unsigned t, TwCyclePoint *out) const {
         P131 zero = {{0,0,0,0,0}}, tx, ty;
         twAddend(t, zero, zero, tab, &tx, &ty);
-        tx = fromPolynomial131(tx); ty = fromPolynomial131(ty);
         const P131 d = add131(p.x, tx);
         if (twFieldEqual(d, zero)) return false;
-        const P131 lambda = mul131(add131(p.y, ty), inv131(d));
-        out->x = add131(add131(sqr131(lambda), lambda), d);
-        out->y = add131(add131(mul131(lambda, add131(p.x, out->x)), out->x), p.y);
+        const P131 lambda = mulPolynomial131(add131(p.y, ty), invPolynomial131(d));
+        out->x = add131(add131(twSquare(lambda, sel), lambda), d);
+        out->y = add131(add131(mulPolynomial131(lambda, add131(p.x, out->x)), out->x), p.y);
         return true;
     }
     TW_METHOD bool oppositeCloses(const TwCyclePoint &, const TwCyclePoint &after,
                                   unsigned t) const {
         P131 zero = {{0,0,0,0,0}}, tx, ty;
         twAddend(t, zero, zero, tab, &tx, &ty);
-        tx = fromPolynomial131(tx);
         // The caller proved t is the inverse of the first addend. By group
         // associativity the result is the start whenever next() is defined;
         // next() is defined exactly when this denominator is nonzero.
@@ -387,9 +393,10 @@ struct TwCycleOps {
         return twFieldEqual(a.x,b.x) && twFieldEqual(a.y,b.y);
     }
     TW_METHOD bool less(const TwCyclePoint &a, const TwCyclePoint &b) const {
-        const int wa = twWeight(a.x), wb = twWeight(b.x);
+        const P131 ax = fromPolynomial131(a.x), bx = fromPolynomial131(b.x);
+        const int wa = twWeight(ax), wb = twWeight(bx);
         if (wa != wb) return wa < wb;
-        return twFieldLess(twCanonical(a.x), twCanonical(b.x));
+        return twFieldLess(twCanonical(ax), twCanonical(bx));
     }
 };
 
@@ -423,28 +430,28 @@ __device__ __forceinline__ void twCycleProfileAccumulateDevice(
 }
 #endif
 
-TW_COLD unsigned twCycleTag(const P131 &x, const P131 &yp, unsigned raw,
+TW_COLD unsigned twCycleTag(const P131 &xp, const P131 &yp, unsigned raw,
                             const uint32_t *sel, const uint32_t *tab, int dpWeight) {
 #ifdef __CUDACC__
-    return eccCycleAnchorTagDevice(TwCyclePoint{x, fromPolynomial131(yp)}, raw,
+    return eccCycleAnchorTagDevice(TwCyclePoint{xp, yp}, raw,
 #else
-    return eccCycleAnchorTag(TwCyclePoint{x, fromPolynomial131(yp)}, raw,
+    return eccCycleAnchorTag(TwCyclePoint{xp, yp}, raw,
 #endif
                              TwCycleOps{sel,tab,dpWeight}, 131, TW_H);
 }
 #if ECC_CYCLE_PROFILE
-TW_COLD unsigned twCycleTagProfile(const P131 &x, const P131 &yp, unsigned raw,
+TW_COLD unsigned twCycleTagProfile(const P131 &xp, const P131 &yp, unsigned raw,
                                    const uint32_t *sel, const uint32_t *tab,
                                    int dpWeight, EccCycleProfile *totals) {
     EccCycleProbeProfile probe;
 #ifdef __CUDACC__
     const unsigned tag = eccCycleAnchorTagDeviceProfile(
-        TwCyclePoint{x, fromPolynomial131(yp)}, raw,
+        TwCyclePoint{xp, yp}, raw,
         TwCycleOps{sel,tab,dpWeight}, 131, TW_H, &probe);
     twCycleProfileAccumulateDevice(totals, probe);
 #else
     const unsigned tag = eccCycleAnchorTagProfile(
-        TwCyclePoint{x, fromPolynomial131(yp)}, raw,
+        TwCyclePoint{xp, yp}, raw,
         TwCycleOps{sel,tab,dpWeight}, 131, TW_H, &probe);
     eccCycleProfileAccumulate(totals, probe);
 #endif
@@ -460,11 +467,14 @@ TW_FN unsigned twSelectHist(const P131 &x, const P131 &yp, int hw,
                             ) {
     unsigned tag = twRawTag(x,yp,hw,sel);
     if (eccTagFruitless(tag,*hist,131)) {
+        // The hot selector already has x in the normal basis. Convert only
+        // on the rare hinted path; the cold probe itself stays polynomial.
+        const P131 xp = toPolynomial131(x);
 #if ECC_CYCLE_PROFILE
-        tag = profile ? twCycleTagProfile(x,yp,tag,sel,tab,dpWeight,profile)
-                      : twCycleTag(x,yp,tag,sel,tab,dpWeight);
+        tag = profile ? twCycleTagProfile(xp,yp,tag,sel,tab,dpWeight,profile)
+                      : twCycleTag(xp,yp,tag,sel,tab,dpWeight);
 #else
-        tag = twCycleTag(x,yp,tag,sel,tab,dpWeight);
+        tag = twCycleTag(xp,yp,tag,sel,tab,dpWeight);
 #endif
     }
     *hist = eccHistPush(*hist,tag);

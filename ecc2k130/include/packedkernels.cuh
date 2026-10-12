@@ -613,13 +613,13 @@ __device__ __forceinline__ void tableResolveHintSlot(const WalkParams<unsigned> 
     const size_t id = size_t(slot) * p.threads + tid;
     unsigned long long hist = p.hist[id];
     const unsigned raw = unsigned(hist & 0xffffull);
-    const P131 x = fromPolynomial131(load(p.x, slot, tid, p.threads));
+    const P131 xp = load(p.x, slot, tid, p.threads);
     const P131 yp = load(p.y, slot, tid, p.threads);
 #if ECC_CYCLE_PROFILE
-    const unsigned tag = twCycleTagProfile(x, yp, raw, twSel, twTab, p.dpWeight,
+    const unsigned tag = twCycleTagProfile(xp, yp, raw, twSel, twTab, p.dpWeight,
                                            p.cycleProfile);
 #else
-    const unsigned tag = twCycleTag(x, yp, raw, twSel, twTab, p.dpWeight);
+    const unsigned tag = twCycleTag(xp, yp, raw, twSel, twTab, p.dpWeight);
 #endif
     p.hist[id] = (hist & ~0xffffull) | tag;
 }
