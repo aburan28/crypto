@@ -3,6 +3,12 @@ name: Matrix-F5 cut-19 fresh-seed confirmation
 on:
   pull_request:
     paths:
+      - 'tools/isolated_bench.py'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - 'src/cryptanalysis/matrix_f5_f2.rs'
       - 'src/cryptanalysis/gf2_elim.rs'
       - 'examples/f4_f2_bench.rs'
@@ -18,12 +24,13 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+# PRs retain source, correctness and existing-evidence checks.
+# Fresh timing panels and their result gates run only after merge or by manual dispatch.
 jobs:
   paired-f5:
     runs-on: ubuntu-24.04
-    timeout-minutes: 75
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 75 }}
     strategy:
       fail-fast: false
       matrix:
@@ -48,6 +55,7 @@ jobs:
         run: |
           python3 tools/isolated_bench.py busy --lock "$RUNNER_TEMP/f5-support-cut19-confirm-bench.lock" -- cargo build --release --example f4_f2_bench --example f5_support_cut19_pair --example f5_support_split_cpus --example f5_support_cut19_confirm_analyze
       - name: Choose reservable CPUs
+        if: github.event_name != 'pull_request'
         id: cpus
         run: |
           target/release/examples/f5_support_split_cpus \
@@ -55,6 +63,7 @@ jobs:
             research/f5_support_cut19_confirm_20261003/cpu-choice-t${{ matrix.threads }}.json \
             >> "$GITHUB_OUTPUT"
       - name: Replay four fresh seed blocks
+        if: github.event_name != 'pull_request'
         id: run
         continue-on-error: true
         run: |
@@ -65,6 +74,7 @@ jobs:
             research/f5_support_cut19_confirm_20261003/linux-t${{ matrix.threads }} \
             8
       - name: Apply frozen complete-call gate
+        if: github.event_name != 'pull_request'
         run: |
           target/release/examples/f5_support_cut19_confirm_analyze \
             research/f5_support_cut19_confirm_20261003/linux-t${{ matrix.threads }} \
@@ -72,7 +82,7 @@ jobs:
             research/f5_support_cut19_confirm_20261003/analysis-t${{ matrix.threads }}.json \
             8
       - name: Preserve every qualified and failed attempt
-        if: always()
+        if: github.event_name != 'pull_request' && (always())
         uses: actions/upload-artifact@v4
         with:
           name: f5-support-cut19-confirm-t${{ matrix.threads }}-${{ github.sha }}

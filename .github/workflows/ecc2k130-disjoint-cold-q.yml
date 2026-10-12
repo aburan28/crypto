@@ -9,10 +9,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   validate:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 35 }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,6 +46,7 @@ jobs:
             research/notes/ecc2k130/point_sum_cold_20260930
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             tools/isolated_bench.py
+      - uses: Swatinem/rust-cache@v2
       - name: Replay every frozen public Q and check Python syntax
         run: |
           set -euo pipefail
@@ -154,6 +159,7 @@ jobs:
             research/notes/ecc2k130/point_sum_cold_20260930
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             tools/isolated_bench.py
+      - uses: Swatinem/rust-cache@v2
       - name: Materialize and build exact frozen source
         run: |
           set -euo pipefail
