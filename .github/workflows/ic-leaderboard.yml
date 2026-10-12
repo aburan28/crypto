@@ -6,11 +6,19 @@ name: ic-leaderboard
 # section later than the one the page is current through.  It runs no
 # experiment.  The lab browser's data file (AGENTS.md §7c) is checked the
 # same way, against every committed session and round it indexes.
+#
+# A `paths:` list runs the check on a change to the files it names and on
+# nothing else, so the lists below must name every file the builder reads.
+# scripts/check_ic_leaderboard_paths.py records those reads and fails when
+# either list misses one; the builder is on both lists, so the change that
+# adds an input runs it.
 
 on:
   pull_request:
     paths:
       - 'scripts/build_ic_leaderboard.py'
+      - 'scripts/check_ic_leaderboard_paths.py'
+      - 'scripts/test_check_ic_leaderboard_paths.py'
       - 'scripts/curve_id.py'
       - 'docs/ic-leaderboard.html'
       - 'docs/ic/LEADERBOARD.md'
@@ -29,6 +37,19 @@ on:
       - 'docs/curves/ic/curves.schema.json'
       - 'research/ic_descent_20260930/runs-isolated/main/**'
       - 'research/ic_single_target_20260930/runs/**'
+      - 'research/ic_tool_program/rule/v3/analysis.json'
+      - 'research/ic_tool_program/rule/v3/runs/**'
+      - 'research/ecbench_n37_rank_columns_20261004/RESULT.json'
+      - 'research/ecbench_n37_k8_k16_20261004/DECISION.json'
+      - 'research/ecbench_n37_online_ir_20261004/DECISION.json'
+      - 'research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k8-0.json'
+      - 'research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k16-0.json'
+      - 'research/ecbench_n37_native_online_wall_20261004/DECISION.json'
+      - 'research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json'
+      - 'research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl'
+      - 'research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json'
+      - 'research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json'
+      - 'research/ecbench_n41_n53_shared_rank_20261005/DECISION.json'
       - '.github/workflows/ic-leaderboard.yml'
       - 'scripts/build_lab_browser.py'
       - 'docs/browser/**'
@@ -40,6 +61,8 @@ on:
     branches: [main]
     paths:
       - 'scripts/build_ic_leaderboard.py'
+      - 'scripts/check_ic_leaderboard_paths.py'
+      - 'scripts/test_check_ic_leaderboard_paths.py'
       - 'scripts/curve_id.py'
       - 'docs/ic-leaderboard.html'
       - 'docs/ic/LEADERBOARD.md'
@@ -58,6 +81,19 @@ on:
       - 'docs/curves/ic/curves.schema.json'
       - 'research/ic_descent_20260930/runs-isolated/main/**'
       - 'research/ic_single_target_20260930/runs/**'
+      - 'research/ic_tool_program/rule/v3/analysis.json'
+      - 'research/ic_tool_program/rule/v3/runs/**'
+      - 'research/ecbench_n37_rank_columns_20261004/RESULT.json'
+      - 'research/ecbench_n37_k8_k16_20261004/DECISION.json'
+      - 'research/ecbench_n37_online_ir_20261004/DECISION.json'
+      - 'research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k8-0.json'
+      - 'research/ecbench_n37_online_ir_20261004/candidate_claims/ic-k16-0.json'
+      - 'research/ecbench_n37_native_online_wall_20261004/DECISION.json'
+      - 'research/ecbench_n37_native_online_wall_20261004/EVIDENCE.json'
+      - 'research/f6_ic_geometric_closure_20261003/small_cold/measurements.jsonl'
+      - 'research/f6_ic_geometric_closure_20261003/small_cold/replay-certificate.json'
+      - 'research/f6_ic_ecbench_ladder_20261005/ANALYSIS.json'
+      - 'research/ecbench_n41_n53_shared_rank_20261005/DECISION.json'
       - '.github/workflows/ic-leaderboard.yml'
       - 'scripts/build_lab_browser.py'
       - 'docs/browser/**'
@@ -85,6 +121,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: The path check's own tests
+        run: python3 scripts/test_check_ic_leaderboard_paths.py
+      - name: This workflow's path filter covers every file the builder reads
+        run: python3 scripts/check_ic_leaderboard_paths.py
       - name: The leaderboard is current with its sources and the ledger
         run: python3 scripts/build_ic_leaderboard.py --check
       - name: The lab browser's index is current with the registry, sessions and rounds (AGENTS.md §7c)

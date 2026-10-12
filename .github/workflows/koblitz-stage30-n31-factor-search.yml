@@ -1,11 +1,9 @@
 name: Koblitz Stage 30 n31 factor search
 
 on:
-  pull_request:
-    paths:
-      - "scripts/run_koblitz_stage30_n31_search.py"
-      - "research/sat_factor_base_review_20260908/continuation-05-sota-gates/STAGE30_N31_FACTOR_SEARCH.md"
-      - ".github/workflows/koblitz-stage30-n31-factor-search.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

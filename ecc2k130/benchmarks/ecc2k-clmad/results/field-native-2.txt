@@ -1,0 +1,9 @@
+device: NVIDIA RTX PRO 6000 Blackwell Server Edition  sm_120  188 SMs  2.4 GHz
+        1536 threads/SM, 100 KB shared/SM, 99 KB shared/block (opt-in)
+curve:  ecc2k95, F_2^97, r = 95 bits, class size 2m = 194 (rho speedup 13.9x)
+        class-weight table 8000 B shared
+  mul (throughput): 127.30 Gop/s
+  mul (dependent):  127.19 Gop/s
+  sqr:              342.06 Gop/s  (0.37 mul-equivalents)
+  inv:              3424.72 Mop/s  (37 mul-equivalents)
+  class weight:     68.72 Gop/s  (1.85 mul-equivalents)

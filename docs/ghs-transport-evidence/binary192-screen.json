@@ -1,0 +1,165 @@
+{
+  "schema": "ghs-screen/v1",
+  "curve": {
+    "model": "y^2+xy=x^3+a*x^2+b",
+    "absolute_degree": 192,
+    "modulus": "0x1000000000000000000000000000000000000000000000087",
+    "a": "0x0",
+    "b": "0x1"
+  },
+  "summary": {
+    "factorisations": 13,
+    "candidates_within_bound": 13,
+    "genus_bound": "4",
+    "best_relative_degree": 2,
+    "best_base_degree": 96,
+    "best_magic_number": 1,
+    "best_genus": "0",
+    "interpretation": "structural screen only; no DLP cost or vulnerability claim"
+  },
+  "towers": [
+    {
+      "relative_degree": 2,
+      "base_degree": 96,
+      "field_tower": "F_2 <= F_(2^96) <= F_(2^192)",
+      "cover_tower": "C/F_(2^96) -> E/F_(2^192)",
+      "magic_number": 1,
+      "genus": "0",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "2",
+      "within_genus_bound": true
+    },
+    {
+      "relative_degree": 3,
+      "base_degree": 64,
+      "field_tower": "F_2 <= F_(2^64) <= F_(2^192)",
+      "cover_tower": "C/F_(2^64) -> E/F_(2^192)",
+      "magic_number": 1,
+      "genus": "0",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "2",
+      "within_genus_bound": true
+    },
+    {
+      "relative_degree": 4,
+      "base_degree": 48,
+      "field_tower": "F_2 <= F_(2^48) <= F_(2^192)",
+      "cover_tower": "C/F_(2^48) -> E/F_(2^192)",
+      "magic_number": 1,
+      "genus": "0",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "2",
+      "within_genus_bound": true
+    },
+    {
+      "relative_degree": 6,
+      "base_degree": 32,
+      "field_tower": "F_2 <= F_(2^32) <= F_(2^192)",
+      "cover_tower": "C/F_(2^32) -> E/F_(2^192)",
+      "magic_number": 1,
+      "genus": "0",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "2",
+      "within_genus_bound": true
+    },
+    {
+      "relative_degree": 8,
+      "base_degree": 24,
+      "field_tower": "F_2 <= F_(2^24) <= F_(2^192)",
+      "cover_tower": "C/F_(2^24) -> E/F_(2^192)",
+      "magic_number": 1,
+      "genus": "0",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "2",
+      "within_genus_bound": true
+    },
+    {
+      "relative_degree": 12,
+      "base_degree": 16,
+      "field_tower": "F_2 <= F_(2^16) <= F_(2^192)",
+      "cover_tower": "C/F_(2^16) -> E/F_(2^192)",
+      "magic_number": 1,
+      "genus": "0",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "2",
+      "within_genus_bound": true
+    },
+    {
+      "relative_degree": 16,
+      "base_degree": 12,
+      "field_tower": "F_2 <= F_(2^12) <= F_(2^192)",
+      "cover_tower": "C/F_(2^12) -> E/F_(2^192)",
+      "magic_number": 1,
+      "genus": "0",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "2",
+      "within_genus_bound": true
+    },
+    {
+      "relative_degree": 24,
+      "base_degree": 8,
+      "field_tower": "F_2 <= F_(2^8) <= F_(2^192)",
+      "cover_tower": "C/F_(2^8) -> E/F_(2^192)",
+      "magic_number": 1,
+      "genus": "0",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "2",
+      "within_genus_bound": true
+    },
+    {
+      "relative_degree": 32,
+      "base_degree": 6,
+      "field_tower": "F_2 <= F_(2^6) <= F_(2^192)",
+      "cover_tower": "C/F_(2^6) -> E/F_(2^192)",
+      "magic_number": 1,
+      "genus": "0",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "2",
+      "within_genus_bound": true
+    },
+    {
+      "relative_degree": 48,
+      "base_degree": 4,
+      "field_tower": "F_2 <= F_(2^4) <= F_(2^192)",
+      "cover_tower": "C/F_(2^4) -> E/F_(2^192)",
+      "magic_number": 1,
+      "genus": "0",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "2",
+      "within_genus_bound": true
+    },
+    {
+      "relative_degree": 64,
+      "base_degree": 3,
+      "field_tower": "F_2 <= F_(2^3) <= F_(2^192)",
+      "cover_tower": "C/F_(2^3) -> E/F_(2^192)",
+      "magic_number": 1,
+      "genus": "0",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "2",
+      "within_genus_bound": true
+    },
+    {
+      "relative_degree": 96,
+      "base_degree": 2,
+      "field_tower": "F_2 <= F_(2^2) <= F_(2^192)",
+      "cover_tower": "C/F_(2^2) -> E/F_(2^192)",
+      "magic_number": 1,
+      "genus": "0",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "2",
+      "within_genus_bound": true
+    },
+    {
+      "relative_degree": 192,
+      "base_degree": 1,
+      "field_tower": "F_2 <= F_(2^1) <= F_(2^192)",
+      "cover_tower": "C/F_(2^1) -> E/F_(2^192)",
+      "magic_number": 1,
+      "genus": "0",
+      "ghs_type": "I",
+      "artin_schreier_cover_degree": "2",
+      "within_genus_bound": true
+    }
+  ]
+}

@@ -1,11 +1,9 @@
 name: Koblitz Stage 81 n53 specialized initial pair sums
 
 on:
-  pull_request:
-    paths:
-      - "examples/koblitz_rank_fixture.rs"
-      - "scripts/run_koblitz_stage81_specialized_pair_sums.py"
-      - ".github/workflows/koblitz-stage81-specialized-pair-sums.yml"
+  # Historical stage control. Manual only: shared fixture path
+  # filters used to enqueue dozens of these on one PR and starve
+  # GitHub-hosted runners account-wide.
   workflow_dispatch:
 
 permissions:

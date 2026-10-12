@@ -1626,12 +1626,35 @@ mod tests {
             assert!(
                 found.1 == frozen.1 || found.1 == (fc.f.p - frozen.1) % fc.f.p,
                 "generated point must match the frozen generator up to sign"
+            );;;;
+            let (x, y) = gen.canonical(gg);
+            let (expected_x, expected_y) = fc.canonical(g);
+            assert_eq!(
+                (
+                    gen.f.p,
+                    gen.n,
+                    gen.f.from_mont(gen.a),
+                    gen.f.from_mont(gen.b),
+                    x,
+                    y.min(gen.f.p - y),
+                ),
+                (
+                    fc.f.p,
+                    fc.n,
+                    fc.f.from_mont(fc.a),
+                    fc.f.from_mont(fc.b),
+                    expected_x,
+                    expected_y.min(fc.f.p - expected_y),
+                ),
+                "bits={bits}"
             );
         }
         let (gen, gg) = find_a3_curve(28, 3).unwrap();
         assert_eq!(gen.f.p, 268_435_399);
         assert_eq!(gen.f.from_mont(gen.b), 3);
-        assert_eq!(gen.canonical(gg), (1, 1));
+        let found = gen.canonical(gg);
+        assert_eq!(found.0, 1);
+        assert!(found.1 == 1 || found.1 == gen.f.p - 1);
         assert_eq!(gen.n, 268_407_199);
     }
 

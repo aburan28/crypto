@@ -528,6 +528,48 @@ fn class_view_v2(s: &StableFacts) -> Value {
     })
 }
 
+/// A conservative hardware class for cross-machine replay admission.
+/// Unlike the measurement environment class, this excludes the compiler on
+/// PATH, kernel release, CPU governor and other settings that can change on
+/// the same physical host. Equal classes may still be distinct machines;
+/// rejecting those receipts is safer than accepting a local replay.
+fn hardware_class_view_v1(s: &StableFacts) -> Value {
+    let cpus: Vec<Value> = s
+        .topology
+        .cpus
+        .iter()
+        .map(|c| json!([c.cpu, c.core_id, c.package, c.node, c.siblings]))
+        .collect();
+    let nodes: Vec<Value> = s
+        .topology
+        .nodes
+        .iter()
+        .map(|n| json!([n.node, n.cpus, n.distances, gib(n.mem_total_kib)]))
+        .collect();
+    json!({
+        "schema": "ecbench.hardware_class/v1",
+        "arch": s.arch,
+        "cpu_vendor": s.cpu_vendor,
+        "cpu_model": s.cpu_model,
+        "cpu_signature": s.cpu_signature,
+        "logical_cpus": s.logical_cpus,
+        "physical_cores": s.physical_cores,
+        "packages": s.packages,
+        "numa_nodes": s.numa_nodes,
+        "cpus": cpus,
+        "nodes": nodes,
+        "perf_levels": s.perf_levels,
+        "mem_total_gib": gib(s.mem_total_kib),
+    })
+}
+
+/// Class of the hardware profile, independent of toolchain and OS policy.
+/// A different value is necessary, though not by itself sufficient, to
+/// establish that an audit ran on another physical machine.
+pub fn hardware_class_id(c: &HostCapsule) -> Result<String, String> {
+    short_id("ECBHW1", &hardware_class_view_v1(&c.stable)).map(|(id, _)| id)
+}
+
 /// Capture the capsule now.
 pub fn capture() -> Result<HostCapsule, String> {
     let stable = stable_facts();
@@ -584,6 +626,24 @@ mod tests {
         assert!(a.env_class_id.starts_with("ECBENV2h"));
         assert_eq!(recompute_class(&a).unwrap(), a.env_class_id);
         assert!(!a.stable.os.is_empty());
+    }
+
+    #[test]
+    fn hardware_class_does_not_change_with_toolchain_or_kernel() {
+        let a = capture().unwrap();
+        let mut b = a.clone();
+        b.stable.rustc_vv = Some("another compiler on PATH".into());
+        b.stable.kernel_release = Some("another kernel".into());
+        assert_ne!(recompute_class(&a).unwrap(), recompute_class(&b).unwrap());
+        assert_eq!(
+            hardware_class_id(&a).unwrap(),
+            hardware_class_id(&b).unwrap()
+        );
+        b.stable.logical_cpus += 1;
+        assert_ne!(
+            hardware_class_id(&a).unwrap(),
+            hardware_class_id(&b).unwrap()
+        );
     }
 
     #[test]

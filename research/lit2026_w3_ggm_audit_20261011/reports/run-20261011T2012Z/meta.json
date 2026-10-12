@@ -1,0 +1,23 @@
+{
+  "run_id": "run-20261011T2012Z",
+  "date": "2026-10-11 (UTC start 20:12)",
+  "commit": "3c239129d + examples/lit2026_w3_ggm_audit.rs (this PR)",
+  "branch": "lit2026/w3-ggm-audit",
+  "host": "Apple M4 Pro, 14 cores, 48 GiB, macOS 26.6, shared (load 80-91 during the run), rustc 1.93.1; isolation L0",
+  "commands": [
+    "CARGO_TARGET_DIR=/Volumes/SSD990-2/crypto/targets/lit2026-w3 cargo build --release --example lit2026_w3_ggm_audit",
+    "lit2026_w3_ggm_audit table . > table.json",
+    "lit2026_w3_ggm_audit fit . > fit.json",
+    "lit2026_w3_ggm_audit measure 24 36 > measure.json",
+    "python plot.py reports/run-20261011T2012Z",
+    "lit2026_w3_ggm_audit report table.json fit.json measure.json > report.md",
+    "typst compile --input run=reports/run-20261011T2012Z report.typ reports/run-20261011T2012Z/report.pdf"
+  ],
+  "measure": {
+    "unit": "group-addition equivalents (gae), counted by ic_boundary::GroupOps; wall time not used",
+    "batches_per_k": 24,
+    "ks": [1, 2, 4, 8, 16],
+    "curves": ["prime-field floor curve over GF(68723001073), order 68723001023 (prime, 36.0 bits), A = 2", "icv1-f2m41-tm2308219-7f48b14a (K_0 / GF(2^41)), r = 549756390943, A = 82"],
+    "reproduced": "the measure sub-command was re-run with the final binary; see measure.reproduction.txt"
+  }
+}

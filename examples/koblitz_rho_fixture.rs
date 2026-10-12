@@ -1787,7 +1787,6 @@ fn main() {
         shared_corpus.is_none() || batch_seed.is_some(),
         "KIC_RHO_BATCH_CORPUS requires the batch_seed argument"
     );
-    assert!(matches!(backend, "reference" | "packed"));
     assert!(matches!(n, 7 | 11 | 13 | 17 | 19 | 23 | 37 | 41 | 53 | 61));
     let fixture_target = FixtureTarget::parse(args.get(7).map(String::as_str));
     assert!(matches!(backend, "reference" | "packed" | "strong"));

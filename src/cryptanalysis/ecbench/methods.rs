@@ -30,9 +30,12 @@ use crate::cryptanalysis::ecbench_large_prime::{
     self as large_prime, SolveConfig as LargePrimeConfig,
 };
 use crate::cryptanalysis::ic_boundary::{
-    rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup, BinaryInstance,
-    Calibration, CountedGroup, FieldOps, GroupOps, NegationClasses, PhaseCost, PointClasses,
-    PrimeInstance, PrimePoint, RhoResult, RhoWalk,
+    price_phase, rho_cap, rho_reference, rho_walk_with, signed_frobenius_rho_tuned, BinaryGroup,
+    BinaryInstance, Calibration, CountedGroup, FieldOps, GroupOps, NegationClasses, PhaseCost,
+    PointClasses, PrimeInstance, PrimePoint, RhoResult, RhoWalk,
+};
+use crate::cryptanalysis::ic_framework::fiber::{
+    FiberDescentOracle, FiberFrobeniusMitmOracle, FiberMitmOracle,
 };
 use crate::cryptanalysis::ic_framework::plugins::{
     BinarySubspaceBase, CompactOrbitScanBase, DescentAlgebraicOracle, FrobeniusMitmOracle,
@@ -90,6 +93,46 @@ const RHO_PARAMS: &[ParamDecl] = &[ParamDecl {
     default: Some("64"),
     help: "step budget as a multiple of √r before the run counts as exhausted",
 }];
+
+// Keep the defaults of the frozen `ic.pipeline_counted` sessions. The
+// existing `ic.pipeline` declaration below retains main's newer options.
+const IC_COUNTED_PARAMS: &[ParamDecl] = &[
+    ParamDecl {
+        name: "factor_base",
+        default: None,
+        help: "factor-base plug-in spec",
+    },
+    ParamDecl {
+        name: "oracle",
+        default: None,
+        help: "decomposition oracle plug-in spec",
+    },
+    ParamDecl {
+        name: "solver",
+        default: Some(""),
+        help: "algebraic solver plug-in spec",
+    },
+    ParamDecl {
+        name: "linalg",
+        default: Some("incremental-gauss"),
+        help: "linear algebra plug-in",
+    },
+    ParamDecl {
+        name: "targets",
+        default: Some("walk"),
+        help: "random or walk",
+    },
+    ParamDecl {
+        name: "max_trials",
+        default: Some("100000000"),
+        help: "relation trial cap",
+    },
+    ParamDecl {
+        name: "solver_budget_seconds",
+        default: Some("0"),
+        help: "per-call solver wall budget",
+    },
+];
 
 /// Every method `ecbench` knows.  Adding one is an entry here and an arm
 /// in [`solve`]; nothing else changes.
@@ -246,12 +289,12 @@ pub fn registry() -> &'static [MethodDecl] {
                 ParamDecl {
                     name: "oracle",
                     default: None,
-                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N on koblitz-standard-subspace",
+                    help: "subtract, mitm, mitm-frobenius, mitm-frobenius-counted or descent-algebraic, with :m=2|3; the cofactor-fiber-aware mitm-fiber:fiber=closed|lifts|blind, mitm-frobenius-fiber:fiber=closed|lifts|blind and descent-algebraic-fiber:fiber=combined|lifts|blind (ic_framework::fiber); or pdp3-koblitz:m=3,engine=inherited-f4|f6-ic,degree=D,node_budget=N on koblitz-standard-subspace",
                 },
                 ParamDecl {
                     name: "solver",
                     default: Some(""),
-                    help: "descent-algebraic only: buchberger-f2, sat-cdcl, exhaustive (with :k=v options)",
+                    help: "descent-algebraic and descent-algebraic-fiber only: f4-f2, buchberger-f2, sat-cdcl, exhaustive (with :k=v options)",
                 },
                 ParamDecl {
                     name: "linalg",
@@ -274,6 +317,14 @@ pub fn registry() -> &'static [MethodDecl] {
                     help: "per-call wall budget for an algebraic solver; nonzero makes the run nondeterministic",
                 },
             ],
+        },
+        MethodDecl {
+            id: "ic.pipeline_counted",
+            family: "ic",
+            summary: "index calculus with solver wall pricing excluded by deterministic phase recomputation; unpriced solver work remains explicit",
+            entry: "ic_framework::run_pipeline + ecbench::ic_report(counted)",
+            applies: Applies::Any,
+            params: IC_COUNTED_PARAMS,
         },
         MethodDecl {
             id: "ic.large_prime",
@@ -1505,7 +1556,9 @@ fn ic_report(
     // (`audit::legacy_solver_rounding` reproduces those records).
     let mut total = rep.total_gae;
     if let Some(s) = &rep.decomposition.solver {
-        if s.gae > 0.0 && s.priced_by != "pinned" {
+        if (s.gae > 0.0 || (m.id == "ic.pipeline_counted" && s.calls > 0))
+            && s.priced_by != "pinned"
+        {
             phases[2].gae = rep.decomposition.gae_before_solver;
             total = phases.iter().fold(0.0, |acc, p| acc + p.gae);
             unpriced.push(format!("solver_{}_uncharged", s.op_unit.replace(' ', "_")));
@@ -1513,6 +1566,20 @@ fn ic_report(
         if param_u64(m, "solver_budget_seconds").unwrap_or(0) > 0 {
             nondeterminism.push("solver ran under a wall-clock budget".into());
         }
+    }
+    if m.id == "ic.pipeline_counted" {
+        // The frozen counted method reconstructs its relation charge from
+        // integer group/native work, independent of solver wall time.
+        let mut counted = rep.decomposition.cost.clone();
+        price_phase(&mut counted, calib);
+        phases[2].gae = counted.gae
+            + rep
+                .decomposition
+                .solver
+                .as_ref()
+                .filter(|s| s.priced_by == "pinned")
+                .map_or(0.0, |s| s.gae);
+        total = phases.iter().map(|p| p.gae).sum();
     }
     // Native counters with no pinned ratio for this curve.
     for (counter, unit) in PRICED_NATIVE {
@@ -1671,9 +1738,11 @@ fn solve_ic_prime(
     let ms = spec.oracle_params.u64_or("m", 2)? as u32;
     let mut subtract = SubtractOracle;
     let mut mitm = MitmOracle::new(ms);
+    let mut mitm_fiber = FiberMitmOracle::new(ms);
     let oracle: &mut dyn DecompositionOracle<_> = match or_name.as_str() {
         "subtract" => &mut subtract,
         "mitm" => &mut mitm,
+        "mitm-fiber" => &mut mitm_fiber,
         other => return Err(format!("oracle `{other}` does not run on a prime curve")),
     };
     let ctx = InstanceCtx {
@@ -1777,6 +1846,26 @@ fn solve_ic_binary(
     let mut mitm = MitmOracle::new(ms);
     let mut frob = FrobeniusMitmOracle::new(ms, inst);
     let mut frob_counted = FrobeniusMitmOracle::new_counted(ms, inst);
+    let mut mitm_fiber = FiberMitmOracle::new(ms);
+    let mut frob_fiber = FiberFrobeniusMitmOracle::new(ms, inst);
+    let mut descent_fiber = match or_name.as_str() {
+        "descent-algebraic-fiber" => {
+            let name = spec
+                .solver
+                .as_deref()
+                .ok_or("descent-algebraic-fiber needs `solver`")?;
+            let budget = (spec.solver_budget_seconds > 0)
+                .then(|| std::time::Duration::from_secs(spec.solver_budget_seconds));
+            Some(FiberDescentOracle::new(
+                ms,
+                inst,
+                solver_by_name(name)?,
+                spec.solver_params.clone(),
+                budget,
+            ))
+        }
+        _ => None,
+    };
     let mut plugin_oracle = binary_plugins().and_then(|p| (p.oracle)(or_name.as_str(), ms, inst));
     let mut algebraic = match or_name.as_str() {
         "descent-algebraic" => {
@@ -1801,7 +1890,10 @@ fn solve_ic_binary(
         "mitm" => &mut mitm,
         "mitm-frobenius" => &mut frob,
         "mitm-frobenius-counted" => &mut frob_counted,
+        "mitm-fiber" => &mut mitm_fiber,
+        "mitm-frobenius-fiber" => &mut frob_fiber,
         "descent-algebraic" => algebraic.as_mut().expect("built above"),
+        "descent-algebraic-fiber" => descent_fiber.as_mut().expect("built above"),
         other => match plugin_oracle.as_deref_mut() {
             Some(o) => o,
             None => return Err(format!("oracle `{other}` does not run on a binary curve")),

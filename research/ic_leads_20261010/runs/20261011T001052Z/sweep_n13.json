@@ -1,0 +1,22 @@
+{
+ "_comment": "L3 residual matching against the baseline collector on the same base and oracle: targets=residual replaces the oracle probing by the residual walk (the pair table is still built, so setup is identical and unused by the residual arm; read the relation phase). Also the L2 canonicalisation price now appears as ns_per_canon in the calibration.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 13
+ },
+ "repeats": 8,
+ "seed": 20261010,
+ "max_trials": 40000000,
+ "matrix": {
+  "factor_base": [
+   "koblitz-orbit:divisor=1"
+  ],
+  "oracle": [
+   "mitm-frobenius"
+  ],
+  "targets": [
+   "walk",
+   "residual"
+  ]
+ }
+}

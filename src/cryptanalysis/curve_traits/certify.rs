@@ -26,7 +26,7 @@ use num_traits::{One, ToPrimitive, Zero};
 use num_bigint::BigInt;
 
 use super::arith::{is_prime, lucas_v, prime_status};
-use super::{subfield, Model, Representation, Status};
+use super::{subfield, GeneratorCoords, Model, Representation, Status};
 use crate::binary_ecc::curve::{scalar_mul, BinaryCurve, BinaryPoint};
 use crate::binary_ecc::F2mElement;
 use crate::cryptanalysis::semaev_decomp::Gf2;
@@ -93,10 +93,10 @@ pub fn check_order(
     order: &BigUint,
     reps: &[Representation],
 ) -> Result<Outcome, String> {
-    if matches!(model, Model::PrimeOther { .. }) {
+    if matches!(model, Model::Extension { .. }) {
         return Ok((
             Status::NotEvaluated,
-            "group law for this registered model is not implemented",
+            "extension-field group arithmetic is not implemented in curve traits",
         ));
     }
     let q = model.q();
@@ -111,7 +111,7 @@ pub fn check_order(
                 a.to_u64().expect("reduced"),
                 b.to_u64().expect("reduced"),
             ),
-            Model::PrimeOther { .. } => unreachable!("handled above"),
+            Model::Extension { .. } => unreachable!("extension arithmetic handled above"),
         };
         if BigUint::from(counted) != *order {
             return Err(format!(
@@ -167,7 +167,10 @@ fn generator_certificate(
             rep.cofactor
         ));
     }
-    let (gx, gy) = &rep.generator;
+    let (gx, gy) = match &rep.generator {
+        GeneratorCoords::Affine(x, y) => (x, y),
+        GeneratorCoords::Extension(_, _) => return Ok(None),
+    };
     let killed = match model {
         Model::Binary { n, irr, a, b, .. } => {
             let g = BinaryPoint::Affine {
@@ -203,7 +206,7 @@ fn generator_certificate(
             };
             g.scalar_mul_vartime(r, &FieldElement::new(a.clone(), p.clone())) == Point::Infinity
         }
-        Model::PrimeOther { .. } => return Ok(None),
+        Model::Extension { .. } => return Ok(None),
     };
     if !killed {
         return Err(format!("[r]G ≠ O for the recorded generator and r = {r}"));

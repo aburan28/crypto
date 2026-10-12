@@ -1,0 +1,19 @@
+Independent positive-label validation, 2026-10-08
+
+Command: gp -q -f research/iso1_weak_classes_20261007/gp_p41_p43_validation.gp > research/iso1_weak_classes_20261007/gp_p41_p43_traces.csv 2> research/iso1_weak_classes_20261007/gp_p41_p43_stderr.txt
+Exit status: 0. Standard error: empty. Seed: 1501 independently for each p.
+Field: PARI/GP ffgen([p,6],'z), p=41 and p=43; q=p^2.
+Model: y^2=x(x-1)(x-lambda), lambda=random(z)^(q-1), lambda != 0,1.
+Point counter: native PARI/GP ellcard, independent of Rust curve_order.
+Output: 5,000 samples each; p=41 has 3,952 distinct traces and p=43
+has 4,043. CSV SHA-256:
+363f7d0d29341513cea62a0776a31ac3e90717ca21459204fbcd7a37eb0f654e.
+Every sampled trace occurs as positive in its respective Rust CSV: 0 missing.
+Comparison: awk keyed by CSV trace and weak_representatives>0, against
+the second column of gp_p41_p43_traces.csv for the matching p.
+This validates sampled positive labels, not all positive labels or zero rows.
+
+Failed attempt retained: the first multiline GP script was parsed as separate
+top-level statements by gp -f; it produced syntax/type errors, was interrupted,
+and produced no usable validation. The corrected script keeps each loop on one
+GP statement line; its full raw trace output is retained above.

@@ -1,0 +1,24 @@
+{
+ "_comment": "Opportunity 4 (large-prime / residual regime): at the family-optimum base (5 columns, 230 points) the break-even |F| < 2.4 (K r)^(1/4) is met, so the residual collector is compared with the direct table there; also 2 and 3 columns.",
+ "instance": {
+  "regime": "koblitz",
+  "degree": 17
+ },
+ "repeats": 8,
+ "seed": 20261010,
+ "max_trials": 40000000,
+ "matrix": {
+  "factor_base": [
+   "compact-orbit-scan:columns=2,raw_x_cap=4000000",
+   "compact-orbit-scan:columns=3,raw_x_cap=4000000",
+   "compact-orbit-scan:columns=5,raw_x_cap=4000000"
+  ],
+  "oracle": [
+   "mitm-frobenius"
+  ],
+  "targets": [
+   "walk",
+   "residual"
+  ]
+ }
+}
