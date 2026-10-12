@@ -349,10 +349,11 @@ where
 {
     // Expected hits are sparse; start with 4 per target plus slack and
     // retry once with the exact count if the kernel reports overflow.
-    // The counter is 32-bit on the C side, so saturate rather than wrap:
-    // a batch large enough to hit this would overflow the kernel's own
-    // counter anyway and come back as `Overflow`.
-    let cap0 = u32::try_from(4 * n_targets + 1024).unwrap_or(u32::MAX);
+    // Near 2^30 targets that guess no longer fits in the 32-bit capacity,
+    // while the relation counter wraps only after 2^32 hits.  Probe with
+    // an empty buffer and size the retry from `n_found`.  `u32::MAX` here
+    // would allocate ~64 GiB of relations before the oracle runs.
+    let cap0 = u32::try_from(4 * n_targets + 1024).unwrap_or(0);
     let (mut rc, mut res, mut out) = call(cap0);
     if rc == ffi::RF_ERR_OVERFLOW {
         let (rc2, res2, out2) = call(res.n_found.saturating_add(64));
@@ -590,6 +591,51 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn oversized_batch_sizes_the_buffer_from_n_found() {
+        // 4 * n + 1024 == 2^32, so the initial guess does not fit in u32.
+        // A probe must not request u32::MAX relations; the retry uses the
+        // count the kernel reports.
+        let n_targets = (u32::MAX as usize - 1024) / 4 + 1;
+        assert!(u32::try_from(4 * n_targets + 1024).is_err());
+        let caps = std::cell::RefCell::new(Vec::new());
+        let report = finish(
+            |cap| {
+                caps.borrow_mut().push(cap);
+                assert!(cap < 1_000_000, "refusing a huge relation buffer ({cap})");
+                let mut res = ffi::RfResult::default();
+                res.n_found = 7;
+                res.n_written = if cap >= 7 { 7 } else { 0 };
+                res.backend_used = 1;
+                res.lookup_used = 1;
+                res.chunk_used = 32;
+                let rc = if (cap as u64) < u64::from(res.n_found) {
+                    ffi::RF_ERR_OVERFLOW
+                } else {
+                    ffi::RF_OK
+                };
+                let mut out = vec![ffi::RfRelation::default(); cap as usize];
+                if cap >= 7 {
+                    for (k, slot) in out.iter_mut().take(7).enumerate() {
+                        slot.target = k as u32;
+                        slot.i = 1;
+                        slot.j = 2;
+                        slot.eps = 1;
+                        slot.tau = 1;
+                    }
+                }
+                (rc, res, out)
+            },
+            n_targets,
+        )
+        .expect("sized from n_found");
+        assert_eq!(caps.into_inner(), vec![0, 7 + 64]);
+        assert_eq!(report.relations.len(), 7);
+        assert_eq!(report.relations[0].target, 0);
+        assert_eq!(report.chunk_used, 32);
+        assert_eq!(report.backend_used, Backend::Emulate);
     }
 
     #[test]
