@@ -222,6 +222,38 @@ and `aburan28/ml-cryptanalysis`:
 - `make check` must pass (references and citations resolved, no LaTeX errors,
   no overfull boxes) before a PDF is recommitted.
 
+## Mathematical results should include Lean proofs
+
+**Standing owner instruction, 2026-10-11:** For every new or substantially
+revised mathematical result, include a faithful Lean 4 theorem and checked
+proof whenever formalization is feasible. Treat the formalization attempt as
+part of the requested work, and prioritize the central theorem and its
+dependencies. Keep the readable mathematical proof in the report.
+
+- Maintain a proof map from each report theorem, proposition, lemma or
+  corollary to its Lean declaration, exact hypotheses and verification status.
+  Match the mathematical statement, including quantifiers, exceptional cases
+  and field, curve, subgroup and endomorphism-order assumptions.
+- Pin the Lean toolchain and dependency revisions. Build the actual theorem
+  modules with `lake build` or an equivalent command, retain the command and
+  output, and inspect `#print axioms` for every reported theorem. Recheck the
+  compiled proofs with `lean4checker --fresh` when available.
+- A reported Lean proof must contain no `sorry`, `admit`, `sorryAx`, custom
+  axioms encoding the research claim, kernel-check bypasses or unverified
+  native evaluation. Record the standard Lean foundations used.
+- Prove the structural implications as well as the algebraic identities.
+  Conditional theorems must expose their assumptions and identify any missing
+  bridge to the actual mathematical objects. Do not present a weaker statement,
+  assumed conclusion, circular hypothesis or arithmetic certificate as a full
+  Lean proof of the report's theorem.
+- If the full formalization cannot be completed, preserve the original result
+  and its written proof, finish the feasible Lean lemmas, and record the
+  concrete missing definition, dependency, proof obligation or failed build.
+  Report partial formalization explicitly; keep the full theorem open.
+- Add reproducible proof checks to the relevant CI workflow where practical.
+  Preserve frozen evidence and attach formalization updates as versioned
+  additions rather than rewriting historical verification records.
+
 ## Implementation language: no Python
 
 **Do not use Python for cryptographic research or performance work in this
