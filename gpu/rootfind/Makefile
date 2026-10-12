@@ -2,7 +2,7 @@
 #
 #   make test            CPU verification of the shared headers (no GPU, no nvcc)
 #   make lib             librootfind_oracle.a, emulation backend only
-#                        (what gpu/rootfind/sys/build.rs builds for cargo --features gpu-rootfind)
+#                        (what gpu/rootfind/rs/build.rs builds for the gpu-rootfind cargo crate)
 #   make lib-cuda        librootfind_cuda.a, emulation + CUDA backend (needs nvcc)
 #   make bench           CUDA driver: selftest vs emulation + throughput (needs nvcc)
 #   make bench ARCH=sm_100      datacenter Blackwell; default sm_120 (RTX PRO 6000 Blackwell)

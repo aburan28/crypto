@@ -9,7 +9,7 @@ and the claim boundary: [`RESEARCH_GPU_ROOTFIND_DECOMPOSITION.md`](../../RESEARC
 **Not run on a GPU.** Written on a machine without an NVIDIA device or
 `nvcc`. The kernels' per-thread function is `__host__ __device__` and is
 what the host emulation executes; that emulation is validated bit-for-bit
-against the CPU `prime_fast` oracle (`examples/gpu_rootfind_validate.rs`).
+against the CPU `prime_fast` oracle (`rs/src/bin/gpu_rootfind_validate.rs`).
 
 | File | What |
 |---|---|
@@ -22,10 +22,11 @@ against the CPU `prime_fast` oracle (`examples/gpu_rootfind_validate.rs`).
 | `bench.cu` | `selftest` / `throughput` / `p256` on a device |
 | `test_cpu.cpp` | host self-test (`make test`) |
 | `Makefile`, `CMakeLists.txt` | CUDA optional in both |
-| `sys/` | `gpu-rootfind-sys` path crate: raw FFI + `build.rs` (optional dep of the root crate, feature `gpu-rootfind`) |
+| `rs/` | separate cargo crate `gpu-rootfind`: raw FFI, safe wrappers, `build.rs`, `gpu_rootfind_validate` harness (depends on the root crate; the root crate has no feature/dep/build script for it) |
 
 ```bash
 make test                      # no GPU needed
 make bench ARCH=sm_120 && ./bench selftest     # on the RTX PRO 6000 (untested here)
-cargo run --release --features gpu-rootfind --example gpu_rootfind_validate
+cargo test --release --manifest-path rs/Cargo.toml          # FFI + emulation vs CPU reference
+cargo run --release --manifest-path rs/Cargo.toml --bin gpu_rootfind_validate
 ```

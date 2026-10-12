@@ -16,7 +16,7 @@ find_package(Threads REQUIRED)
 
 set(RF_HDRS fp64.cuh fp256x64.cuh rootfind.cuh rootfind_host.hpp rootfind_api.h)
 
-# Emulation-only library: what the Rust build (sys/build.rs) also compiles.
+# Emulation-only library: what the Rust build (rs/build.rs) also compiles.
 add_library(rootfind_oracle STATIC rootfind_api.cpp ${RF_HDRS})
 target_compile_definitions(rootfind_oracle PRIVATE RF_HAVE_CUDA=0)
 target_include_directories(rootfind_oracle PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -15,7 +15,7 @@
  * Exits non-zero on the first failure.
  *
  * The *bit-for-bit* cross-check against the Rust `prime_fast` oracle is
- * in examples/gpu_rootfind_validate.rs; this file is what `make test`
+ * in gpu/rootfind/rs (gpu_rootfind_validate); this file is what `make test`
  * runs without cargo.
  */
 #include <cstdio>

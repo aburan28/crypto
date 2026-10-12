@@ -9,7 +9,7 @@
  *
  * UNTESTED ON HARDWARE: written on a machine without an NVIDIA GPU.  The
  * host side of every check is the emulation backend that
- * test_cpu.cpp and examples/gpu_rootfind_validate.rs verify; `selftest`
+ * test_cpu.cpp and gpu/rootfind/rs (gpu_rootfind_validate) verify; `selftest`
  * is the step that closes the gap between that and the device.  Exit
  * code is non-zero if any configuration disagrees with the emulation.
  */

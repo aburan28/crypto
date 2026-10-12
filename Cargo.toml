@@ -106,13 +106,6 @@ path = "src/lib.rs"
 # dependency when cross-building a static Linux binary.
 default = ["redis-native-tls"]
 redis-native-tls = ["redis/tls-native-tls"]
-# Link the GPU root-finding decomposition oracle (gpu/rootfind/) through
-# the `gpu-rootfind-sys` path crate, whose build script compiles the
-# host-emulation backend (no CUDA needed) or links a prebuilt CUDA library;
-# see RESEARCH_GPU_ROOTFIND_DECOMPOSITION.md §5.  Kept out of the root
-# crate on purpose: a root build.rs makes cargo walk the whole repository
-# for fingerprinting, which fails on CI (tracked directory symlinks).
-gpu-rootfind = ["dep:gpu-rootfind-sys"]
 f4-four-tables = []
 f4-five-tables = []
 f4-wide-tables = []
@@ -186,8 +179,6 @@ flate2 = "1.0"
 # Base64 codec for cryptopals fixtures (challenge 56 cookie).
 base64 = "0.21"
 redis = "1.7.0"
-# Native half of the GPU root-finding oracle; only with --features gpu-rootfind.
-gpu-rootfind-sys = { path = "gpu/rootfind/sys", optional = true }
 
 [[bench]]
 name = "pqc_speed"

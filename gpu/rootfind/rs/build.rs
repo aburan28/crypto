@@ -1,6 +1,5 @@
-//! Build script for `gpu-rootfind-sys`: compiles the GPU root-finding
-//! oracle's host library in `gpu/rootfind/` (the parent directory).  This
-//! crate is only built when the root crate's `gpu-rootfind` feature is on.
+//! Build script for the `gpu-rootfind` crate: compiles or links the
+//! oracle's native library in `gpu/rootfind/` (the parent directory).
 //!
 //! Two modes, selected by the environment:
 //!
@@ -42,8 +41,14 @@ fn main() {
             .or_else(|| std::env::var_os("CUDA_HOME"))
             .map(PathBuf::from)
             .unwrap_or_else(|| PathBuf::from("/usr/local/cuda"));
-        println!("cargo:rustc-link-search=native={}", cuda.join("lib64").display());
-        println!("cargo:rustc-link-search=native={}", cuda.join("lib").display());
+        println!(
+            "cargo:rustc-link-search=native={}",
+            cuda.join("lib64").display()
+        );
+        println!(
+            "cargo:rustc-link-search=native={}",
+            cuda.join("lib").display()
+        );
         println!("cargo:rustc-link-lib=dylib=cudart");
         println!("cargo:rustc-link-lib=dylib=stdc++");
         return;
