@@ -1,0 +1,14 @@
+#set document(date: none)
+#set page(paper: "a4", margin: 16mm)
+#set text(font: "DejaVu Sans", size: 9pt)
+#set par(leading: 0.55em, spacing: 0.8em)
+#set heading(numbering: none)
+= Rejected first attempt
+#text(size: 8pt, fill: rgb("#79542b"), weight: "bold")[Native instruction and allocation measurements · run-20261012T0543Z]
+
+#image("rejected-attempt.svg", width: 100%)
+
+The first candidate combined ordered F4 readback with default fused F5 construction. The native comparison records 1.44% fewer F4 instructions, below the frozen 2% verdict threshold, so F4 is neutral. F5 recorded 11.13% fewer instructions; outputs/accounting matched and memory did not regress. The frozen two-arm acceptance failed. All profiles, the comparison and controls are retained unchanged. AMENDMENT-2 preregistered compact F4 column lookup before the second measurement, preserving inputs and gates. The final attempt reuses the two unchanged baseline profiles and runs fresh candidate primary and paired profiles.
+
+#text(size: 8pt)[Native sources: #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-fused-readback/research/f4_f5_fused_readback_20261012/records/attempt-2-fixed/comparison.json")[final comparison and raw-record hashes], #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-fused-readback/research/f4_f5_fused_readback_20261012/PROTOCOL.md")[frozen protocol], #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-fused-readback/research/f4_f5_fused_readback_20261012/AMENDMENT-2.md")[first rejection], #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-fused-readback/research/f4_f5_fused_readback_20261012/METADATA-FIX.md")[bounded correction], #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-fused-readback/research/f4_f5_fused_readback_20261012/ACCEPTANCE-CLARIFICATION.md")[gate scope], #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-fused-readback/research/f4_f5_fused_readback_20261012/TEST-FIX.md")[fixture repair], #link("https://github.com/aburan28/crypto/blob/codex/optimize-f4-f5-fused-readback/research/f4_f5_fused_readback_20261012/REPORT.md")[report and validation]. Raw Callgrind dumps and Rust JSONL remain beside the data. Earlier segment: #link("https://github.com/aburan28/crypto/blob/main/research/f4_f5_hash_20261012/records/comparison.json")[hashing study].]
+#text(size: 8pt)[Validation: 3,995 release-library tests passed, zero failed, 112 ignored; complete named coverage verified. The long ignored isogeny test passed separately. 46 Groebner/F4, 18 F5, 21 polynomial, 24 native coordinate and five comparison tests passed; Cargo examples and Clippy passed. Earlier failed/interrupted checks are retained. The inherited fixture-only repair preserves order rejection and strict parsing. Runtime and process RSS remain unmeasured.]

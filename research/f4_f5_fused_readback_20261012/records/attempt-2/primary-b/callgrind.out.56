@@ -1,0 +1,1721 @@
+# callgrind format
+version: 1
+creator: callgrind-3.24.0
+pid: 30372
+cmd:  /workspace/scratch/f4-f5-fused-readback/b/bench profile 3
+part: 56
+
+
+desc: I1 cache: 
+desc: D1 cache: 
+desc: LL cache: 
+
+desc: Timerange: Basic block 30917433 - 34713534
+desc: Trigger: Client Request: ["n10_d5",2685821657736338717,0,"f5"]
+
+positions: line
+events: Ir
+summary: 18926130
+
+
+ob=(2) /usr/lib/x86_64-linux-gnu/libc.so.6
+fl=(2) ???
+fn=(10) clock_gettime
+0 80
+
+fn=(18) 0x0000000000162880
+0 125527
+
+fn=(166) calloc
+0 63884
+cfn=(172) 0x00000000000a0fe0
+calls=1156 0 
+0 209151
+0 16184
+cfn=(524) 0x0000000000163280
+calls=1156 0 
+0 32872
+0 1156
+0 32378
+
+fn=(134) 0x00000000000a02e0
+0 2370
+cfn=(102) 0x000000000009eaf0
+calls=2 0 
+0 40
+0 504
+cfn=(346) 0x000000000009ed80
+calls=84 0 
+0 3461
+0 96926
+cfn=(328) 0x00000000000a01a0
+calls=685 0 
+0 74921
+0 31231
+
+fn=(346)
+0 23482
+cfn=(102)
+calls=50 0 
+0 1111
+0 7304
+
+fn=(78) realloc
+0 14910
+cfn=(80) 0x00000000000a20c0
+calls=213 0 
+0 118985
+0 4128
+
+fn=(328)
+0 23433
+cfn=(102)
+calls=469 0 
+0 10076
+0 4110
+cfn=(346)
+calls=685 0 
+0 28436
+0 8866
+
+fn=(32) 0x00000000001655c0
+0 39
+
+fn=(884) 0x00000000000a0530
+0 178
+cfn=(906) __default_morecore
+calls=2 0 
+0 80
+0 46
+
+fn=(906)
+0 8
+cfn=(908) sbrk
+calls=2 0 
+0 64
+0 8
+
+fn=(172)
+0 204916
+cfn=(416) 0x000000000009ebd0
+calls=12 0 
+0 52778
+0 177567
+cfn=(102)
+calls=257 0 
+0 6004
+0 7263
+cfn=(102)
+calls=1 0 
+0 32
+0 8
+cfn=(476) 0x000000000009e390
+calls=1 0 
+0 4
+0 11536
+cfn=(476)
+calls=2884 0 
+0 11536
+0 61952
+cfn=(884)
+calls=2 0 
+0 304
+0 12
+
+fn=(476)
+0 11540
+
+fn=(524)
+0 939938
+
+fn=(718) syscall
+0 77
+
+fn=(720) sched_yield
+0 28
+
+fn=(64) malloc
+0 94050
+cfn=(172)
+calls=1889 0 
+0 282359
+0 32251
+
+fn=(910) brk
+0 16
+
+fn=(102)
+0 34074
+
+fn=(80)
+0 10802
+cfn=(172)
+calls=156 0 
+0 42402
+0 2652
+cfn=(18)
+calls=156 0 
+0 43050
+0 156
+0 6770
+cfn=(102)
+calls=46 0 
+0 1034
+0 340
+cfn=(134)
+calls=39 0 
+0 3756
+0 551
+cfn=(134)
+calls=73 0 
+0 7399
+0 73
+
+fn=(48) 0x00000000001666a0
+0 72
+
+fn=(416)
+0 31787
+cfn=(102)
+calls=291 0 
+0 5949
+0 4308
+cfn=(102)
+calls=453 0 
+0 9828
+0 906
+
+fn=(28) getenv
+0 51
+cfn=(32)
+calls=3 0 
+0 39
+0 3
+0 1455
+cfn=(48)
+calls=3 0 
+0 72
+0 3
+0 42
+
+fn=(316) free
+0 170385
+cfn=(134)
+calls=2506 0 
+0 198298
+0 2506
+
+fn=(908)
+0 34
+cfn=(910)
+calls=2 0 
+0 16
+0 14
+
+ob=(1) /workspace/scratch/f4-f5-fused-readback/b/bench
+fl=(1) ???
+fn=(1) f4_f5_row_build_bench::main'2
+0 8
+cfn=(630) crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2
+calls=1 0 
+0 18502226
+0 23
+
+fn=(72) <alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global>
+0 7965
+cfn=(74) <alloc::raw_vec::RawVecInner>::finish_grow
+calls=295 0 
+0 92564
+0 2655
+
+fn=(368) <alloc::raw_vec::RawVec<[f64; 3]>>::grow_one
+0 690
+cfn=(74)
+calls=46 0 
+0 60154
+0 414
+
+fn=(544) <alloc::vec::Vec<u64> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<u64, std::collections::hash::set::IntoIter<u64>>>::from_iter
+0 39
+cfn=(60) __rustc::__rust_no_alloc_shim_is_unstable_v2
+calls=1 0 
+0 1
+0 3
+cfn=(62) __rustc::__rust_alloc
+calls=1 0 
+0 299
+0 11934
+cfn=(314) __rustc::__rust_dealloc
+calls=1 0 
+0 213
+0 14
+
+fn=(702) <rayon_core::registry::WORKER_THREAD_STATE::{K#0}::{closure#1} as core::ops::function::FnOnce<(core::option::Option<&mut core::option::Option<core::cell::Cell<*const rayon_core::registry::WorkerThread>>>,)>>::call_once
+0 15
+
+fn=(704) rayon_core::registry::global_registry
+0 38
+
+fn=(58) <core::option::Option<alloc::rc::Rc<[u64]>> as alloc::vec::spec_from_elem::SpecFromElem>::from_elem::<alloc::alloc::Global>
+0 26
+cfn=(60)
+calls=1 0 
+0 1
+0 4
+cfn=(62)
+calls=1 0 
+0 77
+0 13
+cfn=(66) <alloc::vec::Vec<core::option::Option<alloc::rc::Rc<[u64]>>>>::extend_with
+calls=1 0 
+0 67
+0 13
+
+fn=(562) core::slice::sort::unstable::quicksort::quicksort::<u64, <[u64]>::sort_unstable_by_key<core::cmp::Reverse<u128>, crypto_lib::cryptanalysis::koblitz_groebner::macaulay_columns::{closure#0}>::{closure#0}>
+0 46
+cfn=(566) core::slice::sort::shared::smallsort::small_sort_network::<u64, <[u64]>::sort_unstable_by_key<core::cmp::Reverse<u128>, crypto_lib::cryptanalysis::koblitz_groebner::macaulay_columns::{closure#0}>::{closure#0}>
+calls=2 0 
+0 4356
+0 482
+cfn=(564) core::slice::sort::shared::pivot::median3_rec::<u64, <[u64]>::sort_unstable_by_key<core::cmp::Reverse<u128>, crypto_lib::cryptanalysis::koblitz_groebner::macaulay_columns::{closure#0}>::{closure#0}>
+calls=6 0 
+0 3549
+0 45709
+cfn=(563) core::slice::sort::unstable::quicksort::quicksort::<u64, <[u64]>::sort_unstable_by_key<core::cmp::Reverse<u128>, crypto_lib::cryptanalysis::koblitz_groebner::macaulay_columns::{closure#0}>::{closure#0}>'2
+calls=8 0 
+0 191278
+0 94
+
+fn=(563)
+0 805
+cfn=(566)
+calls=35 0 
+0 119794
+0 2378
+cfn=(564)
+calls=13 0 
+0 5564
+0 62430
+cfn=(563)
+calls=27 0 
+0 228208
+0 307
+
+fn=(860) <crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::pack_product
+0 6600
+cob=(2)
+cfi=(2)
+cfn=(524)
+calls=220 0 
+0 2200
+0 4180
+cob=(2)
+cfi=(2)
+cfn=(524)
+calls=220 0 
+0 2200
+0 301558
+cfn=(72)
+calls=220 0 
+0 58517
+0 5080
+
+fn=(1010) crypto_lib::cryptanalysis::gf2_elim::eliminate_with
+0 79
+cfn=(60)
+calls=1 0 
+0 1
+0 5
+cfn=(164) __rustc::__rust_alloc_zeroed
+calls=1 0 
+0 50718
+0 11
+cfn=(60)
+calls=1 0 
+0 1
+0 3
+cfn=(62)
+calls=1 0 
+0 77
+0 933576
+cfn=(1020) crypto_lib::cryptanalysis::gf2_elim::clear_strip_avx2
+calls=637 0 
+0 1021871
+0 374218
+cfn=(1022) crypto_lib::cryptanalysis::gf2_elim::clear_block
+calls=20 0 
+0 8230304
+0 336
+cfn=(314)
+calls=1 0 
+0 232
+0 7
+cfn=(314)
+calls=1 0 
+0 67
+0 4
+cfn=(314)
+calls=1 0 
+0 208
+0 9
+
+fn=(1052) core::slice::sort::shared::pivot::median3_rec::<usize, <usize as core::cmp::PartialOrd>::lt>
+0 76
+cfn=(1053) core::slice::sort::shared::pivot::median3_rec::<usize, <usize as core::cmp::PartialOrd>::lt>'2
+calls=4 0 
+0 136
+0 24
+cfn=(1053)
+calls=4 0 
+0 136
+0 32
+cfn=(1053)
+calls=4 0 
+0 136
+0 100
+
+fn=(1053)
+0 408
+
+fn=(60)
+0 3415
+
+fn=(514) crypto_lib::cryptanalysis::koblitz_groebner::macaulay_columns
+0 22
+cfn=(516) crypto_lib::cryptanalysis::koblitz_groebner::max_f4_cols
+calls=2 0 
+0 1540
+0 15
+cfn=(666) <alloc::vec::Vec<u64> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<u64, core::iter::adapters::copied::Copied<core::iter::adapters::flatten::Flatten<core::slice::iter::Iter<alloc::vec::Vec<u64>>>>>>::from_iter
+calls=1 0 
+0 3692
+0 15036
+cfn=(518) <hashbrown::map::HashMap<u64, (), core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::fx_hash::MaskHasher>>>::insert
+calls=1155 0 
+0 90204
+0 53166
+cfn=(518)
+calls=17722 0 
+0 997873
+0 153356
+cfn=(544)
+calls=1 0 
+0 12503
+0 1104
+cfn=(398) core::slice::sort::unstable::ipnsort::<u64, <u64 as core::cmp::PartialOrd>::lt>
+calls=1 0 
+0 11528
+0 7
+cfn=(560) core::slice::sort::unstable::ipnsort::<u64, <[u64]>::sort_unstable_by_key<core::cmp::Reverse<u128>, crypto_lib::cryptanalysis::koblitz_groebner::macaulay_columns::{closure#0}>::{closure#0}>
+calls=2 0 
+0 245677
+0 2
+
+fn=(518)
+0 1088981
+cfn=(520) <hashbrown::raw::RawTable<(u64, ())>>::reserve_rehash::<hashbrown::map::make_hasher<u64, (), core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::fx_hash::MaskHasher>>::{closure#0}>
+calls=61 0 
+0 102345
+0 183
+
+fn=(566)
+0 122892
+cob=(2)
+cfi=(2)
+cfn=(18)
+calls=28 0 
+0 812
+0 446
+
+fn=(670) <hashbrown::raw::RawTable<(u64, usize)>>::reserve_rehash::<hashbrown::map::make_hasher<u64, usize, core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::fx_hash::MaskHasher>>::{closure#0}>
+0 62
+cfn=(522) <hashbrown::raw::RawTableInner>::fallible_with_capacity::<alloc::alloc::Global>
+calls=2 0 
+0 971
+0 46
+
+fn=(692) <core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u64>>, crypto_lib::cryptanalysis::koblitz_groebner::pack_rows::{closure#1}> as core::iter::traits::iterator::Iterator>::fold::<(), core::iter::traits::iterator::Iterator::for_each::call<alloc::vec::Vec<u64>, <alloc::vec::Vec<alloc::vec::Vec<u64>>>::extend_trusted<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u64>>, crypto_lib::cryptanalysis::koblitz_groebner::pack_rows::{closure#1}>>::{closure#0}>::{closure#0}>
+0 9277
+cfn=(60)
+calls=1155 0 
+0 1155
+0 4620
+cfn=(164)
+calls=1155 0 
+0 345364
+0 1022986
+
+fn=(706) rayon::iter::plumbing::bridge_producer_consumer::helper::<rayon::slice::IterProducer<alloc::vec::Vec<u64>>, rayon::iter::map::MapConsumer<rayon::iter::filter::FilterConsumer<rayon::iter::extend::ListVecConsumer, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>>
+0 64
+cfn=(700) rayon_core::current_num_threads
+calls=2 0 
+0 32
+0 96
+cfn=(704)
+calls=1 0 
+0 19
+0 10
+cfn=(739) rayon_core::join::join_context::<rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::slice::IterProducer<alloc::vec::Vec<u64>>, rayon::iter::map::MapConsumer<rayon::iter::filter::FilterConsumer<rayon::iter::extend::ListVecConsumer, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>>::{closure#0}, rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::slice::IterProducer<alloc::vec::Vec<u64>>, rayon::iter::map::MapConsumer<rayon::iter::filter::FilterConsumer<rayon::iter::extend::ListVecConsumer, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>>::{closure#1}, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>>::{closure#0}'2
+calls=2 0 
+0 425999
+0 89
+cfn=(708) <rayon_core::registry::Registry>::in_worker_cold::<rayon_core::join::join_context<rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::slice::IterProducer<alloc::vec::Vec<u64>>, rayon::iter::map::MapConsumer<rayon::iter::filter::FilterConsumer<rayon::iter::extend::ListVecConsumer, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>>::{closure#0}, rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::slice::IterProducer<alloc::vec::Vec<u64>>, rayon::iter::map::MapConsumer<rayon::iter::filter::FilterConsumer<rayon::iter::extend::ListVecConsumer, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>>::{closure#1}, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>>::{closure#0}, (alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>)>
+calls=1 0 
+0 354
+0 2
+
+fn=(707) rayon::iter::plumbing::bridge_producer_consumer::helper::<rayon::slice::IterProducer<alloc::vec::Vec<u64>>, rayon::iter::map::MapConsumer<rayon::iter::filter::FilterConsumer<rayon::iter::extend::ListVecConsumer, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>>'2
+0 368
+cfn=(740) <rayon::iter::filter::FilterFolder<rayon::iter::extend::ListVecFolder<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}> as rayon::iter::plumbing::Folder<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>::consume_iter::<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u64>>, &crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>>
+calls=8 0 
+0 421699
+0 64
+cfn=(748) <rayon::iter::extend::ListVecFolder<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly> as rayon::iter::plumbing::Folder<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>::complete
+calls=8 0 
+0 2296
+0 136
+cfn=(739)
+calls=4 0 
+0 425285
+0 220
+
+fn=(716) <std::sys::sync::condvar::futex::Condvar>::wait
+0 68
+cob=(2)
+cfi=(2)
+cfn=(718)
+calls=2 0 
+0 22
+0 31
+cfn=(1040) <std::sys::sync::mutex::futex::Mutex>::lock_contended
+calls=1 0 
+0 769
+0 1
+
+fn=(736) <rayon_core::job::StackJob<rayon_core::latch::LatchRef<rayon_core::latch::LockLatch>, <rayon_core::registry::Registry>::in_worker_cold<rayon_core::join::join_context<rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::slice::IterProducer<alloc::vec::Vec<u64>>, rayon::iter::map::MapConsumer<rayon::iter::filter::FilterConsumer<rayon::iter::extend::ListVecConsumer, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>>::{closure#0}, rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::slice::IterProducer<alloc::vec::Vec<u64>>, rayon::iter::map::MapConsumer<rayon::iter::filter::FilterConsumer<rayon::iter::extend::ListVecConsumer, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>>::{closure#1}, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>>::{closure#0}, (alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>)>::{closure#0}::{closure#0}, (alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>)> as rayon_core::job::Job>::execute
+0 33
+cfn=(738) rayon_core::join::join_context::<rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::slice::IterProducer<alloc::vec::Vec<u64>>, rayon::iter::map::MapConsumer<rayon::iter::filter::FilterConsumer<rayon::iter::extend::ListVecConsumer, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>>::{closure#0}, rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::slice::IterProducer<alloc::vec::Vec<u64>>, rayon::iter::map::MapConsumer<rayon::iter::filter::FilterConsumer<rayon::iter::extend::ListVecConsumer, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>>::{closure#1}, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>>::{closure#0}
+calls=1 0 
+0 426409
+0 21
+cfn=(756) <rayon_core::latch::LatchRef<rayon_core::latch::LockLatch> as rayon_core::latch::Latch>::set
+calls=1 0 
+0 54
+0 8
+
+fn=(756)
+0 21
+cfn=(758) <std::sync::poison::condvar::Condvar>::notify_all
+calls=1 0 
+0 18
+0 15
+
+fn=(632) crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed
+0 16
+cfn=(6) <std::time::Instant>::now
+calls=1 0 
+0 28
+0 18
+cfn=(634) <crypto_lib::cryptanalysis::matrix_f5_f2::F5Criterion>::new
+calls=1 0 
+0 1044527
+0 2
+cfn=(608) <std::time::Instant>::elapsed
+calls=1 0 
+0 88
+0 3
+cfn=(6)
+calls=1 0 
+0 28
+0 30
+cfn=(680) crypto_lib::cryptanalysis::koblitz_groebner::f5_rows_monos_with_f4_count
+calls=1 0 
+0 3518871
+0 18
+cfn=(514)
+calls=1 0 
+0 1525784
+0 11
+cfn=(688) crypto_lib::cryptanalysis::koblitz_groebner::pack_rows
+calls=1 0 
+0 1442273
+0 11554
+cfn=(314)
+calls=1155 0 
+0 186713
+0 1163
+cfn=(314)
+calls=1 0 
+0 204
+0 19
+cfn=(608)
+calls=1 0 
+0 88
+0 3
+cfn=(6)
+calls=1 0 
+0 28
+0 39
+cfn=(612) crypto_lib::cryptanalysis::koblitz_groebner::rref_f2_counted
+calls=1 0 
+0 10611781
+0 14
+cfn=(608)
+calls=1 0 
+0 88
+0 3
+cfn=(6)
+calls=1 0 
+0 28
+0 49
+cfn=(698) <alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly> as rayon::iter::ParallelExtend<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>::par_extend::<rayon::iter::filter::Filter<rayon::iter::map::Map<rayon::slice::Iter<alloc::vec::Vec<u64>>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}>>
+calls=1 0 
+0 6158
+0 6
+cfn=(608)
+calls=1 0 
+0 88
+0 11615
+cfn=(314)
+calls=1155 0 
+0 137441
+0 1163
+cfn=(314)
+calls=1 0 
+0 213
+0 7
+cfn=(314)
+calls=1 0 
+0 228
+0 167
+cfn=(314)
+calls=10 0 
+0 1535
+0 17
+cfn=(314)
+calls=1 0 
+0 67
+0 9
+
+fn=(642) <alloc::vec::Vec<u32> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<u32, core::iter::adapters::map::Map<core::iter::adapters::filter::Filter<core::slice::iter::Iter<u32>, <crypto_lib::cryptanalysis::matrix_f5_f2::F5Criterion>::new::{closure#0}>, <crypto_lib::cryptanalysis::matrix_f5_f2::F5Criterion>::new::{closure#1}>>>::from_iter
+0 23
+cfn=(60)
+calls=1 0 
+0 1
+0 3
+cfn=(62)
+calls=1 0 
+0 77
+0 112
+cfn=(72)
+calls=2 0 
+0 1007
+0 82
+
+fn=(870) <alloc::raw_vec::RawVec<usize>>::grow_one
+0 90
+cfn=(74)
+calls=6 0 
+0 3000
+0 54
+
+fn=(1034) <&mut core::iter::adapters::map::map_fold<&mut alloc::vec::Vec<u64>, u64, u64, crypto_lib::cryptanalysis::gf2_elim::clear_block::{closure#1}, <u64 as core::iter::traits::accum::Sum>::sum<core::iter::adapters::map::Map<core::iter::adapters::chain::Chain<core::slice::iter::IterMut<alloc::vec::Vec<u64>>, core::slice::iter::IterMut<alloc::vec::Vec<u64>>>, crypto_lib::cryptanalysis::gf2_elim::clear_block::{closure#1}>>::{closure#0}>::{closure#0} as core::ops::function::FnMut<(u64, &mut alloc::vec::Vec<u64>)>>::call_mut
+0 133760
+cfn=(1028) crypto_lib::cryptanalysis::gf2_elim::pext_bmi2
+calls=6080 0 
+0 12160
+0 1103729
+cfn=(1032) crypto_lib::cryptanalysis::gf2_elim::xor_entries_avx2
+calls=5967 0 
+0 585552
+0 84668
+
+fn=(14) std::env::var::inner
+0 30
+cfn=(16) std::sys::env::unix::getenv
+calls=3 0 
+0 2187
+0 48
+
+fn=(76) __rustc::__rust_realloc
+0 4260
+cob=(2)
+cfi=(2)
+cfn=(78)
+calls=213 0 
+0 138023
+0 5112
+
+fn=(608)
+0 28
+cfn=(8) <std::sys::pal::unix::time::Timespec>::now
+calls=4 0 
+0 104
+0 40
+cfn=(610) <std::sys::pal::unix::time::Timespec>::sub_timespec
+calls=4 0 
+0 144
+0 36
+
+fn=(722) <rayon_core::registry::WorkerThread>::wait_until_cold
+cob=(2)
+cfi=(2)
+cfn=(720)
+calls=1 0 
+0 18446744073709546353
+
+fn=(723) <rayon_core::registry::WorkerThread>::wait_until_cold'2
+0 2
+cfn=(726) <crossbeam_deque::deque::Worker<rayon_core::job::JobRef>>::pop
+calls=1 0 
+0 15
+0 6
+cfn=(728) <crossbeam_deque::deque::Stealer<rayon_core::job::JobRef>>::steal
+calls=1 0 
+0 65
+0 55
+cfn=(724) <rayon_core::registry::WorkerThread>::find_work
+calls=8 0 
+0 1377
+0 57
+cfn=(760) std::thread::functions::yield_now
+calls=5 0 
+0 25
+0 22
+cfn=(816) <rayon_core::sleep::Sleep>::sleep::<<rayon_core::registry::WorkerThread>::wait_until_cold::{closure#0}>
+calls=1 0 
+0 949
+0 13
+cfn=(760)
+calls=1 0 
+0 6
+0 11
+cfn=(734) <rayon_core::sleep::Sleep>::wake_any_threads
+calls=1 0 
+0 3
+0 2
+cfn=(736)
+calls=1 0 
+0 426525
+0 3
+
+fn=(724)
+0 80
+cfn=(726)
+calls=8 0 
+0 120
+0 64
+cfn=(728)
+calls=8 0 
+0 520
+0 208
+cfn=(732) <crossbeam_deque::deque::Injector<rayon_core::job::JobRef>>::steal
+calls=8 0 
+0 328
+0 57
+
+fn=(734)
+0 19
+cfn=(992) <rayon_core::sleep::Sleep>::wake_specific_thread
+calls=1 0 
+0 89
+0 11
+
+fn=(364) alloc::rc::rc_inner_layout_for_value_layout
+0 34
+
+fn=(402) core::slice::sort::shared::smallsort::small_sort_network::<usize, <usize as core::cmp::PartialOrd>::lt>
+0 1782155
+cob=(2)
+cfi=(2)
+cfn=(18)
+calls=1766 0 
+0 51214
+0 22124
+
+fn=(610)
+0 144
+
+fn=(636) <std::collections::hash::set::HashSet<u64, core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::fx_hash::MaskHasher>> as alloc::vec::spec_from_elem::SpecFromElem>::from_elem::<alloc::alloc::Global>
+0 22
+cfn=(60)
+calls=1 0 
+0 1
+0 4
+cfn=(62)
+calls=1 0 
+0 77
+0 17
+cfn=(638) <alloc::vec::Vec<std::collections::hash::set::HashSet<u64, core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::fx_hash::MaskHasher>>>>::extend_with
+calls=1 0 
+0 368
+0 12
+
+fn=(638)
+0 30
+cfn=(640) <hashbrown::raw::RawTable<(u64, ())> as core::clone::Clone>::clone
+calls=1 0 
+0 25
+0 24
+cfn=(640)
+calls=8 0 
+0 200
+0 89
+
+fn=(1022)
+0 1496
+cob=(2)
+cfi=(2)
+cfn=(524)
+calls=20 0 
+0 901320
+0 1910821
+cfn=(72)
+calls=1 0 
+0 428
+0 1264
+cfn=(1034)
+calls=19 0 
+0 5882
+0 24244
+cfn=(1034)
+calls=6061 0 
+0 1913987
+0 24940
+cfn=(1026) crypto_lib::cryptanalysis::gf2_elim::clear_block::{closure#1}
+calls=20 0 
+0 1222
+0 65452
+cfn=(1026)
+calls=16363 0 
+0 3313536
+0 65712
+
+fn=(62)
+0 35776
+cob=(2)
+cfi=(2)
+cfn=(64)
+calls=2236 0 
+0 408660
+0 44720
+
+fn=(678) core::ptr::drop_glue::<crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>
+0 13
+cfn=(314)
+calls=1 0 
+0 196
+0 13
+cfn=(314)
+calls=1 0 
+0 172
+0 7
+cfn=(314)
+calls=1 0 
+0 204
+0 1107
+cfn=(314)
+calls=110 0 
+0 12724
+0 118
+cfn=(314)
+calls=1 0 
+0 172
+0 12
+cfn=(314)
+calls=1 0 
+0 211
+
+fn=(714) <rayon_core::latch::LockLatch>::wait_and_reset
+0 28
+cfn=(716)
+calls=1 0 
+0 60
+0 23
+
+fn=(70) <alloc::vec::Vec<u64> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<u64, core::iter::adapters::map::Map<core::iter::adapters::filter::Filter<core::ops::range::Range<i32>, crypto_lib::cryptanalysis::koblitz_groebner::monomials_up_to_mask::{closure#0}>, crypto_lib::cryptanalysis::koblitz_groebner::monomials_up_to_mask::{closure#1}>>>::from_iter
+0 506
+cfn=(60)
+calls=22 0 
+0 22
+0 66
+cfn=(62)
+calls=22 0 
+0 3341
+0 11836
+cfn=(72)
+calls=44 0 
+0 21024
+0 2002
+
+fn=(398)
+0 37928
+cfn=(400) core::slice::sort::unstable::quicksort::quicksort::<u64, <u64 as core::cmp::PartialOrd>::lt>
+calls=1761 0 
+0 1901702
+0 43488
+
+fn=(522)
+0 4710
+cfn=(60)
+calls=93 0 
+0 93
+0 279
+cfn=(62)
+calls=93 0 
+0 15855
+0 1581
+cob=(2)
+cfi=(2)
+cfn=(524)
+calls=93 0 
+0 1346
+0 1116
+
+fn=(816)
+0 89
+cfn=(716)
+calls=1 0 
+0 831
+0 12
+cfn=(1042) <std::sys::sync::mutex::futex::Mutex>::wake
+calls=1 0 
+0 17
+
+fn=(992)
+0 32
+cfn=(994) <std::sync::poison::condvar::Condvar>::notify_one
+calls=1 0 
+0 18
+0 21
+cfn=(1042)
+calls=1 0 
+0 17
+0 1
+
+fn=(66)
+0 67
+
+fn=(164)
+0 21222
+cob=(2)
+cfi=(2)
+cfn=(166)
+calls=1179 0 
+0 355625
+0 24759
+
+fn=(688)
+0 37
+cfn=(690) <alloc::vec::Vec<alloc::vec::Vec<u64>> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<alloc::vec::Vec<u64>, core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u64>>, crypto_lib::cryptanalysis::koblitz_groebner::pack_rows::{closure#1}>>>::from_iter
+calls=1 0 
+0 1383676
+0 13
+cfn=(314)
+calls=1 0 
+0 172
+0 19
+cfn=(670)
+calls=1 0 
+0 524
+0 7
+cfn=(672) <hashbrown::map::HashMap<u64, usize, core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::fx_hash::MaskHasher>>>::insert
+calls=1 0 
+0 79
+0 2548
+cfn=(672)
+calls=637 0 
+0 50731
+0 4467
+
+fn=(710) <rayon_core::registry::Registry>::inject
+0 9
+cfn=(712) <crossbeam_deque::deque::Injector<rayon_core::job::JobRef>>::push
+calls=1 0 
+0 49
+0 23
+cfn=(734)
+calls=1 0 
+0 116
+
+fn=(726)
+0 407
+
+fn=(748)
+0 128
+cfn=(60)
+calls=8 0 
+0 8
+0 24
+cfn=(62)
+calls=8 0 
+0 1960
+0 176
+
+fn=(74)
+0 11265
+cfn=(76)
+calls=208 0 
+0 144713
+0 1223
+cfn=(60)
+calls=269 0 
+0 269
+0 807
+cfn=(62)
+calls=269 0 
+0 46003
+0 5941
+cfn=(76)
+calls=5 0 
+0 2682
+0 13
+cfn=(60)
+calls=1 0 
+0 1
+0 3
+cfn=(62)
+calls=1 0 
+0 77
+0 68
+
+fn=(630)
+0 6
+cfn=(632)
+calls=1 0 
+0 18502185
+0 35
+
+fn=(640)
+0 225
+
+fn=(858) <crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>::add_popcnt
+0 230
+cfn=(60)
+calls=10 0 
+0 10
+0 40
+cfn=(62)
+calls=10 0 
+0 770
+0 16360
+cob=(2)
+cfi=(2)
+cfn=(18)
+calls=3 0 
+0 36
+0 153
+
+fn=(1026)
+0 311277
+cfn=(1028)
+calls=16383 0 
+0 32766
+0 733224
+cfn=(1030) crypto_lib::cryptanalysis::gf2_elim::xor_entries
+calls=9121 0 
+0 2079064
+0 158427
+
+fn=(1030)
+0 1081926
+cfn=(1032)
+calls=9121 0 
+0 905928
+0 91210
+
+fn=(1032)
+0 1491480
+
+fn=(1042)
+0 12
+cob=(2)
+cfi=(2)
+cfn=(718)
+calls=2 0 
+0 22
+
+fn=(6)
+0 8
+cfn=(8)
+calls=4 0 
+0 104
+
+fn=(16)
+0 39
+cob=(2)
+cfi=(2)
+cfn=(18)
+calls=3 0 
+0 36
+0 18
+cfn=(24) <core::ffi::c_str::CStr>::from_bytes_with_nul
+calls=3 0 
+0 267
+0 15
+cfn=(26) std::sys::env::unix::getenv::{closure#0}
+calls=3 0 
+0 1770
+0 42
+
+fn=(24)
+0 267
+
+fn=(68) crypto_lib::cryptanalysis::koblitz_groebner::monomials_up_to_mask
+0 374
+cfn=(70)
+calls=22 0 
+0 38797
+0 22
+cfn=(60)
+calls=22 0 
+0 22
+0 66
+cfn=(62)
+calls=22 0 
+0 1628
+0 176
+cfn=(60)
+calls=22 0 
+0 22
+0 66
+cfn=(164)
+calls=22 0 
+0 2266
+0 2206
+cfn=(168) <alloc::raw_vec::RawVec<(f64, f64)>>::grow_one
+calls=30 0 
+0 7307
+0 7892
+cfn=(168)
+calls=58 0 
+0 30094
+0 4316
+cfn=(314)
+calls=26 0 
+0 2239
+0 360
+cfn=(72)
+calls=26 0 
+0 21521
+0 424
+cfn=(314)
+calls=22 0 
+0 4603
+0 308
+cfn=(314)
+calls=22 0 
+0 4114
+0 66
+
+fn=(168)
+0 1320
+cfn=(74)
+calls=88 0 
+0 35289
+0 792
+
+fn=(680)
+0 17
+cfn=(40) crypto_lib::cryptanalysis::koblitz_groebner::max_f4_rows
+calls=1 0 
+0 770
+0 6
+cfn=(58)
+calls=1 0 
+0 201
+0 4543
+cfn=(68)
+calls=1 0 
+0 23690
+0 10
+cfn=(364)
+calls=1 0 
+0 17
+0 5
+cfn=(364)
+calls=1 0 
+0 17
+0 6
+cfn=(60)
+calls=1 0 
+0 1
+0 3
+cfn=(62)
+calls=1 0 
+0 554
+0 10
+cob=(2)
+cfi=(2)
+cfn=(18)
+calls=1 0 
+0 160
+0 7
+cfn=(314)
+calls=1 0 
+0 228
+0 1116603
+cfn=(72)
+calls=1 0 
+0 154
+0 22225
+cfn=(60)
+calls=1155 0 
+0 1155
+0 3465
+cfn=(62)
+calls=1155 0 
+0 260506
+0 9240
+cob=(2)
+cfi=(2)
+cfn=(18)
+calls=1155 0 
+0 28075
+0 3485
+cfn=(368)
+calls=10 0 
+0 43696
+0 26245
+cfn=(398)
+calls=1760 0 
+0 1971590
+0 1797
+cfn=(314)
+calls=1 0 
+0 67
+0 47
+cfn=(512) <alloc::rc::Rc<[u64]>>::drop_slow
+calls=1 0 
+0 182
+0 9
+cfn=(314)
+calls=1 0 
+0 67
+0 18
+
+fn=(732)
+0 328
+
+fn=(758)
+0 7
+cob=(2)
+cfi=(2)
+cfn=(718)
+calls=1 0 
+0 11
+
+fn=(760)
+0 6
+cob=(2)
+cfi=(2)
+cfn=(720)
+calls=6 0 
+0 25
+
+fn=(400)
+0 40503
+cfn=(402)
+calls=1761 0 
+0 1850779
+0 49
+cfn=(1052)
+calls=3 0 
+0 480
+0 3004
+cfn=(401) core::slice::sort::unstable::quicksort::quicksort::<u64, <u64 as core::cmp::PartialOrd>::lt>'2
+calls=3 0 
+0 6870
+0 17
+
+fn=(401)
+0 161
+cfn=(402)
+calls=7 0 
+0 4714
+0 120
+cfn=(1052)
+calls=1 0 
+0 160
+0 1694
+cfn=(401)
+calls=4 0 
+0 3375
+0 21
+
+fn=(1020)
+0 1021871
+
+fn=(1028)
+0 44926
+
+fn=(8)
+0 48
+cob=(2)
+cfi=(2)
+cfn=(10)
+calls=8 0 
+0 80
+0 80
+
+fn=(314)
+0 5554
+cob=(2)
+cfi=(2)
+cfn=(316)
+calls=2777 0 
+0 371189
+
+fn=(520)
+0 1891
+cfn=(522)
+calls=61 0 
+0 18899
+0 77775
+cfn=(314)
+calls=50 0 
+0 3730
+0 50
+
+fn=(698)
+0 25
+cfn=(700)
+calls=1 0 
+0 35
+0 15
+cfn=(706)
+calls=1 0 
+0 460
+0 64
+cfn=(72)
+calls=1 0 
+0 533
+0 98
+cfn=(314)
+calls=1 0 
+0 127
+0 42
+cfn=(314)
+calls=7 0 
+0 887
+0 192
+cob=(2)
+cfi=(2)
+cfn=(18)
+calls=8 0 
+0 2144
+0 88
+cfn=(314)
+calls=8 0 
+0 1432
+0 16
+
+fn=(708)
+0 30
+cfn=(710)
+calls=1 0 
+0 197
+0 2
+cfn=(714)
+calls=1 0 
+0 111
+0 14
+
+fn=(712)
+0 49
+
+fn=(730) crossbeam_epoch::default::with_handle::<crossbeam_epoch::default::pin::{closure#0}, crossbeam_epoch::guard::Guard>
+0 279
+
+fn=(742) <&crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5} as core::ops::function::FnMut<(&alloc::vec::Vec<u64>,)>>::call_mut
+0 111475
+cfn=(60)
+calls=637 0 
+0 637
+0 2548
+cfn=(62)
+calls=637 0 
+0 156209
+0 104272
+
+fn=(40)
+0 6
+cfn=(14)
+calls=1 0 
+0 755
+0 9
+
+fn=(560)
+0 129
+cfn=(562)
+calls=2 0 
+0 245514
+0 34
+
+fn=(564)
+0 361
+cfn=(565) core::slice::sort::shared::pivot::median3_rec::<u64, <[u64]>::sort_unstable_by_key<core::cmp::Reverse<u128>, crypto_lib::cryptanalysis::koblitz_groebner::macaulay_columns::{closure#0}>::{closure#0}>'2
+calls=19 0 
+0 2246
+0 114
+cfn=(565)
+calls=19 0 
+0 2246
+0 152
+cfn=(565)
+calls=19 0 
+0 2246
+0 1748
+
+fn=(565)
+0 750
+cfn=(565)
+calls=3 0 
+0 303
+0 18
+cfn=(565)
+calls=3 0 
+0 303
+0 24
+cfn=(565)
+calls=3 0 
+0 303
+0 5946
+
+fn=(26)
+0 51
+cob=(2)
+cfi=(2)
+cfn=(28)
+calls=3 0 
+0 1665
+0 54
+
+fn=(612)
+0 47
+cfn=(1010)
+calls=1 0 
+0 10611727
+0 7
+
+fn=(666)
+0 69
+cfn=(60)
+calls=1 0 
+0 1
+0 3
+cfn=(62)
+calls=1 0 
+0 606
+0 3013
+
+fn=(676) <core::iter::adapters::map::Map<core::iter::adapters::map::Map<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::filter::Filter<core::iter::adapters::zip::Zip<core::slice::iter::Iter<alloc::vec::Vec<u64>>, core::slice::iter::Iter<usize>>, <crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::leading_monomials::{closure#0}>, <crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::leading_monomials::{closure#1}>, <crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::leading_monomials::{closure#2}>, <hashbrown::set::HashSet<u64, core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::fx_hash::MaskHasher>> as core::iter::traits::collect::Extend<u64>>::extend<core::iter::adapters::map::Map<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::filter::Filter<core::iter::adapters::zip::Zip<core::slice::iter::Iter<alloc::vec::Vec<u64>>, core::slice::iter::Iter<usize>>, <crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::leading_monomials::{closure#0}>, <crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::leading_monomials::{closure#1}>, <crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::leading_monomials::{closure#2}>>::{closure#0}> as core::iter::traits::iterator::Iterator>::fold::<(), core::iter::traits::iterator::Iterator::for_each::call<(u64, ()), <hashbrown::map::HashMap<u64, (), core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::fx_hash::MaskHasher>> as core::iter::traits::collect::Extend<(u64, ())>>::extend<core::iter::adapters::map::Map<core::iter::adapters::map::Map<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::filter::Filter<core::iter::adapters::zip::Zip<core::slice::iter::Iter<alloc::vec::Vec<u64>>, core::slice::iter::Iter<usize>>, <crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::leading_monomials::{closure#0}>, <crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::leading_monomials::{closure#1}>, <crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::leading_monomials::{closure#2}>, <hashbrown::set::HashSet<u64, core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::fx_hash::MaskHasher>> as core::iter::traits::collect::Extend<u64>>::extend<core::iter::adapters::map::Map<core::iter::adapters::filter_map::FilterMap<core::iter::adapters::filter::Filter<core::iter::adapters::zip::Zip<core::slice::iter::Iter<alloc::vec::Vec<u64>>, core::slice::iter::Iter<usize>>, <crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::leading_monomials::{closure#0}>, <crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::leading_monomials::{closure#1}>, <crypto_lib::cryptanalysis::matrix_f5_f2::PrefixEchelon>::leading_monomials::{closure#2}>>::{closure#0}>>::{closure#0}>::{closure#0}>
+0 13986
+cfn=(518)
+calls=495 0 
+0 86787
+0 495
+
+fn=(700)
+0 9
+cfn=(702)
+calls=3 0 
+0 15
+0 20
+cfn=(704)
+calls=1 0 
+0 19
+0 4
+
+fn=(728)
+0 135
+cfn=(730)
+calls=9 0 
+0 279
+0 171
+
+fn=(750) <rayon_core::job::StackJob<rayon_core::latch::SpinLatch, rayon_core::join::join_context::call_b<alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>, rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::slice::IterProducer<alloc::vec::Vec<u64>>, rayon::iter::map::MapConsumer<rayon::iter::filter::FilterConsumer<rayon::iter::extend::ListVecConsumer, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>>::{closure#1}>::{closure#0}, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>>>::run_inline
+0 69
+cfn=(706)
+calls=1 0 
+0 211877
+cfn=(707)
+calls=2 0 
+0 159811
+0 27
+
+fn=(751) <rayon_core::job::StackJob<rayon_core::latch::SpinLatch, rayon_core::join::join_context::call_b<alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>, rayon::iter::plumbing::bridge_producer_consumer::helper<rayon::slice::IterProducer<alloc::vec::Vec<u64>>, rayon::iter::map::MapConsumer<rayon::iter::filter::FilterConsumer<rayon::iter::extend::ListVecConsumer, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#6}>, crypto_lib::cryptanalysis::matrix_f5_f2::matrix_f5_f2_with_form_timed::{closure#5}>>::{closure#1}>::{closure#0}, alloc::collections::linked_list::LinkedList<alloc::vec::Vec<crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>>>>::run_inline'2
+0 92
+cfn=(707)
+calls=4 0 
+0 264979
+0 36
+
+fn=(634)
+0 20
+cfn=(636)
+calls=1 0 
+0 501
+0 10
+cfn=(60)
+calls=1 0 
+0 1
+0 4
+cfn=(62)
+calls=1 0 
+0 77
+0 5070
+cfn=(642)
+calls=1 0 
+0 1305
+0 23
+cfn=(678)
+calls=1 0 
+0 14949
+0 10
+cfn=(68)
+calls=1 0 
+0 16139
+0 8
+cfn=(514)
+calls=1 0 
+0 59941
+0 13
+cfn=(314)
+calls=1 0 
+0 225
+0 428
+cfn=(676)
+calls=10 0 
+0 101268
+0 240
+cfn=(60)
+calls=10 0 
+0 10
+0 30
+cfn=(62)
+calls=10 0 
+0 740
+0 130
+cfn=(856) <crypto_lib::cryptanalysis::pq_groebner_f2::F2BoolPoly>::add
+calls=10 0 
+0 17919
+0 40
+cfn=(314)
+calls=10 0 
+0 670
+0 40
+cfn=(68)
+calls=10 0 
+0 45980
+0 2140
+cfn=(860)
+calls=110 0 
+0 195264
+0 114540
+cfn=(866) <hashbrown::map::HashMap<usize, usize, core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::fx_hash::FxHasher>>>::insert
+calls=110 0 
+0 20158
+0 830
+cfn=(368)
+calls=30 0 
+0 12946
+0 100
+cfn=(314)
+calls=10 0 
+0 1174
+0 2190
+cfn=(518)
+calls=110 0 
+0 16645
+0 840
+cfn=(314)
+calls=10 0 
+0 1036
+0 150
+cfn=(314)
+calls=10 0 
+0 670
+0 1160
+cfn=(314)
+calls=110 0 
+0 9690
+0 190
+cfn=(314)
+calls=10 0 
+0 1890
+0 290
+cfn=(68)
+calls=10 0 
+0 43080
+0 1150
+cfn=(860)
+calls=110 0 
+0 185071
+0 136979
+cfn=(368)
+calls=6 0 
+0 4616
+0 1442
+cfn=(870)
+calls=6 0 
+0 3144
+0 630
+cfn=(314)
+calls=10 0 
+0 1172
+0 26
+cfn=(670)
+calls=1 0 
+0 555
+0 6
+cfn=(672)
+calls=1 0 
+0 79
+0 700
+cfn=(672)
+calls=175 0 
+0 13966
+0 538
+cfn=(60)
+calls=1 0 
+0 1
+0 3
+cfn=(164)
+calls=1 0 
+0 3258
+0 11
+cfn=(314)
+calls=1 0 
+0 119
+0 12
+cfn=(314)
+calls=1 0 
+0 119
+0 156
+
+fn=(856)
+0 220
+cfn=(858)
+calls=10 0 
+0 17599
+0 100
+
+fn=(672)
+0 64855
+
+fn=(690)
+0 17
+cfn=(60)
+calls=1 0 
+0 1
+0 4
+cfn=(62)
+calls=1 0 
+0 223
+0 18
+cfn=(692)
+calls=1 0 
+0 1383402
+0 11
+
+fn=(738)
+0 72
+cfn=(706)
+calls=1 0 
+0 214328
+0 13
+cfn=(726)
+calls=1 0 
+0 40
+0 30
+cfn=(750)
+calls=1 0 
+0 211909
+0 17
+
+fn=(739)
+0 432
+cfn=(707)
+calls=6 0 
+0 425278
+0 72
+cfn=(726)
+calls=6 0 
+0 232
+0 186
+cfn=(751)
+calls=4 0 
+0 265107
+cfn=(750)
+calls=2 0 
+0 159875
+0 102
+
+fn=(740)
+0 15440
+cfn=(742)
+calls=637 0 
+0 375141
+0 7740
+cfn=(744) <alloc::raw_vec::RawVec<[u64; 4]>>::grow_one
+calls=48 0 
+0 23210
+0 168
+
+fn=(744)
+0 720
+cfn=(74)
+calls=48 0 
+0 22058
+0 432
+
+fn=(512)
+0 10
+cfn=(314)
+calls=1 0 
+0 172
+
+fn=(516)
+0 12
+cfn=(14)
+calls=2 0 
+0 1510
+0 18
+
+fn=(866)
+0 7623
+cfn=(868) <hashbrown::raw::RawTable<(usize, usize)>>::reserve_rehash::<hashbrown::map::make_hasher<usize, usize, core::hash::BuildHasherDefault<crypto_lib::cryptanalysis::fx_hash::FxHasher>>::{closure#0}>
+calls=30 0 
+0 12390
+0 145
+
+fn=(868)
+0 960
+cfn=(522)
+calls=30 0 
+0 5110
+0 4960
+cfn=(314)
+calls=20 0 
+0 1340
+0 20
+
+fn=(994)
+0 7
+cob=(2)
+cfi=(2)
+cfn=(718)
+calls=1 0 
+0 11
+
+fn=(1040)
+0 753
+cob=(2)
+cfi=(2)
+cfn=(718)
+calls=1 0 
+0 11
+0 5
+
+totals: 18931396

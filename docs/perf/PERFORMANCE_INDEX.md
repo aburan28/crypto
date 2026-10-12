@@ -77,6 +77,17 @@ instructions; F4 is neutral. Its merged-worker profiler contract, native
 controls and live-byte intervals stay separate from earlier CI diagnostics.
 Runtime and process RSS remain unmeasured.
 
+The [native F4 indexing/F5 construction follow-up](../../research/f4_f5_fused_readback_20261012/REPORT.md)
+records 5.28% fewer complete-F4 instructions and 11.02% fewer complete-F5
+instructions on the same eleven-system suite. It adds paired instruction-history,
+allocation-request and peak-live-byte graphs, inspected PDFs and both rejected
+attempts. No final memory metric regresses. Three standalone criterion cases
+use more instructions: the original all-arm gate fails, while the explicitly
+clarified complete-call gate passes. The report retains that gate-scope change
+and every case verdict. Historical and current matched pairs are disconnected
+across intervening unrelated merges; no runtime, RSS or solver-speed claim is
+made.
+
 ## What it measures, and what it does not
 
 `examples/perfbench` is a registry of **kernels**: each runs a fixed,

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Thin orchestration only: the Rust driver executes and verifies every call.
 set -euo pipefail
-task_record_root=research/f4_f5_fused_readback_20261012/records
+task_record_root=${F4_F5_RECORD_ROOT:-research/f4_f5_fused_readback_20261012/records}
 task_profiler=/workspace/scratch/f4-f5-hash/valgrind/usr/bin/valgrind
 export VALGRIND_LIB=/workspace/scratch/f4-f5-hash/valgrind/usr/libexec/valgrind
 
@@ -17,6 +17,9 @@ profile() {
     fi
     mkdir -p "$task_destination"
     date -u '+%Y-%m-%dT%H:%M:%SZ' > "$task_destination/start-utc.txt"
+    printf '%s\n' "KIC_F5_FUSED_BUILD=${KIC_F5_FUSED_BUILD:-unset}" \
+        "KIC_F4_HASH_COLUMN_INDEX=${KIC_F4_HASH_COLUMN_INDEX:-unset}" \
+        > "$task_destination/environment.txt"
     printf '%s\n' "VALGRIND_LIB=$VALGRIND_LIB timeout -k 5 180 $task_profiler --tool=callgrind --instr-atstart=no --separate-threads=no --callgrind-out-file=$task_destination/callgrind.out /workspace/scratch/f4-f5-fused-readback/$task_variant/bench profile $task_repeats" > "$task_destination/command.txt"
     if timeout -k 5 180 "$task_profiler" --tool=callgrind --instr-atstart=no --separate-threads=no \
         --callgrind-out-file="$task_destination/callgrind.out" \
@@ -40,6 +43,7 @@ fi
 
 if [ "${1:-}" = "legacy" ]; then
     export KIC_F5_FUSED_BUILD=0
+    export KIC_F4_HASH_COLUMN_INDEX=1
     profile legacy-b b 1
     exit
 fi
