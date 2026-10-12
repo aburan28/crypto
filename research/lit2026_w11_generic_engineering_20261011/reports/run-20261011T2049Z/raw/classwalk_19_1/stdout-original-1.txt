@@ -1,0 +1,18 @@
+════════════════════════════════════════════════════════════════
+Walking isogeny classes by explicit isogenies, instance in hand
+════════════════════════════════════════════════════════════════
+E[ℓ] is built in F_(q^m), m = ord_ℓ(λ), where π acts as the scalar λ;
+every kernel, every t and every transported X must land in F_q.
+
+════════════════════════════════════════════════════════════════
+── n = 19, a₂ = 1: class of 457 over conductor 457 (ℓ ∈ [457]) ──
+   instance on K_a: r = 262543, d = 95119 (the cost sweep's class secret)
+     … 457 vertices, 456 edges, 0.8s
+   splitting fields: {457: 8}  (ℓ ↦ m)
+   ℓ = 457: E[ℓ] proved rank 2 at 1 vertices (volcano predicts 1) ✓,  rank 1 at 456,  undecided 0,  not classified (budget) 0
+   reached 457 vertices by 456 explicit isogenies in 1.2s; depth histogram {0: 1, 1: 456}
+   rationality: 0 kernels with t ∉ F_q, 0 images with X ∉ F_q   (both must be 0)
+   transport: 456 of 456 edges carried (P, Q = [d]P) with #E' = #E, ord φ(P) = r, x([d]φ(P)) = x(φ(Q))
+   census (cost-sweep snapshot (exhaustive trace scan)): 457 members → walk REACHED EXACTLY THE CLASS
+
+wrote experiments/koblitz_isogeny_class_walk.json
