@@ -1,0 +1,234 @@
+{
+  "schema": "f4-f5-allocation-audit/v1",
+  "repository": "aburan28/crypto",
+  "branch": "codex/optimize-f4-f5-row-build",
+  "scope": "Existing Boolean Rust matrix-F4/F5 construction",
+  "requested": "Optimize existing F4/F5 implementation",
+  "original_main": "c95a14de9bfa2711643a9318f3728d5d1109367b",
+  "production_baseline": "e957e48c2b8cf1f84a7fc44a1d673103964a789d",
+  "diagnostic_revision": "ee344374",
+  "optimized_kernels": "2e3dffda681a4771be511653180da8354de3bce3",
+  "compiler": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "target": "default release Linux x86-64",
+  "rayon_workers": 1,
+  "host_records": [
+    "records/cpu.json",
+    "records/memory.txt",
+    "records/os.txt",
+    "records/kernel.txt",
+    "records/cpu-quota.txt"
+  ],
+  "configuration_records": [
+    "records/configuration-sha256.txt",
+    "records/solver-environment.txt"
+  ],
+  "tuned_environment_overrides": [],
+  "exclusive_cpu_isolation": false,
+  "wall_time_speedup": null,
+  "peak_memory": null,
+  "full_ecdlp_cost": null,
+  "m83_scaling_evidence": null,
+  "suite": {
+    "systems": 8,
+    "repetitions": 3,
+    "workloads": [
+      [
+        8,
+        8,
+        3
+      ],
+      [
+        8,
+        8,
+        4
+      ],
+      [
+        10,
+        10,
+        4
+      ],
+      [
+        10,
+        10,
+        5
+      ]
+    ],
+    "seeds": [
+      "0x2545f4914f6cdd1d",
+      "0x9e3779b97f4a7c15"
+    ],
+    "holdout_seed": "0x9e3779b97f4a7c15",
+    "units": [
+      "allocation/reallocation requests",
+      "cumulative requested bytes"
+    ],
+    "counted": "complete F4/F5 calls; criterion construction in separate arm",
+    "excluded": [
+      "fixture generation",
+      "worker startup",
+      "warmup",
+      "hashing",
+      "verification"
+    ]
+  },
+  "hashes": [
+    "records/baseline-sha256.txt",
+    "records/baseline-aa-sha256.txt",
+    "records/candidate-sha256.txt"
+  ],
+  "saved_binaries": [
+    "/workspace/scratch/f4-f5-row-build-baseline",
+    "/workspace/scratch/f4-f5-row-build-baseline-formatted",
+    "/workspace/scratch/f4-f5-row-build-candidate"
+  ],
+  "saved_baseline_rlib": "/workspace/scratch/libcrypto_lib-f4-f5-baseline.rlib",
+  "runs": [
+    {
+      "id": "run-20261011T1655Z",
+      "command": "/workspace/scratch/f4-f5-row-build-baseline 3",
+      "raw": "records/baseline.jsonl",
+      "records": 72,
+      "exit_status": 0
+    },
+    {
+      "id": "run-20261011T1700Z",
+      "command": "/workspace/scratch/f4-f5-row-build-baseline-formatted 3",
+      "raw": "records/baseline-aa.jsonl",
+      "records": 72,
+      "comparison": "records/baseline-aa-comparison.json",
+      "exit_status": 0,
+      "calibration": "exact allocations, bytes, output and metadata agreement"
+    },
+    {
+      "id": "run-20261011T1715Z",
+      "command": "target/release/examples/f4_f5_row_build_bench 3",
+      "raw": "records/candidate.jsonl",
+      "records": 72,
+      "comparison": "records/comparison.json",
+      "exit_status": 0
+    },
+    {
+      "id": "run-20261011T1716Z",
+      "command": "For rounds 1..5: baseline-formatted 3; candidate 3; native compare; cmp each JSONL to primary",
+      "raw": "records/paired/",
+      "pairs": 5,
+      "records_per_variant_per_pair": 72,
+      "exit_status": 0,
+      "calibration": "all five pairs reproduced both primary JSONL files byte for byte"
+    }
+  ],
+  "comparison_command": "target/release/examples/f4_f5_row_build_bench compare BASELINE.jsonl CANDIDATE.jsonl",
+  "acceptance": {
+    "exact_outputs_and_counters": true,
+    "fewer_f4_allocation_requests": true,
+    "at_least_20_percent_fewer_criterion_allocation_requests": true,
+    "all_measured_workloads_without_allocation_regressions": true
+  },
+  "validation": {
+    "focused": [
+      {
+        "filter": "cryptanalysis::matrix_f5_f2::tests",
+        "passed": 17,
+        "failed": 0,
+        "raw": "records/f5-tests.log",
+        "exit_status": 0
+      },
+      {
+        "filter": "cryptanalysis::koblitz_groebner::tests",
+        "passed": 43,
+        "failed": 0,
+        "raw": "records/macaulay-tests.log",
+        "exit_status": 0
+      },
+      {
+        "filter": "cryptanalysis::pq_f4_f2::tests",
+        "passed": 13,
+        "failed": 0,
+        "raw": "records/f4-tests.log",
+        "exit_status": 0
+      }
+    ],
+    "example": {
+      "command": "cargo test --locked --release --example f4_f5_row_build_bench",
+      "exit_status": 0,
+      "unit_tests": 0,
+      "raw": "records/example-tests.log"
+    },
+    "library": {
+      "command": "RAYON_NUM_THREADS=1 cargo test --locked --release --lib -- --test-threads=1",
+      "status": "incomplete: budget exceeded; stopped stalled test",
+      "raw": "records/library-tests.log",
+      "budget_minutes": 20,
+      "stalled_test_sources_unchanged": [
+        "src/cryptanalysis/jv_isogeny_walk.rs",
+        "src/cryptanalysis/jv_sieve.rs"
+      ],
+      "exit_status": 101,
+      "signal": 15,
+      "execution_budget_seconds": 1200,
+      "observed_process_age_seconds_at_termination": 1257,
+      "timeout_records": [
+        "records/library-timeout.txt",
+        "records/library-timeout-at.txt",
+        "records/library-timeout-elapsed-seconds.txt"
+      ],
+      "full_suite_passed": false
+    },
+    "remaining_library": {
+      "command": "RAYON_NUM_THREADS=1 cargo test --locked --release --lib -- --test-threads=3 --skip stalled test and previously completed exact test names",
+      "status": "passed",
+      "raw": "records/library-tests-remainder.log",
+      "skipped_completed_names": "records/library-remainder-already-tested.txt",
+      "exit_status": 0,
+      "passed": 2585,
+      "ignored": 86,
+      "filtered_out": 1278
+    },
+    "library_coverage": {
+      "distinct_passed": 3838,
+      "distinct_ignored": 110,
+      "unfinished": 1,
+      "expected_tests": 3949,
+      "unfinished_name": "cryptanalysis::jv_isogeny_walk::tests::end_to_end_from_a_non_weak_curve_recovers_and_verifies",
+      "coverage_records": [
+        "records/library-expected-tests.txt",
+        "records/library-passed-tests.txt",
+        "records/library-ignored-tests.txt",
+        "records/library-pending-tests.txt"
+      ]
+    }
+  },
+  "prerequisites": {
+    "compile_failures_exit_status": 101,
+    "logs": "records/f4-f5-baseline*.log and records/f4-f5-candidate-test-build*.log",
+    "valid_benchmark_records_from_failures": 0,
+    "production_repairs_identical_across_variants": true,
+    "test_assertions_retained": true
+  },
+  "workflow": {
+    "conductor": "unavailable: command not installed; no .conductor/WORKFLOW.md",
+    "github": "HTTP 401 Bad credentials",
+    "github_evidence": "records/github-access.log",
+    "pr_opened": false,
+    "git_push_preflight": "git push --dry-run failed: no configured GitHub username/credential",
+    "git_push_preflight_exit_status": 128,
+    "git_push_preflight_evidence": "records/git-push-access.log"
+  },
+  "graphics": {
+    "source": "render_reports.py",
+    "data": "reports/run-*/graph-data.json",
+    "main_pdf": "report.pdf",
+    "run_pdfs": "reports/run-*/report.pdf",
+    "run_pdf_inspection": "All four single-page run PDFs opened and inspected",
+    "result_pdf_inspection": "Both final pages opened and inspected after updating verification status; all four run PDFs also inspected",
+    "canonical_checked_unchanged": [
+      "docs/index-calculus-scoreboard.html",
+      "docs/ic/progress-timeline.json",
+      "docs/performance-gains.html",
+      "docs/performance-gains/",
+      "docs/curves/",
+      "figures/"
+    ],
+    "reason": "Standalone allocation diagnostic changes no measured time, IC/rho, curve or scaling facts"
+  }
+}

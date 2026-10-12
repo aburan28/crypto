@@ -44,9 +44,29 @@ companion as much as a working library.
 | `ecc2k130/`, `gpu/`, `hdl/` | the ECC2K-130 rho campaign: fleet tooling, GPU kernels, FPGA cost models |
 | `sage/`, `scripts/`, `secp256k1_cm_audit/`, `cd_attack/`, `quantum_circuit_secp256k1/` | Sage/PARI/Python companions to specific notes |
 | `papers/` | manuscript sources, one directory per paper (`papers/README.md` is the index) |
+| [`problems/`](problems/README.md) | named research and audit blockers, supporting evidence, and concrete conditions for moving past them |
 | `AGENTS.md` | the reporting convention (boundary, table, ratio) every research thread follows |
 
 ## Quick tour
+
+The dedicated [`isogeny` executable](tools/isogeny-cli/README.md) screens P192/P224
+prime degrees, constructs explicit isogenies, and verifies their certificates.
+Download its platform archive from [Releases](https://github.com/aburan28/crypto/releases)
+and run it directly:
+
+```sh
+isogeny search --curve p224 --ell 1471 --out ./p224-1471
+isogeny search --curve p192 --ell 10453 --out ./p192-10453
+isogeny verify --input ./p224-1471
+isogeny curves
+isogeny search --curve P-384 --ell 19 --out ./p384-19
+isogeny search --curve P-521 --ell 7 --out ./p521-7
+```
+
+The executable embeds its algorithms and standard curve data. The kernel route at
+these two degrees constructs one Frobenius eigenline of two and labels coverage
+`PARTIAL`. The repository's Release workflow builds the platform archives and
+publishes them through ReleaseMe; PR runs test the archives before publication.
 
 ```bash
 # Build
@@ -99,6 +119,27 @@ command remains the default for cargo run.
 The [EC index-calculus baseline](research/index_calculus_baseline_20260914/README.md)
 adds counting bounds, an operation-accounting contract, and a certified WDSat control
 with frozen measurements and reproducible commands.
+
+## Elliptic-curve surface tools
+
+[`tools/ecdlp-surfaces`](tools/ecdlp-surfaces/README.md) is a standalone Rust
+crate with four command-line tools: `surface_search` enumerates containing
+quadrics, `transfer_check` checks the transported group law and prime subgroup,
+and `frobenius_filter` applies necessary conditions to supplied abelian-surface
+polynomials. `binary_surface_check` checks the pinned a=0/a=1 Koblitz fixtures
+over GF(2^83), including exact pencil counts and subgroup transport. The
+odd-prime arithmetic uses primes up to 10,000. Equivalent
+embeddings preserve the ECDLP; no destination-solver speedup is established.
+The [report](docs/ecdlp-surfaces/REPORT.md) includes the diagram, PDF, fixtures,
+and native identity certificates. Run `tools/ecdlp-surfaces/check.sh` to validate
+the crate and replay its examples. The [n=83 report](research/ecdlp_surfaces_n83_20261012/reports/run-20261012T0331Z/REPORT.md)
+records the binary checks and includes an inspected PDF.
+
+For genus-2 and higher Jacobian transfers, use the
+[`ecdlp-surfaces` skill](.agents/skills/ecdlp-surfaces/SKILL.md) and its
+[higher-genus reference](.agents/skills/ecdlp-surfaces/references/higher-genus.md)
+for the existing cover/arithmetic tools, native pullback APIs, and construction
+and subgroup-validation requirements.
 
 ## Isogeny walks
 

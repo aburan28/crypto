@@ -1,0 +1,277 @@
+   Compiling p192-p224-kernel-first-replay v0.1.0 (/Volumes/SSD990/crypto/worktrees/codex-p192-p224-large-degree-isogenies-20261008/research/p192_p224_large_degree_isogenies_20261009)
+warning: methods `modulus`, `neg`, `from_i64`, `from_u128`, `div`, and `hex` are never used
+   --> ../../src/cryptanalysis/isogeny_walk/field.rs:125:12
+    |
+ 85 | impl Field {
+    | ---------- methods in this implementation
+...
+125 |     pub fn modulus(&self) -> &BigUint {
+    |            ^^^^^^^
+...
+204 |     pub fn neg(&self, a: &Fe) -> Fe {
+    |            ^^^
+...
+212 |     pub fn from_i64(&self, v: i64) -> Fe {
+    |            ^^^^^^^^
+...
+221 |     pub fn from_u128(&self, v: u128) -> Fe {
+    |            ^^^^^^^^^
+...
+253 |     pub fn div(&self, a: &Fe, b: &Fe) -> Option<Fe> {
+    |            ^^^
+...
+300 |     pub fn hex(&self, a: &Fe) -> String {
+    |            ^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `degree` is never used
+  --> verification_poly.rs:23:8
+   |
+23 | pub fn degree(a: &Poly) -> Option<usize> {
+   |        ^^^^^^
+
+warning: function `constant` is never used
+  --> verification_poly.rs:27:8
+   |
+27 | pub fn constant(f: &Field, c: Fe) -> Poly {
+   |        ^^^^^^^^
+
+warning: function `x` is never used
+  --> verification_poly.rs:32:8
+   |
+32 | pub fn x(f: &Field) -> Poly {
+   |        ^
+
+warning: function `add` is never used
+  --> verification_poly.rs:36:8
+   |
+36 | pub fn add(f: &Field, a: &Poly, b: &Poly) -> Poly {
+   |        ^^^
+
+warning: function `sub` is never used
+  --> verification_poly.rs:45:8
+   |
+45 | pub fn sub(f: &Field, a: &Poly, b: &Poly) -> Poly {
+   |        ^^^
+
+warning: function `scale` is never used
+  --> verification_poly.rs:54:8
+   |
+54 | pub fn scale(f: &Field, a: &Poly, c: &Fe) -> Poly {
+   |        ^^^^^
+
+warning: function `divrem` is never used
+   --> verification_poly.rs:125:8
+    |
+125 | pub fn divrem(f: &Field, a: &Poly, b: &Poly) -> (Poly, Poly) {
+    |        ^^^^^^
+
+warning: function `rem` is never used
+   --> verification_poly.rs:147:8
+    |
+147 | pub fn rem(f: &Field, a: &Poly, b: &Poly) -> Poly {
+    |        ^^^
+
+warning: function `mulmod` is never used
+   --> verification_poly.rs:151:8
+    |
+151 | pub fn mulmod(f: &Field, a: &Poly, b: &Poly, m: &Poly) -> Poly {
+    |        ^^^^^^
+
+warning: function `monic` is never used
+   --> verification_poly.rs:155:8
+    |
+155 | pub fn monic(f: &Field, a: &Poly) -> Poly {
+    |        ^^^^^
+
+warning: function `gcd` is never used
+   --> verification_poly.rs:163:8
+    |
+163 | pub fn gcd(f: &Field, a: &Poly, b: &Poly) -> Poly {
+    |        ^^^
+
+warning: function `invmod` is never used
+   --> verification_poly.rs:174:8
+    |
+174 | pub fn invmod(f: &Field, a: &Poly, m: &Poly) -> Option<Poly> {
+    |        ^^^^^^
+
+warning: function `powmod` is never used
+   --> verification_poly.rs:190:8
+    |
+190 | pub fn powmod(f: &Field, base: &Poly, e: &BigUint, m: &Poly) -> Poly {
+    |        ^^^^^^
+
+warning: function `derivative` is never used
+   --> verification_poly.rs:202:8
+    |
+202 | pub fn derivative(f: &Field, a: &Poly) -> Poly {
+    |        ^^^^^^^^^^
+
+warning: function `eval` is never used
+   --> verification_poly.rs:213:8
+    |
+213 | pub fn eval(f: &Field, a: &Poly, x: &Fe) -> Fe {
+    |        ^^^^
+
+warning: function `eval_mod` is never used
+   --> verification_poly.rs:220:8
+    |
+220 | pub fn eval_mod(f: &Field, a: &Poly, x: &Poly, m: &Poly) -> Poly {
+    |        ^^^^^^^^
+
+warning: function `roots` is never used
+   --> verification_poly.rs:229:8
+    |
+229 | pub fn roots(f: &Field, a: &Poly, seed: u64) -> Vec<Fe> {
+    |        ^^^^^
+
+warning: function `split_linear` is never used
+   --> verification_poly.rs:244:4
+    |
+244 | fn split_linear(f: &Field, g: Poly, rng: &mut SmallRng, out: &mut Vec<Fe>) {
+    |    ^^^^^^^^^^^^
+
+warning: function `power_sums` is never used
+   --> verification_poly.rs:269:8
+    |
+269 | pub fn power_sums(f: &Field, h: &Poly, n: usize) -> Vec<Fe> {
+    |        ^^^^^^^^^^
+
+warning: function `from_power_sums` is never used
+   --> verification_poly.rs:313:8
+    |
+313 | pub fn from_power_sums(f: &Field, s: &[Fe], d: usize) -> Poly {
+    |        ^^^^^^^^^^^^^^^
+
+warning: function `degree` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/poly.rs:23:8
+   |
+23 | pub fn degree(a: &Poly) -> Option<usize> {
+   |        ^^^^^^
+
+warning: function `constant` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/poly.rs:27:8
+   |
+27 | pub fn constant(f: &Field, c: Fe) -> Poly {
+   |        ^^^^^^^^
+
+warning: function `x` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/poly.rs:32:8
+   |
+32 | pub fn x(f: &Field) -> Poly {
+   |        ^
+
+warning: function `add` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/poly.rs:36:8
+   |
+36 | pub fn add(f: &Field, a: &Poly, b: &Poly) -> Poly {
+   |        ^^^
+
+warning: function `sub` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/poly.rs:45:8
+   |
+45 | pub fn sub(f: &Field, a: &Poly, b: &Poly) -> Poly {
+   |        ^^^
+
+warning: function `scale` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/poly.rs:54:8
+   |
+54 | pub fn scale(f: &Field, a: &Poly, c: &Fe) -> Poly {
+   |        ^^^^^
+
+warning: function `divrem` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/poly.rs:75:8
+   |
+75 | pub fn divrem(f: &Field, a: &Poly, b: &Poly) -> (Poly, Poly) {
+   |        ^^^^^^
+
+warning: function `rem` is never used
+  --> ../../src/cryptanalysis/isogeny_walk/poly.rs:97:8
+   |
+97 | pub fn rem(f: &Field, a: &Poly, b: &Poly) -> Poly {
+   |        ^^^
+
+warning: function `mulmod` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:101:8
+    |
+101 | pub fn mulmod(f: &Field, a: &Poly, b: &Poly, m: &Poly) -> Poly {
+    |        ^^^^^^
+
+warning: function `monic` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:105:8
+    |
+105 | pub fn monic(f: &Field, a: &Poly) -> Poly {
+    |        ^^^^^
+
+warning: function `gcd` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:113:8
+    |
+113 | pub fn gcd(f: &Field, a: &Poly, b: &Poly) -> Poly {
+    |        ^^^
+
+warning: function `invmod` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:124:8
+    |
+124 | pub fn invmod(f: &Field, a: &Poly, m: &Poly) -> Option<Poly> {
+    |        ^^^^^^
+
+warning: function `powmod` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:140:8
+    |
+140 | pub fn powmod(f: &Field, base: &Poly, e: &BigUint, m: &Poly) -> Poly {
+    |        ^^^^^^
+
+warning: function `derivative` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:152:8
+    |
+152 | pub fn derivative(f: &Field, a: &Poly) -> Poly {
+    |        ^^^^^^^^^^
+
+warning: function `eval` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:163:8
+    |
+163 | pub fn eval(f: &Field, a: &Poly, x: &Fe) -> Fe {
+    |        ^^^^
+
+warning: function `eval_mod` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:170:8
+    |
+170 | pub fn eval_mod(f: &Field, a: &Poly, x: &Poly, m: &Poly) -> Poly {
+    |        ^^^^^^^^
+
+warning: function `roots` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:179:8
+    |
+179 | pub fn roots(f: &Field, a: &Poly, seed: u64) -> Vec<Fe> {
+    |        ^^^^^
+
+warning: function `split_linear` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:194:4
+    |
+194 | fn split_linear(f: &Field, g: Poly, rng: &mut SmallRng, out: &mut Vec<Fe>) {
+    |    ^^^^^^^^^^^^
+
+warning: function `power_sums` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:219:8
+    |
+219 | pub fn power_sums(f: &Field, h: &Poly, n: usize) -> Vec<Fe> {
+    |        ^^^^^^^^^^
+
+warning: function `from_power_sums` is never used
+   --> ../../src/cryptanalysis/isogeny_walk/poly.rs:263:8
+    |
+263 | pub fn from_power_sums(f: &Field, s: &[Fe], d: usize) -> Poly {
+    |        ^^^^^^^^^^^^^^^
+
+warning: `p192-p224-kernel-first-replay` (bin "verification-poly-checks" test) generated 41 warnings
+    Finished `release` profile [optimized] target(s) in 1.09s
+     Running unittests verification_poly_checks.rs (/private/tmp/p192-p224-continuation.f9sck4/replay/release/deps/verification_poly_checks-d664e63002a9f7df)
+
+running 2 tests
+test field::tests::arithmetic_matches_biguint_on_p224_and_small_primes ... ok
+test tests::agrees_with_unchanged_schoolbook_on_both_source_fields ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

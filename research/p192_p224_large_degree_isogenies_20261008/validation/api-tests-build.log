@@ -1,0 +1,18 @@
+error: environment variable `CARGO_BIN_EXE_isogeny-algos` not defined at compile time
+   --> isogeny_algos/tests/api.rs:154:15
+    |
+154 |     let bin = env!("CARGO_BIN_EXE_isogeny-algos");
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: Cargo sets build script variables at run time. Use `std::env::var("CARGO_BIN_EXE_isogeny-algos")` instead
+
+error: environment variable `CARGO_PKG_VERSION` not defined at compile time
+   --> isogeny_algos/tests/api.rs:186:13
+    |
+186 |             env!("CARGO_PKG_VERSION")
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: there is a similar Cargo environment variable: `CARGO_PKG_VERSION`
+
+error: aborting due to 2 previous errors
+

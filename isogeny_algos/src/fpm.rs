@@ -1285,6 +1285,9 @@ impl<const N: usize> Field for FpM<N> {
     fn char(&self) -> u64 {
         self.p[0]
     }
+    fn characteristic_exceeds(&self, n: u64) -> bool {
+        self.pbits > 64 || self.p[0] > n
+    }
     fn conv(&self, a: &[Self::E], b: &[Self::E]) -> Vec<Self::E> {
         self.conv_trunc(a, b, a.len() + b.len() - 1)
     }

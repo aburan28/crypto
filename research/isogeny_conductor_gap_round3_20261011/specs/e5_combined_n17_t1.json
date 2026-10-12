@@ -1,0 +1,69 @@
+{
+  "arms": [
+    {
+      "method": {
+        "id": "rho.negation"
+      },
+      "name": "rho-neg",
+      "role": "reference"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "descent-algebraic:m=2",
+          "solver": "f4-f2"
+        }
+      },
+      "name": "f4-blind",
+      "role": "baseline"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "descent-algebraic-fiber:fiber=lifts",
+          "solver": "f4-f2"
+        }
+      },
+      "name": "f4-lifts",
+      "role": "candidate"
+    },
+    {
+      "method": {
+        "id": "ic.pipeline",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "oracle": "descent-algebraic-fiber:fiber=combined",
+          "solver": "f4-f2"
+        }
+      },
+      "name": "f4-combined",
+      "role": "candidate"
+    }
+  ],
+  "description": "Lead E5 of research/isogeny_conductor_gap_round3_20261011/PROTOCOL.md: round 1 arm A3 (combined descent, target abscissa free, fiber polynomial adjoined) against blind and all-lifts F4 descents and rho, one target and two measured rounds so the session fits between host reboots.",
+  "label": "round 3 E5: combined Weil descent at n = 17, Koblitz curve, target seed 20261011",
+  "measurement": {
+    "isolation_required": "L2",
+    "order": "alternate",
+    "rounds": 2,
+    "seed": 1,
+    "timeout_seconds": 3600,
+    "warmup": 0
+  },
+  "schema": "ecbench.spec/v1",
+  "workloads": {
+    "curves": [
+      {
+        "a": 1,
+        "kind": "koblitz",
+        "n": 17
+      }
+    ],
+    "target_seed": 20261011,
+    "targets_per_curve": 1
+  }
+}

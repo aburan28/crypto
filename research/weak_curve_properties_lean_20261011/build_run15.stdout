@@ -1,0 +1,34 @@
+⚠ [1634/1637] Built WeakCurveProperties.WeierstrassTwists (55s)
+warning: WeakCurveProperties/WeierstrassTwists.lean:118:70: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: WeakCurveProperties/WeierstrassTwists.lean:120:70: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: WeakCurveProperties/WeierstrassTwists.lean:139:4: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+warning: WeakCurveProperties/WeierstrassTwists.lean:144:4: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+⚠ [1635/1637] Built WeakCurveProperties.FiniteFields (23s)
+warning: WeakCurveProperties/FiniteFields.lean:22:0: automatically included section variable(s) unused in theorem `WeakCurveProperties.card_subfield_units`:
+  [Finite F]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Finite F] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: WeakCurveProperties/FiniteFields.lean:42:0: automatically included section variable(s) unused in theorem `WeakCurveProperties.subfield_twist_witness_iff`:
+  [Finite F]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Finite F] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+warning: WeakCurveProperties/FiniteFields.lean:60:0: automatically included section variable(s) unused in theorem `WeakCurveProperties.mapped_generic_model`:
+  [Finite F]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [Finite F] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+✔ [1636/1637] Built WeakCurveProperties (19s)
+Build completed successfully (1637 jobs).
