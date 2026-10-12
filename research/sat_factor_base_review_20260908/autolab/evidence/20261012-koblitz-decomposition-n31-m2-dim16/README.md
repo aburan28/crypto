@@ -55,3 +55,17 @@ python3 research/sat_factor_base_review_20260908/autolab/boundary_autolab.py cla
 `autolab_runs/20261012T173525Z-27b5dd9f1d/` holds `state.json`, `artifacts/`,
 `receipts/`, `inputs/` (protocol + ledger pin; full `boundary_targets.json`
 omitted, SHA-256 in `ledger_pin.json`), and producer logs.
+
+## Hosted L=65536 fallthrough context
+
+Independent-host L=65,536 (`compact-orbit-n61-isolated.yml`, targets=65536,
+blocks=2, k=700) remained queued on GitHub-hosted runners after a reasonable
+wait (validate never started; queue depth ~100). Timeout bump PR #1736 is on
+`main`. Dispatches left running:
+
+- https://github.com/aburan28/crypto/actions/runs/38285023608 (`main`)
+- https://github.com/aburan28/crypto/actions/runs/38283955374 (`cursor/ic-n61-l65536-hosted-20261012`)
+
+Saturation note also recorded under
+[`../20261003-koblitz-n61-hosted-isolated/`](../20261003-koblitz-n61-hosted-isolated/README.md#l65536-attempt-2026-10-12--runner-saturation).
+

@@ -151,3 +151,21 @@ they expire.
 | `gha-37156127161-1` | `compact-orbit-n61-isolated-L4096` | 11287237024 | `sha256:83dd37be3ccbbd60…` | 2027-01-01 |
 | `gha-37159733133-1` | `compact-orbit-n61-isolated-L16384` | 11289103797 | `sha256:a42d32a3c2cf8505…` | 2027-01-01 |
 | `gha-37156392134-1` | `compact-orbit-n61-single-target-W256` | 11287912438 | `sha256:8cd7bc1b6a2b137f…` | 2027-01-01 |
+
+
+## L=65,536 attempt (2026-10-12) — runner saturation
+
+Timeout bump landed in PR #1736 (`timeout-minutes` 300→480 on the measure
+job). Confirmed YAML `workflow_dispatch` inputs: `targets`, `blocks`, `k`.
+
+Dispatched:
+
+| Actions run | Ref | Inputs | Outcome after ~40+ min |
+|---|---|---|---|
+| [38285023608](https://github.com/aburan28/crypto/actions/runs/38285023608) | `main` @ `be456ef51` | targets=65536, blocks=2, k=700 | `validate` still **queued** (never started) |
+| [38283955374](https://github.com/aburan28/crypto/actions/runs/38283955374) | `cursor/ic-n61-l65536-hosted-20261012` @ `43a69f870` | workflow_dispatch (sibling) | `validate` still **queued** |
+
+Repo Actions queue depth was ~100 queued / 0–1 in progress. Prior L=65536
+attempts on 2026-10-10 were cancelled (e.g. [38024710170](https://github.com/aburan28/crypto/actions/runs/38024710170)).
+No receipts to archive yet. Fallthrough: `koblitz.decomposition.n31_m2_dim16`
+evidence in [`../20261012-koblitz-decomposition-n31-m2-dim16/`](../20261012-koblitz-decomposition-n31-m2-dim16/README.md).
