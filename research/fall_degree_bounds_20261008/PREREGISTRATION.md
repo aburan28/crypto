@@ -337,3 +337,28 @@ The shapes are the committed ladder controls' `(n_vars, terms_per_eq)`:
 | **mixed** | otherwise |
 
 Nothing from any control has been computed.
+
+## Amendment 6 (2026-10-12, after Part D's controls turned out satisfiable; before any `d_last` on them)
+
+**What happened.** All 12 Part D controls (shapes `n5l2`, `n7l3`, `n11l4`; 4 seeds each)
+have 1 or 2 solutions by exhaustive evaluation. `random_control_system` plants a root. So
+Part D as registered, which needs unsatisfiable controls, is **not testable**. The closure
+dimensions were computed and are recorded (`e6/D_controls_small.jsonl`). The refutation
+degree is undefined for these systems.
+
+**Part D′ (replacement).** Use the same 12 controls, plus 4 at the `n13l5` shape. Compute
+`d_last` exactly as Part C does for satisfiable Semaev draws:
+- the solution set `S` by exhaustive evaluation over `F₂^N`;
+- `dim (I(S) ∩ R_{≤c})` and `DG` from `S`;
+- `e₀` and `d_last` as in `lfd_fast.sage`;
+- `cmax = 6`.
+
+The comparison is Part C's satisfiable Semaev draws, where `d_last = 4` on all 6.
+
+**Reading rule (fixed now).**
+
+| reading | condition |
+|:--|:--|
+| **"Semaev-specific"** | every shape has control median `d_last ≥ 5` |
+| **"generic at toy size"** | every shape has control median `d_last ≤ 4` |
+| **mixed** | otherwise |
