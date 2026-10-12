@@ -1,0 +1,109 @@
+# Execution notes
+
+The original 2026-10-08 evidence is preserved. Its large probes had low sampled
+resident memory before the timeouts, motivating stage diagnosis. Source review
+found that the initial E4 coefficients scan every possible divisor separately
+for every series coefficient. It also uses u64 cubes, which overflow at large
+indices. Any correction is checked independently before construction results
+are accepted.
+
+The ignored algorithm-validation build cache was moved from the previous
+study's target directory to /private/tmp/p192-p224-continuation.f9sck4/algorithm-validation.
+It is absent from the prior manifest's bound executable list. Prior raw data,
+reports, source snapshots and bound executables remain at their original paths.
+New build artifacts use this temporary volume. An initial Conductor connection
+failure was followed by a successful scope check and T-7 reservation under the
+currently configured cryptanalysis project.
+
+The first copied launcher kept its old argument interface; that failed launch
+is preserved in validation/supervisor-first-launch-failure.log. The next
+20-second diagnostic completed but had no PID file for sampling. Both sampler
+attempts failed before collecting a stack. The corrected PID-writing launcher
+uses baseline-diagnostic-v2/ and successfully sampled only its own child.
+The retained sample places all sampled main-thread stacks inside the Hecke
+modular-polynomial constructor; it does not identify a later stage or establish
+a speed comparison. New stage traces will distinguish the constructor phases.
+
+The field-valued divisor sieve and its optional stage logging were committed
+as 97c80540b. The full release suite passed 114 tests, including the independently
+enumerated divisor coefficients, a coefficient beyond u64 cube/sum capacity,
+and known normalized j-series coefficients. The new protocol and diagnostics
+were committed separately as b8133a7bc after adding the study to sparse checkout.
+
+The extended full-Hecke probes preserve 600-second timeouts for p192/509 and
+p224/521 and an 1800-second timeout for p192/1021. Their last completed stage
+was q-series construction; later baby/giant powers had not completed within
+those budgets. The p224/1031 invocation follows serially. These are operational
+stage records, without a matched performance comparison.
+
+An exact additional eigenvalue-order screen through 65537 found a degree-5
+eigenline at p224/1471 and a degree-3 eigenline at p192/10453. KERNEL_PROTOCOL.md
+freezes a distinct kernel-first route; it does not replace the full-Hecke
+two-map obligations. Extension tests passed on both source primes and on an
+independent exhaustive small-field point count. The per-map replay imports the
+same unchanged existing walker arithmetic and retains every mathematical check.
+
+The first Cargo build attempted to include the manually linked kernel helper
+without a crate dependency and failed. That log is preserved. The Cargo
+workspace now builds only the independent replay; the helper and supervisor
+use their recorded rustc --extern builds. The kernel helper's early argument
+arity was corrected before target construction. Kernel source 2fe16c12b,
+the frozen executable and the separate single-map supervisor are used for the
+queued kernel runs. No new map is promoted without independent replay.
+
+For the degree-10453 certificate, the independent verifier retains the original
+walker field, kernel and curve checks. Its polynomial multiplication is adapted
+to exact Karatsuba recursion, with the original schoolbook source as the test
+oracle on both source fields and balanced/unbalanced lengths. This changes
+arithmetic cost, without skipping any torsion, subgroup, normalization or exact
+map-identity check. The copied implementation and equivalence test are frozen
+as verification_poly.rs and verification_poly_checks.rs.
+
+Both kernel constructions passed the native API checks: p224/1471 and
+p192/10453. Each returned one explicit map, with degree coverage PARTIAL.
+Independent P-224 replay passed every kernel and exact-map check. The initial
+eager P-192 replay was stopped before certification, with its process exit 143
+and raw construction retained. The old and memoized replay executables remain
+distinct. Memoized division recurrences, exact reciprocal reduction and block
+modular composition were added to preserve all checks at the larger degree;
+12 tests compare them with the original all-index, long-division, schoolbook
+and Horner routines, including a rejected mutated kernel. The known-answer
+degree-199 single-map control passed before target use. The first verifier
+test build lacked the existing modular-polynomial fixture module; that failure
+and the corrected passing build are preserved.
+
+P-192 degree-10453 replay then passed every original kernel, codomain, exact
+rational-map and subgroup check, including 20 fresh scalar transports. The
+kernel degrees are 5226 and 735; numerator/denominator coefficient counts are
+10454/10453 and 1472/1471. These are individual verified maps, with the other
+eigenline left unresolved at each degree. All four full-Hecke probes timed out
+within their declared bounds, and none is recast as a kernel-first success.
+
+The final two target models were registered before rendering their identities.
+The native covers and linked graph replay verified all 345 models, with zero
+invalid or unsupported inputs. Alias, leaderboard-roster and browser refresh
+added two records and preserved existing IC measurement bytes. Native logs are
+validation/catalogue-covers-check.log and validation/catalogue-views.log.
+No ECDLP cost, fitted exponent, boundary promotion or old-walker integration
+was measured, so the performance scoreboard, timeline and existing theory
+figures keep their prior results.
+
+The branch was refreshed onto upstream dba53d92517a8899699639a55f7748f489be4693
+after all construction and independent replay completed. Exact pre-rebase build
+revisions remain reachable in the local source-archive branch
+codex/p192-p224-large-degree-isogenies-build-snapshots. The executed binaries
+were not replaced during any run. The manifest records their byte digests and
+the complete source snapshot as well as the recorded build revision labels.
+
+The mandatory root cargo test --release --lib was rerun after the refresh and
+failed with the same 643 pre-existing compiler errors; its complete log is
+validation/root-release-library.log. Publication, PR creation and merge remain
+blocked by the owner's fix-before-push rule. The previous traits export failure
+and unsupported model forms remain unresolved; the original stale traits file
+is preserved and pinned rather than reported as refreshed.
+
+The three-page continuation PDF was rendered with Poppler at 130 dpi. All
+pages were visually inspected: complete source/target identities, directed
+degree edges, partial-coverage labels, quantitative probe population and
+evidence paths are legible without clipping. Artifact and catalogue hashes
+are frozen only after all final logs and notes have closed.

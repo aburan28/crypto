@@ -6,6 +6,17 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - 'scripts/test_run_koblitz_phase_b_native_f4.py'
+      - 'scripts/verify_koblitz_stage159_native_f4.py'
+      - 'scripts/verify_koblitz_stage160_fixed_x1.py'
+      - 'scripts/verify_koblitz_stage161_fast_hash.py'
+      - 'scripts/verify_koblitz_stage162_pair_selection.py'
+      - 'scripts/verify_koblitz_stage163_m4ri.py'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - '.cargo/**'
+      - 'rust-toolchain*'
       - "examples/koblitz_algebraic_e2e.rs"
       - "examples/koblitz_public_factor_base_discovery.rs"
       - "examples/koblitz_pdp_export.rs"
@@ -142,16 +153,21 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   reproduce-toy-controls:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 30 }}
     steps:
       - uses: actions/checkout@v4
         with:
           # Phase-B custody checks the bound Phase-A revision is an ancestor.
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: Build frozen executables
         run: cargo build --release --bin koblitz_pdp_prepare --example koblitz_algebraic_e2e --example koblitz_public_factor_base_discovery --example koblitz_pdp_export --example koblitz_pdp_backend
       - name: Validate balanced PDP Phase-A preparation

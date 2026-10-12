@@ -1,0 +1,31 @@
+{
+  "schema": "lit2026-journey-entry/v1",
+  "workstream": "W8",
+  "date": "2026-10-11",
+  "pr": "aburan28/crypto#1712",
+  "slug": "wu-state-model-s3",
+  "papers": [
+    "arXiv 2608.01675"
+  ],
+  "kind": "diagnostic",
+  "workload": {
+    "id": "binary-s3-coordinate-models",
+    "description": "descended S3 (m = 2) in Weierstrass x, Wu Kummer ratio k = x/d, Wu u = d/(x+d), binary Edwards w, on icv1-f2m15-tm275-2d22ff5d, icv1-f2m15-t5-d9fb183e, icv1-f2m17-t101-e6c4b64d, icv1-f2m17-t209-0eba1a1e (uniform affine targets)",
+    "curve_ids": [
+      "icv1-f2m15-tm275-2d22ff5d",
+      "icv1-f2m15-t5-d9fb183e",
+      "icv1-f2m17-t101-e6c4b64d",
+      "icv1-f2m17-t209-0eba1a1e"
+    ]
+  },
+  "metric": "F4 word XORs per solve (median over targets x rounds)",
+  "unit": "counted ops",
+  "isolation": "L0",
+  "samples": 40,
+  "arms": [],
+  "ratio_original_over_candidate": null,
+  "ratio_previous_over_candidate": null,
+  "outputs_identical": true,
+  "run_report": "research/lit2026_w8_summation_models_20261011/reports/run-20261011T2017Z/report.pdf",
+  "note": "Wu u is a Mobius frame of x and equals the FGHR frame (u -> u+1 is translation by T); k is x rescaled. S3 terms/total degree: x and k 5/4, u 11/6. Word ops u vs x: 1.2-1.4x fewer at n = 15, 3.1x more at n = 17; binary Edwards w is an E/<T> coordinate, 5.7-7.5x more. No model uniformly cheaper; root sets equal brute force everywhere."
+}

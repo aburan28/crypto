@@ -1,0 +1,8 @@
+{"elapsed_process_wall_ms":5858.910336,"event":"FactorBaseReady { points: 339968, orbits: 2048 }"}
+{"elapsed_process_wall_ms":5862.6002530000005,"event":"RelationCollectionStarted { wanted: 2052 }"}
+{"elapsed_process_wall_ms":52107.120857,"event":"RelationAttemptFinished { trial: 1, disposition: Unknown, conflicts: 1000, collected: 0 }"}
+{"elapsed_process_wall_ms":52110.293773000005,"event":"RelationProgress { collected: 0, wanted: 2052, trials: 1 }"}
+{"elapsed_process_wall_ms":52112.339107,"event":"RelationCollectionFinished { collected: 0, trials: 1 }"}
+{"elapsed_process_wall_ms":52115.076315000006,"event":"LinearAlgebraStarted { rows: 0, columns: 2049 }"}
+{"elapsed_process_wall_ms":52116.658897999994,"event":"MatrixRank { rows: 0, columns: 2049, rank: 0, candidate_produced: false }"}
+{"elapsed_process_wall_ms":52118.585398,"event":"LinearAlgebraIncomplete"}

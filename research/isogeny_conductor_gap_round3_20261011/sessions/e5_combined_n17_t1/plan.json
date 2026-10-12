@@ -1,0 +1,184 @@
+{
+  "schema": "ecbench.plan/v1",
+  "spec_id": "ECS1h48daf2a21ac6",
+  "arms": [
+    {
+      "name": "rho-neg",
+      "role": "reference",
+      "method": {
+        "id": "rho.negation",
+        "family": "rho",
+        "params": {
+          "cap_multiple": "64"
+        },
+        "method_id": "ECM1hefea4e0ebe79",
+        "method_sha256": "efea4e0ebe79dadfedeb75106dab92e25fc26bfe282155ee0326380d4184e995",
+        "entry": "ic_boundary::rho_walk_with(NegationClasses, RhoWalk::negation())"
+      }
+    },
+    {
+      "name": "f4-blind",
+      "role": "baseline",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "linalg": "incremental-gauss",
+          "max_trials": "100000000",
+          "oracle": "descent-algebraic:m=2",
+          "solver": "f4-f2",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1h7ba0103c09d8",
+        "method_sha256": "7ba0103c09d89c16d611f041095375e5b5e43e0e24b6ad922bfc269cf04bfca5",
+        "entry": "ic_framework::run_pipeline"
+      }
+    },
+    {
+      "name": "f4-lifts",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "linalg": "incremental-gauss",
+          "max_trials": "100000000",
+          "oracle": "descent-algebraic-fiber:fiber=lifts",
+          "solver": "f4-f2",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1h165ad1d4d564",
+        "method_sha256": "165ad1d4d564b0079da352b51beec4d74ab8fd9c61a9cbb3897096ac2f8366bd",
+        "entry": "ic_framework::run_pipeline"
+      }
+    },
+    {
+      "name": "f4-combined",
+      "role": "candidate",
+      "method": {
+        "id": "ic.pipeline",
+        "family": "ic",
+        "params": {
+          "factor_base": "binary-subspace:dimension=8",
+          "linalg": "incremental-gauss",
+          "max_trials": "100000000",
+          "oracle": "descent-algebraic-fiber:fiber=combined",
+          "solver": "f4-f2",
+          "solver_budget_seconds": "0",
+          "targets": "walk"
+        },
+        "method_id": "ECM1h6bd195224e9d",
+        "method_sha256": "6bd195224e9de3cad337e644abce8295d7479397b9cb83492a08425fe1bf788e",
+        "entry": "ic_framework::run_pipeline"
+      }
+    }
+  ],
+  "workloads": [
+    {
+      "workload_id": "Wc4ce5d69d8b4",
+      "workload_sha256": "c4ce5d69d8b46cf8062f5c535033f5d20a5920fad1ac1bdbab91e128d83b6272",
+      "curve_spec": {
+        "kind": "koblitz",
+        "a": 1,
+        "n": 17
+      },
+      "curve": {
+        "slug": "icv1-f2m17-tm101-00378d4e",
+        "icv1": "ICV1:f2m-17-237ceae1:-101:131174:0x1:-7:unk:r:00378d4e488b",
+        "family": "koblitz",
+        "construction": "KoblitzCurve::new(1, 17)",
+        "field_degree": 17,
+        "field_bits": null,
+        "group_order": 131174,
+        "r": 65587,
+        "cofactor": 2,
+        "generator": [
+          "0xaaad",
+          "0x5b2b"
+        ],
+        "automorphisms_available": 34,
+        "registered": true,
+        "ec1": "EC1N17Ce1hdfbf24105ef5",
+        "curve_uid": "urn:ec-record:1:sha256:dfbf24105ef5c3f3743c8d5c0917e98d601a89714ebcf54c1d886b722329161d"
+      },
+      "target_law": "uniform_scalar_sha256_v1",
+      "target_seed": 20261011,
+      "target_index": 0,
+      "target": [
+        "0xba59",
+        "0x8230"
+      ],
+      "planted": 2654
+    }
+  ],
+  "executions": [
+    {
+      "seq": 0,
+      "round": 0,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 16199463472938152499
+    },
+    {
+      "seq": 1,
+      "round": 0,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 16199463472938152499
+    },
+    {
+      "seq": 2,
+      "round": 0,
+      "warmup": false,
+      "arm": 2,
+      "workload": 0,
+      "algorithm_seed": 16199463472938152499
+    },
+    {
+      "seq": 3,
+      "round": 0,
+      "warmup": false,
+      "arm": 3,
+      "workload": 0,
+      "algorithm_seed": 16199463472938152499
+    },
+    {
+      "seq": 4,
+      "round": 1,
+      "warmup": false,
+      "arm": 3,
+      "workload": 0,
+      "algorithm_seed": 17404294927356571817
+    },
+    {
+      "seq": 5,
+      "round": 1,
+      "warmup": false,
+      "arm": 2,
+      "workload": 0,
+      "algorithm_seed": 17404294927356571817
+    },
+    {
+      "seq": 6,
+      "round": 1,
+      "warmup": false,
+      "arm": 1,
+      "workload": 0,
+      "algorithm_seed": 17404294927356571817
+    },
+    {
+      "seq": 7,
+      "round": 1,
+      "warmup": false,
+      "arm": 0,
+      "workload": 0,
+      "algorithm_seed": 17404294927356571817
+    }
+  ]
+}

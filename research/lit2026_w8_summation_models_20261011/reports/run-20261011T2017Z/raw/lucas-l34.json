@@ -1,0 +1,2207 @@
+{
+  "command": "lucas --rounds 5 --targets 8 --only 9-3,12-4 --out research/lit2026_w8_summation_models_20261011/reports/run-20261011T2017Z/raw/lucas-l34.json",
+  "env": {
+    "KIC_F4_INHERIT": null,
+    "KIC_F4_MAX_DEGREE_ONLY": null
+  },
+  "git_head": "3c239129d2ccf26706d56b05304c1f35a7c44d7f",
+  "result": {
+    "cells": [
+      {
+        "arms": [
+          {
+            "arm": "e-split-repo",
+            "degrees": [
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3,
+                  4
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3,
+                  4
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3,
+                  4
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3,
+                  4
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3,
+                  4
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3,
+                  4
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3,
+                  4
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3,
+                  4
+                ],
+                "scan_max": 4
+              }
+            ],
+            "median_ms": 822.691167,
+            "median_word_ops": 11696023.0,
+            "samples": [
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 405.31066599999997,
+                  "oversize": 0,
+                  "reductions": 106,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 11689009
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 777.740042,
+                  "oversize": 0,
+                  "reductions": 106,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 11689009
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1003.511292,
+                  "oversize": 0,
+                  "reductions": 106,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 11689009
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1502.024625,
+                  "oversize": 0,
+                  "reductions": 106,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 11689009
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 742.070292,
+                  "oversize": 0,
+                  "reductions": 106,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 11689009
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 301.438625,
+                  "oversize": 0,
+                  "reductions": 104,
+                  "roots": 0,
+                  "splits": 36,
+                  "word_ops": 10543092
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 342.479917,
+                  "oversize": 0,
+                  "reductions": 104,
+                  "roots": 0,
+                  "splits": 36,
+                  "word_ops": 10543092
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1049.523208,
+                  "oversize": 0,
+                  "reductions": 104,
+                  "roots": 0,
+                  "splits": 36,
+                  "word_ops": 10543092
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1380.896125,
+                  "oversize": 0,
+                  "reductions": 104,
+                  "roots": 0,
+                  "splits": 36,
+                  "word_ops": 10543092
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 948.74,
+                  "oversize": 0,
+                  "reductions": 104,
+                  "roots": 0,
+                  "splits": 36,
+                  "word_ops": 10543092
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 384.736625,
+                  "oversize": 0,
+                  "reductions": 102,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 10601523
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 468.140375,
+                  "oversize": 0,
+                  "reductions": 102,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 10601523
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 671.874417,
+                  "oversize": 0,
+                  "reductions": 102,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 10601523
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1209.492708,
+                  "oversize": 0,
+                  "reductions": 102,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 10601523
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 739.349,
+                  "oversize": 0,
+                  "reductions": 102,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 10601523
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 418.610167,
+                  "oversize": 0,
+                  "reductions": 105,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 12247742
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 440.484,
+                  "oversize": 0,
+                  "reductions": 105,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 12247742
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1286.433041,
+                  "oversize": 0,
+                  "reductions": 105,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 12247742
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1140.560083,
+                  "oversize": 0,
+                  "reductions": 105,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 12247742
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1198.047958,
+                  "oversize": 0,
+                  "reductions": 105,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 12247742
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 550.002084,
+                  "oversize": 0,
+                  "reductions": 109,
+                  "roots": 0,
+                  "splits": 38,
+                  "word_ops": 12647217
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 615.357083,
+                  "oversize": 0,
+                  "reductions": 109,
+                  "roots": 0,
+                  "splits": 38,
+                  "word_ops": 12647217
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 970.7715000000001,
+                  "oversize": 0,
+                  "reductions": 109,
+                  "roots": 0,
+                  "splits": 38,
+                  "word_ops": 12647217
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1161.5805830000002,
+                  "oversize": 0,
+                  "reductions": 109,
+                  "roots": 0,
+                  "splits": 38,
+                  "word_ops": 12647217
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 974.1210420000001,
+                  "oversize": 0,
+                  "reductions": 109,
+                  "roots": 0,
+                  "splits": 38,
+                  "word_ops": 12647217
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 405.202042,
+                  "oversize": 0,
+                  "reductions": 105,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 11696023
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 424.006041,
+                  "oversize": 0,
+                  "reductions": 105,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 11696023
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1044.8162089999998,
+                  "oversize": 0,
+                  "reductions": 105,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 11696023
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 806.5369999999999,
+                  "oversize": 0,
+                  "reductions": 105,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 11696023
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 937.551,
+                  "oversize": 0,
+                  "reductions": 105,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 11696023
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 556.206542,
+                  "oversize": 0,
+                  "reductions": 110,
+                  "roots": 0,
+                  "splits": 41,
+                  "word_ops": 13769927
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 741.1664169999999,
+                  "oversize": 0,
+                  "reductions": 110,
+                  "roots": 0,
+                  "splits": 41,
+                  "word_ops": 13769927
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1424.300375,
+                  "oversize": 0,
+                  "reductions": 110,
+                  "roots": 0,
+                  "splits": 41,
+                  "word_ops": 13769927
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1214.705041,
+                  "oversize": 0,
+                  "reductions": 110,
+                  "roots": 0,
+                  "splits": 41,
+                  "word_ops": 13769927
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1184.201125,
+                  "oversize": 0,
+                  "reductions": 110,
+                  "roots": 0,
+                  "splits": 41,
+                  "word_ops": 13769927
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 490.311792,
+                  "oversize": 0,
+                  "reductions": 137,
+                  "roots": 22,
+                  "splits": 40,
+                  "word_ops": 9487614
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 822.691167,
+                  "oversize": 0,
+                  "reductions": 137,
+                  "roots": 22,
+                  "splits": 40,
+                  "word_ops": 9487614
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1229.085333,
+                  "oversize": 0,
+                  "reductions": 137,
+                  "roots": 22,
+                  "splits": 40,
+                  "word_ops": 9487614
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1028.893125,
+                  "oversize": 0,
+                  "reductions": 137,
+                  "roots": 22,
+                  "splits": 40,
+                  "word_ops": 9487614
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 783.9490420000001,
+                  "oversize": 0,
+                  "reductions": 137,
+                  "roots": 22,
+                  "splits": 40,
+                  "word_ops": 9487614
+                }
+              ]
+            ],
+            "system": {
+              "boolean_degree": 3,
+              "distinct_monomials": 156,
+              "n_equations": 24,
+              "n_vars": 24,
+              "total_terms": 438
+            },
+            "x_root_sets_equal_brute_force": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "arm": "e-split-convolution",
+            "degrees": [
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              }
+            ],
+            "median_ms": 2616.8291249999997,
+            "median_word_ops": 24241099.0,
+            "samples": [
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1103.093708,
+                  "oversize": 0,
+                  "reductions": 126,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 23840760
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1225.24575,
+                  "oversize": 0,
+                  "reductions": 126,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 23840760
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3924.357,
+                  "oversize": 0,
+                  "reductions": 126,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 23840760
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2632.208875,
+                  "oversize": 0,
+                  "reductions": 126,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 23840760
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2408.0705,
+                  "oversize": 0,
+                  "reductions": 126,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 23840760
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1271.456917,
+                  "oversize": 0,
+                  "reductions": 124,
+                  "roots": 0,
+                  "splits": 36,
+                  "word_ops": 24217912
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3279.181333,
+                  "oversize": 0,
+                  "reductions": 124,
+                  "roots": 0,
+                  "splits": 36,
+                  "word_ops": 24217912
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3937.5635,
+                  "oversize": 0,
+                  "reductions": 124,
+                  "roots": 0,
+                  "splits": 36,
+                  "word_ops": 24217912
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3178.696,
+                  "oversize": 0,
+                  "reductions": 124,
+                  "roots": 0,
+                  "splits": 36,
+                  "word_ops": 24217912
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2296.104917,
+                  "oversize": 0,
+                  "reductions": 124,
+                  "roots": 0,
+                  "splits": 36,
+                  "word_ops": 24217912
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2314.4657500000003,
+                  "oversize": 0,
+                  "reductions": 128,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 21820234
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 864.441625,
+                  "oversize": 0,
+                  "reductions": 128,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 21820234
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3000.173083,
+                  "oversize": 0,
+                  "reductions": 128,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 21820234
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2553.346458,
+                  "oversize": 0,
+                  "reductions": 128,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 21820234
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2294.182875,
+                  "oversize": 0,
+                  "reductions": 128,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 21820234
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 931.315333,
+                  "oversize": 0,
+                  "reductions": 124,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 25269492
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1078.675,
+                  "oversize": 0,
+                  "reductions": 124,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 25269492
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3007.8138750000003,
+                  "oversize": 0,
+                  "reductions": 124,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 25269492
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2448.9545000000003,
+                  "oversize": 0,
+                  "reductions": 124,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 25269492
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2859.553667,
+                  "oversize": 0,
+                  "reductions": 124,
+                  "roots": 0,
+                  "splits": 39,
+                  "word_ops": 25269492
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1125.771792,
+                  "oversize": 0,
+                  "reductions": 128,
+                  "roots": 0,
+                  "splits": 38,
+                  "word_ops": 26308261
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2603.016292,
+                  "oversize": 0,
+                  "reductions": 128,
+                  "roots": 0,
+                  "splits": 38,
+                  "word_ops": 26308261
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3028.604375,
+                  "oversize": 0,
+                  "reductions": 128,
+                  "roots": 0,
+                  "splits": 38,
+                  "word_ops": 26308261
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2826.373667,
+                  "oversize": 0,
+                  "reductions": 128,
+                  "roots": 0,
+                  "splits": 38,
+                  "word_ops": 26308261
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3630.314875,
+                  "oversize": 0,
+                  "reductions": 128,
+                  "roots": 0,
+                  "splits": 38,
+                  "word_ops": 26308261
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1143.1342499999998,
+                  "oversize": 0,
+                  "reductions": 125,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 24241099
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2566.0705,
+                  "oversize": 0,
+                  "reductions": 125,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 24241099
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2674.643792,
+                  "oversize": 0,
+                  "reductions": 125,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 24241099
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3050.906208,
+                  "oversize": 0,
+                  "reductions": 125,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 24241099
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2616.8291249999997,
+                  "oversize": 0,
+                  "reductions": 125,
+                  "roots": 0,
+                  "splits": 37,
+                  "word_ops": 24241099
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1343.1386249999998,
+                  "oversize": 0,
+                  "reductions": 132,
+                  "roots": 0,
+                  "splits": 41,
+                  "word_ops": 28051084
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3109.4072920000003,
+                  "oversize": 0,
+                  "reductions": 132,
+                  "roots": 0,
+                  "splits": 41,
+                  "word_ops": 28051084
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3192.317,
+                  "oversize": 0,
+                  "reductions": 132,
+                  "roots": 0,
+                  "splits": 41,
+                  "word_ops": 28051084
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3412.4,
+                  "oversize": 0,
+                  "reductions": 132,
+                  "roots": 0,
+                  "splits": 41,
+                  "word_ops": 28051084
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2686.234166,
+                  "oversize": 0,
+                  "reductions": 132,
+                  "roots": 0,
+                  "splits": 41,
+                  "word_ops": 28051084
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2358.381625,
+                  "oversize": 0,
+                  "reductions": 158,
+                  "roots": 22,
+                  "splits": 40,
+                  "word_ops": 22108713
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 2273.437541,
+                  "oversize": 0,
+                  "reductions": 158,
+                  "roots": 22,
+                  "splits": 40,
+                  "word_ops": 22108713
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3018.290625,
+                  "oversize": 0,
+                  "reductions": 158,
+                  "roots": 22,
+                  "splits": 40,
+                  "word_ops": 22108713
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3127.701333,
+                  "oversize": 0,
+                  "reductions": 158,
+                  "roots": 22,
+                  "splits": 40,
+                  "word_ops": 22108713
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 1652.252333,
+                  "oversize": 0,
+                  "reductions": 158,
+                  "roots": 22,
+                  "splits": 40,
+                  "word_ops": 22108713
+                }
+              ]
+            ],
+            "system": {
+              "boolean_degree": 2,
+              "distinct_monomials": 149,
+              "n_equations": 29,
+              "n_vars": 29,
+              "total_terms": 436
+            },
+            "x_root_sets_equal_brute_force": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        ],
+        "cell": "S4 symmetrised, b=1, n=9, l=3",
+        "engine": "MatrixF4 { max_degree: 3 }",
+        "l": 3,
+        "modulus_low_terms": [
+          0,
+          1
+        ],
+        "n": 9,
+        "roots_per_target": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          22
+        ],
+        "rounds": 5,
+        "targets": 8,
+        "uptime_per_round": [
+          "14:32  up 14:11, 10 users, load averages: 111.22 107.00 100.50",
+          "14:32  up 14:11, 10 users, load averages: 111.97 107.34 100.73",
+          "14:32  up 14:11, 10 users, load averages: 119.27 109.46 101.69",
+          "14:33  up 14:12, 10 users, load averages: 125.51 112.10 102.96",
+          "14:33  up 14:12, 10 users, load averages: 130.42 114.60 104.18"
+        ]
+      },
+      {
+        "arms": [
+          {
+            "arm": "e-split-repo",
+            "degrees": [
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  3
+                ],
+                "scan_max": 4
+              }
+            ],
+            "median_ms": 4190.4467079999995,
+            "median_word_ops": 860353404.0,
+            "samples": [
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 18724.295791,
+                  "oversize": 0,
+                  "reductions": 575,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 869083427
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4190.4467079999995,
+                  "oversize": 0,
+                  "reductions": 575,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 869083427
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3926.218917,
+                  "oversize": 0,
+                  "reductions": 575,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 869083427
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3820.118875,
+                  "oversize": 0,
+                  "reductions": 575,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 869083427
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4928.358582999999,
+                  "oversize": 0,
+                  "reductions": 575,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 869083427
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 5080.070375,
+                  "oversize": 0,
+                  "reductions": 566,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 860746576
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3812.399375,
+                  "oversize": 0,
+                  "reductions": 566,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 860746576
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3749.4053750000003,
+                  "oversize": 0,
+                  "reductions": 566,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 860746576
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3513.2028330000003,
+                  "oversize": 0,
+                  "reductions": 566,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 860746576
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4649.475375,
+                  "oversize": 0,
+                  "reductions": 566,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 860746576
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 5360.492042,
+                  "oversize": 0,
+                  "reductions": 574,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 849967043
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3482.215917,
+                  "oversize": 0,
+                  "reductions": 574,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 849967043
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4065.579875,
+                  "oversize": 0,
+                  "reductions": 574,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 849967043
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3752.494875,
+                  "oversize": 0,
+                  "reductions": 574,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 849967043
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4757.421375,
+                  "oversize": 0,
+                  "reductions": 574,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 849967043
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 5187.619374999999,
+                  "oversize": 0,
+                  "reductions": 576,
+                  "roots": 6,
+                  "splits": 240,
+                  "word_ops": 862295741
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3591.7142919999997,
+                  "oversize": 0,
+                  "reductions": 576,
+                  "roots": 6,
+                  "splits": 240,
+                  "word_ops": 862295741
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3819.703042,
+                  "oversize": 0,
+                  "reductions": 576,
+                  "roots": 6,
+                  "splits": 240,
+                  "word_ops": 862295741
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4823.322209,
+                  "oversize": 0,
+                  "reductions": 576,
+                  "roots": 6,
+                  "splits": 240,
+                  "word_ops": 862295741
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4757.219084,
+                  "oversize": 0,
+                  "reductions": 576,
+                  "roots": 6,
+                  "splits": 240,
+                  "word_ops": 862295741
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 5424.361250000001,
+                  "oversize": 0,
+                  "reductions": 564,
+                  "roots": 0,
+                  "splits": 237,
+                  "word_ops": 859333623
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3779.560916,
+                  "oversize": 0,
+                  "reductions": 564,
+                  "roots": 0,
+                  "splits": 237,
+                  "word_ops": 859333623
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4238.530833000001,
+                  "oversize": 0,
+                  "reductions": 564,
+                  "roots": 0,
+                  "splits": 237,
+                  "word_ops": 859333623
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4679.868875,
+                  "oversize": 0,
+                  "reductions": 564,
+                  "roots": 0,
+                  "splits": 237,
+                  "word_ops": 859333623
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4309.910917,
+                  "oversize": 0,
+                  "reductions": 564,
+                  "roots": 0,
+                  "splits": 237,
+                  "word_ops": 859333623
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 5101.6065,
+                  "oversize": 0,
+                  "reductions": 566,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 856186890
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3509.5905,
+                  "oversize": 0,
+                  "reductions": 566,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 856186890
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3685.771709,
+                  "oversize": 0,
+                  "reductions": 566,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 856186890
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3748.572333,
+                  "oversize": 0,
+                  "reductions": 566,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 856186890
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4493.427541,
+                  "oversize": 0,
+                  "reductions": 566,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 856186890
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 5335.386083,
+                  "oversize": 0,
+                  "reductions": 570,
+                  "roots": 0,
+                  "splits": 240,
+                  "word_ops": 852386507
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3462.642917,
+                  "oversize": 0,
+                  "reductions": 570,
+                  "roots": 0,
+                  "splits": 240,
+                  "word_ops": 852386507
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3533.057125,
+                  "oversize": 0,
+                  "reductions": 570,
+                  "roots": 0,
+                  "splits": 240,
+                  "word_ops": 852386507
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4631.424625000001,
+                  "oversize": 0,
+                  "reductions": 570,
+                  "roots": 0,
+                  "splits": 240,
+                  "word_ops": 852386507
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4038.079958,
+                  "oversize": 0,
+                  "reductions": 570,
+                  "roots": 0,
+                  "splits": 240,
+                  "word_ops": 852386507
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 5122.483209,
+                  "oversize": 0,
+                  "reductions": 567,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 860353404
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3356.846042,
+                  "oversize": 0,
+                  "reductions": 567,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 860353404
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3672.9046670000002,
+                  "oversize": 0,
+                  "reductions": 567,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 860353404
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 4932.765166,
+                  "oversize": 0,
+                  "reductions": 567,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 860353404
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 3923.482,
+                  "oversize": 0,
+                  "reductions": 567,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 860353404
+                }
+              ]
+            ],
+            "system": {
+              "boolean_degree": 3,
+              "distinct_monomials": 301,
+              "n_equations": 33,
+              "n_vars": 33,
+              "total_terms": 1251
+            },
+            "x_root_sets_equal_brute_force": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "arm": "e-split-convolution",
+            "degrees": [
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              },
+              {
+                "first_fall_degree": 2,
+                "resolution_degree": null,
+                "resolution_degrees_built": [
+                  2,
+                  3
+                ],
+                "scan_max": 4
+              }
+            ],
+            "median_ms": 10915.107624999999,
+            "median_word_ops": 1292552008.0,
+            "samples": [
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 25451.348083,
+                  "oversize": 0,
+                  "reductions": 707,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 1320125742
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 11973.274875,
+                  "oversize": 0,
+                  "reductions": 707,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 1320125742
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9563.759958,
+                  "oversize": 0,
+                  "reductions": 707,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 1320125742
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 10139.096583,
+                  "oversize": 0,
+                  "reductions": 707,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 1320125742
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 11922.792417,
+                  "oversize": 0,
+                  "reductions": 707,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 1320125742
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 13836.197417,
+                  "oversize": 0,
+                  "reductions": 699,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1294398254
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9972.947041,
+                  "oversize": 0,
+                  "reductions": 699,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1294398254
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 10255.596041,
+                  "oversize": 0,
+                  "reductions": 699,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1294398254
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9586.516916,
+                  "oversize": 0,
+                  "reductions": 699,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1294398254
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 12248.5835,
+                  "oversize": 0,
+                  "reductions": 699,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1294398254
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 13410.451167,
+                  "oversize": 0,
+                  "reductions": 706,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 1262961396
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9492.681458,
+                  "oversize": 0,
+                  "reductions": 706,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 1262961396
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9397.158917,
+                  "oversize": 0,
+                  "reductions": 706,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 1262961396
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9749.667583,
+                  "oversize": 0,
+                  "reductions": 706,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 1262961396
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 12428.127917,
+                  "oversize": 0,
+                  "reductions": 706,
+                  "roots": 6,
+                  "splits": 239,
+                  "word_ops": 1262961396
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 13835.036625,
+                  "oversize": 0,
+                  "reductions": 708,
+                  "roots": 6,
+                  "splits": 240,
+                  "word_ops": 1292820553
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9395.54975,
+                  "oversize": 0,
+                  "reductions": 708,
+                  "roots": 6,
+                  "splits": 240,
+                  "word_ops": 1292820553
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9303.545209,
+                  "oversize": 0,
+                  "reductions": 708,
+                  "roots": 6,
+                  "splits": 240,
+                  "word_ops": 1292820553
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 10390.306459,
+                  "oversize": 0,
+                  "reductions": 708,
+                  "roots": 6,
+                  "splits": 240,
+                  "word_ops": 1292820553
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 11930.704583,
+                  "oversize": 0,
+                  "reductions": 708,
+                  "roots": 6,
+                  "splits": 240,
+                  "word_ops": 1292820553
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 13954.139916,
+                  "oversize": 0,
+                  "reductions": 698,
+                  "roots": 0,
+                  "splits": 237,
+                  "word_ops": 1291693500
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9450.078917,
+                  "oversize": 0,
+                  "reductions": 698,
+                  "roots": 0,
+                  "splits": 237,
+                  "word_ops": 1291693500
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9252.439875,
+                  "oversize": 0,
+                  "reductions": 698,
+                  "roots": 0,
+                  "splits": 237,
+                  "word_ops": 1291693500
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 12143.588125,
+                  "oversize": 0,
+                  "reductions": 698,
+                  "roots": 0,
+                  "splits": 237,
+                  "word_ops": 1291693500
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 11689.068666000001,
+                  "oversize": 0,
+                  "reductions": 698,
+                  "roots": 0,
+                  "splits": 237,
+                  "word_ops": 1291693500
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 13780.772708,
+                  "oversize": 0,
+                  "reductions": 698,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1277015556
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9271.481084,
+                  "oversize": 0,
+                  "reductions": 698,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1277015556
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9287.935042000001,
+                  "oversize": 0,
+                  "reductions": 698,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1277015556
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 12374.358042000002,
+                  "oversize": 0,
+                  "reductions": 698,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1277015556
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 11130.720792,
+                  "oversize": 0,
+                  "reductions": 698,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1277015556
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 13243.191541,
+                  "oversize": 0,
+                  "reductions": 701,
+                  "roots": 0,
+                  "splits": 240,
+                  "word_ops": 1260385342
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 8969.307708,
+                  "oversize": 0,
+                  "reductions": 701,
+                  "roots": 0,
+                  "splits": 240,
+                  "word_ops": 1260385342
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9926.389542,
+                  "oversize": 0,
+                  "reductions": 701,
+                  "roots": 0,
+                  "splits": 240,
+                  "word_ops": 1260385342
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 11662.001459000001,
+                  "oversize": 0,
+                  "reductions": 701,
+                  "roots": 0,
+                  "splits": 240,
+                  "word_ops": 1260385342
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9610.446917000001,
+                  "oversize": 0,
+                  "reductions": 701,
+                  "roots": 0,
+                  "splits": 240,
+                  "word_ops": 1260385342
+                }
+              ],
+              [
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 13686.191791000001,
+                  "oversize": 0,
+                  "reductions": 700,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1292552008
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9692.174458,
+                  "oversize": 0,
+                  "reductions": 700,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1292552008
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 10915.107624999999,
+                  "oversize": 0,
+                  "reductions": 700,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1292552008
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 11888.216124999999,
+                  "oversize": 0,
+                  "reductions": 700,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1292552008
+                },
+                {
+                  "exhausted": false,
+                  "max_degree_built": 3,
+                  "ms": 9471.187625,
+                  "oversize": 0,
+                  "reductions": 700,
+                  "roots": 0,
+                  "splits": 238,
+                  "word_ops": 1292552008
+                }
+              ]
+            ],
+            "system": {
+              "boolean_degree": 2,
+              "distinct_monomials": 272,
+              "n_equations": 40,
+              "n_vars": 40,
+              "total_terms": 1229
+            },
+            "x_root_sets_equal_brute_force": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        ],
+        "cell": "S4 symmetrised, b=1, n=12, l=4",
+        "engine": "MatrixF4 { max_degree: 3 }",
+        "l": 4,
+        "modulus_low_terms": [
+          0,
+          3
+        ],
+        "n": 12,
+        "roots_per_target": [
+          6,
+          0,
+          6,
+          6,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rounds": 5,
+        "targets": 8,
+        "uptime_per_round": [
+          "14:34  up 14:13, 10 users, load averages: 125.50 115.40 104.96",
+          "14:37  up 14:16, 10 users, load averages: 124.09 124.03 110.84",
+          "14:39  up 14:18, 10 users, load averages: 134.64 125.65 112.92",
+          "14:40  up 14:19, 10 users, load averages: 154.68 135.02 118.04",
+          "14:43  up 14:21, 10 users, load averages: 146.80 140.15 122.51"
+        ]
+      }
+    ],
+    "correspondence_shapes": [
+      {
+        "convolution": {
+          "distinct_monomials": 24,
+          "equations": 11,
+          "max_degree": 2,
+          "total_terms": 24
+        },
+        "direct": {
+          "distinct_monomials": 24,
+          "equations": 11,
+          "max_degree": 2,
+          "total_terms": 24
+        },
+        "l": 4,
+        "m": 2
+      },
+      {
+        "convolution": {
+          "distinct_monomials": 95,
+          "equations": 28,
+          "max_degree": 2,
+          "total_terms": 102
+        },
+        "direct": {
+          "distinct_monomials": 124,
+          "equations": 21,
+          "max_degree": 3,
+          "total_terms": 124
+        },
+        "l": 4,
+        "m": 3
+      },
+      {
+        "convolution": {
+          "distinct_monomials": 144,
+          "equations": 36,
+          "max_degree": 2,
+          "total_terms": 153
+        },
+        "direct": {
+          "distinct_monomials": 215,
+          "equations": 27,
+          "max_degree": 3,
+          "total_terms": 215
+        },
+        "l": 5,
+        "m": 3
+      },
+      {
+        "convolution": {
+          "distinct_monomials": 287,
+          "equations": 48,
+          "max_degree": 2,
+          "total_terms": 301
+        },
+        "direct": {
+          "distinct_monomials": 624,
+          "equations": 34,
+          "max_degree": 4,
+          "total_terms": 624
+        },
+        "l": 4,
+        "m": 4
+      },
+      {
+        "convolution": {
+          "distinct_monomials": 449,
+          "equations": 62,
+          "max_degree": 2,
+          "total_terms": 467
+        },
+        "direct": {
+          "distinct_monomials": 1295,
+          "equations": 44,
+          "max_degree": 4,
+          "total_terms": 1295
+        },
+        "l": 5,
+        "m": 4
+      }
+    ],
+    "part": "lucas"
+  },
+  "schema": "lit2026-w8-run/v1",
+  "started_unix": 1791754323
+}

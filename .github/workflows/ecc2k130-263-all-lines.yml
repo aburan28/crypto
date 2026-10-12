@@ -23,10 +23,14 @@ on:
       - '.github/workflows/ecc2k130-263-all-lines.yml'
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   all-line-replay:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 25 || 45 }}
     env:
       PR_DRAFT: ${{ github.event.pull_request.draft }}
     steps:

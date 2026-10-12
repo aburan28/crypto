@@ -1,0 +1,20 @@
+[package]
+name = "isogeny-runner"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Standalone Cargo entry points for the recorded P192/P224 isogeny experiments"
+
+# Build independently of the repository's root library.
+[workspace]
+
+[[bin]]
+name = "isogeny-kernel"
+path = "../../research/p192_p224_large_degree_isogenies_20261009/kernel_first.rs"
+
+[[bin]]
+name = "isogeny-probe"
+path = "../../research/p192_p224_large_degree_isogenies_20261009/supervisor.rs"
+
+[dependencies]
+isogeny_algos = { path = "../../isogeny_algos" }

@@ -1,0 +1,101 @@
+{
+  "candidate": {
+    "schema": "isogeny-tool/v1",
+    "tool": {
+      "git_commit": "ec6240c25f6d5f169e9fb3b11baa2b2cfa3c75f4",
+      "git_dirty": "false",
+      "name": "isogeny",
+      "standards_sha256": "4b6a02bdfe2db4e39b6e295a396a9a8a41a14edc09bfab7942cdfe37e38929c4",
+      "version": "0.1.0"
+    }
+  },
+  "primary_acceptance": "PASS",
+  "reference": {
+    "schema": "isogeny-tool/v1",
+    "tool": {
+      "git_commit": "5cbc3a2dd61028aa5fcbcd6cba7def1818d8ce8e",
+      "git_dirty": "false",
+      "name": "isogeny",
+      "standards_sha256": "4b6a02bdfe2db4e39b6e295a396a9a8a41a14edc09bfab7942cdfe37e38929c4",
+      "version": "0.1.0"
+    }
+  },
+  "rows": [
+    {
+      "candidate": [
+        25560912,
+        25560912,
+        25560912,
+        25560912,
+        25560912
+      ],
+      "candidate_median": 25560912,
+      "case": "screen-p224",
+      "correctness": "PASS",
+      "instruction_ratio": 3.120987545358319,
+      "reduction_percent": 67.95885964084518,
+      "reference": [
+        79775288,
+        79775288,
+        79775296,
+        79775288,
+        79775288
+      ],
+      "reference_median": 79775288,
+      "rounds": 5,
+      "unit": "Callgrind Ir, ARM Linux, all traced processes",
+      "wall_time_claim": false
+    },
+    {
+      "candidate": [
+        46964692849,
+        46964692849,
+        46964692849,
+        46964692849,
+        46964692849
+      ],
+      "candidate_median": 46964692849,
+      "case": "verify-p224",
+      "correctness": "PASS",
+      "instruction_ratio": 1.0014801501251909,
+      "reduction_percent": 0.14779625187837375,
+      "reference": [
+        47034207645,
+        47034207645,
+        47034207645,
+        47034207645,
+        47034207645
+      ],
+      "reference_median": 47034207645,
+      "rounds": 5,
+      "unit": "Callgrind Ir, ARM Linux, all traced processes",
+      "wall_time_claim": false
+    },
+    {
+      "candidate": [
+        11873982047,
+        11876585699,
+        11907368561,
+        11849177008,
+        11843642427
+      ],
+      "candidate_median": 11873982047,
+      "case": "search-p192",
+      "correctness": "PASS",
+      "instruction_ratio": 1.0558816030185632,
+      "reduction_percent": 5.292411844169687,
+      "reference": [
+        12559255175,
+        12536953883,
+        12537519198,
+        12553133150,
+        12510750721
+      ],
+      "reference_median": 12537519198,
+      "rounds": 5,
+      "unit": "Callgrind Ir, ARM Linux, all traced processes",
+      "wall_time_claim": false
+    }
+  ],
+  "schema": "isogeny-setup-profile/v1"
+}

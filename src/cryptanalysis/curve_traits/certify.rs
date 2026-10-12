@@ -93,11 +93,20 @@ pub fn check_order(
     order: &BigUint,
     reps: &[Representation],
 ) -> Result<Outcome, String> {
-    if matches!(model, Model::Extension { .. }) {
-        return Ok((
-            Status::NotEvaluated,
-            "extension-field group arithmetic is not implemented in curve traits",
-        ));
+    match model {
+        Model::Other { .. } => {
+            return Ok((
+                Status::NotEvaluated,
+                "coordinate/order certificate adapter unavailable for this catalogue model",
+            ))
+        }
+        Model::Extension { .. } => {
+            return Ok((
+                Status::NotEvaluated,
+                "extension-field group arithmetic is not implemented in curve traits",
+            ))
+        }
+        _ => {}
     }
     let q = model.q();
     if model.size_bits() <= COUNT_MAX_BITS {
@@ -111,6 +120,7 @@ pub fn check_order(
                 a.to_u64().expect("reduced"),
                 b.to_u64().expect("reduced"),
             ),
+            Model::Other { .. } => unreachable!("unavailable models returned above"),
             Model::Extension { .. } => unreachable!("extension arithmetic handled above"),
         };
         if BigUint::from(counted) != *order {
@@ -206,7 +216,7 @@ fn generator_certificate(
             };
             g.scalar_mul_vartime(r, &FieldElement::new(a.clone(), p.clone())) == Point::Infinity
         }
-        Model::Extension { .. } => return Ok(None),
+        Model::Other { .. } | Model::Extension { .. } => return Ok(None),
     };
     if !killed {
         return Err(format!("[r]G ≠ O for the recorded generator and r = {r}"));

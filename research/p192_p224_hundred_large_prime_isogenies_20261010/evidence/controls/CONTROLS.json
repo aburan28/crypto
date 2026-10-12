@@ -1,0 +1,34 @@
+{
+  "changed_mapped_generator_with_updated_hash_rejected": {
+    "exit_code": 1,
+    "stderr_sha256": "bc7e993e323d24a3c969fab81c1cc35d1bf04bbecd4ec39bb01cf0c71ed003db",
+    "stdout": {
+      "error": "construction or independent verification failed; inspect retained run records",
+      "status": "FAIL"
+    }
+  },
+  "changed_source_with_updated_hash_rejected": {
+    "exit_code": 1,
+    "stderr_sha256": "c363f32fe7d0bdc6d6616d1d5aed52b74f4e475549e7773d2edbc7298b00a10e",
+    "stdout": {
+      "error": "construction or independent verification failed; inspect retained run records",
+      "status": "FAIL"
+    }
+  },
+  "positive_two_step_chain": {
+    "exit_code": 0,
+    "stderr_sha256": "8bca467d8c6600f27c7d4e819719720172db05a258d98156980057cac9bacaa4",
+    "stdout": {
+      "curve": "p224",
+      "degree_coverage": "PARTIAL",
+      "ell": 1117,
+      "schema": "isogeny-prime-walk-replay/v1",
+      "scope": "same-host independent implementation",
+      "status": "PASS",
+      "verified_maps": 2,
+      "walk_sha256": "786348360bd07421e1f7e2d044270bfe9115d5d1d96cd49143b8d8209dec7401"
+    }
+  },
+  "schema": "isogeny-walk-controls/v1",
+  "status": "PASS"
+}
