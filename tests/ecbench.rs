@@ -817,6 +817,67 @@ fn pdp3_koblitz_f4_and_f6_verify_on_one_query_stream() {
     assert!(ok, "replay: {err}");
 }
 
+#[test]
+fn pdp_split_verifies_on_standard_and_closure_bases() {
+    // The pdp-split oracle (research/pdp_split_slots_20261012) on K_1 / GF(2^11):
+    // unsplit S4 and the S3 chain, two guessed unknowns, over the standard
+    // subspace (one system per query) and over its Frobenius closure (every
+    // tau-slot tuple per query).  Every run verifies; the unsplit and chain
+    // arms on one base are exact on the same systems, so they find the same
+    // relations; F4's XORs are counted and left out of S; replays reproduce.
+    let dir = scratch("pdp-split");
+    let spec = r#"{
+      "schema": "ecbench.spec/v1",
+      "label": "pdp-split test",
+      "workloads": {"curves": [{"kind": "koblitz", "a": 1, "n": 11}],
+                    "targets_per_curve": 1, "target_seed": 7, "target_kind": "public"},
+      "arms": [
+        {"name": "std-unsplit", "role": "baseline", "method": {"id": "ic.pipeline", "params": {
+          "factor_base": "koblitz-standard-subspace:dimension=4",
+          "oracle": "pdp-split:m=3,plan=3,guess=2,slots=one,max_free=24"}}},
+        {"name": "clo-unsplit", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+          "factor_base": "koblitz-closure:dimension=4",
+          "oracle": "pdp-split:m=3,plan=3,guess=2,slots=all,max_free=24"}}},
+        {"name": "clo-chain", "role": "candidate", "method": {"id": "ic.pipeline", "params": {
+          "factor_base": "koblitz-closure:dimension=4",
+          "oracle": "pdp-split:m=3,plan=2+1,guess=2,slots=all,max_free=24"}}}
+      ],
+      "measurement": {"rounds": 1, "warmup": 0, "seed": 5, "isolation_required": "L0", "timeout_seconds": 300}
+    }"#;
+    std::fs::write(dir.join("spec.json"), spec).unwrap();
+    let out = dir.join("s");
+    let (ok, err) = run_spec(&dir, &out, &[]);
+    assert!(ok, "{err}");
+    let text = std::fs::read_to_string(out.join("records.jsonl")).unwrap();
+    let mut closure = Vec::new();
+    for line in text.lines() {
+        let r: Value = serde_json::from_str(line).unwrap();
+        assert_eq!(r["outcome"]["status"], "verified", "{line}");
+        assert_eq!(r["cost"]["lower_bound"], true, "{line}");
+        assert!(r["cost"]["unpriced"].to_string().contains("word_XORs"), "{line}");
+        assert!(r["solver"]["ops"].as_u64().unwrap() > 0, "{line}");
+        assert!(r["solver"]["extra"]["systems"].as_u64().unwrap() > 0, "{line}");
+        if r["arm"] != "std-unsplit" {
+            closure.push(r);
+        }
+    }
+    assert_eq!(closure.len(), 2);
+    for key in ["targets_tried", "relations_found", "matrix_rank"] {
+        assert_eq!(
+            closure[0]["counters"][key], closure[1]["counters"][key],
+            "unsplit and chain diverged at {key}"
+        );
+    }
+    let (ok, _, err) = ecbench(&[
+        "verify",
+        "--dir",
+        out.to_str().unwrap(),
+        "--replay-all",
+        "--exit-code",
+    ]);
+    assert!(ok, "replay: {err}");
+}
+
 const BOUNDS_SPEC: &str = r#"{
   "schema": "ecbench.spec/v1",
   "label": "bounds integration test: four sizes",

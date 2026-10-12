@@ -83,7 +83,7 @@ fn main() {
             .and_then(|i| args.get(i + 1))
             .cloned()
     };
-    let runs_dir = flag("--runs").expect("--runs DIR");
+    let runs_dir = flag("--runs").unwrap_or_default();
     let session = flag("--rho-session").expect("--rho-session DIR");
     let calibration_path = flag("--calibration").expect("--calibration FILE");
     let out_path = flag("--out").expect("--out FILE");
@@ -119,16 +119,33 @@ fn main() {
         "| cell m:a:n:ℓ | plan | g | unknowns | targets complete | exact | solving degree (per target) | mean word XORs | mean F4 wall s | λ | projected S (relations) | ÷ strong rho S | ÷ signed-Frobenius rho S |\n\
          |---|---|--:|--:|--:|---|---|--:|--:|--:|--:|--:|--:|\n",
     );
-    for f in jsonl_files(Path::new(&runs_dir)) {
+    let run_files_empty = runs_dir.is_empty();
+    let run_files = if runs_dir.is_empty() {
+        Vec::new()
+    } else {
+        jsonl_files(Path::new(&runs_dir))
+    };
+    for f in run_files {
         let lines = read_jsonl(&f);
         let Some(cell) = lines.iter().find(|l| l["kind"] == "cell") else {
             continue;
         };
         let (m, a, n, ell) = (u(cell, "m"), u(cell, "a"), u(cell, "n"), u(cell, "ell"));
         let r = u(cell, "r") as f64;
-        let fb = u(cell, "factor_base_liftable_abscissae") as f64;
-        let lambda =
-            u(cell, "lambda_decompositions") as f64 / u(cell, "lambda_targets").max(1) as f64;
+        // A closure cell (round 2, `--base closure`) needs its folded
+        // columns and its per-system yield; a standard cell its base size
+        // and per-target yield (one system per target).
+        let closure = cell["base"] == "closure";
+        let fb = if closure {
+            u(cell, "closure_columns") as f64
+        } else {
+            u(cell, "factor_base_liftable_abscissae") as f64
+        };
+        let lambda = if closure {
+            u(cell, "lambda_system_decompositions") as f64 / u(cell, "lambda_systems").max(1) as f64
+        } else {
+            u(cell, "lambda_decompositions") as f64 / u(cell, "lambda_targets").max(1) as f64
+        };
         let cal_key = format!("koblitz/K_{a} / GF(2^{n})");
         let ratio = calibration["instances"][&cal_key]["ns_per_word_xor"].as_f64();
         let strong = rho.get(&("rho-strong".to_string(), n)).copied();
@@ -193,7 +210,8 @@ fn main() {
             let pj = projection.as_ref();
             let s_proj = pj.and_then(|p| p["s_relations"].as_f64());
             table.push_str(&format!(
-                "| {m}:{a}:{n}:{ell} | {plan} | {g} | {n_vars} | {}/{} | {} | {} | {:.3e} | {:.3} | {:.4} | {} | {} | {} |\n",
+                "| {m}:{a}:{n}:{ell}{} | {plan} | {g} | {n_vars} | {}/{} | {} | {} | {:.3e} | {:.3} | {:.4} | {} | {} | {} |\n",
+                if closure { " closure" } else { "" },
                 complete.len(),
                 runs.len(),
                 if exact_fail == 0 { "yes" } else { "**NO**" },
@@ -224,7 +242,7 @@ fn main() {
         }
         cells_out.push(json!({
             "file": f.file_name().unwrap().to_string_lossy(),
-            "m": m, "a": a, "n": n, "ell": ell,
+            "m": m, "a": a, "n": n, "ell": ell, "base": cell["base"].as_str().unwrap_or("standard"),
             "curve_slug": cell["curve_slug"], "r": r, "factor_base": fb,
             "surplus": cell["surplus_n_minus_m_ell"],
             "lambda": lambda, "lambda_targets": cell["lambda_targets"],
@@ -234,8 +252,16 @@ fn main() {
             "variants": variants,
         }));
     }
+    let ecbench_dirs: Vec<String> = args
+        .iter()
+        .enumerate()
+        .filter(|(_, a)| *a == "--ecbench")
+        .filter_map(|(i, _)| args.get(i + 1).cloned())
+        .collect();
+    let (ecbench_json, ecbench_table) = ecbench_summary(&ecbench_dirs, &calibration);
     let analysis = json!({
         "schema": "pdp_split_dreg.analysis/v1",
+        "ecbench": ecbench_json,
         "inputs": {"runs": runs_dir, "rho_session": session, "calibration": calibration_path, "replica": flag("--replica")},
         "projection_rule": "S_relations = (F+1)/lambda * mean_word_xors * ns_per_word_xor / sqrt(r); relation phase only; pinned ratio from another host",
         "replica_runs_compared": replica_compared,
@@ -247,6 +273,155 @@ fn main() {
         serde_json::to_string_pretty(&analysis).unwrap() + "\n",
     )
     .expect("write");
-    print!("{table}");
+    if !run_files_empty {
+        print!("{table}");
+    }
+    print!("{ecbench_table}");
     println!("\nreplica: {replica_compared} runs compared, {replica_mismatch} mismatched (solving degree, word XORs, verified count)");
+}
+
+fn median(xs: &mut [f64]) -> Option<f64> {
+    if xs.is_empty() {
+        return None;
+    }
+    xs.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let k = xs.len();
+    Some(if k % 2 == 1 {
+        xs[k / 2]
+    } else {
+        (xs[k / 2 - 1] + xs[k / 2]) / 2.0
+    })
+}
+
+/// Per (curve, arm) of ecbench sessions: S as recorded (a lower bound for
+/// the IC arms: F4 work counted, not charged), F4 word XORs and systems
+/// per run, and the pinned-ratio sensitivity `S + XORs · ns_per_word_xor /
+/// √r` per run; per IC arm, the per-workload ratios of that priced S to
+/// each rho arm's S on the same workload, and closure arms to their
+/// standard twin (`clo-X` ↔ `std-X`).  Everything is read from records.
+fn ecbench_summary(dirs: &[String], calibration: &Value) -> (Value, String) {
+    // (n, arm) -> workload -> (s, priced, xors, systems, verified)
+    type Row = (f64, f64, Option<f64>, Option<f64>, bool);
+    let mut by: BTreeMap<(u64, String), BTreeMap<String, Row>> = BTreeMap::new();
+    let mut meta: BTreeMap<u64, (String, f64, Option<f64>)> = BTreeMap::new();
+    for d in dirs {
+        for r in read_jsonl(&Path::new(d).join("records.jsonl")) {
+            if r["warmup"].as_bool() == Some(true) {
+                continue;
+            }
+            let w = &r["workload"];
+            let n = w["curve"]["field_degree"].as_u64().expect("field_degree");
+            let a = w["curve_spec"]["a"].as_u64().unwrap_or(0);
+            let rr = w["curve"]["r"].as_f64().expect("r");
+            let key = format!("koblitz/K_{a} / GF(2^{n})");
+            let ratio = calibration["instances"][&key]["ns_per_word_xor"].as_f64();
+            meta.insert(
+                n,
+                (
+                    w["curve"]["slug"].as_str().unwrap_or("?").to_string(),
+                    rr,
+                    ratio,
+                ),
+            );
+            let verified = r["outcome"]["status"] == "verified";
+            let s = r["cost"]["s"].as_f64().unwrap_or(f64::NAN);
+            let xors = r["solver"]["ops"].as_f64();
+            let systems = r["solver"]["extra"]["systems"].as_f64();
+            let priced = match (xors, ratio) {
+                (Some(x), Some(q)) => s + x * q / rr.sqrt(),
+                (None, _) => s,
+                _ => f64::NAN,
+            };
+            let arm = r["arm"].as_str().expect("arm").to_string();
+            let wid = w["workload_id"].as_str().expect("workload_id").to_string();
+            by.entry((n, arm))
+                .or_default()
+                .insert(wid, (s, priced, xors, systems, verified));
+        }
+    }
+    let mut out = Vec::new();
+    let mut table = String::from(
+        "\n| curve | arm | verified | median S (recorded) | median F4 XORs | median systems | median priced S | priced ÷ strong rho S, median (min–max) | priced ÷ signed-Frobenius rho S, median | priced ÷ standard twin, median |\n\
+         |---|---|--:|--:|--:|--:|--:|---|--:|--:|\n",
+    );
+    for ((n, arm), rows) in &by {
+        let (slug, _, ratio) = meta[n].clone();
+        let col = |f: &dyn Fn(&Row) -> Option<f64>| -> Vec<f64> {
+            rows.values()
+                .filter_map(f)
+                .filter(|v| v.is_finite())
+                .collect()
+        };
+        let verified = rows.values().filter(|r| r.4).count();
+        let paired = |other: &str| -> Vec<f64> {
+            let Some(o) = by.get(&(*n, other.to_string())) else {
+                return Vec::new();
+            };
+            rows.iter()
+                .filter_map(|(w, r)| o.get(w).map(|q| r.1 / q.1))
+                .filter(|v| v.is_finite())
+                .collect()
+        };
+        let mut vs_strong = paired("rho-strong");
+        let mut vs_frob = paired("rho-frob");
+        let twin = arm.strip_prefix("clo-").map(|t| format!("std-{t}"));
+        let mut vs_twin = twin.as_deref().map(paired).unwrap_or_default();
+        let range = |v: &[f64]| {
+            let lo = v.iter().cloned().fold(f64::INFINITY, f64::min);
+            let hi = v.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+            (lo, hi)
+        };
+        let (lo, hi) = range(&vs_strong);
+        let ms = median(&mut col(&|r| Some(r.0)));
+        let mx = median(&mut col(&|r| r.2));
+        let msys = median(&mut col(&|r| r.3));
+        let mp = median(&mut col(&|r| Some(r.1)));
+        let m_strong = median(&mut vs_strong.clone());
+        let m_frob = median(&mut vs_frob);
+        let m_twin = median(&mut vs_twin);
+        let f = |x: Option<f64>| x.map_or("—".to_string(), |v| format!("{v:.4}"));
+        let e = |x: Option<f64>| x.map_or("—".to_string(), |v| format!("{v:.3e}"));
+        table.push_str(&format!(
+            "| {slug} | {arm} | {verified}/{} | {} | {} | {} | {} | {} ({}) | {} | {} |\n",
+            rows.len(),
+            f(ms),
+            e(mx),
+            f(msys),
+            f(mp),
+            f(m_strong),
+            if vs_strong.is_empty() {
+                "—".to_string()
+            } else {
+                format!("{lo:.3}–{hi:.3}")
+            },
+            f(m_frob),
+            f(m_twin),
+        ));
+        vs_strong.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        out.push(json!({
+            "n": n, "curve_slug": slug, "arm": arm, "pinned_ns_per_word_xor": ratio,
+            "runs": rows.len(), "verified": verified,
+            "median_s_recorded": ms, "median_f4_word_xors": mx, "median_systems": msys,
+            "median_priced_s": mp,
+            "priced_over_strong_rho_per_workload": vs_strong,
+            "median_priced_over_strong_rho": m_strong,
+            "median_priced_over_signed_frobenius_rho": m_frob,
+            "median_priced_over_standard_twin": m_twin,
+            "per_workload": rows.iter().map(|(w, r)| json!({
+                "workload": w, "s": r.0, "priced_s": r.1, "f4_word_xors": r.2,
+                "systems": r.3, "verified": r.4})).collect::<Vec<_>>(),
+        }));
+    }
+    (
+        json!({
+            "sessions": dirs,
+            "pricing": "priced S = recorded S + F4 word XORs * pinned ns_per_word_xor (docs/ic/calibration.json, another host) / sqrt(r); a sensitivity, not the recorded S",
+            "rows": out,
+        }),
+        if dirs.is_empty() {
+            String::new()
+        } else {
+            table
+        },
+    )
 }

@@ -20,7 +20,8 @@ use std::time::Duration;
 
 use crypto_lib::cryptanalysis::ic_boundary::koblitz_instance;
 use crypto_lib::cryptanalysis::pdp_split::{
-    build_for_instance, exhaustive_decompositions, factor_base_size, run_hybrid,
+    build_for_instance, build_for_instance_slots, closure_census, exhaustive_decompositions,
+    exhaustive_decompositions_bases, factor_base_size, rotate_words, run_hybrid_bases, slot_tuples,
 };
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
@@ -85,6 +86,18 @@ fn main() {
     let budget = Duration::from_secs(num("--budget-secs", 120));
     let max_free = num("--max-free", 24) as usize;
     let lambda_targets = num("--lambda-targets", 256);
+    // `--base closure`: the Frobenius closure of V, solved per τ-slot
+    // tuple (summand i over σ^{jᵢ}(V)); `--slots-per-target` tuples are
+    // drawn per target, and λ is counted per system over
+    // `--lambda-systems` random (target, tuple) pairs.
+    let base = flag("--base").unwrap_or_else(|| "standard".into());
+    assert!(
+        base == "standard" || base == "closure",
+        "--base standard|closure"
+    );
+    let closure = base == "closure";
+    let slots_per_target = num("--slots-per-target", 1) as usize;
+    let lambda_systems = num("--lambda-systems", lambda_targets);
     let out_path = flag("--out").expect("--out FILE (must not exist)");
     let mut out = OpenOptions::new()
         .write(true)
@@ -116,7 +129,14 @@ fn main() {
         "max_free": max_free,
         "lambda_targets": lambda_targets,
         "solver": "pq_f4_f2::groebner_basis_f4",
-        "factor_base": "standard subspace span(1, z, ..., z^(l-1))",
+        "factor_base": if closure {
+            "Frobenius closure of span(1, z, ..., z^(l-1)), tau-slot systems"
+        } else {
+            "standard subspace span(1, z, ..., z^(l-1))"
+        },
+        "base": base,
+        "slots_per_target": slots_per_target,
+        "lambda_systems": lambda_systems,
     }));
 
     for &(m, a, n, ell) in &cells {
@@ -140,8 +160,33 @@ fn main() {
             lambda_decomps += d;
             lambda_hits += usize::from(d > 0);
         }
+        let all_slots = slot_tuples(n, m);
+        let census = closure_census(&inst, &words);
+        let (mut lam_sys_decomps, mut lam_sys_hits) = (0usize, 0usize);
+        if closure {
+            let mut srng = StdRng::seed_from_u64(
+                seed ^ 0x534c_4f54 ^ ((n as u64) << 40) ^ ((m * 64 + ell) as u64),
+            );
+            for _ in 0..lambda_systems {
+                let k = srng.gen_range(1..inst.r);
+                let x = inst.fast.mul_u64(inst.generator, k).x;
+                let sl = &all_slots[srng.gen_range(0..all_slots.len())];
+                let ws: Vec<Vec<u64>> =
+                    sl.iter().map(|&j| rotate_words(&inst, &words, j)).collect();
+                let d = exhaustive_decompositions_bases(&inst, &ws, x).len();
+                lam_sys_decomps += d;
+                lam_sys_hits += usize::from(d > 0);
+            }
+        }
         emit(serde_json::json!({
             "kind": "cell",
+            "base": base,
+            "slot_tuples": all_slots.len(),
+            "closure_abscissae": census.abscissae,
+            "closure_columns": census.columns,
+            "lambda_systems": if closure { lambda_systems } else { 0 },
+            "lambda_system_decompositions": lam_sys_decomps,
+            "lambda_systems_decomposable": lam_sys_hits,
             "m": m, "a": a, "n": n, "ell": ell,
             "curve": inst.name,
             "curve_icv1": curve_id.icv1,
@@ -163,69 +208,95 @@ fn main() {
             let k = rng.gen_range(1..inst.r);
             let r_pt = inst.fast.mul_u64(inst.generator, k);
             let x_r = r_pt.x;
-            let truth = exhaustive_decompositions(&inst, &words, m, x_r);
-            for &g in &guesses {
-                for plan in &plans {
-                    if g > m * ell {
-                        continue;
-                    }
-                    let (sys, build_ns) = match build_for_instance(&inst, plan, ell, x_r) {
-                        Ok(s) => s,
-                        Err(e) => {
-                            emit(serde_json::json!({
-                                "kind": "refused", "m": m, "n": n, "ell": ell,
-                                "plan": plan, "g": g, "target": t, "reason": e,
-                            }));
+            let target_slots: Vec<Vec<u32>> = if closure {
+                (0..slots_per_target)
+                    .map(|_| all_slots[rng.gen_range(0..all_slots.len())].clone())
+                    .collect()
+            } else {
+                vec![vec![0; m]]
+            };
+            for slots in &target_slots {
+                let words_i: Vec<Vec<u64>> = slots
+                    .iter()
+                    .map(|&j| rotate_words(&inst, &words, j))
+                    .collect();
+                let truth = if closure {
+                    exhaustive_decompositions_bases(&inst, &words_i, x_r)
+                } else {
+                    exhaustive_decompositions(&inst, &words, m, x_r)
+                };
+                for &g in &guesses {
+                    for plan in &plans {
+                        if g > m * ell {
                             continue;
                         }
-                    };
-                    let run = run_hybrid(
-                        &inst,
-                        &sys,
-                        &words,
-                        x_r,
-                        g,
-                        Some(budget),
-                        max_free,
-                        &truth,
-                        build_ns,
-                    );
-                    eprintln!(
-                        "  t={t} {:<14} g={g}: vars={:>2} sd_max={} wall={:.3}s xors={} \
+                        let built = if closure {
+                            build_for_instance_slots(&inst, plan, ell, slots, x_r)
+                                .map(|(s, _, ns)| (s, ns))
+                        } else {
+                            build_for_instance(&inst, plan, ell, x_r)
+                        };
+                        let (sys, build_ns) = match built {
+                            Ok(s) => s,
+                            Err(e) => {
+                                emit(serde_json::json!({
+                                    "kind": "refused", "m": m, "n": n, "ell": ell,
+                                    "plan": plan, "g": g, "target": t, "reason": e,
+                                }));
+                                continue;
+                            }
+                        };
+                        let run = run_hybrid_bases(
+                            &inst,
+                            &sys,
+                            &words_i,
+                            x_r,
+                            g,
+                            Some(budget),
+                            max_free,
+                            &truth,
+                            build_ns,
+                        );
+                        eprintln!(
+                            "  t={t} {:<14} g={g}: vars={:>2} sd_max={} wall={:.3}s xors={} \
                          verified={}/{} exact={:?} timeouts={}",
-                        run.plan,
-                        run.n_vars,
-                        run.solving_degree_max,
-                        run.f4_wall_ns as f64 * 1e-9,
-                        run.word_xors,
-                        run.verified.len(),
-                        truth.len(),
-                        run.complete_and_exact,
-                        run.branches_timed_out,
-                    );
-                    profile.push(format!(
-                        "{m}:{n}:{ell}:{t}:{}:g{g}=sd{}/x{}/v{}/e{}",
-                        run.plan,
-                        run.solving_degree_max,
-                        run.word_xors,
-                        run.verified.len(),
-                        run.complete_and_exact.map_or("-".into(), |e| e.to_string()),
-                    ));
-                    xors_total += run.word_xors;
-                    verified_total += run.verified.len();
-                    timeouts_total += run.branches_timed_out;
-                    all_exact &= run.complete_and_exact == Some(true);
-                    let mut v = serde_json::to_value(&run).expect("serialize");
-                    let o = v.as_object_mut().expect("object");
-                    o.insert("kind".into(), "run".into());
-                    o.insert("m".into(), m.into());
-                    o.insert("a".into(), a.into());
-                    o.insert("n".into(), n.into());
-                    o.insert("ell".into(), ell.into());
-                    o.insert("target".into(), t.into());
-                    o.insert("x_r".into(), x_r.into());
-                    o.insert("truth_count".into(), truth.len().into());
-                    emit(v);
+                            run.plan,
+                            run.n_vars,
+                            run.solving_degree_max,
+                            run.f4_wall_ns as f64 * 1e-9,
+                            run.word_xors,
+                            run.verified.len(),
+                            truth.len(),
+                            run.complete_and_exact,
+                            run.branches_timed_out,
+                        );
+                        profile.push(format!(
+                            "{m}:{n}:{ell}:{t}:{}:g{g}=sd{}/x{}/v{}/e{}",
+                            run.plan,
+                            run.solving_degree_max,
+                            run.word_xors,
+                            run.verified.len(),
+                            run.complete_and_exact.map_or("-".into(), |e| e.to_string()),
+                        ));
+                        xors_total += run.word_xors;
+                        verified_total += run.verified.len();
+                        timeouts_total += run.branches_timed_out;
+                        all_exact &= run.complete_and_exact == Some(true);
+                        let mut v = serde_json::to_value(&run).expect("serialize");
+                        let o = v.as_object_mut().expect("object");
+                        o.insert("kind".into(), "run".into());
+                        o.insert("m".into(), m.into());
+                        o.insert("a".into(), a.into());
+                        o.insert("n".into(), n.into());
+                        o.insert("ell".into(), ell.into());
+                        o.insert("target".into(), t.into());
+                        o.insert("x_r".into(), x_r.into());
+                        o.insert("truth_count".into(), truth.len().into());
+                        if closure {
+                            o.insert("slots".into(), serde_json::json!(slots));
+                        }
+                        emit(v);
+                    }
                 }
             }
         }
