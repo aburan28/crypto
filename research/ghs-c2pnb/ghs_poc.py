@@ -31,7 +31,20 @@ References:
     logarithm." LMS J. Comput. Math. 7, 2004.
   - Menezes, Teske. "Cryptographic implications of Hess' generalized GHS
     attack." Applicable Algebra in Engineering, Communication and
-    Computing, 16(6), 2006. (Source for the c2pnb176w1 numerical break.)
+    Computing, 16(6), 2006. (Treats F_{2^{3l}}, F_{2^{6l}}, F_{2^{7l}} and
+    F_{2^{8l}}; does not discuss the X9.62 curves.)
+  - Maurer, Menezes, Teske. "Analysis of the GHS Weil descent attack on the
+    ECDLP over characteristic two finite fields of composite degree." LMS J.
+    Comput. Math. 5 (2002) 127-174, Section 6 (the X9.62 curves: no direct
+    attack, and a hypothetical isogenous m' = 5 instance for c2pnb176w1 that
+    the authors judge infeasible to find; see section 4 below).
+
+CORRECTION (2026-10-09): an earlier version of this file attributed a
+"c2pnb176w1 numerical break at m' = 5, ~2^57, BROKEN" to Menezes-Teske. No
+paper read for this repository reports that; the prose below is corrected and
+no computed value in this script changed. This is legacy Python (see
+AGENTS.md, "Implementation language: no Python"): only strings and comments
+were edited.
 """
 
 from __future__ import annotations
@@ -354,9 +367,12 @@ def hess_magic_vs_cost(c: W1Curve) -> None:
     so long as m' >= 2).
 
     Whether a given m' is reachable in the actual isogeny class of E is a
-    separate (hard) computational question -- Menezes-Teske 2006 answered
-    it positively for c2pnb176w1 at m' = 5, and negatively (no useful
-    reduction below Pollard rho) for the other four c2pnb*w1 curves.
+    separate (hard) computational question, and no source read for this
+    repository answers it positively for any c2pnb*w1 curve. Maurer-Menezes-
+    Teske (2002), Section 6, Remark 26, list the best hypothetical instances
+    and judge finding them infeasible; for c2pnb272w1 they searched the
+    (n, m) = (136, 9) and (272, 9) classes exhaustively and found no curve
+    isogenous to it. See section 4 of the printed output for the numbers.
     """
     q = 1 << c.l
     rho_E = pollard_rho_cost_bits(c.order)
@@ -518,7 +534,8 @@ def main() -> None:
     print("and the attack cost is min(index calculus on Jac(C), Pollard rho on Jac).")
     print("Below we sweep all theoretically reachable m' and show what each costs.")
     print("Whether the actual isogeny class of E reaches a given m' is a separate")
-    print("question (Menezes-Teske answered yes for c2pnb176w1 at m' = 5).")
+    print("question (Maurer-Menezes-Teske 2002, Sec. 6, judge it infeasible for every")
+    print("c2pnb*w1 curve; see section 4).")
     print()
     for c in CURVES:
         hess_magic_vs_cost(c)
@@ -533,25 +550,30 @@ def main() -> None:
   IMPORTANT: the '*** BREAKS ECDLP ***' lines in section 2 are hypothetical:
   they say "IF the isogeny class reaches this m', the descent costs X".
   Finding such an E' is a SEPARATE computational problem (the Hess isogeny
-  walk -- step 1 of the pipeline below) and is what distinguishes the
-  c2pnb176w1 break from the rest of the family.
+  walk -- step 1 of the pipeline below), and no source this repository has
+  read reports finding one for any c2pnb*w1 curve.
 
-  Per Menezes-Teske 2006 the actual reachable m' and resulting costs:
+  What Maurer-Menezes-Teske (LMS J. Comput. Math. 5 (2002) 127-174, Section 6,
+  Remark 26, Table 4) say about the isogeny route. All figures are log2 in
+  their units, which differ from section 2's sqrt(r): compare within this
+  table only. 'classes' is log2 of the number of isomorphism classes with the
+  listed (n, m); the field has about 2^N classes in all.
 
-    curve         rho on E   reachable m'   resulting cost     verdict
-    c2pnb176w1     2^80         m' = 5        ~2^57            BROKEN
-    c2pnb208w1     2^96         m' >= 7       >~2^96           secure vs descent
-    c2pnb272w1     2^128        m' >= ?       >~2^128          secure vs descent
-    c2pnb304w1     2^144        m' >= ?       >~2^144          secure vs descent
-    c2pnb368w1     2^176        m' >= ?       >~2^176          secure vs descent
+    curve        rho  best hypothetical instance    EG cost  classes  authors' verdict
+                      (n, l, m, g)
+    c2pnb176w1    87  (8, 22, 5, 16)                61-65    110      finding it judged much harder than rho
+    c2pnb208w1   103  (8, 26, 5, 16)                69       130      needs a 2^50 factor base; finding a (8,5) or (4,3) curve
+                                                                      among 2^130 or 2^156 classes "does not seem feasible"
+    c2pnb272w1   135  (272, 1, 9, 255)              51       10       exhaustive search of the (136,9) and (272,9) classes:
+                                                                      none isogenous to E272; next best (8,34,5,16), cost 77,
+                                                                      170 classes, "beyond the realm of feasibility"
+    c2pnb304w1   151  (8, 38, 5, 16)                81       190      "not possible to improve on the GHS attack" (as 272)
+    c2pnb368w1   183  (8, 46, 5, 16)                89       230      same as 304
 
-  Compare against section 2's tables: c2pnb176w1's m'=5 row reads ~2^74
-  (our crude cost model overshoots Menezes-Teske's 2^57 by a factor that
-  comes from a tighter constant in the relation-collection phase, but the
-  shape -- well under 2^80 rho -- is right). For c2pnb208w1, the same row
-  *would* break the curve if reached, but the isogeny class doesn't get
-  there: the smallest m' the walk attains is m' >= 7, giving descent cost
-  > 2^327 -- vastly worse than rho on E.
+  Section 2 sweeps descents to F_{2^16} (n = 11 for c2pnb176w1); Table 4 lists
+  no entry for that descent. Its m' = 5 row (~2^74 in this PoC's crude model)
+  is a hypothetical row, not a result, and the PoC's 2^80 rho is sqrt(r) with
+  no per-step cost.
 
   The full attack pipeline (this PoC does NOT execute steps 1-4):
 
@@ -567,7 +589,8 @@ def main() -> None:
 
   Each of steps 1-4 is a research-grade implementation. Step 1 is the
   hard one and is what determines whether a given c2pnb*w1 curve is in
-  practice broken. For c2pnb176w1 the answer is yes; for the rest, no.
+  practice broken. No source read reports step 1 succeeding for any of the
+  five, so none is known broken by this route.
 """)
 
 

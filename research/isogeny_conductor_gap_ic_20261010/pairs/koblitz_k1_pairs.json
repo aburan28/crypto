@@ -1,0 +1,248 @@
+{
+  "failures": [],
+  "family": "koblitz",
+  "pairs": [
+    {
+      "a": 1,
+      "cofactor": 2,
+      "conductor_factors": [
+        [
+          271,
+          1
+        ]
+      ],
+      "curves": [
+        {
+          "a6": 1,
+          "conductor": 1,
+          "end_evidence": "defined over F_2: End = Z[τ] = O_K",
+          "explicit": {
+            "a": 1,
+            "b": 1,
+            "group_order": 131174,
+            "gx": 43693,
+            "gy": 23339,
+            "kind": "binary_explicit",
+            "modulus": 131081,
+            "n": 17,
+            "r": 65587
+          },
+          "role": "crater",
+          "spec": {
+            "a": 1,
+            "kind": "koblitz",
+            "n": 17
+          }
+        },
+        {
+          "a6": 112561,
+          "at_ell_floor": true,
+          "conductor": 271,
+          "ell": 271,
+          "end_evidence": "rank-1 E[ℓ] over F_{q^m} for every ℓ | f_π: End = Z[π]",
+          "role": "floor",
+          "spec": {
+            "a": 1,
+            "b": 112561,
+            "group_order": 131174,
+            "gx": 115363,
+            "gy": 54399,
+            "kind": "binary_explicit",
+            "modulus": 131081,
+            "n": 17,
+            "r": 65587
+          },
+          "step": 1
+        }
+      ],
+      "edges": [
+        {
+          "a6_from": 1,
+          "a6_to": 112561,
+          "ell": 271,
+          "ext_degree": 135,
+          "kernels_tried": 1,
+          "loops_skipped": 0,
+          "x_image": 115363
+        }
+      ],
+      "family": "koblitz",
+      "floor_certificates": [
+        {
+          "ell": 271,
+          "ext_degree": 135,
+          "rank": 1
+        }
+      ],
+      "frobenius_conductor": 271,
+      "gap": 271,
+      "group_order": 131174,
+      "n": 17,
+      "r": 65587,
+      "seconds": 131.328851014,
+      "trace": -101
+    },
+    {
+      "a": 1,
+      "cofactor": 2,
+      "conductor_factors": [
+        [
+          457,
+          1
+        ]
+      ],
+      "curves": [
+        {
+          "a6": 1,
+          "conductor": 1,
+          "end_evidence": "defined over F_2: End = Z[τ] = O_K",
+          "explicit": {
+            "a": 1,
+            "b": 1,
+            "group_order": 525086,
+            "gx": 393246,
+            "gy": 31114,
+            "kind": "binary_explicit",
+            "modulus": 524327,
+            "n": 19,
+            "r": 262543
+          },
+          "role": "crater",
+          "spec": {
+            "a": 1,
+            "kind": "koblitz",
+            "n": 19
+          }
+        },
+        {
+          "a6": 212302,
+          "at_ell_floor": true,
+          "conductor": 457,
+          "ell": 457,
+          "end_evidence": "rank-1 E[ℓ] over F_{q^m} for every ℓ | f_π: End = Z[π]",
+          "role": "floor",
+          "spec": {
+            "a": 1,
+            "b": 212302,
+            "group_order": 525086,
+            "gx": 133228,
+            "gy": 435006,
+            "kind": "binary_explicit",
+            "modulus": 524327,
+            "n": 19,
+            "r": 262543
+          },
+          "step": 1
+        }
+      ],
+      "edges": [
+        {
+          "a6_from": 1,
+          "a6_to": 212302,
+          "ell": 457,
+          "ext_degree": 8,
+          "kernels_tried": 1,
+          "loops_skipped": 0,
+          "x_image": 133228
+        }
+      ],
+      "family": "koblitz",
+      "floor_certificates": [
+        {
+          "ell": 457,
+          "ext_degree": 8,
+          "rank": 1
+        }
+      ],
+      "frobenius_conductor": 457,
+      "gap": 457,
+      "group_order": 525086,
+      "n": 19,
+      "r": 262543,
+      "seconds": 0.050976664,
+      "trace": -797
+    },
+    {
+      "a": 1,
+      "cofactor": 2,
+      "conductor_factors": [
+        [
+          967,
+          1
+        ]
+      ],
+      "curves": [
+        {
+          "a6": 1,
+          "conductor": 1,
+          "end_evidence": "defined over F_2: End = Z[τ] = O_K",
+          "explicit": {
+            "a": 1,
+            "b": 1,
+            "group_order": 8393806,
+            "gx": 2796197,
+            "gy": 1282171,
+            "kind": "binary_explicit",
+            "modulus": 8388641,
+            "n": 23,
+            "r": 4196903
+          },
+          "role": "crater",
+          "spec": {
+            "a": 1,
+            "kind": "koblitz",
+            "n": 23
+          }
+        },
+        {
+          "a6": 8138435,
+          "at_ell_floor": true,
+          "conductor": 967,
+          "ell": 967,
+          "end_evidence": "rank-1 E[ℓ] over F_{q^m} for every ℓ | f_π: End = Z[π]",
+          "role": "floor",
+          "spec": {
+            "a": 1,
+            "b": 8138435,
+            "group_order": 8393806,
+            "gx": 7975409,
+            "gy": 6985862,
+            "kind": "binary_explicit",
+            "modulus": 8388641,
+            "n": 23,
+            "r": 4196903
+          },
+          "step": 1
+        }
+      ],
+      "edges": [
+        {
+          "a6_from": 1,
+          "a6_to": 8138435,
+          "ell": 967,
+          "ext_degree": 42,
+          "kernels_tried": 1,
+          "loops_skipped": 0,
+          "x_image": 7975409
+        }
+      ],
+      "family": "koblitz",
+      "floor_certificates": [
+        {
+          "ell": 967,
+          "ext_degree": 42,
+          "rank": 1
+        }
+      ],
+      "frobenius_conductor": 967,
+      "gap": 967,
+      "group_order": 8393806,
+      "n": 23,
+      "r": 4196903,
+      "seconds": 5.766656628,
+      "trace": -5197
+    }
+  ],
+  "schema": "isogeny_gap_pairs/v1",
+  "seed": 20261010
+}

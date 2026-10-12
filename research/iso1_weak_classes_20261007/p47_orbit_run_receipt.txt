@@ -1,0 +1,38 @@
+ISO-1 p=47 exhaustive normalized-representative orbit census, 2026-10-08
+
+Host: arm64 macOS, contended; RAYON_NUM_THREADS=4. Rustc 1.93.1.
+Source and build details: orbit_run_receipt.txt.
+Executable SHA-256:
+568925dc4487caaece26cdd5f60f05850b2d68fedc493c9bce777e240f57ee9b.
+
+Command:
+RAYON_NUM_THREADS=4 target/release/examples/iso1_class_census 47 research/iso1_weak_classes_20261007/p47_orbit.csv --derive-twists --orbit-quotient
+
+Exit status: 0. Standard output: empty. Standard error is retained in
+p47_orbit_stderr.txt. Exploratory wall: 1,121.109 seconds.
+Point-count calls: 813,649 = (q^2+q+4)/6 at q=2,209.
+Charged F_p multiplications: 327,801,319,442.
+Weighted normalized representatives: 9,763,780 = 2q^2+2q.
+CSV SHA-256:
+bb6a396a2fda0a739ed6cb5d14441250663dbe869bf124838f8359c4cc10cef7.
+
+Hasse candidate rows: 103,824; ordinary: 101,614; nonordinary or
+boundary: 2,210. Ordinary weak rows: 50,382; ordinary zero rows:
+51,232. Depth-1 weak/rows: 0/50,808. Depth-at-least-2 zero/rows:
+424/50,806. Of those 424 zero rows, 392 are in the outer fifth of
+|t|/(2p^3). All-positive rows: 50,384, including the special orbit's
+two boundary traces +/-207646, each with representative count 2.
+
+The previous direct twist-derived p=47 attempt was interrupted (exit
+130) after the orbit algorithm passed its p=13 bytewise check. It had
+not reached CSV writing, so it produced no trace labels. Its empty
+stdout/stderr files are not retained as evidence; this paragraph
+preserves the aborted attempt. This orbit run is the completed p=47
+census.
+
+Independent checks: 5,000 native PARI/GP ellcard norm-one samples,
+4,200 distinct traces, all in the positive set; direct GP check of the
+special boundary trace. See gp_p47_validation_receipt.txt and
+gp_p47_special_trace.txt. These do not certify all zero labels, because
+the exhaustive Rust point counter is randomized. This is a class-label
+diagnostic, not an isolated CPU speed comparison or an IC/rho result.

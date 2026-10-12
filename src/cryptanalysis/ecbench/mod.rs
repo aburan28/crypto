@@ -13,6 +13,7 @@
 //! | [`methods`] | the method registry and the one `solve` every method goes through |
 //! | [`generic`] | counted BSGS (three forms) and the kangaroo on any [`CountedGroup`] |
 //! | [`claw`] | the four-point signed-Frobenius pair claw (aburan28/cryptanalysis#175) on a Koblitz curve |
+//! | [`conductor_gap`] | CM crater/floor curve pairs with a certified prime endomorphism-conductor gap |
 //! | [`spec`] | the experiment spec and its deterministic expansion |
 //! | [`host`] | the host capsule and its environment class |
 //! | [`isolation`] | CPU reservation, eviction, pinning, NUMA binding, kernel counters |
@@ -20,6 +21,7 @@
 //! | [`runner`] | sessions: interleaved measured children, sealed append-only records |
 //! | [`signals`] | interruption: the host is restored and no child outlives the runner |
 //! | [`compare`] | paired ratios with bootstrap intervals; wall time gated by level |
+//! | [`resources`] | cold native-work, memory and PMU vectors without invented GAE prices |
 //! | [`claim`] | `vs_rho` claims: the IC1 identity, the claim report, the native checker |
 //! | [`audit`] | re-derive a session from its files; replay runs exactly |
 //! | [`db`] | SQL that loads sessions into the schema in `docs/ecbench/schema.sql` |
@@ -38,6 +40,7 @@ pub mod challenge;
 pub mod claim;
 pub mod claw;
 pub mod compare;
+pub mod conductor_gap;
 pub mod db;
 pub mod frontier;
 pub mod generic;
@@ -46,6 +49,7 @@ pub mod isolab;
 pub mod isolation;
 pub mod methods;
 pub mod record;
+pub mod resources;
 pub mod runner;
 pub mod signals;
 pub mod spec;

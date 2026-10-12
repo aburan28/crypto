@@ -24,6 +24,7 @@
 use super::keccak::keccak_f1600;
 
 /// Round constants, as in the scalar permutation.
+#[cfg(target_arch = "x86_64")]
 const RC: [u64; 24] = [
     0x0000_0000_0000_0001,
     0x0000_0000_0000_8082,
@@ -497,6 +498,7 @@ pub(crate) mod tests {
     use crate::pqc::fast::keccak::{shake256_into, SHAKE256_RATE};
 
     pub(crate) fn backends() -> Vec<Backend> {
+        #[cfg_attr(not(target_arch = "x86_64"), allow(unused_mut))]
         let mut v = vec![Backend::Portable];
         #[cfg(target_arch = "x86_64")]
         {

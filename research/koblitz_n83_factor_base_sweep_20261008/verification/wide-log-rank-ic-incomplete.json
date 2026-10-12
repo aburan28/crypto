@@ -1,0 +1,41 @@
+{
+  "counts": {
+    "columns": 3,
+    "dense_solve_attempts": 0,
+    "rank": 1,
+    "relations": 1,
+    "trials": 1
+  },
+  "curve_a": 0,
+  "degree": 9,
+  "elapsed_seconds": 0.000677875,
+  "evidence_scope": "synthetic_known_answer",
+  "factor_base": {
+    "abscissae": 64,
+    "columns": 3,
+    "dimension": 6,
+    "domain": "linear_subspace",
+    "family": "factor",
+    "points": 55,
+    "signed_orbits": 4,
+    "spec": {
+      "index": 0,
+      "kind": "factor"
+    }
+  },
+  "operation": "logs",
+  "reason": "relations did not determine every column logarithm within the trial budget",
+  "resources": {
+    "cpu_seconds": 0.108133,
+    "peak_rss_bytes": 8077312,
+    "scope": "process counters sampled before report emission; peak resident memory, not allocated bytes"
+  },
+  "schema_version": 1,
+  "software": {
+    "arch": "aarch64",
+    "binary_blake3": "9d85e8e0f75c27883ec6e573ff71c4d7a4e2b49c0695947f243a6c0b9cb52914",
+    "os": "macos",
+    "version": "0.1.0"
+  },
+  "status": "incomplete"
+}

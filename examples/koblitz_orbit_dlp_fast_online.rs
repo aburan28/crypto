@@ -25,6 +25,9 @@
 //!
 //! Usage: <base_header.jsonl> <target_points.jsonl|legacy_scalars.txt> <rank_seed> <out.jsonl>
 
+#![recursion_limit = "256"]
+
+use crypto_lib::cryptanalysis::ecbench::isolation::HwCounters;
 use crypto_lib::cryptanalysis::koblitz_fast_arith::{s3_x_roots, FastBinaryCurve, FastPoint};
 use crypto_lib::cryptanalysis::koblitz_index_calculus::KoblitzCurve;
 use crypto_lib::cryptanalysis::semaev_decomp::Gf2;
@@ -62,6 +65,8 @@ struct ExtractSplit {
     pdp: Duration,
     relation_check: Duration,
     relation_checks: u64,
+    root_calls: u64,
+    skipped_symmetric_states: u64,
 }
 
 fn ms(duration: Duration) -> f64 {
@@ -282,10 +287,64 @@ fn invert(gf: &Gf2, basis: &NormalBasis, a: u64) -> u64 {
 
 /// Open-addressing u64 -> u64 table; keys are < 2^63 so u64::MAX marks empty.
 /// Key and value share a slot so a probe touches one cache line.
+/// A negative answer skips an exact root-table probe. Every inserted key is
+/// also inserted here, so the filter cannot discard a table witness.
+struct RootBloom {
+    words: Vec<u64>,
+    bit_mask: usize,
+}
+
+impl RootBloom {
+    fn with_capacity(keys: usize) -> Self {
+        let bits = keys
+            .checked_mul(8)
+            .and_then(usize::checked_next_power_of_two)
+            .expect("root Bloom size overflow")
+            .max(64);
+        Self {
+            words: vec![0; bits / 64],
+            bit_mask: bits - 1,
+        }
+    }
+
+    #[inline(always)]
+    fn positions(&self, key: u64) -> [usize; 3] {
+        let first = mix_root_bloom(key ^ 0xA5A5_38F9_9328_6F3D);
+        let step = mix_root_bloom(key.rotate_left(17) ^ 0xD4C9_3E72_B719_485B) | 1;
+        [0, 1, 2].map(|index| first.wrapping_add(index * step) as usize & self.bit_mask)
+    }
+
+    #[inline(always)]
+    fn insert(&mut self, key: u64) {
+        for bit in self.positions(key) {
+            self.words[bit >> 6] |= 1u64 << (bit & 63);
+        }
+    }
+
+    #[inline(always)]
+    fn contains(&self, key: u64) -> bool {
+        self.positions(key)
+            .into_iter()
+            .all(|bit| self.words[bit >> 6] & (1u64 << (bit & 63)) != 0)
+    }
+
+    fn bytes(&self) -> usize {
+        self.words.len() * std::mem::size_of::<u64>()
+    }
+}
+
+#[inline(always)]
+fn mix_root_bloom(mut value: u64) -> u64 {
+    value = (value ^ (value >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    value = (value ^ (value >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    value ^ (value >> 31)
+}
+
 struct RootTable {
     slots: Vec<(u64, u64)>,
     shift: u32,
     len: usize,
+    bloom: Option<RootBloom>,
 }
 
 impl RootTable {
@@ -295,6 +354,8 @@ impl RootTable {
             slots: vec![(u64::MAX, 0); slots],
             shift: 64 - slots.trailing_zeros(),
             len: 0,
+            bloom: (std::env::var("KIC_ROOT_BLOOM").as_deref() == Ok("1"))
+                .then(|| RootBloom::with_capacity(entries)),
         }
     }
 
@@ -310,6 +371,9 @@ impl RootTable {
             if self.slots[slot].0 == u64::MAX {
                 self.slots[slot] = (key, value);
                 self.len += 1;
+                if let Some(bloom) = &mut self.bloom {
+                    bloom.insert(key);
+                }
                 return;
             }
             if self.slots[slot].0 == key {
@@ -321,6 +385,13 @@ impl RootTable {
 
     #[inline(always)]
     fn get(&self, key: u64) -> Option<u64> {
+        if self
+            .bloom
+            .as_ref()
+            .is_some_and(|bloom| !bloom.contains(key))
+        {
+            return None;
+        }
         let mask = self.slots.len() - 1;
         let mut slot = self.slot(key);
         loop {
@@ -336,6 +407,36 @@ impl RootTable {
     }
 }
 
+#[cfg(test)]
+mod root_bloom_table_tests {
+    use super::{mix_root_bloom, RootBloom, RootTable};
+
+    #[test]
+    fn screened_lookup_matches_exact_table() {
+        let mut reference = RootTable::with_capacity(4096);
+        reference.bloom = None;
+        let mut screened = RootTable::with_capacity(4096);
+        screened.bloom = Some(RootBloom::with_capacity(4096));
+        for i in 0..4096u64 {
+            let key = mix_root_bloom(i) & (u64::MAX >> 1);
+            reference.insert_if_absent(key, i);
+            screened.insert_if_absent(key, i);
+            screened.insert_if_absent(key, i + 1);
+        }
+        for i in 0..100_000u64 {
+            let key = mix_root_bloom(i ^ 0xD1B5_4A32_D192_ED03) & (u64::MAX >> 1);
+            assert_eq!(screened.get(key), reference.get(key));
+        }
+        for &(key, value) in &reference.slots {
+            if key != u64::MAX {
+                assert!(screened.bloom.as_ref().unwrap().contains(key));
+                assert_eq!(screened.get(key), Some(value));
+            }
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
 struct State {
     left: u16,
     right: u16,
@@ -347,6 +448,8 @@ struct Index {
     states: Vec<State>,
     table: RootTable,
     shifted: Vec<Vec<u64>>,
+    pair_candidates: usize,
+    counterparts: Option<Vec<u32>>,
 }
 
 fn pack(left: u16, right: u16, relative: u16, shift: u32) -> u64 {
@@ -362,7 +465,13 @@ fn unpack(value: u64) -> (usize, usize, usize, u32) {
     )
 }
 
-fn build_index(gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, reps: &[u64]) -> Index {
+fn build_index(
+    gf: &Gf2,
+    basis: &NormalBasis,
+    solver: &S3Solver,
+    reps: &[u64],
+    pair_symmetry: bool,
+) -> Index {
     let n = gf.n as usize;
     let shifted: Vec<Vec<u64>> = reps
         .iter()
@@ -376,28 +485,109 @@ fn build_index(gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, reps: &[u64]) -
             row
         })
         .collect();
-    let mut states = Vec::new();
-    for left in 0..reps.len() {
-        for right in 0..reps.len() {
-            for relative in 0..n {
-                if let Some(roots) =
-                    solver.roots(gf, basis, shifted[left][0], shifted[right][relative])
-                {
-                    states.push(State {
-                        left: left as u16,
-                        right: right as u16,
-                        relative: relative as u16,
-                        normal_roots: [
+    let width = reps.len();
+    let slot = |left: usize, right: usize, relative: usize| (left * width + right) * n + relative;
+    let mate_slot =
+        |left: usize, right: usize, relative: usize| slot(right, left, (n - relative) % n);
+    let mut pair_candidates = 0;
+    let (states, counterparts) = if pair_symmetry {
+        // Build each unordered pair orbit once, then restore its swapped
+        // alias in the original scan position without another S3 solve.
+        // This keeps the public-query scan origin identical to the control.
+        let mut slots: Vec<Option<State>> = vec![None; width * width * n];
+        for left in 0..width {
+            for right in left..width {
+                for relative in 0..n {
+                    if left == right && relative > n - relative {
+                        continue;
+                    }
+                    pair_candidates += 1;
+                    if let Some(roots) =
+                        solver.roots(gf, basis, shifted[left][0], shifted[right][relative])
+                    {
+                        let normal_roots = [
                             basis.to_normal.apply(roots[0]),
                             basis.to_normal.apply(roots[1]),
-                        ],
-                    });
+                        ];
+                        let original = slot(left, right, relative);
+                        let swapped = mate_slot(left, right, relative);
+                        assert!(slots[original].is_none());
+                        slots[original] = Some(State {
+                            left: left as u16,
+                            right: right as u16,
+                            relative: relative as u16,
+                            normal_roots,
+                        });
+                        if swapped != original {
+                            assert!(slots[swapped].is_none());
+                            slots[swapped] = Some(State {
+                                left: right as u16,
+                                right: left as u16,
+                                relative: ((n - relative) % n) as u16,
+                                normal_roots: [
+                                    basis.rotate(normal_roots[0], ((n - relative) % n) as u32),
+                                    basis.rotate(normal_roots[1], ((n - relative) % n) as u32),
+                                ],
+                            });
+                        }
+                    }
                 }
             }
         }
-    }
-    let mut table = RootTable::with_capacity(states.len() * 2);
-    for state in &states {
+        let mut positions = vec![u32::MAX; slots.len()];
+        let mut states = Vec::new();
+        for (candidate_slot, state) in slots.into_iter().enumerate() {
+            if let Some(state) = state {
+                positions[candidate_slot] = states.len() as u32;
+                states.push(state);
+            }
+        }
+        let counterparts = states
+            .iter()
+            .map(|state| {
+                let mate = mate_slot(
+                    state.left as usize,
+                    state.right as usize,
+                    state.relative as usize,
+                );
+                let position = positions[mate];
+                assert_ne!(position, u32::MAX);
+                position
+            })
+            .collect();
+        (states, Some(counterparts))
+    } else {
+        let mut states = Vec::new();
+        for left in 0..width {
+            for right in 0..width {
+                for relative in 0..n {
+                    pair_candidates += 1;
+                    if let Some(roots) =
+                        solver.roots(gf, basis, shifted[left][0], shifted[right][relative])
+                    {
+                        states.push(State {
+                            left: left as u16,
+                            right: right as u16,
+                            relative: relative as u16,
+                            normal_roots: [
+                                basis.to_normal.apply(roots[0]),
+                                basis.to_normal.apply(roots[1]),
+                            ],
+                        });
+                    }
+                }
+            }
+        }
+        (states, None)
+    };
+    let mut table = RootTable::with_capacity(pair_candidates * 2);
+    for (index, state) in states.iter().enumerate() {
+        if counterparts
+            .as_ref()
+            .is_some_and(|partners: &Vec<u32>| partners[index] < index as u32)
+        {
+            continue;
+        }
         for &root in &state.normal_roots {
             let (canonical, shift) = basis.canonical(root);
             table.insert_if_absent(
@@ -410,6 +600,8 @@ fn build_index(gf: &Gf2, basis: &NormalBasis, solver: &S3Solver, reps: &[u64]) -
         states,
         table,
         shifted,
+        pair_candidates,
+        counterparts,
     }
 }
 
@@ -512,14 +704,30 @@ fn extract_timed(
     let mut probes = 0u64;
     // Callers provide a rotating, target-dependent origin so rank-stage rows
     // do not concentrate on the same early columns.
-    let start = start % index.states.len().max(1);
-    for state in index.states[start..].iter().chain(&index.states[..start]) {
+    let len = index.states.len();
+    let start = start % len.max(1);
+    let first = index.states[start..]
+        .iter()
+        .enumerate()
+        .map(|(offset, state)| (start + offset, state));
+    let second = index.states[..start].iter().enumerate();
+    for (state_index, state) in first.chain(second) {
+        if let Some(counterparts) = &index.counterparts {
+            let mate_index = counterparts[state_index] as usize;
+            let distance = (state_index + len - start) % len;
+            let mate_distance = (mate_index + len - start) % len;
+            if mate_distance < distance {
+                split.skipped_symmetric_states += 1;
+                continue;
+            }
+        }
         for shift in 0..n {
             let left_x = index.shifted[state.left as usize][shift as usize];
             let right_x = index.shifted[state.right as usize]
                 [(shift as usize + state.relative as usize) % n as usize];
             for &normal_root in &state.normal_roots {
                 let absolute = basis.to_poly.apply(basis.rotate(normal_root, shift));
+                split.root_calls += 1;
                 let Some(partners) = solver.roots(gf, basis, absolute, target_x) else {
                     continue;
                 };
@@ -801,6 +1009,11 @@ fn main() -> ExitCode {
         assert!(cap > 0, "KIC_RANK_PROBE_CAP must be positive");
         cap
     });
+    let pair_symmetry = match std::env::var("KIC_PAIR_SYMMETRY").as_deref() {
+        Ok("1") => true,
+        Ok("0") | Err(_) => false,
+        Ok(_) => panic!("KIC_PAIR_SYMMETRY must be 0 or 1"),
+    };
     let mut out = std::fs::File::create(&arguments[4]).expect("create output");
 
     let setup_started = Instant::now();
@@ -901,7 +1114,7 @@ fn main() -> ExitCode {
     let basis_ms = ms(basis_elapsed);
 
     let index_started = Instant::now();
-    let index = build_index(&gf, &basis, &solver, &reps);
+    let index = build_index(&gf, &basis, &solver, &reps, pair_symmetry);
     let index_elapsed = index_started.elapsed();
     let index_ms = ms(index_elapsed);
     let setup_ms = ms(setup_started.elapsed());
@@ -921,6 +1134,7 @@ fn main() -> ExitCode {
                 "kind":"compact_orbit_rank_header", "schema_version":1,
                 "n":n, "a":a, "subgroup_order":r, "base_hash":base_hash,
                 "rank_probe_cap":rank_probe_cap,
+                "pair_symmetry":pair_symmetry,
                 "generator":generator.map(|(x, y)| [x, y]),
                 "orbit_columns":base.columns, "factor_base_points":base.points.len(),
             })
@@ -937,6 +1151,8 @@ fn main() -> ExitCode {
     let mut rank_failures = 0u64;
     let mut rank_relations = 0u64;
     let mut rank_probes = 0u64;
+    let mut rank_root_calls = 0u64;
+    let mut rank_skipped_symmetric_states = 0u64;
     let mut rank_relation_probes = 0u64;
     let mut rank_capped_attempts = 0u64;
     let mut rank_capped_probes = 0u64;
@@ -981,6 +1197,8 @@ fn main() -> ExitCode {
         );
         rank_pdp_elapsed += rank_split.pdp;
         rank_relation_check_elapsed += rank_split.relation_check;
+        rank_root_calls += rank_split.root_calls;
+        rank_skipped_symmetric_states += rank_split.skipped_symmetric_states;
         let ExtractOutcome {
             relation,
             probes,
@@ -1011,6 +1229,8 @@ fn main() -> ExitCode {
                             "query_ms":ms(query_elapsed), "pdp_ms":ms(rank_split.pdp),
                             "relation_check_ms":ms(rank_split.relation_check),
                             "relation_checks":rank_split.relation_checks,
+                            "root_calls":rank_split.root_calls,
+                            "skipped_symmetric_states":rank_split.skipped_symmetric_states,
                             "rank_before":rank_before, "rank_after":echelon.rank, "gained":gained,
                         })
                     )
@@ -1035,6 +1255,8 @@ fn main() -> ExitCode {
                             "query_ms":ms(query_elapsed), "pdp_ms":ms(rank_split.pdp),
                             "relation_check_ms":ms(rank_split.relation_check),
                             "relation_checks":rank_split.relation_checks,
+                            "root_calls":rank_split.root_calls,
+                            "skipped_symmetric_states":rank_split.skipped_symmetric_states,
                             "rank_before":rank_before, "rank_after":echelon.rank,
                         })
                     )
@@ -1091,6 +1313,8 @@ fn main() -> ExitCode {
                 (target, Some(scalar), elapsed)
             }
         };
+        let online_counters = HwCounters::open();
+        online_counters.start();
         let mut clock = PhaseClock::start();
         let online_started = clock.last;
         // The scan origin must be a function of the public target point only;
@@ -1117,6 +1341,7 @@ fn main() -> ExitCode {
         let verified = recovered.map(|d| fast.scalar_mul(generator, &BigUint::from(d)) == target);
         let recovery_check_phase = clock.lap();
         let online_stopped = clock.last;
+        let online_hw_counts = online_counters.stop();
         let online = online_stopped - online_started;
         if target_inputs.len() == 1 {
             single_target_phases = Some((
@@ -1151,12 +1376,16 @@ fn main() -> ExitCode {
             "recovered_matches_published":published.and_then(|scalar| recovered.map(|d| d == scalar % r)),
             "group_verified":verified,
             "relation_checks":split.relation_checks,
+            "root_calls":split.root_calls,
+            "skipped_symmetric_states":split.skipped_symmetric_states,
             "target_generation_ms_excluded":target_generation_ms,
             "online_start_event":"target_query_begin",
             "online_stop_event":"recovery_check_end",
             "online_start_ns":(online_started - process_started).as_nanos() as u64,
             "online_stop_ns":(online_stopped - process_started).as_nanos() as u64,
             "online_ms":elapsed,
+            "online_hw_counts":online_hw_counts,
+            "online_hw_scope":"calling thread, user space, target query through recovery check",
             "target_query_ms":ms(query_phase),
             "target_pdp_ms":ms(split.pdp),
             "target_relation_check_ms":ms(split.relation_check),
@@ -1230,7 +1459,7 @@ fn main() -> ExitCode {
     let summary = json!({
         "kind":"compact_orbit_dlp_summary",
         "schema_version":"1.0",
-        "producer_version":"compact_orbit_online_rank_restart_v1",
+        "producer_version":"compact_orbit_online_pair_symmetry_v1",
         "setup_complete_ns":setup_complete_ns,
         "cold_in_process_ms":cold_in_process_ms,
         "cold_phase_ms":cold_phase_ms,
@@ -1241,7 +1470,11 @@ fn main() -> ExitCode {
         "orbit_columns":base.columns,
         "factor_base_points":base.points.len(),
         "regular_states":index.states.len(),
+        "index_pair_candidates":index.pair_candidates,
+        "pair_symmetry":pair_symmetry,
         "root_table_entries":index.table.len,
+        "root_bloom_enabled":index.table.bloom.is_some(),
+        "root_bloom_bytes":index.table.bloom.as_ref().map_or(0, RootBloom::bytes),
         "pair_table_entries":0,
         "edge_selectors":0,
         "timing_ms":{
@@ -1263,6 +1496,8 @@ fn main() -> ExitCode {
         "rank_capped_probes":rank_capped_probes,
         "rank_exhausted_attempts":rank_failures - rank_capped_attempts,
         "rank_probes_total":rank_probes,
+        "rank_root_calls_total":rank_root_calls,
+        "rank_skipped_symmetric_states":rank_skipped_symmetric_states,
         "rank_rows_without_gain":rank_rows_without_gain,
         "rank_policy":"guided: decompose [a]G - R_j for the first pivotless column j",
         "rank_restart_policy":if rank_probe_cap.is_some() { "abandon after cap support probes; draw next scalar" } else { "unbounded" },
@@ -1296,5 +1531,80 @@ fn main() -> ExitCode {
         ExitCode::SUCCESS
     } else {
         ExitCode::FAILURE
+    }
+}
+
+#[cfg(test)]
+mod pair_symmetry_tests {
+    use super::*;
+
+    #[test]
+    fn unordered_pair_orbits_preserve_every_index_root() {
+        let curve = KoblitzCurve::new(0, 13).unwrap();
+        let gf = Gf2::new(&curve.curve.irreducible);
+        let basis = NormalBasis::new(&gf);
+        let solver = S3Solver::new(&gf, gf.from_element(&curve.curve.b));
+        let reps = [2, 3, 5, 7, 11];
+        let full = build_index(&gf, &basis, &solver, &reps, false);
+        let folded = build_index(&gf, &basis, &solver, &reps, true);
+        let keys = |index: &Index| {
+            let mut roots: Vec<u64> = index
+                .table
+                .slots
+                .iter()
+                .filter_map(|&(key, _)| (key != u64::MAX).then_some(key))
+                .collect();
+            roots.sort_unstable();
+            roots
+        };
+        assert_eq!(
+            full.pair_candidates,
+            reps.len() * reps.len() * gf.n as usize
+        );
+        assert_eq!(folded.pair_candidates, 165);
+        let full_keys = keys(&full);
+        assert_eq!(full_keys, keys(&folded));
+        assert_eq!(folded.states.len(), full.states.len());
+        for key in full_keys {
+            assert_eq!(full.table.get(key), folded.table.get(key));
+        }
+        for (index, &mate) in folded.counterparts.as_ref().unwrap().iter().enumerate() {
+            assert_eq!(
+                folded.counterparts.as_ref().unwrap()[mate as usize],
+                index as u32
+            );
+        }
+    }
+
+    #[test]
+    fn n53_pair_quotient_preserves_the_complete_root_table() {
+        let curve = KoblitzCurve::new(0, 53).unwrap();
+        let fast = FastBinaryCurve::new(&curve.curve.irreducible, 0).unwrap();
+        let gf = Gf2::new(&curve.curve.irreducible);
+        let b = gf.from_element(&curve.curve.b);
+        let (_, _, representatives, _) = construct_base(
+            &fast,
+            &curve,
+            b,
+            220,
+            curve.subgroup_order.to_u64().unwrap(),
+        );
+        let reps: Vec<u64> = representatives
+            .iter()
+            .map(|point| point.unwrap()[0])
+            .collect();
+        let basis = NormalBasis::new(&gf);
+        let solver = S3Solver::new(&gf, b);
+        let full = build_index(&gf, &basis, &solver, &reps, false);
+        let folded = build_index(&gf, &basis, &solver, &reps, true);
+        assert_eq!(full.pair_candidates, 2_565_200);
+        assert_eq!(folded.pair_candidates, 1_282_710);
+        assert_eq!(full.states.len(), folded.states.len());
+        assert_eq!(full.table.len, folded.table.len);
+        for &(key, value) in &full.table.slots {
+            if key != u64::MAX {
+                assert_eq!(folded.table.get(key), Some(value));
+            }
+        }
     }
 }

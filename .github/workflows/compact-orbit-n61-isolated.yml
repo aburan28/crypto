@@ -33,8 +33,13 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            Cargo.lock
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
+            experiments/koblitz-single-target-n61-20260925
+            experiments/koblitz-single-target-n71-20261002
+            experiments/koblitz-single-target-n73-20261003
+            experiments/koblitz-single-target-n83-20261006
             docs/ecbench/schema.sql
             docs/curves/registry.json
             src
@@ -45,7 +50,6 @@ jobs:
             examples/koblitz_rho_batch_ks_strong_online.rs
             examples/koblitz_rank_fixture.rs
             examples/koblitz_rho_fixture.rs
-            research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
             research/sat_factor_base_review_20260908/autolab
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930_rho_replay.py
@@ -62,7 +66,6 @@ jobs:
           python3 -m unittest test_boundary_autolab.py -v
           python3 boundary_autolab.py plan > /dev/null
           if python3 boundary_autolab.py launch-panel --beat koblitz.compact_orbit.n61_panel --targets 32; then exit 1; fi
-      - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
       - run: cargo build --release --locked --example koblitz_orbit_dlp_fast --example koblitz_rho_batch_ks_v2_n61
 
   measure:
@@ -76,6 +79,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             Cargo.toml
+            Cargo.lock
             docs/ic/calibration.json
             docs/ic/boundary_targets.json
             docs/ecbench/schema.sql
@@ -88,7 +92,6 @@ jobs:
             examples/koblitz_rho_batch_ks_strong_online.rs
             examples/koblitz_rank_fixture.rs
             examples/koblitz_rho_fixture.rs
-            research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock
             research/sat_factor_base_review_20260908/autolab
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/independent_replay.py
             research/sat_factor_base_review_20260908/autolab_orbit_extract_20260924/growing_n_n61_L65536_20260930_rho_replay.py
@@ -98,7 +101,6 @@ jobs:
             tools/curve_identity.py
             tools/isolated_bench.py
             .github/workflows/compact-orbit-n61-isolated.yml
-      - run: cp research/notes/ecc2k130/compact_shared_log_20260925/Cargo.lock Cargo.lock
       - run: cargo build --release --locked --example koblitz_orbit_dlp_fast --example koblitz_rho_batch_ks_v2_n61
       - name: Run the panel through the autolab on a reserved core
         id: run

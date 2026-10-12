@@ -659,8 +659,6 @@ fn solve_fixture(
         (1..modulus).contains(&d0),
         "fixed target scalar must be in [1,r)"
     );
-    let target_generation_started = Instant::now();
-    let q = curve.mul(curve.generator(), &BigUint::from(d0));
     let generated_scalar = rng.gen_range(1..modulus);
     let target_generation_started = Instant::now();
     let (known_scalar, q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
@@ -866,10 +864,6 @@ fn solve_fixture_packed(
         (1..modulus).contains(&d0),
         "fixed target scalar must be in [1,r)"
     );
-    let mut charges = Charges::default();
-    let target_generation_started = Instant::now();
-    let q = raw_scalar_mul(curve, generator, d0);
-    let target_generation_ms = target_generation_started.elapsed().as_secs_f64() * 1000.0;
     let generated_scalar = rng.gen_range(1..modulus);
     let target_generation_started = Instant::now();
     let (known_scalar, reference_q, fixture_scalar_source, public_hash_seed, public_hash_counter) =
@@ -901,7 +895,6 @@ fn solve_fixture_packed(
         };
     let target_generation_ms = target_generation_started.elapsed().as_secs_f64() * 1000.0;
     let mut charges = Charges::default();
-    let started = Instant::now();
     let q = raw_point(&reference_q);
     charges.scalar_multiplications += 1;
     let started = Instant::now();
@@ -1263,7 +1256,6 @@ mod wide {
     pub(crate) struct WideBackend {
         pub(crate) fast: FastBinaryCurve128,
         pub(crate) gf: Gf2_128,
-        n: u32,
         mask: u128,
     }
 
@@ -1281,7 +1273,6 @@ mod wide {
             Some(Self {
                 fast,
                 gf,
-                n,
                 mask: (1u128 << n) - 1,
             })
         }
@@ -1402,10 +1393,7 @@ mod wide {
                 }
             }
             if exponent + 1 < powers {
-                point = match point {
-                    None => None,
-                    Some((x, y)) => Some((backend.gf.sqr(x), backend.gf.sqr(y))),
-                };
+                point = point.map(|(x, y)| (backend.gf.sqr(x), backend.gf.sqr(y)));
                 multiplier = mul_mod(multiplier, lambda, modulus);
                 charges.frobenius_maps += 1;
             }
@@ -1430,7 +1418,7 @@ mod wide {
 
     pub(crate) fn raw_random_state128(
         backend: &WideBackend,
-        curve: &KoblitzCurve,
+        _curve: &KoblitzCurve,
         generator: RawPoint128,
         q: RawPoint128,
         rng: &mut StdRng,

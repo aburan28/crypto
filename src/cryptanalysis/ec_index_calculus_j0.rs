@@ -90,8 +90,8 @@
 //!   Semaev-polynomial Gröbner basis cost across curve families.
 
 use crate::cryptanalysis::ec_index_calculus::{
-    find_one_relation, gaussian_eliminate_mod_n, gaussian_eliminate_mod_n_particular, semaev_s3,
-    semaev_s3_in_x3, sqrt_mod_p, FactorBaseEntry,
+    find_one_relation, gaussian_eliminate_mod_n_particular, semaev_s3, semaev_s3_in_x3, sqrt_mod_p,
+    FactorBaseEntry,
 };
 use crate::ecc::curve::CurveParams;
 use crate::ecc::field::FieldElement;
@@ -652,9 +652,7 @@ pub fn j0_index_calculus_dlp_staged(
             }
             None
         };
-        let Some((batch, trials)) = batch_and_trials else {
-            return None;
-        };
+        let (batch, trials) = batch_and_trials?;
         trials_total += trials;
         trials_per_relation.push(trials);
         if let Some(first) = batch.into_iter().next() {
@@ -678,9 +676,12 @@ pub fn j0_index_calculus_dlp_staged(
         rhs.push(rel.coef_a.clone() % &curve.n);
     }
     let la_started = Instant::now();
-    let solution = gaussian_eliminate_mod_n(&mut matrix, &mut rhs, &curve.n)?;
+    let solution = gaussian_eliminate_mod_n_particular(&mut matrix, &mut rhs, &curve.n)?;
+    if !solution.determined[m] {
+        return None;
+    }
     let linear_algebra_ms = la_started.elapsed().as_secs_f64() * 1e3;
-    let x = solution[m].clone();
+    let x = solution.values[m].clone();
 
     let verify_started = Instant::now();
     let a_fe = curve.a_fe();
@@ -889,10 +890,14 @@ mod tests {
         let a_fe = curve.a_fe();
         let g = curve.generator();
         let q = g.scalar_mul(&num_bigint::BigUint::from(123u32), &a_fe);
-        let plain = j0_index_calculus_dlp(&curve, &g, &q, 6, 2, 5000);
-        let staged = j0_index_calculus_dlp_staged(&curve, &g, &q, 6, 2, 5000, 64);
-        let (staged_x, report) = staged.expect("staged j0 solve succeeds on the toy curve");
-        let plain_x = plain.expect("plain j0 solve succeeds on the toy curve");
+        // A bounded fresh relation set may leave the target column free.
+        // Retry the randomized collection while keeping both correctness checks.
+        let plain_x = (0..64)
+            .find_map(|_| j0_index_calculus_dlp(&curve, &g, &q, 6, 2, 5000))
+            .expect("plain j0 solve succeeds on the small curve within 64 attempts");
+        let (staged_x, report) = (0..64)
+            .find_map(|_| j0_index_calculus_dlp_staged(&curve, &g, &q, 6, 2, 5000, 64))
+            .expect("staged j0 solve succeeds on the small curve within 64 attempts");
         assert_eq!(staged_x, plain_x);
         assert_eq!(g.scalar_mul(&staged_x, &a_fe), q);
         assert!(report.orbit_count > 0);

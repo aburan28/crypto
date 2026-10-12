@@ -23,10 +23,7 @@ use std::time::Instant;
 
 fn main() {
     let arguments: Vec<String> = std::env::args().collect();
-    let bits: u32 = arguments
-        .get(1)
-        .and_then(|a| a.parse().ok())
-        .unwrap_or(20);
+    let bits: u32 = arguments.get(1).and_then(|a| a.parse().ok()).unwrap_or(20);
     let target_seed: u64 = arguments
         .get(2)
         .and_then(|a| a.parse().ok())
@@ -46,7 +43,7 @@ fn main() {
     let mut x_truth = num_bigint::BigUint::zero();
     for i in 0..limbs {
         let word: u64 = rng.gen();
-        x_truth = x_truth | (num_bigint::BigUint::from(word) << (64 * i));
+        x_truth |= num_bigint::BigUint::from(word) << (64 * i);
     }
     x_truth = (x_truth % (&curve.n - 1u32)) + 1u32;
     if x_truth.is_zero() || x_truth >= curve.n {

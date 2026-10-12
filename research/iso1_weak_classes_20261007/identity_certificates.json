@@ -1,0 +1,476 @@
+[
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1h8ae7209125dfe0a2",
+    "statement": {
+      "name": "ISO-1 quartic-parameter quotient factorization",
+      "source": "research/iso1_weak_classes_20261007/REPORT.md; lambda=s^2, s=mu^2",
+      "variables": [
+        "x",
+        "s"
+      ],
+      "degree_bound": 4,
+      "lhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "var",
+                "args": "x"
+              },
+              {
+                "op": "var",
+                "args": "x"
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "const",
+                "args": 2
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 1
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "s"
+                      },
+                      {
+                        "op": "var",
+                        "args": "s"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "var",
+                "args": "x"
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 1
+                  },
+                  {
+                    "op": "neg",
+                    "args": {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "s"
+                        },
+                        {
+                          "op": "var",
+                          "args": "s"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "const",
+                    "args": 1
+                  },
+                  {
+                    "op": "neg",
+                    "args": {
+                      "op": "mul",
+                      "args": [
+                        {
+                          "op": "var",
+                          "args": "s"
+                        },
+                        {
+                          "op": "var",
+                          "args": "s"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "x"
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "const",
+                        "args": 1
+                      },
+                      {
+                        "op": "var",
+                        "args": "s"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "const",
+                        "args": 1
+                      },
+                      {
+                        "op": "var",
+                        "args": "s"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "var",
+                "args": "x"
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "const",
+                        "args": 1
+                      },
+                      {
+                        "op": "neg",
+                        "args": {
+                          "op": "var",
+                          "args": "s"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "op": "add",
+                    "args": [
+                      {
+                        "op": "const",
+                        "args": 1
+                      },
+                      {
+                        "op": "neg",
+                        "args": {
+                          "op": "var",
+                          "args": "s"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 32,
+    "seed": 20261008,
+    "value_digest": "1aec9472fb7c31143faacb40d7ba348098ac2b28ef3d0457ba4c90329fe83c53",
+    "independence": "Native issuer and replay use the same repository checker; exact integer-polynomial expansion is checked separately by PARI/GP. No formal theorem-prover artifact is asserted.",
+    "proof": null
+  },
+  {
+    "schema": "identity.certificate/v1",
+    "id": "IDC1he02ab9a5cf019a56",
+    "statement": {
+      "name": "ISO-1 rational 2-isogeny cleared equation",
+      "source": "research/iso1_weak_classes_20261007/REPORT.md; U=x^2+a*x+b",
+      "variables": [
+        "x",
+        "a",
+        "b"
+      ],
+      "degree_bound": 4,
+      "lhs": {
+        "op": "add",
+        "args": [
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "x"
+                      },
+                      {
+                        "op": "var",
+                        "args": "x"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "a"
+                      },
+                      {
+                        "op": "var",
+                        "args": "x"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "x"
+                      },
+                      {
+                        "op": "var",
+                        "args": "x"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "a"
+                      },
+                      {
+                        "op": "var",
+                        "args": "x"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "const",
+                "args": -2
+              },
+              {
+                "op": "var",
+                "args": "a"
+              },
+              {
+                "op": "var",
+                "args": "x"
+              },
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "x"
+                      },
+                      {
+                        "op": "var",
+                        "args": "x"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "a"
+                      },
+                      {
+                        "op": "var",
+                        "args": "x"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "var",
+                    "args": "b"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "mul",
+            "args": [
+              {
+                "op": "add",
+                "args": [
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "var",
+                        "args": "a"
+                      },
+                      {
+                        "op": "var",
+                        "args": "a"
+                      }
+                    ]
+                  },
+                  {
+                    "op": "mul",
+                    "args": [
+                      {
+                        "op": "const",
+                        "args": -4
+                      },
+                      {
+                        "op": "var",
+                        "args": "b"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "x"
+                  },
+                  {
+                    "op": "var",
+                    "args": "x"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rhs": {
+        "op": "mul",
+        "args": [
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "x"
+                  },
+                  {
+                    "op": "var",
+                    "args": "x"
+                  }
+                ]
+              },
+              {
+                "op": "neg",
+                "args": {
+                  "op": "var",
+                  "args": "b"
+                }
+              }
+            ]
+          },
+          {
+            "op": "add",
+            "args": [
+              {
+                "op": "mul",
+                "args": [
+                  {
+                    "op": "var",
+                    "args": "x"
+                  },
+                  {
+                    "op": "var",
+                    "args": "x"
+                  }
+                ]
+              },
+              {
+                "op": "neg",
+                "args": {
+                  "op": "var",
+                  "args": "b"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "modulus": 2305843009213693951,
+    "points": 32,
+    "seed": 20261008,
+    "value_digest": "743a8c060742af159d1937e015d78c03fa503005bab954be509686fc6d8064c1",
+    "independence": "Native issuer and replay use the same repository checker; exact integer-polynomial expansion is checked separately by PARI/GP. No formal theorem-prover artifact is asserted.",
+    "proof": null
+  }
+]

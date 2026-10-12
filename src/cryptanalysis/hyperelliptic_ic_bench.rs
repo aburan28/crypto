@@ -1021,6 +1021,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "wall-clock cost calibration requires an isolated CPU"]
     fn the_unit_tracks_wall_clock() {
         // The accounting has now been wrong twice in opposite
         // directions: a hand-derived multiplication charge understated

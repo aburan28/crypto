@@ -1,0 +1,29 @@
+{
+  "schema": "iso1.cubic_continuation_resume/v1",
+  "recorded_utc": "2026-10-10T05:09:00Z",
+  "status": "RUNNING_P71",
+  "output_directory": "/Users/adamburan/Library/Application Support/crypto-iso1/census-20261009-run5",
+  "first_prime": 71,
+  "last_prime": 199,
+  "threads": 4,
+  "keep_alive": false,
+  "census_binary_sha256": "51f14c7022addcee5711d4de3ad67baf632eb84e83c76ce077b9c974be3ff216",
+  "queue_binary_sha256": "d69cc6b70b6f863d6b17826efd208858ee94357b0ceab72d4dc20b9801f55843",
+  "bootstrap_attempts": [
+    {
+      "plist_location": "isolated worktree",
+      "exit_code": 5,
+      "message": "Input/output error"
+    },
+    {
+      "plist_location": "isolated worktree after output directory creation",
+      "exit_code": 5,
+      "message": "Input/output error"
+    },
+    {
+      "plist_location": "owner LaunchAgents directory",
+      "exit_code": 0
+    }
+  ],
+  "storage_guard": "Original per-prime preflight; prior p61/p67 and stopped queue receipts preserved"
+}

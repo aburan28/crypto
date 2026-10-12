@@ -1,4 +1,9 @@
 #![recursion_limit = "512"]
+//! Public fixture interface for the independently complete rank and shared-log implementations.
+#[path = "koblitz_rank_fixture/rank.rs"]
+mod rank;
+#[path = "koblitz_rank_fixture/shared.rs"]
+mod shared;
 //! Point-defined factor base, exact-support relation collection, and rank trace.
 //!
 //! This is the fully charged V2 control for the Koblitz crossover task.  The
@@ -248,6 +253,8 @@ struct RawFiber {
     members: Vec<(usize, u64)>,
 }
 
+// Orphaned when #1639 removed its caller; kept until that path is re-wired.
+#[allow(dead_code)]
 #[derive(Default)]
 struct BatchInverseScratch {
     denominators: Vec<u64>,
@@ -335,6 +342,8 @@ impl QuotientPairWitness {
         })
     }
 
+    // Orphaned when #1639 removed its caller; kept until that path is re-wired.
+    #[allow(dead_code)]
     fn image_y(self) -> u64 {
         self.image_y
     }
@@ -402,6 +411,8 @@ struct CompactPairTable {
 }
 
 impl CompactPairTable {
+    // Orphaned when #1639 removed its caller; kept until that path is re-wired.
+    #[allow(dead_code)]
     fn with_capacity(expected: usize, x_only: bool, x_domain: usize) -> Self {
         Self::with_capacity_config(expected, x_only, x_domain, 16, 2)
     }
@@ -1780,6 +1791,8 @@ fn reference_fixed_base_table(curve: &KoblitzCurve, point: &BinaryPoint) -> Vec<
     table
 }
 
+// Orphaned when #1639 removed its caller; kept until that path is re-wired.
+#[allow(dead_code)]
 fn reference_fixed_base_mul(
     curve: &KoblitzCurve,
     table: &[BinaryPoint],
@@ -3390,6 +3403,8 @@ fn point_defined_base_with_seed(
     }
 }
 
+// Orphaned when #1639 removed its caller; kept until that path is re-wired.
+#[allow(dead_code)]
 fn point_defined_base(curve: &KoblitzCurve, wanted: usize) -> Base {
     point_defined_base_with_seed(curve, wanted, DEFAULT_FACTOR_BASE_SEED)
 }
@@ -3758,7 +3773,22 @@ fn expand_support_batch_selected(
 }
 
 fn main() {
+    // Diagnostic counters (parallel waves, rank-targeted trials, …) are
+    // accumulated for manual inspection and not always printed.
+    #![allow(unused_assignments)]
     let arguments: Vec<_> = std::env::args().collect();
+    let mode = arguments.get(8).map(String::as_str).unwrap_or("pointwise");
+    let shared_mode = mode.starts_with("pair_pair_dual_")
+        || mode.starts_with("pair_pair_guided_")
+        || std::env::var("KIC_SHARED_FACTOR_LOG_PRECOMPUTATION").as_deref() == Ok("1")
+        || std::env::var("KIC_SHARED_PUBLIC_FIXTURE_DOMAIN").as_deref() == Ok("1")
+        || std::env::var_os("KIC_X_FILTER_BITS_PER_EXPECTED").is_some()
+        || std::env::var_os("KIC_X_FILTER_HASHES").is_some();
+    if shared_mode {
+        assert!(arguments.len() <= 10, "the shared-log interface takes its public fixture domain through KIC_SHARED_PUBLIC_FIXTURE_DOMAIN");
+        shared::run();
+    } else {
+        rank::run();
     assert!(
         (6..=11).contains(&arguments.len()),
         "usage: <n> <a> <eta_numerator> <eta_denominator> <seed> [full|signed_quotient|signed_expanded] [independent|coefficient_walk|partition_walk] [pointwise|batch_inverse_*|fiber_batch_*|pair_pair_*] [batch_fixtures] [explicit_fixture_scalar|hash:public_seed]"
@@ -3841,10 +3871,6 @@ fn main() {
         !shared_factor_log_precomputation || batch_fixtures > 1,
         "KIC_SHARED_FACTOR_LOG_PRECOMPUTATION requires at least two fixtures"
     );
-    let required_rank_surplus: usize = std::env::var("KIC_RANK_SURPLUS")
-        .ok()
-        .map(|value| value.parse().unwrap())
-        .unwrap_or(32);
     let rank_aware_pair_scan = std::env::var("KIC_RANK_AWARE_PAIR_SCAN").as_deref() == Ok("1");
     let rank_target_deficiency: usize = std::env::var("KIC_RANK_TARGET_DEFICIENCY")
         .ok()
@@ -3891,7 +3917,6 @@ fn main() {
     let modulus = curve.subgroup_order.to_u64().unwrap();
     let lambda = curve.lambda.to_u64().unwrap();
     let automorphisms: Vec<_> = signed_scalars(lambda, modulus, n).into_iter().collect();
-    let signed_size = automorphisms.len();
     if let FixtureTarget::ExplicitScalar(scalar) = fixture_target {
         assert!(
             batch_fixtures == 1,
@@ -4286,7 +4311,9 @@ fn main() {
         return;
     }
     let reference_generator_table_started = Instant::now();
-    let reference_generator_table = fixed_base_reference_validation
+    // Its consumer (`reference_fixed_base_mul`) lost its call sites in #1639;
+    // the build is still timed so `reference_generator_table_ms` stays comparable.
+    let _reference_generator_table = fixed_base_reference_validation
         .then(|| reference_fixed_base_table(&curve, curve.generator()));
     let reference_generator_table_ms =
         reference_generator_table_started.elapsed().as_secs_f64() * 1000.0;
@@ -5016,6 +5043,7 @@ fn main() {
             let incremented = echelon.insert(row.clone(), modulus);
             let rank_after = echelon.rank;
             assert_eq!(rank_after, rank_before + usize::from(incremented));
+            rank_targeted_nonincrements += usize::from(targeted_column.is_some() && !incremented);
             rows.push(row.clone());
             right_hand_sides.push(coefficient_a);
             let independently_crosschecked_rank = if incremental_rank_crosscheck {
@@ -5263,6 +5291,7 @@ fn main() {
             "evidence_class":"measured_exact_support_relation",
             "fixture_index":fixture_index,
             "fixture_seed":fixture_seed,
+            "fixture_scalar_source":fixture_scalar_source,
             "published_fixture_scalar":known_scalar,
             "published_q":to_raw_point(&q).map(|(x,y)| [x,y]),
             "generator_point_key":[generator_key.0.to_string(),generator_key.1.to_string()],
@@ -5323,6 +5352,13 @@ fn main() {
             "query_mode":query_mode.name(),
             "decomposition_arity":if query_mode.pair_pair_width().is_some() || query_mode.pair_pair_dual_width().is_some() || query_mode.pair_pair_guided_width().is_some() {4} else {3},
             "query_batch_inversions":query_batch_inversions,
+            "query_parallel_waves":query_parallel_waves,
+            "query_parallel_chunks":query_parallel_chunks,
+            "query_shared_sign_denominator_inputs":query_shared_sign_denominator_inputs,
+            "rank_targeted_trials":rank_targeted_trials,
+            "rank_targeted_nonincrements":rank_targeted_nonincrements,
+            "rank_target_slot_index_builds":rank_target_slot_index_builds,
+            "reference_generator_table_ms":reference_generator_table_ms,
             "target_mode":target_mode.name(),
             "target_walk_additions":target_walk_additions,
             "target_walk_restarts":target_walk_restarts,

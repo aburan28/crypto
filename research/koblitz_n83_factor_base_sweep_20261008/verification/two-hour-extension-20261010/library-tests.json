@@ -1,0 +1,7 @@
+{
+  "schema": "n83.extension-validation/v1",
+  "check": "cargo test --release --lib --offline -- --test-threads=1",
+  "exit_code": 124,
+  "process_wall_seconds": 2201,
+  "role": "software validation; not IC runtime"
+}

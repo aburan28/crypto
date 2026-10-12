@@ -22,6 +22,18 @@ Two things live here:
         python3 ecref.py vectors --curve toy40     --mode mont > vec_toy40_mont.h
         python3 ecref.py params --curve toy36j0   > curve_toy36j0.h
         python3 ecref.py vectors --curve toy36j0  --mode mont > vec_toy36j0_mont.h
+        python3 ecref.py params --curve curve25519 > curve_curve25519.h
+        python3 ecref.py vectors --curve curve25519 --mode fast > vec_curve25519_fast.h
+
+`curve25519` is the prime-order subgroup of Ed25519 / X25519 (RFC 7748,
+RFC 8032) in short-Weierstrass form: Ed25519's twisted-Edwards curve and
+the Montgomery curve v^2 = u^3 + 486662 u^2 + u are birationally equivalent
+over F_p, and u = x - 486662/3 takes the Montgomery curve to
+y^2 = x^3 + a x + b, so the discrete-logarithm problem in Ed25519's group of
+order l = 2^252 + 27742317777372353535851937790883648493 is literally the
+problem on this curve.  The cofactor is 8; every point the generator emits
+is multiplied by it, so the vectors live in <G>.  `fast` mode on this curve
+is the 2^256 = 38 (mod p) special reduction in fp256.cuh.
 
 The r-adding walk used by the rho kernel is defined here as well (see
 `RhoWalk`); the C code must match it bit-for-bit, including the choice of
@@ -87,8 +99,9 @@ def isqrt(n):
 class Curve:
     """y^2 = x^3 + a x + b over F_p.  Points are (x, y) tuples or None (O)."""
 
-    def __init__(self, name, p, a, b, n=None, G=None):
+    def __init__(self, name, p, a, b, n=None, G=None, h=1):
         self.name, self.p, self.a, self.b, self.n, self.G = name, p, a, b, n, G
+        self.h = h            # cofactor: #E = h * n
 
     # -- affine group law ---------------------------------------------------
     def neg(self, P):
@@ -140,7 +153,14 @@ class Curve:
                 if y is None:
                     continue
             if y * y % p == rhs:
-                return (x, y)
+                P = (x, y)
+                if self.h != 1:
+                    # clear the cofactor so the point lies in the order-n
+                    # subgroup the walk, the solver and the vectors assume
+                    P = self.mul(self.h, P)
+                    if P is None:
+                        continue
+                return P
 
     # -- Montgomery helpers --------------------------------------------------
     @property
@@ -233,6 +253,51 @@ SECP256K1 = Curve(
 )
 
 
+def make_curve25519():
+    """Ed25519's group in short-Weierstrass form (see the module docstring).
+
+    Montgomery form (RFC 7748): v^2 = u^3 + A u^2 + u, A = 486662, over
+    p = 2^255 - 19, base point u = 9.  With u = x - A/3:
+        a = 1 - A^2/3,   b = (2 A^3 - 9 A) / 27,   x_G = 9 + A/3,
+    and y_G is the smaller square root of the right-hand side, which is the
+    v-coordinate RFC 7748 fixes for u = 9.  The constants are recomputed
+    here from A and p and then asserted against the published hex values,
+    so a slip in the derivation cannot reach the headers."""
+    p = (1 << 255) - 19
+    A = 486662
+    inv3 = pow(3, -1, p)
+    a = (1 - A * A * inv3) % p
+    b = ((2 * A ** 3 - 9 * A) * pow(27, -1, p)) % p
+    n = (1 << 252) + 27742317777372353535851937790883648493
+    gx = (9 + A * inv3) % p
+    rhs = (gx ** 3 + a * gx + b) % p
+    gy = pow(rhs, (p + 3) // 8, p)           # p = 5 (mod 8)
+    if (gy * gy - rhs) % p:
+        gy = gy * pow(2, (p - 1) // 4, p) % p
+    assert (gy * gy - rhs) % p == 0
+    gy = min(gy, p - gy)
+    # RFC 7748 section 4.1: the v-coordinate of the base point u = 9 (the
+    # smaller of the two square roots)
+    assert gy == 14781619447589544791020593568409986887264606134616475288964881837755586237401
+    assert a == 0x2AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA984914A144
+    assert b == 0x7B425ED097B425ED097B425ED097B425ED097B425ED097B4260B5E9C7710C864
+    E = Curve("curve25519", p, a, b, n=n, G=(gx, gy), h=8)
+    assert E.on_curve(E.G)
+    assert E.mul(n, E.G) is None
+    assert E.mul(2, E.mul(4, E.G)) is not None      # order is l, not 2 or 4
+    return E
+
+
+CURVE25519 = make_curve25519()
+
+
+def fast_kind(E):
+    """Which special reduction fp256.cuh has for this curve's prime:
+    0 none (Montgomery), 1 secp256k1 (2^256 = 2^32 + 977), 2 curve25519
+    (2^256 = 38)."""
+    return {"secp256k1": 1, "curve25519": 2}.get(E.name, 0)
+
+
 def point_order_bsgs(E, P):
     """Order of P for a curve with p large enough that the Hasse interval
     (width 4 sqrt p) is shorter than p.  Returns the unique m in the Hasse
@@ -313,6 +378,8 @@ def get_curve(name):
     if name not in _CURVES:
         if name == "secp256k1":
             _CURVES[name] = SECP256K1
+        elif name in ("curve25519", "ed25519", "x25519"):
+            _CURVES[name] = CURVE25519
         elif name.startswith("toy") and name.endswith("j0"):
             _CURVES[name] = make_toy_j0_curve(int(name[3:-2]))
         elif name.startswith("toy"):
@@ -328,12 +395,13 @@ def get_curve(name):
 
 class Repr:
     """How the kernels store field elements.  'fast' = canonical integers
-    (secp256k1 special reduction); 'mont' = Montgomery form x*2^256 mod p."""
+    (a special reduction for the curve's prime); 'mont' = Montgomery form
+    x*2^256 mod p."""
 
     def __init__(self, E, mode):
         self.E, self.mode = E, mode
-        if mode == "fast" and E.name != "secp256k1":
-            raise SystemExit("fast mode is secp256k1-only")
+        if mode == "fast" and not fast_kind(E):
+            raise SystemExit("fast mode needs a special reduction (secp256k1 or curve25519)")
 
     def internal(self, x):
         return x if self.mode == "fast" else self.E.to_mont(x)
@@ -459,6 +527,9 @@ def emit_params(E, out):
     w("#define CURVE_BITS %d\n" % p.bit_length())
     w("#define CURVE_A_IS_ZERO %d\n" % (1 if E.a == 0 else 0))
     w("#define CURVE_IS_SECP256K1 %d\n" % (1 if E.name == "secp256k1" else 0))
+    w("/* special reduction in fp256.cuh: 0 none, 1 secp256k1, 2 curve25519 */\n")
+    w("#define CURVE_FAST_KIND %d\n" % fast_kind(E))
+    w("#define CURVE_COFACTOR %d\n" % E.h)
     w("/* prime p, little-endian 32-bit limbs */\n")
     w("#define FP_P_LIMBS %s\n" % c_limbs(p))
     w("/* -p^{-1} mod 2^32 (Montgomery CIOS constant) */\n")
@@ -486,6 +557,10 @@ def emit_params(E, out):
         # src/field.h); a mismatch here would mean an arithmetic slip above.
         assert beta == 0x7AE96A2B657C07106E64479EAC3434E99CF0497512F58995C1396C28719501EE
         assert lam == 0x5363AD4CC05C30E0A5261C028812645A122E22EA20816678DF02967C1B23BD72
+    if E.name == "curve25519":
+        # RFC 7748 / RFC 8032: the prime and the subgroup order
+        assert p == 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFED
+        assert E.n == 0x1000000000000000000000000000000014DEF9DEA2F79CD65812631A5CF5D3ED
     w("#define CURVE_BETA_LIMBS %s\n" % c_limbs(beta))
     w("/* beta * 2^256 mod p: beta in Montgomery form, for FP_FAST=0 builds */\n")
     w("#define CURVE_BETA_MONT_LIMBS %s\n" % c_limbs(beta * R256 % p if aut else 0))
@@ -665,7 +740,8 @@ def main():
     E = get_curve(args.curve)
     if args.what == "info":
         print("curve", E.name, "p =", hex(E.p), "a =", hex(E.a), "b =", hex(E.b))
-        print("n =", hex(E.n), "prime" if is_probable_prime(E.n) else "COMPOSITE")
+        print("n =", hex(E.n), "prime" if is_probable_prime(E.n) else "COMPOSITE",
+              "cofactor", E.h, "fast kind", fast_kind(E))
         print("G =", tuple(hex(c) for c in E.G))
         if E.aut6:
             print("Aut(E) = Z/6: beta =", hex(E.aut6[0]), "lambda =", hex(E.aut6[1]))
